@@ -39,14 +39,17 @@ def build_parser() -> argparse.ArgumentParser:
     after = subparsers.add_parser("after", help="create a wake after a duration such as 45m or 1h30m")
     after.add_argument("duration")
     after.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(after)
 
     at = subparsers.add_parser("at", help="create a wake at an ISO-8601 timestamp with timezone")
     at.add_argument("timestamp")
     at.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(at)
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
     file_cmd.add_argument("path")
     file_cmd.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(file_cmd)
 
     list_cmd = subparsers.add_parser("list", help="list wake records")
     list_cmd.add_argument("--json", action="store_true", dest="as_json")
@@ -65,6 +68,18 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def add_target_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--app-server-thread-id",
+        help="create an app-server-targeted wake for the given Codex thread id instead of capturing tmux",
+    )
+    parser.add_argument(
+        "--app-server-endpoint",
+        default="stdio://",
+        help="app-server endpoint for --app-server-thread-id; only stdio:// is currently implemented",
+    )
+
+
 def resolve_root(args: argparse.Namespace) -> Path:
     return (args.wake_root or default_wake_root()).resolve()
 
@@ -73,13 +88,13 @@ def create_after(args: argparse.Namespace, root: Path) -> int:
     now = utc_now()
     due = now + parse_duration(args.duration)
     predicate = {"type": "not_before", "due_at": format_utc(due)}
-    return create_record(args.prompt, predicate, root, now)
+    return create_record(args.prompt, predicate, root, now, args)
 
 
 def create_at(args: argparse.Namespace, root: Path) -> int:
     due = parse_timestamp(args.timestamp)
     predicate = {"type": "not_before", "due_at": format_utc(due)}
-    return create_record(args.prompt, predicate, root, utc_now())
+    return create_record(args.prompt, predicate, root, utc_now(), args)
 
 
 def create_file(args: argparse.Namespace, root: Path) -> int:
@@ -87,21 +102,34 @@ def create_file(args: argparse.Namespace, root: Path) -> int:
     if not path:
         raise WakeError("file path is required")
     predicate = {"type": "file_exists", "path": path}
-    return create_record(args.prompt, predicate, root, utc_now())
+    return create_record(args.prompt, predicate, root, utc_now(), args)
 
 
-def create_record(prompt_parts: list[str], predicate: dict[str, str], root: Path, now) -> int:
+def create_record(prompt_parts: list[str], predicate: dict[str, str], root: Path, now, args: argparse.Namespace) -> int:
     prompt = normalize_prompt(prompt_parts)
     record = build_record(
         predicate=predicate,
         prompt=prompt,
         cwd=Path.cwd(),
-        target=capture_tmux_target(),
+        target=target_for_args(args),
         now=now,
     )
     path = write_record(root, record)
     print(f"{record['id']} {path}")
     return 0
+
+
+def target_for_args(args: argparse.Namespace) -> dict[str, str]:
+    if getattr(args, "app_server_thread_id", None):
+        endpoint = getattr(args, "app_server_endpoint", "stdio://")
+        if endpoint != "stdio://":
+            raise WakeError("only app-server endpoint stdio:// is currently implemented")
+        return {
+            "transport": "app-server",
+            "endpoint": endpoint,
+            "thread_id": args.app_server_thread_id,
+        }
+    return capture_tmux_target()
 
 
 def list_records(args: argparse.Namespace, root: Path) -> int:

@@ -1,6 +1,6 @@
 # App-Server Controlled Mode
 
-State: OPEN
+State: CLOSED
 Lane: P07
 
 ## Scope
@@ -27,4 +27,4 @@ The tmux MVP can create wake records, evaluate predicates, inject canonical prom
 
 ## Definition Of Done
 
-The plan can close when app-server mode has a verified contract and either a working controlled dispatch path or a concrete blocker with next steps.
+Closed on 2026-05-18. App-server mode has a verified contract and a working stdio dispatch path in code. WebSocket dispatch is deferred behind the documented experimental/auth boundary.

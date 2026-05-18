@@ -130,3 +130,25 @@ Validation:
 - `python -m compileall -q src tests .codex/hooks`
 
 Next checkpoint: verify current Codex app-server contract and decide whether P07 can implement controlled dispatch now or should record a precise blocker.
+
+## Turn 9 | 2026-05-18
+
+Implemented and validated the P07 app-server controlled mode slice.
+
+- Verified official Codex docs for app-server transports and WebSocket safety boundaries.
+- Verified local Codex CLI 0.130.0 supports `codex app-server --listen stdio://`, schema generation, and TypeScript generation.
+- Generated local app-server schemas and confirmed `thread/resume` and `turn/start` payload shapes.
+- Added `codex_wake.app_server` with a stdio JSON-RPC client and controlled dispatch through `initialize`, `thread/resume`, and `turn/start`.
+- Added app-server target support through `--app-server-thread-id`.
+- Explicitly rejected non-stdio app-server endpoints in the MVP.
+- Added `docs/dev/app-server-mode.md`.
+- Added tests for app-server dispatch, unsupported endpoint failure, dispatcher routing, and CLI target creation.
+- Closed P07 in `ROADMAP.md`.
+- Opened P08 with `docs/dev/plans/0008-2026-05-18-installed-runtime-verification.md`.
+
+Validation:
+
+- `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`
+- `python -m compileall -q src tests .codex/hooks`
+
+Next checkpoint: verify installed executables and hook behavior end to end from a temporary install.

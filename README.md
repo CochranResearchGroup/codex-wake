@@ -18,6 +18,12 @@ Run the CLI from source:
 PYTHONPATH=src python -m codex_wake.cli --help
 ```
 
+Create an app-server-targeted wake instead of a tmux-targeted wake:
+
+```bash
+PYTHONPATH=src python -m codex_wake.cli after --app-server-thread-id thread_abc 45m -- "Resume the scheduled task."
+```
+
 Archive terminal wake records:
 
 ```bash

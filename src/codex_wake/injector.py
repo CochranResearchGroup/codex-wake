@@ -176,6 +176,12 @@ def dispatch_firing_record(
     wake_id = record.get("id")
     if not isinstance(wake_id, str) or not wake_id:
         raise WakeError("wake record missing id")
+    target = record.get("target")
+    if isinstance(target, dict) and target.get("transport") == "app-server":
+        from .app_server import dispatch_app_server_record
+
+        result = dispatch_app_server_record(root, found, now=current)
+        return DispatchResult(result.status, result.message)
     try:
         socket, pane = target_from_record(record)
     except WakeError as exc:

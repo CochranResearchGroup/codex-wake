@@ -122,9 +122,9 @@ Safety requirements:
 
 ## P07 | App-Server Controlled Mode
 
-State: OPEN
+State: CLOSED
 
-Current State: The tmux MVP path exists. This is the preferred long-term mode and should now be designed against the current Codex app-server contract before implementation.
+Current State: Closed by the stdio app-server controlled dispatch path. Wake records can target app-server threads, dispatch uses `initialize`, `thread/resume`, and `turn/start`, and WebSocket mode remains explicitly deferred behind the documented experimental/auth boundary.
 
 Plan: [App-Server Controlled Mode](docs/dev/plans/0007-2026-05-18-app-server-controlled-mode.md)
 
@@ -138,9 +138,11 @@ Planned behavior:
 
 ## P08 | Installed Runtime Verification
 
-State: PLANNED
+State: OPEN
 
-Current State: No installed command, hook, or daemon exists yet. This lane opens once there is an executable surface.
+Current State: The CLI, daemon, tmux injector, Codex hook, archive controls, and stdio app-server dispatch path exist on the feature branch. This lane should verify the installed executable surface end to end.
+
+Plan: [Installed Runtime Verification](docs/dev/plans/0008-2026-05-18-installed-runtime-verification.md)
 
 Acceptance target:
 

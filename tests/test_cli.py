@@ -82,6 +82,53 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("TMUX_PANE is required", stderr.getvalue())
 
+    def test_app_server_thread_target_does_not_require_tmux(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch.dict(os.environ, {"TMUX_PANE": "", "TMUX": ""}, clear=False):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = cli.main(
+                        [
+                            "--wake-root",
+                            str(root),
+                            "after",
+                            "--app-server-thread-id",
+                            "thread_abc",
+                            "1m",
+                            "--",
+                            "Wake app server",
+                        ]
+                    )
+            self.assertEqual(code, 0, stderr.getvalue())
+            wake_id = stdout.getvalue().split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["target"], {"transport": "app-server", "endpoint": "stdio://", "thread_id": "thread_abc"})
+
+    def test_app_server_rejects_non_stdio_endpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(
+                    [
+                        "--wake-root",
+                        str(root),
+                        "after",
+                        "--app-server-thread-id",
+                        "thread_abc",
+                        "--app-server-endpoint",
+                        "ws://127.0.0.1:4500",
+                        "1m",
+                        "--",
+                        "Wake app server",
+                    ]
+                )
+            self.assertEqual(code, 2)
+            self.assertIn("only app-server endpoint stdio://", stderr.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
