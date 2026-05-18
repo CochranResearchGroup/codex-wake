@@ -17,3 +17,9 @@ Run the CLI from source:
 ```bash
 PYTHONPATH=src python -m codex_wake.cli --help
 ```
+
+Run one daemon polling pass from source:
+
+```bash
+PYTHONPATH=src python -m codex_wake.daemon --once
+```

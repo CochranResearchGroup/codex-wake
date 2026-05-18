@@ -72,6 +72,11 @@ def parse_timestamp(value: str) -> datetime:
     return parsed.astimezone(UTC).replace(microsecond=0)
 
 
+def parse_utc_timestamp(value: str) -> datetime:
+    parsed = parse_timestamp(value)
+    return parsed.astimezone(UTC).replace(microsecond=0)
+
+
 def make_wake_id(now: datetime | None = None) -> str:
     current = now or utc_now()
     stamp = current.astimezone(UTC).strftime("%Y%m%d_%H%M%S")
@@ -203,6 +208,33 @@ def cancel_record(root: Path, wake_id: str, now: datetime | None = None) -> Path
     record["updated_at"] = format_utc(current)
     events = list(record.get("events") or [])
     events.append(make_event("cancelled", "Wake cancelled by operator", current))
+    record["events"] = events
+    destination = write_record(root, record)
+    if found.path != destination and found.path.exists():
+        found.path.unlink()
+    return destination
+
+
+def move_record(
+    root: Path,
+    found: WakePath,
+    status: str,
+    *,
+    event_type: str,
+    message: str,
+    now: datetime | None = None,
+    last_error: str | None = None,
+) -> Path:
+    if status not in VALID_STATUSES:
+        raise WakeError(f"invalid wake status: {status}")
+    current = now or utc_now()
+    record = dict(found.record)
+    record["status"] = status
+    record["updated_at"] = format_utc(current)
+    if last_error:
+        record["last_error"] = last_error
+    events = list(record.get("events") or [])
+    events.append(make_event(event_type, message, current))
     record["events"] = events
     destination = write_record(root, record)
     if found.path != destination and found.path.exists():

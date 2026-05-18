@@ -1,6 +1,6 @@
 # Wake Daemon And Trigger Engine
 
-State: OPEN
+State: CLOSED
 Lane: P03
 
 ## Scope
@@ -30,4 +30,4 @@ The `codex-wake` CLI can create, list, show, and cancel declarative wake records
 
 ## Definition Of Done
 
-The plan can close when `codex-waked` can deterministically move eligible records into `firing` and tests cover both MVP predicates.
+Closed on 2026-05-18. `codex-waked` can deterministically move eligible records into `firing`, invalid predicates into `failed`, and tests cover both MVP predicates.

@@ -16,6 +16,7 @@ dependencies = []
 
 [project.scripts]
 codex-wake = "codex_wake.cli:main"
+codex-waked = "codex_wake.daemon:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

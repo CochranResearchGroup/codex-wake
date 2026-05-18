@@ -51,3 +51,24 @@ Validation:
 - `TMUX_PANE='%11' TMUX='/tmp/tmux-1000/default,123,0' PYTHONPATH=src python -m codex_wake.cli --wake-root /tmp/codex-wake-smoke after 1m -- 'Smoke wake'`
 
 Next checkpoint: implement `codex-waked` predicate polling and `pending -> firing` movement for `not_before` and `file_exists`.
+
+## Turn 5 | 2026-05-18
+
+Implemented and validated the P03 daemon slice.
+
+- Added `codex-waked` as a console entry point.
+- Added one-shot and polling daemon modes.
+- Added predicate evaluation for `not_before` and `file_exists`.
+- Added deterministic movement from `pending` to `firing`.
+- Added invalid-predicate movement from `pending` to `failed`.
+- Added stable transition events and `last_error` support.
+- Closed P03 in `ROADMAP.md`.
+- Opened P04 with `docs/dev/plans/0004-2026-05-18-tmux-injection-mvp.md`.
+
+Validation:
+
+- `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`
+- `PYTHONPATH=src python -m codex_wake.daemon --once --wake-root /tmp/codex-wake-daemon-smoke`
+- create an already-due wake through `codex-wake`, then run `codex-waked --once` and verify the record moved to `firing`.
+
+Next checkpoint: implement the tmux injector, per-pane locking, unsafe pane checks, and bounded missing-ack behavior.

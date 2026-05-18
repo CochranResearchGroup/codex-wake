@@ -42,9 +42,9 @@ Acceptance target:
 
 ## P03 | Wake Daemon And Trigger Engine
 
-State: OPEN
+State: CLOSED
 
-Current State: The CLI can create declarative wake records. No daemon exists yet. The first daemon implementation should be a small polling daemon rather than systemd, cron, or a general TUI automation controller.
+Current State: Closed by the first `codex-waked` implementation. The daemon can poll pending records, evaluate `not_before` and `file_exists`, move ready records into `firing`, and fail records with invalid predicates.
 
 Plan: [Wake Daemon And Trigger Engine](docs/dev/plans/0003-2026-05-18-wake-daemon-trigger-engine.md)
 
@@ -60,9 +60,11 @@ Planned behavior:
 
 ## P04 | Tmux Injection MVP
 
-State: PLANNED
+State: OPEN
 
-Current State: No injector exists yet. MVP injection should paste a short canonical wake prompt into the captured pane and press Enter.
+Current State: The daemon can move eligible records into `firing`, but no injector exists yet. MVP injection should paste a short canonical wake prompt into the captured pane and press Enter.
+
+Plan: [Tmux Injection MVP](docs/dev/plans/0004-2026-05-18-tmux-injection-mvp.md)
 
 Planned behavior:
 
