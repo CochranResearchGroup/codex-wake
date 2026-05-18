@@ -82,9 +82,9 @@ Resume the scheduled wake task.
 
 ## P05 | Codex Hook Ack And Context Loader
 
-State: OPEN
+State: CLOSED
 
-Current State: The injector now waits for `.codex/wake/acks/<wake-id>.submitted`, but no Codex hook exists yet. This lane should implement the repo-local `UserPromptSubmit` hook and a sample config fragment.
+Current State: Closed by the repo-local `UserPromptSubmit` hook. The hook self-filters for `WAKE_TRIGGER_ID=...`, writes ack files, and returns wake context through `hookSpecificOutput.additionalContext`.
 
 Plan: [Codex Hook Ack And Context Loader](docs/dev/plans/0005-2026-05-18-codex-hook-ack-context-loader.md)
 
@@ -98,9 +98,11 @@ Planned behavior:
 
 ## P06 | Runtime State, Retention, And Safety
 
-State: PLANNED
+State: OPEN
 
-Current State: Policy requires runtime state classification, but no concrete layout exists yet.
+Current State: Core runtime directories exist and wake records carry deterministic statuses and events. This lane should finalize retention, archive, cleanup, and safety documentation around the active runtime layout.
+
+Plan: [Runtime State, Retention, And Safety](docs/dev/plans/0006-2026-05-18-runtime-state-retention-safety.md)
 
 Planned state layout:
 

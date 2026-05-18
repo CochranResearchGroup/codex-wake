@@ -1,6 +1,6 @@
 # Codex Hook Ack And Context Loader
 
-State: OPEN
+State: CLOSED
 Lane: P05
 
 ## Scope
@@ -29,4 +29,4 @@ The tmux injector can paste canonical wake prompts and waits for `.codex/wake/ac
 
 ## Definition Of Done
 
-The plan can close when the hook can produce ack files and hook-specific JSON output deterministically without depending on a live Codex TUI.
+Closed on 2026-05-18. The hook can produce ack files and hook-specific JSON output deterministically without depending on a live Codex TUI.

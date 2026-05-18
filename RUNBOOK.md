@@ -90,3 +90,23 @@ Validation:
 - `python -m compileall -q src tests`
 
 Next checkpoint: implement the `UserPromptSubmit` hook that writes ack files and injects wake context into Codex.
+
+## Turn 7 | 2026-05-18
+
+Implemented and validated the P05 Codex hook slice.
+
+- Added `codex_wake.hook` with wake id extraction, ack writing, trigger lookup, missing-trigger warnings, and hook-specific JSON output.
+- Added `.codex/hooks/wake_user_prompt_submit.py` as the repo-local command hook wrapper.
+- Added `docs/dev/codex-hooks.example.json` with a sample `UserPromptSubmit` hook configuration.
+- Added tests for no-match, found-record, missing-record, and direct hook output behavior.
+- Verified official Codex hook docs for `UserPromptSubmit` matcher behavior and `hookSpecificOutput.additionalContext`.
+- Closed P05 in `ROADMAP.md`.
+- Opened P06 with `docs/dev/plans/0006-2026-05-18-runtime-state-retention-safety.md`.
+
+Validation:
+
+- `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`
+- direct `.codex/hooks/wake_user_prompt_submit.py` smoke with a generated JSON payload
+- `python -m compileall -q src tests .codex/hooks`
+
+Next checkpoint: specify and implement runtime-state retention, archive, and cleanup behavior.
