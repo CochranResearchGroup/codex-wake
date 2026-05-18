@@ -72,3 +72,21 @@ Validation:
 - create an already-due wake through `codex-wake`, then run `codex-waked --once` and verify the record moved to `firing`.
 
 Next checkpoint: implement the tmux injector, per-pane locking, unsafe pane checks, and bounded missing-ack behavior.
+
+## Turn 6 | 2026-05-18
+
+Implemented and validated the P04 tmux injector slice.
+
+- Added `codex_wake.injector` with canonical prompt construction, tmux subprocess runner, pane capture, prompt paste, per-pane locks, ack waiting, and bounded requeue/fail behavior.
+- Wired `codex-waked` to dispatch `firing` records by default, with `--no-dispatch` and `--ack-timeout` controls.
+- Ensured injected text contains only `WAKE_TRIGGER_ID=<id>` and the short resume instruction.
+- Added tests for canonical prompt construction, unsafe pane detection, lock contention, submitted ack behavior, missing-ack requeue, and full-prompt exclusion from injected text.
+- Closed P04 in `ROADMAP.md`.
+- Opened P05 with `docs/dev/plans/0005-2026-05-18-codex-hook-ack-context-loader.md`.
+
+Validation:
+
+- `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`
+- `python -m compileall -q src tests`
+
+Next checkpoint: implement the `UserPromptSubmit` hook that writes ack files and injects wake context into Codex.

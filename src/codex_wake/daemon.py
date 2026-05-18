@@ -16,6 +16,7 @@ from .records import (
     parse_utc_timestamp,
     utc_now,
 )
+from .injector import TmuxRunner, dispatch_firing_record
 
 
 @dataclass(frozen=True)
@@ -24,10 +25,17 @@ class PollResult:
     fired: int = 0
     failed: int = 0
     pending: int = 0
+    dispatched: int = 0
+    requeued: int = 0
+    submitted: int = 0
 
 
 def pending_records(root: Path) -> list[WakePath]:
     return [item for item in iter_records(root) if item.record.get("status") == "pending"]
+
+
+def firing_records(root: Path) -> list[WakePath]:
+    return [item for item in iter_records(root) if item.record.get("status") == "firing"]
 
 
 def predicate_is_ready(record: dict, now: datetime) -> tuple[bool, str]:
@@ -54,9 +62,16 @@ def predicate_is_ready(record: dict, now: datetime) -> tuple[bool, str]:
     raise WakeError(f"unsupported predicate type: {predicate_type}")
 
 
-def poll_once(root: Path, now: datetime | None = None) -> PollResult:
+def poll_once(
+    root: Path,
+    now: datetime | None = None,
+    *,
+    dispatch: bool = True,
+    runner: TmuxRunner | None = None,
+    ack_timeout_override: float | None = None,
+) -> PollResult:
     current = now or utc_now()
-    checked = fired = failed = pending = 0
+    checked = fired = failed = pending = dispatched = requeued = submitted = 0
     for item in pending_records(root):
         checked += 1
         try:
@@ -85,7 +100,31 @@ def poll_once(root: Path, now: datetime | None = None) -> PollResult:
             fired += 1
         else:
             pending += 1
-    return PollResult(checked=checked, fired=fired, failed=failed, pending=pending)
+    if dispatch:
+        for item in firing_records(root):
+            dispatched += 1
+            result = dispatch_firing_record(
+                root,
+                item,
+                runner=runner,
+                now=current,
+                ack_timeout_override=ack_timeout_override,
+            )
+            if result.status == "submitted":
+                submitted += 1
+            elif result.status == "requeued":
+                requeued += 1
+            elif result.status == "failed":
+                failed += 1
+    return PollResult(
+        checked=checked,
+        fired=fired,
+        failed=failed,
+        pending=pending,
+        dispatched=dispatched,
+        requeued=requeued,
+        submitted=submitted,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -98,6 +137,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--once", action="store_true", help="run one polling pass and exit")
     parser.add_argument("--interval", type=float, default=5.0, help="poll interval in seconds")
+    parser.add_argument("--no-dispatch", action="store_true", help="evaluate predicates but do not dispatch firing records")
+    parser.add_argument(
+        "--ack-timeout",
+        type=float,
+        default=None,
+        help="override ack wait timeout in seconds",
+    )
     return parser
 
 
@@ -106,16 +152,17 @@ def run(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     root = (args.wake_root or default_wake_root()).resolve()
     if args.once:
-        result = poll_once(root)
+        result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
         print(
             f"checked={result.checked} fired={result.fired} "
-            f"failed={result.failed} pending={result.pending}"
+            f"failed={result.failed} pending={result.pending} "
+            f"dispatched={result.dispatched} submitted={result.submitted} requeued={result.requeued}"
         )
         return 0
     if args.interval <= 0:
         raise WakeError("--interval must be greater than zero")
     while True:
-        poll_once(root)
+        poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
         time.sleep(args.interval)
 
 

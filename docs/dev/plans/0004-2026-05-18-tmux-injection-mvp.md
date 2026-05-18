@@ -1,6 +1,6 @@
 # Tmux Injection MVP
 
-State: OPEN
+State: CLOSED
 Lane: P04
 
 ## Scope
@@ -30,4 +30,4 @@ Implement the tmux injector that handles records in `firing` by submitting the c
 
 ## Definition Of Done
 
-The plan can close when firing records can be safely dispatched to tmux in a dry-run/testable injector path and missing ack behavior is deterministic.
+Closed on 2026-05-18. Firing records can be dispatched through a testable tmux injector path, unsafe panes are rejected, per-pane locks are enforced, and missing ack behavior is deterministic.

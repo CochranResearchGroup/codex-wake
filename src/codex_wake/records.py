@@ -124,6 +124,22 @@ def make_event(event_type: str, message: str, now: datetime | None = None) -> di
     }
 
 
+def append_event(
+    record: dict[str, Any],
+    event_type: str,
+    message: str,
+    now: datetime | None = None,
+    **extra: Any,
+) -> dict[str, Any]:
+    updated = dict(record)
+    event = make_event(event_type, message, now)
+    event.update(extra)
+    events = list(updated.get("events") or [])
+    events.append(event)
+    updated["events"] = events
+    return updated
+
+
 def build_record(
     *,
     predicate: dict[str, Any],
@@ -233,9 +249,14 @@ def move_record(
     record["updated_at"] = format_utc(current)
     if last_error:
         record["last_error"] = last_error
-    events = list(record.get("events") or [])
-    events.append(make_event(event_type, message, current))
-    record["events"] = events
+    record = append_event(record, event_type, message, current)
+    destination = write_record(root, record)
+    if found.path != destination and found.path.exists():
+        found.path.unlink()
+    return destination
+
+
+def replace_record(root: Path, found: WakePath, record: dict[str, Any]) -> Path:
     destination = write_record(root, record)
     if found.path != destination and found.path.exists():
         found.path.unlink()

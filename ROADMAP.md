@@ -60,9 +60,9 @@ Planned behavior:
 
 ## P04 | Tmux Injection MVP
 
-State: OPEN
+State: CLOSED
 
-Current State: The daemon can move eligible records into `firing`, but no injector exists yet. MVP injection should paste a short canonical wake prompt into the captured pane and press Enter.
+Current State: Closed by the first tmux injector implementation. Firing records can be dispatched through a testable injector path, canonical prompts are generated from wake id only, unsafe panes are rejected, per-pane locks are enforced, and missing ack requeues with backoff.
 
 Plan: [Tmux Injection MVP](docs/dev/plans/0004-2026-05-18-tmux-injection-mvp.md)
 
@@ -82,9 +82,11 @@ Resume the scheduled wake task.
 
 ## P05 | Codex Hook Ack And Context Loader
 
-State: PLANNED
+State: OPEN
 
-Current State: No hook exists yet. This lane should implement the repo-local `UserPromptSubmit` hook and a sample config fragment.
+Current State: The injector now waits for `.codex/wake/acks/<wake-id>.submitted`, but no Codex hook exists yet. This lane should implement the repo-local `UserPromptSubmit` hook and a sample config fragment.
+
+Plan: [Codex Hook Ack And Context Loader](docs/dev/plans/0005-2026-05-18-codex-hook-ack-context-loader.md)
 
 Planned behavior:
 

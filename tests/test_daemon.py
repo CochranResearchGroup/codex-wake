@@ -29,7 +29,7 @@ class DaemonTests(unittest.TestCase):
             record = self.make_record(tmp, {"type": "not_before", "due_at": "2026-05-18T21:15:00Z"})
             write_record(root, record)
 
-            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC))
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
 
             self.assertEqual(result.fired, 1)
             self.assertFalse((root / "pending" / f"{record['id']}.json").exists())
@@ -45,7 +45,7 @@ class DaemonTests(unittest.TestCase):
             record = self.make_record(tmp, {"type": "not_before", "due_at": "2026-05-18T21:15:00Z"})
             write_record(root, record)
 
-            result = poll_once(root, now=datetime(2026, 5, 18, 21, 14, tzinfo=UTC))
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 14, tzinfo=UTC), dispatch=False)
 
             self.assertEqual(result.pending, 1)
             self.assertTrue((root / "pending" / f"{record['id']}.json").exists())
@@ -60,7 +60,7 @@ class DaemonTests(unittest.TestCase):
             record["id"] = "wake_file"
             write_record(root, record)
 
-            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC))
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
 
             self.assertEqual(result.fired, 1)
             self.assertTrue((root / "firing" / "wake_file.json").exists())
@@ -72,7 +72,7 @@ class DaemonTests(unittest.TestCase):
             record["id"] = "wake_bad"
             write_record(root, record)
 
-            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC))
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
 
             self.assertEqual(result.failed, 1)
             failed = root / "failed" / "wake_bad.json"
