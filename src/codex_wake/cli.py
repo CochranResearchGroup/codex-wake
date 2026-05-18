@@ -1,0 +1,157 @@
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from datetime import UTC
+from pathlib import Path
+
+from .records import (
+    WakeError,
+    build_record,
+    cancel_record,
+    capture_tmux_target,
+    default_wake_root,
+    find_record,
+    format_utc,
+    iter_records,
+    normalize_prompt,
+    parse_duration,
+    parse_timestamp,
+    utc_now,
+    write_record,
+)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="codex-wake")
+    parser.add_argument(
+        "--wake-root",
+        type=Path,
+        default=None,
+        help="wake runtime root; defaults to .codex/wake under the current directory",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    after = subparsers.add_parser("after", help="create a wake after a duration such as 45m or 1h30m")
+    after.add_argument("duration")
+    after.add_argument("prompt", nargs=argparse.REMAINDER)
+
+    at = subparsers.add_parser("at", help="create a wake at an ISO-8601 timestamp with timezone")
+    at.add_argument("timestamp")
+    at.add_argument("prompt", nargs=argparse.REMAINDER)
+
+    file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
+    file_cmd.add_argument("path")
+    file_cmd.add_argument("prompt", nargs=argparse.REMAINDER)
+
+    list_cmd = subparsers.add_parser("list", help="list wake records")
+    list_cmd.add_argument("--json", action="store_true", dest="as_json")
+
+    show = subparsers.add_parser("show", help="show one wake record")
+    show.add_argument("wake_id")
+
+    cancel = subparsers.add_parser("cancel", help="cancel a pending or firing wake")
+    cancel.add_argument("wake_id")
+
+    return parser
+
+
+def resolve_root(args: argparse.Namespace) -> Path:
+    return (args.wake_root or default_wake_root()).resolve()
+
+
+def create_after(args: argparse.Namespace, root: Path) -> int:
+    now = utc_now()
+    due = now + parse_duration(args.duration)
+    predicate = {"type": "not_before", "due_at": format_utc(due)}
+    return create_record(args.prompt, predicate, root, now)
+
+
+def create_at(args: argparse.Namespace, root: Path) -> int:
+    due = parse_timestamp(args.timestamp)
+    predicate = {"type": "not_before", "due_at": format_utc(due)}
+    return create_record(args.prompt, predicate, root, utc_now())
+
+
+def create_file(args: argparse.Namespace, root: Path) -> int:
+    path = args.path.strip()
+    if not path:
+        raise WakeError("file path is required")
+    predicate = {"type": "file_exists", "path": path}
+    return create_record(args.prompt, predicate, root, utc_now())
+
+
+def create_record(prompt_parts: list[str], predicate: dict[str, str], root: Path, now) -> int:
+    prompt = normalize_prompt(prompt_parts)
+    record = build_record(
+        predicate=predicate,
+        prompt=prompt,
+        cwd=Path.cwd(),
+        target=capture_tmux_target(),
+        now=now,
+    )
+    path = write_record(root, record)
+    print(f"{record['id']} {path}")
+    return 0
+
+
+def list_records(args: argparse.Namespace, root: Path) -> int:
+    records = iter_records(root)
+    if args.as_json:
+        print(json.dumps([item.record for item in records], indent=2, sort_keys=True))
+        return 0
+    if not records:
+        print("No wakes.")
+        return 0
+    print("ID\tSTATUS\tPREDICATE\tNEXT")
+    for item in records:
+        record = item.record
+        predicate = record.get("predicate") or {}
+        predicate_type = predicate.get("type", "unknown")
+        next_attempt = record.get("next_attempt_at", "")
+        print(f"{record.get('id')}\t{record.get('status')}\t{predicate_type}\t{next_attempt}")
+    return 0
+
+
+def show_record(args: argparse.Namespace, root: Path) -> int:
+    found = find_record(root, args.wake_id)
+    print(json.dumps(found.record, indent=2, sort_keys=True))
+    return 0
+
+
+def cancel(args: argparse.Namespace, root: Path) -> int:
+    path = cancel_record(root, args.wake_id)
+    print(f"cancelled {args.wake_id} {path}")
+    return 0
+
+
+def run(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    root = resolve_root(args)
+    if args.command == "after":
+        return create_after(args, root)
+    if args.command == "at":
+        return create_at(args, root)
+    if args.command == "file":
+        return create_file(args, root)
+    if args.command == "list":
+        return list_records(args, root)
+    if args.command == "show":
+        return show_record(args, root)
+    if args.command == "cancel":
+        return cancel(args, root)
+    raise WakeError(f"unknown command: {args.command}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    try:
+        return run(argv)
+    except WakeError as exc:
+        print(f"codex-wake: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,19 @@
+# Codex Wake
+
+Codex Wake is a local wake spooler for TUI-bound Codex agents.
+
+The first implementation target is a small `codex-wake` CLI that writes declarative wake records under `.codex/wake/`. Later slices add the daemon, tmux injector, and Codex hook ack flow described in [docs/dev/0001-wake-spooler-design.md](docs/dev/0001-wake-spooler-design.md).
+
+## Development
+
+Run the focused test suite:
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
+```
+
+Run the CLI from source:
+
+```bash
+PYTHONPATH=src python -m codex_wake.cli --help
+```

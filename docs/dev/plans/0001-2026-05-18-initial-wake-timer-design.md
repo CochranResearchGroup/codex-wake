@@ -1,6 +1,6 @@
 # Initial Wake Timer Design
 
-State: OPEN
+State: CLOSED
 Lane: P01
 
 ## Scope
@@ -17,7 +17,7 @@ Design the first durable product shape for a wake spooler that TUI-bound Codex a
 
 ## Current State
 
-The repo has policy and planning scaffolding only. No source tree, package manifest, CLI, runtime state schema, or tests exist yet. The roadmap now records the intended MVP: `codex-wake` CLI, a polling `codex-waked` daemon, tmux injection, and a `UserPromptSubmit` hook ack/context loader.
+The repo has an accepted P01 design artifact at `docs/dev/0001-wake-spooler-design.md`. No source tree, package manifest, CLI, runtime state schema implementation, or tests exist yet.
 
 ## Design Questions
 
@@ -41,4 +41,4 @@ The repo has policy and planning scaffolding only. No source tree, package manif
 
 ## Definition Of Done
 
-This plan can close when a design artifact is added under `docs/dev/` and `ROADMAP.md` is updated with the next implementation slice.
+Closed on 2026-05-18. The next active slice is P02, tracked in `docs/dev/plans/0002-2026-05-18-agent-facing-cli.md`.

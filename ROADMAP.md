@@ -2,9 +2,9 @@
 
 ## P01 | Wake Spooler Architecture
 
-State: OPEN
+State: CLOSED
 
-Current State: The repo has policy and planning surfaces. The accepted architecture direction is a wake spooler: agents request wakes through `codex-wake`, deterministic runtime code owns trigger persistence and firing, and the MVP targets a live Codex TUI through tmux plus a `UserPromptSubmit` hook ack.
+Current State: Closed by `docs/dev/0001-wake-spooler-design.md`. The accepted architecture direction is a wake spooler: agents request wakes through `codex-wake`, deterministic runtime code owns trigger persistence and firing, and the MVP targets a live Codex TUI through tmux plus a `UserPromptSubmit` hook ack.
 
 Plan: [Initial Wake Timer Design](docs/dev/plans/0001-2026-05-18-initial-wake-timer-design.md)
 
@@ -18,9 +18,11 @@ Deliverables:
 
 ## P02 | Agent-Facing CLI
 
-State: PLANNED
+State: CLOSED
 
-Current State: No CLI exists yet. This lane opens after P01 fixes the wake-record schema and trigger vocabulary.
+Current State: Closed by the first Python package and CLI implementation. `codex-wake` can create `after`, `at`, and `file` wake records, list records, show a record, and cancel pending or firing records.
+
+Plan: [Agent-Facing CLI](docs/dev/plans/0002-2026-05-18-agent-facing-cli.md)
 
 Planned surface:
 
@@ -40,9 +42,11 @@ Acceptance target:
 
 ## P03 | Wake Daemon And Trigger Engine
 
-State: PLANNED
+State: OPEN
 
-Current State: No daemon exists yet. The first implementation should be a small polling daemon rather than systemd, cron, or a general TUI automation controller.
+Current State: The CLI can create declarative wake records. No daemon exists yet. The first daemon implementation should be a small polling daemon rather than systemd, cron, or a general TUI automation controller.
+
+Plan: [Wake Daemon And Trigger Engine](docs/dev/plans/0003-2026-05-18-wake-daemon-trigger-engine.md)
 
 Planned behavior:
 

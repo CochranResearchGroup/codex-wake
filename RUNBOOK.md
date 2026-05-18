@@ -21,3 +21,33 @@ Roadmapped the wake-spooler design from the supplied design note.
 - Verified current Codex docs for `UserPromptSubmit`, hook timeout/async behavior, `codex exec resume`, remote TUI mode, and app-server `thread/resume` plus `turn/start`.
 
 Next checkpoint: write the source-backed design brief and first wake-record contract under `docs/dev/`.
+
+## Turn 3 | 2026-05-18
+
+Started execution on P01 and moved the repo into the first implementation slice.
+
+- Added `docs/dev/0001-wake-spooler-design.md` with the accepted architecture, schema, status vocabulary, event records, hook ack contract, retry policy, CLI contract, and validation requirements.
+- Closed P01 in `ROADMAP.md`.
+- Opened P02 in `ROADMAP.md`.
+- Added `docs/dev/plans/0002-2026-05-18-agent-facing-cli.md` as the active implementation plan.
+
+Next checkpoint: implement the `codex-wake` CLI and tests for wake-record creation, listing, showing, and cancellation.
+
+## Turn 4 | 2026-05-18
+
+Implemented and validated the P02 CLI slice.
+
+- Added Python package metadata and a `codex-wake` console entry point.
+- Added `after`, `at`, `file`, `list`, `show`, and `cancel` command support.
+- Added wake-record helpers for duration parsing, timestamp normalization, tmux target capture, atomic JSON writes, record lookup, and cancellation.
+- Added focused standard-library tests for records and CLI behavior.
+- Closed P02 in `ROADMAP.md`.
+- Opened P03 with `docs/dev/plans/0003-2026-05-18-wake-daemon-trigger-engine.md`.
+
+Validation:
+
+- `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`
+- `PYTHONPATH=src python -m codex_wake.cli --help`
+- `TMUX_PANE='%11' TMUX='/tmp/tmux-1000/default,123,0' PYTHONPATH=src python -m codex_wake.cli --wake-root /tmp/codex-wake-smoke after 1m -- 'Smoke wake'`
+
+Next checkpoint: implement `codex-waked` predicate polling and `pending -> firing` movement for `not_before` and `file_exists`.

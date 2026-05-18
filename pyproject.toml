@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codex-wake"
+version = "0.1.0"
+description = "Local wake spooler for TUI-bound Codex agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "Cochran Research Group" }
+]
+dependencies = []
+
+[project.scripts]
+codex-wake = "codex_wake.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
