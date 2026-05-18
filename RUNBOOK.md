@@ -152,3 +152,25 @@ Validation:
 - `python -m compileall -q src tests .codex/hooks`
 
 Next checkpoint: verify installed executables and hook behavior end to end from a temporary install.
+
+## Turn 10 | 2026-05-18
+
+Completed P08 installed runtime verification.
+
+- Installed the package into `/tmp/codex-wake-venv`.
+- Verified installed `codex-wake --help`.
+- Verified installed `codex-waked --once --no-dispatch`.
+- Verified installed CLI create, list, cancel, and archive lifecycle.
+- Verified installed daemon predicate movement for an already-due wake with `--no-dispatch`.
+- Verified the repo-local hook wrapper writes an ack and returns hook-specific output from a JSON payload.
+- Verified installed app-server-targeted wake creation and JSON listing.
+- Recorded verification details in `docs/dev/verification/0001-2026-05-18-installed-runtime-verification.md`.
+- Closed P08 in `ROADMAP.md`.
+
+Known limits:
+
+- Live tmux dispatch was not attempted without a disposable Codex TUI pane target.
+- Live app-server dispatch was not attempted without a real target thread id.
+- WebSocket app-server dispatch remains intentionally unimplemented.
+
+Next checkpoint: open PR for review and merge planning.

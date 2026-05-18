@@ -138,9 +138,9 @@ Planned behavior:
 
 ## P08 | Installed Runtime Verification
 
-State: OPEN
+State: CLOSED
 
-Current State: The CLI, daemon, tmux injector, Codex hook, archive controls, and stdio app-server dispatch path exist on the feature branch. This lane should verify the installed executable surface end to end.
+Current State: Closed by `docs/dev/verification/0001-2026-05-18-installed-runtime-verification.md`. Installed console scripts, CLI lifecycle, daemon predicate movement, hook ack behavior, and app-server target creation were verified from a temporary virtualenv.
 
 Plan: [Installed Runtime Verification](docs/dev/plans/0008-2026-05-18-installed-runtime-verification.md)
 

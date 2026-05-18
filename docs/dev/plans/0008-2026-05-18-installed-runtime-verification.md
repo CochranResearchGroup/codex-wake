@@ -1,6 +1,6 @@
 # Installed Runtime Verification
 
-State: OPEN
+State: CLOSED
 Lane: P08
 
 ## Scope
@@ -29,4 +29,4 @@ The feature branch includes CLI creation/inspection/cancel/archive commands, `co
 
 ## Definition Of Done
 
-The plan can close when the installed runtime surface has been verified and the branch is ready for PR review or merge.
+Closed on 2026-05-18. The installed runtime surface has been verified and the branch is ready for PR review.
