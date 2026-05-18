@@ -2,9 +2,9 @@
 
 ## P01 | Wake Spooler Architecture
 
-State: OPEN
+State: CLOSED
 
-Current State: The repo has policy and planning surfaces. The accepted architecture direction is a wake spooler: agents request wakes through `codex-wake`, deterministic runtime code owns trigger persistence and firing, and the MVP targets a live Codex TUI through tmux plus a `UserPromptSubmit` hook ack.
+Current State: Closed by `docs/dev/0001-wake-spooler-design.md`. The accepted architecture direction is a wake spooler: agents request wakes through `codex-wake`, deterministic runtime code owns trigger persistence and firing, and the MVP targets a live Codex TUI through tmux plus a `UserPromptSubmit` hook ack.
 
 Plan: [Initial Wake Timer Design](docs/dev/plans/0001-2026-05-18-initial-wake-timer-design.md)
 
@@ -18,9 +18,11 @@ Deliverables:
 
 ## P02 | Agent-Facing CLI
 
-State: PLANNED
+State: CLOSED
 
-Current State: No CLI exists yet. This lane opens after P01 fixes the wake-record schema and trigger vocabulary.
+Current State: Closed by the first Python package and CLI implementation. `codex-wake` can create `after`, `at`, and `file` wake records, list records, show a record, and cancel pending or firing records.
+
+Plan: [Agent-Facing CLI](docs/dev/plans/0002-2026-05-18-agent-facing-cli.md)
 
 Planned surface:
 
@@ -40,9 +42,11 @@ Acceptance target:
 
 ## P03 | Wake Daemon And Trigger Engine
 
-State: PLANNED
+State: CLOSED
 
-Current State: No daemon exists yet. The first implementation should be a small polling daemon rather than systemd, cron, or a general TUI automation controller.
+Current State: Closed by the first `codex-waked` implementation. The daemon can poll pending records, evaluate `not_before` and `file_exists`, move ready records into `firing`, and fail records with invalid predicates.
+
+Plan: [Wake Daemon And Trigger Engine](docs/dev/plans/0003-2026-05-18-wake-daemon-trigger-engine.md)
 
 Planned behavior:
 
@@ -56,9 +60,11 @@ Planned behavior:
 
 ## P04 | Tmux Injection MVP
 
-State: PLANNED
+State: CLOSED
 
-Current State: No injector exists yet. MVP injection should paste a short canonical wake prompt into the captured pane and press Enter.
+Current State: Closed by the first tmux injector implementation. Firing records can be dispatched through a testable injector path, canonical prompts are generated from wake id only, unsafe panes are rejected, per-pane locks are enforced, and missing ack requeues with backoff.
+
+Plan: [Tmux Injection MVP](docs/dev/plans/0004-2026-05-18-tmux-injection-mvp.md)
 
 Planned behavior:
 
@@ -76,9 +82,11 @@ Resume the scheduled wake task.
 
 ## P05 | Codex Hook Ack And Context Loader
 
-State: PLANNED
+State: CLOSED
 
-Current State: No hook exists yet. This lane should implement the repo-local `UserPromptSubmit` hook and a sample config fragment.
+Current State: Closed by the repo-local `UserPromptSubmit` hook. The hook self-filters for `WAKE_TRIGGER_ID=...`, writes ack files, and returns wake context through `hookSpecificOutput.additionalContext`.
+
+Plan: [Codex Hook Ack And Context Loader](docs/dev/plans/0005-2026-05-18-codex-hook-ack-context-loader.md)
 
 Planned behavior:
 
@@ -90,9 +98,11 @@ Planned behavior:
 
 ## P06 | Runtime State, Retention, And Safety
 
-State: PLANNED
+State: CLOSED
 
-Current State: Policy requires runtime state classification, but no concrete layout exists yet.
+Current State: Closed by runtime-state documentation and the terminal-record archive command. Operators can inspect active and archived wakes, and terminal wake records can be archived without touching active `pending` or `firing` records.
+
+Plan: [Runtime State, Retention, And Safety](docs/dev/plans/0006-2026-05-18-runtime-state-retention-safety.md)
 
 Planned state layout:
 
@@ -112,9 +122,11 @@ Safety requirements:
 
 ## P07 | App-Server Controlled Mode
 
-State: PLANNED
+State: CLOSED
 
-Current State: This is the preferred long-term mode, but it should follow the tmux MVP.
+Current State: Closed by the stdio app-server controlled dispatch path. Wake records can target app-server threads, dispatch uses `initialize`, `thread/resume`, and `turn/start`, and WebSocket mode remains explicitly deferred behind the documented experimental/auth boundary.
+
+Plan: [App-Server Controlled Mode](docs/dev/plans/0007-2026-05-18-app-server-controlled-mode.md)
 
 Planned behavior:
 
@@ -126,9 +138,11 @@ Planned behavior:
 
 ## P08 | Installed Runtime Verification
 
-State: PLANNED
+State: CLOSED
 
-Current State: No installed command, hook, or daemon exists yet. This lane opens once there is an executable surface.
+Current State: Closed by `docs/dev/verification/0001-2026-05-18-installed-runtime-verification.md`. Installed console scripts, CLI lifecycle, daemon predicate movement, hook ack behavior, and app-server target creation were verified from a temporary virtualenv.
+
+Plan: [Installed Runtime Verification](docs/dev/plans/0008-2026-05-18-installed-runtime-verification.md)
 
 Acceptance target:
 
