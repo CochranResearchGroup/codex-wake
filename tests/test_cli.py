@@ -62,6 +62,15 @@ class CliTests(unittest.TestCase):
             self.assertTrue((root / "cancelled" / f"{wake_id}.json").exists())
             self.assertFalse((root / "pending" / f"{wake_id}.json").exists())
 
+            code, archive_out, err = self.run_cli(["archive", wake_id], root)
+            self.assertEqual(code, 0, err)
+            self.assertIn("archived", archive_out)
+            self.assertTrue((root / "archive" / f"{wake_id}.json").exists())
+
+            code, archived_list, err = self.run_cli(["list", "--archived"], root)
+            self.assertEqual(code, 0, err)
+            self.assertIn(wake_id, archived_list)
+
     def test_create_requires_tmux_environment(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

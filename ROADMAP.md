@@ -98,9 +98,9 @@ Planned behavior:
 
 ## P06 | Runtime State, Retention, And Safety
 
-State: OPEN
+State: CLOSED
 
-Current State: Core runtime directories exist and wake records carry deterministic statuses and events. This lane should finalize retention, archive, cleanup, and safety documentation around the active runtime layout.
+Current State: Closed by runtime-state documentation and the terminal-record archive command. Operators can inspect active and archived wakes, and terminal wake records can be archived without touching active `pending` or `firing` records.
 
 Plan: [Runtime State, Retention, And Safety](docs/dev/plans/0006-2026-05-18-runtime-state-retention-safety.md)
 
@@ -122,9 +122,11 @@ Safety requirements:
 
 ## P07 | App-Server Controlled Mode
 
-State: PLANNED
+State: OPEN
 
-Current State: This is the preferred long-term mode, but it should follow the tmux MVP.
+Current State: The tmux MVP path exists. This is the preferred long-term mode and should now be designed against the current Codex app-server contract before implementation.
+
+Plan: [App-Server Controlled Mode](docs/dev/plans/0007-2026-05-18-app-server-controlled-mode.md)
 
 Planned behavior:
 

@@ -110,3 +110,23 @@ Validation:
 - `python -m compileall -q src tests .codex/hooks`
 
 Next checkpoint: specify and implement runtime-state retention, archive, and cleanup behavior.
+
+## Turn 8 | 2026-05-18
+
+Implemented and validated the P06 runtime-state retention slice.
+
+- Added `docs/dev/runtime-state.md` documenting runtime directory classes, retention rules, safety rules, and archive commands.
+- Added `codex-wake archive <wake-id>`.
+- Added `codex-wake archive --all-terminal`.
+- Added `codex-wake list --archived`.
+- Added archive helpers that only move terminal records and preserve JSON with `previous_status`, `archived_at`, and an `archived` event.
+- Added tests for single-record archive, archive-all-terminal, CLI archive, and archived listing.
+- Closed P06 in `ROADMAP.md`.
+- Opened P07 with `docs/dev/plans/0007-2026-05-18-app-server-controlled-mode.md`.
+
+Validation:
+
+- `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`
+- `python -m compileall -q src tests .codex/hooks`
+
+Next checkpoint: verify current Codex app-server contract and decide whether P07 can implement controlled dispatch now or should record a precise blocker.

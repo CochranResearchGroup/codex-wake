@@ -8,6 +8,9 @@ from pathlib import Path
 
 from .records import (
     WakeError,
+    all_records,
+    archive_record,
+    archive_terminal_records,
     build_record,
     cancel_record,
     capture_tmux_target,
@@ -47,12 +50,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     list_cmd = subparsers.add_parser("list", help="list wake records")
     list_cmd.add_argument("--json", action="store_true", dest="as_json")
+    list_cmd.add_argument("--archived", action="store_true", help="include archived wake records")
 
     show = subparsers.add_parser("show", help="show one wake record")
     show.add_argument("wake_id")
 
     cancel = subparsers.add_parser("cancel", help="cancel a pending or firing wake")
     cancel.add_argument("wake_id")
+
+    archive = subparsers.add_parser("archive", help="archive terminal wake records")
+    archive.add_argument("wake_id", nargs="?", help="specific wake id to archive")
+    archive.add_argument("--all-terminal", action="store_true", help="archive all submitted, failed, cancelled, and expired wakes")
 
     return parser
 
@@ -97,7 +105,7 @@ def create_record(prompt_parts: list[str], predicate: dict[str, str], root: Path
 
 
 def list_records(args: argparse.Namespace, root: Path) -> int:
-    records = iter_records(root)
+    records = all_records(root, include_archive=args.archived)
     if args.as_json:
         print(json.dumps([item.record for item in records], indent=2, sort_keys=True))
         return 0
@@ -126,6 +134,21 @@ def cancel(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def archive(args: argparse.Namespace, root: Path) -> int:
+    if bool(args.wake_id) == bool(args.all_terminal):
+        raise WakeError("provide either a wake id or --all-terminal")
+    if args.all_terminal:
+        paths = archive_terminal_records(root)
+        for path in paths:
+            print(f"archived {path.stem} {path}")
+        if not paths:
+            print("No terminal wakes to archive.")
+        return 0
+    path = archive_record(root, args.wake_id)
+    print(f"archived {args.wake_id} {path}")
+    return 0
+
+
 def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -142,6 +165,8 @@ def run(argv: list[str] | None = None) -> int:
         return show_record(args, root)
     if args.command == "cancel":
         return cancel(args, root)
+    if args.command == "archive":
+        return archive(args, root)
     raise WakeError(f"unknown command: {args.command}")
 
 

@@ -1,6 +1,6 @@
 # Runtime State, Retention, And Safety
 
-State: OPEN
+State: CLOSED
 Lane: P06
 
 ## Scope
@@ -28,4 +28,4 @@ The CLI creates wake records, the daemon evaluates predicates and dispatches fir
 
 ## Definition Of Done
 
-The plan can close when operators can understand what wake runtime files mean, what is safe to keep, and how terminal records are retained or archived.
+Closed on 2026-05-18. Operators can understand what wake runtime files mean, what is safe to keep, and how terminal records are retained or archived.

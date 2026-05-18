@@ -18,6 +18,12 @@ Run the CLI from source:
 PYTHONPATH=src python -m codex_wake.cli --help
 ```
 
+Archive terminal wake records:
+
+```bash
+PYTHONPATH=src python -m codex_wake.cli archive --all-terminal
+```
+
 Run one daemon polling pass from source:
 
 ```bash

@@ -12,6 +12,7 @@ from typing import Any
 
 SCHEMA_VERSION = 1
 ACTIVE_STATUS_DIRS = ("pending", "firing", "submitted", "failed", "cancelled", "expired")
+TERMINAL_STATUSES = {"submitted", "failed", "cancelled", "expired"}
 VALID_STATUSES = set(ACTIVE_STATUS_DIRS) | {"archived"}
 
 
@@ -206,11 +207,32 @@ def iter_records(root: Path) -> list[WakePath]:
     return sorted(results, key=lambda item: (item.record.get("created_at", ""), item.record.get("id", "")))
 
 
+def iter_archived_records(root: Path) -> list[WakePath]:
+    archive_dir = root / "archive"
+    results: list[WakePath] = []
+    if not archive_dir.exists():
+        return results
+    for path in sorted(archive_dir.glob("*.json")):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        results.append(WakePath(path=path, record=record))
+    return sorted(results, key=lambda item: (item.record.get("archived_at", ""), item.record.get("id", "")))
+
+
 def find_record(root: Path, wake_id: str) -> WakePath:
     for item in iter_records(root):
         if item.record.get("id") == wake_id:
             return item
     raise WakeError(f"wake not found: {wake_id}")
+
+
+def all_records(root: Path, include_archive: bool = False) -> list[WakePath]:
+    records = iter_records(root)
+    if include_archive:
+        records.extend(iter_archived_records(root))
+    return sorted(records, key=lambda item: (item.record.get("created_at", ""), item.record.get("id", "")))
 
 
 def cancel_record(root: Path, wake_id: str, now: datetime | None = None) -> Path:
@@ -261,3 +283,35 @@ def replace_record(root: Path, found: WakePath, record: dict[str, Any]) -> Path:
     if found.path != destination and found.path.exists():
         found.path.unlink()
     return destination
+
+
+def archive_record(root: Path, wake_id: str, now: datetime | None = None) -> Path:
+    found = find_record(root, wake_id)
+    record = dict(found.record)
+    status = record.get("status")
+    if status not in TERMINAL_STATUSES:
+        raise WakeError(f"cannot archive wake in status {status}")
+    current = now or utc_now()
+    record["previous_status"] = status
+    record["status"] = "archived"
+    record["archived_at"] = format_utc(current)
+    record["updated_at"] = format_utc(current)
+    record = append_event(record, "archived", "Wake archived by operator", current)
+    archive_dir = root / "archive"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    final_path = archive_dir / f"{wake_id}.json"
+    temp_path = final_path.with_suffix(".json.tmp")
+    temp_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temp_path.replace(final_path)
+    if found.path.exists():
+        found.path.unlink()
+    return final_path
+
+
+def archive_terminal_records(root: Path, now: datetime | None = None) -> list[Path]:
+    archived: list[Path] = []
+    for item in list(iter_records(root)):
+        wake_id = item.record.get("id")
+        if item.record.get("status") in TERMINAL_STATUSES and isinstance(wake_id, str):
+            archived.append(archive_record(root, wake_id, now=now))
+    return archived
