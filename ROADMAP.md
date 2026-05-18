@@ -1,0 +1,140 @@
+# Codex Wake Roadmap
+
+## P01 | Wake Spooler Architecture
+
+State: OPEN
+
+Current State: The repo has policy and planning surfaces. The accepted architecture direction is a wake spooler: agents request wakes through `codex-wake`, deterministic runtime code owns trigger persistence and firing, and the MVP targets a live Codex TUI through tmux plus a `UserPromptSubmit` hook ack.
+
+Plan: [Initial Wake Timer Design](docs/dev/plans/0001-2026-05-18-initial-wake-timer-design.md)
+
+Deliverables:
+
+- Source-backed design brief for the MVP and preferred future mode.
+- Wake-record JSON contract.
+- Trigger/status vocabulary.
+- Runtime state layout under a user-scoped wake root.
+- Explicit split between model-requested wake intent and daemon-owned execution.
+
+## P02 | Agent-Facing CLI
+
+State: PLANNED
+
+Current State: No CLI exists yet. This lane opens after P01 fixes the wake-record schema and trigger vocabulary.
+
+Planned surface:
+
+- `codex-wake after <duration> -- <prompt>`
+- `codex-wake at <timestamp> -- <prompt>`
+- `codex-wake file <path> -- <prompt>`
+- `codex-wake list`
+- `codex-wake show <wake-id>`
+- `codex-wake cancel <wake-id>`
+
+Acceptance target:
+
+- The CLI captures cwd, `TMUX_PANE`, tmux socket, trigger predicate, prompt text, and creation metadata.
+- Relative file predicates are stored with the creating cwd and validated before write.
+- Time triggers store absolute UTC timestamps, not only relative expressions.
+- Trigger JSON never contains shell commands to execute.
+
+## P03 | Wake Daemon And Trigger Engine
+
+State: PLANNED
+
+Current State: No daemon exists yet. The first implementation should be a small polling daemon rather than systemd, cron, or a general TUI automation controller.
+
+Planned behavior:
+
+- Poll pending wake records.
+- Support `not_before` and `file_exists` first.
+- Add `file_changed` and `process_done` only after the base state machine is stable.
+- Mark triggers `firing` before injection.
+- Use per-pane locks so concurrent wakes cannot paste into the same TUI.
+- Require ack before marking a trigger `submitted`.
+- Requeue with bounded backoff when ack is missing.
+
+## P04 | Tmux Injection MVP
+
+State: PLANNED
+
+Current State: No injector exists yet. MVP injection should paste a short canonical wake prompt into the captured pane and press Enter.
+
+Planned behavior:
+
+- Capture target pane from `TMUX_PANE` at trigger creation time.
+- Resolve tmux socket from the environment or tmux introspection.
+- Before injection, use tmux capture heuristics to reject obvious unsafe states such as approval prompts, active tool output, or non-Codex shell prompts.
+- Inject only:
+
+```text
+WAKE_TRIGGER_ID=<wake-id>
+Resume the scheduled wake task.
+```
+
+- Keep full wake context in the trigger record and hook-added context, not in the pasted prompt.
+
+## P05 | Codex Hook Ack And Context Loader
+
+State: PLANNED
+
+Current State: No hook exists yet. This lane should implement the repo-local `UserPromptSubmit` hook and a sample config fragment.
+
+Planned behavior:
+
+- Self-filter for `WAKE_TRIGGER_ID=...` because Codex ignores `matcher` for `UserPromptSubmit`.
+- Write an ack file when the wake prompt is submitted.
+- Load the trigger JSON and add the full wake context as developer context.
+- If the trigger file is missing, add context that instructs the agent to inspect wake state before continuing.
+- Keep the hook short and bounded by a small timeout.
+
+## P06 | Runtime State, Retention, And Safety
+
+State: PLANNED
+
+Current State: Policy requires runtime state classification, but no concrete layout exists yet.
+
+Planned state layout:
+
+- `.codex/wake/pending/`
+- `.codex/wake/firing/` or status-bearing records
+- `.codex/wake/acks/`
+- `.codex/wake/logs/`
+- `.codex/wake/archive/`
+- `.codex/wake/locks/`
+
+Safety requirements:
+
+- Never store secrets or raw private transcripts in trigger JSON.
+- Require idempotent prompts: every wake should first verify whether the task is already complete.
+- Define cleanup and archival semantics before broad use.
+- Treat missed, failed, expired, cancelled, and submitted wakes as distinct inspectable outcomes.
+
+## P07 | App-Server Controlled Mode
+
+State: PLANNED
+
+Current State: This is the preferred long-term mode, but it should follow the tmux MVP.
+
+Planned behavior:
+
+- Support Codex app-server as a target transport.
+- Store app-server thread id and target cwd when available.
+- Use `thread/resume` followed by `turn/start` for controlled wake dispatch.
+- Treat WebSocket mode as localhost or SSH-forwarding first; require auth/TLS before non-local exposure.
+- Keep `codex exec resume <session-id> ...` as a fallback when a live TUI pane is not required.
+
+## P08 | Installed Runtime Verification
+
+State: PLANNED
+
+Current State: No installed command, hook, or daemon exists yet. This lane opens once there is an executable surface.
+
+Acceptance target:
+
+- A wake request can be created from a tmux-hosted Codex TUI.
+- The daemon observes the predicate and moves the wake through expected states.
+- The injector sends only the canonical wake prompt.
+- The `UserPromptSubmit` hook records ack and supplies context.
+- The resumed agent can inspect the trigger and referenced log/event files.
+- Failed ack, unsafe pane, cancellation, timeout, and duplicate wake attempts are observable.
