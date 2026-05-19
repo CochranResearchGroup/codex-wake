@@ -218,3 +218,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0010-2026-05-19-ci-release-gates.md`. GitHub Actions now runs compile checks, unit tests, package build, and installed-wheel CLI smoke checks for Python 3.11 and 3.12 on push and pull request.
 
 Plan: [CI Release Gates](docs/dev/plans/0016-2026-05-18-ci-release-gates.md)
+
+## P17 | Event Predicates
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0012-2026-05-19-event-predicates.md`. `codex-wake changed <path>` and `codex-wake pid <pid>` now create declarative predicates, and the daemon can move ready `file_changed` and `process_done` records to `firing`.
+
+Plan: [Event Predicates](docs/dev/plans/0017-2026-05-19-event-predicates.md)

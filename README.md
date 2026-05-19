@@ -29,7 +29,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.3.0
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.3.1
 ```
 
 Verify the installed commands:
@@ -104,6 +104,21 @@ codex-wake file .codex/events/pytest.done -- \
   "Pytest finished. Read .codex/events/pytest.log and continue from the failing tests."
 ```
 
+Wake when a file is created or changes:
+
+```bash
+codex-wake changed .codex/events/build.log -- \
+  "The build log changed. Read .codex/events/build.log and continue."
+```
+
+Wake when a known background process exits:
+
+```bash
+long-running-command > .codex/events/job.log 2>&1 &
+codex-wake pid "$!" -- \
+  "The background process exited. Read .codex/events/job.log and continue."
+```
+
 Run the daemon once:
 
 ```bash
@@ -166,7 +181,8 @@ By default, Codex Wake stores state under the current repo:
 - The tmux path is intentionally narrow: the daemon injects only `WAKE_TRIGGER_ID=<id>` plus a short resume instruction.
 - The first hook use in a repo may require manual `/hooks` trust review in Codex.
 - The daemon polls; it does not install a system service or systemd timer.
-- `file_exists` and `not_before` are the verified trigger predicates in v0.1.0.
+- `not_before`, `file_exists`, `file_changed`, and `process_done` are polled predicates.
+- `process_done` checks PID liveness only; it does not yet guard against PID reuse.
 - App-server targeting is present for stdio dispatch experiments, but the tmux/hook path is the verified operator flow.
 
 ## Development

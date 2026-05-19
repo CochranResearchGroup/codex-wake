@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from dataclasses import dataclass
@@ -73,14 +74,52 @@ def predicate_is_ready(record: dict, now: datetime) -> tuple[bool, str]:
         raw_path = predicate.get("path")
         if not isinstance(raw_path, str) or not raw_path:
             raise WakeError("file_exists predicate requires path")
-        path = Path(raw_path)
-        if not path.is_absolute():
-            cwd = record.get("cwd")
-            if not isinstance(cwd, str) or not cwd:
-                raise WakeError("relative file_exists predicate requires record cwd")
-            path = Path(cwd) / path
+        path = resolve_record_path(record, raw_path, "file_exists")
         return path.exists(), f"file_exists path {path} matched"
+    if predicate_type == "file_changed":
+        raw_path = predicate.get("path")
+        if not isinstance(raw_path, str) or not raw_path:
+            raise WakeError("file_changed predicate requires path")
+        path = resolve_record_path(record, raw_path, "file_changed")
+        try:
+            stat = path.stat()
+        except FileNotFoundError:
+            return False, f"file_changed path {path} matched"
+        registered_exists = bool(predicate.get("registered_exists"))
+        registered_mtime_ns = predicate.get("registered_mtime_ns")
+        registered_size = predicate.get("registered_size")
+        if not registered_exists:
+            return True, f"file_changed path {path} was created"
+        if not isinstance(registered_mtime_ns, int) or not isinstance(registered_size, int):
+            raise WakeError("file_changed predicate requires registered_mtime_ns and registered_size")
+        changed = stat.st_mtime_ns != registered_mtime_ns or stat.st_size != registered_size
+        return changed, f"file_changed path {path} changed"
+    if predicate_type == "process_done":
+        pid = predicate.get("pid")
+        if not isinstance(pid, int) or pid <= 0:
+            raise WakeError("process_done predicate requires positive integer pid")
+        return not process_exists(pid), f"process_done pid {pid} exited"
     raise WakeError(f"unsupported predicate type: {predicate_type}")
+
+
+def resolve_record_path(record: dict, raw_path: str, predicate_type: str) -> Path:
+    path = Path(raw_path)
+    if path.is_absolute():
+        return path
+    cwd = record.get("cwd")
+    if not isinstance(cwd, str) or not cwd:
+        raise WakeError(f"relative {predicate_type} predicate requires record cwd")
+    return Path(cwd) / path
+
+
+def process_exists(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
 
 
 def poll_once(

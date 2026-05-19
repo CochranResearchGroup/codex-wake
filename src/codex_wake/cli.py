@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 from datetime import UTC
@@ -53,6 +54,16 @@ def build_parser() -> argparse.ArgumentParser:
     file_cmd.add_argument("path")
     file_cmd.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(file_cmd)
+
+    changed = subparsers.add_parser("changed", help="create a wake when a file is created or changes mtime/size")
+    changed.add_argument("path")
+    changed.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(changed)
+
+    pid = subparsers.add_parser("pid", help="create a wake when a process id exits")
+    pid.add_argument("pid", type=int)
+    pid.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(pid)
 
     list_cmd = subparsers.add_parser("list", help="list wake records")
     list_cmd.add_argument("--json", action="store_true", dest="as_json")
@@ -154,7 +165,54 @@ def create_file(args: argparse.Namespace, root: Path) -> int:
     return create_record(args.prompt, predicate, root, utc_now(), args)
 
 
-def create_record(prompt_parts: list[str], predicate: dict[str, str], root: Path, now, args: argparse.Namespace) -> int:
+def create_changed(args: argparse.Namespace, root: Path) -> int:
+    path_text = args.path.strip()
+    if not path_text:
+        raise WakeError("file path is required")
+    path = Path(path_text)
+    resolved = path if path.is_absolute() else Path.cwd() / path
+    try:
+        stat = resolved.stat()
+    except FileNotFoundError:
+        predicate = {
+            "type": "file_changed",
+            "path": path_text,
+            "registered_exists": False,
+            "registered_mtime_ns": None,
+            "registered_size": None,
+        }
+    else:
+        predicate = {
+            "type": "file_changed",
+            "path": path_text,
+            "registered_exists": True,
+            "registered_mtime_ns": stat.st_mtime_ns,
+            "registered_size": stat.st_size,
+        }
+    return create_record(args.prompt, predicate, root, utc_now(), args)
+
+
+def create_pid(args: argparse.Namespace, root: Path) -> int:
+    pid = args.pid
+    if pid <= 0:
+        raise WakeError("pid must be a positive integer")
+    if not process_exists(pid):
+        raise WakeError(f"process does not exist: {pid}")
+    predicate = {"type": "process_done", "pid": pid}
+    return create_record(args.prompt, predicate, root, utc_now(), args)
+
+
+def process_exists(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def create_record(prompt_parts: list[str], predicate: dict, root: Path, now, args: argparse.Namespace) -> int:
     prompt = normalize_prompt(prompt_parts)
     record = build_record(
         predicate=predicate,
@@ -335,6 +393,10 @@ def run(argv: list[str] | None = None) -> int:
         return create_at(args, root)
     if args.command == "file":
         return create_file(args, root)
+    if args.command == "changed":
+        return create_changed(args, root)
+    if args.command == "pid":
+        return create_pid(args, root)
     if args.command == "list":
         return list_records(args, root)
     if args.command == "show":

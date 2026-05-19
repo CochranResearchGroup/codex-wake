@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import unittest
 from datetime import UTC, datetime
@@ -64,6 +65,94 @@ class DaemonTests(unittest.TestCase):
 
             self.assertEqual(result.fired, 1)
             self.assertTrue((root / "firing" / "wake_file.json").exists())
+
+    def test_file_changed_waits_for_mtime_or_size_change(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            watched = Path(tmp) / "watched.log"
+            watched.write_text("before", encoding="utf-8")
+            stat = watched.stat()
+            record = self.make_record(
+                tmp,
+                {
+                    "type": "file_changed",
+                    "path": "watched.log",
+                    "registered_exists": True,
+                    "registered_mtime_ns": stat.st_mtime_ns,
+                    "registered_size": stat.st_size,
+                },
+            )
+            record["id"] = "wake_changed"
+            write_record(root, record)
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.pending, 1)
+            watched.write_text("after value", encoding="utf-8")
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 16, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.fired, 1)
+            self.assertTrue((root / "firing" / "wake_changed.json").exists())
+
+    def test_file_changed_fires_when_missing_file_is_created(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            watched = Path(tmp) / "created.log"
+            record = self.make_record(
+                tmp,
+                {
+                    "type": "file_changed",
+                    "path": "created.log",
+                    "registered_exists": False,
+                    "registered_mtime_ns": None,
+                    "registered_size": None,
+                },
+            )
+            record["id"] = "wake_created"
+            write_record(root, record)
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.pending, 1)
+            watched.write_text("created", encoding="utf-8")
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 16, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.fired, 1)
+            self.assertTrue((root / "firing" / "wake_created.json").exists())
+
+    def test_process_done_waits_for_pid_exit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            proc = subprocess.Popen(["sleep", "0.2"])
+            self.addCleanup(lambda: proc.poll() is None and proc.kill())
+            record = self.make_record(tmp, {"type": "process_done", "pid": proc.pid})
+            record["id"] = "wake_pid"
+            write_record(root, record)
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.pending, 1)
+            proc.wait(timeout=2)
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 16, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.fired, 1)
+            self.assertTrue((root / "firing" / "wake_pid.json").exists())
+
+    def test_process_done_rejects_invalid_pid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            record = self.make_record(tmp, {"type": "process_done", "pid": "nope"})
+            record["id"] = "wake_bad_pid"
+            write_record(root, record)
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.failed, 1)
+            data = json.loads((root / "failed" / "wake_bad_pid.json").read_text())
+            self.assertIn("process_done predicate requires", data["last_error"])
 
     def test_invalid_predicate_moves_to_failed(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

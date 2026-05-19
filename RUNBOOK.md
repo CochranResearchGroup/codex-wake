@@ -425,3 +425,31 @@ Published and verified `v0.3.1`.
 - Recorded evidence in `docs/dev/verification/0011-2026-05-19-v0.3.1-release.md`.
 
 Best next turn option: open a new roadmap lane for either `file_changed`/`process_done` predicates or app-server-controlled wake hardening.
+
+## Turn 27 | 2026-05-19
+
+Opened P17 for event predicates.
+
+- Selected `file_changed` and `process_done` as the next runtime slice.
+- Added `docs/dev/plans/0017-2026-05-19-event-predicates.md`.
+- Opened P17 in `ROADMAP.md`.
+- Started implementation with `codex-wake changed <path>` and `codex-wake pid <pid>`.
+
+Best next turn option: finish predicate implementation, run source and CLI validation, record evidence, and close P17.
+
+## Turn 28 | 2026-05-19
+
+Completed P17 event predicates.
+
+- Added `codex-wake changed <path> -- <prompt>` for file creation or mtime/size changes.
+- Added `codex-wake pid <pid> -- <prompt>` for process-exit waits.
+- Added daemon evaluation for `file_changed` and `process_done`.
+- Kept both predicates declarative; wake records still do not execute shell commands.
+- Documented examples and PID-reuse limit in `README.md`.
+- Added focused CLI and daemon tests.
+- Ran source validation: `51` tests passed.
+- Ran CLI smoke with `--no-dispatch`, confirming both predicates move from `pending` to `firing`.
+- Recorded evidence in `docs/dev/verification/0012-2026-05-19-event-predicates.md`.
+- Closed P17 in `ROADMAP.md` and `docs/dev/plans/0017-2026-05-19-event-predicates.md`.
+
+Best next turn option: cut `v0.4.0` for the new predicate surface, with clean tag install smoke and release notes.

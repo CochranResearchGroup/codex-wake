@@ -71,6 +71,57 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn(wake_id, archived_list)
 
+    def test_changed_creates_file_changed_predicate_with_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            watched = repo / "watched.log"
+            watched.write_text("before", encoding="utf-8")
+            root = repo / ".codex" / "wake"
+            cwd = Path.cwd()
+            try:
+                os.chdir(repo)
+                code, out, err = self.run_cli(["changed", "watched.log", "--", "Read changed log"], root)
+            finally:
+                os.chdir(cwd)
+
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["predicate"]["type"], "file_changed")
+            self.assertEqual(data["predicate"]["path"], "watched.log")
+            self.assertTrue(data["predicate"]["registered_exists"])
+            self.assertIsInstance(data["predicate"]["registered_mtime_ns"], int)
+            self.assertEqual(data["predicate"]["registered_size"], len("before"))
+
+    def test_changed_allows_missing_file_creation_watch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / ".codex" / "wake"
+            cwd = Path.cwd()
+            try:
+                os.chdir(repo)
+                code, out, err = self.run_cli(["changed", "missing.log", "--", "Read created log"], root)
+            finally:
+                os.chdir(cwd)
+
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["predicate"]["type"], "file_changed")
+            self.assertFalse(data["predicate"]["registered_exists"])
+            self.assertIsNone(data["predicate"]["registered_mtime_ns"])
+            self.assertIsNone(data["predicate"]["registered_size"])
+
+    def test_pid_creates_process_done_predicate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(["pid", str(os.getpid()), "--", "Process done"], root)
+
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["predicate"], {"type": "process_done", "pid": os.getpid()})
+
     def test_create_requires_tmux_environment(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
