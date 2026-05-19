@@ -570,3 +570,13 @@ Completed P19 PID reuse safety.
 - Closed P19 in `ROADMAP.md` and `docs/dev/plans/0019-2026-05-19-pid-reuse-safety.md`.
 
 Best next turn option: commit and push P19, wait for CI, then cut `v0.4.2` if the branch remains green.
+
+## Turn 38 | 2026-05-19
+
+Started the `v0.4.2` release for P19 PID reuse safety.
+
+- Selected release because P19 changes runtime wake predicate behavior and installed CLI output.
+- Bumped package version to `0.4.2`.
+- Added `docs/releases/v0.4.2.md`.
+
+Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.2` if validation passes.
