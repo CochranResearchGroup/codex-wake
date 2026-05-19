@@ -199,6 +199,8 @@ State: CLOSED
 
 Current State: Closed by `docs/dev/verification/0007-2026-05-18-hook-setup-doctor-cli.md`. Operators can run `codex-wake hook install/check` and `codex-wake doctor` to set up and inspect wake readiness without bypassing Codex hook trust review.
 
+Live note: `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md` confirmed that tmux injection can resume the active TUI pane, but an already-running TUI session still needs `/hooks` review before the installed `codex-wake-hook` ack path should be expected to fire.
+
 Plan: [Hook Setup And Doctor CLI](docs/dev/plans/0014-2026-05-18-hook-setup-doctor-cli.md)
 
 ## P15 | Clean Fresh Install Smoke

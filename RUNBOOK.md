@@ -314,3 +314,17 @@ Completed P15 clean fresh install smoke.
 - Opened P16 with `docs/dev/plans/0016-2026-05-18-ci-release-gates.md`.
 
 Best next turn option: implement P16 with GitHub Actions for unit tests, package build, and lightweight CLI smoke on push and pull request.
+
+## Turn 19 | 2026-05-18
+
+Dogfooded a wake against this active Codex TUI pane.
+
+- Confirmed this session exposes `TMUX_PANE=%202` and tmux socket `/tmp/tmux-1000/default`.
+- Started the CLI-managed user service with `codex-wake service install`.
+- Scheduled `wake_20260519_030204_9085` with a 45 second `not_before` predicate targeting this pane.
+- Observed the canonical wake prompt land in this same Codex TUI, proving current-pane tmux injection works.
+- Observed missing `UserPromptSubmit` ack in this already-running session, so the daemon retried and then failed closed after three attempts.
+- Stopped and disabled `codex-wake-codex-wake.service` after the dogfood run.
+- Recorded evidence in `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
+
+Best next turn option: run `/hooks` in this TUI to review/trust `codex-wake-hook`, then rerun a short current-pane wake to close the live-session ack gap before continuing P16 CI gates.
