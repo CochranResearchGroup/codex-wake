@@ -400,3 +400,13 @@ Completed P16 CI release gates.
 - Closed P16 in `ROADMAP.md` and `docs/dev/plans/0016-2026-05-18-ci-release-gates.md`.
 
 Best next turn option: decide the next release boundary after the stale-lock fix and CI gates, likely a `v0.3.1` patch release with release notes and clean tag install smoke.
+
+## Turn 25 | 2026-05-19
+
+Started the `v0.3.1` patch release boundary.
+
+- Selected `v0.3.1` for stale pane-lock cleanup, hook visibility diagnostics, current-TUI dogfood proof, and CI release gates.
+- Bumped package version to `0.3.1`.
+- Added `docs/releases/v0.3.1.md`.
+
+Best next turn option: run local release validation, commit, tag `v0.3.1`, publish the GitHub release, and verify a clean install from the public tag.
