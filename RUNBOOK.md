@@ -580,3 +580,19 @@ Started the `v0.4.2` release for P19 PID reuse safety.
 - Added `docs/releases/v0.4.2.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.2` if validation passes.
+
+## Turn 39 | 2026-05-19
+
+Published and verified `v0.4.2`.
+
+- Ran source validation: compileall and `61` unit tests.
+- Built and installed the local wheel in temporary virtual environments.
+- Smoked installed `codex-wake`, `codex-waked`, and `codex-wake-hook`.
+- Smoked installed-wheel PID wake identity capture and `pending -> firing` after process exit.
+- Committed `e6c91dd`, tagged and pushed `v0.4.2`, and published the GitHub release.
+- Verified clean public tag installation with isolated `uv` tool/cache directories.
+- Confirmed clean public tag PID wake identity capture and `pending -> firing` after process exit.
+- Confirmed upstream CI run `26130628026` passed on the release commit.
+- Recorded evidence in `docs/dev/verification/0017-2026-05-19-v0.4.2-release.md`.
+
+Best next turn option: open a retention/cleanup policy lane for wake runtime state, because active trigger behavior is now solid enough to revisit archive defaults and operator cleanup ergonomics.
