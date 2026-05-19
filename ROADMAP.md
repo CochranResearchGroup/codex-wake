@@ -152,3 +152,19 @@ Acceptance target:
 - The `UserPromptSubmit` hook records ack and supplies context.
 - The resumed agent can inspect the trigger and referenced log/event files.
 - Failed ack, unsafe pane, cancellation, timeout, and duplicate wake attempts are observable.
+
+## P09 | User-Scope Install And Operator Smoke
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0002-2026-05-18-user-scope-install-operator-smoke.md`. `codex-wake` and `codex-waked` are installed as uv user tools and verified through PATH-resolved operator smokes.
+
+Plan: [User-Scope Install And Operator Smoke](docs/dev/plans/0009-2026-05-18-user-scope-install-operator-smoke.md)
+
+## P10 | Disposable Live Tmux Wake Smoke
+
+State: OPEN
+
+Current State: User-scope install is verified. The remaining high-value live check is a disposable tmux-hosted Codex TUI wake where `codex-waked` injects the canonical prompt and the hook writes the ack without disturbing a human session.
+
+Plan: [Disposable Live Tmux Wake Smoke](docs/dev/plans/0010-2026-05-18-disposable-live-tmux-wake-smoke.md)

@@ -174,3 +174,33 @@ Known limits:
 - WebSocket app-server dispatch remains intentionally unimplemented.
 
 Next checkpoint: open PR for review and merge planning.
+
+## Turn 11 | 2026-05-18
+
+Merged PR #1 and started the next operator-useful lane.
+
+- Merged `p02-agent-facing-cli` into `main` with merge commit `4c8d38c`.
+- Verified post-merge tests and planning audit on local `main`.
+- Added P09 for user-scope install and operator smoke.
+
+Next checkpoint: install Codex Wake with `python -m pip install --user .` and verify the actual PATH-resolved commands.
+
+## Turn 12 | 2026-05-18
+
+Completed P09 user-scope install and operator smoke.
+
+- Direct `python -m pip install --user .` was blocked by the uv-managed Python environment.
+- Installed safely with `uv tool install --force .`.
+- Verified PATH-resolved `/home/ecochran76/.local/bin/codex-wake`.
+- Verified PATH-resolved `/home/ecochran76/.local/bin/codex-waked`.
+- Verified CLI create, list, cancel, and archive lifecycle.
+- Verified daemon predicate movement with `--no-dispatch`.
+- Verified hook wrapper ack behavior.
+- Verified app-server-targeted wake creation.
+- Closed `docs/dev/plans/0009-2026-05-18-user-scope-install-operator-smoke.md`.
+- Opened `docs/dev/plans/0010-2026-05-18-disposable-live-tmux-wake-smoke.md`.
+- Recorded details in `docs/dev/verification/0002-2026-05-18-user-scope-install-operator-smoke.md`.
+- Closed P09 in `ROADMAP.md`.
+- Opened P10 for a disposable live tmux wake smoke.
+
+Best next turn option: run P10 against a disposable tmux session, not a human active Codex pane.
