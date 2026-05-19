@@ -463,3 +463,18 @@ Started the `v0.4.0` release boundary.
 - Added `docs/releases/v0.4.0.md`.
 
 Best next turn option: run local release validation, commit, tag `v0.4.0`, publish the GitHub release, and verify a clean install from the public tag.
+
+## Turn 30 | 2026-05-19
+
+Published and verified `v0.4.0`.
+
+- Ran local release validation: compileall, `51` unit tests, package build, installed-wheel command smoke, non-wake hook smoke, and installed-wheel `changed`/`pid` predicate smokes.
+- Committed `63ccd12` with the `0.4.0` version bump and release notes.
+- Tagged and pushed `v0.4.0`.
+- Published GitHub release `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.0`.
+- Verified clean public tag install with isolated `UV_TOOL_DIR`, `UV_TOOL_BIN_DIR`, and `UV_CACHE_DIR`.
+- Verified clean tag commands, daemon no-dispatch, `changed` predicate movement, `pid` predicate movement, and doctor output.
+- Confirmed upstream CI run `26126484154` passed on the release commit.
+- Recorded evidence in `docs/dev/verification/0013-2026-05-19-v0.4.0-release.md`.
+
+Best next turn option: open a new roadmap lane for app-server controlled wake hardening or PID-reuse-safe process predicates.
