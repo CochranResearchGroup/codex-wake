@@ -77,3 +77,33 @@ The likely operator action is to run `/hooks` in this TUI session and trust/revi
 - Keep `codex-wake doctor` wording explicit that hook config validity is not equivalent to active-session trust.
 - Repeat this smoke after `/hooks` review in the same TUI pane.
 - Consider adding an operator runbook step named "current TUI dogfood" that starts with `/hooks` before scheduling the wake.
+
+## Repeat After Hook Review Attempt
+
+A second current-pane wake was scheduled after the operator requested hook review:
+
+```bash
+codex-wake service install
+codex-wake after 20s -- "Second current-TUI dogfood after hook review. Verify codex-wake list and report whether the ack path submitted this wake, then stop."
+sleep 55
+codex-wake show wake_20260519_031211_5457
+codex-wake service stop
+codex-wake cancel wake_20260519_031211_5457
+```
+
+Evidence:
+
+- Wake id: `wake_20260519_031211_5457`
+- Target pane: `%202`
+- Predicate due at: `2026-05-19T03:12:31Z`
+- The canonical prompt landed in the active TUI pane.
+- No `.codex/wake/acks/wake_20260519_031211_5457.submitted` file appeared.
+- The service was stopped, then the still-firing wake was cancelled to prevent a future retry when the service is restarted.
+
+Final status:
+
+```text
+wake_20260519_031211_5457 cancelled not_before 2026-05-19T03:17:31Z
+```
+
+Result: injection still passes, ack still fails in this current TUI. The likely cause is that the hook was not actually accepted by the active Codex hook trust UI. A chat message containing `/hooks codex-wake-hook` is not sufficient evidence that the interactive hook review flow ran.

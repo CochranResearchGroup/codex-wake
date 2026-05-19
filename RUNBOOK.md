@@ -328,3 +328,15 @@ Dogfooded a wake against this active Codex TUI pane.
 - Recorded evidence in `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
 
 Best next turn option: run `/hooks` in this TUI to review/trust `codex-wake-hook`, then rerun a short current-pane wake to close the live-session ack gap before continuing P16 CI gates.
+
+## Turn 20 | 2026-05-18
+
+Repeated the current TUI dogfood after a hook-review attempt.
+
+- Scheduled `wake_20260519_031211_5457` with a 20 second `not_before` predicate.
+- Observed the canonical wake prompt land in this same TUI pane again.
+- Confirmed the ack file was still missing after the ack window.
+- Stopped the service and cancelled the still-firing wake to prevent later retries.
+- Appended the repeat evidence to `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
+
+Best next turn option: invoke the actual Codex `/hooks` interactive review UI in this TUI and explicitly trust `codex-wake-hook`; then run one more 20 second wake and expect `status=submitted` plus an ack file.
