@@ -508,3 +508,13 @@ Completed P18 app-server hardening.
 - Closed P18 in `ROADMAP.md` and `docs/dev/plans/0018-2026-05-19-app-server-hardening.md`.
 
 Best next turn option: cut `v0.4.1` for the app-server CLI and dispatch metadata hardening, or continue to a PID-reuse-safety lane before releasing.
+
+## Turn 33 | 2026-05-19
+
+Started the `v0.4.1` release for P18 app-server hardening.
+
+- Selected release over a new PID-reuse-safety lane because P18 is already closed and changes installed agent-facing CLI behavior.
+- Bumped package version to `0.4.1`.
+- Added `docs/releases/v0.4.1.md`.
+
+Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.1` if validation passes.
