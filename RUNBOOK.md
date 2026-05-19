@@ -299,3 +299,18 @@ Completed P14 hook setup and doctor CLI.
 - Opened P15 with `docs/dev/plans/0015-2026-05-18-clean-fresh-install-smoke.md`.
 
 Best next turn option: commit, tag, and publish `v0.3.0`, then run P15 as a clean install from the public GitHub tag.
+
+## Turn 18 | 2026-05-18
+
+Completed P15 clean fresh install smoke.
+
+- Installed `v0.3.0` from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.3.0` into isolated `/tmp` `UV_TOOL_DIR`, `UV_TOOL_BIN_DIR`, and `UV_CACHE_DIR`.
+- Verified isolated `codex-wake`, `codex-waked`, and `codex-wake-hook`.
+- Verified `hook install` and `hook check` against a temporary repo.
+- Verified `doctor` with the isolated bin directory at the front of `PATH`.
+- Verified temporary user service install/status/logs/uninstall from the clean install.
+- Recorded evidence in `docs/dev/verification/0008-2026-05-18-clean-fresh-install-smoke.md`.
+- Closed P15 in `ROADMAP.md`.
+- Opened P16 with `docs/dev/plans/0016-2026-05-18-ci-release-gates.md`.
+
+Best next turn option: implement P16 with GitHub Actions for unit tests, package build, and lightweight CLI smoke on push and pull request.

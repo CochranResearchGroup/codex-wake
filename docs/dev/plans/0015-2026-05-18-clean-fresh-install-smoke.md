@@ -1,6 +1,6 @@
 # Clean Fresh Install Smoke
 
-State: OPEN
+State: CLOSED
 Lane: P15
 
 ## Scope
@@ -15,7 +15,7 @@ Verify the published release install path from a clean environment, independent 
 
 ## Current State
 
-Local source and user-scoped installs are validated. A clean release-tag install is still the best confirmation that README install commands work from the public upstream.
+Local source, user-scoped installs, and the public `v0.3.0` tag install path are validated.
 
 ## Acceptance Criteria
 
@@ -28,4 +28,4 @@ Local source and user-scoped installs are validated. A clean release-tag install
 
 ## Definition Of Done
 
-This lane can close when the public tag install path works without relying on the local checkout.
+Closed by `docs/dev/verification/0008-2026-05-18-clean-fresh-install-smoke.md`.

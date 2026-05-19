@@ -203,8 +203,16 @@ Plan: [Hook Setup And Doctor CLI](docs/dev/plans/0014-2026-05-18-hook-setup-doct
 
 ## P15 | Clean Fresh Install Smoke
 
-State: OPEN
+State: CLOSED
 
-Current State: `v0.3.0` is ready from the source tree. The next best slice is a clean install from the published GitHub tag into a temporary tool environment or fresh `uv tool` install path, then run doctor/hook/service smoke from that release artifact rather than local source.
+Current State: Closed by `docs/dev/verification/0008-2026-05-18-clean-fresh-install-smoke.md`. The public `v0.3.0` tag installs into an isolated `uv tool` path and passes command, hook, doctor, and temporary service lifecycle smokes without relying on the local checkout.
 
 Plan: [Clean Fresh Install Smoke](docs/dev/plans/0015-2026-05-18-clean-fresh-install-smoke.md)
+
+## P16 | CI Release Gates
+
+State: OPEN
+
+Current State: Releases are validated manually. The next best release-quality slice is GitHub Actions CI for tests, build, and planning-contract checks on push and pull request so future tags are gated before publication.
+
+Plan: [CI Release Gates](docs/dev/plans/0016-2026-05-18-ci-release-gates.md)
