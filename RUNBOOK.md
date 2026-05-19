@@ -518,3 +518,18 @@ Started the `v0.4.1` release for P18 app-server hardening.
 - Added `docs/releases/v0.4.1.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.1` if validation passes.
+
+## Turn 34 | 2026-05-19
+
+Published and verified `v0.4.1`.
+
+- Ran source validation: compileall and `53` unit tests.
+- Built and installed the local wheel in temporary virtual environments.
+- Smoked installed `codex-wake`, `codex-waked`, and `codex-wake-hook`.
+- Smoked installed-wheel `app after` and `app at` wake creation.
+- Committed `2f53ea9`, tagged and pushed `v0.4.1`, and published the GitHub release.
+- Verified clean public tag installation with isolated `uv` tool/cache directories.
+- Confirmed upstream CI run `26127180628` passed on the release commit.
+- Recorded evidence in `docs/dev/verification/0015-2026-05-19-v0.4.1-release.md`.
+
+Best next turn option: open a PID-reuse-safety lane for `process_done`, because it is the main known correctness gap left in the event predicate surface.
