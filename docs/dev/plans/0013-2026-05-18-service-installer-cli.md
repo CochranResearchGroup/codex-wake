@@ -1,6 +1,6 @@
 # Service Installer CLI
 
-State: OPEN
+State: CLOSED
 Lane: P13
 
 ## Scope
@@ -15,7 +15,7 @@ Add an operator CLI surface for managing a repo-local user service without hand-
 
 ## Current State
 
-P12 verified the user systemd service path and dogfood wake, but service setup still requires manual file copy and `systemctl --user` commands.
+P12 verified the user systemd service path and dogfood wake. P13 adds `codex-wake service` commands for unit install, status, logs, stop, and uninstall.
 
 ## Acceptance Criteria
 
@@ -29,4 +29,4 @@ P12 verified the user systemd service path and dogfood wake, but service setup s
 
 ## Definition Of Done
 
-This lane can close when an operator can manage the verified user service path through `codex-wake` itself.
+Closed by `docs/dev/verification/0006-2026-05-18-service-installer-cli.md`.

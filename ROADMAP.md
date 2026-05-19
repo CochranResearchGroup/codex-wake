@@ -187,8 +187,16 @@ Plan: [User Daemon Service And Dogfood Wake](docs/dev/plans/0012-2026-05-18-user
 
 ## P13 | Service Installer CLI
 
-State: OPEN
+State: CLOSED
 
-Current State: The user service path is verified but still requires manual copy/edit/systemctl commands. The next best operator slice is a `codex-wake service` command group for install, status, logs, stop, and uninstall against a named repo wake root.
+Current State: Closed by `docs/dev/verification/0006-2026-05-18-service-installer-cli.md`. Operators can now manage a repo-local user systemd service with `codex-wake service install/status/logs/stop/uninstall`.
 
 Plan: [Service Installer CLI](docs/dev/plans/0013-2026-05-18-service-installer-cli.md)
+
+## P14 | Hook Setup And Doctor CLI
+
+State: OPEN
+
+Current State: Service management is CLI-driven, but hook setup still relies on manual `.codex/hooks.json` editing and Codex `/hooks` review. The next best operator slice is a `codex-wake hook` or `codex-wake doctor` surface that can install/check hook config and report trust prerequisites without bypassing Codex review.
+
+Plan: [Hook Setup And Doctor CLI](docs/dev/plans/0014-2026-05-18-hook-setup-doctor-cli.md)

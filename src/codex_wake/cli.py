@@ -24,6 +24,7 @@ from .records import (
     utc_now,
     write_record,
 )
+from .service import build_service_config, install_service, read_log_tail, service_status, stop_service, uninstall_service
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -65,6 +66,26 @@ def build_parser() -> argparse.ArgumentParser:
     archive.add_argument("wake_id", nargs="?", help="specific wake id to archive")
     archive.add_argument("--all-terminal", action="store_true", help="archive all submitted, failed, cancelled, and expired wakes")
 
+    service = subparsers.add_parser("service", help="manage a user-scoped codex-waked service")
+    service_subparsers = service.add_subparsers(dest="service_command", required=True)
+
+    service_install = service_subparsers.add_parser("install", help="install and start a user systemd service")
+    add_service_options(service_install)
+    service_install.add_argument("--no-start", action="store_true", help="write the unit but do not enable or start it")
+
+    service_status_cmd = service_subparsers.add_parser("status", help="show user service state")
+    add_service_options(service_status_cmd)
+
+    service_logs = service_subparsers.add_parser("logs", help="print recent service log lines")
+    add_service_options(service_logs)
+    service_logs.add_argument("--lines", type=int, default=50)
+
+    service_stop = service_subparsers.add_parser("stop", help="stop and disable the user service")
+    add_service_options(service_stop)
+
+    service_uninstall = service_subparsers.add_parser("uninstall", help="stop, disable, and remove the user service")
+    add_service_options(service_uninstall)
+
     return parser
 
 
@@ -78,6 +99,14 @@ def add_target_options(parser: argparse.ArgumentParser) -> None:
         default="stdio://",
         help="app-server endpoint for --app-server-thread-id; only stdio:// is currently implemented",
     )
+
+
+def add_service_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--name", help="systemd user unit name; defaults to codex-wake-<repo>.service")
+    parser.add_argument("--repo-root", type=Path, default=None, help="repo root for the service; defaults to current directory")
+    parser.add_argument("--interval", type=float, default=1.0, help="daemon poll interval in seconds")
+    parser.add_argument("--daemon-path", help="path to codex-waked; defaults to PATH resolution")
+    parser.add_argument("--log-path", type=Path, default=None, help="service log path")
 
 
 def resolve_root(args: argparse.Namespace) -> Path:
@@ -177,6 +206,52 @@ def archive(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def service_config_for_args(args: argparse.Namespace, root: Path):
+    return build_service_config(
+        repo_root=args.repo_root,
+        wake_root=root,
+        name=args.name,
+        interval=args.interval,
+        daemon_path=args.daemon_path,
+        log_path=args.log_path,
+    )
+
+
+def service_command(args: argparse.Namespace, root: Path) -> int:
+    config = service_config_for_args(args, root)
+    if args.service_command == "install":
+        install_service(config, start=not args.no_start)
+        action = "installed" if args.no_start else "installed and started"
+        print(f"{action} {config.name}")
+        print(f"unit={config.unit_path}")
+        print(f"log={config.log_path}")
+        return 0
+    if args.service_command == "status":
+        active, enabled = service_status(config)
+        print(f"name={config.name}")
+        print(f"active={active}")
+        print(f"enabled={enabled}")
+        print(f"unit={config.unit_path}")
+        print(f"log={config.log_path}")
+        return 0
+    if args.service_command == "logs":
+        print(f"log={config.log_path}")
+        text = read_log_tail(config.log_path, args.lines)
+        if text:
+            print(text)
+        return 0
+    if args.service_command == "stop":
+        stop_service(config)
+        print(f"stopped {config.name}")
+        return 0
+    if args.service_command == "uninstall":
+        uninstall_service(config)
+        print(f"uninstalled {config.name}")
+        print(f"removed={config.unit_path}")
+        return 0
+    raise WakeError(f"unknown service command: {args.service_command}")
+
+
 def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -195,6 +270,8 @@ def run(argv: list[str] | None = None) -> int:
         return cancel(args, root)
     if args.command == "archive":
         return archive(args, root)
+    if args.command == "service":
+        return service_command(args, root)
     raise WakeError(f"unknown command: {args.command}")
 
 

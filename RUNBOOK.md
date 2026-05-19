@@ -259,3 +259,25 @@ Completed P12 user daemon service and dogfood wake.
 - Opened P13 with `docs/dev/plans/0013-2026-05-18-service-installer-cli.md`.
 
 Best next turn option: commit, tag, and publish `v0.1.1`, then implement P13 so service install/status/logs/stop/uninstall are managed by `codex-wake service`.
+
+## Turn 16 | 2026-05-18
+
+Completed P13 service installer CLI.
+
+- Added `codex_wake.service` for user systemd unit rendering and lifecycle helpers.
+- Added `codex-wake service install`.
+- Added `codex-wake service status`.
+- Added `codex-wake service logs`.
+- Added `codex-wake service stop`.
+- Added `codex-wake service uninstall`.
+- Updated README and daemon-service docs to prefer the CLI-managed path.
+- Bumped package version to `0.2.0`.
+- Fixed systemd unit rendering after live validation showed quoted `WorkingDirectory` was rejected as non-absolute.
+- Made `service install` verify that the unit becomes active before reporting success.
+- Validated installed service lifecycle with a temporary `codex-wake-p13-smoke.service`.
+- Validated `service logs` with an intentionally missing tmux pane wake, producing daemon activity without targeting a live pane.
+- Recorded evidence in `docs/dev/verification/0006-2026-05-18-service-installer-cli.md`.
+- Closed P13 in `ROADMAP.md`.
+- Opened P14 with `docs/dev/plans/0014-2026-05-18-hook-setup-doctor-cli.md`.
+
+Best next turn option: commit, tag, and publish `v0.2.0`, then implement P14 so hook setup and readiness checks are available through `codex-wake`.

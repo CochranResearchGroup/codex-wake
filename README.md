@@ -29,7 +29,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.1.1
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.2.0
 ```
 
 Verify the installed commands:
@@ -107,6 +107,16 @@ Run the daemon in polling mode:
 
 ```bash
 codex-waked --interval 5
+```
+
+Manage a repo-local user service:
+
+```bash
+codex-wake service install
+codex-wake service status
+codex-wake service logs --lines 50
+codex-wake service stop
+codex-wake service uninstall
 ```
 
 Inspect and manage wakes:

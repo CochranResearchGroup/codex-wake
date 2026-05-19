@@ -129,6 +129,31 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("only app-server endpoint stdio://", stderr.getvalue())
 
+    def test_service_status_command_prints_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            unit_path = Path(tmp) / "unit.service"
+            log_path = Path(tmp) / "service.log"
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
+                with patch("codex_wake.cli.build_service_config") as build_config:
+                    build_config.return_value = type(
+                        "Config",
+                        (),
+                        {
+                            "name": "wake-test.service",
+                            "unit_path": unit_path,
+                            "log_path": log_path,
+                        },
+                    )()
+                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                        code = cli.main(["--wake-root", str(root), "service", "status"])
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            self.assertIn("name=wake-test.service", stdout.getvalue())
+            self.assertIn(f"unit={unit_path}", stdout.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

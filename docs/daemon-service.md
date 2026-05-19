@@ -6,7 +6,22 @@ This is the preferred persistent path on hosts where `systemctl --user` is avail
 
 ## Install
 
-Create a user service from the example and adjust paths if the repo is not at `~/workspace.local/codex-wake`:
+Use the CLI-managed path:
+
+```bash
+codex-wake service install
+codex-wake service status
+codex-wake service logs --lines 50
+```
+
+Stop and remove the service:
+
+```bash
+codex-wake service stop
+codex-wake service uninstall
+```
+
+The manual equivalent is to create a user service from the example and adjust paths if the repo is not at `~/workspace.local/codex-wake`:
 
 ```bash
 mkdir -p ~/.config/systemd/user ~/.local/state/codex-wake
@@ -22,7 +37,7 @@ systemctl --user status --no-pager codex-wake-codex-wake.service
 tail -n 50 ~/.local/state/codex-wake/codex-wake.log
 ```
 
-Stop and disable:
+Stop and disable manually:
 
 ```bash
 systemctl --user disable --now codex-wake-codex-wake.service
