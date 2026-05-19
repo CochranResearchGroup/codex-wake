@@ -106,4 +106,4 @@ Final status:
 wake_20260519_031211_5457 cancelled not_before 2026-05-19T03:17:31Z
 ```
 
-Result: injection still passes, ack still fails in this current TUI. The likely cause is that the hook was not actually accepted by the active Codex hook trust UI. A chat message containing `/hooks codex-wake-hook` is not sufficient evidence that the interactive hook review flow ran.
+Result: injection still passes, ack still fails in this current TUI. The operator reported that the hook was not visible in the `/hooks` list. That means the active TUI had not loaded this repo hook source, so hook trust review was not available from this session. A chat message containing `/hooks codex-wake-hook` is not sufficient evidence that the interactive hook review flow ran.

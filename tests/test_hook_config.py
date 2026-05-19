@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from codex_wake.hook_config import check_hook_config, contains_hook_command, install_hook_config
+from codex_wake.hook_config import check_hook_config, contains_hook_command, hook_review_note, install_hook_config
 
 
 class HookConfigTests(unittest.TestCase):
@@ -47,6 +47,13 @@ class HookConfigTests(unittest.TestCase):
             self.assertFalse(check.valid_json)
             self.assertFalse(check.installed)
             self.assertEqual(check.message, "missing")
+
+    def test_hook_review_note_names_missing_hooks_list_case(self) -> None:
+        note = hook_review_note()
+
+        self.assertIn("/hooks", note)
+        self.assertIn("does not list", note)
+        self.assertIn("restart or resume", note)
 
 
 if __name__ == "__main__":

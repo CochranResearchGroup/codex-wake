@@ -7,7 +7,7 @@ import sys
 from datetime import UTC
 from pathlib import Path
 
-from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, install_hook_config
+from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, hook_review_note, install_hook_config
 from .records import (
     WakeError,
     all_records,
@@ -278,7 +278,7 @@ def hook_command(args: argparse.Namespace) -> int:
         path = install_hook_config(repo_root, args.hook_command_text)
         print(f"installed hook config: {path}")
         print(f"command={args.hook_command_text}")
-        print("note=Codex may still require /hooks review before this hook can run.")
+        print(f"note={hook_review_note()}")
         return 0
     if args.hook_command == "check":
         check = check_hook_config(repo_root, args.hook_command_text)
@@ -288,7 +288,7 @@ def hook_command(args: argparse.Namespace) -> int:
         print(f"installed={str(check.installed).lower()}")
         print(f"command={check.command}")
         print(f"message={check.message}")
-        print("trust=Codex may require /hooks review before this hook can run.")
+        print(f"trust={hook_review_note()}")
         return 0 if check.installed else 1
     raise WakeError(f"unknown hook command: {args.hook_command}")
 
@@ -321,7 +321,7 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     print(f"service_enabled={enabled}")
     print(f"service_unit={config.unit_path}")
     print(f"service_log={config.log_path}")
-    print("trust=Codex may require /hooks review before this hook can run.")
+    print(f"trust={hook_review_note()}")
     return 0
 
 

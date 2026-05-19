@@ -172,6 +172,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0, stderr.getvalue())
             self.assertIn("installed=true", stdout.getvalue())
             self.assertIn("/hooks review", stdout.getvalue())
+            self.assertIn("does not list", stdout.getvalue())
 
     def test_doctor_reports_readiness_fields(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -190,6 +191,7 @@ class CliTests(unittest.TestCase):
             self.assertIn("codex_waked=/usr/bin/codex-waked", output)
             self.assertIn("hook_config_installed=false", output)
             self.assertIn("service_active=inactive", output)
+            self.assertIn("restart or resume", output)
 
 
 if __name__ == "__main__":

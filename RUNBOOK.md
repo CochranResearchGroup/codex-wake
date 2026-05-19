@@ -340,3 +340,16 @@ Repeated the current TUI dogfood after a hook-review attempt.
 - Appended the repeat evidence to `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
 
 Best next turn option: invoke the actual Codex `/hooks` interactive review UI in this TUI and explicitly trust `codex-wake-hook`; then run one more 20 second wake and expect `status=submitted` plus an ack file.
+
+## Turn 21 | 2026-05-18
+
+Investigated why `codex-wake-hook` was not visible in `/hooks`.
+
+- Confirmed `codex features list` reports `hooks` as enabled.
+- Confirmed official Codex docs say repo hooks are discovered from `<repo>/.codex/hooks.json` and listed through `/hooks`.
+- Confirmed this repo has `.codex/hooks.json` with `UserPromptSubmit -> codex-wake-hook`.
+- Confirmed shared Codex config contains an existing hook trust-state entry for this repo path.
+- Concluded this active TUI likely did not load the repo hook source for the current session, so `/hooks` cannot review it here.
+- Updated `codex-wake hook check`, `codex-wake doctor`, README, service docs, and the current-TUI dogfood note to call out the missing-list case explicitly.
+
+Best next turn option: restart or resume Codex in `/home/ecochran76/workspace.local/codex-wake`, confirm `/hooks` lists the repo `.codex/hooks.json` source, trust it if prompted, then rerun one short current-pane wake.

@@ -11,6 +11,11 @@ from .records import WakeError
 HOOK_EVENT = "UserPromptSubmit"
 DEFAULT_HOOK_COMMAND = "codex-wake-hook"
 DEFAULT_STATUS_MESSAGE = "Checking wake trigger"
+HOOK_REVIEW_NOTE = (
+    "Codex may require /hooks review before this hook can run. "
+    "If /hooks does not list this repo hook source, the active TUI has not loaded it; "
+    "restart or resume Codex in this repo, then review hooks before dogfooding ack behavior."
+)
 
 
 @dataclass(frozen=True)
@@ -21,6 +26,10 @@ class HookCheck:
     installed: bool
     command: str
     message: str
+
+
+def hook_review_note() -> str:
+    return HOOK_REVIEW_NOTE
 
 
 def hook_path_for_repo(repo_root: Path) -> Path:

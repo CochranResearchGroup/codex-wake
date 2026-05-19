@@ -65,7 +65,7 @@ The service is intentionally repo-specific. Use a separate service name and wake
 
 1. Start the user service.
 2. Open or identify a Codex TUI pane in tmux.
-3. Confirm the repo-local `UserPromptSubmit` hook is trusted with `/hooks`.
+3. Confirm the repo-local `UserPromptSubmit` hook is visible and trusted with `/hooks`. If `/hooks` does not list the repo hook source, restart or resume Codex in this repo before testing daemon ack behavior.
 4. Register a wake from the target pane environment, or set `TMUX_PANE` and `TMUX` explicitly for a disposable pane:
 
 ```bash
