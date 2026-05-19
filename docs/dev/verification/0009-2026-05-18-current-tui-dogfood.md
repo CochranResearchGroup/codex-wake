@@ -127,3 +127,49 @@ Evidence:
 - The wake was cancelled after the service stopped.
 
 Result: no ack-path conclusion. The run found a stale pane-lock bug before injection. The fix is for `PaneLock` to remove dead-PID or malformed lock files before acquiring the lock.
+
+## Successful Current TUI Dogfood
+
+After the stale-lock fix was installed and the operator found the hook under the `UserPromptHooks` group, a fourth current-pane wake was scheduled:
+
+```bash
+codex-wake service install
+codex-wake after 20s -- "Fourth current-TUI dogfood after stale-lock fix and UserPromptHooks discovery. Verify codex-wake show for this wake, report whether status is submitted and ack exists, then stop."
+sleep 50
+codex-wake show wake_20260519_104518_d191
+codex-wake service stop
+```
+
+Evidence:
+
+- Wake id: `wake_20260519_104518_d191`
+- Target pane: `%202`
+- Predicate due at: `2026-05-19T10:45:38Z`
+- The stale lock directory was empty after dispatch.
+- Service log ended with `checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0`.
+- Final service state was inactive and disabled.
+
+Final record:
+
+```text
+status=submitted
+attempts=1
+events:
+  created
+  predicate_matched
+  dispatch_attempt: Pasting canonical wake prompt into tmux pane %202
+  ack_observed: Wake prompt submission ack observed
+```
+
+Ack file:
+
+```json
+{
+  "session_id": "019e3c37-6dbf-70a0-bbaf-0668ed98ecc3",
+  "submitted_at": "2026-05-19T10:45:52Z",
+  "turn_id": "019e3fd6-cc5e-7ca2-a24f-507f65d86a7d",
+  "wake_id": "wake_20260519_104518_d191"
+}
+```
+
+Result: pass. The current Codex TUI session was resumed by tmux injection, `UserPromptSubmit` ran, the hook added wake context, the ack was persisted, the daemon marked the wake submitted, and the user service was stopped cleanly afterward.

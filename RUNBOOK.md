@@ -367,3 +367,19 @@ Retried dogfood after the operator found the hook under `UserPromptHooks`.
 - Appended the evidence to `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
 
 Best next turn option: remove the current stale lock with the patched code path, reinstall the tool, then rerun one 20 second wake now that `UserPromptHooks` has been found.
+
+## Turn 23 | 2026-05-19
+
+Completed a successful current TUI dogfood wake.
+
+- Scheduled `wake_20260519_104518_d191` for a 20 second current-pane wake.
+- The stale pane lock was cleaned by the patched dispatch path.
+- The daemon pasted the canonical wake prompt into pane `%202`.
+- `UserPromptSubmit` ran and added the wake trigger context to this turn.
+- The hook wrote `.codex/wake/acks/wake_20260519_104518_d191.submitted`.
+- The daemon observed the ack and marked the wake `submitted`.
+- The service log ended with `checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0`.
+- Stopped and disabled `codex-wake-codex-wake.service` after the pass.
+- Appended the pass evidence to `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
+
+Best next turn option: commit this dogfood pass, then continue P16 CI release gates from the now-validated current-TUI wake baseline.
