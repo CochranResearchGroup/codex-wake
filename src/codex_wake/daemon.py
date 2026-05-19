@@ -30,6 +30,27 @@ class PollResult:
     submitted: int = 0
 
 
+def format_poll_result(result: PollResult) -> str:
+    return (
+        f"checked={result.checked} fired={result.fired} "
+        f"failed={result.failed} pending={result.pending} "
+        f"dispatched={result.dispatched} submitted={result.submitted} requeued={result.requeued}"
+    )
+
+
+def poll_result_has_activity(result: PollResult) -> bool:
+    return any(
+        (
+            result.checked,
+            result.fired,
+            result.failed,
+            result.dispatched,
+            result.submitted,
+            result.requeued,
+        )
+    )
+
+
 def pending_records(root: Path) -> list[WakePath]:
     return [item for item in iter_records(root) if item.record.get("status") == "pending"]
 
@@ -153,16 +174,14 @@ def run(argv: list[str] | None = None) -> int:
     root = (args.wake_root or default_wake_root()).resolve()
     if args.once:
         result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
-        print(
-            f"checked={result.checked} fired={result.fired} "
-            f"failed={result.failed} pending={result.pending} "
-            f"dispatched={result.dispatched} submitted={result.submitted} requeued={result.requeued}"
-        )
+        print(format_poll_result(result))
         return 0
     if args.interval <= 0:
         raise WakeError("--interval must be greater than zero")
     while True:
-        poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
+        result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
+        if poll_result_has_activity(result):
+            print(format_poll_result(result), flush=True)
         time.sleep(args.interval)
 
 

@@ -179,8 +179,16 @@ Plan: [Release Packaging And Install Docs](docs/dev/plans/0011-2026-05-18-releas
 
 ## P12 | User Daemon Service And Dogfood Wake
 
-State: OPEN
+State: CLOSED
 
-Current State: The MVP can be installed and manually run. The best next operational slice is a user-scoped daemon service or runbook path plus a real dogfood wake so Codex Wake can monitor future long jobs without manually starting `codex-waked`.
+Current State: Closed by `docs/dev/verification/0005-2026-05-18-user-daemon-service-dogfood-wake.md`. A user-scoped systemd path is documented, the daemon logs non-empty poll results, and a real dogfood wake resolved through the running service.
 
 Plan: [User Daemon Service And Dogfood Wake](docs/dev/plans/0012-2026-05-18-user-daemon-service-dogfood-wake.md)
+
+## P13 | Service Installer CLI
+
+State: OPEN
+
+Current State: The user service path is verified but still requires manual copy/edit/systemctl commands. The next best operator slice is a `codex-wake service` command group for install, status, logs, stop, and uninstall against a named repo wake root.
+
+Plan: [Service Installer CLI](docs/dev/plans/0013-2026-05-18-service-installer-cli.md)

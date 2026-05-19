@@ -239,3 +239,23 @@ Completed P11 release packaging and install docs.
 - Opened P12 with `docs/dev/plans/0012-2026-05-18-user-daemon-service-dogfood-wake.md`.
 
 Best next turn option: commit and tag `v0.1.0`, then complete P12 by selecting a user-scoped daemon path and dogfooding a real wake.
+
+## Turn 15 | 2026-05-18
+
+Completed P12 user daemon service and dogfood wake.
+
+- Added `docs/daemon-service.md` as the user-scoped systemd runbook.
+- Added `docs/examples/systemd/codex-wake.service` as the repo-specific service template.
+- Verified this workstation has a usable `systemctl --user` manager and `Linger=yes`.
+- Installed and started `codex-wake-codex-wake.service`.
+- Ran an initial dogfood wake through the service and observed ack, then found the service log was empty.
+- Added continuous daemon activity logging for non-empty poll results.
+- Bumped package version to `0.1.1` because the installed daemon behavior changed after the `v0.1.0` release.
+- Reinstalled the user-scoped tool and verified the installed daemon contains the logging path.
+- Ran a second dogfood wake through the service and observed ack plus service log activity.
+- Stopped and disabled the user service after verification.
+- Recorded evidence in `docs/dev/verification/0005-2026-05-18-user-daemon-service-dogfood-wake.md`.
+- Closed P12 in `ROADMAP.md`.
+- Opened P13 with `docs/dev/plans/0013-2026-05-18-service-installer-cli.md`.
+
+Best next turn option: commit, tag, and publish `v0.1.1`, then implement P13 so service install/status/logs/stop/uninstall are managed by `codex-wake service`.

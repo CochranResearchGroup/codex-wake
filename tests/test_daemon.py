@@ -6,7 +6,7 @@ import unittest
 from datetime import UTC, datetime
 from pathlib import Path
 
-from codex_wake.daemon import poll_once
+from codex_wake.daemon import PollResult, format_poll_result, poll_once, poll_result_has_activity
 from codex_wake.records import build_record, write_record
 
 
@@ -80,6 +80,17 @@ class DaemonTests(unittest.TestCase):
             data = json.loads(failed.read_text())
             self.assertEqual(data["status"], "failed")
             self.assertIn("unsupported predicate type", data["last_error"])
+
+    def test_poll_result_format_and_activity(self) -> None:
+        empty = PollResult()
+        active = PollResult(checked=1, fired=1, dispatched=1, submitted=1)
+
+        self.assertFalse(poll_result_has_activity(empty))
+        self.assertTrue(poll_result_has_activity(active))
+        self.assertEqual(
+            format_poll_result(active),
+            "checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0",
+        )
 
 
 if __name__ == "__main__":

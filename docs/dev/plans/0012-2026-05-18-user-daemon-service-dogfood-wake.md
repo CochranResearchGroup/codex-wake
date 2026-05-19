@@ -1,6 +1,6 @@
 # User Daemon Service And Dogfood Wake
 
-State: OPEN
+State: CLOSED
 Lane: P12
 
 ## Scope
@@ -15,7 +15,7 @@ Define and verify a user-scoped way to keep `codex-waked` running for a repo, th
 
 ## Current State
 
-`codex-waked --once` and foreground polling are verified. Operators still need a durable daemon-running pattern for repo-local wake roots.
+`codex-waked --once`, foreground polling, and the user-scoped systemd service path are verified. The service was installed, started, used for a dogfood wake, logged activity, then stopped and disabled cleanly.
 
 ## Acceptance Criteria
 
@@ -27,4 +27,4 @@ Define and verify a user-scoped way to keep `codex-waked` running for a repo, th
 
 ## Definition Of Done
 
-This lane can close when a repo-local wake daemon can be started, observed, stopped, and used to resolve at least one dogfood wake.
+Closed by `docs/dev/verification/0005-2026-05-18-user-daemon-service-dogfood-wake.md`.
