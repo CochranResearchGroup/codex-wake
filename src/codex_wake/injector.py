@@ -121,6 +121,7 @@ class PaneLock:
 
     def __enter__(self) -> "PaneLock":
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._remove_stale_lock()
         try:
             self.fd = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
         except FileExistsError as exc:
@@ -133,6 +134,21 @@ class PaneLock:
             os.close(self.fd)
             self.fd = None
         self.path.unlink(missing_ok=True)
+
+    def _remove_stale_lock(self) -> None:
+        if not self.path.exists():
+            return
+        try:
+            pid = int(self.path.read_text(encoding="ascii").strip())
+        except (OSError, ValueError):
+            self.path.unlink(missing_ok=True)
+            return
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            self.path.unlink(missing_ok=True)
+        except PermissionError:
+            return
 
 
 def ack_path(root: Path, wake_id: str) -> Path:

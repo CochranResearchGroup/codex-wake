@@ -353,3 +353,17 @@ Investigated why `codex-wake-hook` was not visible in `/hooks`.
 - Updated `codex-wake hook check`, `codex-wake doctor`, README, service docs, and the current-TUI dogfood note to call out the missing-list case explicitly.
 
 Best next turn option: restart or resume Codex in `/home/ecochran76/workspace.local/codex-wake`, confirm `/hooks` lists the repo `.codex/hooks.json` source, trust it if prompted, then rerun one short current-pane wake.
+
+## Turn 22 | 2026-05-18
+
+Retried dogfood after the operator found the hook under `UserPromptHooks`.
+
+- Scheduled `wake_20260519_033023_e611` for a 20 second current-pane wake.
+- The wake did not paste because the pane lock already existed.
+- Confirmed stale lock file `.codex/wake/locks/tmp_tmux-1000_default__202.lock` contained dead PID `3672992`.
+- Stopped the service and cancelled the wake.
+- Patched `PaneLock` to remove dead-PID and malformed lock files before acquiring a pane lock.
+- Added tests for stale dead-PID and malformed lock cleanup.
+- Appended the evidence to `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
+
+Best next turn option: remove the current stale lock with the patched code path, reinstall the tool, then rerun one 20 second wake now that `UserPromptHooks` has been found.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from datetime import UTC, datetime
@@ -59,6 +60,30 @@ class InjectorTests(unittest.TestCase):
                     with PaneLock(root, "/tmp/tmux/default", "%1"):
                         pass
             self.assertFalse((root / "locks" / f"{lock_name_for_pane('/tmp/tmux/default', '%1')}.lock").exists())
+
+    def test_pane_lock_removes_stale_dead_pid_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            lock_path = root / "locks" / f"{lock_name_for_pane('/tmp/tmux/default', '%1')}.lock"
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            lock_path.write_text("999999999", encoding="ascii")
+
+            with PaneLock(root, "/tmp/tmux/default", "%1"):
+                self.assertEqual(lock_path.read_text(encoding="ascii"), str(os.getpid()))
+
+            self.assertFalse(lock_path.exists())
+
+    def test_pane_lock_removes_malformed_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            lock_path = root / "locks" / f"{lock_name_for_pane('/tmp/tmux/default', '%1')}.lock"
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            lock_path.write_text("not-a-pid", encoding="ascii")
+
+            with PaneLock(root, "/tmp/tmux/default", "%1"):
+                self.assertEqual(lock_path.read_text(encoding="ascii"), str(os.getpid()))
+
+            self.assertFalse(lock_path.exists())
 
     def test_dispatch_pastes_only_canonical_prompt_and_requeues_without_ack(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
