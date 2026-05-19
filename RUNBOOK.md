@@ -410,3 +410,18 @@ Started the `v0.3.1` patch release boundary.
 - Added `docs/releases/v0.3.1.md`.
 
 Best next turn option: run local release validation, commit, tag `v0.3.1`, publish the GitHub release, and verify a clean install from the public tag.
+
+## Turn 26 | 2026-05-19
+
+Published and verified `v0.3.1`.
+
+- Ran local release validation: compileall, `44` unit tests, package build, installed-wheel command smoke, non-wake hook smoke, and tmux-env-only wake creation.
+- Committed `aad1be4` with the `0.3.1` version bump and release notes.
+- Tagged and pushed `v0.3.1`.
+- Published GitHub release `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.3.1`.
+- Verified clean public tag install with isolated `UV_TOOL_DIR`, `UV_TOOL_BIN_DIR`, and `UV_CACHE_DIR`.
+- Verified installed tag commands, hook install/check, wake creation, and doctor output.
+- Confirmed upstream CI run `26102171944` passed on the release commit.
+- Recorded evidence in `docs/dev/verification/0011-2026-05-19-v0.3.1-release.md`.
+
+Best next turn option: open a new roadmap lane for either `file_changed`/`process_done` predicates or app-server-controlled wake hardening.
