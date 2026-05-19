@@ -213,8 +213,8 @@ Plan: [Clean Fresh Install Smoke](docs/dev/plans/0015-2026-05-18-clean-fresh-ins
 
 ## P16 | CI Release Gates
 
-State: OPEN
+State: CLOSED
 
-Current State: Releases are validated manually. The next best release-quality slice is GitHub Actions CI for tests, build, and planning-contract checks on push and pull request so future tags are gated before publication.
+Current State: Closed by `docs/dev/verification/0010-2026-05-19-ci-release-gates.md`. GitHub Actions now runs compile checks, unit tests, package build, and installed-wheel CLI smoke checks for Python 3.11 and 3.12 on push and pull request.
 
 Plan: [CI Release Gates](docs/dev/plans/0016-2026-05-18-ci-release-gates.md)

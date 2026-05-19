@@ -1,6 +1,6 @@
 # CI Release Gates
 
-State: OPEN
+State: CLOSED
 Lane: P16
 
 ## Scope
@@ -15,7 +15,9 @@ Add GitHub Actions validation for the public repo.
 
 ## Current State
 
-Local and clean public-tag installs are validated manually. The repo does not yet have CI to run source tests and package builds on pushes or pull requests.
+Local and clean public-tag installs were validated manually before this lane. CI now runs source tests, package build, and installed-wheel CLI smoke checks on pushes to `main` and pull requests.
+
+Validation evidence: [CI Release Gates](../verification/0010-2026-05-19-ci-release-gates.md)
 
 ## Acceptance Criteria
 

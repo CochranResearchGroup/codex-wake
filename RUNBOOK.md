@@ -383,3 +383,20 @@ Completed a successful current TUI dogfood wake.
 - Appended the pass evidence to `docs/dev/verification/0009-2026-05-18-current-tui-dogfood.md`.
 
 Best next turn option: commit this dogfood pass, then continue P16 CI release gates from the now-validated current-TUI wake baseline.
+
+## Turn 24 | 2026-05-19
+
+Completed P16 CI release gates.
+
+- Added `.github/workflows/ci.yml`.
+- CI runs on push to `main` and pull request.
+- Matrix covers Python 3.11 and 3.12.
+- Each job runs compile checks, standard-library unit tests, package build, installed-wheel command smoke, non-wake hook smoke, and tmux-env-only wake creation.
+- Local validation passed after moving the package-build dependency install into a temporary venv.
+- First upstream run passed but warned that `actions/checkout@v4` and `actions/setup-python@v5` use Node 20.
+- Updated the workflow to `actions/checkout@v6` and `actions/setup-python@v6`.
+- Final upstream run `26092549749` passed both matrix jobs.
+- Recorded evidence in `docs/dev/verification/0010-2026-05-19-ci-release-gates.md`.
+- Closed P16 in `ROADMAP.md` and `docs/dev/plans/0016-2026-05-18-ci-release-gates.md`.
+
+Best next turn option: decide the next release boundary after the stale-lock fix and CI gates, likely a `v0.3.1` patch release with release notes and clean tag install smoke.
