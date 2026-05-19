@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/wake_user_prompt_submit.py\"",
+            "command": "codex-wake-hook",
             "timeout": 5,
             "statusMessage": "Checking wake trigger"
           }

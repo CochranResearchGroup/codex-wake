@@ -154,6 +154,43 @@ class CliTests(unittest.TestCase):
             self.assertIn("name=wake-test.service", stdout.getvalue())
             self.assertIn(f"unit={unit_path}", stdout.getvalue())
 
+    def test_hook_install_and_check_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / ".codex" / "wake"
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(["--wake-root", str(root), "hook", "install", "--repo-root", str(repo)])
+            self.assertEqual(code, 0, stderr.getvalue())
+            self.assertIn("installed hook config", stdout.getvalue())
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(["--wake-root", str(root), "hook", "check", "--repo-root", str(repo)])
+            self.assertEqual(code, 0, stderr.getvalue())
+            self.assertIn("installed=true", stdout.getvalue())
+            self.assertIn("/hooks review", stdout.getvalue())
+
+    def test_doctor_reports_readiness_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / ".codex" / "wake"
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
+                with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
+                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                        code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo)])
+            self.assertEqual(code, 0, stderr.getvalue())
+            output = stdout.getvalue()
+            self.assertIn(f"repo_root={repo}", output)
+            self.assertIn(f"wake_root={root}", output)
+            self.assertIn("codex_waked=/usr/bin/codex-waked", output)
+            self.assertIn("hook_config_installed=false", output)
+            self.assertIn("service_active=inactive", output)
+
 
 if __name__ == "__main__":
     unittest.main()

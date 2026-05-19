@@ -195,8 +195,16 @@ Plan: [Service Installer CLI](docs/dev/plans/0013-2026-05-18-service-installer-c
 
 ## P14 | Hook Setup And Doctor CLI
 
-State: OPEN
+State: CLOSED
 
-Current State: Service management is CLI-driven, but hook setup still relies on manual `.codex/hooks.json` editing and Codex `/hooks` review. The next best operator slice is a `codex-wake hook` or `codex-wake doctor` surface that can install/check hook config and report trust prerequisites without bypassing Codex review.
+Current State: Closed by `docs/dev/verification/0007-2026-05-18-hook-setup-doctor-cli.md`. Operators can run `codex-wake hook install/check` and `codex-wake doctor` to set up and inspect wake readiness without bypassing Codex hook trust review.
 
 Plan: [Hook Setup And Doctor CLI](docs/dev/plans/0014-2026-05-18-hook-setup-doctor-cli.md)
+
+## P15 | Clean Fresh Install Smoke
+
+State: OPEN
+
+Current State: `v0.3.0` is ready from the source tree. The next best slice is a clean install from the published GitHub tag into a temporary tool environment or fresh `uv tool` install path, then run doctor/hook/service smoke from that release artifact rather than local source.
+
+Plan: [Clean Fresh Install Smoke](docs/dev/plans/0015-2026-05-18-clean-fresh-install-smoke.md)

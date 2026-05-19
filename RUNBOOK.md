@@ -281,3 +281,21 @@ Completed P13 service installer CLI.
 - Opened P14 with `docs/dev/plans/0014-2026-05-18-hook-setup-doctor-cli.md`.
 
 Best next turn option: commit, tag, and publish `v0.2.0`, then implement P14 so hook setup and readiness checks are available through `codex-wake`.
+
+## Turn 17 | 2026-05-18
+
+Completed P14 hook setup and doctor CLI.
+
+- Added `codex_wake.hook_config` for repo-local `.codex/hooks.json` rendering and checking.
+- Added `codex-wake hook install`.
+- Added `codex-wake hook check`.
+- Added `codex-wake doctor`.
+- Updated tracked `.codex/hooks.json` and `docs/dev/codex-hooks.example.json` to use installed `codex-wake-hook`.
+- Updated README hook setup to prefer `codex-wake hook install/check`.
+- Bumped package version to `0.3.0`.
+- Added `docs/releases/v0.3.0.md`.
+- Recorded evidence in `docs/dev/verification/0007-2026-05-18-hook-setup-doctor-cli.md`.
+- Closed P14 in `ROADMAP.md`.
+- Opened P15 with `docs/dev/plans/0015-2026-05-18-clean-fresh-install-smoke.md`.
+
+Best next turn option: commit, tag, and publish `v0.3.0`, then run P15 as a clean install from the public GitHub tag.

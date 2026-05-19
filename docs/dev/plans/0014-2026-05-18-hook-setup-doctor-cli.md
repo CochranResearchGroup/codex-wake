@@ -1,6 +1,6 @@
 # Hook Setup And Doctor CLI
 
-State: OPEN
+State: CLOSED
 Lane: P14
 
 ## Scope
@@ -15,7 +15,7 @@ Add operator commands that make hook setup and environment readiness inspectable
 
 ## Current State
 
-The installed `codex-wake-hook` command exists and README documents manual `.codex/hooks.json` setup. Operators still need a deterministic way to install/check repo hook config and diagnose missing tmux, service, wake root, or hook state.
+The installed `codex-wake-hook` command exists, `codex-wake hook install/check` can manage repo-local hook config, and `codex-wake doctor` reports command, tmux, wake-root, hook, and service readiness.
 
 ## Acceptance Criteria
 
@@ -28,4 +28,4 @@ The installed `codex-wake-hook` command exists and README documents manual `.cod
 
 ## Definition Of Done
 
-This lane can close when a fresh operator can run a command to install/check hook config and get a concise readiness report before scheduling wakes.
+Closed by `docs/dev/verification/0007-2026-05-18-hook-setup-doctor-cli.md`.

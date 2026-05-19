@@ -29,7 +29,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.2.0
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.3.0
 ```
 
 Verify the installed commands:
@@ -46,7 +46,14 @@ codex-waked --once --no-dispatch --wake-root /tmp/codex-wake-empty
 
 Codex Wake needs a `UserPromptSubmit` hook so the daemon can confirm that its pasted wake prompt was actually submitted and so Codex receives the full wake context from the trigger JSON.
 
-For an installed tool, add this to the target repo's `.codex/hooks.json`:
+For an installed tool, let Codex Wake write the repo-local hook config:
+
+```bash
+codex-wake hook install
+codex-wake hook check
+```
+
+This writes or checks this `.codex/hooks.json` shape:
 
 ```json
 {
@@ -67,7 +74,7 @@ For an installed tool, add this to the target repo's `.codex/hooks.json`:
 }
 ```
 
-This repo tracks a source-tree hook wrapper at `.codex/hooks/wake_user_prompt_submit.py` and a matching `.codex/hooks.json` for development. Codex may require a one-time `/hooks` review before a new repo-local hook runs.
+Codex may require a one-time `/hooks` review before a new repo-local hook runs. Codex Wake reports that prerequisite, but it does not bypass Codex hook trust.
 
 ## Basic Usage
 
@@ -117,6 +124,12 @@ codex-wake service status
 codex-wake service logs --lines 50
 codex-wake service stop
 codex-wake service uninstall
+```
+
+Run a readiness report:
+
+```bash
+codex-wake doctor
 ```
 
 Inspect and manage wakes:

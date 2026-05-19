@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from datetime import UTC
 from pathlib import Path
 
+from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, install_hook_config
 from .records import (
     WakeError,
     all_records,
@@ -86,6 +88,19 @@ def build_parser() -> argparse.ArgumentParser:
     service_uninstall = service_subparsers.add_parser("uninstall", help="stop, disable, and remove the user service")
     add_service_options(service_uninstall)
 
+    hook = subparsers.add_parser("hook", help="install or check repo-local Codex hook config")
+    hook_subparsers = hook.add_subparsers(dest="hook_command", required=True)
+
+    hook_install = hook_subparsers.add_parser("install", help="write .codex/hooks.json for codex-wake-hook")
+    add_hook_options(hook_install)
+
+    hook_check = hook_subparsers.add_parser("check", help="check .codex/hooks.json for codex-wake-hook")
+    add_hook_options(hook_check)
+
+    doctor = subparsers.add_parser("doctor", help="report Codex Wake readiness for this repo")
+    doctor.add_argument("--hook-command", default=DEFAULT_HOOK_COMMAND, help="expected UserPromptSubmit hook command")
+    add_service_options(doctor)
+
     return parser
 
 
@@ -107,6 +122,11 @@ def add_service_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--interval", type=float, default=1.0, help="daemon poll interval in seconds")
     parser.add_argument("--daemon-path", help="path to codex-waked; defaults to PATH resolution")
     parser.add_argument("--log-path", type=Path, default=None, help="service log path")
+
+
+def add_hook_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--repo-root", type=Path, default=None, help="repo root to update; defaults to current directory")
+    parser.add_argument("--command", dest="hook_command_text", default=DEFAULT_HOOK_COMMAND, help="hook command to install or check")
 
 
 def resolve_root(args: argparse.Namespace) -> Path:
@@ -252,6 +272,59 @@ def service_command(args: argparse.Namespace, root: Path) -> int:
     raise WakeError(f"unknown service command: {args.service_command}")
 
 
+def hook_command(args: argparse.Namespace) -> int:
+    repo_root = (args.repo_root or Path.cwd()).resolve()
+    if args.hook_command == "install":
+        path = install_hook_config(repo_root, args.hook_command_text)
+        print(f"installed hook config: {path}")
+        print(f"command={args.hook_command_text}")
+        print("note=Codex may still require /hooks review before this hook can run.")
+        return 0
+    if args.hook_command == "check":
+        check = check_hook_config(repo_root, args.hook_command_text)
+        print(f"path={check.path}")
+        print(f"exists={str(check.exists).lower()}")
+        print(f"valid_json={str(check.valid_json).lower()}")
+        print(f"installed={str(check.installed).lower()}")
+        print(f"command={check.command}")
+        print(f"message={check.message}")
+        print("trust=Codex may require /hooks review before this hook can run.")
+        return 0 if check.installed else 1
+    raise WakeError(f"unknown hook command: {args.hook_command}")
+
+
+def doctor_command(args: argparse.Namespace, root: Path) -> int:
+    repo_root = (args.repo_root or Path.cwd()).resolve()
+    hook_check = check_hook_config(repo_root, args.hook_command)
+    config = service_config_for_args(args, root)
+    codex_wake = shutil.which("codex-wake") or ""
+    codex_waked = shutil.which("codex-waked") or ""
+    codex_wake_hook = shutil.which("codex-wake-hook") or ""
+    tmux = shutil.which("tmux") or ""
+    try:
+        active, enabled = service_status(config)
+    except Exception as exc:
+        active, enabled = "unknown", f"unknown ({exc})"
+    print(f"repo_root={repo_root}")
+    print(f"wake_root={root}")
+    print(f"codex_wake={codex_wake or 'missing'}")
+    print(f"codex_waked={codex_waked or 'missing'}")
+    print(f"codex_wake_hook={codex_wake_hook or 'missing'}")
+    print(f"tmux={tmux or 'missing'}")
+    print(f"hook_config={hook_check.path}")
+    print(f"hook_config_exists={str(hook_check.exists).lower()}")
+    print(f"hook_config_valid_json={str(hook_check.valid_json).lower()}")
+    print(f"hook_config_installed={str(hook_check.installed).lower()}")
+    print(f"hook_command={hook_check.command}")
+    print(f"service_name={config.name}")
+    print(f"service_active={active}")
+    print(f"service_enabled={enabled}")
+    print(f"service_unit={config.unit_path}")
+    print(f"service_log={config.log_path}")
+    print("trust=Codex may require /hooks review before this hook can run.")
+    return 0
+
+
 def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -272,6 +345,10 @@ def run(argv: list[str] | None = None) -> int:
         return archive(args, root)
     if args.command == "service":
         return service_command(args, root)
+    if args.command == "hook":
+        return hook_command(args)
+    if args.command == "doctor":
+        return doctor_command(args, root)
     raise WakeError(f"unknown command: {args.command}")
 
 
