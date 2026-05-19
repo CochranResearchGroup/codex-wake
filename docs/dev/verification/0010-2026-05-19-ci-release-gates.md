@@ -72,6 +72,15 @@ Jobs:
 - `Release gates (3.12)`: success
 - `Release gates (3.11)`: success
 
+Branch-tip closeout run:
+
+- Commit: `928ceb30d45876bdefd0cafd2fd36e088b9f73da`
+- Run: `26092616255`
+- URL: `https://github.com/CochranResearchGroup/codex-wake/actions/runs/26092616255`
+- Result: success
+- `Release gates (3.11)`: success
+- `Release gates (3.12)`: success
+
 Both jobs completed:
 
 - Check out repository
