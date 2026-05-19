@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Local wake spooler for TUI-bound Codex agents"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
   { name = "Cochran Research Group" }
 ]
@@ -17,6 +17,7 @@ dependencies = []
 [project.scripts]
 codex-wake = "codex_wake.cli:main"
 codex-waked = "codex_wake.daemon:main"
+codex-wake-hook = "codex_wake.hook:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

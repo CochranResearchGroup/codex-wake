@@ -1,6 +1,6 @@
 # Release Packaging And Install Docs
 
-State: OPEN
+State: CLOSED
 Lane: P11
 
 ## Scope
@@ -15,7 +15,7 @@ Prepare the first operator-facing release surface for the verified wake spooler 
 
 ## Current State
 
-The MVP has verified CLI lifecycle, daemon predicate movement, hook ack behavior, app-server target creation, and disposable live tmux wake dispatch. The repo still needs fresh-install instructions and a release-ready version boundary.
+The MVP has verified CLI lifecycle, daemon predicate movement, hook ack behavior, app-server target creation, and disposable live tmux wake dispatch. README install docs, v0.1.0 release notes, package metadata, and refreshed user-scope install evidence are complete.
 
 ## Acceptance Criteria
 
@@ -27,4 +27,4 @@ The MVP has verified CLI lifecycle, daemon predicate movement, hook ack behavior
 
 ## Definition Of Done
 
-This lane can close when a fresh operator can install the tool, enable the hook, run a wake, and understand current limitations from tracked docs.
+Closed by README install docs, `docs/releases/v0.1.0.md`, `codex-wake-hook` packaging, and `docs/dev/verification/0004-2026-05-18-release-packaging-install-docs.md`.

@@ -171,8 +171,16 @@ Plan: [Disposable Live Tmux Wake Smoke](docs/dev/plans/0010-2026-05-18-disposabl
 
 ## P11 | Release Packaging And Install Docs
 
-State: OPEN
+State: CLOSED
 
-Current State: The MVP has passed source tests, user-scope install smokes, and disposable live tmux wake validation. The next best operator slice is to prepare release packaging and install documentation so a fresh agent can install the verified behavior without reading the dev runbook.
+Current State: Closed by `docs/dev/verification/0004-2026-05-18-release-packaging-install-docs.md`. README install docs, v0.1.0 release notes, installed `codex-wake-hook`, clean package build, and refreshed user-scope install evidence are complete.
 
 Plan: [Release Packaging And Install Docs](docs/dev/plans/0011-2026-05-18-release-packaging-install-docs.md)
+
+## P12 | User Daemon Service And Dogfood Wake
+
+State: OPEN
+
+Current State: The MVP can be installed and manually run. The best next operational slice is a user-scoped daemon service or runbook path plus a real dogfood wake so Codex Wake can monitor future long jobs without manually starting `codex-waked`.
+
+Plan: [User Daemon Service And Dogfood Wake](docs/dev/plans/0012-2026-05-18-user-daemon-service-dogfood-wake.md)

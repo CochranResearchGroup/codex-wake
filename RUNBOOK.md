@@ -222,3 +222,20 @@ Completed P10 disposable live tmux wake smoke.
 - Opened P11 with `docs/dev/plans/0011-2026-05-18-release-packaging-install-docs.md` for release packaging and install docs.
 
 Best next turn option: complete P11 by writing operator install docs, choosing the first release version boundary, refreshing the user-scope install, and tagging the release.
+
+## Turn 14 | 2026-05-18
+
+Completed P11 release packaging and install docs.
+
+- Chose `v0.1.0` as the initial MVP release boundary.
+- Rewrote `README.md` with requirements, install, hook setup, usage examples, daemon commands, runtime state, limits, and development commands.
+- Added installed `codex-wake-hook` console script for operator hook configs.
+- Added `docs/releases/v0.1.0.md` release notes.
+- Updated package license metadata to the non-deprecated SPDX string form.
+- Built source and wheel artifacts cleanly with `uv build`.
+- Refreshed the user-scoped install and verified `codex-wake`, `codex-waked`, and `codex-wake-hook`.
+- Recorded evidence in `docs/dev/verification/0004-2026-05-18-release-packaging-install-docs.md`.
+- Closed P11 in `ROADMAP.md`.
+- Opened P12 with `docs/dev/plans/0012-2026-05-18-user-daemon-service-dogfood-wake.md`.
+
+Best next turn option: commit and tag `v0.1.0`, then complete P12 by selecting a user-scoped daemon path and dogfooding a real wake.
