@@ -61,6 +61,9 @@ class AppServerTests(unittest.TestCase):
             data = json.loads((root / "submitted" / "wake_app.json").read_text())
             self.assertEqual(data["status"], "submitted")
             self.assertEqual(data["events"][-1]["type"], "ack_observed")
+            self.assertEqual(data["events"][-2]["type"], "dispatch_attempt")
+            self.assertEqual(data["dispatch_result"], {"thread_id": "thread_abc", "turn_id": "turn_123"})
+            self.assertEqual(data["events"][-1]["turn_id"], "turn_123")
 
     def test_unsupported_endpoint_fails_record(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

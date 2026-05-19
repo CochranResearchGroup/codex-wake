@@ -30,6 +30,19 @@ WAKE_TRIGGER_ID=<wake-id>
 Resume the scheduled wake task.
 ```
 
+## CLI
+
+Use explicit app-server commands for time-based wakes:
+
+```bash
+codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
+```
+
+The older `--app-server-thread-id` option on time commands remains available for compatibility, but the `app` subcommands are the clearer operator surface.
+
+When `turn/start` is accepted, Codex Wake records available response metadata in `dispatch_result`, including `thread_id` and `turn_id` when returned by app-server.
+
 ## Source Verification
 
 Official docs checked on 2026-05-18:
@@ -53,7 +66,7 @@ Generated schema confirmed:
 
 ## Safety Boundary
 
-Only `stdio://` is implemented in Codex Wake right now.
+Only `stdio://` is implemented in Codex Wake right now. Non-stdio endpoints are rejected during CLI creation and dispatch validation.
 
 WebSocket support is deferred until there is a clear local operator need and a testable auth setup. If implemented, it must enforce one of:
 

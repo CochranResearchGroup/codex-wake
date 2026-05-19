@@ -119,6 +119,13 @@ codex-wake pid "$!" -- \
   "The background process exited. Read .codex/events/job.log and continue."
 ```
 
+Create an app-server-targeted wake instead of a tmux-targeted wake:
+
+```bash
+codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
+```
+
 Run the daemon once:
 
 ```bash
@@ -183,7 +190,7 @@ By default, Codex Wake stores state under the current repo:
 - The daemon polls; it does not install a system service or systemd timer.
 - `not_before`, `file_exists`, `file_changed`, and `process_done` are polled predicates.
 - `process_done` checks PID liveness only; it does not yet guard against PID reuse.
-- App-server targeting is present for stdio dispatch experiments, but the tmux/hook path is the verified operator flow.
+- App-server targeting is present for stdio dispatch experiments, but unauthenticated WebSocket dispatch is intentionally not implemented.
 
 ## Development
 
@@ -203,7 +210,7 @@ PYTHONPATH=src python -m codex_wake.daemon --once --no-dispatch
 Create an app-server-targeted wake instead of a tmux-targeted wake:
 
 ```bash
-PYTHONPATH=src python -m codex_wake.cli after --app-server-thread-id thread_abc 45m -- "Resume the scheduled task."
+PYTHONPATH=src python -m codex_wake.cli app after thread_abc 45m -- "Resume the scheduled task."
 ```
 
 Design and validation notes live under `docs/dev/`.

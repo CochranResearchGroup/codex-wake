@@ -50,6 +50,21 @@ def build_parser() -> argparse.ArgumentParser:
     at.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(at)
 
+    app = subparsers.add_parser("app", help="create an app-server-targeted wake")
+    app_subparsers = app.add_subparsers(dest="app_command", required=True)
+
+    app_after = app_subparsers.add_parser("after", help="create an app-server wake after a duration")
+    app_after.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
+    app_after.add_argument("thread_id")
+    app_after.add_argument("duration")
+    app_after.add_argument("prompt", nargs=argparse.REMAINDER)
+
+    app_at = app_subparsers.add_parser("at", help="create an app-server wake at an ISO-8601 timestamp")
+    app_at.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
+    app_at.add_argument("thread_id")
+    app_at.add_argument("timestamp")
+    app_at.add_argument("prompt", nargs=argparse.REMAINDER)
+
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
     file_cmd.add_argument("path")
     file_cmd.add_argument("prompt", nargs=argparse.REMAINDER)
@@ -157,6 +172,25 @@ def create_at(args: argparse.Namespace, root: Path) -> int:
     return create_record(args.prompt, predicate, root, utc_now(), args)
 
 
+def create_app(args: argparse.Namespace, root: Path) -> int:
+    now = utc_now()
+    if args.app_command == "after":
+        due = now + parse_duration(args.duration)
+    elif args.app_command == "at":
+        due = parse_timestamp(args.timestamp)
+    else:
+        raise WakeError(f"unknown app command: {args.app_command}")
+    if args.endpoint != "stdio://":
+        raise WakeError("only app-server endpoint stdio:// is currently implemented")
+    predicate = {"type": "not_before", "due_at": format_utc(due)}
+    target = {
+        "transport": "app-server",
+        "endpoint": args.endpoint,
+        "thread_id": args.thread_id,
+    }
+    return create_record(args.prompt, predicate, root, now, args, target=target)
+
+
 def create_file(args: argparse.Namespace, root: Path) -> int:
     path = args.path.strip()
     if not path:
@@ -212,13 +246,21 @@ def process_exists(pid: int) -> bool:
     return True
 
 
-def create_record(prompt_parts: list[str], predicate: dict, root: Path, now, args: argparse.Namespace) -> int:
+def create_record(
+    prompt_parts: list[str],
+    predicate: dict,
+    root: Path,
+    now,
+    args: argparse.Namespace,
+    *,
+    target: dict[str, str] | None = None,
+) -> int:
     prompt = normalize_prompt(prompt_parts)
     record = build_record(
         predicate=predicate,
         prompt=prompt,
         cwd=Path.cwd(),
-        target=target_for_args(args),
+        target=target or target_for_args(args),
         now=now,
     )
     path = write_record(root, record)
@@ -391,6 +433,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_after(args, root)
     if args.command == "at":
         return create_at(args, root)
+    if args.command == "app":
+        return create_app(args, root)
     if args.command == "file":
         return create_file(args, root)
     if args.command == "changed":

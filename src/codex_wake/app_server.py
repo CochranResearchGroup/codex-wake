@@ -141,11 +141,21 @@ def dispatch_app_server_record(
         target = app_server_target(record)
         thread_id = target["thread_id"]
         cwd = record.get("cwd") if isinstance(record.get("cwd"), str) else None
+        record["updated_at"] = format_utc(current)
+        record = append_event(
+            record,
+            "dispatch_attempt",
+            "Starting app-server wake turn",
+            current,
+            thread_id=thread_id,
+            endpoint=target.get("endpoint", "stdio://"),
+        )
+        replace_record(root, found, record)
         app_client = client or StdioAppServerClient(command=target.get("command"))
         try:
             app_client.initialize()
-            app_client.resume_thread(thread_id, cwd=cwd)
-            app_client.start_turn(thread_id, canonical_prompt(wake_id), cwd=cwd)
+            resume_result = app_client.resume_thread(thread_id, cwd=cwd)
+            turn_result = app_client.start_turn(thread_id, canonical_prompt(wake_id), cwd=cwd)
         finally:
             if client is None:
                 app_client.close()
@@ -158,7 +168,24 @@ def dispatch_app_server_record(
         return AppServerDispatchResult("failed", str(exc))
     record["status"] = "submitted"
     record["updated_at"] = format_utc(current)
-    record = append_event(record, "dispatch_attempt", "Starting app-server wake turn", current)
-    record = append_event(record, "ack_observed", "App-server turn/start accepted wake prompt", current)
+    record["dispatch_result"] = app_server_dispatch_metadata(resume_result, turn_result)
+    record = append_event(
+        record,
+        "ack_observed",
+        "App-server turn/start accepted wake prompt",
+        current,
+        **record["dispatch_result"],
+    )
     replace_record(root, found, record)
     return AppServerDispatchResult("submitted", "turn/start accepted")
+
+
+def app_server_dispatch_metadata(resume_result: dict[str, Any], turn_result: dict[str, Any]) -> dict[str, Any]:
+    metadata: dict[str, Any] = {}
+    thread = resume_result.get("thread")
+    if isinstance(thread, dict) and isinstance(thread.get("id"), str):
+        metadata["thread_id"] = thread["id"]
+    turn = turn_result.get("turn")
+    if isinstance(turn, dict) and isinstance(turn.get("id"), str):
+        metadata["turn_id"] = turn["id"]
+    return metadata

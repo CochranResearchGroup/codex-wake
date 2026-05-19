@@ -478,3 +478,33 @@ Published and verified `v0.4.0`.
 - Recorded evidence in `docs/dev/verification/0013-2026-05-19-v0.4.0-release.md`.
 
 Best next turn option: open a new roadmap lane for app-server controlled wake hardening or PID-reuse-safe process predicates.
+
+## Turn 31 | 2026-05-19
+
+Opened P18 for app-server hardening.
+
+- Selected app-server hardening over PID-reuse safety because it advances the preferred controlled wake transport.
+- Added `docs/dev/plans/0018-2026-05-19-app-server-hardening.md`.
+- Opened P18 in `ROADMAP.md`.
+- Added explicit `codex-wake app after` and `codex-wake app at` commands.
+- Added app-server dispatch metadata capture for accepted `thread_id` and `turn_id`.
+- Updated README and app-server docs.
+
+Best next turn option: run source and CLI validation, record P18 evidence, close the lane, then consider a release boundary.
+
+## Turn 32 | 2026-05-19
+
+Completed P18 app-server hardening.
+
+- Added explicit `codex-wake app after <thread-id> <duration> -- <prompt>`.
+- Added explicit `codex-wake app at <thread-id> <timestamp> -- <prompt>`.
+- Kept non-stdio app-server endpoints rejected.
+- App-server dispatch now records a `dispatch_attempt` event before requests.
+- App-server dispatch now stores accepted `thread_id` and `turn_id` metadata in `dispatch_result` when available.
+- Added focused CLI and app-server dispatch tests.
+- Ran source validation: `53` tests passed.
+- Ran CLI smoke creating both app-server `after` and `at` wakes.
+- Recorded evidence in `docs/dev/verification/0014-2026-05-19-app-server-hardening.md`.
+- Closed P18 in `ROADMAP.md` and `docs/dev/plans/0018-2026-05-19-app-server-hardening.md`.
+
+Best next turn option: cut `v0.4.1` for the app-server CLI and dispatch metadata hardening, or continue to a PID-reuse-safety lane before releasing.

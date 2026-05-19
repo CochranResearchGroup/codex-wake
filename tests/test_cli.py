@@ -157,6 +157,56 @@ class CliTests(unittest.TestCase):
             data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
             self.assertEqual(data["target"], {"transport": "app-server", "endpoint": "stdio://", "thread_id": "thread_abc"})
 
+    def test_app_after_creates_app_server_target_without_tmux(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch.dict(os.environ, {"TMUX_PANE": "", "TMUX": ""}, clear=False):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = cli.main(
+                        [
+                            "--wake-root",
+                            str(root),
+                            "app",
+                            "after",
+                            "thread_abc",
+                            "1m",
+                            "--",
+                            "Wake app server",
+                        ]
+                    )
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            wake_id = stdout.getvalue().split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["predicate"]["type"], "not_before")
+            self.assertEqual(data["target"], {"transport": "app-server", "endpoint": "stdio://", "thread_id": "thread_abc"})
+
+    def test_app_rejects_non_stdio_endpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(
+                    [
+                        "--wake-root",
+                            str(root),
+                            "app",
+                            "after",
+                            "--endpoint",
+                            "ws://127.0.0.1:4500",
+                            "thread_abc",
+                            "1m",
+                            "--",
+                            "Wake app server",
+                    ]
+                )
+
+            self.assertEqual(code, 2)
+            self.assertIn("only app-server endpoint stdio://", stderr.getvalue())
+
     def test_app_server_rejects_non_stdio_endpoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

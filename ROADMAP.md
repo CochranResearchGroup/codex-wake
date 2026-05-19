@@ -226,3 +226,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0012-2026-05-19-event-predicates.md`. `codex-wake changed <path>` and `codex-wake pid <pid>` now create declarative predicates, and the daemon can move ready `file_changed` and `process_done` records to `firing`.
 
 Plan: [Event Predicates](docs/dev/plans/0017-2026-05-19-event-predicates.md)
+
+## P18 | App-Server Hardening
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0014-2026-05-19-app-server-hardening.md`. `codex-wake app after` and `codex-wake app at` now create explicit app-server wakes, and accepted app-server dispatch stores available `thread_id` and `turn_id` metadata.
+
+Plan: [App-Server Hardening](docs/dev/plans/0018-2026-05-19-app-server-hardening.md)
