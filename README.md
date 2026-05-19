@@ -119,6 +119,10 @@ codex-wake pid "$!" -- \
   "The background process exited. Read .codex/events/job.log and continue."
 ```
 
+On Linux, `pid` wakes record the process start time from `/proc/<pid>/stat`
+and the current boot id when available. The daemon fires if the PID disappears
+or if the live PID no longer matches that registered process identity.
+
 Create an app-server-targeted wake instead of a tmux-targeted wake:
 
 ```bash
@@ -189,7 +193,7 @@ By default, Codex Wake stores state under the current repo:
 - The first hook use in a repo may require manual `/hooks` trust review in Codex.
 - The daemon polls; it does not install a system service or systemd timer.
 - `not_before`, `file_exists`, `file_changed`, and `process_done` are polled predicates.
-- `process_done` checks PID liveness only; it does not yet guard against PID reuse.
+- `process_done` falls back to PID liveness on platforms where process identity is unavailable.
 - App-server targeting is present for stdio dispatch experiments, but unauthenticated WebSocket dispatch is intentionally not implemented.
 
 ## Development

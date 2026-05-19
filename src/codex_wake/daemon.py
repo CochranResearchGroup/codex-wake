@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 import time
 from dataclasses import dataclass
@@ -18,6 +17,7 @@ from .records import (
     utc_now,
 )
 from .injector import TmuxRunner, dispatch_firing_record
+from .process import boot_id_value, process_exists, process_identity
 
 
 @dataclass(frozen=True)
@@ -98,7 +98,26 @@ def predicate_is_ready(record: dict, now: datetime) -> tuple[bool, str]:
         pid = predicate.get("pid")
         if not isinstance(pid, int) or pid <= 0:
             raise WakeError("process_done predicate requires positive integer pid")
-        return not process_exists(pid), f"process_done pid {pid} exited"
+        if not process_exists(pid):
+            return True, f"process_done pid {pid} exited"
+        registered_boot_id = predicate.get("registered_boot_id")
+        if registered_boot_id is not None and not isinstance(registered_boot_id, str):
+            raise WakeError("process_done registered_boot_id must be a string when present")
+        if registered_boot_id:
+            current_boot_id = boot_id_value()
+            if current_boot_id and current_boot_id != registered_boot_id:
+                return True, f"process_done pid {pid} was from previous boot"
+        registered_start_time_ticks = predicate.get("registered_start_time_ticks")
+        if registered_start_time_ticks is None:
+            return False, f"process_done pid {pid} still exists"
+        if not isinstance(registered_start_time_ticks, int):
+            raise WakeError("process_done registered_start_time_ticks must be an integer when present")
+        current_identity = process_identity(pid)
+        if current_identity is None:
+            return False, f"process_done pid {pid} still exists; process identity unavailable"
+        if current_identity.get("start_time_ticks") != registered_start_time_ticks:
+            return True, f"process_done pid {pid} no longer matches registered process"
+        return False, f"process_done pid {pid} still matches registered process"
     raise WakeError(f"unsupported predicate type: {predicate_type}")
 
 
@@ -110,16 +129,6 @@ def resolve_record_path(record: dict, raw_path: str, predicate_type: str) -> Pat
     if not isinstance(cwd, str) or not cwd:
         raise WakeError(f"relative {predicate_type} predicate requires record cwd")
     return Path(cwd) / path
-
-
-def process_exists(pid: int) -> bool:
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    return True
 
 
 def poll_once(

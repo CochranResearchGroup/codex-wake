@@ -533,3 +533,40 @@ Published and verified `v0.4.1`.
 - Recorded evidence in `docs/dev/verification/0015-2026-05-19-v0.4.1-release.md`.
 
 Best next turn option: open a PID-reuse-safety lane for `process_done`, because it is the main known correctness gap left in the event predicate surface.
+
+## Turn 35 | 2026-05-19
+
+Opened P19 for PID reuse safety.
+
+- Selected PID reuse safety because `process_done` was the main known correctness gap after `v0.4.1`.
+- Added `docs/dev/plans/0019-2026-05-19-pid-reuse-safety.md`.
+- Opened P19 in `ROADMAP.md`.
+
+Best next turn option: implement process identity capture and daemon identity comparison, then validate source and installed CLI behavior.
+
+## Turn 36 | 2026-05-19
+
+Implemented P19 PID reuse safety.
+
+- Added Linux `/proc` process identity helpers.
+- Updated `codex-wake pid` to record process start time and boot id when available.
+- Updated daemon `process_done` evaluation to fire when a live PID no longer matches the registered identity.
+- Preserved liveness fallback for old records and platforms without process identity data.
+- Updated README process predicate behavior and limits.
+
+Best next turn option: run source validation and installed CLI smokes, then record P19 verification and close the lane if validation passes.
+
+## Turn 37 | 2026-05-19
+
+Completed P19 PID reuse safety.
+
+- Ran source validation: compileall and `61` unit tests.
+- Ran source CLI smoke with a live `sleep` process.
+- Confirmed source `codex-wake pid` recorded process start time and boot id on this host.
+- Confirmed source daemon kept the wake pending while the process lived and moved it to `firing` after exit.
+- Built and installed a local wheel in temporary virtual environments.
+- Confirmed installed `codex-wake` and `codex-waked` produced the same PID wake behavior.
+- Recorded evidence in `docs/dev/verification/0016-2026-05-19-pid-reuse-safety.md`.
+- Closed P19 in `ROADMAP.md` and `docs/dev/plans/0019-2026-05-19-pid-reuse-safety.md`.
+
+Best next turn option: commit and push P19, wait for CI, then cut `v0.4.2` if the branch remains green.

@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import patch
 
 from codex_wake.daemon import PollResult, format_poll_result, poll_once, poll_result_has_activity
 from codex_wake.records import build_record, write_record
@@ -140,6 +141,96 @@ class DaemonTests(unittest.TestCase):
 
             self.assertEqual(result.fired, 1)
             self.assertTrue((root / "firing" / "wake_pid.json").exists())
+
+    def test_process_done_waits_for_matching_process_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            record = self.make_record(
+                tmp,
+                {
+                    "type": "process_done",
+                    "pid": 123,
+                    "registered_start_time_ticks": 456,
+                    "registered_boot_id": "boot-abc",
+                },
+            )
+            record["id"] = "wake_pid_identity"
+            write_record(root, record)
+
+            with patch("codex_wake.daemon.process_exists", return_value=True):
+                with patch("codex_wake.daemon.boot_id_value", return_value="boot-abc"):
+                    with patch(
+                        "codex_wake.daemon.process_identity",
+                        return_value={"start_time_ticks": 456, "boot_id": "boot-abc"},
+                    ):
+                        result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.pending, 1)
+            self.assertTrue((root / "pending" / "wake_pid_identity.json").exists())
+
+    def test_process_done_fires_when_pid_identity_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            record = self.make_record(
+                tmp,
+                {
+                    "type": "process_done",
+                    "pid": 123,
+                    "registered_start_time_ticks": 456,
+                    "registered_boot_id": "boot-abc",
+                },
+            )
+            record["id"] = "wake_pid_reused"
+            write_record(root, record)
+
+            with patch("codex_wake.daemon.process_exists", return_value=True):
+                with patch("codex_wake.daemon.boot_id_value", return_value="boot-abc"):
+                    with patch(
+                        "codex_wake.daemon.process_identity",
+                        return_value={"start_time_ticks": 789, "boot_id": "boot-abc"},
+                    ):
+                        result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.fired, 1)
+            data = json.loads((root / "firing" / "wake_pid_reused.json").read_text())
+            self.assertIn("no longer matches", data["events"][-1]["message"])
+
+    def test_process_done_fires_when_boot_id_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            record = self.make_record(
+                tmp,
+                {
+                    "type": "process_done",
+                    "pid": 123,
+                    "registered_start_time_ticks": 456,
+                    "registered_boot_id": "boot-abc",
+                },
+            )
+            record["id"] = "wake_pid_boot"
+            write_record(root, record)
+
+            with patch("codex_wake.daemon.process_exists", return_value=True):
+                with patch("codex_wake.daemon.boot_id_value", return_value="boot-def"):
+                    result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.fired, 1)
+            data = json.loads((root / "firing" / "wake_pid_boot.json").read_text())
+            self.assertIn("previous boot", data["events"][-1]["message"])
+
+    def test_process_done_rejects_invalid_registered_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            record = self.make_record(tmp, {"type": "process_done", "pid": 123, "registered_start_time_ticks": "bad"})
+            record["id"] = "wake_bad_pid_identity"
+            write_record(root, record)
+
+            with patch("codex_wake.daemon.process_exists", return_value=True):
+                result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.failed, 1)
+            data = json.loads((root / "failed" / "wake_bad_pid_identity.json").read_text())
+            self.assertIn("registered_start_time_ticks", data["last_error"])
 
     def test_process_done_rejects_invalid_pid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

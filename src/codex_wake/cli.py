@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import shutil
 import sys
 from datetime import UTC
 from pathlib import Path
 
 from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, hook_review_note, install_hook_config
+from .process import process_exists, process_identity
 from .records import (
     WakeError,
     all_records,
@@ -233,17 +233,12 @@ def create_pid(args: argparse.Namespace, root: Path) -> int:
     if not process_exists(pid):
         raise WakeError(f"process does not exist: {pid}")
     predicate = {"type": "process_done", "pid": pid}
+    identity = process_identity(pid)
+    if identity:
+        predicate["registered_start_time_ticks"] = identity["start_time_ticks"]
+        if "boot_id" in identity:
+            predicate["registered_boot_id"] = identity["boot_id"]
     return create_record(args.prompt, predicate, root, utc_now(), args)
-
-
-def process_exists(pid: int) -> bool:
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    return True
 
 
 def create_record(

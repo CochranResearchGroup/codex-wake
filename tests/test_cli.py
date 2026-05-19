@@ -115,7 +115,27 @@ class CliTests(unittest.TestCase):
     def test_pid_creates_process_done_predicate(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            code, out, err = self.run_cli(["pid", str(os.getpid()), "--", "Process done"], root)
+            with patch("codex_wake.cli.process_identity", return_value={"start_time_ticks": 12345, "boot_id": "boot-abc"}):
+                code, out, err = self.run_cli(["pid", str(os.getpid()), "--", "Process done"], root)
+
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(
+                data["predicate"],
+                {
+                    "type": "process_done",
+                    "pid": os.getpid(),
+                    "registered_start_time_ticks": 12345,
+                    "registered_boot_id": "boot-abc",
+                },
+            )
+
+    def test_pid_keeps_liveness_fallback_when_identity_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with patch("codex_wake.cli.process_identity", return_value=None):
+                code, out, err = self.run_cli(["pid", str(os.getpid()), "--", "Process done"], root)
 
             self.assertEqual(code, 0, err)
             wake_id = out.split()[0]

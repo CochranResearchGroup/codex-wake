@@ -234,3 +234,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0014-2026-05-19-app-server-hardening.md`. `codex-wake app after` and `codex-wake app at` now create explicit app-server wakes, and accepted app-server dispatch stores available `thread_id` and `turn_id` metadata.
 
 Plan: [App-Server Hardening](docs/dev/plans/0018-2026-05-19-app-server-hardening.md)
+
+## P19 | PID Reuse Safety
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0016-2026-05-19-pid-reuse-safety.md`. `codex-wake pid` now records best-effort process identity on Linux, and the daemon fires when a live PID no longer matches the registered process.
+
+Plan: [PID Reuse Safety](docs/dev/plans/0019-2026-05-19-pid-reuse-safety.md)
