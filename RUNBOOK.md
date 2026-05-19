@@ -453,3 +453,13 @@ Completed P17 event predicates.
 - Closed P17 in `ROADMAP.md` and `docs/dev/plans/0017-2026-05-19-event-predicates.md`.
 
 Best next turn option: cut `v0.4.0` for the new predicate surface, with clean tag install smoke and release notes.
+
+## Turn 29 | 2026-05-19
+
+Started the `v0.4.0` release boundary.
+
+- Selected `v0.4.0` because P17 adds new CLI commands and predicate semantics.
+- Bumped package version to `0.4.0`.
+- Added `docs/releases/v0.4.0.md`.
+
+Best next turn option: run local release validation, commit, tag `v0.4.0`, publish the GitHub release, and verify a clean install from the public tag.
