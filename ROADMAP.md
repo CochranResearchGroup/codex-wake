@@ -163,8 +163,16 @@ Plan: [User-Scope Install And Operator Smoke](docs/dev/plans/0009-2026-05-18-use
 
 ## P10 | Disposable Live Tmux Wake Smoke
 
-State: OPEN
+State: CLOSED
 
-Current State: User-scope install is verified. The remaining high-value live check is a disposable tmux-hosted Codex TUI wake where `codex-waked` injects the canonical prompt and the hook writes the ack without disturbing a human session.
+Current State: Closed by `docs/dev/verification/0003-2026-05-18-disposable-live-tmux-wake-smoke.md`. A disposable tmux-hosted Codex TUI wake was verified with repo-local hook trust, delayed multiline submit, daemon-observed ack, and a submitted wake record.
 
 Plan: [Disposable Live Tmux Wake Smoke](docs/dev/plans/0010-2026-05-18-disposable-live-tmux-wake-smoke.md)
+
+## P11 | Release Packaging And Install Docs
+
+State: OPEN
+
+Current State: The MVP has passed source tests, user-scope install smokes, and disposable live tmux wake validation. The next best operator slice is to prepare release packaging and install documentation so a fresh agent can install the verified behavior without reading the dev runbook.
+
+Plan: [Release Packaging And Install Docs](docs/dev/plans/0011-2026-05-18-release-packaging-install-docs.md)

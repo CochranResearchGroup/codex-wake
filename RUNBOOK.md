@@ -204,3 +204,21 @@ Completed P09 user-scope install and operator smoke.
 - Opened P10 for a disposable live tmux wake smoke.
 
 Best next turn option: run P10 against a disposable tmux session, not a human active Codex pane.
+
+## Turn 13 | 2026-05-18
+
+Completed P10 disposable live tmux wake smoke.
+
+- Installed `.codex/hooks.json` so the repo-local `UserPromptSubmit` hook is available to Codex.
+- Created a disposable tmux session running `codex -C /home/ecochran76/workspace.local/codex-wake --no-alt-screen`.
+- Observed the Codex hook trust gate and trusted the hook inside the disposable pane.
+- Found that immediate submit after paste left the two-line wake prompt in the Codex composer.
+- Updated the tmux injector to wait after paste and send delayed `C-m` submit keys.
+- Verified daemon-owned live dispatch with `checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0`.
+- Verified the hook wrote `.codex/wake/acks/wake_20260519_003526_bfaa.submitted`.
+- Refreshed the user-scoped `uv tool install --force .` after the injector submit timing fix.
+- Recorded evidence in `docs/dev/verification/0003-2026-05-18-disposable-live-tmux-wake-smoke.md`.
+- Closed P10 in `ROADMAP.md`.
+- Opened P11 with `docs/dev/plans/0011-2026-05-18-release-packaging-install-docs.md` for release packaging and install docs.
+
+Best next turn option: complete P11 by writing operator install docs, choosing the first release version boundary, refreshing the user-scope install, and tagging the release.

@@ -1,6 +1,6 @@
 # Disposable Live Tmux Wake Smoke
 
-State: OPEN
+State: CLOSED
 Lane: P10
 
 ## Scope
@@ -15,7 +15,7 @@ Run a live wake smoke against a disposable tmux pane running Codex so the daemon
 
 ## Current State
 
-`codex-wake` and `codex-waked` are installed in user scope and verified through PATH-resolved commands. Live tmux injection has not yet been attempted.
+`codex-wake` and `codex-waked` are installed in user scope and verified through PATH-resolved commands. Live tmux injection has been verified against a disposable Codex TUI pane in `docs/dev/verification/0003-2026-05-18-disposable-live-tmux-wake-smoke.md`.
 
 ## Acceptance Criteria
 
@@ -29,4 +29,4 @@ Run a live wake smoke against a disposable tmux pane running Codex so the daemon
 
 ## Definition Of Done
 
-The plan can close when a disposable live tmux wake is verified or a precise blocker is recorded with the exact command and failure output.
+Closed after a disposable live tmux wake was verified. The final daemon-owned smoke observed `checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0` and the `UserPromptSubmit` hook wrote `.codex/wake/acks/wake_20260519_003526_bfaa.submitted`.

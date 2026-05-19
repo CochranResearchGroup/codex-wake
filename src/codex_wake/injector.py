@@ -65,8 +65,18 @@ class SubprocessTmuxRunner:
                 text=True,
                 capture_output=True,
             )
+            # Codex's tmux-hosted multiline composer needs the paste to settle,
+            # then a blank-line submit for the two-line canonical prompt.
+            time.sleep(0.2)
             subprocess.run(
-                ["tmux", "-S", socket, "send-keys", "-t", pane, "Enter"],
+                ["tmux", "-S", socket, "send-keys", "-t", pane, "C-m"],
+                check=True,
+                text=True,
+                capture_output=True,
+            )
+            time.sleep(0.2)
+            subprocess.run(
+                ["tmux", "-S", socket, "send-keys", "-t", pane, "C-m"],
                 check=True,
                 text=True,
                 capture_output=True,

@@ -1,5 +1,4 @@
 {
-  "_note": "This example is installed as .codex/hooks.json in this repo.",
   "hooks": {
     "UserPromptSubmit": [
       {
