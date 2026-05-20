@@ -916,3 +916,12 @@ Completed P26 cleanup JSON output.
 - Closed P26 in `ROADMAP.md` and `docs/dev/plans/0026-2026-05-20-cleanup-json.md`.
 
 Best next turn option: commit and push P26, wait for CI, then cut `v0.4.8` if the branch remains green.
+
+## Turn 64 | 2026-05-20
+
+Started the `v0.4.8` release for P26 cleanup JSON output.
+
+- Bumped package version to `0.4.8`.
+- Added `docs/releases/v0.4.8.md`.
+
+Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.8` if validation passes.
