@@ -274,3 +274,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0024-2026-05-20-doctor-json.md`. `codex-wake doctor --json` now emits structured command, tmux, hook config, hook runtime evidence, service, and trust fields while preserving text doctor output.
 
 Plan: [Doctor JSON Inspection Surface](docs/dev/plans/0023-2026-05-20-doctor-json.md)
+
+## P24 | Status JSON Summary Surface
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0026-2026-05-20-status-json.md`. `codex-wake status` and `codex-wake status --json` now summarize wake counts by status, predicate type, and target transport.
+
+Plan: [Status JSON Summary Surface](docs/dev/plans/0024-2026-05-20-status-json.md)

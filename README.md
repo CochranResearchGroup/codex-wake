@@ -174,6 +174,8 @@ Inspect and manage wakes:
 ```bash
 codex-wake list
 codex-wake list --json
+codex-wake status
+codex-wake status --json
 codex-wake show <wake-id>
 codex-wake cancel <wake-id>
 codex-wake archive <wake-id>
@@ -183,6 +185,9 @@ codex-wake cleanup --older-than 30d --delete
 codex-wake schema
 codex-wake schema --json
 ```
+
+`status --json` emits compact counts by status, predicate, and target transport
+plus the earliest pending or firing `next_attempt_at`.
 
 ## Runtime State
 

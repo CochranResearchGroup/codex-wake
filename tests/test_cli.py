@@ -87,6 +87,38 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn(wake_id, archived_list)
 
+    def test_status_command_reports_counts_and_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(["after", "45m", "--", "Continue later"], root)
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            code, _, err = self.run_cli(["cancel", wake_id], root)
+            self.assertEqual(code, 0, err)
+            code, _, err = self.run_cli(["archive", wake_id], root)
+            self.assertEqual(code, 0, err)
+            code, _, err = self.run_cli(["file", ".codex/events/done", "--", "Check event"], root)
+            self.assertEqual(code, 0, err)
+
+            code, text_out, err = self.run_cli(["status"], root)
+            self.assertEqual(code, 0, err)
+            self.assertIn("total=2", text_out)
+            self.assertIn("active_total=1", text_out)
+            self.assertIn("archived_total=1", text_out)
+            self.assertIn("counts_by_status=", text_out)
+
+            code, json_out, err = self.run_cli(["status", "--json"], root)
+            self.assertEqual(code, 0, err)
+            data = json.loads(json_out)
+            self.assertEqual(data["total"], 2)
+            self.assertEqual(data["active_total"], 1)
+            self.assertEqual(data["archived_total"], 1)
+            self.assertEqual(data["counts_by_status"]["pending"], 1)
+            self.assertEqual(data["counts_by_status"]["archived"], 1)
+            self.assertEqual(data["counts_by_predicate"]["file_exists"], 1)
+            self.assertEqual(data["counts_by_target_transport"]["tmux"], 2)
+            self.assertTrue(data["earliest_next_attempt_at"])
+
     def test_cleanup_dry_run_and_delete_archived_records(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

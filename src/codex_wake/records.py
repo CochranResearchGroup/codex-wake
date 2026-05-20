@@ -292,6 +292,53 @@ def all_records(root: Path, include_archive: bool = False) -> list[WakePath]:
     return sorted(records, key=lambda item: (item.record.get("created_at", ""), item.record.get("id", "")))
 
 
+def status_summary(root: Path) -> dict[str, Any]:
+    active_records = iter_records(root)
+    archived_records = iter_archived_records(root)
+    status_counts = {status: 0 for status in ACTIVE_STATUS_DIRS}
+    status_counts["archived"] = 0
+    predicate_counts: dict[str, int] = {}
+    target_counts: dict[str, int] = {}
+    pending_next_attempts: list[str] = []
+
+    for item in [*active_records, *archived_records]:
+        record = item.record
+        status = record.get("status")
+        if status == "archived":
+            status_counts["archived"] += 1
+        elif isinstance(status, str):
+            status_counts[status] = status_counts.get(status, 0) + 1
+        predicate = record.get("predicate")
+        if isinstance(predicate, dict):
+            predicate_type = predicate.get("type")
+            if isinstance(predicate_type, str) and predicate_type:
+                predicate_counts[predicate_type] = predicate_counts.get(predicate_type, 0) + 1
+        target = record.get("target")
+        if isinstance(target, dict):
+            transport = target.get("transport")
+            if isinstance(transport, str) and transport:
+                target_counts[transport] = target_counts.get(transport, 0) + 1
+        if status in {"pending", "firing"}:
+            next_attempt = record.get("next_attempt_at")
+            if isinstance(next_attempt, str) and next_attempt:
+                pending_next_attempts.append(next_attempt)
+
+    active_total = status_counts.get("pending", 0) + status_counts.get("firing", 0)
+    terminal_total = sum(status_counts.get(status, 0) for status in sorted(TERMINAL_STATUSES))
+    archived_total = status_counts.get("archived", 0)
+    return {
+        "wake_root": str(root),
+        "total": len(active_records) + len(archived_records),
+        "active_total": active_total,
+        "terminal_total": terminal_total,
+        "archived_total": archived_total,
+        "counts_by_status": status_counts,
+        "counts_by_predicate": dict(sorted(predicate_counts.items())),
+        "counts_by_target_transport": dict(sorted(target_counts.items())),
+        "earliest_next_attempt_at": min(pending_next_attempts) if pending_next_attempts else "",
+    }
+
+
 def cancel_record(root: Path, wake_id: str, now: datetime | None = None) -> Path:
     found = find_record(root, wake_id)
     record = dict(found.record)

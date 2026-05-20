@@ -808,3 +808,30 @@ Published and verified `v0.4.6`.
 - Recorded evidence in `docs/dev/verification/0025-2026-05-20-v0.4.6-release.md`.
 
 Best next turn option: open P24 for `list --json` enrichment or a compact `status --json` command that summarizes wake counts by state for supervisor automation.
+
+## Turn 56 | 2026-05-20
+
+Opened P24 for a compact status JSON summary surface.
+
+- Selected `status --json` over `list --json` enrichment because `list --json` already exposes full records.
+- Added `docs/dev/plans/0024-2026-05-20-status-json.md`.
+- Marked P24 active in `ROADMAP.md`.
+
+Best next turn option: implement `codex-wake status` and `codex-wake status --json`, then validate source and installed CLI output.
+
+## Turn 57 | 2026-05-20
+
+Completed P24 status JSON summary.
+
+- Added record-layer `status_summary()`.
+- Added `codex-wake status`.
+- Added `codex-wake status --json`.
+- Updated README usage.
+- Added tests for summary logic and CLI text/JSON output.
+- Ran source validation: compileall and `73` unit tests.
+- Built and installed a local working-tree wheel.
+- Ran installed CLI smokes for `status` and `status --json`.
+- Recorded evidence in `docs/dev/verification/0026-2026-05-20-status-json.md`.
+- Closed P24 in `ROADMAP.md` and `docs/dev/plans/0024-2026-05-20-status-json.md`.
+
+Best next turn option: commit and push P24, wait for CI, then cut `v0.4.7` if the branch remains green.

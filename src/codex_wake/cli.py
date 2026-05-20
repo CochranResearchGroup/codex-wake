@@ -26,6 +26,7 @@ from .records import (
     parse_duration,
     parse_timestamp,
     schema_summary,
+    status_summary,
     utc_now,
     write_record,
 )
@@ -85,6 +86,9 @@ def build_parser() -> argparse.ArgumentParser:
     list_cmd = subparsers.add_parser("list", help="list wake records")
     list_cmd.add_argument("--json", action="store_true", dest="as_json")
     list_cmd.add_argument("--archived", action="store_true", help="include archived wake records")
+
+    status = subparsers.add_parser("status", help="summarize wake records by state")
+    status.add_argument("--json", action="store_true", dest="as_json")
 
     show = subparsers.add_parser("show", help="show one wake record")
     show.add_argument("wake_id")
@@ -302,6 +306,29 @@ def list_records(args: argparse.Namespace, root: Path) -> int:
         predicate_type = predicate.get("type", "unknown")
         next_attempt = record.get("next_attempt_at", "")
         print(f"{record.get('id')}\t{record.get('status')}\t{predicate_type}\t{next_attempt}")
+    return 0
+
+
+def status_command(args: argparse.Namespace, root: Path) -> int:
+    summary = status_summary(root)
+    if args.as_json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+    print(f"wake_root={summary['wake_root']}")
+    print(f"total={summary['total']}")
+    print(f"active_total={summary['active_total']}")
+    print(f"terminal_total={summary['terminal_total']}")
+    print(f"archived_total={summary['archived_total']}")
+    counts_by_status = summary["counts_by_status"]
+    counts_by_predicate = summary["counts_by_predicate"]
+    counts_by_target = summary["counts_by_target_transport"]
+    assert isinstance(counts_by_status, dict)
+    assert isinstance(counts_by_predicate, dict)
+    assert isinstance(counts_by_target, dict)
+    print("counts_by_status=" + ",".join(f"{key}:{counts_by_status[key]}" for key in sorted(counts_by_status)))
+    print("counts_by_predicate=" + ",".join(f"{key}:{counts_by_predicate[key]}" for key in sorted(counts_by_predicate)))
+    print("counts_by_target_transport=" + ",".join(f"{key}:{counts_by_target[key]}" for key in sorted(counts_by_target)))
+    print(f"earliest_next_attempt_at={summary['earliest_next_attempt_at']}")
     return 0
 
 
@@ -552,6 +579,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_pid(args, root)
     if args.command == "list":
         return list_records(args, root)
+    if args.command == "status":
+        return status_command(args, root)
     if args.command == "show":
         return show_record(args, root)
     if args.command == "cancel":
