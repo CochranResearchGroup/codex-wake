@@ -24,6 +24,7 @@ Codex Wake runtime state lives under `.codex/wake/` by default. This directory i
 - Cleanup is dry-run by default and requires `--delete` before removing archived records.
 - Cleanup uses `archived_at`, then `updated_at`, then `created_at` as the retention timestamp.
 - `acks/` are derived evidence. They may be retained while debugging, but the authoritative wake outcome is the wake record.
+- Ack files are the only local proof that `UserPromptSubmit` ran after a wake prompt was submitted. Absence of an ack means hook execution is unknown, not that tmux injection failed.
 - `logs/` and `locks/` are operational artifacts and should not be treated as durable source of truth.
 
 ## Safety Rules

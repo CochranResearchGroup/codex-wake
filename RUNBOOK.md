@@ -651,3 +651,31 @@ Published and verified `v0.4.3`.
 - Recorded evidence in `docs/dev/verification/0019-2026-05-19-v0.4.3-release.md`.
 
 Best next turn option: open a hook/session visibility lane so `doctor` can better distinguish hook config on disk from hooks loaded in the active Codex TUI.
+
+## Turn 44 | 2026-05-19
+
+Opened P21 for hook session visibility.
+
+- Selected hook visibility because current diagnostics still blur `.codex/hooks.json` config state with active-TUI hook execution.
+- Added `docs/dev/plans/0021-2026-05-19-hook-session-visibility.md`.
+- Opened P21 in `ROADMAP.md`.
+- Chose ack evidence diagnostics instead of TUI transcript scraping.
+
+Best next turn option: add latest-ack runtime evidence to `hook check` and `doctor`, then validate source and installed CLI output.
+
+## Turn 45 | 2026-05-19
+
+Completed P21 hook session visibility.
+
+- Added hook runtime ack evidence.
+- Updated `codex-wake hook check` to report ack count, latest ack metadata, and active-session hook evidence state.
+- Updated `codex-wake doctor` to report the same hook runtime evidence.
+- Documented that no ack means active-session hook state is unknown, not that tmux injection failed.
+- Ran source validation: compileall and `68` unit tests.
+- Ran source CLI smoke for no-ack and observed-ack states.
+- Built and installed a local wheel in temporary virtual environments.
+- Ran installed CLI smoke for no-ack and observed-ack states.
+- Recorded evidence in `docs/dev/verification/0020-2026-05-19-hook-session-visibility.md`.
+- Closed P21 in `ROADMAP.md` and `docs/dev/plans/0021-2026-05-19-hook-session-visibility.md`.
+
+Best next turn option: commit and push P21, wait for CI, then cut `v0.4.4` if the branch remains green.

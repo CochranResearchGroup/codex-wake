@@ -7,7 +7,7 @@ import sys
 from datetime import UTC
 from pathlib import Path
 
-from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, hook_review_note, install_hook_config
+from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, hook_review_note, hook_runtime_evidence, install_hook_config
 from .process import process_exists, process_identity
 from .records import (
     WakeError,
@@ -389,7 +389,18 @@ def service_command(args: argparse.Namespace, root: Path) -> int:
     raise WakeError(f"unknown service command: {args.service_command}")
 
 
-def hook_command(args: argparse.Namespace) -> int:
+def print_hook_runtime_evidence(root: Path) -> None:
+    evidence = hook_runtime_evidence(root)
+    print(f"hook_ack_count={evidence.ack_count}")
+    print(f"hook_active_session_loaded={evidence.active_session_loaded}")
+    print(f"hook_latest_ack_path={evidence.latest_ack_path or ''}")
+    print(f"hook_latest_ack_submitted_at={evidence.latest_ack_submitted_at}")
+    print(f"hook_latest_ack_wake_id={evidence.latest_ack_wake_id}")
+    print(f"hook_latest_ack_session_id={evidence.latest_ack_session_id}")
+    print("hook_loaded_note=ack evidence proves a hook ran only after a wake prompt was submitted")
+
+
+def hook_command(args: argparse.Namespace, root: Path) -> int:
     repo_root = (args.repo_root or Path.cwd()).resolve()
     if args.hook_command == "install":
         path = install_hook_config(repo_root, args.hook_command_text)
@@ -406,6 +417,7 @@ def hook_command(args: argparse.Namespace) -> int:
         print(f"command={check.command}")
         print(f"message={check.message}")
         print(f"trust={hook_review_note()}")
+        print_hook_runtime_evidence(root)
         return 0 if check.installed else 1
     raise WakeError(f"unknown hook command: {args.hook_command}")
 
@@ -433,6 +445,7 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     print(f"hook_config_valid_json={str(hook_check.valid_json).lower()}")
     print(f"hook_config_installed={str(hook_check.installed).lower()}")
     print(f"hook_command={hook_check.command}")
+    print_hook_runtime_evidence(root)
     print(f"service_name={config.name}")
     print(f"service_active={active}")
     print(f"service_enabled={enabled}")
@@ -471,7 +484,7 @@ def run(argv: list[str] | None = None) -> int:
     if args.command == "service":
         return service_command(args, root)
     if args.command == "hook":
-        return hook_command(args)
+        return hook_command(args, root)
     if args.command == "doctor":
         return doctor_command(args, root)
     raise WakeError(f"unknown command: {args.command}")

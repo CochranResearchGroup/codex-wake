@@ -53,6 +53,11 @@ codex-wake hook install
 codex-wake hook check
 ```
 
+`hook check` verifies the repo-local config and reports ack evidence from
+`.codex/wake/acks/`. If no ack exists, the active TUI hook-loaded state is
+reported as `unknown_without_ack`; that is not proof that tmux injection failed.
+Codex may show the hook source under `UserPromptHooks` during `/hooks` review.
+
 This writes or checks this `.codex/hooks.json` shape:
 
 ```json
@@ -157,6 +162,9 @@ Run a readiness report:
 ```bash
 codex-wake doctor
 ```
+
+`doctor` prints the same hook ack evidence as `hook check`, including the latest
+ack wake id, submitted timestamp, and session id when available.
 
 Inspect and manage wakes:
 

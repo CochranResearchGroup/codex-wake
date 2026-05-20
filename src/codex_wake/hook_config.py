@@ -28,6 +28,16 @@ class HookCheck:
     message: str
 
 
+@dataclass(frozen=True)
+class HookRuntimeEvidence:
+    ack_count: int
+    active_session_loaded: str
+    latest_ack_path: Path | None
+    latest_ack_submitted_at: str
+    latest_ack_wake_id: str
+    latest_ack_session_id: str
+
+
 def hook_review_note() -> str:
     return HOOK_REVIEW_NOTE
 
@@ -113,4 +123,43 @@ def check_hook_config(repo_root: Path, command: str = DEFAULT_HOOK_COMMAND) -> H
         installed=installed,
         command=command,
         message="installed" if installed else "expected hook command missing",
+    )
+
+
+def hook_runtime_evidence(wake_root: Path) -> HookRuntimeEvidence:
+    ack_dir = wake_root / "acks"
+    ack_paths = sorted(ack_dir.glob("*.submitted")) if ack_dir.exists() else []
+    latest_path: Path | None = None
+    latest_data: dict[str, Any] = {}
+    latest_sort_key = ""
+    for path in ack_paths:
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            data = {}
+        submitted_at = data.get("submitted_at")
+        sort_key = submitted_at if isinstance(submitted_at, str) else ""
+        if latest_path is None or sort_key >= latest_sort_key:
+            latest_path = path
+            latest_data = data if isinstance(data, dict) else {}
+            latest_sort_key = sort_key
+    if latest_path is None:
+        return HookRuntimeEvidence(
+            ack_count=0,
+            active_session_loaded="unknown_without_ack",
+            latest_ack_path=None,
+            latest_ack_submitted_at="",
+            latest_ack_wake_id="",
+            latest_ack_session_id="",
+        )
+    submitted_at = latest_data.get("submitted_at")
+    wake_id = latest_data.get("wake_id")
+    session_id = latest_data.get("session_id")
+    return HookRuntimeEvidence(
+        ack_count=len(ack_paths),
+        active_session_loaded="observed_ack",
+        latest_ack_path=latest_path,
+        latest_ack_submitted_at=submitted_at if isinstance(submitted_at, str) else "",
+        latest_ack_wake_id=wake_id if isinstance(wake_id, str) else "",
+        latest_ack_session_id=session_id if isinstance(session_id, str) else "",
     )

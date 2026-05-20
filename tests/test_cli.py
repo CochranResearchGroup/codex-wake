@@ -339,6 +339,8 @@ class CliTests(unittest.TestCase):
             self.assertIn("installed=true", stdout.getvalue())
             self.assertIn("/hooks review", stdout.getvalue())
             self.assertIn("does not list", stdout.getvalue())
+            self.assertIn("hook_ack_count=0", stdout.getvalue())
+            self.assertIn("hook_active_session_loaded=unknown_without_ack", stdout.getvalue())
 
     def test_doctor_reports_readiness_fields(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -356,8 +358,43 @@ class CliTests(unittest.TestCase):
             self.assertIn(f"wake_root={root}", output)
             self.assertIn("codex_waked=/usr/bin/codex-waked", output)
             self.assertIn("hook_config_installed=false", output)
+            self.assertIn("hook_active_session_loaded=unknown_without_ack", output)
             self.assertIn("service_active=inactive", output)
             self.assertIn("restart or resume", output)
+
+    def test_hook_check_reports_latest_ack_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / ".codex" / "wake"
+            ack_dir = root / "acks"
+            ack_dir.mkdir(parents=True)
+            (ack_dir / "wake_seen.submitted").write_text(
+                json.dumps(
+                    {
+                        "wake_id": "wake_seen",
+                        "submitted_at": "2026-05-18T21:30:00Z",
+                        "session_id": "session_seen",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(["--wake-root", str(root), "hook", "install", "--repo-root", str(repo)])
+            self.assertEqual(code, 0, stderr.getvalue())
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(["--wake-root", str(root), "hook", "check", "--repo-root", str(repo)])
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            output = stdout.getvalue()
+            self.assertIn("hook_ack_count=1", output)
+            self.assertIn("hook_active_session_loaded=observed_ack", output)
+            self.assertIn("hook_latest_ack_wake_id=wake_seen", output)
+            self.assertIn("hook_latest_ack_session_id=session_seen", output)
 
 
 if __name__ == "__main__":

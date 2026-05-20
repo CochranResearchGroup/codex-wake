@@ -250,3 +250,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0018-2026-05-19-runtime-retention-cleanup.md`. `codex-wake cleanup` now previews old archived records by default, deletes them only with `--delete`, and can archive terminal records first with `--archive-terminal`.
 
 Plan: [Runtime Retention Cleanup](docs/dev/plans/0020-2026-05-19-runtime-retention-cleanup.md)
+
+## P21 | Hook Session Visibility
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0020-2026-05-19-hook-session-visibility.md`. `hook check` and `doctor` now report hook ack evidence and explicitly mark active-session hook state as unknown until an ack is observed.
+
+Plan: [Hook Session Visibility](docs/dev/plans/0021-2026-05-19-hook-session-visibility.md)
