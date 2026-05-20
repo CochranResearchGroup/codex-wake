@@ -625,3 +625,13 @@ Completed P20 runtime retention cleanup.
 - Closed P20 in `ROADMAP.md` and `docs/dev/plans/0020-2026-05-19-runtime-retention-cleanup.md`.
 
 Best next turn option: commit and push P20, wait for CI, then cut `v0.4.3` if the branch remains green.
+
+## Turn 42 | 2026-05-19
+
+Started the `v0.4.3` release for P20 runtime retention cleanup.
+
+- Selected release because P20 adds an installed operator command for runtime state cleanup.
+- Bumped package version to `0.4.3`.
+- Added `docs/releases/v0.4.3.md`.
+
+Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.3` if validation passes.
