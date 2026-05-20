@@ -282,3 +282,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0026-2026-05-20-status-json.md`. `codex-wake status` and `codex-wake status --json` now summarize wake counts by status, predicate type, and target transport.
 
 Plan: [Status JSON Summary Surface](docs/dev/plans/0024-2026-05-20-status-json.md)
+
+## P25 | Status Summary Dogfood
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0028-2026-05-20-status-dogfood.md`. Bounded dogfood confirmed `status --json` exposes pending, firing, and archived summary movement for a short repo-local wake without live pane injection.
+
+Plan: [Status Summary Dogfood](docs/dev/plans/0025-2026-05-20-status-dogfood.md)

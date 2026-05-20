@@ -858,3 +858,34 @@ Published and verified `v0.4.7`.
 - Recorded evidence in `docs/dev/verification/0027-2026-05-20-v0.4.7-release.md`.
 
 Best next turn option: open P25 for bounded self-dogfood using `status --json` plus a short wake trigger, then record whether the runtime summary helps supervise the wake lifecycle.
+
+## Turn 60 | 2026-05-20
+
+Opened P25 for bounded `status --json` dogfood.
+
+- Added `docs/dev/plans/0025-2026-05-20-status-dogfood.md`.
+- Marked P25 active in `ROADMAP.md`.
+- Observed that `/home/ecochran76/.local/bin/codex-wake` did not yet expose `status`, so runtime refresh is required before dogfood.
+- Confirmed the active shell has `TMUX_PANE=%202`.
+- Confirmed `codex-wake-codex-wake.service` exists but is inactive.
+
+Best next turn option: refresh the installed runtime to `v0.4.7`, register a short dogfood wake, use `status --json` to supervise it, and record wake/ack evidence.
+
+## Turn 61 | 2026-05-20
+
+Completed bounded `status --json` dogfood.
+
+- Refreshed the installed runtime to public tag `v0.4.7`.
+- Confirmed installed `codex-wake` exposes `status`.
+- Captured baseline `status --json` with `active_total=0`.
+- Registered dogfood wake `wake_20260520_174316_9be6`.
+- Confirmed pending `status --json` reported `active_total=1`, `pending=1`, and `earliest_next_attempt_at=2026-05-20T17:43:36Z`.
+- Ran `codex-waked --once --no-dispatch` after the due time to avoid live pane injection during the turn.
+- Confirmed daemon result `checked=1 fired=1 failed=0 pending=0 dispatched=0 submitted=0 requeued=0`.
+- Confirmed firing `status --json` reported `pending=0` and `firing=1`.
+- Cancelled and archived the dogfood wake.
+- Confirmed final `status --json` reported `active_total=0`, `archived=1`, and no earliest next attempt.
+- Recorded evidence in `docs/dev/verification/0028-2026-05-20-status-dogfood.md`.
+- Closed P25 in `ROADMAP.md` and `docs/dev/plans/0025-2026-05-20-status-dogfood.md`.
+
+Best next turn option: commit and push P25, wait for CI, then open P26 for a controlled live-dispatch dogfood or for cleanup UX around old terminal wake records.
