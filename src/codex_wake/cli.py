@@ -135,6 +135,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor = subparsers.add_parser("doctor", help="report Codex Wake readiness for this repo")
     doctor.add_argument("--hook-command", default=DEFAULT_HOOK_COMMAND, help="expected UserPromptSubmit hook command")
+    doctor.add_argument("--json", action="store_true", dest="as_json")
     add_service_options(doctor)
 
     return parser
@@ -443,7 +444,7 @@ def hook_command(args: argparse.Namespace, root: Path) -> int:
     raise WakeError(f"unknown hook command: {args.hook_command}")
 
 
-def doctor_command(args: argparse.Namespace, root: Path) -> int:
+def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
     repo_root = (args.repo_root or Path.cwd()).resolve()
     hook_check = check_hook_config(repo_root, args.hook_command)
     config = service_config_for_args(args, root)
@@ -455,24 +456,81 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
         active, enabled = service_status(config)
     except Exception as exc:
         active, enabled = "unknown", f"unknown ({exc})"
-    print(f"repo_root={repo_root}")
-    print(f"wake_root={root}")
-    print(f"codex_wake={codex_wake or 'missing'}")
-    print(f"codex_waked={codex_waked or 'missing'}")
-    print(f"codex_wake_hook={codex_wake_hook or 'missing'}")
-    print(f"tmux={tmux or 'missing'}")
-    print(f"hook_config={hook_check.path}")
-    print(f"hook_config_exists={str(hook_check.exists).lower()}")
-    print(f"hook_config_valid_json={str(hook_check.valid_json).lower()}")
-    print(f"hook_config_installed={str(hook_check.installed).lower()}")
-    print(f"hook_command={hook_check.command}")
-    print_hook_runtime_evidence(root)
-    print(f"service_name={config.name}")
-    print(f"service_active={active}")
-    print(f"service_enabled={enabled}")
-    print(f"service_unit={config.unit_path}")
-    print(f"service_log={config.log_path}")
-    print(f"trust={hook_review_note()}")
+    hook_evidence = hook_runtime_evidence(root)
+    return {
+        "repo_root": str(repo_root),
+        "wake_root": str(root),
+        "commands": {
+            "codex_wake": codex_wake or "",
+            "codex_waked": codex_waked or "",
+            "codex_wake_hook": codex_wake_hook or "",
+            "tmux": tmux or "",
+        },
+        "hook_config": {
+            "path": str(hook_check.path),
+            "exists": hook_check.exists,
+            "valid_json": hook_check.valid_json,
+            "installed": hook_check.installed,
+            "command": hook_check.command,
+            "message": hook_check.message,
+        },
+        "hook_runtime": {
+            "ack_count": hook_evidence.ack_count,
+            "active_session_loaded": hook_evidence.active_session_loaded,
+            "latest_ack_path": str(hook_evidence.latest_ack_path) if hook_evidence.latest_ack_path else "",
+            "latest_ack_submitted_at": hook_evidence.latest_ack_submitted_at,
+            "latest_ack_wake_id": hook_evidence.latest_ack_wake_id,
+            "latest_ack_session_id": hook_evidence.latest_ack_session_id,
+            "loaded_note": "ack evidence proves a hook ran only after a wake prompt was submitted",
+        },
+        "service": {
+            "name": config.name,
+            "active": active,
+            "enabled": enabled,
+            "unit": str(config.unit_path),
+            "log": str(config.log_path),
+        },
+        "trust": hook_review_note(),
+    }
+
+
+def doctor_command(args: argparse.Namespace, root: Path) -> int:
+    summary = doctor_summary(args, root)
+    if args.as_json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+    commands = summary["commands"]
+    hook_config = summary["hook_config"]
+    hook_runtime = summary["hook_runtime"]
+    service = summary["service"]
+    assert isinstance(commands, dict)
+    assert isinstance(hook_config, dict)
+    assert isinstance(hook_runtime, dict)
+    assert isinstance(service, dict)
+    print(f"repo_root={summary['repo_root']}")
+    print(f"wake_root={summary['wake_root']}")
+    print(f"codex_wake={commands['codex_wake'] or 'missing'}")
+    print(f"codex_waked={commands['codex_waked'] or 'missing'}")
+    print(f"codex_wake_hook={commands['codex_wake_hook'] or 'missing'}")
+    print(f"tmux={commands['tmux'] or 'missing'}")
+    print(f"hook_config={hook_config['path']}")
+    print(f"hook_config_exists={str(hook_config['exists']).lower()}")
+    print(f"hook_config_valid_json={str(hook_config['valid_json']).lower()}")
+    print(f"hook_config_installed={str(hook_config['installed']).lower()}")
+    print(f"hook_command={hook_config['command']}")
+    print(f"hook_ack_count={hook_runtime['ack_count']}")
+    print(f"hook_active_session_loaded={hook_runtime['active_session_loaded']}")
+    print(f"hook_latest_ack_path={hook_runtime['latest_ack_path']}")
+    print(f"hook_latest_ack_submitted_at={hook_runtime['latest_ack_submitted_at']}")
+    print(f"hook_latest_ack_wake_id={hook_runtime['latest_ack_wake_id']}")
+    print(f"hook_latest_ack_session_id={hook_runtime['latest_ack_session_id']}")
+    print(f"hook_loaded_note={hook_runtime['loaded_note']}")
+    print(f"service_name={service['name']}")
+    print(f"service_active={service['active']}")
+    print(f"service_enabled={service['enabled']}")
+    print(f"service_unit={service['unit']}")
+    print(f"service_log={service['log']}")
+    print(f"trust={summary['trust']}")
     return 0
 
 

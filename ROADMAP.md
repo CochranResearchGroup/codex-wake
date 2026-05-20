@@ -266,3 +266,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0022-2026-05-19-wake-record-schema-versioning.md`. Schema version `1` is now documented as an additive optional-field contract, and `codex-wake schema` exposes the compatibility policy.
 
 Plan: [Wake Record Schema Versioning](docs/dev/plans/0022-2026-05-19-wake-record-schema-versioning.md)
+
+## P23 | Doctor JSON Inspection Surface
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0024-2026-05-20-doctor-json.md`. `codex-wake doctor --json` now emits structured command, tmux, hook config, hook runtime evidence, service, and trust fields while preserving text doctor output.
+
+Plan: [Doctor JSON Inspection Surface](docs/dev/plans/0023-2026-05-20-doctor-json.md)

@@ -377,6 +377,42 @@ class CliTests(unittest.TestCase):
             self.assertIn("service_active=inactive", output)
             self.assertIn("restart or resume", output)
 
+    def test_doctor_json_reports_readiness_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / ".codex" / "wake"
+            ack_dir = root / "acks"
+            ack_dir.mkdir(parents=True)
+            (ack_dir / "wake_seen.submitted").write_text(
+                json.dumps(
+                    {
+                        "wake_id": "wake_seen",
+                        "submitted_at": "2026-05-20T03:30:00Z",
+                        "session_id": "session_seen",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch("codex_wake.cli.service_status", return_value=("active", "enabled")):
+                with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
+                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                        code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            data = json.loads(stdout.getvalue())
+            self.assertEqual(data["repo_root"], str(repo))
+            self.assertEqual(data["wake_root"], str(root))
+            self.assertEqual(data["commands"]["codex_waked"], "/usr/bin/codex-waked")
+            self.assertEqual(data["commands"]["tmux"], "/usr/bin/tmux")
+            self.assertFalse(data["hook_config"]["installed"])
+            self.assertEqual(data["hook_runtime"]["ack_count"], 1)
+            self.assertEqual(data["hook_runtime"]["active_session_loaded"], "observed_ack")
+            self.assertEqual(data["hook_runtime"]["latest_ack_wake_id"], "wake_seen")
+            self.assertEqual(data["service"]["active"], "active")
+            self.assertIn("restart or resume", data["trust"])
+
     def test_hook_check_reports_latest_ack_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)

@@ -758,3 +758,30 @@ Published and verified `v0.4.5`.
 - Recorded evidence in `docs/dev/verification/0023-2026-05-19-v0.4.5-release.md`.
 
 Best next turn option: open P23 for a user-facing `doctor --json` or `list --json` inspection surface so wake state can be consumed reliably by automation.
+
+## Turn 52 | 2026-05-20
+
+Opened P23 for a machine-readable doctor inspection surface.
+
+- Selected `doctor --json` first because runtime readiness already aggregates command, tmux, hook, ack, and service state.
+- Added `docs/dev/plans/0023-2026-05-20-doctor-json.md`.
+- Marked P23 active in `ROADMAP.md`.
+
+Best next turn option: implement `doctor --json` over the same structured summary as text `doctor`, then validate source and installed CLI output.
+
+## Turn 53 | 2026-05-20
+
+Completed P23 doctor JSON inspection.
+
+- Added `doctor --json`.
+- Factored doctor data collection into a shared structured summary for text and JSON output.
+- Preserved existing text `doctor` keys.
+- Added tests for JSON shape and text compatibility.
+- Updated README usage.
+- Ran source validation: compileall and `71` unit tests.
+- Built and installed a local working-tree wheel.
+- Ran installed CLI smokes for `doctor` and `doctor --json`, including a venv-first `PATH` check for command path fields.
+- Recorded evidence in `docs/dev/verification/0024-2026-05-20-doctor-json.md`.
+- Closed P23 in `ROADMAP.md` and `docs/dev/plans/0023-2026-05-20-doctor-json.md`.
+
+Best next turn option: commit and push P23, wait for CI, then cut `v0.4.6` if the branch remains green.

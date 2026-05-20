@@ -161,10 +161,13 @@ Run a readiness report:
 
 ```bash
 codex-wake doctor
+codex-wake doctor --json
 ```
 
 `doctor` prints the same hook ack evidence as `hook check`, including the latest
-ack wake id, submitted timestamp, and session id when available.
+ack wake id, submitted timestamp, and session id when available. Use
+`doctor --json` when automation needs command, tmux, hook, ack, and service
+readiness without parsing text output.
 
 Inspect and manage wakes:
 
