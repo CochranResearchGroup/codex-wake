@@ -147,6 +147,38 @@ class CliTests(unittest.TestCase):
             self.assertIn("deleted", deleted)
             self.assertFalse(archived_path.exists())
 
+    def test_cleanup_json_reports_archive_and_delete_candidates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(["after", "1m", "--", "Cleanup json"], root)
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            code, _, err = self.run_cli(["cancel", wake_id], root)
+            self.assertEqual(code, 0, err)
+
+            code, archive_json, err = self.run_cli(["cleanup", "--archive-terminal", "--older-than", "30d", "--json"], root)
+            self.assertEqual(code, 0, err)
+            archive_data = json.loads(archive_json)
+            self.assertEqual(archive_data["mode"], "dry-run")
+            self.assertTrue(archive_data["archive_terminal"])
+            self.assertEqual(archive_data["archived_terminal_count"], 1)
+            self.assertEqual(archive_data["archived_terminal"][0]["wake_id"], wake_id)
+            archived_path = root / "archive" / f"{wake_id}.json"
+            record = json.loads(archived_path.read_text())
+            record["archived_at"] = "2026-05-01T00:00:00Z"
+            record["updated_at"] = "2026-05-01T00:00:00Z"
+            archived_path.write_text(json.dumps(record), encoding="utf-8")
+
+            with patch("codex_wake.records.utc_now", return_value=datetime(2026, 5, 19, tzinfo=UTC)):
+                code, delete_json, err = self.run_cli(["cleanup", "--older-than", "7d", "--delete", "--json"], root)
+            self.assertEqual(code, 0, err)
+            delete_data = json.loads(delete_json)
+            self.assertEqual(delete_data["mode"], "delete")
+            self.assertEqual(delete_data["matched_count"], 1)
+            self.assertEqual(delete_data["matched"][0]["wake_id"], wake_id)
+            self.assertTrue(delete_data["matched"][0]["deleted"])
+            self.assertFalse(archived_path.exists())
+
     def test_cleanup_can_archive_terminal_records_first(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

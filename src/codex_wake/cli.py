@@ -104,6 +104,7 @@ def build_parser() -> argparse.ArgumentParser:
     cleanup.add_argument("--older-than", default="30d", help="archive retention window; defaults to 30d")
     cleanup.add_argument("--delete", action="store_true", help="delete matching archived records; default is dry-run")
     cleanup.add_argument("--archive-terminal", action="store_true", help="archive terminal records before evaluating cleanup")
+    cleanup.add_argument("--json", action="store_true", dest="as_json")
 
     schema = subparsers.add_parser("schema", help="show wake record schema version and compatibility policy")
     schema.add_argument("--json", action="store_true", dest="as_json")
@@ -364,9 +365,35 @@ def cleanup(args: argparse.Namespace, root: Path) -> int:
     archived = []
     if args.archive_terminal:
         archived = archive_terminal_records(root)
-        for path in archived:
-            print(f"archived {path.stem} {path}")
     results = cleanup_archived_records(root, older_than=older_than, delete=args.delete)
+    if args.as_json:
+        print(
+            json.dumps(
+                {
+                    "wake_root": str(root),
+                    "mode": "delete" if args.delete else "dry-run",
+                    "older_than": args.older_than,
+                    "archive_terminal": bool(args.archive_terminal),
+                    "archived_terminal_count": len(archived),
+                    "archived_terminal": [{"wake_id": path.stem, "path": str(path)} for path in archived],
+                    "matched_count": len(results),
+                    "matched": [
+                        {
+                            "wake_id": result.wake_id,
+                            "path": str(result.path),
+                            "retention_at": result.retention_at,
+                            "deleted": result.deleted,
+                        }
+                        for result in results
+                    ],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+    for path in archived:
+        print(f"archived {path.stem} {path}")
     action = "deleted" if args.delete else "would-delete"
     for result in results:
         print(f"{action} {result.wake_id} {result.path} retention_at={result.retention_at}")

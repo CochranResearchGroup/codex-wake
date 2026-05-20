@@ -889,3 +889,30 @@ Completed bounded `status --json` dogfood.
 - Closed P25 in `ROADMAP.md` and `docs/dev/plans/0025-2026-05-20-status-dogfood.md`.
 
 Best next turn option: commit and push P25, wait for CI, then open P26 for a controlled live-dispatch dogfood or for cleanup UX around old terminal wake records.
+
+## Turn 62 | 2026-05-20
+
+Opened P26 for cleanup JSON output.
+
+- Selected cleanup UX before live-dispatch dogfood because P25 showed historical terminal records cluttering `status --json`.
+- Added `docs/dev/plans/0026-2026-05-20-cleanup-json.md`.
+- Marked P26 active in `ROADMAP.md`.
+
+Best next turn option: implement `cleanup --json` without changing dry-run defaults, then validate source and installed CLI cleanup output.
+
+## Turn 63 | 2026-05-20
+
+Completed P26 cleanup JSON output.
+
+- Added `codex-wake cleanup --json`.
+- Preserved existing text cleanup output and dry-run default behavior.
+- JSON output reports mode, retention window, terminal archives, matched archived records, deletion state, and counts.
+- Updated README cleanup usage.
+- Added cleanup JSON tests.
+- Ran source validation: compileall and `74` unit tests.
+- Built and installed a local working-tree wheel.
+- Ran installed CLI smoke for `cleanup --archive-terminal --json`.
+- Recorded evidence in `docs/dev/verification/0029-2026-05-20-cleanup-json.md`.
+- Closed P26 in `ROADMAP.md` and `docs/dev/plans/0026-2026-05-20-cleanup-json.md`.
+
+Best next turn option: commit and push P26, wait for CI, then cut `v0.4.8` if the branch remains green.

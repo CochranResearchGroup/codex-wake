@@ -290,3 +290,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0028-2026-05-20-status-dogfood.md`. Bounded dogfood confirmed `status --json` exposes pending, firing, and archived summary movement for a short repo-local wake without live pane injection.
 
 Plan: [Status Summary Dogfood](docs/dev/plans/0025-2026-05-20-status-dogfood.md)
+
+## P26 | Cleanup JSON Surface
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0029-2026-05-20-cleanup-json.md`. `codex-wake cleanup --json` now reports cleanup mode, terminal archives, matched archived records, deletion state, and counts without changing dry-run defaults.
+
+Plan: [Cleanup JSON Surface](docs/dev/plans/0026-2026-05-20-cleanup-json.md)
