@@ -689,3 +689,19 @@ Started the `v0.4.4` release for P21 hook session visibility.
 - Added `docs/releases/v0.4.4.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.4` if validation passes.
+
+## Turn 47 | 2026-05-19
+
+Published and verified `v0.4.4`.
+
+- Ran source validation: compileall and `68` unit tests.
+- Built and installed the local wheel in temporary virtual environments.
+- Smoked installed `codex-wake`, `codex-waked`, and `codex-wake-hook`.
+- Smoked installed-wheel hook diagnostics for no-ack and observed-ack states.
+- Committed `a357c0b`, tagged and pushed `v0.4.4`, and published the GitHub release.
+- Verified clean public tag installation with isolated `uv` tool/cache directories.
+- Confirmed clean public tag hook diagnostics output.
+- Confirmed upstream CI run `26137262586` passed on the release commit.
+- Recorded evidence in `docs/dev/verification/0021-2026-05-19-v0.4.4-release.md`.
+
+Best next turn option: open a wake-record schema/versioning lane to document compatibility for optional predicate and diagnostic fields before adding more runtime metadata.
