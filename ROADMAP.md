@@ -306,3 +306,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0031-2026-05-20-live-dispatch-dogfood.md`. The installed daemon fired one live tmux dispatch, observed the `UserPromptSubmit` hook ack, moved the wake to `submitted`, and the dogfood wake was archived with `active_total=0`.
 
 Plan: [Controlled Live Dispatch Dogfood](docs/dev/plans/0027-2026-05-20-live-dispatch-dogfood.md)
+
+## P28 | Installed Runtime State Tidy Dogfood
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0032-2026-05-20-installed-runtime-state-tidy-dogfood.md`. The repo-local wake root is tidy after archiving four terminal records with installed `cleanup --archive-terminal --json`; no archived evidence was deleted.
+
+Plan: [Installed Runtime State Tidy Dogfood](docs/dev/plans/0028-2026-05-20-installed-runtime-state-tidy-dogfood.md)

@@ -980,3 +980,32 @@ Completed the P27 live-dispatch dogfood.
 - Closed P27 in `ROADMAP.md` and `docs/dev/plans/0027-2026-05-20-live-dispatch-dogfood.md`.
 
 Best next turn option: commit and push P27, wait for CI, then open the next roadmap lane for either installed-runtime retention cleanup or app-server-backed dispatch design.
+
+## Turn 69 | 2026-05-20
+
+Opened P28 for installed runtime state tidy dogfood.
+
+- Re-read planning, runtime-state, and validation policies.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Captured baseline `status --json`: `active_total=0`, `terminal_total=4`, `archived_total=2`, and no `earliest_next_attempt_at`.
+- Added `docs/dev/plans/0028-2026-05-20-installed-runtime-state-tidy-dogfood.md`.
+- Marked P28 active in `ROADMAP.md`.
+
+Best next turn option: run installed `codex-wake --wake-root .codex/wake cleanup --archive-terminal --json`, verify terminal records were archived without deletion, then close P28 if the current cleanup surface is sufficient.
+
+## Turn 70 | 2026-05-20
+
+Completed P28 installed runtime state tidy dogfood.
+
+- Attempted installed `codex-wake --wake-root .codex/wake cleanup --archive-terminal --json`.
+- Found the user-scoped installed tool was stale at `codex-wake v0.4.7`, which rejected `--json`.
+- Refreshed the installed tool from public tag `v0.4.8` with `uv tool install --force`.
+- Verified installed cleanup help now includes `--json`.
+- Ran `codex-wake --wake-root .codex/wake cleanup --archive-terminal --json`.
+- Archived four terminal records: `wake_20260519_030204_9085`, `wake_20260519_031211_5457`, `wake_20260519_033023_e611`, and `wake_20260519_104518_d191`.
+- Did not pass `--delete`; no archived records were deleted.
+- Confirmed final `status --json` reports `active_total=0`, `terminal_total=0`, `archived_total=6`, and no `earliest_next_attempt_at`.
+- Recorded evidence in `docs/dev/verification/0032-2026-05-20-installed-runtime-state-tidy-dogfood.md`.
+- Closed P28 in `ROADMAP.md` and `docs/dev/plans/0028-2026-05-20-installed-runtime-state-tidy-dogfood.md`.
+
+Best next turn option: commit and push P28, wait for CI, then open the app-server-backed dispatch design lane.
