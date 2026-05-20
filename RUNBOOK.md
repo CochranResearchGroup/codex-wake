@@ -835,3 +835,12 @@ Completed P24 status JSON summary.
 - Closed P24 in `ROADMAP.md` and `docs/dev/plans/0024-2026-05-20-status-json.md`.
 
 Best next turn option: commit and push P24, wait for CI, then cut `v0.4.7` if the branch remains green.
+
+## Turn 58 | 2026-05-20
+
+Started the `v0.4.7` release for P24 status JSON summaries.
+
+- Bumped package version to `0.4.7`.
+- Added `docs/releases/v0.4.7.md`.
+
+Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.7` if validation passes.
