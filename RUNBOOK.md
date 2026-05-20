@@ -925,3 +925,17 @@ Started the `v0.4.8` release for P26 cleanup JSON output.
 - Added `docs/releases/v0.4.8.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.8` if validation passes.
+
+## Turn 65 | 2026-05-20
+
+Published and verified `v0.4.8`.
+
+- Ran source validation: compileall and `74` unit tests.
+- Built `codex_wake-0.4.8.tar.gz` and `codex_wake-0.4.8-py3-none-any.whl`.
+- Ran installed-wheel smoke for `cleanup --archive-terminal --json`.
+- Committed `cebb92c`, tagged and pushed `v0.4.8`, and published the GitHub release.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.8`.
+- Verified public CI run `26183703882` passed.
+- Recorded evidence in `docs/dev/verification/0030-2026-05-20-v0.4.8-release.md`.
+
+Best next turn option: open P27 for a controlled live-dispatch dogfood with preflight checks for service state, active hook ack baseline, and stale pane locks.
