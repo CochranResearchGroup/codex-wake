@@ -844,3 +844,17 @@ Started the `v0.4.7` release for P24 status JSON summaries.
 - Added `docs/releases/v0.4.7.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.7` if validation passes.
+
+## Turn 59 | 2026-05-20
+
+Published and verified `v0.4.7`.
+
+- Ran source validation: compileall and `73` unit tests.
+- Built `codex_wake-0.4.7.tar.gz` and `codex_wake-0.4.7-py3-none-any.whl`.
+- Ran installed-wheel smokes for `status` and `status --json`.
+- Committed `5aa3f61`, tagged and pushed `v0.4.7`, and published the GitHub release.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.7`.
+- Verified public CI run `26179270632` passed.
+- Recorded evidence in `docs/dev/verification/0027-2026-05-20-v0.4.7-release.md`.
+
+Best next turn option: open P25 for bounded self-dogfood using `status --json` plus a short wake trigger, then record whether the runtime summary helps supervise the wake lifecycle.
