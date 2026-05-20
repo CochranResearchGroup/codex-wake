@@ -735,3 +735,12 @@ Completed P22 wake record schema versioning.
 - Closed P22 in `ROADMAP.md` and `docs/dev/plans/0022-2026-05-19-wake-record-schema-versioning.md`.
 
 Best next turn option: commit and push P22, wait for CI, then cut `v0.4.5` if the branch remains green.
+
+## Turn 50 | 2026-05-19
+
+Started the `v0.4.5` release for P22 wake record schema versioning.
+
+- Bumped package version to `0.4.5`.
+- Added `docs/releases/v0.4.5.md`.
+
+Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.5` if validation passes.
