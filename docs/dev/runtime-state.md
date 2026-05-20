@@ -2,6 +2,13 @@
 
 Codex Wake runtime state lives under `.codex/wake/` by default. This directory is ignored by git and is not a source-controlled product artifact.
 
+Wake records use the schema contract documented in [Wake Record Schema](wake-record-schema.md). The installed CLI reports the active schema with:
+
+```bash
+codex-wake schema
+codex-wake schema --json
+```
+
 ## Directory Classes
 
 - `pending/`: authoritative active wake records awaiting predicate match.

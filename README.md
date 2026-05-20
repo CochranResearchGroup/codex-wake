@@ -177,6 +177,8 @@ codex-wake archive <wake-id>
 codex-wake archive --all-terminal
 codex-wake cleanup --older-than 30d
 codex-wake cleanup --older-than 30d --delete
+codex-wake schema
+codex-wake schema --json
 ```
 
 ## Runtime State
@@ -202,6 +204,10 @@ targets records already under `.codex/wake/archive/`. Add `--delete` to remove
 matching archived records, and `--archive-terminal` to archive terminal records
 before cleanup evaluation. Active `pending/` and `firing/` records are never
 deleted by cleanup.
+
+Wake records currently use schema version `1`. The compatibility policy is
+additive optional fields; inspect it with `codex-wake schema` or read
+`docs/dev/wake-record-schema.md`.
 
 ## Current Limits
 

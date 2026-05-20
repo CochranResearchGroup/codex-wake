@@ -40,6 +40,21 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["prompt"], "Continue later")
             self.assertEqual(data["status"], "pending")
 
+    def test_schema_command_reports_version_and_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(["schema"], root)
+            self.assertEqual(code, 0, err)
+            self.assertIn("schema_version=1", out)
+            self.assertIn("compatibility=additive_optional_fields", out)
+            self.assertIn("schema_doc=docs/dev/wake-record-schema.md", out)
+
+            code, json_out, err = self.run_cli(["schema", "--json"], root)
+            self.assertEqual(code, 0, err)
+            data = json.loads(json_out)
+            self.assertEqual(data["schema_version"], 1)
+            self.assertIn("file_changed", data["predicate_types"])
+
     def test_file_show_list_and_cancel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

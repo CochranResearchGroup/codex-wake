@@ -11,9 +11,13 @@ from typing import Any
 
 
 SCHEMA_VERSION = 1
+SCHEMA_COMPATIBILITY = "additive_optional_fields"
+SCHEMA_DOC = "docs/dev/wake-record-schema.md"
 ACTIVE_STATUS_DIRS = ("pending", "firing", "submitted", "failed", "cancelled", "expired")
 TERMINAL_STATUSES = {"submitted", "failed", "cancelled", "expired"}
 VALID_STATUSES = set(ACTIVE_STATUS_DIRS) | {"archived"}
+PREDICATE_TYPES = ("not_before", "file_exists", "file_changed", "process_done")
+TARGET_TRANSPORTS = ("tmux", "app-server")
 
 
 class WakeError(ValueError):
@@ -175,6 +179,51 @@ def build_record(
         "ack_timeout_seconds": 30,
         "next_attempt_at": predicate.get("due_at", timestamp),
         "events": [make_event("created", "Wake record created", current)],
+    }
+
+
+def schema_summary() -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "compatibility": SCHEMA_COMPATIBILITY,
+        "schema_doc": SCHEMA_DOC,
+        "active_statuses": list(ACTIVE_STATUS_DIRS[:2]),
+        "terminal_statuses": sorted(TERMINAL_STATUSES),
+        "archived_status": "archived",
+        "predicate_types": list(PREDICATE_TYPES),
+        "target_transports": list(TARGET_TRANSPORTS),
+        "required_fields": [
+            "schema_version",
+            "id",
+            "created_at",
+            "updated_at",
+            "cwd",
+            "target",
+            "predicate",
+            "prompt",
+            "status",
+            "attempts",
+            "max_attempts",
+            "ack_timeout_seconds",
+            "next_attempt_at",
+            "events",
+        ],
+        "optional_fields": [
+            "context_paths",
+            "evidence_paths",
+            "last_error",
+            "previous_status",
+            "archived_at",
+            "dispatch_result",
+        ],
+        "schema_bump_required_for": [
+            "rename_or_remove_required_fields",
+            "incompatible_field_meaning_change",
+            "make_optional_field_required_for_existing_records",
+            "incompatible_status_or_directory_change",
+            "incompatible_target_transport_change",
+            "incompatible_predicate_semantics_change",
+        ],
     }
 
 

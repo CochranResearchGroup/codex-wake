@@ -25,6 +25,7 @@ from .records import (
     normalize_prompt,
     parse_duration,
     parse_timestamp,
+    schema_summary,
     utc_now,
     write_record,
 )
@@ -99,6 +100,9 @@ def build_parser() -> argparse.ArgumentParser:
     cleanup.add_argument("--older-than", default="30d", help="archive retention window; defaults to 30d")
     cleanup.add_argument("--delete", action="store_true", help="delete matching archived records; default is dry-run")
     cleanup.add_argument("--archive-terminal", action="store_true", help="archive terminal records before evaluating cleanup")
+
+    schema = subparsers.add_parser("schema", help="show wake record schema version and compatibility policy")
+    schema.add_argument("--json", action="store_true", dest="as_json")
 
     service = subparsers.add_parser("service", help="manage a user-scoped codex-waked service")
     service_subparsers = service.add_subparsers(dest="service_command", required=True)
@@ -343,6 +347,23 @@ def cleanup(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def schema_command(args: argparse.Namespace) -> int:
+    summary = schema_summary()
+    if args.as_json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+    print(f"schema_version={summary['schema_version']}")
+    print(f"compatibility={summary['compatibility']}")
+    print(f"schema_doc={summary['schema_doc']}")
+    print(f"statuses={','.join(summary['active_statuses'] + summary['terminal_statuses'] + [summary['archived_status']])}")
+    print(f"predicate_types={','.join(summary['predicate_types'])}")
+    print(f"target_transports={','.join(summary['target_transports'])}")
+    print(f"required_fields={','.join(summary['required_fields'])}")
+    print(f"optional_fields={','.join(summary['optional_fields'])}")
+    print(f"schema_bump_required_for={','.join(summary['schema_bump_required_for'])}")
+    return 0
+
+
 def service_config_for_args(args: argparse.Namespace, root: Path):
     return build_service_config(
         repo_root=args.repo_root,
@@ -481,6 +502,8 @@ def run(argv: list[str] | None = None) -> int:
         return archive(args, root)
     if args.command == "cleanup":
         return cleanup(args, root)
+    if args.command == "schema":
+        return schema_command(args)
     if args.command == "service":
         return service_command(args, root)
     if args.command == "hook":

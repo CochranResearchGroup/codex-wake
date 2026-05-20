@@ -705,3 +705,33 @@ Published and verified `v0.4.4`.
 - Recorded evidence in `docs/dev/verification/0021-2026-05-19-v0.4.4-release.md`.
 
 Best next turn option: open a wake-record schema/versioning lane to document compatibility for optional predicate and diagnostic fields before adding more runtime metadata.
+
+## Turn 48 | 2026-05-19
+
+Opened P22 for wake record schema versioning.
+
+- Selected schema/versioning because optional predicate, dispatch, archive, and diagnostic fields have accumulated while `schema_version` remains `1`.
+- Added `docs/dev/plans/0022-2026-05-19-wake-record-schema-versioning.md`.
+- Added `docs/dev/wake-record-schema.md`.
+- Added `codex-wake schema` and `codex-wake schema --json`.
+- Opened P22 in `ROADMAP.md`.
+
+Best next turn option: validate the schema command from source and installed wheel, record evidence, close P22, and push if validation passes.
+
+## Turn 49 | 2026-05-19
+
+Completed P22 wake record schema versioning.
+
+- Documented schema version `1` in `docs/dev/wake-record-schema.md`.
+- Defined the compatibility policy as additive optional fields.
+- Documented required fields, status vocabulary, target variants, predicate variants, optional fields, derived ack files, and schema bump triggers.
+- Added `codex-wake schema`.
+- Added `codex-wake schema --json`.
+- Ran source validation: compileall and `70` unit tests.
+- Ran source CLI schema smoke.
+- Built and installed a local wheel in temporary virtual environments.
+- Ran installed CLI schema smoke.
+- Recorded evidence in `docs/dev/verification/0022-2026-05-19-wake-record-schema-versioning.md`.
+- Closed P22 in `ROADMAP.md` and `docs/dev/plans/0022-2026-05-19-wake-record-schema-versioning.md`.
+
+Best next turn option: commit and push P22, wait for CI, then cut `v0.4.5` if the branch remains green.

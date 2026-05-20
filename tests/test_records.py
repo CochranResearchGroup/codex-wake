@@ -18,6 +18,7 @@ from codex_wake.records import (
     format_utc,
     parse_duration,
     parse_timestamp,
+    schema_summary,
     write_record,
 )
 
@@ -44,6 +45,16 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(target["transport"], "tmux")
         self.assertEqual(target["pane"], "%11")
         self.assertEqual(target["tmux_socket"], "/tmp/tmux-1000/default")
+
+    def test_schema_summary_documents_version_and_compatibility(self) -> None:
+        summary = schema_summary()
+
+        self.assertEqual(summary["schema_version"], 1)
+        self.assertEqual(summary["compatibility"], "additive_optional_fields")
+        self.assertIn("schema_version", summary["required_fields"])
+        self.assertIn("process_done", summary["predicate_types"])
+        self.assertIn("dispatch_result", summary["optional_fields"])
+        self.assertIn("incompatible_predicate_semantics_change", summary["schema_bump_required_for"])
 
     def test_write_and_cancel_record(self) -> None:
         now = datetime(2026, 5, 18, 20, 30, tzinfo=UTC)
