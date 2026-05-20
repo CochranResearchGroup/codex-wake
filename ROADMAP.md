@@ -298,3 +298,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0029-2026-05-20-cleanup-json.md`. `codex-wake cleanup --json` now reports cleanup mode, terminal archives, matched archived records, deletion state, and counts without changing dry-run defaults.
 
 Plan: [Cleanup JSON Surface](docs/dev/plans/0026-2026-05-20-cleanup-json.md)
+
+## P27 | Controlled Live Dispatch Dogfood
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0031-2026-05-20-live-dispatch-dogfood.md`. The installed daemon fired one live tmux dispatch, observed the `UserPromptSubmit` hook ack, moved the wake to `submitted`, and the dogfood wake was archived with `active_total=0`.
+
+Plan: [Controlled Live Dispatch Dogfood](docs/dev/plans/0027-2026-05-20-live-dispatch-dogfood.md)

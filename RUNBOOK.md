@@ -939,3 +939,44 @@ Published and verified `v0.4.8`.
 - Recorded evidence in `docs/dev/verification/0030-2026-05-20-v0.4.8-release.md`.
 
 Best next turn option: open P27 for a controlled live-dispatch dogfood with preflight checks for service state, active hook ack baseline, and stale pane locks.
+
+## Turn 66 | 2026-05-20
+
+Opened P27 for controlled live-dispatch dogfood.
+
+- Added `docs/dev/plans/0027-2026-05-20-live-dispatch-dogfood.md`.
+- Marked P27 active in `ROADMAP.md`.
+- Re-read planning, runtime-state, and agent-runtime policies.
+- Used memory guidance to re-check active hook state, avoid stale lock assumptions, and preserve correct global flag ordering.
+- Captured preflight state: `active_total=0`, hook config installed, latest ack is the older `wake_20260519_104518_d191`, repo service is inactive, current tmux pane is `%202`, and no pane lock files were present.
+- Pane capture showed the current turn was actively running, so live dispatch should be delayed until after the pane can go idle.
+
+Best next turn option: schedule one short tmux wake plus a delayed one-shot daemon dispatch, then let the wake-triggered turn verify ack and record movement.
+
+## Turn 67 | 2026-05-20
+
+Scheduled the P27 live-dispatch dogfood wake.
+
+- Registered `wake_20260520_214519_1ee0` with `codex-wake --wake-root .codex/wake after 45s`.
+- Confirmed the wake record targets tmux pane `%202` on `/tmp/tmux-1000/default`.
+- Confirmed `status --json` reports `active_total=1`, `pending=1`, and `earliest_next_attempt_at=2026-05-20T21:46:04Z`.
+- Armed a bounded user-systemd one-shot timer: `codex-wake-p27-live-wake_20260520_214519_1ee0.timer`.
+- The timer activates `codex-waked --wake-root /home/ecochran76/workspace.local/codex-wake/.codex/wake --once --ack-timeout 15`.
+
+Best next turn option: let the wake-triggered prompt land, then verify the ack file and wake events before archiving or recording any failure.
+
+## Turn 68 | 2026-05-20
+
+Completed the P27 live-dispatch dogfood.
+
+- Wake-triggered prompt landed for `wake_20260520_214519_1ee0`.
+- Verified current UTC time `2026-05-20T21:46:37Z` was after predicate due time `2026-05-20T21:46:04Z`.
+- Verified the wake record showed `predicate_matched`, `dispatch_attempt`, and `ack_observed` at `2026-05-20T21:46:18Z`.
+- Verified hook ack `.codex/wake/acks/wake_20260520_214519_1ee0.submitted` with matching wake id, session id, turn id, and submitted timestamp.
+- Verified transient dispatcher journal reported `checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0`.
+- Archived the submitted dogfood wake.
+- Confirmed final `status --json` reports `active_total=0` and no `earliest_next_attempt_at`.
+- Recorded evidence in `docs/dev/verification/0031-2026-05-20-live-dispatch-dogfood.md`.
+- Closed P27 in `ROADMAP.md` and `docs/dev/plans/0027-2026-05-20-live-dispatch-dogfood.md`.
+
+Best next turn option: commit and push P27, wait for CI, then open the next roadmap lane for either installed-runtime retention cleanup or app-server-backed dispatch design.
