@@ -6,6 +6,7 @@ import json
 import os
 import tempfile
 import unittest
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -70,6 +71,50 @@ class CliTests(unittest.TestCase):
             code, archived_list, err = self.run_cli(["list", "--archived"], root)
             self.assertEqual(code, 0, err)
             self.assertIn(wake_id, archived_list)
+
+    def test_cleanup_dry_run_and_delete_archived_records(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(["after", "1m", "--", "Cleanup later"], root)
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            code, _, err = self.run_cli(["cancel", wake_id], root)
+            self.assertEqual(code, 0, err)
+            code, _, err = self.run_cli(["archive", wake_id], root)
+            self.assertEqual(code, 0, err)
+            archived_path = root / "archive" / f"{wake_id}.json"
+            data = json.loads(archived_path.read_text())
+            data["archived_at"] = "2026-05-01T00:00:00Z"
+            data["updated_at"] = "2026-05-01T00:00:00Z"
+            archived_path.write_text(json.dumps(data), encoding="utf-8")
+
+            with patch("codex_wake.records.utc_now", return_value=datetime(2026, 5, 19, tzinfo=UTC)):
+                code, dry_run, err = self.run_cli(["cleanup", "--older-than", "7d"], root)
+            self.assertEqual(code, 0, err)
+            self.assertIn("would-delete", dry_run)
+            self.assertTrue(archived_path.exists())
+
+            with patch("codex_wake.records.utc_now", return_value=datetime(2026, 5, 19, tzinfo=UTC)):
+                code, deleted, err = self.run_cli(["cleanup", "--older-than", "7d", "--delete"], root)
+            self.assertEqual(code, 0, err)
+            self.assertIn("deleted", deleted)
+            self.assertFalse(archived_path.exists())
+
+    def test_cleanup_can_archive_terminal_records_first(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(["after", "1m", "--", "Cleanup later"], root)
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            code, _, err = self.run_cli(["cancel", wake_id], root)
+            self.assertEqual(code, 0, err)
+
+            code, cleanup_out, err = self.run_cli(["cleanup", "--archive-terminal", "--older-than", "1d"], root)
+
+            self.assertEqual(code, 0, err)
+            self.assertIn(f"archived {wake_id}", cleanup_out)
+            self.assertTrue((root / "archive" / f"{wake_id}.json").exists())
+            self.assertFalse((root / "cancelled" / f"{wake_id}.json").exists())
 
     def test_changed_creates_file_changed_predicate_with_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

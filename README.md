@@ -167,6 +167,8 @@ codex-wake show <wake-id>
 codex-wake cancel <wake-id>
 codex-wake archive <wake-id>
 codex-wake archive --all-terminal
+codex-wake cleanup --older-than 30d
+codex-wake cleanup --older-than 30d --delete
 ```
 
 ## Runtime State
@@ -186,6 +188,12 @@ By default, Codex Wake stores state under the current repo:
 ```
 
 `.codex/wake/` and `.codex/events/` are ignored by this repo because they are runtime state, not source.
+
+Cleanup is conservative. `codex-wake cleanup` is dry-run by default and only
+targets records already under `.codex/wake/archive/`. Add `--delete` to remove
+matching archived records, and `--archive-terminal` to archive terminal records
+before cleanup evaluation. Active `pending/` and `firing/` records are never
+deleted by cleanup.
 
 ## Current Limits
 

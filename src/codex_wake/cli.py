@@ -16,6 +16,7 @@ from .records import (
     archive_terminal_records,
     build_record,
     cancel_record,
+    cleanup_archived_records,
     capture_tmux_target,
     default_wake_root,
     find_record,
@@ -93,6 +94,11 @@ def build_parser() -> argparse.ArgumentParser:
     archive = subparsers.add_parser("archive", help="archive terminal wake records")
     archive.add_argument("wake_id", nargs="?", help="specific wake id to archive")
     archive.add_argument("--all-terminal", action="store_true", help="archive all submitted, failed, cancelled, and expired wakes")
+
+    cleanup = subparsers.add_parser("cleanup", help="preview or delete old archived wake records")
+    cleanup.add_argument("--older-than", default="30d", help="archive retention window; defaults to 30d")
+    cleanup.add_argument("--delete", action="store_true", help="delete matching archived records; default is dry-run")
+    cleanup.add_argument("--archive-terminal", action="store_true", help="archive terminal records before evaluating cleanup")
 
     service = subparsers.add_parser("service", help="manage a user-scoped codex-waked service")
     service_subparsers = service.add_subparsers(dest="service_command", required=True)
@@ -321,6 +327,22 @@ def archive(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def cleanup(args: argparse.Namespace, root: Path) -> int:
+    older_than = parse_duration(args.older_than)
+    archived = []
+    if args.archive_terminal:
+        archived = archive_terminal_records(root)
+        for path in archived:
+            print(f"archived {path.stem} {path}")
+    results = cleanup_archived_records(root, older_than=older_than, delete=args.delete)
+    action = "deleted" if args.delete else "would-delete"
+    for result in results:
+        print(f"{action} {result.wake_id} {result.path} retention_at={result.retention_at}")
+    mode = "delete" if args.delete else "dry-run"
+    print(f"cleanup mode={mode} older_than={args.older_than} archived={len(archived)} matched={len(results)}")
+    return 0
+
+
 def service_config_for_args(args: argparse.Namespace, root: Path):
     return build_service_config(
         repo_root=args.repo_root,
@@ -444,6 +466,8 @@ def run(argv: list[str] | None = None) -> int:
         return cancel(args, root)
     if args.command == "archive":
         return archive(args, root)
+    if args.command == "cleanup":
+        return cleanup(args, root)
     if args.command == "service":
         return service_command(args, root)
     if args.command == "hook":

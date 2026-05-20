@@ -596,3 +596,32 @@ Published and verified `v0.4.2`.
 - Recorded evidence in `docs/dev/verification/0017-2026-05-19-v0.4.2-release.md`.
 
 Best next turn option: open a retention/cleanup policy lane for wake runtime state, because active trigger behavior is now solid enough to revisit archive defaults and operator cleanup ergonomics.
+
+## Turn 40 | 2026-05-19
+
+Opened P20 for runtime retention cleanup.
+
+- Selected retention cleanup because active trigger behavior is stable and archived wake records currently have no pruning command.
+- Added `docs/dev/plans/0020-2026-05-19-runtime-retention-cleanup.md`.
+- Opened P20 in `ROADMAP.md`.
+- Chose a conservative cleanup shape: dry-run by default, delete only archived records, and optionally archive terminal records first.
+
+Best next turn option: implement `codex-wake cleanup`, test dry-run/delete behavior, and validate installed CLI cleanup smokes.
+
+## Turn 41 | 2026-05-19
+
+Completed P20 runtime retention cleanup.
+
+- Added `codex-wake cleanup`.
+- Kept cleanup dry-run by default.
+- Limited deletion to records already under `.codex/wake/archive/`.
+- Added `--delete`, `--older-than`, and `--archive-terminal`.
+- Updated README and runtime-state docs.
+- Ran source validation: compileall and `65` unit tests.
+- Ran source CLI cleanup smoke.
+- Built and installed a local wheel in temporary virtual environments.
+- Ran installed CLI cleanup smoke.
+- Recorded evidence in `docs/dev/verification/0018-2026-05-19-runtime-retention-cleanup.md`.
+- Closed P20 in `ROADMAP.md` and `docs/dev/plans/0020-2026-05-19-runtime-retention-cleanup.md`.
+
+Best next turn option: commit and push P20, wait for CI, then cut `v0.4.3` if the branch remains green.

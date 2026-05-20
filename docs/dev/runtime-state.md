@@ -20,6 +20,9 @@ Codex Wake runtime state lives under `.codex/wake/` by default. This directory i
 - Active records in `pending/` and `firing/` must not be archived.
 - Terminal records in `submitted/`, `failed/`, `cancelled/`, and `expired/` may be archived.
 - Archiving preserves the JSON record, appends an `archived` event, sets `previous_status`, and moves the record to `archive/`.
+- Cleanup prunes only records already under `archive/`.
+- Cleanup is dry-run by default and requires `--delete` before removing archived records.
+- Cleanup uses `archived_at`, then `updated_at`, then `created_at` as the retention timestamp.
 - `acks/` are derived evidence. They may be retained while debugging, but the authoritative wake outcome is the wake record.
 - `logs/` and `locks/` are operational artifacts and should not be treated as durable source of truth.
 
@@ -58,4 +61,22 @@ Archive all terminal wakes:
 
 ```bash
 codex-wake archive --all-terminal
+```
+
+Preview archived records older than the default retention window:
+
+```bash
+codex-wake cleanup
+```
+
+Delete archived records older than a retention window:
+
+```bash
+codex-wake cleanup --older-than 30d --delete
+```
+
+Archive terminal records before cleanup evaluation:
+
+```bash
+codex-wake cleanup --archive-terminal --older-than 30d
 ```

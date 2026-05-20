@@ -13,6 +13,7 @@ from codex_wake.records import (
     archive_terminal_records,
     build_record,
     cancel_record,
+    cleanup_archived_records,
     capture_tmux_target,
     format_utc,
     parse_duration,
@@ -112,6 +113,67 @@ class RecordTests(unittest.TestCase):
             paths = archive_terminal_records(root, now=now)
 
             self.assertEqual([path.name for path in paths], ["wake_failed.json"])
+            self.assertTrue((root / "pending" / "wake_pending.json").exists())
+
+    def test_cleanup_archived_records_is_dry_run_by_default(self) -> None:
+        old = datetime(2026, 5, 1, 20, 30, tzinfo=UTC)
+        current = datetime(2026, 5, 19, 20, 30, tzinfo=UTC)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            record = build_record(
+                predicate={"type": "not_before", "due_at": "2026-05-01T21:15:00Z"},
+                prompt="old",
+                cwd=Path(tmp),
+                target={"transport": "tmux", "tmux_socket": "/tmp/tmux/default", "pane": "%1"},
+                now=old,
+            )
+            record["id"] = "wake_old"
+            record["status"] = "cancelled"
+            write_record(root, record)
+            archived = archive_record(root, "wake_old", now=old)
+
+            results = cleanup_archived_records(root, older_than=timedelta(days=7), now=current)
+
+            self.assertEqual([result.wake_id for result in results], ["wake_old"])
+            self.assertFalse(results[0].deleted)
+            self.assertTrue(archived.exists())
+
+    def test_cleanup_archived_records_deletes_only_old_archived_records(self) -> None:
+        old = datetime(2026, 5, 1, 20, 30, tzinfo=UTC)
+        fresh = datetime(2026, 5, 18, 20, 30, tzinfo=UTC)
+        current = datetime(2026, 5, 19, 20, 30, tzinfo=UTC)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            base = build_record(
+                predicate={"type": "not_before", "due_at": "2026-05-01T21:15:00Z"},
+                prompt="wake",
+                cwd=Path(tmp),
+                target={"transport": "tmux", "tmux_socket": "/tmp/tmux/default", "pane": "%1"},
+                now=old,
+            )
+            old_record = dict(base)
+            old_record["id"] = "wake_old"
+            old_record["status"] = "cancelled"
+            write_record(root, old_record)
+            old_path = archive_record(root, "wake_old", now=old)
+
+            fresh_record = dict(base)
+            fresh_record["id"] = "wake_fresh"
+            fresh_record["status"] = "cancelled"
+            write_record(root, fresh_record)
+            fresh_path = archive_record(root, "wake_fresh", now=fresh)
+
+            pending = dict(base)
+            pending["id"] = "wake_pending"
+            pending["status"] = "pending"
+            write_record(root, pending)
+
+            results = cleanup_archived_records(root, older_than=timedelta(days=7), now=current, delete=True)
+
+            self.assertEqual([result.wake_id for result in results], ["wake_old"])
+            self.assertTrue(results[0].deleted)
+            self.assertFalse(old_path.exists())
+            self.assertTrue(fresh_path.exists())
             self.assertTrue((root / "pending" / "wake_pending.json").exists())
 
 

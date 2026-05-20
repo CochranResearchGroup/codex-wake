@@ -26,6 +26,14 @@ class WakePath:
     record: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class CleanupResult:
+    path: Path
+    wake_id: str
+    retention_at: str
+    deleted: bool
+
+
 def utc_now() -> datetime:
     return datetime.now(UTC).replace(microsecond=0)
 
@@ -315,3 +323,40 @@ def archive_terminal_records(root: Path, now: datetime | None = None) -> list[Pa
         if item.record.get("status") in TERMINAL_STATUSES and isinstance(wake_id, str):
             archived.append(archive_record(root, wake_id, now=now))
     return archived
+
+
+def cleanup_archived_records(
+    root: Path,
+    *,
+    older_than: timedelta,
+    now: datetime | None = None,
+    delete: bool = False,
+) -> list[CleanupResult]:
+    if older_than <= timedelta():
+        raise WakeError("older_than must be greater than zero")
+    current = now or utc_now()
+    cutoff = current - older_than
+    results: list[CleanupResult] = []
+    for item in iter_archived_records(root):
+        wake_id = item.record.get("id")
+        retention_text = retention_timestamp(item.record)
+        if not isinstance(wake_id, str) or not wake_id or retention_text is None:
+            continue
+        try:
+            retention_at = parse_utc_timestamp(retention_text)
+        except WakeError:
+            continue
+        if retention_at > cutoff:
+            continue
+        if delete and item.path.exists():
+            item.path.unlink()
+        results.append(CleanupResult(path=item.path, wake_id=wake_id, retention_at=format_utc(retention_at), deleted=delete))
+    return results
+
+
+def retention_timestamp(record: dict[str, Any]) -> str | None:
+    for key in ("archived_at", "updated_at", "created_at"):
+        value = record.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return None

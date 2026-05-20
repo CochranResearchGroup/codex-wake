@@ -242,3 +242,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0016-2026-05-19-pid-reuse-safety.md`. `codex-wake pid` now records best-effort process identity on Linux, and the daemon fires when a live PID no longer matches the registered process.
 
 Plan: [PID Reuse Safety](docs/dev/plans/0019-2026-05-19-pid-reuse-safety.md)
+
+## P20 | Runtime Retention Cleanup
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0018-2026-05-19-runtime-retention-cleanup.md`. `codex-wake cleanup` now previews old archived records by default, deletes them only with `--delete`, and can archive terminal records first with `--archive-terminal`.
+
+Plan: [Runtime Retention Cleanup](docs/dev/plans/0020-2026-05-19-runtime-retention-cleanup.md)
