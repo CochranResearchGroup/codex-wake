@@ -794,3 +794,17 @@ Started the `v0.4.6` release for P23 doctor JSON inspection.
 - Added `docs/releases/v0.4.6.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.6` if validation passes.
+
+## Turn 55 | 2026-05-20
+
+Published and verified `v0.4.6`.
+
+- Ran source validation: compileall and `71` unit tests.
+- Built `codex_wake-0.4.6.tar.gz` and `codex_wake-0.4.6-py3-none-any.whl`.
+- Ran installed-wheel smokes for text `doctor` and `doctor --json`.
+- Committed `b61670f`, tagged and pushed `v0.4.6`, and published the GitHub release.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.6`.
+- Verified public CI run `26176601988` passed.
+- Recorded evidence in `docs/dev/verification/0025-2026-05-20-v0.4.6-release.md`.
+
+Best next turn option: open P24 for `list --json` enrichment or a compact `status --json` command that summarizes wake counts by state for supervisor automation.
