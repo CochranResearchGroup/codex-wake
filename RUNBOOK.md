@@ -1009,3 +1009,21 @@ Completed P28 installed runtime state tidy dogfood.
 - Closed P28 in `ROADMAP.md` and `docs/dev/plans/0028-2026-05-20-installed-runtime-state-tidy-dogfood.md`.
 
 Best next turn option: commit and push P28, wait for CI, then open the app-server-backed dispatch design lane.
+
+## Turn 71 | 2026-05-20
+
+Completed P29 app-server contract refresh.
+
+- Re-read planning, runtime-state, and agent-runtime policies.
+- Used the `openai-docs` skill because this lane depends on Codex app-server behavior.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Checked local Codex CLI: `codex-cli 0.131.0`.
+- Verified `codex app-server --help` still supports `stdio://`, Unix sockets, WebSockets, and WebSocket auth modes.
+- Generated current app-server JSON schema with `codex app-server generate-json-schema --out /tmp/codex-app-schema-p29 --experimental`.
+- Confirmed schema still includes `thread/resume` and `turn/start`; `ThreadResumeParams` requires `threadId`, `TurnStartParams` requires `threadId` and `input`, and `TurnStartResponse` returns `turn`.
+- Ran a source-tree stdio initialize smoke with `PYTHONPATH=src`; it returned Codex home, platform, and user-agent metadata.
+- Updated `docs/dev/app-server-mode.md` with the current local contract and implementation boundary.
+- Recorded evidence in `docs/dev/verification/0033-2026-05-20-app-server-contract-refresh.md`.
+- Closed P29 in `ROADMAP.md` and `docs/dev/plans/0029-2026-05-20-app-server-contract-refresh.md`.
+
+Best next turn option: commit and push P29, wait for CI, then choose between disposable-thread app-server dogfood and thread-status preflight implementation.

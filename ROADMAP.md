@@ -314,3 +314,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0032-2026-05-20-installed-runtime-state-tidy-dogfood.md`. The repo-local wake root is tidy after archiving four terminal records with installed `cleanup --archive-terminal --json`; no archived evidence was deleted.
 
 Plan: [Installed Runtime State Tidy Dogfood](docs/dev/plans/0028-2026-05-20-installed-runtime-state-tidy-dogfood.md)
+
+## P29 | App-Server Contract Refresh
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0033-2026-05-20-app-server-contract-refresh.md`. Codex CLI `0.131.0` still exposes the stdio app-server primitives used by codex-wake, and the source-tree stdio initialize smoke passed. No code change is required before a live disposable-thread dogfood or thread-status preflight lane.
+
+Plan: [App-Server Contract Refresh](docs/dev/plans/0029-2026-05-20-app-server-contract-refresh.md)

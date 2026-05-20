@@ -1,7 +1,7 @@
 # App-Server Mode
 
 Status: MVP stdio transport implemented
-Verified: 2026-05-18 with Codex CLI 0.130.0
+Verified: 2026-05-20 with Codex CLI 0.131.0
 
 ## Contract
 
@@ -63,6 +63,29 @@ Generated schema confirmed:
 
 - `thread/resume` uses `ThreadResumeParams` with `threadId`.
 - `turn/start` uses `TurnStartParams` with `threadId` and text `input`.
+
+Local Codex CLI refreshed on 2026-05-20:
+
+- `codex-cli 0.131.0`
+- `codex app-server --listen stdio://`
+- `codex app-server generate-json-schema --out /tmp/codex-app-schema-p29 --experimental`
+- The generated schema now includes v2 schema files under `v2/`.
+- `ThreadResumeParams` still requires `threadId` and supports `cwd`; `persistExtendedHistory` is deprecated and ignored but remains accepted for older clients.
+- `TurnStartParams` still requires `threadId` and `input`, and supports optional turn-scoped overrides such as `cwd`, model, effort, permissions, and sandbox policy.
+- `TurnStartResponse` still returns a required `turn` object.
+- `ThreadStatusChangedNotification` exposes `idle`, `active`, `systemError`, and `notLoaded` thread states, which is the likely future basis for safer app-server wake preflight.
+- A source-tree stdio initialize smoke succeeded and returned Codex home, platform, and user-agent metadata.
+
+## Current Implementation Boundary
+
+The current implementation is suitable for unit-tested stdio dispatch and for future controlled dogfood against a known thread id. It should not yet be treated as a full replacement for the tmux path because:
+
+- the CLI does not yet expose a discovery command for selecting a current app-server thread id;
+- live app-server dispatch has not been dogfooded against a deliberately created disposable thread;
+- current dispatch treats `turn/start` acceptance as the app-server acknowledgement, while tmux dispatch still relies on the Codex hook ack file;
+- thread status preflight is not implemented yet.
+
+The next app-server implementation lane should add a bounded operator smoke for a disposable thread, or add a thread-status preflight helper before any live dispatch against user work.
 
 ## Safety Boundary
 
