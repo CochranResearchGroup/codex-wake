@@ -635,3 +635,19 @@ Started the `v0.4.3` release for P20 runtime retention cleanup.
 - Added `docs/releases/v0.4.3.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.3` if validation passes.
+
+## Turn 43 | 2026-05-19
+
+Published and verified `v0.4.3`.
+
+- Ran source validation: compileall and `65` unit tests.
+- Built and installed the local wheel in temporary virtual environments.
+- Smoked installed `codex-wake`, `codex-waked`, and `codex-wake-hook`.
+- Smoked installed-wheel cleanup archive, dry-run, and delete behavior.
+- Committed `279c975`, tagged and pushed `v0.4.3`, and published the GitHub release.
+- Verified clean public tag installation with isolated `uv` tool/cache directories.
+- Confirmed clean public tag cleanup archive, dry-run, and delete behavior.
+- Confirmed upstream CI run `26135597539` passed on the release commit.
+- Recorded evidence in `docs/dev/verification/0019-2026-05-19-v0.4.3-release.md`.
+
+Best next turn option: open a hook/session visibility lane so `doctor` can better distinguish hook config on disk from hooks loaded in the active Codex TUI.
