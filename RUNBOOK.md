@@ -744,3 +744,17 @@ Started the `v0.4.5` release for P22 wake record schema versioning.
 - Added `docs/releases/v0.4.5.md`.
 
 Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.5` if validation passes.
+
+## Turn 51 | 2026-05-19
+
+Published and verified `v0.4.5`.
+
+- Ran source validation: compileall and `70` unit tests.
+- Built `codex_wake-0.4.5.tar.gz` and `codex_wake-0.4.5-py3-none-any.whl`.
+- Ran installed-wheel schema command smoke.
+- Committed `e4aabf2`, tagged and pushed `v0.4.5`, and published the GitHub release.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.5`.
+- Verified public CI run `26139110324` passed.
+- Recorded evidence in `docs/dev/verification/0023-2026-05-19-v0.4.5-release.md`.
+
+Best next turn option: open P23 for a user-facing `doctor --json` or `list --json` inspection surface so wake state can be consumed reliably by automation.
