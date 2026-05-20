@@ -679,3 +679,13 @@ Completed P21 hook session visibility.
 - Closed P21 in `ROADMAP.md` and `docs/dev/plans/0021-2026-05-19-hook-session-visibility.md`.
 
 Best next turn option: commit and push P21, wait for CI, then cut `v0.4.4` if the branch remains green.
+
+## Turn 46 | 2026-05-19
+
+Started the `v0.4.4` release for P21 hook session visibility.
+
+- Selected release because P21 changes installed operator diagnostics in `hook check` and `doctor`.
+- Bumped package version to `0.4.4`.
+- Added `docs/releases/v0.4.4.md`.
+
+Best next turn option: run source and installed-package release validation, then tag and publish `v0.4.4` if validation passes.
