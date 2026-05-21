@@ -55,6 +55,28 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["schema_version"], 1)
             self.assertIn("file_changed", data["predicate_types"])
 
+    def test_app_status_reports_thread_status_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with patch(
+                "codex_wake.cli.read_app_server_thread_status",
+                return_value={
+                    "thread_id": "thread_abc",
+                    "status": {"type": "active", "activeFlags": ["waitingOnApproval"]},
+                    "status_type": "active",
+                    "active_flags": ["waitingOnApproval"],
+                    "cwd": "/tmp/repo",
+                    "sessionId": "session_123",
+                },
+            ):
+                code, out, err = self.run_cli(["app", "status", "--json", "thread_abc"], root)
+
+            self.assertEqual(code, 0, err)
+            data = json.loads(out)
+            self.assertEqual(data["thread_id"], "thread_abc")
+            self.assertEqual(data["status_type"], "active")
+            self.assertEqual(data["active_flags"], ["waitingOnApproval"])
+
     def test_file_show_list_and_cancel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

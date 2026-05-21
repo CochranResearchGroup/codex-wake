@@ -43,6 +43,19 @@ The older `--app-server-thread-id` option on time commands remains available for
 
 When `turn/start` is accepted, Codex Wake records available response metadata in `dispatch_result`, including `thread_id` and `turn_id` when returned by app-server.
 
+Inspect an app-server thread without starting a turn:
+
+```bash
+codex-wake app status thread_abc
+codex-wake app status --json thread_abc
+```
+
+Dispatch preflight resumes the target thread, records `app_server_preflight`
+status evidence, and only calls `turn/start` when the resumed thread reports
+`idle`. If the thread reports `active`, Codex Wake requeues the wake with
+backoff instead of starting another turn. Malformed status or non-idle
+unhealthy states fail the wake record visibly.
+
 ## Source Verification
 
 Official docs checked on 2026-05-18:
@@ -83,9 +96,9 @@ The current implementation is suitable for unit-tested stdio dispatch and for fu
 - the CLI does not yet expose a discovery command for selecting a current app-server thread id;
 - live app-server dispatch has not been dogfooded against a deliberately created disposable thread;
 - current dispatch treats `turn/start` acceptance as the app-server acknowledgement, while tmux dispatch still relies on the Codex hook ack file;
-- thread status preflight is not implemented yet.
+- thread status preflight is implemented for resumed-thread status, but still needs a live disposable-thread dogfood.
 
-The next app-server implementation lane should add a bounded operator smoke for a disposable thread, or add a thread-status preflight helper before any live dispatch against user work.
+The next app-server implementation lane should add a bounded operator smoke for a disposable thread.
 
 ## Safety Boundary
 

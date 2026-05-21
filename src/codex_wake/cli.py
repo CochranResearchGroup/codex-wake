@@ -7,6 +7,7 @@ import sys
 from datetime import UTC
 from pathlib import Path
 
+from .app_server import read_app_server_thread_status
 from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, hook_review_note, hook_runtime_evidence, install_hook_config
 from .process import process_exists, process_identity
 from .records import (
@@ -67,6 +68,11 @@ def build_parser() -> argparse.ArgumentParser:
     app_at.add_argument("thread_id")
     app_at.add_argument("timestamp")
     app_at.add_argument("prompt", nargs=argparse.REMAINDER)
+
+    app_status = app_subparsers.add_parser("status", help="read an app-server thread status without starting a turn")
+    app_status.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
+    app_status.add_argument("--json", action="store_true", dest="as_json")
+    app_status.add_argument("thread_id")
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
     file_cmd.add_argument("path")
@@ -189,6 +195,8 @@ def create_at(args: argparse.Namespace, root: Path) -> int:
 
 
 def create_app(args: argparse.Namespace, root: Path) -> int:
+    if args.app_command == "status":
+        return app_status(args)
     now = utc_now()
     if args.app_command == "after":
         due = now + parse_duration(args.duration)
@@ -205,6 +213,25 @@ def create_app(args: argparse.Namespace, root: Path) -> int:
         "thread_id": args.thread_id,
     }
     return create_record(args.prompt, predicate, root, now, args, target=target)
+
+
+def app_status(args: argparse.Namespace) -> int:
+    if args.endpoint != "stdio://":
+        raise WakeError("only app-server endpoint stdio:// is currently implemented")
+    summary = read_app_server_thread_status(args.thread_id)
+    if args.as_json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+    print(f"thread_id={summary['thread_id']}")
+    print(f"status_type={summary['status_type']}")
+    active_flags = summary.get("active_flags")
+    if isinstance(active_flags, list):
+        print("active_flags=" + ",".join(str(flag) for flag in active_flags))
+    if summary.get("cwd"):
+        print(f"cwd={summary['cwd']}")
+    if summary.get("sessionId"):
+        print(f"session_id={summary['sessionId']}")
+    return 0
 
 
 def create_file(args: argparse.Namespace, root: Path) -> int:

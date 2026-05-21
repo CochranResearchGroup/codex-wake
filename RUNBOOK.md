@@ -1027,3 +1027,40 @@ Completed P29 app-server contract refresh.
 - Closed P29 in `ROADMAP.md` and `docs/dev/plans/0029-2026-05-20-app-server-contract-refresh.md`.
 
 Best next turn option: commit and push P29, wait for CI, then choose between disposable-thread app-server dogfood and thread-status preflight implementation.
+
+## Turn 72 | 2026-05-20
+
+Started P30 app-server thread status preflight.
+
+- Re-read planning, runtime-state, agent-runtime, and validation policies.
+- Used memory guidance to keep the app-server path local-auth/minimal and to distinguish source-tree work from installed runtime behavior.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Added `docs/dev/plans/0030-2026-05-21-app-server-thread-status-preflight.md`.
+- Implemented a read-only `thread/read` client method and `codex-wake app status <thread-id>`.
+- Added app-server dispatch preflight: after `thread/resume`, dispatch records thread status and starts `turn/start` only for `idle` threads.
+- Active app-server threads are requeued with backoff instead of receiving a new turn.
+- Added focused app-server and CLI tests for status output, idle dispatch, and active-thread requeue.
+- Focused tests passed: `PYTHONPATH=src python -m unittest tests.test_app_server` and `PYTHONPATH=src python -m unittest tests.test_cli`.
+
+Best next turn option: run full repo validation, update verification docs, then close and publish P30 if validation passes.
+
+## Turn 73 | 2026-05-20
+
+Completed P30 app-server thread status preflight.
+
+- Updated `README.md` and `docs/dev/app-server-mode.md` for `codex-wake app status`.
+- Ran source validation:
+  - `PYTHONPATH=src python -m compileall -q src tests`
+  - `PYTHONPATH=src python -m unittest tests.test_app_server`
+  - `PYTHONPATH=src python -m unittest tests.test_cli`
+  - `PYTHONPATH=src python -m unittest discover -s tests`
+- Full suite passed with `77` tests.
+- Smoked source CLI `app status --help`.
+- Smoked source app-server wake record creation in a temporary wake root.
+- Installed the working tree into the user-scoped uv tool with `uv tool install --force .`.
+- Smoked installed `codex-wake app status --help`.
+- Smoked installed app-server wake record creation in a temporary wake root.
+- Recorded evidence in `docs/dev/verification/0034-2026-05-21-app-server-thread-status-preflight.md`.
+- Closed P30 in `ROADMAP.md` and `docs/dev/plans/0030-2026-05-21-app-server-thread-status-preflight.md`.
+
+Best next turn option: commit and push P30, wait for CI, then cut a `v0.4.9` release for the app-server preflight CLI/runtime change.

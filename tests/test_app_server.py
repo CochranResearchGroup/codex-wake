@@ -6,7 +6,7 @@ import unittest
 from datetime import UTC, datetime
 from pathlib import Path
 
-from codex_wake.app_server import dispatch_app_server_record
+from codex_wake.app_server import dispatch_app_server_record, read_app_server_thread_status
 from codex_wake.injector import canonical_prompt, dispatch_firing_record
 from codex_wake.records import WakePath, build_record, write_record
 
@@ -21,7 +21,18 @@ class FakeAppServerClient:
 
     def resume_thread(self, thread_id: str, cwd: str | None = None) -> dict:
         self.calls.append(("thread/resume", {"thread_id": thread_id, "cwd": cwd}))
-        return {"thread": {"id": thread_id}}
+        return {"thread": {"id": thread_id, "status": {"type": "idle"}}}
+
+    def read_thread(self, thread_id: str, include_turns: bool = False) -> dict:
+        self.calls.append(("thread/read", {"thread_id": thread_id, "include_turns": include_turns}))
+        return {
+            "thread": {
+                "id": thread_id,
+                "status": {"type": "idle"},
+                "cwd": "/tmp/repo",
+                "sessionId": "session_123",
+            }
+        }
 
     def start_turn(self, thread_id: str, prompt: str, cwd: str | None = None) -> dict:
         self.calls.append(("turn/start", {"thread_id": thread_id, "prompt": prompt, "cwd": cwd}))
@@ -61,9 +72,50 @@ class AppServerTests(unittest.TestCase):
             data = json.loads((root / "submitted" / "wake_app.json").read_text())
             self.assertEqual(data["status"], "submitted")
             self.assertEqual(data["events"][-1]["type"], "ack_observed")
-            self.assertEqual(data["events"][-2]["type"], "dispatch_attempt")
+            self.assertEqual(data["events"][-2]["type"], "app_server_preflight")
+            self.assertEqual(data["events"][-3]["type"], "dispatch_attempt")
+            self.assertEqual(data["app_server_preflight"]["status"], {"type": "idle"})
             self.assertEqual(data["dispatch_result"], {"thread_id": "thread_abc", "turn_id": "turn_123"})
             self.assertEqual(data["events"][-1]["turn_id"], "turn_123")
+
+    def test_dispatch_app_server_record_requeues_active_thread_without_starting_turn(self) -> None:
+        class ActiveClient(FakeAppServerClient):
+            def resume_thread(self, thread_id: str, cwd: str | None = None) -> dict:
+                self.calls.append(("thread/resume", {"thread_id": thread_id, "cwd": cwd}))
+                return {"thread": {"id": thread_id, "status": {"type": "active", "activeFlags": ["waitingOnApproval"]}}}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_record(root, Path(tmp))
+            client = ActiveClient()
+
+            result = dispatch_app_server_record(root, found, client=client, now=datetime(2026, 5, 18, 21, 0, tzinfo=UTC))
+
+            self.assertEqual(result.status, "requeued")
+            self.assertEqual([call[0] for call in client.calls], ["initialize", "thread/resume"])
+            data = json.loads((root / "pending" / "wake_app.json").read_text())
+            self.assertEqual(data["status"], "pending")
+            self.assertEqual(data["attempts"], 1)
+            self.assertEqual(data["next_attempt_at"], "2026-05-18T21:01:00Z")
+            self.assertEqual(data["events"][-1]["type"], "requeued")
+            self.assertFalse((root / "firing" / "wake_app.json").exists())
+
+    def test_read_app_server_thread_status_summarizes_thread_status(self) -> None:
+        client = FakeAppServerClient()
+
+        summary = read_app_server_thread_status("thread_abc", client=client)
+
+        self.assertEqual([call[0] for call in client.calls], ["initialize", "thread/read"])
+        self.assertEqual(
+            summary,
+            {
+                "thread_id": "thread_abc",
+                "status": {"type": "idle"},
+                "status_type": "idle",
+                "cwd": "/tmp/repo",
+                "sessionId": "session_123",
+            },
+        )
 
     def test_unsupported_endpoint_fails_record(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

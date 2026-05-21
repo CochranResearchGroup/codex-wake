@@ -322,3 +322,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0033-2026-05-20-app-server-contract-refresh.md`. Codex CLI `0.131.0` still exposes the stdio app-server primitives used by codex-wake, and the source-tree stdio initialize smoke passed. No code change is required before a live disposable-thread dogfood or thread-status preflight lane.
 
 Plan: [App-Server Contract Refresh](docs/dev/plans/0029-2026-05-20-app-server-contract-refresh.md)
+
+## P30 | App-Server Thread Status Preflight
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0034-2026-05-21-app-server-thread-status-preflight.md`. `codex-wake app status` reads app-server thread status without starting a turn, and app-server dispatch now starts `turn/start` only after an idle resumed-thread preflight.
+
+Plan: [App-Server Thread Status Preflight](docs/dev/plans/0030-2026-05-21-app-server-thread-status-preflight.md)
