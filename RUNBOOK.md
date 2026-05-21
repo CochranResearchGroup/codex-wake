@@ -1064,3 +1064,19 @@ Completed P30 app-server thread status preflight.
 - Closed P30 in `ROADMAP.md` and `docs/dev/plans/0030-2026-05-21-app-server-thread-status-preflight.md`.
 
 Best next turn option: commit and push P30, wait for CI, then cut a `v0.4.9` release for the app-server preflight CLI/runtime change.
+
+## Turn 74 | 2026-05-20
+
+Started the `v0.4.9` release for P30 app-server thread status preflight.
+
+- Re-read engineering/git/release and validation policies.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Bumped `pyproject.toml` to `0.4.9`.
+- Added `docs/releases/v0.4.9.md`.
+- Ran source validation: compileall, `77` unit tests, and `git diff --check`.
+- Built `codex_wake-0.4.9.tar.gz` and `codex_wake-0.4.9-py3-none-any.whl`.
+- Ran installed-wheel smoke for `codex-wake app status --help`.
+- Ran installed-wheel smoke for `codex-wake --wake-root "$ROOT/wake" app after thread_abc 1m`.
+- Recorded evidence in `docs/dev/verification/0035-2026-05-21-v0.4.9-release.md`.
+
+Best next turn option: commit the release files, tag and push `v0.4.9`, wait for CI, run a clean public tag install smoke, then publish the GitHub release.
