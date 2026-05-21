@@ -1300,3 +1300,19 @@ Started the `v0.4.12` release for validated app-server candidate discovery.
 - Verified installed repo-filtered `codex-wake app candidates --cwd "$PWD" --validate --only-idle --json --limit 2`; both local candidates resumed idle.
 
 Best next turn option: commit, tag, and push `v0.4.12`; wait for CI; run a clean public tag install smoke; then publish the GitHub release.
+
+## Turn 87 | 2026-05-20
+
+Published `v0.4.12`.
+
+- Committed release prep as `b51a819`.
+- Tagged and pushed `v0.4.12`.
+- Verified branch CI run `26203255415` passed on Python 3.11 and 3.12.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.12`.
+- Confirmed public tag install reports package version `0.4.12`.
+- Smoked public tag `codex-wake app candidates --help`.
+- Smoked public tag repo-filtered `codex-wake app candidates --cwd "$PWD" --validate --only-idle --json --limit 2`; both local candidates resumed idle.
+- Published GitHub release `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.12`.
+- Updated `docs/dev/verification/0042-2026-05-21-v0.4.12-release.md` with public tag and release evidence.
+
+Best next turn option: commit and push the final release verification note, wait for CI, then consider a small installed-service audit to confirm the repo-scoped daemon still runs cleanly after the release sequence.
