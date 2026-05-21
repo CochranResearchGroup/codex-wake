@@ -1220,3 +1220,24 @@ Completed P33 app-server target discovery.
 - Smoked installed `app candidates --help`, text candidates, and repo-filtered JSON.
 
 Best next turn option: commit and push P33, wait for CI, then cut `v0.4.11` if the public tool surface should include target discovery.
+
+## Turn 83 | 2026-05-20
+
+Started the `v0.4.11` release for app-server target discovery.
+
+- Re-read release and validation policies.
+- Bumped `pyproject.toml` to `0.4.11`.
+- Added `docs/releases/v0.4.11.md`.
+- Added `docs/dev/verification/0040-2026-05-21-v0.4.11-release.md`.
+- Ran source validation:
+  - `PYTHONPATH=src python -m compileall -q src tests`
+  - `PYTHONPATH=src python -m unittest discover -s tests`
+  - `git diff --check`
+- Full suite passed with `83` tests.
+- Built source and wheel distributions for `0.4.11`.
+- Installed the wheel into `/tmp/codex-wake-v0411-install`.
+- Verified installed package version `0.4.11`.
+- Verified installed `codex-wake app candidates --help`.
+- Verified installed repo-filtered `codex-wake app candidates --cwd "$PWD" --json --limit 2`.
+
+Best next turn option: commit, tag, and push `v0.4.11`; wait for CI; run a clean public tag install smoke; then publish the GitHub release.
