@@ -1080,3 +1080,19 @@ Started the `v0.4.9` release for P30 app-server thread status preflight.
 - Recorded evidence in `docs/dev/verification/0035-2026-05-21-v0.4.9-release.md`.
 
 Best next turn option: commit the release files, tag and push `v0.4.9`, wait for CI, run a clean public tag install smoke, then publish the GitHub release.
+
+## Turn 75 | 2026-05-20
+
+Published and verified `v0.4.9`.
+
+- Committed release files as `72b78fa`.
+- Tagged and pushed `v0.4.9`.
+- Verified branch CI run `26199151140` passed on Python 3.11 and 3.12.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.9`.
+- Confirmed public tag install reports package version `0.4.9`.
+- Smoked public tag `codex-wake app status --help`.
+- Smoked public tag app-server wake record creation in a temporary wake root.
+- Published GitHub release `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.9`.
+- Updated `docs/dev/verification/0035-2026-05-21-v0.4.9-release.md` with public tag and release evidence.
+
+Best next turn option: commit and push the final release verification note, wait for CI, then open a disposable-thread app-server dogfood lane.
