@@ -134,6 +134,7 @@ Create an app-server-targeted wake instead of a tmux-targeted wake:
 codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
 codex-wake app status thread_abc
+codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
 ```
 
@@ -192,8 +193,10 @@ codex-wake schema --json
 `status --json` emits compact counts by status, predicate, and target transport
 plus the earliest pending or firing `next_attempt_at`.
 
-`app status` is read-only. It asks local `codex app-server` for the thread
-status and does not start a turn.
+`app status` is read-only and does not start a turn. By default it asks local
+`codex app-server` for `thread/read` status. Use `app status --resume` to load a
+resumable rollout-backed thread first, which mirrors the dispatch preflight
+without calling `turn/start`.
 
 ## Runtime State
 

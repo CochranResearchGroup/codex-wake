@@ -338,3 +338,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0036-2026-05-21-disposable-app-server-dogfood.md`. Released `v0.4.9` app-server dispatch succeeded against a disposable thread with a persisted rollout; `thread/start`-only targets are not resumable and should not be treated as valid wake targets.
 
 Plan: [Disposable App-Server Dogfood](docs/dev/plans/0031-2026-05-21-disposable-app-server-dogfood.md)
+
+## P32 | App Status Resume Mode
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0037-2026-05-21-app-status-resume-mode.md`. `codex-wake app status --resume` now mirrors the dispatch preflight path with `thread/resume` while default `app status` stays on `thread/read`.
+
+Plan: [App Status Resume Mode](docs/dev/plans/0032-2026-05-21-app-status-resume-mode.md)

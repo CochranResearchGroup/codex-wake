@@ -164,11 +164,20 @@ def thread_summary_from_response(response: dict[str, Any]) -> dict[str, Any]:
     return summary
 
 
-def read_app_server_thread_status(thread_id: str, *, client: AppServerClient | None = None) -> dict[str, Any]:
+def read_app_server_thread_status(
+    thread_id: str,
+    *,
+    client: AppServerClient | None = None,
+    resume: bool = False,
+    cwd: str | None = None,
+) -> dict[str, Any]:
     app_client = client or StdioAppServerClient()
     try:
         app_client.initialize()
-        response = app_client.read_thread(thread_id)
+        if resume:
+            response = app_client.resume_thread(thread_id, cwd=cwd)
+        else:
+            response = app_client.read_thread(thread_id)
         return thread_summary_from_response(response)
     finally:
         if client is None:

@@ -47,6 +47,7 @@ Inspect an app-server thread without starting a turn:
 
 ```bash
 codex-wake app status thread_abc
+codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
 ```
 
@@ -55,6 +56,13 @@ status evidence, and only calls `turn/start` when the resumed thread reports
 `idle`. If the thread reports `active`, Codex Wake requeues the wake with
 backoff instead of starting another turn. Malformed status or non-idle
 unhealthy states fail the wake record visibly.
+
+App-server wake targets must be resumable rollout-backed thread ids. A bare
+`thread/start` response is not enough if no turn has materialized a rollout for
+later resume. Plain `app status` uses `thread/read` and can report `notLoaded`
+for a resumable thread in a fresh stdio app-server process. Use `app status
+--resume` when checking the same path dispatch will use; it calls
+`thread/resume` and reports the resumed status without starting a turn.
 
 ## Source Verification
 

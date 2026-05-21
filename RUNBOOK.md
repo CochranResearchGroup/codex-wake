@@ -1132,3 +1132,37 @@ Completed P31 disposable app-server dogfood.
 - Closed P31 in `ROADMAP.md` and `docs/dev/plans/0031-2026-05-21-disposable-app-server-dogfood.md`.
 
 Best next turn option: commit and push P31, wait for CI, then open a small docs/UX lane to clarify resumable app-server targets and improve `app status` for not-loaded-but-resumable threads.
+
+## Turn 78 | 2026-05-20
+
+Started P32 app status resume mode.
+
+- Re-read planning, runtime-state, agent-runtime, and validation policies.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Added `docs/dev/plans/0032-2026-05-21-app-status-resume-mode.md`.
+- Added read-only `codex-wake app status --resume <thread-id>`.
+- Kept default `app status` on `thread/read`; `--resume` uses `thread/resume` without starting a turn.
+- Updated README and app-server mode docs to clarify resumable rollout-backed app-server wake targets.
+- Added focused app-server and CLI tests for resume-backed status.
+
+Best next turn option: run validation, record P32 evidence, close the lane, then commit and push.
+
+## Turn 79 | 2026-05-20
+
+Completed P32 app status resume mode.
+
+- Ran focused tests:
+  - `PYTHONPATH=src python -m unittest tests.test_app_server`
+  - `PYTHONPATH=src python -m unittest tests.test_cli`
+- Ran source validation:
+  - `PYTHONPATH=src python -m compileall -q src tests`
+  - `PYTHONPATH=src python -m unittest discover -s tests`
+  - `git diff --check`
+- Full suite passed with `79` tests.
+- Smoked source-tree `codex-wake app status --help`.
+- Installed the working tree with `uv tool install --force .`.
+- Smoked installed `codex-wake app status --help`; it shows `--resume`.
+- Recorded evidence in `docs/dev/verification/0037-2026-05-21-app-status-resume-mode.md`.
+- Closed P32 in `ROADMAP.md` and `docs/dev/plans/0032-2026-05-21-app-status-resume-mode.md`.
+
+Best next turn option: commit and push P32, wait for CI, then cut a `v0.4.10` release for `app status --resume`.

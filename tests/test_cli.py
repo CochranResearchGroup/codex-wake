@@ -77,6 +77,25 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["status_type"], "active")
             self.assertEqual(data["active_flags"], ["waitingOnApproval"])
 
+    def test_app_status_can_request_resume_backed_status(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with patch(
+                "codex_wake.cli.read_app_server_thread_status",
+                return_value={
+                    "thread_id": "thread_abc",
+                    "status": {"type": "idle"},
+                    "status_type": "idle",
+                },
+            ) as read_status:
+                code, out, err = self.run_cli(["app", "status", "--resume", "thread_abc"], root)
+
+            self.assertEqual(code, 0, err)
+            read_status.assert_called_once_with("thread_abc", resume=True)
+            self.assertIn("thread_id=thread_abc", out)
+            self.assertIn("status_type=idle", out)
+            self.assertIn("source=thread/resume", out)
+
     def test_file_show_list_and_cancel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

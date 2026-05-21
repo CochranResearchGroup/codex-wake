@@ -117,6 +117,15 @@ class AppServerTests(unittest.TestCase):
             },
         )
 
+    def test_read_app_server_thread_status_can_resume_for_status(self) -> None:
+        client = FakeAppServerClient()
+
+        summary = read_app_server_thread_status("thread_abc", client=client, resume=True, cwd="/tmp/repo")
+
+        self.assertEqual([call[0] for call in client.calls], ["initialize", "thread/resume"])
+        self.assertEqual(summary["thread_id"], "thread_abc")
+        self.assertEqual(summary["status_type"], "idle")
+
     def test_unsupported_endpoint_fails_record(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"

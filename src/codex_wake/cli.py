@@ -72,6 +72,7 @@ def build_parser() -> argparse.ArgumentParser:
     app_status = app_subparsers.add_parser("status", help="read an app-server thread status without starting a turn")
     app_status.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
     app_status.add_argument("--json", action="store_true", dest="as_json")
+    app_status.add_argument("--resume", action="store_true", help="resume the thread before reading status; does not start a turn")
     app_status.add_argument("thread_id")
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
@@ -218,12 +219,13 @@ def create_app(args: argparse.Namespace, root: Path) -> int:
 def app_status(args: argparse.Namespace) -> int:
     if args.endpoint != "stdio://":
         raise WakeError("only app-server endpoint stdio:// is currently implemented")
-    summary = read_app_server_thread_status(args.thread_id)
+    summary = read_app_server_thread_status(args.thread_id, resume=args.resume)
     if args.as_json:
         print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
     print(f"thread_id={summary['thread_id']}")
     print(f"status_type={summary['status_type']}")
+    print(f"source={'thread/resume' if args.resume else 'thread/read'}")
     active_flags = summary.get("active_flags")
     if isinstance(active_flags, list):
         print("active_flags=" + ",".join(str(flag) for flag in active_flags))
