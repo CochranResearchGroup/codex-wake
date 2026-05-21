@@ -133,6 +133,8 @@ Create an app-server-targeted wake instead of a tmux-targeted wake:
 ```bash
 codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
+codex-wake app candidates
+codex-wake app candidates --cwd "$PWD" --json
 codex-wake app status thread_abc
 codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
@@ -197,6 +199,12 @@ plus the earliest pending or firing `next_attempt_at`.
 `codex app-server` for `thread/read` status. Use `app status --resume` to load a
 resumable rollout-backed thread first, which mirrors the dispatch preflight
 without calling `turn/start`.
+
+`app candidates` is also read-only. It scans local Codex session rollout
+metadata under `~/.codex/sessions`, reads only the `session_meta` line from each
+rollout file, and prints recent rollout-backed thread ids. Use `--cwd "$PWD"`
+to narrow candidates to the current repo, then check a candidate with
+`codex-wake app status --resume <thread-id>` before registering a wake.
 
 ## Runtime State
 

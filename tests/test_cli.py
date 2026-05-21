@@ -96,6 +96,54 @@ class CliTests(unittest.TestCase):
             self.assertIn("status_type=idle", out)
             self.assertIn("source=thread/resume", out)
 
+    def test_app_candidates_reports_local_rollout_backed_threads_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            codex_home = Path(tmp) / "codex"
+            session_dir = codex_home / "sessions" / "2026" / "05" / "21"
+            session_dir.mkdir(parents=True)
+            (session_dir / "rollout-2026-05-21T01-00-00-thread_abc.jsonl").write_text(
+                json.dumps(
+                    {
+                        "timestamp": "2026-05-21T01:00:00.000Z",
+                        "type": "session_meta",
+                        "payload": {
+                            "id": "thread_abc",
+                            "timestamp": "2026-05-21T01:00:00.000Z",
+                            "cwd": "/tmp/repo",
+                            "originator": "codex-tui",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            code, out, err = self.run_cli(["app", "candidates", "--codex-home", str(codex_home), "--json"], root)
+
+            self.assertEqual(code, 0, err)
+            data = json.loads(out)
+            self.assertEqual(data[0]["thread_id"], "thread_abc")
+            self.assertEqual(data[0]["cwd"], "/tmp/repo")
+            self.assertEqual(data[0]["resumable_source"], "local_session_rollout")
+
+    def test_app_candidates_text_points_to_resume_status_check(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            codex_home = Path(tmp) / "codex"
+            session_dir = codex_home / "sessions" / "2026" / "05" / "21"
+            session_dir.mkdir(parents=True)
+            (session_dir / "rollout-2026-05-21T01-00-00-thread_abc.jsonl").write_text(
+                json.dumps({"type": "session_meta", "payload": {"id": "thread_abc", "cwd": "/tmp/repo"}}),
+                encoding="utf-8",
+            )
+
+            code, out, err = self.run_cli(["app", "candidates", "--codex-home", str(codex_home)], root)
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("THREAD_ID", out)
+            self.assertIn("thread_abc", out)
+            self.assertIn("codex-wake app status --resume <THREAD_ID>", out)
+
     def test_file_show_list_and_cancel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -1201,3 +1201,22 @@ Published `v0.4.10`.
 - Updated `docs/dev/verification/0038-2026-05-21-v0.4.10-release.md` with public tag and release evidence.
 
 Best next turn option: open P33 for app-server target discovery/status UX, focusing on a read-only way to identify resumable thread ids before registering a wake.
+
+## Turn 82 | 2026-05-20
+
+Completed P33 app-server target discovery.
+
+- Re-read planning, runtime-state, agent-runtime, and validation policies.
+- Added `docs/dev/plans/0033-2026-05-21-app-server-target-discovery.md`.
+- Added `codex-wake app candidates`.
+- Candidate discovery scans local Codex session rollouts under `~/.codex/sessions`, follows the active Codex home symlink, and reads only the first `session_meta` line from each rollout file.
+- Added text output, JSON output, `--cwd`, `--codex-home`, and `--limit`.
+- Updated README and `docs/dev/app-server-mode.md`.
+- Added source tests for candidate discovery, cwd filtering, and CLI output.
+- Ran focused tests, compile, full suite, and diff check.
+- Full suite passed with `83` tests.
+- Smoked source `app candidates --help`, text candidates, and repo-filtered JSON.
+- Installed the working tree with `uv tool install --force .`.
+- Smoked installed `app candidates --help`, text candidates, and repo-filtered JSON.
+
+Best next turn option: commit and push P33, wait for CI, then cut `v0.4.11` if the public tool surface should include target discovery.

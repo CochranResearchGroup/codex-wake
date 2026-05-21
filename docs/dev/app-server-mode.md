@@ -46,6 +46,8 @@ When `turn/start` is accepted, Codex Wake records available response metadata in
 Inspect an app-server thread without starting a turn:
 
 ```bash
+codex-wake app candidates
+codex-wake app candidates --cwd "$PWD" --json
 codex-wake app status thread_abc
 codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
@@ -63,6 +65,13 @@ later resume. Plain `app status` uses `thread/read` and can report `notLoaded`
 for a resumable thread in a fresh stdio app-server process. Use `app status
 --resume` when checking the same path dispatch will use; it calls
 `thread/resume` and reports the resumed status without starting a turn.
+
+`app candidates` scans local Codex session rollout metadata under
+`~/.codex/sessions` and reports recent rollout-backed thread ids. It reads only
+the first `session_meta` line from each rollout file and does not emit prompt or
+transcript body content. Use `--cwd "$PWD"` to narrow the list to a repo, then
+run `codex-wake app status --resume <thread-id>` before registering an
+app-server wake.
 
 ## Source Verification
 
@@ -101,7 +110,6 @@ Local Codex CLI refreshed on 2026-05-20:
 
 The current implementation is suitable for unit-tested stdio dispatch and for future controlled dogfood against a known thread id. It should not yet be treated as a full replacement for the tmux path because:
 
-- the CLI does not yet expose a discovery command for selecting a current app-server thread id;
 - live app-server dispatch has not been dogfooded against a deliberately created disposable thread;
 - current dispatch treats `turn/start` acceptance as the app-server acknowledgement, while tmux dispatch still relies on the Codex hook ack file;
 - thread status preflight is implemented for resumed-thread status, but still needs a live disposable-thread dogfood.

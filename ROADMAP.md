@@ -346,3 +346,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0037-2026-05-21-app-status-resume-mode.md`. `codex-wake app status --resume` now mirrors the dispatch preflight path with `thread/resume` while default `app status` stays on `thread/read`.
 
 Plan: [App Status Resume Mode](docs/dev/plans/0032-2026-05-21-app-status-resume-mode.md)
+
+## P33 | App-Server Target Discovery
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0039-2026-05-21-app-server-target-discovery.md`. `codex-wake app candidates` now lists recent local rollout-backed thread ids from Codex session metadata and points operators to `app status --resume` before wake registration.
+
+Plan: [App-Server Target Discovery](docs/dev/plans/0033-2026-05-21-app-server-target-discovery.md)

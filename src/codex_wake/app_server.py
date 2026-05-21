@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -35,6 +36,20 @@ class AppServerClient(Protocol):
 class AppServerDispatchResult:
     status: str
     message: str
+
+
+@dataclass(frozen=True)
+class AppServerThreadCandidate:
+    thread_id: str
+    cwd: str
+    created_at: str
+    updated_at: str
+    path: str
+    originator: str
+    cli_version: str
+    model_provider: str
+    agent_nickname: str
+    agent_role: str
 
 
 class StdioAppServerClient:
@@ -182,6 +197,71 @@ def read_app_server_thread_status(
     finally:
         if client is None:
             app_client.close()
+
+
+def discover_local_thread_candidates(
+    *,
+    codex_home: Path | None = None,
+    limit: int = 20,
+    cwd: Path | None = None,
+) -> list[AppServerThreadCandidate]:
+    if limit <= 0:
+        raise WakeError("limit must be a positive integer")
+    root = (codex_home or Path.home() / ".codex").expanduser()
+    sessions_root = root / "sessions"
+    if not sessions_root.exists():
+        return []
+    cwd_filter = str(cwd.resolve()) if cwd else None
+    paths: list[Path] = []
+    for dirpath, _, filenames in os.walk(sessions_root, followlinks=True):
+        for filename in filenames:
+            if filename.startswith("rollout-") and filename.endswith(".jsonl"):
+                paths.append(Path(dirpath) / filename)
+    paths.sort(key=lambda path: path.stat().st_mtime if path.exists() else 0, reverse=True)
+    candidates: list[AppServerThreadCandidate] = []
+    for path in paths:
+        candidate = thread_candidate_from_rollout(path)
+        if candidate is None:
+            continue
+        if cwd_filter and candidate.cwd != cwd_filter:
+            continue
+        candidates.append(candidate)
+        if len(candidates) >= limit:
+            break
+    return candidates
+
+
+def thread_candidate_from_rollout(path: Path) -> AppServerThreadCandidate | None:
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            first_line = handle.readline()
+        event = json.loads(first_line)
+        stat = path.stat()
+    except (OSError, IndexError, json.JSONDecodeError):
+        return None
+    if event.get("type") != "session_meta":
+        return None
+    payload = event.get("payload")
+    if not isinstance(payload, dict):
+        return None
+    thread_id = payload.get("id")
+    if not isinstance(thread_id, str) or not thread_id:
+        return None
+    cwd = payload.get("cwd")
+    if not isinstance(cwd, str):
+        cwd = ""
+    return AppServerThreadCandidate(
+        thread_id=thread_id,
+        cwd=cwd,
+        created_at=str(payload.get("timestamp") or event.get("timestamp") or ""),
+        updated_at=format_utc(datetime.fromtimestamp(stat.st_mtime, tz=UTC)),
+        path=str(path),
+        originator=str(payload.get("originator") or ""),
+        cli_version=str(payload.get("cli_version") or ""),
+        model_provider=str(payload.get("model_provider") or ""),
+        agent_nickname=str(payload.get("agent_nickname") or ""),
+        agent_role=str(payload.get("agent_role") or ""),
+    )
 
 
 def app_server_backoff_for_attempt(attempt: int) -> int:

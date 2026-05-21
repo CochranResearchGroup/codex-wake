@@ -7,7 +7,7 @@ import sys
 from datetime import UTC
 from pathlib import Path
 
-from .app_server import read_app_server_thread_status
+from .app_server import discover_local_thread_candidates, read_app_server_thread_status
 from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, hook_review_note, hook_runtime_evidence, install_hook_config
 from .process import process_exists, process_identity
 from .records import (
@@ -74,6 +74,15 @@ def build_parser() -> argparse.ArgumentParser:
     app_status.add_argument("--json", action="store_true", dest="as_json")
     app_status.add_argument("--resume", action="store_true", help="resume the thread before reading status; does not start a turn")
     app_status.add_argument("thread_id")
+
+    app_candidates = app_subparsers.add_parser(
+        "candidates",
+        help="list local rollout-backed thread ids that can be checked with app status --resume",
+    )
+    app_candidates.add_argument("--codex-home", type=Path, default=None, help="Codex home to scan; defaults to ~/.codex")
+    app_candidates.add_argument("--cwd", type=Path, default=None, help="only show candidates created for this working directory")
+    app_candidates.add_argument("--limit", type=int, default=20, help="maximum candidates to print")
+    app_candidates.add_argument("--json", action="store_true", dest="as_json")
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
     file_cmd.add_argument("path")
@@ -198,6 +207,8 @@ def create_at(args: argparse.Namespace, root: Path) -> int:
 def create_app(args: argparse.Namespace, root: Path) -> int:
     if args.app_command == "status":
         return app_status(args)
+    if args.app_command == "candidates":
+        return app_candidates(args)
     now = utc_now()
     if args.app_command == "after":
         due = now + parse_duration(args.duration)
@@ -233,6 +244,37 @@ def app_status(args: argparse.Namespace) -> int:
         print(f"cwd={summary['cwd']}")
     if summary.get("sessionId"):
         print(f"session_id={summary['sessionId']}")
+    return 0
+
+
+def app_candidates(args: argparse.Namespace) -> int:
+    candidates = discover_local_thread_candidates(codex_home=args.codex_home, limit=args.limit, cwd=args.cwd)
+    rows = [
+        {
+            "thread_id": candidate.thread_id,
+            "cwd": candidate.cwd,
+            "created_at": candidate.created_at,
+            "updated_at": candidate.updated_at,
+            "path": candidate.path,
+            "originator": candidate.originator,
+            "cli_version": candidate.cli_version,
+            "model_provider": candidate.model_provider,
+            "agent_nickname": candidate.agent_nickname,
+            "agent_role": candidate.agent_role,
+            "resumable_source": "local_session_rollout",
+        }
+        for candidate in candidates
+    ]
+    if args.as_json:
+        print(json.dumps(rows, indent=2, sort_keys=True))
+        return 0
+    if not rows:
+        print("No local app-server thread candidates found.")
+        return 0
+    print("THREAD_ID\tUPDATED_AT\tCWD")
+    for row in rows:
+        print(f"{row['thread_id']}\t{row['updated_at']}\t{row['cwd']}")
+    print("Use: codex-wake app status --resume <THREAD_ID>")
     return 0
 
 
