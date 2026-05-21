@@ -1316,3 +1316,25 @@ Published `v0.4.12`.
 - Updated `docs/dev/verification/0042-2026-05-21-v0.4.12-release.md` with public tag and release evidence.
 
 Best next turn option: commit and push the final release verification note, wait for CI, then consider a small installed-service audit to confirm the repo-scoped daemon still runs cleanly after the release sequence.
+
+## Turn 88 | 2026-05-20
+
+Completed installed service audit after `v0.4.12`.
+
+- Re-read runtime-state and validation policies.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Confirmed repo wake root was tidy before audit: `active_total=0`, `terminal_total=0`, `archived_total=8`.
+- Verified repo-scoped service unit name `codex-wake-codex-wake.service`.
+- Verified unit was initially `inactive/dead` and `disabled`.
+- Found installed uv tool package metadata still reported `0.4.11`.
+- Refreshed installed uv tool from public tag `v0.4.12`.
+- Verified installed package metadata reports `0.4.12`.
+- Verified installed CLI exposes `app candidates --validate` and `--only-idle`.
+- Reloaded user systemd and started the repo-scoped service without enabling it.
+- Verified service reached `active/running`, `Result=success`, `NRestarts=0`.
+- Stopped the service and restored final state to `inactive/dead` and `disabled`.
+- Verified journal start/stop evidence.
+- Confirmed final wake root remained tidy: `active_total=0`, `terminal_total=0`, `archived_total=8`.
+- Recorded evidence in `docs/dev/verification/0043-2026-05-21-installed-service-audit.md`.
+
+Best next turn option: commit and push the installed-service audit note, wait for CI, then consider a live dogfood wake using the refreshed `v0.4.12` installed runtime only if we want fresh end-to-end proof.
