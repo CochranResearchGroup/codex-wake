@@ -362,3 +362,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0041-2026-05-21-app-candidate-validation.md`. `app candidates --validate` checks local rollout-backed thread ids with resume-backed status, and `--only-idle` filters to candidates whose resumed status is idle.
 
 Plan: [App Candidate Validation](docs/dev/plans/0034-2026-05-21-app-candidate-validation.md)
+
+## P35 | v0.4.12 Installed App Dogfood
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0044-2026-05-21-v0412-installed-app-dogfood.md`. The installed public `v0.4.12` runtime created, fired, app-server-dispatched, submitted, and archived one dogfood wake.
+
+Plan: [v0.4.12 Installed App Dogfood](docs/dev/plans/0035-2026-05-21-v0412-installed-app-dogfood.md)

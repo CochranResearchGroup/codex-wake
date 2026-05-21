@@ -1338,3 +1338,25 @@ Completed installed service audit after `v0.4.12`.
 - Recorded evidence in `docs/dev/verification/0043-2026-05-21-installed-service-audit.md`.
 
 Best next turn option: commit and push the installed-service audit note, wait for CI, then consider a live dogfood wake using the refreshed `v0.4.12` installed runtime only if we want fresh end-to-end proof.
+
+## Turn 89 | 2026-05-21
+
+Completed P35 installed `v0.4.12` app-server dogfood.
+
+- Re-read planning, runtime-state, and validation policies.
+- Added `docs/dev/plans/0035-2026-05-21-v0412-installed-app-dogfood.md`.
+- Confirmed installed uv tool package metadata reports `0.4.12`.
+- Confirmed initial wake root was tidy: `active_total=0`, `terminal_total=0`, `archived_total=8`.
+- Validated repo-local app-server candidates with installed `codex-wake app candidates --cwd "$PWD" --validate --only-idle --json --limit 3`.
+- Selected disposable `codex-wake`-originated candidate `019e4814-febe-7fe3-b2b5-8f23ffe54b5b`, not the active TUI-originated candidate.
+- Created installed-runtime app-server wake `wake_20260521_125018_24fb`.
+- Ran installed `codex-waked --wake-root .codex/wake --once --ack-timeout 10` after the due time.
+- Daemon result: `checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0`.
+- Verified submitted record evidence included `predicate_matched`, `dispatch_attempt`, `app_server_preflight`, and `ack_observed`.
+- Verified dispatch result included app-server turn id `019e4a96-6aef-7b50-9acb-6ac384fa12b4`.
+- Archived the dogfood wake.
+- Confirmed final wake root is tidy: `active_total=0`, `terminal_total=0`, `archived_total=9`.
+- Confirmed repo-scoped service remained `inactive/dead` and `disabled`.
+- Recorded evidence in `docs/dev/verification/0044-2026-05-21-v0412-installed-app-dogfood.md`.
+
+Best next turn option: commit and push P35, wait for CI, then either stop here or plan the next product slice around operator ergonomics for choosing between tmux and app-server wake targets.
