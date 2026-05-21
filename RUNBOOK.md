@@ -1279,3 +1279,24 @@ Completed P34 app candidate validation.
 - Smoked installed repo-filtered `--validate --only-idle --json`; both local candidates resumed idle.
 
 Best next turn option: commit and push P34, wait for CI, then cut `v0.4.12` if validated candidate discovery should be available from the public release.
+
+## Turn 86 | 2026-05-20
+
+Started the `v0.4.12` release for validated app-server candidate discovery.
+
+- Re-read release and validation policies.
+- Bumped `pyproject.toml` to `0.4.12`.
+- Added `docs/releases/v0.4.12.md`.
+- Added `docs/dev/verification/0042-2026-05-21-v0.4.12-release.md`.
+- Ran source validation:
+  - `PYTHONPATH=src python -m compileall -q src tests`
+  - `PYTHONPATH=src python -m unittest discover -s tests`
+  - `git diff --check`
+- Full suite passed with `86` tests.
+- Built source and wheel distributions for `0.4.12`.
+- Installed the wheel into `/tmp/codex-wake-v0412-install`.
+- Verified installed package version `0.4.12`.
+- Verified installed `codex-wake app candidates --help` exposes `--validate` and `--only-idle`.
+- Verified installed repo-filtered `codex-wake app candidates --cwd "$PWD" --validate --only-idle --json --limit 2`; both local candidates resumed idle.
+
+Best next turn option: commit, tag, and push `v0.4.12`; wait for CI; run a clean public tag install smoke; then publish the GitHub release.
