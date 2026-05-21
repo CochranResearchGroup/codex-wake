@@ -135,6 +135,7 @@ codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
 codex-wake app candidates
 codex-wake app candidates --cwd "$PWD" --json
+codex-wake app candidates --cwd "$PWD" --validate --only-idle --json
 codex-wake app status thread_abc
 codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
@@ -205,6 +206,9 @@ metadata under `~/.codex/sessions`, reads only the `session_meta` line from each
 rollout file, and prints recent rollout-backed thread ids. Use `--cwd "$PWD"`
 to narrow candidates to the current repo, then check a candidate with
 `codex-wake app status --resume <thread-id>` before registering a wake.
+Use `--validate` to run that resume-backed status check for every listed
+candidate without starting turns. Add `--only-idle` to print only candidates
+whose resumed status is `idle`.
 
 ## Runtime State
 

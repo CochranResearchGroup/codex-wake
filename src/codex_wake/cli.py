@@ -82,6 +82,8 @@ def build_parser() -> argparse.ArgumentParser:
     app_candidates.add_argument("--codex-home", type=Path, default=None, help="Codex home to scan; defaults to ~/.codex")
     app_candidates.add_argument("--cwd", type=Path, default=None, help="only show candidates created for this working directory")
     app_candidates.add_argument("--limit", type=int, default=20, help="maximum candidates to print")
+    app_candidates.add_argument("--validate", action="store_true", help="check each candidate with thread/resume without starting a turn")
+    app_candidates.add_argument("--only-idle", action="store_true", help="with --validate, only print candidates whose resumed status is idle")
     app_candidates.add_argument("--json", action="store_true", dest="as_json")
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
@@ -248,9 +250,12 @@ def app_status(args: argparse.Namespace) -> int:
 
 
 def app_candidates(args: argparse.Namespace) -> int:
+    if args.only_idle and not args.validate:
+        raise WakeError("--only-idle requires --validate")
     candidates = discover_local_thread_candidates(codex_home=args.codex_home, limit=args.limit, cwd=args.cwd)
-    rows = [
-        {
+    rows = []
+    for candidate in candidates:
+        row = {
             "thread_id": candidate.thread_id,
             "cwd": candidate.cwd,
             "created_at": candidate.created_at,
@@ -262,18 +267,41 @@ def app_candidates(args: argparse.Namespace) -> int:
             "agent_nickname": candidate.agent_nickname,
             "agent_role": candidate.agent_role,
             "resumable_source": "local_session_rollout",
+            "validation": "unchecked",
         }
-        for candidate in candidates
-    ]
+        if args.validate:
+            try:
+                summary = read_app_server_thread_status(
+                    candidate.thread_id,
+                    resume=True,
+                    cwd=candidate.cwd or None,
+                )
+            except WakeError as exc:
+                row["validation"] = "resume_failed"
+                row["validation_error"] = str(exc)
+            else:
+                row["validation"] = "resume_ok"
+                row["status_type"] = summary.get("status_type", "")
+                row["status"] = summary.get("status", {})
+        if args.only_idle and row.get("status_type") != "idle":
+            continue
+        rows.append(row)
     if args.as_json:
         print(json.dumps(rows, indent=2, sort_keys=True))
         return 0
     if not rows:
         print("No local app-server thread candidates found.")
         return 0
-    print("THREAD_ID\tUPDATED_AT\tCWD")
-    for row in rows:
-        print(f"{row['thread_id']}\t{row['updated_at']}\t{row['cwd']}")
+    if args.validate:
+        print("THREAD_ID\tVALIDATION\tSTATUS\tUPDATED_AT\tCWD")
+        for row in rows:
+            print(
+                f"{row['thread_id']}\t{row['validation']}\t{row.get('status_type', '')}\t{row['updated_at']}\t{row['cwd']}"
+            )
+    else:
+        print("THREAD_ID\tUPDATED_AT\tCWD")
+        for row in rows:
+            print(f"{row['thread_id']}\t{row['updated_at']}\t{row['cwd']}")
     print("Use: codex-wake app status --resume <THREAD_ID>")
     return 0
 

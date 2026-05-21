@@ -48,6 +48,7 @@ Inspect an app-server thread without starting a turn:
 ```bash
 codex-wake app candidates
 codex-wake app candidates --cwd "$PWD" --json
+codex-wake app candidates --cwd "$PWD" --validate --only-idle --json
 codex-wake app status thread_abc
 codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
@@ -71,7 +72,9 @@ for a resumable thread in a fresh stdio app-server process. Use `app status
 the first `session_meta` line from each rollout file and does not emit prompt or
 transcript body content. Use `--cwd "$PWD"` to narrow the list to a repo, then
 run `codex-wake app status --resume <thread-id>` before registering an
-app-server wake.
+app-server wake. `app candidates --validate` performs the same resume-backed
+status check for each candidate without starting turns; `--only-idle` filters to
+candidates that resume to an idle status.
 
 ## Source Verification
 

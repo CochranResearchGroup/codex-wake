@@ -354,3 +354,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0039-2026-05-21-app-server-target-discovery.md`. `codex-wake app candidates` now lists recent local rollout-backed thread ids from Codex session metadata and points operators to `app status --resume` before wake registration.
 
 Plan: [App-Server Target Discovery](docs/dev/plans/0033-2026-05-21-app-server-target-discovery.md)
+
+## P34 | App Candidate Validation
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0041-2026-05-21-app-candidate-validation.md`. `app candidates --validate` checks local rollout-backed thread ids with resume-backed status, and `--only-idle` filters to candidates whose resumed status is idle.
+
+Plan: [App Candidate Validation](docs/dev/plans/0034-2026-05-21-app-candidate-validation.md)

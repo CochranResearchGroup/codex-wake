@@ -1257,3 +1257,25 @@ Published `v0.4.11`.
 - Updated `docs/dev/verification/0040-2026-05-21-v0.4.11-release.md` with public tag and release evidence.
 
 Best next turn option: commit and push the final release verification note, wait for CI, then open a follow-up lane to make `app candidates --cwd "$PWD"` optionally validate each candidate with `app status --resume`.
+
+## Turn 85 | 2026-05-20
+
+Completed P34 app candidate validation.
+
+- Re-read planning, agent-runtime, and validation policies.
+- Added `docs/dev/plans/0034-2026-05-21-app-candidate-validation.md`.
+- Added `codex-wake app candidates --validate`.
+- Added `codex-wake app candidates --validate --only-idle`.
+- Validation uses `thread/resume` status checks and does not call `turn/start`.
+- Added JSON validation fields and row-local resume failure reporting.
+- Updated README and `docs/dev/app-server-mode.md`.
+- Added CLI tests for validation, idle filtering, and invalid flag combinations.
+- Ran focused tests, compile, full suite, and diff check.
+- Full suite passed with `86` tests.
+- Smoked source `app candidates --help`.
+- Smoked source repo-filtered `--validate --json` and `--validate --only-idle --json`; both local candidates resumed idle.
+- Installed the working tree with `uv tool install --force .`.
+- Smoked installed `app candidates --help`.
+- Smoked installed repo-filtered `--validate --only-idle --json`; both local candidates resumed idle.
+
+Best next turn option: commit and push P34, wait for CI, then cut `v0.4.12` if validated candidate discovery should be available from the public release.

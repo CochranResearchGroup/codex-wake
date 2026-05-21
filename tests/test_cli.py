@@ -144,6 +144,70 @@ class CliTests(unittest.TestCase):
             self.assertIn("thread_abc", out)
             self.assertIn("codex-wake app status --resume <THREAD_ID>", out)
 
+    def test_app_candidates_can_validate_with_resume_status(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            codex_home = Path(tmp) / "codex"
+            session_dir = codex_home / "sessions" / "2026" / "05" / "21"
+            session_dir.mkdir(parents=True)
+            (session_dir / "rollout-2026-05-21T01-00-00-thread_abc.jsonl").write_text(
+                json.dumps({"type": "session_meta", "payload": {"id": "thread_abc", "cwd": "/tmp/repo"}}),
+                encoding="utf-8",
+            )
+            with patch(
+                "codex_wake.cli.read_app_server_thread_status",
+                return_value={
+                    "thread_id": "thread_abc",
+                    "status": {"type": "idle"},
+                    "status_type": "idle",
+                },
+            ) as read_status:
+                code, out, err = self.run_cli(
+                    ["app", "candidates", "--codex-home", str(codex_home), "--validate", "--json"],
+                    root,
+                )
+
+            self.assertEqual(code, 0, err)
+            read_status.assert_called_once_with("thread_abc", resume=True, cwd="/tmp/repo")
+            data = json.loads(out)
+            self.assertEqual(data[0]["validation"], "resume_ok")
+            self.assertEqual(data[0]["status_type"], "idle")
+            self.assertEqual(data[0]["status"], {"type": "idle"})
+
+    def test_app_candidates_only_idle_filters_validated_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            codex_home = Path(tmp) / "codex"
+            session_dir = codex_home / "sessions" / "2026" / "05" / "21"
+            session_dir.mkdir(parents=True)
+            for thread_id in ("thread_idle", "thread_active"):
+                (session_dir / f"rollout-{thread_id}.jsonl").write_text(
+                    json.dumps({"type": "session_meta", "payload": {"id": thread_id, "cwd": "/tmp/repo"}}),
+                    encoding="utf-8",
+                )
+
+            def fake_status(thread_id: str, *, resume: bool, cwd: str | None = None) -> dict:
+                status_type = "idle" if thread_id == "thread_idle" else "active"
+                return {"thread_id": thread_id, "status": {"type": status_type}, "status_type": status_type}
+
+            with patch("codex_wake.cli.read_app_server_thread_status", side_effect=fake_status):
+                code, out, err = self.run_cli(
+                    ["app", "candidates", "--codex-home", str(codex_home), "--validate", "--only-idle", "--json"],
+                    root,
+                )
+
+            self.assertEqual(code, 0, err)
+            data = json.loads(out)
+            self.assertEqual([row["thread_id"] for row in data], ["thread_idle"])
+
+    def test_app_candidates_only_idle_requires_validate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            code, _, err = self.run_cli(["app", "candidates", "--only-idle"], root)
+
+            self.assertEqual(code, 2)
+            self.assertIn("--only-idle requires --validate", err)
+
     def test_file_show_list_and_cancel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
