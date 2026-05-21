@@ -1241,3 +1241,19 @@ Started the `v0.4.11` release for app-server target discovery.
 - Verified installed repo-filtered `codex-wake app candidates --cwd "$PWD" --json --limit 2`.
 
 Best next turn option: commit, tag, and push `v0.4.11`; wait for CI; run a clean public tag install smoke; then publish the GitHub release.
+
+## Turn 84 | 2026-05-20
+
+Published `v0.4.11`.
+
+- Committed release prep as `7f9e001`.
+- Tagged and pushed `v0.4.11`.
+- Verified branch CI run `26201481308` passed on Python 3.11 and 3.12.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.11`.
+- Confirmed public tag install reports package version `0.4.11`.
+- Smoked public tag `codex-wake app candidates --help`.
+- Smoked public tag repo-filtered `codex-wake app candidates --cwd "$PWD" --json --limit 2`.
+- Published GitHub release `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.11`.
+- Updated `docs/dev/verification/0040-2026-05-21-v0.4.11-release.md` with public tag and release evidence.
+
+Best next turn option: commit and push the final release verification note, wait for CI, then open a follow-up lane to make `app candidates --cwd "$PWD"` optionally validate each candidate with `app status --resume`.
