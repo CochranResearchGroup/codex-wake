@@ -1186,3 +1186,18 @@ Prepared the `v0.4.10` release for app-server status resume mode.
 - Verified installed `codex-wake app status --help` shows `--resume`.
 
 Best next turn option: commit, tag, and push `v0.4.10`; wait for CI; run a clean public tag install smoke; then publish the GitHub release.
+
+## Turn 81 | 2026-05-20
+
+Published `v0.4.10`.
+
+- Committed release prep as `f58e15f`.
+- Tagged and pushed `v0.4.10`.
+- Verified branch CI run `26199800551` passed on Python 3.11 and 3.12.
+- Ran clean public tag install smoke from `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.10`.
+- Confirmed public tag install reports package version `0.4.10`.
+- Smoked public tag `codex-wake app status --help`; it shows `--resume`.
+- Published GitHub release `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.10`.
+- Updated `docs/dev/verification/0038-2026-05-21-v0.4.10-release.md` with public tag and release evidence.
+
+Best next turn option: open P33 for app-server target discovery/status UX, focusing on a read-only way to identify resumable thread ids before registering a wake.
