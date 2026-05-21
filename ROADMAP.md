@@ -330,3 +330,11 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0034-2026-05-21-app-server-thread-status-preflight.md`. `codex-wake app status` reads app-server thread status without starting a turn, and app-server dispatch now starts `turn/start` only after an idle resumed-thread preflight.
 
 Plan: [App-Server Thread Status Preflight](docs/dev/plans/0030-2026-05-21-app-server-thread-status-preflight.md)
+
+## P31 | Disposable App-Server Dogfood
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0036-2026-05-21-disposable-app-server-dogfood.md`. Released `v0.4.9` app-server dispatch succeeded against a disposable thread with a persisted rollout; `thread/start`-only targets are not resumable and should not be treated as valid wake targets.
+
+Plan: [Disposable App-Server Dogfood](docs/dev/plans/0031-2026-05-21-disposable-app-server-dogfood.md)

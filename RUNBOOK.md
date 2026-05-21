@@ -1096,3 +1096,39 @@ Published and verified `v0.4.9`.
 - Updated `docs/dev/verification/0035-2026-05-21-v0.4.9-release.md` with public tag and release evidence.
 
 Best next turn option: commit and push the final release verification note, wait for CI, then open a disposable-thread app-server dogfood lane.
+
+## Turn 76 | 2026-05-20
+
+Opened P31 for disposable app-server dogfood.
+
+- Re-read planning, runtime-state, agent-runtime, and validation policies.
+- Used memory guidance to keep app-server dispatch local-auth/minimal and to distinguish installed runtime from source-tree behavior.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Confirmed local Codex CLI is `codex-cli 0.131.0`.
+- Regenerated local app-server schema and confirmed `ThreadStartParams` and `ThreadStartResponse` are available.
+- Confirmed repo wake root is tidy: `active_total=0`, `terminal_total=0`, `archived_total=6`.
+- Added `docs/dev/plans/0031-2026-05-21-disposable-app-server-dogfood.md`.
+- Marked P31 active in `ROADMAP.md`.
+
+Best next turn option: create one disposable app-server thread, run a short app-server-targeted wake in a temporary wake root, verify preflight/submission events, archive it, and close P31.
+
+## Turn 77 | 2026-05-20
+
+Completed P31 disposable app-server dogfood.
+
+- Refreshed the user-scoped installed tool from public `v0.4.9`.
+- Created disposable thread `019e4813-b4da-7b80-9e45-03123c3eb57b` with `thread/start` only.
+- Verified `codex-wake app status --json` failed for that thread from a fresh stdio app-server process with `thread not loaded`.
+- Registered wake `wake_20260521_010911_f2d9`; dispatch failed with `no rollout found for thread id`.
+- Created disposable thread `019e4814-febe-7fe3-b2b5-8f23ffe54b5b`, started one bootstrap turn, and waited for it to return idle.
+- Verified fresh `codex-wake app status --json` reported that persisted thread as `notLoaded`.
+- Registered wake `wake_20260521_011040_bd20`.
+- Ran `codex-waked --wake-root .codex/wake --once --ack-timeout 10`.
+- Verified daemon result `checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0`.
+- Verified the wake record showed `predicate_matched`, `dispatch_attempt`, `app_server_preflight` with idle status, and `ack_observed` with turn id `019e4815-eddb-79f2-a374-615bcd974284`.
+- Archived both P31 terminal dogfood wake records.
+- Confirmed final wake status reports `active_total=0`, `terminal_total=0`, and `archived_total=8`.
+- Recorded evidence in `docs/dev/verification/0036-2026-05-21-disposable-app-server-dogfood.md`.
+- Closed P31 in `ROADMAP.md` and `docs/dev/plans/0031-2026-05-21-disposable-app-server-dogfood.md`.
+
+Best next turn option: commit and push P31, wait for CI, then open a small docs/UX lane to clarify resumable app-server targets and improve `app status` for not-loaded-but-resumable threads.
