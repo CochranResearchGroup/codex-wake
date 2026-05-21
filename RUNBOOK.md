@@ -1166,3 +1166,23 @@ Completed P32 app status resume mode.
 - Closed P32 in `ROADMAP.md` and `docs/dev/plans/0032-2026-05-21-app-status-resume-mode.md`.
 
 Best next turn option: commit and push P32, wait for CI, then cut a `v0.4.10` release for `app status --resume`.
+
+## Turn 80 | 2026-05-20
+
+Prepared the `v0.4.10` release for app-server status resume mode.
+
+- Re-read release and validation policies.
+- Bumped `pyproject.toml` to `0.4.10`.
+- Added `docs/releases/v0.4.10.md`.
+- Added `docs/dev/verification/0038-2026-05-21-v0.4.10-release.md`.
+- Ran source validation:
+  - `PYTHONPATH=src python -m compileall -q src tests`
+  - `PYTHONPATH=src python -m unittest discover -s tests`
+  - `git diff --check`
+- Full suite passed with `79` tests.
+- Built source and wheel distributions for `0.4.10`.
+- Installed the wheel into `/tmp/codex-wake-v0410-install`.
+- Verified installed package version `0.4.10`.
+- Verified installed `codex-wake app status --help` shows `--resume`.
+
+Best next turn option: commit, tag, and push `v0.4.10`; wait for CI; run a clean public tag install smoke; then publish the GitHub release.
