@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -29,6 +30,26 @@ class HookCheck:
 
 
 @dataclass(frozen=True)
+class HookSourceCheck:
+    scope: str
+    path: Path
+    exists: bool
+    valid_json: bool
+    installed: bool
+    command: str
+    message: str
+
+
+@dataclass(frozen=True)
+class HookSources:
+    project: HookSourceCheck
+    user: HookSourceCheck
+    installed_scopes: tuple[str, ...]
+    duplicate_installed: bool
+    overlap_warning: str
+
+
+@dataclass(frozen=True)
 class HookRuntimeEvidence:
     ack_count: int
     active_session_loaded: str
@@ -44,6 +65,13 @@ def hook_review_note() -> str:
 
 def hook_path_for_repo(repo_root: Path) -> Path:
     return repo_root.resolve() / ".codex" / "hooks.json"
+
+
+def user_hook_path(codex_home: Path | None = None) -> Path:
+    if codex_home is None:
+        env_home = os.environ.get("CODEX_HOME")
+        codex_home = Path(env_home).expanduser() if env_home else Path.home() / ".codex"
+    return codex_home.expanduser().resolve() / "hooks.json"
 
 
 def hook_entry(command: str = DEFAULT_HOOK_COMMAND) -> dict[str, Any]:
@@ -109,20 +137,74 @@ def install_hook_config(repo_root: Path, command: str = DEFAULT_HOOK_COMMAND) ->
 
 def check_hook_config(repo_root: Path, command: str = DEFAULT_HOOK_COMMAND) -> HookCheck:
     path = hook_path_for_repo(repo_root)
+    check = check_hook_file(path, command, scope="project")
+    return HookCheck(
+        path=check.path,
+        exists=check.exists,
+        valid_json=check.valid_json,
+        installed=check.installed,
+        command=check.command,
+        message=check.message,
+    )
+
+
+def check_hook_file(path: Path, command: str = DEFAULT_HOOK_COMMAND, *, scope: str) -> HookSourceCheck:
     if not path.exists():
-        return HookCheck(path=path, exists=False, valid_json=False, installed=False, command=command, message="missing")
+        return HookSourceCheck(
+            scope=scope,
+            path=path,
+            exists=False,
+            valid_json=False,
+            installed=False,
+            command=command,
+            message="missing",
+        )
     try:
         config = load_hook_config(path)
     except WakeError as exc:
-        return HookCheck(path=path, exists=True, valid_json=False, installed=False, command=command, message=str(exc))
+        return HookSourceCheck(
+            scope=scope,
+            path=path,
+            exists=True,
+            valid_json=False,
+            installed=False,
+            command=command,
+            message=str(exc),
+        )
     installed = contains_hook_command(config, command)
-    return HookCheck(
+    return HookSourceCheck(
+        scope=scope,
         path=path,
         exists=True,
         valid_json=True,
         installed=installed,
         command=command,
         message="installed" if installed else "expected hook command missing",
+    )
+
+
+def check_hook_sources(
+    repo_root: Path,
+    command: str = DEFAULT_HOOK_COMMAND,
+    *,
+    codex_home: Path | None = None,
+) -> HookSources:
+    project = check_hook_file(hook_path_for_repo(repo_root), command, scope="project")
+    user = check_hook_file(user_hook_path(codex_home), command, scope="user")
+    installed_scopes = tuple(check.scope for check in (project, user) if check.installed)
+    duplicate_installed = len(installed_scopes) > 1
+    overlap_warning = ""
+    if duplicate_installed:
+        overlap_warning = (
+            "codex-wake-hook is installed in both project and user hook sources; "
+            "Codex may run both and inject duplicate wake context."
+        )
+    return HookSources(
+        project=project,
+        user=user,
+        installed_scopes=installed_scopes,
+        duplicate_installed=duplicate_installed,
+        overlap_warning=overlap_warning,
     )
 
 

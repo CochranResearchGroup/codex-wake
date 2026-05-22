@@ -5,7 +5,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from codex_wake.hook_config import check_hook_config, contains_hook_command, hook_review_note, hook_runtime_evidence, install_hook_config
+from codex_wake.hook_config import (
+    check_hook_config,
+    check_hook_sources,
+    contains_hook_command,
+    hook_entry,
+    hook_review_note,
+    hook_runtime_evidence,
+    install_hook_config,
+)
 
 
 class HookConfigTests(unittest.TestCase):
@@ -54,6 +62,49 @@ class HookConfigTests(unittest.TestCase):
         self.assertIn("/hooks", note)
         self.assertIn("does not list", note)
         self.assertIn("restart or resume", note)
+
+    def test_check_hook_sources_detects_project_user_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            codex_home = base / "codex-home"
+            repo.mkdir()
+            install_hook_config(repo)
+            user_hook = codex_home / "hooks.json"
+            user_hook.parent.mkdir()
+            user_hook.write_text(
+                json.dumps({"hooks": {"UserPromptSubmit": [{"hooks": [hook_entry("codex-wake-hook")]}]}}),
+                encoding="utf-8",
+            )
+
+            sources = check_hook_sources(repo, codex_home=codex_home)
+
+            self.assertTrue(sources.project.installed)
+            self.assertTrue(sources.user.installed)
+            self.assertEqual(sources.installed_scopes, ("project", "user"))
+            self.assertTrue(sources.duplicate_installed)
+            self.assertIn("duplicate wake context", sources.overlap_warning)
+
+    def test_check_hook_sources_reports_user_only_install(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            codex_home = base / "codex-home"
+            repo.mkdir()
+            user_hook = codex_home / "hooks.json"
+            user_hook.parent.mkdir()
+            user_hook.write_text(
+                json.dumps({"hooks": {"UserPromptSubmit": [{"hooks": [hook_entry("codex-wake-hook")]}]}}),
+                encoding="utf-8",
+            )
+
+            sources = check_hook_sources(repo, codex_home=codex_home)
+
+            self.assertFalse(sources.project.installed)
+            self.assertTrue(sources.user.installed)
+            self.assertEqual(sources.installed_scopes, ("user",))
+            self.assertFalse(sources.duplicate_installed)
+            self.assertEqual(sources.overlap_warning, "")
 
     def test_hook_runtime_evidence_reports_unknown_without_ack(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

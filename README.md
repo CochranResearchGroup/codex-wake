@@ -57,6 +57,10 @@ codex-wake hook check
 `.codex/wake/acks/`. If no ack exists, the active TUI hook-loaded state is
 reported as `unknown_without_ack`; that is not proof that tmux injection failed.
 Codex may show the hook source under `UserPromptHooks` during `/hooks` review.
+It also reports whether the same `codex-wake-hook` command is present in both
+the project hook file and the user hook file at `$CODEX_HOME/hooks.json` or
+`~/.codex/hooks.json`. If both sources are installed, Codex may run both and
+inject duplicate wake context for the same submitted prompt.
 
 This writes or checks this `.codex/hooks.json` shape:
 
@@ -173,7 +177,9 @@ codex-wake doctor --json
 `doctor` prints the same hook ack evidence as `hook check`, including the latest
 ack wake id, submitted timestamp, and session id when available. Use
 `doctor --json` when automation needs command, tmux, hook, ack, and service
-readiness without parsing text output.
+readiness without parsing text output. The report also includes hook source
+overlap fields so operators can see when both project and user hook sources are
+enabled for `codex-wake-hook`.
 
 Inspect and manage wakes:
 

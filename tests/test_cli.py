@@ -556,21 +556,27 @@ class CliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             root = repo / ".codex" / "wake"
+            codex_home = repo / "codex-home"
             stdout = io.StringIO()
             stderr = io.StringIO()
-            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                code = cli.main(["--wake-root", str(root), "hook", "install", "--repo-root", str(repo)])
+            with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = cli.main(["--wake-root", str(root), "hook", "install", "--repo-root", str(repo)])
             self.assertEqual(code, 0, stderr.getvalue())
             self.assertIn("installed hook config", stdout.getvalue())
 
             stdout = io.StringIO()
             stderr = io.StringIO()
-            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                code = cli.main(["--wake-root", str(root), "hook", "check", "--repo-root", str(repo)])
+            with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = cli.main(["--wake-root", str(root), "hook", "check", "--repo-root", str(repo)])
             self.assertEqual(code, 0, stderr.getvalue())
             self.assertIn("installed=true", stdout.getvalue())
             self.assertIn("/hooks review", stdout.getvalue())
             self.assertIn("does not list", stdout.getvalue())
+            self.assertIn("hook_project_config_installed=true", stdout.getvalue())
+            self.assertIn("hook_user_config_installed=false", stdout.getvalue())
+            self.assertIn("hook_duplicate_install=false", stdout.getvalue())
             self.assertIn("hook_ack_count=0", stdout.getvalue())
             self.assertIn("hook_active_session_loaded=unknown_without_ack", stdout.getvalue())
 
@@ -578,18 +584,22 @@ class CliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             root = repo / ".codex" / "wake"
+            codex_home = repo / "codex-home"
             stdout = io.StringIO()
             stderr = io.StringIO()
             with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
                 with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
-                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                        code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo)])
+                    with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                            code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo)])
             self.assertEqual(code, 0, stderr.getvalue())
             output = stdout.getvalue()
             self.assertIn(f"repo_root={repo}", output)
             self.assertIn(f"wake_root={root}", output)
             self.assertIn("codex_waked=/usr/bin/codex-waked", output)
             self.assertIn("hook_config_installed=false", output)
+            self.assertIn("hook_user_config_installed=false", output)
+            self.assertIn("hook_duplicate_install=false", output)
             self.assertIn("hook_active_session_loaded=unknown_without_ack", output)
             self.assertIn("service_active=inactive", output)
             self.assertIn("restart or resume", output)
@@ -598,6 +608,7 @@ class CliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             root = repo / ".codex" / "wake"
+            codex_home = repo / "codex-home"
             ack_dir = root / "acks"
             ack_dir.mkdir(parents=True)
             (ack_dir / "wake_seen.submitted").write_text(
@@ -614,8 +625,9 @@ class CliTests(unittest.TestCase):
             stderr = io.StringIO()
             with patch("codex_wake.cli.service_status", return_value=("active", "enabled")):
                 with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
-                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                        code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
+                    with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                            code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
 
             self.assertEqual(code, 0, stderr.getvalue())
             data = json.loads(stdout.getvalue())
@@ -624,11 +636,50 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["commands"]["codex_waked"], "/usr/bin/codex-waked")
             self.assertEqual(data["commands"]["tmux"], "/usr/bin/tmux")
             self.assertFalse(data["hook_config"]["installed"])
+            self.assertFalse(data["hook_sources"]["project"]["installed"])
+            self.assertFalse(data["hook_sources"]["user"]["installed"])
+            self.assertFalse(data["hook_sources"]["duplicate_installed"])
             self.assertEqual(data["hook_runtime"]["ack_count"], 1)
             self.assertEqual(data["hook_runtime"]["active_session_loaded"], "observed_ack")
             self.assertEqual(data["hook_runtime"]["latest_ack_wake_id"], "wake_seen")
             self.assertEqual(data["service"]["active"], "active")
             self.assertIn("restart or resume", data["trust"])
+
+    def test_doctor_json_reports_duplicate_hook_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            codex_home = Path(tmp) / "codex-home"
+            root = repo / ".codex" / "wake"
+            repo.mkdir()
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.main(["--wake-root", str(root), "hook", "install", "--repo-root", str(repo)])
+            user_hook = codex_home / "hooks.json"
+            user_hook.parent.mkdir()
+            user_hook.write_text(
+                json.dumps(
+                    {
+                        "hooks": {
+                            "UserPromptSubmit": [
+                                {"hooks": [{"type": "command", "command": "codex-wake-hook"}]}
+                            ]
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
+                with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
+                    with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                            code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            data = json.loads(stdout.getvalue())
+            self.assertEqual(data["hook_sources"]["installed_scopes"], ["project", "user"])
+            self.assertTrue(data["hook_sources"]["duplicate_installed"])
+            self.assertIn("duplicate wake context", data["hook_sources"]["overlap_warning"])
 
     def test_hook_check_reports_latest_ack_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

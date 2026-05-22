@@ -8,7 +8,15 @@ from datetime import UTC
 from pathlib import Path
 
 from .app_server import discover_local_thread_candidates, read_app_server_thread_status
-from .hook_config import DEFAULT_HOOK_COMMAND, check_hook_config, hook_review_note, hook_runtime_evidence, install_hook_config
+from .hook_config import (
+    DEFAULT_HOOK_COMMAND,
+    HookSourceCheck,
+    check_hook_config,
+    check_hook_sources,
+    hook_review_note,
+    hook_runtime_evidence,
+    install_hook_config,
+)
 from .process import process_exists, process_identity
 from .records import (
     WakeError,
@@ -575,6 +583,31 @@ def print_hook_runtime_evidence(root: Path) -> None:
     print("hook_loaded_note=ack evidence proves a hook ran only after a wake prompt was submitted")
 
 
+def hook_source_to_dict(check: HookSourceCheck) -> dict[str, object]:
+    return {
+        "scope": check.scope,
+        "path": str(check.path),
+        "exists": check.exists,
+        "valid_json": check.valid_json,
+        "installed": check.installed,
+        "command": check.command,
+        "message": check.message,
+    }
+
+
+def print_hook_sources(repo_root: Path, command: str) -> None:
+    sources = check_hook_sources(repo_root, command)
+    print(f"hook_project_config={sources.project.path}")
+    print(f"hook_project_config_exists={str(sources.project.exists).lower()}")
+    print(f"hook_project_config_installed={str(sources.project.installed).lower()}")
+    print(f"hook_user_config={sources.user.path}")
+    print(f"hook_user_config_exists={str(sources.user.exists).lower()}")
+    print(f"hook_user_config_installed={str(sources.user.installed).lower()}")
+    print(f"hook_installed_scopes={','.join(sources.installed_scopes)}")
+    print(f"hook_duplicate_install={str(sources.duplicate_installed).lower()}")
+    print(f"hook_overlap_warning={sources.overlap_warning}")
+
+
 def hook_command(args: argparse.Namespace, root: Path) -> int:
     repo_root = (args.repo_root or Path.cwd()).resolve()
     if args.hook_command == "install":
@@ -592,6 +625,7 @@ def hook_command(args: argparse.Namespace, root: Path) -> int:
         print(f"command={check.command}")
         print(f"message={check.message}")
         print(f"trust={hook_review_note()}")
+        print_hook_sources(repo_root, args.hook_command_text)
         print_hook_runtime_evidence(root)
         return 0 if check.installed else 1
     raise WakeError(f"unknown hook command: {args.hook_command}")
@@ -600,6 +634,7 @@ def hook_command(args: argparse.Namespace, root: Path) -> int:
 def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
     repo_root = (args.repo_root or Path.cwd()).resolve()
     hook_check = check_hook_config(repo_root, args.hook_command)
+    hook_sources = check_hook_sources(repo_root, args.hook_command)
     config = service_config_for_args(args, root)
     codex_wake = shutil.which("codex-wake") or ""
     codex_waked = shutil.which("codex-waked") or ""
@@ -626,6 +661,13 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
             "installed": hook_check.installed,
             "command": hook_check.command,
             "message": hook_check.message,
+        },
+        "hook_sources": {
+            "project": hook_source_to_dict(hook_sources.project),
+            "user": hook_source_to_dict(hook_sources.user),
+            "installed_scopes": list(hook_sources.installed_scopes),
+            "duplicate_installed": hook_sources.duplicate_installed,
+            "overlap_warning": hook_sources.overlap_warning,
         },
         "hook_runtime": {
             "ack_count": hook_evidence.ack_count,
@@ -655,10 +697,12 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     commands = summary["commands"]
     hook_config = summary["hook_config"]
     hook_runtime = summary["hook_runtime"]
+    hook_sources = summary["hook_sources"]
     service = summary["service"]
     assert isinstance(commands, dict)
     assert isinstance(hook_config, dict)
     assert isinstance(hook_runtime, dict)
+    assert isinstance(hook_sources, dict)
     assert isinstance(service, dict)
     print(f"repo_root={summary['repo_root']}")
     print(f"wake_root={summary['wake_root']}")
@@ -671,6 +715,12 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     print(f"hook_config_valid_json={str(hook_config['valid_json']).lower()}")
     print(f"hook_config_installed={str(hook_config['installed']).lower()}")
     print(f"hook_command={hook_config['command']}")
+    print(f"hook_user_config={hook_sources['user']['path']}")
+    print(f"hook_user_config_exists={str(hook_sources['user']['exists']).lower()}")
+    print(f"hook_user_config_installed={str(hook_sources['user']['installed']).lower()}")
+    print(f"hook_installed_scopes={','.join(hook_sources['installed_scopes'])}")
+    print(f"hook_duplicate_install={str(hook_sources['duplicate_installed']).lower()}")
+    print(f"hook_overlap_warning={hook_sources['overlap_warning']}")
     print(f"hook_ack_count={hook_runtime['ack_count']}")
     print(f"hook_active_session_loaded={hook_runtime['active_session_loaded']}")
     print(f"hook_latest_ack_path={hook_runtime['latest_ack_path']}")
