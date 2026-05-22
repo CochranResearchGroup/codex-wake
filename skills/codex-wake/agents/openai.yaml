@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Wake"
+  short_description: "Schedule durable agent wake cycles"
+  default_prompt: "Use $codex-wake to schedule a durable follow-up wake for this agent task."
+
+policy:
+  allow_implicit_invocation: true

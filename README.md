@@ -100,6 +100,11 @@ Codex may require a one-time `/hooks` review before a new repo-local hook runs. 
 
 Run these commands inside a tmux pane that is hosting the Codex TUI you want to wake. `codex-wake` captures `TMUX_PANE` and the tmux socket from the environment.
 
+Agents can use the bundled `$codex-wake` skill for workflow guidance and wake
+cycle examples. The skill lives at `skills/codex-wake/` in this repo and can be
+installed into user skill roots when agents need to schedule their own wake
+cycles.
+
 Wake after a duration:
 
 ```bash
