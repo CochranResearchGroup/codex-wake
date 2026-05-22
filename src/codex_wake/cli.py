@@ -13,9 +13,11 @@ from .hook_config import (
     HookSourceCheck,
     check_hook_config,
     check_hook_sources,
+    check_user_hook_config,
     hook_review_note,
     hook_runtime_evidence,
     install_hook_config,
+    install_user_hook_config,
 )
 from .process import process_exists, process_identity
 from .records import (
@@ -155,7 +157,7 @@ def build_parser() -> argparse.ArgumentParser:
     service_uninstall = service_subparsers.add_parser("uninstall", help="stop, disable, and remove the user service")
     add_service_options(service_uninstall)
 
-    hook = subparsers.add_parser("hook", help="install or check repo-local Codex hook config")
+    hook = subparsers.add_parser("hook", help="install or check Codex hook config")
     hook_subparsers = hook.add_subparsers(dest="hook_command", required=True)
 
     hook_install = hook_subparsers.add_parser("install", help="write .codex/hooks.json for codex-wake-hook")
@@ -163,6 +165,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     hook_check = hook_subparsers.add_parser("check", help="check .codex/hooks.json for codex-wake-hook")
     add_hook_options(hook_check)
+
+    hook_user = hook_subparsers.add_parser("user", help="install or check user-scope Codex hook config")
+    hook_user_subparsers = hook_user.add_subparsers(dest="user_hook_command", required=True)
+
+    hook_user_install = hook_user_subparsers.add_parser("install", help="write user-scope hooks.json for codex-wake-hook")
+    add_user_hook_options(hook_user_install)
+
+    hook_user_check = hook_user_subparsers.add_parser("check", help="check user-scope hooks.json for codex-wake-hook")
+    add_user_hook_options(hook_user_check)
 
     doctor = subparsers.add_parser("doctor", help="report Codex Wake readiness for this repo")
     doctor.add_argument("--hook-command", default=DEFAULT_HOOK_COMMAND, help="expected UserPromptSubmit hook command")
@@ -194,6 +205,11 @@ def add_service_options(parser: argparse.ArgumentParser) -> None:
 
 def add_hook_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--repo-root", type=Path, default=None, help="repo root to update; defaults to current directory")
+    parser.add_argument("--command", dest="hook_command_text", default=DEFAULT_HOOK_COMMAND, help="hook command to install or check")
+
+
+def add_user_hook_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--codex-home", type=Path, default=None, help="Codex home; defaults to CODEX_HOME or ~/.codex")
     parser.add_argument("--command", dest="hook_command_text", default=DEFAULT_HOOK_COMMAND, help="hook command to install or check")
 
 
@@ -608,8 +624,18 @@ def print_hook_sources(repo_root: Path, command: str) -> None:
     print(f"hook_overlap_warning={sources.overlap_warning}")
 
 
+def print_hook_source_check(check: HookSourceCheck) -> None:
+    print(f"path={check.path}")
+    print(f"scope={check.scope}")
+    print(f"exists={str(check.exists).lower()}")
+    print(f"valid_json={str(check.valid_json).lower()}")
+    print(f"installed={str(check.installed).lower()}")
+    print(f"command={check.command}")
+    print(f"message={check.message}")
+
+
 def hook_command(args: argparse.Namespace, root: Path) -> int:
-    repo_root = (args.repo_root or Path.cwd()).resolve()
+    repo_root = (getattr(args, "repo_root", None) or Path.cwd()).resolve()
     if args.hook_command == "install":
         path = install_hook_config(repo_root, args.hook_command_text)
         print(f"installed hook config: {path}")
@@ -628,6 +654,20 @@ def hook_command(args: argparse.Namespace, root: Path) -> int:
         print_hook_sources(repo_root, args.hook_command_text)
         print_hook_runtime_evidence(root)
         return 0 if check.installed else 1
+    if args.hook_command == "user":
+        if args.user_hook_command == "install":
+            path = install_user_hook_config(args.codex_home, args.hook_command_text)
+            print(f"installed user hook config: {path}")
+            print(f"command={args.hook_command_text}")
+            print(f"note={hook_review_note()}")
+            return 0
+        if args.user_hook_command == "check":
+            check = check_user_hook_config(args.codex_home, args.hook_command_text)
+            print_hook_source_check(check)
+            print(f"trust={hook_review_note()}")
+            print_hook_runtime_evidence(root)
+            return 0 if check.installed else 1
+        raise WakeError(f"unknown user hook command: {args.user_hook_command}")
     raise WakeError(f"unknown hook command: {args.hook_command}")
 
 

@@ -715,6 +715,51 @@ class CliTests(unittest.TestCase):
             self.assertIn("hook_latest_ack_wake_id=wake_seen", output)
             self.assertIn("hook_latest_ack_session_id=session_seen", output)
 
+    def test_hook_user_install_and_check_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            codex_home = Path(tmp) / "codex-home"
+            root = Path(tmp) / "wake"
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(
+                    [
+                        "--wake-root",
+                        str(root),
+                        "hook",
+                        "user",
+                        "install",
+                        "--codex-home",
+                        str(codex_home),
+                    ]
+                )
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            self.assertIn("installed user hook config", stdout.getvalue())
+            self.assertTrue((codex_home / "hooks.json").exists())
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(
+                    [
+                        "--wake-root",
+                        str(root),
+                        "hook",
+                        "user",
+                        "check",
+                        "--codex-home",
+                        str(codex_home),
+                    ]
+                )
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            output = stdout.getvalue()
+            self.assertIn(f"path={codex_home / 'hooks.json'}", output)
+            self.assertIn("scope=user", output)
+            self.assertIn("installed=true", output)
+            self.assertIn("hook_active_session_loaded=unknown_without_ack", output)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -117,7 +117,14 @@ def contains_hook_command(config: dict[str, Any], command: str = DEFAULT_HOOK_CO
 
 
 def install_hook_config(repo_root: Path, command: str = DEFAULT_HOOK_COMMAND) -> Path:
-    path = hook_path_for_repo(repo_root)
+    return install_hook_file(hook_path_for_repo(repo_root), command)
+
+
+def install_user_hook_config(codex_home: Path | None = None, command: str = DEFAULT_HOOK_COMMAND) -> Path:
+    return install_hook_file(user_hook_path(codex_home), command)
+
+
+def install_hook_file(path: Path, command: str = DEFAULT_HOOK_COMMAND) -> Path:
     config = load_hook_config(path)
     if contains_hook_command(config, command):
         return path
@@ -146,6 +153,10 @@ def check_hook_config(repo_root: Path, command: str = DEFAULT_HOOK_COMMAND) -> H
         command=check.command,
         message=check.message,
     )
+
+
+def check_user_hook_config(codex_home: Path | None = None, command: str = DEFAULT_HOOK_COMMAND) -> HookSourceCheck:
+    return check_hook_file(user_hook_path(codex_home), command, scope="user")
 
 
 def check_hook_file(path: Path, command: str = DEFAULT_HOOK_COMMAND, *, scope: str) -> HookSourceCheck:

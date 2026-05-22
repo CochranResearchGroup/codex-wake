@@ -8,11 +8,13 @@ from pathlib import Path
 from codex_wake.hook_config import (
     check_hook_config,
     check_hook_sources,
+    check_user_hook_config,
     contains_hook_command,
     hook_entry,
     hook_review_note,
     hook_runtime_evidence,
     install_hook_config,
+    install_user_hook_config,
 )
 
 
@@ -105,6 +107,19 @@ class HookConfigTests(unittest.TestCase):
             self.assertEqual(sources.installed_scopes, ("user",))
             self.assertFalse(sources.duplicate_installed)
             self.assertEqual(sources.overlap_warning, "")
+
+    def test_install_user_hook_config_uses_codex_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            codex_home = Path(tmp) / "codex-home"
+
+            path = install_user_hook_config(codex_home)
+            check = check_user_hook_config(codex_home)
+
+            self.assertEqual(path, codex_home / "hooks.json")
+            self.assertTrue(path.exists())
+            self.assertEqual(check.scope, "user")
+            self.assertTrue(check.installed)
+            self.assertEqual(check.path, path)
 
     def test_hook_runtime_evidence_reports_unknown_without_ack(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

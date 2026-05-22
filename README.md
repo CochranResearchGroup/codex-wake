@@ -53,6 +53,17 @@ codex-wake hook install
 codex-wake hook check
 ```
 
+For a hook that should be available from user scope, install the same handler in
+Codex's user hook file:
+
+```bash
+codex-wake hook user install
+codex-wake hook user check
+```
+
+The user hook commands write or check `$CODEX_HOME/hooks.json` when `CODEX_HOME`
+is set, otherwise `~/.codex/hooks.json`.
+
 `hook check` verifies the repo-local config and reports ack evidence from
 `.codex/wake/acks/`. If no ack exists, the active TUI hook-loaded state is
 reported as `unknown_without_ack`; that is not proof that tmux injection failed.
