@@ -83,7 +83,7 @@ Write migration logs to `.codex/events/` before scheduling the wake.
 
 Use when validating that tmux injection, hook execution, ack persistence, and daemon status movement work in the active TUI.
 
-Pattern:
+Immediate pattern, only when the target pane is idle:
 
 ```bash
 codex-wake --wake-root .codex/wake hook check
@@ -94,7 +94,42 @@ codex-wake --wake-root .codex/wake after 15s -- \
 codex-waked --wake-root .codex/wake --once --ack-timeout 20
 ```
 
+Operator-visible delayed pattern:
+
+```bash
+wake_id=$(codex-wake --wake-root .codex/wake after 15s -- \
+  "Dogfood wake. Verify this wake id, ack evidence, target pane, and final status, then archive the record." | awk '{print $1}')
+unit="codex-wake-${wake_id//_/-}"
+systemd-run --user --unit="$unit" --on-active=25s \
+  "$(command -v codex-waked)" --wake-root "$PWD/.codex/wake" --once --ack-timeout 20
+```
+
+After creating the delayed pattern, stop the current turn. The daemon should fire after the active TUI is no longer in the middle of a tool/model turn.
+
 If `ack_timeout` occurs but the TUI later receives the wake prompt, inspect the ack file and rerun one daemon pass to reconcile pending state.
+
+## Ack But No Visible Turn
+
+Ack means `UserPromptSubmit` ran for the wake prompt. It does not prove the operator saw a new turn in the pane they were watching.
+
+Check:
+
+```bash
+codex-wake --wake-root .codex/wake show <wake-id>
+python -m json.tool .codex/wake/acks/<wake-id>.submitted
+tmux list-panes -a -F '#{session_name}:#{window_index}.#{pane_index} #{pane_id} cwd=#{pane_current_path} cmd=#{pane_current_command} title=#{pane_title}'
+tmux capture-pane -p -S -120 -t <pane-id>
+```
+
+Common causes:
+
+- The wake targeted a different pane than the one the operator watched.
+- The target TUI was busy; Codex accepted the prompt, but the visible UI continued an interrupted or already-running turn.
+- The wake used app-server transport, which can resume a thread without showing in a live tmux pane.
+- The record was archived after handling, so only ack/archive evidence remains.
+- Duplicate project and user hooks injected duplicate wake context, which can make the visible event harder to interpret.
+
+Report this as `ack_observed; operator-visible turn not proven` unless the target pane scrollback shows the wake prompt or the turn output.
 
 ## App-Server Wake
 

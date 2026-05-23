@@ -197,6 +197,11 @@ readiness without parsing text output. The report also includes hook source
 overlap fields so operators can see when both project and user hook sources are
 enabled for `codex-wake-hook`.
 
+Ack evidence proves that Codex submitted the wake prompt in the target session.
+It does not by itself prove that a new turn was visible in the pane the operator
+was watching. Check the wake record target and tmux pane scrollback before
+claiming an operator-visible wake.
+
 Inspect and manage wakes:
 
 ```bash

@@ -36,6 +36,8 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Never put secrets, raw credentials, or private transcript bodies in wake prompts or tracked docs.
 - Use `codex-waked --once` for bounded checks, or `codex-wake service install/status/logs` for longer monitoring.
 - After a wake fires, inspect `codex-wake show <wake-id>`, `.codex/wake/acks/`, and `codex-wake status --json` before claiming success.
+- Treat ack as proof that Codex submitted the wake prompt in the target session, not proof that the operator saw a new turn in the pane they were watching.
+- If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
 
 ## Common Patterns
@@ -87,6 +89,18 @@ Run one daemon pass:
 codex-waked --wake-root .codex/wake --once --ack-timeout 20
 ```
 
+Operator-visible delayed wake:
+
+```bash
+wake_id=$(codex-wake --wake-root .codex/wake after 15s -- \
+  "Visible wake check. Verify this wake id, ack evidence, target pane, and final status." | awk '{print $1}')
+unit="codex-wake-${wake_id//_/-}"
+systemd-run --user --unit="$unit" --on-active=25s \
+  "$(command -v codex-waked)" --wake-root "$PWD/.codex/wake" --once --ack-timeout 20
+```
+
+After scheduling this delayed wake, end the current turn so the target TUI is idle enough to show the submitted wake prompt.
+
 ## Use Cases
 
 Read `references/use-cases.md` when choosing a wake pattern for CI/test babysitting, long builds, review loops, staged migrations, app-server wakes, or dogfood runs.
@@ -102,3 +116,5 @@ codex-wake --wake-root .codex/wake archive <wake-id>
 ```
 
 Report the wake id, trigger evidence, ack/submitted status, and any remaining active wake count.
+
+If ack exists but no new turn is visible, read `references/use-cases.md#ack-but-no-visible-turn`.
