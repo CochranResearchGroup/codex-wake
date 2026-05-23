@@ -1427,3 +1427,31 @@ Completed app-server service environment product hardening.
 Best next turn option: commit and push this product hardening slice, wait for
 CI, then cut a small release if we want downstream repos to install the
 service-environment fix by tag rather than from the working tree.
+
+## Turn 92 | 2026-05-23
+
+Started the `v0.4.13` release for app-server service environment hardening.
+
+- Re-read planning, release, and validation policies.
+- Confirmed `main` was clean and aligned with `origin/main`.
+- Bumped `pyproject.toml` to `0.4.13`.
+- Added `docs/releases/v0.4.13.md`.
+- Added `docs/dev/plans/0039-2026-05-23-v0413-release.md`.
+- Added `docs/dev/verification/0055-2026-05-23-v0.4.13-release.md`.
+- Updated the README GitHub install example to `v0.4.13`.
+- Ran source validation:
+  - `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`
+  - `python -m compileall -q src tests .codex/hooks`
+  - `git diff --check`
+- Full suite passed with `100` tests.
+- Built source and wheel distributions for `0.4.13`.
+- Installed the wheel into `/tmp/codex-wake-v0413-install`.
+- Verified installed package version `0.4.13`.
+- Verified installed `app after --help` and `service install --help` expose
+  `--codex-path`.
+- Verified an installed-wheel no-start service unit renders
+  `CODEX_WAKE_CODEX_CMD`.
+- Verified an installed-wheel app-server wake target records `codex_cmd`.
+
+Best next turn option: commit, tag, and push `v0.4.13`; wait for CI; run a
+clean public tag install smoke; then publish the GitHub release.
