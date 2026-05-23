@@ -18,12 +18,20 @@ from codex_wake.records import WakePath, build_record, write_record
 
 
 class FakeTmuxRunner:
-    def __init__(self, capture: str = "Codex ready") -> None:
-        self.capture = capture
+    def __init__(self, capture: str = "Codex ready", captures: list[str | BaseException] | None = None) -> None:
+        self.captures: list[str | BaseException] = list(captures) if captures is not None else [capture]
+        self.capture_calls = 0
         self.pastes: list[tuple[str, str, str, str]] = []
 
     def capture_pane(self, socket: str, pane: str) -> str:
-        return self.capture
+        self.capture_calls += 1
+        if len(self.captures) > 1:
+            value = self.captures.pop(0)
+        else:
+            value = self.captures[0]
+        if isinstance(value, BaseException):
+            raise value
+        return value
 
     def paste_prompt(self, socket: str, pane: str, wake_id: str, prompt: str) -> None:
         self.pastes.append((socket, pane, wake_id, prompt))
@@ -127,7 +135,71 @@ class InjectorTests(unittest.TestCase):
             )
 
             self.assertEqual(result.status, "submitted")
-            self.assertTrue((root / "submitted" / "wake_test.json").exists())
+            submitted_path = root / "submitted" / "wake_test.json"
+            self.assertTrue(submitted_path.exists())
+            data = json.loads(submitted_path.read_text())
+            self.assertEqual(data["visibility_result"]["classification"], "ack_observed_visibility_unproven")
+            self.assertEqual(data["events"][-2]["type"], "ack_observed")
+            self.assertEqual(data["events"][-1]["type"], "tmux_visibility_checked")
+
+    def test_dispatch_records_visible_prompt_when_marker_appears_after_ack(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp))
+            ack_dir = root / "acks"
+            ack_dir.mkdir(parents=True, exist_ok=True)
+            (ack_dir / "wake_test.submitted").write_text("{}", encoding="utf-8")
+            runner = FakeTmuxRunner(
+                captures=[
+                    "Codex ready",
+                    "Codex\n> WAKE_TRIGGER_ID=wake_test\n  Resume the scheduled wake task.",
+                ]
+            )
+
+            result = dispatch_firing_record(
+                root,
+                found,
+                runner=runner,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+                ack_timeout_override=0,
+            )
+
+            self.assertEqual(result.status, "submitted")
+            data = json.loads((root / "submitted" / "wake_test.json").read_text())
+            visibility = data["visibility_result"]
+            self.assertEqual(visibility["classification"], "visible_prompt_observed")
+            self.assertFalse(visibility["pre_capture"]["wake_marker_present"])
+            self.assertTrue(visibility["post_capture"]["wake_marker_present"])
+            self.assertTrue(visibility["post_marker_new"])
+            self.assertEqual(visibility["privacy"], "raw_pane_text_not_stored")
+            self.assertEqual(data["events"][-1]["visibility_result"]["classification"], "visible_prompt_observed")
+            self.assertNotIn("WAKE_TRIGGER_ID", json.dumps(visibility))
+
+    def test_dispatch_records_visibility_check_failure_without_failing_ack(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp))
+            ack_dir = root / "acks"
+            ack_dir.mkdir(parents=True, exist_ok=True)
+            (ack_dir / "wake_test.submitted").write_text("{}", encoding="utf-8")
+            runner = FakeTmuxRunner(captures=["Codex ready", OSError("capture failed")])
+
+            result = dispatch_firing_record(
+                root,
+                found,
+                runner=runner,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+                ack_timeout_override=0,
+            )
+
+            self.assertEqual(result.status, "submitted")
+            data = json.loads((root / "submitted" / "wake_test.json").read_text())
+            visibility = data["visibility_result"]
+            self.assertEqual(visibility["classification"], "visibility_check_failed")
+            self.assertIn("post-ack tmux capture failed", visibility["error"])
+            self.assertEqual(data["events"][-2]["type"], "ack_observed")
+            self.assertEqual(data["events"][-1]["type"], "tmux_visibility_checked")
+            self.assertEqual(data["status"], "submitted")
 
     def test_unsafe_pane_requeues_and_does_not_paste(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

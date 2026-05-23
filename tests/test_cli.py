@@ -259,6 +259,7 @@ class CliTests(unittest.TestCase):
             self.assertIn("active_total=1", text_out)
             self.assertIn("archived_total=1", text_out)
             self.assertIn("counts_by_status=", text_out)
+            self.assertIn("counts_by_visibility_classification=", text_out)
 
             code, json_out, err = self.run_cli(["status", "--json"], root)
             self.assertEqual(code, 0, err)
@@ -270,6 +271,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["counts_by_status"]["archived"], 1)
             self.assertEqual(data["counts_by_predicate"]["file_exists"], 1)
             self.assertEqual(data["counts_by_target_transport"]["tmux"], 2)
+            self.assertEqual(data["counts_by_visibility_classification"], {})
             self.assertTrue(data["earliest_next_attempt_at"])
 
     def test_cleanup_dry_run_and_delete_archived_records(self) -> None:

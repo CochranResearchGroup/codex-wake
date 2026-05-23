@@ -37,6 +37,7 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Use `codex-waked --once` for bounded checks, or `codex-wake service install/status/logs` for longer monitoring.
 - After a wake fires, inspect `codex-wake show <wake-id>`, `.codex/wake/acks/`, and `codex-wake status --json` before claiming success.
 - Treat ack as proof that Codex submitted the wake prompt in the target session, not proof that the operator saw a new turn in the pane they were watching.
+- For tmux wakes, report `visibility_result.classification` when present; `visible_prompt_observed` is stronger than ack alone, and `ack_observed_visibility_unproven` must not be described as operator-visible success.
 - If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
 
@@ -115,6 +116,6 @@ codex-wake --wake-root .codex/wake status --json
 codex-wake --wake-root .codex/wake archive <wake-id>
 ```
 
-Report the wake id, trigger evidence, ack/submitted status, and any remaining active wake count.
+Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, and any remaining active wake count.
 
 If ack exists but no new turn is visible, read `references/use-cases.md#ack-but-no-visible-turn`.

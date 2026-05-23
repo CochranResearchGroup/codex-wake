@@ -120,8 +120,43 @@ Current optional fields include:
 - `previous_status`: status before archival.
 - `archived_at`: archive timestamp.
 - `dispatch_result`: accepted app-server `thread_id` and `turn_id` metadata when returned.
+- `visibility_result`: sanitized tmux operator-visibility evidence when checked.
 
 Event objects may also include extra metadata such as accepted app-server turn identifiers.
+
+## Tmux Visibility Result
+
+Tmux-submitted records may include a `visibility_result` object:
+
+```json
+{
+  "transport": "tmux",
+  "pane": "%11",
+  "checked_at": "2026-05-23T16:30:00Z",
+  "privacy": "raw_pane_text_not_stored",
+  "classification": "visible_prompt_observed",
+  "pre_capture": {
+    "line_count": 45,
+    "wake_marker_present": false
+  },
+  "post_capture": {
+    "line_count": 46,
+    "wake_marker_present": true
+  },
+  "post_marker_new": true
+}
+```
+
+Classification values:
+
+- `visible_prompt_observed`: the wake marker was absent before dispatch and
+  present after ack.
+- `ack_observed_visibility_unproven`: the hook ack was observed, but pane
+  marker evidence did not prove a new visible prompt.
+- `visibility_check_failed`: ack was observed, but post-ack tmux capture failed.
+
+`visibility_result` deliberately stores counts, booleans, and classification
+only. It must not store raw pane text or transcript content.
 
 ## Derived Ack Files
 

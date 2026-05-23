@@ -199,8 +199,10 @@ enabled for `codex-wake-hook`.
 
 Ack evidence proves that Codex submitted the wake prompt in the target session.
 It does not by itself prove that a new turn was visible in the pane the operator
-was watching. Check the wake record target and tmux pane scrollback before
-claiming an operator-visible wake.
+was watching. For tmux dispatches, check `visibility_result` on the wake record:
+`visible_prompt_observed` means the wake marker newly appeared in captured pane
+scrollback after ack, while `ack_observed_visibility_unproven` means the hook
+ack was real but operator-visible display was not proven.
 
 Inspect and manage wakes:
 
@@ -220,8 +222,9 @@ codex-wake schema
 codex-wake schema --json
 ```
 
-`status --json` emits compact counts by status, predicate, and target transport
-plus the earliest pending or firing `next_attempt_at`.
+`status --json` emits compact counts by status, predicate, target transport,
+and visibility classification plus the earliest pending or firing
+`next_attempt_at`.
 
 `app status` is read-only and does not start a turn. By default it asks local
 `codex app-server` for `thread/read` status. Use `app status --resume` to load a

@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 from .records import (
     WakeError,
@@ -87,6 +87,49 @@ class SubprocessTmuxRunner:
 
 def canonical_prompt(wake_id: str) -> str:
     return f"WAKE_TRIGGER_ID={wake_id}\nResume the scheduled wake task.\n"
+
+
+def wake_marker_present(text: str, wake_id: str) -> bool:
+    return f"WAKE_TRIGGER_ID={wake_id}" in text
+
+
+def pane_capture_summary(text: str, wake_id: str) -> dict[str, Any]:
+    return {
+        "line_count": len(text.splitlines()),
+        "wake_marker_present": wake_marker_present(text, wake_id),
+    }
+
+
+def tmux_visibility_result(
+    *,
+    wake_id: str,
+    pane: str,
+    before_text: str,
+    after_text: str | None,
+    now: datetime,
+    error: str | None = None,
+) -> dict[str, Any]:
+    before = pane_capture_summary(before_text, wake_id)
+    result: dict[str, Any] = {
+        "transport": "tmux",
+        "pane": pane,
+        "checked_at": format_utc(now),
+        "privacy": "raw_pane_text_not_stored",
+        "pre_capture": before,
+    }
+    if error:
+        result["classification"] = "visibility_check_failed"
+        result["error"] = error
+        return result
+    after = pane_capture_summary(after_text or "", wake_id)
+    post_marker_new = bool(after["wake_marker_present"] and not before["wake_marker_present"])
+    result["post_capture"] = after
+    result["post_marker_new"] = post_marker_new
+    if post_marker_new:
+        result["classification"] = "visible_prompt_observed"
+    else:
+        result["classification"] = "ack_observed_visibility_unproven"
+    return result
 
 
 def unsafe_pane_reason(text: str) -> str | None:
@@ -243,6 +286,35 @@ def dispatch_firing_record(
                 record["status"] = "submitted"
                 record["updated_at"] = format_utc(current)
                 record = append_event(record, "ack_observed", "Wake prompt submission ack observed", current)
+                try:
+                    post_ack_capture = tmux.capture_pane(socket, pane)
+                except (WakeError, OSError, subprocess.SubprocessError) as exc:
+                    visibility = tmux_visibility_result(
+                        wake_id=wake_id,
+                        pane=pane,
+                        before_text=captured,
+                        after_text=None,
+                        now=current,
+                        error=f"post-ack tmux capture failed: {exc}",
+                    )
+                    message = "Tmux pane visibility check failed after ack"
+                else:
+                    visibility = tmux_visibility_result(
+                        wake_id=wake_id,
+                        pane=pane,
+                        before_text=captured,
+                        after_text=post_ack_capture,
+                        now=current,
+                    )
+                    message = f"Tmux pane visibility classified as {visibility['classification']}"
+                record["visibility_result"] = visibility
+                record = append_event(
+                    record,
+                    "tmux_visibility_checked",
+                    message,
+                    current,
+                    visibility_result=visibility,
+                )
                 replace_record(root, WakePath(root / "firing" / f"{wake_id}.json", record), record)
                 return DispatchResult("submitted", "ack observed")
             return requeue_or_fail(root, WakePath(root / "firing" / f"{wake_id}.json", record), record, "ack timeout", current, "ack_timeout")

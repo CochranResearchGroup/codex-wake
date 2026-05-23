@@ -55,6 +55,7 @@ class RecordTests(unittest.TestCase):
         self.assertIn("schema_version", summary["required_fields"])
         self.assertIn("process_done", summary["predicate_types"])
         self.assertIn("dispatch_result", summary["optional_fields"])
+        self.assertIn("visibility_result", summary["optional_fields"])
         self.assertIn("incompatible_predicate_semantics_change", summary["schema_bump_required_for"])
 
     def test_status_summary_counts_records(self) -> None:
@@ -80,6 +81,7 @@ class RecordTests(unittest.TestCase):
             failed["id"] = "wake_failed"
             failed["status"] = "failed"
             failed["next_attempt_at"] = "2026-05-18T22:00:00Z"
+            failed["visibility_result"] = {"classification": "visible_prompt_observed"}
             write_record(root, failed)
             archived = archive_record(root, "wake_failed", now=now)
             self.assertTrue(archived.exists())
@@ -94,6 +96,7 @@ class RecordTests(unittest.TestCase):
             self.assertEqual(summary["counts_by_status"]["archived"], 1)
             self.assertEqual(summary["counts_by_predicate"], {"file_exists": 1, "not_before": 1})
             self.assertEqual(summary["counts_by_target_transport"], {"app-server": 1, "tmux": 1})
+            self.assertEqual(summary["counts_by_visibility_classification"], {"visible_prompt_observed": 1})
             self.assertEqual(summary["earliest_next_attempt_at"], "2026-05-18T21:15:00Z")
 
     def test_write_and_cancel_record(self) -> None:

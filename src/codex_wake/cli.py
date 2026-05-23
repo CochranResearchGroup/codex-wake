@@ -446,12 +446,18 @@ def status_command(args: argparse.Namespace, root: Path) -> int:
     counts_by_status = summary["counts_by_status"]
     counts_by_predicate = summary["counts_by_predicate"]
     counts_by_target = summary["counts_by_target_transport"]
+    counts_by_visibility = summary["counts_by_visibility_classification"]
     assert isinstance(counts_by_status, dict)
     assert isinstance(counts_by_predicate, dict)
     assert isinstance(counts_by_target, dict)
+    assert isinstance(counts_by_visibility, dict)
     print("counts_by_status=" + ",".join(f"{key}:{counts_by_status[key]}" for key in sorted(counts_by_status)))
     print("counts_by_predicate=" + ",".join(f"{key}:{counts_by_predicate[key]}" for key in sorted(counts_by_predicate)))
     print("counts_by_target_transport=" + ",".join(f"{key}:{counts_by_target[key]}" for key in sorted(counts_by_target)))
+    print(
+        "counts_by_visibility_classification="
+        + ",".join(f"{key}:{counts_by_visibility[key]}" for key in sorted(counts_by_visibility))
+    )
     print(f"earliest_next_attempt_at={summary['earliest_next_attempt_at']}")
     return 0
 

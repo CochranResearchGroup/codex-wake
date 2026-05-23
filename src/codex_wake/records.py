@@ -215,6 +215,7 @@ def schema_summary() -> dict[str, Any]:
             "previous_status",
             "archived_at",
             "dispatch_result",
+            "visibility_result",
         ],
         "schema_bump_required_for": [
             "rename_or_remove_required_fields",
@@ -299,6 +300,7 @@ def status_summary(root: Path) -> dict[str, Any]:
     status_counts["archived"] = 0
     predicate_counts: dict[str, int] = {}
     target_counts: dict[str, int] = {}
+    visibility_counts: dict[str, int] = {}
     pending_next_attempts: list[str] = []
 
     for item in [*active_records, *archived_records]:
@@ -318,6 +320,11 @@ def status_summary(root: Path) -> dict[str, Any]:
             transport = target.get("transport")
             if isinstance(transport, str) and transport:
                 target_counts[transport] = target_counts.get(transport, 0) + 1
+        visibility = record.get("visibility_result")
+        if isinstance(visibility, dict):
+            classification = visibility.get("classification")
+            if isinstance(classification, str) and classification:
+                visibility_counts[classification] = visibility_counts.get(classification, 0) + 1
         if status in {"pending", "firing"}:
             next_attempt = record.get("next_attempt_at")
             if isinstance(next_attempt, str) and next_attempt:
@@ -335,6 +342,7 @@ def status_summary(root: Path) -> dict[str, Any]:
         "counts_by_status": status_counts,
         "counts_by_predicate": dict(sorted(predicate_counts.items())),
         "counts_by_target_transport": dict(sorted(target_counts.items())),
+        "counts_by_visibility_classification": dict(sorted(visibility_counts.items())),
         "earliest_next_attempt_at": min(pending_next_attempts) if pending_next_attempts else "",
     }
 

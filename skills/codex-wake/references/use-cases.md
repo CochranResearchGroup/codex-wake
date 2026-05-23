@@ -121,6 +121,11 @@ tmux list-panes -a -F '#{session_name}:#{window_index}.#{pane_index} #{pane_id} 
 tmux capture-pane -p -S -120 -t <pane-id>
 ```
 
+For tmux wakes, inspect `visibility_result.classification` in the wake record.
+`visible_prompt_observed` means the wake marker newly appeared in captured
+scrollback after ack. `ack_observed_visibility_unproven` means the hook ack was
+real, but operator-visible display was not proven.
+
 Common causes:
 
 - The wake targeted a different pane than the one the operator watched.
@@ -129,7 +134,7 @@ Common causes:
 - The record was archived after handling, so only ack/archive evidence remains.
 - Duplicate project and user hooks injected duplicate wake context, which can make the visible event harder to interpret.
 
-Report this as `ack_observed; operator-visible turn not proven` unless the target pane scrollback shows the wake prompt or the turn output.
+Report this as `ack_observed; operator-visible turn not proven` unless `visibility_result.classification` is `visible_prompt_observed` or direct target-pane inspection shows the wake prompt or the turn output.
 
 ## App-Server Wake
 
