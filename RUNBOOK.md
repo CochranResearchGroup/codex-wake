@@ -1455,3 +1455,35 @@ Started the `v0.4.13` release for app-server service environment hardening.
 
 Best next turn option: commit, tag, and push `v0.4.13`; wait for CI; run a
 clean public tag install smoke; then publish the GitHub release.
+
+## Turn 93 | 2026-05-23
+
+Published `v0.4.13`.
+
+- Committed release prep as `31ca6e8`.
+- Tagged and pushed `v0.4.13`.
+- Verified branch CI run `26340673030` passed on Python 3.11 and 3.12.
+- Ran clean public tag install smoke from
+  `git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.13`.
+- Confirmed public tag install resolves to commit
+  `31ca6e83df61dc0a598060a6e9fd87e5a5053f2d`.
+- Confirmed public tag install reports package version `0.4.13`.
+- Smoked public tag `app after --help` and `service install --help` for
+  `--codex-path`.
+- Smoked public tag no-start service unit rendering with
+  `CODEX_WAKE_CODEX_CMD`.
+- Smoked public tag app-server wake target creation with `target.codex_cmd`.
+- Published GitHub release
+  `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.13`.
+- Refreshed the user-scoped `uv tool` install from the public tag; `uv tool
+  list` reports `codex-wake v0.4.13`.
+- Verified installed `doctor --json` reports
+  `service_app_server.codex_cmd_ready=true`.
+- Confirmed final repo wake root remained clean:
+  `active_total=0`, `terminal_total=0`, `archived_total=13`.
+- Updated `docs/dev/verification/0055-2026-05-23-v0.4.13-release.md` with
+  public tag, CI, release, public install, and installed-tool evidence.
+
+Best next turn option: commit and push the final release verification note,
+wait for CI, then use `v0.4.13` in Ragmail/Graphiti service installs where the
+app-server service environment fix is needed.
