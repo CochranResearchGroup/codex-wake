@@ -1360,3 +1360,30 @@ Completed P35 installed `v0.4.12` app-server dogfood.
 - Recorded evidence in `docs/dev/verification/0044-2026-05-21-v0412-installed-app-dogfood.md`.
 
 Best next turn option: commit and push P35, wait for CI, then either stop here or plan the next product slice around operator ergonomics for choosing between tmux and app-server wake targets.
+
+## Turn 90 | 2026-05-23
+
+Recorded a Ragmail app-server service environment handoff for skill hardening.
+
+- Added `docs/dev/verification/0052-2026-05-23-ragmail-app-server-service-env-handoff.md`.
+- Captured live Ragmail evidence from `wake_20260523_180552_881f`:
+  - app-server status checks worked from the interactive shell;
+  - the repo-scoped `codex-wake-ragmail.service` initially failed dispatch with
+    `FileNotFoundError: [Errno 2] No such file or directory: 'codex'`;
+  - importing the current shell environment into user-systemd and restarting the
+    service let the same wake record submit successfully with
+    `app_server_preflight.status.type=idle`, a `dispatch_result.turn_id`, and
+    `ack_observed`;
+  - the dogfood wake was archived and the Ragmail wake root ended with
+    `active_total=0`.
+- The note separates immediate skill-hardening guidance from product hardening:
+  - skill should warn that app-server dispatch runs in the daemon environment,
+    not the current shell;
+  - agents should inspect user-systemd `PATH`, service logs, and wake records
+    before creating duplicate app-server wakes;
+  - product follow-on should make `service install`, app-server dispatch, and
+    `doctor` less dependent on ambient `PATH`.
+
+Best next turn option: open a bounded app-server service-environment hardening
+plan, then update the tracked and installed `codex-wake` skill copies once the
+desired product behavior is clear.
