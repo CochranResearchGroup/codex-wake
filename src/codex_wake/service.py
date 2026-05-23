@@ -3,11 +3,13 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import shlex
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+from .app_server import APP_SERVER_CODEX_ENV, resolve_codex_cmd
 from .records import WakeError, default_wake_root
 
 
@@ -33,6 +35,18 @@ class ServiceConfig:
     daemon_path: Path
     unit_path: Path
     log_path: Path
+    codex_path: Path | None = None
+
+
+@dataclass(frozen=True)
+class ServiceAppServerReadiness:
+    codex_cmd_ready: bool
+    codex_cmd_source: str
+    codex_cmd: str
+    unit_codex_cmd: str
+    user_manager_codex_cmd: str
+    interactive_codex_cmd: str
+    message: str
 
 
 def slugify(value: str) -> str:
@@ -76,6 +90,8 @@ def build_service_config(
     name: str | None = None,
     interval: float = DEFAULT_INTERVAL,
     daemon_path: str | None = None,
+    codex_path: str | None = None,
+    resolve_default_codex: bool = False,
     unit_dir: Path | None = None,
     log_path: Path | None = None,
 ) -> ServiceConfig:
@@ -87,6 +103,11 @@ def build_service_config(
         raise WakeError("service name must not contain '/'")
     if interval <= 0:
         raise WakeError("--interval must be greater than zero")
+    resolved_codex = ""
+    if codex_path:
+        resolved_codex = resolve_codex_cmd(codex_path, required=True)
+    elif resolve_default_codex:
+        resolved_codex = resolve_codex_cmd()
     resolved_unit_dir = (unit_dir or user_systemd_dir()).expanduser()
     resolved_log_path = (log_path or (user_state_dir() / f"{resolved_name.removesuffix('.service')}.log")).expanduser()
     return ServiceConfig(
@@ -97,6 +118,7 @@ def build_service_config(
         daemon_path=resolve_daemon_path(daemon_path),
         unit_path=resolved_unit_dir / resolved_name,
         log_path=resolved_log_path,
+        codex_path=Path(resolved_codex) if resolved_codex else None,
     )
 
 
@@ -106,7 +128,15 @@ def systemd_quote(value: Path | str) -> str:
     return f'"{escaped}"'
 
 
+def systemd_environment_assignment(key: str, value: str) -> str:
+    escaped = f"{key}={value}".replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def render_unit(config: ServiceConfig) -> str:
+    environment = ""
+    if config.codex_path:
+        environment = f"Environment={systemd_environment_assignment(APP_SERVER_CODEX_ENV, str(config.codex_path))}\n"
     return (
         "[Unit]\n"
         "Description=Codex Wake daemon for one repository\n"
@@ -116,6 +146,7 @@ def render_unit(config: ServiceConfig) -> str:
         "[Service]\n"
         "Type=simple\n"
         f"WorkingDirectory={config.repo_root}\n"
+        f"{environment}"
         f"ExecStart={systemd_quote(config.daemon_path)} --wake-root {systemd_quote(config.wake_root)} --interval {config.interval:g}\n"
         "Restart=on-failure\n"
         "RestartSec=5\n"
@@ -158,6 +189,119 @@ def service_status(config: ServiceConfig, runner: CommandRunner | None = None) -
     active = systemctl(["is-active", config.name], runner, check=False).stdout.strip() or "unknown"
     enabled = systemctl(["is-enabled", config.name], runner, check=False).stdout.strip() or "unknown"
     return active, enabled
+
+
+def parse_unit_environment(unit_path: Path) -> dict[str, str]:
+    if not unit_path.exists():
+        return {}
+    values: dict[str, str] = {}
+    for line in unit_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("Environment="):
+            continue
+        try:
+            assignments = shlex.split(stripped.removeprefix("Environment="))
+        except ValueError:
+            continue
+        for assignment in assignments:
+            if "=" not in assignment:
+                continue
+            key, value = assignment.split("=", 1)
+            values[key] = value
+    return values
+
+
+def user_manager_environment(runner: CommandRunner | None = None) -> dict[str, str]:
+    try:
+        result = systemctl(["show-environment"], runner, check=False)
+    except Exception:
+        return {}
+    if result.returncode != 0:
+        return {}
+    values: dict[str, str] = {}
+    for line in result.stdout.splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key] = value
+    return values
+
+
+def service_app_server_readiness(
+    config: ServiceConfig,
+    runner: CommandRunner | None = None,
+) -> ServiceAppServerReadiness:
+    unit_env = parse_unit_environment(config.unit_path)
+    unit_codex_cmd = unit_env.get(APP_SERVER_CODEX_ENV, "")
+    manager_env = user_manager_environment(runner)
+    manager_path = manager_env.get("PATH") or None
+    user_manager_codex_cmd = ""
+    if APP_SERVER_CODEX_ENV in manager_env:
+        user_manager_codex_cmd = resolve_codex_cmd(env=manager_env, path=manager_path or "")
+    elif manager_path:
+        user_manager_codex_cmd = resolve_codex_cmd(env={}, path=manager_path)
+    interactive_codex_cmd = resolve_codex_cmd()
+
+    if unit_codex_cmd:
+        try:
+            resolved_unit = resolve_codex_cmd(unit_codex_cmd, env={}, path=manager_path or "", required=True)
+        except WakeError as exc:
+            return ServiceAppServerReadiness(
+                codex_cmd_ready=False,
+                codex_cmd_source="unit_environment",
+                codex_cmd=unit_codex_cmd,
+                unit_codex_cmd=unit_codex_cmd,
+                user_manager_codex_cmd=user_manager_codex_cmd,
+                interactive_codex_cmd=interactive_codex_cmd,
+                message=str(exc),
+            )
+        return ServiceAppServerReadiness(
+            codex_cmd_ready=True,
+            codex_cmd_source="unit_environment",
+            codex_cmd=resolved_unit,
+            unit_codex_cmd=unit_codex_cmd,
+            user_manager_codex_cmd=user_manager_codex_cmd,
+            interactive_codex_cmd=interactive_codex_cmd,
+            message=f"service unit sets {APP_SERVER_CODEX_ENV}",
+        )
+
+    if user_manager_codex_cmd:
+        return ServiceAppServerReadiness(
+            codex_cmd_ready=True,
+            codex_cmd_source="user_manager_path",
+            codex_cmd=user_manager_codex_cmd,
+            unit_codex_cmd="",
+            user_manager_codex_cmd=user_manager_codex_cmd,
+            interactive_codex_cmd=interactive_codex_cmd,
+            message="user-systemd manager PATH can resolve codex",
+        )
+
+    if interactive_codex_cmd:
+        return ServiceAppServerReadiness(
+            codex_cmd_ready=False,
+            codex_cmd_source="interactive_path_only",
+            codex_cmd="",
+            unit_codex_cmd="",
+            user_manager_codex_cmd="",
+            interactive_codex_cmd=interactive_codex_cmd,
+            message=(
+                "interactive shell can resolve codex, but the service unit and "
+                "user-systemd manager environment do not expose it"
+            ),
+        )
+
+    return ServiceAppServerReadiness(
+        codex_cmd_ready=False,
+        codex_cmd_source="missing",
+        codex_cmd="",
+        unit_codex_cmd="",
+        user_manager_codex_cmd="",
+        interactive_codex_cmd="",
+        message=(
+            f"Codex CLI not found for app-server dispatch; set {APP_SERVER_CODEX_ENV} "
+            "or reinstall the service with --codex-path"
+        ),
+    )
 
 
 def read_log_tail(path: Path, lines: int) -> str:

@@ -152,6 +152,7 @@ Create an app-server-targeted wake instead of a tmux-targeted wake:
 
 ```bash
 codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app after --codex-path "$(command -v codex)" thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
 codex-wake app candidates
 codex-wake app candidates --cwd "$PWD" --json
@@ -177,6 +178,7 @@ Manage a repo-local user service:
 
 ```bash
 codex-wake service install
+codex-wake service install --codex-path "$(command -v codex)"
 codex-wake service status
 codex-wake service logs --lines 50
 codex-wake service stop
@@ -195,7 +197,11 @@ ack wake id, submitted timestamp, and session id when available. Use
 `doctor --json` when automation needs command, tmux, hook, ack, and service
 readiness without parsing text output. The report also includes hook source
 overlap fields so operators can see when both project and user hook sources are
-enabled for `codex-wake-hook`.
+enabled for `codex-wake-hook`. For app-server wakes fired by a user service,
+`doctor` reports `service_app_server_codex_ready`, the resolution source, and
+the Codex CLI command the service can use. `service install` writes
+`CODEX_WAKE_CODEX_CMD` into the unit when `codex` is resolvable from the
+installing shell, and `--codex-path` can be used to persist an explicit path.
 
 Ack evidence proves that Codex submitted the wake prompt in the target session.
 It does not by itself prove that a new turn was visible in the pane the operator
@@ -229,7 +235,8 @@ and visibility classification plus the earliest pending or firing
 `app status` is read-only and does not start a turn. By default it asks local
 `codex app-server` for `thread/read` status. Use `app status --resume` to load a
 resumable rollout-backed thread first, which mirrors the dispatch preflight
-without calling `turn/start`.
+without calling `turn/start`. Add `--codex-path` when the app-server check must
+use a specific Codex CLI command instead of ambient `PATH`.
 
 `app candidates` is also read-only. It scans local Codex session rollout
 metadata under `~/.codex/sessions`, reads only the `session_meta` line from each
@@ -238,7 +245,8 @@ to narrow candidates to the current repo, then check a candidate with
 `codex-wake app status --resume <thread-id>` before registering a wake.
 Use `--validate` to run that resume-backed status check for every listed
 candidate without starting turns. Add `--only-idle` to print only candidates
-whose resumed status is `idle`.
+whose resumed status is `idle`. `app candidates --validate --codex-path ...`
+uses the same explicit command for those validation checks.
 
 ## Runtime State
 

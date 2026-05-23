@@ -5,8 +5,15 @@ import tempfile
 import unittest
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import patch
 
-from codex_wake.app_server import discover_local_thread_candidates, dispatch_app_server_record, read_app_server_thread_status
+from codex_wake.app_server import (
+    APP_SERVER_CODEX_ENV,
+    app_server_command,
+    discover_local_thread_candidates,
+    dispatch_app_server_record,
+    read_app_server_thread_status,
+)
 from codex_wake.injector import canonical_prompt, dispatch_firing_record
 from codex_wake.records import WakePath, build_record, write_record
 
@@ -77,6 +84,33 @@ class AppServerTests(unittest.TestCase):
             self.assertEqual(data["app_server_preflight"]["status"], {"type": "idle"})
             self.assertEqual(data["dispatch_result"], {"thread_id": "thread_abc", "turn_id": "turn_123"})
             self.assertEqual(data["events"][-1]["turn_id"], "turn_123")
+
+    def test_app_server_command_uses_configured_codex_env_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            codex = Path(tmp) / "codex"
+            codex.write_text("#!/bin/sh\n", encoding="utf-8")
+            codex.chmod(0o755)
+
+            command = app_server_command(env={APP_SERVER_CODEX_ENV: str(codex)})
+
+            self.assertEqual(command, [str(codex.resolve()), "app-server", "--listen", "stdio://"])
+
+    def test_dispatch_records_missing_app_server_command_as_operator_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_record(root, Path(tmp))
+            with patch("codex_wake.app_server.shutil.which", return_value=None):
+                with patch("codex_wake.app_server.subprocess.Popen", side_effect=FileNotFoundError("codex")):
+                    result = dispatch_app_server_record(
+                        root,
+                        found,
+                        now=datetime(2026, 5, 18, 21, 0, tzinfo=UTC),
+                    )
+
+            self.assertEqual(result.status, "failed")
+            data = json.loads((root / "failed" / "wake_app.json").read_text())
+            self.assertIn("app-server command not found: codex", data["last_error"])
+            self.assertEqual(data["events"][-1]["type"], "failed")
 
     def test_dispatch_app_server_record_requeues_active_thread_without_starting_turn(self) -> None:
         class ActiveClient(FakeAppServerClient):

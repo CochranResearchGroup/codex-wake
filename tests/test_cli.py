@@ -11,9 +11,21 @@ from pathlib import Path
 from unittest.mock import patch
 
 from codex_wake import cli
+from codex_wake.service import ServiceAppServerReadiness
 
 
 class CliTests(unittest.TestCase):
+    def readiness(self) -> ServiceAppServerReadiness:
+        return ServiceAppServerReadiness(
+            codex_cmd_ready=True,
+            codex_cmd_source="unit_environment",
+            codex_cmd="/usr/bin/codex",
+            unit_codex_cmd="/usr/bin/codex",
+            user_manager_codex_cmd="",
+            interactive_codex_cmd="/usr/bin/codex",
+            message="service unit sets CODEX_WAKE_CODEX_CMD",
+        )
+
     def run_cli(self, argv: list[str], root: Path) -> tuple[int, str, str]:
         env = {
             **os.environ,
@@ -482,6 +494,37 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["predicate"]["type"], "not_before")
             self.assertEqual(data["target"], {"transport": "app-server", "endpoint": "stdio://", "thread_id": "thread_abc"})
 
+    def test_app_after_can_persist_codex_cmd_for_daemon_dispatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            codex = Path(tmp) / "bin" / "codex"
+            codex.parent.mkdir()
+            codex.write_text("#!/bin/sh\n", encoding="utf-8")
+            codex.chmod(0o755)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch.dict(os.environ, {"TMUX_PANE": "", "TMUX": ""}, clear=False):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = cli.main(
+                        [
+                            "--wake-root",
+                            str(root),
+                            "app",
+                            "after",
+                            "--codex-path",
+                            str(codex),
+                            "thread_abc",
+                            "1m",
+                            "--",
+                            "Wake app server",
+                        ]
+                    )
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            wake_id = stdout.getvalue().split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["target"]["codex_cmd"], str(codex.resolve()))
+
     def test_app_rejects_non_stdio_endpoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -590,20 +633,25 @@ class CliTests(unittest.TestCase):
             stdout = io.StringIO()
             stderr = io.StringIO()
             with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
-                with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
-                    with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
-                        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                            code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo)])
+                with patch("codex_wake.cli.service_app_server_readiness", return_value=self.readiness()):
+                    with patch("codex_wake.cli.shutil.which", side_effect=lambda name, **_: f"/usr/bin/{name}"):
+                        with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                                code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo)])
             self.assertEqual(code, 0, stderr.getvalue())
             output = stdout.getvalue()
             self.assertIn(f"repo_root={repo}", output)
             self.assertIn(f"wake_root={root}", output)
             self.assertIn("codex_waked=/usr/bin/codex-waked", output)
+            self.assertIn("codex=/usr/bin/codex", output)
             self.assertIn("hook_config_installed=false", output)
             self.assertIn("hook_user_config_installed=false", output)
             self.assertIn("hook_duplicate_install=false", output)
             self.assertIn("hook_active_session_loaded=unknown_without_ack", output)
             self.assertIn("service_active=inactive", output)
+            self.assertIn("service_app_server_codex_ready=true", output)
+            self.assertIn("service_app_server_codex_source=unit_environment", output)
+            self.assertIn("service_app_server_codex_cmd=/usr/bin/codex", output)
             self.assertIn("restart or resume", output)
 
     def test_doctor_json_reports_readiness_fields(self) -> None:
@@ -626,16 +674,18 @@ class CliTests(unittest.TestCase):
             stdout = io.StringIO()
             stderr = io.StringIO()
             with patch("codex_wake.cli.service_status", return_value=("active", "enabled")):
-                with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
-                    with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
-                        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                            code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
+                with patch("codex_wake.cli.service_app_server_readiness", return_value=self.readiness()):
+                    with patch("codex_wake.cli.shutil.which", side_effect=lambda name, **_: f"/usr/bin/{name}"):
+                        with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                                code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
 
             self.assertEqual(code, 0, stderr.getvalue())
             data = json.loads(stdout.getvalue())
             self.assertEqual(data["repo_root"], str(repo))
             self.assertEqual(data["wake_root"], str(root))
             self.assertEqual(data["commands"]["codex_waked"], "/usr/bin/codex-waked")
+            self.assertEqual(data["commands"]["codex"], "/usr/bin/codex")
             self.assertEqual(data["commands"]["tmux"], "/usr/bin/tmux")
             self.assertFalse(data["hook_config"]["installed"])
             self.assertFalse(data["hook_sources"]["project"]["installed"])
@@ -645,6 +695,9 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["hook_runtime"]["active_session_loaded"], "observed_ack")
             self.assertEqual(data["hook_runtime"]["latest_ack_wake_id"], "wake_seen")
             self.assertEqual(data["service"]["active"], "active")
+            self.assertTrue(data["service_app_server"]["codex_cmd_ready"])
+            self.assertEqual(data["service_app_server"]["codex_cmd_source"], "unit_environment")
+            self.assertEqual(data["service_app_server"]["codex_cmd"], "/usr/bin/codex")
             self.assertIn("restart or resume", data["trust"])
 
     def test_doctor_json_reports_duplicate_hook_sources(self) -> None:
@@ -672,10 +725,11 @@ class CliTests(unittest.TestCase):
             stdout = io.StringIO()
             stderr = io.StringIO()
             with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
-                with patch("codex_wake.cli.shutil.which", side_effect=lambda name: f"/usr/bin/{name}"):
-                    with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
-                        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                            code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
+                with patch("codex_wake.cli.service_app_server_readiness", return_value=self.readiness()):
+                    with patch("codex_wake.cli.shutil.which", side_effect=lambda name, **_: f"/usr/bin/{name}"):
+                        with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+                            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                                code = cli.main(["--wake-root", str(root), "doctor", "--repo-root", str(repo), "--json"])
 
             self.assertEqual(code, 0, stderr.getvalue())
             data = json.loads(stdout.getvalue())

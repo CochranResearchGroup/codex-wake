@@ -2,17 +2,19 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Mapping, Protocol
 
 from .injector import canonical_prompt
 from .records import WakeError, WakePath, append_event, format_utc, replace_record, utc_now
 
 
 APP_SERVER_BACKOFF_SECONDS = (60, 300)
+APP_SERVER_CODEX_ENV = "CODEX_WAKE_CODEX_CMD"
 
 
 class AppServerClient(Protocol):
@@ -52,18 +54,78 @@ class AppServerThreadCandidate:
     agent_role: str
 
 
+def resolve_codex_cmd(
+    raw: str | None = None,
+    *,
+    env: Mapping[str, str] | None = None,
+    path: str | None = None,
+    required: bool = False,
+) -> str:
+    source_env = env if env is not None else os.environ
+    candidate = raw or source_env.get(APP_SERVER_CODEX_ENV) or ""
+    if candidate:
+        if "/" in candidate:
+            resolved = Path(candidate).expanduser()
+            if resolved.exists():
+                return str(resolved.resolve())
+            if required:
+                raise WakeError(f"configured Codex CLI path does not exist: {candidate}")
+            return ""
+        found = shutil.which(candidate, path=path)
+        if found:
+            return str(Path(found).resolve())
+        if required:
+            raise WakeError(f"Codex CLI command not found: {candidate}")
+        return ""
+    found = shutil.which("codex", path=path)
+    if found:
+        return str(Path(found).resolve())
+    if required:
+        raise WakeError(
+            "Codex CLI command not found: codex; configure "
+            f"{APP_SERVER_CODEX_ENV} or reinstall the service with --codex-path"
+        )
+    return ""
+
+
+def app_server_command(
+    command: list[str] | None = None,
+    *,
+    codex_cmd: str | None = None,
+    env: Mapping[str, str] | None = None,
+) -> list[str]:
+    if command:
+        return list(command)
+    source_env = env if env is not None else os.environ
+    configured = codex_cmd or source_env.get(APP_SERVER_CODEX_ENV) or ""
+    resolved = resolve_codex_cmd(codex_cmd, env=source_env, required=bool(configured))
+    return [resolved or "codex", "app-server", "--listen", "stdio://"]
+
+
 class StdioAppServerClient:
-    def __init__(self, command: list[str] | None = None, timeout_seconds: float = 30.0) -> None:
-        self.command = command or ["codex", "app-server", "--listen", "stdio://"]
+    def __init__(
+        self,
+        command: list[str] | None = None,
+        *,
+        codex_cmd: str | None = None,
+        timeout_seconds: float = 30.0,
+    ) -> None:
+        self.command = app_server_command(command, codex_cmd=codex_cmd)
         self.timeout_seconds = timeout_seconds
         self._next_id = 1
-        self.process = subprocess.Popen(
-            self.command,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
+        try:
+            self.process = subprocess.Popen(
+                self.command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except FileNotFoundError as exc:
+            raise WakeError(
+                f"app-server command not found: {self.command[0]}; configure "
+                f"{APP_SERVER_CODEX_ENV} or reinstall the service with --codex-path"
+            ) from exc
 
     def close(self) -> None:
         if self.process.poll() is None:
@@ -185,8 +247,9 @@ def read_app_server_thread_status(
     client: AppServerClient | None = None,
     resume: bool = False,
     cwd: str | None = None,
+    codex_cmd: str | None = None,
 ) -> dict[str, Any]:
-    app_client = client or StdioAppServerClient()
+    app_client = client or StdioAppServerClient(codex_cmd=codex_cmd)
     try:
         app_client.initialize()
         if resume:
@@ -329,7 +392,13 @@ def dispatch_app_server_record(
             endpoint=target.get("endpoint", "stdio://"),
         )
         replace_record(root, found, record)
-        app_client = client or StdioAppServerClient(command=target.get("command"))
+        command = target.get("command")
+        if command is not None and not isinstance(command, list):
+            raise WakeError("app-server target command must be a list when provided")
+        codex_cmd = target.get("codex_cmd")
+        if codex_cmd is not None and not isinstance(codex_cmd, str):
+            raise WakeError("app-server target codex_cmd must be a string when provided")
+        app_client = client or StdioAppServerClient(command=command, codex_cmd=codex_cmd)
         try:
             app_client.initialize()
             resume_result = app_client.resume_thread(thread_id, cwd=cwd)

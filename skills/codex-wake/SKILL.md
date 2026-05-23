@@ -39,6 +39,7 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Treat ack as proof that Codex submitted the wake prompt in the target session, not proof that the operator saw a new turn in the pane they were watching.
 - For tmux wakes, report `visibility_result.classification` when present; `visible_prompt_observed` is stronger than ack alone, and `ack_observed_visibility_unproven` must not be described as operator-visible success.
 - For app-server wakes fired by a repo-scoped service, verify the daemon's user-systemd environment; `command -v codex` in the interactive shell is not enough evidence that the service can launch `codex app-server`.
+- Prefer `codex-wake service install --codex-path "$(command -v codex)"` for service-fired app-server wakes when the repo service needs a durable Codex CLI command.
 - If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
 
@@ -95,10 +96,20 @@ App-server service environment preflight:
 
 ```bash
 command -v codex
+codex-wake --wake-root .codex/wake doctor
+codex-wake --wake-root .codex/wake doctor --json
 systemctl --user show-environment | rg '^(PATH|CODEX_)='
 systemctl --user status codex-wake-<repo>.service --no-pager
 codex-wake --wake-root .codex/wake service status
 codex-wake --wake-root .codex/wake service logs --lines 80
+```
+
+`doctor` should report `service_app_server_codex_ready=true` before relying on
+the repo service for app-server dispatch. If it reports
+`interactive_path_only` or `missing`, reinstall the service with:
+
+```bash
+codex-wake --wake-root .codex/wake service install --codex-path "$(command -v codex)"
 ```
 
 If service logs show `No such file or directory: 'codex'`, classify it as a service-environment failure, not an app-server protocol failure. Re-check the same wake record after recovery instead of creating a duplicate wake.

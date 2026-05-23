@@ -4,10 +4,11 @@ import argparse
 import json
 import shutil
 import sys
+from dataclasses import asdict
 from datetime import UTC
 from pathlib import Path
 
-from .app_server import discover_local_thread_candidates, read_app_server_thread_status
+from .app_server import discover_local_thread_candidates, read_app_server_thread_status, resolve_codex_cmd
 from .hook_config import (
     DEFAULT_HOOK_COMMAND,
     HookSourceCheck,
@@ -42,6 +43,7 @@ from .records import (
     write_record,
 )
 from .service import build_service_config, install_service, read_log_tail, service_status, stop_service, uninstall_service
+from .service import service_app_server_readiness
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -69,18 +71,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     app_after = app_subparsers.add_parser("after", help="create an app-server wake after a duration")
     app_after.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
+    app_after.add_argument("--codex-path", help="Codex CLI path or command for daemon-side app-server dispatch")
     app_after.add_argument("thread_id")
     app_after.add_argument("duration")
     app_after.add_argument("prompt", nargs=argparse.REMAINDER)
 
     app_at = app_subparsers.add_parser("at", help="create an app-server wake at an ISO-8601 timestamp")
     app_at.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
+    app_at.add_argument("--codex-path", help="Codex CLI path or command for daemon-side app-server dispatch")
     app_at.add_argument("thread_id")
     app_at.add_argument("timestamp")
     app_at.add_argument("prompt", nargs=argparse.REMAINDER)
 
     app_status = app_subparsers.add_parser("status", help="read an app-server thread status without starting a turn")
     app_status.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
+    app_status.add_argument("--codex-path", help="Codex CLI path or command to launch local stdio app-server")
     app_status.add_argument("--json", action="store_true", dest="as_json")
     app_status.add_argument("--resume", action="store_true", help="resume the thread before reading status; does not start a turn")
     app_status.add_argument("thread_id")
@@ -94,6 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     app_candidates.add_argument("--limit", type=int, default=20, help="maximum candidates to print")
     app_candidates.add_argument("--validate", action="store_true", help="check each candidate with thread/resume without starting a turn")
     app_candidates.add_argument("--only-idle", action="store_true", help="with --validate, only print candidates whose resumed status is idle")
+    app_candidates.add_argument("--codex-path", help="Codex CLI path or command for validation checks")
     app_candidates.add_argument("--json", action="store_true", dest="as_json")
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
@@ -193,6 +199,10 @@ def add_target_options(parser: argparse.ArgumentParser) -> None:
         default="stdio://",
         help="app-server endpoint for --app-server-thread-id; only stdio:// is currently implemented",
     )
+    parser.add_argument(
+        "--app-server-codex-path",
+        help="Codex CLI path or command for daemon-side app-server dispatch",
+    )
 
 
 def add_service_options(parser: argparse.ArgumentParser) -> None:
@@ -200,6 +210,7 @@ def add_service_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--repo-root", type=Path, default=None, help="repo root for the service; defaults to current directory")
     parser.add_argument("--interval", type=float, default=1.0, help="daemon poll interval in seconds")
     parser.add_argument("--daemon-path", help="path to codex-waked; defaults to PATH resolution")
+    parser.add_argument("--codex-path", help="Codex CLI path or command to persist for app-server dispatch")
     parser.add_argument("--log-path", type=Path, default=None, help="service log path")
 
 
@@ -250,13 +261,18 @@ def create_app(args: argparse.Namespace, root: Path) -> int:
         "endpoint": args.endpoint,
         "thread_id": args.thread_id,
     }
+    if args.codex_path:
+        target["codex_cmd"] = resolve_codex_cmd(args.codex_path, required=True)
     return create_record(args.prompt, predicate, root, now, args, target=target)
 
 
 def app_status(args: argparse.Namespace) -> int:
     if args.endpoint != "stdio://":
         raise WakeError("only app-server endpoint stdio:// is currently implemented")
-    summary = read_app_server_thread_status(args.thread_id, resume=args.resume)
+    status_kwargs = {"resume": args.resume}
+    if args.codex_path:
+        status_kwargs["codex_cmd"] = args.codex_path
+    summary = read_app_server_thread_status(args.thread_id, **status_kwargs)
     if args.as_json:
         print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
@@ -295,10 +311,12 @@ def app_candidates(args: argparse.Namespace) -> int:
         }
         if args.validate:
             try:
+                status_kwargs = {"resume": True, "cwd": candidate.cwd or None}
+                if args.codex_path:
+                    status_kwargs["codex_cmd"] = args.codex_path
                 summary = read_app_server_thread_status(
                     candidate.thread_id,
-                    resume=True,
-                    cwd=candidate.cwd or None,
+                    **status_kwargs,
                 )
             except WakeError as exc:
                 row["validation"] = "resume_failed"
@@ -407,11 +425,15 @@ def target_for_args(args: argparse.Namespace) -> dict[str, str]:
         endpoint = getattr(args, "app_server_endpoint", "stdio://")
         if endpoint != "stdio://":
             raise WakeError("only app-server endpoint stdio:// is currently implemented")
-        return {
+        target = {
             "transport": "app-server",
             "endpoint": endpoint,
             "thread_id": args.app_server_thread_id,
         }
+        codex_path = getattr(args, "app_server_codex_path", None)
+        if codex_path:
+            target["codex_cmd"] = resolve_codex_cmd(codex_path, required=True)
+        return target
     return capture_tmux_target()
 
 
@@ -555,6 +577,8 @@ def service_config_for_args(args: argparse.Namespace, root: Path):
         name=args.name,
         interval=args.interval,
         daemon_path=args.daemon_path,
+        codex_path=args.codex_path,
+        resolve_default_codex=True,
         log_path=args.log_path,
     )
 
@@ -567,6 +591,7 @@ def service_command(args: argparse.Namespace, root: Path) -> int:
         print(f"{action} {config.name}")
         print(f"unit={config.unit_path}")
         print(f"log={config.log_path}")
+        print(f"app_server_codex_cmd={config.codex_path or 'missing'}")
         return 0
     if args.service_command == "status":
         active, enabled = service_status(config)
@@ -575,6 +600,7 @@ def service_command(args: argparse.Namespace, root: Path) -> int:
         print(f"enabled={enabled}")
         print(f"unit={config.unit_path}")
         print(f"log={config.log_path}")
+        print(f"app_server_codex_cmd={getattr(config, 'codex_path', None) or 'missing'}")
         return 0
     if args.service_command == "logs":
         print(f"log={config.log_path}")
@@ -685,12 +711,14 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
     codex_wake = shutil.which("codex-wake") or ""
     codex_waked = shutil.which("codex-waked") or ""
     codex_wake_hook = shutil.which("codex-wake-hook") or ""
+    codex = shutil.which("codex") or ""
     tmux = shutil.which("tmux") or ""
     try:
         active, enabled = service_status(config)
     except Exception as exc:
         active, enabled = "unknown", f"unknown ({exc})"
     hook_evidence = hook_runtime_evidence(root)
+    app_server_readiness = service_app_server_readiness(config)
     return {
         "repo_root": str(repo_root),
         "wake_root": str(root),
@@ -698,6 +726,7 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
             "codex_wake": codex_wake or "",
             "codex_waked": codex_waked or "",
             "codex_wake_hook": codex_wake_hook or "",
+            "codex": codex or "",
             "tmux": tmux or "",
         },
         "hook_config": {
@@ -731,6 +760,7 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
             "unit": str(config.unit_path),
             "log": str(config.log_path),
         },
+        "service_app_server": asdict(app_server_readiness),
         "trust": hook_review_note(),
     }
 
@@ -745,16 +775,19 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     hook_runtime = summary["hook_runtime"]
     hook_sources = summary["hook_sources"]
     service = summary["service"]
+    service_app_server = summary["service_app_server"]
     assert isinstance(commands, dict)
     assert isinstance(hook_config, dict)
     assert isinstance(hook_runtime, dict)
     assert isinstance(hook_sources, dict)
     assert isinstance(service, dict)
+    assert isinstance(service_app_server, dict)
     print(f"repo_root={summary['repo_root']}")
     print(f"wake_root={summary['wake_root']}")
     print(f"codex_wake={commands['codex_wake'] or 'missing'}")
     print(f"codex_waked={commands['codex_waked'] or 'missing'}")
     print(f"codex_wake_hook={commands['codex_wake_hook'] or 'missing'}")
+    print(f"codex={commands['codex'] or 'missing'}")
     print(f"tmux={commands['tmux'] or 'missing'}")
     print(f"hook_config={hook_config['path']}")
     print(f"hook_config_exists={str(hook_config['exists']).lower()}")
@@ -779,6 +812,13 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     print(f"service_enabled={service['enabled']}")
     print(f"service_unit={service['unit']}")
     print(f"service_log={service['log']}")
+    print(f"service_app_server_codex_ready={str(service_app_server['codex_cmd_ready']).lower()}")
+    print(f"service_app_server_codex_source={service_app_server['codex_cmd_source']}")
+    print(f"service_app_server_codex_cmd={service_app_server['codex_cmd'] or 'missing'}")
+    print(f"service_app_server_unit_codex_cmd={service_app_server['unit_codex_cmd'] or 'missing'}")
+    print(f"service_app_server_user_manager_codex_cmd={service_app_server['user_manager_codex_cmd'] or 'missing'}")
+    print(f"service_app_server_interactive_codex_cmd={service_app_server['interactive_codex_cmd'] or 'missing'}")
+    print(f"service_app_server_note={service_app_server['message']}")
     print(f"trust={summary['trust']}")
     return 0
 

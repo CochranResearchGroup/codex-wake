@@ -144,6 +144,7 @@ Interactive protocol check:
 
 ```bash
 codex-wake --wake-root .codex/wake app candidates --cwd "$PWD" --validate --only-idle --json
+codex-wake --wake-root .codex/wake app status --codex-path "$(command -v codex)" --resume <THREAD_ID>
 codex-wake --wake-root .codex/wake app after <THREAD_ID> 30m -- \
   "Resume this app-server thread. Verify current thread status and continue only if the task is incomplete."
 ```
@@ -159,11 +160,22 @@ Service-fired app-server preflight:
 ```bash
 command -v codex
 codex --version
+codex-wake --wake-root .codex/wake doctor
+codex-wake --wake-root .codex/wake doctor --json
 systemctl --user show-environment | rg '^(PATH|CODEX_)='
 systemctl --user status codex-wake-<repo>.service --no-pager
 codex-wake --wake-root .codex/wake service status
 codex-wake --wake-root .codex/wake service logs --lines 80
 codex-wake --wake-root .codex/wake app candidates --cwd "$PWD" --validate --only-idle --json
+```
+
+`doctor` should report `service_app_server_codex_ready=true` before you rely on
+the repo service to fire an app-server wake. If it reports
+`interactive_path_only` or `missing`, reinstall the service with an explicit
+Codex CLI path:
+
+```bash
+codex-wake --wake-root .codex/wake service install --codex-path "$(command -v codex)"
 ```
 
 If logs contain `No such file or directory: 'codex'`, classify the wake as a

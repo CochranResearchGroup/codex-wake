@@ -1387,3 +1387,43 @@ Recorded a Ragmail app-server service environment handoff for skill hardening.
 Best next turn option: open a bounded app-server service-environment hardening
 plan, then update the tracked and installed `codex-wake` skill copies once the
 desired product behavior is clear.
+
+## Turn 91 | 2026-05-23
+
+Completed app-server service environment product hardening.
+
+- Re-read planning, runtime-state, agent-runtime, and validation policies.
+- Added `docs/dev/plans/0038-2026-05-23-app-server-service-env-product-hardening.md`.
+- Added explicit Codex CLI command resolution for app-server dispatch:
+  `target.codex_cmd`, `CODEX_WAKE_CODEX_CMD`, then daemon `PATH`.
+- Made missing app-server command launch errors visible as operator-facing wake
+  `last_error` values.
+- Added `--codex-path` to app-server wake creation/status/candidate validation
+  and service install surfaces.
+- Updated service units to persist `CODEX_WAKE_CODEX_CMD` when a Codex CLI
+  command is available.
+- Extended `doctor` and `doctor --json` with service-side app-server Codex
+  readiness fields.
+- Updated README, app-server docs, wake schema docs, and the tracked
+  `codex-wake` skill guidance.
+- Synced installed skill copies under `~/.codex/shared/skills/codex-wake` and
+  `~/.agents/skills/codex-wake`.
+- Ran source validation: 100 tests via the unittest discovery command, plus
+  `python -m compileall -q src tests` and `git diff --check`.
+- Refreshed the installed uv tool from the working tree.
+- Verified installed `doctor --json` reports
+  `service_app_server.codex_cmd_ready=true`.
+- Ran an installed-service app-server dogfood with temporary service
+  `codex-wake-p38-service-app.service` and wake
+  `wake_20260523_183616_fb5a`; it submitted through app-server with
+  `app_server_preflight.status.type=idle`, turn id
+  `019e561f-c418-7213-8846-3fd1839cc5ad`, and `ack_observed`.
+- Uninstalled the temporary service and confirmed its unit was removed.
+- Confirmed the repo wake root remained clean:
+  `active_total=0`, `terminal_total=0`, `archived_total=13`.
+- Recorded evidence in
+  `docs/dev/verification/0054-2026-05-23-app-server-service-env-product-hardening.md`.
+
+Best next turn option: commit and push this product hardening slice, wait for
+CI, then cut a small release if we want downstream repos to install the
+service-environment fix by tag rather than from the working tree.

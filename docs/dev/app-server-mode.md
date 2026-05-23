@@ -1,7 +1,7 @@
 # App-Server Mode
 
 Status: MVP stdio transport implemented
-Verified: 2026-05-20 with Codex CLI 0.131.0
+Verified: 2026-05-23 with Codex CLI 0.133.0
 
 ## Contract
 
@@ -12,10 +12,16 @@ Codex Wake supports an app-server target record shape for controlled dispatch:
   "target": {
     "transport": "app-server",
     "endpoint": "stdio://",
-    "thread_id": "thread_..."
+    "thread_id": "thread_...",
+    "codex_cmd": "/home/you/.nvm/versions/node/v24.14.0/bin/codex"
   }
 }
 ```
+
+`codex_cmd` is optional. When present, dispatch uses that validated Codex CLI
+command for `codex app-server --listen stdio://`. When absent, dispatch checks
+`CODEX_WAKE_CODEX_CMD` and then falls back to `codex` from the daemon process
+environment.
 
 The implemented path starts or uses a stdio app-server client and sends:
 
@@ -36,6 +42,7 @@ Use explicit app-server commands for time-based wakes:
 
 ```bash
 codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app after --codex-path "$(command -v codex)" thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
 ```
 
@@ -51,8 +58,23 @@ codex-wake app candidates --cwd "$PWD" --json
 codex-wake app candidates --cwd "$PWD" --validate --only-idle --json
 codex-wake app status thread_abc
 codex-wake app status --resume thread_abc
+codex-wake app status --codex-path "$(command -v codex)" --resume thread_abc
 codex-wake app status --json thread_abc
 ```
+
+For service-fired app-server wakes, install the repo service from an
+environment that can resolve `codex`, or pass an explicit path:
+
+```bash
+codex-wake service install --codex-path "$(command -v codex)"
+codex-wake doctor
+codex-wake doctor --json
+```
+
+The service unit persists `CODEX_WAKE_CODEX_CMD` when a Codex CLI command can be
+resolved. `doctor` reports whether the installed unit or user-systemd manager
+environment can resolve the Codex CLI used for app-server dispatch. It reports
+only the relevant command-resolution fields, not the full service environment.
 
 Dispatch preflight resumes the target thread, records `app_server_preflight`
 status evidence, and only calls `turn/start` when the resumed thread reports
@@ -109,15 +131,30 @@ Local Codex CLI refreshed on 2026-05-20:
 - `ThreadStatusChangedNotification` exposes `idle`, `active`, `systemError`, and `notLoaded` thread states, which is the likely future basis for safer app-server wake preflight.
 - A source-tree stdio initialize smoke succeeded and returned Codex home, platform, and user-agent metadata.
 
+Local Codex CLI refreshed on 2026-05-23:
+
+- `codex-cli 0.133.0`
+- Product hardening added explicit Codex CLI command resolution for app-server
+  dispatch, service unit persistence through `CODEX_WAKE_CODEX_CMD`, and doctor
+  readiness fields for service-side app-server command resolution.
+
 ## Current Implementation Boundary
 
-The current implementation is suitable for unit-tested stdio dispatch and for future controlled dogfood against a known thread id. It should not yet be treated as a full replacement for the tmux path because:
+The current implementation is suitable for controlled stdio dispatch against a
+known resumable idle thread id. It should not yet be treated as a full
+replacement for the tmux path because:
 
-- live app-server dispatch has not been dogfooded against a deliberately created disposable thread;
-- current dispatch treats `turn/start` acceptance as the app-server acknowledgement, while tmux dispatch still relies on the Codex hook ack file;
-- thread status preflight is implemented for resumed-thread status, but still needs a live disposable-thread dogfood.
+- service-fired app-server dispatch should be checked with `doctor` before a
+  wake is queued;
+- current dispatch treats `turn/start` acceptance as the app-server
+  acknowledgement, while tmux dispatch still relies on the Codex hook ack file;
+- app-server dispatch can resume a thread without producing a visible turn in a
+  live tmux pane the operator is watching;
+- target selection is still an explicit operator or agent decision from local
+  rollout-backed thread candidates.
 
-The next app-server implementation lane should add a bounded operator smoke for a disposable thread.
+The 2026-05-23 product-hardening lane validated service-fired app-server
+dispatch through a temporary user service and a known idle thread id.
 
 ## Safety Boundary
 
