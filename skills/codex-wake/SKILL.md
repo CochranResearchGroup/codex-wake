@@ -38,6 +38,7 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - After a wake fires, inspect `codex-wake show <wake-id>`, `.codex/wake/acks/`, and `codex-wake status --json` before claiming success.
 - Treat ack as proof that Codex submitted the wake prompt in the target session, not proof that the operator saw a new turn in the pane they were watching.
 - For tmux wakes, report `visibility_result.classification` when present; `visible_prompt_observed` is stronger than ack alone, and `ack_observed_visibility_unproven` must not be described as operator-visible success.
+- For app-server wakes fired by a repo-scoped service, verify the daemon's user-systemd environment; `command -v codex` in the interactive shell is not enough evidence that the service can launch `codex app-server`.
 - If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
 
@@ -90,6 +91,18 @@ Run one daemon pass:
 codex-waked --wake-root .codex/wake --once --ack-timeout 20
 ```
 
+App-server service environment preflight:
+
+```bash
+command -v codex
+systemctl --user show-environment | rg '^(PATH|CODEX_)='
+systemctl --user status codex-wake-<repo>.service --no-pager
+codex-wake --wake-root .codex/wake service status
+codex-wake --wake-root .codex/wake service logs --lines 80
+```
+
+If service logs show `No such file or directory: 'codex'`, classify it as a service-environment failure, not an app-server protocol failure. Re-check the same wake record after recovery instead of creating a duplicate wake.
+
 Operator-visible delayed wake:
 
 ```bash
@@ -116,6 +129,8 @@ codex-wake --wake-root .codex/wake status --json
 codex-wake --wake-root .codex/wake archive <wake-id>
 ```
 
-Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, and any remaining active wake count.
+For app-server dogfood, inspect `app_server_preflight`, `dispatch_result.turn_id`, and `ack_observed`; if dispatch was service-fired, also inspect the service logs and daemon environment.
+
+Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, app-server dispatch evidence when present, and any remaining active wake count.
 
 If ack exists but no new turn is visible, read `references/use-cases.md#ack-but-no-visible-turn`.

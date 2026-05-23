@@ -140,7 +140,7 @@ Report this as `ack_observed; operator-visible turn not proven` unless `visibili
 
 Use when a resumable app-server-backed thread is the target instead of a live tmux pane.
 
-Pattern:
+Interactive protocol check:
 
 ```bash
 codex-wake --wake-root .codex/wake app candidates --cwd "$PWD" --validate --only-idle --json
@@ -149,6 +149,59 @@ codex-wake --wake-root .codex/wake app after <THREAD_ID> 30m -- \
 ```
 
 Only target a thread that can be resumed and is idle. Use `codex-wake app status --resume <THREAD_ID>` when in doubt.
+
+If the repo-scoped user service will fire the wake, check the service
+environment before relying on it. App-server dispatch is executed by the daemon
+process, so `command -v codex` in the current shell is insufficient evidence.
+
+Service-fired app-server preflight:
+
+```bash
+command -v codex
+codex --version
+systemctl --user show-environment | rg '^(PATH|CODEX_)='
+systemctl --user status codex-wake-<repo>.service --no-pager
+codex-wake --wake-root .codex/wake service status
+codex-wake --wake-root .codex/wake service logs --lines 80
+codex-wake --wake-root .codex/wake app candidates --cwd "$PWD" --validate --only-idle --json
+```
+
+If logs contain `No such file or directory: 'codex'`, classify the wake as a
+service-environment failure, not an app-server protocol failure. Do not create a
+duplicate wake just because dispatch failed; inspect and continue the same wake
+record when possible.
+
+Immediate recovery, when the current shell is the desired runtime environment:
+
+```bash
+systemctl --user import-environment PATH CODEX_CI CODEX_MANAGED_BY_NPM CODEX_MANAGED_PACKAGE_ROOT CODEX_PROFILES_CONFIG CODEX_PROFILES_REPO
+systemctl --user restart codex-wake-<repo>.service
+codex-wake --wake-root .codex/wake service logs --lines 80
+codex-wake --wake-root .codex/wake show <wake-id>
+```
+
+This is a workstation recovery step, not a portable product fix. After recovery,
+wait for or run one bounded daemon pass and re-check the same wake record.
+
+For one-off app-server protocol validation, prefer a shell-fired pass:
+
+```bash
+codex-waked --wake-root .codex/wake --once --ack-timeout 20
+```
+
+Use the repo-scoped service path when the goal is to validate service-fired
+dispatch specifically.
+
+After app-server dogfood, inspect:
+
+```bash
+codex-wake --wake-root .codex/wake show <wake-id>
+codex-wake --wake-root .codex/wake status --json
+codex-wake --wake-root .codex/wake service logs --lines 80
+```
+
+Report `app_server_preflight.status.type`, `dispatch_result.turn_id`,
+`ack_observed`, and whether any service-environment failure was seen.
 
 ## Cleanup Or Closeout Wake
 
