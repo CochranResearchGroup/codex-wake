@@ -1672,3 +1672,32 @@ Best next turn option: decide whether to cut a small follow-up release for the
 OpenClaw plugin and `openclaw_gateway` transport, or leave the plugin as a
 repo-linked local integration until the OpenClaw plugin packaging story is
 settled.
+
+## Turn 99 | 2026-05-25
+
+Completed the `codex-wake` skill transport decision hardening pass.
+
+- Added a top-level `Choose Wake Transport` section to the tracked
+  `codex-wake` skill.
+- Made agents classify the target runtime before scheduling: live Codex
+  TUI/tmux, Codex app-server thread, or OpenClaw Slack/API agent.
+- Added required target-proof and delivery-proof guidance for tmux,
+  app-server, and OpenClaw Gateway wakes.
+- Added explicit wrong-transport warnings for OpenClaw session keys,
+  app-server thread ids, tmux visibility, placeholder ids, and
+  `codex-waked --no-dispatch`.
+- Added a matching `Choose Transport First` matrix to the skill use-case
+  reference before the trigger examples.
+- Synced the hardened skill to `~/.agents/skills/codex-wake`,
+  `~/.codex/shared/skills/codex-wake`, and
+  `~/.openclaw/skills/codex-wake`.
+- Verified all installed skill copies match the tracked skill with `diff -qr`.
+- Verified OpenClaw still sees the skill for `agent main` with
+  `eligible=true`, `modelVisible=true`, `userInvocable=true`, and
+  `commandVisible=true`.
+- Recorded evidence in
+  `docs/dev/verification/0060-2026-05-25-skill-transport-decision-hardening.md`.
+
+Best next turn option: decide whether this docs-only skill hardening should be
+released together with the OpenClaw plugin/transport changes, or left as a
+main-branch operator guidance update until plugin packaging is settled.

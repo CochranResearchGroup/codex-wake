@@ -2,6 +2,34 @@
 
 Use these patterns when deciding how an agent should schedule its own wake cycle.
 
+## Choose Transport First
+
+Pick the target runtime before choosing a trigger. The same `after 20m` timing
+can mean three different dispatch paths:
+
+| If the target is... | Schedule with... | Required target id | Proof that delivery landed |
+| --- | --- | --- | --- |
+| A live Codex TUI pane | default `codex-wake after/at/file/changed/pid` | `TMUX_PANE` and tmux socket from the target pane | ack evidence plus `visibility_result.classification=visible_prompt_observed` or target-pane inspection for operator-visible claims |
+| A Codex app-server thread | `codex-wake app ...` | real resumable Codex thread id | `app_server_preflight`, `dispatch_result.turn_id` when returned, `submitted`, `ack_observed`, or target transcript evidence |
+| An OpenClaw Slack/API agent | `codex_wake_schedule` plugin tool, or `codex-wake openclaw ...` | real OpenClaw session key with agent/workspace/channel evidence | `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, `submitted`, `openclaw_gateway_dispatch_result`, and Slack/transcript readback when needed |
+
+Use the OpenClaw plugin from inside a live OpenClaw turn when it is available.
+It captures trusted runtime context, so the model does not need to copy a
+session key, Slack channel, or thread timestamp into a shell command.
+
+Never use:
+
+- an OpenClaw session key as a Codex app-server thread id;
+- a Slack channel id as a tmux target;
+- an app-server dispatch as proof of a visible turn in the current TUI;
+- a tmux hook ack as proof that OpenClaw received a Slack/API wake;
+- `codex-waked --no-dispatch` as proof that any dispatcher delivered the wake;
+- placeholders such as `noop-smoke-test`, `thread_abc`, or sample session keys
+  as readiness evidence.
+
+Before scheduling, the agent should know the runtime, target id, dispatcher,
+landing evidence, and follow-up inspection path for missing visible output.
+
 ## CI Or Test Babysitting
 
 Use when a test suite or CI run is too slow to wait on in the active turn.
@@ -147,6 +175,10 @@ Report this as `ack_observed; operator-visible turn not proven` unless `visibili
 ## App-Server Wake
 
 Use when a resumable app-server-backed thread is the target instead of a live tmux pane.
+
+Do not use this for OpenClaw Slack/API sessions unless the target is actually a
+resumable Codex app-server thread. OpenClaw wakes should use the OpenClaw
+Gateway transport and prove delivery with Gateway/Slack/transcript evidence.
 
 Interactive protocol check:
 

@@ -31,6 +31,7 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 ## Core Rules
 
 - Create a durable wake record with `codex-wake`; do not say you will remember to check later.
+- Choose the wake transport before scheduling. The runtime you are waking determines the required target id, dispatcher, and completion evidence.
 - Put logs and marker files under `.codex/events/` unless the repo has a stronger convention.
 - Keep prompts short, idempotent, and evidence-oriented: tell the future agent what to verify first.
 - Never put secrets, raw credentials, or private transcript bodies in wake prompts or tracked docs.
@@ -43,6 +44,33 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Prefer `codex-wake service install --codex-path "$(command -v codex)"` for service-fired app-server wakes when the repo service needs a durable Codex CLI command.
 - If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
+
+## Choose Wake Transport
+
+Classify the target runtime before creating a wake:
+
+| Target runtime | Use | Required target proof | Required delivery proof |
+| --- | --- | --- | --- |
+| Live Codex TUI in tmux | default `after`, `at`, `file`, `changed`, or `pid` commands | `TMUX_PANE` and tmux socket captured from the target pane | ack evidence plus `visibility_result.classification=visible_prompt_observed` or direct pane inspection for operator-visible claims |
+| Codex app-server thread | `codex-wake app ...` commands | real resumable Codex thread id from `app candidates --validate` or `app status --resume` | `app_server_preflight`, `dispatch_result.turn_id` when returned, `submitted`, `ack_observed`, or target transcript evidence |
+| OpenClaw Slack/API agent | `codex_wake_schedule` plugin tool, or `codex-wake openclaw ...` when scheduling externally | real OpenClaw session key plus agent/workspace/channel evidence captured by OpenClaw or explicitly provided | `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, `submitted`, `openclaw_gateway_dispatch_result`, and Slack/transcript readback when human-visible proof is required |
+
+Do not confuse transports:
+
+- An OpenClaw Slack channel, OpenClaw agent id, or OpenClaw session key is not a Codex app-server thread id.
+- A Codex app-server thread id is not a tmux pane and does not prove a visible turn in the active TUI.
+- A tmux ack is not proof that an OpenClaw Slack/API session received a wake.
+- `TMUX_PANE` empty means the default tmux-targeted creation path is unavailable.
+- `codex-waked --no-dispatch` proves only trigger evaluation and state movement, not delivery.
+- Placeholder ids such as `noop-smoke-test`, `thread_abc`, or copied sample session keys are invalid readiness evidence.
+
+Before scheduling, be able to answer:
+
+- What runtime am I waking?
+- What durable identifier will route the wake?
+- Which dispatcher will deliver it?
+- What evidence will prove it landed?
+- What will I inspect if dispatch succeeds but no human-visible turn appears?
 
 ## OpenClaw Sessions
 
