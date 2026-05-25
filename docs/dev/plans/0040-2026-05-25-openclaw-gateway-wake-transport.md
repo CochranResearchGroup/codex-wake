@@ -55,6 +55,16 @@ OpenClaw Gateway on retry and produced the unique transcript response
 fixed a contract bug: `expectFinal` must be the Gateway CLI flag
 `--expect-final`, not a JSON `agent` param.
 
+Slice 4 is recorded in
+`docs/dev/verification/0059-2026-05-25-openclaw-plugin-registration-smoke.md`.
+An external OpenClaw plugin in `plugins/openclaw-codex-wake/` registers
+`codex_wake_schedule`, captures trusted runtime context from the current
+OpenClaw session, writes schema-versioned `openclaw_gateway` wake JSON without
+running shell commands, and rejects missing or placeholder session keys. A real
+plugin-scheduled wake against `agent:main:slack:channel:c0ahqqcg7j4` submitted
+through OpenClaw Gateway and produced the Slack-visible response
+`CODEX_WAKE_PLUGIN_WAKE_20260525_211530`.
+
 ## Non-Goals
 
 - Do not treat `--no-dispatch` as wake success.
@@ -232,6 +242,13 @@ Acceptance criteria:
 - Plugin behavior is covered by focused OpenClaw tests or a documented plugin
   harness smoke.
 
+Status: Completed with focused plugin tests and live Gateway/Slack evidence.
+The first plugin-created wake exposed an unsafe default: inferred Slack delivery
+context was being persisted as `reply_channel=slack`, which Gateway rejected as
+an explicit channel override. The plugin now records channel/session metadata
+as evidence by default and only stores `reply_channel`, `reply_to`, or
+`reply_account_id` when explicitly configured.
+
 ### Slice 5: Core Seam Decision
 
 If the plugin cannot capture required session context or schedule a safe
@@ -254,3 +271,7 @@ This lane is complete when:
 - an OpenClaw plugin or documented SDK blocker exists for live-session
   registration;
 - roadmap, runbook, docs, and installed skill guidance are updated.
+
+Status: Complete. Slice 4 added and verified the plugin path, and the final
+smoke was confirmed through OpenClaw transcript/trajectory evidence plus live
+Slack message readback.

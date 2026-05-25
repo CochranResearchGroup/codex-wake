@@ -11,6 +11,7 @@ The v0.1.0 MVP supports:
 - terminal-state archival with `codex-wake archive`
 - experimental stdio app-server targeted wake records
 - experimental OpenClaw Gateway targeted wake records
+- OpenClaw plugin registration through `codex_wake_schedule`
 
 ## Requirements
 
@@ -179,6 +180,23 @@ codex-wake openclaw after \
 OpenClaw Gateway dispatch requires a real `agent:<agent_id>:...` session key.
 It rejects placeholder values such as `noop-smoke-test`. Channel fields are
 stored as evidence; the session key is the durable target.
+
+Install the OpenClaw plugin when OpenClaw agents should schedule their own
+wakes from live session context:
+
+```bash
+openclaw plugins install --link ./plugins/openclaw-codex-wake
+systemctl --user restart openclaw-gateway.service
+openclaw plugins inspect codex-wake --runtime --json
+openclaw gateway call tools.catalog --json \
+  --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
+```
+
+The plugin registers `codex_wake_schedule`. It writes schema-versioned
+`openclaw_gateway` wake JSON directly, captures the current OpenClaw
+`agentId`, `sessionKey`, and channel/thread evidence, and rejects missing or
+placeholder session keys. By default, channel metadata is stored as evidence
+only; explicit Gateway reply override fields are written only when configured.
 
 Run the daemon once:
 

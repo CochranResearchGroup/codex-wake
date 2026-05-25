@@ -1616,3 +1616,52 @@ Best next turn option: start P40 Slice 4 in the OpenClaw repo: implement or
 prototype the plugin registration surface that captures live `agentId`,
 `sessionKey`, and channel/thread evidence, then writes an `openclaw_gateway`
 wake record without manual target copying.
+
+## Turn 98 | 2026-05-25
+
+Completed P40 Slice 4 OpenClaw plugin registration.
+
+- Added external OpenClaw plugin package under
+  `plugins/openclaw-codex-wake/`.
+- Registered the `codex_wake_schedule` tool and `/codex-wake` command.
+- Kept plugin installation compatible with OpenClaw's unsafe-code guard by
+  writing schema-versioned wake JSON directly instead of running shell
+  commands.
+- Installed the plugin with
+  `openclaw plugins install --link ./plugins/openclaw-codex-wake`.
+- Restarted `openclaw-gateway.service` and verified the plugin is loaded from
+  this repo with `toolNames=["codex_wake_schedule"]`.
+- Verified the live Gateway tool catalog includes plugin id
+  `plugin:codex-wake` and tool id `codex_wake_schedule`.
+- Found and fixed a plugin routing bug: inferred Slack delivery context was
+  being persisted as explicit `dispatch.reply_channel=slack`,
+  `reply_to=channel:C0AHQQCG7J4`, and `reply_account_id=default`; Gateway
+  rejected that override with `Unknown channel: slack`.
+- Updated the plugin so channel/account/thread context is stored as evidence
+  by default and reply override fields are written only when explicitly
+  configured.
+- Ran focused plugin validation: 9 tests passed, Node syntax checks passed,
+  and no dangerous `child_process`/`spawn` shell execution was present.
+- Ran a live OpenClaw scheduling turn against
+  `agent:main:slack:channel:c0ahqqcg7j4`; the agent called
+  `codex_wake_schedule` once and created wake `wake_20260525_211551_b1f4`.
+- Fired the wake with `codex-waked --once --ack-timeout 30`; the first attempt
+  coincided with a Gateway restart and requeued, and the retry submitted
+  successfully with run id `codex-wake:wake_20260525_211551_b1f4`.
+- Verified OpenClaw transcript/trajectory evidence and live Slack readback:
+  `openclaw message read --channel slack --account default --target channel:C0AHQQCG7J4 --limit 20 --json`
+  returned text `CODEX_WAKE_PLUGIN_WAKE_20260525_211530` at Slack timestamp
+  `1779743864.850509`.
+- Archived both the failed routing smoke and the successful plugin smoke;
+  final wake-root status returned to `active_total=0`.
+- Updated P40 plan, roadmap, README, wake schema docs, plugin README, and
+  tracked `codex-wake` skill guidance.
+- Synced the updated `codex-wake` skill to `~/.agents/skills`,
+  `~/.codex/shared/skills`, and `~/.openclaw/skills`; `openclaw skills info
+  codex-wake --agent main --json` reports it is visible and invocable.
+- Recorded evidence in
+  `docs/dev/verification/0059-2026-05-25-openclaw-plugin-registration-smoke.md`.
+
+Best next turn option: run the full repo validation gate, sync the updated
+skill into user/OpenClaw skill roots, commit and push the P40 plugin slice, and
+wait for CI.

@@ -168,7 +168,9 @@ Current optional fields include:
 - OpenClaw Gateway target `openclaw_cmd`: optional command path for launching
   local Gateway dispatch through the OpenClaw CLI.
 
-Event objects may also include extra metadata such as accepted app-server turn identifiers.
+Event objects may also include extra metadata such as accepted app-server turn
+identifiers or `created_by` provenance. The OpenClaw plugin uses
+`created_by: "openclaw-plugin:codex-wake"` on the initial `created` event.
 
 ## Tmux Visibility Result
 

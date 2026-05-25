@@ -65,6 +65,18 @@ codex-wake --wake-root .codex/wake openclaw after \
   30m -- "Resume this OpenClaw session. Inspect the wake record first."
 ```
 
+When the OpenClaw `codex-wake` plugin is installed, prefer the
+`codex_wake_schedule` tool from inside the live OpenClaw turn. It captures the
+current `agentId`, `sessionKey`, and channel/thread evidence; do not invent or
+copy placeholder session keys into wake records.
+
+Plugin readiness checks:
+
+```bash
+openclaw plugins inspect codex-wake --runtime --json
+openclaw gateway call tools.catalog --json --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
+```
+
 Use an app-server wake only when you have a real resumable Codex thread id:
 
 ```bash
@@ -171,8 +183,14 @@ codex-wake --wake-root .codex/wake status --json
 codex-wake --wake-root .codex/wake archive <wake-id>
 ```
 
-For OpenClaw Gateway dogfood, inspect `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, and `openclaw_gateway_dispatch_result`. For app-server dogfood, inspect `app_server_preflight`, `dispatch_result.turn_id`, and `ack_observed`; if dispatch was service-fired, also inspect the service logs and daemon environment.
+For OpenClaw Gateway dogfood, inspect `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, and `openclaw_gateway_dispatch_result`. For plugin-scheduled OpenClaw wakes, also verify that the wake target dispatch block did not acquire inferred `reply_channel`, `reply_to`, or `reply_account_id` values unless those overrides were explicitly configured. For app-server dogfood, inspect `app_server_preflight`, `dispatch_result.turn_id`, and `ack_observed`; if dispatch was service-fired, also inspect the service logs and daemon environment.
 
-Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, OpenClaw/app-server dispatch evidence when present, and any remaining active wake count.
+Use live channel readback when Slack-visible proof is required:
+
+```bash
+openclaw message read --channel slack --account default --target channel:<channel-id> --limit 20 --json
+```
+
+Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, OpenClaw/app-server dispatch evidence when present, Slack readback evidence when used, and any remaining active wake count.
 
 If ack exists but no new turn is visible, read `references/use-cases.md#ack-but-no-visible-turn`.

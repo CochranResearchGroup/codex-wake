@@ -405,9 +405,9 @@ Plan: [v0.4.13 Release](docs/dev/plans/0039-2026-05-23-v0413-release.md)
 
 ## P40 | OpenClaw Gateway Wake Transport
 
-State: OPEN
+State: CLOSED
 
-Current State: Slice 3 real sidecar smoke is complete and recorded in `docs/dev/verification/0058-2026-05-25-openclaw-gateway-real-sidecar-smoke.md`. `codex-wake` can create structured `openclaw_gateway` wake records, reject placeholder session keys, dispatch through OpenClaw Gateway method `agent`, and has produced a real OpenClaw transcript response for `wake_20260525_203934_201f`. Slice 4 remains: OpenClaw plugin registration from live session context.
+Current State: Closed by `docs/dev/verification/0059-2026-05-25-openclaw-plugin-registration-smoke.md`. `codex-wake` can create structured `openclaw_gateway` wake records, reject placeholder session keys, dispatch through OpenClaw Gateway method `agent`, and the external OpenClaw plugin at `plugins/openclaw-codex-wake/` can register a durable wake from live OpenClaw session context. Real smokes produced Slack-visible responses for `wake_20260525_203934_201f` and plugin-created wake `wake_20260525_211551_b1f4`.
 
 Plan: [OpenClaw Gateway Wake Transport](docs/dev/plans/0040-2026-05-25-openclaw-gateway-wake-transport.md)
 

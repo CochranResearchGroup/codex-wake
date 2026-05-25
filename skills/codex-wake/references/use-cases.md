@@ -183,6 +183,34 @@ The daemon sends a short `WAKE_TRIGGER_ID=...` handoff through OpenClaw
 Gateway method `agent`. The resumed OpenClaw agent should inspect the durable
 wake record before continuing.
 
+OpenClaw plugin registration:
+
+When the `codex-wake` OpenClaw plugin is loaded, use `codex_wake_schedule`
+inside the live OpenClaw turn instead of asking the model to copy session
+metadata into a CLI command. The tool captures `agentId`, `sessionKey`, and
+channel/thread evidence from trusted OpenClaw runtime context.
+
+Readiness:
+
+```bash
+openclaw plugins inspect codex-wake --runtime --json
+openclaw gateway call tools.catalog --json --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
+```
+
+Expected tool arguments:
+
+```json
+{
+  "trigger": "after",
+  "delay": "20m",
+  "prompt": "Wake idempotently. First inspect the wake record and any referenced logs, then continue only if work remains."
+}
+```
+
+The plugin writes channel metadata as evidence by default. It should not write
+`dispatch.reply_channel`, `dispatch.reply_to`, or
+`dispatch.reply_account_id` unless those overrides were explicitly configured.
+
 OpenClaw readiness levels:
 
 - Skill visible: `openclaw skills info codex-wake --agent <id> --json` reports `modelVisible=true` and `commandVisible=true`.
@@ -190,6 +218,7 @@ OpenClaw readiness levels:
 - Wake dispatched: run without `--no-dispatch`, then inspect `codex-wake show <wake-id>` for OpenClaw Gateway or app-server dispatch evidence.
 - Wake accepted by OpenClaw Gateway: inspect `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, `submitted`, and `openclaw_gateway_dispatch_result`.
 - Wake accepted by Codex app-server: inspect `dispatch_result.turn_id`, `submitted`, `ack_observed`, or the target app-server transcript.
+- Slack-visible OpenClaw wake: use `openclaw message read --channel slack --account <account> --target channel:<channel-id> --limit 20 --json` and verify the unique marker text.
 - Operator-visible current TUI wake: only tmux transport with `visibility_result.classification=visible_prompt_observed` or direct pane inspection proves this.
 
 If the repo-scoped user service will fire the wake, check the service

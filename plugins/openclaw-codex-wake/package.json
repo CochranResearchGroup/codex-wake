@@ -1,0 +1,28 @@
+{
+  "name": "@cochranresearchgroup/openclaw-codex-wake",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin that lets agents schedule durable codex-wake OpenClaw Gateway wakes.",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "lib",
+    "openclaw.plugin.json",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.5.22"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.5.22",
+      "minGatewayVersion": "2026.5.22"
+    }
+  }
+}

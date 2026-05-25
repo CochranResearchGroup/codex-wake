@@ -1,0 +1,99 @@
+{
+  "id": "codex-wake",
+  "name": "Codex Wake",
+  "description": "Schedule durable codex-wake records from live OpenClaw sessions.",
+  "version": "0.1.0",
+  "activation": {
+    "onStartup": true
+  },
+  "contracts": {
+    "tools": [
+      "codex_wake_schedule"
+    ]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "openclawCommand": {
+        "type": "string",
+        "minLength": 1,
+        "description": "OpenClaw executable path or command name stored in wake records for daemon-side dispatch."
+      },
+      "wakeRoot": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Default wake root. Relative values resolve against the active OpenClaw workspace."
+      },
+      "cwd": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Default working directory for codex-wake record creation."
+      },
+      "gatewayUrl": {
+        "type": "string",
+        "minLength": 1
+      },
+      "tokenEnv": {
+        "type": "string",
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+      },
+      "passwordEnv": {
+        "type": "string",
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+      },
+      "workspace": {
+        "type": "string",
+        "minLength": 1
+      },
+      "channelProvider": {
+        "type": "string",
+        "minLength": 1
+      },
+      "channelId": {
+        "type": "string",
+        "minLength": 1
+      },
+      "threadTs": {
+        "type": "string",
+        "minLength": 1
+      },
+      "replyChannel": {
+        "type": "string",
+        "minLength": 1
+      },
+      "replyTo": {
+        "type": "string",
+        "minLength": 1
+      },
+      "replyAccountId": {
+        "type": "string",
+        "minLength": 1
+      },
+      "model": {
+        "type": "string",
+        "minLength": 1
+      },
+      "thinking": {
+        "type": "string",
+        "minLength": 1
+      },
+      "deliverByDefault": {
+        "type": "boolean"
+      },
+      "defaultTimeoutSeconds": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "defaultGatewayTimeoutMs": {
+        "type": "integer",
+        "minimum": 1000
+      }
+    }
+  },
+  "toolMetadata": {
+    "codex_wake_schedule": {
+      "optional": false
+    }
+  }
+}
