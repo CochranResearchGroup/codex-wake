@@ -309,6 +309,12 @@ Results:
 - Node syntax checks passed.
 - Diff whitespace check passed.
 
+Upstream CI for implementation commit `ebc9235` also passed:
+
+- GitHub Actions run `26420370299`
+- `Release gates (3.11)`: success
+- `Release gates (3.12)`: success
+
 ## Acceptance Result
 
 Slice 4 passes:

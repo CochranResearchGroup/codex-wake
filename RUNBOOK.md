@@ -1659,9 +1659,16 @@ Completed P40 Slice 4 OpenClaw plugin registration.
 - Synced the updated `codex-wake` skill to `~/.agents/skills`,
   `~/.codex/shared/skills`, and `~/.openclaw/skills`; `openclaw skills info
   codex-wake --agent main --json` reports it is visible and invocable.
+- Ran the full validation gate: 112 Python tests, Python compile checks, 9
+  plugin tests, Node syntax checks, and `git diff --check` passed.
+- Committed and pushed the implementation as `ebc9235` (`Add OpenClaw
+  codex-wake plugin`).
+- Confirmed upstream CI run `26420370299` passed for Python 3.11 and 3.12
+  release gates.
 - Recorded evidence in
   `docs/dev/verification/0059-2026-05-25-openclaw-plugin-registration-smoke.md`.
 
-Best next turn option: run the full repo validation gate, sync the updated
-skill into user/OpenClaw skill roots, commit and push the P40 plugin slice, and
-wait for CI.
+Best next turn option: decide whether to cut a small follow-up release for the
+OpenClaw plugin and `openclaw_gateway` transport, or leave the plugin as a
+repo-linked local integration until the OpenClaw plugin packaging story is
+settled.
