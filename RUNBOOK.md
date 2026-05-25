@@ -1576,3 +1576,43 @@ Best next turn option: run P40 Slice 3 against a real active OpenClaw session:
 create a short `openclaw_gateway` wake without `--no-dispatch`, verify the
 unique response through Slack Mirror or OpenClaw transcript evidence, then
 record the exact wake id/session key/Gateway evidence under `docs/dev/verification/`.
+
+## Turn 97 | 2026-05-25
+
+Completed P40 Slice 3 real OpenClaw Gateway sidecar smoke.
+
+- Confirmed the repo wake root started with `active_total=0`.
+- Confirmed OpenClaw Gateway was running at `ws://127.0.0.1:18789` with RPC
+  `ok=true`.
+- Confirmed active OpenClaw session
+  `agent:main:slack:channel:c0ahqqcg7j4`, session id
+  `b0abcc43-cba3-40f0-8691-082ec7e49c97`.
+- Created wake `wake_20260525_203934_201f` with unique expected response
+  `CODEX_WAKE_OPENCLAW_SLICE3_20260525_203917`.
+- Fired the wake with `codex-waked --once` and dispatch enabled.
+- First dispatch attempt requeued because real Gateway rejected JSON param
+  `expectFinal`; fixed the source to use only the CLI flag `--expect-final`
+  and added a regression test.
+- Also tightened OpenClaw dispatch metadata handling: clear stale `last_error`
+  on successful retry and parse provider/model from `meta.agentMeta` when
+  present.
+- Retried the same wake record; second dispatch submitted successfully with
+  `run_id=codex-wake:wake_20260525_203934_201f`, `status=ok`,
+  `summary=completed`, and `payload_text_summary.total_length=42`.
+- Verified OpenClaw transcript evidence:
+  rollout line 136 and line 137 contain
+  `CODEX_WAKE_OPENCLAW_SLICE3_20260525_203917`; trajectory line 80 records
+  `session.ended` with `status=success` for the same wake run id.
+- Slack Mirror search was attempted but stale for private channel
+  `C0AHQQCG7J4`, so transcript/log evidence is the Slice 3 proof.
+- Archived the smoke wake; final wake-root status returned to
+  `active_total=0`, `terminal_total=0`, `archived_total=14`.
+- Re-ran validation after the fix: 112 tests passed, compile check passed, and
+  `git diff --check` passed.
+- Recorded evidence in
+  `docs/dev/verification/0058-2026-05-25-openclaw-gateway-real-sidecar-smoke.md`.
+
+Best next turn option: start P40 Slice 4 in the OpenClaw repo: implement or
+prototype the plugin registration surface that captures live `agentId`,
+`sessionKey`, and channel/thread evidence, then writes an `openclaw_gateway`
+wake record without manual target copying.

@@ -407,7 +407,7 @@ Plan: [v0.4.13 Release](docs/dev/plans/0039-2026-05-23-v0413-release.md)
 
 State: OPEN
 
-Current State: Slice 2 source implementation is complete and recorded in `docs/dev/verification/0057-2026-05-25-openclaw-gateway-target-implementation.md`. `codex-wake` can create structured `openclaw_gateway` wake records, reject placeholder session keys, and dispatch through OpenClaw Gateway method `agent` with sanitized preflight/result evidence in focused fake-Gateway tests. Slice 3 still needs a real Slack-visible OpenClaw wake smoke.
+Current State: Slice 3 real sidecar smoke is complete and recorded in `docs/dev/verification/0058-2026-05-25-openclaw-gateway-real-sidecar-smoke.md`. `codex-wake` can create structured `openclaw_gateway` wake records, reject placeholder session keys, dispatch through OpenClaw Gateway method `agent`, and has produced a real OpenClaw transcript response for `wake_20260525_203934_201f`. Slice 4 remains: OpenClaw plugin registration from live session context.
 
 Plan: [OpenClaw Gateway Wake Transport](docs/dev/plans/0040-2026-05-25-openclaw-gateway-wake-transport.md)
 

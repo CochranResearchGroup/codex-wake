@@ -81,9 +81,11 @@ class OpenClawGatewayTests(unittest.TestCase):
                     "payloads": [{"text": "P40_OPENCLAW_OK"}],
                     "finalAssistantVisibleText": "P40_OPENCLAW_OK",
                     "meta": {
-                        "provider": "openai-codex",
-                        "model": "gpt-5.5",
-                        "agentMeta": {"sessionId": "session_123"},
+                        "agentMeta": {
+                            "sessionId": "session_123",
+                            "provider": "openai-codex",
+                            "model": "gpt-5.5",
+                        },
                     },
                 },
             }
@@ -129,11 +131,14 @@ class OpenClawGatewayTests(unittest.TestCase):
             self.assertEqual(params["timeout"], 120)
             self.assertIn("WAKE_TRIGGER_ID=wake_openclaw", params["message"])
             self.assertNotIn("SECRET ORIGINAL PROMPT", params["message"])
+            self.assertNotIn("expectFinal", params)
 
     def test_dispatch_success_records_sanitized_gateway_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"
             found = self.make_firing_record(root, Path(tmp))
+            found.record["last_error"] = "previous transient failure"
+            write_record(root, found.record)
             runner = FakeOpenClawRunner([self.preflight_ok(), self.dispatch_ok()])
 
             result = dispatch_openclaw_gateway_record(
@@ -152,6 +157,7 @@ class OpenClawGatewayTests(unittest.TestCase):
             self.assertEqual(params["sessionKey"], "agent:main:slack:channel:c0ahqqcg7j4")
             submitted = json.loads((root / "submitted" / "wake_openclaw.json").read_text())
             self.assertEqual(submitted["status"], "submitted")
+            self.assertNotIn("last_error", submitted)
             self.assertEqual(submitted["openclaw_gateway_preflight"]["rpc_ok"], True)
             dispatch_result = submitted["dispatch_result"]
             self.assertEqual(dispatch_result["transport"], "openclaw_gateway")

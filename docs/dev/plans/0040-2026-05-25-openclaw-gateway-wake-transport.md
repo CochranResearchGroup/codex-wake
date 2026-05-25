@@ -45,7 +45,15 @@ Slice 2 is recorded in
 `codex-wake` now has an `openclaw_gateway` target transport for creating
 durable OpenClaw wake records, validating real `agent:<agent_id>:...` session
 keys, dispatching through Gateway method `agent`, and storing sanitized
-preflight/result evidence. Real Slack-visible delivery remains Slice 3.
+preflight/result evidence.
+
+Slice 3 is recorded in
+`docs/dev/verification/0058-2026-05-25-openclaw-gateway-real-sidecar-smoke.md`.
+A real wake against `agent:main:slack:channel:c0ahqqcg7j4` submitted through
+OpenClaw Gateway on retry and produced the unique transcript response
+`CODEX_WAKE_OPENCLAW_SLICE3_20260525_203917`. The first attempt found and
+fixed a contract bug: `expectFinal` must be the Gateway CLI flag
+`--expect-final`, not a JSON `agent` param.
 
 ## Non-Goals
 
@@ -197,6 +205,9 @@ Acceptance criteria:
   evidence.
 - Record the exact wake id, session key, Slack target, Gateway response, and
   evidence retrieval path under `docs/dev/verification/`.
+
+Status: Completed with OpenClaw transcript/log evidence. Slack Mirror was
+checked but stale for the private channel at smoke time.
 
 ### Slice 4: OpenClaw Plugin Registration
 

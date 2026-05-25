@@ -267,6 +267,7 @@ def dispatch_openclaw_gateway_record(
 
     record["status"] = "submitted"
     record["updated_at"] = format_utc(current)
+    record.pop("last_error", None)
     record["dispatch_result"] = metadata
     record = append_event(
         record,
@@ -353,7 +354,6 @@ def openclaw_gateway_agent_params(root: Path, record: dict[str, Any], target: di
         "deliver": bool(dispatch.get("deliver", False)),
         "timeout": int(dispatch.get("timeout_seconds") or DEFAULT_OPENCLAW_TIMEOUT_SECONDS),
         "idempotencyKey": str(dispatch.get("idempotency_key") or f"codex-wake:{wake_id}"),
-        "expectFinal": True,
     }
     optional_mapping = {
         "reply_channel": "replyChannel",
@@ -466,6 +466,8 @@ def _merge_result_metadata(metadata: dict[str, Any], result: dict[str, Any], wak
                 metadata["session_id"] = session_id
         for key in ("provider", "model"):
             value = meta.get(key)
+            if not isinstance(value, str) and isinstance(agent_meta, dict):
+                value = agent_meta.get(key)
             if isinstance(value, str):
                 metadata[key] = value
     final_text = result.get("finalAssistantVisibleText")
