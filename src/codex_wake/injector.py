@@ -251,6 +251,11 @@ def dispatch_firing_record(
 
         result = dispatch_app_server_record(root, found, now=current)
         return DispatchResult(result.status, result.message)
+    if isinstance(target, dict) and target.get("transport") == "openclaw_gateway":
+        from .openclaw_gateway import dispatch_openclaw_gateway_record
+
+        result = dispatch_openclaw_gateway_record(root, found, now=current)
+        return DispatchResult(result.status, result.message)
     try:
         socket, pane = target_from_record(record)
     except WakeError as exc:

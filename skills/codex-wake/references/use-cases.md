@@ -159,14 +159,37 @@ codex-wake --wake-root .codex/wake app after <THREAD_ID> 30m -- \
 
 Only target a thread that can be resumed and is idle. Use `codex-wake app status --resume <THREAD_ID>` when in doubt.
 
-In OpenClaw Slack/API sessions, this is the only viable wake transport unless the agent is explicitly running inside a tmux-backed Codex TUI. Do not use fake thread ids for smoke tests. A dummy app-server target plus `codex-waked --no-dispatch` proves only that a wake record can be created and its predicate can move to `firing`; it does not prove a wake turn, Slack reply, hook ack, or operator-visible behavior.
+In OpenClaw Slack/API sessions, use `openclaw_gateway` transport when you have
+a real durable OpenClaw session key. Use app-server only for a real resumable
+Codex thread id. Do not use fake thread ids or session keys for smoke tests. A
+dummy app-server target plus `codex-waked --no-dispatch` proves only that a
+wake record can be created and its predicate can move to `firing`; it does not
+prove a wake turn, Slack reply, hook ack, or operator-visible behavior.
+
+OpenClaw Gateway wake:
+
+```bash
+codex-wake --wake-root .codex/wake openclaw after \
+  --agent main \
+  --session-key agent:main:slack:channel:c0ahqqcg7j4 \
+  --workspace default \
+  --channel C0AHQQCG7J4 \
+  --thread-ts 1779729958.218239 \
+  --openclaw-path "$(command -v openclaw)" \
+  30m -- "Resume this OpenClaw session. Inspect the wake record first."
+```
+
+The daemon sends a short `WAKE_TRIGGER_ID=...` handoff through OpenClaw
+Gateway method `agent`. The resumed OpenClaw agent should inspect the durable
+wake record before continuing.
 
 OpenClaw readiness levels:
 
 - Skill visible: `openclaw skills info codex-wake --agent <id> --json` reports `modelVisible=true` and `commandVisible=true`.
 - Predicate fired: `codex-waked --once --no-dispatch` reports `fired=1`; this is not dispatch.
-- Wake dispatched: run without `--no-dispatch`, then inspect `codex-wake show <wake-id>` for app-server dispatch evidence.
-- Wake accepted by Codex: inspect `dispatch_result.turn_id`, `submitted`, `ack_observed`, or the target app-server transcript.
+- Wake dispatched: run without `--no-dispatch`, then inspect `codex-wake show <wake-id>` for OpenClaw Gateway or app-server dispatch evidence.
+- Wake accepted by OpenClaw Gateway: inspect `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, `submitted`, and `openclaw_gateway_dispatch_result`.
+- Wake accepted by Codex app-server: inspect `dispatch_result.turn_id`, `submitted`, `ack_observed`, or the target app-server transcript.
 - Operator-visible current TUI wake: only tmux transport with `visibility_result.classification=visible_prompt_observed` or direct pane inspection proves this.
 
 If the repo-scoped user service will fire the wake, check the service

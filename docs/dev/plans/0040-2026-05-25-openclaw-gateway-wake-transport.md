@@ -40,6 +40,13 @@ The selected dispatch surface is the Gateway `agent` method, with
 wrapper and direct `openclaw gateway call agent --expect-final --json` as the
 sidecar proof path. No OpenClaw core patch is needed for Slice 2.
 
+Slice 2 is recorded in
+`docs/dev/verification/0057-2026-05-25-openclaw-gateway-target-implementation.md`.
+`codex-wake` now has an `openclaw_gateway` target transport for creating
+durable OpenClaw wake records, validating real `agent:<agent_id>:...` session
+keys, dispatching through Gateway method `agent`, and storing sanitized
+preflight/result evidence. Real Slack-visible delivery remains Slice 3.
+
 ## Non-Goals
 
 - Do not treat `--no-dispatch` as wake success.
@@ -77,8 +84,8 @@ Add a new target transport:
 {
   "transport": "openclaw_gateway",
   "gateway": {
-    "url": "http://127.0.0.1:18789",
-    "auth_ref": "env:OPENCLAW_GATEWAY_TOKEN"
+    "url": "ws://127.0.0.1:18789",
+    "token_env": "OPENCLAW_GATEWAY_TOKEN"
   },
   "openclaw": {
     "agent_id": "main",
@@ -90,24 +97,27 @@ Add a new target transport:
       "thread_ts": "1779729958.218239"
     }
   },
-  "prompt": {
-    "mode": "agent_turn",
-    "wake_marker": "WAKE_TRIGGER_ID=wake_...",
-    "text": "Resume the scheduled wake task."
+  "dispatch": {
+    "deliver": false,
+    "timeout_seconds": 120,
+    "gateway_timeout_ms": 180000
   }
 }
 ```
 
 Rules:
 
-- `auth_ref` may name an environment variable or configured credential handle;
-  it must not contain the secret value.
+- Gateway auth fields may name environment variables; they must not contain
+  secret values.
 - `session_key` is required for OpenClaw registration unless a documented
   Gateway method can safely resolve the current session from channel refs.
 - Channel refs are evidence and validation aids, not a substitute for
   `session_key`.
 - Records must preserve `wake_id`, trigger evidence, dispatch attempt metadata,
   Gateway response metadata, and final validation evidence.
+- Dispatch sends a short `WAKE_TRIGGER_ID=...` handoff prompt that points the
+  OpenClaw agent back to the durable wake record. It does not embed the
+  original wake prompt in the Gateway call.
 
 ## Status And Evidence
 
@@ -151,23 +161,28 @@ Add record creation, validation, and dispatch support for the new transport.
 Candidate CLI:
 
 ```bash
-codex-wake --wake-root .codex/wake openclaw after 30s \
+codex-wake --wake-root .codex/wake openclaw after \
   --agent main \
   --session-key agent:main:slack:channel:c0ahqqcg7j4 \
   --workspace default \
   --channel C0AHQQCG7J4 \
   --thread-ts 1779729958.218239 \
+  --openclaw-path "$(command -v openclaw)" \
+  30s \
   -- "Wake idempotently. Echo the unique wake marker, then inspect state."
 ```
 
 Acceptance criteria:
 
 - CLI rejects missing `session_key`, fake placeholder values, and unsupported
-  dispatch modes.
+  placeholder targets.
 - Wake JSON stores structured OpenClaw target metadata without secrets.
 - Daemon dispatch records Gateway preflight, attempt, result, and failures.
 - Focused tests cover record creation, validation errors, successful fake
   Gateway dispatch, Gateway failure, and timeout behavior.
+
+Status: Implemented in source with fake Gateway validation. Real sidecar smoke
+is Slice 3.
 
 ### Slice 3: Real Sidecar Smoke
 

@@ -52,14 +52,27 @@ OpenClaw Slack/API sessions are not tmux panes. Before using tmux wake patterns:
 printf 'TMUX_PANE=%s\n' "${TMUX_PANE-}"
 ```
 
-If `TMUX_PANE` is empty, the default `codex-wake after ...` path cannot capture a tmux target. Use an app-server wake only when you have a real resumable thread id:
+If `TMUX_PANE` is empty, the default `codex-wake after ...` path cannot capture a tmux target. For OpenClaw Slack/API sessions, prefer an OpenClaw Gateway wake with a real durable session key:
+
+```bash
+codex-wake --wake-root .codex/wake openclaw after \
+  --agent main \
+  --session-key agent:main:slack:channel:c0ahqqcg7j4 \
+  --workspace default \
+  --channel C0AHQQCG7J4 \
+  --thread-ts 1779729958.218239 \
+  --openclaw-path "$(command -v openclaw)" \
+  30m -- "Resume this OpenClaw session. Inspect the wake record first."
+```
+
+Use an app-server wake only when you have a real resumable Codex thread id:
 
 ```bash
 codex-wake --wake-root .codex/wake app candidates --cwd "$PWD" --validate --only-idle --json
 codex-wake --wake-root .codex/wake app status --codex-path "$(command -v codex)" --resume <THREAD_ID>
 ```
 
-Never use placeholder thread ids such as `noop-smoke-test` as proof of OpenClaw wake readiness. For OpenClaw skill availability, use `openclaw skills info codex-wake --agent <id> --json`; for wake execution, require a real dispatch without `--no-dispatch` and then verify `submitted`, `ack_observed`, or app-server turn evidence.
+Never use placeholder thread ids or session keys such as `noop-smoke-test` as proof of OpenClaw wake readiness. For OpenClaw skill availability, use `openclaw skills info codex-wake --agent <id> --json`; for wake execution, require a real dispatch without `--no-dispatch` and then verify `submitted`, `openclaw_gateway_dispatch_result`, `ack_observed`, or app-server turn evidence.
 
 ## Common Patterns
 
@@ -158,8 +171,8 @@ codex-wake --wake-root .codex/wake status --json
 codex-wake --wake-root .codex/wake archive <wake-id>
 ```
 
-For app-server dogfood, inspect `app_server_preflight`, `dispatch_result.turn_id`, and `ack_observed`; if dispatch was service-fired, also inspect the service logs and daemon environment.
+For OpenClaw Gateway dogfood, inspect `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, and `openclaw_gateway_dispatch_result`. For app-server dogfood, inspect `app_server_preflight`, `dispatch_result.turn_id`, and `ack_observed`; if dispatch was service-fired, also inspect the service logs and daemon environment.
 
-Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, app-server dispatch evidence when present, and any remaining active wake count.
+Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, OpenClaw/app-server dispatch evidence when present, and any remaining active wake count.
 
 If ack exists but no new turn is visible, read `references/use-cases.md#ack-but-no-visible-turn`.

@@ -10,6 +10,7 @@ The v0.1.0 MVP supports:
 - tmux pane injection with `UserPromptSubmit` hook ack
 - terminal-state archival with `codex-wake archive`
 - experimental stdio app-server targeted wake records
+- experimental OpenClaw Gateway targeted wake records
 
 ## Requirements
 
@@ -161,6 +162,23 @@ codex-wake app status thread_abc
 codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
 ```
+
+Create an OpenClaw Gateway-targeted wake for a durable OpenClaw session:
+
+```bash
+codex-wake openclaw after \
+  --agent main \
+  --session-key agent:main:slack:channel:c0ahqqcg7j4 \
+  --workspace default \
+  --channel C0AHQQCG7J4 \
+  --thread-ts 1779729958.218239 \
+  --openclaw-path "$(command -v openclaw)" \
+  45m -- "Resume this OpenClaw session. Inspect the wake record first."
+```
+
+OpenClaw Gateway dispatch requires a real `agent:<agent_id>:...` session key.
+It rejects placeholder values such as `noop-smoke-test`. Channel fields are
+stored as evidence; the session key is the durable target.
 
 Run the daemon once:
 

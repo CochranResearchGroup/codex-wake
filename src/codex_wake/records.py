@@ -17,7 +17,7 @@ ACTIVE_STATUS_DIRS = ("pending", "firing", "submitted", "failed", "cancelled", "
 TERMINAL_STATUSES = {"submitted", "failed", "cancelled", "expired"}
 VALID_STATUSES = set(ACTIVE_STATUS_DIRS) | {"archived"}
 PREDICATE_TYPES = ("not_before", "file_exists", "file_changed", "process_done")
-TARGET_TRANSPORTS = ("tmux", "app-server")
+TARGET_TRANSPORTS = ("tmux", "app-server", "openclaw_gateway")
 
 
 class WakeError(ValueError):
@@ -158,7 +158,7 @@ def build_record(
     predicate: dict[str, Any],
     prompt: str,
     cwd: Path,
-    target: dict[str, str],
+    target: dict[str, Any],
     now: datetime | None = None,
 ) -> dict[str, Any]:
     current = now or utc_now()

@@ -525,6 +525,132 @@ class CliTests(unittest.TestCase):
             data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
             self.assertEqual(data["target"]["codex_cmd"], str(codex.resolve()))
 
+    def test_openclaw_after_creates_gateway_target_without_tmux(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch.dict(os.environ, {"TMUX_PANE": "", "TMUX": ""}, clear=False):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = cli.main(
+                        [
+                            "--wake-root",
+                            str(root),
+                            "openclaw",
+                            "after",
+                            "--agent",
+                            "main",
+                            "--session-key",
+                            "agent:main:slack:channel:c0ahqqcg7j4",
+                            "--workspace",
+                            "default",
+                            "--channel",
+                            "C0AHQQCG7J4",
+                            "--thread-ts",
+                            "1779729958.218239",
+                            "1m",
+                            "--",
+                            "Wake OpenClaw",
+                        ]
+                    )
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            wake_id = stdout.getvalue().split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["predicate"]["type"], "not_before")
+            target = data["target"]
+            self.assertEqual(target["transport"], "openclaw_gateway")
+            self.assertEqual(target["openclaw"]["agent_id"], "main")
+            self.assertEqual(target["openclaw"]["session_key"], "agent:main:slack:channel:c0ahqqcg7j4")
+            self.assertEqual(target["openclaw"]["channel"]["workspace"], "default")
+            self.assertEqual(target["openclaw"]["channel"]["channel_id"], "C0AHQQCG7J4")
+            self.assertEqual(target["openclaw"]["channel"]["thread_ts"], "1779729958.218239")
+            self.assertFalse(target["dispatch"]["deliver"])
+            self.assertEqual(data["prompt"], "Wake OpenClaw")
+
+    def test_openclaw_after_can_persist_openclaw_cmd_for_daemon_dispatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            openclaw = Path(tmp) / "bin" / "openclaw"
+            openclaw.parent.mkdir()
+            openclaw.write_text("#!/bin/sh\n", encoding="utf-8")
+            openclaw.chmod(0o755)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with patch.dict(os.environ, {"TMUX_PANE": "", "TMUX": ""}, clear=False):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = cli.main(
+                        [
+                            "--wake-root",
+                            str(root),
+                            "openclaw",
+                            "after",
+                            "--agent",
+                            "main",
+                            "--session-key",
+                            "agent:main:slack:channel:c0ahqqcg7j4",
+                            "--openclaw-path",
+                            str(openclaw),
+                            "1m",
+                            "--",
+                            "Wake OpenClaw",
+                        ]
+                    )
+
+            self.assertEqual(code, 0, stderr.getvalue())
+            wake_id = stdout.getvalue().split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(data["target"]["openclaw_cmd"], str(openclaw.resolve()))
+
+    def test_openclaw_after_rejects_placeholder_session_key(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = cli.main(
+                    [
+                        "--wake-root",
+                        str(root),
+                        "openclaw",
+                        "after",
+                        "--agent",
+                        "main",
+                        "--session-key",
+                        "agent:main:noop-smoke-test",
+                        "1m",
+                        "--",
+                        "Wake OpenClaw",
+                    ]
+                )
+
+            self.assertEqual(code, 2)
+            self.assertIn("unsupported placeholder value", stderr.getvalue())
+
+    def test_openclaw_after_requires_session_key(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                with self.assertRaises(SystemExit) as exc:
+                    cli.main(
+                        [
+                            "--wake-root",
+                            str(root),
+                            "openclaw",
+                            "after",
+                            "--agent",
+                            "main",
+                            "1m",
+                            "--",
+                            "Wake OpenClaw",
+                        ]
+                    )
+
+            self.assertEqual(exc.exception.code, 2)
+            self.assertIn("the following arguments are required: --session-key", stderr.getvalue())
+
     def test_app_rejects_non_stdio_endpoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

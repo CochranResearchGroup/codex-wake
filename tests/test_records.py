@@ -54,6 +54,7 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(summary["compatibility"], "additive_optional_fields")
         self.assertIn("schema_version", summary["required_fields"])
         self.assertIn("process_done", summary["predicate_types"])
+        self.assertIn("openclaw_gateway", summary["target_transports"])
         self.assertIn("dispatch_result", summary["optional_fields"])
         self.assertIn("visibility_result", summary["optional_fields"])
         self.assertIn("incompatible_predicate_semantics_change", summary["schema_bump_required_for"])
@@ -83,19 +84,35 @@ class RecordTests(unittest.TestCase):
             failed["next_attempt_at"] = "2026-05-18T22:00:00Z"
             failed["visibility_result"] = {"classification": "visible_prompt_observed"}
             write_record(root, failed)
+            openclaw = build_record(
+                predicate={"type": "not_before", "due_at": "2026-05-18T21:15:00Z"},
+                prompt="openclaw",
+                cwd=Path(tmp),
+                target={
+                    "transport": "openclaw_gateway",
+                    "openclaw": {"agent_id": "main", "session_key": "agent:main:slack:channel:c0ahqqcg7j4"},
+                    "dispatch": {"deliver": False, "timeout_seconds": 120, "gateway_timeout_ms": 10000},
+                    "gateway": {},
+                },
+                now=now,
+            )
+            openclaw["id"] = "wake_openclaw"
+            openclaw["status"] = "cancelled"
+            write_record(root, openclaw)
             archived = archive_record(root, "wake_failed", now=now)
             self.assertTrue(archived.exists())
 
             summary = status_summary(root)
 
-            self.assertEqual(summary["total"], 2)
+            self.assertEqual(summary["total"], 3)
             self.assertEqual(summary["active_total"], 1)
-            self.assertEqual(summary["terminal_total"], 0)
+            self.assertEqual(summary["terminal_total"], 1)
             self.assertEqual(summary["archived_total"], 1)
             self.assertEqual(summary["counts_by_status"]["pending"], 1)
+            self.assertEqual(summary["counts_by_status"]["cancelled"], 1)
             self.assertEqual(summary["counts_by_status"]["archived"], 1)
-            self.assertEqual(summary["counts_by_predicate"], {"file_exists": 1, "not_before": 1})
-            self.assertEqual(summary["counts_by_target_transport"], {"app-server": 1, "tmux": 1})
+            self.assertEqual(summary["counts_by_predicate"], {"file_exists": 1, "not_before": 2})
+            self.assertEqual(summary["counts_by_target_transport"], {"app-server": 1, "openclaw_gateway": 1, "tmux": 1})
             self.assertEqual(summary["counts_by_visibility_classification"], {"visible_prompt_observed": 1})
             self.assertEqual(summary["earliest_next_attempt_at"], "2026-05-18T21:15:00Z")
 

@@ -407,7 +407,7 @@ Plan: [v0.4.13 Release](docs/dev/plans/0039-2026-05-23-v0413-release.md)
 
 State: OPEN
 
-Current State: Opened after OpenClaw Slack/API dogfood showed the current skill-only path can create false-positive smoke results. The accepted direction is a Gateway-backed sidecar transport in `codex-wake`, followed by an OpenClaw plugin for safe live-session wake registration if the Gateway transport proves viable.
+Current State: Slice 2 source implementation is complete and recorded in `docs/dev/verification/0057-2026-05-25-openclaw-gateway-target-implementation.md`. `codex-wake` can create structured `openclaw_gateway` wake records, reject placeholder session keys, and dispatch through OpenClaw Gateway method `agent` with sanitized preflight/result evidence in focused fake-Gateway tests. Slice 3 still needs a real Slack-visible OpenClaw wake smoke.
 
 Plan: [OpenClaw Gateway Wake Transport](docs/dev/plans/0040-2026-05-25-openclaw-gateway-wake-transport.md)
 

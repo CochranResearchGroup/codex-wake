@@ -69,6 +69,41 @@ Only `stdio://` app-server dispatch is implemented in schema version `1`.
 Codex CLI command or absolute path used by the daemon to launch local stdio
 app-server dispatch.
 
+OpenClaw Gateway target:
+
+```json
+{
+  "transport": "openclaw_gateway",
+  "gateway": {
+    "url": "ws://127.0.0.1:18789",
+    "token_env": "OPENCLAW_GATEWAY_TOKEN"
+  },
+  "openclaw": {
+    "agent_id": "main",
+    "session_key": "agent:main:slack:channel:c0ahqqcg7j4",
+    "channel": {
+      "provider": "slack",
+      "workspace": "default",
+      "channel_id": "C0AHQQCG7J4",
+      "thread_ts": "1779729958.218239"
+    }
+  },
+  "dispatch": {
+    "deliver": false,
+    "timeout_seconds": 120,
+    "gateway_timeout_ms": 180000
+  },
+  "openclaw_cmd": "/home/you/.local/bin/openclaw"
+}
+```
+
+`openclaw_gateway` targets require a durable `agent:<agent_id>:...`
+`session_key`. Channel fields are evidence and validation aids, not a
+substitute for the session key. Gateway auth fields name environment variables;
+they must not store token or password values. Dispatch sends a short
+`WAKE_TRIGGER_ID=...` handoff prompt that points the OpenClaw agent back to the
+durable wake record instead of embedding the original prompt text.
+
 ## Predicate Variants
 
 Wall-clock predicate:
@@ -123,10 +158,15 @@ Current optional fields include:
 - `last_error`: terminal failure detail.
 - `previous_status`: status before archival.
 - `archived_at`: archive timestamp.
-- `dispatch_result`: accepted app-server `thread_id` and `turn_id` metadata when returned.
+- `dispatch_result`: accepted app-server `thread_id` and `turn_id` metadata
+  when returned; for OpenClaw Gateway dispatch, sanitized Gateway metadata
+  such as `run_id`, `status`, `summary`, `session_id`, provider/model, payload
+  counts, and text summaries. It must not store raw assistant transcript text.
 - `visibility_result`: sanitized tmux operator-visibility evidence when checked.
 - app-server target `codex_cmd`: optional command path for launching local
   stdio app-server dispatch.
+- OpenClaw Gateway target `openclaw_cmd`: optional command path for launching
+  local Gateway dispatch through the OpenClaw CLI.
 
 Event objects may also include extra metadata such as accepted app-server turn identifiers.
 

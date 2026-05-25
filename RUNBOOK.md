@@ -1540,3 +1540,39 @@ Best next turn option: implement P40 Slice 2 in `codex-wake` by adding an
 `openclaw_gateway` target transport that calls Gateway method `agent`, stores
 dispatch evidence, rejects fake targets, and covers success/failure/timeout
 paths with focused tests.
+
+## Turn 96 | 2026-05-25
+
+Implemented P40 Slice 2 OpenClaw Gateway target support.
+
+- Added `src/codex_wake/openclaw_gateway.py`.
+- Added `codex-wake openclaw after` and `codex-wake openclaw at`.
+- Added structured `openclaw_gateway` wake targets with `agent_id`,
+  durable `session_key`, optional channel/thread evidence, delivery settings,
+  Gateway timeout, and optional persisted `openclaw_cmd`.
+- Rejected placeholder session keys such as `noop-smoke-test` and mismatched
+  `agent:<agent_id>:...` values.
+- Wired daemon dispatch to run OpenClaw Gateway RPC preflight and Gateway
+  method `agent` via `openclaw gateway call --expect-final --json`.
+- Used deterministic idempotency key `codex-wake:<wake-id>`.
+- Kept OpenClaw dispatch prompts short: the prompt contains
+  `WAKE_TRIGGER_ID=...`, wake root, and record cwd, but not the original wake
+  prompt text.
+- Stored sanitized Gateway result metadata instead of raw assistant text.
+- Updated README, wake schema docs, P40 plan, roadmap, and codex-wake skill
+  guidance.
+- Added focused tests for OpenClaw target creation, validation errors,
+  successful fake Gateway dispatch, Gateway failure, max-attempt failure, and
+  timeout requeue behavior.
+- Ran focused tests: 74 passed.
+- Ran full suite: 112 passed.
+- Ran compile check and `git diff --check`.
+- Ran a source CLI smoke creating an `openclaw_gateway` pending record and
+  verified `counts_by_target_transport.openclaw_gateway=1`.
+- Recorded evidence in
+  `docs/dev/verification/0057-2026-05-25-openclaw-gateway-target-implementation.md`.
+
+Best next turn option: run P40 Slice 3 against a real active OpenClaw session:
+create a short `openclaw_gateway` wake without `--no-dispatch`, verify the
+unique response through Slack Mirror or OpenClaw transcript evidence, then
+record the exact wake id/session key/Gateway evidence under `docs/dev/verification/`.

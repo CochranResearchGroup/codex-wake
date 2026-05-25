@@ -20,6 +20,7 @@ from .hook_config import (
     install_hook_config,
     install_user_hook_config,
 )
+from .openclaw_gateway import DEFAULT_GATEWAY_TIMEOUT_MS, DEFAULT_OPENCLAW_TIMEOUT_SECONDS, build_openclaw_gateway_target
 from .process import process_exists, process_identity
 from .records import (
     WakeError,
@@ -101,6 +102,19 @@ def build_parser() -> argparse.ArgumentParser:
     app_candidates.add_argument("--only-idle", action="store_true", help="with --validate, only print candidates whose resumed status is idle")
     app_candidates.add_argument("--codex-path", help="Codex CLI path or command for validation checks")
     app_candidates.add_argument("--json", action="store_true", dest="as_json")
+
+    openclaw = subparsers.add_parser("openclaw", help="create an OpenClaw Gateway-targeted wake")
+    openclaw_subparsers = openclaw.add_subparsers(dest="openclaw_command", required=True)
+
+    openclaw_after = openclaw_subparsers.add_parser("after", help="create an OpenClaw Gateway wake after a duration")
+    add_openclaw_gateway_options(openclaw_after)
+    openclaw_after.add_argument("duration")
+    openclaw_after.add_argument("prompt", nargs=argparse.REMAINDER)
+
+    openclaw_at = openclaw_subparsers.add_parser("at", help="create an OpenClaw Gateway wake at an ISO-8601 timestamp")
+    add_openclaw_gateway_options(openclaw_at)
+    openclaw_at.add_argument("timestamp")
+    openclaw_at.add_argument("prompt", nargs=argparse.REMAINDER)
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
     file_cmd.add_argument("path")
@@ -205,6 +219,27 @@ def add_target_options(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def add_openclaw_gateway_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--agent", required=True, help="OpenClaw agent id")
+    parser.add_argument("--session-key", required=True, help="durable OpenClaw session key, such as agent:main:slack:channel:c0...")
+    parser.add_argument("--gateway-url", help="OpenClaw Gateway WebSocket URL; defaults to OpenClaw config")
+    parser.add_argument("--token-env", help="environment variable containing the Gateway token")
+    parser.add_argument("--password-env", help="environment variable containing the Gateway password")
+    parser.add_argument("--openclaw-path", help="OpenClaw CLI path or command for daemon-side Gateway dispatch")
+    parser.add_argument("--workspace", help="channel workspace/account evidence")
+    parser.add_argument("--channel", dest="channel_id", help="channel id evidence, for example a Slack channel id")
+    parser.add_argument("--thread-ts", help="thread timestamp evidence")
+    parser.add_argument("--channel-provider", default="slack", help="channel provider evidence; defaults to slack")
+    parser.add_argument("--deliver", action="store_true", help="ask OpenClaw to deliver the final reply through the session/channel")
+    parser.add_argument("--timeout", type=int, default=DEFAULT_OPENCLAW_TIMEOUT_SECONDS, help="OpenClaw agent turn timeout in seconds")
+    parser.add_argument("--gateway-timeout-ms", type=int, default=DEFAULT_GATEWAY_TIMEOUT_MS, help="Gateway CLI timeout in milliseconds")
+    parser.add_argument("--reply-channel", help="delivery channel override passed to OpenClaw")
+    parser.add_argument("--reply-to", help="delivery target override passed to OpenClaw")
+    parser.add_argument("--reply-account", dest="reply_account_id", help="delivery account id override passed to OpenClaw")
+    parser.add_argument("--model", help="OpenClaw model override")
+    parser.add_argument("--thinking", help="OpenClaw thinking level override")
+
+
 def add_service_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--name", help="systemd user unit name; defaults to codex-wake-<repo>.service")
     parser.add_argument("--repo-root", type=Path, default=None, help="repo root for the service; defaults to current directory")
@@ -263,6 +298,38 @@ def create_app(args: argparse.Namespace, root: Path) -> int:
     }
     if args.codex_path:
         target["codex_cmd"] = resolve_codex_cmd(args.codex_path, required=True)
+    return create_record(args.prompt, predicate, root, now, args, target=target)
+
+
+def create_openclaw(args: argparse.Namespace, root: Path) -> int:
+    now = utc_now()
+    if args.openclaw_command == "after":
+        due = now + parse_duration(args.duration)
+    elif args.openclaw_command == "at":
+        due = parse_timestamp(args.timestamp)
+    else:
+        raise WakeError(f"unknown openclaw command: {args.openclaw_command}")
+    predicate = {"type": "not_before", "due_at": format_utc(due)}
+    target = build_openclaw_gateway_target(
+        agent_id=args.agent,
+        session_key=args.session_key,
+        gateway_url=args.gateway_url,
+        token_env=args.token_env,
+        password_env=args.password_env,
+        openclaw_cmd=args.openclaw_path,
+        workspace=args.workspace,
+        channel_id=args.channel_id,
+        thread_ts=args.thread_ts,
+        channel_provider=args.channel_provider,
+        deliver=args.deliver,
+        timeout_seconds=args.timeout,
+        gateway_timeout_ms=args.gateway_timeout_ms,
+        reply_channel=args.reply_channel,
+        reply_to=args.reply_to,
+        reply_account_id=args.reply_account_id,
+        model=args.model,
+        thinking=args.thinking,
+    )
     return create_record(args.prompt, predicate, root, now, args, target=target)
 
 
@@ -405,7 +472,7 @@ def create_record(
     now,
     args: argparse.Namespace,
     *,
-    target: dict[str, str] | None = None,
+    target: dict | None = None,
 ) -> int:
     prompt = normalize_prompt(prompt_parts)
     record = build_record(
@@ -833,6 +900,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_at(args, root)
     if args.command == "app":
         return create_app(args, root)
+    if args.command == "openclaw":
+        return create_openclaw(args, root)
     if args.command == "file":
         return create_file(args, root)
     if args.command == "changed":
