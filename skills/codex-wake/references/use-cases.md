@@ -83,6 +83,14 @@ Write migration logs to `.codex/events/` before scheduling the wake.
 
 Use when validating that tmux injection, hook execution, ack persistence, and daemon status movement work in the active TUI.
 
+Preflight:
+
+```bash
+printf 'TMUX_PANE=%s\n' "${TMUX_PANE-}"
+```
+
+If `TMUX_PANE` is empty, this is not a TUI-bound tmux session. Do not use the default `after`, `at`, `file`, `changed`, or `pid` creation path as a tmux dogfood proof; it will fail with `TMUX_PANE is required to create a tmux-targeted wake`.
+
 Immediate pattern, only when the target pane is idle:
 
 ```bash
@@ -150,6 +158,16 @@ codex-wake --wake-root .codex/wake app after <THREAD_ID> 30m -- \
 ```
 
 Only target a thread that can be resumed and is idle. Use `codex-wake app status --resume <THREAD_ID>` when in doubt.
+
+In OpenClaw Slack/API sessions, this is the only viable wake transport unless the agent is explicitly running inside a tmux-backed Codex TUI. Do not use fake thread ids for smoke tests. A dummy app-server target plus `codex-waked --no-dispatch` proves only that a wake record can be created and its predicate can move to `firing`; it does not prove a wake turn, Slack reply, hook ack, or operator-visible behavior.
+
+OpenClaw readiness levels:
+
+- Skill visible: `openclaw skills info codex-wake --agent <id> --json` reports `modelVisible=true` and `commandVisible=true`.
+- Predicate fired: `codex-waked --once --no-dispatch` reports `fired=1`; this is not dispatch.
+- Wake dispatched: run without `--no-dispatch`, then inspect `codex-wake show <wake-id>` for app-server dispatch evidence.
+- Wake accepted by Codex: inspect `dispatch_result.turn_id`, `submitted`, `ack_observed`, or the target app-server transcript.
+- Operator-visible current TUI wake: only tmux transport with `visibility_result.classification=visible_prompt_observed` or direct pane inspection proves this.
 
 If the repo-scoped user service will fire the wake, check the service
 environment before relying on it. App-server dispatch is executed by the daemon

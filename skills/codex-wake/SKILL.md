@@ -35,6 +35,7 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Keep prompts short, idempotent, and evidence-oriented: tell the future agent what to verify first.
 - Never put secrets, raw credentials, or private transcript bodies in wake prompts or tracked docs.
 - Use `codex-waked --once` for bounded checks, or `codex-wake service install/status/logs` for longer monitoring.
+- Do not call a wake smoke successful when using `codex-waked --no-dispatch`; that only proves predicate evaluation.
 - After a wake fires, inspect `codex-wake show <wake-id>`, `.codex/wake/acks/`, and `codex-wake status --json` before claiming success.
 - Treat ack as proof that Codex submitted the wake prompt in the target session, not proof that the operator saw a new turn in the pane they were watching.
 - For tmux wakes, report `visibility_result.classification` when present; `visible_prompt_observed` is stronger than ack alone, and `ack_observed_visibility_unproven` must not be described as operator-visible success.
@@ -42,6 +43,23 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Prefer `codex-wake service install --codex-path "$(command -v codex)"` for service-fired app-server wakes when the repo service needs a durable Codex CLI command.
 - If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
+
+## OpenClaw Sessions
+
+OpenClaw Slack/API sessions are not tmux panes. Before using tmux wake patterns:
+
+```bash
+printf 'TMUX_PANE=%s\n' "${TMUX_PANE-}"
+```
+
+If `TMUX_PANE` is empty, the default `codex-wake after ...` path cannot capture a tmux target. Use an app-server wake only when you have a real resumable thread id:
+
+```bash
+codex-wake --wake-root .codex/wake app candidates --cwd "$PWD" --validate --only-idle --json
+codex-wake --wake-root .codex/wake app status --codex-path "$(command -v codex)" --resume <THREAD_ID>
+```
+
+Never use placeholder thread ids such as `noop-smoke-test` as proof of OpenClaw wake readiness. For OpenClaw skill availability, use `openclaw skills info codex-wake --agent <id> --json`; for wake execution, require a real dispatch without `--no-dispatch` and then verify `submitted`, `ack_observed`, or app-server turn evidence.
 
 ## Common Patterns
 

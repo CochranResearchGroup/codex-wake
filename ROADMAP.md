@@ -370,3 +370,50 @@ State: CLOSED
 Current State: Closed by `docs/dev/verification/0044-2026-05-21-v0412-installed-app-dogfood.md`. The installed public `v0.4.12` runtime created, fired, app-server-dispatched, submitted, and archived one dogfood wake.
 
 Plan: [v0.4.12 Installed App Dogfood](docs/dev/plans/0035-2026-05-21-v0412-installed-app-dogfood.md)
+
+## P36 | Tmux Visibility Accounting
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0051-2026-05-23-tmux-visibility-accounting.md`. Tmux dispatch records sanitized visibility evidence so hook ack is no longer conflated with operator-visible prompt proof.
+
+Plan: [Tmux Visibility Accounting](docs/dev/plans/0036-2026-05-23-tmux-visibility-accounting.md)
+
+## P37 | App-Server Service Environment Skill Hardening
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0053-2026-05-23-app-server-service-env-skill-hardening.md`. The agent skill now warns that app-server service dispatch depends on the daemon environment, not the interactive shell, and points agents to service logs and `doctor --json`.
+
+Plan: [App-Server Service Environment Skill Hardening](docs/dev/plans/0037-2026-05-23-app-server-service-env-skill-hardening.md)
+
+## P38 | App-Server Service Environment Product Hardening
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0054-2026-05-23-app-server-service-env-product-hardening.md`. Service-installed app-server dispatch can persist an explicit Codex CLI command, and `doctor --json` exposes service-side Codex readiness.
+
+Plan: [App-Server Service Environment Product Hardening](docs/dev/plans/0038-2026-05-23-app-server-service-env-product-hardening.md)
+
+## P39 | v0.4.13 Release
+
+State: CLOSED
+
+Current State: Closed by `docs/dev/verification/0055-2026-05-23-v0.4.13-release.md`. Public tag `v0.4.13`, release notes, GitHub release, public tag install smoke, and refreshed user-scoped install verification are complete.
+
+Plan: [v0.4.13 Release](docs/dev/plans/0039-2026-05-23-v0413-release.md)
+
+## P40 | OpenClaw Gateway Wake Transport
+
+State: OPEN
+
+Current State: Opened after OpenClaw Slack/API dogfood showed the current skill-only path can create false-positive smoke results. The accepted direction is a Gateway-backed sidecar transport in `codex-wake`, followed by an OpenClaw plugin for safe live-session wake registration if the Gateway transport proves viable.
+
+Plan: [OpenClaw Gateway Wake Transport](docs/dev/plans/0040-2026-05-25-openclaw-gateway-wake-transport.md)
+
+Acceptance target:
+
+- `codex-wake` can store and dispatch an `openclaw_gateway` wake target with real `agent_id`, `session_key`, and channel/thread evidence.
+- The daemon rejects placeholder targets and no-dispatch false positives for OpenClaw smokes.
+- A real OpenClaw wake is verified through Gateway response plus Slack Mirror or transcript evidence.
+- The OpenClaw plugin path can create wake records from live session context, or a precise missing SDK/core seam is documented.

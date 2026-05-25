@@ -1487,3 +1487,26 @@ Published `v0.4.13`.
 Best next turn option: commit and push the final release verification note,
 wait for CI, then use `v0.4.13` in Ragmail/Graphiti service installs where the
 app-server service environment fix is needed.
+
+## Turn 94 | 2026-05-25
+
+Opened the OpenClaw Gateway wake transport planning lane.
+
+- Re-read planning, runtime-state, agent-runtime, and validation policies.
+- Re-read OpenClaw plugin-survivability guidance and the relevant OpenClaw
+  plugin SDK architecture docs.
+- Classified the OpenClaw wake problem as a hybrid runtime boundary:
+  `codex-wake` should own durable wake records and trigger evaluation, while
+  OpenClaw Gateway should own delayed OpenClaw turns.
+- Added `docs/dev/plans/0040-2026-05-25-openclaw-gateway-wake-transport.md`.
+- Updated `ROADMAP.md` with the previously missing P36-P39 closed lanes and
+  opened P40.
+- Captured the accepted direction: implement a Gateway-backed sidecar transport
+  first, then add an OpenClaw plugin for safe in-turn registration if the
+  transport proves viable.
+
+Best next turn option: run the P40 Slice 1 Gateway capability probe in the
+OpenClaw repo, identify the exact supported turn-start method for a real
+`agent_id` and `session_key`, then decide whether the first implementation
+change belongs only in `codex-wake` or also needs a narrow OpenClaw plugin
+skeleton.
