@@ -33,6 +33,13 @@ OpenClaw has plugin and Gateway surfaces that appear suitable for this lane:
 plugin commands/tools, plugin services, session workflow scheduling, and
 Gateway methods. A direct core patch is not the preferred first move.
 
+Slice 1 is recorded in
+`docs/dev/verification/0056-2026-05-25-openclaw-gateway-capability-probe.md`.
+The selected dispatch surface is the Gateway `agent` method, with
+`openclaw agent --session-key ... --message ... --json` as the stable CLI
+wrapper and direct `openclaw gateway call agent --expect-final --json` as the
+sidecar proof path. No OpenClaw core patch is needed for Slice 2.
+
 ## Non-Goals
 
 - Do not treat `--no-dispatch` as wake success.
@@ -221,4 +228,3 @@ This lane is complete when:
 - an OpenClaw plugin or documented SDK blocker exists for live-session
   registration;
 - roadmap, runbook, docs, and installed skill guidance are updated.
-

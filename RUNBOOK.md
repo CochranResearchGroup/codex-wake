@@ -1510,3 +1510,33 @@ OpenClaw repo, identify the exact supported turn-start method for a real
 `agent_id` and `session_key`, then decide whether the first implementation
 change belongs only in `codex-wake` or also needs a narrow OpenClaw plugin
 skeleton.
+
+## Turn 95 | 2026-05-25
+
+Completed P40 Slice 1 Gateway capability probe.
+
+- Confirmed the `codex-wake` worktree was clean after commit `2f19d5b` before
+  probing OpenClaw.
+- Found the OpenClaw checkout dirty with unrelated Slack/status work and treated
+  it as read/probe-only.
+- Verified `openclaw gateway status --deep --require-rpc --json` reports a
+  running loopback Gateway at `ws://127.0.0.1:18789` with RPC `ok: true`.
+- Confirmed `openclaw agent --help` exposes a Gateway-backed turn command with
+  `--agent`, `--session-key`, `--message`, `--deliver`, `--timeout`, and
+  `--json`.
+- Confirmed source `src/commands/agent-via-gateway.ts` dispatches Gateway
+  method `agent` with `message`, `agentId`, `sessionKey`, delivery fields,
+  timeout, lane, extra system prompt, and idempotency key.
+- Ran a direct non-delivering Gateway `agent` smoke with session key
+  `agent:main:codex-wake-p40-probe-20260525-142100`.
+- The Gateway returned `status: ok`, `summary: completed`, run id
+  `codex-wake-p40-probe-20260525-142100`, and visible text
+  `P40_GATEWAY_PROBE_20260525_142100`.
+- Recorded evidence in
+  `docs/dev/verification/0056-2026-05-25-openclaw-gateway-capability-probe.md`.
+- Updated the P40 plan current state with the selected dispatch surface.
+
+Best next turn option: implement P40 Slice 2 in `codex-wake` by adding an
+`openclaw_gateway` target transport that calls Gateway method `agent`, stores
+dispatch evidence, rejects fake targets, and covers success/failure/timeout
+paths with focused tests.
