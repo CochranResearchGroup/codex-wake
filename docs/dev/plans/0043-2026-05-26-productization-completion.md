@@ -2,7 +2,7 @@
 
 Date: 2026-05-26
 
-Status: Open
+Status: Closed
 
 ## Scope
 
@@ -237,6 +237,27 @@ Acceptance criteria:
 - GitHub release, CI run ids, live wake ids, and runtime status are recorded
   under `docs/dev/verification/`.
 
+Progress 2026-05-26:
+
+- Bumped package and OpenClaw plugin metadata to `0.5.0`.
+- Added `docs/releases/v0.5.0.md`.
+- Committed productization release candidate as
+  `64627ab7217c4eab232127ed3d388d46964b9e39`.
+- Tagged and pushed `v0.5.0`.
+- GitHub Actions run `26450020574` passed release gates on Python 3.11 and
+  3.12.
+- Published GitHub release
+  `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.5.0`.
+- Public-tag product smoke from GitHub reported `cli_version=0.5.0`,
+  `schema_version=1`, and `supervisor_once_roots=1`.
+- Refreshed user-scoped `uv tool` install from the public tag.
+- Restarted `codex-wake-supervisor.service`; the repo wake root remained
+  monitor-ready through supervisor health.
+- Updated the OpenClaw plugin from the public tag; Gateway runtime reports
+  plugin version `0.5.0`, `codex_wake_schedule`, and zero diagnostics.
+- Verification is recorded in
+  `docs/dev/verification/0069-2026-05-26-v050-release.md`.
+
 ## Bounded Definition Of Done
 
 P43 is done when:
@@ -253,6 +274,9 @@ P43 is done when:
   public-install-smoked;
 - `ROADMAP.md`, `RUNBOOK.md`, and `docs/dev/verification/` record the closeout
   evidence.
+
+Closeout 2026-05-26: all DOD items are satisfied by verification records
+`0063` through `0069`.
 
 Explicitly out of bounds for this DOD:
 

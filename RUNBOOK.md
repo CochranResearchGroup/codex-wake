@@ -2023,3 +2023,34 @@ Best next turn option: complete P43 Slice 6 by bumping to `v0.5.0`, committing,
 tagging, pushing, waiting for CI, publishing the GitHub release, refreshing the
 user-scoped install from the public tag, and recording public-install smoke
 evidence.
+
+## Turn 111 | 2026-05-26
+
+Released `v0.5.0` and closed P43.
+
+- Bumped `pyproject.toml`, `src/codex_wake/__init__.py`, and OpenClaw plugin
+  package/manifest metadata to `0.5.0`.
+- Fixed source-tree version resolution so `PYTHONPATH=src codex-wake --version`
+  reports the checkout version rather than an older installed distribution.
+- Added `docs/releases/v0.5.0.md`.
+- Revalidated Python tests, compile checks, product smoke script py_compile,
+  plugin tests, plugin syntax checks, plugin no-shell scan, package build,
+  installed-wheel product smoke, product-readiness, and `git diff --check`.
+- Committed productization release candidate as
+  `64627ab7217c4eab232127ed3d388d46964b9e39`.
+- Tagged and pushed `v0.5.0`.
+- CI run `26450020574` passed release gates on Python 3.11 and 3.12.
+- Published
+  `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.5.0`.
+- Public-tag smoke reported `cli_version=0.5.0`, `schema_version=1`, and
+  `supervisor_once_roots=1`.
+- Refreshed user-scoped `uv tool` install from public `v0.5.0` and restarted
+  `codex-wake-supervisor.service`; monitor readiness stayed ready.
+- Updated OpenClaw plugin from public `v0.5.0`; Gateway runtime reports plugin
+  `0.5.0`, `codex_wake_schedule`, and zero diagnostics.
+- Recorded closeout evidence in
+  `docs/dev/verification/0069-2026-05-26-v050-release.md`.
+
+Best next turn option: use `codex-wake product-readiness --json` as the first
+check in downstream repos, then only add new trigger/transport work after a new
+bounded plan.

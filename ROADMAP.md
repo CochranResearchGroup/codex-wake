@@ -461,9 +461,13 @@ Acceptance target:
 
 ## P43 | Productization Completion
 
-State: OPEN
+State: CLOSED
 
-Current State: Slices 1 through 5 are implemented.
+Current State: Closed by
+`docs/dev/verification/0069-2026-05-26-v050-release.md`. `v0.5.0` is tagged,
+published, CI-passed, public-install-smoked, installed user-scoped from the
+public tag, and live-validated through Codex app-server plus OpenClaw Gateway
+wakes. Slices 1 through 5 are implemented.
 `codex-wake openclaw-plugin
 install|update` can materialize a public tag, install through OpenClaw's
 non-linked plugin installer, prune stale linked plugin paths with a config
@@ -482,7 +486,7 @@ selection, readiness checks, cleanup boundaries, and unsupported false
 positives. Fresh Codex app-server and OpenClaw Gateway smokes through the
 harness are recorded in
 `docs/dev/verification/0068-2026-05-26-live-product-smokes.md`. Remaining
-product risk is the `v0.5.0` release and public-tag install smoke.
+product risk is closed for the scoped `v0.5.0` productization DOD.
 
 Plan: [Productization Completion](docs/dev/plans/0043-2026-05-26-productization-completion.md)
 
