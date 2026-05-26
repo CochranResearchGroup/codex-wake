@@ -26,14 +26,53 @@ Channel/account/thread metadata is evidence by default. The plugin does not
 infer Gateway reply overrides from Slack delivery context; `replyChannel`,
 `replyTo`, and `replyAccountId` are written only when explicitly configured.
 
-## Install Locally
+## Install From Codex Wake
 
 ```bash
-openclaw plugins install --link ./plugins/openclaw-codex-wake
+codex-wake openclaw-plugin install --tag <codex-wake-tag> --prune-linked-path
+openclaw gateway restart
 openclaw plugins inspect codex-wake --runtime --json
 ```
 
-Restart the Gateway after installing or updating the plugin.
+The `codex-wake` helper materializes the plugin from the selected public repo
+tag into user state and then runs OpenClaw's normal plugin installer against
+that copy. This is the productized path because it does not depend on the
+current repo checkout after install.
+
+Use `--prune-linked-path` when migrating from a previous linked development
+install. It removes only linked `plugins.load.paths` entries whose manifest id
+is `codex-wake`, writes an OpenClaw config backup, and refreshes OpenClaw's
+generated plugin registry.
+
+Update to a newer tag:
+
+```bash
+codex-wake openclaw-plugin update --tag <codex-wake-tag> --prune-linked-path
+openclaw gateway restart
+openclaw plugins inspect codex-wake --runtime --json
+```
+
+Build and install a local package artifact for release-candidate validation:
+
+```bash
+codex-wake openclaw-plugin pack --output-dir dist/openclaw-plugin
+openclaw plugins install --force npm-pack:dist/openclaw-plugin/<tarball>.tgz
+openclaw gateway restart
+```
+
+Use a linked local path only while developing the plugin:
+
+```bash
+openclaw plugins install --link ./plugins/openclaw-codex-wake
+```
+
+Rollback:
+
+```bash
+openclaw plugins uninstall codex-wake
+codex-wake openclaw-plugin install --tag <previous-codex-wake-tag>
+openclaw gateway restart
+```
 
 Verify the live tool catalog:
 
@@ -41,6 +80,16 @@ Verify the live tool catalog:
 openclaw gateway call tools.catalog --json \
   --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
 ```
+
+Also verify installed product readiness from the workspace wake root:
+
+```bash
+codex-wake --wake-root .codex/wake monitor check --json
+codex-wake --wake-root .codex/wake product-readiness --json
+```
+
+Do not treat a linked local plugin path, placeholder session key, or
+`--no-dispatch` smoke as durable OpenClaw delivery evidence.
 
 ## Tool Example
 
@@ -96,3 +145,8 @@ codex-waked --wake-root <root> --once --ack-timeout 30
 codex-wake --wake-root <root> show <wake-id>
 openclaw message read --channel slack --account default --target channel:<id> --limit 20 --json
 ```
+
+For release-level OpenClaw Gateway smoke through the installed CLI, use the
+matrix in `docs/product-smoke-matrix.md` and pass real
+`--live-openclaw-agent` plus `--live-openclaw-session-key` values to
+`scripts/product_smoke.py`. A `--no-dispatch` smoke is not delivery proof.

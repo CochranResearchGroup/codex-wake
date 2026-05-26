@@ -261,17 +261,37 @@ def entry_status(entry: dict[str, Any], *, state_dir: Path | None = None) -> dic
     monitor_dir = state_dir.parent / "monitors" if state_dir else None
     health = read_monitor_health(wake_root, monitor_dir)
     recent = health_is_recent(health)
+    enabled = bool(entry.get("enabled", False))
+    if recent:
+        health_status = "ready"
+        remediation = ""
+    elif health:
+        health_status = "stale"
+        remediation = (
+            "check codex-wake-supervisor.service, run `codex-wake supervisor run --once`, "
+            f"or unenroll stale root with `codex-wake supervisor unenroll --root-id {entry.get('root_id', '')}`"
+        )
+    else:
+        health_status = "missing"
+        remediation = (
+            "start the supervisor and run `codex-wake supervisor run --once`, "
+            f"or unenroll obsolete root with `codex-wake supervisor unenroll --root-id {entry.get('root_id', '')}`"
+        )
+    if not enabled:
+        remediation = f"enable this root registration or remove it with `codex-wake supervisor unenroll --root-id {entry.get('root_id', '')}`"
     return {
         "root_id": entry.get("root_id", ""),
         "wake_root": str(wake_root.resolve()) if str(wake_root) else "",
         "repo_root": entry.get("repo_root", ""),
-        "enabled": bool(entry.get("enabled", False)),
+        "enabled": enabled,
         "registry_path": entry.get("_path", ""),
         "health_path": str(monitor_health_path(wake_root, monitor_dir)),
         "health_recent": recent,
+        "health_status": health_status,
         "health_source": str(health.get("source") or "") if health else "",
         "health_mode": str(health.get("mode") or "") if health else "",
         "health_checked_at": str(health.get("checked_at") or "") if health else "",
+        "remediation": remediation,
     }
 
 
@@ -296,7 +316,7 @@ def supervisor_status(config: SupervisorConfig, runner: CommandRunner | None = N
     }
 
 
-def supervisor_poll_once(config: SupervisorConfig, *, mode: str = "once") -> list[dict[str, Any]]:
+def supervisor_poll_once(config: SupervisorConfig, *, mode: str = "once", dispatch: bool = True) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     monitor_dir = config.state_dir.parent / "monitors"
     for entry in iter_registry_entries(config.registry_dir):
@@ -309,7 +329,7 @@ def supervisor_poll_once(config: SupervisorConfig, *, mode: str = "once") -> lis
         repo_root_text = entry.get("repo_root")
         repo_root = Path(repo_root_text).expanduser().resolve() if isinstance(repo_root_text, str) and repo_root_text else None
         try:
-            result = poll_once(wake_root)
+            result = poll_once(wake_root, dispatch=dispatch)
             poll_summary = {
                 "checked": result.checked,
                 "fired": result.fired,
@@ -361,9 +381,9 @@ def supervisor_poll_once(config: SupervisorConfig, *, mode: str = "once") -> lis
     return results
 
 
-def supervisor_run_loop(config: SupervisorConfig, *, once: bool = False) -> int:
+def supervisor_run_loop(config: SupervisorConfig, *, once: bool = False, dispatch: bool = True) -> int:
     if once:
-        results = supervisor_poll_once(config, mode="once")
+        results = supervisor_poll_once(config, mode="once", dispatch=dispatch)
         for item in results:
             if item.get("ok"):
                 print(f"{item['root_id']} {item['summary']}")
@@ -371,7 +391,7 @@ def supervisor_run_loop(config: SupervisorConfig, *, once: bool = False) -> int:
                 print(f"{item['root_id']} failed error={item.get('error', '')}")
         return 0
     while True:
-        results = supervisor_poll_once(config, mode="loop")
+        results = supervisor_poll_once(config, mode="loop", dispatch=dispatch)
         for item in results:
             if item.get("activity"):
                 if item.get("ok"):

@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from codex_wake import cli
+from codex_wake.openclaw_plugin import package_version
 from codex_wake.service import ServiceAppServerReadiness
 
 
@@ -66,6 +67,18 @@ class CliTests(unittest.TestCase):
             data = json.loads(json_out)
             self.assertEqual(data["schema_version"], 1)
             self.assertIn("file_changed", data["predicate_types"])
+
+    def test_version_reports_package_version(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                with self.assertRaises(SystemExit) as raised:
+                    cli.main(["--wake-root", str(root), "--version"])
+
+            self.assertEqual(raised.exception.code, 0)
+            self.assertIn(f"codex-wake {package_version()}", stdout.getvalue())
 
     def test_app_status_reports_thread_status_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -627,6 +640,178 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("unsupported placeholder value", stderr.getvalue())
 
+    def test_openclaw_plugin_install_json_reports_non_link_install_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            source = Path(tmp) / "plugin"
+            source.mkdir()
+            with patch(
+                "codex_wake.cli.install_openclaw_plugin",
+                return_value={
+                    "plugin_id": "codex-wake",
+                    "plugin_version": "0.1.1",
+                    "package_name": "@cochranresearchgroup/openclaw-codex-wake",
+                    "package_version": "0.1.1",
+                    "source_kind": "local-path",
+                    "source_path": str(source),
+                    "command": ["/usr/bin/openclaw", "plugins", "install", "--force", str(source)],
+                    "dry_run": False,
+                    "returncode": 0,
+                    "stdout": "Installed codex-wake\n",
+                    "stderr": "",
+                },
+            ) as install_plugin:
+                code, out, err = self.run_cli(
+                    [
+                        "openclaw-plugin",
+                        "install",
+                        "--source-dir",
+                        str(source),
+                        "--openclaw-path",
+                        "/usr/bin/openclaw",
+                        "--force",
+                        "--json",
+                    ],
+                    root,
+                )
+
+            self.assertEqual(code, 0, err)
+            install_plugin.assert_called_once()
+            kwargs = install_plugin.call_args.kwargs
+            self.assertEqual(kwargs["source_dir"], source)
+            self.assertTrue(kwargs["force"])
+            self.assertFalse(kwargs["refresh"])
+            self.assertFalse(kwargs["prune_linked_path"])
+            data = json.loads(out)
+            self.assertEqual(data["plugin_id"], "codex-wake")
+            self.assertEqual(data["source_kind"], "local-path")
+            self.assertNotIn("--link", data["command"])
+
+    def test_openclaw_plugin_install_can_request_linked_path_prune(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            source = Path(tmp) / "plugin"
+            linked = Path(tmp) / "repo" / "plugins" / "openclaw-codex-wake"
+            config = Path(tmp) / "openclaw.json"
+            with patch(
+                "codex_wake.cli.install_openclaw_plugin",
+                return_value={
+                    "plugin_id": "codex-wake",
+                    "plugin_version": "0.1.1",
+                    "package_name": "@cochranresearchgroup/openclaw-codex-wake",
+                    "package_version": "0.1.1",
+                    "source_kind": "local-path",
+                    "source_path": str(source),
+                    "command": ["/usr/bin/openclaw", "plugins", "install", "--force", str(source)],
+                    "dry_run": False,
+                    "returncode": 0,
+                    "stdout": "Installed codex-wake\n",
+                    "stderr": "",
+                    "prune_linked_path": {
+                        "config_path": str(config),
+                        "backup_path": str(config) + ".codex-wake-backup-20260526T120000Z",
+                        "linked_source_dir": str(linked),
+                        "removed_paths": [str(linked)],
+                        "changed": True,
+                        "dry_run": False,
+                    },
+                },
+            ) as install_plugin:
+                code, out, err = self.run_cli(
+                    [
+                        "openclaw-plugin",
+                        "install",
+                        "--source-dir",
+                        str(source),
+                        "--force",
+                        "--prune-linked-path",
+                        "--linked-source-dir",
+                        str(linked),
+                        "--openclaw-config",
+                        str(config),
+                        "--json",
+                    ],
+                    root,
+                )
+
+            self.assertEqual(code, 0, err)
+            kwargs = install_plugin.call_args.kwargs
+            self.assertTrue(kwargs["prune_linked_path"])
+            self.assertEqual(kwargs["linked_source_dir"], linked)
+            self.assertEqual(kwargs["openclaw_config"], config)
+            data = json.loads(out)
+            self.assertEqual(data["prune_linked_path"]["removed_paths"], [str(linked)])
+
+    def test_openclaw_plugin_update_forces_and_refreshes_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            with patch(
+                "codex_wake.cli.install_openclaw_plugin",
+                return_value={
+                    "plugin_id": "codex-wake",
+                    "plugin_version": "0.1.1",
+                    "package_name": "@cochranresearchgroup/openclaw-codex-wake",
+                    "package_version": "0.1.1",
+                    "source_kind": "git-materialized",
+                    "source_path": str(Path(tmp) / "materialized"),
+                    "command": ["/usr/bin/openclaw", "plugins", "install", "--force", str(Path(tmp) / "materialized")],
+                    "dry_run": True,
+                    "returncode": None,
+                    "stdout": "",
+                    "stderr": "",
+                    "prune_linked_path": None,
+                },
+            ) as install_plugin:
+                code, out, err = self.run_cli(
+                    [
+                        "openclaw-plugin",
+                        "update",
+                        "--tag",
+                        "v0.4.15",
+                        "--openclaw-path",
+                        "/usr/bin/openclaw",
+                        "--dry-run",
+                    ],
+                    root,
+                )
+
+            self.assertEqual(code, 0, err)
+            kwargs = install_plugin.call_args.kwargs
+            self.assertEqual(kwargs["ref"], "v0.4.15")
+            self.assertTrue(kwargs["force"])
+            self.assertTrue(kwargs["refresh"])
+            self.assertFalse(kwargs["prune_linked_path"])
+            self.assertIn("plugin_id=codex-wake", out)
+            self.assertIn("dry_run=true", out)
+
+    def test_openclaw_plugin_pack_prints_install_hint(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            output = Path(tmp) / "dist"
+            with patch(
+                "codex_wake.cli.pack_openclaw_plugin",
+                return_value={
+                    "plugin_id": "codex-wake",
+                    "plugin_version": "0.1.1",
+                    "package_name": "@cochranresearchgroup/openclaw-codex-wake",
+                    "package_version": "0.1.1",
+                    "source_path": str(Path(tmp) / "plugin"),
+                    "output_dir": str(output),
+                    "tarball": str(output / "plugin.tgz"),
+                    "command": ["npm", "pack"],
+                    "stdout": "plugin.tgz\n",
+                    "stderr": "",
+                },
+            ) as pack_plugin:
+                code, out, err = self.run_cli(
+                    ["openclaw-plugin", "pack", "--output-dir", str(output)],
+                    root,
+                )
+
+            self.assertEqual(code, 0, err)
+            self.assertEqual(pack_plugin.call_args.kwargs["output_dir"], output)
+            self.assertIn("install_hint=openclaw plugins install npm-pack:", out)
+
     def test_openclaw_after_requires_session_key(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -932,6 +1117,66 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["hook_sources"]["installed_scopes"], ["project", "user"])
             self.assertTrue(data["hook_sources"]["duplicate_installed"])
             self.assertIn("duplicate wake context", data["hook_sources"]["overlap_warning"])
+
+    def test_product_readiness_json_reports_normalized_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            with patch(
+                "codex_wake.cli.product_readiness_summary",
+                return_value={
+                    "schema_version": 1,
+                    "generated_at": "2026-05-26T12:00:00Z",
+                    "repo_root": str(Path(tmp) / "repo"),
+                    "wake_root": str(root),
+                    "overall_status": "blocked",
+                    "status_vocabulary": ["ready", "warning", "manual_only", "blocked"],
+                    "checks": {
+                        "cli": {"status": "ready", "message": "installed"},
+                        "openclaw_gateway": {"status": "blocked", "message": "auth missing"},
+                        "tmux": {"status": "manual_only", "message": "no pane"},
+                    },
+                },
+            ) as readiness:
+                code, out, err = self.run_cli(["product-readiness", "--json"], root)
+
+            self.assertEqual(code, 0, err)
+            readiness.assert_called_once()
+            data = json.loads(out)
+            self.assertEqual(data["overall_status"], "blocked")
+            self.assertEqual(data["checks"]["tmux"]["status"], "manual_only")
+
+    def test_product_readiness_text_prints_check_statuses(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            with patch(
+                "codex_wake.cli.product_readiness_summary",
+                return_value={
+                    "schema_version": 1,
+                    "generated_at": "2026-05-26T12:00:00Z",
+                    "repo_root": str(Path(tmp) / "repo"),
+                    "wake_root": str(root),
+                    "overall_status": "warning",
+                    "status_vocabulary": ["ready", "warning", "manual_only", "blocked"],
+                    "checks": {
+                        "cli": {"status": "ready", "message": "installed"},
+                        "hooks": {"status": "warning", "message": "hook missing"},
+                        "skills": {"status": "ready", "message": "skill installed"},
+                        "repo_service": {"status": "warning", "message": "inactive"},
+                        "supervisor": {"status": "ready", "message": "active"},
+                        "monitor": {"status": "ready", "message": "owned"},
+                        "app_server": {"status": "ready", "message": "codex ready"},
+                        "openclaw_gateway": {"status": "ready", "message": "rpc ready"},
+                        "openclaw_plugin": {"status": "ready", "message": "plugin ready"},
+                        "tmux": {"status": "manual_only", "message": "no pane"},
+                    },
+                },
+            ):
+                code, out, err = self.run_cli(["product-readiness"], root)
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("overall_status=warning", out)
+            self.assertIn("hooks_status=warning", out)
+            self.assertIn("tmux_status=manual_only", out)
 
     def test_hook_check_reports_latest_ack_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

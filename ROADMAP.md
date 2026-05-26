@@ -463,11 +463,26 @@ Acceptance target:
 
 State: OPEN
 
-Current State: Opened after `v0.4.15` proved monitor-readiness and supervisor
-delivery. Remaining product risk is distribution and supportability: the
-OpenClaw plugin is still proven through a linked local checkout, readiness is
-spread across several commands, and cleanup/smoke/release procedures need one
-bounded `v0.5.0` productization path.
+Current State: Slices 1 through 5 are implemented.
+`codex-wake openclaw-plugin
+install|update` can materialize a public tag, install through OpenClaw's
+non-linked plugin installer, prune stale linked plugin paths with a config
+backup, refresh the generated registry, and survive Gateway restart from
+`~/.openclaw/extensions/codex-wake`. `codex-wake product-readiness --json`
+reports normalized installed readiness across CLI, hooks, skills, repo service,
+supervisor roots, monitor health, app-server, OpenClaw Gateway, OpenClaw plugin,
+and tmux. Runtime state classes and cleanup/archive/supervisor-unenroll effects
+are documented, and stale supervisor roots now include health status plus
+remediation. `scripts/product_smoke.py` and `docs/product-smoke-matrix.md`
+codify safe installed/public-tag smokes, optional live Codex/OpenClaw smokes,
+and the manual tmux visibility boundary. README, daemon-service docs, the
+OpenClaw plugin README, the `codex-wake` skill, and
+`docs/support-boundary.md` now document the public install path, monitor
+selection, readiness checks, cleanup boundaries, and unsupported false
+positives. Fresh Codex app-server and OpenClaw Gateway smokes through the
+harness are recorded in
+`docs/dev/verification/0068-2026-05-26-live-product-smokes.md`. Remaining
+product risk is the `v0.5.0` release and public-tag install smoke.
 
 Plan: [Productization Completion](docs/dev/plans/0043-2026-05-26-productization-completion.md)
 

@@ -1853,3 +1853,173 @@ Best next turn option: implement Slice 1 by replacing the repo-linked
 OpenClaw plugin install path with a durable public-tag or package-artifact
 install/update flow, then verify it through Gateway restart and tool catalog
 inspection.
+
+## Turn 105 | 2026-05-26
+
+Implemented P43 Slice 1 OpenClaw plugin distribution.
+
+- Added `src/codex_wake/openclaw_plugin.py` with public-tag materialization,
+  non-linked OpenClaw install/update, npm-pack artifact creation, and guarded
+  linked-path pruning.
+- Added `codex-wake openclaw-plugin install|update|pack`.
+- Added `--prune-linked-path`, which removes only linked `plugins.load.paths`
+  entries whose manifest id is `codex-wake`, writes an OpenClaw config backup,
+  and refreshes OpenClaw's generated plugin registry.
+- Updated README, plugin README, and the `codex-wake` skill to use the
+  productized install/update path.
+- Verified focused Python tests: 52 tests passed.
+- Built an npm-pack artifact under `dist/openclaw-plugin/`.
+- Installed from public tag `v0.4.15` into
+  `~/.local/share/codex-wake/openclaw-plugins/v0.4.15`, then OpenClaw installed
+  the managed extension at `~/.openclaw/extensions/codex-wake`.
+- Removed the previous linked source override from OpenClaw config and wrote
+  backup
+  `~/.openclaw/openclaw.json.codex-wake-backup-20260526T121635Z`.
+- Refreshed OpenClaw's plugin registry and restarted
+  `openclaw-gateway.service`.
+- Verified `openclaw plugins inspect codex-wake --runtime --json` reports
+  source `~/.openclaw/extensions/codex-wake/index.js`, origin `global`,
+  `codex_wake_schedule`, config schema present, and zero diagnostics.
+- Verified Gateway RPC readiness after restart.
+- Recorded evidence in
+  `docs/dev/verification/0063-2026-05-26-openclaw-plugin-productized-install.md`.
+
+Best next turn option: implement P43 Slice 2 by adding a unified readiness
+doctor that reports CLI version, hooks, installed skill, supervisor roots,
+monitor health, app-server readiness, OpenClaw Gateway readiness, plugin
+readiness, and tmux availability without leaking secrets.
+
+## Turn 106 | 2026-05-26
+
+Implemented P43 Slice 2 unified product readiness.
+
+- Added `src/codex_wake/product_readiness.py`.
+- Added `codex-wake product-readiness --json`.
+- The report includes normalized `ready`, `warning`, `manual_only`, and
+  `blocked` outcomes for CLI version/commands, hook sources/runtime evidence,
+  skill installs, repo service, supervisor status/enrolled roots, monitor
+  health, app-server dispatch readiness, OpenClaw Gateway auth/RPC readiness,
+  OpenClaw plugin readiness, and tmux availability.
+- Gateway auth reporting includes variable names, source type, and presence
+  booleans only; raw token/password values are not emitted.
+- Added tests for missing supervisor, stale monitor health, missing OpenClaw
+  plugin, missing Gateway auth environment, app-server command drift, CLI
+  product-readiness output, and secret-value omission.
+- Live smoke reported `overall_status=warning` with expected warnings for
+  duplicate hook install and inactive repo service; supervisor, monitor,
+  app-server, OpenClaw Gateway, OpenClaw plugin, and tmux checks were ready.
+- Synced the updated `codex-wake` skill to user, shared Codex, and OpenClaw
+  skill locations.
+- Recorded evidence in
+  `docs/dev/verification/0064-2026-05-26-product-readiness-command.md`.
+
+Best next turn option: implement P43 Slice 3 by documenting runtime state
+classes and making cleanup/archive/supervisor-unenroll behavior visible,
+dry-run first, and validated against a clean dogfood wake root.
+
+## Turn 107 | 2026-05-26
+
+Implemented P43 Slice 3 state lifecycle and retention.
+
+- Added `docs/runtime-state-lifecycle.md`.
+- Documented authoritative wake records, archived records, hook acks, logs,
+  locks, monitor health, supervisor registry entries, service units/logs, and
+  OpenClaw plugin materialized source.
+- Documented the effects of `archive`, `archive --all-terminal`, `cleanup`,
+  `cleanup --archive-terminal`, `cleanup --delete`, and `supervisor unenroll`.
+- Added `health_status` and `remediation` to supervisor root status entries so
+  stale or missing roots are visible and actionable.
+- Updated `supervisor status` text output to include health status and
+  remediation.
+- Updated README, the `codex-wake` skill, and P43 plan progress.
+- Ran disposable cleanup dogfood: terminal record archived, dry-run showed an
+  old archived deletion candidate, `--delete` removed it, and final status had
+  `active_total=0`, `terminal_total=0`.
+- Recorded evidence in
+  `docs/dev/verification/0065-2026-05-26-state-lifecycle-retention.md`.
+
+Best next turn option: implement P43 Slice 4 by adding a repeatable
+cross-runtime smoke harness or command matrix for installed CLI, supervisor,
+Codex app-server, OpenClaw Gateway, and manual/operator-visible tmux boundaries.
+
+## Turn 108 | 2026-05-26
+
+Implemented the P43 Slice 4 smoke harness.
+
+- Added `scripts/product_smoke.py`.
+- Added `docs/product-smoke-matrix.md`.
+- Added `codex-wake --version`.
+- Added `codex-wake supervisor run --once --no-dispatch` so safe smokes can
+  exercise supervisor polling without delivering due wakes.
+- Updated CI to run OpenClaw plugin tests, plugin syntax checks, package build,
+  and the installed-wheel product smoke.
+- Updated README, daemon-service docs, OpenClaw plugin README, the
+  `codex-wake` skill, P43 plan, and roadmap status.
+- Verified focused CLI/supervisor tests, then the full source suite:
+  155 Python tests passed.
+- Verified compile checks, `scripts/product_smoke.py` py_compile, plugin tests,
+  plugin no-shell scan, installed-wheel build, installed-wheel smoke harness,
+  live product-readiness snapshot, and `git diff --check`.
+- Recorded evidence in
+  `docs/dev/verification/0066-2026-05-26-product-smoke-harness.md`.
+
+Best next turn option: implement P43 Slice 5 by consolidating operator docs and
+support boundaries around the public install/update path, user supervisor,
+product-readiness, product smoke matrix, and unsupported placeholder/no-dispatch
+cases.
+
+## Turn 109 | 2026-05-26
+
+Implemented P43 Slice 5 operator docs and support boundary.
+
+- Added a README public-install quickstart from public tag install through
+  hook setup, supervisor setup, monitor readiness, product-readiness, and
+  product smoke.
+- Added `docs/support-boundary.md` with supported product paths, required
+  dispatch evidence, manual-only cases, no-dispatch false positives, placeholder
+  id limits, tmux visibility limits, linked-plugin limits, and cleanup
+  boundaries.
+- Updated `docs/daemon-service.md` with repo-service versus user-supervisor
+  selection guidance.
+- Updated the OpenClaw plugin README with product-readiness checks and explicit
+  OpenClaw non-evidence cases.
+- Updated the `codex-wake` skill with version checks, product smoke guidance,
+  and the support-boundary pointer.
+- Revalidated Python tests, compile checks, product smoke script py_compile,
+  plugin tests, plugin syntax checks, plugin no-shell scan, installed-wheel
+  product smoke, live product-readiness, and `git diff --check`.
+- Recorded evidence in
+  `docs/dev/verification/0067-2026-05-26-operator-docs-support-boundary.md`.
+
+Best next turn option: start P43 Slice 6 by bumping to `v0.5.0`, then run
+fresh live Codex app-server and OpenClaw Gateway smokes through the new harness
+before tagging and public-install smoking the release.
+
+## Turn 110 | 2026-05-26
+
+Ran fresh live P43 product smokes through `scripts/product_smoke.py`.
+
+- Discovered idle local app-server candidate
+  `019e4814-febe-7fe3-b2b5-8f23ffe54b5b`.
+- Ran live Codex app-server smoke:
+  `wake_20260526_130227_30c0`,
+  marker `CODEX_WAKE_PRODUCT_SMOKE_CODEX_20260526T130227Z`,
+  `dispatch_result.turn_id=019e6461-4566-7a40-83c7-02f8f5f57eb4`,
+  final status `submitted`.
+- Ran live OpenClaw Gateway smoke:
+  `wake_20260526_130335_d7b5`,
+  marker `CODEX_WAKE_PRODUCT_SMOKE_OPENCLAW_20260526T130335Z`,
+  `dispatch_result.run_id=codex-wake:wake_20260526_130335_d7b5`,
+  `dispatch_result.session_id=f8d86ef1-76f0-49ef-97a0-05801ef3bad2`,
+  final status `submitted`.
+- Verified Slack readback for the OpenClaw marker at
+  `2026-05-26T13:04:37.926Z`.
+- Archived both smoke records and confirmed final repo wake root
+  `active_total=0`, `terminal_total=0`, `archived_total=23`.
+- Recorded evidence in
+  `docs/dev/verification/0068-2026-05-26-live-product-smokes.md`.
+
+Best next turn option: complete P43 Slice 6 by bumping to `v0.5.0`, committing,
+tagging, pushing, waiting for CI, publishing the GitHub release, refreshing the
+user-scoped install from the public tag, and recording public-install smoke
+evidence.

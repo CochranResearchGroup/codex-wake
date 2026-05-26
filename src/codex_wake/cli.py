@@ -21,6 +21,14 @@ from .hook_config import (
     install_user_hook_config,
 )
 from .openclaw_gateway import DEFAULT_GATEWAY_TIMEOUT_MS, DEFAULT_OPENCLAW_TIMEOUT_SECONDS, build_openclaw_gateway_target
+from .openclaw_plugin import (
+    DEFAULT_PLUGIN_REPO_URL,
+    default_plugin_ref,
+    install_openclaw_plugin,
+    pack_openclaw_plugin,
+    package_version,
+)
+from .product_readiness import product_readiness_summary
 from .process import process_exists, process_identity
 from .monitor import monitor_readiness, require_monitor_ready
 from .records import (
@@ -60,6 +68,7 @@ from .supervisor import (
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="codex-wake")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {package_version()}")
     parser.add_argument(
         "--wake-root",
         type=Path,
@@ -132,6 +141,30 @@ def build_parser() -> argparse.ArgumentParser:
     add_monitor_gate_options(openclaw_at)
     openclaw_at.add_argument("timestamp")
     openclaw_at.add_argument("prompt", nargs=argparse.REMAINDER)
+
+    openclaw_plugin = subparsers.add_parser("openclaw-plugin", help="install or package the OpenClaw codex-wake plugin")
+    openclaw_plugin_subparsers = openclaw_plugin.add_subparsers(dest="openclaw_plugin_command", required=True)
+
+    openclaw_plugin_install = openclaw_plugin_subparsers.add_parser(
+        "install",
+        help="install the OpenClaw plugin from a public codex-wake tag or local source copy",
+    )
+    add_openclaw_plugin_install_options(openclaw_plugin_install, force_default=False)
+
+    openclaw_plugin_update = openclaw_plugin_subparsers.add_parser(
+        "update",
+        help="refresh and force-install the OpenClaw plugin from a public codex-wake tag or local source copy",
+    )
+    add_openclaw_plugin_install_options(openclaw_plugin_update, force_default=True)
+
+    openclaw_plugin_pack = openclaw_plugin_subparsers.add_parser(
+        "pack",
+        help="create an npm-pack artifact for the OpenClaw plugin",
+    )
+    openclaw_plugin_pack.add_argument("--source-dir", type=Path, default=None, help="plugin source dir; defaults to ./plugins/openclaw-codex-wake")
+    openclaw_plugin_pack.add_argument("--output-dir", type=Path, default=Path("dist/openclaw-plugin"), help="directory for the .tgz artifact")
+    openclaw_plugin_pack.add_argument("--npm-path", default="npm", help="npm executable to run")
+    openclaw_plugin_pack.add_argument("--json", action="store_true", dest="as_json")
 
     file_cmd = subparsers.add_parser("file", help="create a wake when a file exists")
     file_cmd.add_argument("path")
@@ -248,6 +281,7 @@ def build_parser() -> argparse.ArgumentParser:
     supervisor_run = supervisor_subparsers.add_parser("run", help="run supervisor polling")
     add_supervisor_options(supervisor_run)
     supervisor_run.add_argument("--once", action="store_true", help="run one multi-root poll and exit")
+    supervisor_run.add_argument("--no-dispatch", action="store_true", help="evaluate predicates but do not dispatch firing records")
     supervisor_run.add_argument("--json", action="store_true", dest="as_json", help="with --once, print JSON results")
 
     hook = subparsers.add_parser("hook", help="install or check Codex hook config")
@@ -273,6 +307,25 @@ def build_parser() -> argparse.ArgumentParser:
     doctor.add_argument("--json", action="store_true", dest="as_json")
     doctor.add_argument("--monitor", action="store_true", help="include monitor readiness; included by default")
     add_service_options(doctor)
+
+    readiness = subparsers.add_parser("product-readiness", help="report installed product readiness across Codex and OpenClaw")
+    readiness.add_argument("--hook-command", default=DEFAULT_HOOK_COMMAND, help="expected UserPromptSubmit hook command")
+    readiness.add_argument("--repo-root", type=Path, default=None, help="repo root; defaults to current directory")
+    readiness.add_argument("--service-name", help="repo-scoped systemd service name")
+    readiness.add_argument("--supervisor-name", help="user supervisor systemd service name")
+    readiness.add_argument("--interval", type=float, default=1.0, help="service/supervisor poll interval for config inspection")
+    readiness.add_argument("--daemon-path", help="codex-waked path for repo service config inspection")
+    readiness.add_argument("--codex-path", help="Codex CLI command for repo service app-server readiness")
+    readiness.add_argument("--codex-wake-path", help="codex-wake path for supervisor config inspection")
+    readiness.add_argument("--log-path", type=Path, default=None, help="repo service log path")
+    readiness.add_argument("--supervisor-log-path", type=Path, default=None, help="supervisor log path")
+    readiness.add_argument("--registry-dir", type=Path, default=None, help="supervisor registry dir")
+    readiness.add_argument("--state-dir", type=Path, default=None, help="supervisor state dir")
+    readiness.add_argument("--openclaw-path", help="OpenClaw CLI command")
+    readiness.add_argument("--openclaw-config", type=Path, default=None, help="OpenClaw config path")
+    readiness.add_argument("--stale-after", type=int, default=120, help="seconds before monitor health is considered stale")
+    readiness.add_argument("--openclaw-timeout", type=float, default=30.0, help="seconds for OpenClaw readiness probes")
+    readiness.add_argument("--json", action="store_true", dest="as_json")
 
     return parser
 
@@ -312,6 +365,33 @@ def add_openclaw_gateway_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--reply-account", dest="reply_account_id", help="delivery account id override passed to OpenClaw")
     parser.add_argument("--model", help="OpenClaw model override")
     parser.add_argument("--thinking", help="OpenClaw thinking level override")
+
+
+def add_openclaw_plugin_install_options(parser: argparse.ArgumentParser, *, force_default: bool) -> None:
+    parser.add_argument("--source-dir", type=Path, default=None, help="install from this local plugin source directory instead of git")
+    parser.add_argument("--repo-url", default=DEFAULT_PLUGIN_REPO_URL, help="codex-wake git repo URL for public-tag materialization")
+    parser.add_argument("--tag", dest="ref", default=None, help="codex-wake git tag/ref to materialize; defaults to the installed package version")
+    parser.add_argument("--materialize-dir", type=Path, default=None, help="directory for materialized public-tag plugin source")
+    parser.add_argument("--openclaw-path", help="OpenClaw CLI path or command")
+    parser.add_argument("--openclaw-config", type=Path, default=None, help="OpenClaw config to edit when pruning a linked plugin path")
+    parser.add_argument(
+        "--prune-linked-path",
+        action="store_true",
+        help="remove the repo-linked plugins.load.paths entry after a successful install, writing a config backup",
+    )
+    parser.add_argument(
+        "--linked-source-dir",
+        type=Path,
+        default=None,
+        help="linked plugin source path to prune; defaults to any linked codex-wake plugin path in OpenClaw config",
+    )
+    parser.add_argument("--refresh", action="store_true", help="re-clone and replace the materialized public-tag source")
+    parser.add_argument("--dry-run", action="store_true", help="print the install command without running OpenClaw")
+    parser.add_argument("--json", action="store_true", dest="as_json")
+    if force_default:
+        parser.add_argument("--no-force", action="store_true", help="do not pass --force to OpenClaw install")
+    else:
+        parser.add_argument("--force", action="store_true", help="pass --force to OpenClaw install")
 
 
 def add_monitor_gate_options(parser: argparse.ArgumentParser) -> None:
@@ -422,6 +502,72 @@ def create_openclaw(args: argparse.Namespace, root: Path) -> int:
         thinking=args.thinking,
     )
     return create_record(args.prompt, predicate, root, now, args, target=target)
+
+
+def openclaw_plugin_command(args: argparse.Namespace) -> int:
+    command = args.openclaw_plugin_command
+    if command in {"install", "update"}:
+        force = bool(args.force) if command == "install" else not bool(args.no_force)
+        result = install_openclaw_plugin(
+            source_dir=args.source_dir,
+            repo_url=args.repo_url,
+            ref=args.ref or (None if args.source_dir else default_plugin_ref()),
+            materialize_dir=args.materialize_dir,
+            openclaw_path=args.openclaw_path,
+            force=force,
+            refresh=bool(args.refresh or command == "update"),
+            dry_run=bool(args.dry_run),
+            prune_linked_path=bool(args.prune_linked_path),
+            linked_source_dir=args.linked_source_dir,
+            openclaw_config=args.openclaw_config,
+        )
+        if args.as_json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+        print(f"plugin_id={result['plugin_id']}")
+        print(f"plugin_version={result['plugin_version']}")
+        print(f"package_name={result['package_name']}")
+        print(f"package_version={result['package_version']}")
+        print(f"source_kind={result['source_kind']}")
+        print(f"source_path={result['source_path']}")
+        print("command=" + " ".join(result["command"]))
+        if result["dry_run"]:
+            print("dry_run=true")
+        else:
+            print("installed=true")
+            if result["stdout"]:
+                print(str(result["stdout"]).rstrip())
+            if result["stderr"]:
+                print(str(result["stderr"]).rstrip(), file=sys.stderr)
+        prune = result.get("prune_linked_path")
+        if isinstance(prune, dict):
+            print(f"prune_linked_path_changed={str(bool(prune.get('changed'))).lower()}")
+            print(f"prune_linked_path_removed={len(prune.get('removed_paths') or [])}")
+            if prune.get("backup_path"):
+                print(f"prune_linked_path_backup={prune['backup_path']}")
+        registry_refresh = result.get("registry_refresh")
+        if isinstance(registry_refresh, dict):
+            print("registry_refresh_command=" + " ".join(registry_refresh["command"]))
+            print(f"registry_refresh_dry_run={str(bool(registry_refresh.get('dry_run'))).lower()}")
+        return 0
+    if command == "pack":
+        result = pack_openclaw_plugin(
+            source_dir=args.source_dir,
+            output_dir=args.output_dir,
+            npm_path=args.npm_path,
+        )
+        if args.as_json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+        print(f"plugin_id={result['plugin_id']}")
+        print(f"plugin_version={result['plugin_version']}")
+        print(f"package_name={result['package_name']}")
+        print(f"package_version={result['package_version']}")
+        print(f"source_path={result['source_path']}")
+        print(f"tarball={result['tarball']}")
+        print("install_hint=openclaw plugins install npm-pack:" + str(result["tarball"]))
+        return 0
+    raise WakeError(f"unknown openclaw-plugin command: {command}")
 
 
 def app_status(args: argparse.Namespace) -> int:
@@ -881,11 +1027,12 @@ def supervisor_command(args: argparse.Namespace, root: Path) -> int:
         roots = summary["roots"]
         assert isinstance(roots, list)
         if roots:
-            print("ROOT_ID\tENABLED\tHEALTH_RECENT\tWAKE_ROOT")
+            print("ROOT_ID\tENABLED\tHEALTH_STATUS\tHEALTH_RECENT\tWAKE_ROOT\tREMEDIATION")
             for item in roots:
                 print(
                     f"{item.get('root_id')}\t{str(item.get('enabled')).lower()}\t"
-                    f"{str(item.get('health_recent')).lower()}\t{item.get('wake_root')}"
+                    f"{item.get('health_status')}\t{str(item.get('health_recent')).lower()}\t"
+                    f"{item.get('wake_root')}\t{item.get('remediation') or ''}"
                 )
         return 0
     if command == "enroll":
@@ -918,9 +1065,15 @@ def supervisor_command(args: argparse.Namespace, root: Path) -> int:
         if args.once and args.as_json:
             from .supervisor import supervisor_poll_once
 
-            print(json.dumps(supervisor_poll_once(config, mode="once"), indent=2, sort_keys=True))
+            print(
+                json.dumps(
+                    supervisor_poll_once(config, mode="once", dispatch=not args.no_dispatch),
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
             return 0
-        return supervisor_run_loop(config, once=args.once)
+        return supervisor_run_loop(config, once=args.once, dispatch=not args.no_dispatch)
     raise WakeError(f"unknown supervisor command: {command}")
 
 
@@ -1140,6 +1293,53 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
+    summary = product_readiness_summary(
+        wake_root=root,
+        repo_root=args.repo_root,
+        hook_command=args.hook_command,
+        service_name=args.service_name,
+        supervisor_name=args.supervisor_name,
+        interval=args.interval,
+        daemon_path=args.daemon_path,
+        codex_path=args.codex_path,
+        codex_wake_path=args.codex_wake_path,
+        log_path=args.log_path,
+        supervisor_log_path=args.supervisor_log_path,
+        registry_dir=args.registry_dir,
+        state_dir=args.state_dir,
+        openclaw_path=args.openclaw_path,
+        openclaw_config=args.openclaw_config,
+        stale_after_seconds=args.stale_after,
+        openclaw_timeout=args.openclaw_timeout,
+    )
+    if args.as_json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+    print(f"overall_status={summary['overall_status']}")
+    print(f"repo_root={summary['repo_root']}")
+    print(f"wake_root={summary['wake_root']}")
+    checks = summary["checks"]
+    assert isinstance(checks, dict)
+    for name in (
+        "cli",
+        "hooks",
+        "skills",
+        "repo_service",
+        "supervisor",
+        "monitor",
+        "app_server",
+        "openclaw_gateway",
+        "openclaw_plugin",
+        "tmux",
+    ):
+        check = checks.get(name)
+        if isinstance(check, dict):
+            print(f"{name}_status={check.get('status')}")
+            print(f"{name}_message={check.get('message')}")
+    return 0
+
+
 def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -1152,6 +1352,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_app(args, root)
     if args.command == "openclaw":
         return create_openclaw(args, root)
+    if args.command == "openclaw-plugin":
+        return openclaw_plugin_command(args)
     if args.command == "file":
         return create_file(args, root)
     if args.command == "changed":
@@ -1182,6 +1384,8 @@ def run(argv: list[str] | None = None) -> int:
         return hook_command(args, root)
     if args.command == "doctor":
         return doctor_command(args, root)
+    if args.command == "product-readiness":
+        return product_readiness_command(args, root)
     raise WakeError(f"unknown command: {args.command}")
 
 

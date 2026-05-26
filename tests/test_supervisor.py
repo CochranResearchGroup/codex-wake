@@ -4,9 +4,11 @@ import json
 import subprocess
 import tempfile
 import unittest
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
+from codex_wake.monitor import write_monitor_health
 from codex_wake.records import build_record, write_record
 from codex_wake.supervisor import (
     build_supervisor_config,
@@ -113,6 +115,38 @@ class SupervisorTests(unittest.TestCase):
             self.assertEqual(status["root_count"], 1)
             self.assertEqual(status["roots"][0]["root_id"], "repo-test")
             self.assertEqual(status["roots"][0]["wake_root"], str(wake_root.resolve()))
+            self.assertEqual(status["roots"][0]["health_status"], "missing")
+            self.assertIn("supervisor run --once", status["roots"][0]["remediation"])
+
+    def test_supervisor_status_marks_stale_health_with_remediation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            codex_wake = self.make_executable(base / "bin" / "codex-wake")
+            config = build_supervisor_config(
+                codex_wake_path=str(codex_wake),
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "supervisor.log",
+                registry_dir=base / "config" / "roots.d",
+                state_dir=base / "state" / "supervisor",
+            )
+            wake_root = base / "repo" / ".codex" / "wake"
+            enroll_root(wake_root=wake_root, repo_root=base / "repo", registry_dir=config.registry_dir, root_id="repo-test")
+            write_monitor_health(
+                wake_root=wake_root,
+                repo_root=base / "repo",
+                source="supervisor",
+                mode="loop",
+                state_dir=config.state_dir.parent / "monitors",
+                now=datetime.now(UTC) - timedelta(hours=1),
+            )
+
+            status = supervisor_status(config, FakeRunner(active="active", enabled="enabled"))
+
+            root_status = status["roots"][0]
+            self.assertFalse(root_status["health_recent"])
+            self.assertEqual(root_status["health_status"], "stale")
+            self.assertIn("codex-wake-supervisor.service", root_status["remediation"])
+            self.assertIn("supervisor unenroll --root-id repo-test", root_status["remediation"])
 
     def test_supervisor_run_once_polls_registered_roots_and_writes_health(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -151,12 +185,14 @@ class SupervisorTests(unittest.TestCase):
                         "requeued": 0,
                     },
                 )()
-                results = supervisor_poll_once(config, mode="loop")
+                results = supervisor_poll_once(config, mode="loop", dispatch=False)
 
             self.assertEqual(results[0]["root_id"], "repo-test")
             self.assertTrue(results[0]["ok"])
             self.assertTrue(results[0]["activity"])
             self.assertTrue((base / "state" / "monitors").exists())
+            poll_once.assert_called_once()
+            self.assertFalse(poll_once.call_args.kwargs["dispatch"])
 
 
 if __name__ == "__main__":

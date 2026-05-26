@@ -266,11 +266,36 @@ channel/thread evidence from trusted OpenClaw runtime context.
 Readiness:
 
 ```bash
+codex-wake openclaw-plugin install --tag <codex-wake-tag> --prune-linked-path
+openclaw gateway restart
 openclaw plugins inspect codex-wake --runtime --json
 openclaw gateway call tools.catalog --json --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
 codex-wake --wake-root .codex/wake monitor check --json
 codex-wake supervisor status --all
 ```
+
+For update validation:
+
+```bash
+codex-wake openclaw-plugin update --tag <codex-wake-tag> --prune-linked-path
+openclaw gateway restart
+openclaw plugins inspect codex-wake --runtime --json
+```
+
+For release-candidate package validation:
+
+```bash
+codex-wake openclaw-plugin pack --output-dir dist/openclaw-plugin
+openclaw plugins install --force npm-pack:dist/openclaw-plugin/<tarball>.tgz
+openclaw gateway restart
+```
+
+Treat `openclaw plugins install --link ./plugins/openclaw-codex-wake` as a
+development-only path, not productized install evidence.
+The productized install/update commands use `--prune-linked-path` so a previous
+linked development path cannot override the managed extension; codex-wake
+removes only linked paths whose manifest id is `codex-wake`, writes an
+OpenClaw config backup, and refreshes the generated plugin registry.
 
 For supervisor-fired OpenClaw wakes, the user systemd manager must have any
 Gateway auth variables referenced by OpenClaw config:

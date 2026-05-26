@@ -17,8 +17,8 @@ test("plugin manifest exposes monitor readiness config", () => {
   const manifest = JSON.parse(fs.readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf8"));
   const packageJson = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
-  assert.equal(manifest.version, "0.1.1");
-  assert.equal(packageJson.version, "0.1.1");
+  assert.equal(manifest.version, packageJson.version);
+  assert.equal(packageJson.version, "0.5.0");
   assert.equal(manifest.configSchema.properties.requireMonitorByDefault.type, "boolean");
   assert.equal(manifest.configSchema.properties.monitorStaleAfterSeconds.type, "integer");
   assert.equal(manifest.configSchema.properties.monitorStaleAfterSeconds.minimum, 1);

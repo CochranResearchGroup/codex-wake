@@ -33,7 +33,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.15
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.5.0
 ```
 
 Verify the installed commands:
@@ -45,6 +45,44 @@ command -v codex-wake-hook
 codex-wake --help
 codex-waked --once --no-dispatch --wake-root /tmp/codex-wake-empty
 ```
+
+## Public Install Quickstart
+
+Use a released public tag and make the wake root monitor-ready before
+scheduling unattended wakes:
+
+```bash
+tag=<release-tag>
+uv tool install --force --reinstall "git+https://github.com/CochranResearchGroup/codex-wake.git@$tag"
+
+codex-wake hook user install
+codex-wake hook user check
+
+codex-wake supervisor install
+codex-wake supervisor enroll --wake-root "$PWD/.codex/wake" --repo-root "$PWD"
+codex-wake supervisor status --all
+
+codex-wake --wake-root .codex/wake monitor check --json
+codex-wake --wake-root .codex/wake product-readiness --json
+```
+
+From this repo checkout, run the release smoke harness against the installed
+commands:
+
+```bash
+python scripts/product_smoke.py --json
+```
+
+For OpenClaw Gateway wakes fired by the user supervisor, import the Gateway
+auth environment into the user systemd manager before scheduling:
+
+```bash
+systemctl --user import-environment OPENCLAW_GATEWAY_TOKEN OPENCLAW_GATEWAY_PASSWORD
+systemctl --user restart codex-wake-supervisor.service
+```
+
+The support boundary and false-positive cases are documented in
+`docs/support-boundary.md`.
 
 ## Hook Setup
 
@@ -185,14 +223,52 @@ It rejects placeholder values such as `noop-smoke-test`. Channel fields are
 stored as evidence; the session key is the durable target.
 
 Install the OpenClaw plugin when OpenClaw agents should schedule their own
-wakes from live session context:
+wakes from live session context. Prefer the `codex-wake` helper because it
+materializes a public `codex-wake` tag into user state and asks OpenClaw to
+install that copy, rather than linking the live repo checkout:
 
 ```bash
-openclaw plugins install --link ./plugins/openclaw-codex-wake
-systemctl --user restart openclaw-gateway.service
+codex-wake openclaw-plugin install --tag <codex-wake-tag> --prune-linked-path
+openclaw gateway restart
 openclaw plugins inspect codex-wake --runtime --json
 openclaw gateway call tools.catalog --json \
   --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
+```
+
+`--prune-linked-path` is safe for migration from a prior linked development
+install: it removes only linked `plugins.load.paths` entries whose manifest id
+is `codex-wake`, writes an OpenClaw config backup, and refreshes OpenClaw's
+generated plugin registry. If no linked path is present, it leaves the config
+unchanged.
+
+For updates, force-refresh the materialized public-tag source and reinstall:
+
+```bash
+codex-wake openclaw-plugin update --tag <codex-wake-tag> --prune-linked-path
+openclaw gateway restart
+```
+
+For local release-candidate validation, build an npm-pack artifact and install
+through OpenClaw's package path:
+
+```bash
+codex-wake openclaw-plugin pack --output-dir dist/openclaw-plugin
+openclaw plugins install --force npm-pack:dist/openclaw-plugin/<tarball>.tgz
+openclaw gateway restart
+```
+
+Use a linked plugin only for active local plugin development:
+
+```bash
+openclaw plugins install --link ./plugins/openclaw-codex-wake
+```
+
+Rollback is explicit:
+
+```bash
+openclaw plugins uninstall codex-wake
+codex-wake openclaw-plugin install --tag <previous-codex-wake-tag>
+openclaw gateway restart
 ```
 
 The plugin registers `codex_wake_schedule`. It writes schema-versioned
@@ -274,6 +350,7 @@ Run a readiness report:
 ```bash
 codex-wake doctor
 codex-wake doctor --json
+codex-wake --wake-root .codex/wake product-readiness --json
 ```
 
 `doctor` prints the same hook ack evidence as `hook check`, including the latest
@@ -286,6 +363,13 @@ enabled for `codex-wake-hook`. For app-server wakes fired by a user service,
 the Codex CLI command the service can use. `service install` writes
 `CODEX_WAKE_CODEX_CMD` into the unit when `codex` is resolvable from the
 installing shell, and `--codex-path` can be used to persist an explicit path.
+
+`product-readiness --json` is the productization-level report. It normalizes
+CLI, hooks, skill installs, repo service, user supervisor, enrolled roots,
+monitor health, app-server dispatch readiness, OpenClaw Gateway RPC readiness,
+OpenClaw plugin readiness, and tmux availability into `ready`, `warning`,
+`manual_only`, or `blocked` outcomes. Gateway auth is reported by variable name
+and presence only; secret values are not emitted.
 
 Ack evidence proves that Codex submitted the wake prompt in the target session.
 It does not by itself prove that a new turn was visible in the pane the operator
@@ -350,6 +434,9 @@ By default, Codex Wake stores state under the current repo:
 
 `.codex/wake/` and `.codex/events/` are ignored by this repo because they are runtime state, not source.
 
+For the full state classification and command-effect contract, see
+`docs/runtime-state-lifecycle.md`.
+
 Cleanup is conservative. `codex-wake cleanup` is dry-run by default and only
 targets records already under `.codex/wake/archive/`. Add `--delete` to remove
 matching archived records, and `--archive-terminal` to archive terminal records
@@ -357,9 +444,29 @@ before cleanup evaluation. Active `pending/` and `firing/` records are never
 deleted by cleanup. Use `cleanup --json` for structured dry-run previews and
 delete reports.
 
+`codex-wake supervisor status --json` reports registered roots with
+`health_status` and `remediation` fields so stale or obsolete roots can be
+repaired with `supervisor run --once` or removed with `supervisor unenroll`.
+
 Wake records currently use schema version `1`. The compatibility policy is
 additive optional fields; inspect it with `codex-wake schema` or read
 `docs/dev/wake-record-schema.md`.
+
+## Product Smoke
+
+Use the tracked smoke harness for productization and release gates:
+
+```bash
+python scripts/product_smoke.py --json
+python scripts/product_smoke.py --public-tag v0.5.0 --json
+```
+
+The safe smoke verifies installed CLI version reporting, schema output,
+product-readiness output, `codex-waked --once --no-dispatch`, monitor-check
+execution, and `supervisor run --once --no-dispatch`. Live Codex app-server and
+OpenClaw Gateway smokes are opt-in because they require real sessions and
+operator-visible readback. The full matrix is documented in
+`docs/product-smoke-matrix.md`.
 
 ## Current Limits
 
@@ -369,6 +476,8 @@ additive optional fields; inspect it with `codex-wake schema` or read
 - `not_before`, `file_exists`, `file_changed`, and `process_done` are polled predicates.
 - `process_done` falls back to PID liveness on platforms where process identity is unavailable.
 - App-server targeting is present for stdio dispatch experiments, but unauthenticated WebSocket dispatch is intentionally not implemented.
+- `--no-dispatch` smokes prove polling and state movement only; they are not delivery proof.
+- Placeholder app-server thread ids or OpenClaw session keys are rejected as product evidence.
 
 ## Development
 

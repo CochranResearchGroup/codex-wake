@@ -32,6 +32,14 @@ jobs:
       - name: Run unit tests
         run: PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
 
+      - name: Run OpenClaw plugin tests
+        run: npm --prefix plugins/openclaw-codex-wake test
+
+      - name: Check OpenClaw plugin entrypoints
+        run: |
+          node --check plugins/openclaw-codex-wake/index.js
+          node --check plugins/openclaw-codex-wake/lib/scheduler.js
+
       - name: Build package
         run: |
           python -m venv /tmp/codex-wake-build
@@ -44,7 +52,12 @@ jobs:
           /tmp/codex-wake-ci/bin/python -m pip install --upgrade pip
           /tmp/codex-wake-ci/bin/python -m pip install dist/*.whl
 
-          /tmp/codex-wake-ci/bin/codex-wake --help
+          python scripts/product_smoke.py \
+            --codex-wake-bin /tmp/codex-wake-ci/bin/codex-wake \
+            --codex-waked-bin /tmp/codex-wake-ci/bin/codex-waked \
+            --artifact-dir /tmp/codex-wake-ci-artifacts \
+            --json
+
           /tmp/codex-wake-ci/bin/codex-waked --once --no-dispatch --wake-root /tmp/codex-wake-ci-empty
 
           hook_output="$(printf '{"prompt":"hello","cwd":"%s"}' "$PWD" | /tmp/codex-wake-ci/bin/codex-wake-hook)"

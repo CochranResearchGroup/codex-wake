@@ -2,7 +2,7 @@
   "id": "codex-wake",
   "name": "Codex Wake",
   "description": "Schedule durable codex-wake records from live OpenClaw sessions.",
-  "version": "0.1.1",
+  "version": "0.5.0",
   "activation": {
     "onStartup": true
   },

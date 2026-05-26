@@ -15,6 +15,7 @@ Run from the repo or workspace that owns the wake state.
 command -v codex-wake
 command -v codex-waked
 command -v codex-wake-hook
+codex-wake --version
 codex-wake --wake-root .codex/wake doctor
 codex-wake --wake-root .codex/wake monitor check --json
 codex-wake --wake-root .codex/wake hook check
@@ -58,6 +59,7 @@ For a repo-scoped service:
 codex-wake --wake-root .codex/wake monitor check --json
 codex-wake --wake-root .codex/wake service status
 codex-wake --wake-root .codex/wake doctor --json
+codex-wake --wake-root .codex/wake product-readiness --json
 ```
 
 `monitor_ready=true` means either the repo-scoped service is active for this
@@ -144,11 +146,20 @@ copy placeholder session keys into wake records.
 Plugin readiness checks:
 
 ```bash
+codex-wake openclaw-plugin install --tag <codex-wake-tag> --prune-linked-path
+openclaw gateway restart
 openclaw plugins inspect codex-wake --runtime --json
 openclaw gateway call tools.catalog --json --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
 codex-wake --wake-root .codex/wake monitor check --json
 codex-wake supervisor status --all
 ```
+
+Use `codex-wake openclaw-plugin update --tag <tag> --prune-linked-path` for
+routine updates. The prune option removes only linked `plugins.load.paths`
+entries whose manifest id is `codex-wake`, writes an OpenClaw config backup,
+and refreshes the generated plugin registry. Use `openclaw plugins install --link
+./plugins/openclaw-codex-wake` only for local plugin development; linked plugin
+state is not durable product evidence.
 
 If OpenClaw Gateway auth uses environment-variable references, ensure the user
 systemd manager that runs `codex-wake-supervisor.service` has those variables:
@@ -222,6 +233,7 @@ App-server service environment preflight:
 command -v codex
 codex-wake --wake-root .codex/wake doctor
 codex-wake --wake-root .codex/wake doctor --json
+codex-wake --wake-root .codex/wake product-readiness --json
 codex-wake --wake-root .codex/wake monitor check --json
 systemctl --user show-environment | rg '^(PATH|CODEX_)='
 systemctl --user status codex-wake-<repo>.service --no-pager
@@ -236,6 +248,26 @@ the repo service for app-server dispatch. If it reports
 ```bash
 codex-wake --wake-root .codex/wake service install --codex-path "$(command -v codex)"
 ```
+
+Use `product-readiness --json` for productization and release gates. It reports
+normalized `ready`, `warning`, `manual_only`, and `blocked` outcomes for CLI,
+hooks, skill installs, repo service, supervisor roots, monitor health,
+app-server dispatch, OpenClaw Gateway, OpenClaw plugin, and tmux availability
+without emitting Gateway secret values.
+
+Use the tracked product smoke harness when validating an installed release:
+
+```bash
+python scripts/product_smoke.py --json
+python scripts/product_smoke.py --public-tag v0.5.0 --json
+```
+
+The safe smoke uses `--no-dispatch` for daemon and supervisor checks. For live
+Codex app-server or OpenClaw Gateway proof, pass the harness real thread/session
+arguments and verify the unique marker in the resulting turn, transcript, or
+channel readback. Treat tmux as `manual_only` unless pane visibility evidence is
+captured. Read `docs/support-boundary.md` before claiming unsupported cases as
+product evidence.
 
 If service logs show `No such file or directory: 'codex'`, classify it as a service-environment failure, not an app-server protocol failure. Re-check the same wake record after recovery instead of creating a duplicate wake.
 
@@ -263,7 +295,14 @@ After handling a wake:
 codex-wake --wake-root .codex/wake show <wake-id>
 codex-wake --wake-root .codex/wake status --json
 codex-wake --wake-root .codex/wake archive <wake-id>
+codex-wake --wake-root .codex/wake cleanup --archive-terminal --json
 ```
+
+`cleanup` is dry-run by default and deletes only archived records when
+`--delete` is supplied. It does not delete active wakes, terminal records before
+archive, acks, logs, monitor health, or supervisor registry entries. Use
+`codex-wake supervisor status --json` to find stale roots; remediate them with
+`supervisor run --once` or `supervisor unenroll`.
 
 For OpenClaw Gateway dogfood, inspect `openclaw_gateway_preflight`, `dispatch_result.run_id`, `dispatch_result.session_id`, and `openclaw_gateway_dispatch_result`. For plugin-scheduled OpenClaw wakes, also verify that the wake target dispatch block did not acquire inferred `reply_channel`, `reply_to`, or `reply_account_id` values unless those overrides were explicitly configured. For app-server dogfood, inspect `app_server_preflight`, `dispatch_result.turn_id`, and `ack_observed`; if dispatch was service-fired, also inspect the service logs and daemon environment.
 

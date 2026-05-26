@@ -60,6 +60,11 @@ have deterministic answers from installed commands and tracked docs:
 
 Replace the repo-linked plugin as the only proven install path.
 
+Implementation direction: keep the plugin as plugin-owned behavior in this
+repo, but install it through OpenClaw's normal plugin installer from a
+materialized public `codex-wake` tag or npm-pack artifact. Do not patch
+OpenClaw core for this unless the installer cannot express a durable source.
+
 Acceptance criteria:
 
 - A documented install/update command installs the OpenClaw plugin from a
@@ -71,6 +76,20 @@ Acceptance criteria:
 - Plugin config schema exposes monitor defaults, timeout defaults, wake root,
   and OpenClaw command settings.
 - A local uninstall or rollback path is documented.
+
+Progress 2026-05-26:
+
+- Added `codex-wake openclaw-plugin install|update|pack` helpers.
+- Productized install/update materializes a public repo tag into user state and
+  runs OpenClaw's normal non-linked plugin installer.
+- `--prune-linked-path` removes only linked `plugins.load.paths` entries whose
+  manifest id is `codex-wake`, writes an OpenClaw config backup, and refreshes
+  OpenClaw's generated plugin registry.
+- Verification `docs/dev/verification/0063-2026-05-26-openclaw-plugin-productized-install.md`
+  confirms the active plugin source is
+  `/home/ecochran76/.openclaw/extensions/codex-wake/index.js` after Gateway
+  restart, with `codex_wake_schedule`, config schema present, and no plugin
+  diagnostics.
 
 ### Slice 2: Unified Readiness Doctor
 
@@ -86,6 +105,20 @@ Acceptance criteria:
 - The report distinguishes `ready`, `warning`, `manual_only`, and `blocked`
   outcomes.
 - Secrets and raw environment values are not emitted.
+- Tests cover missing supervisor, stale monitor health, missing OpenClaw
+  plugin, missing Gateway auth environment, and app-server command drift.
+
+Progress 2026-05-26:
+
+- Added `codex-wake product-readiness --json`.
+- The report includes normalized readiness checks for CLI version/commands,
+  hook sources/runtime evidence, user-scope skill installs, repo service,
+  supervisor status/enrolled roots, monitor health, app-server dispatch
+  readiness, OpenClaw Gateway auth/RPC readiness, OpenClaw plugin readiness,
+  and tmux availability.
+- The status vocabulary is `ready`, `warning`, `manual_only`, and `blocked`.
+- Gateway auth values are reduced to variable names, value source, and
+  presence booleans; secret values are not emitted.
 - Tests cover missing supervisor, stale monitor health, missing OpenClaw
   plugin, missing Gateway auth environment, and app-server command drift.
 
@@ -106,6 +139,17 @@ Acceptance criteria:
 - Verification records show cleanup leaves no active or terminal wake records
   behind after dogfood.
 
+Progress 2026-05-26:
+
+- Added `docs/runtime-state-lifecycle.md` with authoritative, derived,
+  ephemeral, and retained state classes.
+- Documented the exact effects of `archive`, `cleanup`, `cleanup --delete`,
+  `cleanup --archive-terminal`, and `supervisor unenroll`.
+- `supervisor status --json` now reports per-root `health_status` and
+  `remediation` so stale or missing health can be repaired or unenrolled.
+- README and the `codex-wake` skill point operators to cleanup and stale-root
+  remediation behavior.
+
 ### Slice 4: Cross-Runtime Smoke Harness
 
 Codify the release smoke matrix so product validation is repeatable.
@@ -123,6 +167,27 @@ Acceptance criteria:
 - CI continues to run source tests, build artifacts, and installed-wheel
   smokes on supported Python versions.
 
+Progress 2026-05-26:
+
+- Added `scripts/product_smoke.py`.
+- The safe installed-surface smoke verifies `codex-wake --version`, schema
+  output, product-readiness output, `codex-waked --once --no-dispatch`,
+  monitor-check execution, and `supervisor run --once --no-dispatch` without
+  requiring source-tree CLI imports.
+- Public-tag smoke can install a GitHub tag into a temporary virtualenv before
+  running the same installed-surface checks.
+- Live Codex app-server and OpenClaw Gateway smoke paths are opt-in and record
+  unique marker evidence plus final wake JSON.
+- Tmux is explicitly marked manual/operator-visible unless a human captures
+  pane visibility evidence.
+- Added `docs/product-smoke-matrix.md`.
+- CI now runs plugin tests, plugin entrypoint syntax checks, package build, and
+  the installed-wheel product smoke.
+- Verification `docs/dev/verification/0068-2026-05-26-live-product-smokes.md`
+  records fresh Codex app-server and OpenClaw Gateway wakes through the
+  harness with unique marker evidence, real turn/session ids, Slack readback
+  for OpenClaw, and a clean final wake root.
+
 ### Slice 5: Operator Docs And Support Boundary
 
 Give future agents and operators one canonical path.
@@ -139,6 +204,20 @@ Acceptance criteria:
 - Unsupported cases are explicit, including absent tmux target, placeholder
   app-server thread ids, placeholder OpenClaw session keys, and no-dispatch
   false positives.
+
+Progress 2026-05-26:
+
+- Added a README public-install quickstart from tag install through hook
+  install, supervisor install/enroll, monitor check, and product-readiness.
+- Added `docs/support-boundary.md` to define supported product paths,
+  manual-only cases, required dispatch evidence, and unsupported false
+  positives.
+- Updated `docs/daemon-service.md` with repo-service versus user-supervisor
+  selection guidance and the `--no-dispatch` smoke boundary.
+- Updated the OpenClaw plugin README with product-readiness checks and explicit
+  non-evidence cases for linked paths, placeholders, and no-dispatch smokes.
+- Updated the `codex-wake` skill to point agents at version/readiness checks,
+  product smoke, and the support boundary.
 
 ### Slice 6: v0.5.0 Release
 
@@ -191,6 +270,7 @@ Minimum source validation:
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
 python -m compileall -q src tests .codex/hooks
+python -m py_compile scripts/product_smoke.py
 npm --prefix plugins/openclaw-codex-wake test
 node --check plugins/openclaw-codex-wake/index.js
 node --check plugins/openclaw-codex-wake/lib/scheduler.js
@@ -205,6 +285,7 @@ uv tool list | rg 'codex-wake'
 codex-wake --wake-root .codex/wake doctor --json
 codex-wake --wake-root .codex/wake monitor check --json
 codex-wake supervisor status --all --json
+python scripts/product_smoke.py --json
 openclaw plugins inspect codex-wake --runtime --json
 openclaw gateway status --require-rpc --json --timeout 180000
 ```

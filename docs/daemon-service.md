@@ -10,6 +10,21 @@ Both keep wake polling out of the model turn. The supervisor is preferred for
 multi-repo and OpenClaw plugin-created wakes because it avoids one disabled
 per-repo service silently stranding records.
 
+## Choose A Monitor Mode
+
+Use the user supervisor by default when an operator expects more than one repo,
+OpenClaw plugin-created wakes, or user-scoped lifecycle management:
+
+| Situation | Recommended monitor |
+| --- | --- |
+| One repo, local Codex-only dogfood | repo-scoped `codex-waked` service |
+| Multiple repos or mixed Codex/OpenClaw wakes | user `codex-wake-supervisor.service` |
+| OpenClaw plugin-created wakes | user `codex-wake-supervisor.service` |
+| Short manual predicate check only | `codex-waked --once --no-dispatch` |
+
+`--no-dispatch` modes are smoke/check tools only. They do not prove a wake can
+deliver a turn.
+
 Before relying on unattended delivery, check monitor readiness:
 
 ```bash
@@ -153,10 +168,14 @@ inspect the running service:
 
 ```bash
 codex-wake supervisor enroll --wake-root "$PWD/.codex/wake" --repo-root "$PWD"
-codex-wake supervisor run --once
+codex-wake supervisor run --once --no-dispatch
 codex-wake supervisor status --all
 codex-wake --wake-root .codex/wake monitor check --json
 ```
+
+Use `--no-dispatch` for smoke checks that should exercise polling and monitor
+health without delivering a wake. Omit it only when the operator intends to
+fire due wake records.
 
 ## Limits
 
