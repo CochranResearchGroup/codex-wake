@@ -30,6 +30,47 @@ Never use:
 Before scheduling, the agent should know the runtime, target id, dispatcher,
 landing evidence, and follow-up inspection path for missing visible output.
 
+## Check Monitor Readiness
+
+Use before any wake that must fire without a manual daemon pass:
+
+```bash
+codex-wake --wake-root .codex/wake monitor check --json
+codex-wake --wake-root .codex/wake doctor --json
+```
+
+`monitor_ready=true` is the scheduling proof. It means the selected wake root
+is owned by an active repo service or recent persistent daemon/supervisor
+health. A matching unit file, a wake record, or an old one-shot health file is
+not enough.
+
+For single-repo operation, repair or install the repo service:
+
+```bash
+codex-wake --wake-root .codex/wake service install --codex-path "$(command -v codex)"
+codex-wake --wake-root .codex/wake monitor check --json
+```
+
+For multi-repo or OpenClaw operation, enroll the root in the user supervisor:
+
+```bash
+codex-wake supervisor install
+codex-wake supervisor enroll --wake-root "$PWD/.codex/wake" --repo-root "$PWD"
+codex-wake supervisor status --all
+```
+
+Use `--require-monitor` on CLI-created wakes when unattended delivery is part
+of the promise:
+
+```bash
+codex-wake --wake-root .codex/wake after --require-monitor 20m -- \
+  "Check CI for the current branch. First verify the branch and latest commit."
+```
+
+If this fails, either repair the monitor or explicitly choose a manual
+`codex-waked --once` flow. Do not describe an unmonitored wake as scheduled for
+background delivery.
+
 ## CI Or Test Babysitting
 
 Use when a test suite or CI run is too slow to wait on in the active turn.
@@ -42,7 +83,7 @@ mkdir -p .codex/events
   pytest -q > .codex/events/pytest.log 2>&1
   touch .codex/events/pytest.done
 ) &
-codex-wake --wake-root .codex/wake file .codex/events/pytest.done -- \
+codex-wake --wake-root .codex/wake file --require-monitor .codex/events/pytest.done -- \
   "Background pytest is complete. Read .codex/events/pytest.log. If failures remain, fix them; if not, report pass and archive this wake."
 ```
 
@@ -62,7 +103,7 @@ Pattern:
 mkdir -p .codex/events
 build-or-index-command > .codex/events/build.log 2>&1 &
 pid=$!
-codex-wake --wake-root .codex/wake pid "$pid" -- \
+codex-wake --wake-root .codex/wake pid --require-monitor "$pid" -- \
   "The build/index job exited. Read .codex/events/build.log, verify success or failure, and continue from the recorded outcome."
 ```
 
@@ -75,7 +116,7 @@ Use when a separate tool, human action, or service writes a marker file.
 Pattern:
 
 ```bash
-codex-wake --wake-root .codex/wake file .codex/events/review-ready.json -- \
+codex-wake --wake-root .codex/wake file --require-monitor .codex/events/review-ready.json -- \
   "Review input arrived. Read .codex/events/review-ready.json, verify it belongs to this task, then continue."
 ```
 
@@ -88,7 +129,7 @@ Use when the agent needs a bounded follow-up, such as checking CI status after a
 Pattern:
 
 ```bash
-codex-wake --wake-root .codex/wake after 20m -- \
+codex-wake --wake-root .codex/wake after --require-monitor 20m -- \
   "Check CI for the current branch. First verify the branch and latest commit, then inspect CI status and report or repair failures."
 ```
 
@@ -101,7 +142,7 @@ Use when a migration should proceed only after a delay, service restart, queue d
 Pattern:
 
 ```bash
-codex-wake --wake-root .codex/wake after 10m -- \
+codex-wake --wake-root .codex/wake after --require-monitor 10m -- \
   "Continue the staged migration. First inspect .codex/events/migration.log and codex-wake status. If the migration already completed, report evidence and stop."
 ```
 
@@ -227,6 +268,16 @@ Readiness:
 ```bash
 openclaw plugins inspect codex-wake --runtime --json
 openclaw gateway call tools.catalog --json --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
+codex-wake --wake-root .codex/wake monitor check --json
+codex-wake supervisor status --all
+```
+
+For supervisor-fired OpenClaw wakes, the user systemd manager must have any
+Gateway auth variables referenced by OpenClaw config:
+
+```bash
+systemctl --user import-environment OPENCLAW_GATEWAY_TOKEN OPENCLAW_GATEWAY_PASSWORD
+systemctl --user restart codex-wake-supervisor.service
 ```
 
 Expected tool arguments:
@@ -235,6 +286,7 @@ Expected tool arguments:
 {
   "trigger": "after",
   "delay": "20m",
+  "requireMonitor": true,
   "prompt": "Wake idempotently. First inspect the wake record and any referenced logs, then continue only if work remains."
 }
 ```
@@ -242,6 +294,10 @@ Expected tool arguments:
 The plugin writes channel metadata as evidence by default. It should not write
 `dispatch.reply_channel`, `dispatch.reply_to`, or
 `dispatch.reply_account_id` unless those overrides were explicitly configured.
+It also requires recent persistent monitor health by default. If the selected
+wake root is not actively monitored, the tool should fail instead of writing a
+record that no daemon will fire. Use `requireMonitor=false` only when an
+operator will run `codex-waked --once` manually.
 
 OpenClaw readiness levels:
 
@@ -264,6 +320,7 @@ command -v codex
 codex --version
 codex-wake --wake-root .codex/wake doctor
 codex-wake --wake-root .codex/wake doctor --json
+codex-wake --wake-root .codex/wake monitor check --json
 systemctl --user show-environment | rg '^(PATH|CODEX_)='
 systemctl --user status codex-wake-<repo>.service --no-pager
 codex-wake --wake-root .codex/wake service status
@@ -324,7 +381,7 @@ Use when a future agent should confirm cleanup after asynchronous work.
 Pattern:
 
 ```bash
-codex-wake --wake-root .codex/wake after 5m -- \
+codex-wake --wake-root .codex/wake after --require-monitor 5m -- \
   "Cleanup check. Run codex-wake --wake-root .codex/wake status --json. Archive terminal records for this dogfood lane and report active_total and terminal_total."
 ```
 

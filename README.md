@@ -2,11 +2,13 @@
 
 Codex Wake is a local wake spooler for TUI-bound Codex agents. It lets an agent register a durable wake request, lets a deterministic daemon wait for the trigger, and resumes a Codex TUI pane by submitting a short wake prompt.
 
-The v0.1.0 MVP supports:
+The current package supports:
 
 - `codex-wake after`, `codex-wake at`, and `codex-wake file`
 - durable JSON wake records under `.codex/wake/`
 - `codex-waked` polling and dispatch
+- monitor readiness checks and `--require-monitor` scheduling gates
+- a user-scoped supervisor for explicitly registered wake roots
 - tmux pane injection with `UserPromptSubmit` hook ack
 - terminal-state archival with `codex-wake archive`
 - experimental stdio app-server targeted wake records
@@ -31,7 +33,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.14
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.15
 ```
 
 Verify the installed commands:
@@ -110,13 +112,13 @@ cycles.
 Wake after a duration:
 
 ```bash
-codex-wake after 45m -- "Continue the migration. First inspect .codex/events/migration.log."
+codex-wake after --require-monitor 45m -- "Continue the migration. First inspect .codex/events/migration.log."
 ```
 
 Wake at an absolute timestamp:
 
 ```bash
-codex-wake at "2026-05-18T17:30:00-05:00" -- "Check whether the release branch is ready."
+codex-wake at --require-monitor "2026-05-18T17:30:00-05:00" -- "Check whether the release branch is ready."
 ```
 
 Wake when a marker file exists:
@@ -127,14 +129,14 @@ mkdir -p .codex/events
   pytest -q > .codex/events/pytest.log 2>&1
   touch .codex/events/pytest.done
 ) &
-codex-wake file .codex/events/pytest.done -- \
+codex-wake file --require-monitor .codex/events/pytest.done -- \
   "Pytest finished. Read .codex/events/pytest.log and continue from the failing tests."
 ```
 
 Wake when a file is created or changes:
 
 ```bash
-codex-wake changed .codex/events/build.log -- \
+codex-wake changed --require-monitor .codex/events/build.log -- \
   "The build log changed. Read .codex/events/build.log and continue."
 ```
 
@@ -142,7 +144,7 @@ Wake when a known background process exits:
 
 ```bash
 long-running-command > .codex/events/job.log 2>&1 &
-codex-wake pid "$!" -- \
+codex-wake pid --require-monitor "$!" -- \
   "The background process exited. Read .codex/events/job.log and continue."
 ```
 
@@ -153,8 +155,8 @@ or if the live PID no longer matches that registered process identity.
 Create an app-server-targeted wake instead of a tmux-targeted wake:
 
 ```bash
-codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
-codex-wake app after --codex-path "$(command -v codex)" thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app after --require-monitor thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app after --require-monitor --codex-path "$(command -v codex)" thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
 codex-wake app candidates
 codex-wake app candidates --cwd "$PWD" --json
@@ -168,6 +170,7 @@ Create an OpenClaw Gateway-targeted wake for a durable OpenClaw session:
 
 ```bash
 codex-wake openclaw after \
+  --require-monitor \
   --agent main \
   --session-key agent:main:slack:channel:c0ahqqcg7j4 \
   --workspace default \
@@ -197,6 +200,51 @@ The plugin registers `codex_wake_schedule`. It writes schema-versioned
 `agentId`, `sessionKey`, and channel/thread evidence, and rejects missing or
 placeholder session keys. By default, channel metadata is stored as evidence
 only; explicit Gateway reply override fields are written only when configured.
+The plugin requires recent persistent monitor health by default before writing
+a wake record. Set `requireMonitor=false` only for an operator-managed
+`codex-waked --once` flow.
+
+## Monitor Readiness
+
+Before relying on unattended wake delivery, verify that a monitor owns the
+selected wake root:
+
+```bash
+codex-wake --wake-root .codex/wake monitor check --json
+codex-wake --wake-root .codex/wake doctor --json
+```
+
+`monitor_ready=true` means an active repo-scoped service matches the exact
+wake root, or recent persistent daemon/supervisor health was observed. A wake
+record without monitor readiness may remain pending forever unless an operator
+runs `codex-waked --once`.
+
+For single-repo operation, install or repair the repo-scoped service:
+
+```bash
+codex-wake --wake-root .codex/wake service install --codex-path "$(command -v codex)"
+```
+
+For multi-repo and OpenClaw usage, use the user-scoped supervisor:
+
+```bash
+codex-wake supervisor install
+codex-wake supervisor enroll --wake-root "$PWD/.codex/wake" --repo-root "$PWD"
+codex-wake supervisor status --all
+```
+
+If OpenClaw Gateway auth uses environment-variable references, import those
+variables into the user systemd manager before relying on supervisor-fired
+OpenClaw wakes:
+
+```bash
+systemctl --user import-environment OPENCLAW_GATEWAY_TOKEN OPENCLAW_GATEWAY_PASSWORD
+systemctl --user restart codex-wake-supervisor.service
+```
+
+The supervisor reads explicit root registrations from
+`~/.config/codex-wake/roots.d/` and writes monitor health under
+`~/.local/state/codex-wake/monitors/`. It does not scan arbitrary workspaces.
 
 Run the daemon once:
 

@@ -723,6 +723,76 @@ class CliTests(unittest.TestCase):
             self.assertIn("name=wake-test.service", stdout.getvalue())
             self.assertIn(f"unit={unit_path}", stdout.getvalue())
 
+    def test_monitor_check_json_reports_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            readiness = {
+                "wake_root": str(root),
+                "repo_root": str(Path(tmp)),
+                "monitor_ready": True,
+                "monitor_source": "repo_service",
+                "service": {
+                    "name": "wake-test.service",
+                    "active": "active",
+                    "enabled": "enabled",
+                    "unit": str(Path(tmp) / "wake-test.service"),
+                    "log": str(Path(tmp) / "wake.log"),
+                    "wake_root": str(root),
+                    "matches_wake_root": True,
+                    "config_error": "",
+                },
+                "health": {
+                    "path": str(Path(tmp) / "health.json"),
+                    "exists": False,
+                    "recent": False,
+                    "persistent": False,
+                    "source": "",
+                    "mode": "",
+                    "checked_at": "",
+                    "pid": "",
+                },
+                "transports": {},
+            }
+            with patch("codex_wake.cli.monitor_readiness", return_value=readiness):
+                code, out, err = self.run_cli(["monitor", "check", "--json"], root)
+
+            self.assertEqual(code, 0, err)
+            data = json.loads(out)
+            self.assertTrue(data["monitor_ready"])
+            self.assertEqual(data["monitor_source"], "repo_service")
+
+    def test_require_monitor_blocks_unmonitored_wake_before_write(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            readiness = {
+                "wake_root": str(root),
+                "monitor_ready": False,
+                "service": {"name": "wake-test.service", "active": "inactive", "wake_root": ""},
+                "health": {"recent": False},
+            }
+            with patch("codex_wake.cli.monitor_readiness", return_value=readiness):
+                code, _out, err = self.run_cli(["after", "--require-monitor", "1m", "--", "Wake later"], root)
+
+            self.assertEqual(code, 2)
+            self.assertIn("no active monitor owns this wake root", err)
+            self.assertFalse((root / "pending").exists())
+
+    def test_require_monitor_allows_ready_wake(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            readiness = {
+                "wake_root": str(root),
+                "monitor_ready": True,
+                "service": {"name": "wake-test.service", "active": "active", "wake_root": str(root)},
+                "health": {"recent": True},
+            }
+            with patch("codex_wake.cli.monitor_readiness", return_value=readiness):
+                code, out, err = self.run_cli(["after", "--require-monitor", "1m", "--", "Wake later"], root)
+
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            self.assertTrue((root / "pending" / f"{wake_id}.json").exists())
+
     def test_hook_install_and_check_commands(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)

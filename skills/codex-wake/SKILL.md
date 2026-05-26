@@ -16,6 +16,7 @@ command -v codex-wake
 command -v codex-waked
 command -v codex-wake-hook
 codex-wake --wake-root .codex/wake doctor
+codex-wake --wake-root .codex/wake monitor check --json
 codex-wake --wake-root .codex/wake hook check
 ```
 
@@ -36,6 +37,7 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Keep prompts short, idempotent, and evidence-oriented: tell the future agent what to verify first.
 - Never put secrets, raw credentials, or private transcript bodies in wake prompts or tracked docs.
 - Use `codex-waked --once` for bounded checks, or `codex-wake service install/status/logs` for longer monitoring.
+- Before scheduling any unattended wake, prove that an active monitor owns the selected wake root with `codex-wake --wake-root .codex/wake monitor check --json`; use `--require-monitor` when creating wakes that must fire without a manual daemon pass.
 - Do not call a wake smoke successful when using `codex-waked --no-dispatch`; that only proves predicate evaluation.
 - After a wake fires, inspect `codex-wake show <wake-id>`, `.codex/wake/acks/`, and `codex-wake status --json` before claiming success.
 - Treat ack as proof that Codex submitted the wake prompt in the target session, not proof that the operator saw a new turn in the pane they were watching.
@@ -44,6 +46,47 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Prefer `codex-wake service install --codex-path "$(command -v codex)"` for service-fired app-server wakes when the repo service needs a durable Codex CLI command.
 - If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
+
+## Monitor Readiness
+
+Unattended wake delivery requires a running monitor. A wake JSON file by itself
+does not prove any daemon will poll it.
+
+For a repo-scoped service:
+
+```bash
+codex-wake --wake-root .codex/wake monitor check --json
+codex-wake --wake-root .codex/wake service status
+codex-wake --wake-root .codex/wake doctor --json
+```
+
+`monitor_ready=true` means either the repo-scoped service is active for this
+exact wake root, or recent persistent daemon/supervisor health was observed.
+If it is false, install or repair a monitor before scheduling:
+
+```bash
+codex-wake --wake-root .codex/wake service install --codex-path "$(command -v codex)"
+```
+
+For multi-repo or OpenClaw usage, prefer the user-scoped supervisor once
+available:
+
+```bash
+codex-wake supervisor install
+codex-wake supervisor enroll --wake-root "$PWD/.codex/wake" --repo-root "$PWD"
+codex-wake supervisor status --all
+```
+
+When a wake must fire unattended, create it with `--require-monitor`:
+
+```bash
+codex-wake --wake-root .codex/wake after --require-monitor 45m -- \
+  "Wake idempotently. First inspect the wake record and continue only if work remains."
+```
+
+If `--require-monitor` fails, do not work around it by omitting the flag unless
+you intend to run `codex-waked --once` manually before the due time. Treat
+missing monitor evidence as a delivery risk, not as a scheduled wake.
 
 ## Choose Wake Transport
 
@@ -103,6 +146,16 @@ Plugin readiness checks:
 ```bash
 openclaw plugins inspect codex-wake --runtime --json
 openclaw gateway call tools.catalog --json --params '{"agentId":"main","includePlugins":true}' | rg 'codex_wake_schedule|codex-wake'
+codex-wake --wake-root .codex/wake monitor check --json
+codex-wake supervisor status --all
+```
+
+If OpenClaw Gateway auth uses environment-variable references, ensure the user
+systemd manager that runs `codex-wake-supervisor.service` has those variables:
+
+```bash
+systemctl --user import-environment OPENCLAW_GATEWAY_TOKEN OPENCLAW_GATEWAY_PASSWORD
+systemctl --user restart codex-wake-supervisor.service
 ```
 
 Use an app-server wake only when you have a real resumable Codex thread id:
@@ -119,14 +172,14 @@ Never use placeholder thread ids or session keys such as `noop-smoke-test` as pr
 Wake after a delay:
 
 ```bash
-codex-wake --wake-root .codex/wake after 45m -- \
+codex-wake --wake-root .codex/wake after --require-monitor 45m -- \
   "Wake idempotently. First run codex-wake --wake-root .codex/wake status --json, then continue the migration if it is not already complete."
 ```
 
 Wake at an absolute time:
 
 ```bash
-codex-wake --wake-root .codex/wake at "2026-05-22T17:30:00-05:00" -- \
+codex-wake --wake-root .codex/wake at --require-monitor "2026-05-22T17:30:00-05:00" -- \
   "Check the release branch. First verify whether the release is already complete."
 ```
 
@@ -138,14 +191,14 @@ mkdir -p .codex/events
   pytest -q > .codex/events/pytest.log 2>&1
   touch .codex/events/pytest.done
 ) &
-codex-wake --wake-root .codex/wake file .codex/events/pytest.done -- \
+codex-wake --wake-root .codex/wake file --require-monitor .codex/events/pytest.done -- \
   "Pytest finished. Read .codex/events/pytest.log, summarize failures, and continue only if fixes are still needed."
 ```
 
 Wake when a file changes:
 
 ```bash
-codex-wake --wake-root .codex/wake changed .codex/events/build.log -- \
+codex-wake --wake-root .codex/wake changed --require-monitor .codex/events/build.log -- \
   "The build log changed. Read .codex/events/build.log and continue from the current state."
 ```
 
@@ -153,7 +206,7 @@ Wake when a process exits:
 
 ```bash
 long-running-command > .codex/events/job.log 2>&1 &
-codex-wake --wake-root .codex/wake pid "$!" -- \
+codex-wake --wake-root .codex/wake pid --require-monitor "$!" -- \
   "The background job exited. Read .codex/events/job.log, verify the outcome, and continue or report completion."
 ```
 
@@ -169,6 +222,7 @@ App-server service environment preflight:
 command -v codex
 codex-wake --wake-root .codex/wake doctor
 codex-wake --wake-root .codex/wake doctor --json
+codex-wake --wake-root .codex/wake monitor check --json
 systemctl --user show-environment | rg '^(PATH|CODEX_)='
 systemctl --user status codex-wake-<repo>.service --no-pager
 codex-wake --wake-root .codex/wake service status

@@ -432,3 +432,29 @@ Acceptance target:
 - Source, package, plugin, installed-wheel, and installed-skill validation pass.
 - Public tag, GitHub release, public tag install smoke, and user-scoped install
   refresh are recorded under `docs/dev/verification/`.
+
+## P42 | Wake Monitor Readiness And User Supervisor
+
+State: CLOSED
+
+Current State: Closed by
+`docs/dev/verification/0062-2026-05-26-wake-monitor-readiness-user-supervisor.md`.
+The skill, CLI, and OpenClaw plugin now gate unattended wakes on monitor
+readiness; `codex-wake-supervisor.service` monitors explicitly enrolled roots;
+the repo-scoped service remains supported; and live Codex app-server plus
+OpenClaw Gateway wakes fired from the supervisor with recorded evidence.
+
+Plan: [Wake Monitor Readiness And User Supervisor](docs/dev/plans/0042-2026-05-25-wake-monitor-readiness-user-supervisor.md)
+
+Acceptance target:
+
+- The `codex-wake` skill requires monitor readiness before unattended wake
+  scheduling.
+- The CLI exposes monitor readiness for the selected wake root and can fail
+  scheduling when a caller requires an active monitor.
+- A user-scoped `codex-wake-supervisor.service` can monitor explicitly
+  registered wake roots across Codex and OpenClaw transports.
+- The OpenClaw plugin schedules into monitored roots by default, or returns a
+  clear failure instead of implying unattended delivery.
+- Real Codex app-server and OpenClaw Gateway wakes fire from monitored roots
+  with recorded validation evidence.

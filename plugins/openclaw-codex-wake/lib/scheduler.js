@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 export const TOOL_NAME = "codex_wake_schedule";
@@ -7,6 +8,7 @@ export const DEFAULT_WAKE_ROOT = ".codex/wake";
 export const DEFAULT_OPENCLAW_COMMAND = "openclaw";
 export const DEFAULT_TIMEOUT_SECONDS = 600;
 export const DEFAULT_GATEWAY_TIMEOUT_MS = 180000;
+export const DEFAULT_MONITOR_STALE_AFTER_SECONDS = 120;
 export const SCHEMA_VERSION = 1;
 
 const WAKE_DIRS = [
@@ -77,6 +79,154 @@ function readPositiveInteger(record, key, fallback, min = 1) {
     throw new CodexWakePluginInputError(`${key} must be an integer >= ${min}`);
   }
   return value;
+}
+
+function rootKey(wakeRoot) {
+  return crypto.createHash("sha1").update(path.resolve(wakeRoot)).digest("hex").slice(0, 12);
+}
+
+function userConfigDir(env = process.env) {
+  return path.join(env.XDG_CONFIG_HOME || path.join(env.HOME || os.homedir(), ".config"), "codex-wake");
+}
+
+function userStateDir(env = process.env) {
+  return path.join(env.XDG_STATE_HOME || path.join(env.HOME || os.homedir(), ".local", "state"), "codex-wake");
+}
+
+function readJsonFile(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return undefined;
+  }
+}
+
+function findSupervisorEntry(wakeRoot, env = process.env) {
+  const registryDir = path.join(userConfigDir(env), "roots.d");
+  let files = [];
+  try {
+    files = fs.readdirSync(registryDir);
+  } catch {
+    return {
+      registryDir,
+      registered: false,
+    };
+  }
+  const resolved = path.resolve(wakeRoot);
+  for (const file of files) {
+    if (!file.endsWith(".json")) {
+      continue;
+    }
+    const filePath = path.join(registryDir, file);
+    const entry = readJsonFile(filePath);
+    if (entry && path.resolve(String(entry.wake_root || "")) === resolved) {
+      return {
+        registryDir,
+        registered: true,
+        enabled: Boolean(entry.enabled),
+        rootId: entry.root_id,
+        path: filePath,
+      };
+    }
+  }
+  return {
+    registryDir,
+    registered: false,
+  };
+}
+
+function parseServiceWakeRoot(unitText) {
+  const match = /--wake-root(?:=|\s+)(?:"([^"]+)"|([^\s]+))/.exec(unitText);
+  return match?.[1] || match?.[2] ? path.resolve(match[1] || match[2]) : undefined;
+}
+
+function findRepoServiceUnit(wakeRoot, env = process.env) {
+  const systemdDir = path.join(env.XDG_CONFIG_HOME || path.join(env.HOME || os.homedir(), ".config"), "systemd", "user");
+  let files = [];
+  try {
+    files = fs.readdirSync(systemdDir);
+  } catch {
+    return {
+      systemdDir,
+      appearsMonitored: false,
+    };
+  }
+  const resolved = path.resolve(wakeRoot);
+  for (const file of files) {
+    if (!file.startsWith("codex-wake-") || !file.endsWith(".service")) {
+      continue;
+    }
+    const filePath = path.join(systemdDir, file);
+    let unitText = "";
+    try {
+      unitText = fs.readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+    const serviceWakeRoot = parseServiceWakeRoot(unitText);
+    if (serviceWakeRoot === resolved) {
+      return {
+        systemdDir,
+        appearsMonitored: true,
+        name: file,
+        path: filePath,
+        wakeRoot: serviceWakeRoot,
+      };
+    }
+  }
+  return {
+    systemdDir,
+    appearsMonitored: false,
+  };
+}
+
+function readMonitorHealth(wakeRoot, env = process.env) {
+  const healthPath = path.join(userStateDir(env), "monitors", `${rootKey(wakeRoot)}.json`);
+  const health = readJsonFile(healthPath);
+  return {
+    path: healthPath,
+    exists: Boolean(health),
+    health,
+  };
+}
+
+function isoAgeSeconds(value, now = new Date()) {
+  if (typeof value !== "string" || !value) {
+    return undefined;
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())) {
+    return undefined;
+  }
+  return Math.max(0, Math.floor((now.valueOf() - parsed.valueOf()) / 1000));
+}
+
+export function monitorStatusForWakeRoot(wakeRoot, { env = process.env, now = new Date(), staleAfterSeconds = DEFAULT_MONITOR_STALE_AFTER_SECONDS } = {}) {
+  const supervisor = findSupervisorEntry(wakeRoot, env);
+  const repoService = findRepoServiceUnit(wakeRoot, env);
+  const healthProbe = readMonitorHealth(wakeRoot, env);
+  const ageSeconds = isoAgeSeconds(healthProbe.health?.checked_at, now);
+  const recent = ageSeconds !== undefined && ageSeconds <= staleAfterSeconds;
+  const persistent = healthProbe.health?.mode === "loop";
+  const monitorReady = Boolean(recent && persistent);
+  return {
+    monitorReady,
+    monitorSource: monitorReady ? String(healthProbe.health?.source || "health") : "",
+    wakeRoot: path.resolve(wakeRoot),
+    staleAfterSeconds,
+    supervisor,
+    repoService,
+    health: {
+      path: healthProbe.path,
+      exists: healthProbe.exists,
+      recent,
+      persistent,
+      ageSeconds: ageSeconds ?? null,
+      source: healthProbe.health?.source ?? "",
+      mode: healthProbe.health?.mode ?? "",
+      checkedAt: healthProbe.health?.checked_at ?? "",
+    },
+  };
 }
 
 function readConfigString(config, key) {
@@ -397,6 +547,16 @@ export function buildSchedulePlan({
     readPositiveInteger(pluginConfig, "defaultGatewayTimeoutMs", DEFAULT_GATEWAY_TIMEOUT_MS, 1000),
     1000,
   );
+  const requireMonitor = readBoolean(
+    params,
+    "requireMonitor",
+    readBoolean(pluginConfig, "requireMonitorByDefault", true),
+  );
+  const monitorStaleAfterSeconds = readPositiveInteger(
+    params,
+    "monitorStaleAfterSeconds",
+    readPositiveInteger(pluginConfig, "monitorStaleAfterSeconds", DEFAULT_MONITOR_STALE_AFTER_SECONDS),
+  );
   return {
     cwd,
     wakeRoot,
@@ -418,6 +578,8 @@ export function buildSchedulePlan({
     openclawCommand,
     timeoutSeconds,
     gatewayTimeoutMs,
+    requireMonitor,
+    monitorStaleAfterSeconds,
     deliver: readBoolean(params, "deliver", readBoolean(pluginConfig, "deliverByDefault", true)),
     model: readString(params, "model") ?? readConfigString(pluginConfig, "model"),
     thinking: readString(params, "thinking") ?? readConfigString(pluginConfig, "thinking"),
@@ -485,10 +647,23 @@ export function writeWakeRecord(wakeRoot, record) {
 
 export function createWakeRecord(params) {
   const plan = buildSchedulePlan(params);
+  const monitor = monitorStatusForWakeRoot(plan.wakeRoot, {
+    env: params.env,
+    now: params.now,
+    staleAfterSeconds: plan.monitorStaleAfterSeconds,
+  });
+  if (plan.requireMonitor && !monitor.monitorReady) {
+    throw new CodexWakePluginInputError(
+      `wake root is not actively monitored: ${plan.wakeRoot}; ` +
+        `health_recent=${monitor.health.recent} health_persistent=${monitor.health.persistent} ` +
+        `repo_service_unit=${monitor.repoService.appearsMonitored}`,
+    );
+  }
   const record = buildWakeRecord(plan, params);
   const recordPath = writeWakeRecord(plan.wakeRoot, record);
   return {
     plan,
+    monitor,
     record,
     recordPath,
   };
@@ -506,7 +681,10 @@ export function parseCodexWakeCreateOutput(stdout) {
   };
 }
 
-export function summarizeScheduleResult(plan, record, recordPath) {
+export function summarizeScheduleResult(plan, record, recordPath, monitorStatus) {
+  const monitor = monitorStatus ?? monitorStatusForWakeRoot(plan.wakeRoot, {
+    staleAfterSeconds: plan.monitorStaleAfterSeconds,
+  });
   return {
     ok: true,
     wakeId: record.id,
@@ -520,6 +698,18 @@ export function summarizeScheduleResult(plan, record, recordPath) {
     trigger: plan.trigger,
     triggerValue: plan.triggerValue,
     dueAt: record.predicate.due_at,
+    monitor: {
+      requireMonitor: plan.requireMonitor,
+      monitorReady: monitor.monitorReady,
+      monitorSource: monitor.monitorSource,
+      wakeRoot: monitor.wakeRoot,
+      health: monitor.health,
+      supervisor: monitor.supervisor,
+      repoService: monitor.repoService,
+      warning: monitor.monitorReady
+        ? ""
+        : "Wake record was written, but no recent persistent monitor health was found for this wake root.",
+    },
     validation: {
       show: `codex-wake --wake-root ${plan.wakeRoot} show ${record.id}`,
       status: `codex-wake --wake-root ${plan.wakeRoot} status --json`,

@@ -2,7 +2,7 @@
   "id": "codex-wake",
   "name": "Codex Wake",
   "description": "Schedule durable codex-wake records from live OpenClaw sessions.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "activation": {
     "onStartup": true
   },
@@ -80,6 +80,15 @@
       },
       "deliverByDefault": {
         "type": "boolean"
+      },
+      "requireMonitorByDefault": {
+        "type": "boolean",
+        "description": "Require recent persistent codex-wake monitor health before plugin-created wakes are written. Defaults to true."
+      },
+      "monitorStaleAfterSeconds": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Maximum age in seconds for persistent codex-wake monitor health. Defaults to 120."
       },
       "defaultTimeoutSeconds": {
         "type": "integer",

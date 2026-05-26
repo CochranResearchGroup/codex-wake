@@ -17,6 +17,7 @@ from .records import (
     utc_now,
 )
 from .injector import TmuxRunner, dispatch_firing_record
+from .monitor import write_monitor_health
 from .process import boot_id_value, process_exists, process_identity
 
 
@@ -52,12 +53,37 @@ def poll_result_has_activity(result: PollResult) -> bool:
     )
 
 
+def poll_result_dict(result: PollResult) -> dict[str, int]:
+    return {
+        "checked": result.checked,
+        "fired": result.fired,
+        "failed": result.failed,
+        "pending": result.pending,
+        "dispatched": result.dispatched,
+        "submitted": result.submitted,
+        "requeued": result.requeued,
+    }
+
+
 def pending_records(root: Path) -> list[WakePath]:
     return [item for item in iter_records(root) if item.record.get("status") == "pending"]
 
 
 def firing_records(root: Path) -> list[WakePath]:
     return [item for item in iter_records(root) if item.record.get("status") == "firing"]
+
+
+def next_attempt_is_due(record: dict, now: datetime) -> tuple[bool, str]:
+    next_attempt = record.get("next_attempt_at")
+    if not isinstance(next_attempt, str) or not next_attempt:
+        return True, ""
+    try:
+        due_at = parse_utc_timestamp(next_attempt)
+    except WakeError:
+        return True, ""
+    if due_at > now:
+        return False, next_attempt
+    return True, next_attempt
 
 
 def predicate_is_ready(record: dict, now: datetime) -> tuple[bool, str]:
@@ -143,6 +169,10 @@ def poll_once(
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
     for item in pending_records(root):
         checked += 1
+        due_for_attempt, _next_attempt = next_attempt_is_due(item.record, current)
+        if not due_for_attempt:
+            pending += 1
+            continue
         try:
             ready, message = predicate_is_ready(item.record, current)
         except WakeError as exc:
@@ -222,12 +252,26 @@ def run(argv: list[str] | None = None) -> int:
     root = (args.wake_root or default_wake_root()).resolve()
     if args.once:
         result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
+        write_monitor_health(
+            wake_root=root,
+            repo_root=Path.cwd(),
+            source="codex-waked",
+            mode="once",
+            poll_result=poll_result_dict(result),
+        )
         print(format_poll_result(result))
         return 0
     if args.interval <= 0:
         raise WakeError("--interval must be greater than zero")
     while True:
         result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
+        write_monitor_health(
+            wake_root=root,
+            repo_root=Path.cwd(),
+            source="codex-waked",
+            mode="loop",
+            poll_result=poll_result_dict(result),
+        )
         if poll_result_has_activity(result):
             print(format_poll_result(result), flush=True)
         time.sleep(args.interval)

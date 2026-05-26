@@ -52,6 +52,19 @@ class DaemonTests(unittest.TestCase):
             self.assertEqual(result.pending, 1)
             self.assertTrue((root / "pending" / f"{record['id']}.json").exists())
 
+    def test_pending_record_respects_future_next_attempt_backoff(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            record = self.make_record(tmp, {"type": "not_before", "due_at": "2026-05-18T21:15:00Z"})
+            record["next_attempt_at"] = "2026-05-18T21:30:00Z"
+            write_record(root, record)
+
+            result = poll_once(root, now=datetime(2026, 5, 18, 21, 16, tzinfo=UTC), dispatch=False)
+
+            self.assertEqual(result.pending, 1)
+            self.assertEqual(result.fired, 0)
+            self.assertTrue((root / "pending" / f"{record['id']}.json").exists())
+
     def test_file_exists_relative_to_record_cwd(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"

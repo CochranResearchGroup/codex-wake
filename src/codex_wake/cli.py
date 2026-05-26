@@ -22,6 +22,7 @@ from .hook_config import (
 )
 from .openclaw_gateway import DEFAULT_GATEWAY_TIMEOUT_MS, DEFAULT_OPENCLAW_TIMEOUT_SECONDS, build_openclaw_gateway_target
 from .process import process_exists, process_identity
+from .monitor import monitor_readiness, require_monitor_ready
 from .records import (
     WakeError,
     all_records,
@@ -45,6 +46,16 @@ from .records import (
 )
 from .service import build_service_config, install_service, read_log_tail, service_status, stop_service, uninstall_service
 from .service import service_app_server_readiness
+from .supervisor import (
+    build_supervisor_config,
+    enroll_root,
+    install_supervisor,
+    stop_supervisor,
+    supervisor_run_loop,
+    supervisor_status,
+    uninstall_supervisor,
+    unenroll_root,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -61,11 +72,13 @@ def build_parser() -> argparse.ArgumentParser:
     after.add_argument("duration")
     after.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(after)
+    add_monitor_gate_options(after)
 
     at = subparsers.add_parser("at", help="create a wake at an ISO-8601 timestamp with timezone")
     at.add_argument("timestamp")
     at.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(at)
+    add_monitor_gate_options(at)
 
     app = subparsers.add_parser("app", help="create an app-server-targeted wake")
     app_subparsers = app.add_subparsers(dest="app_command", required=True)
@@ -73,6 +86,7 @@ def build_parser() -> argparse.ArgumentParser:
     app_after = app_subparsers.add_parser("after", help="create an app-server wake after a duration")
     app_after.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
     app_after.add_argument("--codex-path", help="Codex CLI path or command for daemon-side app-server dispatch")
+    add_monitor_gate_options(app_after)
     app_after.add_argument("thread_id")
     app_after.add_argument("duration")
     app_after.add_argument("prompt", nargs=argparse.REMAINDER)
@@ -80,6 +94,7 @@ def build_parser() -> argparse.ArgumentParser:
     app_at = app_subparsers.add_parser("at", help="create an app-server wake at an ISO-8601 timestamp")
     app_at.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
     app_at.add_argument("--codex-path", help="Codex CLI path or command for daemon-side app-server dispatch")
+    add_monitor_gate_options(app_at)
     app_at.add_argument("thread_id")
     app_at.add_argument("timestamp")
     app_at.add_argument("prompt", nargs=argparse.REMAINDER)
@@ -108,11 +123,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     openclaw_after = openclaw_subparsers.add_parser("after", help="create an OpenClaw Gateway wake after a duration")
     add_openclaw_gateway_options(openclaw_after)
+    add_monitor_gate_options(openclaw_after)
     openclaw_after.add_argument("duration")
     openclaw_after.add_argument("prompt", nargs=argparse.REMAINDER)
 
     openclaw_at = openclaw_subparsers.add_parser("at", help="create an OpenClaw Gateway wake at an ISO-8601 timestamp")
     add_openclaw_gateway_options(openclaw_at)
+    add_monitor_gate_options(openclaw_at)
     openclaw_at.add_argument("timestamp")
     openclaw_at.add_argument("prompt", nargs=argparse.REMAINDER)
 
@@ -120,16 +137,19 @@ def build_parser() -> argparse.ArgumentParser:
     file_cmd.add_argument("path")
     file_cmd.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(file_cmd)
+    add_monitor_gate_options(file_cmd)
 
     changed = subparsers.add_parser("changed", help="create a wake when a file is created or changes mtime/size")
     changed.add_argument("path")
     changed.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(changed)
+    add_monitor_gate_options(changed)
 
     pid = subparsers.add_parser("pid", help="create a wake when a process id exits")
     pid.add_argument("pid", type=int)
     pid.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(pid)
+    add_monitor_gate_options(pid)
 
     list_cmd = subparsers.add_parser("list", help="list wake records")
     list_cmd.add_argument("--json", action="store_true", dest="as_json")
@@ -177,6 +197,59 @@ def build_parser() -> argparse.ArgumentParser:
     service_uninstall = service_subparsers.add_parser("uninstall", help="stop, disable, and remove the user service")
     add_service_options(service_uninstall)
 
+    monitor = subparsers.add_parser("monitor", help="inspect monitor readiness for the selected wake root")
+    monitor_subparsers = monitor.add_subparsers(dest="monitor_command", required=True)
+    monitor_check = monitor_subparsers.add_parser("check", help="check whether an active monitor owns this wake root")
+    add_service_options(monitor_check)
+    monitor_check.add_argument("--stale-after", type=int, default=120, help="seconds before monitor health is considered stale")
+    monitor_check.add_argument("--json", action="store_true", dest="as_json")
+
+    supervisor = subparsers.add_parser("supervisor", help="manage the user-scoped multi-root wake supervisor")
+    supervisor_subparsers = supervisor.add_subparsers(dest="supervisor_command", required=True)
+
+    supervisor_install = supervisor_subparsers.add_parser("install", help="install and start the user supervisor service")
+    add_supervisor_options(supervisor_install)
+    supervisor_install.add_argument("--no-start", action="store_true", help="write the unit but do not enable or start it")
+
+    supervisor_status_cmd = supervisor_subparsers.add_parser("status", help="show supervisor service and registered roots")
+    add_supervisor_options(supervisor_status_cmd)
+    supervisor_status_cmd.add_argument("--all", action="store_true", help="show all registered roots")
+    supervisor_status_cmd.add_argument("--json", action="store_true", dest="as_json")
+
+    supervisor_logs = supervisor_subparsers.add_parser("logs", help="print recent supervisor log lines")
+    add_supervisor_options(supervisor_logs)
+    supervisor_logs.add_argument("--lines", type=int, default=50)
+
+    supervisor_start = supervisor_subparsers.add_parser("start", help="start the user supervisor service")
+    add_supervisor_options(supervisor_start)
+
+    supervisor_stop = supervisor_subparsers.add_parser("stop", help="stop and disable the user supervisor service")
+    add_supervisor_options(supervisor_stop)
+
+    supervisor_uninstall = supervisor_subparsers.add_parser("uninstall", help="stop, disable, and remove the supervisor service")
+    add_supervisor_options(supervisor_uninstall)
+
+    supervisor_enroll = supervisor_subparsers.add_parser("enroll", help="register a wake root for supervisor monitoring")
+    add_supervisor_options(supervisor_enroll)
+    supervisor_enroll.add_argument("--wake-root", dest="enroll_wake_root", type=Path, default=None)
+    supervisor_enroll.add_argument("--repo-root", type=Path, default=None)
+    supervisor_enroll.add_argument("--root-id")
+    supervisor_enroll.add_argument("--owner-kind", default="repo")
+    supervisor_enroll.add_argument("--owner-name")
+    supervisor_enroll.add_argument("--codex-path", help="Codex CLI command to record for this root")
+    supervisor_enroll.add_argument("--openclaw-path", help="OpenClaw CLI command to record for this root")
+    supervisor_enroll.add_argument("--disabled", action="store_true", help="register the root disabled")
+
+    supervisor_unenroll = supervisor_subparsers.add_parser("unenroll", help="remove a wake root from supervisor monitoring")
+    add_supervisor_options(supervisor_unenroll)
+    supervisor_unenroll.add_argument("--wake-root", dest="unenroll_wake_root", type=Path, default=None)
+    supervisor_unenroll.add_argument("--root-id")
+
+    supervisor_run = supervisor_subparsers.add_parser("run", help="run supervisor polling")
+    add_supervisor_options(supervisor_run)
+    supervisor_run.add_argument("--once", action="store_true", help="run one multi-root poll and exit")
+    supervisor_run.add_argument("--json", action="store_true", dest="as_json", help="with --once, print JSON results")
+
     hook = subparsers.add_parser("hook", help="install or check Codex hook config")
     hook_subparsers = hook.add_subparsers(dest="hook_command", required=True)
 
@@ -198,6 +271,7 @@ def build_parser() -> argparse.ArgumentParser:
     doctor = subparsers.add_parser("doctor", help="report Codex Wake readiness for this repo")
     doctor.add_argument("--hook-command", default=DEFAULT_HOOK_COMMAND, help="expected UserPromptSubmit hook command")
     doctor.add_argument("--json", action="store_true", dest="as_json")
+    doctor.add_argument("--monitor", action="store_true", help="include monitor readiness; included by default")
     add_service_options(doctor)
 
     return parser
@@ -240,6 +314,14 @@ def add_openclaw_gateway_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--thinking", help="OpenClaw thinking level override")
 
 
+def add_monitor_gate_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--require-monitor",
+        action="store_true",
+        help="fail before writing a wake record unless an active monitor owns this wake root",
+    )
+
+
 def add_service_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--name", help="systemd user unit name; defaults to codex-wake-<repo>.service")
     parser.add_argument("--repo-root", type=Path, default=None, help="repo root for the service; defaults to current directory")
@@ -247,6 +329,15 @@ def add_service_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--daemon-path", help="path to codex-waked; defaults to PATH resolution")
     parser.add_argument("--codex-path", help="Codex CLI path or command to persist for app-server dispatch")
     parser.add_argument("--log-path", type=Path, default=None, help="service log path")
+
+
+def add_supervisor_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--name", help="systemd user unit name; defaults to codex-wake-supervisor.service")
+    parser.add_argument("--interval", type=float, default=1.0, help="supervisor poll interval in seconds")
+    parser.add_argument("--codex-wake-path", help="path to codex-wake; defaults to PATH resolution")
+    parser.add_argument("--registry-dir", type=Path, default=None, help="root registry directory; defaults to ~/.config/codex-wake/roots.d")
+    parser.add_argument("--state-dir", type=Path, default=None, help="supervisor state directory; defaults to ~/.local/state/codex-wake/supervisor")
+    parser.add_argument("--log-path", type=Path, default=None, help="supervisor service log path")
 
 
 def add_hook_options(parser: argparse.ArgumentParser) -> None:
@@ -475,6 +566,9 @@ def create_record(
     target: dict | None = None,
 ) -> int:
     prompt = normalize_prompt(prompt_parts)
+    if getattr(args, "require_monitor", False):
+        readiness = monitor_readiness(wake_root=root, repo_root=Path.cwd())
+        require_monitor_ready(readiness)
     record = build_record(
         predicate=predicate,
         prompt=prompt,
@@ -687,6 +781,149 @@ def service_command(args: argparse.Namespace, root: Path) -> int:
     raise WakeError(f"unknown service command: {args.service_command}")
 
 
+def monitor_command(args: argparse.Namespace, root: Path) -> int:
+    if args.monitor_command != "check":
+        raise WakeError(f"unknown monitor command: {args.monitor_command}")
+    readiness = monitor_readiness(
+        wake_root=root,
+        repo_root=args.repo_root,
+        service_name=args.name,
+        interval=args.interval,
+        daemon_path=args.daemon_path,
+        codex_path=args.codex_path,
+        log_path=args.log_path,
+        stale_after_seconds=args.stale_after,
+    )
+    if args.as_json:
+        print(json.dumps(readiness, indent=2, sort_keys=True))
+        return 0 if readiness["monitor_ready"] else 1
+    service = readiness["service"]
+    health = readiness["health"]
+    assert isinstance(service, dict)
+    assert isinstance(health, dict)
+    print(f"wake_root={readiness['wake_root']}")
+    print(f"repo_root={readiness['repo_root']}")
+    print(f"monitor_ready={str(readiness['monitor_ready']).lower()}")
+    print(f"monitor_source={readiness['monitor_source'] or 'missing'}")
+    print(f"service_name={service['name']}")
+    print(f"service_active={service['active']}")
+    print(f"service_enabled={service['enabled']}")
+    print(f"service_unit={service['unit']}")
+    print(f"service_wake_root={service['wake_root'] or 'missing'}")
+    print(f"service_matches_wake_root={str(service['matches_wake_root']).lower()}")
+    print(f"health_path={health['path']}")
+    print(f"health_exists={str(health['exists']).lower()}")
+    print(f"health_recent={str(health['recent']).lower()}")
+    print(f"health_persistent={str(health['persistent']).lower()}")
+    print(f"health_source={health['source'] or 'missing'}")
+    print(f"health_mode={health['mode'] or 'missing'}")
+    print(f"health_checked_at={health['checked_at']}")
+    return 0 if readiness["monitor_ready"] else 1
+
+
+def supervisor_config_for_args(args: argparse.Namespace):
+    return build_supervisor_config(
+        name=args.name,
+        interval=args.interval,
+        codex_wake_path=args.codex_wake_path,
+        registry_dir=args.registry_dir,
+        state_dir=args.state_dir,
+        log_path=args.log_path,
+    )
+
+
+def supervisor_command(args: argparse.Namespace, root: Path) -> int:
+    config = supervisor_config_for_args(args)
+    command = args.supervisor_command
+    if command == "install":
+        install_supervisor(config, start=not args.no_start)
+        action = "installed" if args.no_start else "installed and started"
+        print(f"{action} {config.name}")
+        print(f"unit={config.unit_path}")
+        print(f"log={config.log_path}")
+        print(f"registry_dir={config.registry_dir}")
+        print(f"state_dir={config.state_dir}")
+        return 0
+    if command == "start":
+        install_supervisor(config, start=True)
+        print(f"started {config.name}")
+        return 0
+    if command == "stop":
+        stop_supervisor(config)
+        print(f"stopped {config.name}")
+        return 0
+    if command == "uninstall":
+        uninstall_supervisor(config)
+        print(f"uninstalled {config.name}")
+        print(f"removed={config.unit_path}")
+        return 0
+    if command == "logs":
+        print(f"log={config.log_path}")
+        text = read_log_tail(config.log_path, args.lines)
+        if text:
+            print(text)
+        return 0
+    if command == "status":
+        summary = supervisor_status(config)
+        if args.as_json:
+            print(json.dumps(summary, indent=2, sort_keys=True))
+            return 0
+        service = summary["service"]
+        assert isinstance(service, dict)
+        print(f"name={service['name']}")
+        print(f"active={service['active']}")
+        print(f"enabled={service['enabled']}")
+        print(f"unit={service['unit']}")
+        print(f"log={service['log']}")
+        print(f"registry_dir={summary['registry_dir']}")
+        print(f"state_dir={summary['state_dir']}")
+        print(f"root_count={summary['root_count']}")
+        roots = summary["roots"]
+        assert isinstance(roots, list)
+        if roots:
+            print("ROOT_ID\tENABLED\tHEALTH_RECENT\tWAKE_ROOT")
+            for item in roots:
+                print(
+                    f"{item.get('root_id')}\t{str(item.get('enabled')).lower()}\t"
+                    f"{str(item.get('health_recent')).lower()}\t{item.get('wake_root')}"
+                )
+        return 0
+    if command == "enroll":
+        enroll_wake_root = (args.enroll_wake_root or root).resolve()
+        path = enroll_root(
+            wake_root=enroll_wake_root,
+            repo_root=args.repo_root,
+            registry_dir=config.registry_dir,
+            root_id=args.root_id,
+            enabled=not args.disabled,
+            owner_kind=args.owner_kind,
+            owner_name=args.owner_name,
+            codex_cmd=args.codex_path,
+            openclaw_cmd=args.openclaw_path,
+        )
+        print(f"enrolled {path.stem}")
+        print(f"path={path}")
+        print(f"wake_root={enroll_wake_root}")
+        return 0
+    if command == "unenroll":
+        path = unenroll_root(
+            wake_root=args.unenroll_wake_root,
+            root_id=args.root_id,
+            registry_dir=config.registry_dir,
+        )
+        print(f"unenrolled {path.stem}")
+        print(f"removed={path}")
+        return 0
+    if command == "run":
+        if args.once and args.as_json:
+            from .supervisor import supervisor_poll_once
+
+            print(json.dumps(supervisor_poll_once(config, mode="once"), indent=2, sort_keys=True))
+            return 0
+        return supervisor_run_loop(config, once=args.once)
+    raise WakeError(f"unknown supervisor command: {command}")
+
+
 def print_hook_runtime_evidence(root: Path) -> None:
     evidence = hook_runtime_evidence(root)
     print(f"hook_ack_count={evidence.ack_count}")
@@ -786,6 +1023,14 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
         active, enabled = "unknown", f"unknown ({exc})"
     hook_evidence = hook_runtime_evidence(root)
     app_server_readiness = service_app_server_readiness(config)
+    monitor = monitor_readiness(
+        wake_root=root,
+        repo_root=repo_root,
+        service_name=config.name,
+        interval=config.interval,
+        daemon_path=str(config.daemon_path),
+        log_path=config.log_path,
+    )
     return {
         "repo_root": str(repo_root),
         "wake_root": str(root),
@@ -828,6 +1073,7 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
             "log": str(config.log_path),
         },
         "service_app_server": asdict(app_server_readiness),
+        "monitor": monitor,
         "trust": hook_review_note(),
     }
 
@@ -843,12 +1089,14 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     hook_sources = summary["hook_sources"]
     service = summary["service"]
     service_app_server = summary["service_app_server"]
+    monitor = summary["monitor"]
     assert isinstance(commands, dict)
     assert isinstance(hook_config, dict)
     assert isinstance(hook_runtime, dict)
     assert isinstance(hook_sources, dict)
     assert isinstance(service, dict)
     assert isinstance(service_app_server, dict)
+    assert isinstance(monitor, dict)
     print(f"repo_root={summary['repo_root']}")
     print(f"wake_root={summary['wake_root']}")
     print(f"codex_wake={commands['codex_wake'] or 'missing'}")
@@ -886,6 +1134,8 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     print(f"service_app_server_user_manager_codex_cmd={service_app_server['user_manager_codex_cmd'] or 'missing'}")
     print(f"service_app_server_interactive_codex_cmd={service_app_server['interactive_codex_cmd'] or 'missing'}")
     print(f"service_app_server_note={service_app_server['message']}")
+    print(f"monitor_ready={str(monitor['monitor_ready']).lower()}")
+    print(f"monitor_source={monitor['monitor_source'] or 'missing'}")
     print(f"trust={summary['trust']}")
     return 0
 
@@ -924,6 +1174,10 @@ def run(argv: list[str] | None = None) -> int:
         return schema_command(args)
     if args.command == "service":
         return service_command(args, root)
+    if args.command == "monitor":
+        return monitor_command(args, root)
+    if args.command == "supervisor":
+        return supervisor_command(args, root)
     if args.command == "hook":
         return hook_command(args, root)
     if args.command == "doctor":

@@ -1748,3 +1748,59 @@ Started the `v0.4.14` release lane for OpenClaw wake support.
 Best next turn option: decide whether to formalize OpenClaw plugin packaging
 outside this repo-linked install path, or keep using the linked plugin while
 OpenClaw's plugin distribution story settles.
+
+## Turn 101 | 2026-05-25
+
+Planned the monitor-readiness and user-scoped supervisor lane.
+
+- Re-read repo planning, runtime-state, agent-runtime, engineering, and
+  validation policies before changing active planning surfaces.
+- Added `docs/dev/plans/0042-2026-05-25-wake-monitor-readiness-user-supervisor.md`.
+- Opened P42 in `ROADMAP.md`.
+- Selected one user-scoped, registry-backed supervisor as the preferred
+  long-term monitor for Codex and OpenClaw wake roots.
+- Kept repo-scoped services as supported single-root mode and migration
+  fallback.
+- Defined the first implementation slices: skill/plugin readiness gate,
+  monitor-readiness API, supervisor registry, OpenClaw plugin enforcement, and
+  live dogfood validation.
+
+Best next turn option: implement Slice 1 by hardening the `codex-wake` skill
+and OpenClaw plugin result handling so unattended wake scheduling reports or
+requires monitor readiness.
+
+## Turn 102 | 2026-05-26
+
+Completed P42 monitor-readiness and user-supervisor implementation.
+
+- Added `codex-wake monitor check --json`, `doctor --json` monitor evidence,
+  and `--require-monitor` gates for CLI scheduling paths.
+- Added the user-scoped `codex-wake-supervisor.service` workflow:
+  `supervisor install`, `enroll`, `status`, `logs`, `run`, `stop`, and
+  `uninstall`.
+- Added persistent monitor health files under
+  `~/.local/state/codex-wake/monitors/` and explicit supervisor root registry
+  entries under `~/.config/codex-wake/roots.d/`.
+- Hardened the OpenClaw plugin so `codex_wake_schedule` requires recent
+  persistent monitor health by default and exposes
+  `requireMonitorByDefault` plus `monitorStaleAfterSeconds` in plugin schema
+  version `0.1.1`.
+- Fixed daemon retry behavior so pending records with future `next_attempt_at`
+  are not retried early.
+- Documented the OpenClaw Gateway user-systemd environment requirement for
+  supervisor-fired OpenClaw wakes.
+- Synced the updated `codex-wake` skill to `~/.agents/skills/codex-wake`,
+  `~/.codex/shared/skills/codex-wake`, and
+  `~/.openclaw/skills/codex-wake`.
+- Verified source tests, package build, installed wheel smoke, refreshed
+  user-scoped `uv tool` install, active supervisor health, OpenClaw plugin
+  visibility, Gateway RPC readiness, Codex app-server dogfood wake
+  `wake_20260526_034420_a0c4`, and OpenClaw Gateway dogfood wake
+  `wake_20260526_034938_2c63`.
+- Recorded evidence in
+  `docs/dev/verification/0062-2026-05-26-wake-monitor-readiness-user-supervisor.md`.
+- Closed P42 in `ROADMAP.md`.
+
+Best next turn option: finish the `v0.4.15` release by committing the P42
+implementation, tagging it, waiting for CI, publishing the GitHub release, and
+running a public-tag install smoke.

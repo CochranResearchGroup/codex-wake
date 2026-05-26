@@ -70,6 +70,16 @@ function createScheduleTool(api, toolContext) {
           minimum: 1000,
           description: "Gateway CLI timeout in milliseconds. Defaults to 180000.",
         },
+        requireMonitor: {
+          type: "boolean",
+          description:
+            "Require recent persistent codex-wake monitor health before writing the wake. Defaults to true.",
+        },
+        monitorStaleAfterSeconds: {
+          type: "integer",
+          minimum: 1,
+          description: "Maximum age for monitor health. Defaults to 120 seconds.",
+        },
         model: {
           type: "string",
           description: "Optional OpenClaw model override.",
@@ -82,12 +92,12 @@ function createScheduleTool(api, toolContext) {
       required: ["prompt"],
     },
     async execute(_toolCallId, params) {
-      const { plan, record, recordPath } = createWakeRecord({
+      const { plan, monitor, record, recordPath } = createWakeRecord({
         params,
         config: api.pluginConfig,
         toolContext,
       });
-      return jsonToolResult(summarizeScheduleResult(plan, record, recordPath));
+      return jsonToolResult(summarizeScheduleResult(plan, record, recordPath, monitor));
     },
   };
 }

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,8 +9,20 @@ import {
   buildWakeRecord,
   commandStatusSummary,
   createWakeRecord,
+  monitorStatusForWakeRoot,
   parseCodexWakeCreateOutput,
 } from "../lib/scheduler.js";
+
+test("plugin manifest exposes monitor readiness config", () => {
+  const manifest = JSON.parse(fs.readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf8"));
+  const packageJson = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+
+  assert.equal(manifest.version, "0.1.1");
+  assert.equal(packageJson.version, "0.1.1");
+  assert.equal(manifest.configSchema.properties.requireMonitorByDefault.type, "boolean");
+  assert.equal(manifest.configSchema.properties.monitorStaleAfterSeconds.type, "integer");
+  assert.equal(manifest.configSchema.properties.monitorStaleAfterSeconds.minimum, 1);
+});
 
 test("builds an OpenClaw Gateway wake plan from trusted tool context", () => {
   const plan = buildSchedulePlan({
@@ -22,6 +35,7 @@ test("builds an OpenClaw Gateway wake plan from trusted tool context", () => {
       openclawCommand: "/bin/sh",
       wakeRoot: ".codex/wake",
       workspace: "default",
+      requireMonitorByDefault: false,
     },
     toolContext: {
       workspaceDir: "/repo",
@@ -62,6 +76,7 @@ test("builds an absolute at-trigger wake root without workspace rewriting", () =
     },
     config: {
       openclawCommand: "/bin/sh",
+      requireMonitorByDefault: false,
     },
     toolContext: {
       workspaceDir: "/repo",
@@ -106,6 +121,7 @@ test("builds schema-versioned wake records", () => {
     },
     config: {
       openclawCommand: "/bin/sh",
+      requireMonitorByDefault: false,
     },
     toolContext: {
       workspaceDir: "/repo",
@@ -142,6 +158,7 @@ test("includes dispatch reply overrides only when explicitly configured", () => 
       replyChannel: "api",
       replyTo: "channel:C0AHQQCG7J4",
       replyAccountId: "default",
+      requireMonitorByDefault: false,
     },
     toolContext: {
       workspaceDir: "/repo",
@@ -174,6 +191,7 @@ test("writes wake records atomically under pending", () => {
     },
     config: {
       openclawCommand: "/bin/sh",
+      requireMonitorByDefault: false,
     },
     toolContext: {
       workspaceDir: "/repo",
@@ -185,6 +203,79 @@ test("writes wake records atomically under pending", () => {
 
   assert.equal(record.id, "wake_20260525_203934_beef");
   assert.equal(recordPath, path.join(root, "pending", "wake_20260525_203934_beef.json"));
+  assert.equal(fs.existsSync(recordPath), true);
+});
+
+test("requires recent persistent monitor health by default", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-wake-unmonitored-"));
+
+  assert.throws(
+    () =>
+      createWakeRecord({
+        params: {
+          delay: "30s",
+          prompt: "Resume idempotently.",
+          wakeRoot: root,
+        },
+        config: {
+          openclawCommand: "/bin/sh",
+        },
+        toolContext: {
+          workspaceDir: "/repo",
+          sessionKey: "agent:main:slack:channel:c0ahqqcg7j4",
+        },
+      }),
+    /wake root is not actively monitored/,
+  );
+});
+
+test("accepts monitored roots with recent loop health", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-wake-monitored-"));
+  const state = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-wake-state-"));
+  const env = { HOME: os.homedir(), XDG_STATE_HOME: state };
+  const key = crypto.createHash("sha1").update(path.resolve(root)).digest("hex").slice(0, 12);
+  const healthDir = path.join(state, "codex-wake", "monitors");
+  fs.mkdirSync(healthDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(healthDir, `${key}.json`),
+    `${JSON.stringify(
+      {
+        wake_root: path.resolve(root),
+        source: "supervisor",
+        mode: "loop",
+        checked_at: "2026-05-25T20:39:30Z",
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  const status = monitorStatusForWakeRoot(root, {
+    env,
+    now: new Date("2026-05-25T20:39:34Z"),
+  });
+  assert.equal(status.monitorReady, true);
+  assert.equal(status.monitorSource, "supervisor");
+
+  const { monitor, recordPath } = createWakeRecord({
+    params: {
+      delay: "30s",
+      prompt: "Resume idempotently.",
+      wakeRoot: root,
+    },
+    config: {
+      openclawCommand: "/bin/sh",
+    },
+    toolContext: {
+      workspaceDir: "/repo",
+      sessionKey: "agent:main:slack:channel:c0ahqqcg7j4",
+    },
+    env,
+    now: new Date("2026-05-25T20:39:34Z"),
+    randomHex: "feed",
+  });
+
+  assert.equal(monitor.monitorReady, true);
   assert.equal(fs.existsSync(recordPath), true);
 });
 
