@@ -417,3 +417,20 @@ Acceptance target:
 - The daemon rejects placeholder targets and no-dispatch false positives for OpenClaw smokes.
 - A real OpenClaw wake is verified through Gateway response plus Slack Mirror or transcript evidence.
 - The OpenClaw plugin path can create wake records from live session context, or a precise missing SDK/core seam is documented.
+
+## P41 | v0.4.14 Release
+
+State: OPEN
+
+Current State: Release lane opened to publish the closed P40 OpenClaw Gateway
+wake transport, repo-linked OpenClaw plugin, and skill transport-selection
+hardening as `v0.4.14`.
+
+Plan: [v0.4.14 Release](docs/dev/plans/0041-2026-05-25-v0414-release.md)
+
+Acceptance target:
+
+- `pyproject.toml`, README install docs, and release notes name `v0.4.14`.
+- Source, package, plugin, installed-wheel, and installed-skill validation pass.
+- Public tag, GitHub release, public tag install smoke, and user-scoped install
+  refresh are recorded under `docs/dev/verification/`.

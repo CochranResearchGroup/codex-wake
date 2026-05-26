@@ -1701,3 +1701,31 @@ Completed the `codex-wake` skill transport decision hardening pass.
 Best next turn option: decide whether this docs-only skill hardening should be
 released together with the OpenClaw plugin/transport changes, or left as a
 main-branch operator guidance update until plugin packaging is settled.
+
+## Turn 100 | 2026-05-25
+
+Started the `v0.4.14` release lane for OpenClaw wake support.
+
+- Selected the release path because P40 is closed, the skill hardening is on
+  `main`, and downstream installs need a tag newer than `v0.4.13` to pin
+  `openclaw_gateway` CLI/runtime support.
+- Added `docs/dev/plans/0041-2026-05-25-v0414-release.md`.
+- Bumped `pyproject.toml` to `0.4.14`.
+- Updated the README GitHub install example to `v0.4.14`.
+- Added `docs/releases/v0.4.14.md`.
+- Opened P41 in `ROADMAP.md`.
+- Started release evidence in
+  `docs/dev/verification/0061-2026-05-25-v0.4.14-release.md`.
+- Ran the pre-tag release validation gate: 112 Python tests passed, compile
+  checks passed, 9 OpenClaw plugin tests passed, Node syntax checks passed,
+  plugin shell-execution scan passed, package build produced
+  `codex_wake-0.4.14.tar.gz` and `codex_wake-0.4.14-py3-none-any.whl`, and
+  installed-wheel smokes verified `openclaw_gateway` CLI surfaces, schema
+  exposure, target creation, and placeholder-key rejection.
+- Verified installed skill copies match the tracked skill and OpenClaw still
+  reports the `codex-wake` skill as visible/invocable for `agent main`.
+- Verified the live OpenClaw plugin is loaded from this repo and Gateway tool
+  catalog includes `codex_wake_schedule`.
+
+Next checkpoint: commit the release metadata, tag `v0.4.14`, push main and the
+tag, then record public-tag and user-scoped install verification.

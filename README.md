@@ -31,7 +31,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.13
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.14
 ```
 
 Verify the installed commands:
