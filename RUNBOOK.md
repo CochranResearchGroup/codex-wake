@@ -1834,3 +1834,22 @@ Best next turn option: open the next bounded lane for OpenClaw plugin
 distribution durability, so linked-plugin local state is replaced by a
 documented install/update path that survives gateway restarts and downstream
 agent workspaces.
+
+## Turn 104 | 2026-05-26
+
+Planned the remaining productization path.
+
+- Re-read repo planning, agent-runtime, engineering, and validation policies
+  before changing roadmap surfaces.
+- Added `docs/dev/plans/0043-2026-05-26-productization-completion.md`.
+- Opened P43 in `ROADMAP.md`.
+- Defined productization as a bounded `v0.5.0` readiness boundary: durable
+  OpenClaw plugin distribution, unified readiness diagnostics, state lifecycle
+  cleanup, repeatable smoke matrix, operator docs, and release evidence.
+- Kept new trigger classes, database-backed state, remote multi-user service
+  deployment, and mandatory package-registry publication out of scope.
+
+Best next turn option: implement Slice 1 by replacing the repo-linked
+OpenClaw plugin install path with a durable public-tag or package-artifact
+install/update flow, then verify it through Gateway restart and tool catalog
+inspection.

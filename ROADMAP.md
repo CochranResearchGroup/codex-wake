@@ -458,3 +458,28 @@ Acceptance target:
   clear failure instead of implying unattended delivery.
 - Real Codex app-server and OpenClaw Gateway wakes fire from monitored roots
   with recorded validation evidence.
+
+## P43 | Productization Completion
+
+State: OPEN
+
+Current State: Opened after `v0.4.15` proved monitor-readiness and supervisor
+delivery. Remaining product risk is distribution and supportability: the
+OpenClaw plugin is still proven through a linked local checkout, readiness is
+spread across several commands, and cleanup/smoke/release procedures need one
+bounded `v0.5.0` productization path.
+
+Plan: [Productization Completion](docs/dev/plans/0043-2026-05-26-productization-completion.md)
+
+Acceptance target:
+
+- OpenClaw plugin install/update works from a durable public tag or package
+  artifact, not only from a repo-linked path.
+- Installed readiness reports CLI, supervisor, monitor, hook, app-server,
+  OpenClaw Gateway, plugin, and tmux status without leaking secrets.
+- Runtime state cleanup and supervisor root lifecycle are documented and
+  validated.
+- A repeatable smoke matrix covers installed CLI, supervisor, Codex app-server,
+  OpenClaw Gateway, and manual/operator-visible tmux boundaries.
+- A productization release is tagged, published, public-install-smoked, and
+  recorded with live wake evidence.
