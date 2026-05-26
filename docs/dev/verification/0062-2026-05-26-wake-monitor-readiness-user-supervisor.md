@@ -52,6 +52,14 @@ A throwaway virtualenv installed the built wheel and verified:
 - `codex-wake supervisor run --once --registry-dir <tmp>/roots.d --state-dir
   <tmp>/state --json` returns `[]` for an empty registry.
 
+After commit `91921263a38efe5e79ebf462e905c96ee2aa33ae` was pushed, GitHub
+Actions CI run `26431676604` passed release gates on Python 3.11 and 3.12:
+
+- compile sources;
+- run unit tests;
+- build package;
+- smoke installed wheel.
+
 ## Installed Runtime Validation
 
 The user-scoped executable install was refreshed from this checkout:
@@ -59,6 +67,15 @@ The user-scoped executable install was refreshed from this checkout:
 ```bash
 uv tool install --force --reinstall .
 # codex-wake==0.4.15
+```
+
+After the public tag was pushed, the user-scoped executable install was
+refreshed again from GitHub:
+
+```bash
+uv tool install --force --reinstall git+https://github.com/CochranResearchGroup/codex-wake.git@v0.4.15
+# resolved v0.4.15 to 91921263a38efe5e79ebf462e905c96ee2aa33ae
+# installed codex-wake==0.4.15
 ```
 
 The user supervisor is installed and running:
@@ -142,6 +159,21 @@ The updated `codex-wake` skill was synced and diff-checked across:
 - `/home/ecochran76/.codex/shared/skills/codex-wake/`
 - `/home/ecochran76/.openclaw/skills/codex-wake/`
 
+Release/public install validation:
+
+- `v0.4.15` tag points at
+  `91921263a38efe5e79ebf462e905c96ee2aa33ae`.
+- GitHub release:
+  `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.15`
+- Public tag install smoke in a temporary virtualenv reported package version
+  `0.4.15`, exposed `monitor` and `supervisor`, ran
+  `monitor check --json`, and returned `[]` from `supervisor run --once` with
+  an empty registry.
+- After refreshing the user-scoped install from the public tag and restarting
+  `codex-wake-supervisor.service`, `monitor check --json` still reported
+  `monitor_ready=true`, `monitor_source=supervisor`, and the repo wake root had
+  `active_total=0`, `terminal_total=0`, `archived_total=21`.
+
 ## Live Wake Validation
 
 Codex app-server supervisor-fired wake:
@@ -223,4 +255,5 @@ Residual notes:
 
 - OpenClaw Gateway status still reports the existing recommended
   `gateway-path-nonminimal` audit warning.
-- Public tag install validation is expected during the `v0.4.15` release step.
+- No active or terminal wake records remain in the repo wake root after
+  dogfood cleanup.

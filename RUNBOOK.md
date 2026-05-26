@@ -1804,3 +1804,33 @@ Completed P42 monitor-readiness and user-supervisor implementation.
 Best next turn option: finish the `v0.4.15` release by committing the P42
 implementation, tagging it, waiting for CI, publishing the GitHub release, and
 running a public-tag install smoke.
+
+## Turn 103 | 2026-05-26
+
+Released `v0.4.15`.
+
+- Committed P42 as `9192126` (`Add wake monitor supervisor`).
+- Tagged `v0.4.15` and pushed `main` plus the tag to
+  `CochranResearchGroup/codex-wake`.
+- Confirmed both `HEAD` and `v0.4.15` resolve to
+  `91921263a38efe5e79ebf462e905c96ee2aa33ae`.
+- Confirmed CI run `26431676604` passed release gates on Python 3.11 and 3.12.
+- Published the GitHub release:
+  `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.15`.
+- Ran a clean public tag install smoke from GitHub; it installed
+  `codex-wake 0.4.15`, exposed `monitor` and `supervisor`, ran
+  `monitor check --json`, and verified `supervisor run --once` on an empty
+  registry.
+- Refreshed the user-scoped `uv tool` install from the public `v0.4.15` tag
+  and restarted `codex-wake-supervisor.service`.
+- Verified supervisor monitor health remains active for this repo wake root and
+  the repo wake root has `active_total=0`, `terminal_total=0`,
+  `archived_total=21`.
+- Updated
+  `docs/dev/verification/0062-2026-05-26-wake-monitor-readiness-user-supervisor.md`
+  with release and public-install evidence.
+
+Best next turn option: open the next bounded lane for OpenClaw plugin
+distribution durability, so linked-plugin local state is replaced by a
+documented install/update path that survives gateway restarts and downstream
+agent workspaces.
