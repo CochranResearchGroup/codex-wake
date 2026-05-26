@@ -1726,6 +1726,25 @@ Started the `v0.4.14` release lane for OpenClaw wake support.
   reports the `codex-wake` skill as visible/invocable for `agent main`.
 - Verified the live OpenClaw plugin is loaded from this repo and Gateway tool
   catalog includes `codex_wake_schedule`.
+- Committed the release metadata as `7af85f9` (`Prepare v0.4.14 release`) and
+  tagged it as `v0.4.14`.
+- Pushed `main` and `v0.4.14`; both remote refs point at
+  `7af85f93831413e2943189e709b0b4ba3c4f8265`.
+- Confirmed CI run `26425127961` passed on Python 3.11 and 3.12.
+- Published the GitHub release:
+  `https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.4.14`.
+- Ran a clean public tag install smoke; it resolved `v0.4.14` to
+  `7af85f93831413e2943189e709b0b4ba3c4f8265`, installed
+  `codex-wake-0.4.14`, exposed `openclaw_gateway` in `schema --json`, and
+  created public-tag OpenClaw target wake `wake_20260526_001729_c543` in a
+  temporary wake root.
+- Verified the public-tag installed tool can render a no-start user-systemd
+  service unit with explicit `CODEX_WAKE_CODEX_CMD`.
+- Refreshed the user-scoped `uv tool` install from the public `v0.4.14` tag;
+  `uv tool list` reports `codex-wake v0.4.14`.
+- Confirmed the repo wake root remains clean with `active_total=0`.
+- Closed P41 in `ROADMAP.md`.
 
-Next checkpoint: commit the release metadata, tag `v0.4.14`, push main and the
-tag, then record public-tag and user-scoped install verification.
+Best next turn option: decide whether to formalize OpenClaw plugin packaging
+outside this repo-linked install path, or keep using the linked plugin while
+OpenClaw's plugin distribution story settles.

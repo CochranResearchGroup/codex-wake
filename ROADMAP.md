@@ -420,11 +420,9 @@ Acceptance target:
 
 ## P41 | v0.4.14 Release
 
-State: OPEN
+State: CLOSED
 
-Current State: Release lane opened to publish the closed P40 OpenClaw Gateway
-wake transport, repo-linked OpenClaw plugin, and skill transport-selection
-hardening as `v0.4.14`.
+Current State: Closed by `docs/dev/verification/0061-2026-05-25-v0.4.14-release.md`. Public tag `v0.4.14`, GitHub release, CI, public tag install smoke, OpenClaw CLI target smoke, plugin visibility checks, installed-skill checks, and user-scoped `uv tool` refresh are complete.
 
 Plan: [v0.4.14 Release](docs/dev/plans/0041-2026-05-25-v0414-release.md)
 
