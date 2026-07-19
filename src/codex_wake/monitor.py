@@ -179,8 +179,9 @@ def monitor_readiness(
             interval=interval,
             daemon_path=daemon_path,
             codex_path=codex_path,
-            resolve_default_codex=True,
+            resolve_default_codex=False,
             log_path=log_path,
+            validate_executables=False,
         )
     except Exception as exc:
         config = None

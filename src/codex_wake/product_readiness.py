@@ -155,8 +155,9 @@ def repo_service_readiness(
             interval=interval,
             daemon_path=daemon_path,
             codex_path=codex_path,
-            resolve_default_codex=True,
+            resolve_default_codex=False,
             log_path=log_path,
+            validate_executables=False,
         )
     except Exception as exc:
         return {**outcome(STATUS_BLOCKED, f"repo service config could not be built: {exc}"), "config_error": str(exc)}, None, str(exc)
@@ -252,6 +253,7 @@ def supervisor_product_readiness(
             registry_dir=registry_dir,
             state_dir=state_dir,
             log_path=log_path,
+            validate_executable=False,
         )
     except Exception as exc:
         return {**outcome(STATUS_BLOCKED, f"supervisor config could not be built: {exc}"), "config_error": str(exc)}

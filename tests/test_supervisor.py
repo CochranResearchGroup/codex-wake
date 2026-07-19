@@ -3,19 +3,23 @@ from __future__ import annotations
 import json
 import subprocess
 import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
 from codex_wake.monitor import write_monitor_health
-from codex_wake.records import build_record, write_record
+from codex_wake.records import WakeError, build_record, write_record
 from codex_wake.supervisor import (
     build_supervisor_config,
     enroll_root,
     install_supervisor,
     iter_registry_entries,
     render_supervisor_unit,
+    resolve_codex_wake_path,
+    stop_supervisor,
     supervisor_poll_once,
     supervisor_status,
     uninstall_supervisor,
@@ -63,6 +67,118 @@ class SupervisorTests(unittest.TestCase):
             self.assertEqual(removed, path)
             self.assertFalse(path.exists())
 
+    def test_enroll_preserves_stable_codex_and_openclaw_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            codex = self.make_executable(base / "bin" / "codex")
+            openclaw = self.make_executable(base / "bin" / "openclaw")
+            path = enroll_root(
+                wake_root=base / "repo" / ".codex" / "wake",
+                repo_root=base / "repo",
+                registry_dir=base / "registry",
+                codex_cmd=str(codex),
+                openclaw_cmd=str(openclaw),
+            )
+
+            dispatch = json.loads(path.read_text())["dispatch"]
+            self.assertEqual(dispatch["codex_cmd"], str(codex))
+            self.assertEqual(dispatch["openclaw_cmd"], str(openclaw))
+
+    def test_enroll_rejects_version_managed_node_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            openclaw = self.make_executable(
+                base / ".nvm" / "versions" / "node" / "v24.1.0" / "bin" / "openclaw"
+            )
+
+            with self.assertRaisesRegex(WakeError, "stable wrapper or symlink"):
+                enroll_root(
+                    wake_root=base / "repo" / ".codex" / "wake",
+                    registry_dir=base / "registry",
+                    openclaw_cmd=str(openclaw),
+                )
+
+            self.assertFalse((base / "registry").exists())
+
+    def test_lifecycle_and_registry_commands_do_not_require_supervisor_executable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_supervisor_config(
+                codex_wake_path=str(base / "missing-codex-wake"),
+                unit_dir=base / "systemd",
+                registry_dir=base / "registry",
+                state_dir=base / "state",
+                validate_executable=False,
+            )
+            self.assertIsNone(config.codex_wake_path)
+            path = enroll_root(
+                wake_root=base / "repo" / ".codex" / "wake",
+                registry_dir=config.registry_dir,
+                root_id="lifecycle",
+            )
+            self.assertEqual(supervisor_status(config, FakeRunner())["root_count"], 1)
+            self.assertEqual(unenroll_root(root_id="lifecycle", registry_dir=config.registry_dir), path)
+            runner = FakeRunner()
+            stop_supervisor(config, runner)
+            uninstall_supervisor(config, runner)
+            self.assertIn(["systemctl", "--user", "disable", "--now", config.name], runner.calls)
+            with self.assertRaisesRegex(WakeError, "resolved before rendering"):
+                render_supervisor_unit(config)
+
+    def test_resolve_codex_wake_uses_valid_named_invocation_as_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            invoked = self.make_executable(Path(tmp) / "bin" / "codex-wake")
+            with patch("codex_wake.executables.shutil.which", return_value=None):
+                with patch("sys.argv", [str(invoked)]):
+                    self.assertEqual(resolve_codex_wake_path(), invoked)
+
+    def test_concurrent_enrollment_writes_complete_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            registry = base / "registry"
+            wake_root = base / "repo" / ".codex" / "wake"
+            writers = 12
+            barrier = threading.Barrier(writers + 1)
+            stop_reading = threading.Event()
+            read_errors: list[Exception] = []
+            target = registry / "shared-root.json"
+
+            def read_while_writing() -> None:
+                barrier.wait()
+                while not stop_reading.is_set():
+                    try:
+                        json.loads(target.read_text(encoding="utf-8"))
+                    except FileNotFoundError:
+                        pass
+                    except Exception as exc:
+                        read_errors.append(exc)
+
+            def write(index: int) -> Path:
+                barrier.wait()
+                return enroll_root(
+                    wake_root=wake_root,
+                    repo_root=base / "repo",
+                    registry_dir=registry,
+                    root_id="shared-root",
+                    owner_name=f"writer-{index}",
+                )
+
+            reader = threading.Thread(target=read_while_writing)
+            reader.start()
+            try:
+                with ThreadPoolExecutor(max_workers=writers) as pool:
+                    paths = list(pool.map(write, range(writers)))
+            finally:
+                stop_reading.set()
+                reader.join()
+
+            self.assertEqual(len(set(paths)), 1)
+            self.assertEqual(read_errors, [])
+            payload = json.loads(paths[0].read_text(encoding="utf-8"))
+            self.assertEqual(payload["root_id"], "shared-root")
+            self.assertRegex(payload["owner"]["name"], r"^writer-\d+$")
+            self.assertEqual(sorted(item.name for item in registry.iterdir()), ["shared-root.json"])
+
     def test_render_and_install_supervisor_unit(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -80,6 +196,7 @@ class SupervisorTests(unittest.TestCase):
             self.assertIn("supervisor run --interval 1", unit)
             self.assertIn("--registry-dir", unit)
             self.assertIn("--state-dir", unit)
+            self.assertIn(f'ExecStart="{codex_wake}" supervisor run', unit)
 
             runner = FakeRunner()
             install_supervisor(config, runner)

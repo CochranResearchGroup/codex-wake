@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import re
-import shutil
 import shlex
 import subprocess
 from dataclasses import dataclass
@@ -10,6 +9,7 @@ from pathlib import Path
 from typing import Protocol
 
 from .app_server import APP_SERVER_CODEX_ENV, resolve_codex_cmd
+from .executables import resolve_stable_executable
 from .records import WakeError, default_wake_root
 
 
@@ -32,7 +32,7 @@ class ServiceConfig:
     repo_root: Path
     wake_root: Path
     interval: float
-    daemon_path: Path
+    daemon_path: Path | None
     unit_path: Path
     log_path: Path
     codex_path: Path | None = None
@@ -75,12 +75,13 @@ def user_state_dir(env: dict[str, str] | None = None) -> Path:
 
 
 def resolve_daemon_path(raw: str | None = None) -> Path:
-    if raw:
-        return Path(raw).expanduser().resolve()
-    found = shutil.which("codex-waked")
-    if not found:
-        raise WakeError("codex-waked was not found on PATH; install codex-wake first")
-    return Path(found).resolve()
+    return Path(
+        resolve_stable_executable(
+            raw,
+            default_command="codex-waked",
+            label="codex-waked",
+        )
+    )
 
 
 def build_service_config(
@@ -94,6 +95,7 @@ def build_service_config(
     resolve_default_codex: bool = False,
     unit_dir: Path | None = None,
     log_path: Path | None = None,
+    validate_executables: bool = True,
 ) -> ServiceConfig:
     resolved_repo = (repo_root or Path.cwd()).resolve()
     resolved_name = name or default_service_name(resolved_repo)
@@ -104,10 +106,21 @@ def build_service_config(
     if interval <= 0:
         raise WakeError("--interval must be greater than zero")
     resolved_codex = ""
-    if codex_path:
-        resolved_codex = resolve_codex_cmd(codex_path, required=True)
-    elif resolve_default_codex:
-        resolved_codex = resolve_codex_cmd()
+    if validate_executables and codex_path:
+        resolved_codex = resolve_stable_executable(
+            codex_path,
+            default_command="codex",
+            label="Codex CLI",
+            reject_node_versioned=True,
+        )
+    elif validate_executables and resolve_default_codex:
+        resolved_codex = resolve_stable_executable(
+            None,
+            default_command="codex",
+            label="Codex CLI",
+            required=False,
+            reject_node_versioned=True,
+        )
     resolved_unit_dir = (unit_dir or user_systemd_dir()).expanduser()
     resolved_log_path = (log_path or (user_state_dir() / f"{resolved_name.removesuffix('.service')}.log")).expanduser()
     return ServiceConfig(
@@ -115,7 +128,7 @@ def build_service_config(
         repo_root=resolved_repo,
         wake_root=(wake_root or default_wake_root(resolved_repo)).resolve(),
         interval=interval,
-        daemon_path=resolve_daemon_path(daemon_path),
+        daemon_path=resolve_daemon_path(daemon_path) if validate_executables else None,
         unit_path=resolved_unit_dir / resolved_name,
         log_path=resolved_log_path,
         codex_path=Path(resolved_codex) if resolved_codex else None,
@@ -134,6 +147,8 @@ def systemd_environment_assignment(key: str, value: str) -> str:
 
 
 def render_unit(config: ServiceConfig) -> str:
+    if config.daemon_path is None:
+        raise WakeError("codex-waked must be resolved before rendering a service unit")
     environment = ""
     if config.codex_path:
         environment = f"Environment={systemd_environment_assignment(APP_SERVER_CODEX_ENV, str(config.codex_path))}\n"

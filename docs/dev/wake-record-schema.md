@@ -60,14 +60,16 @@ App-server target:
   "transport": "app-server",
   "endpoint": "stdio://",
   "thread_id": "thread_abc",
-  "codex_cmd": "/home/you/.nvm/versions/node/v24.14.0/bin/codex"
+  "codex_cmd": "/home/you/.local/bin/codex"
 }
 ```
 
 Only `stdio://` app-server dispatch is implemented in schema version `1`.
 `codex_cmd` is optional and may be absent. When present, it is a validated
 Codex CLI command or absolute path used by the daemon to launch local stdio
-app-server dispatch.
+app-server dispatch. Generated service and supervisor configuration preserves
+stable symlink spellings and rejects paths tied to version-managed Node
+installations.
 
 OpenClaw Gateway target:
 

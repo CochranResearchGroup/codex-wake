@@ -269,8 +269,8 @@ def build_parser() -> argparse.ArgumentParser:
     supervisor_enroll.add_argument("--root-id")
     supervisor_enroll.add_argument("--owner-kind", default="repo")
     supervisor_enroll.add_argument("--owner-name")
-    supervisor_enroll.add_argument("--codex-path", help="Codex CLI command to record for this root")
-    supervisor_enroll.add_argument("--openclaw-path", help="OpenClaw CLI command to record for this root")
+    supervisor_enroll.add_argument("--codex-path", help="stable Codex executable path to record for this root")
+    supervisor_enroll.add_argument("--openclaw-path", help="stable OpenClaw executable path to record for this root")
     supervisor_enroll.add_argument("--disabled", action="store_true", help="register the root disabled")
 
     supervisor_unenroll = supervisor_subparsers.add_parser("unenroll", help="remove a wake root from supervisor monitoring")
@@ -406,15 +406,15 @@ def add_service_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--name", help="systemd user unit name; defaults to codex-wake-<repo>.service")
     parser.add_argument("--repo-root", type=Path, default=None, help="repo root for the service; defaults to current directory")
     parser.add_argument("--interval", type=float, default=1.0, help="daemon poll interval in seconds")
-    parser.add_argument("--daemon-path", help="path to codex-waked; defaults to PATH resolution")
-    parser.add_argument("--codex-path", help="Codex CLI path or command to persist for app-server dispatch")
+    parser.add_argument("--daemon-path", help="stable codex-waked executable path; defaults to PATH resolution")
+    parser.add_argument("--codex-path", help="stable Codex executable path to persist for app-server dispatch")
     parser.add_argument("--log-path", type=Path, default=None, help="service log path")
 
 
 def add_supervisor_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--name", help="systemd user unit name; defaults to codex-wake-supervisor.service")
     parser.add_argument("--interval", type=float, default=1.0, help="supervisor poll interval in seconds")
-    parser.add_argument("--codex-wake-path", help="path to codex-wake; defaults to PATH resolution")
+    parser.add_argument("--codex-wake-path", help="stable codex-wake executable path; defaults to PATH resolution")
     parser.add_argument("--registry-dir", type=Path, default=None, help="root registry directory; defaults to ~/.config/codex-wake/roots.d")
     parser.add_argument("--state-dir", type=Path, default=None, help="supervisor state directory; defaults to ~/.local/state/codex-wake/supervisor")
     parser.add_argument("--log-path", type=Path, default=None, help="supervisor service log path")
@@ -877,7 +877,7 @@ def schema_command(args: argparse.Namespace) -> int:
     return 0
 
 
-def service_config_for_args(args: argparse.Namespace, root: Path):
+def service_config_for_args(args: argparse.Namespace, root: Path, *, validate_executables: bool = False):
     return build_service_config(
         repo_root=args.repo_root,
         wake_root=root,
@@ -885,13 +885,18 @@ def service_config_for_args(args: argparse.Namespace, root: Path):
         interval=args.interval,
         daemon_path=args.daemon_path,
         codex_path=args.codex_path,
-        resolve_default_codex=True,
+        resolve_default_codex=validate_executables,
         log_path=args.log_path,
+        validate_executables=validate_executables,
     )
 
 
 def service_command(args: argparse.Namespace, root: Path) -> int:
-    config = service_config_for_args(args, root)
+    config = service_config_for_args(
+        args,
+        root,
+        validate_executables=args.service_command == "install",
+    )
     if args.service_command == "install":
         install_service(config, start=not args.no_start)
         action = "installed" if args.no_start else "installed and started"
@@ -967,7 +972,7 @@ def monitor_command(args: argparse.Namespace, root: Path) -> int:
     return 0 if readiness["monitor_ready"] else 1
 
 
-def supervisor_config_for_args(args: argparse.Namespace):
+def supervisor_config_for_args(args: argparse.Namespace, *, validate_executable: bool = False):
     return build_supervisor_config(
         name=args.name,
         interval=args.interval,
@@ -975,12 +980,16 @@ def supervisor_config_for_args(args: argparse.Namespace):
         registry_dir=args.registry_dir,
         state_dir=args.state_dir,
         log_path=args.log_path,
+        validate_executable=validate_executable,
     )
 
 
 def supervisor_command(args: argparse.Namespace, root: Path) -> int:
-    config = supervisor_config_for_args(args)
     command = args.supervisor_command
+    config = supervisor_config_for_args(
+        args,
+        validate_executable=command in {"install", "start", "run"},
+    )
     if command == "install":
         install_supervisor(config, start=not args.no_start)
         action = "installed" if args.no_start else "installed and started"
@@ -1164,7 +1173,7 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
     repo_root = (args.repo_root or Path.cwd()).resolve()
     hook_check = check_hook_config(repo_root, args.hook_command)
     hook_sources = check_hook_sources(repo_root, args.hook_command)
-    config = service_config_for_args(args, root)
+    config = service_config_for_args(args, root, validate_executables=False)
     codex_wake = shutil.which("codex-wake") or ""
     codex_waked = shutil.which("codex-waked") or ""
     codex_wake_hook = shutil.which("codex-wake-hook") or ""
@@ -1181,7 +1190,7 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
         repo_root=repo_root,
         service_name=config.name,
         interval=config.interval,
-        daemon_path=str(config.daemon_path),
+        daemon_path=str(config.daemon_path) if config.daemon_path else None,
         log_path=config.log_path,
     )
     return {

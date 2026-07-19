@@ -13,7 +13,7 @@ Codex Wake supports an app-server target record shape for controlled dispatch:
     "transport": "app-server",
     "endpoint": "stdio://",
     "thread_id": "thread_...",
-    "codex_cmd": "/home/you/.nvm/versions/node/v24.14.0/bin/codex"
+    "codex_cmd": "/home/you/.local/bin/codex"
   }
 }
 ```
@@ -66,7 +66,7 @@ For service-fired app-server wakes, install the repo service from an
 environment that can resolve `codex`, or pass an explicit path:
 
 ```bash
-codex-wake service install --codex-path "$(command -v codex)"
+codex-wake service install --codex-path "$HOME/.local/bin/codex"
 codex-wake doctor
 codex-wake doctor --json
 ```

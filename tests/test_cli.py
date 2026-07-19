@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 from codex_wake import cli
 from codex_wake.openclaw_plugin import package_version
+from codex_wake.records import WakeError
 from codex_wake.service import ServiceAppServerReadiness
 
 
@@ -39,6 +40,61 @@ class CliTests(unittest.TestCase):
             with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                 code = cli.main(["--wake-root", str(root), *argv])
         return code, stdout.getvalue(), stderr.getvalue()
+
+    def test_service_and_supervisor_help_describe_stable_executable_paths(self) -> None:
+        parser = cli.build_parser()
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as raised:
+            parser.parse_args(["service", "install", "--help"])
+        self.assertEqual(raised.exception.code, 0)
+        self.assertIn("stable Codex executable path", stdout.getvalue())
+
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as raised:
+            parser.parse_args(["supervisor", "enroll", "--help"])
+        self.assertEqual(raised.exception.code, 0)
+        self.assertIn("stable OpenClaw executable path", stdout.getvalue())
+
+    def test_lifecycle_argument_configs_ignore_missing_launch_executables(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            parser = cli.build_parser()
+            service_args = parser.parse_args(
+                [
+                    "--wake-root",
+                    str(base / "wake"),
+                    "service",
+                    "status",
+                    "--daemon-path",
+                    str(base / "missing-daemon"),
+                    "--codex-path",
+                    str(base / "missing-codex"),
+                ]
+            )
+            service_config = cli.service_config_for_args(service_args, base / "wake")
+            self.assertIsNone(service_config.daemon_path)
+            self.assertIsNone(service_config.codex_path)
+            with self.assertRaises(WakeError):
+                cli.service_config_for_args(
+                    service_args,
+                    base / "wake",
+                    validate_executables=True,
+                )
+
+            supervisor_args = parser.parse_args(
+                [
+                    "supervisor",
+                    "status",
+                    "--codex-wake-path",
+                    str(base / "missing-codex-wake"),
+                    "--registry-dir",
+                    str(base / "registry"),
+                ]
+            )
+            supervisor_config = cli.supervisor_config_for_args(supervisor_args)
+            self.assertIsNone(supervisor_config.codex_wake_path)
+            with self.assertRaises(WakeError):
+                cli.supervisor_config_for_args(supervisor_args, validate_executable=True)
 
     def test_after_creates_pending_wake(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

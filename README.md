@@ -298,7 +298,7 @@ runs `codex-waked --once`.
 For single-repo operation, install or repair the repo-scoped service:
 
 ```bash
-codex-wake --wake-root .codex/wake service install --codex-path "$(command -v codex)"
+codex-wake --wake-root .codex/wake service install --codex-path "$HOME/.local/bin/codex"
 ```
 
 For multi-repo and OpenClaw usage, use the user-scoped supervisor:
@@ -338,7 +338,7 @@ Manage a repo-local user service:
 
 ```bash
 codex-wake service install
-codex-wake service install --codex-path "$(command -v codex)"
+codex-wake service install --codex-path "$HOME/.local/bin/codex"
 codex-wake service status
 codex-wake service logs --lines 50
 codex-wake service stop
@@ -362,7 +362,18 @@ enabled for `codex-wake-hook`. For app-server wakes fired by a user service,
 `doctor` reports `service_app_server_codex_ready`, the resolution source, and
 the Codex CLI command the service can use. `service install` writes
 `CODEX_WAKE_CODEX_CMD` into the unit when `codex` is resolvable from the
-installing shell, and `--codex-path` can be used to persist an explicit path.
+installing shell, and `--codex-path` can be used to persist an explicit stable
+path. Persisted Codex and OpenClaw commands must be regular executable files.
+Paths inside version-managed Node installations (for example
+`~/.nvm/versions/node/...`) are rejected because a Node upgrade can invalidate
+them when supplied explicitly and are not auto-persisted from `PATH`. Point the
+option at a stable wrapper or symlink such as
+`~/.local/bin/codex` or `~/.local/bin/openclaw`; the stable spelling is kept
+instead of being dereferenced to its current versioned target. Detection follows
+the versioned install layout, so relocated NVM, FNM, asdf, Volta, and mise data
+roots are covered without rejecting ordinary stable custom paths. Lifecycle
+commands such as status, logs, stop, uninstall, enroll, and unenroll do not
+require the original launch executable to remain installed.
 
 `product-readiness --json` is the productization-level report. It normalizes
 CLI, hooks, skill installs, repo service, user supervisor, enrolled roots,

@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from codex_wake.app_server import APP_SERVER_CODEX_ENV
+from codex_wake.records import WakeError
 from codex_wake.service import (
     build_service_config,
     default_service_name,
@@ -17,6 +18,7 @@ from codex_wake.service import (
     service_app_server_readiness,
     service_status,
     slugify,
+    stop_service,
     uninstall_service,
 )
 
@@ -52,7 +54,7 @@ class ServiceTests(unittest.TestCase):
                 repo_root=base / "repo",
                 wake_root=base / "repo" / ".codex" / "wake",
                 name="wake-test",
-                daemon_path="/usr/local/bin/codex-waked",
+                daemon_path="/bin/sh",
                 unit_dir=base / "systemd",
                 log_path=base / "state" / "wake.log",
             )
@@ -61,7 +63,7 @@ class ServiceTests(unittest.TestCase):
 
             self.assertEqual(config.name, "wake-test.service")
             self.assertIn(f"WorkingDirectory={base / 'repo'}", unit)
-            self.assertIn(f'ExecStart="/usr/local/bin/codex-waked" --wake-root "{base / "repo" / ".codex" / "wake"}" --interval 1', unit)
+            self.assertIn(f'ExecStart="/bin/sh" --wake-root "{base / "repo" / ".codex" / "wake"}" --interval 1', unit)
             self.assertIn(f"StandardOutput=append:{base / 'state' / 'wake.log'}", unit)
             self.assertNotIn(APP_SERVER_CODEX_ENV, unit)
 
@@ -76,7 +78,7 @@ class ServiceTests(unittest.TestCase):
                 repo_root=base / "repo",
                 wake_root=base / "repo" / ".codex" / "wake",
                 name="wake-test",
-                daemon_path="/usr/local/bin/codex-waked",
+                daemon_path="/bin/sh",
                 codex_path=str(codex),
                 unit_dir=base / "systemd",
                 log_path=base / "state" / "wake.log",
@@ -89,6 +91,89 @@ class ServiceTests(unittest.TestCase):
             self.assertIn(f'Environment="{APP_SERVER_CODEX_ENV}={codex.resolve()}"', unit)
             self.assertEqual(parse_unit_environment(config.unit_path)[APP_SERVER_CODEX_ENV], str(codex.resolve()))
 
+    def test_render_unit_preserves_stable_codex_symlink_spelling(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            target = base / "packages" / "codex"
+            target.parent.mkdir()
+            target.write_text("#!/bin/sh\n", encoding="utf-8")
+            target.chmod(0o755)
+            stable = base / "bin" / "codex"
+            stable.parent.mkdir()
+            stable.symlink_to(target)
+
+            config = build_service_config(
+                repo_root=base / "repo",
+                daemon_path="/bin/sh",
+                codex_path=str(stable),
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+            )
+
+            self.assertEqual(config.codex_path, stable)
+            self.assertIn(f'Environment="{APP_SERVER_CODEX_ENV}={stable}"', render_unit(config))
+
+    def test_service_path_resolution_preserves_stable_codex_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            stable = Path(tmp) / "bin" / "codex"
+            stable.parent.mkdir()
+            stable.write_text("#!/bin/sh\n", encoding="utf-8")
+            stable.chmod(0o755)
+
+            with patch.dict("os.environ", {"PATH": str(stable.parent)}, clear=True):
+                config = build_service_config(
+                    daemon_path="/bin/sh",
+                    resolve_default_codex=True,
+                )
+
+            self.assertEqual(config.codex_path, stable)
+
+    def test_service_rejects_version_managed_codex_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            codex = Path(tmp) / ".nvm" / "versions" / "node" / "v24.1.0" / "bin" / "codex"
+            codex.parent.mkdir(parents=True)
+            codex.write_text("#!/bin/sh\n", encoding="utf-8")
+            codex.chmod(0o755)
+
+            with self.assertRaisesRegex(WakeError, "stable wrapper or symlink"):
+                build_service_config(daemon_path="/bin/sh", codex_path=str(codex))
+
+            with patch.dict("os.environ", {"PATH": str(codex.parent)}, clear=True):
+                config = build_service_config(
+                    daemon_path="/bin/sh",
+                    resolve_default_codex=True,
+                )
+            self.assertIsNone(config.codex_path)
+
+    def test_service_rejects_non_regular_daemon_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(WakeError, "not a regular file"):
+                build_service_config(daemon_path=tmp)
+
+    def test_lifecycle_config_does_not_require_launch_executables(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_service_config(
+                daemon_path=str(base / "missing-codex-waked"),
+                codex_path=str(base / "missing-codex"),
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+                validate_executables=False,
+            )
+
+            self.assertIsNone(config.daemon_path)
+            self.assertIsNone(config.codex_path)
+            self.assertEqual(
+                service_status(config, FakeRunner(active="inactive", enabled="disabled")),
+                ("inactive", "disabled"),
+            )
+            runner = FakeRunner()
+            stop_service(config, runner)
+            uninstall_service(config, runner)
+            self.assertIn(["systemctl", "--user", "disable", "--now", config.name], runner.calls)
+            with self.assertRaisesRegex(WakeError, "resolved before rendering"):
+                render_unit(config)
+
     def test_service_app_server_readiness_prefers_unit_environment(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -100,7 +185,7 @@ class ServiceTests(unittest.TestCase):
                 repo_root=base / "repo",
                 wake_root=base / "repo" / ".codex" / "wake",
                 name="wake-test",
-                daemon_path="/usr/local/bin/codex-waked",
+                daemon_path="/bin/sh",
                 codex_path=str(codex),
                 unit_dir=base / "systemd",
                 log_path=base / "state" / "wake.log",
@@ -125,7 +210,7 @@ class ServiceTests(unittest.TestCase):
                 repo_root=base / "repo",
                 wake_root=base / "repo" / ".codex" / "wake",
                 name="wake-test",
-                daemon_path="/usr/local/bin/codex-waked",
+                daemon_path="/bin/sh",
                 unit_dir=base / "systemd",
                 log_path=base / "state" / "wake.log",
             )
@@ -147,7 +232,7 @@ class ServiceTests(unittest.TestCase):
                 repo_root=base / "repo",
                 wake_root=base / "repo" / ".codex" / "wake",
                 name="wake-test",
-                daemon_path="/usr/local/bin/codex-waked",
+                daemon_path="/bin/sh",
                 unit_dir=base / "systemd",
                 log_path=base / "state" / "wake.log",
             )
@@ -167,7 +252,7 @@ class ServiceTests(unittest.TestCase):
                 repo_root=base / "repo",
                 wake_root=base / "repo" / ".codex" / "wake",
                 name="wake-test",
-                daemon_path="/usr/local/bin/codex-waked",
+                daemon_path="/bin/sh",
                 unit_dir=base / "systemd",
                 log_path=base / "state" / "wake.log",
             )
@@ -198,7 +283,7 @@ class ServiceTests(unittest.TestCase):
                 repo_root=base / "repo",
                 wake_root=base / "repo" / ".codex" / "wake",
                 name="wake-test",
-                daemon_path="/usr/local/bin/codex-waked",
+                daemon_path="/bin/sh",
                 unit_dir=base / "systemd",
                 log_path=base / "state" / "wake.log",
             )

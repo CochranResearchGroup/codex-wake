@@ -40,10 +40,21 @@ or recent persistent daemon/supervisor health was observed.
 Use the CLI-managed path:
 
 ```bash
-codex-wake service install
+codex-wake service install --codex-path "$HOME/.local/bin/codex"
 codex-wake service status
 codex-wake service logs --lines 50
 ```
+
+Service generation preserves the spelling of an explicit stable executable
+path instead of dereferencing its symlink. Use a user-scoped wrapper or symlink
+such as `~/.local/bin/codex`; paths under version-managed Node directories such
+as `~/.nvm/versions/node/...` are rejected because they become stale across
+Node upgrades. An unstable command found implicitly on `PATH` is omitted from
+the generated unit instead of blocking unrelated service management commands.
+The layout check also covers relocated manager data roots, including FNM XDG
+and multishell paths plus custom asdf, Volta, mise, and NVM roots. Status, logs,
+stop, and uninstall resolve only unit locations; they remain available after a
+launch executable is moved or removed.
 
 Stop and remove the service:
 
@@ -104,10 +115,26 @@ codex-wake supervisor status --all
 Enroll a wake root explicitly:
 
 ```bash
-codex-wake supervisor enroll --wake-root "$PWD/.codex/wake" --repo-root "$PWD"
+codex-wake supervisor enroll \
+  --wake-root "$PWD/.codex/wake" \
+  --repo-root "$PWD" \
+  --codex-path "$HOME/.local/bin/codex" \
+  --openclaw-path "$HOME/.local/bin/openclaw"
 codex-wake supervisor status --all
 codex-wake --wake-root .codex/wake monitor check --json
 ```
+
+The optional `--codex-path` and `--openclaw-path` values use the same stable
+executable contract as repo service generation. Bare command names are resolved
+through the enrolling shell's `PATH`; use explicit stable paths when `PATH`
+points into a Node version manager.
+
+Root registry replacement uses a unique same-directory temporary file, flushes
+the file, atomically replaces the registration, and syncs the registry
+directory. Concurrent enrollments therefore leave one complete last-writer
+registration rather than a shared temporary file or partial JSON. Supervisor
+status, enrollment, unenrollment, stop, and uninstall do not require the
+`codex-wake` launch executable; install, start, and run still validate it.
 
 The supervisor stores root registrations under:
 

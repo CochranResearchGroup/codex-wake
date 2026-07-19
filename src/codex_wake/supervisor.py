@@ -3,14 +3,15 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import shutil
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from .daemon import format_poll_result, poll_once, poll_result_has_activity
+from .executables import resolve_stable_executable
 from .monitor import (
     health_is_recent,
     monitor_health_path,
@@ -30,7 +31,7 @@ DEFAULT_SUPERVISOR_INTERVAL = 1.0
 class SupervisorConfig:
     name: str
     interval: float
-    codex_wake_path: Path
+    codex_wake_path: Path | None
     unit_path: Path
     log_path: Path
     registry_dir: Path
@@ -55,15 +56,24 @@ def default_supervisor_state_dir(env: dict[str, str] | None = None) -> Path:
 
 
 def resolve_codex_wake_path(raw: str | None = None) -> Path:
-    if raw:
-        return Path(raw).expanduser().resolve()
-    found = shutil.which("codex-wake")
-    if not found:
-        invoked = Path(sys.argv[0]).expanduser()
-        if invoked.exists():
-            return invoked.resolve()
-        raise WakeError("codex-wake was not found on PATH; install codex-wake first")
-    return Path(found).resolve()
+    resolved = resolve_stable_executable(
+        raw,
+        default_command="codex-wake",
+        label="codex-wake",
+        required=False,
+    )
+    if resolved:
+        return Path(resolved)
+    invoked = Path(sys.argv[0]).expanduser()
+    if invoked.name == "codex-wake":
+        return Path(
+            resolve_stable_executable(
+                str(invoked),
+                default_command="codex-wake",
+                label="codex-wake",
+            )
+        )
+    raise WakeError("codex-wake was not found on PATH; install codex-wake or pass --codex-wake-path")
 
 
 def build_supervisor_config(
@@ -75,6 +85,7 @@ def build_supervisor_config(
     log_path: Path | None = None,
     registry_dir: Path | None = None,
     state_dir: Path | None = None,
+    validate_executable: bool = True,
 ) -> SupervisorConfig:
     resolved_name = name or DEFAULT_SUPERVISOR_SERVICE
     if not resolved_name.endswith(".service"):
@@ -89,7 +100,7 @@ def build_supervisor_config(
     return SupervisorConfig(
         name=resolved_name,
         interval=interval,
-        codex_wake_path=resolve_codex_wake_path(codex_wake_path),
+        codex_wake_path=resolve_codex_wake_path(codex_wake_path) if validate_executable else None,
         unit_path=(unit_dir or user_systemd_dir()).expanduser() / resolved_name,
         log_path=resolved_log,
         registry_dir=resolved_registry,
@@ -98,6 +109,8 @@ def build_supervisor_config(
 
 
 def render_supervisor_unit(config: SupervisorConfig) -> str:
+    if config.codex_wake_path is None:
+        raise WakeError("codex-wake must be resolved before rendering a supervisor unit")
     return (
         "[Unit]\n"
         "Description=Codex Wake supervisor for registered wake roots\n"
@@ -162,9 +175,30 @@ def registry_path(registry_dir: Path, root_id: str) -> Path:
 
 def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp_path = path.with_suffix(path.suffix + ".tmp")
-    temp_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    temp_path.replace(path)
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temp_path = Path(handle.name)
+            handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_path, path)
+        directory_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+        directory_fd = os.open(path.parent, directory_flags)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
 
 
 def enroll_root(
@@ -202,9 +236,19 @@ def enroll_root(
         "dispatch": {},
     }
     if codex_cmd:
-        entry["dispatch"]["codex_cmd"] = codex_cmd
+        entry["dispatch"]["codex_cmd"] = resolve_stable_executable(
+            codex_cmd,
+            default_command="codex",
+            label="Codex CLI",
+            reject_node_versioned=True,
+        )
     if openclaw_cmd:
-        entry["dispatch"]["openclaw_cmd"] = openclaw_cmd
+        entry["dispatch"]["openclaw_cmd"] = resolve_stable_executable(
+            openclaw_cmd,
+            default_command="openclaw",
+            label="OpenClaw CLI",
+            reject_node_versioned=True,
+        )
     path = registry_path(resolved_registry, resolved_id)
     _atomic_write_json(path, entry)
     return path
