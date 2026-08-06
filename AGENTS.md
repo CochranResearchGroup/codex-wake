@@ -36,6 +36,12 @@ Read and follow:
 - `docs/dev/policies/0007-graph-backed-memory-usage.md`
 - `docs/dev/policies/0008-codegraph-usage.md`
 - `docs/dev/policies/0009-goal-execution-governance.md`
+- `docs/dev/policies/0010-policy-management.md`
+- `docs/dev/policies/0011-policy-adoption-feedback-loop.md`
+- `docs/dev/policies/0012-notes-and-memories.md`
+- `docs/dev/policies/0013-planning-discipline.md`
+- `docs/dev/policies/0014-architecture-guardrails.md`
+- `docs/dev/policies/0015-turn-closeout.md`
 
 ## Scope
 

@@ -1,13 +1,4 @@
----
-id: planning-discipline
-title: Planning Discipline
-summary: Keep stable high-level outcome plans while deriving bounded execution packets, explicit definitions of done, and parallel workstreams as work becomes ready.
-tags:
-  - planning
-  - slices
-  - parallelism
-  - states
----
+# Policy | Planning Discipline
 
 ## Policy
 
