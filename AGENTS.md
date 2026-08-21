@@ -55,15 +55,16 @@ Read and follow:
 - `docs/dev/policies/0026-architecture-guardrails.md`
 - `docs/dev/policies/0027-documentation-change-control.md`
 - `docs/dev/policies/0028-git-worktree-hygiene.md`
-- `docs/dev/policies/0029-commit-history-discipline.md`
-- `docs/dev/policies/0030-branch-and-integration-strategy.md`
-- `docs/dev/policies/0031-commit-and-push-cadence.md`
-- `docs/dev/policies/0032-multi-agent-reconciliation.md`
-- `docs/dev/policies/0033-subagent-workflow-optimization.md`
-- `docs/dev/policies/0034-versioning-and-release.md`
-- `docs/dev/policies/0035-turn-closeout.md`
-- `docs/dev/policies/0036-validation-and-handoff.md`
-- `docs/dev/policies/0037-subagent-runtime-governance.md`
+- `docs/dev/policies/0029-active-lane-coordination.md`
+- `docs/dev/policies/0030-commit-history-discipline.md`
+- `docs/dev/policies/0031-branch-and-integration-strategy.md`
+- `docs/dev/policies/0032-commit-and-push-cadence.md`
+- `docs/dev/policies/0033-multi-agent-reconciliation.md`
+- `docs/dev/policies/0034-subagent-workflow-optimization.md`
+- `docs/dev/policies/0035-versioning-and-release.md`
+- `docs/dev/policies/0036-turn-closeout.md`
+- `docs/dev/policies/0037-validation-and-handoff.md`
+- `docs/dev/policies/0038-subagent-runtime-governance.md`
 
 ## Scope
 
