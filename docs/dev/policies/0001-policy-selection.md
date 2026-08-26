@@ -155,6 +155,11 @@ Repo-purpose override from the user-stated goal:
   reproducer, confidence, and suggested disposition. A useful independent
   review may return no findings; novelty and finding count are not quality
   metrics.
+- When both conformance and objective correctness matter, report them as
+  separate review axes: one for repository standards and one for the frozen
+  specification or acceptance contract. Do not let a pass on one axis mask a
+  failure on the other, and do not let the separation bypass primary-agent
+  evidence review and disposition.
 - Separate review modes. Use at most one broad fresh-context `drift_discovery`
   pass when observed drift, consequence, or uncertainty justifies it. After
   adjudication, use `closed_world` remediation
@@ -187,6 +192,40 @@ Repo-purpose override from the user-stated goal:
 - Register normal work before parallel execution begins. An urgent lane may start first only when delay creates greater risk; register and publish its first recoverable checkpoint at the earliest safe boundary.
 - Do not silently resolve catalog conflicts. Duplicate lane ids, two lanes claiming one branch, missing custody, stale checkpoints, active local/remote mismatch, plan/catalog drift, and unresolved overlaps fail closed until reconciled.
 - Keep the catalog current through the repository's protected-default-branch workflow. A lane branch may propose its own registration, but it is not globally discoverable until that projection lands on the configured default ref.
+- Treat shared policy upgrades as intentional maintenance work, not accidental drift from copying files ad hoc.
+- Check for policy-library updates through a deterministic source of truth, such as:
+  - tagged releases
+  - upstream commits
+  - a pinned selector bundle version
+  - a checked-out local policy repo or workspace path
+  - a known GitHub repository and branch or release channel
+- Record what version, tag, commit, bundle ref, or local policy source the repo last reviewed or adopted when that information materially affects reproducibility.
+- When upstream policy changes appear, decide explicitly whether to:
+  - adopt a new module
+  - upgrade an already adopted module
+  - retire a no-longer-useful local policy
+  - defer the change for a documented reason
+- Review profile changes separately from module changes; a profile upgrade should not silently force a repo into every newly suggested module.
+- When a local repo has customized policy, prefer merge review over blind overwrite.
+- Retire superseded local policy files explicitly when a shared replacement makes them unnecessary.
+- Resolve upgrades by module identity before allocating a new ordinal filename.
+  Replace or merge the existing adopted path when one identity exists; when
+  several paths claim the identity, stop and require explicit reconciliation.
+- An upgrade is incomplete while `AGENTS.md` wires both a superseded and current
+  generation. Remove the retired pointer in the same transaction and verify
+  that exactly one retained path remains.
+- Never infer the winner between divergent duplicates from filename recency,
+  modification time, or list order. Compare content and local overrides, retain
+  the intended semantics, and record the retirement decision.
+- Scope upgrades against the repo's retained module set first; a broader profile recommendation should not automatically become the new local baseline when fit review says otherwise.
+- When the policy library publishes release notes, changelog entries, or comparable upgrade summaries, use them to scope the upgrade review before patching local policy.
+- If the repo follows upstream commits directly instead of releases, define how often to check and what level of change justifies adoption.
+- Keep policy upgrade decisions durable in repo docs, plans, runbooks, or notes when the rationale would otherwise be lost.
+- One dated policy adoption or upgrade artifact may serve as the canonical durable record for:
+  - the upgrade decision
+  - adoption feedback
+  - reusable continuity notes
+  when it records the version reviewed, decision taken, rationale, and notable fit or friction.
 
 ## Adoption Notes
 
