@@ -157,7 +157,7 @@ def render_unit(config: ServiceConfig) -> str:
         "Description=Codex Wake daemon for one repository\n"
         "Documentation=https://github.com/CochranResearchGroup/codex-wake\n"
         "After=default.target\n"
-        f"ConditionPathIsDirectory={systemd_quote(config.repo_root)}\n"
+        f"ConditionPathIsDirectory={config.repo_root}\n"
         "\n"
         "[Service]\n"
         "Type=simple\n"

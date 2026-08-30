@@ -82,7 +82,7 @@ class ServiceTests(unittest.TestCase):
 
             unit = render_unit(config)
 
-            self.assertIn(f'ConditionPathIsDirectory="{repo.resolve()}"', unit)
+            self.assertIn(f"ConditionPathIsDirectory={repo.resolve()}", unit)
 
     def test_render_unit_does_not_restart_after_working_directory_failure(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
