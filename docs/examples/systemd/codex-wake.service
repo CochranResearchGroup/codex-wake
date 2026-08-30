@@ -2,12 +2,14 @@
 Description=Codex Wake daemon for one repository
 Documentation=https://github.com/CochranResearchGroup/codex-wake
 After=default.target
+ConditionPathIsDirectory=%h/workspace.local/codex-wake
 
 [Service]
 Type=simple
 WorkingDirectory=%h/workspace.local/codex-wake
 ExecStart=%h/.local/bin/codex-waked --wake-root %h/workspace.local/codex-wake/.codex/wake --interval 1
 Restart=on-failure
+RestartPreventExitStatus=200
 RestartSec=5
 StandardOutput=append:%h/.local/state/codex-wake/codex-wake.log
 StandardError=append:%h/.local/state/codex-wake/codex-wake.log

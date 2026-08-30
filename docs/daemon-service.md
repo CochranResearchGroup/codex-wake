@@ -56,6 +56,12 @@ and multishell paths plus custom asdf, Volta, mise, and NVM roots. Status, logs,
 stop, and uninstall resolve only unit locations; they remain available after a
 launch executable is moved or removed.
 
+Generated repo services also require their resolved repository directory with
+`ConditionPathIsDirectory`. If that directory is removed, systemd skips future
+starts instead of launching against a missing working directory. Exit status
+`200/CHDIR` is excluded from automatic restart so a deleted worktree cannot
+create a five-second restart loop.
+
 Stop and remove the service:
 
 ```bash

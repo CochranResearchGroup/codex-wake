@@ -67,6 +67,39 @@ class ServiceTests(unittest.TestCase):
             self.assertIn(f"StandardOutput=append:{base / 'state' / 'wake.log'}", unit)
             self.assertNotIn(APP_SERVER_CODEX_ENV, unit)
 
+    def test_render_unit_skips_start_when_repo_directory_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo with spaces"
+            config = build_service_config(
+                repo_root=repo,
+                wake_root=repo / ".codex" / "wake",
+                name="wake-test",
+                daemon_path="/bin/sh",
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+            )
+
+            unit = render_unit(config)
+
+            self.assertIn(f'ConditionPathIsDirectory="{repo.resolve()}"', unit)
+
+    def test_render_unit_does_not_restart_after_working_directory_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_service_config(
+                repo_root=base / "repo",
+                wake_root=base / "repo" / ".codex" / "wake",
+                name="wake-test",
+                daemon_path="/bin/sh",
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+            )
+
+            unit = render_unit(config)
+
+            self.assertIn("RestartPreventExitStatus=200", unit)
+
     def test_render_unit_can_persist_codex_path_for_app_server_dispatch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
