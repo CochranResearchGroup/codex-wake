@@ -522,3 +522,40 @@ Acceptance target:
 - Explicitly opted-in records retry with the existing bounded attempt and
   backoff policy.
 - CLI, persisted schema, tests, operator docs, and agent guidance agree.
+
+## P45 | Cross-Root Wake Hook Routing
+
+State: CLOSED
+
+Current State: Closed on 2026-09-04. Canonical prompts carry the absolute wake
+root, the hook resolves records and retained archives against that owner, and
+terminal archived wakes fail closed without resuming stale work. The redundant
+project hook was removed while the user-scoped hook remains installed.
+
+Plan: [Cross-Root Wake Hook Routing](docs/dev/plans/0045-2026-09-03-cross-root-wake-hook-routing.md)
+
+Acceptance target:
+
+- Every transport includes the owning absolute wake root in its canonical prompt.
+- Cross-repository and archived wake submissions resolve against the owner.
+- Terminal records return explicit do-not-resume context.
+- Legacy id-only prompts retain the cwd fallback.
+- Exactly one user-scoped hook remains installed on this workstation.
+
+## P46 | v0.5.1 Maintenance Release
+
+State: OPEN
+
+Current State: Release candidate preparation is in progress. The patch release
+contains P44 and P45 plus the unpublished stable-command and removed-repository
+service maintenance already present on `main`.
+
+Plan: [v0.5.1 Maintenance Release](docs/dev/plans/0046-2026-09-04-v051-maintenance-release.md)
+
+Acceptance target:
+
+- Source, package, plugin, and planning validation pass.
+- The release commit and `v0.5.1` tag are pushed without rewriting history.
+- GitHub CI and the GitHub release complete successfully.
+- Public-tag smoke, user-scoped CLI refresh, hook/skill synchronization,
+  supervisor restart, and OpenClaw plugin refresh are verified.

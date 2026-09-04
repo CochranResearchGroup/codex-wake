@@ -2076,3 +2076,34 @@ Implemented and closed P44 app-server active-writer policy.
 Best next turn option: include P44 in the next release slice, then verify the
 installed CLI help and one controlled active-writer record outcome before
 refreshing any user-scoped install.
+
+## Turn 113 | 2026-09-04
+
+Implemented and closed P45 cross-root wake hook routing.
+
+- Added `WAKE_TRIGGER_ROOT` to tmux, app-server, and OpenClaw canonical prompts.
+- Made the hook resolve explicit owning roots across active and archived state.
+- Added fail-closed terminal context for cancelled, expired, failed, and
+  archived records while preserving the legacy id-only cwd fallback.
+- Removed the duplicate tracked project hook and retained the installed user
+  hook.
+- Passed 39 focused tests, 180 comprehensive Python tests, 12 plugin tests,
+  compile checks, planning audit, isolated wheel smoke, and installed-wheel
+  cross-root archived-record replay.
+
+Best next turn option: release P44 and P45 as `v0.5.1`, refresh installed
+surfaces from the public tag, and record CI plus public-install evidence.
+
+## Turn 114 | 2026-09-04
+
+Opened P46 for the `v0.5.1` maintenance release.
+
+- Reconciled `main` with `origin/main`; the remote was not ahead and local
+  history was preserved without rebasing or squashing.
+- Committed the P44/P45 implementation separately from release metadata.
+- Bumped Python package and OpenClaw plugin metadata to `0.5.1`.
+- Updated public install and smoke examples to use `v0.5.1`.
+
+Best next turn option: complete release-candidate validation, push and tag,
+wait for CI, publish the GitHub release, refresh installed surfaces, and close
+P46 with verification evidence.

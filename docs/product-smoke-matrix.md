@@ -36,7 +36,7 @@ To validate a public GitHub tag without mutating the user-scoped `uv tool`
 install, install the tag into a temporary virtual environment:
 
 ```bash
-python scripts/product_smoke.py --public-tag v0.5.0 --json
+python scripts/product_smoke.py --public-tag v0.5.1 --json
 ```
 
 This covers package installability from GitHub, CLI version reporting, schema
@@ -44,7 +44,7 @@ reporting, monitor-check execution, and supervisor `run --once --no-dispatch`.
 The release closeout should still include the final user-scoped install command:
 
 ```bash
-uv tool install --force --reinstall git+https://github.com/CochranResearchGroup/codex-wake.git@v0.5.0
+uv tool install --force --reinstall git+https://github.com/CochranResearchGroup/codex-wake.git@v0.5.1
 ```
 
 ## Live Codex App-Server Smoke
