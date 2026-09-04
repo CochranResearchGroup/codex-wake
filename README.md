@@ -33,7 +33,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.5.1
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.5.2
 ```
 
 Verify the installed commands:
@@ -478,7 +478,7 @@ Use the tracked smoke harness for productization and release gates:
 
 ```bash
 python scripts/product_smoke.py --json
-python scripts/product_smoke.py --public-tag v0.5.1 --json
+python scripts/product_smoke.py --public-tag v0.5.2 --json
 ```
 
 The safe smoke verifies installed CLI version reporting, schema output,

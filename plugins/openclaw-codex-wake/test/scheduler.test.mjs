@@ -18,7 +18,7 @@ test("plugin manifest exposes monitor readiness config", () => {
   const packageJson = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
   assert.equal(manifest.version, packageJson.version);
-  assert.equal(packageJson.version, "0.5.1");
+  assert.equal(packageJson.version, "0.5.2");
   assert.equal(manifest.configSchema.properties.requireMonitorByDefault.type, "boolean");
   assert.equal(manifest.configSchema.properties.monitorStaleAfterSeconds.type, "integer");
   assert.equal(manifest.configSchema.properties.monitorStaleAfterSeconds.minimum, 1);
