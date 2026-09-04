@@ -2,7 +2,7 @@
 
 Date: 2026-09-04
 
-Status: OPEN
+Status: CLOSED
 
 ## Objective
 
@@ -12,10 +12,11 @@ public tag.
 
 ## Current State
 
-`main` contains the closed P44 and P45 changes plus eleven unpublished
-maintenance commits. `origin/main` is not ahead, so the history can be pushed
-without rebasing or force-pushing. Package and plugin metadata have been
-prepared for `0.5.1`; publication and installed readback remain open.
+`v0.5.1` is tagged and published from
+`c31a03b7fce77679a08ddf9eb7036f545f055d85`. GitHub CI passed on Python 3.11
+and 3.12, the public-tag smoke reports CLI `0.5.1` with schema version `1`, and
+the CLI, hook, skills, supervisor, and OpenClaw plugin have been refreshed and
+read back from their installed locations.
 
 ## Scope
 
@@ -56,3 +57,22 @@ The public release, installed runtime, and durable verification evidence all
 agree on `v0.5.1`; required services are healthy; the repository is clean and
 pushed; and any remaining warnings or intentionally skipped live delivery are
 stated precisely.
+
+## Result
+
+- Preserved and pushed the unpublished local history without a rebase, squash,
+  force push, or overwritten upstream commit.
+- Published annotated tag and GitHub release `v0.5.1`.
+- GitHub Actions run `33858855558` passed both release-gate jobs.
+- Refreshed the user-scoped `uv tool` install, user hook, three standard skill
+  copies, user supervisor, and managed OpenClaw plugin.
+- Verified the installed active-writer option and cross-root archived-terminal
+  hook behavior with disposable records.
+- Recorded detailed evidence in
+  `docs/dev/verification/0070-2026-09-04-v051-release.md`.
+
+No live app-server, tmux injection, or OpenClaw delivery was initiated because
+this release did not need to send a real external wake. The installed product
+readiness warning is limited to the intentionally inactive repo-scoped service;
+the enabled user supervisor owns the root and all three enrolled roots are
+recent and ready.

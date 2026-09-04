@@ -544,11 +544,14 @@ Acceptance target:
 
 ## P46 | v0.5.1 Maintenance Release
 
-State: OPEN
+State: CLOSED
 
-Current State: Release candidate preparation is in progress. The patch release
+Current State: Closed by
+`docs/dev/verification/0070-2026-09-04-v051-release.md`. The patch release
 contains P44 and P45 plus the unpublished stable-command and removed-repository
-service maintenance already present on `main`.
+service maintenance already present on `main`. `v0.5.1` is tagged, published,
+CI-passed, public-install-smoked, and installed user-scoped; hook, skill,
+supervisor, and OpenClaw plugin readbacks are complete.
 
 Plan: [v0.5.1 Maintenance Release](docs/dev/plans/0046-2026-09-04-v051-maintenance-release.md)
 

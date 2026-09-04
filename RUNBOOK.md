@@ -2096,14 +2096,26 @@ surfaces from the public tag, and record CI plus public-install evidence.
 
 ## Turn 114 | 2026-09-04
 
-Opened P46 for the `v0.5.1` maintenance release.
+Released `v0.5.1` and closed P46.
 
 - Reconciled `main` with `origin/main`; the remote was not ahead and local
   history was preserved without rebasing or squashing.
 - Committed the P44/P45 implementation separately from release metadata.
 - Bumped Python package and OpenClaw plugin metadata to `0.5.1`.
 - Updated public install and smoke examples to use `v0.5.1`.
+- Passed 180 Python tests, 12 plugin tests, compilation and syntax checks,
+  planning audit, package build, installed-wheel smoke, and diff checks.
+- Pushed `main` and annotated tag `v0.5.1`; GitHub Actions run `33858855558`
+  passed on Python 3.11 and 3.12.
+- Published the GitHub release and passed public-tag product smoke with CLI
+  `0.5.1`, schema version `1`, and one supervisor root in the isolated smoke.
+- Refreshed the user CLI, user hook, three skill copies, supervisor, and
+  OpenClaw plugin from the public tag.
+- Verified installed active-writer option persistence and cross-root terminal
+  archive handling with disposable records.
+- Recorded closeout in
+  `docs/dev/verification/0070-2026-09-04-v051-release.md`.
 
-Best next turn option: complete release-candidate validation, push and tag,
-wait for CI, publish the GitHub release, refresh installed surfaces, and close
-P46 with verification evidence.
+Best next turn option: use installed `codex-wake product-readiness --json` in
+downstream roots; open a new bounded plan before changing trigger or transport
+semantics.
