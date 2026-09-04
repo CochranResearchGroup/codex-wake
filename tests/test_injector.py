@@ -52,8 +52,14 @@ class InjectorTests(unittest.TestCase):
         path = write_record(root, record)
         return WakePath(path=path, record=record)
 
-    def test_canonical_prompt_uses_wake_id_only(self) -> None:
-        self.assertEqual(canonical_prompt("wake_123"), "WAKE_TRIGGER_ID=wake_123\nResume the scheduled wake task.\n")
+    def test_canonical_prompt_routes_to_owning_wake_root(self) -> None:
+        root = Path("/tmp/a wake root")
+        self.assertEqual(
+            canonical_prompt("wake_123", root),
+            "WAKE_TRIGGER_ID=wake_123\n"
+            "WAKE_TRIGGER_ROOT=/tmp/a wake root\n"
+            "Resume the scheduled wake task.\n",
+        )
 
     def test_unsafe_pane_reason_rejects_shell_prompt_and_approval(self) -> None:
         self.assertEqual(unsafe_pane_reason("Approve command?"), "approval prompt visible")
@@ -109,7 +115,7 @@ class InjectorTests(unittest.TestCase):
 
             self.assertEqual(result.status, "requeued")
             self.assertEqual(len(runner.pastes), 1)
-            self.assertEqual(runner.pastes[0][3], canonical_prompt("wake_test"))
+            self.assertEqual(runner.pastes[0][3], canonical_prompt("wake_test", root))
             self.assertNotIn("SECRET FULL PROMPT", runner.pastes[0][3])
             pending = root / "pending" / "wake_test.json"
             self.assertTrue(pending.exists())

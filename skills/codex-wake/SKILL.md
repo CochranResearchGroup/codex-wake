@@ -45,6 +45,7 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - For tmux wakes, report `visibility_result.classification` when present; `visible_prompt_observed` is stronger than ack alone, and `ack_observed_visibility_unproven` must not be described as operator-visible success.
 - For app-server wakes fired by a repo-scoped service, verify the daemon's user-systemd environment; `command -v codex` in the interactive shell is not enough evidence that the service can launch `codex app-server`.
 - Prefer `codex-wake service install --codex-path "$(command -v codex)"` for service-fired app-server wakes when the repo service needs a durable Codex CLI command.
+- App-server wakes fail by default if the target thread has an active writer. Use `--retry-active-writer` only when bounded delayed delivery is preferable; it never permits `turn/start` while the thread is active.
 - If the goal is an operator-visible current-TUI wake, schedule the daemon to run after this agent turn has stopped, then stop. Do not immediately fire the wake from the same active turn.
 - Archive completed dogfood or one-off wakes so future agents see a clean active state.
 
@@ -174,7 +175,13 @@ Use an app-server wake only when you have a real resumable Codex thread id:
 ```bash
 codex-wake --wake-root .codex/wake app candidates --cwd "$PWD" --validate --only-idle --json
 codex-wake --wake-root .codex/wake app status --codex-path "$(command -v codex)" --resume <THREAD_ID>
+codex-wake --wake-root .codex/wake app after --retry-active-writer <THREAD_ID> 30m -- \
+  "Resume only after the target thread becomes idle."
 ```
+
+Omit `--retry-active-writer` for the fail-fast default. With the flag, active
+writer contention requeues only within the wake record's bounded attempt and
+backoff policy.
 
 Never use placeholder thread ids or session keys such as `noop-smoke-test` as proof of OpenClaw wake readiness. For OpenClaw skill availability, use `openclaw skills info codex-wake --agent <id> --json`; for wake execution, require a real dispatch without `--no-dispatch` and then verify `submitted`, `openclaw_gateway_dispatch_result`, `ack_observed`, or app-server turn evidence.
 

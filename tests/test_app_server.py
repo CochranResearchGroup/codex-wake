@@ -74,7 +74,7 @@ class AppServerTests(unittest.TestCase):
             self.assertEqual(result.status, "submitted")
             self.assertEqual([call[0] for call in client.calls], ["initialize", "thread/resume", "turn/start"])
             turn_call = client.calls[-1][1]
-            self.assertEqual(turn_call["prompt"], canonical_prompt("wake_app"))
+            self.assertEqual(turn_call["prompt"], canonical_prompt("wake_app", root))
             self.assertNotIn("full prompt", turn_call["prompt"])
             data = json.loads((root / "submitted" / "wake_app.json").read_text())
             self.assertEqual(data["status"], "submitted")
@@ -112,7 +112,7 @@ class AppServerTests(unittest.TestCase):
             self.assertIn("app-server command not found: codex", data["last_error"])
             self.assertEqual(data["events"][-1]["type"], "failed")
 
-    def test_dispatch_app_server_record_requeues_active_thread_without_starting_turn(self) -> None:
+    def test_dispatch_app_server_record_fails_active_thread_by_default_without_starting_turn(self) -> None:
         class ActiveClient(FakeAppServerClient):
             def resume_thread(self, thread_id: str, cwd: str | None = None) -> dict:
                 self.calls.append(("thread/resume", {"thread_id": thread_id, "cwd": cwd}))
@@ -125,6 +125,30 @@ class AppServerTests(unittest.TestCase):
 
             result = dispatch_app_server_record(root, found, client=client, now=datetime(2026, 5, 18, 21, 0, tzinfo=UTC))
 
+            self.assertEqual(result.status, "failed")
+            self.assertEqual([call[0] for call in client.calls], ["initialize", "thread/resume"])
+            data = json.loads((root / "failed" / "wake_app.json").read_text())
+            self.assertEqual(data["status"], "failed")
+            self.assertEqual(data["attempts"], 1)
+            self.assertIn("active writer", data["last_error"])
+            self.assertEqual(data["events"][-1]["type"], "failed")
+            self.assertFalse((root / "firing" / "wake_app.json").exists())
+
+    def test_dispatch_app_server_record_requeues_active_thread_when_opted_in(self) -> None:
+        class ActiveClient(FakeAppServerClient):
+            def resume_thread(self, thread_id: str, cwd: str | None = None) -> dict:
+                self.calls.append(("thread/resume", {"thread_id": thread_id, "cwd": cwd}))
+                return {"thread": {"id": thread_id, "status": {"type": "active"}}}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_record(root, Path(tmp))
+            found.record["target"]["retry_active_writer"] = True
+            write_record(root, found.record)
+            client = ActiveClient()
+
+            result = dispatch_app_server_record(root, found, client=client, now=datetime(2026, 5, 18, 21, 0, tzinfo=UTC))
+
             self.assertEqual(result.status, "requeued")
             self.assertEqual([call[0] for call in client.calls], ["initialize", "thread/resume"])
             data = json.loads((root / "pending" / "wake_app.json").read_text())
@@ -133,6 +157,32 @@ class AppServerTests(unittest.TestCase):
             self.assertEqual(data["next_attempt_at"], "2026-05-18T21:01:00Z")
             self.assertEqual(data["events"][-1]["type"], "requeued")
             self.assertFalse((root / "firing" / "wake_app.json").exists())
+
+    def test_dispatch_app_server_record_stops_retrying_active_writer_at_attempt_limit(self) -> None:
+        class ActiveClient(FakeAppServerClient):
+            def resume_thread(self, thread_id: str, cwd: str | None = None) -> dict:
+                self.calls.append(("thread/resume", {"thread_id": thread_id, "cwd": cwd}))
+                return {"thread": {"id": thread_id, "status": {"type": "active"}}}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_record(root, Path(tmp))
+            found.record["target"]["retry_active_writer"] = True
+            found.record["attempts"] = 2
+            write_record(root, found.record)
+
+            result = dispatch_app_server_record(
+                root,
+                found,
+                client=ActiveClient(),
+                now=datetime(2026, 5, 18, 21, 0, tzinfo=UTC),
+            )
+
+            self.assertEqual(result.status, "failed")
+            data = json.loads((root / "failed" / "wake_app.json").read_text())
+            self.assertEqual(data["attempts"], 3)
+            self.assertEqual(data["events"][-1]["type"], "failed")
+            self.assertIn("active writer", data["last_error"])
 
     def test_read_app_server_thread_status_summarizes_thread_status(self) -> None:
         client = FakeAppServerClient()

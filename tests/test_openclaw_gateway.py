@@ -99,6 +99,7 @@ class OpenClawGatewayTests(unittest.TestCase):
             prompt = openclaw_wake_prompt(root, found.record)
 
             self.assertIn("WAKE_TRIGGER_ID=wake_openclaw", prompt)
+            self.assertIn(f"WAKE_TRIGGER_ROOT={root.resolve()}", prompt)
             self.assertIn(f"Wake root: {root.resolve()}", prompt)
             self.assertIn(f"Record cwd: {Path(tmp)}", prompt)
             self.assertNotIn("SECRET ORIGINAL PROMPT", prompt)

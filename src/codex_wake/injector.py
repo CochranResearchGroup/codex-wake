@@ -85,8 +85,12 @@ class SubprocessTmuxRunner:
             Path(prompt_path).unlink(missing_ok=True)
 
 
-def canonical_prompt(wake_id: str) -> str:
-    return f"WAKE_TRIGGER_ID={wake_id}\nResume the scheduled wake task.\n"
+def canonical_prompt(wake_id: str, wake_root: Path) -> str:
+    return (
+        f"WAKE_TRIGGER_ID={wake_id}\n"
+        f"WAKE_TRIGGER_ROOT={wake_root.resolve()}\n"
+        "Resume the scheduled wake task.\n"
+    )
 
 
 def wake_marker_present(text: str, wake_id: str) -> bool:
@@ -283,7 +287,7 @@ def dispatch_firing_record(
             unsafe = unsafe_pane_reason(captured)
             if unsafe:
                 return requeue_or_fail(root, WakePath(root / "firing" / f"{wake_id}.json", record), record, f"unsafe pane: {unsafe}", current, "unsafe_pane")
-            tmux.paste_prompt(socket, pane, wake_id, canonical_prompt(wake_id))
+            tmux.paste_prompt(socket, pane, wake_id, canonical_prompt(wake_id, root))
             timeout = ack_timeout_override
             if timeout is None:
                 timeout = float(record.get("ack_timeout_seconds") or 30)

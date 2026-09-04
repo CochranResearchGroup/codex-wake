@@ -95,6 +95,7 @@ def build_parser() -> argparse.ArgumentParser:
     app_after = app_subparsers.add_parser("after", help="create an app-server wake after a duration")
     app_after.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
     app_after.add_argument("--codex-path", help="Codex CLI path or command for daemon-side app-server dispatch")
+    add_active_writer_retry_option(app_after)
     add_monitor_gate_options(app_after)
     app_after.add_argument("thread_id")
     app_after.add_argument("duration")
@@ -103,6 +104,7 @@ def build_parser() -> argparse.ArgumentParser:
     app_at = app_subparsers.add_parser("at", help="create an app-server wake at an ISO-8601 timestamp")
     app_at.add_argument("--endpoint", default="stdio://", help="app-server endpoint; only stdio:// is currently implemented")
     app_at.add_argument("--codex-path", help="Codex CLI path or command for daemon-side app-server dispatch")
+    add_active_writer_retry_option(app_at)
     add_monitor_gate_options(app_at)
     app_at.add_argument("thread_id")
     app_at.add_argument("timestamp")
@@ -344,6 +346,15 @@ def add_target_options(parser: argparse.ArgumentParser) -> None:
         "--app-server-codex-path",
         help="Codex CLI path or command for daemon-side app-server dispatch",
     )
+    add_active_writer_retry_option(parser)
+
+
+def add_active_writer_retry_option(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--retry-active-writer",
+        action="store_true",
+        help="retry with bounded backoff if the app-server thread has an active writer; default is terminal failure",
+    )
 
 
 def add_openclaw_gateway_options(parser: argparse.ArgumentParser) -> None:
@@ -462,11 +473,13 @@ def create_app(args: argparse.Namespace, root: Path) -> int:
     if args.endpoint != "stdio://":
         raise WakeError("only app-server endpoint stdio:// is currently implemented")
     predicate = {"type": "not_before", "due_at": format_utc(due)}
-    target = {
+    target: dict[str, object] = {
         "transport": "app-server",
         "endpoint": args.endpoint,
         "thread_id": args.thread_id,
     }
+    if args.retry_active_writer:
+        target["retry_active_writer"] = True
     if args.codex_path:
         target["codex_cmd"] = resolve_codex_cmd(args.codex_path, required=True)
     return create_record(args.prompt, predicate, root, now, args, target=target)
@@ -727,20 +740,24 @@ def create_record(
     return 0
 
 
-def target_for_args(args: argparse.Namespace) -> dict[str, str]:
+def target_for_args(args: argparse.Namespace) -> dict[str, object]:
     if getattr(args, "app_server_thread_id", None):
         endpoint = getattr(args, "app_server_endpoint", "stdio://")
         if endpoint != "stdio://":
             raise WakeError("only app-server endpoint stdio:// is currently implemented")
-        target = {
+        target: dict[str, object] = {
             "transport": "app-server",
             "endpoint": endpoint,
             "thread_id": args.app_server_thread_id,
         }
+        if getattr(args, "retry_active_writer", False):
+            target["retry_active_writer"] = True
         codex_path = getattr(args, "app_server_codex_path", None)
         if codex_path:
             target["codex_cmd"] = resolve_codex_cmd(codex_path, required=True)
         return target
+    if getattr(args, "retry_active_writer", False):
+        raise WakeError("--retry-active-writer requires an app-server target")
     return capture_tmux_target()
 
 

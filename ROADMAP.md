@@ -502,3 +502,23 @@ Acceptance target:
   OpenClaw Gateway, and manual/operator-visible tmux boundaries.
 - A productization release is tagged, published, public-install-smoked, and
   recorded with live wake evidence.
+
+## P44 | App-Server Active Writer Policy
+
+State: CLOSED
+
+Current State: Closed on 2026-08-25. App-server preflight never calls
+`turn/start` while the target is active. Active-writer contention fails by
+default, including for older records without the additive target option, and
+`--retry-active-writer` opts a wake into the existing bounded three-attempt
+backoff policy.
+
+Plan: [App-Server Active Writer Policy](docs/dev/plans/0044-2026-08-25-app-server-active-writer-policy.md)
+
+Acceptance target:
+
+- Active-writer contention never calls `turn/start`.
+- Default and legacy records fail visibly when the target is active.
+- Explicitly opted-in records retry with the existing bounded attempt and
+  backoff policy.
+- CLI, persisted schema, tests, operator docs, and agent guidance agree.

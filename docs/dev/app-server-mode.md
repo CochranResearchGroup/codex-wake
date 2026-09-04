@@ -13,7 +13,8 @@ Codex Wake supports an app-server target record shape for controlled dispatch:
     "transport": "app-server",
     "endpoint": "stdio://",
     "thread_id": "thread_...",
-    "codex_cmd": "/home/you/.local/bin/codex"
+    "codex_cmd": "/home/you/.local/bin/codex",
+    "retry_active_writer": true
   }
 }
 ```
@@ -22,6 +23,10 @@ Codex Wake supports an app-server target record shape for controlled dispatch:
 command for `codex app-server --listen stdio://`. When absent, dispatch checks
 `CODEX_WAKE_CODEX_CMD` and then falls back to `codex` from the daemon process
 environment.
+
+`retry_active_writer` is optional and defaults to `false` when absent. This
+preserves a fail-fast default for older wake records. When true, active-writer
+contention is retried under the wake record's bounded `max_attempts` policy.
 
 The implemented path starts or uses a stdio app-server client and sends:
 
@@ -43,6 +48,7 @@ Use explicit app-server commands for time-based wakes:
 ```bash
 codex-wake app after thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app after --codex-path "$(command -v codex)" thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app after --retry-active-writer thread_abc 45m -- "Resume when this thread is idle."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
 ```
 
@@ -78,9 +84,11 @@ only the relevant command-resolution fields, not the full service environment.
 
 Dispatch preflight resumes the target thread, records `app_server_preflight`
 status evidence, and only calls `turn/start` when the resumed thread reports
-`idle`. If the thread reports `active`, Codex Wake requeues the wake with
-backoff instead of starting another turn. Malformed status or non-idle
-unhealthy states fail the wake record visibly.
+`idle`. If the thread reports `active`, Codex Wake records active-writer
+contention and fails the wake by default instead of starting another turn.
+`--retry-active-writer` changes that outcome to a bounded requeue using the
+existing 60-second then 300-second backoff and three-attempt record limit.
+Malformed status or other non-idle states fail the wake record visibly.
 
 App-server wake targets must be resumable rollout-backed thread ids. A bare
 `thread/start` response is not enough if no turn has materialized a rollout for

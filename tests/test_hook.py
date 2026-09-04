@@ -8,8 +8,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from codex_wake.hook import extract_wake_id, handle_payload, main
-from codex_wake.records import build_record, write_record
+from codex_wake.hook import extract_wake_id, extract_wake_root, handle_payload, main
+from codex_wake.records import archive_record, build_record, write_record
 
 
 class HookTests(unittest.TestCase):
@@ -25,6 +25,14 @@ class HookTests(unittest.TestCase):
     def test_extract_wake_id(self) -> None:
         self.assertEqual(extract_wake_id("WAKE_TRIGGER_ID=wake_123\nResume"), "wake_123")
         self.assertIsNone(extract_wake_id("ordinary prompt"))
+
+    def test_extract_wake_root(self) -> None:
+        self.assertEqual(
+            extract_wake_root("WAKE_TRIGGER_ID=wake_123\nWAKE_TRIGGER_ROOT=/tmp/a wake root\nResume"),
+            Path("/tmp/a wake root"),
+        )
+        self.assertIsNone(extract_wake_root("WAKE_TRIGGER_ID=wake_123\nResume"))
+        self.assertIsNone(extract_wake_root("WAKE_TRIGGER_ROOT=relative/wake\nResume"))
 
     def test_no_match_returns_none_and_writes_no_ack(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -59,6 +67,86 @@ class HookTests(unittest.TestCase):
             self.assertIn("A scheduled wake trigger fired.", context)
             self.assertIn("Read pytest log and continue", context)
             self.assertIn(".codex/events/pytest.log", context)
+
+    def test_explicit_root_routes_cross_repository_ack_and_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            record_cwd = base / "record owner"
+            receiving_cwd = base / "receiving repo"
+            wake_root = record_cwd / ".codex" / "wake"
+            record = build_record(
+                predicate={"type": "file_exists", "path": ".codex/events/done"},
+                prompt="Continue from the owning repository",
+                cwd=record_cwd,
+                target={"transport": "tmux", "tmux_socket": "/tmp/tmux/default", "pane": "%1"},
+            )
+            record["id"] = "wake_cross_root"
+            record["status"] = "firing"
+            write_record(wake_root, record)
+
+            output = handle_payload(
+                self.make_payload(
+                    receiving_cwd,
+                    f"WAKE_TRIGGER_ID=wake_cross_root\nWAKE_TRIGGER_ROOT={wake_root}\nResume",
+                )
+            )
+
+            self.assertTrue((wake_root / "acks" / "wake_cross_root.submitted").exists())
+            self.assertFalse((receiving_cwd / ".codex" / "wake" / "acks").exists())
+            context = output["hookSpecificOutput"]["additionalContext"]
+            self.assertIn("A scheduled wake trigger fired.", context)
+            self.assertIn("Continue from the owning repository", context)
+
+    def test_archived_cancelled_wake_returns_terminal_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            record_cwd = base / "owner"
+            receiving_cwd = base / "receiver"
+            wake_root = record_cwd / ".codex" / "wake"
+            record = build_record(
+                predicate={"type": "file_exists", "path": ".codex/events/done"},
+                prompt="This task must not resume",
+                cwd=record_cwd,
+                target={"transport": "tmux", "tmux_socket": "/tmp/tmux/default", "pane": "%1"},
+            )
+            record["id"] = "wake_archived"
+            record["status"] = "cancelled"
+            write_record(wake_root, record)
+            archive_record(wake_root, "wake_archived")
+
+            output = handle_payload(
+                self.make_payload(
+                    receiving_cwd,
+                    f"WAKE_TRIGGER_ID=wake_archived\nWAKE_TRIGGER_ROOT={wake_root}\nResume",
+                )
+            )
+
+            self.assertTrue((wake_root / "acks" / "wake_archived.submitted").exists())
+            context = output["hookSpecificOutput"]["additionalContext"]
+            self.assertIn("terminal", context.lower())
+            self.assertIn("archived", context)
+            self.assertIn("cancelled", context)
+            self.assertIn("Do not resume", context)
+            self.assertNotIn("A scheduled wake trigger fired.", context)
+
+    def test_missing_explicit_root_record_does_not_write_ack(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "owner" / ".codex" / "wake"
+            receiving_cwd = base / "receiver"
+
+            output = handle_payload(
+                self.make_payload(
+                    receiving_cwd,
+                    f"WAKE_TRIGGER_ID=wake_missing\nWAKE_TRIGGER_ROOT={wake_root}\nResume",
+                )
+            )
+
+            self.assertFalse((wake_root / "acks" / "wake_missing.submitted").exists())
+            self.assertFalse((receiving_cwd / ".codex" / "wake" / "acks").exists())
+            context = output["hookSpecificOutput"]["additionalContext"]
+            self.assertIn(str(wake_root), context)
+            self.assertIn("trigger file was not found", context)
 
     def test_missing_record_writes_ack_and_warns(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

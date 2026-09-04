@@ -206,6 +206,9 @@ def app_server_target(record: dict[str, Any]) -> dict[str, Any]:
     thread_id = target.get("thread_id")
     if not isinstance(thread_id, str) or not thread_id:
         raise WakeError("app-server target requires thread_id")
+    retry_active_writer = target.get("retry_active_writer", False)
+    if not isinstance(retry_active_writer, bool):
+        raise WakeError("app-server target retry_active_writer must be a boolean when provided")
     return target
 
 
@@ -420,15 +423,18 @@ def dispatch_app_server_record(
             if thread_status["type"] != "idle":
                 message = f"app-server thread not idle: {thread_status['type']}"
                 if thread_status["type"] == "active":
-                    return requeue_app_server_record(
-                        root,
-                        WakePath(root / "firing" / f"{wake_id}.json", record),
-                        record,
-                        message,
-                        current,
-                    )
+                    message = "app-server thread has an active writer"
+                    if target.get("retry_active_writer", False):
+                        return requeue_app_server_record(
+                            root,
+                            WakePath(root / "firing" / f"{wake_id}.json", record),
+                            record,
+                            message,
+                            current,
+                        )
+                    raise WakeError(f"{message}; retry not enabled")
                 raise WakeError(message)
-            turn_result = app_client.start_turn(thread_id, canonical_prompt(wake_id), cwd=cwd)
+            turn_result = app_client.start_turn(thread_id, canonical_prompt(wake_id, root), cwd=cwd)
         finally:
             if client is None:
                 app_client.close()

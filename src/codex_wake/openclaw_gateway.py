@@ -196,6 +196,7 @@ def openclaw_wake_prompt(root: Path, record: dict[str, Any]) -> str:
     return "\n".join(
         [
             f"WAKE_TRIGGER_ID={wake_id}",
+            f"WAKE_TRIGGER_ROOT={root.resolve()}",
             "Resume the scheduled wake task.",
             f"Wake root: {root.resolve()}",
             f"Record cwd: {cwd_line}",

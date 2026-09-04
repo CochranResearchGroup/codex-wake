@@ -2054,3 +2054,25 @@ Released `v0.5.0` and closed P43.
 Best next turn option: use `codex-wake product-readiness --json` as the first
 check in downstream repos, then only add new trigger/transport work after a new
 bounded plan.
+
+## Turn 112 | 2026-08-25
+
+Implemented and closed P44 app-server active-writer policy.
+
+- Changed active-writer contention from implicit retry to terminal failure by
+  default; older records without the additive option receive this default.
+- Added `--retry-active-writer` to `app after|at` and compatibility
+  `after|at --app-server-thread-id` registration surfaces.
+- Opted-in wakes persist `target.retry_active_writer=true` and reuse the
+  existing 60-second/300-second backoff with the three-attempt bound.
+- Preserved the invariant that active preflight never calls `turn/start`.
+- Updated README, app-server mode, wake-record schema, and the Codex Wake skill.
+- Test-first focused checks initially failed on the old implicit retry and
+  missing CLI flag, then passed after implementation.
+- Focused app-server and CLI tier: 61 tests passed.
+- Comprehensive source tier: 174 tests passed with zero retries.
+- Python compile checks, active planning audit, and `git diff --check` passed.
+
+Best next turn option: include P44 in the next release slice, then verify the
+installed CLI help and one controlled active-writer record outcome before
+refreshing any user-scoped install.

@@ -195,6 +195,7 @@ Create an app-server-targeted wake instead of a tmux-targeted wake:
 ```bash
 codex-wake app after --require-monitor thread_abc 45m -- "Resume this thread through app-server."
 codex-wake app after --require-monitor --codex-path "$(command -v codex)" thread_abc 45m -- "Resume this thread through app-server."
+codex-wake app after --require-monitor --retry-active-writer thread_abc 45m -- "Resume when this thread is idle."
 codex-wake app at thread_abc "2026-05-19T17:30:00-05:00" -- "Check the release state."
 codex-wake app candidates
 codex-wake app candidates --cwd "$PWD" --json
@@ -203,6 +204,12 @@ codex-wake app status thread_abc
 codex-wake app status --resume thread_abc
 codex-wake app status --json thread_abc
 ```
+
+App-server dispatch fails visibly by default if preflight finds that the
+target thread already has an active writer. Add `--retry-active-writer` only
+when delayed delivery remains useful; the wake then retries with bounded
+backoff under the record's existing three-attempt limit. In either mode,
+Codex Wake does not call `turn/start` while the thread is active.
 
 Create an OpenClaw Gateway-targeted wake for a durable OpenClaw session:
 

@@ -60,7 +60,8 @@ App-server target:
   "transport": "app-server",
   "endpoint": "stdio://",
   "thread_id": "thread_abc",
-  "codex_cmd": "/home/you/.local/bin/codex"
+  "codex_cmd": "/home/you/.local/bin/codex",
+  "retry_active_writer": true
 }
 ```
 
@@ -70,6 +71,11 @@ Codex CLI command or absolute path used by the daemon to launch local stdio
 app-server dispatch. Generated service and supervisor configuration preserves
 stable symlink spellings and rejects paths tied to version-managed Node
 installations.
+
+`retry_active_writer` is an optional boolean. Missing or `false` means an
+active writer causes terminal wake failure after preflight. `true` permits
+bounded requeue under the record's `max_attempts` and app-server backoff
+schedule. Neither policy permits `turn/start` while the thread is active.
 
 OpenClaw Gateway target:
 
@@ -167,6 +173,8 @@ Current optional fields include:
 - `visibility_result`: sanitized tmux operator-visibility evidence when checked.
 - app-server target `codex_cmd`: optional command path for launching local
   stdio app-server dispatch.
+- app-server target `retry_active_writer`: optional boolean enabling bounded
+  retry when preflight observes an active writer; absence means fail-fast.
 - OpenClaw Gateway target `openclaw_cmd`: optional command path for launching
   local Gateway dispatch through the OpenClaw CLI.
 

@@ -563,6 +563,40 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["predicate"]["type"], "not_before")
             self.assertEqual(data["target"], {"transport": "app-server", "endpoint": "stdio://", "thread_id": "thread_abc"})
 
+    def test_app_after_can_opt_into_active_writer_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(
+                ["app", "after", "--retry-active-writer", "thread_abc", "1m", "--", "Wake app server"],
+                root,
+            )
+
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertIs(data["target"]["retry_active_writer"], True)
+
+    def test_compatibility_app_target_can_opt_into_active_writer_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code, out, err = self.run_cli(
+                [
+                    "after",
+                    "--app-server-thread-id",
+                    "thread_abc",
+                    "--retry-active-writer",
+                    "1m",
+                    "--",
+                    "Wake app server",
+                ],
+                root,
+            )
+
+            self.assertEqual(code, 0, err)
+            wake_id = out.split()[0]
+            data = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertIs(data["target"]["retry_active_writer"], True)
+
     def test_app_after_can_persist_codex_cmd_for_daemon_dispatch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"
