@@ -19,11 +19,13 @@ from .supervisor import build_supervisor_config, supervisor_status
 
 
 STATUS_READY = "ready"
+STATUS_NOT_NEEDED = "not_needed"
 STATUS_WARNING = "warning"
 STATUS_MANUAL_ONLY = "manual_only"
 STATUS_BLOCKED = "blocked"
 STATUS_ORDER = {
     STATUS_READY: 0,
+    STATUS_NOT_NEEDED: 0,
     STATUS_MANUAL_ONLY: 1,
     STATUS_WARNING: 2,
     STATUS_BLOCKED: 3,
@@ -62,7 +64,8 @@ def outcome(status: str, message: str, **extra: Any) -> dict[str, Any]:
 def overall_status(items: list[dict[str, Any]]) -> str:
     if not items:
         return STATUS_READY
-    return max((str(item.get("status") or STATUS_READY) for item in items), key=lambda status: STATUS_ORDER.get(status, 0))
+    status = max((str(item.get("status") or STATUS_READY) for item in items), key=lambda value: STATUS_ORDER.get(value, 0))
+    return STATUS_READY if STATUS_ORDER.get(status, 0) == 0 else status
 
 
 def command_paths() -> dict[str, str]:
@@ -272,6 +275,30 @@ def supervisor_product_readiness(
         status = STATUS_READY
         message = "codex-wake supervisor is active and this wake root is enrolled"
     return {**outcome(status, message), **summary, "current_root_enrolled": bool(matching)}
+
+
+def reconcile_repo_service_readiness(
+    repo_service: dict[str, Any],
+    supervisor: dict[str, Any],
+    monitor: dict[str, Any],
+) -> dict[str, Any]:
+    supervisor_covers_root = (
+        supervisor.get("status") == STATUS_READY
+        and bool(supervisor.get("current_root_enrolled"))
+        and monitor.get("status") == STATUS_READY
+        and bool(monitor.get("monitor_ready"))
+    )
+    if repo_service.get("active") == "active" or not supervisor_covers_root:
+        return repo_service
+    return {
+        **repo_service,
+        **outcome(
+            STATUS_NOT_NEEDED,
+            "repo-scoped service is not needed because the active user supervisor owns this wake root",
+        ),
+        "required": False,
+        "covered_by": "supervisor",
+    }
 
 
 def env_ref(value: Any) -> str:
@@ -526,6 +553,7 @@ def product_readiness_summary(
         log_path=supervisor_log_path,
         runner=runner,
     )
+    repo_service = reconcile_repo_service_readiness(repo_service, supervisor, monitor)
     auth = openclaw_auth_readiness(config_path=openclaw_config, env=source_env)
     openclaw_cmd = commands.get("openclaw", "")
     openclaw_gateway = openclaw_gateway_readiness(
@@ -558,6 +586,6 @@ def product_readiness_summary(
         "repo_root": str(resolved_repo),
         "wake_root": str(resolved_root),
         "overall_status": overall_status(list(checks.values())),
-        "status_vocabulary": [STATUS_READY, STATUS_WARNING, STATUS_MANUAL_ONLY, STATUS_BLOCKED],
+        "status_vocabulary": [STATUS_READY, STATUS_NOT_NEEDED, STATUS_WARNING, STATUS_MANUAL_ONLY, STATUS_BLOCKED],
         "checks": checks,
     }

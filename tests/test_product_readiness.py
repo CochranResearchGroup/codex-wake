@@ -6,17 +6,21 @@ import tempfile
 import unittest
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from unittest import mock
 
 from codex_wake.monitor import write_monitor_health
 from codex_wake.product_readiness import (
     STATUS_BLOCKED,
+    STATUS_NOT_NEEDED,
     STATUS_READY,
     app_server_readiness_from_service,
     monitor_product_readiness,
     openclaw_auth_readiness,
     openclaw_gateway_readiness,
     openclaw_plugin_readiness,
+    overall_status,
     product_readiness_summary,
+    reconcile_repo_service_readiness,
     supervisor_product_readiness,
 )
 from codex_wake.service import ServiceAppServerReadiness
@@ -76,6 +80,36 @@ def make_executable(path: Path) -> Path:
 
 
 class ProductReadinessTests(unittest.TestCase):
+    def test_healthy_supervisor_coverage_makes_repo_service_not_needed(self) -> None:
+        result = reconcile_repo_service_readiness(
+            {"status": "warning", "message": "repo-scoped service is not active", "active": "inactive"},
+            {"status": STATUS_READY, "current_root_enrolled": True},
+            {"status": STATUS_READY, "monitor_ready": True},
+        )
+
+        self.assertEqual(result["status"], STATUS_NOT_NEEDED)
+        self.assertEqual(result["covered_by"], "supervisor")
+        self.assertIn("not needed", result["message"])
+        self.assertEqual(overall_status([result, {"status": STATUS_READY}]), STATUS_READY)
+
+    def test_repo_service_warning_remains_without_healthy_supervisor_coverage(self) -> None:
+        repo_service = {"status": "warning", "message": "repo-scoped service is not active", "active": "inactive"}
+
+        inactive_supervisor = reconcile_repo_service_readiness(
+            repo_service,
+            {"status": STATUS_BLOCKED, "current_root_enrolled": True},
+            {"status": STATUS_BLOCKED, "monitor_ready": False},
+        )
+        unenrolled_supervisor = reconcile_repo_service_readiness(
+            repo_service,
+            {"status": "warning", "current_root_enrolled": False},
+            {"status": STATUS_BLOCKED, "monitor_ready": False},
+        )
+
+        self.assertEqual(inactive_supervisor["status"], "warning")
+        self.assertEqual(unenrolled_supervisor["status"], "warning")
+        self.assertNotIn("covered_by", inactive_supervisor)
+
     def test_openclaw_auth_reports_missing_token_env_without_secret_value(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             config = Path(tmp) / "openclaw.json"
@@ -211,7 +245,7 @@ class ProductReadinessTests(unittest.TestCase):
             message="interactive shell can resolve codex, but user-systemd cannot",
         )
 
-        with unittest.mock.patch("codex_wake.product_readiness.service_app_server_readiness", return_value=readiness):
+        with mock.patch("codex_wake.product_readiness.service_app_server_readiness", return_value=readiness):
             result = app_server_readiness_from_service(object())
 
         self.assertEqual(result["status"], STATUS_BLOCKED)
@@ -253,7 +287,7 @@ class ProductReadinessTests(unittest.TestCase):
                 }
             )
 
-            with unittest.mock.patch(
+            with mock.patch(
                 "codex_wake.product_readiness.command_paths",
                 return_value={
                     "codex_wake": str(codex_wake),

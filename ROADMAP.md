@@ -562,3 +562,21 @@ Acceptance target:
 - GitHub CI and the GitHub release complete successfully.
 - Public-tag smoke, user-scoped CLI refresh, hook/skill synchronization,
   supervisor restart, and OpenClaw plugin refresh are verified.
+
+## P47 | Readiness Alternative Monitor Status
+
+State: OPEN
+
+Current State: `product-readiness` incorrectly warns that the repo-scoped
+service is inactive even when the active user supervisor owns this root and
+has recent monitor health. Implementation and release validation are in
+progress.
+
+Plan: [Readiness Alternative Monitor Status](docs/dev/plans/0047-2026-09-04-readiness-alternative-monitor-status.md)
+
+Acceptance target:
+
+- Healthy supervisor coverage reports the repo service as `not_needed`.
+- Missing or unhealthy alternative coverage preserves the warning.
+- Overall readiness treats `not_needed` as neutral.
+- Source, CI, public-tag, and installed-runtime evidence agree.

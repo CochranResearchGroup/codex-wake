@@ -2119,3 +2119,16 @@ Released `v0.5.1` and closed P46.
 Best next turn option: use installed `codex-wake product-readiness --json` in
 downstream roots; open a new bounded plan before changing trigger or transport
 semantics.
+
+## Turn 115 | 2026-09-04
+
+Opened P47 to correct alternative-monitor readiness semantics.
+
+- Confirmed the installed warning is caused by independent check aggregation,
+  not by missing wake coverage.
+- Bounded the correction to a neutral `not_needed` repo-service status when
+  supervisor and monitor readiness both prove coverage for the selected root.
+- Preserved warnings for inactive, unenrolled, or unhealthy supervisor paths.
+
+Best next turn option: add red regression coverage, implement the neutral
+status reconciliation, then run release and installed-runtime validation.

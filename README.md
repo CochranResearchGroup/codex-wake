@@ -385,9 +385,11 @@ require the original launch executable to remain installed.
 `product-readiness --json` is the productization-level report. It normalizes
 CLI, hooks, skill installs, repo service, user supervisor, enrolled roots,
 monitor health, app-server dispatch readiness, OpenClaw Gateway RPC readiness,
-OpenClaw plugin readiness, and tmux availability into `ready`, `warning`,
-`manual_only`, or `blocked` outcomes. Gateway auth is reported by variable name
-and presence only; secret values are not emitted.
+OpenClaw plugin readiness, and tmux availability into `ready`, `not_needed`,
+`warning`, `manual_only`, or `blocked` outcomes. An inactive repo-scoped service
+is `not_needed`, rather than a warning, when the active user supervisor is
+enrolled for the same wake root and monitor health is ready. Gateway auth is
+reported by variable name and presence only; secret values are not emitted.
 
 Ack evidence proves that Codex submitted the wake prompt in the target session.
 It does not by itself prove that a new turn was visible in the pane the operator

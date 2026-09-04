@@ -257,10 +257,14 @@ codex-wake --wake-root .codex/wake service install --codex-path "$(command -v co
 ```
 
 Use `product-readiness --json` for productization and release gates. It reports
-normalized `ready`, `warning`, `manual_only`, and `blocked` outcomes for CLI,
-hooks, skill installs, repo service, supervisor roots, monitor health,
+normalized `ready`, `not_needed`, `warning`, `manual_only`, and `blocked`
+outcomes for CLI, hooks, skill installs, repo service, supervisor roots, monitor health,
 app-server dispatch, OpenClaw Gateway, OpenClaw plugin, and tmux availability
 without emitting Gateway secret values.
+
+`repo_service=not_needed` is healthy when `covered_by=supervisor`: it means the
+active user supervisor is enrolled for this wake root and has ready monitor
+evidence, so a redundant repo-scoped service should remain inactive.
 
 Use the tracked product smoke harness when validating an installed release:
 
