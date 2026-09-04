@@ -2122,13 +2122,26 @@ semantics.
 
 ## Turn 115 | 2026-09-04
 
-Opened P47 to correct alternative-monitor readiness semantics.
+Implemented, released, and closed P47 alternative-monitor readiness semantics.
 
 - Confirmed the installed warning is caused by independent check aggregation,
   not by missing wake coverage.
 - Bounded the correction to a neutral `not_needed` repo-service status when
   supervisor and monitor readiness both prove coverage for the selected root.
 - Preserved warnings for inactive, unenrolled, or unhealthy supervisor paths.
+- Added the neutral `not_needed` status plus `required=false` and
+  `covered_by=supervisor` structured evidence.
+- Added two focused regression cases; the focused module passes independently
+  and the comprehensive suite passes 182 tests.
+- Released public `v0.5.2`; GitHub Actions run `33866311984` passed on Python
+  3.11 and 3.12, and public-tag smoke reports CLI `0.5.2` with schema `1`.
+- Refreshed the user CLI, hook, three skill copies, supervisor, and OpenClaw
+  plugin from the public tag.
+- Installed readback reports `repo_service=not_needed`,
+  `covered_by=supervisor`, `supervisor=ready`, and `monitor=ready`.
+- Recorded the separate masked OpenClaw Gateway condition without unmasking it
+  or claiming live Gateway RPC readiness.
 
-Best next turn option: add red regression coverage, implement the neutral
-status reconciliation, then run release and installed-runtime validation.
+Best next turn option: diagnose why `openclaw-gateway.service` is masked only
+if live OpenClaw Gateway delivery is currently required; no further action is
+needed for the corrected repo-service readiness result.

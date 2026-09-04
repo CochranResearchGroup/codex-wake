@@ -565,12 +565,14 @@ Acceptance target:
 
 ## P47 | Readiness Alternative Monitor Status
 
-State: OPEN
+State: CLOSED
 
-Current State: `product-readiness` incorrectly warns that the repo-scoped
-service is inactive even when the active user supervisor owns this root and
-has recent monitor health. Implementation and release validation are in
-progress.
+Current State: Closed by
+`docs/dev/verification/0071-2026-09-04-v052-readiness-release.md`. Installed
+`v0.5.2` reports the inactive repo service as `not_needed`, with
+`required=false` and `covered_by=supervisor`, when the active enrolled
+supervisor and ready monitor prove alternative coverage. Missing or unhealthy
+coverage still warns.
 
 Plan: [Readiness Alternative Monitor Status](docs/dev/plans/0047-2026-09-04-readiness-alternative-monitor-status.md)
 

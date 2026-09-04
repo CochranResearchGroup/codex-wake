@@ -2,7 +2,7 @@
 
 Date: 2026-09-04
 
-Status: OPEN
+Status: CLOSED
 
 ## Objective
 
@@ -11,11 +11,10 @@ enrolled, healthy user supervisor already owns the same wake root.
 
 ## Current State
 
-`product-readiness` evaluates the repo service before the supervisor and emits
-`warning` whenever the repo service is inactive. The final aggregation does not
-reconcile that warning with the later evidence that the supervisor is active,
-the root is enrolled, and monitor health is ready. This creates an actionable-
-looking warning for an intentionally redundant service.
+Released and installed in `v0.5.2`. The live repo-service check now reports
+`status=not_needed`, `required=false`, and `covered_by=supervisor` while the
+supervisor and monitor checks both report ready. The previous misleading
+warning is gone.
 
 ## Scope
 
@@ -52,3 +51,21 @@ looking warning for an intentionally redundant service.
 The corrected status is released and installed, the live workstation report
 no longer shows the misleading repo-service warning, validation evidence is
 recorded, the plan is closed, and the repository is clean and pushed.
+
+## Result
+
+- Added `not_needed` as a neutral readiness status that does not increase the
+  overall severity.
+- Reconciled the repo-service result only when the supervisor is active, the
+  selected wake root is enrolled, and monitor readiness is true.
+- Preserved the warning for absent, inactive, unenrolled, or unhealthy
+  alternative coverage.
+- Released and installed `v0.5.2`; source, CI, package, public-tag, skill,
+  supervisor, and plugin checks passed.
+- Recorded evidence in
+  `docs/dev/verification/0071-2026-09-04-v052-readiness-release.md`.
+
+The live overall product status is currently `blocked` for a separate reason:
+`openclaw-gateway.service` is masked and inactive. The release did not unmask
+that unrelated service. The installed OpenClaw plugin files inspect as version
+`0.5.2` with zero diagnostics, but live Gateway RPC was not claimed.
