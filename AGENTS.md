@@ -44,6 +44,9 @@ Read and follow:
 - `docs/dev/policies/0015-turn-closeout.md`
 - `docs/dev/policies/0016-code-testing-discipline.md`
 - `docs/dev/policies/0017-work-item-traceability.md`
+- `docs/dev/policies/0018-model-selection-and-calibration.md`
+- `docs/dev/policies/0019-forge-issue-reporting.md`
+- `docs/dev/policies/0020-github-issue-operations.md`
 
 ## Scope
 
