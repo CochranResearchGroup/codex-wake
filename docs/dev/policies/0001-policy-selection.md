@@ -55,6 +55,10 @@ Repo-purpose override from the user-stated goal:
 - Keep the critical path visible so parallel work does not hide the real blocker.
 - Prefer plan slices that minimize cross-lane file overlap and reconciliation cost.
 - Call out integration points explicitly when multiple lanes must converge before completion.
+- Define shared schemas, interfaces, and other cross-lane contracts before
+  dependent implementations fan out. If the contract is still unsettled, keep
+  that decision on the critical path or assign it one coordination owner rather
+  than letting parallel lanes establish competing authorities.
 - Express non-trivial execution as inspectable work units and dependency edges,
   including fan-out, join, review, retry, and terminal transitions. A table or
   plan section is sufficient; a graph framework is not required.
@@ -91,6 +95,11 @@ Repo-purpose override from the user-stated goal:
   evidence returned, and the primary agent's reconciliation decision.
 - Keep urgent blocking work local when the next action depends directly on the answer.
 - Give delegated work explicit ownership, expected output, and write scope.
+- Prefer economical workers for bounded inventory, normalization, receipt
+  drafting, manifest/counter checks, focused test triage, and other readily
+  verified transformations. Give them minimal context, a structured return
+  contract, deterministic checks, and no authority to alter goal scope,
+  acceptance, safety controls, or material budgets.
 - Prefer subagents for independent sidecar work, verification, or implementation slices with disjoint write sets.
 - Do not spawn parallel work that duplicates context loading or repeats the same exploration without a clear benefit.
 - Reuse prior agent context when the task is a continuation of the same bounded thread.
@@ -113,6 +122,9 @@ Repo-purpose override from the user-stated goal:
   replacement, plan revisions, and successor packets so review discovery does
   not restart accidentally.
 - Keep final integration responsibility with the primary agent even when subagents perform part of the work.
+- Integrate a verified worker result directly. Repeating its full investigation
+  with the primary defeats the routing decision; re-open only failed checks,
+  missing evidence, or consequential judgments reserved to the primary.
 - Be explicit about whether the repo optimizes for wall-clock speed, token efficiency, or a balance of the two.
 - Treat spawned subagents as asynchronous runtime artifacts, not just informal delegation.
 - Record the subagent run id, session id, transcript path, or equivalent handle when the runtime provides one.
@@ -160,6 +172,14 @@ Repo-purpose override from the user-stated goal:
   specification or acceptance contract. Do not let a pass on one axis mask a
   failure on the other, and do not let the separation bypass primary-agent
   evidence review and disposition.
+- For experiments and multi-axis acceptance, record verdicts independently for
+  the primary measurement, correctness, resources, maintenance, and evidence
+  integrity when those axes apply. Preserve every completed sample with its
+  identity and conditions even when the overall packet later stops.
+- Define an invalidation map before execution: each stop predicate names the
+  samples and verdicts it can invalidate and the causal reason. A later failure
+  may mark the packet incomplete without erasing unaffected valid samples.
+  Never promote partial evidence into a complete acceptance claim.
 - Separate review modes. Use at most one broad fresh-context `drift_discovery`
   pass when observed drift, consequence, or uncertainty justifies it. After
   adjudication, use `closed_world` remediation
@@ -183,11 +203,21 @@ Repo-purpose override from the user-stated goal:
 - Keep a compact machine-readable active-lane catalog on the canonical default branch, normally `docs/dev/active-lanes.yaml`. A documented equivalent path is allowed.
 - Treat the catalog as a discovery projection. A roadmap owns priority, a branch-local plan owns execution detail, a runbook owns chronological history, review tooling owns review state, and Git refs plus receipts prove custody and integration.
 - Give each lane one stable id and one branch owner. Record its objective, plan path and source ref, branch, target, plan state, custody state, published checkpoint, remote ref, integration method, dependencies, overlaps, reconciliation date, and any blocker or disposition.
+- Give each lane one stable id and one branch owner. Record its objective, work-item locators when work-item tracking is adopted, plan path and source ref, branch, target, plan state, custody state, published checkpoint, remote ref, integration method, dependencies, overlaps, reconciliation date, and any blocker or disposition.
+- Give each substantive lane one accountable execution owner. When several lanes
+  depend on shared schemas, roadmaps, catalogs, or other integration surfaces,
+  name one coordination owner for those surfaces instead of allowing every lane
+  to edit them independently. A person or session may fill more than one role
+  when the portfolio is small and the ownership remains unambiguous.
 - Keep plan outcome state separate from Git custody state. Use a small plan vocabulary such as `PLANNED`, `OPEN`, `BLOCKED`, `CLOSED`, and `CANCELLED`, and a custody vocabulary such as `ACTIVE_WORKTREE`, `PAUSED_REF`, `INTEGRATION_READY`, `INTEGRATED`, `ARCHIVED`, and `DISCARD_APPROVED`.
 - Keep detailed plans with their topic branches. Expose deterministic metadata for lane, state, branch, target, integration method, dependencies, overlaps, and base or checkpoint evidence so an auditor can read it from an explicit ref without checkout.
 - Do not put absolute worktree paths, ephemeral agent identifiers, secrets, tenant data, or private runtime details in the shared catalog. Derive local worktree locations during reconciliation.
 - Reconcile the catalog against current worktrees, bounded local and remote refs, branch-local plan metadata, checkpoint SHAs, target ancestry, receipts, dependencies, and overlap before planning, handoff, integration, or cleanup decisions. Prefer catalog-only discovery when the catalog is the complete authorized population; use exact repeated branch selectors for bounded unregistered-lane discovery. Prefix discovery is an explicit broader survey and should not be the default in repositories with large historical branch namespaces.
 - For active worktree custody, classify equal, local-ahead, remote-ahead, and diverged local/remote tips explicitly. Local-ahead, remote-ahead, and diverged state fail closed until the lane owner reconciles and publishes the intended checkpoint.
+- Treat worktree presence as workstation-local evidence. When a cataloged
+  `ACTIVE_WORKTREE` lane has no local branch or checkout but its exact remote
+  ref and checkpoint agree, classify it as healthy remote-active custody;
+  require a local checkout only when evaluating local worktree claims.
 - Fetching is a caller-controlled operation. A lane auditor must remain read-only and must not fetch, merge, rebase, push, delete refs, remove worktrees, edit plans, or infer authority from a clean report.
 - Register normal work before parallel execution begins. An urgent lane may start first only when delay creates greater risk; register and publish its first recoverable checkpoint at the earliest safe boundary.
 - Do not silently resolve catalog conflicts. Duplicate lane ids, two lanes claiming one branch, missing custody, stale checkpoints, active local/remote mismatch, plan/catalog drift, and unresolved overlaps fail closed until reconciled.
@@ -226,6 +256,58 @@ Repo-purpose override from the user-stated goal:
   - adoption feedback
   - reusable continuity notes
   when it records the version reviewed, decision taken, rationale, and notable fit or friction.
+- Reconcile worktree lifecycle with lane state. An integrated, archived, paused,
+  or handed-off branch does not justify an indefinitely registered checkout;
+  close an unneeded clean worktree after custody is verified and update the lane
+  projection without erasing the branch's disposition.
+- Start branch-sensitive work by checking `git status`.
+- Inventory all registered worktrees with `git worktree list --porcelain` before creating, closing, pruning, or reassigning one; the current checkout alone is not the repository topology.
+- Before creating a worktree, decide whether an existing clean checkout already
+  owns the intended branch and lane. Continue in the correct existing worktree
+  when it is safe; do not create duplicate checkouts merely to avoid orienting
+  to current custody.
+- Create a new worktree only when the work needs an isolated branch, a separate
+  concurrent checkout, or continuity beyond the current session. Give it one
+  clear branch and purpose, and do not repurpose another active lane's checkout
+  by switching its branch or mixing in unrelated work.
+- Treat pre-existing dirty state as a real constraint.
+- Keep one bounded branch or worktree scope per execution slice or roadmap lane, consistent with the repo's documented integration model.
+- When parallel work is needed, prefer `git worktree` over a second full clone.
+- Do not call work merge-ready while the intended changes are still uncommitted.
+- Treat the worktree as a checkout, the branch or detached commit as local custody, and a verified remote or archive ref as shared custody. Removing a worktree does not preserve uncommitted changes and does not prove the commits remain discoverable.
+- Before removing a worktree, require a clean status, a named branch or explicitly preserved detached commit, an exact checkpoint SHA, and verified durable custody on the intended remote ref or on matching local and remote archive refs.
+- Close a worktree promptly when its branch is integrated, its work is durably
+  handed off without needing the checkout, or its preserved branch is paused or
+  archived. Do not accumulate idle worktrees as informal reminders or confuse a
+  retained branch with a need to retain its checkout.
+- Normal closure uses `git worktree remove` without `--force`. Forced removal is exceptional recovery work: first inventory the exact path, preserve any recoverable diff and commit, establish a durable ref, record the reason, and verify the retained SHA.
+- After removal, verify the exact path is absent from the registered worktree
+  inventory. Prune only stale administrative entries whose checkout absence and
+  branch custody have been established; pruning is not a substitute for closing
+  a live worktree deliberately.
+- Do not delete an unmerged branch merely because its worktree is gone. Prove integration, archival, or explicit discard approval separately.
+- If overlapping dirty work exists across branches or worktrees, open a reconciliation step rather than calling it a normal merge.
+- Keep branch scope narrow and avoid mixing unrelated lanes unless the active slice requires it.
+- Treat overlapping agent changes as reconciliation work, not as normal silent merge cleanup.
+- Prefer disjoint write scopes before parallel execution, and record ownership when multiple agents are active.
+- Declare shared integration surfaces before concurrent work and give each one a
+  single coordination owner. Other lanes may propose changes, but they must not
+  independently rewrite shared schemas, coordination catalogs, or equivalent
+  cross-lane authorities without explicit reconciliation.
+- Reconcile against the default-branch active-lane projection before assigning a new branch or worktree when the repository adopts that contract. Record dependencies and expected overlap before concurrent edits begin.
+- When integrating conflicting edits, inspect history directly rather than assuming the most recent edit is correct.
+- Use commit history, branch context, and `git blame` or equivalent file-history inspection when authorship and intent need to be reconstructed.
+- Preserve useful ownership signals such as named commits, clear branch purpose, or explicit closeout notes when they help later reconciliation.
+- Preserve subagent run ids, session keys, transcript paths, or equivalent provenance when integrating delegated work.
+- When delegated output changes code, policy, or durable docs, cite the delegated source in closeout, commit context, or the relevant plan/handoff note.
+- If delegated outputs conflict, inspect logs or transcripts before deciding which result to keep.
+- Do not treat summarized announce messages as sufficient reconciliation evidence for high-risk changes.
+- Do not rewrite another agent's work without first understanding the intended change surface.
+- Keep accountability with the lane owner even when agents or subagents perform
+  bounded work. Session topology is an implementation choice; ownership,
+  evidence, and reconciliation must remain clear across session replacement.
+- If a collision reveals weak lane boundaries, update the plan or policy so the same overlap is less likely next time.
+- Do not treat an agent session ending as Git closure. The responsible owner must leave a clean published checkpoint and an explicit custody or integration disposition before its worktree can be removed safely.
 
 ## Adoption Notes
 

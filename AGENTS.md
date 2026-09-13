@@ -47,6 +47,34 @@ Read and follow:
 - `docs/dev/policies/0018-model-selection-and-calibration.md`
 - `docs/dev/policies/0019-forge-issue-reporting.md`
 - `docs/dev/policies/0020-github-issue-operations.md`
+- `docs/dev/policies/0021-policy-management.md`
+- `docs/dev/policies/0022-policy-upgrade-management.md`
+- `docs/dev/policies/0023-policy-adoption-feedback-loop.md`
+- `docs/dev/policies/0024-notes-and-memories.md`
+- `docs/dev/policies/0025-graph-backed-memory-usage.md`
+- `docs/dev/policies/0026-codegraph-usage.md`
+- `docs/dev/policies/0027-planning-discipline.md`
+- `docs/dev/policies/0028-model-selection-and-calibration.md`
+- `docs/dev/policies/0029-goal-execution-governance.md`
+- `docs/dev/policies/0030-parallel-plan-design.md`
+- `docs/dev/policies/0031-roadmap-runbook-governance.md`
+- `docs/dev/policies/0032-work-item-traceability.md`
+- `docs/dev/policies/0033-architecture-guardrails.md`
+- `docs/dev/policies/0034-code-testing-discipline.md`
+- `docs/dev/policies/0035-documentation-change-control.md`
+- `docs/dev/policies/0036-git-worktree-hygiene.md`
+- `docs/dev/policies/0037-active-lane-coordination.md`
+- `docs/dev/policies/0038-commit-history-discipline.md`
+- `docs/dev/policies/0039-branch-and-integration-strategy.md`
+- `docs/dev/policies/0040-commit-and-push-cadence.md`
+- `docs/dev/policies/0041-multi-agent-reconciliation.md`
+- `docs/dev/policies/0042-subagent-workflow-optimization.md`
+- `docs/dev/policies/0043-versioning-and-release.md`
+- `docs/dev/policies/0044-turn-closeout.md`
+- `docs/dev/policies/0045-validation-and-handoff.md`
+- `docs/dev/policies/0046-subagent-runtime-governance.md`
+- `docs/dev/policies/0047-forge-issue-reporting.md`
+- `docs/dev/policies/0048-github-issue-operations.md`
 
 ## Scope
 
