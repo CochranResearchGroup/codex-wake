@@ -590,8 +590,10 @@ State: IN_PROGRESS
 Current State: The product vision and collaboration foundation are accepted on
 `origin/main`. Seven approved vertical slices are published as GitHub issues
 `#4` through `#10`. Plan 0049 defines one staged `/goal` campaign that covers
-all seven issues with two safe parallel fan-outs. Checkpoint `P48-G1-C00` has
-opened the issue #4 foundation lane and its active-lane projection; runtime
+all seven issues with two safe parallel fan-outs. Checkpoint `P48-G1-C01` has
+completed the provider-free issue #4 implementation and review on its feature
+branch; pull-request integration is the remaining gate before adapter lanes
+unlock. Runtime
 implementation has not started, and adapter lanes remain blocked until the
 contract milestone merges.
 
