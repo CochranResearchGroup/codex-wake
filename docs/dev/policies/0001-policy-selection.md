@@ -39,6 +39,7 @@ Repo-purpose override from the user-stated goal:
 - `versioning-and-release`
 - `turn-closeout`
 - `validation-and-handoff`
+- `collaborative-development-workflow`
 
 ## Adoption Rules
 

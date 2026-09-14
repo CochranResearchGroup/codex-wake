@@ -582,3 +582,29 @@ Acceptance target:
 - Missing or unhealthy alternative coverage preserves the warning.
 - Overall readiness treats `not_needed` as neutral.
 - Source, CI, public-tag, and installed-runtime evidence agree.
+
+## P48 | Event-Driven Wakes Product Lane
+
+State: OPEN
+
+Current State: The product vision, collaboration prerequisites, and proposed
+vertical delivery slices are being recorded on the linked documentation branch.
+Runtime implementation has not started. GitHub issue
+`CochranResearchGroup/codex-wake#2` owns the current vision slice.
+
+Plan: [Event-Driven Wakes Product Lane](docs/dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md)
+
+Vision: [Event-driven wakes](docs/event-driven-wakes.md)
+
+Acceptance target:
+
+- A provider-neutral signal module arms, ingests, evaluates, and explains
+  filesystem and GitHub events without provider logic leaking into dispatch.
+- Durable receipts, deduplication, checkpoints, reservations, and recovery
+  prevent missed or duplicate wake transitions across restarts.
+- Existing wake predicates and target transports retain their documented
+  behavior through a versioned compatibility path.
+- GitHub Issues, short-lived branches, pull requests, CI, and the active-lane
+  catalog provide shared coordination and custody evidence.
+- Bounded subagent use and measured model routing reduce accepted-slice cost
+  without weakening correctness, safety, or delivery evidence.
