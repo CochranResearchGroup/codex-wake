@@ -38,6 +38,8 @@ from .signals import (
     Verification,
     WakeId,
     _matches,
+    _occurrence_is_after_anchor,
+    _validate_occurrence_anchor,
     _validate_signal,
 )
 
@@ -633,6 +635,11 @@ class SQLiteSignalModule(SignalEngine):
             if isinstance(anchor, Degraded):
                 return Degraded(wake_id, anchor.code, anchor.retry_at, anchor.evidence_ref)
             return anchor
+
+        invalid = _validate_occurrence_anchor(contract, spec, anchor)
+        if invalid is not None:
+            self._best_effort_release_preparation(arm_id, contract.source, contract.source_instance, owner, generation)
+            return invalid
 
         connection = None
         try:
@@ -1440,6 +1447,32 @@ class SQLiteSignalModule(SignalEngine):
         finally:
             _close_quietly(connection)
 
+    def source_checkpoint(self, source: str, source_instance: str) -> SourceCommit | Degraded | None:
+        """Read the atomic source cursor without creating or changing a journal."""
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = sqlite3.connect(
+                self._database.resolve().as_uri() + "?mode=ro", uri=True,
+                timeout=self._busy_timeout_ms / 1000,
+            )
+            row = connection.execute(
+                "SELECT checkpoint, checkpoint_order, observed_through FROM source_state WHERE source = ? AND source_instance = ?",
+                (source, source_instance),
+            ).fetchone()
+            if row is None or all(value is None for value in row):
+                return None
+            checkpoint, order, through = row
+            if not isinstance(checkpoint, str) or type(order) is not int or not isinstance(through, str):
+                return Degraded(None, "SOURCE_CHECKPOINT_INVALID", None)
+            observed_through = _parse_time(through)
+            if observed_through.tzinfo is None or observed_through.utcoffset() is None:
+                return Degraded(None, "SOURCE_CHECKPOINT_INVALID", None)
+            return SourceCommit(source, source_instance, checkpoint, order, observed_through)
+        except Exception:
+            return Degraded(None, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
     def ingest(
         self,
         observations: Sequence[NormalizedObservation],
@@ -1627,6 +1660,18 @@ class SQLiteSignalModule(SignalEngine):
             if durable.publication != "published" or durable.arm_id != armed_signal.arm_id:
                 connection.rollback()
                 return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
+            source = connection.execute(
+                "SELECT contract_json, contract_fingerprint FROM source_instances WHERE source = ? AND source_instance = ?",
+                (durable.spec.source, durable.spec.source_instance),
+            ).fetchone()
+            if source is None or _fingerprint(source["contract_json"]) != source["contract_fingerprint"]:
+                connection.rollback()
+                return Degraded(wake_id, "SOURCE_STATE_UNAVAILABLE", None)
+            contract = _contract_from_json(source["contract_json"])
+            invalid = _validate_occurrence_anchor(contract, durable.spec, durable.anchor)
+            if invalid is not None:
+                connection.rollback()
+                return invalid
             reservation = connection.execute(
                 "SELECT * FROM match_reservations WHERE wake_id = ?",
                 (str(wake_id),),
@@ -1684,7 +1729,11 @@ class SQLiteSignalModule(SignalEngine):
             for row in page:
                 observation = _observation_from_json(row["observation_json"])
                 sequence = int(row["local_sequence"])
-                if not _matches(observation, durable.spec.where):
+                after = _occurrence_is_after_anchor(observation, contract, durable.anchor)
+                if isinstance(after, Invalid):
+                    connection.rollback()
+                    return after
+                if not after or not _matches(observation, durable.spec.where):
                     safe_progress = sequence
                     continue
                 if durable.spec.verification == "required" and observation.verification.state != "verified":
@@ -1977,7 +2026,7 @@ _TYPES = {value: key for key, value in _TYPE_NAMES.items()}
 
 
 def _contract_payload(contract: SourceContract) -> dict[str, Any]:
-    return {
+    payload = {
         "source": contract.source,
         "source_instance": contract.source_instance,
         "kinds": sorted(contract.kinds),
@@ -1991,6 +2040,10 @@ def _contract_payload(contract: SourceContract) -> dict[str, Any]:
         "max_attribute_bytes": contract.max_attribute_bytes,
         "max_evidence_ref_bytes": contract.max_evidence_ref_bytes,
     }
+    # Omit the unset default to preserve fingerprints of pre-extension rows.
+    if contract.occurrence_order_attribute is not None:
+        payload["occurrence_order_attribute"] = contract.occurrence_order_attribute
+    return payload
 
 
 def _contract_from_json(value: str) -> SourceContract:
@@ -2007,6 +2060,7 @@ def _contract_from_json(value: str) -> SourceContract:
         max_in_values=payload["max_in_values"],
         max_attribute_bytes=payload["max_attribute_bytes"],
         max_evidence_ref_bytes=payload["max_evidence_ref_bytes"],
+        occurrence_order_attribute=payload.get("occurrence_order_attribute"),
     )
 
 
