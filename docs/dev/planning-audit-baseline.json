@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "rationale": "Plans 0023 through 0042 predate deterministic state headers and describe closed historical roadmap lanes. P48 preserves them as history instead of rewriting unrelated records.",
+  "review_condition": "Remove entries when a bounded planning-history migration normalizes these plans or before any listed plan is reopened.",
+  "accepted_findings": [
+    "plan missing deterministic state: 0023-2026-05-20-doctor-json.md",
+    "plan missing deterministic state: 0024-2026-05-20-status-json.md",
+    "plan missing deterministic state: 0025-2026-05-20-status-dogfood.md",
+    "plan missing deterministic state: 0026-2026-05-20-cleanup-json.md",
+    "plan missing deterministic state: 0027-2026-05-20-live-dispatch-dogfood.md",
+    "plan missing deterministic state: 0028-2026-05-20-installed-runtime-state-tidy-dogfood.md",
+    "plan missing deterministic state: 0029-2026-05-20-app-server-contract-refresh.md",
+    "plan missing deterministic state: 0030-2026-05-21-app-server-thread-status-preflight.md",
+    "plan missing deterministic state: 0031-2026-05-21-disposable-app-server-dogfood.md",
+    "plan missing deterministic state: 0032-2026-05-21-app-status-resume-mode.md",
+    "plan missing deterministic state: 0033-2026-05-21-app-server-target-discovery.md",
+    "plan missing deterministic state: 0034-2026-05-21-app-candidate-validation.md",
+    "plan missing deterministic state: 0035-2026-05-21-v0412-installed-app-dogfood.md",
+    "plan missing deterministic state: 0036-2026-05-23-tmux-visibility-accounting.md",
+    "plan missing deterministic state: 0037-2026-05-23-app-server-service-env-skill-hardening.md",
+    "plan missing deterministic state: 0038-2026-05-23-app-server-service-env-product-hardening.md",
+    "plan missing deterministic state: 0039-2026-05-23-v0413-release.md",
+    "plan missing deterministic state: 0040-2026-05-25-openclaw-gateway-wake-transport.md",
+    "plan missing deterministic state: 0041-2026-05-25-v0414-release.md",
+    "plan missing deterministic state: 0042-2026-05-25-wake-monitor-readiness-user-supervisor.md"
+  ]
+}

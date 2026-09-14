@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "targets": [
+    {
+      "id": "codex-wake-github",
+      "forge": "github",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "relationship": "owned",
+      "allowed_actions": [
+        "read",
+        "create",
+        "comment",
+        "edit",
+        "apply_labels",
+        "assign",
+        "close"
+      ],
+      "security_route": "none",
+      "label_map": {
+        "intent/documentation": {
+          "provider_label": "documentation"
+        },
+        "intent/feature": {
+          "provider_label": "enhancement"
+        }
+      }
+    }
+  ]
+}
