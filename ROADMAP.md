@@ -585,14 +585,15 @@ Acceptance target:
 
 ## P48 | Event-Driven Wakes Product Lane
 
-State: READY
+State: IN_PROGRESS
 
 Current State: The product vision and collaboration foundation are accepted on
 `origin/main`. Seven approved vertical slices are published as GitHub issues
-`#4` through `#10`; runtime implementation has not started. Issue `#4` is the
-critical-path item available to claim first, and the active-lane catalog remains
-empty until an implementation branch is opened. Plan 0049 defines one staged
-`/goal` campaign that covers all seven issues with two safe parallel fan-outs.
+`#4` through `#10`. Plan 0049 defines one staged `/goal` campaign that covers
+all seven issues with two safe parallel fan-outs. Checkpoint `P48-G1-C00` has
+opened the issue #4 foundation lane and its active-lane projection; runtime
+implementation has not started, and adapter lanes remain blocked until the
+contract milestone merges.
 
 Plan: [Event-Driven Wakes Product Lane](docs/dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md)
 
