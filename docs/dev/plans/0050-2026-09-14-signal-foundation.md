@@ -174,8 +174,71 @@ plan, and the logical-identity wording in the product vision. Existing wake
 records, daemon behavior, CLI commands, plugins, and dispatch transports are
 unchanged.
 
-The next action is Packet 4B: design and implement the SQLite journal at the
-accepted signal seam, including transactional arm preparation, observation
-deduplication, monotonic checkpoints, match reservations, retention pins, and
-bounded evaluation progress. Packet 4C and every source adapter remain
-blocked.
+## Packet 4B outcome
+
+Packet 4B is complete at the accepted signal seam. `SignalEngine` now names
+the internal protocol while `WakeSignalModule` remains a compatibility alias.
+`SQLiteSignalModule` implements that protocol without changing
+`EventWake.register`, `arm`, `ingest`, or `evaluate` signatures.
+
+The journal uses SQLite application and schema version 1, WAL,
+`synchronous=FULL`, foreign keys, one bounded connection per operation, and
+`BEGIN IMMEDIATE` mutation transactions. A new empty database can be
+initialized; a nonempty unowned database, foreign application ID, or newer
+schema fails closed. The initial schema persists source contracts and state,
+preparing and published arms, logical observation receipts, evaluation
+progress, match reservations, and retention pins.
+
+The transactional ordering is:
+
+1. Reserve an idempotency key, stable wake identity, preparation token, and
+   source lease before calling the adapter anchor seam.
+2. Publish an arm only when the same lease generation and preparation token
+   still own the source. An expired preparation can be taken over while the
+   stale preparer is fenced from publication.
+3. Reject ingestion while a live source lease exists. Lease time comes from a
+   local injected clock; provider observation time cannot bypass the fence.
+4. Validate and insert a complete observation batch, allocate local
+   sequences, deduplicate logical identities, and advance the monotonic source
+   checkpoint in one transaction.
+5. Scan through a durable bounded progress cursor and reserve the first
+   eligible receipt in the same transaction. Concurrent evaluators replay the
+   same durable winner.
+6. Keep active-anchor, pending-verification, and match-evidence pins durable.
+   Explicit release plus bounded compaction deletes only unpinned receipts;
+   the reservation retains its immutable evidence summary after compaction.
+
+Adapter and store failures are translated to sanitized closed outcomes at
+public boundaries. A fresh module instance replays the same registration and
+match without a new anchor call. The checkpoint contract guarantees atomic
+monotonic advancement, but not gap-free provider succession because
+`SourceCommit` intentionally has no expected-prior field; provider runners
+must supply their own history-gap proof.
+
+Validation on Python 3.12.13 passed:
+
+```text
+PYTHONPATH=src python -m unittest tests.test_signal_store
+Ran 15 tests - OK
+
+PYTHONPATH=src python -m unittest tests.test_signal_store tests.test_signals
+Ran 31 tests - OK
+
+PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
+Ran 213 tests - OK
+
+python -m compileall -q src tests
+PASS
+```
+
+No provider access, wake JSON publication, daemon transition, or dispatch
+effect was added. Physical power-loss qualification is not claimed; this
+packet proves process-restart recovery, stale-preparer takeover, transaction
+atomicity, and two-instance contention through provider-free tests.
+
+## Next action
+
+Packet 4C will add the capability-gated schema-version-2 signal record,
+recoverable SQLite-to-JSON outbox, startup reconciliation, daemon evaluation
+seam, bounded CLI inspection, corruption handling, and fresh-process crash
+matrix. Provider adapters and live dispatch remain blocked.

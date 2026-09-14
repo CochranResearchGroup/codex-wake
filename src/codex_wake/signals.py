@@ -217,7 +217,7 @@ class SignalSourceAdapter(Protocol):
     def establish_anchor(self, spec: SignalRequest, now: datetime) -> SourceAnchor | Degraded | Invalid: ...
 
 
-class WakeSignalModule(Protocol):
+class SignalEngine(Protocol):
     def arm(self, wake_id: WakeId, spec: SignalRequest, context: ArmContext) -> ArmedSignal | Degraded | Invalid: ...
 
     def ingest(
@@ -233,6 +233,9 @@ class WakeSignalModule(Protocol):
         now: datetime,
         limits: EvaluationLimits,
     ) -> Matched | NotReady | Degraded | Invalid | Expired: ...
+
+
+WakeSignalModule = SignalEngine
 
 
 class ScriptedSourceAdapter:
