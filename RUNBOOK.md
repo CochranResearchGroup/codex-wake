@@ -2329,3 +2329,35 @@ Closed Plan 0049 at terminal checkpoint `P48-G1-C05`.
 
 Final gate: merge this documentation-only checkpoint, verify `origin/main`,
 then close parent issue #2 with the terminal merge receipt.
+
+## Turn 123 | 2026-09-14
+
+Opened P49 and recorded the pre-effect control checkpoint.
+
+- Created and assigned issue #30 after target, role, label, duplicate, and
+  idempotency preflight.
+- Reconciled clean `main` and `origin/main` at
+  `6779902a190aa3552c6380f934c8b3e3abc4236b`, with no open PR or active lane.
+- Confirmed the global uv-tool `codex-wake 0.5.2` lacks the new schema-v2
+  filesystem CLI while current main exposes it; P49 therefore uses an isolated
+  candidate venv and never refreshes the global installation.
+- Confirmed the user supervisor is active for the normal repo wake root, which
+  has zero active wakes, and the normal repo service remains inactive.
+- Confirmed user hook installation and live tmux pane `%36`; neither is yet
+  acceptance evidence for the future canary dispatch.
+- Opened Plan 0057 with one installation attempt, one live dispatch, zero live
+  retries, one pre-effect review, exact isolation identities, and fail-closed
+  rollback rules.
+- The fresh pre-effect review blocked arming because schema-v2 records hardcode
+  three attempts, monitor health defaults to shared user state, registration
+  cwd was underspecified, and restart recovery was absent. Accepted repairs add
+  a supported `--max-attempts 1` prerequisite, unit-specific `XDG_STATE_HOME`,
+  runtime-root registration, an exact marker-trigger identity, and a controlled
+  pre-trigger service restart. No installed-runtime mutation occurred.
+- Graphiti was healthy but had no P49-specific recall. CodeGraph was healthy at
+  90 files, 2,284 nodes, and 8,200 edges.
+
+Next checkpoint: merge this coordination state, create the registered issue
+branch from exact main, implement and validate the one-attempt record contract,
+and install the isolated service only if every identity and readiness gate
+passes.

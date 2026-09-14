@@ -614,3 +614,31 @@ Acceptance target:
   catalog provide shared coordination and custody evidence.
 - Bounded subagent use and measured model routing reduce accepted-slice cost
   without weakening correctness, safety, or delivery evidence.
+
+## P49 | Installed Filesystem Wake Canary
+
+State: IN_PROGRESS
+
+Current State: Issue #30 is ready for one isolated installed-candidate service
+and one live tmux dispatch. The global `0.5.2` uv-tool installation and normal
+repo wake root are observation-only. The candidate service, wake root, marker,
+and venv use exact P49-only identities and must be removed after evidence
+capture. Provider access, public ingress, deployment, tag, and release remain
+excluded. A pre-effect review found that schema-v2 filesystem registration
+must first gain a supported one-attempt bound; the same lane will implement and
+validate that prerequisite before any installed mutation.
+
+Plan: [Installed Filesystem Wake Canary](docs/dev/plans/0057-2026-09-14-installed-filesystem-canary.md)
+
+Acceptance target:
+
+- Bind the candidate source and wheel to one isolated active user service.
+- Persist and enforce `max_attempts: 1` through the supported CLI and
+  journal-authoritative record path.
+- Arm `file.created` while absent and dispatch exactly once after the initiating
+  turn becomes idle.
+- Recover the same pending wake across a controlled service restart before the
+  marker is created.
+- Prove submitted status, hook acknowledgement, and visible prompt evidence.
+- Archive and roll back the canary without global install, normal wake-root,
+  supervisor, or unrelated service drift.
