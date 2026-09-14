@@ -56,7 +56,7 @@ def make_adapter() -> ScriptedSourceAdapter:
     )
 
 
-def make_intent(*, result: str = "ready") -> WakeIntent:
+def make_intent(*, result: str = "ready", max_attempts: int = 3) -> WakeIntent:
     return WakeIntent(
         when=SignalRequest(
             contract_version=1,
@@ -73,6 +73,7 @@ def make_intent(*, result: str = "ready") -> WakeIntent:
             cwd=Path("/tmp/repo"),
             target={"transport": "tmux", "tmux_socket": "/tmp/tmux/default", "pane": "%1"},
         ),
+        max_attempts=max_attempts,
     )
 
 
@@ -111,12 +112,29 @@ class SignalContractTests(unittest.TestCase):
         first = event_wake.register(make_intent(), idempotency_key="job-42")
         replay = event_wake.register(make_intent(), idempotency_key="job-42")
         conflict = event_wake.register(make_intent(result="failed"), idempotency_key="job-42")
+        delivery_conflict = event_wake.register(make_intent(max_attempts=1), idempotency_key="job-42")
 
         self.assertIsInstance(first, Registration)
         self.assertEqual(replay, first)
         self.assertIsInstance(conflict, Invalid)
         self.assertEqual(conflict.code, "IDEMPOTENCY_CONFLICT")
+        self.assertIsInstance(delivery_conflict, Invalid)
+        self.assertEqual(delivery_conflict.code, "IDEMPOTENCY_CONFLICT")
         self.assertEqual(adapter.anchor_calls, 1)
+
+    def test_registration_rejects_out_of_range_attempt_bounds_before_arming(self) -> None:
+        adapter = make_adapter()
+        module = InMemorySignalModule()
+        event_wake = EventWake(module, adapters=[adapter], clock=lambda: NOW, id_factory=lambda: "wake_1")
+
+        for max_attempts in (0, 101):
+            result = event_wake.register(
+                make_intent(max_attempts=max_attempts),
+                idempotency_key=f"attempts-{max_attempts}",
+            )
+            self.assertIsInstance(result, Invalid)
+            self.assertEqual(result.code, "INVALID_SIGNAL")
+        self.assertEqual(adapter.anchor_calls, 0)
 
     def test_registration_publishes_only_after_anchor_and_retries_reserved_identity(self) -> None:
         degraded = Degraded(None, "SOURCE_UNAVAILABLE", None)

@@ -55,7 +55,9 @@ payloads, but never derives live authority from JSON alone.
 - `prompt`: wake instruction text.
 - `status`: wake status.
 - `attempts`: dispatch attempt count.
-- `max_attempts`: bounded retry limit.
+- `max_attempts`: bounded retry limit. Schema-v2 signal registrations default
+  to `3`; supported callers may select an integer from `1` through `100`, and
+  the selected value participates in idempotency identity.
 - `ack_timeout_seconds`: ack wait limit.
 - `next_attempt_at`: UTC timestamp for the next dispatch attempt or predicate check.
 - `events`: ordered audit events.

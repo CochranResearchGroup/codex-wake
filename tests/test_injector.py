@@ -178,7 +178,14 @@ class InjectorTests(unittest.TestCase):
             self.assertEqual(runner.capture_calls, 0)
             self.assertEqual(runner.pastes, [])
 
-    def make_firing_record(self, root: Path, cwd: Path, prompt: str = "full continuation prompt") -> WakePath:
+    def make_firing_record(
+        self,
+        root: Path,
+        cwd: Path,
+        prompt: str = "full continuation prompt",
+        *,
+        max_attempts: int = 3,
+    ) -> WakePath:
         now = datetime(2026, 5, 18, 20, 30, tzinfo=UTC)
         record = build_record(
             predicate={"type": "not_before", "due_at": "2026-05-18T21:15:00Z"},
@@ -189,6 +196,7 @@ class InjectorTests(unittest.TestCase):
         )
         record["id"] = "wake_test"
         record["status"] = "firing"
+        record["max_attempts"] = max_attempts
         path = write_record(root, record)
         return WakePath(path=path, record=record)
 
@@ -366,6 +374,27 @@ class InjectorTests(unittest.TestCase):
             data = json.loads((root / "pending" / "wake_test.json").read_text())
             self.assertEqual(data["attempts"], 1)
             self.assertEqual(data["events"][-2]["type"], "unsafe_pane")
+
+    def test_one_attempt_bound_fails_terminally_without_requeue(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), max_attempts=1)
+            runner = FakeTmuxRunner(capture="Approve command?")
+
+            result = dispatch_firing_record(
+                root,
+                found,
+                runner=runner,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+                ack_timeout_override=0,
+            )
+
+            self.assertEqual(result.status, "failed")
+            self.assertEqual(runner.pastes, [])
+            data = json.loads((root / "failed" / "wake_test.json").read_text())
+            self.assertEqual(data["attempts"], 1)
+            self.assertEqual(data["max_attempts"], 1)
+            self.assertNotIn("requeued", [event["type"] for event in data["events"]])
 
 
 if __name__ == "__main__":

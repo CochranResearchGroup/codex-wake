@@ -261,6 +261,8 @@ class CliTests(unittest.TestCase):
                             "created",
                             "--idempotency-key",
                             "build-result",
+                            "--max-attempts",
+                            "1",
                             "out/result.txt",
                             "--",
                             "Continue build",
@@ -273,6 +275,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(pending["schema_version"], 2)
             self.assertEqual(pending["predicate"]["kind"], "file.created")
             self.assertEqual(pending["predicate"]["subject"], "path:out/result.txt")
+            self.assertEqual(pending["max_attempts"], 1)
 
             code, inspected_output, error = self.run_cli(
                 ["show", wake_id, "--signal-state"], root
@@ -308,6 +311,14 @@ class CliTests(unittest.TestCase):
             self.assertEqual(observed["observation_reason"], "periodic")
             self.assertEqual(len(observed["fingerprint"]), 64)
             self.assertNotIn("never expose this", inspected_output)
+
+    def test_filesystem_rejects_non_positive_attempt_bound(self) -> None:
+        parser = cli.build_parser()
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            parser.parse_args(
+                ["filesystem", "created", "--max-attempts", "0", "out/result.txt", "continue"]
+            )
+        self.assertEqual(raised.exception.code, 2)
 
     def test_version_reports_package_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

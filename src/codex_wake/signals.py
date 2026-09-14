@@ -55,6 +55,7 @@ class WakeIntent:
     when: SignalRequest
     resume: Resume
     expires_at: datetime | None = None
+    max_attempts: int = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -201,6 +202,7 @@ class ArmContext:
     expires_at: datetime | None
     resume: Resume
     adapter: SignalSourceAdapter
+    max_attempts: int = 3
 
 
 @dataclass(frozen=True, slots=True)

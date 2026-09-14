@@ -9,9 +9,9 @@ lanes:
     branch: chore/issue-30-installed-filesystem-canary
     target: origin/main
     plan_state: OPEN
-    custody_state: PAUSED_REF
-    checkpoint: 6779902a190aa3552c6380f934c8b3e3abc4236b
-    remote_ref: pending
+    custody_state: ACTIVE
+    checkpoint: cdd00a0ecce6aa10f7f9ffef384810df2acb674e
+    remote_ref: refs/remotes/origin/chore/issue-30-installed-filesystem-canary
     integration: squash pull request
     dependencies: [CochranResearchGroup/codex-wake#9, CochranResearchGroup/codex-wake#10]
     overlaps: []
