@@ -10,7 +10,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: f7abe0cfe7906e120c95f0fa3ff423689fa2ff1c
+    checkpoint: f75fe21617c9b36f621180323e27af7fb5b3b7bc
     remote_ref: refs/remotes/origin/feat/issue-4-signal-foundation
     integration: squash pull request
     dependencies: []
