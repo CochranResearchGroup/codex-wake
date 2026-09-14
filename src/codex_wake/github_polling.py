@@ -203,7 +203,9 @@ class GitHubPollingAdapter:
                     verified = self._client.get_run_attempt(self.config.repository, candidate.run_id, candidate.run_attempt)
                     if not _valid_run(verified) or verified != candidate:
                         return Degraded(None, "GITHUB_VERIFICATION_FAILED", now + timedelta(seconds=self.config.retry_seconds))
-                    observation = self._normalize(verified)
+                    observation = self.normalize_verified_attempt(verified)
+                    if isinstance(observation, Invalid):
+                        return Degraded(None, "GITHUB_VERIFICATION_FAILED", None)
                     key = observation.occurrence_value
                     if key in observations and observations[key] != observation:
                         return Degraded(None, "GITHUB_VERIFICATION_FAILED", None)
@@ -268,7 +270,32 @@ class GitHubPollingAdapter:
                 and run.workflow_id == self.config.workflow_id and run.ref in self.config.refs
                 and run.status == "completed" and run.conclusion in self.config.conclusions)
 
-    def _normalize(self, run: WorkflowRun) -> NormalizedObservation:
+    def checkpoint_for_anchor(self, anchor: SourceAnchor) -> SourceCommit | Invalid:
+        """Validate source binding and seed an explicit no-coverage checkpoint.
+
+        An arbitrary arm's cutoff is not source-wide polling coverage: older
+        arms may still need earlier history. Epoch/order zero preserves each
+        polling anchor's recovery floor without inventing coverage.
+        """
+        try:
+            if type(anchor) is not SourceAnchor:
+                raise ValueError("incompatible anchor")
+            cutoff = self._parse_cursor(anchor.source_anchor)
+            if (anchor.recovery != "source_replay"
+                    or type(anchor.local_after_sequence) is not int or anchor.local_after_sequence < 0
+                    or set(anchor.baseline) != {"completed_at_us"}
+                    or type(anchor.baseline["completed_at_us"]) is not int
+                    or anchor.baseline["completed_at_us"] != _order(cutoff)):
+                raise ValueError("incompatible anchor")
+            epoch = datetime(1970, 1, 1, tzinfo=UTC)
+            return SourceCommit("github", self.config.source_instance, self._cursor(epoch), 0, epoch)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            return Invalid(None, "GITHUB_ANCHOR_INVALID", ("GitHub anchor is incompatible",))
+
+    def normalize_verified_attempt(self, run: WorkflowRun) -> NormalizedObservation | Invalid:
+        """Normalize an authoritative attempt read; callers own read provenance."""
+        if not _valid_run(run) or not self._allowed_run(run):
+            return Invalid(None, "GITHUB_SIGNAL_NOT_ALLOWED", ("GitHub attempt is outside the configured allowlist",))
         return NormalizedObservation(
             "github", self.config.source_instance, "workflow_run.completed", "repo:" + self.config.repository,
             "github.workflow_run.attempt.completed", f"{run.repository_id}:{run.run_id}:{run.run_attempt}",
