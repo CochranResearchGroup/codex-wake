@@ -2361,3 +2361,60 @@ Next checkpoint: merge this coordination state, create the registered issue
 branch from exact main, implement and validate the one-attempt record contract,
 and install the isolated service only if every identity and readiness gate
 passes.
+
+## Turn 124 | 2026-09-14
+
+Passed the P49 pre-dispatch checkpoint.
+
+- Merged prerequisite PR #32 at
+  `86291bf8782759dfd6d4bd19e1429392e8f77279` after both Python CI gates passed.
+- Full local suites passed on Python 3.11 and 3.12 with 310 tests each; 12
+  plugin tests and entrypoint syntax checks also passed.
+- Built the canonical wheel with SHA-256
+  `956846a82cd9007c423f11ee19400e0cd1ec4a9a79659befd638d869f80b6b75`
+  and installed it only in the exact P49 venv.
+- Started `codex-wake-p49-canary.service` with isolated wake, log, and
+  `XDG_STATE_HOME` paths. Its initial PID was `3287811`.
+- Registered exactly one wake,
+  `wake_9dbc51cc5a2d405d8ef4f1d2623d9c0d`, from the canary runtime root against
+  absent relative marker `events/created.marker`. Its persisted record is
+  pending with zero attempts and `max_attempts: 1`, targeting pane `%36`.
+- Restarted the named service. PID `3292411` recovered the same pending wake;
+  source and monitor readiness are current, and the marker remains absent.
+- The global uv-tool hashes/version and normal repo wake-root active count are
+  unchanged. No dispatch or marker effect has occurred at this checkpoint.
+
+Next checkpoint: publish this pre-effect state, schedule the exact marker
+trigger after the initiating turn ends, and inspect only the original wake on
+resume.
+
+## Turn 125 | 2026-09-14
+
+Closed the P49 live canary and rollback.
+
+- The marker remained a zero-byte regular file when the resumed turn began.
+- Wake `wake_9dbc51cc5a2d405d8ef4f1d2623d9c0d` matched once with required
+  `filesystem_state_recheck` verification, dispatched once, received its hook
+  acknowledgement, and recorded `visible_prompt_observed` without retaining
+  raw pane text.
+- The submitted record retained `attempts: 1` and `max_attempts: 1`; no requeue
+  or second dispatch occurred.
+- The canary exposed a stale revision-1 pending projection recreated on the
+  first post-submit poll. A failing regression reproduced the exact state.
+- The repair prevents revision-1 republication after lifecycle advancement,
+  preserves idempotent replay, and convergently removes only an attributable
+  lower-or-equal-revision pending projection during terminal retirement.
+- The focused 168-test suite passed after repair. Final full suites passed with
+  312 tests on Python 3.11 and 312 on Python 3.12; all 12 plugin tests and both
+  JavaScript syntax checks passed.
+- The stopped canary was repaired to one terminal projection, archived, and
+  uninstalled. The named service, drop-in, marker units, and both service PIDs
+  are absent. The exact runtime and build directories were moved to trash and
+  are recoverable.
+- Global CLI version/hashes, the normal root's zero active and 23 archived
+  wakes, the active supervisor, and live pane `%36` all match preflight.
+- Verification 0073 is the durable evidence surface. Plan 0057 and roadmap P49
+  are closed, and the active-lane catalog is empty.
+
+Final gate: pass planning audits, integrate the issue-closing pull request,
+verify canonical `origin/main`, and confirm issue #30 is closed.

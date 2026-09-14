@@ -617,7 +617,7 @@ Acceptance target:
 
 ## P49 | Installed Filesystem Wake Canary
 
-State: IN_PROGRESS
+State: CLOSED
 
 Current State: Issue #30 is ready for one isolated installed-candidate service
 and one live tmux dispatch. The global `0.5.2` uv-tool installation and normal
@@ -627,6 +627,12 @@ capture. Provider access, public ingress, deployment, tag, and release remain
 excluded. A pre-effect review found that schema-v2 filesystem registration
 must first gain a supported one-attempt bound; the same lane will implement and
 validate that prerequisite before any installed mutation.
+
+Closure: Candidate `86291bf` completed the isolated live canary with one
+verified filesystem match, one dispatch, hook acknowledgement, and
+`visible_prompt_observed`. The canary found and repaired stale pending
+republication after terminal submission. Verification 0073 records the test,
+receipt, archive, complete rollback, and unchanged global/normal runtime state.
 
 Plan: [Installed Filesystem Wake Canary](docs/dev/plans/0057-2026-09-14-installed-filesystem-canary.md)
 

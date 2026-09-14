@@ -1,11 +1,11 @@
 # Plan 0057: Installed Filesystem Wake Canary
 
-State: OPEN
+State: CLOSED
 Lane: P49
 Owner: ecochran76
 Work Item: CochranResearchGroup/codex-wake#30
 Goal Version: P49-G1-v1
-Branch: chore/issue-30-installed-filesystem-canary
+Branch: chore/issue-30-installed-filesystem-canary-receipt
 Target: origin/main
 Integration: squash pull request
 
@@ -21,14 +21,31 @@ repo wake root.
 ## Current State
 
 Issue #30 is open and assigned. Canonical `main` is
-`6779902a190aa3552c6380f934c8b3e3abc4236b`; the repo and active-lane catalog
-were clean before this plan. The global installed CLI is `codex-wake 0.5.2`
+`86291bf8782759dfd6d4bd19e1429392e8f77279`; prerequisite PR #32 is merged and
+provides the tested `--max-attempts 1` contract. The global installed CLI is `codex-wake 0.5.2`
 from the uv tool environment and does not expose the newly merged `filesystem`
 or `support` commands, while current source does. The existing user supervisor
 is active and owns the normal repo wake root, which has zero active wakes and
 is observation-only for P49. User hook configuration is installed. Tmux pane
-`%36` in session `recovered-050801-20542` is live in this repo. No P49 runtime
-state, service, marker, or dispatch exists yet.
+`%36` in session `recovered-050801-20542` is live in this repo. At initial
+preflight, no P49 runtime state, service, marker, or dispatch existed.
+
+The prerequisite merged in PR #32 at `86291bf8782759dfd6d4bd19e1429392e8f77279`.
+The wheel built from that clean commit has SHA-256
+`956846a82cd9007c423f11ee19400e0cd1ec4a9a79659befd638d869f80b6b75`.
+The isolated service started as PID `3287811`, then a controlled restart moved
+it to PID `3292411` while wake
+`wake_9dbc51cc5a2d405d8ef4f1d2623d9c0d` remained pending with zero attempts,
+`max_attempts: 1`, an absent marker, and current source/monitor readiness. The
+live marker effect and dispatch have not yet occurred.
+
+The marker subsequently matched with verified filesystem state, the wake
+dispatched once, the hook acknowledged it, and visibility was
+`visible_prompt_observed`. A stale revision-1 pending projection discovered on
+the next poll was repaired with a deterministic regression and convergent
+terminal cleanup. Verification 0073 records the complete evidence. The wake
+was archived and every named canary resource was removed; global and normal
+repo state remained unchanged.
 
 Graphiti was healthy but returned no P49-specific recall. CodeGraph was healthy
 at 90 files, 2,284 nodes, and 8,200 edges. Current repo, GitHub, process,
@@ -160,8 +177,8 @@ global uv tool, or unrelated process tree.
 
 ## Definition Of Done
 
-All acceptance criteria have current evidence, rollback is complete, issue #30
-and its pull request are closed/merged, Plan 0057 and roadmap P49 are closed,
-the active-lane catalog is empty, and canonical `origin/main` contains the
-verification receipt. A failed live criterion still requires truthful rollback
-and integration but does not count as successful P49 completion.
+All acceptance criteria have current evidence, rollback is complete, Plan 0057
+and roadmap P49 are closed, and the active-lane catalog is empty. Integration
+still requires the issue-closing pull request, green CI, and canonical-main
+readback. A failed live criterion would require truthful rollback and
+integration but would not count as successful P49 completion.

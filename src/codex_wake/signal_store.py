@@ -986,9 +986,20 @@ class SQLiteSignalModule(SignalEngine):
                 "SELECT * FROM record_outbox WHERE wake_id = ? AND revision = 1",
                 (str(wake_id),),
             ).fetchone()
-            if arm is None or outbox is None:
+            lifecycle = connection.execute(
+                "SELECT desired_status, desired_revision FROM wake_lifecycle WHERE wake_id = ?",
+                (str(wake_id),),
+            ).fetchone()
+            if arm is None or outbox is None or lifecycle is None:
                 return Invalid(wake_id, "ARM_STATE_UNAVAILABLE", ("arm publication state is unavailable",))
             if arm["state"] not in {"prepared", "published"}:
+                return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
+            if (
+                lifecycle["desired_status"] != "pending"
+                or int(lifecycle["desired_revision"]) != 1
+            ):
+                if arm["state"] == "published" and outbox["state"] == "applied":
+                    return _armed_from_row(arm)
                 return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
             payload_json = str(outbox["payload_json"])
             payload_sha256 = str(outbox["payload_sha256"])
@@ -1375,6 +1386,8 @@ class SQLiteSignalModule(SignalEngine):
             self._checkpoint("before_terminal_commit")
             connection.commit()
             self._checkpoint("after_terminal_commit")
+            if self._record_publisher is not None:
+                self._record_publisher.remove_superseded_pending(decoded)
             return True
         except Exception:
             _rollback_quietly(connection)

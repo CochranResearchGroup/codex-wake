@@ -12,7 +12,14 @@ from unittest.mock import patch
 
 from codex_wake.daemon import PollResult, format_poll_result, poll_once, poll_result_has_activity, run
 from codex_wake.event_wake import EventWake
-from codex_wake.records import WakeLifecycleLock, build_record, cancel_record, write_record
+from codex_wake.records import (
+    WakeLifecycleLock,
+    build_record,
+    cancel_record,
+    find_record,
+    move_record,
+    write_record,
+)
 from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
 from codex_wake.signal_store import SQLiteSignalModule
 from codex_wake.signals import Registration, SourceCommit
@@ -177,6 +184,56 @@ class DaemonTests(unittest.TestCase):
             self.assertEqual(firing["trigger_match"]["verification"]["state"], "verified")
             self.assertEqual(firing["trigger_match"]["verification"]["method"], "scripted")
             self.assertEqual(len(firing["trigger_match"]["evidence_digest"]), 64)
+
+    def test_terminal_signal_is_not_republished_as_stale_pending_on_next_poll(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root,
+                    ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+            stale_pending = (root / "pending" / "wake_signal.json").read_bytes()
+            runtime.ingest(
+                [make_observation()],
+                SourceCommit(
+                    "memory", "contract-test", "checkpoint-1", 1,
+                    datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                ),
+            )
+            poll_once(
+                root,
+                now=datetime(2026, 9, 14, 14, 2, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+            )
+            move_record(
+                root,
+                find_record(root, "wake_signal"),
+                "submitted",
+                event_type="ack_observed",
+                message="Wake prompt submission ack observed",
+                now=datetime(2026, 9, 14, 14, 3, tzinfo=UTC),
+            )
+            (root / "pending" / "wake_signal.json").write_bytes(stale_pending)
+
+            poll_once(
+                root,
+                now=datetime(2026, 9, 14, 14, 4, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+            )
+
+            self.assertTrue((root / "submitted" / "wake_signal.json").is_file())
+            self.assertFalse((root / "pending" / "wake_signal.json").exists())
 
     def test_signal_cancellation_wins_before_evaluation_and_cannot_be_republished(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
