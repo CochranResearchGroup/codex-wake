@@ -1,6 +1,6 @@
 # Event-Driven Wakes Product Lane
 
-State: OPEN
+State: CLOSED
 Lane: P48
 Owner: ecochran76
 Work Item: CochranResearchGroup/codex-wake#2
@@ -116,33 +116,33 @@ recovery, name the accountable owner, and record policy-adoption feedback. The
 primary owner accepted and corrected all four findings, then retained final
 validation and integration authority.
 
-## Draft child issue map
+## Published child issue map
 
-The following tracer-bullet slices are proposed for user review. They are not
-yet published as GitHub issues.
+The user approved the tracer-bullet decomposition on 2026-09-14. The issues
+were published in dependency order and read back from GitHub.
 
-1. **Establish the signal contract and crash-safe journal.** Add multi-version
+1. [**#4 Establish the signal contract and crash-safe journal.**](https://github.com/CochranResearchGroup/codex-wake/issues/4) Add multi-version
    reader groundwork, safe registration, bounded matching, SQLite receipts,
    deduplication, reservations, inspection, and provider-free restart tests.
    This is the critical-path blocker for every later slice.
-2. **Preserve existing predicates behind the signal evaluation seam.** Route
+2. [**#5 Preserve existing predicates behind the signal evaluation seam.**](https://github.com/CochranResearchGroup/codex-wake/issues/5) Route
    time, file-exists, file-changed, and process-done behavior through the new
    module without changing user-visible semantics.
-3. **Deliver restart-correct filesystem wakes.** Add notification acceleration,
+3. [**#6 Deliver restart-correct filesystem wakes.**](https://github.com/CochranResearchGroup/codex-wake/issues/6) Add notification acceleration,
    registration fingerprints, startup and overflow reconciliation, evidence,
    CLI recipes, and end-to-end no-dispatch tests. This depends on slices 1 and 2.
-4. **Deliver GitHub CI wakes through polling.** Add explicit repository and
+4. [**#7 Deliver GitHub CI wakes through authoritative polling.**](https://github.com/CochranResearchGroup/codex-wake/issues/7) Add explicit repository and
    workflow allowlists, least-privilege credentials, provider checkpoints,
    fixtures, current-state verification, CLI recipes, and bounded optional live
    read evidence. This depends on slice 1.
-5. **Converge signed GitHub webhooks with polling.** Add authenticated ingress,
+5. [**#8 Converge signed GitHub webhooks with polling.**](https://github.com/CochranResearchGroup/codex-wake/issues/8) Add authenticated ingress,
    delivery deduplication, acknowledgement-after-commit, replay reconciliation,
    event-storm containment, and an opt-in live smoke. This depends on slice 4.
-6. **Productize signal readiness and lifecycle.** Extend doctor, monitor,
+6. [**#9 Productize signal readiness and lifecycle.**](https://github.com/CochranResearchGroup/codex-wake/issues/9) Extend doctor, monitor,
    product-readiness, evidence export, retention, cleanup, migration, downgrade,
    packaging, and public-install smoke across filesystem and GitHub sources.
    This depends on slices 3 through 5.
-7. **Calibrate multi-agent and model routing.** Run a bounded comparison across
+7. [**#10 Calibrate multi-agent and model routing for signal work.**](https://github.com/CochranResearchGroup/codex-wake/issues/10) Run a bounded comparison across
    representative adapter, fixture, and verification work. Record accepted
    outcomes, defects, interventions, elapsed time, and allocation proxies before
    changing repo defaults. This depends on completed implementation samples.
@@ -155,10 +155,23 @@ Webhook work follows GitHub polling. Productization joins the completed source
 lanes. Calibration observes representative completed work and cannot block
 correctness fixes.
 
-Each child issue will name one accountable owner, affected surface, branch,
-plan locator when needed, dependencies, overlaps, acceptance evidence, and live
-effect. Every substantive branch will appear in the default-branch active-lane
-catalog before parallel implementation begins.
+Each child issue names one accountable owner, affected surface, future branch,
+plan locator, dependencies, overlaps, acceptance evidence, and live effect.
+Every substantive branch will appear in the default-branch active-lane catalog
+before parallel implementation begins.
+
+## Closeout receipt
+
+Pull request [#3](https://github.com/CochranResearchGroup/codex-wake/pull/3)
+merged the vision and governance foundation into `origin/main` as
+`46dcb9a60c8af497009470cc76edbea40471ec05` after the Python 3.11 and 3.12
+release gates passed. The user then approved the seven-slice decomposition.
+
+Issues #4 through #10 were created with stable idempotency markers, assigned to
+`ecochran76`, labeled `enhancement`, marked `READY` in their bodies, linked to
+parent issue #2 and this plan, and read back with their concrete dependencies.
+No implementation branch was opened and no provider, dispatch, install, or
+release effect occurred.
 
 ## Validation plan
 
@@ -192,7 +205,7 @@ The vision slice is acceptable when all of these statements are true.
 
 ## Definition of done
 
-Close this plan after the documentation and governance change is merged through
-its linked pull request, GitHub issue `#2` records the merged outcome, and the
-approved child issues are ready to govern implementation. Keep the plan open if
-the pull request or issue decomposition remains unresolved.
+This plan is closed: the documentation and governance change merged through
+pull request #3, GitHub issue #2 records the merged outcome, and approved child
+issues #4 through #10 are ready to govern implementation. Roadmap lane P48 is
+`READY`; issue #4 is the next critical-path work item to claim.

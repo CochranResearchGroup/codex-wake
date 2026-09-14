@@ -585,12 +585,13 @@ Acceptance target:
 
 ## P48 | Event-Driven Wakes Product Lane
 
-State: OPEN
+State: READY
 
-Current State: The product vision, collaboration prerequisites, and proposed
-vertical delivery slices are being recorded on the linked documentation branch.
-Runtime implementation has not started. GitHub issue
-`CochranResearchGroup/codex-wake#2` owns the current vision slice.
+Current State: The product vision and collaboration foundation are accepted on
+`origin/main`. Seven approved vertical slices are published as GitHub issues
+`#4` through `#10`; runtime implementation has not started. Issue `#4` is the
+critical-path item available to claim first, and the active-lane catalog remains
+empty until an implementation branch is opened.
 
 Plan: [Event-Driven Wakes Product Lane](docs/dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md)
 
