@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -73,8 +74,12 @@ def run_command(
     env: dict[str, str] | None = None,
     timeout: float = 60.0,
     allow_returncodes: tuple[int, ...] = (0,),
+    cwd: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(args, text=True, capture_output=True, env=env, timeout=timeout, check=False)
+    result = subprocess.run(
+        args, text=True, capture_output=True, env=env, cwd=cwd,
+        timeout=timeout, check=False,
+    )
     command_dir = artifact_dir / "commands"
     write_text(command_dir / f"{name}.cmd", command_text(args) + "\n")
     write_text(command_dir / f"{name}.stdout", result.stdout)
@@ -97,6 +102,7 @@ def run_json(
     timeout: float = 60.0,
     allow_returncodes: tuple[int, ...] = (0,),
     expect_object: bool = True,
+    cwd: Path | None = None,
 ) -> Any:
     result = run_command(
         args,
@@ -105,6 +111,7 @@ def run_json(
         env=env,
         timeout=timeout,
         allow_returncodes=allow_returncodes,
+        cwd=cwd,
     )
     try:
         payload = json.loads(result.stdout or "{}")
@@ -188,6 +195,7 @@ def run_surface_smoke(
     root: Path,
     source_env: dict[str, str],
     use_user_state: bool,
+    upgrade_wheel: Path | None = None,
 ) -> dict[str, Any]:
     env = dict(source_env) if use_user_state else make_isolated_env(source_env, artifact_dir)
     surface_root = artifact_dir / "surface-wake"
@@ -300,6 +308,227 @@ def run_surface_smoke(
         name="status",
         env=env,
     )
+    signal_env = dict(env)
+    signal_env.update({"TMUX_PANE": "%smoke", "TMUX": "/tmp/codex-wake-smoke,1,0"})
+    signal_work = artifact_dir / "signal-work"
+    signal_work.mkdir(parents=True, exist_ok=True)
+    daemon_stdout_path = artifact_dir / "commands" / "signal-monitor.stdout"
+    daemon_stderr_path = artifact_dir / "commands" / "signal-monitor.stderr"
+    daemon_stdout_path.parent.mkdir(parents=True, exist_ok=True)
+    with daemon_stdout_path.open("w", encoding="utf-8") as daemon_stdout, daemon_stderr_path.open(
+        "w", encoding="utf-8"
+    ) as daemon_stderr:
+        signal_monitor = subprocess.Popen(
+            [
+                str(codex_waked), "--wake-root", str(surface_root),
+                "--interval", "0.1", "--no-dispatch",
+            ],
+            stdout=daemon_stdout,
+            stderr=daemon_stderr,
+            text=True,
+            env=signal_env,
+            cwd=signal_work,
+        )
+        try:
+            deadline = time.monotonic() + 10
+            while True:
+                if signal_monitor.poll() is not None:
+                    raise SystemExit("installed signal monitor exited before readiness")
+                monitor_state = run_json(
+                    [str(codex_wake), "--wake-root", str(surface_root), "monitor", "check", "--json"],
+                    artifact_dir=artifact_dir,
+                    name="signal-monitor-readiness",
+                    env=signal_env,
+                    cwd=signal_work,
+                    allow_returncodes=(0, 1),
+                )
+                if monitor_state.get("monitor_ready"):
+                    break
+                if time.monotonic() >= deadline:
+                    raise SystemExit("installed signal monitor did not become ready")
+                time.sleep(0.1)
+            created = run_command(
+                [
+                    str(codex_wake), "--wake-root", str(surface_root),
+                    "filesystem", "created", "--idempotency-key", "product-smoke-signal",
+                    "ready.flag", "--", "provider-free signal smoke",
+                ],
+                artifact_dir=artifact_dir,
+                name="signal-create",
+                env=signal_env,
+                cwd=signal_work,
+            )
+            signal_wake_id = parse_wake_id(created.stdout)
+            if upgrade_wheel is not None:
+                run_command(
+                    [
+                        str(codex_wake.parent / "python"), "-m", "pip", "install",
+                        "--force-reinstall", str(upgrade_wheel.resolve()),
+                    ],
+                    artifact_dir=artifact_dir,
+                    name="signal-upgrade-wheel",
+                    env=signal_env,
+                    cwd=signal_work,
+                    timeout=240,
+                )
+                signal_monitor.terminate()
+                try:
+                    signal_monitor.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    signal_monitor.kill()
+                    signal_monitor.wait(timeout=5)
+                signal_monitor = subprocess.Popen(
+                    [
+                        str(codex_waked), "--wake-root", str(surface_root),
+                        "--interval", "0.1", "--no-dispatch",
+                    ],
+                    stdout=daemon_stdout,
+                    stderr=daemon_stderr,
+                    text=True,
+                    env=signal_env,
+                    cwd=signal_work,
+                )
+            write_text(signal_work / "ready.flag", "fixture-only\n")
+            deadline = time.monotonic() + 10
+            while True:
+                signal_record = run_json(
+                    [str(codex_wake), "--wake-root", str(surface_root), "show", signal_wake_id],
+                    artifact_dir=artifact_dir,
+                    name="signal-show-firing",
+                    env=signal_env,
+                    cwd=signal_work,
+                )
+                if signal_record.get("status") == "firing":
+                    break
+                if signal_monitor.poll() is not None:
+                    raise SystemExit("installed signal monitor exited before observation")
+                if time.monotonic() >= deadline:
+                    raise SystemExit("installed signal lifecycle did not reach firing without dispatch")
+                time.sleep(0.1)
+        finally:
+            signal_monitor.terminate()
+            try:
+                signal_monitor.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                signal_monitor.kill()
+                signal_monitor.wait(timeout=5)
+    if signal_record.get("status") != "firing":
+        raise SystemExit("installed signal lifecycle did not reach firing without dispatch")
+    run_json(
+        [
+            str(codex_wake), "--wake-root", str(surface_root),
+            "show", signal_wake_id, "--signal-state",
+        ],
+        artifact_dir=artifact_dir,
+        name="signal-authority",
+        env=signal_env,
+        cwd=signal_work,
+    )
+    support_path = artifact_dir / "signal-support.json"
+    support_receipt = run_json(
+        [
+            str(codex_wake), "--wake-root", str(surface_root), "support", "export",
+            "--output", str(support_path), "--max-wakes", "10", "--max-bytes", "32768", "--json",
+        ],
+        artifact_dir=artifact_dir,
+        name="signal-support-export",
+        env=signal_env,
+        cwd=signal_work,
+    )
+    run_command(
+        [str(codex_wake), "--wake-root", str(surface_root), "cancel", signal_wake_id],
+        artifact_dir=artifact_dir,
+        name="signal-cancel",
+        env=signal_env,
+        cwd=signal_work,
+    )
+    run_command(
+        [str(codex_wake), "--wake-root", str(surface_root), "archive", signal_wake_id],
+        artifact_dir=artifact_dir,
+        name="signal-archive",
+        env=signal_env,
+        cwd=signal_work,
+    )
+    time.sleep(1.1)
+    cleanup = run_json(
+        [
+            str(codex_wake), "--wake-root", str(surface_root), "cleanup",
+            "--older-than", "1s", "--delete", "--json",
+        ],
+        artifact_dir=artifact_dir,
+        name="signal-retention-cleanup",
+        env=signal_env,
+        cwd=signal_work,
+    )
+    if cleanup.get("matched_count") != 1 or cleanup.get("protected_count") != 0:
+        raise SystemExit("installed signal retirement was not eligible for bounded cleanup")
+    summary["signal_lifecycle"] = {
+        "wake_id": signal_wake_id,
+        "observed_status": signal_record.get("status"),
+        "dispatch_attempted": False,
+        "support_size_bytes": support_receipt.get("size_bytes"),
+        "retired_status": "archived",
+        "cleanup_deleted": bool(cleanup.get("matched", [{}])[0].get("deleted")),
+        "upgrade_reinstall": upgrade_wheel is not None,
+        "upgrade_restart": upgrade_wheel is not None,
+    }
+    github_fixture_code = textwrap.dedent(
+        """
+        import json, tempfile
+        from datetime import UTC, datetime, timedelta
+        from pathlib import Path
+        from codex_wake.event_wake import EventWake
+        from codex_wake.github_polling import GitHubPollingAdapter, GitHubPollingConfig, RunPage, WorkflowRun
+        from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+        from codex_wake.signal_store import SQLiteSignalModule
+        from codex_wake.signals import EvaluationLimits, Resume, WakeIntent
+
+        now = datetime(2026, 9, 14, 18, 0, tzinfo=UTC)
+        run = WorkflowRun('example/project', 42, 7, 101, 1, 'refs/heads/main', 'a' * 40,
+                          'completed', 'success', now + timedelta(seconds=1))
+        class FixtureClient:
+            def list_runs(self, query):
+                return RunPage((run,), None, now - timedelta(days=1), query.until)
+            def get_run_attempt(self, repository, run_id, run_attempt):
+                return run
+        config = GitHubPollingConfig(
+            source_instance='github-ci', repository='example/project', repository_id=42,
+            workflow_id=7, refs=frozenset({'refs/heads/main'}),
+            conclusions=frozenset({'success'}), credential_ref='fixture-only'
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'wake'
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root, ManagedReaderCapability(root, 'fixture-reader', 1, frozenset({1, 2}), True)
+                ),
+            )
+            adapter = GitHubPollingAdapter(config, FixtureClient())
+            registration = EventWake(runtime, adapters=(adapter,), clock=lambda: now,
+                                     id_factory=lambda: 'wake_github_fixture').register(
+                WakeIntent(adapter.request(ref='refs/heads/main', conclusions=('success',)),
+                           Resume('continue', Path(tmp), {'transport': 'tmux'})),
+                idempotency_key='github-fixture'
+            )
+            armed = runtime.load_armed_signal(registration.wake_id)
+            ingested = adapter.poll_into(runtime, armed.anchor, checkpoints=runtime,
+                                         now=now + timedelta(seconds=2))
+            matched = runtime.evaluate(registration.wake_id, armed,
+                                       now + timedelta(seconds=2), EvaluationLimits(20))
+            if getattr(matched, 'outcome', '') != 'matched':
+                raise SystemExit('fixture-backed GitHub signal did not match')
+            print(json.dumps({'status': matched.outcome, 'source': armed.spec.source,
+                              'receipts': len(ingested.receipts)}))
+        """
+    )
+    github_fixture = run_json(
+        [str(codex_wake.parent / "python"), "-c", github_fixture_code],
+        artifact_dir=artifact_dir,
+        name="signal-github-fixture",
+        env=signal_env,
+    )
+    summary["github_fixture_lifecycle"] = github_fixture
     return summary
 
 
@@ -425,6 +654,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--codex-wake-bin", default=os.environ.get("CODEX_WAKE_BIN", "codex-wake"))
     parser.add_argument("--codex-waked-bin", default=os.environ.get("CODEX_WAKED_BIN", "codex-waked"))
     parser.add_argument("--public-tag", help="install codex-wake from this public Git tag into a temporary venv before smoking")
+    parser.add_argument("--upgrade-wheel", type=Path, help="force-reinstall this wheel after signal arm and before observation")
     parser.add_argument("--artifact-dir", type=Path, default=None, help="directory for smoke artifacts")
     parser.add_argument("--wake-root", type=Path, default=None, help="live wake root; defaults to .codex/wake under the repo")
     parser.add_argument("--allow-source", action="store_true", help="allow smoke against a binary inside this source checkout")
@@ -497,6 +727,7 @@ def main(argv: list[str] | None = None) -> int:
         root=root,
         source_env=env,
         use_user_state=args.use_user_state,
+        upgrade_wheel=args.upgrade_wheel,
     )
 
     if args.expect_monitor_ready:

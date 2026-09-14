@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
-from codex_wake.daemon import PollResult, format_poll_result, poll_once, poll_result_has_activity
+from codex_wake.daemon import PollResult, format_poll_result, poll_once, poll_result_has_activity, run
 from codex_wake.event_wake import EventWake
 from codex_wake.records import WakeLifecycleLock, build_record, cancel_record, write_record
 from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
@@ -21,6 +21,25 @@ from tests.test_signals import make_adapter, make_intent
 
 
 class DaemonTests(unittest.TestCase):
+    def test_loop_marks_only_its_first_default_source_pass_as_startup(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            with (
+                patch(
+                    "codex_wake.daemon.poll_once",
+                    side_effect=(PollResult(), KeyboardInterrupt()),
+                ) as polling,
+                patch("codex_wake.daemon.write_monitor_health"),
+                patch("codex_wake.daemon.time.sleep"),
+            ):
+                with self.assertRaises(KeyboardInterrupt):
+                    run(["--wake-root", str(root), "--no-dispatch", "--interval", "0.1"])
+
+            self.assertEqual(
+                [call.kwargs["signal_reconcile_reason"] for call in polling.call_args_list],
+                ["startup", "periodic"],
+            )
+
     def test_v1_not_ready_record_bytes_survive_repeated_restart_checks(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"

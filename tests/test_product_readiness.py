@@ -312,6 +312,8 @@ class ProductReadinessTests(unittest.TestCase):
 
             rendered = json.dumps(summary)
             self.assertNotIn("super-secret-token", rendered)
+            self.assertEqual(summary["checks"]["signals"]["capability"]["status"], STATUS_READY)
+            self.assertFalse(summary["checks"]["signals"]["dispatch_readiness"]["included"])
             self.assertEqual(summary["checks"]["openclaw_gateway"]["status"], STATUS_READY)
             self.assertEqual(summary["checks"]["openclaw_plugin"]["status"], STATUS_READY)
 

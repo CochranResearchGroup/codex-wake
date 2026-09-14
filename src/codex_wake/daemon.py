@@ -6,6 +6,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 from .records import (
     WakeError,
@@ -36,6 +37,7 @@ class PollResult:
     dispatched: int = 0
     requeued: int = 0
     submitted: int = 0
+    signal_sources: tuple[dict[str, object], ...] = ()
 
 
 def format_poll_result(result: PollResult) -> str:
@@ -59,7 +61,7 @@ def poll_result_has_activity(result: PollResult) -> bool:
     )
 
 
-def poll_result_dict(result: PollResult) -> dict[str, int]:
+def poll_result_dict(result: PollResult) -> dict[str, object]:
     return {
         "checked": result.checked,
         "fired": result.fired,
@@ -68,7 +70,65 @@ def poll_result_dict(result: PollResult) -> dict[str, int]:
         "dispatched": result.dispatched,
         "submitted": result.submitted,
         "requeued": result.requeued,
+        "signal_sources": list(getattr(result, "signal_sources", ())),
     }
+
+
+def default_signal_runners(
+    root: Path,
+    runtime: SQLiteSignalModule,
+    *,
+    initial_reason: Literal["startup", "periodic"] = "startup",
+) -> tuple[SignalSourceRunner, ...]:
+    """Reconstruct provider-free source adapters from durable wake records."""
+
+    from .filesystem_signals import FilesystemSignalAdapter, FilesystemSignalRunner
+
+    adapters: dict[str, FilesystemSignalAdapter] = {}
+    arms = []
+    for item in pending_records(root):
+        if classify_record(item.record) != "signal_v2":
+            continue
+        wake_id = item.record.get("id")
+        cwd = item.record.get("cwd")
+        predicate = item.record.get("predicate")
+        if not isinstance(wake_id, str) or not isinstance(cwd, str) or not isinstance(predicate, dict):
+            continue
+        if predicate.get("source") != "filesystem":
+            continue
+        subject = predicate.get("subject")
+        source_instance = predicate.get("source_instance")
+        if (
+            not isinstance(subject, str)
+            or not subject.startswith("path:")
+            or not isinstance(source_instance, str)
+        ):
+            continue
+        armed = runtime.load_armed_signal(wake_id)
+        if armed is None:
+            continue
+        try:
+            adapter = FilesystemSignalAdapter(
+                Path(cwd),
+                subject.removeprefix("path:"),
+                source_instance=source_instance,
+            )
+        except ValueError:
+            continue
+        existing = adapters.get(source_instance)
+        if existing is not None and (
+            existing.root != adapter.root or existing.relative_path != adapter.relative_path
+        ):
+            continue
+        adapters[source_instance] = adapter
+        arms.append(armed)
+    if not arms:
+        return ()
+    return (
+        FilesystemSignalRunner(
+            adapters.values(), armed_signals=arms, initial_reason=initial_reason
+        ),
+    )
 
 
 def pending_records(root: Path) -> list[WakePath]:
@@ -106,6 +166,7 @@ def poll_once(
     ack_timeout_override: float | None = None,
     signal_runtime: SQLiteSignalModule | None = None,
     signal_runners: tuple[SignalSourceRunner, ...] = (),
+    signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
 ) -> PollResult:
     current = now or utc_now()
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
@@ -123,17 +184,47 @@ def poll_once(
             except Exception:
                 signal_runtime = None
     if signal_runtime is not None:
+        if not signal_runners:
+            signal_runners = default_signal_runners(
+                root, signal_runtime, initial_reason=signal_reconcile_reason
+            )
         firing_before = {item.record.get("id") for item in firing_records(root)}
         signal_runtime.reconcile_publications(limit=100, include_matches=False)
         firing_after = {item.record.get("id") for item in firing_records(root)}
         fired += len(firing_after - firing_before)
+        signal_source_health: list[dict[str, object]] = []
         for source_runner in signal_runners:
             try:
-                source_runner.reconcile(signal_runtime, current, EvaluationLimits(100))
+                source_result = source_runner.reconcile(signal_runtime, current, EvaluationLimits(100))
+                if source_result.instances:
+                    signal_source_health.extend(
+                        {
+                            "source": item.source,
+                            "source_instance": item.source_instance,
+                            "scope": "instance",
+                            "scanned": item.scanned,
+                            "observed": item.observed,
+                            "degraded": item.degraded,
+                        }
+                        for item in source_result.instances
+                    )
+                else:
+                    signal_source_health.append(
+                        {
+                            "source": source_result.source,
+                            "source_instance": "",
+                            "scope": "aggregate",
+                            "scanned": source_result.scanned,
+                            "observed": source_result.observed,
+                            "degraded": source_result.degraded,
+                        }
+                    )
             except Exception:
                 # Source adapters fail closed. Wake evaluation below remains
                 # available for already committed observations and v1 records.
                 continue
+    else:
+        signal_source_health = []
     terminal_signal_ids: set[str] = set()
     if signal_runtime is not None:
         for terminal in iter_records(root):
@@ -274,6 +365,7 @@ def poll_once(
         dispatched=dispatched,
         requeued=requeued,
         submitted=submitted,
+        signal_sources=tuple(signal_source_health),
     )
 
 
@@ -314,8 +406,15 @@ def run(argv: list[str] | None = None) -> int:
         return 0
     if args.interval <= 0:
         raise WakeError("--interval must be greater than zero")
+    signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
     while True:
-        result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
+        result = poll_once(
+            root,
+            dispatch=not args.no_dispatch,
+            ack_timeout_override=args.ack_timeout,
+            signal_reconcile_reason=signal_reconcile_reason,
+        )
+        signal_reconcile_reason = "periodic"
         write_monitor_health(
             wake_root=root,
             repo_root=Path.cwd(),

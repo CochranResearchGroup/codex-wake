@@ -10,6 +10,7 @@ cleanup commands can and cannot remove.
 | Active wake records | `.codex/wake/pending/`, `.codex/wake/firing/` | Authoritative. These records define work the daemon may still evaluate or dispatch. | Never deleted by `cleanup`. Cancel first when a wake should not fire. |
 | Terminal wake records | `.codex/wake/submitted/`, `.codex/wake/failed/`, `.codex/wake/cancelled/`, `.codex/wake/expired/` | Authoritative outcome records until archived. | `archive <wake-id>` or `archive --all-terminal` moves them to `archive/`. `cleanup` never deletes them directly. |
 | Archived wake records | `.codex/wake/archive/` | Durable historical evidence. | `cleanup` previews old archived records by default and deletes only with `--delete`. |
+| Signal journal | `.codex/wake/signals/journal.sqlite3` plus SQLite WAL files | Authoritative anchors, source checkpoints, match reservations, and evidence-retention pins. | Never deleted by record cleanup. Preserve it through migration and restore/repair from a copy if readiness reports corruption. |
 | Hook ack records | `.codex/wake/acks/` | Durable delivery evidence for Codex hook submission. | Not deleted by `cleanup`; retain or prune manually according to local evidence policy. |
 | Wake logs and event logs | `.codex/wake/logs/`, `.codex/events/` | Ephemeral or operator-created evidence, depending on the workflow. | Not deleted by `cleanup`; preserve if referenced by a wake record or verification note. |
 | Pane locks | `.codex/wake/locks/` | Ephemeral concurrency guard. | Removed by the daemon when stale; not a durable outcome record. |
@@ -52,13 +53,22 @@ tenant-specific logs stay in runtime locations.
 - Archives terminal wake records first.
 - Then evaluates archived records against the retention window.
 - Produces a structured preview containing `archived_terminal` and `matched`
-  entries.
+  entries. Signal records held by an active anchor, checkpoint dependency,
+  match reservation, or evidence pin appear under `protected` with reasons and
+  repair guidance.
 
 `codex-wake cleanup --delete`:
 
 - Deletes only matched archived records.
 - Never deletes active wake records, non-archived terminal records, ack files,
   logs, monitor health, or supervisor registry entries.
+- Deletes an archived signal record only after its registration is durably
+  tombstoned and every retention pin is released.
+
+Journal schema upgrades are transactional and retryable after interruption.
+Readiness refuses a journal newer than the running binary and instructs the
+operator to restore a pre-upgrade backup or use a compatible runtime; it does
+not attempt an in-place downgrade.
 
 `codex-wake supervisor unenroll --root-id <id>` or
 `codex-wake supervisor unenroll --wake-root <path>`:

@@ -29,6 +29,7 @@ from .signals import (
     SourceAnchor,
     SourceCommit,
     SourceContract,
+    SourceInstanceReconcileResult,
     SourceReconcileResult,
     Verification,
 )
@@ -109,6 +110,7 @@ class FilesystemSignalRunner:
             self.last_result = SourceReconcileResult(_SOURCE, 0, 0, 1)
             return self.last_result
         scanned = observed = degraded = 0
+        instance_results: list[SourceInstanceReconcileResult] = []
         if limits.max_candidates <= 0:
             self.last_result = SourceReconcileResult(_SOURCE, 0, 0, 1)
             return self.last_result
@@ -119,18 +121,37 @@ class FilesystemSignalRunner:
             adapter = self._adapters.get(armed.spec.source_instance)
             if adapter is None or not adapter._valid_request(armed.spec):
                 degraded += 1
+                instance_results.append(
+                    SourceInstanceReconcileResult(
+                        _SOURCE, armed.spec.source_instance, 0, 0, 1
+                    )
+                )
                 continue
             groups.setdefault(armed.spec.source_instance, []).append(armed)
         for source_instance, source_arms in groups.items():
             adapter = self._adapters[source_instance]
             scanned += 1
+            instance_observed = 0
+            instance_degraded = 0
             sampled = _fingerprint(adapter.root, adapter.relative_path)
             if isinstance(sampled, Degraded):
                 degraded += 1
+                instance_degraded = 1
+                instance_results.append(
+                    SourceInstanceReconcileResult(
+                        _SOURCE, source_instance, 1, instance_observed, instance_degraded
+                    )
+                )
                 continue
             previous = module.source_checkpoint(_SOURCE, adapter.source_instance)
             if isinstance(previous, Degraded):
                 degraded += 1
+                instance_degraded = 1
+                instance_results.append(
+                    SourceInstanceReconcileResult(
+                        _SOURCE, source_instance, 1, instance_observed, instance_degraded
+                    )
+                )
                 continue
             order = (
                 previous.checkpoint_order + 1
@@ -140,6 +161,12 @@ class FilesystemSignalRunner:
             previous_state = _checkpoint_fingerprint(previous)
             if isinstance(previous, SourceCommit) and previous_state is None:
                 degraded += 1
+                instance_degraded = 1
+                instance_results.append(
+                    SourceInstanceReconcileResult(
+                        _SOURCE, source_instance, 1, instance_observed, instance_degraded
+                    )
+                )
                 continue
             if previous_state is None:
                 earliest = min(source_arms, key=lambda item: item.registered_at)
@@ -158,50 +185,86 @@ class FilesystemSignalRunner:
             kinds = {armed.spec.kind for armed in source_arms}
             for kind in sorted(kinds):
                 recipe = kind.removeprefix("file.")
+                kind_arms = [armed for armed in source_arms if armed.spec.kind == kind]
                 if recipe == "exists":
-                    matched = sampled.exists and (
-                        previous is None or not previous_state.exists
+                    eligible_baselines = sorted(
+                        {
+                            (
+                                armed.anchor.local_after_sequence,
+                                str(armed.anchor.baseline.get("fingerprint", "")),
+                            )
+                            for armed in kind_arms
+                        }
                     )
+                    if not sampled.exists:
+                        eligible_baselines = []
                 elif recipe == "created":
-                    matched = sampled.exists and not previous_state.exists
-                else:
-                    matched = sampled.digest != previous_state.digest
-                if not matched:
-                    continue
-                attributes = MappingProxyType(
-                    {
-                        "matched": True,
-                        "exists": sampled.exists,
-                        "file_kind": sampled.file_kind,
-                        "fingerprint": sampled.digest,
-                        "baseline_fingerprint": previous_state.digest,
-                        "coalesced": coalesced,
-                        "observation_reason": observation_reason,
-                        "hint_count": hint_count,
-                    }
-                )
-                observations.append(
-                    NormalizedObservation(
-                        _SOURCE,
-                        adapter.source_instance,
-                        kind,
-                        adapter.subject,
-                        "filesystem-reconciliation-v1",
-                        _digest(
-                            {
-                                "source_instance": adapter.source_instance,
-                                "kind": kind,
-                                "order": order,
-                                "fingerprint": sampled.digest,
-                            }
-                        ),
-                        now,
-                        now,
-                        attributes,
-                        Verification("verified", "filesystem_state_recheck"),
-                        f"filesystem:{sampled.digest[:24]}",
+                    eligible_baselines = sorted(
+                        {
+                            (
+                                armed.anchor.local_after_sequence,
+                                str(armed.anchor.baseline.get("fingerprint", "")),
+                            )
+                            for armed in kind_arms
+                            if sampled.exists
+                            and (
+                                not bool(armed.anchor.baseline.get("exists"))
+                                or (
+                                    previous is not None
+                                    and not previous_state.exists
+                                    and armed.anchor.baseline.get("fingerprint")
+                                    != sampled.digest
+                                )
+                            )
+                        }
                     )
-                )
+                else:
+                    eligible_baselines = sorted(
+                        {
+                            (
+                                armed.anchor.local_after_sequence,
+                                str(armed.anchor.baseline.get("fingerprint", "")),
+                            )
+                            for armed in kind_arms
+                            if armed.anchor.baseline.get("fingerprint") != sampled.digest
+                        }
+                    )
+                for baseline_cohort, baseline_fingerprint in eligible_baselines:
+                    attributes = MappingProxyType(
+                        {
+                            "matched": True,
+                            "exists": sampled.exists,
+                            "file_kind": sampled.file_kind,
+                            "fingerprint": sampled.digest,
+                            "baseline_fingerprint": baseline_fingerprint,
+                            "coalesced": coalesced,
+                            "observation_reason": observation_reason,
+                            "hint_count": hint_count,
+                        }
+                    )
+                    observations.append(
+                        NormalizedObservation(
+                            _SOURCE,
+                            adapter.source_instance,
+                            kind,
+                            adapter.subject,
+                            "filesystem-reconciliation-v1",
+                            _digest(
+                                {
+                                    "source_instance": adapter.source_instance,
+                                    "kind": kind,
+                                    "fingerprint": sampled.digest,
+                                    "baseline_cohort": baseline_cohort,
+                                    "baseline_fingerprint": baseline_fingerprint,
+                                }
+                            ),
+                            now,
+                            now,
+                            attributes,
+                            Verification("verified", "filesystem_state_recheck"),
+                            f"filesystem:{sampled.digest[:24]}",
+                        )
+                    )
             checkpoint = SourceCommit(
                 _SOURCE,
                 adapter.source_instance,
@@ -217,14 +280,46 @@ class FilesystemSignalRunner:
             )
             outcome = module.ingest(tuple(observations), checkpoint)
             if isinstance(outcome, Ingested):
-                observed += len(observations)
+                instance_observed = sum(
+                    not receipt.duplicate for receipt in outcome.receipts
+                )
+                observed += instance_observed
                 self._hint_counts.pop(adapter.source_instance, None)
             else:
                 degraded += 1
+                instance_degraded = 1
+            instance_results.append(
+                SourceInstanceReconcileResult(
+                    _SOURCE,
+                    source_instance,
+                    1,
+                    instance_observed,
+                    instance_degraded,
+                )
+            )
         if degraded == 0:
             self._watcher_uncertain = False
             self._reason = "periodic"
-        self.last_result = SourceReconcileResult(_SOURCE, scanned, observed, degraded)
+        combined_instances: dict[str, SourceInstanceReconcileResult] = {}
+        for item in instance_results:
+            previous_result = combined_instances.get(item.source_instance)
+            if previous_result is None:
+                combined_instances[item.source_instance] = item
+            else:
+                combined_instances[item.source_instance] = SourceInstanceReconcileResult(
+                    _SOURCE,
+                    item.source_instance,
+                    previous_result.scanned + item.scanned,
+                    previous_result.observed + item.observed,
+                    previous_result.degraded + item.degraded,
+                )
+        self.last_result = SourceReconcileResult(
+            _SOURCE,
+            scanned,
+            observed,
+            degraded,
+            tuple(combined_instances[key] for key in sorted(combined_instances)),
+        )
         return self.last_result
 
 

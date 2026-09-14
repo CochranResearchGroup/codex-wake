@@ -8,9 +8,9 @@ import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from .daemon import format_poll_result, poll_once, poll_result_has_activity
+from .daemon import format_poll_result, poll_once, poll_result_dict, poll_result_has_activity
 from .executables import resolve_stable_executable
 from .monitor import (
     health_is_recent,
@@ -360,7 +360,13 @@ def supervisor_status(config: SupervisorConfig, runner: CommandRunner | None = N
     }
 
 
-def supervisor_poll_once(config: SupervisorConfig, *, mode: str = "once", dispatch: bool = True) -> list[dict[str, Any]]:
+def supervisor_poll_once(
+    config: SupervisorConfig,
+    *,
+    mode: str = "once",
+    dispatch: bool = True,
+    signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
+) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     monitor_dir = config.state_dir.parent / "monitors"
     for entry in iter_registry_entries(config.registry_dir):
@@ -373,16 +379,12 @@ def supervisor_poll_once(config: SupervisorConfig, *, mode: str = "once", dispat
         repo_root_text = entry.get("repo_root")
         repo_root = Path(repo_root_text).expanduser().resolve() if isinstance(repo_root_text, str) and repo_root_text else None
         try:
-            result = poll_once(wake_root, dispatch=dispatch)
-            poll_summary = {
-                "checked": result.checked,
-                "fired": result.fired,
-                "failed": result.failed,
-                "pending": result.pending,
-                "dispatched": result.dispatched,
-                "submitted": result.submitted,
-                "requeued": result.requeued,
-            }
+            result = poll_once(
+                wake_root,
+                dispatch=dispatch,
+                signal_reconcile_reason=signal_reconcile_reason,
+            )
+            poll_summary = poll_result_dict(result)
             health_path = write_monitor_health(
                 wake_root=wake_root,
                 repo_root=repo_root,
@@ -434,8 +436,15 @@ def supervisor_run_loop(config: SupervisorConfig, *, once: bool = False, dispatc
             else:
                 print(f"{item['root_id']} failed error={item.get('error', '')}")
         return 0
+    signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
     while True:
-        results = supervisor_poll_once(config, mode="loop", dispatch=dispatch)
+        results = supervisor_poll_once(
+            config,
+            mode="loop",
+            dispatch=dispatch,
+            signal_reconcile_reason=signal_reconcile_reason,
+        )
+        signal_reconcile_reason = "periodic"
         for item in results:
             if item.get("activity"):
                 if item.get("ok"):

@@ -549,6 +549,44 @@ def cleanup_archived_records(
     return results
 
 
+def protected_signal_cleanup_records(
+    root: Path,
+    *,
+    older_than: timedelta,
+    now: datetime | None = None,
+) -> list[dict[str, Any]]:
+    """List old signal records held by lifecycle or retention protection."""
+
+    if older_than <= timedelta():
+        raise WakeError("older_than must be greater than zero")
+    cutoff = (now or utc_now()) - older_than
+    protected: list[dict[str, Any]] = []
+    for item in iter_archived_records(root):
+        wake_id = item.record.get("id")
+        retention_text = retention_timestamp(item.record)
+        if not isinstance(wake_id, str) or retention_text is None:
+            continue
+        try:
+            retention_at = parse_utc_timestamp(retention_text)
+        except WakeError:
+            continue
+        if retention_at > cutoff:
+            continue
+        detail = signal_cleanup_protection(root, item.record)
+        if detail is None or detail.get("allowed"):
+            continue
+        protected.append(
+            {
+                "wake_id": wake_id,
+                "path": str(item.path),
+                "retention_at": format_utc(retention_at),
+                "reasons": list(detail.get("reasons") or []),
+                "repair": str(detail.get("repair") or ""),
+            }
+        )
+    return protected
+
+
 def _retire_signal_terminal(root: Path, record: dict[str, Any], now: datetime) -> None:
     if decode_signal_record(record) is None:
         return
@@ -570,6 +608,30 @@ def _signal_cleanup_allowed(root: Path, record: dict[str, Any]) -> bool:
         return runtime is not None and runtime.cleanup_allowed(record)
     except Exception:
         return False
+
+
+def signal_cleanup_protection(root: Path, record: dict[str, Any]) -> dict[str, Any] | None:
+    """Return actionable protection detail for an archived signal record."""
+
+    if decode_signal_record(record) is None:
+        return None
+    try:
+        from .signal_store import SQLiteSignalModule
+
+        runtime = SQLiteSignalModule.open_existing(signal_journal_path(root))
+        if runtime is None:
+            return {
+                "allowed": False,
+                "reasons": ["journal_missing"],
+                "repair": "preserve the record and restore its signal journal before cleanup",
+            }
+        return runtime.cleanup_diagnostic(record)
+    except Exception:
+        return {
+            "allowed": False,
+            "reasons": ["journal_unavailable"],
+            "repair": "preserve the record and repair or restore the signal journal before cleanup",
+        }
 
 
 def retention_timestamp(record: dict[str, Any]) -> str | None:

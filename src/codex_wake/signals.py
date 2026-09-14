@@ -241,11 +241,21 @@ class SignalEngine(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
+class SourceInstanceReconcileResult:
+    source: str
+    source_instance: str
+    scanned: int
+    observed: int
+    degraded: int
+
+
+@dataclass(frozen=True, slots=True)
 class SourceReconcileResult:
     source: str
     scanned: int
     observed: int
     degraded: int
+    instances: tuple[SourceInstanceReconcileResult, ...] = ()
 
 
 class SignalSourceRunner(Protocol):

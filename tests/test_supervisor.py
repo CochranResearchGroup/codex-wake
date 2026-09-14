@@ -11,7 +11,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 from codex_wake.monitor import write_monitor_health
+from codex_wake.event_wake import EventWake
+from codex_wake.filesystem_signals import FilesystemSignalAdapter
 from codex_wake.records import WakeError, build_record, write_record
+from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+from codex_wake.signal_store import SQLiteSignalModule
+from codex_wake.signals import Resume, WakeIntent
 from codex_wake.supervisor import (
     build_supervisor_config,
     enroll_root,
@@ -44,6 +49,61 @@ class FakeRunner:
 
 
 class SupervisorTests(unittest.TestCase):
+    def test_supervisor_preserves_mixed_legacy_and_signal_readers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_supervisor_config(
+                unit_dir=base / "systemd",
+                registry_dir=base / "registry",
+                state_dir=base / "state" / "supervisor",
+                validate_executable=False,
+            )
+            legacy_root = base / "legacy" / "wake"
+            legacy = build_record(
+                predicate={"type": "not_before", "due_at": "2026-09-14T00:00:00Z"},
+                prompt="legacy",
+                cwd=base,
+                target={"transport": "tmux", "tmux_socket": "/tmp/tmux", "pane": "%1"},
+            )
+            legacy["id"] = "wake_legacy"
+            write_record(legacy_root, legacy)
+            signal_repo = base / "signal"
+            signal_root = signal_repo / "wake"
+            adapter = FilesystemSignalAdapter(signal_repo, "ready.flag")
+            runtime = SQLiteSignalModule(
+                signal_journal_path(signal_root),
+                record_publisher=WakeRecordPublisher(
+                    signal_root,
+                    ManagedReaderCapability(signal_root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=(adapter,),
+                clock=lambda: datetime(2026, 9, 14, 18, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(
+                WakeIntent(adapter.request("created"), Resume("signal", signal_repo, {"transport": "tmux"})),
+                idempotency_key="signal",
+            )
+            signal_repo.mkdir(exist_ok=True)
+            (signal_repo / "ready.flag").write_text("ready", encoding="utf-8")
+            enroll_root(wake_root=legacy_root, repo_root=base / "legacy", registry_dir=config.registry_dir, root_id="legacy")
+            enroll_root(wake_root=signal_root, repo_root=signal_repo, registry_dir=config.registry_dir, root_id="signal")
+
+            results = supervisor_poll_once(config, mode="once", dispatch=False)
+
+            self.assertEqual([item["root_id"] for item in results], ["legacy", "signal"])
+            self.assertTrue(all(item["ok"] for item in results))
+            self.assertTrue((legacy_root / "firing" / "wake_legacy.json").is_file())
+            signal_record = json.loads(
+                (signal_root / "firing" / "wake_signal.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                signal_record["trigger_match"]["attributes"]["observation_reason"],
+                "startup",
+            )
+
     def make_executable(self, path: Path) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("#!/bin/sh\n", encoding="utf-8")
