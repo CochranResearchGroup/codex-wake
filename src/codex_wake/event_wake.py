@@ -34,6 +34,12 @@ class EventWake:
         self._id_factory = id_factory
 
     def register(self, intent: WakeIntent, *, idempotency_key: str) -> RegisterResult:
+        if (
+            isinstance(intent.max_attempts, bool)
+            or not isinstance(intent.max_attempts, int)
+            or not 1 <= intent.max_attempts <= 100
+        ):
+            return Invalid(None, "INVALID_SIGNAL", ("max_attempts must be between 1 and 100",))
         adapter = self._adapters.get((intent.when.source, intent.when.source_instance))
         if adapter is None:
             return Invalid(None, "INVALID_SIGNAL", ("signal specification is invalid",))
@@ -48,6 +54,7 @@ class EventWake:
                 expires_at=intent.expires_at,
                 resume=intent.resume,
                 adapter=adapter,
+                max_attempts=intent.max_attempts,
             ),
         )
         if isinstance(armed, (Degraded, Invalid)):
@@ -83,6 +90,7 @@ def _intent_fingerprint(intent: WakeIntent) -> str:
             "target": dict(intent.resume.target),
         },
         "expires_at": intent.expires_at.isoformat() if intent.expires_at else None,
+        "max_attempts": intent.max_attempts,
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=list).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()

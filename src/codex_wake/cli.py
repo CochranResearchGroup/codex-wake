@@ -68,6 +68,16 @@ from .supervisor import (
 )
 
 
+def bounded_attempt_count(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("must be an integer between 1 and 100") from None
+    if not 1 <= parsed <= 100:
+        raise argparse.ArgumentTypeError("must be between 1 and 100")
+    return parsed
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="codex-wake")
     parser.add_argument("--version", action="version", version=f"%(prog)s {package_version()}")
@@ -196,6 +206,12 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         recipe_parser = filesystem_subparsers.add_parser(recipe, help=help_text)
         recipe_parser.add_argument("--idempotency-key")
+        recipe_parser.add_argument(
+            "--max-attempts",
+            type=bounded_attempt_count,
+            default=3,
+            help="maximum dispatch attempts (1-100; default: 3)",
+        )
         recipe_parser.add_argument("path")
         recipe_parser.add_argument("prompt", nargs=argparse.REMAINDER)
         add_target_options(recipe_parser)
@@ -767,6 +783,7 @@ def create_filesystem_signal(args: argparse.Namespace, root: Path) -> int:
         WakeIntent(
             adapter.request(args.filesystem_command),
             Resume(prompt, Path.cwd(), target_for_args(args)),
+            max_attempts=args.max_attempts,
         ),
         idempotency_key=args.idempotency_key or f"filesystem:{uuid.uuid4().hex}",
     )

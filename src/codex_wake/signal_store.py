@@ -693,6 +693,7 @@ class SQLiteSignalModule(SignalEngine):
                 context.resume,
                 journal_uuid=journal_uuid,
                 revision=1,
+                max_attempts=context.max_attempts,
             )
             connection.execute(
                 """

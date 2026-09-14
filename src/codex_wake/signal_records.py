@@ -303,6 +303,7 @@ def build_signal_record(
     *,
     journal_uuid: str,
     revision: int,
+    max_attempts: int = 3,
 ) -> tuple[str, str]:
     timestamp = _format_time(armed.registered_at)
     predicate = {
@@ -343,7 +344,7 @@ def build_signal_record(
         "prompt": resume.prompt,
         "status": "pending",
         "attempts": 0,
-        "max_attempts": 3,
+        "max_attempts": max_attempts,
         "ack_timeout_seconds": 30,
         "next_attempt_at": timestamp,
         "events": [
