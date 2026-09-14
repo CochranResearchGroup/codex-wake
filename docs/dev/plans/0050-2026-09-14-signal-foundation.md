@@ -141,7 +141,41 @@ implementation attempts cannot pass the same acceptance check.
 
 ## Next action
 
-Publish this checkpoint, register the branch in the active-lane catalog, and
-run three bounded read-only interface challenges before writing the first
-failing test. The primary will reconcile those alternatives and retain the
-final shared interface decision.
+Packet 4A is complete. It was split after two bounded implementation work
+units into Packet 4A.2 for primary-owned acceptance hardening rather than
+resetting the attempt count.
+
+Three read-only interface challenges completed under
+`/root/p48_i4_minimal`, `/root/p48_i4_extensible`, and
+`/root/p48_i4_caller_first`. One implementation worker then completed ten
+registration, ingestion, and evaluation contract tests. The primary accepted
+its core behavior and added six tests for immutable evidence, storage and
+projection bounds, observation-contract enforcement, bounded `in`, source
+isolation, and fan-out.
+
+Validation on Python 3.12.13 passed:
+
+```text
+PYTHONPATH=src python -m unittest tests.test_signals
+Ran 16 tests in 0.002s - OK
+
+PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
+Ran 198 tests in 1.391s - OK
+
+npm --prefix plugins/openclaw-codex-wake test
+12 passed, 0 failed
+
+python -m compileall -q src tests
+PASS
+```
+
+Packet 4A changed only the signal module, caller facade, contract tests, this
+plan, and the logical-identity wording in the product vision. Existing wake
+records, daemon behavior, CLI commands, plugins, and dispatch transports are
+unchanged.
+
+The next action is Packet 4B: design and implement the SQLite journal at the
+accepted signal seam, including transactional arm preparation, observation
+deduplication, monotonic checkpoints, match reservations, retention pins, and
+bounded evaluation progress. Packet 4C and every source adapter remain
+blocked.

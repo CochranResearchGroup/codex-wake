@@ -263,9 +263,12 @@ it. The journal never becomes a raw provider-payload archive.
 }
 ```
 
-The stable provider deduplication key is the source instance plus provider
-delivery ID. An adapter without provider IDs must declare and test a bounded,
-deterministic identity rule.
+The stable logical deduplication key is the source, source instance, and an
+adapter-declared occurrence namespace plus occurrence value. Polling and push
+adapters for one source must emit the same logical identity for the same
+occurrence. A provider delivery ID may be retained as bounded transport
+evidence, but it is not the cross-transport identity. Every adapter must
+declare and test its deterministic identity and collision domain.
 
 Provider timestamps are evidence. The local monotonic sequence determines
 journal ordering.
