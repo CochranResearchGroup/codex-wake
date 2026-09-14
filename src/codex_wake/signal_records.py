@@ -243,8 +243,23 @@ class WakeRecordPublisher:
         except (OSError, TypeError, ValueError, KeyError):
             return PublicationResult("unavailable")
 
+    def remove_superseded_pending(self, terminal_record: object) -> bool:
+        payload = decode_signal_record(terminal_record)
+        if payload is None or payload.get("status") not in {
+            "submitted", "failed", "cancelled", "expired", "archived"
+        }:
+            return False
+        status_dir = "archive" if payload["status"] == "archived" else str(payload["status"])
+        final_path = self.wake_root / status_dir / f"{payload['id']}.json"
+        if not final_path.is_file():
+            return False
+        self._remove_superseded_source(payload, final_path)
+        return not (self.wake_root / "pending" / f"{payload['id']}.json").exists()
+
     def _remove_superseded_source(self, payload: dict[str, object], final_path: Path) -> None:
-        if payload.get("status") not in {"firing", "cancelled", "expired"}:
+        if payload.get("status") not in {
+            "firing", "submitted", "failed", "cancelled", "expired", "archived"
+        }:
             return
         wake_id = payload["id"]
         source_path = self.wake_root / "pending" / f"{wake_id}.json"

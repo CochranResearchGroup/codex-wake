@@ -1,6 +1,6 @@
 # Plan 0057: Installed Filesystem Wake Canary
 
-State: OPEN
+State: CLOSED
 Lane: P49
 Owner: ecochran76
 Work Item: CochranResearchGroup/codex-wake#30
@@ -38,6 +38,14 @@ it to PID `3292411` while wake
 `wake_9dbc51cc5a2d405d8ef4f1d2623d9c0d` remained pending with zero attempts,
 `max_attempts: 1`, an absent marker, and current source/monitor readiness. The
 live marker effect and dispatch have not yet occurred.
+
+The marker subsequently matched with verified filesystem state, the wake
+dispatched once, the hook acknowledged it, and visibility was
+`visible_prompt_observed`. A stale revision-1 pending projection discovered on
+the next poll was repaired with a deterministic regression and convergent
+terminal cleanup. Verification 0073 records the complete evidence. The wake
+was archived and every named canary resource was removed; global and normal
+repo state remained unchanged.
 
 Graphiti was healthy but returned no P49-specific recall. CodeGraph was healthy
 at 90 files, 2,284 nodes, and 8,200 edges. Current repo, GitHub, process,
@@ -169,8 +177,8 @@ global uv tool, or unrelated process tree.
 
 ## Definition Of Done
 
-All acceptance criteria have current evidence, rollback is complete, issue #30
-and its pull request are closed/merged, Plan 0057 and roadmap P49 are closed,
-the active-lane catalog is empty, and canonical `origin/main` contains the
-verification receipt. A failed live criterion still requires truthful rollback
-and integration but does not count as successful P49 completion.
+All acceptance criteria have current evidence, rollback is complete, Plan 0057
+and roadmap P49 are closed, and the active-lane catalog is empty. Integration
+still requires the issue-closing pull request, green CI, and canonical-main
+readback. A failed live criterion would require truthful rollback and
+integration but would not count as successful P49 completion.

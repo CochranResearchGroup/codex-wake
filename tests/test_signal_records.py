@@ -90,6 +90,29 @@ class SignalRecordPublicationTests(unittest.TestCase):
             self.assertEqual(publisher.apply(missing_json, missing_digest).outcome, "conflict")
             self.assertFalse((base / "new-outside.json").exists())
 
+    def test_terminal_cleanup_preserves_newer_or_foreign_pending_projection(self) -> None:
+        for case in ("newer", "foreign"):
+            with self.subTest(case=case), tempfile.TemporaryDirectory() as tmp:
+                base = Path(tmp)
+                terminal, publisher = self._published_record(base)
+                wake_root = base / "wake"
+                terminal.update({"status": "submitted", "record_revision": 2})
+                terminal_path = wake_root / "submitted" / "wake_1.json"
+                terminal_path.parent.mkdir(parents=True)
+                terminal_path.write_text(json.dumps(terminal), encoding="utf-8")
+
+                pending = dict(terminal)
+                pending["status"] = "pending"
+                if case == "newer":
+                    pending["record_revision"] = 3
+                else:
+                    pending["journal_uuid"] = "foreign-journal"
+                pending_path = wake_root / "pending" / "wake_1.json"
+                pending_path.write_text(json.dumps(pending), encoding="utf-8")
+
+                self.assertFalse(publisher.remove_superseded_pending(terminal))
+                self.assertTrue(pending_path.is_file())
+
     @staticmethod
     def _downgrade_empty_journal_to_v1(database: Path) -> None:
         with sqlite3.connect(database) as connection:
