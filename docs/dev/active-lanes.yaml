@@ -1,33 +1,3 @@
 schema_version: 1
 work_item_tracking: required
-lanes:
-  - id: P48-G1-I9
-    objective: Productize signal readiness and lifecycle
-    work_items: [CochranResearchGroup/codex-wake#9]
-    plan: docs/dev/plans/0055-2026-09-14-signal-productization.md
-    plan_ref: refs/heads/feat/issue-9-signal-productization
-    branch: feat/issue-9-signal-productization
-    target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 4169d7e1ea4f14144f493e934bfb14ce648adb05
-    remote_ref: refs/heads/feat/issue-9-signal-productization
-    integration: squash pull request
-    dependencies: [CochranResearchGroup/codex-wake#6, CochranResearchGroup/codex-wake#7, CochranResearchGroup/codex-wake#8]
-    overlaps: []
-    updated_at: 2026-09-14
-  - id: P48-G1-I10
-    objective: Calibrate multi-agent and model routing for signal work
-    work_items: [CochranResearchGroup/codex-wake#10]
-    plan: docs/dev/plans/0056-2026-09-14-model-routing-calibration.md
-    plan_ref: refs/heads/chore/issue-10-model-calibration
-    branch: chore/issue-10-model-calibration
-    target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 4169d7e1ea4f14144f493e934bfb14ce648adb05
-    remote_ref: refs/heads/chore/issue-10-model-calibration
-    integration: squash pull request
-    dependencies: [CochranResearchGroup/codex-wake#6, CochranResearchGroup/codex-wake#7]
-    overlaps: []
-    updated_at: 2026-09-14
+lanes: []

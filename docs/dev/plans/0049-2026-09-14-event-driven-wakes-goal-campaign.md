@@ -1,6 +1,6 @@
 # Event-driven wakes goal campaign
 
-State: OPEN
+State: CLOSED
 Lane: P48
 Owner: ecochran76
 Work Items: CochranResearchGroup/codex-wake#4, #5, #6, #7, #8, #9, #10
@@ -29,12 +29,15 @@ pull request, or one simultaneous execution packet.
 
 ## Current state
 
-Checkpoint `P48-G1-C04` accepts issues #4 through #8 on `origin/main` commit
-`4169d7e1ea4f14144f493e934bfb14ce648adb05`. The crash-safe signal module,
-v1 compatibility, filesystem wakes, GitHub polling, and webhook convergence
-are integrated. Issues #9 and #10 are dependency-ready and registered as the
-two final parallel lanes. Provider access, public ingress, live dispatch,
-installed-runtime mutation, deployment, and release remain unexecuted.
+Checkpoint `P48-G1-C05` accepts issues #4 through #10 on `origin/main` through
+`0f917719f8a50f55f76d33262c3ca639c7f515c4`. The crash-safe signal module,
+v1 compatibility, filesystem wakes, GitHub polling, webhook convergence,
+product lifecycle, and bounded routing calibration are integrated. A fresh
+current-main acceptance ran 307 tests on Python 3.11 and 3.12, 12 plugin tests,
+and a clean installed-wheel filesystem/GitHub fixture lifecycle with dispatch
+disabled. The active-lane catalog is empty. Provider access, public ingress,
+live dispatch, installed-runtime mutation, deployment, tag, and release remain
+unexecuted.
 
 The current implementation writes schema-version-1 JSON wake records through
 `cli.create_record` and evaluates predicates in `daemon.poll_once`. CodeGraph
@@ -458,7 +461,7 @@ The campaign is complete only when all of these conditions hold:
 - final evidence distinguishes provider-free acceptance from every unexecuted
   live, release, deployment, and installed-runtime gate.
 
-The first goal action is to record checkpoint `P48-G1-C00`, claim issue #4,
-register `feat/issue-4-signal-foundation`, and derive Packet 4A from the current
-`origin/main`. No adapter implementation begins before the #4 contract
-milestone merges.
+Terminal checkpoint `P48-G1-C05` records all seven issue merges, provider-free
+acceptance, the repaired drift finding, the inconclusive calibration, and the
+unchanged live-effect gates. Parent issue #2 closes only after this closeout
+state is integrated and read back from `origin/main`.
