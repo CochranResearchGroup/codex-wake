@@ -591,9 +591,12 @@ Current State: The product vision and collaboration foundation are accepted on
 `origin/main`. Seven approved vertical slices are published as GitHub issues
 `#4` through `#10`; runtime implementation has not started. Issue `#4` is the
 critical-path item available to claim first, and the active-lane catalog remains
-empty until an implementation branch is opened.
+empty until an implementation branch is opened. Plan 0049 defines one staged
+`/goal` campaign that covers all seven issues with two safe parallel fan-outs.
 
 Plan: [Event-Driven Wakes Product Lane](docs/dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md)
+
+Goal campaign: [Event-driven wakes goal campaign](docs/dev/plans/0049-2026-09-14-event-driven-wakes-goal-campaign.md)
 
 Vision: [Event-driven wakes](docs/event-driven-wakes.md)
 
