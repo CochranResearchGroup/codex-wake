@@ -1,6 +1,6 @@
 # Signal foundation
 
-State: OPEN
+State: CLOSED
 Lane: P48-G1-I4
 Owner: ecochran76
 Work Item: CochranResearchGroup/codex-wake#4

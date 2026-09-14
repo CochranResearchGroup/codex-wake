@@ -1,6 +1,6 @@
 # Plan 0054: Signed GitHub Webhook Convergence
 
-Status: OPEN
+Status: CLOSED
 
 Issue: `CochranResearchGroup/codex-wake#8`
 

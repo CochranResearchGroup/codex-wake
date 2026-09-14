@@ -1,6 +1,6 @@
 # Plan 0053: Restart-Correct Filesystem Wakes
 
-Status: OPEN
+Status: CLOSED
 
 Issue: `CochranResearchGroup/codex-wake#6`
 

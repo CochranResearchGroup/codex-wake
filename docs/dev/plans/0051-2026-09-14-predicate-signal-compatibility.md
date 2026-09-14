@@ -1,6 +1,6 @@
 # Plan 0051: Predicate Signal Compatibility
 
-Status: OPEN
+Status: CLOSED
 
 Issue: `CochranResearchGroup/codex-wake#5`
 
