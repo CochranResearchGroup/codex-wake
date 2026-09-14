@@ -15,16 +15,21 @@ from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublish
 from codex_wake.signal_store import SQLiteSignalModule, SignalStoreError
 from codex_wake.signals import (
     Degraded,
+    Eq,
     EvaluationLimits,
     Ingested,
     Invalid,
     Matched,
     NormalizedObservation,
     Registration,
+    Resume,
     ScriptedSourceAdapter,
+    SignalRequest,
     SourceAnchor,
     SourceCommit,
+    SourceContract,
     Verification,
+    WakeIntent,
 )
 from tests.test_signals import make_adapter, make_intent
 
@@ -96,6 +101,66 @@ class RaisingOnceAdapter(ScriptedSourceAdapter):
 
 
 class SQLiteSignalModuleTests(unittest.TestCase):
+    def test_filesystem_baseline_filter_does_not_change_other_state_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "signals.sqlite3"
+            module = make_module(database)
+            contract = SourceContract(
+                "other",
+                "state-test",
+                frozenset({"thing.changed"}),
+                frozenset({"thing:1"}),
+                {"matched": bool, "baseline_fingerprint": str},
+            )
+            adapter = ScriptedSourceAdapter(
+                contract,
+                anchor=SourceAnchor(0, "other:a", {"fingerprint": "a"}, "state_recheck"),
+            )
+            intent = WakeIntent(
+                SignalRequest(
+                    1,
+                    "other",
+                    "state-test",
+                    "state",
+                    "thing.changed",
+                    "thing:1",
+                    "becomes",
+                    (Eq("matched", True),),
+                    "required",
+                ),
+                Resume("continue", Path(tmp), {"transport": "tmux"}),
+            )
+            registration = EventWake(
+                module,
+                adapters=(adapter,),
+                clock=lambda: NOW,
+                id_factory=lambda: "wake_other",
+            ).register(intent, idempotency_key="other-state")
+            armed = module.load_armed_signal(registration.wake_id)
+            module.ingest(
+                (
+                    NormalizedObservation(
+                        "other",
+                        "state-test",
+                        "thing.changed",
+                        "thing:1",
+                        "fixture",
+                        "change-1",
+                        NOW,
+                        NOW,
+                        {"matched": True, "baseline_fingerprint": "different"},
+                        Verification("verified", "fixture"),
+                    ),
+                ),
+                SourceCommit("other", "state-test", "checkpoint-1", 1, NOW),
+            )
+
+            result = module.evaluate(
+                registration.wake_id, armed, NOW, EvaluationLimits(10)
+            )
+
+            self.assertEqual(result.outcome, "matched")
+
     def test_reserved_match_survives_expiry_for_delivery_retry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"

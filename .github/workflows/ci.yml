@@ -56,6 +56,7 @@ jobs:
             --codex-wake-bin /tmp/codex-wake-ci/bin/codex-wake \
             --codex-waked-bin /tmp/codex-wake-ci/bin/codex-waked \
             --artifact-dir /tmp/codex-wake-ci-artifacts \
+            --upgrade-wheel dist/*.whl \
             --json
 
           /tmp/codex-wake-ci/bin/codex-waked --once --no-dispatch --wake-root /tmp/codex-wake-ci-empty

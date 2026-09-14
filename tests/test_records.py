@@ -21,6 +21,7 @@ from codex_wake.records import (
     parse_duration,
     parse_timestamp,
     schema_summary,
+    signal_cleanup_protection,
     status_summary,
     write_record,
 )
@@ -77,6 +78,12 @@ class RecordTests(unittest.TestCase):
             )
             self.assertEqual(refused, [])
             self.assertTrue(archive_path.exists())
+            protection = signal_cleanup_protection(root, archived_record)
+            self.assertEqual(
+                set(protection["reasons"]),
+                {"active_anchor", "registration_not_retired"},
+            )
+            self.assertIn("archive wake_signal", protection["repair"])
 
             self.assertTrue(
                 runtime.retire_terminal_record(

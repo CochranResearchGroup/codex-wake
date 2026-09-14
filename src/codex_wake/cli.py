@@ -48,6 +48,7 @@ from .records import (
     normalize_prompt,
     parse_duration,
     parse_timestamp,
+    protected_signal_cleanup_records,
     schema_summary,
     status_summary,
     utc_now,
@@ -233,6 +234,18 @@ def build_parser() -> argparse.ArgumentParser:
     cleanup.add_argument("--delete", action="store_true", help="delete matching archived records; default is dry-run")
     cleanup.add_argument("--archive-terminal", action="store_true", help="archive terminal records before evaluating cleanup")
     cleanup.add_argument("--json", action="store_true", dest="as_json")
+
+    support = subparsers.add_parser(
+        "support", help="inspect or export sanitized signal support evidence"
+    )
+    support_subparsers = support.add_subparsers(dest="support_command", required=True)
+    support_export = support_subparsers.add_parser(
+        "export", help="write a deterministic bounded signal support artifact"
+    )
+    support_export.add_argument("--output", type=Path, required=True)
+    support_export.add_argument("--max-wakes", type=int, default=50)
+    support_export.add_argument("--max-bytes", type=int, default=262_144)
+    support_export.add_argument("--json", action="store_true", dest="as_json")
 
     schema = subparsers.add_parser("schema", help="show wake record schema version and compatibility policy")
     schema.add_argument("--json", action="store_true", dest="as_json")
@@ -922,6 +935,7 @@ def cleanup(args: argparse.Namespace, root: Path) -> int:
     archived = []
     if args.archive_terminal:
         archived = archive_terminal_records(root)
+    protected = protected_signal_cleanup_records(root, older_than=older_than)
     results = cleanup_archived_records(root, older_than=older_than, delete=args.delete)
     if args.as_json:
         print(
@@ -934,6 +948,8 @@ def cleanup(args: argparse.Namespace, root: Path) -> int:
                     "archived_terminal_count": len(archived),
                     "archived_terminal": [{"wake_id": path.stem, "path": str(path)} for path in archived],
                     "matched_count": len(results),
+                    "protected_count": len(protected),
+                    "protected": protected,
                     "matched": [
                         {
                             "wake_id": result.wake_id,
@@ -954,8 +970,45 @@ def cleanup(args: argparse.Namespace, root: Path) -> int:
     action = "deleted" if args.delete else "would-delete"
     for result in results:
         print(f"{action} {result.wake_id} {result.path} retention_at={result.retention_at}")
+    for item in protected:
+        print(
+            f"protected {item['wake_id']} reasons={','.join(item['reasons'])} "
+            f"repair={item['repair']}"
+        )
     mode = "delete" if args.delete else "dry-run"
-    print(f"cleanup mode={mode} older_than={args.older_than} archived={len(archived)} matched={len(results)}")
+    print(
+        f"cleanup mode={mode} older_than={args.older_than} archived={len(archived)} "
+        f"matched={len(results)} protected={len(protected)}"
+    )
+    return 0
+
+
+def support_command(args: argparse.Namespace, root: Path) -> int:
+    if args.support_command != "export":
+        raise WakeError(f"unknown support command: {args.support_command}")
+    from .signal_support import export_signal_support
+
+    try:
+        result = export_signal_support(
+            root,
+            args.output,
+            max_wakes=args.max_wakes,
+            max_bytes=args.max_bytes,
+        )
+    except (OSError, ValueError) as exc:
+        raise WakeError(str(exc)) from None
+    payload = {
+        "path": str(result.path),
+        "size_bytes": result.size_bytes,
+        "sha256": result.sha256,
+        "included_wakes": result.included_wakes,
+        "omitted_wakes": result.omitted_wakes,
+    }
+    if args.as_json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        for key, value in payload.items():
+            print(f"{key}={value}")
     return 0
 
 
@@ -1072,6 +1125,14 @@ def monitor_command(args: argparse.Namespace, root: Path) -> int:
     print(f"health_source={health['source'] or 'missing'}")
     print(f"health_mode={health['mode'] or 'missing'}")
     print(f"health_checked_at={health['checked_at']}")
+    signals = readiness["signals"]
+    print(f"signal_capability_status={signals['capability']['status']}")
+    print(f"signal_source_count={len(signals['sources'])}")
+    for item in signals["sources"]:
+        print(
+            f"signal_source={item['source']}:{item['source_instance']} "
+            f"status={item['status']} message={item['message']}"
+        )
     return 0 if readiness["monitor_ready"] else 1
 
 
@@ -1339,6 +1400,7 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
         },
         "service_app_server": asdict(app_server_readiness),
         "monitor": monitor,
+        "signals": monitor["signals"],
         "trust": hook_review_note(),
     }
 
@@ -1355,6 +1417,7 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     service = summary["service"]
     service_app_server = summary["service_app_server"]
     monitor = summary["monitor"]
+    signals = summary["signals"]
     assert isinstance(commands, dict)
     assert isinstance(hook_config, dict)
     assert isinstance(hook_runtime, dict)
@@ -1362,6 +1425,7 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     assert isinstance(service, dict)
     assert isinstance(service_app_server, dict)
     assert isinstance(monitor, dict)
+    assert isinstance(signals, dict)
     print(f"repo_root={summary['repo_root']}")
     print(f"wake_root={summary['wake_root']}")
     print(f"codex_wake={commands['codex_wake'] or 'missing'}")
@@ -1401,6 +1465,8 @@ def doctor_command(args: argparse.Namespace, root: Path) -> int:
     print(f"service_app_server_note={service_app_server['message']}")
     print(f"monitor_ready={str(monitor['monitor_ready']).lower()}")
     print(f"monitor_source={monitor['monitor_source'] or 'missing'}")
+    print(f"signal_capability_status={signals['capability']['status']}")
+    print(f"signal_source_count={len(signals['sources'])}")
     print(f"trust={summary['trust']}")
     return 0
 
@@ -1440,6 +1506,7 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
         "repo_service",
         "supervisor",
         "monitor",
+        "signals",
         "app_server",
         "openclaw_gateway",
         "openclaw_plugin",
@@ -1486,6 +1553,8 @@ def run(argv: list[str] | None = None) -> int:
         return archive(args, root)
     if args.command == "cleanup":
         return cleanup(args, root)
+    if args.command == "support":
+        return support_command(args, root)
     if args.command == "schema":
         return schema_command(args)
     if args.command == "service":

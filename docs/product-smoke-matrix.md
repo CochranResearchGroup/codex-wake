@@ -22,6 +22,23 @@ It verifies:
 - `codex-waked --once --no-dispatch`
 - `codex-wake monitor check --json`
 - `codex-wake supervisor run --once --no-dispatch --json`
+- filesystem signal arm, observation, inspection, support export, retirement,
+  and cleanup without dispatch
+- fixture-backed GitHub signal arm, observation, and match through the
+  installed package
+
+For a disposable upgrade lifecycle, point `--codex-wake-bin` and
+`--codex-waked-bin` at a venv containing the baseline build, then pass the
+distinct candidate wheel. Record both artifact hashes. The harness arms under
+the baseline, force-installs the candidate, restarts the daemon, and then
+observes the source:
+
+```bash
+python scripts/product_smoke.py \
+  --codex-wake-bin /tmp/baseline/bin/codex-wake \
+  --codex-waked-bin /tmp/baseline/bin/codex-waked \
+  --upgrade-wheel dist/*.whl --json
+```
 
 By default, the smoke isolates `XDG_CONFIG_HOME` and `XDG_STATE_HOME` for the
 safe surface checks. Use `--use-user-state` when the smoke is intended to
@@ -40,7 +57,9 @@ python scripts/product_smoke.py --public-tag v0.5.2 --json
 ```
 
 This covers package installability from GitHub, CLI version reporting, schema
-reporting, monitor-check execution, and supervisor `run --once --no-dispatch`.
+reporting, signal lifecycles, support export, monitor-check execution, and
+supervisor `run --once --no-dispatch`. No source is enabled until the disposable
+smoke explicitly arms its fixture wake, and no provider or dispatch is used.
 The release closeout should still include the final user-scoped install command:
 
 ```bash

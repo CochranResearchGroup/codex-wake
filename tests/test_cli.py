@@ -128,6 +128,54 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["signal_journal_schema_version"], 2)
             self.assertIn("file_changed", data["predicate_types"])
 
+    def test_support_export_writes_bounded_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            output = base / "support" / "signals.json"
+
+            code, stdout, stderr = self.run_cli(
+                [
+                    "support",
+                    "export",
+                    "--output",
+                    str(output),
+                    "--max-wakes",
+                    "5",
+                    "--max-bytes",
+                    "8192",
+                    "--json",
+                ],
+                base / "wake",
+            )
+
+            self.assertEqual(code, 0, stderr)
+            receipt = json.loads(stdout)
+            self.assertEqual(receipt["path"], str(output))
+            self.assertLessEqual(receipt["size_bytes"], 8192)
+            self.assertEqual(len(receipt["sha256"]), 64)
+            self.assertEqual(json.loads(output.read_text())["schema_version"], 1)
+
+    def test_support_export_cli_cannot_replace_signal_journal(self) -> None:
+        from codex_wake.signal_records import signal_journal_path
+        from codex_wake.signal_store import SQLiteSignalModule
+        from codex_wake.signal_support import signal_readiness
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            journal = signal_journal_path(root)
+            SQLiteSignalModule(journal)
+            original = journal.read_bytes()
+            before = signal_readiness(root)
+
+            code, _stdout, stderr = self.run_cli(
+                ["support", "export", "--output", str(journal), "--json"], root
+            )
+
+            self.assertEqual(code, 2)
+            self.assertIn("outside the wake root", stderr)
+            self.assertEqual(journal.read_bytes(), original)
+            self.assertEqual(signal_readiness(root), before)
+
     def test_show_signal_state_reads_existing_authority_without_creating_it(self) -> None:
         from codex_wake.event_wake import EventWake
         from codex_wake.signal_records import (

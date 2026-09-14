@@ -1473,6 +1473,52 @@ class SQLiteSignalModule(SignalEngine):
         finally:
             _close_quietly(connection)
 
+    def cleanup_diagnostic(self, record: object) -> dict[str, Any]:
+        """Explain why an archived signal record is protected from cleanup."""
+
+        decoded = decode_signal_record(record)
+        if decoded is None or decoded.get("status") != "archived":
+            return {
+                "allowed": False,
+                "reasons": ["record_not_archived_signal"],
+                "repair": "archive a valid terminal signal record before cleanup",
+            }
+        wake_id = str(decoded["id"])
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            arm = connection.execute(
+                "SELECT state FROM arms WHERE wake_id = ?", (wake_id,)
+            ).fetchone()
+            tombstone = connection.execute(
+                "SELECT 1 FROM registration_tombstones WHERE wake_id = ?", (wake_id,)
+            ).fetchone()
+            pins = connection.execute(
+                "SELECT reason FROM retention_pins WHERE wake_id = ? AND released_at IS NULL ORDER BY reason",
+                (wake_id,),
+            ).fetchall()
+        except Exception:
+            return {
+                "allowed": False,
+                "reasons": ["journal_unavailable"],
+                "repair": "preserve the record and repair or restore the signal journal before cleanup",
+            }
+        finally:
+            _close_quietly(connection)
+        reasons = [str(row["reason"]) for row in pins]
+        if arm is None or arm["state"] != "tombstoned" or tombstone is None:
+            reasons.append("registration_not_retired")
+        reasons = sorted(set(reasons))
+        return {
+            "allowed": not reasons,
+            "reasons": reasons,
+            "repair": (
+                ""
+                if not reasons
+                else f"run `codex-wake --wake-root <path> archive {wake_id}` again after verifying the signal journal is writable"
+            ),
+        }
+
     def source_checkpoint(self, source: str, source_instance: str) -> SourceCommit | Degraded | None:
         """Read the atomic source cursor without creating or changing a journal."""
         connection: sqlite3.Connection | None = None
@@ -1759,7 +1805,24 @@ class SQLiteSignalModule(SignalEngine):
                 if isinstance(after, Invalid):
                     connection.rollback()
                     return after
-                if not after or not _matches(observation, durable.spec.where):
+                baseline_matches = True
+                # Filesystem reconciliation emits one receipt per eligible
+                # registration-baseline cohort. Keep this source convention
+                # out of unrelated state adapters.
+                if (
+                    durable.spec.source == "filesystem"
+                    and durable.spec.semantics == "state"
+                    and durable.spec.condition == "becomes"
+                ):
+                    observed_baseline = observation.attributes.get("baseline_fingerprint")
+                    armed_baseline = durable.anchor.baseline.get("fingerprint")
+                    if isinstance(observed_baseline, str) and isinstance(armed_baseline, str):
+                        baseline_matches = observed_baseline == armed_baseline
+                if (
+                    not after
+                    or not baseline_matches
+                    or not _matches(observation, durable.spec.where)
+                ):
                     safe_progress = sequence
                     continue
                 if durable.spec.verification == "required" and observation.verification.state != "verified":

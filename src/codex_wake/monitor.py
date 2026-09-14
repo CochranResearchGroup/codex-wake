@@ -76,6 +76,9 @@ def write_monitor_health(
         "checked_at": format_utc(current),
         "poll_result": poll_result or {},
     }
+    signal_sources = (poll_result or {}).get("signal_sources")
+    if isinstance(signal_sources, list):
+        payload["signal_sources"] = signal_sources
     if extra:
         payload.update(extra)
     path = monitor_health_path(wake_root, state_dir)
@@ -236,6 +239,9 @@ def monitor_readiness(
         }
         transports = transport_readiness(config)
     health = read_monitor_health(resolved_root, state_dir)
+    from .signal_support import signal_readiness
+
+    signals = signal_readiness(resolved_root, health=health)
     recent_health = health_is_recent(health, stale_after_seconds=stale_after_seconds, now=now)
     persistent_health = bool(health and health.get("mode") == "loop")
     service_ready = service_active == "active" and service_matches_root
@@ -262,6 +268,7 @@ def monitor_readiness(
             "checked_at": str(health.get("checked_at") or "") if health else "",
             "pid": health.get("pid", "") if health else "",
         },
+        "signals": signals,
         "transports": transports,
     }
 

@@ -6,6 +6,7 @@ import unittest
 from datetime import UTC, datetime
 from pathlib import Path
 from types import MappingProxyType
+from unittest.mock import patch
 
 from codex_wake.daemon import poll_once
 from codex_wake.event_wake import EventWake
@@ -13,6 +14,7 @@ from codex_wake.filesystem_signals import FilesystemSignalAdapter, FilesystemSig
 from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
 from codex_wake.signal_store import SQLiteSignalModule
 from codex_wake.signals import (
+    Degraded,
     Eq,
     EvaluationLimits,
     Invalid,
@@ -124,6 +126,103 @@ class FilesystemSignalAdapterTests(unittest.TestCase):
             self.assertEqual(evidence["observation_reason"], "notification")
             self.assertEqual(len(evidence["fingerprint"]), 64)
 
+    def test_daemon_constructs_filesystem_source_from_durable_record(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+            watched = base / "out" / "result.txt"
+            adapter = FilesystemSignalAdapter(base, "out/result.txt")
+            self.register(base, wake_root, adapter, "created")
+            watched.parent.mkdir()
+            watched.write_text("ready", encoding="utf-8")
+
+            result = poll_once(wake_root, now=NOW, dispatch=False)
+
+            self.assertEqual((result.fired, result.dispatched), (1, 0))
+            self.assertEqual(
+                result.signal_sources[0]["source_instance"], adapter.source_instance
+            )
+            self.assertTrue((wake_root / "firing" / "wake_filesystem.json").is_file())
+
+    def test_default_source_is_startup_only_on_first_loop_poll_then_periodic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+            watched = base / "state.txt"
+            watched.write_text("before", encoding="utf-8")
+            adapter = FilesystemSignalAdapter(base, watched)
+            runtime, armed = self.register(base, wake_root, adapter, "changed")
+
+            first = poll_once(
+                wake_root,
+                now=NOW,
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_reconcile_reason="startup",
+            )
+            watched.write_text("after", encoding="utf-8")
+            second = poll_once(
+                wake_root,
+                now=NOW,
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_reconcile_reason="periodic",
+            )
+            matched = runtime.evaluate(armed.wake_id, armed, NOW, EvaluationLimits(10))
+
+            self.assertEqual((first.fired, second.fired), (0, 1))
+            self.assertEqual(matched.outcome, "matched")
+            self.assertEqual(matched.receipt.attributes["observation_reason"], "periodic")
+            self.assertFalse(matched.receipt.attributes["coalesced"])
+
+    def test_health_preserves_distinct_results_for_two_source_instances(self) -> None:
+        from codex_wake import filesystem_signals
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+            healthy_adapter = FilesystemSignalAdapter(
+                base, "healthy.flag", source_instance="healthy-instance"
+            )
+            degraded_adapter = FilesystemSignalAdapter(
+                base, "degraded.flag", source_instance="degraded-instance"
+            )
+            runtime, healthy = self.register(
+                base, wake_root, healthy_adapter, "exists", "wake_healthy"
+            )
+            runtime, degraded = self.register(
+                base, wake_root, degraded_adapter, "exists", "wake_degraded"
+            )
+            original_fingerprint = filesystem_signals._fingerprint
+
+            def sample(root: Path, relative_path: str):
+                if relative_path == "degraded.flag":
+                    return Degraded(None, "FILESYSTEM_SAMPLE_UNAVAILABLE", None)
+                return original_fingerprint(root, relative_path)
+
+            runner = FilesystemSignalRunner(
+                (healthy_adapter, degraded_adapter),
+                armed_signals=(healthy, degraded),
+            )
+            with patch(
+                "codex_wake.filesystem_signals._fingerprint", side_effect=sample
+            ):
+                result = poll_once(
+                    wake_root,
+                    now=NOW,
+                    dispatch=False,
+                    signal_runtime=runtime,
+                    signal_runners=(runner,),
+                )
+
+            statuses = {
+                item["source_instance"]: item["degraded"]
+                for item in result.signal_sources
+            }
+            self.assertEqual(
+                statuses, {"degraded-instance": 1, "healthy-instance": 0}
+            )
+
     def test_file_exists_holds_even_when_present_at_registration(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -139,6 +238,54 @@ class FilesystemSignalAdapterTests(unittest.TestCase):
             self.assertEqual((result.scanned, result.observed, result.degraded), (1, 1, 0))
             self.assertEqual(match.outcome, "matched")
             self.assertTrue(match.receipt.attributes["exists"])
+
+    def test_new_exists_arm_observes_current_state_after_shared_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+            watched = base / "ready.flag"
+            adapter = FilesystemSignalAdapter(base, watched)
+            runtime, first = self.register(
+                base, wake_root, adapter, "exists", "wake_first"
+            )
+            watched.write_text("ready", encoding="utf-8")
+            FilesystemSignalRunner(
+                (adapter,), armed_signals=(first,)
+            ).reconcile(runtime, NOW, EvaluationLimits(10))
+            self.assertEqual(
+                runtime.evaluate(first.wake_id, first, NOW, EvaluationLimits(10)).outcome,
+                "matched",
+            )
+
+            runtime, second = self.register(
+                base, wake_root, adapter, "exists", "wake_second"
+            )
+            report = FilesystemSignalRunner(
+                (adapter,), armed_signals=(second,)
+            ).reconcile(runtime, NOW, EvaluationLimits(10))
+            second_match = runtime.evaluate(
+                second.wake_id, second, NOW, EvaluationLimits(10)
+            )
+
+            self.assertEqual((report.observed, report.degraded), (1, 0))
+            self.assertEqual(second_match.outcome, "matched")
+
+    def test_exists_state_recheck_emits_once_then_quiesces(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            watched = base / "ready.flag"
+            watched.write_text("ready", encoding="utf-8")
+            adapter = FilesystemSignalAdapter(base, watched)
+            runtime, armed = self.register(base, base / "wake", adapter, "exists")
+            runner = FilesystemSignalRunner((adapter,), armed_signals=(armed,))
+
+            first = runner.reconcile(runtime, NOW, EvaluationLimits(10))
+            second = runner.reconcile(runtime, NOW, EvaluationLimits(10))
+            matched = runtime.evaluate(armed.wake_id, armed, NOW, EvaluationLimits(10))
+
+            self.assertEqual((first.observed, second.observed), (1, 0))
+            self.assertEqual(matched.outcome, "matched")
+            self.assertEqual(matched.receipt.local_sequence, 1)
 
     def test_changed_ignores_registration_baseline_then_matches_rename_away(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -343,6 +490,34 @@ class FilesystemSignalAdapterTests(unittest.TestCase):
                 dict(first_match.receipt.attributes),
                 dict(second_match.receipt.attributes),
             )
+
+    def test_created_receipt_only_matches_arms_with_qualifying_baselines(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+            watched = base / "shared.flag"
+            adapter = FilesystemSignalAdapter(base, watched)
+            runtime, before_creation = self.register(
+                base, wake_root, adapter, "created", "wake_before"
+            )
+            watched.write_text("ready", encoding="utf-8")
+            runtime, after_creation = self.register(
+                base, wake_root, adapter, "created", "wake_after"
+            )
+
+            report = FilesystemSignalRunner(
+                (adapter,), armed_signals=(before_creation, after_creation)
+            ).reconcile(runtime, NOW, EvaluationLimits(10))
+            eligible = runtime.evaluate(
+                before_creation.wake_id, before_creation, NOW, EvaluationLimits(10)
+            )
+            ineligible = runtime.evaluate(
+                after_creation.wake_id, after_creation, NOW, EvaluationLimits(10)
+            )
+
+            self.assertEqual((report.observed, report.degraded), (1, 0))
+            self.assertEqual(eligible.outcome, "matched")
+            self.assertEqual(ineligible.outcome, "not_ready")
 
     def test_changed_transition_emits_once_then_quiesces(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -240,6 +240,13 @@ written by wake callers.
 Adapters normalize authenticated source data before the signal module stores
 it. The journal never becomes a raw provider-payload archive.
 
+Filesystem `state/becomes` receipts carry the registration baseline
+fingerprint for the eligible arm cohort. The SQLite evaluator applies that
+baseline comparison only to the filesystem source; other state adapters retain
+their declared matching semantics. This prevents a shared post-registration
+receipt from crossing into an arm whose own filesystem baseline did not
+qualify, while preserving one-receipt fanout for equally eligible arms.
+
 ```json
 {
   "schema_version": 1,

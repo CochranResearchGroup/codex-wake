@@ -16,6 +16,9 @@ Supported productized paths:
 - schedule OpenClaw Gateway wakes with a real agent/session key;
 - install/update the OpenClaw plugin from a public `codex-wake` tag or
   generated package artifact.
+- inspect signal capability and each configured source independently from
+  dispatch-target readiness;
+- export a deterministic bounded support artifact with `support export`.
 
 Unsupported as product evidence:
 
@@ -69,3 +72,14 @@ It does not delete active wake records, terminal records before archive, ack
 files, logs, monitor health, or supervisor registry entries.
 
 Use `docs/runtime-state-lifecycle.md` for the full state classification.
+
+Support exports contain bounded identifiers, source health, schema posture,
+and sanitized match references. They exclude prompts, targets, credentials,
+idempotency keys, raw provider payloads, and filesystem contents.
+
+The export destination must resolve outside the wake root. Export configuration
+is capped at 100 wakes and 1 MiB of output. Collection enumerates at most 2,048
+directory entries, retains at most 512 selected record paths, reads at most 64 KiB from each record,
+and includes at most 128 journal source instances. The artifact reports records
+omitted before read plus oversized, invalid, and unreadable records without
+copying their contents.

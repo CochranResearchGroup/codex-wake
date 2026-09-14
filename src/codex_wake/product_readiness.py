@@ -15,6 +15,7 @@ from .monitor import DEFAULT_HEALTH_STALE_AFTER_SECONDS, monitor_readiness
 from .openclaw_plugin import DEFAULT_PLUGIN_ID, default_openclaw_config_path, package_version
 from .records import format_utc, utc_now
 from .service import build_service_config, service_app_server_readiness, service_status
+from .signal_support import signal_readiness
 from .supervisor import build_supervisor_config, supervisor_status
 
 
@@ -568,6 +569,7 @@ def product_readiness_summary(
         timeout=openclaw_timeout,
     )
     tmux = tmux_readiness(commands, source_env)
+    signals = signal_readiness(resolved_root)
     checks = {
         "cli": cli,
         "hooks": hooks,
@@ -575,6 +577,7 @@ def product_readiness_summary(
         "repo_service": repo_service,
         "supervisor": supervisor,
         "monitor": monitor,
+        "signals": signals,
         "app_server": app_server,
         "openclaw_gateway": openclaw_gateway,
         "openclaw_plugin": openclaw_plugin,

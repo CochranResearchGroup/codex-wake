@@ -384,12 +384,23 @@ require the original launch executable to remain installed.
 
 `product-readiness --json` is the productization-level report. It normalizes
 CLI, hooks, skill installs, repo service, user supervisor, enrolled roots,
-monitor health, app-server dispatch readiness, OpenClaw Gateway RPC readiness,
+monitor health, signal capability and per-source health, app-server dispatch readiness, OpenClaw Gateway RPC readiness,
 OpenClaw plugin readiness, and tmux availability into `ready`, `not_needed`,
 `warning`, `manual_only`, or `blocked` outcomes. An inactive repo-scoped service
 is `not_needed`, rather than a warning, when the active user supervisor is
 enrolled for the same wake root and monitor health is ready. Gateway auth is
 reported by variable name and presence only; secret values are not emitted.
+Signal source readiness is a separate fact from target dispatch readiness. A
+healthy filesystem or GitHub source does not imply that tmux, app-server, or
+OpenClaw dispatch is ready.
+
+Export deterministic, bounded signal support evidence without prompts,
+credentials, raw provider payloads, or file contents:
+
+```bash
+codex-wake --wake-root .codex/wake support export \
+  --output signal-support.json --max-wakes 50 --max-bytes 262144 --json
+```
 
 Ack evidence proves that Codex submitted the wake prompt in the target session.
 It does not by itself prove that a new turn was visible in the pane the operator
@@ -483,7 +494,12 @@ python scripts/product_smoke.py --public-tag v0.5.2 --json
 
 The safe smoke verifies installed CLI version reporting, schema output,
 product-readiness output, `codex-waked --once --no-dispatch`, monitor-check
-execution, and `supervisor run --once --no-dispatch`. Live Codex app-server and
+execution, a provider-free filesystem signal lifecycle, an installed
+fixture-backed GitHub lifecycle, support export, retirement, and
+`supervisor run --once --no-dispatch`. Pass `--upgrade-wheel dist/*.whl` to
+force-install a candidate wheel and restart the daemon between signal
+registration and observation; for upgrade evidence, start the named binaries
+from a distinct baseline install and record both wheel hashes. Live Codex app-server and
 OpenClaw Gateway smokes are opt-in because they require real sessions and
 operator-visible readback. The full matrix is documented in
 `docs/product-smoke-matrix.md`.
