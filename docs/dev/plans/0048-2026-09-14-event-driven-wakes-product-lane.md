@@ -2,6 +2,7 @@
 
 State: OPEN
 Lane: P48
+Owner: ecochran76
 Work Item: CochranResearchGroup/codex-wake#2
 Branch: docs/p48-event-driven-wakes-vision
 Target: main
@@ -61,6 +62,12 @@ user-scoped SQLite signal journal for transactional receipts, deduplication,
 source checkpoints, match reservations, and retention pins. Copy a bounded
 sanitized match summary into the firing wake record.
 
+Bridge SQLite arming authority and JSON publication with a recoverable outbox:
+persist a `prepared` arm and stable identity, atomically publish the JSON record,
+then finalize the arm as `published`. Only published arms can match. Startup
+reconciliation completes JSON-backed prepared arms and fails closed on missing
+or corrupt cross-store state.
+
 Treat filesystem notifications and GitHub webhooks as latency hints. Use
 restart reconciliation or provider polling as correctness authority whenever
 the source can reconstruct current state or replay history.
@@ -98,6 +105,16 @@ All three workers were read-only. They inherited the session model request;
 the runtime did not report a separate effective model or token/cost receipt.
 The primary owner reconciled the outputs without delegating the final decision.
 This comparison is design evidence, not a formal model-calibration result.
+
+## Independent review receipt
+
+A fresh read-only review used `/root/vision_doc_review` with requested model
+`gpt-5.6-luna` at medium reasoning. The runtime did not report a separate
+effective-model receipt. The reviewer returned four actionable findings: add
+workflow identity to the GitHub filter, define cross-store publication and
+recovery, name the accountable owner, and record policy-adoption feedback. The
+primary owner accepted and corrected all four findings, then retained final
+validation and integration authority.
 
 ## Draft child issue map
 

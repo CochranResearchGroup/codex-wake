@@ -205,6 +205,7 @@ branch for each provider.
   "condition": "occurs",
   "where": {
     "all": [
+      {"field": "workflow", "op": "eq", "value": "CI"},
       {"field": "branch", "op": "eq", "value": "main"},
       {
         "field": "conclusion",
@@ -287,6 +288,34 @@ The journal stores:
 SQLite lets receipt insertion, deduplication, checkpoint advancement, and match
 reservation commit atomically. JSON exports may provide human-readable evidence,
 but they do not become a second live authority.
+
+### Cross-store publication protocol
+
+Registration crosses the SQLite runtime authority and the JSON wake-record
+contract, so `register` uses a recoverable outbox protocol rather than implying
+an impossible transaction across both stores.
+
+1. In one SQLite transaction, reserve the caller's idempotency key and stable
+   wake ID, persist the source anchor, and create an arm row in `prepared` state.
+2. Atomically write and rename the pending JSON wake record with the stable wake
+   ID, arm ID, contract version, and source anchor.
+3. In a second SQLite transaction, verify the published record identity and
+   advance the arm row to `published`.
+4. Return a successful registration only after the arm is `published`. Only
+   published arms are eligible for observation matching.
+
+Startup reconciliation completes interrupted registrations deterministically.
+A `prepared` row with its matching JSON record is finalized to `published`. A
+`prepared` row without JSON remains ineligible and retryable through the same
+idempotency key until bounded expiry, after which it is tombstoned. A JSON wake
+whose arm row is missing or corrupt remains pending with
+`ARM_STATE_UNAVAILABLE` degradation evidence and cannot match. The runtime does
+not reconstruct live authority from JSON unless a future version defines and
+tests an explicit recovery contract for doing so.
+
+This protocol makes the SQLite arm row authoritative for eligibility while the
+JSON record remains authoritative for the agent-facing wake intent and state.
+Neither store can independently cause a signal wake to fire.
 
 When a signal matches, the daemon copies a bounded `trigger_match` summary,
 receipt ID, verification state, and evidence reference into the wake record.
