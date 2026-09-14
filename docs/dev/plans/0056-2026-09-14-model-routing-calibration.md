@@ -76,9 +76,12 @@ endpoints are retained only as overlapping wall-clock proxies.
 
 All three families have evidence, but effective model, measured allocation,
 and non-overlapping causal timing are unavailable. The campaign drift pass
-also found P48-DRIFT-01 after #6 merged, so the two filesystem samples remain
-below the final quality floor until #9 records the bounded repair. The frozen
-promotion rule therefore returns an honest inconclusive result. Current
-`balanced` defaults remain unchanged; no new samples, retries, provider
+also found P48-DRIFT-01 after #6 merged. Issue #9 repaired the per-arm baseline
+defect, passed 307 tests on each supported Python version plus both pull-request
+release gates, and merged as `73e7753`; the filesystem samples therefore meet
+the final quality floor. That repair's effort is inseparable from the shared
+#9 productization lane and remains cumulative rather than model-attributed.
+The frozen promotion rule therefore returns an honest inconclusive result.
+Current `balanced` defaults remain unchanged; no new samples, retries, provider
 effects, or policy edits were performed. The artifact is documentation-only
 and retains cumulative repair and primary reconciliation costs.
