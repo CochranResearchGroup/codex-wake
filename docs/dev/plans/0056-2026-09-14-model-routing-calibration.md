@@ -64,3 +64,24 @@ deterministic Git/test locators. The primary validates every locator and owns
 the conclusion. The issue is done when a compact calibration artifact covers
 all frozen fields, states validity honestly, and its documentation-only pull
 request passes CI and merges.
+
+## Outcome and receipt (2026-09-14)
+
+The bounded packet is recorded in
+`docs/dev/verification/0072-2026-09-14-model-routing-calibration.md`. It
+covers six units across the frozen adapter-implementation, fixture-construction,
+and fresh-independent-verification families. Plans 0052--0054 provide the
+accepted outcomes, defects, interventions, and validation receipts; Git
+endpoints are retained only as overlapping wall-clock proxies.
+
+All three families have evidence, but effective model, measured allocation,
+and non-overlapping causal timing are unavailable. The campaign drift pass
+also found P48-DRIFT-01 after #6 merged. Issue #9 repaired the per-arm baseline
+defect, passed 307 tests on each supported Python version plus both pull-request
+release gates, and merged as `73e7753`; the filesystem samples therefore meet
+the final quality floor. That repair's effort is inseparable from the shared
+#9 productization lane and remains cumulative rather than model-attributed.
+The frozen promotion rule therefore returns an honest inconclusive result.
+Current `balanced` defaults remain unchanged; no new samples, retries, provider
+effects, or policy edits were performed. The artifact is documentation-only
+and retains cumulative repair and primary reconciliation costs.
