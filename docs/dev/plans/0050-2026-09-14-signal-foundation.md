@@ -43,6 +43,62 @@ The implementation owns normalization, deduplication, anchoring, matching,
 reservation, and evidence shaping; source-specific payloads stay behind source
 adapters.
 
+## Interface decision
+
+Three read-only `gpt-5.6-sol` high-effort challenges compared a minimal
+interface, an extensible kernel, and an ordinary-caller-first facade. The
+primary accepts a hybrid with two layers:
+
+- `EventWake.register(intent, idempotency_key)` is the only ordinary caller
+  entry point. It selects a configured source adapter and does not expose
+  anchors, receipts, checkpoints, or publication internals.
+- `WakeSignalModule.arm`, `ingest`, and `evaluate` remain the explicit internal
+  seam for registration orchestration, source runners, and the future daemon
+  bridge.
+
+Both layers return immutable closed outcomes. Registration distinguishes a
+published registration, retryable degradation, and permanent invalidity.
+Evaluation distinguishes `Matched`, `NotReady`, `Degraded`, `Invalid`, and
+`Expired`. Provider exceptions and payloads never cross the adapter seam.
+
+Packet 4A uses a single `signals.py` module until a second production adapter
+justifies a package split. It injects an in-memory store and scripted source
+adapter, uses synchronous methods that match the existing daemon, and leaves
+SQLite, JSON publication, and provider runners for later packets.
+
+Logical observation identity is
+`(source, source_instance, occurrence_namespace, occurrence_value)`. A provider
+delivery ID is optional transport evidence, not the cross-transport identity.
+This lets later GitHub polling and webhook adapters converge on one workflow
+run-attempt occurrence. Identical redelivery returns the original receipt;
+conflicting immutable content under the same identity is invalid and does not
+advance a checkpoint.
+
+Packet 4A does not write signal-bearing wake JSON. The accepted compatibility
+direction for Packet 4C is a capability-gated schema-version-2 signal record,
+with multi-version readers retaining schema-version-1 behavior. A writer must
+refuse signal registration when the installed reader lacks that capability.
+
+The in-memory trace enforces these ordering rules:
+
+1. Validate and canonicalize intent before mutation.
+2. Establish an unambiguous source anchor before an arm becomes published.
+3. Commit a complete sanitized observation batch before reporting checkpoint
+   advancement.
+4. Order eligibility by local sequence strictly after the anchor, never by
+   provider time.
+5. Reserve the lowest eligible winner before returning `Matched`; evaluation
+   replay returns the same reservation.
+6. Preserve one winner per wake while allowing bounded fan-out from one receipt
+   to independent wakes.
+
+The minimal design's removal of callable `arm` is rejected because the
+accepted vision needs that internal seam for recoverable publication. The
+extensible design's early `WakePublisher` and delivery-adapter ports are
+deferred because Packet 4A cannot yet prove two implementations. Source-store
+serialization and lease ownership remain a Packet 4B decision at the SQLite
+transaction seam.
+
 ## Test-first sequence
 
 Each step is one red-green vertical slice through a public interface:
