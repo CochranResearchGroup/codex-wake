@@ -585,15 +585,16 @@ Acceptance target:
 
 ## P48 | Event-Driven Wakes Product Lane
 
-State: IN_PROGRESS
+State: CLOSED
 
-Current State: Issues #4 through #8 are accepted on `origin/main` at
-`4169d7e1ea4f14144f493e934bfb14ce648adb05`: the crash-safe provider-neutral
-signal module, v1 compatibility, filesystem wakes, GitHub polling, and signed
-webhook convergence are integrated. Checkpoint `P48-G1-C04` opens the final
-parallel lanes for #9 productization and #10 bounded routing calibration.
-Provider access, public ingress, live dispatch, installed-runtime mutation,
-deployment, and release remain outside the goal's current authority.
+Current State: Closed at checkpoint `P48-G1-C05`. Issues #4 through #10 are
+accepted on `origin/main` through `0f917719f8a50f55f76d33262c3ca639c7f515c4`.
+The provider-neutral signal module, v1 compatibility, filesystem wakes, GitHub
+polling, signed webhook convergence, lifecycle productization, disposable
+package proof, and bounded routing calibration are integrated. The calibration
+was honestly inconclusive and retained `balanced` defaults. Provider access,
+public ingress, live dispatch, installed-runtime mutation, deployment, tag,
+and release were not performed.
 
 Plan: [Event-Driven Wakes Product Lane](docs/dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md)
 

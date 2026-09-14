@@ -1,6 +1,6 @@
 # Plan 0056: Signal Work Model-Routing Calibration
 
-Status: OPEN
+Status: CLOSED
 
 Issue: `CochranResearchGroup/codex-wake#10`
 
@@ -20,6 +20,11 @@ six-unit ceiling and cumulative repair accounting. Plans 0052 through 0054,
 Git history, test receipts, review findings, and agent closeouts now provide
 the available completed samples. Effective-model and measured allocation
 counters were not exposed and must remain explicitly unknown.
+
+PR #27 passed both release gates and merged as
+`0f917719f8a50f55f76d33262c3ca639c7f515c4`; issue #10 is closed. The accepted
+result is honest inconclusive and leaves the repo's `balanced` defaults
+unchanged.
 
 ## Frozen comparison window
 

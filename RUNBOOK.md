@@ -2302,3 +2302,30 @@ Recorded Plan 0049 checkpoint `P48-G1-C04` and opened the final parallel wave.
 - Kept public ingress, provider credentials, live dispatch, installed-runtime mutation, deployment, tag, and release effects unexecuted.
 
 Next checkpoint: publish and merge this coordination state, create both worktrees from exact `origin/main`, then run issue #9 and #10 in parallel with disjoint write surfaces.
+
+## Turn 122 | 2026-09-14
+
+Closed Plan 0049 at terminal checkpoint `P48-G1-C05`.
+
+- Accepted issue #9 through PR #28 at
+  `73e775362bac0043e3852b25bbcd6d0c1c86530e` after its single fresh review and
+  repair cycle, primary enumeration-bound reconciliation, a distinct
+  baseline-to-candidate wheel upgrade, and both release gates.
+- Accepted issue #10 through PR #27 at
+  `0f917719f8a50f55f76d33262c3ca639c7f515c4`. The bounded six-sample
+  calibration remained honestly inconclusive because effective-model,
+  allocation, and controlled causal timing were unavailable; `balanced`
+  defaults remain unchanged.
+- Re-ran current-main acceptance: 307 Python tests passed on Python 3.11 and
+  3.12, 12 plugin tests passed, and a clean installed `0.5.2` wheel completed
+  the provider-free filesystem lifecycle and fixture-backed GitHub match with
+  dispatch disabled. Artifact root:
+  `/tmp/codex-wake-final-accept.mzLKEJ/artifacts`.
+- Reconciled issues #4 through #10 closed, no open pull requests, and an empty
+  active-lane catalog. Plans 0055 and 0056 and roadmap lane P48 are closed.
+- Preserved the authority boundary: no live provider read, public ingress,
+  live dispatch, installed-user mutation or cleanup, deployment, tag, or
+  release was performed.
+
+Final gate: merge this documentation-only checkpoint, verify `origin/main`,
+then close parent issue #2 with the terminal merge receipt.

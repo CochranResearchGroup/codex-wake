@@ -1,6 +1,6 @@
 # Plan 0055: Signal Readiness And Lifecycle Productization
 
-Status: OPEN
+Status: CLOSED
 
 Issue: `CochranResearchGroup/codex-wake#9`
 
@@ -14,16 +14,14 @@ journal lifecycle, compatibility tests, and disposable package acceptance.
 
 ## Current state
 
-Implementation is complete in the issue worktree on
-`feat/issue-9-signal-productization` from
-`bf05bb8c027e1b4451d1bbc8065a5ab39112fec5`. The candidate adds installed
+Accepted through PR #28 on `origin/main` merge
+`73e775362bac0043e3852b25bbcd6d0c1c86530e`. The implementation adds installed
 filesystem source reconstruction, source-specific readiness, sanitized support
 export, cleanup protection diagnostics, compatibility regressions, and
-package-level signal acceptance. The one bounded review-repair cycle and its
-focused and distinct baseline-to-candidate upgrade checks are green; the
-earlier comprehensive and plugin tiers are also green. Pull-request checks,
-primary reconciliation, integration, and current `origin/main` ancestry remain
-open. No live or installed user runtime was authorized or changed.
+package-level signal acceptance. The bounded review-repair cycle, primary
+enumeration-bound reconciliation, distinct baseline-to-candidate upgrade, both
+release gates, merge, and issue closure are accepted. No live or installed user
+runtime was authorized or changed.
 
 ## Scope and acceptance
 
@@ -195,7 +193,7 @@ Distinct-artifact disposable upgrade receipt:
   under its `artifacts2/` directory and the candidate wheel is under
   `candidate-dist2/`.
 
-## Remaining integration gates
+## Integration receipt
 
 Primary reconciliation on the final candidate passed on both supported Python
 versions: `PYTHONPATH=src python3.11 -m unittest discover -s tests -p
@@ -203,9 +201,8 @@ versions: `PYTHONPATH=src python3.11 -m unittest discover -s tests -p
 `OK`. The plugin tier passed 12/12; syntax compilation and `git diff --check`
 passed; and the selector's `--active-only` planning audit returned `ok: true`.
 
-- Pull request, required Python 3.11/3.12 and installed-wheel CI jobs, primary
-  reconciliation, merge, issue closure, and current `origin/main` ancestry
-  readback are unexecuted.
+- PR #28 passed the Python 3.11 and 3.12 release gates, merged as `73e7753`,
+  and closed issue #9. Current `origin/main` contains that merge.
 - Public-tag smoke is defined but was not executed because no tag/release is
   authorized. Live GitHub, public listeners, live dispatch, installed-user
   mutation/cleanup, deployment, release, tag creation, and install refresh were
@@ -213,5 +210,4 @@ passed; and the selector's `--active-only` planning audit returned `ok: true`.
 - The plan requested one `gpt-5.6-sol` high implementation worker and a later
   `gpt-5.6-luna` review. This delegated implementation used no subagents; the
   runtime-reported effective model and effort were unavailable and are recorded
-  as unknown. Primary reconciliation of the completed review-repair cycle
-  remains an integration gate.
+  as unknown.
