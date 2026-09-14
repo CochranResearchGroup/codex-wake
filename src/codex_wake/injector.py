@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import json
 import re
 import subprocess
 import tempfile
@@ -8,11 +9,12 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from .records import (
     WakeError,
     WakePath,
+    WakeLifecycleLock,
     append_event,
     format_utc,
     replace_record,
@@ -241,6 +243,45 @@ def dispatch_firing_record(
     runner: TmuxRunner | None = None,
     now: datetime | None = None,
     ack_timeout_override: float | None = None,
+    signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
+) -> DispatchResult:
+    record = found.record
+    wake_id = record.get("id")
+    if record.get("schema_version") != 2 or not isinstance(wake_id, str) or not wake_id:
+        return _dispatch_firing_record_unlocked(
+            root,
+            found,
+            runner=runner,
+            now=now,
+            ack_timeout_override=ack_timeout_override,
+            signal_authorizer=signal_authorizer,
+        )
+    with WakeLifecycleLock(root, wake_id):
+        try:
+            reloaded = json.loads(found.path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, json.JSONDecodeError):
+            return DispatchResult("skipped", "signal firing record is no longer active")
+        active = WakePath(found.path, reloaded)
+        if reloaded.get("schema_version") != 2 or reloaded.get("status") != "firing":
+            return DispatchResult("skipped", "signal firing record is no longer active")
+        return _dispatch_firing_record_unlocked(
+            root,
+            active,
+            runner=runner,
+            now=now,
+            ack_timeout_override=ack_timeout_override,
+            signal_authorizer=signal_authorizer,
+        )
+
+
+def _dispatch_firing_record_unlocked(
+    root: Path,
+    found: WakePath,
+    *,
+    runner: TmuxRunner | None = None,
+    now: datetime | None = None,
+    ack_timeout_override: float | None = None,
+    signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
 ) -> DispatchResult:
     current = now or utc_now()
     record = dict(found.record)
@@ -249,6 +290,24 @@ def dispatch_firing_record(
     wake_id = record.get("id")
     if not isinstance(wake_id, str) or not wake_id:
         raise WakeError("wake record missing id")
+    if record.get("schema_version") == 2:
+        authorized = False
+        if signal_authorizer is not None:
+            try:
+                authorized = bool(signal_authorizer(record))
+            except Exception:
+                authorized = False
+        else:
+            try:
+                from .signal_records import signal_journal_path
+                from .signal_store import SQLiteSignalModule
+
+                runtime = SQLiteSignalModule.open_existing(signal_journal_path(root))
+                authorized = runtime is not None and runtime.authorize_firing_record(record)
+            except Exception:
+                authorized = False
+        if not authorized:
+            return DispatchResult("skipped", "signal firing authority unavailable")
     target = record.get("target")
     if isinstance(target, dict) and target.get("transport") == "app-server":
         from .app_server import dispatch_app_server_record

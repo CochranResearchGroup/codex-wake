@@ -3,16 +3,164 @@ from __future__ import annotations
 import json
 import subprocess
 import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
 from codex_wake.daemon import PollResult, format_poll_result, poll_once, poll_result_has_activity
-from codex_wake.records import build_record, write_record
+from codex_wake.event_wake import EventWake
+from codex_wake.records import WakeLifecycleLock, build_record, cancel_record, write_record
+from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+from codex_wake.signal_store import SQLiteSignalModule
+from codex_wake.signals import Registration, SourceCommit
+from tests.test_signal_store import make_observation
+from tests.test_signals import make_adapter, make_intent
 
 
 class DaemonTests(unittest.TestCase):
+    def test_mixed_root_keeps_v1_healthy_and_holds_unreadable_signal_records(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            ready = self.make_record(
+                tmp,
+                {"type": "not_before", "due_at": "2026-05-18T21:15:00Z"},
+            )
+            ready["id"] = "wake_v1"
+            v1_signal = self.make_record(tmp, {"type": "signal"})
+            v1_signal["id"] = "wake_v1_signal"
+            malformed_v2 = self.make_record(tmp, {"type": "signal"})
+            malformed_v2.update({"id": "wake_bad_v2", "schema_version": 2})
+            for record in (ready, v1_signal, malformed_v2):
+                write_record(root, record)
+
+            result = poll_once(
+                root,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+                dispatch=False,
+            )
+
+            self.assertEqual((result.fired, result.failed, result.pending), (1, 0, 2))
+            self.assertTrue((root / "firing" / "wake_v1.json").exists())
+            self.assertTrue((root / "pending" / "wake_v1_signal.json").exists())
+            self.assertTrue((root / "pending" / "wake_bad_v2.json").exists())
+
+    def test_signal_registration_ingest_and_poll_publishes_one_firing_record_without_dispatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            capability = ManagedReaderCapability(
+                root, "reader-1", 1, frozenset({1, 2}), True
+            )
+            signal_runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(root, capability),
+            )
+            registration = EventWake(
+                signal_runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+            self.assertIsInstance(registration, Registration)
+            signal_runtime.ingest(
+                [make_observation()],
+                SourceCommit(
+                    "memory", "contract-test", "checkpoint-1", 1,
+                    datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                ),
+            )
+
+            result = poll_once(
+                root,
+                now=datetime(2026, 9, 14, 14, 2, tzinfo=UTC),
+                dispatch=False,
+            )
+
+            self.assertEqual((result.fired, result.dispatched), (1, 0))
+            self.assertFalse((root / "pending" / "wake_signal.json").exists())
+            firing = json.loads((root / "firing" / "wake_signal.json").read_text())
+            self.assertEqual(firing["record_revision"], 2)
+            self.assertEqual(firing["status"], "firing")
+            self.assertEqual(firing["trigger_match"]["verification"]["state"], "verified")
+            self.assertEqual(firing["trigger_match"]["verification"]["method"], "scripted")
+            self.assertEqual(len(firing["trigger_match"]["evidence_digest"]), 64)
+
+    def test_signal_cancellation_wins_before_evaluation_and_cannot_be_republished(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root,
+                    ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+            runtime.ingest(
+                [make_observation()],
+                SourceCommit(
+                    "memory", "contract-test", "checkpoint-1", 1,
+                    datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                ),
+            )
+            cancellation_holds_lock = threading.Event()
+            release_cancellation = threading.Event()
+            evaluation_attempted_lock = threading.Event()
+
+            def cancellation_checkpoint(name: str) -> None:
+                if name == "after_cancel_lock":
+                    cancellation_holds_lock.set()
+                    self.assertTrue(release_cancellation.wait(timeout=5))
+
+            class ProbedLifecycleLock:
+                def __init__(self, lock_root: Path, wake_id: str) -> None:
+                    self._lock = WakeLifecycleLock(lock_root, wake_id)
+
+                def __enter__(self):
+                    evaluation_attempted_lock.set()
+                    return self._lock.__enter__()
+
+                def __exit__(self, exc_type, exc, tb) -> None:
+                    self._lock.__exit__(exc_type, exc, tb)
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                cancellation = pool.submit(
+                    cancel_record,
+                    root,
+                    "wake_signal",
+                    datetime(2026, 9, 14, 14, 2, tzinfo=UTC),
+                    checkpoint=cancellation_checkpoint,
+                )
+                self.assertTrue(cancellation_holds_lock.wait(timeout=5))
+                with patch("codex_wake.daemon.WakeLifecycleLock", ProbedLifecycleLock, create=True):
+                    evaluation = pool.submit(
+                        poll_once,
+                        root,
+                        datetime(2026, 9, 14, 14, 3, tzinfo=UTC),
+                        dispatch=False,
+                        signal_runtime=runtime,
+                    )
+                    attempted = evaluation_attempted_lock.wait(timeout=1)
+                    if attempted:
+                        self.assertFalse(evaluation.done())
+                    release_cancellation.set()
+                    cancellation.result(timeout=5)
+                    result = evaluation.result(timeout=5)
+            self.assertTrue(attempted)
+            self.assertEqual(result.fired, 0)
+            self.assertTrue((root / "cancelled" / "wake_signal.json").is_file())
+            self.assertFalse((root / "pending" / "wake_signal.json").exists())
+            self.assertFalse((root / "firing" / "wake_signal.json").exists())
+            runtime.reconcile_publications(limit=100)
+            self.assertFalse((root / "firing" / "wake_signal.json").exists())
+
     def make_record(self, tmp: str, predicate: dict) -> dict:
         now = datetime(2026, 5, 18, 20, 30, tzinfo=UTC)
         record = build_record(

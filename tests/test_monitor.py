@@ -15,6 +15,7 @@ from codex_wake.monitor import (
     parse_unit_exec_start_wake_root,
     write_monitor_health,
 )
+from codex_wake.signal_records import probe_managed_reader_capability
 from codex_wake.service import build_service_config, render_unit
 
 
@@ -36,6 +37,34 @@ class FakeRunner:
 
 
 class MonitorTests(unittest.TestCase):
+    def test_health_advertises_a_live_identity_bound_signal_reader(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root = base / "wake"
+            state_dir = base / "state"
+            now = datetime.now(UTC).replace(microsecond=0)
+            write_monitor_health(
+                wake_root=root,
+                source="codex-waked",
+                mode="loop",
+                state_dir=state_dir,
+                now=now,
+            )
+
+            capability = probe_managed_reader_capability(root, state_dir=state_dir, now=now)
+            self.assertIsNotNone(capability)
+            self.assertEqual(capability.wake_root, root)
+            self.assertIn(2, capability.schema_versions)
+            self.assertGreater(capability.generation, 0)
+            self.assertIsNone(
+                probe_managed_reader_capability(
+                    root,
+                    state_dir=state_dir,
+                    expected_generation=capability.generation + 1,
+                    now=now,
+                )
+            )
+
     def make_executable(self, path: Path) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("#!/bin/sh\n", encoding="utf-8")

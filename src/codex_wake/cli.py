@@ -195,6 +195,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     show = subparsers.add_parser("show", help="show one wake record")
     show.add_argument("wake_id")
+    show.add_argument(
+        "--signal-state",
+        action="store_true",
+        help="inspect bounded signal authority without evaluating it",
+    )
 
     cancel = subparsers.add_parser("cancel", help="cancel a pending or firing wake")
     cancel.add_argument("wake_id")
@@ -810,6 +815,22 @@ def status_command(args: argparse.Namespace, root: Path) -> int:
 
 def show_record(args: argparse.Namespace, root: Path) -> int:
     found = find_record(root, args.wake_id)
+    if getattr(args, "signal_state", False):
+        from .signal_records import signal_journal_path
+        from .signal_store import SQLiteSignalModule, SignalStoreError
+        from .signals import Degraded
+
+        try:
+            runtime = SQLiteSignalModule.open_existing(signal_journal_path(root))
+        except SignalStoreError:
+            raise WakeError("signal authority is unavailable") from None
+        if runtime is None:
+            raise WakeError("signal authority is unavailable")
+        inspected = runtime.inspect_signal_state(args.wake_id, record=found.record)
+        if isinstance(inspected, Degraded):
+            raise WakeError(f"signal authority is unavailable: {inspected.code}")
+        print(json.dumps(inspected, indent=2, sort_keys=True))
+        return 0
     print(json.dumps(found.record, indent=2, sort_keys=True))
     return 0
 
@@ -883,6 +904,10 @@ def schema_command(args: argparse.Namespace) -> int:
         print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
     print(f"schema_version={summary['schema_version']}")
+    print(f"read_versions={','.join(str(value) for value in summary['read_versions'])}")
+    print(f"default_write_version={summary['default_write_version']}")
+    print(f"signal_record_contract_version={summary['signal_record_contract_version']}")
+    print(f"signal_journal_schema_version={summary['signal_journal_schema_version']}")
     print(f"compatibility={summary['compatibility']}")
     print(f"schema_doc={summary['schema_doc']}")
     print(f"statuses={','.join(summary['active_statuses'] + summary['terminal_statuses'] + [summary['archived_status']])}")

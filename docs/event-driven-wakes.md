@@ -1,6 +1,6 @@
 ---
 last_updated: 2026-09-14
-status: proposed
+status: foundation-in-progress
 applies_to: post-v0.5.2 product development
 ---
 
@@ -11,9 +11,12 @@ external condition occurs. The design preserves Codex Wake's durable records,
 inspectable evidence, bounded delivery, and narrow resume authority while
 supporting filesystem, GitHub, runtime, data, monitoring, and human signals.
 
-> **Note:** This document records the proposed product direction. Codex Wake
-> currently supports polling predicates such as `file_changed` and
-> `process_done`; it does not yet implement the signal substrate described here.
+> **Implementation note:** The provider-neutral contract, in-memory engine,
+> SQLite journal, capability-gated schema-v2 record projection, daemon seam,
+> bounded inspection, and fresh-process recovery proof are implemented on the
+> issue #4 delivery lane. Filesystem and GitHub adapters, webhook ingress, and
+> product-facing recipes remain later work; no provider or live-dispatch proof
+> is claimed here.
 
 ## Product outcome
 
@@ -263,9 +266,12 @@ it. The journal never becomes a raw provider-payload archive.
 }
 ```
 
-The stable provider deduplication key is the source instance plus provider
-delivery ID. An adapter without provider IDs must declare and test a bounded,
-deterministic identity rule.
+The stable logical deduplication key is the source, source instance, and an
+adapter-declared occurrence namespace plus occurrence value. Polling and push
+adapters for one source must emit the same logical identity for the same
+occurrence. A provider delivery ID may be retained as bounded transport
+evidence, but it is not the cross-transport identity. Every adapter must
+declare and test its deterministic identity and collision domain.
 
 Provider timestamps are evidence. The local monotonic sequence determines
 journal ordering.
