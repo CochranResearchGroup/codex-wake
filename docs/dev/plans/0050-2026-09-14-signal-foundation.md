@@ -236,9 +236,39 @@ effect was added. Physical power-loss qualification is not claimed; this
 packet proves process-restart recovery, stale-preparer takeover, transaction
 atomicity, and two-instance contention through provider-free tests.
 
+## Packet 4C outcome
+
+Packet 4C adds the capability-gated schema-version-2 signal record while
+leaving every existing writer on schema version 1. The root-local SQLite
+journal owns prepared and published arms, lifecycle state, exact JSON outbox
+payloads, match reservations, terminal tombstones, and retention pins. The
+daemon opens only an existing journal, reconciles bounded outbox work, and
+continues valid v1 predicates when signal authority is unavailable.
+
+Registration and firing publication use unique temporary files, atomic
+replacement, file and directory synchronization, exact byte/hash inspection,
+and managed-reader capability checks at apply and finalize. Firing dispatch
+requires an exact applied outbox payload plus published arm, journal,
+lifecycle, and match authority. Cancellation and dispatch share a per-wake
+lifecycle lock; terminal recovery prevents stale active copies from regaining
+eligibility. CLI schema output remains additive and `show --signal-state`
+performs bounded, existing-authority inspection.
+
+Provider-free validation covers registration through no-dispatch firing,
+mixed v1/v2 behavior, capability loss, malformed and conflicting records,
+terminal fencing, expiry, archive and cleanup, two-instance contention, and 13
+fresh-subprocess `os._exit` interruption checkpoints. Python 3.11 and 3.12,
+the complete source suite, the OpenClaw plugin suite, compilation, and diff
+checks pass at the Packet 4C checkpoint.
+
+This proves process-crash recovery and the documented SQLite/file-system
+synchronization protocol; it does not constitute literal host power-loss
+qualification or exactly-once external delivery. Provider adapters, provider
+history-gap proof, public ingress, installed-runtime mutation, and live
+dispatch remain blocked to later issues and explicit gates.
+
 ## Next action
 
-Packet 4C will add the capability-gated schema-version-2 signal record,
-recoverable SQLite-to-JSON outbox, startup reconciliation, daemon evaluation
-seam, bounded CLI inspection, corruption handling, and fresh-process crash
-matrix. Provider adapters and live dispatch remain blocked.
+Publish the issue #4 implementation pull request and merge it only after CI and
+review are green. Then unlock issues #5 and #7 as the first parallel adapter
+lanes under Plan 0049.

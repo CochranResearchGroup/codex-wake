@@ -96,6 +96,38 @@ class RaisingOnceAdapter(ScriptedSourceAdapter):
 
 
 class SQLiteSignalModuleTests(unittest.TestCase):
+    def test_reserved_match_survives_expiry_for_delivery_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "signals.sqlite3"
+            module = make_module(database)
+            intent = replace(make_intent(), expires_at=NOW + timedelta(seconds=1))
+            registration = EventWake(
+                module,
+                adapters=[make_adapter()],
+                clock=lambda: NOW,
+                id_factory=lambda: "wake_1",
+            ).register(intent, idempotency_key="job-42")
+            module.ingest(
+                [make_observation()],
+                SourceCommit("memory", "contract-test", "checkpoint-1", 1, NOW),
+            )
+            armed = module.load_armed_signal(registration.wake_id)
+            reserved = module.evaluate(
+                registration.wake_id, armed, NOW, EvaluationLimits(10)
+            )
+
+            reopened = make_module(database)
+            replay = reopened.evaluate(
+                registration.wake_id,
+                armed,
+                NOW + timedelta(seconds=2),
+                EvaluationLimits(10),
+            )
+
+            self.assertIsInstance(reserved, Matched)
+            self.assertEqual(replay, reserved)
+            self.assertFalse(reopened.expire_unreserved(registration.wake_id, now=NOW + timedelta(seconds=2)))
+
     def test_existing_only_open_never_creates_a_missing_journal(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"

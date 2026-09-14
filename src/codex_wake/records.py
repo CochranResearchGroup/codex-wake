@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import json
+import fcntl
+import hashlib
 import os
 import re
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
+
+from .signal_records import decode_signal_record, signal_journal_path
 
 
 SCHEMA_VERSION = 1
@@ -36,6 +40,44 @@ class CleanupResult:
     wake_id: str
     retention_at: str
     deleted: bool
+
+
+class WakeLifecycleLock:
+    """Root/wake-scoped serialization for v2 terminal and dispatch decisions."""
+
+    def __init__(self, root: Path, wake_id: str) -> None:
+        digest = hashlib.sha256(wake_id.encode("utf-8")).hexdigest()[:24]
+        self.path = Path(root) / "locks" / f"signal-lifecycle-{digest}.lock"
+        self._handle = None
+
+    def __enter__(self) -> WakeLifecycleLock:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._handle = self.path.open("a+", encoding="ascii")
+        fcntl.flock(self._handle.fileno(), fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        if self._handle is not None:
+            fcntl.flock(self._handle.fileno(), fcntl.LOCK_UN)
+            self._handle.close()
+            self._handle = None
+
+
+def classify_record(record: object) -> str:
+    """Pure multi-version classification; unrecognized records are held."""
+
+    if decode_signal_record(record) is not None:
+        return "signal_v2"
+    if not isinstance(record, dict) or record.get("schema_version") != SCHEMA_VERSION:
+        return "hold"
+    predicate = record.get("predicate")
+    if isinstance(predicate, dict) and predicate.get("type") == "signal":
+        return "hold"
+    if not isinstance(record.get("id"), str) or not record.get("id"):
+        return "hold"
+    if record.get("status") not in VALID_STATUSES:
+        return "hold"
+    return "v1"
 
 
 def utc_now() -> datetime:
@@ -185,6 +227,10 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
+        "read_versions": [1, 2],
+        "default_write_version": SCHEMA_VERSION,
+        "signal_record_contract_version": 2,
+        "signal_journal_schema_version": 2,
         "compatibility": SCHEMA_COMPATIBILITY,
         "schema_doc": SCHEMA_DOC,
         "active_statuses": list(ACTIVE_STATUS_DIRS[:2]),
@@ -259,7 +305,9 @@ def iter_records(root: Path) -> list[WakePath]:
         for path in sorted(directory.glob("*.json")):
             try:
                 record = json.loads(path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            except (OSError, UnicodeError, json.JSONDecodeError):
+                continue
+            if not isinstance(record, dict):
                 continue
             results.append(WakePath(path=path, record=record))
     return sorted(results, key=lambda item: (item.record.get("created_at", ""), item.record.get("id", "")))
@@ -273,7 +321,9 @@ def iter_archived_records(root: Path) -> list[WakePath]:
     for path in sorted(archive_dir.glob("*.json")):
         try:
             record = json.loads(path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            continue
+        if not isinstance(record, dict):
             continue
         results.append(WakePath(path=path, record=record))
     return sorted(results, key=lambda item: (item.record.get("archived_at", ""), item.record.get("id", "")))
@@ -347,8 +397,28 @@ def status_summary(root: Path) -> dict[str, Any]:
     }
 
 
-def cancel_record(root: Path, wake_id: str, now: datetime | None = None) -> Path:
+def cancel_record(
+    root: Path,
+    wake_id: str,
+    now: datetime | None = None,
+    *,
+    checkpoint: Callable[[str], None] | None = None,
+) -> Path:
     found = find_record(root, wake_id)
+    if decode_signal_record(found.record) is not None:
+        with WakeLifecycleLock(root, wake_id):
+            if checkpoint is not None:
+                checkpoint("after_cancel_lock")
+            return _cancel_found(root, find_record(root, wake_id), now, checkpoint)
+    return _cancel_found(root, found, now, checkpoint)
+
+
+def _cancel_found(
+    root: Path,
+    found: WakePath,
+    now: datetime | None,
+    checkpoint: Callable[[str], None] | None,
+) -> Path:
     record = dict(found.record)
     status = record.get("status")
     if status in {"submitted", "failed", "cancelled", "expired", "archived"}:
@@ -360,8 +430,13 @@ def cancel_record(root: Path, wake_id: str, now: datetime | None = None) -> Path
     events.append(make_event("cancelled", "Wake cancelled by operator", current))
     record["events"] = events
     destination = write_record(root, record)
+    if checkpoint is not None:
+        checkpoint("after_cancel_replace")
     if found.path != destination and found.path.exists():
         found.path.unlink()
+    if checkpoint is not None:
+        checkpoint("after_cancel_source_unlink")
+    _retire_signal_terminal(root, record, current)
     return destination
 
 
@@ -397,7 +472,13 @@ def replace_record(root: Path, found: WakePath, record: dict[str, Any]) -> Path:
     return destination
 
 
-def archive_record(root: Path, wake_id: str, now: datetime | None = None) -> Path:
+def archive_record(
+    root: Path,
+    wake_id: str,
+    now: datetime | None = None,
+    *,
+    checkpoint: Callable[[str], None] | None = None,
+) -> Path:
     found = find_record(root, wake_id)
     record = dict(found.record)
     status = record.get("status")
@@ -415,8 +496,11 @@ def archive_record(root: Path, wake_id: str, now: datetime | None = None) -> Pat
     temp_path = final_path.with_suffix(".json.tmp")
     temp_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     temp_path.replace(final_path)
+    if checkpoint is not None:
+        checkpoint("after_archive_replace")
     if found.path.exists():
         found.path.unlink()
+    _retire_signal_terminal(root, record, current)
     return final_path
 
 
@@ -435,6 +519,7 @@ def cleanup_archived_records(
     older_than: timedelta,
     now: datetime | None = None,
     delete: bool = False,
+    checkpoint: Callable[[str], None] | None = None,
 ) -> list[CleanupResult]:
     if older_than <= timedelta():
         raise WakeError("older_than must be greater than zero")
@@ -452,10 +537,39 @@ def cleanup_archived_records(
             continue
         if retention_at > cutoff:
             continue
+        if decode_signal_record(item.record) is not None and not _signal_cleanup_allowed(root, item.record):
+            continue
         if delete and item.path.exists():
+            if checkpoint is not None:
+                checkpoint("before_cleanup_unlink")
             item.path.unlink()
+            if checkpoint is not None:
+                checkpoint("after_cleanup_unlink")
         results.append(CleanupResult(path=item.path, wake_id=wake_id, retention_at=format_utc(retention_at), deleted=delete))
     return results
+
+
+def _retire_signal_terminal(root: Path, record: dict[str, Any], now: datetime) -> None:
+    if decode_signal_record(record) is None:
+        return
+    try:
+        from .signal_store import SQLiteSignalModule
+
+        runtime = SQLiteSignalModule.open_existing(signal_journal_path(root))
+        if runtime is not None:
+            runtime.retire_terminal_record(record, now=now)
+    except Exception:
+        return
+
+
+def _signal_cleanup_allowed(root: Path, record: dict[str, Any]) -> bool:
+    try:
+        from .signal_store import SQLiteSignalModule
+
+        runtime = SQLiteSignalModule.open_existing(signal_journal_path(root))
+        return runtime is not None and runtime.cleanup_allowed(record)
+    except Exception:
+        return False
 
 
 def retention_timestamp(record: dict[str, Any]) -> str | None:

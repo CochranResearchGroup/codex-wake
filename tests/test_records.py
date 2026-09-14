@@ -14,17 +14,136 @@ from codex_wake.records import (
     build_record,
     cancel_record,
     cleanup_archived_records,
+    classify_record,
     capture_tmux_target,
     format_utc,
+    iter_records,
     parse_duration,
     parse_timestamp,
     schema_summary,
     status_summary,
     write_record,
 )
+from codex_wake.signal_records import build_signal_record
+from codex_wake.signals import ArmedSignal, Eq, Resume, SignalRequest, SourceAnchor
 
 
 class RecordTests(unittest.TestCase):
+    def test_signal_cleanup_requires_durable_terminal_fence_and_released_pins(self) -> None:
+        from codex_wake.event_wake import EventWake
+        from codex_wake.signal_records import (
+            ManagedReaderCapability,
+            WakeRecordPublisher,
+            signal_journal_path,
+        )
+        from codex_wake.signal_store import SQLiteSignalModule
+        from tests.test_signals import make_adapter, make_intent
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root,
+                    ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+            pending = root / "pending" / "wake_signal.json"
+            archived_record = json.loads(pending.read_text())
+            archived_record.update(
+                {
+                    "status": "archived",
+                    "record_revision": 2,
+                    "archived_at": "2026-09-14T14:00:00Z",
+                    "updated_at": "2026-09-14T14:00:00Z",
+                }
+            )
+            archive_path = root / "archive" / "wake_signal.json"
+            archive_path.parent.mkdir(parents=True)
+            archive_path.write_text(json.dumps(archived_record) + "\n")
+            pending.unlink()
+
+            refused = cleanup_archived_records(
+                root,
+                older_than=timedelta(seconds=1),
+                now=datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                delete=True,
+            )
+            self.assertEqual(refused, [])
+            self.assertTrue(archive_path.exists())
+
+            self.assertTrue(
+                runtime.retire_terminal_record(
+                    archived_record,
+                    now=datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                )
+            )
+            deleted = cleanup_archived_records(
+                root,
+                older_than=timedelta(seconds=1),
+                now=datetime(2026, 9, 14, 14, 2, tzinfo=UTC),
+                delete=True,
+            )
+            self.assertEqual(len(deleted), 1)
+            self.assertFalse(archive_path.exists())
+
+    def test_multi_version_classification_is_pure_and_fail_closed(self) -> None:
+        v1 = build_record(
+            predicate={"type": "not_before", "due_at": "2026-05-18T21:15:00Z"},
+            prompt="continue",
+            cwd=Path("/tmp"),
+            target={"transport": "tmux", "tmux_socket": "/tmp/tmux", "pane": "%1"},
+            now=datetime(2026, 5, 18, 20, 30, tzinfo=UTC),
+        )
+        armed = ArmedSignal(
+            wake_id="wake_signal",
+            arm_id="arm_wake_signal",
+            spec=SignalRequest(
+                1, "memory", "source-1", "occurrence", "job.completed", "job:1",
+                "occurs", (Eq("result", "ready"),), "required",
+            ),
+            anchor=SourceAnchor(0, "memory:0", {}, "local_journal"),
+            registered_at=datetime(2026, 5, 18, 20, 30, tzinfo=UTC),
+            expires_at=None,
+        )
+        signal_json, _digest = build_signal_record(
+            armed,
+            Resume("continue", Path("/tmp"), {"transport": "tmux"}),
+            journal_uuid="journal-1",
+            revision=1,
+        )
+        v2 = json.loads(signal_json)
+
+        self.assertEqual(classify_record(v1), "v1")
+        self.assertEqual(classify_record(v2), "signal_v2")
+        self.assertEqual(classify_record({**v1, "predicate": {"type": "signal"}}), "hold")
+        self.assertEqual(classify_record({**v2, "record_revision": "1"}), "hold")
+        self.assertEqual(classify_record({**v2, "schema_version": 99}), "hold")
+        self.assertEqual(classify_record({"schema_version": 2}), "hold")
+
+    def test_record_scanning_ignores_non_object_json_without_hiding_valid_records(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            valid = build_record(
+                predicate={"type": "not_before", "due_at": "2026-05-18T21:15:00Z"},
+                prompt="continue",
+                cwd=root,
+                target={"transport": "tmux", "tmux_socket": "/tmp/tmux", "pane": "%1"},
+                now=datetime(2026, 5, 18, 20, 30, tzinfo=UTC),
+            )
+            write_record(root, valid)
+            (root / "pending" / "array.json").write_text("[]\n", encoding="utf-8")
+
+            records = iter_records(root)
+
+            self.assertEqual([item.record["id"] for item in records], [valid["id"]])
+
     def test_parse_duration_supports_compound_values(self) -> None:
         self.assertEqual(parse_duration("1h30m"), timedelta(minutes=90))
         self.assertEqual(parse_duration("2d3h4m5s"), timedelta(days=2, hours=3, minutes=4, seconds=5))

@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 from codex_wake import cli
 from codex_wake.openclaw_plugin import package_version
-from codex_wake.records import WakeError
+from codex_wake.records import WakeError, build_record, write_record
 from codex_wake.service import ServiceAppServerReadiness
 
 
@@ -122,7 +122,71 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0, err)
             data = json.loads(json_out)
             self.assertEqual(data["schema_version"], 1)
+            self.assertEqual(data["read_versions"], [1, 2])
+            self.assertEqual(data["default_write_version"], 1)
+            self.assertEqual(data["signal_record_contract_version"], 2)
+            self.assertEqual(data["signal_journal_schema_version"], 2)
             self.assertIn("file_changed", data["predicate_types"])
+
+    def test_show_signal_state_reads_existing_authority_without_creating_it(self) -> None:
+        from codex_wake.event_wake import EventWake
+        from codex_wake.signal_records import (
+            ManagedReaderCapability,
+            WakeRecordPublisher,
+            signal_journal_path,
+        )
+        from codex_wake.signal_store import SQLiteSignalModule
+        from tests.test_signals import make_adapter, make_intent
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            journal = signal_journal_path(root)
+            placeholder = build_record(
+                predicate={"type": "not_before", "due_at": "2026-09-15T14:00:00Z"},
+                prompt="continue",
+                cwd=Path(tmp),
+                target={"transport": "tmux", "tmux_socket": "/tmp/tmux", "pane": "%1"},
+                now=datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+            )
+            placeholder["id"] = "missing"
+            write_record(root, placeholder)
+            code, _out, _err = self.run_cli(
+                ["show", "missing", "--signal-state"], root
+            )
+            self.assertNotEqual(code, 0)
+            self.assertFalse(journal.exists())
+            journal.parent.mkdir(parents=True)
+            journal.write_bytes(b"not-a-sqlite-journal")
+            code, _out, error = self.run_cli(
+                ["show", "missing", "--signal-state"], root
+            )
+            self.assertNotEqual(code, 0)
+            self.assertNotIn("not-a-sqlite", error)
+            journal.unlink()
+
+            runtime = SQLiteSignalModule(
+                journal,
+                record_publisher=WakeRecordPublisher(
+                    root,
+                    ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+
+            code, output, error = self.run_cli(
+                ["show", "wake_signal", "--signal-state"], root
+            )
+            self.assertEqual(code, 0, error)
+            inspected = json.loads(output)
+            self.assertEqual(inspected["arm"]["state"], "published")
+            self.assertEqual(inspected["lifecycle"]["applied_status"], "pending")
+            self.assertEqual(inspected["record"]["schema_version"], 2)
+            self.assertIsNone(inspected["degradation"])
 
     def test_version_reports_package_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -3,7 +3,9 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -14,7 +16,14 @@ from codex_wake.injector import (
     lock_name_for_pane,
     unsafe_pane_reason,
 )
-from codex_wake.records import WakePath, build_record, write_record
+from codex_wake.daemon import poll_once
+from codex_wake.event_wake import EventWake
+from codex_wake.records import WakePath, build_record, cancel_record, find_record, write_record
+from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+from codex_wake.signal_store import SQLiteSignalModule
+from codex_wake.signals import SourceCommit
+from tests.test_signal_store import make_observation
+from tests.test_signals import make_adapter, make_intent
 
 
 class FakeTmuxRunner:
@@ -38,6 +47,137 @@ class FakeTmuxRunner:
 
 
 class InjectorTests(unittest.TestCase):
+    def test_signal_cancellation_holds_lifecycle_lock_until_dispatch_reloads_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root,
+                    ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+            runtime.ingest(
+                [make_observation()],
+                SourceCommit(
+                    "memory", "contract-test", "checkpoint-1", 1,
+                    datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                ),
+            )
+            poll_once(
+                root,
+                now=datetime(2026, 9, 14, 14, 2, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+            )
+            firing = find_record(root, "wake_signal")
+            lock_held = threading.Event()
+            release = threading.Event()
+
+            def cancellation_checkpoint(name: str) -> None:
+                if name == "after_cancel_lock":
+                    lock_held.set()
+                    self.assertTrue(release.wait(timeout=5))
+
+            runner = FakeTmuxRunner()
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                cancellation = pool.submit(
+                    cancel_record,
+                    root,
+                    "wake_signal",
+                    datetime(2026, 9, 14, 14, 3, tzinfo=UTC),
+                    checkpoint=cancellation_checkpoint,
+                )
+                self.assertTrue(lock_held.wait(timeout=5))
+                dispatch = pool.submit(
+                    dispatch_firing_record,
+                    root,
+                    firing,
+                    runner=runner,
+                    signal_authorizer=runtime.authorize_firing_record,
+                )
+                release.set()
+                cancellation.result(timeout=5)
+                result = dispatch.result(timeout=5)
+
+            self.assertEqual(result.status, "skipped")
+            self.assertEqual(runner.capture_calls, 0)
+            self.assertEqual(runner.pastes, [])
+            cancelled = json.loads((root / "cancelled" / "wake_signal.json").read_text())
+            self.assertEqual(cancelled["attempts"], 0)
+
+    def test_signal_firing_without_live_authority_makes_no_transport_attempt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp))
+            found.record["schema_version"] = 2
+            found.record["record_revision"] = 2
+            runner = FakeTmuxRunner()
+
+            result = dispatch_firing_record(
+                root,
+                found,
+                runner=runner,
+                signal_authorizer=lambda _record: False,
+            )
+
+            self.assertEqual(result.status, "skipped")
+            self.assertEqual(found.record["attempts"], 0)
+            self.assertEqual(runner.capture_calls, 0)
+            self.assertEqual(runner.pastes, [])
+
+    def test_signal_firing_with_tampered_payload_makes_no_transport_attempt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root,
+                    ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+            runtime.ingest(
+                [make_observation()],
+                SourceCommit(
+                    "memory", "contract-test", "checkpoint-1", 1,
+                    datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                ),
+            )
+            poll_once(
+                root,
+                now=datetime(2026, 9, 14, 14, 2, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+            )
+            found = find_record(root, "wake_signal")
+            tampered = dict(found.record)
+            tampered["prompt"] = "tampered prompt"
+            found.path.write_text(json.dumps(tampered), encoding="utf-8")
+            runner = FakeTmuxRunner()
+
+            result = dispatch_firing_record(
+                root,
+                WakePath(found.path, tampered),
+                runner=runner,
+                signal_authorizer=runtime.authorize_firing_record,
+            )
+
+            self.assertEqual(result.status, "skipped")
+            self.assertEqual(runner.capture_calls, 0)
+            self.assertEqual(runner.pastes, [])
+
     def make_firing_record(self, root: Path, cwd: Path, prompt: str = "full continuation prompt") -> WakePath:
         now = datetime(2026, 5, 18, 20, 30, tzinfo=UTC)
         record = build_record(

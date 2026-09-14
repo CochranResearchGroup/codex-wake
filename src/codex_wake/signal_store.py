@@ -10,7 +10,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Callable, Sequence
 
-from .signal_records import WakeRecordPublisher, build_signal_record
+from .signal_records import WakeRecordPublisher, build_signal_record, decode_signal_record
 from .signals import (
     ArmContext,
     ArmId,
@@ -420,7 +420,9 @@ class SQLiteSignalModule(SignalEngine):
                     (row["receipt_id"],),
                 )
                 deleted += 1
+            self._checkpoint("before_compaction_commit")
             connection.commit()
+            self._checkpoint("after_compaction_commit")
             return CompactionResult(len(rows), deleted, retained)
         except Exception:
             _rollback_quietly(connection)
@@ -752,6 +754,7 @@ class SQLiteSignalModule(SignalEngine):
                 """,
                 (contract.source, contract.source_instance, owner, generation),
             )
+            self._checkpoint("before_prepared_commit")
             connection.commit()
             self._checkpoint("after_prepared_commit")
             return self._complete_registration_publication(wake_id)
@@ -761,7 +764,12 @@ class SQLiteSignalModule(SignalEngine):
         finally:
             _close_quietly(connection)
 
-    def reconcile_publications(self, *, limit: int = 100) -> int | Degraded:
+    def reconcile_publications(
+        self,
+        *,
+        limit: int = 100,
+        include_matches: bool = True,
+    ) -> int | Degraded:
         if limit <= 0:
             return Degraded(None, "INVALID_PUBLICATION_LIMIT", None)
         connection: sqlite3.Connection | None = None
@@ -785,7 +793,170 @@ class SQLiteSignalModule(SignalEngine):
             outcome = self._complete_registration_publication(WakeId(row["wake_id"]))
             if isinstance(outcome, ArmedSignal):
                 applied += 1
+        if not include_matches:
+            return applied
+        connection = None
+        try:
+            connection = self._connect()
+            matches = connection.execute(
+                """
+                SELECT wake_id, revision FROM record_outbox
+                WHERE revision > 1
+                ORDER BY created_at, wake_id, revision
+                LIMIT ?
+                """,
+                (max(0, limit - applied),),
+            ).fetchall()
+        except Exception:
+            return Degraded(None, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+        for row in matches:
+            outcome = self._complete_match_publication(
+                WakeId(row["wake_id"]), int(row["revision"])
+            )
+            if outcome is True:
+                applied += 1
         return applied
+
+    def reconcile_match_publication(self, wake_id: WakeId) -> bool | Degraded:
+        """Apply only the reserved match projection for one lifecycle-locked wake."""
+
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            row = connection.execute(
+                """
+                SELECT revision FROM record_outbox
+                WHERE wake_id = ? AND revision > 1
+                ORDER BY revision DESC LIMIT 1
+                """,
+                (str(wake_id),),
+            ).fetchone()
+            if row is None:
+                return Degraded(wake_id, "FIRING_AUTHORITY_UNAVAILABLE", None)
+            revision = int(row["revision"])
+        except Exception:
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+        return self._complete_match_publication(wake_id, revision)
+
+    def _complete_match_publication(
+        self,
+        wake_id: WakeId,
+        revision: int,
+    ) -> bool | Degraded:
+        publisher = self._record_publisher
+        if publisher is None or publisher.capability_code() is not None:
+            return Degraded(wake_id, "READER_CAPABILITY_UNAVAILABLE", None)
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            row = connection.execute(
+                """
+                SELECT a.state AS arm_state, l.desired_status, l.desired_revision,
+                       l.applied_status,
+                       o.payload_json, o.payload_sha256, o.state AS outbox_state,
+                       r.match_token,
+                       EXISTS(
+                           SELECT 1 FROM registration_tombstones AS t
+                           WHERE t.wake_id = a.wake_id
+                       ) AS terminal_fence
+                FROM arms AS a
+                JOIN wake_lifecycle AS l USING(wake_id)
+                JOIN record_outbox AS o USING(wake_id)
+                JOIN match_reservations AS r USING(wake_id)
+                WHERE a.wake_id = ? AND o.revision = ?
+                """,
+                (str(wake_id), revision),
+            ).fetchone()
+            if (
+                row is None
+                or row["arm_state"] != "published"
+                or row["desired_status"] != "firing"
+                or int(row["desired_revision"]) != revision
+                or row["applied_status"] in {"submitted", "failed", "cancelled", "expired", "archived"}
+                or bool(row["terminal_fence"])
+            ):
+                return Degraded(wake_id, "FIRING_AUTHORITY_UNAVAILABLE", None)
+            payload_json = str(row["payload_json"])
+            payload_sha256 = str(row["payload_sha256"])
+        except Exception:
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
+        inspected = publisher.inspect(payload_json, payload_sha256)
+        if inspected.outcome == "missing":
+            inspected = publisher.apply(payload_json, payload_sha256)
+            if inspected.outcome == "applied":
+                inspected = publisher.inspect(payload_json, payload_sha256)
+        elif inspected.outcome == "applied":
+            inspected = publisher.apply(payload_json, payload_sha256)
+        if inspected.outcome != "applied" or publisher.capability_code() is not None:
+            return Degraded(wake_id, "WAKE_RECORD_PUBLICATION_FAILED", None)
+
+        connection = None
+        try:
+            connection = self._connect()
+            connection.execute("BEGIN IMMEDIATE")
+            current = connection.execute(
+                """
+                SELECT a.state AS arm_state, l.desired_status, l.desired_revision,
+                       l.applied_status,
+                       o.payload_sha256, o.state AS outbox_state,
+                       r.match_token,
+                       EXISTS(
+                           SELECT 1 FROM registration_tombstones AS t
+                           WHERE t.wake_id = a.wake_id
+                       ) AS terminal_fence
+                FROM arms AS a
+                JOIN wake_lifecycle AS l USING(wake_id)
+                JOIN record_outbox AS o USING(wake_id)
+                JOIN match_reservations AS r USING(wake_id)
+                WHERE a.wake_id = ? AND o.revision = ?
+                """,
+                (str(wake_id), revision),
+            ).fetchone()
+            if (
+                current is None
+                or current["arm_state"] != "published"
+                or current["desired_status"] != "firing"
+                or int(current["desired_revision"]) != revision
+                or current["applied_status"] in {"submitted", "failed", "cancelled", "expired", "archived"}
+                or bool(current["terminal_fence"])
+                or str(current["payload_sha256"]) != payload_sha256
+                or publisher.capability_code() is not None
+            ):
+                connection.rollback()
+                return Degraded(wake_id, "FIRING_AUTHORITY_UNAVAILABLE", None)
+            applied_at = _format_time(self._lease_clock())
+            connection.execute(
+                """
+                UPDATE record_outbox
+                SET state = 'applied', applied_at = ?, blocked_code = NULL,
+                    attempt_count = attempt_count + CASE WHEN state = 'applied' THEN 0 ELSE 1 END,
+                    last_attempt_at = ?
+                WHERE wake_id = ? AND revision = ?
+                """,
+                (applied_at, applied_at, str(wake_id), revision),
+            )
+            connection.execute(
+                """
+                UPDATE wake_lifecycle
+                SET applied_status = 'firing', applied_revision = ?, updated_at = ?
+                WHERE wake_id = ? AND desired_status = 'firing' AND desired_revision = ?
+                """,
+                (revision, applied_at, str(wake_id), revision),
+            )
+            connection.commit()
+            return True
+        except Exception:
+            _rollback_quietly(connection)
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
 
     def _complete_registration_publication(
         self,
@@ -839,9 +1010,13 @@ class SQLiteSignalModule(SignalEngine):
             current = connection.execute(
                 "SELECT state FROM arms WHERE wake_id = ?", (str(wake_id),)
             ).fetchone()
-            if current is None or current["state"] not in {"prepared", "published"}:
+            if (
+                current is None
+                or current["state"] not in {"prepared", "published"}
+                or publisher.capability_code() is not None
+            ):
                 connection.rollback()
-                return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
+                return Degraded(wake_id, "READER_CAPABILITY_UNAVAILABLE", None)
             applied_at = _format_time(self._lease_clock())
             connection.execute(
                 """
@@ -867,6 +1042,7 @@ class SQLiteSignalModule(SignalEngine):
             row = connection.execute(
                 "SELECT * FROM arms WHERE wake_id = ?", (str(wake_id),)
             ).fetchone()
+            self._checkpoint("before_published_commit")
             connection.commit()
             self._checkpoint("after_published_commit")
             return _armed_from_row(row)
@@ -962,6 +1138,305 @@ class SQLiteSignalModule(SignalEngine):
             return _armed_from_row(row) if row is not None else None
         except Exception:
             return None
+        finally:
+            _close_quietly(connection)
+
+    def authorize_firing_record(self, record: object) -> bool:
+        decoded = decode_signal_record(record)
+        if decoded is None or decoded.get("status") != "firing":
+            return False
+        connection: sqlite3.Connection | None = None
+        try:
+            wake_id = str(decoded["id"])
+            revision = int(decoded["record_revision"])
+            connection = self._connect()
+            row = connection.execute(
+                """
+                SELECT a.arm_id, a.state AS arm_state, m.match_token,
+                       l.desired_status, l.desired_revision,
+                       l.applied_status, l.applied_revision,
+                       o.state AS outbox_state, o.payload_json, j.journal_uuid
+                FROM arms AS a
+                JOIN match_reservations AS m USING(wake_id)
+                JOIN wake_lifecycle AS l USING(wake_id)
+                JOIN record_outbox AS o USING(wake_id)
+                JOIN journal_meta AS j ON j.singleton = 1
+                WHERE a.wake_id = ? AND o.revision = ?
+                """,
+                (wake_id, revision),
+            ).fetchone()
+            if row is None:
+                return False
+            expected = json.loads(str(row["payload_json"]))
+            trigger = decoded.get("trigger_match")
+            return bool(
+                row["arm_state"] == "published"
+                and decoded == expected
+                and decoded.get("arm_id") == row["arm_id"]
+                and decoded.get("journal_uuid") == row["journal_uuid"]
+                and row["desired_status"] == "firing"
+                and int(row["desired_revision"]) == revision
+                and row["applied_status"] == "firing"
+                and int(row["applied_revision"]) == revision
+                and row["outbox_state"] == "applied"
+                and isinstance(trigger, dict)
+                and trigger == expected.get("trigger_match")
+                and trigger.get("match_token") == row["match_token"]
+            )
+        except Exception:
+            return False
+        finally:
+            _close_quietly(connection)
+
+    def inspect_signal_state(
+        self,
+        wake_id: WakeId,
+        *,
+        record: object | None = None,
+    ) -> dict[str, Any] | Degraded:
+        """Return bounded authority metadata without evaluating or mutating."""
+
+        decoded = decode_signal_record(record) if record is not None else None
+        if record is not None and decoded is None:
+            return Degraded(wake_id, "WAKE_RECORD_INVALID", None)
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            journal = connection.execute(
+                "SELECT journal_uuid FROM journal_meta WHERE singleton = 1"
+            ).fetchone()
+            arm = connection.execute(
+                "SELECT wake_id, arm_id, state, source, source_instance, expires_at FROM arms WHERE wake_id = ?",
+                (str(wake_id),),
+            ).fetchone()
+            lifecycle = connection.execute(
+                "SELECT desired_status, desired_revision, applied_status, applied_revision FROM wake_lifecycle WHERE wake_id = ?",
+                (str(wake_id),),
+            ).fetchone()
+            reservation = connection.execute(
+                "SELECT receipt_id, match_token, matched_at, evidence_json FROM match_reservations WHERE wake_id = ?",
+                (str(wake_id),),
+            ).fetchone()
+            outbox = connection.execute(
+                "SELECT revision, operation, target_status, state, blocked_code FROM record_outbox WHERE wake_id = ? ORDER BY revision",
+                (str(wake_id),),
+            ).fetchall()
+            pins = connection.execute(
+                "SELECT pin_id, receipt_id, min_local_sequence, reason FROM retention_pins WHERE wake_id = ? AND released_at IS NULL ORDER BY pin_id",
+                (str(wake_id),),
+            ).fetchall()
+            if arm is None or journal is None:
+                return Degraded(wake_id, "ARM_STATE_UNAVAILABLE", None)
+            journal_uuid = str(journal["journal_uuid"])
+            degradation = None
+            if decoded is not None and (
+                decoded.get("id") != str(wake_id)
+                or decoded.get("arm_id") != arm["arm_id"]
+                or decoded.get("journal_uuid") != journal_uuid
+            ):
+                degradation = "WAKE_RECORD_AUTHORITY_MISMATCH"
+            evidence = json.loads(str(reservation["evidence_json"])) if reservation else None
+            return {
+                "wake_id": str(wake_id),
+                "journal": {"schema_version": JOURNAL_SCHEMA_VERSION, "journal_uuid": journal_uuid},
+                "record": {
+                    "schema_version": decoded.get("schema_version") if decoded else None,
+                    "record_revision": decoded.get("record_revision") if decoded else None,
+                    "status": decoded.get("status") if decoded else None,
+                },
+                "arm": dict(arm),
+                "lifecycle": dict(lifecycle) if lifecycle else None,
+                "reservation": (
+                    {
+                        "receipt_id": reservation["receipt_id"],
+                        "match_token": reservation["match_token"],
+                        "matched_at": reservation["matched_at"],
+                        "verification_state": evidence.get("verification_state"),
+                        "verification_method": evidence.get("verification_method"),
+                    }
+                    if reservation
+                    else None
+                ),
+                "outbox": [dict(row) for row in outbox[:16]],
+                "pins": [dict(row) for row in pins[:32]],
+                "degradation": degradation,
+            }
+        except Exception:
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
+    def retire_terminal_record(
+        self,
+        record: object,
+        *,
+        now: datetime,
+    ) -> bool | Degraded:
+        decoded = decode_signal_record(record)
+        terminal_status = decoded.get("status") if decoded else None
+        if decoded is None or terminal_status not in {
+            "submitted", "failed", "cancelled", "expired", "archived"
+        }:
+            return Degraded(None, "TERMINAL_RECORD_INVALID", None)
+        wake_id = WakeId(str(decoded["id"]))
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            connection.execute("BEGIN IMMEDIATE")
+            arm = connection.execute(
+                "SELECT * FROM arms WHERE wake_id = ?", (str(wake_id),)
+            ).fetchone()
+            journal_uuid = connection.execute(
+                "SELECT journal_uuid FROM journal_meta WHERE singleton = 1"
+            ).fetchone()[0]
+            if (
+                arm is None
+                or decoded.get("arm_id") != arm["arm_id"]
+                or decoded.get("journal_uuid") != journal_uuid
+            ):
+                connection.rollback()
+                return Degraded(wake_id, "TERMINAL_AUTHORITY_MISMATCH", None)
+            if terminal_status == "expired":
+                reservation = connection.execute(
+                    "SELECT 1 FROM match_reservations WHERE wake_id = ?",
+                    (str(wake_id),),
+                ).fetchone()
+                if reservation is not None:
+                    connection.rollback()
+                    return Degraded(wake_id, "MATCH_RESERVED", None)
+            retired_at = _format_time(now)
+            connection.execute(
+                "UPDATE arms SET state = 'tombstoned' WHERE wake_id = ?",
+                (str(wake_id),),
+            )
+            connection.execute(
+                """
+                INSERT INTO registration_tombstones(
+                    idempotency_key, intent_fingerprint, wake_id, terminal_status, retired_at
+                ) VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(idempotency_key) DO UPDATE SET
+                    terminal_status = excluded.terminal_status,
+                    retired_at = excluded.retired_at
+                """,
+                (
+                    arm["idempotency_key"], arm["intent_fingerprint"], str(wake_id),
+                    terminal_status, retired_at,
+                ),
+            )
+            revision = int(decoded["record_revision"])
+            connection.execute(
+                """
+                UPDATE wake_lifecycle
+                SET desired_status = ?, desired_revision = MAX(desired_revision, ?),
+                    applied_status = ?, applied_revision = MAX(COALESCE(applied_revision, 0), ?),
+                    updated_at = ?
+                WHERE wake_id = ?
+                """,
+                (terminal_status, revision, terminal_status, revision, retired_at, str(wake_id)),
+            )
+            connection.execute(
+                "UPDATE retention_pins SET released_at = ? WHERE wake_id = ? AND released_at IS NULL",
+                (retired_at, str(wake_id)),
+            )
+            self._checkpoint("before_terminal_commit")
+            connection.commit()
+            self._checkpoint("after_terminal_commit")
+            return True
+        except Exception:
+            _rollback_quietly(connection)
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
+    def expire_unreserved(self, wake_id: WakeId, *, now: datetime) -> bool | Degraded:
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            connection.execute("BEGIN IMMEDIATE")
+            arm = connection.execute(
+                "SELECT * FROM arms WHERE wake_id = ?", (str(wake_id),)
+            ).fetchone()
+            reservation = connection.execute(
+                "SELECT 1 FROM match_reservations WHERE wake_id = ?", (str(wake_id),)
+            ).fetchone()
+            if (
+                arm is None
+                or arm["state"] != "published"
+                or arm["expires_at"] is None
+                or _parse_time(arm["expires_at"]) > now
+                or reservation is not None
+            ):
+                connection.rollback()
+                return False
+            retired_at = _format_time(now)
+            connection.execute(
+                "UPDATE arms SET state = 'tombstoned' WHERE wake_id = ?", (str(wake_id),)
+            )
+            connection.execute(
+                """
+                INSERT INTO registration_tombstones(
+                    idempotency_key, intent_fingerprint, wake_id, terminal_status, retired_at
+                ) VALUES (?, ?, ?, 'expired', ?)
+                ON CONFLICT(idempotency_key) DO NOTHING
+                """,
+                (arm["idempotency_key"], arm["intent_fingerprint"], str(wake_id), retired_at),
+            )
+            connection.execute(
+                """
+                UPDATE wake_lifecycle SET desired_status = 'expired', applied_status = 'expired',
+                    updated_at = ? WHERE wake_id = ?
+                """,
+                (retired_at, str(wake_id)),
+            )
+            connection.execute(
+                "UPDATE retention_pins SET released_at = ? WHERE wake_id = ? AND released_at IS NULL",
+                (retired_at, str(wake_id)),
+            )
+            self._checkpoint("before_expiry_commit")
+            connection.commit()
+            self._checkpoint("after_expiry_commit")
+            return True
+        except Exception:
+            _rollback_quietly(connection)
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
+    def terminal_status(self, wake_id: WakeId) -> str | None:
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            row = connection.execute(
+                "SELECT terminal_status FROM registration_tombstones WHERE wake_id = ?",
+                (str(wake_id),),
+            ).fetchone()
+            return str(row["terminal_status"]) if row else None
+        except Exception:
+            return None
+        finally:
+            _close_quietly(connection)
+
+    def cleanup_allowed(self, record: object) -> bool:
+        decoded = decode_signal_record(record)
+        if decoded is None or decoded.get("status") != "archived":
+            return False
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            wake_id = str(decoded["id"])
+            arm = connection.execute(
+                "SELECT state FROM arms WHERE wake_id = ?", (wake_id,)
+            ).fetchone()
+            tombstone = connection.execute(
+                "SELECT 1 FROM registration_tombstones WHERE wake_id = ?", (wake_id,)
+            ).fetchone()
+            pin = connection.execute(
+                "SELECT 1 FROM retention_pins WHERE wake_id = ? AND released_at IS NULL LIMIT 1",
+                (wake_id,),
+            ).fetchone()
+            return bool(arm and arm["state"] == "tombstoned" and tombstone and pin is None)
+        except Exception:
+            return False
         finally:
             _close_quietly(connection)
 
@@ -1121,7 +1596,9 @@ class SQLiteSignalModule(SignalEngine):
                 duplicate = identity in preexisting or identity in returned
                 results.append(ReceiptRef(receipt.receipt_id, receipt.local_sequence, duplicate))
                 returned.add(identity)
+            self._checkpoint("before_ingest_commit")
             connection.commit()
+            self._checkpoint("after_ingest_commit")
             return Ingested(tuple(results), source_commit.checkpoint)
         except Exception:
             _rollback_quietly(connection)
@@ -1150,6 +1627,15 @@ class SQLiteSignalModule(SignalEngine):
             if durable.publication != "published" or durable.arm_id != armed_signal.arm_id:
                 connection.rollback()
                 return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
+            reservation = connection.execute(
+                "SELECT * FROM match_reservations WHERE wake_id = ?",
+                (str(wake_id),),
+            ).fetchone()
+            if reservation is not None:
+                result = _matched_from_row(reservation)
+                self._ensure_match_outbox(connection, durable, result)
+                connection.commit()
+                return result
             lifecycle = connection.execute(
                 "SELECT * FROM wake_lifecycle WHERE wake_id = ?", (str(wake_id),)
             ).fetchone()
@@ -1161,14 +1647,6 @@ class SQLiteSignalModule(SignalEngine):
             ):
                 connection.rollback()
                 return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
-            reservation = connection.execute(
-                "SELECT * FROM match_reservations WHERE wake_id = ?",
-                (str(wake_id),),
-            ).fetchone()
-            if reservation is not None:
-                result = _matched_from_row(reservation)
-                connection.commit()
-                return result
             if durable.expires_at is not None and now >= durable.expires_at:
                 connection.rollback()
                 return Expired(wake_id, durable.expires_at)
@@ -1265,8 +1743,12 @@ class SQLiteSignalModule(SignalEngine):
                     "SELECT * FROM match_reservations WHERE wake_id = ?",
                     (str(wake_id),),
                 ).fetchone()
+                matched_winner = _matched_from_row(winner)
+                self._ensure_match_outbox(connection, durable, matched_winner)
+                self._checkpoint("after_match_reservation_before_commit")
                 connection.commit()
-                return _matched_from_row(winner)
+                self._checkpoint("after_match_reservation_commit")
+                return matched_winner
             if page:
                 safe_progress = int(page[-1]["local_sequence"])
             else:
@@ -1285,6 +1767,77 @@ class SQLiteSignalModule(SignalEngine):
             return Degraded(wake_id, "STORE_UNAVAILABLE", None)
         finally:
             _close_quietly(connection)
+
+    def _ensure_match_outbox(
+        self,
+        connection: sqlite3.Connection,
+        armed: ArmedSignal,
+        matched: Matched,
+    ) -> None:
+        existing = connection.execute(
+            "SELECT 1 FROM record_outbox WHERE wake_id = ? AND revision = 2",
+            (str(matched.wake_id),),
+        ).fetchone()
+        if existing is not None:
+            return
+        pending = connection.execute(
+            "SELECT payload_json FROM record_outbox WHERE wake_id = ? AND revision = 1",
+            (str(matched.wake_id),),
+        ).fetchone()
+        if pending is None:
+            raise SignalStoreError("pending record intent is unavailable")
+        payload = json.loads(str(pending["payload_json"]))
+        evidence = {
+            "match_token": str(matched.match_token),
+            "receipt_id": str(matched.receipt.receipt_id),
+            "local_sequence": matched.receipt.local_sequence,
+            "evidence_ref": matched.receipt.evidence_ref,
+            "attributes": dict(matched.receipt.attributes),
+            "verification": {
+                "state": matched.receipt.verification_state,
+                "method": matched.receipt.verification_method,
+            },
+            "matched_at": _format_time(matched.matched_at),
+        }
+        evidence_digest = _fingerprint(_canonical_json(evidence))
+        evidence["evidence_digest"] = evidence_digest
+        payload["trigger_match"] = evidence
+        payload["status"] = "firing"
+        payload["record_revision"] = 2
+        payload["updated_at"] = _format_time(matched.matched_at)
+        events = list(payload.get("events") or [])
+        events.append(
+            {
+                "at": _format_time(matched.matched_at),
+                "type": "predicate_matched",
+                "message": "Signal observation reserved for firing",
+            }
+        )
+        payload["events"] = events
+        payload_json = _canonical_json(payload)
+        payload_sha256 = hashlib.sha256((payload_json + "\n").encode("utf-8")).hexdigest()
+        connection.execute(
+            """
+            INSERT INTO record_outbox(
+                wake_id, revision, operation, target_status, source_status,
+                payload_json, payload_sha256, state, created_at
+            ) VALUES (?, 2, 'put', 'firing', 'pending', ?, ?, 'pending', ?)
+            """,
+            (
+                str(matched.wake_id),
+                payload_json,
+                payload_sha256,
+                _format_time(matched.matched_at),
+            ),
+        )
+        connection.execute(
+            """
+            UPDATE wake_lifecycle
+            SET desired_status = 'firing', desired_revision = 2, updated_at = ?
+            WHERE wake_id = ? AND desired_status = 'pending'
+            """,
+            (_format_time(matched.matched_at), str(matched.wake_id)),
+        )
 
     @staticmethod
     def _advance_progress(

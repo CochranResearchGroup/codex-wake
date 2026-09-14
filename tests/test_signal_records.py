@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sqlite3
 import tempfile
 import unittest
@@ -8,7 +9,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from codex_wake.event_wake import EventWake
-from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher
+from codex_wake.signal_records import (
+    ManagedReaderCapability,
+    WakeRecordPublisher,
+    decode_signal_record,
+)
 from codex_wake.signal_store import SQLiteSignalModule, SignalStoreError
 from codex_wake.signals import Degraded, Registration
 from tests.test_signals import make_adapter, make_intent
@@ -18,6 +23,73 @@ NOW = datetime(2026, 9, 14, 14, 0, tzinfo=UTC)
 
 
 class SignalRecordPublicationTests(unittest.TestCase):
+    @staticmethod
+    def _published_record(base: Path) -> tuple[dict[str, object], WakeRecordPublisher]:
+        wake_root = base / "wake"
+        publisher = WakeRecordPublisher(
+            wake_root,
+            ManagedReaderCapability(
+                wake_root=wake_root,
+                reader_id="managed-reader-1",
+                generation=1,
+                schema_versions=frozenset({1, 2}),
+                active=True,
+            ),
+        )
+        result = EventWake(
+            SQLiteSignalModule(base / "signals.sqlite3", record_publisher=publisher),
+            adapters=[make_adapter()],
+            clock=lambda: NOW,
+            id_factory=lambda: "wake_1",
+        ).register(make_intent(), idempotency_key="job-42")
+        if not isinstance(result, Registration):
+            raise AssertionError(f"registration failed: {result!r}")
+        record = json.loads((wake_root / "pending" / "wake_1.json").read_text())
+        return record, publisher
+
+    def test_schema_v2_decoder_rejects_unsafe_wake_and_arm_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            record, _publisher = self._published_record(Path(tmp))
+            for unsafe_id in (".", "..", "../escape", "a/b", r"a\b", "/absolute"):
+                with self.subTest(field="id", value=unsafe_id):
+                    candidate = dict(record)
+                    candidate["id"] = unsafe_id
+                    self.assertIsNone(decode_signal_record(candidate))
+                with self.subTest(field="arm_id", value=unsafe_id):
+                    candidate = dict(record)
+                    predicate = dict(candidate["predicate"])
+                    candidate["arm_id"] = unsafe_id
+                    predicate["arm_id"] = unsafe_id
+                    candidate["predicate"] = predicate
+                    self.assertIsNone(decode_signal_record(candidate))
+
+    def test_publisher_rejects_unsafe_id_before_outside_write_read_or_unlink(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            record, publisher = self._published_record(base)
+            wake_root = base / "wake"
+            (wake_root / "pending" / "wake_1.json").unlink()
+
+            candidate = dict(record)
+            candidate["id"] = "../../outside"
+            candidate["status"] = "firing"
+            payload_json = json.dumps(candidate, sort_keys=True, separators=(",", ":"))
+            expected = (payload_json + "\n").encode()
+            digest = hashlib.sha256(expected).hexdigest()
+            outside = base / "outside.json"
+            outside.write_bytes(expected)
+
+            self.assertEqual(publisher.inspect(payload_json, digest).outcome, "conflict")
+            self.assertEqual(publisher.apply(payload_json, digest).outcome, "conflict")
+            self.assertEqual(outside.read_bytes(), expected)
+
+            missing = dict(candidate)
+            missing["id"] = "../../new-outside"
+            missing_json = json.dumps(missing, sort_keys=True, separators=(",", ":"))
+            missing_digest = hashlib.sha256((missing_json + "\n").encode()).hexdigest()
+            self.assertEqual(publisher.apply(missing_json, missing_digest).outcome, "conflict")
+            self.assertFalse((base / "new-outside.json").exists())
+
     @staticmethod
     def _downgrade_empty_journal_to_v1(database: Path) -> None:
         with sqlite3.connect(database) as connection:
@@ -186,11 +258,13 @@ class SignalRecordPublicationTests(unittest.TestCase):
             self.assertEqual(
                 observed,
                 [
+                    "before_prepared_commit",
                     "after_prepared_commit",
                     "after_temp_write",
                     "after_file_fsync",
                     "after_replace",
                     "after_directory_fsync",
+                    "before_published_commit",
                     "after_published_commit",
                 ],
             )

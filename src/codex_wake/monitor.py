@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from .records import WakeError, format_utc, utc_now
+from .process import boot_id_value, process_identity
 from .service import (
     ServiceConfig,
     build_service_config,
@@ -53,6 +54,11 @@ def write_monitor_health(
     extra: dict[str, Any] | None = None,
 ) -> Path:
     current = now or utc_now()
+    pid = os.getpid()
+    identity = process_identity(pid) or {}
+    generation = identity.get("start_time_ticks")
+    if not isinstance(generation, int) or generation < 1:
+        generation = pid
     payload: dict[str, Any] = {
         "schema_version": 1,
         "root_key": root_key(wake_root),
@@ -60,7 +66,13 @@ def write_monitor_health(
         "repo_root": str(repo_root.resolve()) if repo_root else "",
         "source": source,
         "mode": mode,
-        "pid": os.getpid(),
+        "pid": pid,
+        "process_start_time_ticks": identity.get("start_time_ticks"),
+        "process_boot_id": identity.get("boot_id") or boot_id_value(),
+        "reader_id": f"{source}:{pid}",
+        "reader_generation": generation,
+        "reader_schema_versions": [1, 2],
+        "reader_capabilities": ["signal_records_v2"],
         "checked_at": format_utc(current),
         "poll_result": poll_result or {},
     }

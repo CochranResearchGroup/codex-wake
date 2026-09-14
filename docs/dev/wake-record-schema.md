@@ -1,8 +1,47 @@
 # Wake Record Schema
 
-Current schema version: `1`
+Default write schema version: `1`
 
-Wake records are durable runtime records stored as JSON. They are operational state, not source artifacts. Schema version `1` is an additive object contract: readers must tolerate unknown fields, and optional fields may be absent.
+Supported read schema versions: `1`, `2`
+
+Wake records are durable runtime records stored as JSON. They are operational state, not source artifacts. Schema version `1` remains the default for the existing timer, file, process, CLI, and plugin writers. Schema version `2` is reserved for capability-gated signal records backed by the root-local signal journal. A schema-v1 record whose predicate claims `type: signal`, an unknown version, or a malformed schema-v2 record is held rather than evaluated through the legacy predicate path.
+
+## Signal Record Version 2
+
+A signal record adds the required top-level fields `arm_id`, `journal_uuid`,
+and `record_revision`. Its predicate has `type: signal`, contract version `1`,
+the same `arm_id`, source and source-instance routing, occurrence or state
+semantics, bounded `eq`/`in` clauses, verification policy, and its durable
+registration anchor. IDs use the runtime's restricted safe identifier grammar;
+path separators and dot segments are invalid.
+
+The journal lives at `signals/journal.sqlite3` beneath the resolved wake root.
+Registration commits a prepared arm and exact JSON outbox payload, durably
+publishes and verifies revision 1 under `pending/`, and only then marks the arm
+published. A match reservation and exact revision-2 firing payload commit in
+one SQLite transaction. Publication uses a unique temporary file, file and
+directory synchronization, atomic replacement, and pending-directory
+synchronization after removal.
+
+Revision 2 firing records include a bounded `trigger_match` with the stable
+match token, receipt identity and local sequence, sanitized evidence reference
+and attributes, verification state and method, match time, and evidence digest.
+Dispatch revalidates the complete record against the applied outbox payload,
+published arm, journal identity, lifecycle, and reservation before any target
+transport is called.
+
+Signal publication requires a recent managed-reader capability bound to the
+exact root, process ID, process start identity, boot ID, reader generation, and
+schema support. Static schema output describes binary support but is not
+runtime authority. Missing, corrupt, mismatched, stale, or unsupported
+authority fails closed. Opening a missing journal for daemon polling or CLI
+inspection does not create it.
+
+Cancellation and dispatch share a root-and-wake lifecycle lock. Terminal
+tombstones prevent stale pending or firing copies from restoring eligibility;
+archived signal evidence is deleted only after durable terminal fencing and
+pin release. Startup reconciliation is bounded and may repair exact outbox
+payloads, but never derives live authority from JSON alone.
 
 ## Required Top-Level Fields
 
@@ -247,3 +286,10 @@ A schema bump is required for:
 - changing predicate semantics so existing records would fire or fail differently without an explicit migration
 
 Any schema bump must include a release note, validation evidence, and a migration or compatibility plan.
+
+Schema version `2` does not replace or migrate ordinary schema-v1 records.
+Mixed roots continue to evaluate valid v1 predicates when signal authority is
+unavailable. Existing writers, including the OpenClaw plugin, remain on v1.
+Managed downgrade must refuse active or recoverable v2 state; this contract
+does not claim that an arbitrary unmanaged legacy process can be prevented
+from reading files outside the managed-runtime boundary.
