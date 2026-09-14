@@ -3,8 +3,7 @@ work_item_tracking: required
 lanes:
   - id: P48-G1-I4
     objective: Establish the signal contract and crash-safe journal
-    work_items:
-      - CochranResearchGroup/codex-wake#4
+    work_items: [CochranResearchGroup/codex-wake#4]
     plan: docs/dev/plans/0050-2026-09-14-signal-foundation.md
     plan_ref: refs/remotes/origin/feat/issue-4-signal-foundation
     branch: feat/issue-4-signal-foundation
