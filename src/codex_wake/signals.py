@@ -135,6 +135,8 @@ class EvidenceSummary:
     local_sequence: int
     evidence_ref: str | None
     attributes: Mapping[str, JsonScalar]
+    verification_state: Literal["verified", "pending", "rejected"] = "verified"
+    verification_method: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -476,6 +478,8 @@ class InMemorySignalModule:
                 receipt.local_sequence,
                 observation.evidence_ref,
                 MappingProxyType(dict(observation.attributes)),
+                observation.verification.state,
+                observation.verification.method,
             ),
             now,
         )

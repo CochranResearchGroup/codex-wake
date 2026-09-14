@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from codex_wake.event_wake import EventWake
+from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher
 from codex_wake.signal_store import SQLiteSignalModule, SignalStoreError
 from codex_wake.signals import (
     Degraded,
@@ -29,6 +30,21 @@ from tests.test_signals import make_adapter, make_intent
 
 
 NOW = datetime(2026, 9, 14, 14, 0, tzinfo=UTC)
+
+
+def make_module(database: Path, **kwargs) -> SQLiteSignalModule:
+    wake_root = database.parent / "wake"
+    publisher = WakeRecordPublisher(
+        wake_root,
+        ManagedReaderCapability(
+            wake_root=wake_root,
+            reader_id="test-managed-reader",
+            generation=1,
+            schema_versions=frozenset({1, 2}),
+            active=True,
+        ),
+    )
+    return SQLiteSignalModule(database, record_publisher=publisher, **kwargs)
 
 
 def make_observation(value: str = "delivery-1") -> NormalizedObservation:
@@ -80,11 +96,24 @@ class RaisingOnceAdapter(ScriptedSourceAdapter):
 
 
 class SQLiteSignalModuleTests(unittest.TestCase):
+    def test_existing_only_open_never_creates_a_missing_journal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "signals.sqlite3"
+
+            self.assertIsNone(SQLiteSignalModule.open_existing(database))
+            self.assertFalse(database.exists())
+            SQLiteSignalModule(database)
+
+            reopened = SQLiteSignalModule.open_existing(database)
+            self.assertIsNotNone(reopened)
+            self.assertEqual(reopened.journal_status().schema_version, 2)
+
     def test_journal_reports_versioned_full_wal_posture(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             status = SQLiteSignalModule(Path(tmp) / "signals.sqlite3").journal_status()
 
-            self.assertEqual(status.schema_version, 1)
+            self.assertEqual(status.schema_version, 2)
+            self.assertTrue(status.journal_uuid)
             self.assertEqual(status.journal_mode, "wal")
             self.assertEqual(status.synchronous, 2)
             self.assertTrue(status.foreign_keys)
@@ -94,7 +123,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             database = Path(tmp) / "signals.sqlite3"
             SQLiteSignalModule(database)
             with sqlite3.connect(database) as connection:
-                connection.execute("PRAGMA user_version = 2")
+                connection.execute("PRAGMA user_version = 3")
 
             with self.assertRaisesRegex(SignalStoreError, "newer"):
                 SQLiteSignalModule(database)
@@ -118,7 +147,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             database = Path(tmp) / "signals.sqlite3"
             adapter = RaisingOnceAdapter()
             facade = EventWake(
-                SQLiteSignalModule(database),
+                make_module(database),
                 adapters=[adapter],
                 clock=lambda: NOW,
                 id_factory=iter(("wake_1", "wake_2")).__next__,
@@ -135,7 +164,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
 
     def test_preparation_release_failure_does_not_escape_public_registration(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            module = SQLiteSignalModule(Path(tmp) / "signals.sqlite3")
+            module = make_module(Path(tmp) / "signals.sqlite3")
             facade = EventWake(
                 module,
                 adapters=[RaisingOnceAdapter()],
@@ -159,7 +188,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             lease_now = [NOW]
             blocked_adapter = BlockingAdapter()
             interrupted = EventWake(
-                SQLiteSignalModule(database, lease_clock=lambda: lease_now[0]),
+                make_module(database, lease_clock=lambda: lease_now[0]),
                 adapters=[blocked_adapter],
                 clock=lambda: NOW,
                 id_factory=lambda: "wake_1",
@@ -174,7 +203,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
                 lease_now[0] = NOW + timedelta(seconds=31)
                 retry_adapter = make_adapter()
                 recovered = EventWake(
-                    SQLiteSignalModule(database, lease_clock=lambda: lease_now[0]),
+                    make_module(database, lease_clock=lambda: lease_now[0]),
                     adapters=[retry_adapter],
                     clock=lambda: lease_now[0],
                     id_factory=lambda: "wake_2",
@@ -184,7 +213,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
 
             replay_adapter = make_adapter()
             replay = EventWake(
-                SQLiteSignalModule(database, lease_clock=lambda: lease_now[0]),
+                make_module(database, lease_clock=lambda: lease_now[0]),
                 adapters=[replay_adapter],
                 clock=lambda: lease_now[0],
                 id_factory=lambda: "wake_3",
@@ -201,7 +230,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
     def test_store_failures_are_closed_and_sanitized_at_public_boundaries(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
-            module = SQLiteSignalModule(database)
+            module = make_module(database)
             facade = EventWake(
                 module,
                 adapters=[make_adapter()],
@@ -274,7 +303,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
             adapter = make_adapter()
-            first_module = SQLiteSignalModule(database)
+            first_module = make_module(database)
             first_facade = EventWake(
                 first_module,
                 adapters=[adapter],
@@ -298,7 +327,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             self.assertIsInstance(first_match, Matched)
 
             replay_adapter = make_adapter()
-            reopened = SQLiteSignalModule(database)
+            reopened = make_module(database)
             replay_facade = EventWake(
                 reopened,
                 adapters=[replay_adapter],
@@ -325,7 +354,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
     def test_conflicting_batch_rolls_back_receipts_sequence_and_checkpoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
-            module = SQLiteSignalModule(database)
+            module = make_module(database)
             facade = EventWake(
                 module,
                 adapters=[make_adapter()],
@@ -350,7 +379,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
                 SourceCommit("memory", "contract-test", "checkpoint-3", 3, NOW),
             )
 
-            reopened = SQLiteSignalModule(database)
+            reopened = make_module(database)
             accepted = reopened.ingest(
                 [make_observation("new")],
                 SourceCommit("memory", "contract-test", "checkpoint-2", 2, NOW),
@@ -380,13 +409,13 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             database = Path(tmp) / "signals.sqlite3"
             adapter = BlockingAdapter()
             first = EventWake(
-                SQLiteSignalModule(database),
+                make_module(database),
                 adapters=[adapter],
                 clock=lambda: NOW,
                 id_factory=lambda: "wake_1",
             )
             second = EventWake(
-                SQLiteSignalModule(database),
+                make_module(database),
                 adapters=[adapter],
                 clock=lambda: NOW,
                 id_factory=lambda: "wake_2",
@@ -410,7 +439,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
             adapter = BlockingAdapter()
-            registering_module = SQLiteSignalModule(
+            registering_module = make_module(
                 database, lease_clock=lambda: NOW
             )
             registering = EventWake(
@@ -419,7 +448,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
                 clock=lambda: NOW,
                 id_factory=lambda: "wake_1",
             )
-            ingesting = SQLiteSignalModule(database, lease_clock=lambda: NOW)
+            ingesting = make_module(database, lease_clock=lambda: NOW)
             commit = SourceCommit(
                 "memory",
                 "contract-test",
@@ -448,7 +477,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
     def test_concurrent_evaluators_return_one_durable_winner(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
-            first = SQLiteSignalModule(database)
+            first = make_module(database)
             facade = EventWake(
                 first,
                 adapters=[make_adapter()],
@@ -463,7 +492,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             )
             armed = first.load_armed_signal(registration.wake_id)
             self.assertIsNotNone(armed)
-            second = SQLiteSignalModule(database)
+            second = make_module(database)
 
             with ThreadPoolExecutor(max_workers=2) as pool:
                 futures = [
@@ -481,10 +510,48 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             self.assertIsInstance(results[0], Matched)
             self.assertEqual(results[0], results[1])
 
+    def test_reservation_replay_still_requires_a_durable_published_arm(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "signals.sqlite3"
+            module = make_module(database)
+            registration = EventWake(
+                module,
+                adapters=[make_adapter()],
+                clock=lambda: NOW,
+                id_factory=lambda: "wake_1",
+            ).register(make_intent(), idempotency_key="job-42")
+            module.ingest(
+                [make_observation()],
+                SourceCommit("memory", "contract-test", "checkpoint-1", 1, NOW),
+            )
+            armed = module.load_armed_signal(registration.wake_id)
+            first = module.evaluate(
+                registration.wake_id,
+                armed,
+                NOW,
+                EvaluationLimits(10),
+            )
+            self.assertIsInstance(first, Matched)
+            with sqlite3.connect(database) as connection:
+                connection.execute(
+                    "UPDATE arms SET state = 'prepared' WHERE wake_id = ?",
+                    (registration.wake_id,),
+                )
+
+            replay = module.evaluate(
+                registration.wake_id,
+                armed,
+                NOW,
+                EvaluationLimits(10),
+            )
+
+            self.assertIsInstance(replay, Degraded)
+            self.assertEqual(replay.code, "ARM_NOT_PUBLISHED")
+
     def test_bounded_evaluation_progress_survives_reopen(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
-            module = SQLiteSignalModule(database)
+            module = make_module(database)
             facade = EventWake(
                 module,
                 adapters=[make_adapter()],
@@ -505,9 +572,9 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             armed = module.load_armed_signal(registration.wake_id)
 
             first = module.evaluate(registration.wake_id, armed, NOW, EvaluationLimits(1))
-            second_module = SQLiteSignalModule(database)
+            second_module = make_module(database)
             second = second_module.evaluate(registration.wake_id, armed, NOW, EvaluationLimits(1))
-            third_module = SQLiteSignalModule(database)
+            third_module = make_module(database)
             third = third_module.evaluate(registration.wake_id, armed, NOW, EvaluationLimits(1))
 
             self.assertIsInstance(first, Degraded)
@@ -520,7 +587,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
     def test_retention_pins_survive_reopen_and_bound_compaction(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
-            module = SQLiteSignalModule(database)
+            module = make_module(database)
             ids = iter(("wake_pending", "wake_match"))
             facade = EventWake(
                 module,
@@ -563,7 +630,7 @@ class SQLiteSignalModuleTests(unittest.TestCase):
             self.assertEqual(pending.code, "VERIFICATION_PENDING")
             self.assertIsInstance(matched, Matched)
 
-            reopened = SQLiteSignalModule(database)
+            reopened = make_module(database)
             pins = reopened.retention_pins()
             self.assertEqual(
                 {pin.reason for pin in pins},

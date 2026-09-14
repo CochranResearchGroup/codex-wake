@@ -10,8 +10,10 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Callable, Sequence
 
+from .signal_records import WakeRecordPublisher, build_signal_record
 from .signals import (
     ArmContext,
+    ArmId,
     ArmedSignal,
     Degraded,
     Eq,
@@ -27,6 +29,7 @@ from .signals import (
     NotReady,
     ReceiptId,
     ReceiptRef,
+    Resume,
     SignalEngine,
     SignalRequest,
     SourceAnchor,
@@ -39,7 +42,7 @@ from .signals import (
 )
 
 
-JOURNAL_SCHEMA_VERSION = 1
+JOURNAL_SCHEMA_VERSION = 2
 JOURNAL_APPLICATION_ID = 0x4357414B  # CWAK
 
 
@@ -50,6 +53,7 @@ class SignalStoreError(RuntimeError):
 @dataclass(frozen=True, slots=True)
 class JournalStatus:
     schema_version: int
+    journal_uuid: str
     journal_mode: str
     synchronous: int
     foreign_keys: bool
@@ -87,16 +91,35 @@ class SQLiteSignalModule(SignalEngine):
         busy_timeout_ms: int = 5_000,
         source_lease_seconds: int = 30,
         lease_clock: Callable[[], datetime] | None = None,
+        record_publisher: WakeRecordPublisher | None = None,
+        checkpoint: Callable[[str], None] | None = None,
+        create: bool = True,
     ) -> None:
         self._database = Path(database)
         self._busy_timeout_ms = busy_timeout_ms
         self._source_lease_seconds = source_lease_seconds
         self._lease_clock = lease_clock or (lambda: datetime.now(UTC))
+        self._record_publisher = record_publisher
+        self._checkpoint = checkpoint or (lambda _name: None)
+        if not create and not self._database.is_file():
+            raise SignalStoreError("signal journal does not exist")
         try:
-            self._database.parent.mkdir(parents=True, exist_ok=True)
+            if create:
+                self._database.parent.mkdir(parents=True, exist_ok=True)
         except OSError:
             raise SignalStoreError("signal journal initialization failed") from None
         self._initialize()
+
+    @classmethod
+    def open_existing(
+        cls,
+        database: Path,
+        **kwargs: Any,
+    ) -> SQLiteSignalModule | None:
+        path = Path(database)
+        if not path.is_file():
+            return None
+        return cls(path, create=False, **kwargs)
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(
@@ -118,6 +141,7 @@ class SQLiteSignalModule(SignalEngine):
                 timeout=self._busy_timeout_ms / 1000,
                 isolation_level=None,
             )
+            connection.row_factory = sqlite3.Row
             connection.execute(f"PRAGMA busy_timeout = {self._busy_timeout_ms}")
             application_id = int(connection.execute("PRAGMA application_id").fetchone()[0])
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
@@ -138,17 +162,25 @@ class SQLiteSignalModule(SignalEngine):
             connection.execute("PRAGMA journal_mode = WAL")
             connection.execute("PRAGMA synchronous = FULL")
             connection.execute("PRAGMA foreign_keys = ON")
-            connection.executescript("BEGIN IMMEDIATE;\n" + _SCHEMA + "\nCOMMIT;")
-            connection.execute("BEGIN IMMEDIATE")
-            now = _format_time(datetime.now(UTC))
-            connection.execute(
-                """
-                INSERT INTO journal_meta(singleton, schema_version, next_sequence, created_at, migrated_at)
-                VALUES (1, ?, 1, ?, ?)
-                ON CONFLICT(singleton) DO NOTHING
-                """,
-                (JOURNAL_SCHEMA_VERSION, now, now),
-            )
+            if user_version == 1:
+                self._migrate_v1_to_v2(connection)
+            elif user_version == 0:
+                connection.executescript("BEGIN IMMEDIATE;\n" + _SCHEMA + "\nCOMMIT;")
+                connection.execute("BEGIN IMMEDIATE")
+                now = _format_time(datetime.now(UTC))
+                connection.execute(
+                    """
+                    INSERT INTO journal_meta(
+                        singleton, schema_version, next_sequence, created_at,
+                        migrated_at, journal_uuid
+                    ) VALUES (1, ?, 1, ?, ?, ?)
+                    ON CONFLICT(singleton) DO NOTHING
+                    """,
+                    (JOURNAL_SCHEMA_VERSION, now, now, uuid.uuid4().hex),
+                )
+                connection.execute(f"PRAGMA application_id = {JOURNAL_APPLICATION_ID}")
+                connection.execute(f"PRAGMA user_version = {JOURNAL_SCHEMA_VERSION}")
+                connection.commit()
             stored_version = int(
                 connection.execute(
                     "SELECT schema_version FROM journal_meta WHERE singleton = 1"
@@ -156,9 +188,9 @@ class SQLiteSignalModule(SignalEngine):
             )
             if stored_version != JOURNAL_SCHEMA_VERSION:
                 raise SignalStoreError("unsupported signal journal schema version")
-            connection.execute(f"PRAGMA application_id = {JOURNAL_APPLICATION_ID}")
-            connection.execute(f"PRAGMA user_version = {JOURNAL_SCHEMA_VERSION}")
-            connection.commit()
+            foreign_key_error = connection.execute("PRAGMA foreign_key_check").fetchone()
+            if foreign_key_error is not None:
+                raise SignalStoreError("signal journal migration failed foreign-key validation")
         except SignalStoreError:
             _rollback_quietly(connection)
             raise
@@ -168,12 +200,87 @@ class SQLiteSignalModule(SignalEngine):
         finally:
             _close_quietly(connection)
 
+    def _migrate_v1_to_v2(self, connection: sqlite3.Connection) -> None:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            connection.execute("ALTER TABLE journal_meta ADD COLUMN journal_uuid TEXT")
+            journal_uuid = uuid.uuid4().hex
+            connection.execute(
+                "UPDATE journal_meta SET journal_uuid = ?, schema_version = ?, migrated_at = ? WHERE singleton = 1",
+                (journal_uuid, JOURNAL_SCHEMA_VERSION, _format_time(datetime.now(UTC))),
+            )
+            _execute_sql_script(connection, _MIGRATION_V2_TABLES)
+            rows = connection.execute("SELECT * FROM arms").fetchall()
+            connection.execute("DROP TABLE arms")
+            connection.execute("ALTER TABLE arms_v2 RENAME TO arms")
+            for row in rows:
+                state = "prepared" if row["state"] == "published" else "preparing"
+                connection.execute(
+                    """
+                    INSERT INTO arms(
+                        arm_id, wake_id, idempotency_key, intent_fingerprint, state,
+                        contract_version, source, source_instance, kind, subject,
+                        spec_json, resume_json, registered_at, expires_at,
+                        local_after_sequence, source_anchor, baseline_json, recovery,
+                        preparer_token, preparation_expires_at, prepared_at, published_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        row["arm_id"], row["wake_id"], row["idempotency_key"],
+                        row["intent_fingerprint"], state, row["contract_version"],
+                        row["source"], row["source_instance"], row["kind"], row["subject"],
+                        row["spec_json"], row["resume_json"], row["registered_at"],
+                        row["expires_at"], row["local_after_sequence"], row["source_anchor"],
+                        row["baseline_json"], row["recovery"],
+                        row["preparer_token"] if state == "preparing" else None,
+                        row["preparation_expires_at"] if state == "preparing" else None,
+                        row["published_at"] if state == "prepared" else None,
+                        None,
+                    ),
+                )
+                if state == "prepared":
+                    armed = _armed_from_row(connection.execute(
+                        "SELECT * FROM arms WHERE wake_id = ?", (row["wake_id"],)
+                    ).fetchone())
+                    payload_json, payload_sha256 = build_signal_record(
+                        armed,
+                        _resume_from_json(row["resume_json"]),
+                        journal_uuid=journal_uuid,
+                        revision=1,
+                    )
+                    connection.execute(
+                        "INSERT INTO wake_lifecycle(wake_id, desired_status, desired_revision, updated_at) VALUES (?, 'pending', 1, ?)",
+                        (row["wake_id"], row["published_at"]),
+                    )
+                    connection.execute(
+                        """
+                        INSERT INTO record_outbox(
+                            wake_id, revision, operation, target_status, payload_json,
+                            payload_sha256, state, created_at
+                        ) VALUES (?, 1, 'put', 'pending', ?, ?, 'pending', ?)
+                        """,
+                        (row["wake_id"], payload_json, payload_sha256, row["published_at"]),
+                    )
+            connection.execute(f"PRAGMA user_version = {JOURNAL_SCHEMA_VERSION}")
+            self._checkpoint("before_migration_commit")
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.execute("PRAGMA foreign_keys = ON")
+
     def journal_status(self) -> JournalStatus | Degraded:
         connection: sqlite3.Connection | None = None
         try:
             connection = self._connect()
+            journal_uuid = connection.execute(
+                "SELECT journal_uuid FROM journal_meta WHERE singleton = 1"
+            ).fetchone()[0]
             return JournalStatus(
                 schema_version=int(connection.execute("PRAGMA user_version").fetchone()[0]),
+                journal_uuid=str(journal_uuid),
                 journal_mode=str(connection.execute("PRAGMA journal_mode").fetchone()[0]),
                 synchronous=int(connection.execute("PRAGMA synchronous").fetchone()[0]),
                 foreign_keys=bool(connection.execute("PRAGMA foreign_keys").fetchone()[0]),
@@ -367,9 +474,16 @@ class SQLiteSignalModule(SignalEngine):
                         "IDEMPOTENCY_CONFLICT",
                         ("idempotency key already used",),
                     )
-                if existing["state"] == "published":
+                if existing["state"] in {"prepared", "published"}:
                     connection.rollback()
-                    return _armed_from_row(existing)
+                    return self._complete_registration_publication(WakeId(existing["wake_id"]))
+                if existing["state"] == "tombstoned":
+                    connection.rollback()
+                    return Invalid(
+                        WakeId(existing["wake_id"]),
+                        "REGISTRATION_RETIRED",
+                        ("registration is no longer active",),
+                    )
                 preparation_expires = (
                     _parse_time(existing["preparation_expires_at"])
                     if existing["preparation_expires_at"]
@@ -550,12 +664,32 @@ class SQLiteSignalModule(SignalEngine):
                 ),
                 baseline=MappingProxyType(dict(anchor.baseline)),
             )
-            published_at = _format_time(context.registered_at)
+            prepared_at = _format_time(context.registered_at)
+            journal_uuid = str(
+                connection.execute(
+                    "SELECT journal_uuid FROM journal_meta WHERE singleton = 1"
+                ).fetchone()[0]
+            )
+            prepared_arm = ArmedSignal(
+                wake_id=wake_id,
+                arm_id=ArmId(arm_id),
+                spec=spec,
+                anchor=effective_anchor,
+                registered_at=context.registered_at,
+                expires_at=context.expires_at,
+                publication="prepared",
+            )
+            payload_json, payload_sha256 = build_signal_record(
+                prepared_arm,
+                context.resume,
+                journal_uuid=journal_uuid,
+                revision=1,
+            )
             connection.execute(
                 """
                 UPDATE arms
-                SET state = 'published', local_after_sequence = ?, source_anchor = ?,
-                    baseline_json = ?, recovery = ?, published_at = ?,
+                SET state = 'prepared', local_after_sequence = ?, source_anchor = ?,
+                    baseline_json = ?, recovery = ?, prepared_at = ?, published_at = NULL,
                     preparer_token = NULL, preparation_expires_at = NULL
                 WHERE arm_id = ?
                 """,
@@ -564,7 +698,7 @@ class SQLiteSignalModule(SignalEngine):
                     effective_anchor.source_anchor,
                     _canonical_json(dict(effective_anchor.baseline)),
                     effective_anchor.recovery,
-                    published_at,
+                    prepared_at,
                     arm_id,
                 ),
             )
@@ -574,7 +708,7 @@ class SQLiteSignalModule(SignalEngine):
                 VALUES (?, ?, 0, ?)
                 ON CONFLICT(wake_id) DO NOTHING
                 """,
-                (str(wake_id), effective_anchor.local_after_sequence, published_at),
+                (str(wake_id), effective_anchor.local_after_sequence, prepared_at),
             )
             connection.execute(
                 """
@@ -587,8 +721,27 @@ class SQLiteSignalModule(SignalEngine):
                     f"anchor:{wake_id}",
                     str(wake_id),
                     effective_anchor.local_after_sequence + 1,
-                    published_at,
+                    prepared_at,
                 ),
+            )
+            connection.execute(
+                """
+                INSERT INTO wake_lifecycle(
+                    wake_id, desired_status, desired_revision, updated_at
+                ) VALUES (?, 'pending', 1, ?)
+                ON CONFLICT(wake_id) DO NOTHING
+                """,
+                (str(wake_id), prepared_at),
+            )
+            connection.execute(
+                """
+                INSERT INTO record_outbox(
+                    wake_id, revision, operation, target_status, payload_json,
+                    payload_sha256, state, created_at
+                ) VALUES (?, 1, 'put', 'pending', ?, ?, 'pending', ?)
+                ON CONFLICT(wake_id, revision) DO NOTHING
+                """,
+                (str(wake_id), payload_json, payload_sha256, prepared_at),
             )
             connection.execute(
                 """
@@ -599,12 +752,148 @@ class SQLiteSignalModule(SignalEngine):
                 """,
                 (contract.source, contract.source_instance, owner, generation),
             )
-            row = connection.execute("SELECT * FROM arms WHERE arm_id = ?", (arm_id,)).fetchone()
             connection.commit()
+            self._checkpoint("after_prepared_commit")
+            return self._complete_registration_publication(wake_id)
+        except Exception:
+            _rollback_quietly(connection)
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
+    def reconcile_publications(self, *, limit: int = 100) -> int | Degraded:
+        if limit <= 0:
+            return Degraded(None, "INVALID_PUBLICATION_LIMIT", None)
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            rows = connection.execute(
+                """
+                SELECT wake_id FROM arms
+                WHERE state IN ('prepared', 'published')
+                ORDER BY registered_at, wake_id
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        except Exception:
+            return Degraded(None, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+        applied = 0
+        for row in rows:
+            outcome = self._complete_registration_publication(WakeId(row["wake_id"]))
+            if isinstance(outcome, ArmedSignal):
+                applied += 1
+        return applied
+
+    def _complete_registration_publication(
+        self,
+        wake_id: WakeId,
+    ) -> ArmedSignal | Degraded | Invalid:
+        publisher = self._record_publisher
+        if publisher is None:
+            return Degraded(wake_id, "WAKE_RECORD_PUBLISHER_UNAVAILABLE", None)
+        capability_code = publisher.capability_code()
+        if capability_code is not None:
+            return Degraded(wake_id, capability_code, None)
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            arm = connection.execute(
+                "SELECT * FROM arms WHERE wake_id = ?", (str(wake_id),)
+            ).fetchone()
+            outbox = connection.execute(
+                "SELECT * FROM record_outbox WHERE wake_id = ? AND revision = 1",
+                (str(wake_id),),
+            ).fetchone()
+            if arm is None or outbox is None:
+                return Invalid(wake_id, "ARM_STATE_UNAVAILABLE", ("arm publication state is unavailable",))
+            if arm["state"] not in {"prepared", "published"}:
+                return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
+            payload_json = str(outbox["payload_json"])
+            payload_sha256 = str(outbox["payload_sha256"])
+        except Exception:
+            return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
+        inspected = publisher.inspect(payload_json, payload_sha256)
+        if inspected.outcome == "missing":
+            inspected = publisher.apply(payload_json, payload_sha256)
+            if inspected.outcome == "applied":
+                inspected = publisher.inspect(payload_json, payload_sha256)
+        if inspected.outcome != "applied":
+            code = (
+                "WAKE_RECORD_CONFLICT"
+                if inspected.outcome == "conflict"
+                else "WAKE_RECORD_PUBLICATION_FAILED"
+            )
+            self._mark_publication_blocked(wake_id, code)
+            return Degraded(wake_id, code, None)
+
+        connection = None
+        try:
+            connection = self._connect()
+            connection.execute("BEGIN IMMEDIATE")
+            current = connection.execute(
+                "SELECT state FROM arms WHERE wake_id = ?", (str(wake_id),)
+            ).fetchone()
+            if current is None or current["state"] not in {"prepared", "published"}:
+                connection.rollback()
+                return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
+            applied_at = _format_time(self._lease_clock())
+            connection.execute(
+                """
+                UPDATE record_outbox
+                SET state = 'applied', applied_at = ?, blocked_code = NULL,
+                    attempt_count = attempt_count + 1, last_attempt_at = ?
+                WHERE wake_id = ? AND revision = 1
+                """,
+                (applied_at, applied_at, str(wake_id)),
+            )
+            connection.execute(
+                """
+                UPDATE wake_lifecycle
+                SET applied_status = 'pending', applied_revision = 1, updated_at = ?
+                WHERE wake_id = ? AND desired_status = 'pending' AND desired_revision = 1
+                """,
+                (applied_at, str(wake_id)),
+            )
+            connection.execute(
+                "UPDATE arms SET state = 'published', published_at = COALESCE(published_at, ?) WHERE wake_id = ?",
+                (applied_at, str(wake_id)),
+            )
+            row = connection.execute(
+                "SELECT * FROM arms WHERE wake_id = ?", (str(wake_id),)
+            ).fetchone()
+            connection.commit()
+            self._checkpoint("after_published_commit")
             return _armed_from_row(row)
         except Exception:
             _rollback_quietly(connection)
             return Degraded(wake_id, "STORE_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
+    def _mark_publication_blocked(self, wake_id: WakeId, code: str) -> None:
+        connection: sqlite3.Connection | None = None
+        try:
+            connection = self._connect()
+            connection.execute("BEGIN IMMEDIATE")
+            now = _format_time(self._lease_clock())
+            connection.execute(
+                """
+                UPDATE record_outbox
+                SET state = 'blocked', blocked_code = ?,
+                    attempt_count = attempt_count + 1, last_attempt_at = ?
+                WHERE wake_id = ? AND revision = 1
+                """,
+                (code, now, str(wake_id)),
+            )
+            connection.commit()
+        except Exception:
+            _rollback_quietly(connection)
         finally:
             _close_quietly(connection)
 
@@ -853,6 +1142,25 @@ class SQLiteSignalModule(SignalEngine):
         try:
             connection = self._connect()
             connection.execute("BEGIN IMMEDIATE")
+            arm = connection.execute("SELECT * FROM arms WHERE wake_id = ?", (str(wake_id),)).fetchone()
+            if arm is None:
+                connection.rollback()
+                return Invalid(wake_id, "INVALID_ARM", ("armed signal is unavailable",))
+            durable = _armed_from_row(arm)
+            if durable.publication != "published" or durable.arm_id != armed_signal.arm_id:
+                connection.rollback()
+                return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
+            lifecycle = connection.execute(
+                "SELECT * FROM wake_lifecycle WHERE wake_id = ?", (str(wake_id),)
+            ).fetchone()
+            if (
+                lifecycle is None
+                or lifecycle["desired_status"] != "pending"
+                or lifecycle["applied_status"] != "pending"
+                or lifecycle["desired_revision"] != lifecycle["applied_revision"]
+            ):
+                connection.rollback()
+                return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
             reservation = connection.execute(
                 "SELECT * FROM match_reservations WHERE wake_id = ?",
                 (str(wake_id),),
@@ -861,14 +1169,6 @@ class SQLiteSignalModule(SignalEngine):
                 result = _matched_from_row(reservation)
                 connection.commit()
                 return result
-            arm = connection.execute("SELECT * FROM arms WHERE wake_id = ?", (str(wake_id),)).fetchone()
-            if arm is None:
-                connection.rollback()
-                return Invalid(wake_id, "INVALID_ARM", ("armed signal is unavailable",))
-            durable = _armed_from_row(arm)
-            if durable.publication != "published":
-                connection.rollback()
-                return Degraded(wake_id, "ARM_NOT_PUBLISHED", None)
             if durable.expires_at is not None and now >= durable.expires_at:
                 connection.rollback()
                 return Expired(wake_id, durable.expires_at)
@@ -928,6 +1228,8 @@ class SQLiteSignalModule(SignalEngine):
                     sequence,
                     observation.evidence_ref,
                     MappingProxyType(dict(observation.attributes)),
+                    observation.verification.state,
+                    observation.verification.method,
                 )
                 matched = Matched(
                     wake_id,
@@ -1041,6 +1343,13 @@ def _rollback_quietly(connection: sqlite3.Connection | None) -> None:
         return
 
 
+def _execute_sql_script(connection: sqlite3.Connection, script: str) -> None:
+    for statement in script.split(";"):
+        sql = statement.strip()
+        if sql:
+            connection.execute(sql)
+
+
 def _parse_time(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
 
@@ -1099,6 +1408,15 @@ def _resume_payload(context: ArmContext) -> dict[str, Any]:
         "cwd": str(context.resume.cwd),
         "target": dict(context.resume.target),
     }
+
+
+def _resume_from_json(value: str) -> Resume:
+    payload = json.loads(value)
+    return Resume(
+        prompt=payload["prompt"],
+        cwd=Path(payload["cwd"]),
+        target=MappingProxyType(dict(payload["target"])),
+    )
 
 
 _TYPE_NAMES = {str: "str", int: "int", bool: "bool"}
@@ -1207,6 +1525,8 @@ def _matched_payload(matched: Matched) -> dict[str, Any]:
         "local_sequence": matched.receipt.local_sequence,
         "evidence_ref": matched.receipt.evidence_ref,
         "attributes": dict(matched.receipt.attributes),
+        "verification_state": matched.receipt.verification_state,
+        "verification_method": matched.receipt.verification_method,
         "matched_at": _format_time(matched.matched_at),
     }
 
@@ -1221,6 +1541,8 @@ def _matched_from_row(row: sqlite3.Row) -> Matched:
             int(payload["local_sequence"]),
             payload["evidence_ref"],
             MappingProxyType(dict(payload["attributes"])),
+            payload.get("verification_state", "verified"),
+            payload.get("verification_method", ""),
         ),
         _parse_time(payload["matched_at"]),
     )
@@ -1261,7 +1583,8 @@ CREATE TABLE IF NOT EXISTS journal_meta (
     schema_version INTEGER NOT NULL,
     next_sequence INTEGER NOT NULL CHECK(next_sequence >= 1),
     created_at TEXT NOT NULL,
-    migrated_at TEXT NOT NULL
+    migrated_at TEXT NOT NULL,
+    journal_uuid TEXT NOT NULL UNIQUE
 );
 CREATE TABLE IF NOT EXISTS source_instances (
     source TEXT NOT NULL,
@@ -1289,7 +1612,7 @@ CREATE TABLE IF NOT EXISTS arms (
     wake_id TEXT NOT NULL UNIQUE,
     idempotency_key TEXT NOT NULL UNIQUE,
     intent_fingerprint TEXT NOT NULL,
-    state TEXT NOT NULL CHECK(state IN ('preparing', 'published')),
+    state TEXT NOT NULL CHECK(state IN ('preparing', 'prepared', 'published', 'tombstoned')),
     contract_version INTEGER NOT NULL CHECK(contract_version = 1),
     source TEXT NOT NULL,
     source_instance TEXT NOT NULL,
@@ -1305,6 +1628,7 @@ CREATE TABLE IF NOT EXISTS arms (
     recovery TEXT,
     preparer_token TEXT,
     preparation_expires_at TEXT,
+    prepared_at TEXT,
     published_at TEXT,
     FOREIGN KEY(source, source_instance) REFERENCES source_instances(source, source_instance)
 );
@@ -1365,4 +1689,107 @@ CREATE INDEX IF NOT EXISTS retention_pins_live_receipt
 ON retention_pins(receipt_id) WHERE released_at IS NULL;
 CREATE INDEX IF NOT EXISTS retention_pins_live_sequence
 ON retention_pins(min_local_sequence) WHERE released_at IS NULL;
+CREATE TABLE IF NOT EXISTS wake_lifecycle (
+    wake_id TEXT PRIMARY KEY,
+    desired_status TEXT NOT NULL,
+    desired_revision INTEGER NOT NULL CHECK(desired_revision >= 1),
+    applied_status TEXT,
+    applied_revision INTEGER,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY(wake_id) REFERENCES arms(wake_id)
+);
+CREATE TABLE IF NOT EXISTS record_outbox (
+    wake_id TEXT NOT NULL,
+    revision INTEGER NOT NULL CHECK(revision >= 1),
+    operation TEXT NOT NULL CHECK(operation IN ('put', 'delete')),
+    target_status TEXT,
+    source_status TEXT,
+    payload_json TEXT,
+    payload_sha256 TEXT,
+    state TEXT NOT NULL CHECK(state IN ('pending', 'applied', 'blocked')),
+    attempt_count INTEGER NOT NULL DEFAULT 0 CHECK(attempt_count >= 0),
+    last_attempt_at TEXT,
+    created_at TEXT NOT NULL,
+    applied_at TEXT,
+    blocked_code TEXT,
+    PRIMARY KEY(wake_id, revision),
+    FOREIGN KEY(wake_id) REFERENCES arms(wake_id),
+    CHECK(
+      (operation = 'put' AND target_status IS NOT NULL AND payload_json IS NOT NULL AND payload_sha256 IS NOT NULL)
+      OR (operation = 'delete' AND payload_json IS NULL AND payload_sha256 IS NULL)
+    )
+);
+CREATE TABLE IF NOT EXISTS registration_tombstones (
+    idempotency_key TEXT PRIMARY KEY,
+    intent_fingerprint TEXT NOT NULL,
+    wake_id TEXT NOT NULL UNIQUE,
+    terminal_status TEXT NOT NULL,
+    retired_at TEXT NOT NULL
+);
+"""
+
+
+_MIGRATION_V2_TABLES = """
+CREATE TABLE arms_v2 (
+    arm_id TEXT PRIMARY KEY,
+    wake_id TEXT NOT NULL UNIQUE,
+    idempotency_key TEXT NOT NULL UNIQUE,
+    intent_fingerprint TEXT NOT NULL,
+    state TEXT NOT NULL CHECK(state IN ('preparing', 'prepared', 'published', 'tombstoned')),
+    contract_version INTEGER NOT NULL CHECK(contract_version = 1),
+    source TEXT NOT NULL,
+    source_instance TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    spec_json TEXT NOT NULL,
+    resume_json TEXT NOT NULL,
+    registered_at TEXT NOT NULL,
+    expires_at TEXT,
+    local_after_sequence INTEGER,
+    source_anchor TEXT,
+    baseline_json TEXT,
+    recovery TEXT,
+    preparer_token TEXT,
+    preparation_expires_at TEXT,
+    prepared_at TEXT,
+    published_at TEXT,
+    FOREIGN KEY(source, source_instance) REFERENCES source_instances(source, source_instance)
+);
+CREATE TABLE wake_lifecycle (
+    wake_id TEXT PRIMARY KEY,
+    desired_status TEXT NOT NULL,
+    desired_revision INTEGER NOT NULL CHECK(desired_revision >= 1),
+    applied_status TEXT,
+    applied_revision INTEGER,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY(wake_id) REFERENCES arms(wake_id)
+);
+CREATE TABLE record_outbox (
+    wake_id TEXT NOT NULL,
+    revision INTEGER NOT NULL CHECK(revision >= 1),
+    operation TEXT NOT NULL CHECK(operation IN ('put', 'delete')),
+    target_status TEXT,
+    source_status TEXT,
+    payload_json TEXT,
+    payload_sha256 TEXT,
+    state TEXT NOT NULL CHECK(state IN ('pending', 'applied', 'blocked')),
+    attempt_count INTEGER NOT NULL DEFAULT 0 CHECK(attempt_count >= 0),
+    last_attempt_at TEXT,
+    created_at TEXT NOT NULL,
+    applied_at TEXT,
+    blocked_code TEXT,
+    PRIMARY KEY(wake_id, revision),
+    FOREIGN KEY(wake_id) REFERENCES arms(wake_id),
+    CHECK(
+      (operation = 'put' AND target_status IS NOT NULL AND payload_json IS NOT NULL AND payload_sha256 IS NOT NULL)
+      OR (operation = 'delete' AND payload_json IS NULL AND payload_sha256 IS NULL)
+    )
+);
+CREATE TABLE registration_tombstones (
+    idempotency_key TEXT PRIMARY KEY,
+    intent_fingerprint TEXT NOT NULL,
+    wake_id TEXT NOT NULL UNIQUE,
+    terminal_status TEXT NOT NULL,
+    retired_at TEXT NOT NULL
+);
 """
