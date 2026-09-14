@@ -1,6 +1,6 @@
 # Event-driven wakes goal campaign
 
-State: PLANNED
+State: OPEN
 Lane: P48
 Owner: ecochran76
 Work Items: CochranResearchGroup/codex-wake#4, #5, #6, #7, #8, #9, #10
@@ -29,11 +29,12 @@ pull request, or one simultaneous execution packet.
 
 ## Current state
 
-The planning branch starts from `origin/main` commit
-`167b1d25782527957d02487c856cb5fb2161005e`. Issues #4 through #10 are open,
-assigned to `ecochran76`, and marked `READY` in their bodies. No implementation
-branch, worktree, active-lane entry, signal runtime, provider access, or live
-dispatch exists.
+Checkpoint `P48-G1-C00` started the goal from `origin/main` commit
+`5b5d52943e7ba154eb4c1e0516cc7a0274403715`. Issues #4 through #10 are open
+and assigned to `ecochran76`. Issue #4 is claimed on
+`feat/issue-4-signal-foundation` at published checkpoint
+`80e2db7603070452504caf31282558604602c5c2`; later issues remain dependency
+blocked. No signal runtime, provider access, or live dispatch exists.
 
 The current implementation writes schema-version-1 JSON wake records through
 `cli.create_record` and evaluates predicates in `daemon.poll_once`. CodeGraph
