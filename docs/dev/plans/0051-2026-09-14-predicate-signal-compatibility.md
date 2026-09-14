@@ -42,3 +42,32 @@ Use one `gpt-5.6-sol` high-effort implementation agent in the issue worktree.
 The primary owns compatibility decisions and integration. One mechanical
 read-only review may use `gpt-5.6-luna` medium after the focused suite is green.
 
+## Implementation Outcome
+
+The bounded implementation attempt introduced one compatibility module behind
+the existing `predicate_is_ready` interface. The module translates all four
+schema-v1 predicate recipes into `SignalRequest`, `SourceContract`,
+`SourceAnchor`, and `NormalizedObservation` values, then uses the existing
+`InMemorySignalModule` arm, ingest, and evaluate interface. The daemon retains
+one provider-neutral call and no longer owns recipe-specific branches.
+
+The compatibility adapter preserves the existing validation errors and match
+messages. It assigns restart-stable logical occurrence identities from the
+source, source instance, namespace, and a canonical digest of the predicate
+subject plus observed state. Schema-v1 writers, record bytes, lifecycle moves,
+dispatch, retry, cancellation, archive, and evidence events remain on their
+existing paths. New fixtures cover all four adapters, repeated restart checks
+without pending-record byte changes, fail-closed downgrade behavior, and mixed
+schema-v1/schema-v2 evaluation with live signal authority.
+
+Validation from the implementation worktree:
+
+- focused compatibility: 86 tests passed;
+- comprehensive Python 3.12: 245 tests passed;
+- comprehensive Python 3.11: 245 tests passed;
+- OpenClaw plugin: 12 tests passed;
+- `compileall` and `git diff --check`: passed.
+
+No live dispatch, provider access, installed-runtime change, deployment, or
+release was performed. Primary review, commit custody, CI, pull request, and
+integration remain outside this worker attempt.

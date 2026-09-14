@@ -19,12 +19,12 @@ from .records import (
     parse_utc_timestamp,
     utc_now,
 )
+from .builtin_signals import BuiltinPredicateSignals
 from .injector import TmuxRunner, dispatch_firing_record
 from .signal_store import SQLiteSignalModule
 from .signal_records import WakeRecordPublisher, current_reader_capability, signal_journal_path
 from .signals import Degraded, EvaluationLimits, Expired, Matched
 from .monitor import write_monitor_health
-from .process import boot_id_value, process_exists, process_identity
 
 
 @dataclass(frozen=True)
@@ -93,74 +93,8 @@ def next_attempt_is_due(record: dict, now: datetime) -> tuple[bool, str]:
 
 
 def predicate_is_ready(record: dict, now: datetime) -> tuple[bool, str]:
-    predicate = record.get("predicate")
-    if not isinstance(predicate, dict):
-        raise WakeError("predicate must be an object")
-    predicate_type = predicate.get("type")
-    if predicate_type == "not_before":
-        due_at = predicate.get("due_at")
-        if not isinstance(due_at, str) or not due_at:
-            raise WakeError("not_before predicate requires due_at")
-        return parse_utc_timestamp(due_at) <= now, f"not_before due_at {due_at} matched"
-    if predicate_type == "file_exists":
-        raw_path = predicate.get("path")
-        if not isinstance(raw_path, str) or not raw_path:
-            raise WakeError("file_exists predicate requires path")
-        path = resolve_record_path(record, raw_path, "file_exists")
-        return path.exists(), f"file_exists path {path} matched"
-    if predicate_type == "file_changed":
-        raw_path = predicate.get("path")
-        if not isinstance(raw_path, str) or not raw_path:
-            raise WakeError("file_changed predicate requires path")
-        path = resolve_record_path(record, raw_path, "file_changed")
-        try:
-            stat = path.stat()
-        except FileNotFoundError:
-            return False, f"file_changed path {path} matched"
-        registered_exists = bool(predicate.get("registered_exists"))
-        registered_mtime_ns = predicate.get("registered_mtime_ns")
-        registered_size = predicate.get("registered_size")
-        if not registered_exists:
-            return True, f"file_changed path {path} was created"
-        if not isinstance(registered_mtime_ns, int) or not isinstance(registered_size, int):
-            raise WakeError("file_changed predicate requires registered_mtime_ns and registered_size")
-        changed = stat.st_mtime_ns != registered_mtime_ns or stat.st_size != registered_size
-        return changed, f"file_changed path {path} changed"
-    if predicate_type == "process_done":
-        pid = predicate.get("pid")
-        if not isinstance(pid, int) or pid <= 0:
-            raise WakeError("process_done predicate requires positive integer pid")
-        if not process_exists(pid):
-            return True, f"process_done pid {pid} exited"
-        registered_boot_id = predicate.get("registered_boot_id")
-        if registered_boot_id is not None and not isinstance(registered_boot_id, str):
-            raise WakeError("process_done registered_boot_id must be a string when present")
-        if registered_boot_id:
-            current_boot_id = boot_id_value()
-            if current_boot_id and current_boot_id != registered_boot_id:
-                return True, f"process_done pid {pid} was from previous boot"
-        registered_start_time_ticks = predicate.get("registered_start_time_ticks")
-        if registered_start_time_ticks is None:
-            return False, f"process_done pid {pid} still exists"
-        if not isinstance(registered_start_time_ticks, int):
-            raise WakeError("process_done registered_start_time_ticks must be an integer when present")
-        current_identity = process_identity(pid)
-        if current_identity is None:
-            return False, f"process_done pid {pid} still exists; process identity unavailable"
-        if current_identity.get("start_time_ticks") != registered_start_time_ticks:
-            return True, f"process_done pid {pid} no longer matches registered process"
-        return False, f"process_done pid {pid} still matches registered process"
-    raise WakeError(f"unsupported predicate type: {predicate_type}")
-
-
-def resolve_record_path(record: dict, raw_path: str, predicate_type: str) -> Path:
-    path = Path(raw_path)
-    if path.is_absolute():
-        return path
-    cwd = record.get("cwd")
-    if not isinstance(cwd, str) or not cwd:
-        raise WakeError(f"relative {predicate_type} predicate requires record cwd")
-    return Path(cwd) / path
+    result = BuiltinPredicateSignals().evaluate(record, now)
+    return result.ready, result.message
 
 
 def poll_once(

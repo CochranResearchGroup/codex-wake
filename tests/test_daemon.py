@@ -21,6 +21,31 @@ from tests.test_signals import make_adapter, make_intent
 
 
 class DaemonTests(unittest.TestCase):
+    def test_v1_not_ready_record_bytes_survive_repeated_restart_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            record = self.make_record(
+                tmp,
+                {"type": "not_before", "due_at": "2026-05-18T21:15:00Z"},
+            )
+            record["id"] = "wake_v1_restart"
+            pending_path = write_record(root, record)
+            original = pending_path.read_bytes()
+
+            first = poll_once(
+                root,
+                now=datetime(2026, 5, 18, 21, 13, tzinfo=UTC),
+                dispatch=False,
+            )
+            restarted = poll_once(
+                root,
+                now=datetime(2026, 5, 18, 21, 14, tzinfo=UTC),
+                dispatch=False,
+            )
+
+            self.assertEqual((first.pending, restarted.pending), (1, 1))
+            self.assertEqual(pending_path.read_bytes(), original)
+
     def test_mixed_root_keeps_v1_healthy_and_holds_unreadable_signal_records(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"
@@ -46,6 +71,53 @@ class DaemonTests(unittest.TestCase):
             self.assertTrue((root / "firing" / "wake_v1.json").exists())
             self.assertTrue((root / "pending" / "wake_v1_signal.json").exists())
             self.assertTrue((root / "pending" / "wake_bad_v2.json").exists())
+
+    def test_upgrade_mixed_root_evaluates_v1_and_v2_without_cross_schema_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root,
+                    ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(
+                runtime,
+                adapters=[make_adapter()],
+                clock=lambda: datetime(2026, 9, 14, 14, 0, tzinfo=UTC),
+                id_factory=lambda: "wake_signal",
+            ).register(make_intent(), idempotency_key="job-42")
+            runtime.ingest(
+                [make_observation()],
+                SourceCommit(
+                    "memory",
+                    "contract-test",
+                    "checkpoint-1",
+                    1,
+                    datetime(2026, 9, 14, 14, 1, tzinfo=UTC),
+                ),
+            )
+            legacy = self.make_record(
+                tmp,
+                {"type": "not_before", "due_at": "2026-09-14T14:01:00Z"},
+            )
+            legacy["id"] = "wake_v1"
+            write_record(root, legacy)
+
+            result = poll_once(
+                root,
+                now=datetime(2026, 9, 14, 14, 2, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+            )
+
+            self.assertEqual((result.fired, result.failed, result.pending), (2, 0, 0))
+            v1 = json.loads((root / "firing" / "wake_v1.json").read_text())
+            v2 = json.loads((root / "firing" / "wake_signal.json").read_text())
+            self.assertEqual((v1["schema_version"], v2["schema_version"]), (1, 2))
+            self.assertEqual(v1["events"][-1]["type"], "predicate_matched")
+            self.assertIn("trigger_match", v2)
 
     def test_signal_registration_ingest_and_poll_publishes_one_firing_record_without_dispatch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -318,10 +390,10 @@ class DaemonTests(unittest.TestCase):
             record["id"] = "wake_pid_identity"
             write_record(root, record)
 
-            with patch("codex_wake.daemon.process_exists", return_value=True):
-                with patch("codex_wake.daemon.boot_id_value", return_value="boot-abc"):
+            with patch("codex_wake.builtin_signals.process_exists", return_value=True):
+                with patch("codex_wake.builtin_signals.boot_id_value", return_value="boot-abc"):
                     with patch(
-                        "codex_wake.daemon.process_identity",
+                        "codex_wake.builtin_signals.process_identity",
                         return_value={"start_time_ticks": 456, "boot_id": "boot-abc"},
                     ):
                         result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
@@ -344,10 +416,10 @@ class DaemonTests(unittest.TestCase):
             record["id"] = "wake_pid_reused"
             write_record(root, record)
 
-            with patch("codex_wake.daemon.process_exists", return_value=True):
-                with patch("codex_wake.daemon.boot_id_value", return_value="boot-abc"):
+            with patch("codex_wake.builtin_signals.process_exists", return_value=True):
+                with patch("codex_wake.builtin_signals.boot_id_value", return_value="boot-abc"):
                     with patch(
-                        "codex_wake.daemon.process_identity",
+                        "codex_wake.builtin_signals.process_identity",
                         return_value={"start_time_ticks": 789, "boot_id": "boot-abc"},
                     ):
                         result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
@@ -371,8 +443,8 @@ class DaemonTests(unittest.TestCase):
             record["id"] = "wake_pid_boot"
             write_record(root, record)
 
-            with patch("codex_wake.daemon.process_exists", return_value=True):
-                with patch("codex_wake.daemon.boot_id_value", return_value="boot-def"):
+            with patch("codex_wake.builtin_signals.process_exists", return_value=True):
+                with patch("codex_wake.builtin_signals.boot_id_value", return_value="boot-def"):
                     result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
 
             self.assertEqual(result.fired, 1)
@@ -386,7 +458,7 @@ class DaemonTests(unittest.TestCase):
             record["id"] = "wake_bad_pid_identity"
             write_record(root, record)
 
-            with patch("codex_wake.daemon.process_exists", return_value=True):
+            with patch("codex_wake.builtin_signals.process_exists", return_value=True):
                 result = poll_once(root, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), dispatch=False)
 
             self.assertEqual(result.failed, 1)
