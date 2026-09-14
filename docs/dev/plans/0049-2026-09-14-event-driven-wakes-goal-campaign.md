@@ -29,12 +29,12 @@ pull request, or one simultaneous execution packet.
 
 ## Current state
 
-Checkpoint `P48-G1-C00` started the goal from `origin/main` commit
-`5b5d52943e7ba154eb4c1e0516cc7a0274403715`. Issues #4 through #10 are open
-and assigned to `ecochran76`. Issue #4 is claimed on
-`feat/issue-4-signal-foundation` at published checkpoint
-`80e2db7603070452504caf31282558604602c5c2`; later issues remain dependency
-blocked. No signal runtime, provider access, or live dispatch exists.
+Checkpoint `P48-G1-C04` accepts issues #4 through #8 on `origin/main` commit
+`4169d7e1ea4f14144f493e934bfb14ce648adb05`. The crash-safe signal module,
+v1 compatibility, filesystem wakes, GitHub polling, and webhook convergence
+are integrated. Issues #9 and #10 are dependency-ready and registered as the
+two final parallel lanes. Provider access, public ingress, live dispatch,
+installed-runtime mutation, deployment, and release remain unexecuted.
 
 The current implementation writes schema-version-1 JSON wake records through
 `cli.create_record` and evaluates predicates in `daemon.poll_once`. CodeGraph

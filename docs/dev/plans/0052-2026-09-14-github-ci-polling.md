@@ -1,6 +1,6 @@
 # Plan 0052: GitHub CI Polling
 
-Status: OPEN
+Status: CLOSED
 
 Issue: `CochranResearchGroup/codex-wake#7`
 

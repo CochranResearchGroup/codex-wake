@@ -587,15 +587,13 @@ Acceptance target:
 
 State: IN_PROGRESS
 
-Current State: The product vision and collaboration foundation are accepted on
-`origin/main`. Seven approved vertical slices are published as GitHub issues
-`#4` through `#10`. Plan 0049 defines one staged `/goal` campaign that covers
-all seven issues with two safe parallel fan-outs. Checkpoint `P48-G1-C01` has
-completed the provider-free issue #4 implementation and review on its feature
-branch; pull-request integration is the remaining gate before adapter lanes
-unlock. Runtime
-implementation has not started, and adapter lanes remain blocked until the
-contract milestone merges.
+Current State: Issues #4 through #8 are accepted on `origin/main` at
+`4169d7e1ea4f14144f493e934bfb14ce648adb05`: the crash-safe provider-neutral
+signal module, v1 compatibility, filesystem wakes, GitHub polling, and signed
+webhook convergence are integrated. Checkpoint `P48-G1-C04` opens the final
+parallel lanes for #9 productization and #10 bounded routing calibration.
+Provider access, public ingress, live dispatch, installed-runtime mutation,
+deployment, and release remain outside the goal's current authority.
 
 Plan: [Event-Driven Wakes Product Lane](docs/dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md)
 
