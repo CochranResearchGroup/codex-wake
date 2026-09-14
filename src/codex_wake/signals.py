@@ -240,6 +240,23 @@ class SignalEngine(Protocol):
     ) -> Matched | NotReady | Degraded | Invalid | Expired: ...
 
 
+@dataclass(frozen=True, slots=True)
+class SourceReconcileResult:
+    source: str
+    scanned: int
+    observed: int
+    degraded: int
+
+
+class SignalSourceRunner(Protocol):
+    def reconcile(
+        self,
+        module: SignalEngine,
+        now: datetime,
+        limits: EvaluationLimits,
+    ) -> SourceReconcileResult: ...
+
+
 WakeSignalModule = SignalEngine
 
 

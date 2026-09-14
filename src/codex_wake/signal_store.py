@@ -1213,9 +1213,15 @@ class SQLiteSignalModule(SignalEngine):
                 "SELECT journal_uuid FROM journal_meta WHERE singleton = 1"
             ).fetchone()
             arm = connection.execute(
-                "SELECT wake_id, arm_id, state, source, source_instance, expires_at FROM arms WHERE wake_id = ?",
+                "SELECT wake_id, arm_id, state, source, source_instance, expires_at, baseline_json FROM arms WHERE wake_id = ?",
                 (str(wake_id),),
             ).fetchone()
+            source_state = None
+            if arm is not None:
+                source_state = connection.execute(
+                    "SELECT checkpoint FROM source_state WHERE source = ? AND source_instance = ?",
+                    (arm["source"], arm["source_instance"]),
+                ).fetchone()
             lifecycle = connection.execute(
                 "SELECT desired_status, desired_revision, applied_status, applied_revision FROM wake_lifecycle WHERE wake_id = ?",
                 (str(wake_id),),
@@ -1243,6 +1249,25 @@ class SQLiteSignalModule(SignalEngine):
             ):
                 degradation = "WAKE_RECORD_AUTHORITY_MISMATCH"
             evidence = json.loads(str(reservation["evidence_json"])) if reservation else None
+            source_evidence = None
+            if arm["source"] == "filesystem":
+                allowed = {
+                    "matched", "exists", "file_kind", "fingerprint",
+                    "baseline_fingerprint", "coalesced",
+                    "observation_reason", "hint_count",
+                }
+                attributes = evidence.get("attributes") if evidence else None
+                if not isinstance(attributes, dict) and source_state and source_state["checkpoint"]:
+                    parsed_checkpoint = json.loads(str(source_state["checkpoint"]))
+                    attributes = parsed_checkpoint if isinstance(parsed_checkpoint, dict) else None
+                source_evidence = {
+                    "baseline": json.loads(str(arm["baseline_json"])),
+                    "observed": (
+                        {name: attributes[name] for name in sorted(allowed) if name in attributes}
+                        if isinstance(attributes, dict)
+                        else None
+                    ),
+                }
             return {
                 "wake_id": str(wake_id),
                 "journal": {"schema_version": JOURNAL_SCHEMA_VERSION, "journal_uuid": journal_uuid},
@@ -1266,6 +1291,7 @@ class SQLiteSignalModule(SignalEngine):
                 ),
                 "outbox": [dict(row) for row in outbox[:16]],
                 "pins": [dict(row) for row in pins[:32]],
+                "source_evidence": source_evidence,
                 "degradation": degradation,
             }
         except Exception:
