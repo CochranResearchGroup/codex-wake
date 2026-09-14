@@ -1,18 +1,33 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P48-G1-I4
-    objective: Establish the signal contract and crash-safe journal
-    work_items: [CochranResearchGroup/codex-wake#4]
-    plan: docs/dev/plans/0050-2026-09-14-signal-foundation.md
-    plan_ref: refs/remotes/origin/feat/issue-4-signal-foundation
-    branch: feat/issue-4-signal-foundation
+  - id: P48-G1-I5
+    objective: Preserve existing predicates behind the signal evaluation seam
+    work_items: [CochranResearchGroup/codex-wake#5]
+    plan: docs/dev/plans/0051-2026-09-14-predicate-signal-compatibility.md
+    plan_ref: refs/heads/feat/issue-5-predicate-compatibility
+    branch: feat/issue-5-predicate-compatibility
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: f7d84079794ef7629d6463063eee04a5218ff193
-    remote_ref: refs/remotes/origin/feat/issue-4-signal-foundation
+    checkpoint: 9b0f34536f16838b9efd80332df3f563a7932253
+    remote_ref: refs/heads/feat/issue-5-predicate-compatibility
     integration: squash pull request
-    dependencies: []
+    dependencies: [CochranResearchGroup/codex-wake#4]
+    overlaps: []
+    updated_at: 2026-09-14
+  - id: P48-G1-I7
+    objective: Deliver GitHub CI wakes through authoritative polling
+    work_items: [CochranResearchGroup/codex-wake#7]
+    plan: docs/dev/plans/0052-2026-09-14-github-ci-polling.md
+    plan_ref: refs/heads/feat/issue-7-github-ci-polling
+    branch: feat/issue-7-github-ci-polling
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 9b0f34536f16838b9efd80332df3f563a7932253
+    remote_ref: refs/heads/feat/issue-7-github-ci-polling
+    integration: squash pull request
+    dependencies: [CochranResearchGroup/codex-wake#4]
     overlaps: []
     updated_at: 2026-09-14
