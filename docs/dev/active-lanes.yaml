@@ -5,13 +5,13 @@ lanes:
     objective: Prove one installed filesystem wake through a live tmux dispatch
     work_items: [CochranResearchGroup/codex-wake#30]
     plan: docs/dev/plans/0057-2026-09-14-installed-filesystem-canary.md
-    plan_ref: refs/heads/chore/issue-30-installed-filesystem-canary
-    branch: chore/issue-30-installed-filesystem-canary
+    plan_ref: refs/heads/chore/issue-30-installed-filesystem-canary-receipt
+    branch: chore/issue-30-installed-filesystem-canary-receipt
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE
-    checkpoint: cdd00a0ecce6aa10f7f9ffef384810df2acb674e
-    remote_ref: refs/remotes/origin/chore/issue-30-installed-filesystem-canary
+    checkpoint: 86291bf8782759dfd6d4bd19e1429392e8f77279
+    remote_ref: refs/remotes/origin/chore/issue-30-installed-filesystem-canary-receipt
     integration: squash pull request
     dependencies: [CochranResearchGroup/codex-wake#9, CochranResearchGroup/codex-wake#10]
     overlaps: []

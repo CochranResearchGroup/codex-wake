@@ -5,7 +5,7 @@ Lane: P49
 Owner: ecochran76
 Work Item: CochranResearchGroup/codex-wake#30
 Goal Version: P49-G1-v1
-Branch: chore/issue-30-installed-filesystem-canary
+Branch: chore/issue-30-installed-filesystem-canary-receipt
 Target: origin/main
 Integration: squash pull request
 
@@ -21,14 +21,23 @@ repo wake root.
 ## Current State
 
 Issue #30 is open and assigned. Canonical `main` is
-`6779902a190aa3552c6380f934c8b3e3abc4236b`; the repo and active-lane catalog
-were clean before this plan. The global installed CLI is `codex-wake 0.5.2`
+`86291bf8782759dfd6d4bd19e1429392e8f77279`; prerequisite PR #32 is merged and
+provides the tested `--max-attempts 1` contract. The global installed CLI is `codex-wake 0.5.2`
 from the uv tool environment and does not expose the newly merged `filesystem`
 or `support` commands, while current source does. The existing user supervisor
 is active and owns the normal repo wake root, which has zero active wakes and
 is observation-only for P49. User hook configuration is installed. Tmux pane
-`%36` in session `recovered-050801-20542` is live in this repo. No P49 runtime
-state, service, marker, or dispatch exists yet.
+`%36` in session `recovered-050801-20542` is live in this repo. At initial
+preflight, no P49 runtime state, service, marker, or dispatch existed.
+
+The prerequisite merged in PR #32 at `86291bf8782759dfd6d4bd19e1429392e8f77279`.
+The wheel built from that clean commit has SHA-256
+`956846a82cd9007c423f11ee19400e0cd1ec4a9a79659befd638d869f80b6b75`.
+The isolated service started as PID `3287811`, then a controlled restart moved
+it to PID `3292411` while wake
+`wake_9dbc51cc5a2d405d8ef4f1d2623d9c0d` remained pending with zero attempts,
+`max_attempts: 1`, an absent marker, and current source/monitor readiness. The
+live marker effect and dispatch have not yet occurred.
 
 Graphiti was healthy but returned no P49-specific recall. CodeGraph was healthy
 at 90 files, 2,284 nodes, and 8,200 edges. Current repo, GitHub, process,

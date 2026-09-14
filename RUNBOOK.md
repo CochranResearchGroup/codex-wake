@@ -2361,3 +2361,29 @@ Next checkpoint: merge this coordination state, create the registered issue
 branch from exact main, implement and validate the one-attempt record contract,
 and install the isolated service only if every identity and readiness gate
 passes.
+
+## Turn 124 | 2026-09-14
+
+Passed the P49 pre-dispatch checkpoint.
+
+- Merged prerequisite PR #32 at
+  `86291bf8782759dfd6d4bd19e1429392e8f77279` after both Python CI gates passed.
+- Full local suites passed on Python 3.11 and 3.12 with 310 tests each; 12
+  plugin tests and entrypoint syntax checks also passed.
+- Built the canonical wheel with SHA-256
+  `956846a82cd9007c423f11ee19400e0cd1ec4a9a79659befd638d869f80b6b75`
+  and installed it only in the exact P49 venv.
+- Started `codex-wake-p49-canary.service` with isolated wake, log, and
+  `XDG_STATE_HOME` paths. Its initial PID was `3287811`.
+- Registered exactly one wake,
+  `wake_9dbc51cc5a2d405d8ef4f1d2623d9c0d`, from the canary runtime root against
+  absent relative marker `events/created.marker`. Its persisted record is
+  pending with zero attempts and `max_attempts: 1`, targeting pane `%36`.
+- Restarted the named service. PID `3292411` recovered the same pending wake;
+  source and monitor readiness are current, and the marker remains absent.
+- The global uv-tool hashes/version and normal repo wake-root active count are
+  unchanged. No dispatch or marker effect has occurred at this checkpoint.
+
+Next checkpoint: publish this pre-effect state, schedule the exact marker
+trigger after the initiating turn ends, and inspect only the original wake on
+resume.
