@@ -76,6 +76,7 @@ class SourceContract:
     max_in_values: int = 32
     max_attribute_bytes: int = 4096
     max_evidence_ref_bytes: int = 1024
+    occurrence_order_attribute: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -220,6 +221,8 @@ class SignalSourceAdapter(Protocol):
 
 
 class SignalEngine(Protocol):
+    def source_checkpoint(self, source: str, source_instance: str) -> SourceCommit | Degraded | None: ...
+
     def arm(self, wake_id: WakeId, spec: SignalRequest, context: ArmContext) -> ArmedSignal | Degraded | Invalid: ...
 
     def ingest(
@@ -270,7 +273,7 @@ class InMemorySignalModule:
         self._preparations: dict[str, tuple[str, WakeId]] = {}
         self._contracts: dict[tuple[str, str], SourceContract] = {}
         self._receipts: dict[tuple[str, str, str, str], tuple[NormalizedObservation, ReceiptRef]] = {}
-        self._checkpoints: dict[tuple[str, str], tuple[int, str]] = {}
+        self._checkpoints: dict[tuple[str, str], SourceCommit] = {}
         self._reservations: dict[WakeId, Matched] = {}
         self._next_sequence = 1
 
@@ -298,11 +301,14 @@ class InMemorySignalModule:
             return Degraded(wake_id, anchor.code, anchor.retry_at, anchor.evidence_ref)
         if isinstance(anchor, Invalid):
             return anchor
+        invalid = _validate_occurrence_anchor(contract, spec, anchor)
+        if invalid is not None:
+            return invalid
         armed = ArmedSignal(
             wake_id=wake_id,
             arm_id=ArmId(f"arm_{wake_id}"),
             spec=spec,
-            anchor=anchor,
+            anchor=replace(anchor, baseline=MappingProxyType(dict(anchor.baseline))),
             registered_at=context.registered_at,
             expires_at=context.expires_at,
         )
@@ -320,7 +326,7 @@ class InMemorySignalModule:
             return Invalid(None, "SOURCE_COMMIT_MISMATCH", ("source commit does not match observation batch",))
         previous_checkpoint = self._checkpoints.get(source_key)
         if previous_checkpoint is not None:
-            previous_order, previous_value = previous_checkpoint
+            previous_order, previous_value = previous_checkpoint.checkpoint_order, previous_checkpoint.checkpoint
             if source_commit.checkpoint_order < previous_order:
                 return Invalid(None, "CHECKPOINT_REGRESSION", ("source checkpoint order regressed",))
             if source_commit.checkpoint_order == previous_order and source_commit.checkpoint != previous_value:
@@ -406,8 +412,11 @@ class InMemorySignalModule:
             was_duplicate = identity in preexisting or identity in returned
             results.append(ReceiptRef(receipt.receipt_id, receipt.local_sequence, was_duplicate))
             returned.add(identity)
-        self._checkpoints[source_key] = (source_commit.checkpoint_order, source_commit.checkpoint)
+        self._checkpoints[source_key] = source_commit
         return Ingested(tuple(results), source_commit.checkpoint)
+
+    def source_checkpoint(self, source: str, source_instance: str) -> SourceCommit | Degraded | None:
+        return self._checkpoints.get((source, source_instance))
 
     def evaluate(
         self,
@@ -418,6 +427,17 @@ class InMemorySignalModule:
     ) -> Matched | NotReady | Degraded | Invalid | Expired:
         if wake_id != armed_signal.wake_id:
             return Invalid(wake_id, "INVALID_ARM", ("armed signal identity does not match",))
+        contract = self._contracts.get((armed_signal.spec.source, armed_signal.spec.source_instance))
+        if contract is None:
+            return Invalid(wake_id, "INVALID_ARM", ("armed signal source is unavailable",))
+        if contract.occurrence_order_attribute is not None:
+            durable = next((item for _fingerprint, item in self._registrations.values() if item.wake_id == wake_id), None)
+            if durable is None or durable.arm_id != armed_signal.arm_id:
+                return Invalid(wake_id, "INVALID_ARM", ("armed signal is unavailable",))
+            armed_signal = durable
+        invalid = _validate_occurrence_anchor(contract, armed_signal.spec, armed_signal.anchor)
+        if invalid is not None:
+            return invalid
         existing = self._reservations.get(wake_id)
         if existing is not None:
             return existing
@@ -442,7 +462,10 @@ class InMemorySignalModule:
                 armed_signal.spec.subject,
             ):
                 continue
-            if not _matches(observation, armed_signal.spec.where):
+            after = _occurrence_is_after_anchor(observation, contract, armed_signal.anchor)
+            if isinstance(after, Invalid):
+                return after
+            if not after or not _matches(observation, armed_signal.spec.where):
                 continue
             if armed_signal.spec.verification == "required" and observation.verification.state != "verified":
                 if observation.verification.state == "pending":
@@ -493,6 +516,8 @@ Evaluation: TypeAlias = Matched | NotReady | Degraded | Invalid | Expired
 
 
 def _validate_signal(spec: SignalRequest, contract: SourceContract) -> Invalid | None:
+    if not _valid_occurrence_order(contract, spec):
+        return _invalid_signal()
     if type(spec.contract_version) is not int or spec.contract_version != 1:
         return _invalid_signal()
     if spec.source != contract.source or spec.source_instance != contract.source_instance:
@@ -526,6 +551,39 @@ def _validate_signal(spec: SignalRequest, contract: SourceContract) -> Invalid |
 
 def _invalid_signal() -> Invalid:
     return Invalid(None, "INVALID_SIGNAL", ("signal specification is invalid",))
+
+
+def _valid_occurrence_order(contract: SourceContract, spec: SignalRequest) -> bool:
+    try:
+        key = contract.occurrence_order_attribute
+        return key is None or (
+            type(key) is str and contract.allowed_attributes.get(key) is int
+            and (spec.semantics, spec.condition) == ("occurrence", "occurs")
+        )
+    except (AttributeError, TypeError, ValueError):
+        return False
+
+
+def _validate_occurrence_anchor(contract: SourceContract, spec: SignalRequest, anchor: SourceAnchor) -> Invalid | None:
+    try:
+        key = contract.occurrence_order_attribute
+        if _valid_occurrence_order(contract, spec) and (
+            key is None or type(anchor.baseline.get(key)) is int
+        ):
+            return None
+    except (AttributeError, TypeError, ValueError):
+        pass
+    return Invalid(None, "OCCURRENCE_ANCHOR_INVALID", ("occurrence ordering configuration is invalid",))
+
+
+def _occurrence_is_after_anchor(observation: NormalizedObservation, contract: SourceContract, anchor: SourceAnchor) -> bool | Invalid:
+    key = contract.occurrence_order_attribute
+    if key is None:
+        return True
+    value = observation.attributes.get(key)
+    if type(value) is not int:
+        return Invalid(None, "OCCURRENCE_ORDER_INVALID", ("observation ordering evidence is invalid",))
+    return value > anchor.baseline[key]
 
 
 def _matches(observation: NormalizedObservation, clauses: Sequence[WhereClause]) -> bool:
