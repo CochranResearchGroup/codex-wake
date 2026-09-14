@@ -2266,3 +2266,25 @@ Acceptance state: Plan 0049 is active; issue #4 Packet 4A is ready for its
 read-only interface challenge and first red-green tracer. Material blockers:
 none. Next action: publish this catalog projection through a coordination pull
 request, claim issue #4 on GitHub, and run the three bounded interface designs.
+
+## Turn 120 | 2026-09-14
+
+Recorded Plan 0049 checkpoint `P48-G1-C01` for issue #4 Packet 4C.
+
+- Published `feat/issue-4-signal-foundation` at
+  `f7d84079794ef7629d6463063eee04a5218ff193` after the provider-neutral
+  contract, SQLite journal, schema-v2 outbox, daemon seam, inspection, terminal
+  fencing, and fresh-process recovery matrix were complete.
+- Closed both high findings from the one bounded fresh review: unsafe signal
+  identifiers now fail before path construction, and evaluation/publication
+  shares the terminal lifecycle lock and tombstone fence.
+- Validated 239 Python tests on both Python 3.11 and 3.12, 12 OpenClaw plugin
+  tests, compilation, and diff checks. No live dispatch or provider operation
+  ran; literal host power-loss qualification remains unclaimed.
+- Classified movement as `outcome_progress`. Issue #4 remains open until its
+  implementation pull request passes CI and merges. Issues #5 and #7 remain
+  dependency blocked until that exact integration readback.
+
+Best next action: merge the catalog checkpoint, open the issue #4 implementation
+pull request, babysit its CI, and unlock the filesystem and GitHub adapter lanes
+only after the merge is verified.
