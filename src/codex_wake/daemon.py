@@ -23,7 +23,7 @@ from .builtin_signals import BuiltinPredicateSignals
 from .injector import TmuxRunner, dispatch_firing_record
 from .signal_store import SQLiteSignalModule
 from .signal_records import WakeRecordPublisher, current_reader_capability, signal_journal_path
-from .signals import Degraded, EvaluationLimits, Expired, Matched
+from .signals import Degraded, EvaluationLimits, Expired, Matched, SignalSourceRunner
 from .monitor import write_monitor_health
 
 
@@ -105,6 +105,7 @@ def poll_once(
     runner: TmuxRunner | None = None,
     ack_timeout_override: float | None = None,
     signal_runtime: SQLiteSignalModule | None = None,
+    signal_runners: tuple[SignalSourceRunner, ...] = (),
 ) -> PollResult:
     current = now or utc_now()
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
@@ -126,6 +127,13 @@ def poll_once(
         signal_runtime.reconcile_publications(limit=100, include_matches=False)
         firing_after = {item.record.get("id") for item in firing_records(root)}
         fired += len(firing_after - firing_before)
+        for source_runner in signal_runners:
+            try:
+                source_runner.reconcile(signal_runtime, current, EvaluationLimits(100))
+            except Exception:
+                # Source adapters fail closed. Wake evaluation below remains
+                # available for already committed observations and v1 records.
+                continue
     terminal_signal_ids: set[str] = set()
     if signal_runtime is not None:
         for terminal in iter_records(root):

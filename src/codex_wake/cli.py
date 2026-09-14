@@ -4,6 +4,7 @@ import argparse
 import json
 import shutil
 import sys
+import uuid
 from dataclasses import asdict
 from datetime import UTC
 from pathlib import Path
@@ -179,6 +180,25 @@ def build_parser() -> argparse.ArgumentParser:
     changed.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(changed)
     add_monitor_gate_options(changed)
+
+    filesystem = subparsers.add_parser(
+        "filesystem",
+        help="arm a durable schema-v2 filesystem-state wake",
+    )
+    filesystem_subparsers = filesystem.add_subparsers(
+        dest="filesystem_command", required=True
+    )
+    for recipe, help_text in (
+        ("created", "wake after the path is observed being created"),
+        ("exists", "wake while the path exists"),
+        ("changed", "wake after the observed path fingerprint changes"),
+    ):
+        recipe_parser = filesystem_subparsers.add_parser(recipe, help=help_text)
+        recipe_parser.add_argument("--idempotency-key")
+        recipe_parser.add_argument("path")
+        recipe_parser.add_argument("prompt", nargs=argparse.REMAINDER)
+        add_target_options(recipe_parser)
+        add_monitor_gate_options(recipe_parser)
 
     pid = subparsers.add_parser("pid", help="create a wake when a process id exits")
     pid.add_argument("pid", type=int)
@@ -703,6 +723,47 @@ def create_changed(args: argparse.Namespace, root: Path) -> int:
             "registered_size": stat.st_size,
         }
     return create_record(args.prompt, predicate, root, utc_now(), args)
+
+
+def create_filesystem_signal(args: argparse.Namespace, root: Path) -> int:
+    from .event_wake import EventWake
+    from .filesystem_signals import FilesystemSignalAdapter
+    from .signal_records import WakeRecordPublisher, signal_journal_path
+    from .signal_store import SQLiteSignalModule
+    from .signals import Degraded, Invalid, Resume, WakeIntent
+
+    try:
+        adapter = FilesystemSignalAdapter(Path.cwd(), args.path)
+    except ValueError as exc:
+        raise WakeError(str(exc)) from None
+    prompt = normalize_prompt(args.prompt)
+    if getattr(args, "require_monitor", False):
+        readiness = monitor_readiness(wake_root=root, repo_root=Path.cwd())
+        require_monitor_ready(readiness)
+    now = utc_now()
+    runtime = SQLiteSignalModule(
+        signal_journal_path(root),
+        record_publisher=WakeRecordPublisher.for_managed_reader(root),
+    )
+    result = EventWake(
+        runtime,
+        adapters=(adapter,),
+        clock=lambda: now,
+        id_factory=lambda: f"wake_{uuid.uuid4().hex}",
+    ).register(
+        WakeIntent(
+            adapter.request(args.filesystem_command),
+            Resume(prompt, Path.cwd(), target_for_args(args)),
+        ),
+        idempotency_key=args.idempotency_key or f"filesystem:{uuid.uuid4().hex}",
+    )
+    if isinstance(result, Degraded):
+        raise WakeError(f"filesystem signal registration unavailable: {result.code}")
+    if isinstance(result, Invalid):
+        raise WakeError("filesystem signal registration is invalid")
+    path = root / "pending" / f"{result.wake_id}.json"
+    print(f"{result.wake_id} {path}")
+    return 0
 
 
 def create_pid(args: argparse.Namespace, root: Path) -> int:
@@ -1409,6 +1470,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_file(args, root)
     if args.command == "changed":
         return create_changed(args, root)
+    if args.command == "filesystem":
+        return create_filesystem_signal(args, root)
     if args.command == "pid":
         return create_pid(args, root)
     if args.command == "list":

@@ -188,6 +188,79 @@ class CliTests(unittest.TestCase):
             self.assertEqual(inspected["record"]["schema_version"], 2)
             self.assertIsNone(inspected["degradation"])
 
+    def test_filesystem_created_registers_v2_and_inspection_explains_baseline(self) -> None:
+        from codex_wake.daemon import poll_once
+        from codex_wake.filesystem_signals import FilesystemSignalAdapter, FilesystemSignalRunner
+        from codex_wake.signal_records import (
+            ManagedReaderCapability,
+            WakeRecordPublisher,
+            signal_journal_path,
+        )
+        from codex_wake.signal_store import SQLiteSignalModule
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root = base / "wake"
+            publisher = WakeRecordPublisher(
+                root,
+                ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+            )
+            with patch("codex_wake.signal_records.WakeRecordPublisher.for_managed_reader", return_value=publisher):
+                with patch("codex_wake.cli.Path.cwd", return_value=base):
+                    code, output, error = self.run_cli(
+                        [
+                            "filesystem",
+                            "created",
+                            "--idempotency-key",
+                            "build-result",
+                            "out/result.txt",
+                            "--",
+                            "Continue build",
+                        ],
+                        root,
+                    )
+            self.assertEqual(code, 0, error)
+            wake_id = output.split()[0]
+            pending = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(pending["schema_version"], 2)
+            self.assertEqual(pending["predicate"]["kind"], "file.created")
+            self.assertEqual(pending["predicate"]["subject"], "path:out/result.txt")
+
+            code, inspected_output, error = self.run_cli(
+                ["show", wake_id, "--signal-state"], root
+            )
+            self.assertEqual(code, 0, error)
+            inspected = json.loads(inspected_output)
+            self.assertEqual(inspected["source_evidence"]["baseline"]["exists"], False)
+            self.assertIsNone(inspected["source_evidence"]["observed"])
+
+            watched = base / "out" / "result.txt"
+            watched.parent.mkdir()
+            watched.write_text("never expose this", encoding="utf-8")
+            adapter = FilesystemSignalAdapter(base, "out/result.txt")
+            runtime = SQLiteSignalModule.open_existing(
+                signal_journal_path(root), record_publisher=publisher
+            )
+            armed = runtime.load_armed_signal(wake_id)
+            runner = FilesystemSignalRunner((adapter,), armed_signals=(armed,))
+            poll_once(
+                root,
+                now=datetime(2026, 9, 14, 17, 0, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_runners=(runner,),
+            )
+            code, inspected_output, error = self.run_cli(
+                ["show", wake_id, "--signal-state"], root
+            )
+            self.assertEqual(code, 0, error)
+            inspected = json.loads(inspected_output)
+            observed = inspected["source_evidence"]["observed"]
+            self.assertEqual(observed["exists"], True)
+            self.assertEqual(observed["observation_reason"], "periodic")
+            self.assertEqual(len(observed["fingerprint"]), 64)
+            self.assertNotIn("never expose this", inspected_output)
+
     def test_version_reports_package_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
