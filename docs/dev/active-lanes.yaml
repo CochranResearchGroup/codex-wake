@@ -1,3 +1,18 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P49-G1-I30
+    objective: Prove one installed filesystem wake through a live tmux dispatch
+    work_items: [CochranResearchGroup/codex-wake#30]
+    plan: docs/dev/plans/0057-2026-09-14-installed-filesystem-canary.md
+    plan_ref: refs/heads/chore/issue-30-installed-filesystem-canary
+    branch: chore/issue-30-installed-filesystem-canary
+    target: origin/main
+    plan_state: OPEN
+    custody_state: PAUSED_REF
+    checkpoint: 6779902a190aa3552c6380f934c8b3e3abc4236b
+    remote_ref: pending
+    integration: squash pull request
+    dependencies: [CochranResearchGroup/codex-wake#9, CochranResearchGroup/codex-wake#10]
+    overlaps: []
+    updated_at: 2026-09-14
