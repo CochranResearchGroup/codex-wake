@@ -5,8 +5,8 @@ Lane: P51
 Issues: #58, #59, #60, #61, #62, #63
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P51-G1
-Goal Version: P51-G1-v7
-Checkpoint: P51-G1-C06
+Goal Version: P51-G1-v8
+Checkpoint: P51-G1-C07
 
 ## Goal objective
 
@@ -22,12 +22,13 @@ Checkpoint: P51-G1-C06
 
 ## Current state
 
-Checkpoint `P51-G1-C06` accepts process lane #60 through PR #71 at canonical
-commit `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3`. Systemd lane #61 is reviewed
-and integration-ready at `2746c4c5cf1e8e9de0ea7fd9bc20fed39ecb8679`,
-including its fixed read-only session-bus backend, supported CLI, daemon
-reconstruction, and fresh configuration authorization. #62 remains blocked
-only on #61 integration, and #63 remains acceptance-only.
+Checkpoint `P51-G1-C07` accepts process lane #60 through PR #71 at canonical
+commit `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3`. Systemd lane #61 is reviewed,
+integration-ready, and green on required Python 3.11/3.12 CI at
+`692fb72df6561ca495f2ec6a7285d00aadce208b`. Its first CI attempt exposed only
+a hosted-runner UID fixture assumption; the corrected hermetic fixture passed
+on the first authorized retry. #62 remains blocked only on #61 integration,
+and #63 remains acceptance-only.
 
 CodeGraph is healthy with 94 indexed files, 2,462 nodes, and 9,002 edges. It
 confirms that `SignalSourceAdapter` owns contracts and anchors,
