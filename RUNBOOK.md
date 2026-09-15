@@ -2485,3 +2485,34 @@ Acceptance state: issue #34 is claimed and ready. Movement is
 explicit implementation boundary. Next action: merge this custody projection,
 create the exact worktree from canonical main, and implement the provider-free
 production tracer before any live read.
+
+## Turn 128 | 2026-09-14
+
+Accepted issue #34 and opened the P50 parallel product wave.
+
+- PR #40 passed both release gates and squash-merged at
+  `a19af3a3d987b0bdb8cc59c8d4e1053ffe6b951e`; GitHub closed issue #34.
+- Production polling now has an explicit source registry, fixed GitHub.com GET
+  transport, exact repository/head-repository/run-attempt binding, conservative
+  terminal proof, positive-only health, and an epoch checkpoint that does not
+  manufacture history coverage.
+- The single fresh review found branch-origin ambiguity and an absolute-header
+  deadline gap. One bounded repair cycle closed both, and closed-world
+  verification accepted the repairs.
+- Post-repair validation passed 327 tests on Python 3.11 and Python 3.12, 45
+  focused GitHub tests, 12 plugin tests, entrypoint syntax, compile, package
+  build, planning audits, and diff checks.
+- A bounded production-client read verified repository ID `1242753508`,
+  workflow ID `279450573`, run `34920248569` attempt 1, main branch, and a
+  job-derived terminal lower bound. It armed no wake, advanced no checkpoint,
+  printed/persisted no credential, and performed no provider mutation.
+- Removed the merged issue #34 worktree and branches after canonical-main and
+  issue closure readback.
+- Registered issues #35 and #36 as parallel disjoint lanes. Issue #37 remains
+  blocked on their accepted integration.
+
+Acceptance state: issue #34 is accepted; P50 runtime and product surfaces are
+active in parallel. Movement is `outcome_progress`. Next action: merge this
+custody projection, create both exact worktrees, run bounded implementation
+workers, then reconcile their shared read-only configuration assumptions before
+opening either pull request.

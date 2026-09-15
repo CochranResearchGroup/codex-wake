@@ -1,23 +1,44 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - lane: P50-issue-34
+  - lane: P50-issue-35
     work_items:
-      - "#34"
-    branch: feat/issue-34-github-history-evidence
-    worktree: /home/ecochran76/workspace.local/codex-wake.issue-34
-    owner: p50-provider-runtime
+      - "#35"
+    branch: feat/issue-35-github-runtime-cli
+    worktree: /home/ecochran76/workspace.local/codex-wake.issue-35
+    owner: p50-runtime-cli
     state: active
     plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
     expected_write_surface:
-      - src/codex_wake/github_polling.py
       - src/codex_wake/github_source_config.py
-      - src/codex_wake/github_client.py
-      - src/codex_wake/signal_store.py
-      - tests/test_github_polling.py
-      - tests/test_github_client.py
+      - src/codex_wake/cli.py
+      - src/codex_wake/daemon.py
+      - src/codex_wake/service.py
+      - tests/test_cli.py
+      - tests/test_daemon.py
       - tests/test_github_source_config.py
       - docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
-    live_effect: bounded read-only GitHub qualification after provider-free gates
-    dependencies: []
+    live_effect: none; provider calls use injected fixtures
+    dependencies:
+      - "#34"
+    overlaps: []
+  - lane: P50-issue-36
+    work_items:
+      - "#36"
+    branch: feat/issue-36-github-readiness
+    worktree: /home/ecochran76/workspace.local/codex-wake.issue-36
+    owner: p50-readiness
+    state: active
+    plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
+    expected_write_surface:
+      - src/codex_wake/product_readiness.py
+      - src/codex_wake/signal_support.py
+      - scripts/product_smoke.py
+      - tests/test_product_readiness.py
+      - tests/test_signal_support.py
+      - README.md
+      - docs/event-driven-wakes.md
+    live_effect: none
+    dependencies:
+      - "#34"
     overlaps: []
