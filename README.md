@@ -190,6 +190,41 @@ On Linux, `pid` wakes record the process start time from `/proc/<pid>/stat`
 and the current boot id when available. The daemon fires if the PID disappears
 or if the live PID no longer matches that registered process identity.
 
+For a restart-correct process-exit wake, use the supported `process-exit`
+recipe. The process must already be alive, belong to the current effective UID,
+and remain the exact `(boot_id, pid, start_time_ticks, owner_uid)` identity:
+
+```bash
+codex-wake process-exit --require-monitor --idempotency-key build-process \
+  "$PID" -- "The process exited. Read .codex/events/build.log and continue."
+```
+
+This observes only fixed `/proc` identity/state fields. It does not promise an
+exit code or exact exit time, does not kill or signal the process, and treats a
+PID reuse, boot change, foreign owner, missing baseline, or uncertain read as
+unavailable/invalid rather than as an exit. A fresh daemon rechecks the same
+durable identity before publishing one occurrence.
+
+For a configured user-systemd unit transition, first create the exact,
+non-wildcard allowlist entry, then arm a state transition:
+
+```bash
+codex-wake systemd-unit source configure --source build-state \
+  --unit build.service --target-state active --target-state failed \
+  --poll-timeout 5 --enabled
+codex-wake systemd-unit becomes --require-monitor --source build-state \
+  --state active --idempotency-key build-active -- \
+  "build.service became active; inspect the recorded build evidence."
+```
+
+The observer uses only the current user's session manager and a fixed,
+read-only call plan (`GetUnit`, safe `Id`/`ActiveState`, and manager-owner
+rechecks). Missing units, reconnects, manager-generation changes, and
+observation gaps are unavailable/rebaselined; an already matching baseline is
+not a transition. Codex Wake cannot start, stop, restart, reload, enable,
+disable, mask, create units, select the system manager, or issue arbitrary
+D-Bus calls. Configure and arm from the same user account that owns the unit.
+
 Create an app-server-targeted wake instead of a tmux-targeted wake:
 
 ```bash
