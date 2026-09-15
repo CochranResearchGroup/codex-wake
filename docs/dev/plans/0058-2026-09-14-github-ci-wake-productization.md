@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P50
 Issues: #34, #35, #36, #37
-Branch: `docs/p50-github-ci-productization-plan`
+Branch: `feat/issue-34-github-history-evidence`
 Goal ID: P50-G1
 Goal Version: P50-G1-v1
 Checkpoint: P50-G1-C01
@@ -270,3 +270,156 @@ supported installed entrypoints; the isolated canary proves one post-anchor
 workflow occurrence and one visible bounded wake; rollback is complete;
 ROADMAP, RUNBOOK, vision, active-lane, verification, GitHub, Git, tests, and CI
 agree on the result; and `origin/main` is clean with no P50 lane left active.
+
+## Issue #34 implementation receipt | 2026-09-14
+
+State transition: active -> provider-free implementation awaiting primary review.
+Progress classification: outcome_progress. Issue #34 remains open; production
+qualification, integration, and later P50 acceptance are not claimed here.
+
+- Added `GitHubSourceRegistry` for explicitly configured enabled sources and
+  `GitHubRestClient` for internally constructed GitHub.com GET endpoints.
+  Registration selects an existing source; no URL or token comes from a wake.
+  Credentials are obtained through an injected reference resolver and are not
+  persisted. Request, response-byte, aggregate-byte, pagination, and time budgets
+  bound each poll. Redirects and provider pagination URLs are never followed.
+- Production mode is explicitly `positive_only`, restricted to branch refs.
+  It maps the provider's `head_branch` into `refs/heads/` and checks the exact
+  configured namespace plus repository slug/ID, workflow ID, attempt, and SHA.
+  The coordination owner selected this initial branch-only mapping; tag refs
+  and enterprise hosts are unsupported.
+- A terminal exact-attempt read and its fully paginated jobs establish
+  `terminal_proof_at`: the maximum of attempt `run_started_at` and valid job
+  `completed_at` values. This is a lower bound on workflow completion, not its
+  immutable completion time. Mutable workflow `updated_at` is never consumed.
+  Empty job evidence permits the attempt-start lower bound only. An old lower
+  bound does not prove post-arm completion and produces no observation.
+- Positive batches expose `coverage=positive_only` and health
+  `GITHUB_COVERAGE_UNPROVEN`. Their checkpoint remains the configuration-bound
+  epoch/order zero. They re-enumerate within the arm's bounded history horizon;
+  list exhaustion does not establish an interval of complete history. Newer
+  attempts cannot hide earlier attempts because each exact attempt is read.
+  Any request, malformed response, page, jobs, or verification failure aborts
+  the batch before ingestion. Missing history cannot be inferred absent.
+- Normalized evidence uses `terminal_proof_at_us` with explicit provenance.
+  Both normalized time fields contain that stable proof bound, not poll time;
+  fresh-process replay keeps the same receipt identity. If provider evidence
+  changes, the existing journal identity-conflict guard fails closed. The
+  previous fixture-only completion contract and receipt shape remain intact;
+  source fingerprints distinguish the production ordering contract. No
+  signal-store schema change is required.
+- Ingress, daemon, CLI, readiness, and installation were not changed. The
+  current webhook freshness gate requires the fixture completion timestamp and
+  therefore cannot accept this production positive-only mode. No public
+  production webhook capability is claimed. A production runner must consume
+  `PollBatch.health` alongside ingestion; the older `poll_into` convenience
+  return is an ingestion result, not a completeness or readiness result.
+
+TDD evidence: source selection, positive-only journal ingestion, old-started
+job proof, failure categories, earlier rerun visibility, aggregate byte limits,
+duplicate JSON rejection, disabled/tag-source rejection, and fixture-shape
+compatibility each had a failing test before the implementation passed. Final
+tests additionally exercise late visibility, old proof with newer updated_at,
+atomic provider failure, and a fresh Python process recovering the same receipt
+and match with order zero.
+
+Validation performed by implementation worker `/root/p50_i34_implementation`:
+
+- Python 3.12.13 focused: `PYTHONPATH=src python -m unittest
+  tests.test_github_client tests.test_github_polling
+  tests.test_github_source_config tests.test_github_webhooks` — 41 passed.
+- Python 3.12.13 comprehensive: `PYTHONPATH=src python -m unittest discover
+  -s tests -p 'test_*.py'` — 323 passed in 8.723 seconds.
+- `compileall` for the three changed production modules and `git diff --check`
+  passed. Python 3.11, plugin tier, live provider qualification, and integration
+  are reserved for the primary owner; this receipt does not claim them.
+
+CodeGraph reported the branch worktree unindexed, so exact scoped native reads
+were used. Graphiti discovery was skipped because the supplied issue and
+current branch-local plan were sufficient for this packet. Effective model,
+reasoning effort, and allocation were not exposed to the worker runtime;
+configuration was inherited. No nested agents, credentials, provider calls,
+commits, pushes, dispatch, installed-runtime changes, or memory writes occurred.
+
+Next action: primary review and bounded read-only provider qualification of the
+selected lower-bound and branch mapping, then issue #34 integration if accepted.
+
+### Accepted blocking findings: one bounded repair cycle
+
+State transition: primary review -> repaired, awaiting closed-world verification.
+Progress classification: blocker_reduction. This cycle addresses only the two
+accepted findings and does not reopen broad review.
+
+1. **Branch origin ambiguity.** Both list and exact-attempt responses now require
+   `head_repository.id` and `head_repository.full_name` to equal the configured
+   repository before mapping `head_branch` into `refs/heads/`. Missing, null,
+   malformed, or fork origins reject the whole batch. The regression previously
+   produced positive batches in ten missing/mismatched-origin cases and now
+   rejects them all. The primary supplied a sanitized live readback for exact
+   attempt `34920248569/1`: repository and head_repository both have ID
+   `1242753508` and full_name `CochranResearchGroup/codex-wake`; branch `main`,
+   event `push`, workflow `279450573`, SHA
+   `9e9cd3caf5330394a4c8299ee72d1e22e1d3962f`, completed/success. This verifies
+   availability of the required fields on the selected live attempt; the
+   implementation worker performed no live read.
+2. **Absolute deadline over response headers.** A scoped POSIX `ITIMER_REAL`
+   guard now covers one complete synchronous transaction: credential resolution,
+   connect/DNS/TLS, request, headers, body, and cleanup. It uses the smaller of
+   the request limit and remaining poll time, raises a sanitized budget error,
+   cancels its timer, restores the previous signal handler, and closes response
+   and connection resources. It starts no worker thread or subprocess. It
+   refuses existing timers, pending/blocked alarms, unsupported platforms, and
+   non-main-thread callers before credential resolution or network activity.
+   **Issue #35 must run this initial production transport on the Linux/POSIX
+   main thread with an unowned real timer.** An unsupported runner receives
+   `GITHUB_SOURCE_UNAVAILABLE` rather than weaker timeout behavior.
+
+The deterministic header-trickle fixture uses a socket pair and the real HTTP
+header parser. It supplies bytes faster than the inactivity timeout but needs
+two seconds to finish the headers. Before repair, the one-second-budget check
+returned after 2.036 seconds; after repair, it returned a budget failure in
+1.002 seconds, with connection/socket closure, alarm restoration, and the
+bounded fixture producer joined. Additional tests verify handler/timer
+restoration after success and provider failure, preservation of an existing
+periodic alarm, and off-main rejection with zero credential/network calls.
+
+Repair validation: Python 3.12.13 focused GitHub suite — 45 tests passed in
+2.557 seconds. Compile checks and `git diff --check` passed. Per the primary's
+repair closeout instruction, comprehensive Python and plugin tiers are reserved
+to the primary; the earlier 323-test result predates this repair and is not
+presented as post-repair comprehensive evidence. No additional files, provider
+calls, commits, pushes, or live effects were introduced by the repair.
+
+### Primary acceptance and read-only qualification
+
+Closed-world verification by `/root/p50_i34_review` reproduced and closed both
+accepted findings. Exact `head_repository` binding rejects missing and fork
+origins at list and attempt boundaries. The header-trickle deadline now stops,
+closes resources, restores signal state, preserves an already-owned alarm by
+failing closed, and rejects off-main use before credentials or network.
+
+Post-repair primary validation passed:
+
+- Python 3.12.13 comprehensive: 327 tests in 10.188 seconds;
+- Python 3.11.15 comprehensive: 327 tests in 10.524 seconds;
+- focused GitHub polling/client/config/webhook selection: 45 tests in 3.191
+  seconds;
+- OpenClaw plugin: 12 tests passed;
+- both plugin JavaScript entrypoint syntax checks, `compileall`, and
+  `git diff --check` passed.
+
+The bounded live qualification used the production `GitHubRestClient` with an
+in-memory resolver for the already-authenticated `gh` profile; no credential
+value was printed, persisted, or passed in process arguments. It performed only
+the fixed GitHub GET routes against repository ID `1242753508` and workflow ID
+`279450573`. The client listed ten runs and exact-read run
+`34920248569`, attempt 1, branch `refs/heads/main`, SHA
+`9e9cd3caf5330394a4c8299ee72d1e22e1d3962f`, completed/success, with
+`terminal_proof_at=2026-09-15T02:12:42Z` and provenance
+`github_attempt_started_or_job_completed_lower_bound`. The receipt explicitly
+records `coverage=positive_only` and `checkpoint_advanced=false`.
+
+Issue #34 acceptance is ready for integration. This does not claim a daemon,
+CLI, persistent on-disk source registry, webhook production convergence,
+installed runtime, dispatch, or complete GitHub history; those remain owned by
+issues #35 through #37.
