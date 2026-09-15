@@ -261,7 +261,7 @@ class CliTests(unittest.TestCase):
             unit = render_unit(replace(config, daemon_path=Path("/usr/bin/codex-waked")))
 
             self.assertEqual(config.github_credential_file, credential_file.resolve())
-            self.assertIn(f'EnvironmentFile="{credential_file.resolve()}"', unit)
+            self.assertIn(f"EnvironmentFile={credential_file.resolve()}", unit)
             self.assertNotIn("never-render-this", unit)
 
             credential_file.chmod(0o600)
@@ -277,6 +277,20 @@ class CliTests(unittest.TestCase):
                     log_path=base / "wake.log",
                     validate_executables=True,
                 )
+
+    def test_service_config_rejects_relative_github_credential_file_path(self) -> None:
+        parser = cli.build_parser()
+        args = parser.parse_args(
+            [
+                "service",
+                "status",
+                "--github-credential-file",
+                "github.env",
+            ]
+        )
+
+        with self.assertRaisesRegex(WakeError, "absolute parser-safe path"):
+            cli.service_config_for_args(args, Path("/tmp/wake"))
 
     def test_after_creates_pending_wake(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

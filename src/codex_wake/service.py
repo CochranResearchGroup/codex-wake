@@ -86,6 +86,22 @@ def resolve_daemon_path(raw: str | None = None) -> Path:
     )
 
 
+def _systemd_environment_file_path(value: Path) -> str:
+    text = str(value)
+    # The path is emitted without quoting because the installed systemd parser
+    # includes quotes when checking EnvironmentFile= path absoluteness. Keep the
+    # accepted spelling narrow enough that no quoting, escaping, globbing, or
+    # specifier expansion is needed.
+    if (
+        not value.is_absolute()
+        or text.startswith("//")
+        or ".." in value.parts
+        or re.fullmatch(r"/[A-Za-z0-9._/-]+", text) is None
+    ):
+        raise WakeError("GitHub credential environment file must use an absolute parser-safe path")
+    return text
+
+
 def build_service_config(
     *,
     repo_root: Path | None = None,
@@ -127,14 +143,10 @@ def build_service_config(
     resolved_unit_dir = (unit_dir or user_systemd_dir()).expanduser()
     resolved_log_path = (log_path or (user_state_dir() / f"{resolved_name.removesuffix('.service')}.log")).expanduser()
     resolved_github_credentials = (
-        Path(os.path.abspath(github_credential_file.expanduser()))
+        Path(_systemd_environment_file_path(github_credential_file))
         if github_credential_file is not None
         else None
     )
-    if resolved_github_credentials is not None and any(
-        ord(character) < 32 for character in str(resolved_github_credentials)
-    ):
-        raise WakeError("GitHub credential environment file path is invalid")
     if validate_executables and resolved_github_credentials is not None:
         try:
             metadata = resolved_github_credentials.lstat()
@@ -178,7 +190,8 @@ def render_unit(config: ServiceConfig) -> str:
     if config.codex_path:
         environment = f"Environment={systemd_environment_assignment(APP_SERVER_CODEX_ENV, str(config.codex_path))}\n"
     if config.github_credential_file:
-        environment += f"EnvironmentFile={systemd_quote(config.github_credential_file)}\n"
+        environment_file = _systemd_environment_file_path(config.github_credential_file)
+        environment += f"EnvironmentFile={environment_file}\n"
     return (
         "[Unit]\n"
         "Description=Codex Wake daemon for one repository\n"

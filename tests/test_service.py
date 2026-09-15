@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import shutil
 import subprocess
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -123,6 +125,95 @@ class ServiceTests(unittest.TestCase):
 
             self.assertIn(f'Environment="{APP_SERVER_CODEX_ENV}={codex.resolve()}"', unit)
             self.assertEqual(parse_unit_environment(config.unit_path)[APP_SERVER_CODEX_ENV], str(codex.resolve()))
+
+    @unittest.skipUnless(shutil.which("systemd-analyze"), "systemd-analyze is unavailable")
+    def test_render_unit_uses_parser_valid_absolute_environment_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            credential_file = base / "github.env"
+            credential_file.write_text("CODEX_WAKE_GITHUB_TOKEN=test-fixture-only\n", encoding="utf-8")
+            credential_file.chmod(0o600)
+            config = build_service_config(
+                repo_root=base,
+                wake_root=base / "wake",
+                name="wake-test",
+                daemon_path="/bin/true",
+                github_credential_file=credential_file,
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+            )
+
+            unit = render_unit(config)
+            config.unit_path.parent.mkdir()
+            config.unit_path.write_text(unit, encoding="utf-8")
+            verification = subprocess.run(
+                ["systemd-analyze", "--user", "verify", str(config.unit_path)],
+                check=False,
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertIn(f"EnvironmentFile={credential_file}", unit)
+            self.assertNotIn(f'EnvironmentFile="{credential_file}"', unit)
+            self.assertNotIn("test-fixture-only", unit)
+            self.assertEqual(verification.returncode, 0, verification.stderr)
+            self.assertNotIn("EnvironmentFile= path is not absolute", verification.stderr)
+
+    def test_service_rejects_relative_github_credential_file_path(self) -> None:
+        with self.assertRaisesRegex(WakeError, "absolute parser-safe path"):
+            build_service_config(
+                daemon_path="/bin/true",
+                github_credential_file=Path("github.env"),
+                validate_executables=False,
+            )
+
+    def test_service_rejects_unsafe_systemd_environment_file_paths(self) -> None:
+        unsafe_paths = {
+            "whitespace": Path("/tmp/github token.env"),
+            "control": Path("/tmp/github.env\x7f"),
+            "glob_star": Path("/tmp/github*.env"),
+            "glob_question": Path("/tmp/github?.env"),
+            "glob_bracket": Path("/tmp/github[0].env"),
+            "directive_injection": Path("/tmp/github.env\nEnvironment=INJECTED=yes"),
+            "systemd_specifier": Path("/tmp/github-%h.env"),
+            "quote": Path('/tmp/github"token.env'),
+            "escape": Path("/tmp/github\\token.env"),
+            "parent_component": Path("/tmp/../github.env"),
+            "double_root": Path("//tmp/github.env"),
+        }
+
+        for label, unsafe_path in unsafe_paths.items():
+            with self.subTest(label=label), self.assertRaisesRegex(WakeError, "absolute parser-safe path"):
+                build_service_config(
+                    daemon_path="/bin/true",
+                    github_credential_file=unsafe_path,
+                    validate_executables=False,
+                )
+
+    def test_render_unit_revalidates_environment_file_before_unit_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_service_config(
+                repo_root=base,
+                wake_root=base / "wake",
+                name="wake-test",
+                daemon_path="/bin/true",
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+            )
+            config.unit_path.parent.mkdir()
+            config.unit_path.write_text("sentinel\n", encoding="utf-8")
+            runner = FakeRunner()
+            unsafe_config = replace(
+                config,
+                github_credential_file=Path("/tmp/github.env\nEnvironment=INJECTED=yes"),
+            )
+
+            with self.assertRaisesRegex(WakeError, "absolute parser-safe path"):
+                install_service(unsafe_config, runner)
+
+            self.assertEqual(config.unit_path.read_text(encoding="utf-8"), "sentinel\n")
+            self.assertEqual(runner.calls, [])
 
     def test_render_unit_preserves_stable_codex_symlink_spelling(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
