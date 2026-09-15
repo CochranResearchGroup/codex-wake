@@ -43,7 +43,15 @@ unit completion, process exit status, or exact transition time.
 - candidate unit file: `/home/ecochran76/.config/systemd/user/codex-wake-p51-canary.service`
 - disposable observed unit: `codex-wake-p51-target.service`
 - disposable unit file: `/home/ecochran76/.config/systemd/user/codex-wake-p51-target.service`
-- delayed transition trigger: `codex-wake-p51-transition-20260915`
+- delayed transition trigger service:
+  `codex-wake-p51-transition-20260915.service`
+- delayed transition trigger timer:
+  `codex-wake-p51-transition-20260915.timer`
+- delayed transition command: `/usr/bin/systemd-run --user
+  --unit=codex-wake-p51-transition-20260915 --on-active=20s
+  /usr/bin/systemctl --user start codex-wake-p51-target.service`
+- tracked sanitized receipt:
+  `docs/dev/verification/0077-2026-09-15-installed-runtime-wake-canary.md`
 - source instance: `p51-canary-unit`
 - target state: `active`
 - idempotency key: `p51-systemd-active-canary-20260915`
@@ -75,7 +83,10 @@ disposable target.
    that closes #62 custody and registers P51-C5.
 2. Capture global installed identity, normal wake status, supervisor/service
    state, current tmux target, hook readiness, existing named units/processes,
-   and absence of the exact runtime root.
+   and absence of the exact runtime root. The project hook is intentionally
+   absent. Require `codex-wake hook user check` to report the user hook valid
+   and installed, and require an active-pane `/hooks` review to show that user
+   hook loaded; do not install a project hook.
 3. Archive canonical commit `08447afd...` into the exact source root, build one
    wheel, record its SHA-256, create the venv, and install only that wheel.
 4. Write the two exact user-unit files. The target is a benign oneshot with
@@ -89,15 +100,20 @@ disposable target.
 6. Restart only the candidate daemon while the target remains inactive. Prove a
    new PID recovered the same wake/source identity, zero attempts, and recent
    non-stale instance health.
-7. Schedule the exact delayed trigger to start only the named target after this
-   initiating agent turn ends, then stop the turn. Do not poll manually or
-   create another wake.
+7. Schedule the exact delayed trigger with the fixed absolute argv above. The
+   generated transient timer may invoke only `/usr/bin/systemctl --user start
+   codex-wake-p51-target.service`; inspect its unit properties before yielding.
+   Product code receives no mutation method or command authority. The timer
+   starts only the named target after this initiating agent turn ends. Then
+   stop the turn; do not poll manually or create another wake.
 8. On the resumed turn, inspect the original wake, signal state, occurrence,
    match, dispatch count, acknowledgement, target pane, and
    `visibility_result.classification`. Any ambiguity ends the attempt without
    retry.
 9. Export bounded support/readiness/status evidence, archive the wake, extract
-   a tracked sanitized verification receipt, then stop/remove only the exact
+   the tracked sanitized verification receipt at the exact path above, commit
+   and push that receipt before deleting its runtime source evidence, then
+   stop/remove only the exact
    trigger, target, service, unit files, runtime root, and associated processes.
 10. Prove exact rollback and no global/normal-runtime drift, close the plan and
     P51 ledgers, pass CI, merge the receipt PR, close #63, and re-read canonical
@@ -136,7 +152,8 @@ disposable target.
 
 Stop before creating the runtime root if it already exists, either unit name is
 present, the candidate commit differs, the target pane is absent/dead, the hook
-is not installed, or global/normal state cannot be captured. Stop before
+is not installed and loaded in the active pane, or global/normal state cannot
+be captured. Stop before
 registration if wheel/executable/service/root/config identities disagree,
 monitor readiness is false, the target is not inactive, the wake root is not
 otherwise empty, or dispatch cannot be bounded to one. Stop before transition
