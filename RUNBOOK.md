@@ -2625,3 +2625,36 @@ provider occurrence exists yet. Movement is `blocker_reduction`. Next action:
 merge this authority checkpoint, freeze the new canonical candidate identity,
 preflight the exact source/service/target, and arm once before opening the
 receipt pull request that supplies the selected CI completion.
+
+## Turn 133 | 2026-09-15
+
+Stopped and rolled back the authorized replacement canary before its GitHub
+trigger.
+
+- Built and installed the exact `70cdb92` candidate, configured one
+  positive-only GitHub source, verified the corrected credential environment
+  file, and started the exact isolated named service against live pane `%33`.
+- Registration returned `READER_CAPABILITY_UNAVAILABLE` because the candidate
+  CLI did not share the service drop-in's isolated `XDG_STATE_HOME` and omitted
+  `--require-monitor`. The daemon later recovered the durable preparation and
+  published one pending wake, creating an ambiguous outcome.
+- Applied the hard stop: issued no second registration, opened no trigger pull
+  request, and caused no selected GitHub workflow run.
+- Cancelled and archived wake
+  `wake_c8f2ff1960d74c6e8736f32828393eee` with zero receipts, matches, dispatch
+  attempts, acknowledgements, or visibility results.
+- Product uninstall and recoverable trash cleanup removed the exact service,
+  unit, drop-in, process, credential file, candidate root, and build root.
+- PR #51 passed both release gates and merged the sanitized failed-safe receipt
+  at `1b1538a5c8cd994331909b64b6b775a93a7a76a0`; the branch and worktree were
+  removed.
+- CodeGraph confirmed that durable preparing-arm recovery is intentional. The
+  procedural correction is to run all candidate CLI commands under the same
+  isolated `XDG_STATE_HOME` and require monitor readiness before registration.
+
+Acceptance state: issue #37 remains open; no active lane remains. Movement is
+`blocker_reduction` because the second ambiguity was contained and its exact
+cause and prevention are recorded. Stop reason: the one explicitly authorized
+replacement registration was consumed. Another canary requires fresh operator
+authority for exactly one additional isolated registration and at most one
+live tmux dispatch.

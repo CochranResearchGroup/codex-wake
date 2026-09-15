@@ -1,18 +1,3 @@
 schema_version: 1
 work_item_tracking: required
-lanes:
-  - lane: P50-issue-37-replacement
-    work_items:
-      - "#37"
-    branch: chore/issue-37-replacement-github-canary
-    worktree: /home/ecochran76/workspace.local/codex-wake.issue-37-replacement
-    owner: primary-orchestrator
-    state: active
-    plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
-    expected_write_surface:
-      - docs/dev/verification/0074-2026-09-15-installed-github-ci-wake-canary.md
-    live_effect: one replacement isolated GitHub CI wake and at most one live tmux dispatch
-    dependencies:
-      - "#45 accepted via PR #48"
-      - "operator replacement authorization on 2026-09-15"
-    overlaps: []
+lanes: []
