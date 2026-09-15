@@ -8,10 +8,12 @@ import os
 import sqlite3
 import tempfile
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from .monitor import read_monitor_health
+from .github_source_config import GitHubSourceStore
 from .records import ACTIVE_STATUS_DIRS
 from .signal_records import decode_signal_record, signal_journal_path
 from .signal_store import JOURNAL_APPLICATION_ID, JOURNAL_SCHEMA_VERSION
@@ -23,6 +25,103 @@ MAX_SUPPORT_INPUT_FILES = 512
 MAX_SUPPORT_SCANNED_ENTRIES = 2_048
 MAX_SUPPORT_RECORD_BYTES = 65_536
 MAX_SUPPORT_SOURCES = 128
+
+
+def _safe_health(value: object) -> dict[str, Any]:
+    """Keep only bounded health counters and capability labels."""
+    if not isinstance(value, dict):
+        return {}
+    allowed = {"scanned", "observed", "degraded", "checked_at", "credential_capability",
+               "credential_status", "checkpoint_present", "replay_lag_seconds",
+               "lag_seconds", "max_replay_lag_seconds", "failure_code", "terminal_failure",
+               "code", "retry_at", "observed_at"}
+    result: dict[str, Any] = {}
+    for key in allowed:
+        item = value.get(key)
+        if key in {"scanned", "observed", "degraded", "checkpoint_present"} and type(item) not in {bool, int}:
+            continue
+        if key in {"replay_lag_seconds", "lag_seconds", "max_replay_lag_seconds"} and type(item) not in {int, float}:
+            continue
+        if key in {"credential_capability", "credential_status", "failure_code", "terminal_failure", "code", "retry_at", "observed_at", "checked_at"}:
+            if not isinstance(item, str) or len(item) > 128 or not item.isascii():
+                continue
+        result[key] = item
+    return result
+
+
+def github_source_readiness(
+    config: object | None = None,
+    *,
+    health: dict[str, Any] | None = None,
+    checkpoint: object | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Project GitHub source support state without reading credentials.
+
+    ``health`` is an adapter-owned, already sanitized summary.  Only scalar
+    capability fields are copied; provider payloads and credential values are
+    never part of this projection.
+    """
+    observed = _safe_health(health)
+    enabled = bool(getattr(config, "enabled", False)) if config is not None else False
+    supported = config is not None and getattr(config, "hostname", "github.com") == "github.com"
+    configuration_status = "ready" if supported and enabled else "disabled" if supported else "unsupported"
+    credential_state = str(observed.get("credential_capability") or observed.get("credential_status") or ("configured_reference" if getattr(config, "credential_ref", "") else "unknown"))
+    if credential_state not in {"ready", "configured_reference", "missing", "unavailable", "unknown"}:
+        credential_state = "unknown"
+    failure = observed.get("terminal_failure") or observed.get("failure_code") or observed.get("code") or ""
+    failure = str(failure) if isinstance(failure, (str, int)) else ""
+    allowed_codes = {"GITHUB_RATE_LIMITED", "GITHUB_AUTH_UNAVAILABLE", "GITHUB_SOURCE_UNAVAILABLE", "GITHUB_POLL_BUDGET_EXHAUSTED", "GITHUB_HISTORY_GAP", "GITHUB_COVERAGE_UNPROVEN", "GITHUB_PAGINATION_INVALID", "GITHUB_RESPONSE_INVALID", "GITHUB_VERIFICATION_FAILED", "CONFIG_INVALID"}
+    failure = failure[:80] if failure.isascii() and failure in allowed_codes else ""
+    degraded = bool(observed.get("degraded", 0))
+    transient = failure in {"GITHUB_RATE_LIMITED", "GITHUB_AUTH_UNAVAILABLE", "GITHUB_SOURCE_UNAVAILABLE", "GITHUB_POLL_BUDGET_EXHAUSTED", "GITHUB_HISTORY_GAP", "GITHUB_COVERAGE_UNPROVEN", "GITHUB_PAGINATION_INVALID"}
+    expected_warning = failure in {"GITHUB_COVERAGE_UNPROVEN", "GITHUB_HISTORY_GAP"}
+    auth_unavailable = failure == "GITHUB_AUTH_UNAVAILABLE"
+    if auth_unavailable:
+        credential_state = "unavailable"
+    health_status = "warning" if transient and not auth_unavailable else "blocked" if degraded or failure else "warning" if observed.get("checked_at") is None else "ready"
+    checkpoint_present = checkpoint is not None or bool(observed.get("checkpoint_present"))
+    lag_value = observed.get("replay_lag_seconds", observed.get("lag_seconds"))
+    if lag_value is None and isinstance(observed.get("observed_at"), str):
+        try:
+            observed_time = datetime.fromisoformat(observed["observed_at"].replace("Z", "+00:00"))
+            current = now if isinstance(now, datetime) and now.tzinfo else datetime.now(UTC)
+            lag_value = max(0.0, (current.astimezone(UTC) - observed_time.astimezone(UTC)).total_seconds())
+        except (TypeError, ValueError):
+            lag_value = None
+    lag = lag_value if type(lag_value) in {int, float} and lag_value >= 0 else None
+    ceiling = observed.get("max_replay_lag_seconds", 300)
+    if type(ceiling) not in {int, float} or ceiling < 0:
+        ceiling = 300
+    lag_status = "ready" if lag is not None and lag <= ceiling else "warning" if lag is not None else "unknown"
+    if configuration_status == "unsupported":
+        overall = "unsupported"
+    elif configuration_status == "disabled":
+        overall = "disabled"
+    elif auth_unavailable or credential_state in {"missing", "unavailable"}:
+        overall = "blocked"
+    elif expected_warning or transient:
+        overall = "warning"
+    elif (failure and not transient) or degraded:
+        overall = "blocked"
+    elif health_status == "warning" or not checkpoint_present or lag_status in {"warning", "unknown"}:
+        overall = "warning"
+    else:
+        overall = "ready"
+    return {
+        "status": overall,
+        "configuration": {"status": configuration_status, "enabled": enabled},
+        "credential_capability": {"status": credential_state},
+        "health": {"status": health_status, "degraded": degraded},
+        "checkpoint": {"status": "ready" if checkpoint_present else "warning", "present": checkpoint_present},
+        "replay_lag": {"status": lag_status, "seconds": lag},
+        "terminal_failure": {"status": "not_present" if not failure or transient else "blocked", "code": "" if transient else failure},
+        "health_code": failure,
+        "retry_at": observed.get("retry_at"),
+        "observed_at": observed.get("observed_at", observed.get("checked_at")),
+        "disabled": configuration_status == "disabled",
+        "unsupported": configuration_status == "unsupported",
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,8 +141,10 @@ def signal_readiness(
     wake_root: Path,
     *,
     health: dict[str, Any] | None = None,
+    github_store: GitHubSourceStore | None = None,
     max_journal_schema: int = JOURNAL_SCHEMA_VERSION,
     max_sources: int | None = None,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     """Inspect signal capability without creating or migrating runtime state."""
 
@@ -60,19 +161,70 @@ def signal_readiness(
         "included": False,
         "message": "dispatch-target readiness is reported separately",
     }
+    captured_now = now or datetime.now(UTC)
+    configured_github: list[dict[str, Any]] = []
+    config_error = ""
+    health_error = False
+    store = github_store or GitHubSourceStore(root)
+    try:
+        configured = store.sources()
+        health_rows = {}
+        try:
+            for source in configured:
+                item = store.source_health(source.source_instance)
+                if item is not None:
+                    health_rows[source.source_instance] = {"code": item.code, "retry_at": item.retry_at.isoformat() if item.retry_at else None, "observed_at": item.observed_at.isoformat()}
+        except ValueError:
+            config_error = "GitHub source health is invalid"
+            health_error = True
+        for source in configured:
+            health_item = health_rows.get(source.source_instance, {})
+            projection = github_source_readiness(source, health=health_item, now=captured_now)
+            projection["source_instance"] = source.source_instance
+            projection["repository"] = source.repository
+            projection["workflow_id"] = source.workflow_id
+            projection["credential_ref"] = source.credential_ref
+            configured_github.append(projection)
+        if health_error:
+            for projection in configured_github:
+                projection["status"] = "blocked"
+                projection["health"] = {"status": "blocked", "degraded": True}
+                projection["terminal_failure"] = {
+                    "status": "blocked",
+                    "code": "HEALTH_INVALID",
+                }
+                projection["diagnostic"] = "GitHub source health is invalid"
+    except ValueError as exc:
+        config_error = str(exc)
+        configured_github.append({"status": "blocked", "source_instance": "", "configuration": {"status": "invalid", "enabled": None}, "credential_capability": {"status": "unknown"}, "health": {"status": "blocked"}, "checkpoint": {"status": "unknown", "present": False}, "replay_lag": {"status": "unknown", "seconds": None}, "terminal_failure": {"status": "blocked", "code": "CONFIG_INVALID"}, "disabled": False, "unsupported": False, "diagnostic": "GitHub source configuration is invalid"})
     if not journal_path.is_file():
+        source_entries = [
+            {"source": "github", "source_instance": item.get("source_instance", ""),
+             "status": item.get("status", "blocked"),
+             "message": "configured GitHub source has no signal journal or active arm",
+             "active_arms": 0, "checkpoint_present": False, "checkpoint_order": None,
+             "observed_through": "", "latest_reconcile": {}, "health_scope": "none",
+             "support": item}
+            for item in configured_github
+        ]
+        source_statuses = {str(item.get("status")) for item in configured_github}
+        aggregate_status = "blocked" if config_error or "blocked" in source_statuses else "warning" if "warning" in source_statuses else "ready"
         return {
-            "status": "ready",
+            "status": aggregate_status,
             "capability": capability,
             "journal": _outcome(
                 "not_needed",
-                "no signal journal exists because no signal source is configured",
+                (
+                    "no signal journal exists; configured sources have no active arm"
+                    if configured_github
+                    else "no signal journal exists because no signal source is configured"
+                ),
                 exists=False,
                 path=str(journal_path),
                 schema_version=None,
                 repair="",
             ),
-            "sources": [],
+            "sources": source_entries,
             "sources_omitted": 0,
             "dispatch_readiness": dispatch,
         }
@@ -207,8 +359,27 @@ def signal_readiness(
                 "checkpoint_present": row["checkpoint"] is not None,
                 "checkpoint_order": row["checkpoint_order"],
                 "observed_through": row["observed_through"] or "",
-                "latest_reconcile": latest or aggregate or {},
+                "latest_reconcile": _safe_health(latest or aggregate or {}),
                 "health_scope": "instance" if latest is not None else "aggregate" if aggregate is not None else "none",
+                "support": (
+                    {"status": "configured_for_journal",
+                     "configuration": {"status": "unknown", "enabled": None},
+                     "credential_capability": {"status": "unknown"},
+                     "health": {"status": status},
+                     "checkpoint": {"status": "ready" if row["checkpoint"] is not None else "warning", "present": row["checkpoint"] is not None},
+                     "replay_lag": {"status": "unknown", "seconds": None},
+                     "terminal_failure": {"status": "not_present", "code": ""},
+                     "disabled": False, "unsupported": False}
+                    if str(row["source"]) == "github"
+                    else {"status": "ready" if status in {"ready", "not_needed"} else status,
+                          "configuration": {"status": "ready"},
+                          "credential_capability": {"status": "not_applicable"},
+                          "health": {"status": status},
+                          "checkpoint": {"status": "ready" if row["checkpoint"] is not None else "warning", "present": row["checkpoint"] is not None},
+                          "replay_lag": {"status": "unknown", "seconds": None},
+                          "terminal_failure": {"status": "not_present", "code": ""},
+                          "disabled": False, "unsupported": False}
+                ),
             }
         )
     journal = _outcome(
@@ -219,7 +390,27 @@ def signal_readiness(
         schema_version=schema_version,
         repair="",
     )
-    overall = "blocked" if any(item["status"] == "blocked" for item in sources) else "ready"
+    configured_by_instance = {item.get("source_instance"): item for item in configured_github if item.get("source_instance")}
+    seen_instances = set()
+    for item in sources:
+        if item.get("source") != "github":
+            continue
+        instance = item.get("source_instance")
+        seen_instances.add(instance)
+        configured_item = configured_by_instance.get(instance)
+        if configured_item is not None:
+            item["support"] = dict(configured_item)
+            item["support"]["checkpoint"] = {"status": "ready" if item.get("checkpoint_present") else "warning", "present": bool(item.get("checkpoint_present"))}
+    for item in configured_github:
+        if item.get("source_instance") not in seen_instances:
+            sources.append({"source": "github", "source_instance": item.get("source_instance", ""), "status": item.get("status", "blocked"), "message": "configured GitHub source has no active signal arm", "active_arms": 0, "checkpoint_present": False, "checkpoint_order": None, "observed_through": "", "latest_reconcile": {}, "health_scope": "none", "support": item})
+    support_statuses = {str(item.get("support", {}).get("status")) for item in sources}
+    if config_error or "blocked" in support_statuses:
+        overall = "blocked"
+    elif "warning" in support_statuses:
+        overall = "warning"
+    else:
+        overall = "blocked" if any(item["status"] == "blocked" for item in sources) else "ready"
     return {
         "status": overall,
         "capability": capability,

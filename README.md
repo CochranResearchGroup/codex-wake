@@ -495,7 +495,8 @@ python scripts/product_smoke.py --public-tag v0.5.2 --json
 The safe smoke verifies installed CLI version reporting, schema output,
 product-readiness output, `codex-waked --once --no-dispatch`, monitor-check
 execution, a provider-free filesystem signal lifecycle, an installed
-fixture-backed GitHub lifecycle, support export, retirement, and
+fixture-backed GitHub lifecycle, GitHub source readiness dimensions, support
+export, retirement, and
 `supervisor run --once --no-dispatch`. Pass `--upgrade-wheel dist/*.whl` to
 force-install a candidate wheel and restart the daemon between signal
 registration and observation; for upgrade evidence, start the named binaries
@@ -514,6 +515,19 @@ operator-visible readback. The full matrix is documented in
 - App-server targeting is present for stdio dispatch experiments, but unauthenticated WebSocket dispatch is intentionally not implemented.
 - `--no-dispatch` smokes prove polling and state movement only; they are not delivery proof.
 - Placeholder app-server thread ids or OpenClaw session keys are rejected as product evidence.
+- GitHub readiness is read-only and reports configuration, credential capability,
+  source health, checkpoint, replay lag, terminal failure, disabled, and
+  unsupported states. It never reads or prints credential values or provider
+  payloads.
+
+GitHub CI sources are managed with the supported commands
+`codex-wake github-ci source configure`, `list`, and `show`; arm a completion
+wake with `codex-wake github-ci completed`. Configure the daemon service with
+`--github-credential-file PATH` to render an owner-only systemd
+`EnvironmentFile=` containing the referenced credential environment variables.
+The poller uses positive-only evidence: `GITHUB_COVERAGE_UNPROVEN` is an
+expected coverage warning, not proof of complete history. No public listener or
+live GitHub delivery is claimed by the provider-free smoke.
 
 ## Development
 
