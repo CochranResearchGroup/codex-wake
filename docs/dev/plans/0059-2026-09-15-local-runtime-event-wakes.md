@@ -5,8 +5,8 @@ Lane: P51
 Issues: #58, #59, #60, #61, #62, #63
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P51-G1
-Goal Version: P51-G1-v5
-Checkpoint: P51-G1-C04
+Goal Version: P51-G1-v6
+Checkpoint: P51-G1-C05
 
 ## Goal objective
 
@@ -22,13 +22,13 @@ Checkpoint: P51-G1-C04
 
 ## Current state
 
-Checkpoint `P51-G1-C04` accepts issue #59 through PR #67 at canonical commit
-`2760402a2dc9818f43d9567c67c64ad51fb745d6`. Process lane #60 is published at
-`12852dc804c52321149d0b05013edf12d0acc486`; user-systemd lane #61 is published
-at `47fa1902b3aac650f2d449a2235f821e55328aad`. Their adapter/config/test surfaces
-are disjoint and may run in parallel; shared CLI and daemon files are reserved
-to the primary for serialized reconciliation. #62 joins both adapters, and #63
-remains acceptance-only.
+Checkpoint `P51-G1-C05` records process lane #60 integration-ready at
+`57cdaf0345370554d8cbbc2b31560ad2cdecf5f3` after focused, comprehensive,
+plugin, compilation, diff, and independent adversarial review gates passed.
+The systemd pure adapter/config lane #61 is published and reviewed at
+`3635704ff9d8a3d445d7527d82ce8d9d27e3ff69`; its shared CLI/daemon integration
+remains serialized behind #60. #62 joins both adapters after their individual
+merges, and #63 remains acceptance-only.
 
 CodeGraph is healthy with 94 indexed files, 2,462 nodes, and 9,002 edges. It
 confirms that `SignalSourceAdapter` owns contracts and anchors,
