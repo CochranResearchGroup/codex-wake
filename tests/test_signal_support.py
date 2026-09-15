@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import tempfile
 import unittest
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -30,6 +31,81 @@ NOW = datetime(2026, 9, 14, 18, 0, tzinfo=UTC)
 
 
 class SignalSupportTests(unittest.TestCase):
+    def _insert_active_source(self, wake_root: Path, source: str, source_instance: str) -> None:
+        journal = signal_journal_path(wake_root)
+        SQLiteSignalModule(journal)
+        with sqlite3.connect(journal) as connection:
+            connection.execute(
+                "INSERT INTO source_instances VALUES (?, ?, ?, ?, ?)",
+                (source, source_instance, "{}", "fingerprint", NOW.isoformat()),
+            )
+            connection.execute(
+                "INSERT INTO source_state(source, source_instance) VALUES (?, ?)",
+                (source, source_instance),
+            )
+            connection.execute(
+                """INSERT INTO arms(
+                    arm_id, wake_id, idempotency_key, intent_fingerprint, state,
+                    contract_version, source, source_instance, kind, subject,
+                    spec_json, resume_json, registered_at
+                ) VALUES (?, ?, ?, ?, 'published', 1, ?, ?, 'test', 'redacted', '{}', '{}', ?)""",
+                (f"arm-{source}", f"wake-{source}", f"key-{source}", "intent", source, source_instance, NOW.isoformat()),
+            )
+
+    def test_runtime_and_systemd_readiness_requires_fresh_exact_health(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            process_instance = "runtime-" + ("a" * 64)
+            self._insert_active_source(root, "runtime", process_instance)
+            self._insert_active_source(root, "systemd", "user-unit-source")
+
+            unobserved = signal_readiness(root, now=NOW)
+            self.assertEqual({item["status"] for item in unobserved["sources"]}, {"unobserved"})
+
+            aggregate_only = signal_readiness(root, health={
+                "checked_at": NOW.isoformat(),
+                "signal_sources": [{"source": "runtime", "degraded": 0}],
+            }, now=NOW)
+            self.assertEqual(aggregate_only["sources"][0]["status"], "unobserved")
+
+            health = {
+                "checked_at": NOW.isoformat(),
+                "signal_sources": [
+                    {"source": "runtime", "source_instance": process_instance, "degraded": 0, "code": "RUNTIME_READY", "pid": 999},
+                    {"source": "systemd", "source_instance": "user-unit-source", "degraded": 0, "code": "SYSTEMD_AUTHORIZATION_DENIED", "unit": "private.service"},
+                ],
+            }
+            readiness = signal_readiness(root, health=health, now=NOW)
+            statuses = {item["source"]: item["status"] for item in readiness["sources"]}
+            self.assertEqual(statuses, {"runtime": "ready", "systemd": "invalidated"})
+            self.assertNotIn("private.service", json.dumps(readiness))
+            self.assertNotIn("999", json.dumps(readiness))
+
+            unavailable = signal_readiness(root, health={
+                "checked_at": NOW.isoformat(),
+                "signal_sources": [{"source": "systemd", "source_instance": "user-unit-source", "degraded": 1, "code": "SYSTEMD_UNIT_UNAVAILABLE"}],
+            }, now=NOW)
+            self.assertEqual(
+                next(item for item in unavailable["sources"] if item["source"] == "systemd")["status"],
+                "unavailable",
+            )
+            unsupported = signal_readiness(root, health={
+                "checked_at": NOW.isoformat(),
+                "signal_sources": [{"source": "runtime", "source_instance": process_instance, "degraded": 1, "code": "RUNTIME_SOURCE_UNSUPPORTED"}],
+            }, now=NOW)
+            self.assertEqual(
+                next(item for item in unsupported["sources"] if item["source"] == "runtime")["status"],
+                "unsupported",
+            )
+            stale = signal_readiness(root, health={
+                "checked_at": (NOW - timedelta(seconds=121)).isoformat(),
+                "signal_sources": [{"source": "runtime", "source_instance": process_instance, "degraded": 0, "code": "RUNTIME_READY"}],
+            }, now=NOW)
+            self.assertEqual(
+                next(item for item in stale["sources"] if item["source"] == "runtime")["status"],
+                "unobserved",
+            )
+
     def test_github_readiness_is_sanitized_and_separates_support_dimensions(self) -> None:
         config = type("Config", (), {"enabled": True, "hostname": "github.com"})()
         result = github_source_readiness(
@@ -355,6 +431,38 @@ class SignalSupportTests(unittest.TestCase):
             payload = json.loads(text)
             self.assertEqual(payload["wakes"][0]["wake_id"], "wake_export")
             self.assertEqual(payload["wakes"][0]["source"], "filesystem")
+
+    def test_support_export_redacts_raw_systemd_unit_subjects(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+            adapter = FilesystemSignalAdapter(base, "ready.flag")
+            runtime = SQLiteSignalModule(
+                signal_journal_path(wake_root),
+                record_publisher=WakeRecordPublisher(
+                    wake_root,
+                    ManagedReaderCapability(wake_root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            EventWake(runtime, adapters=(adapter,), clock=lambda: NOW, id_factory=lambda: "wake_systemd").register(
+                WakeIntent(adapter.request("exists"), Resume("continue", base, {"transport": "tmux"})),
+                idempotency_key="systemd-redaction",
+            )
+            record_path = wake_root / "pending" / "wake_systemd.json"
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+            record["predicate"].update({
+                "source": "systemd", "source_instance": "unit-source", "kind": "unit.active_state",
+                "subject": "unit:private-customer.service",
+            })
+            record_path.write_text(json.dumps(record), encoding="utf-8")
+
+            destination = base / "support.json"
+            export_signal_support(wake_root, destination, max_bytes=16_384)
+
+            payload = json.loads(destination.read_text(encoding="utf-8"))
+            self.assertEqual(payload["wakes"][0]["source"], "systemd")
+            self.assertEqual(payload["wakes"][0]["subject"], "")
+            self.assertNotIn("private-customer.service", destination.read_text(encoding="utf-8"))
 
     def test_readiness_explains_downgrade_and_corrupt_journal_repair(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

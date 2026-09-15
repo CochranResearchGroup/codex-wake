@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .monitor import read_monitor_health
+from .monitor import health_is_recent, read_monitor_health
 from .github_source_config import GitHubSourceStore
 from .records import ACTIVE_STATUS_DIRS
 from .signal_records import decode_signal_record, signal_journal_path
@@ -25,6 +25,28 @@ MAX_SUPPORT_INPUT_FILES = 512
 MAX_SUPPORT_SCANNED_ENTRIES = 2_048
 MAX_SUPPORT_RECORD_BYTES = 65_536
 MAX_SUPPORT_SOURCES = 128
+
+_RUNTIME_HEALTH_BY_CODE = {
+    "RUNTIME_NOT_OBSERVED": "unobserved", "RUNTIME_READY": "ready",
+    "RUNTIME_SOURCE_UNSUPPORTED": "unsupported", "RUNTIME_AUTHORIZATION_DENIED": "invalidated",
+    "RUNTIME_OBSERVATION_UNAVAILABLE": "unavailable", "RUNTIME_OBSERVATION_AMBIGUOUS": "invalidated",
+    "RUNTIME_BASELINE_MATCHES": "invalidated", "RUNTIME_RESOURCE_LIMIT": "unavailable",
+    "RUNTIME_ANCHOR_INVALID": "invalidated", "RUNTIME_REQUEST_INVALID": "invalidated",
+    "RUNTIME_CHECKPOINT_UNAVAILABLE": "unavailable", "RUNTIME_CHECKPOINT_INVALID": "invalidated",
+    "RUNTIME_INGEST_UNAVAILABLE": "unavailable", "RUNTIME_PUBLICATION_UNAVAILABLE": "unavailable",
+}
+_SYSTEMD_HEALTH_BY_CODE = {
+    "SYSTEMD_CAPABILITY_DENIED": "invalidated", "SYSTEMD_AUTHORIZATION_DENIED": "invalidated",
+    "SYSTEMD_SIGNAL_NOT_ALLOWED": "invalidated", "SYSTEMD_BASELINE_MATCHES": "invalidated",
+    "SYSTEMD_OBSERVATION_UNAVAILABLE": "unavailable", "SYSTEMD_UNIT_UNAVAILABLE": "unavailable",
+    "SYSTEMD_RESOURCE_LIMIT": "unavailable", "SYSTEMD_CHECKPOINT_UNAVAILABLE": "unavailable",
+    "SYSTEMD_CHECKPOINT_INVALID": "invalidated",
+}
+_ALLOWED_HEALTH_CODES = frozenset(_RUNTIME_HEALTH_BY_CODE) | frozenset(_SYSTEMD_HEALTH_BY_CODE) | {
+    "GITHUB_RATE_LIMITED", "GITHUB_AUTH_UNAVAILABLE", "GITHUB_SOURCE_UNAVAILABLE",
+    "GITHUB_POLL_BUDGET_EXHAUSTED", "GITHUB_HISTORY_GAP", "GITHUB_COVERAGE_UNPROVEN",
+    "GITHUB_PAGINATION_INVALID", "GITHUB_RESPONSE_INVALID", "GITHUB_VERIFICATION_FAILED", "CONFIG_INVALID",
+}
 
 
 def _safe_health(value: object) -> dict[str, Any]:
@@ -45,8 +67,26 @@ def _safe_health(value: object) -> dict[str, Any]:
         if key in {"credential_capability", "credential_status", "failure_code", "terminal_failure", "code", "retry_at", "observed_at", "checked_at"}:
             if not isinstance(item, str) or len(item) > 128 or not item.isascii():
                 continue
+            if key in {"failure_code", "terminal_failure", "code"} and item not in _ALLOWED_HEALTH_CODES:
+                continue
         result[key] = item
     return result
+
+
+def _runtime_source_health(
+    source: str, health: dict[str, Any] | None, *, recent: bool,
+) -> tuple[str, str]:
+    """Classify only fresh, exact runtime-instance health."""
+    if health is None or not recent:
+        return "unobserved", ""
+    observed = _safe_health(health)
+    code = observed.get("code") if isinstance(observed.get("code"), str) else ""
+    mapping = _RUNTIME_HEALTH_BY_CODE if source == "runtime" else _SYSTEMD_HEALTH_BY_CODE
+    if code in mapping:
+        return mapping[code], code
+    if int(observed.get("degraded", 0) or 0) > 0:
+        return "unavailable", ""
+    return "ready", ""
 
 
 def github_source_readiness(
@@ -325,15 +365,32 @@ def signal_readiness(
         for item in observed_health
         if isinstance(item, dict) and item.get("source") and not item.get("source_instance")
     }
+    health_is_fresh = health_is_recent(source_health, now=captured_now)
     sources: list[dict[str, Any]] = []
     for row in rows:
         active_arms = int(row["active_arms"] or 0)
         source_key = (str(row["source"]), str(row["source_instance"]))
         latest = by_source_instance.get(source_key)
         aggregate = aggregate_by_source.get(source_key[0])
+        runtime_source = source_key[0] in {"runtime", "systemd"}
+        runtime_code = ""
         if active_arms == 0:
             status = "not_needed"
             message = "source has no active arms"
+        elif runtime_source:
+            status, runtime_code = _runtime_source_health(
+                source_key[0], latest, recent=health_is_fresh
+            )
+            if latest is None and aggregate is not None:
+                message = "aggregate source health cannot establish this instance's readiness"
+            elif latest is None:
+                message = "source is configured but not yet observed"
+            elif status == "ready":
+                message = "source has fresh exact-instance reconciliation health"
+            elif status == "unobserved":
+                message = "source health is stale or does not establish this instance"
+            else:
+                message = "the latest exact-instance reconciliation is not ready"
         elif latest is None and aggregate is not None and int(aggregate.get("degraded", 0) or 0) > 0:
             status = "blocked"
             message = "aggregate source reconciliation degraded; instance health is unavailable"
@@ -371,6 +428,15 @@ def signal_readiness(
                      "terminal_failure": {"status": "not_present", "code": ""},
                      "disabled": False, "unsupported": False}
                     if str(row["source"]) == "github"
+                    else {"status": status,
+                          "configuration": {"status": "unknown"},
+                          "credential_capability": {"status": "not_applicable"},
+                          "health": {"status": status},
+                          "checkpoint": {"status": "ready" if row["checkpoint"] is not None else "warning", "present": row["checkpoint"] is not None},
+                          "replay_lag": {"status": "unknown", "seconds": None},
+                          "terminal_failure": {"status": "blocked" if runtime_code else "not_present", "code": runtime_code},
+                          "disabled": False, "unsupported": status == "unsupported"}
+                    if runtime_source
                     else {"status": "ready" if status in {"ready", "not_needed"} else status,
                           "configuration": {"status": "ready"},
                           "credential_capability": {"status": "not_applicable"},
@@ -405,7 +471,7 @@ def signal_readiness(
         if item.get("source_instance") not in seen_instances:
             sources.append({"source": "github", "source_instance": item.get("source_instance", ""), "status": item.get("status", "blocked"), "message": "configured GitHub source has no active signal arm", "active_arms": 0, "checkpoint_present": False, "checkpoint_order": None, "observed_through": "", "latest_reconcile": {}, "health_scope": "none", "support": item})
     support_statuses = {str(item.get("support", {}).get("status")) for item in sources}
-    if config_error or "blocked" in support_statuses:
+    if config_error or support_statuses & {"blocked", "unavailable", "invalidated", "unsupported"}:
         overall = "blocked"
     elif "warning" in support_statuses:
         overall = "warning"
@@ -435,7 +501,7 @@ def _sanitized_wake(record: object) -> dict[str, Any] | None:
         "source": str(predicate.get("source") or ""),
         "source_instance": str(predicate.get("source_instance") or ""),
         "kind": str(predicate.get("kind") or ""),
-        "subject": str(predicate.get("subject") or ""),
+        "subject": "" if predicate.get("source") == "systemd" else str(predicate.get("subject") or ""),
     }
     match = record.get("trigger_match")
     if isinstance(match, dict):
