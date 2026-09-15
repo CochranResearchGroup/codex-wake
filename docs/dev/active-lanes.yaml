@@ -4,7 +4,6 @@ lanes:
   - lane: P51-goal-coordination
     work_items:
       - "#58"
-      - "#59"
     branch: chore/issue-58-p51-goal-start
     owner: primary-orchestrator
     state: active
