@@ -5,8 +5,8 @@ Lane: P50
 Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v6
-Checkpoint: P50-G1-C09
+Goal Version: P50-G1-v7
+Checkpoint: P50-G1-C10
 
 ## Goal objective
 
@@ -71,6 +71,15 @@ rolled back. Two replacement retries are now consumed and four remain. Retry 3
 must prove the service-process credential is byte-equal to the valid source and
 returns HTTP 200 before registration; values and digests remain forbidden from
 output and evidence.
+
+Checkpoint `P50-G1-C10` accepts the retry-2 failed-safe receipt through PR #54
+at `42f3ef36faf710b4a1be9e2c3e1742c6bf8b818b` and assigns retry 3 to the
+existing branch `chore/issue-37-github-canary-retry-3`. Four attempts remain.
+Before any registration, retry 3 must prove the candidate service process has
+the exact credential bytes returned by the authenticated GitHub CLI and that a
+bounded repository Actions read returns HTTP 200. The value and its digest
+remain prohibited from output and evidence. The primary retains all live-effect
+and integration authority.
 
 ## Scope
 
@@ -232,7 +241,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v6
+goal_version: P50-G1-v7
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
