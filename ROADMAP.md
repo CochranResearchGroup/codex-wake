@@ -648,3 +648,34 @@ Acceptance target:
 - Prove submitted status, hook acknowledgement, and visible prompt evidence.
 - Archive and roll back the canary without global install, normal wake-root,
   supervisor, or unrelated service drift.
+
+## P50 | GitHub CI Wake Productization And Installed Canary
+
+State: OPEN
+
+Current State: Checkpoint `P50-G1-C00` opened issues #34 through #37 from clean
+`origin/main` `b38678d`. The critical path starts with production-safe history
+and timestamp evidence because the accepted fixture adapter currently assumes
+coverage through the poll clock and an immutable completion timestamp that the
+GitHub workflow-run response does not directly provide. Daemon/CLI and
+readiness lanes remain blocked until that contract merges; the installed
+canary remains blocked on both product lanes.
+
+Plan: [GitHub CI wake productization goal campaign](docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md)
+
+Acceptance target:
+
+- An explicit enabled-source registry and fixed-origin read-only client enforce
+  repository, workflow, ref, conclusion, credential, and resource limits.
+- Positive run-attempt evidence and history coverage are independently truthful;
+  missing or delayed provider evidence never advances a false checkpoint.
+- A supported `github-ci` recipe and daemon runner persist and recover the same
+  wake, anchor, checkpoint, retry state, and source health across restart.
+- Operator readiness and support surfaces remain bounded, sanitized, and
+  explicit about recovery strength and degradation.
+- One isolated installed candidate observes one exact post-anchor workflow
+  completion, dispatches once with visibility evidence, archives, and rolls
+  back without global or normal-runtime drift.
+- Issues #34 through #37 integrate through pull requests and required CI; no
+  webhook ingress, provider mutation, global refresh, deployment, tag, or
+  release occurs.

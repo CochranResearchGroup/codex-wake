@@ -1,3 +1,22 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - lane: P50-coordination
+    work_items:
+      - "#34"
+      - "#35"
+      - "#36"
+      - "#37"
+    branch: docs/p50-github-ci-productization-plan
+    worktree: /home/ecochran76/workspace.local/codex-wake
+    owner: primary
+    state: active
+    plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
+    expected_write_surface:
+      - ROADMAP.md
+      - RUNBOOK.md
+      - docs/dev/active-lanes.yaml
+      - docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
+    live_effect: none
+    dependencies: []
+    overlaps: []
