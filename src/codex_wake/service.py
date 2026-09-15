@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import shlex
+import stat
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,6 +37,7 @@ class ServiceConfig:
     unit_path: Path
     log_path: Path
     codex_path: Path | None = None
+    github_credential_file: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -92,6 +94,7 @@ def build_service_config(
     interval: float = DEFAULT_INTERVAL,
     daemon_path: str | None = None,
     codex_path: str | None = None,
+    github_credential_file: Path | None = None,
     resolve_default_codex: bool = False,
     unit_dir: Path | None = None,
     log_path: Path | None = None,
@@ -123,6 +126,27 @@ def build_service_config(
         )
     resolved_unit_dir = (unit_dir or user_systemd_dir()).expanduser()
     resolved_log_path = (log_path or (user_state_dir() / f"{resolved_name.removesuffix('.service')}.log")).expanduser()
+    resolved_github_credentials = (
+        Path(os.path.abspath(github_credential_file.expanduser()))
+        if github_credential_file is not None
+        else None
+    )
+    if resolved_github_credentials is not None and any(
+        ord(character) < 32 for character in str(resolved_github_credentials)
+    ):
+        raise WakeError("GitHub credential environment file path is invalid")
+    if validate_executables and resolved_github_credentials is not None:
+        try:
+            metadata = resolved_github_credentials.lstat()
+        except OSError:
+            raise WakeError("GitHub credential environment file is unavailable") from None
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or resolved_github_credentials.is_symlink()
+            or metadata.st_uid != os.getuid()
+            or stat.S_IMODE(metadata.st_mode) & 0o077
+        ):
+            raise WakeError("GitHub credential environment file must be an owner-only regular file")
     return ServiceConfig(
         name=resolved_name,
         repo_root=resolved_repo,
@@ -132,6 +156,7 @@ def build_service_config(
         unit_path=resolved_unit_dir / resolved_name,
         log_path=resolved_log_path,
         codex_path=Path(resolved_codex) if resolved_codex else None,
+        github_credential_file=resolved_github_credentials,
     )
 
 
@@ -152,6 +177,8 @@ def render_unit(config: ServiceConfig) -> str:
     environment = ""
     if config.codex_path:
         environment = f"Environment={systemd_environment_assignment(APP_SERVER_CODEX_ENV, str(config.codex_path))}\n"
+    if config.github_credential_file:
+        environment += f"EnvironmentFile={systemd_quote(config.github_credential_file)}\n"
     return (
         "[Unit]\n"
         "Description=Codex Wake daemon for one repository\n"

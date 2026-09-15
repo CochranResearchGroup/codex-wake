@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Callable, Literal, Mapping
 
 from .records import (
     WakeError,
@@ -24,7 +25,18 @@ from .builtin_signals import BuiltinPredicateSignals
 from .injector import TmuxRunner, dispatch_firing_record
 from .signal_store import SQLiteSignalModule
 from .signal_records import WakeRecordPublisher, current_reader_capability, signal_journal_path
-from .signals import Degraded, EvaluationLimits, Expired, Matched, SignalSourceRunner
+from .github_polling import (
+    GitHubPollingAdapter,
+    GitHubPollingConfig,
+    GitHubReadClient,
+    PollBatch,
+)
+from .github_source_config import GitHubSourceStore
+from .signals import (
+    ArmedSignal, Degraded, EvaluationLimits, Expired, Ingested,
+    Matched, SignalSourceRunner, SourceInstanceReconcileResult,
+    SourceReconcileResult,
+)
 from .monitor import write_monitor_health
 
 
@@ -79,13 +91,16 @@ def default_signal_runners(
     runtime: SQLiteSignalModule,
     *,
     initial_reason: Literal["startup", "periodic"] = "startup",
+    github_client_factory: Callable[[GitHubPollingConfig], GitHubReadClient] | None = None,
 ) -> tuple[SignalSourceRunner, ...]:
-    """Reconstruct provider-free source adapters from durable wake records."""
+    """Reconstruct only configured source adapters referenced by durable arms."""
 
     from .filesystem_signals import FilesystemSignalAdapter, FilesystemSignalRunner
+    from .github_client import GitHubRestClient
 
     adapters: dict[str, FilesystemSignalAdapter] = {}
-    arms = []
+    arms: list[ArmedSignal] = []
+    github_arms: dict[str, list[ArmedSignal]] = {}
     for item in pending_records(root):
         if classify_record(item.record) != "signal_v2":
             continue
@@ -94,10 +109,16 @@ def default_signal_runners(
         predicate = item.record.get("predicate")
         if not isinstance(wake_id, str) or not isinstance(cwd, str) or not isinstance(predicate, dict):
             continue
-        if predicate.get("source") != "filesystem":
+        source = predicate.get("source")
+        source_instance = predicate.get("source_instance")
+        if source == "github" and isinstance(source_instance, str):
+            armed = runtime.load_armed_signal(wake_id)
+            if armed is not None and armed.spec.source == "github":
+                github_arms.setdefault(source_instance, []).append(armed)
+            continue
+        if source != "filesystem":
             continue
         subject = predicate.get("subject")
-        source_instance = predicate.get("source_instance")
         if (
             not isinstance(subject, str)
             or not subject.startswith("path:")
@@ -122,13 +143,119 @@ def default_signal_runners(
             continue
         adapters[source_instance] = adapter
         arms.append(armed)
-    if not arms:
-        return ()
-    return (
-        FilesystemSignalRunner(
+    runners: list[SignalSourceRunner] = []
+    if arms:
+        runners.append(FilesystemSignalRunner(
             adapters.values(), armed_signals=arms, initial_reason=initial_reason
-        ),
-    )
+        ))
+    if github_arms:
+        store = GitHubSourceStore(root)
+        try:
+            registry = store.registry()
+            github_adapters = {}
+            referenced_arms = []
+            for source_instance in sorted(github_arms):
+                try:
+                    selected = registry.select(source_instance)
+                    client = (
+                        github_client_factory(selected)
+                        if github_client_factory is not None
+                        else GitHubRestClient(
+                            selected,
+                            credential_resolver=lambda ref: os.environ.get(ref, ""),
+                        )
+                    )
+                    github_adapters[source_instance] = GitHubPollingAdapter(
+                        selected,
+                        client,
+                        previous_failure=store.retry_failure(source_instance),
+                    )
+                except (OSError, TypeError, ValueError):
+                    continue
+                referenced_arms.extend(github_arms[source_instance])
+            if github_adapters:
+                runners.append(
+                    GitHubSignalRunner(
+                        github_adapters,
+                        armed_signals=tuple(referenced_arms),
+                        health_store=store,
+                    )
+                )
+        except (OSError, TypeError, ValueError):
+            # A damaged or unsupported configuration cannot create network
+            # authority. Other source classes remain available.
+            pass
+    return tuple(runners)
+
+
+class GitHubSignalRunner:
+    """Poll referenced GitHub sources and commit only verified positive evidence."""
+
+    def __init__(
+        self,
+        adapters: Mapping[str, GitHubPollingAdapter],
+        *,
+        armed_signals: tuple[ArmedSignal, ...],
+        health_store: GitHubSourceStore,
+    ) -> None:
+        self._adapters = dict(adapters)
+        self._armed_signals = armed_signals
+        self._health_store = health_store
+
+    def reconcile(
+        self,
+        module: SQLiteSignalModule,
+        now: datetime,
+        limits: EvaluationLimits,
+    ) -> SourceReconcileResult:
+        if now.tzinfo is None or now.utcoffset() is None or limits.max_candidates <= 0:
+            return SourceReconcileResult("github", 0, 0, 1)
+        groups: dict[str, list[ArmedSignal]] = {}
+        for armed in self._armed_signals:
+            adapter = self._adapters.get(armed.spec.source_instance)
+            if armed.spec.source != "github" or adapter is None:
+                continue
+            groups.setdefault(armed.spec.source_instance, []).append(armed)
+        scanned = observed = degraded = 0
+        instances: list[SourceInstanceReconcileResult] = []
+        for source_instance in sorted(groups)[: limits.max_candidates]:
+            source_arms = groups[source_instance]
+            scanned += 1
+            adapter = self._adapters[source_instance]
+            earliest = min(source_arms, key=lambda item: item.registered_at)
+            checkpoint = module.source_checkpoint("github", source_instance)
+            if isinstance(checkpoint, Degraded):
+                outcome: object = checkpoint
+            else:
+                outcome = adapter.observe(earliest.anchor, checkpoint=checkpoint, now=now)
+            instance_observed = 0
+            instance_degraded = 0
+            health = None
+            if isinstance(outcome, PollBatch):
+                ingested = module.ingest(outcome.observations, outcome.commit)
+                if isinstance(ingested, Ingested):
+                    instance_observed = len(outcome.observations)
+                    health = outcome.health
+                else:
+                    health = ingested if isinstance(ingested, Degraded) else Degraded(None, "STORE_UNAVAILABLE", None)
+            else:
+                health = outcome if isinstance(outcome, Degraded) else Degraded(None, "GITHUB_SOURCE_UNAVAILABLE", None)
+            if health is not None:
+                instance_degraded = 1
+                try:
+                    self._health_store.record_health(source_instance, health, observed_at=now)
+                except (OSError, TypeError, ValueError):
+                    instance_degraded = 1
+            observed += instance_observed
+            degraded += instance_degraded
+            instances.append(
+                SourceInstanceReconcileResult(
+                    "github", source_instance, 1, instance_observed, instance_degraded
+                )
+            )
+        return SourceReconcileResult(
+            "github", scanned, observed, degraded, tuple(instances)
+        )
 
 
 def pending_records(root: Path) -> list[WakePath]:

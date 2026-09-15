@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 import tempfile
 import threading
 import unittest
@@ -10,7 +11,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
-from codex_wake.daemon import PollResult, format_poll_result, poll_once, poll_result_has_activity, run
+from codex_wake.daemon import PollResult, default_signal_runners, format_poll_result, poll_once, poll_result_has_activity, run
 from codex_wake.event_wake import EventWake
 from codex_wake.records import (
     WakeLifecycleLock,
@@ -28,6 +29,258 @@ from tests.test_signals import make_adapter, make_intent
 
 
 class DaemonTests(unittest.TestCase):
+    def test_github_candidate_budget_is_applied_after_grouping_arms_by_source(self) -> None:
+        from dataclasses import replace
+        from datetime import timedelta
+
+        from codex_wake.github_polling import GitHubPollingAdapter
+        from codex_wake.github_source_config import GitHubSourceStore
+        from codex_wake.signals import EvaluationLimits
+        from tests.test_github_polling import FixtureClient, NOW, config
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            sources = (
+                replace(config(evidence_mode="positive_only"), source_instance="github-a"),
+                replace(config(evidence_mode="positive_only"), source_instance="github-b"),
+            )
+            store = GitHubSourceStore(root)
+            for source in sources:
+                store.configure(source)
+            publisher = WakeRecordPublisher(
+                root,
+                ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+            )
+            runtime = SQLiteSignalModule(signal_journal_path(root), record_publisher=publisher)
+            for source, count in ((sources[0], 3), (sources[1], 1)):
+                adapter = GitHubPollingAdapter(source, object())
+                request = adapter.request(
+                    ref="refs/heads/main", conclusions=("success",)
+                )
+                for index in range(count):
+                    wake_id = f"wake_{source.source_instance}_{index}"
+                    registration = EventWake(
+                        runtime,
+                        adapters=(adapter,),
+                        clock=lambda: NOW,
+                        id_factory=lambda wake_id=wake_id: wake_id,
+                    ).register(
+                        replace(make_intent(), when=request, max_attempts=1),
+                        idempotency_key=wake_id,
+                    )
+                    self.assertIsInstance(registration, Registration)
+            clients = {source.source_instance: FixtureClient() for source in sources}
+            runners = default_signal_runners(
+                root,
+                runtime,
+                github_client_factory=lambda source: clients[source.source_instance],
+            )
+
+            report = runners[0].reconcile(
+                runtime,
+                NOW + timedelta(seconds=1),
+                EvaluationLimits(max_candidates=2),
+            )
+
+            self.assertEqual(
+                [item.source_instance for item in report.instances],
+                ["github-a", "github-b"],
+            )
+            self.assertEqual(
+                {name: len(client.requests) for name, client in clients.items()},
+                {"github-a": 1, "github-b": 1},
+            )
+
+    def test_default_runners_poll_only_referenced_enabled_github_source_with_fixture_client(self) -> None:
+        from dataclasses import replace
+        from datetime import timedelta
+
+        from codex_wake.github_polling import GitHubPollingAdapter
+        from codex_wake.github_source_config import GitHubSourceStore
+        from tests.test_github_polling import FixtureClient, NOW, config, run as github_run
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            source = config(evidence_mode="positive_only")
+            store = GitHubSourceStore(root)
+            store.configure(source)
+            store.configure(replace(source, source_instance="unreferenced"))
+            publisher = WakeRecordPublisher(
+                root,
+                ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+            )
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root), record_publisher=publisher
+            )
+            registration_adapter = GitHubPollingAdapter(source, object())
+            request = registration_adapter.request(
+                ref="refs/heads/main", conclusions=("success",)
+            )
+            registration = EventWake(
+                runtime,
+                adapters=(registration_adapter,),
+                clock=lambda: NOW,
+                id_factory=lambda: "wake_github",
+            ).register(
+                replace(make_intent(), when=request, max_attempts=1),
+                idempotency_key="github-main-success",
+            )
+            self.assertIsInstance(registration, Registration)
+            disabled_source = replace(source, source_instance="aaa-disabled")
+            store.configure(disabled_source)
+            disabled_adapter = GitHubPollingAdapter(disabled_source, object())
+            disabled_registration = EventWake(
+                runtime,
+                adapters=(disabled_adapter,),
+                clock=lambda: NOW,
+                id_factory=lambda: "wake_disabled_github",
+            ).register(
+                replace(
+                    make_intent(),
+                    when=disabled_adapter.request(
+                        ref="refs/heads/main", conclusions=("success",)
+                    ),
+                    max_attempts=1,
+                ),
+                idempotency_key="github-disabled",
+            )
+            self.assertIsInstance(disabled_registration, Registration)
+            store.configure(replace(disabled_source, enabled=False))
+            constructed = []
+
+            def client_factory(selected):
+                constructed.append(selected.source_instance)
+                return FixtureClient(
+                    [
+                        github_run(
+                            completed_at=None,
+                            terminal_proof_at=NOW + timedelta(seconds=1),
+                            time_provenance="github_attempt_started_or_job_completed_lower_bound",
+                        )
+                    ]
+                )
+
+            runners = default_signal_runners(
+                root, runtime, github_client_factory=client_factory
+            )
+            result = poll_once(
+                root,
+                now=NOW + timedelta(seconds=2),
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_runners=runners,
+            )
+
+            self.assertEqual(constructed, ["github-ci"])
+            self.assertEqual((result.fired, result.pending), (1, 1))
+            self.assertEqual(result.signal_sources[0]["source"], "github")
+            self.assertEqual(result.signal_sources[0]["observed"], 1)
+            self.assertEqual(result.signal_sources[0]["degraded"], 1)
+            self.assertEqual(
+                GitHubSourceStore(root).source_health("github-ci").code,
+                "GITHUB_COVERAGE_UNPROVEN",
+            )
+            self.assertTrue((root / "firing" / "wake_github.json").is_file())
+
+    def test_github_retry_deadline_survives_runner_restart_and_degradation_cannot_match(self) -> None:
+        from dataclasses import replace
+        from datetime import timedelta
+
+        from codex_wake.github_polling import GitHubPollingAdapter, GitHubReadError
+        from codex_wake.github_source_config import GitHubSourceStore
+        from tests.test_github_polling import FixtureClient, NOW, config
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            source = config(evidence_mode="positive_only")
+            GitHubSourceStore(root).configure(source)
+            publisher = WakeRecordPublisher(
+                root,
+                ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+            )
+            runtime = SQLiteSignalModule(signal_journal_path(root), record_publisher=publisher)
+            registration_adapter = GitHubPollingAdapter(source, object())
+            registration = EventWake(
+                runtime,
+                adapters=(registration_adapter,),
+                clock=lambda: NOW,
+                id_factory=lambda: "wake_github_retry",
+            ).register(
+                replace(
+                    make_intent(),
+                    when=registration_adapter.request(
+                        ref="refs/heads/main", conclusions=("failure",)
+                    ),
+                    max_attempts=1,
+                ),
+                idempotency_key="github-main-failure",
+            )
+            self.assertIsInstance(registration, Registration)
+            retry_at = NOW + timedelta(minutes=10)
+            failed_client = FixtureClient(pages=[GitHubReadError("rate_limit", retry_at=retry_at)])
+
+            first = poll_once(
+                root,
+                now=NOW + timedelta(seconds=1),
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_runners=default_signal_runners(
+                    root, runtime, github_client_factory=lambda _source: failed_client
+                ),
+            )
+            script = r'''
+import json, sys
+from pathlib import Path
+from datetime import timedelta
+from codex_wake.daemon import default_signal_runners, poll_once
+from codex_wake.github_source_config import GitHubSourceStore
+from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+from codex_wake.signal_store import SQLiteSignalModule
+from tests.test_github_polling import FixtureClient, NOW
+root = Path(sys.argv[1])
+runtime = SQLiteSignalModule.open_existing(
+    signal_journal_path(root),
+    record_publisher=WakeRecordPublisher(
+        root, ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True)
+    ),
+)
+client = FixtureClient(pages=[AssertionError("provider read before retry deadline")])
+result = poll_once(
+    root,
+    now=NOW + timedelta(seconds=2),
+    dispatch=False,
+    signal_runtime=runtime,
+    signal_runners=default_signal_runners(
+        root, runtime, github_client_factory=lambda _source: client
+    ),
+)
+print(json.dumps({
+    "fired": result.fired,
+    "pending": result.pending,
+    "request_count": len(client.requests),
+    "retry_at": GitHubSourceStore(root).retry_failure("github-ci").retry_at.isoformat(),
+}))
+'''
+            restarted_process = subprocess.run(
+                [sys.executable, "-c", script, str(root)],
+                text=True,
+                capture_output=True,
+                check=True,
+                timeout=10,
+            )
+            restarted = json.loads(restarted_process.stdout)
+
+            self.assertEqual((first.fired, first.pending), (0, 1))
+            self.assertEqual((restarted["fired"], restarted["pending"]), (0, 1))
+            self.assertEqual(restarted["request_count"], 0)
+            self.assertEqual(
+                GitHubSourceStore(root).retry_failure("github-ci").retry_at,
+                retry_at,
+            )
+            self.assertEqual(restarted["retry_at"], retry_at.isoformat())
+            self.assertTrue((root / "pending" / "wake_github_retry.json").is_file())
+            self.assertFalse((root / "firing" / "wake_github_retry.json").exists())
+
     def test_loop_marks_only_its_first_default_source_pass_as_startup(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"

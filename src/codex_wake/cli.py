@@ -78,6 +78,12 @@ def bounded_attempt_count(value: str) -> int:
     return parsed
 
 
+def one_attempt_count(value: str) -> int:
+    if value != "1":
+        raise argparse.ArgumentTypeError("GitHub CI wakes require exactly one dispatch attempt")
+    return 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="codex-wake")
     parser.add_argument("--version", action="version", version=f"%(prog)s {package_version()}")
@@ -216,6 +222,61 @@ def build_parser() -> argparse.ArgumentParser:
         recipe_parser.add_argument("prompt", nargs=argparse.REMAINDER)
         add_target_options(recipe_parser)
         add_monitor_gate_options(recipe_parser)
+
+    github_ci = subparsers.add_parser(
+        "github-ci", help="configure and arm durable GitHub Actions completion wakes"
+    )
+    github_ci_subparsers = github_ci.add_subparsers(dest="github_ci_command", required=True)
+    github_source = github_ci_subparsers.add_parser(
+        "source", help="manage nonsecret GitHub source configuration"
+    )
+    github_source_subparsers = github_source.add_subparsers(
+        dest="github_source_command", required=True
+    )
+    github_source_configure = github_source_subparsers.add_parser(
+        "configure", help="persist one bounded GitHub.com source allowlist"
+    )
+    github_source_configure.add_argument("--source", required=True, dest="source_instance")
+    github_source_configure.add_argument("--repository", required=True)
+    github_source_configure.add_argument("--repository-id", required=True, type=int)
+    github_source_configure.add_argument("--workflow-id", required=True, type=int)
+    github_source_configure.add_argument("--ref", required=True, action="append", dest="refs")
+    github_source_configure.add_argument(
+        "--conclusion", required=True, action="append", dest="conclusions",
+        choices=("success", "failure", "cancelled", "timed_out", "neutral", "skipped", "action_required", "startup_failure"),
+    )
+    github_source_configure.add_argument(
+        "--credential-ref", required=True,
+        help="credential resolver reference; never a credential value",
+    )
+    enabled = github_source_configure.add_mutually_exclusive_group(required=True)
+    enabled.add_argument("--enabled", "--enable", action="store_true", dest="enabled")
+    enabled.add_argument("--disabled", "--disable", action="store_false", dest="enabled")
+    github_source_list = github_source_subparsers.add_parser(
+        "list", help="list sanitized configured GitHub sources"
+    )
+    github_source_list.add_argument("--json", action="store_true", dest="as_json")
+    github_source_show = github_source_subparsers.add_parser(
+        "show", help="show one sanitized configured GitHub source"
+    )
+    github_source_show.add_argument("source_instance")
+    github_source_show.add_argument("--json", action="store_true", dest="as_json")
+    github_completed = github_ci_subparsers.add_parser(
+        "completed", help="wake on one verified configured workflow completion"
+    )
+    github_completed.add_argument("--source", required=True, dest="source_instance")
+    github_completed.add_argument("--ref", required=True)
+    github_completed.add_argument(
+        "--conclusion", required=True, action="append", dest="conclusions"
+    )
+    github_completed.add_argument("--idempotency-key")
+    github_completed.add_argument(
+        "--max-attempts", type=one_attempt_count, default=1,
+        help="maximum dispatch attempts; GitHub CI wakes require exactly 1",
+    )
+    github_completed.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(github_completed)
+    add_monitor_gate_options(github_completed)
 
     pid = subparsers.add_parser("pid", help="create a wake when a process id exits")
     pid.add_argument("pid", type=int)
@@ -473,6 +534,10 @@ def add_service_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--interval", type=float, default=1.0, help="daemon poll interval in seconds")
     parser.add_argument("--daemon-path", help="stable codex-waked executable path; defaults to PATH resolution")
     parser.add_argument("--codex-path", help="stable Codex executable path to persist for app-server dispatch")
+    parser.add_argument(
+        "--github-credential-file", type=Path, default=None,
+        help="owner-only systemd EnvironmentFile containing referenced GitHub credentials",
+    )
     parser.add_argument("--log-path", type=Path, default=None, help="service log path")
 
 
@@ -796,6 +861,122 @@ def create_filesystem_signal(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def github_ci_command(args: argparse.Namespace, root: Path) -> int:
+    from .event_wake import EventWake
+    from .github_polling import GitHubPollingAdapter, GitHubPollingConfig
+    from .github_source_config import GitHubSourceStore
+    from .signal_records import WakeRecordPublisher, signal_journal_path
+    from .signal_store import SQLiteSignalModule
+    from .signals import Degraded, Invalid, Resume, WakeIntent
+
+    store = GitHubSourceStore(root)
+    if args.github_ci_command == "completed":
+        try:
+            source = store.registry().select(args.source_instance)
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        adapter = GitHubPollingAdapter(source, object())
+        request = adapter.request(ref=args.ref, conclusions=tuple(args.conclusions))
+        if isinstance(request, Invalid):
+            raise WakeError("GitHub CI completion is outside the configured allowlist")
+        prompt = normalize_prompt(args.prompt)
+        if getattr(args, "require_monitor", False):
+            readiness = monitor_readiness(wake_root=root, repo_root=Path.cwd())
+            require_monitor_ready(readiness)
+        now = utc_now()
+        runtime = SQLiteSignalModule(
+            signal_journal_path(root),
+            record_publisher=WakeRecordPublisher.for_managed_reader(root),
+        )
+        result = EventWake(
+            runtime,
+            adapters=(adapter,),
+            clock=lambda: now,
+            id_factory=lambda: f"wake_{uuid.uuid4().hex}",
+        ).register(
+            WakeIntent(
+                request,
+                Resume(prompt, Path.cwd(), target_for_args(args)),
+                max_attempts=args.max_attempts,
+            ),
+            idempotency_key=args.idempotency_key or f"github-ci:{uuid.uuid4().hex}",
+        )
+        if isinstance(result, Degraded):
+            raise WakeError(f"GitHub CI signal registration unavailable: {result.code}")
+        if isinstance(result, Invalid):
+            raise WakeError("GitHub CI signal registration is invalid")
+        path = root / "pending" / f"{result.wake_id}.json"
+        print(f"{result.wake_id} {path}")
+        return 0
+    if args.github_ci_command != "source":
+        raise WakeError("unsupported github-ci command")
+    if args.github_source_command in {"list", "show"}:
+        try:
+            sources = store.sources()
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        if args.github_source_command == "show":
+            sources = tuple(
+                source for source in sources if source.source_instance == args.source_instance
+            )
+            if not sources:
+                raise WakeError("GitHub source is not configured")
+        summaries = [_github_source_summary(source) for source in sources]
+        if getattr(args, "as_json", False):
+            print(json.dumps(summaries[0] if args.github_source_command == "show" else {"sources": summaries}, sort_keys=True))
+        else:
+            for summary in summaries:
+                print(
+                    f"source={summary['source_instance']} enabled={str(summary['enabled']).lower()} "
+                    f"repository={summary['repository']} workflow_id={summary['workflow_id']}"
+                )
+        return 0
+    if args.github_source_command != "configure":
+        raise WakeError("unsupported github-ci source command")
+    if (
+        not isinstance(args.credential_ref, str)
+        or not args.credential_ref
+        or not args.credential_ref.isascii()
+        or not args.credential_ref.replace("_", "A").isalnum()
+        or not args.credential_ref[0].isalpha()
+        or args.credential_ref.upper() != args.credential_ref
+    ):
+        raise WakeError("credential reference must be an uppercase environment variable name")
+    source = GitHubPollingConfig(
+        source_instance=args.source_instance,
+        repository=args.repository,
+        repository_id=args.repository_id,
+        workflow_id=args.workflow_id,
+        refs=frozenset(args.refs),
+        conclusions=frozenset(args.conclusions),
+        credential_ref=args.credential_ref,
+        enabled=args.enabled,
+        evidence_mode="positive_only",
+    )
+    try:
+        store.configure(source)
+    except ValueError as exc:
+        raise WakeError(str(exc)) from None
+    print(f"source={source.source_instance}")
+    print(f"enabled={str(source.enabled).lower()}")
+    print(f"config={store.path}")
+    return 0
+
+
+def _github_source_summary(source) -> dict[str, object]:
+    return {
+        "source_instance": source.source_instance,
+        "repository": source.repository,
+        "repository_id": source.repository_id,
+        "workflow_id": source.workflow_id,
+        "refs": sorted(source.refs),
+        "conclusions": sorted(source.conclusions),
+        "enabled": source.enabled,
+        "hostname": source.hostname,
+        "evidence_mode": source.evidence_mode,
+    }
+
+
 def create_pid(args: argparse.Namespace, root: Path) -> int:
     pid = args.pid
     if pid <= 0:
@@ -1058,6 +1239,7 @@ def service_config_for_args(args: argparse.Namespace, root: Path, *, validate_ex
         interval=args.interval,
         daemon_path=args.daemon_path,
         codex_path=args.codex_path,
+        github_credential_file=args.github_credential_file,
         resolve_default_codex=validate_executables,
         log_path=args.log_path,
         validate_executables=validate_executables,
@@ -1556,6 +1738,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_changed(args, root)
     if args.command == "filesystem":
         return create_filesystem_signal(args, root)
+    if args.command == "github-ci":
+        return github_ci_command(args, root)
     if args.command == "pid":
         return create_pid(args, root)
     if args.command == "list":

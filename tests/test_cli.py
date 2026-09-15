@@ -55,6 +55,149 @@ class CliTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 0)
         self.assertIn("stable OpenClaw executable path", stdout.getvalue())
 
+    def test_github_ci_source_configure_persists_an_explicit_enabled_allowlist(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+
+            code, out, err = self.run_cli(
+                [
+                    "github-ci", "source", "configure",
+                    "--source", "github-ci",
+                    "--repository", "example/project",
+                    "--repository-id", "123",
+                    "--workflow-id", "456",
+                    "--ref", "refs/heads/main",
+                    "--conclusion", "success",
+                    "--credential-ref", "CODEX_WAKE_GITHUB_TOKEN",
+                    "--enabled",
+                ],
+                root,
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("source=github-ci", out)
+            payload = json.loads((root / "github" / "sources.json").read_text())
+            self.assertEqual(payload["sources"][0]["refs"], ["refs/heads/main"])
+            self.assertEqual(payload["sources"][0]["conclusions"], ["success"])
+            self.assertTrue(payload["sources"][0]["enabled"])
+
+            code, listed, err = self.run_cli(
+                ["github-ci", "source", "list", "--json"], root
+            )
+            self.assertEqual(code, 0, err)
+            summary = json.loads(listed)
+            self.assertEqual(summary["sources"][0]["source_instance"], "github-ci")
+            self.assertNotIn("credential_ref", listed)
+
+            code, shown, err = self.run_cli(
+                ["github-ci", "source", "show", "github-ci", "--json"], root
+            )
+            self.assertEqual(code, 0, err)
+            self.assertEqual(json.loads(shown)["repository"], "example/project")
+            self.assertNotIn("credential_ref", shown)
+
+    def test_github_ci_completed_registers_one_idempotent_journal_authoritative_wake(self) -> None:
+        from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            configured = [
+                "github-ci", "source", "configure",
+                "--source", "github-ci",
+                "--repository", "example/project",
+                "--repository-id", "123",
+                "--workflow-id", "456",
+                "--ref", "refs/heads/main",
+                "--conclusion", "failure",
+                "--credential-ref", "CODEX_WAKE_GITHUB_TOKEN",
+                "--enabled",
+            ]
+            self.assertEqual(self.run_cli(configured, root)[0], 0)
+            command = [
+                "github-ci", "completed",
+                "--source", "github-ci",
+                "--ref", "refs/heads/main",
+                "--conclusion", "failure",
+                "--idempotency-key", "ci-main-failed",
+                "--max-attempts", "1",
+                "--", "Inspect the failed workflow",
+            ]
+
+            publisher = WakeRecordPublisher(
+                root,
+                ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+            )
+            with patch(
+                "codex_wake.signal_records.WakeRecordPublisher.for_managed_reader",
+                return_value=publisher,
+            ):
+                first = self.run_cli(command, root)
+                second = self.run_cli(command, root)
+
+            self.assertEqual((first[0], second[0]), (0, 0), first[2] + second[2])
+            wake_id = first[1].split()[0]
+            self.assertEqual(second[1].split()[0], wake_id)
+            record = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(record["schema_version"], 2)
+            self.assertEqual(record["max_attempts"], 1)
+            self.assertEqual(record["predicate"]["source"], "github")
+            self.assertEqual(record["predicate"]["source_instance"], "github-ci")
+            self.assertEqual(record["predicate"]["kind"], "workflow_run.completed")
+            self.assertTrue((root / "signals" / "journal.sqlite3").is_file())
+
+    def test_github_ci_help_and_registration_gates_are_explicit_and_fail_closed(self) -> None:
+        parser = cli.build_parser()
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as raised:
+            parser.parse_args(["github-ci", "completed", "--help"])
+        self.assertEqual(raised.exception.code, 0)
+        self.assertIn("--source", stdout.getvalue())
+        self.assertIn("exactly 1", stdout.getvalue())
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parser.parse_args(
+                [
+                    "github-ci", "completed", "--source", "github-ci",
+                    "--ref", "refs/heads/main", "--conclusion", "success",
+                    "--max-attempts", "2", "continue",
+                ]
+            )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            code, _out, error = self.run_cli(
+                [
+                    "github-ci", "source", "configure",
+                    "--source", "github-ci", "--repository", "example/project",
+                    "--repository-id", "123", "--workflow-id", "456",
+                    "--ref", "refs/heads/main", "--conclusion", "success",
+                    "--credential-ref", "ghp_raw_value", "--enabled",
+                ],
+                root,
+            )
+            self.assertEqual(code, 2)
+            self.assertIn("environment variable name", error)
+            self.assertFalse((root / "github" / "sources.json").exists())
+
+            disabled = [
+                "github-ci", "source", "configure",
+                "--source", "github-ci", "--repository", "example/project",
+                "--repository-id", "123", "--workflow-id", "456",
+                "--ref", "refs/heads/main", "--conclusion", "success",
+                "--credential-ref", "CODEX_WAKE_GITHUB_TOKEN", "--disabled",
+            ]
+            self.assertEqual(self.run_cli(disabled, root)[0], 0)
+            code, _out, error = self.run_cli(
+                [
+                    "github-ci", "completed", "--source", "github-ci",
+                    "--ref", "refs/heads/main", "--conclusion", "success",
+                    "continue",
+                ],
+                root,
+            )
+            self.assertEqual(code, 2)
+            self.assertIn("not enabled", error)
+            self.assertFalse((root / "signals" / "journal.sqlite3").exists())
+
     def test_lifecycle_argument_configs_ignore_missing_launch_executables(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -95,6 +238,45 @@ class CliTests(unittest.TestCase):
             self.assertIsNone(supervisor_config.codex_wake_path)
             with self.assertRaises(WakeError):
                 cli.supervisor_config_for_args(supervisor_args, validate_executable=True)
+
+    def test_service_config_renders_only_a_github_credential_file_reference(self) -> None:
+        from dataclasses import replace
+
+        from codex_wake.service import build_service_config, render_unit
+
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            credential_file = base / "github.env"
+            credential_file.write_text("CODEX_WAKE_GITHUB_TOKEN=never-render-this\n")
+            parser = cli.build_parser()
+            args = parser.parse_args(
+                [
+                    "--wake-root", str(base / "wake"),
+                    "service", "status",
+                    "--github-credential-file", str(credential_file),
+                ]
+            )
+
+            config = cli.service_config_for_args(args, base / "wake")
+            unit = render_unit(replace(config, daemon_path=Path("/usr/bin/codex-waked")))
+
+            self.assertEqual(config.github_credential_file, credential_file.resolve())
+            self.assertIn(f'EnvironmentFile="{credential_file.resolve()}"', unit)
+            self.assertNotIn("never-render-this", unit)
+
+            credential_file.chmod(0o600)
+            symlink = base / "github-link.env"
+            symlink.symlink_to(credential_file)
+            with self.assertRaisesRegex(WakeError, "owner-only regular file"):
+                build_service_config(
+                    repo_root=base,
+                    wake_root=base / "wake",
+                    daemon_path="/bin/true",
+                    github_credential_file=symlink,
+                    unit_dir=base,
+                    log_path=base / "wake.log",
+                    validate_executables=True,
+                )
 
     def test_after_creates_pending_wake(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
