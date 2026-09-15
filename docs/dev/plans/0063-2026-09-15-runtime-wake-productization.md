@@ -19,8 +19,10 @@ authorization, observation, occurrence, or dispatch contracts.
 Process lane #60 is accepted through PR #71 at canonical commit
 `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3`. Systemd lane #61 is accepted
 through PR #73 at canonical commit
-`f41ef0ba6d5b37ab85bea7a1cebbc9bd6b0ad748`. This join is dependency-unblocked.
-Its initial plan checkpoint precedes implementation.
+`f41ef0ba6d5b37ab85bea7a1cebbc9bd6b0ad748`. This join is implemented and
+reviewed at checkpoint `44244785cfa123a3d234989f23b2dae4201a9dca`.
+Readiness, status, support, documentation, and the installed-wheel fixture are
+integration-ready; GitHub CI and canonical-main integration remain.
 
 ## Scope and write surface
 
@@ -106,7 +108,38 @@ normal-runtime mutation, or a live resource. Preserve every failed receipt and
 classify it before a bounded correction. #63 remains blocked until this issue
 is merged, closed, and read back on canonical `origin/main`.
 
+## Validation evidence
+
+- Focused readiness, process, systemd, configuration, daemon, monitor,
+  product-readiness, and CLI tier: 162 tests passed.
+- Comprehensive Python tier: 414 tests passed.
+- OpenClaw plugin tier: 12 tests passed.
+- Compilation, diff, and active planning audits passed.
+- A clean disposable virtual environment installed wheel SHA-256
+  `93e36f45aee64d827aa67dece32329dbae8633b011f854ed569a6856866ee39e`
+  with `dbus-next==0.2.3`. The installed product smoke registered both runtime
+  arms in phase A; a fresh phase-B Python process reconstructed the persisted
+  process descriptor and `SystemdSourceStore` configuration, injected bounded
+  provider-free observations, matched once through each source-owned runner,
+  deduplicated repeats, retired and cleaned both records, and reported
+  `dispatch_attempted: false`.
+
+## Review and repair receipt
+
+The single adversarial review cycle initially failed three material checks:
+the installed smoke used one process and the generic evaluator, daemon health
+dropped source diagnostic causes, and aggregate freshness could validate an
+older instance receipt. The bounded correction split smoke registration and
+reconstruction across installed-wheel subprocesses, routed evaluation through
+the source-owned runners, added allowlisted optional diagnostic and observation
+time fields to reconciliation health, emitted reconstruction-failure rows, and
+required fresh exact-instance timestamps. Verification then found and corrected
+one introduced inconsistency where `*_READY` was labeled a terminal failure.
+The final reviewer verdict is PASS, with focused correction verification green.
+No live process, session bus, dispatch, installed-user runtime, provider,
+release, tag, or deployment effect occurred.
+
 ## Next action
 
-Publish this initial checkpoint, reconcile active-lane custody from completed
-#61 to #62, then implement the bounded shared readiness and lifecycle slice.
+Publish the reviewed checkpoint, reconcile P51-C4 as integration-ready, open
+the linked pull request, and squash-merge only after Python 3.11/3.12 CI passes.
