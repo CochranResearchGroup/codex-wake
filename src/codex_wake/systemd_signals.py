@@ -1,11 +1,12 @@
-"""A fixed, injected read boundary for current-user systemd state signals.
+"""A fixed read boundary for current-user systemd state signals.
 
-There is intentionally no D-Bus implementation here.  A host integration may
-provide the two-method ``SystemdUserManager`` protocol, but it cannot choose a
-manager, method, path, property, or command through this product surface.
+The production backend uses a closed low-level D-Bus call plan.  Tests may
+inject the two-method ``SystemdUserManager`` protocol, but no product surface
+can choose a manager, method, path, property, or command.
 """
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import os
@@ -13,7 +14,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from types import MappingProxyType
-from typing import Iterable, Literal, Mapping, Protocol
+from typing import Awaitable, Callable, Iterable, Literal, Mapping, Protocol
 
 from .runtime_signals import RuntimeSourceRegistry
 from .signals import (
@@ -23,6 +24,7 @@ from .signals import (
     EvaluationLimits,
     Ingested,
     Invalid,
+    Matched,
     NormalizedObservation,
     SignalEngine,
     SignalRequest,
@@ -40,6 +42,14 @@ _SOURCE = "systemd"
 _KIND = "unit.active_state"
 _STATES = frozenset({"active", "inactive", "failed"})
 _GENERATION = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}")
+_SYSTEMD_DESTINATION = "org.freedesktop.systemd1"
+_SYSTEMD_MANAGER_PATH = "/org/freedesktop/systemd1"
+_SYSTEMD_MANAGER_INTERFACE = "org.freedesktop.systemd1.Manager"
+_SYSTEMD_UNIT_INTERFACE = "org.freedesktop.systemd1.Unit"
+_PROPERTIES_INTERFACE = "org.freedesktop.DBus.Properties"
+_DBUS_DESTINATION = "org.freedesktop.DBus"
+_DBUS_PATH = "/org/freedesktop/DBus"
+_DBUS_INTERFACE = "org.freedesktop.DBus"
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +67,179 @@ class SystemdReadError(Exception):
     def __init__(self, kind: str = "unavailable") -> None:
         super().__init__("systemd user-manager read failed")
         self.kind = kind if kind in {"timeout", "unavailable"} else "unavailable"
+
+
+@dataclass(frozen=True, slots=True)
+class SystemdBusCall:
+    """One member of the fixed systemd observation call plan."""
+
+    destination: str
+    path: str
+    interface: str
+    member: str
+    signature: str
+    body: tuple[str, ...]
+
+
+SystemdBusQuery = Callable[[SystemdBusCall], Awaitable[tuple[object, ...]]]
+
+
+class DbusNextUserManager:
+    """Fixed current-session-bus systemd reader with no dynamic bus surface.
+
+    The optional query is a narrow test seam.  Its input is always created by
+    this class from the fixed call plan below; callers cannot select an object
+    path, destination, interface, member, or property.
+    """
+
+    def __init__(self, query: SystemdBusQuery | None = None) -> None:
+        if query is not None and not callable(query):
+            raise ValueError("systemd bus query is invalid")
+        self._query = query or _dbus_next_query
+        self._cached: tuple[str, SystemdUnitState] | None = None
+
+    def resolve_unit(self, unit: str, *, timeout_seconds: int) -> str:
+        sample = self._transaction(unit, timeout_seconds)
+        self._cached = (unit, sample)
+        return sample.unit
+
+    def read_unit(self, unit: str, *, timeout_seconds: int) -> SystemdUnitState | None:
+        cached = self._cached
+        self._cached = None
+        if cached is not None and cached[0] == unit:
+            return cached[1]
+        return self._transaction(unit, timeout_seconds)
+
+    def _transaction(self, unit: str, timeout_seconds: int) -> SystemdUnitState:
+        if not _valid_unit_name(unit) or type(timeout_seconds) is not int or isinstance(timeout_seconds, bool) or not 1 <= timeout_seconds <= 60:
+            raise SystemdReadError("unavailable")
+        try:
+            try:
+                asyncio.get_running_loop()
+            except RuntimeError:
+                pass
+            else:
+                raise SystemdReadError("unavailable")
+            return asyncio.run(self._bounded_observe(unit, timeout_seconds))
+        except TimeoutError:
+            raise SystemdReadError("timeout") from None
+        except SystemdReadError:
+            raise
+        except Exception:
+            raise SystemdReadError("unavailable") from None
+
+    async def _bounded_observe(self, unit: str, timeout_seconds: int) -> SystemdUnitState:
+        return await asyncio.wait_for(self._observe(unit), timeout=timeout_seconds)
+
+    async def _observe(self, unit: str) -> SystemdUnitState:
+        owner_before = _unique_owner(await self._query(_owner_call()))
+        object_path = _unit_path(await self._query(_get_unit_call(unit)))
+        canonical = _unit_id(await self._query(_property_call(object_path, "Id")))
+        active_state = _active_state(await self._query(_property_call(object_path, "ActiveState")))
+        owner_after = _unique_owner(await self._query(_owner_call()))
+        if owner_before != owner_after:
+            raise SystemdReadError("unavailable")
+        return SystemdUnitState(canonical, active_state, _owner_generation(owner_before))
+
+
+# Product integration uses this explicit name; the implementation remains the
+# fixed dbus-next reader above and exposes no additional transport surface.
+SystemdUserBusBackend = DbusNextUserManager
+
+
+def _owner_call() -> SystemdBusCall:
+    return SystemdBusCall(_DBUS_DESTINATION, _DBUS_PATH, _DBUS_INTERFACE, "GetNameOwner", "s", (_SYSTEMD_DESTINATION,))
+
+
+def _get_unit_call(unit: str) -> SystemdBusCall:
+    return SystemdBusCall(_SYSTEMD_DESTINATION, _SYSTEMD_MANAGER_PATH, _SYSTEMD_MANAGER_INTERFACE, "GetUnit", "s", (unit,))
+
+
+def _property_call(path: str, property_name: Literal["Id", "ActiveState"]) -> SystemdBusCall:
+    return SystemdBusCall(_SYSTEMD_DESTINATION, path, _PROPERTIES_INTERFACE, "Get", "ss", (_SYSTEMD_UNIT_INTERFACE, property_name))
+
+
+async def _dbus_next_query(call: SystemdBusCall) -> tuple[object, ...]:
+    """Lazy dbus-next 0.2.x bridge for the fixed low-level call plan only."""
+    try:
+        from dbus_next import BusType, Message, MessageType  # type: ignore[import-not-found]
+        from dbus_next.aio import MessageBus  # type: ignore[import-not-found]
+    except Exception:
+        raise SystemdReadError("unavailable") from None
+    bus = None
+    try:
+        bus = MessageBus(bus_type=BusType.SESSION)
+        await bus.connect()
+        reply = await bus.call(Message(
+            destination=call.destination, path=call.path, interface=call.interface,
+            member=call.member, signature=call.signature, body=list(call.body),
+        ))
+        if (
+            reply.message_type != MessageType.METHOD_RETURN
+            or type(reply.body) is not list
+            or len(reply.body) != 1
+        ):
+            raise SystemdReadError("unavailable")
+        if call.interface == _PROPERTIES_INTERFACE:
+            if type(getattr(reply.body[0], "value", None)) is not str:
+                raise SystemdReadError("unavailable")
+            return (reply.body[0].value,)
+        return (reply.body[0],)
+    except SystemdReadError:
+        raise
+    except Exception:
+        raise SystemdReadError("unavailable") from None
+    finally:
+        if bus is not None:
+            try:
+                bus.disconnect()
+            except Exception:
+                pass
+
+
+def _one_string(reply: object, *, maximum: int) -> str:
+    if type(reply) is not tuple or len(reply) != 1 or type(reply[0]) is not str:
+        raise SystemdReadError("unavailable")
+    value = reply[0]
+    if not value or len(value.encode("utf-8")) > maximum or "\x00" in value:
+        raise SystemdReadError("unavailable")
+    return value
+
+
+def _unique_owner(reply: object) -> str:
+    value = _one_string(reply, maximum=128)
+    if re.fullmatch(r":[A-Za-z0-9_.-]{1,120}", value) is None:
+        raise SystemdReadError("unavailable")
+    return value
+
+
+def _unit_path(reply: object) -> str:
+    value = _one_string(reply, maximum=512)
+    if re.fullmatch(r"/org/freedesktop/systemd1/unit/[A-Za-z0-9_]+", value) is None:
+        raise SystemdReadError("unavailable")
+    return value
+
+
+def _unit_id(reply: object) -> str:
+    value = _one_string(reply, maximum=255)
+    if not _valid_unit_name(value):
+        raise SystemdReadError("unavailable")
+    return value
+
+
+def _active_state(reply: object) -> str:
+    value = _one_string(reply, maximum=16)
+    if value not in _STATES:
+        raise SystemdReadError("unavailable")
+    return value
+
+
+def _owner_generation(owner: str) -> str:
+    return hashlib.sha256(owner.encode("utf-8")).hexdigest()
+
+
+def _valid_unit_name(value: object) -> bool:
+    return bool(type(value) is str and len(value) <= 255 and re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.:@-]*\.(?:service|scope|target|timer|socket|path)", value))
 
 
 @dataclass(frozen=True, slots=True)
@@ -237,6 +420,56 @@ class SystemdSignalAdapter:
         except (AttributeError, TypeError, ValueError):
             return False
 
+    def _authorized(self, spec: SignalRequest) -> bool:
+        descriptor = self._descriptor(spec)
+        return bool(
+            self._capability_allows_read()
+            and descriptor is not None
+            and self._authorization.authorized(descriptor)
+        )
+
+    def _valid_arm(self, armed: object) -> bool:
+        try:
+            baseline = armed.anchor.baseline
+            descriptor = self._descriptor(armed.spec)
+            baseline_state = SystemdUnitState(
+                self.config.unit, baseline["active_state"], baseline["generation"]
+            )
+            return bool(
+                type(armed) is ArmedSignal
+                and self._valid_request(armed.spec)
+                and descriptor is not None
+                and armed.anchor.recovery == "state_recheck"
+                and set(baseline) == {"active_state", "generation"}
+                and type(baseline["active_state"]) is str
+                and baseline["active_state"] in _STATES
+                and baseline["active_state"] != armed.spec.where[0].value
+                and type(baseline["generation"]) is str
+                and _GENERATION.fullmatch(baseline["generation"]) is not None
+                and armed.anchor.source_anchor == _anchor_value(descriptor, baseline_state)
+            )
+        except (AttributeError, KeyError, TypeError, ValueError):
+            return False
+
+    def evaluate(self, module, armed: ArmedSignal, now: datetime, limits: EvaluationLimits):
+        """Guard generic evaluation and publication against fresh revocation."""
+        if not self._valid_arm(armed):
+            wake_id = armed.wake_id if type(armed) is ArmedSignal else None
+            return Invalid(wake_id, "SYSTEMD_ANCHOR_INVALID", ("systemd arm is invalid",))
+        if not self._authorized(armed.spec):
+            return Degraded(armed.wake_id, "SYSTEMD_AUTHORIZATION_DENIED", None)
+        outcome = module.evaluate(armed.wake_id, armed, now, limits)
+        if isinstance(outcome, Matched):
+            if not self._authorized(armed.spec):
+                return Degraded(armed.wake_id, "SYSTEMD_AUTHORIZATION_DENIED", None)
+            try:
+                published = module.reconcile_match_publication(armed.wake_id)
+            except Exception:
+                published = False
+            if published is not True:
+                return Degraded(armed.wake_id, "SYSTEMD_PUBLICATION_UNAVAILABLE", None)
+        return outcome
+
 
 class SystemdSignalRunner:
     """State recheck runner; uncertain gaps and boot changes are rebaselined."""
@@ -257,6 +490,19 @@ class SystemdSignalRunner:
         self._armed_signals = tuple(armed_signals)
         self._reason = initial_reason
         self.last_result: SourceReconcileResult | None = None
+
+    def handles(self, armed: ArmedSignal) -> bool:
+        return bool(
+            type(armed) is ArmedSignal
+            and armed.spec.source == _SOURCE
+            and armed.spec.source_instance in self._adapters
+        )
+
+    def evaluate(self, module, armed: ArmedSignal, now: datetime, limits: EvaluationLimits):
+        if not self.handles(armed):
+            wake_id = armed.wake_id if type(armed) is ArmedSignal else None
+            return Invalid(wake_id, "SYSTEMD_SOURCE_UNSUPPORTED", ("systemd source is not owned by this runner",))
+        return self._adapters[armed.spec.source_instance].evaluate(module, armed, now, limits)
 
     def reconnect(self) -> None:
         self._reason = "reconnect"
@@ -289,7 +535,7 @@ class SystemdSignalRunner:
             if persisted.expires_at is not None and now >= persisted.expires_at:
                 continue
             adapter = self._adapters.get(persisted.spec.source_instance)
-            if adapter is None or not adapter._valid_request(persisted.spec):
+            if adapter is None or not adapter._valid_arm(persisted):
                 degraded += 1
                 rows.append(SourceInstanceReconcileResult(_SOURCE, persisted.spec.source_instance, 0, 0, 1))
                 continue

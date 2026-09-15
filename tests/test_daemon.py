@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -29,6 +30,149 @@ from tests.test_signals import make_adapter, make_intent
 
 
 class DaemonTests(unittest.TestCase):
+    def test_default_runner_restores_configured_systemd_transition_and_publishes(self) -> None:
+        from codex_wake.runtime_signals import RuntimeSourceRegistry
+        from codex_wake.signals import Resume, WakeIntent
+        from codex_wake.systemd_signals import (
+            SystemdReadCapability, SystemdSignalAdapter, SystemdUnitState,
+        )
+        from codex_wake.systemd_source_config import SystemdSourceConfig, SystemdSourceStore
+
+        class FixtureManager:
+            state = "inactive"
+
+            def resolve_unit(self, unit: str, *, timeout_seconds: int) -> str:
+                return unit
+
+            def read_unit(self, unit: str, *, timeout_seconds: int) -> SystemdUnitState:
+                return SystemdUnitState(unit, self.state, "manager-a")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            source = SystemdSourceConfig(
+                "build-state", "build.service", os.geteuid(),
+                frozenset({"active", "failed"}),
+            )
+            SystemdSourceStore(root).configure(source)
+            allowed = tuple(source.descriptor(state) for state in source.target_states)
+            manager = FixtureManager()
+            registration_adapter = SystemdSignalAdapter(
+                source,
+                manager,
+                RuntimeSourceRegistry({"systemd.unit": lambda descriptor: descriptor in allowed}),
+                SystemdReadCapability("user", os.geteuid()),
+            )
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root, ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            registration = EventWake(
+                runtime, adapters=(registration_adapter,),
+                clock=lambda: datetime(2026, 9, 15, tzinfo=UTC),
+                id_factory=lambda: "wake_systemd_v2",
+            ).register(
+                WakeIntent(
+                    registration_adapter.request("active"),
+                    Resume("continue", Path(tmp), {
+                        "transport": "tmux", "tmux_socket": "/tmp/fixture", "pane": "%1",
+                    }),
+                ),
+                idempotency_key="systemd-v2",
+            )
+            self.assertIsInstance(registration, Registration)
+            runners = default_signal_runners(
+                root, runtime, systemd_backend_factory=lambda _source: manager
+            )
+            manager.state = "active"
+
+            result = poll_once(
+                root,
+                now=datetime(2026, 9, 15, 0, 0, 1, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_runners=runners,
+            )
+
+            self.assertEqual((result.fired, result.pending), (1, 0))
+            self.assertEqual(result.signal_sources[0]["source"], "systemd")
+            self.assertTrue((root / "firing" / "wake_systemd_v2.json").is_file())
+
+    def test_systemd_revocation_blocks_generic_evaluation_and_publication(self) -> None:
+        from codex_wake.runtime_signals import RuntimeSourceRegistry
+        from codex_wake.signals import EvaluationLimits, Resume, WakeIntent
+        from codex_wake.systemd_signals import (
+            SystemdReadCapability, SystemdSignalAdapter, SystemdUnitState,
+        )
+        from codex_wake.systemd_source_config import SystemdSourceConfig, SystemdSourceStore
+
+        class FixtureManager:
+            state = "inactive"
+
+            def resolve_unit(self, unit: str, *, timeout_seconds: int) -> str:
+                return unit
+
+            def read_unit(self, unit: str, *, timeout_seconds: int) -> SystemdUnitState:
+                return SystemdUnitState(unit, self.state, "manager-a")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            source = SystemdSourceConfig(
+                "build-state", "build.service", os.geteuid(), frozenset({"active"})
+            )
+            store = SystemdSourceStore(root)
+            store.configure(source)
+            manager = FixtureManager()
+            adapter = SystemdSignalAdapter(
+                source,
+                manager,
+                RuntimeSourceRegistry({"systemd.unit": lambda _descriptor: True}),
+                SystemdReadCapability("user", os.geteuid()),
+            )
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root, ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            registration = EventWake(
+                runtime, adapters=(adapter,),
+                clock=lambda: datetime(2026, 9, 15, tzinfo=UTC),
+                id_factory=lambda: "wake_revoked_systemd",
+            ).register(
+                WakeIntent(
+                    adapter.request("active"),
+                    Resume("continue", Path(tmp), {
+                        "transport": "tmux", "tmux_socket": "/tmp/fixture", "pane": "%1",
+                    }),
+                ),
+                idempotency_key="revoked-systemd-v2",
+            )
+            armed = runtime.load_armed_signal(registration.wake_id)
+            runner = default_signal_runners(
+                root, runtime, systemd_backend_factory=lambda _source: manager
+            )[0]
+            runner.reconcile(runtime, datetime(2026, 9, 15, 0, 0, 1, tzinfo=UTC), EvaluationLimits(8))
+            manager.state = "active"
+            runner.reconcile(runtime, datetime(2026, 9, 15, 0, 0, 2, tzinfo=UTC), EvaluationLimits(8))
+            store.configure(SystemdSourceConfig(
+                "build-state", "build.service", os.geteuid(),
+                frozenset({"active"}), enabled=False,
+            ))
+
+            result = poll_once(
+                root,
+                now=datetime(2026, 9, 15, 0, 0, 3, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_runners=(runner,),
+            )
+
+            self.assertEqual((result.fired, result.pending), (0, 1))
+            self.assertTrue((root / "pending" / "wake_revoked_systemd.json").is_file())
+            self.assertFalse((root / "firing" / "wake_revoked_systemd.json").exists())
+
     def test_default_runner_restores_process_exit_and_publishes_one_transition(self) -> None:
         from codex_wake.process_signals import ProcessExitAdapter, ProcessExitSample
         from codex_wake.runtime_signals import RuntimeSourceDescriptor, RuntimeSourceRegistry

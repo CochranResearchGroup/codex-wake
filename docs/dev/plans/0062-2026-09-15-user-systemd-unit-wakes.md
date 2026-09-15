@@ -9,10 +9,12 @@ Integration: `squash`
 
 ## Current state
 
-The shared runtime-source contract is accepted on canonical main
-`2760402a2dc9818f43d9567c67c64ad51fb745d6`. No systemd observer or authority
-exists. This lane adds a fixed read-only current-user-manager boundary and an
-exact configured unit/state adapter.
+The pure adapter/config and shared product integration are implemented in this
+issue branch after merging canonical process-wake main. The supported
+`systemd-unit` configuration and `becomes` recipe use one exact current-user
+unit allowlist. A fresh daemon reconstructs that source through a fixed
+read-only session-bus call plan and rechecks durable configuration authority
+before observation, evaluation, and publication.
 
 ## Objective
 
@@ -34,7 +36,8 @@ contracts are reviewed. Neither worker may edit shared CLI/daemon surfaces.
 - `tests/test_systemd_source_config.py`
 - `tests/test_systemd_signals.py`
 - Primary-only serialized integration: `src/codex_wake/cli.py`,
-  `src/codex_wake/daemon.py`, and corresponding existing CLI/daemon tests
+  `src/codex_wake/daemon.py`, `pyproject.toml`, and corresponding existing
+  CLI/daemon tests
 
 Any other change stops for primary reconciliation.
 
@@ -72,7 +75,18 @@ No live systemd operation, system-manager access, mutation method, arbitrary
 D-Bus access, shell command, public ingress, installed canary, dispatch,
 release, deployment, provider call, or global runtime change.
 
+## Validation evidence
+
+- Focused systemd, configuration, CLI, and daemon tier: 115 tests passed.
+- Comprehensive Python tier: 411 tests passed.
+- OpenClaw plugin tier: 12 tests passed.
+- Compilation and diff checks passed.
+- A built wheel installed its bounded `dbus-next` dependency and imported the
+  production backend successfully in a clean virtual environment.
+- Independent adversarial review passed after bounded corrections for reply
+  shape validation and pre-observation exact-anchor validation.
+
 ## Next action
 
-Implement and review the fake-boundary adapter/config test-first, then let the
-primary serialize shared CLI/daemon integration before publishing the issue PR.
+Publish the reviewed checkpoint, reconcile active-lane custody, open the linked
+pull request, and squash-merge only after required Python 3.11/3.12 CI passes.

@@ -92,6 +92,7 @@ def default_signal_runners(
     *,
     initial_reason: Literal["startup", "periodic"] = "startup",
     github_client_factory: Callable[[GitHubPollingConfig], GitHubReadClient] | None = None,
+    systemd_backend_factory: Callable[[object], object] | None = None,
 ) -> tuple[SignalSourceRunner, ...]:
     """Reconstruct only configured source adapters referenced by durable arms."""
 
@@ -103,6 +104,7 @@ def default_signal_runners(
     github_arms: dict[str, list[ArmedSignal]] = {}
     process_adapters = {}
     process_arms: dict[str, list[ArmedSignal]] = {}
+    systemd_arms: dict[str, list[ArmedSignal]] = {}
     for item in pending_records(root):
         if classify_record(item.record) != "signal_v2":
             continue
@@ -113,6 +115,16 @@ def default_signal_runners(
             continue
         source = predicate.get("source")
         source_instance = predicate.get("source_instance")
+        if source == "systemd" and isinstance(source_instance, str):
+            armed = runtime.load_armed_signal(wake_id)
+            if (
+                armed is not None
+                and armed.spec.source == "systemd"
+                and armed.spec.kind == "unit.active_state"
+                and armed.spec.source_instance == source_instance
+            ):
+                systemd_arms.setdefault(source_instance, []).append(armed)
+            continue
         if source == "runtime" and isinstance(source_instance, str):
             armed = runtime.load_armed_signal(wake_id)
             if (
@@ -172,6 +184,52 @@ def default_signal_runners(
         ))
     for source_instance in sorted(process_arms):
         runners.append(process_adapters[source_instance].runner(process_arms[source_instance]))
+    if systemd_arms:
+        from .runtime_signals import RuntimeSourceRegistry
+        from .systemd_signals import (
+            SystemdReadCapability,
+            SystemdSignalAdapter,
+            SystemdSignalRunner,
+            SystemdUserBusBackend,
+        )
+        from .systemd_source_config import SystemdSourceStore
+
+        try:
+            configuration_store = SystemdSourceStore(root)
+            registry = configuration_store.registry()
+            systemd_adapters = []
+            referenced_arms = []
+            for source_instance in sorted(systemd_arms):
+                try:
+                    source_config = registry.select(source_instance)
+                    backend = (
+                        systemd_backend_factory(source_config)
+                        if systemd_backend_factory is not None
+                        else SystemdUserBusBackend()
+                    )
+                    systemd_adapters.append(SystemdSignalAdapter(
+                        source_config,
+                        backend,
+                        RuntimeSourceRegistry({
+                            "systemd.unit": lambda descriptor, source_instance=source_instance: (
+                                _configured_systemd_descriptor(
+                                    configuration_store, source_instance, descriptor
+                                )
+                            )
+                        }),
+                        SystemdReadCapability("user", os.geteuid()),
+                    ))
+                except (OSError, TypeError, ValueError):
+                    continue
+                referenced_arms.extend(systemd_arms[source_instance])
+            if systemd_adapters:
+                runners.append(SystemdSignalRunner(
+                    systemd_adapters,
+                    armed_signals=tuple(referenced_arms),
+                    initial_reason=initial_reason,
+                ))
+        except (OSError, TypeError, ValueError):
+            pass
     if github_arms:
         store = GitHubSourceStore(root)
         try:
@@ -212,6 +270,17 @@ def default_signal_runners(
     return tuple(runners)
 
 
+def _configured_systemd_descriptor(store, source_instance: str, descriptor) -> bool:
+    try:
+        current = store.registry().select(source_instance)
+        return any(
+            descriptor == current.descriptor(state)
+            for state in current.target_states
+        )
+    except (OSError, TypeError, ValueError):
+        return False
+
+
 def _evaluate_signal(
     runtime: SQLiteSignalModule,
     armed: ArmedSignal,
@@ -221,7 +290,7 @@ def _evaluate_signal(
 ):
     """Use a source-owned guard for runtime sources before publication."""
 
-    if armed.spec.source != "runtime":
+    if armed.spec.source not in {"runtime", "systemd"}:
         return runtime.evaluate(armed.wake_id, armed, now, limits), False
     for runner in runners:
         handles = getattr(runner, "handles", None)

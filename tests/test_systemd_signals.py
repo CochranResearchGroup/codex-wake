@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import asyncio
+import sys
 import unittest
 import tempfile
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
+from types import ModuleType, SimpleNamespace
 from unittest.mock import patch
 
 from codex_wake.runtime_signals import RuntimeSourceRegistry
@@ -13,20 +16,26 @@ from codex_wake.signals import (
     ArmContext,
     ArmedSignal,
     Degraded,
+    EvidenceSummary,
     EvaluationLimits,
     Expired,
     InMemorySignalModule,
     Invalid,
     Matched,
+    MatchToken,
+    ReceiptId,
     SignalRequest,
     WakeId,
 )
 from codex_wake.systemd_signals import (
     SystemdReadError,
     SystemdReadCapability,
+    SystemdBusCall,
+    DbusNextUserManager,
     SystemdSignalAdapter,
     SystemdSignalRunner,
     SystemdUnitState,
+    _dbus_next_query,
 )
 from codex_wake.systemd_source_config import SystemdSourceConfig
 from codex_wake.records import cancel_record
@@ -52,6 +61,24 @@ class FakeUserManager:
     def read_unit(self, unit: str, *, timeout_seconds: int) -> SystemdUnitState | None:
         self.calls.append(("read", unit))
         return self.state
+
+
+class FixedQuery:
+    def __init__(self, replies: tuple[object, ...]) -> None:
+        self.replies = list(replies)
+        self.calls: list[SystemdBusCall] = []
+
+    async def __call__(self, call: SystemdBusCall) -> tuple[object, ...]:
+        self.calls.append(call)
+        value = self.replies.pop(0)
+        if isinstance(value, BaseException):
+            raise value
+        return value
+
+
+def bus_replies(*, owner_after: str = ":1.20") -> tuple[object, ...]:
+    return ((":1.20",), ("/org/freedesktop/systemd1/unit/build_2eservice",),
+            ("build.service",), ("active",), (owner_after,))
 
 
 def adapter(manager: FakeUserManager, *, authorizer=None,
@@ -89,6 +116,81 @@ def module_at_wake_root(wake_root: Path) -> SQLiteSignalModule:
 
 
 class SystemdSignalTests(unittest.TestCase):
+    def test_dbus_next_backend_uses_only_fixed_call_plan_and_caches_one_sample(self) -> None:
+        query = FixedQuery(bus_replies())
+        backend = DbusNextUserManager(query)
+
+        self.assertEqual(backend.resolve_unit("build.service", timeout_seconds=3), "build.service")
+        sample = backend.read_unit("build.service", timeout_seconds=3)
+
+        self.assertEqual(sample, SystemdUnitState("build.service", "active", sample.generation))
+        self.assertEqual(len(sample.generation), 64)
+        self.assertEqual(
+            [(call.destination, call.path, call.interface, call.member, call.signature, call.body) for call in query.calls],
+            [
+                ("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "GetNameOwner", "s", ("org.freedesktop.systemd1",)),
+                ("org.freedesktop.systemd1", "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager", "GetUnit", "s", ("build.service",)),
+                ("org.freedesktop.systemd1", "/org/freedesktop/systemd1/unit/build_2eservice", "org.freedesktop.DBus.Properties", "Get", "ss", ("org.freedesktop.systemd1.Unit", "Id")),
+                ("org.freedesktop.systemd1", "/org/freedesktop/systemd1/unit/build_2eservice", "org.freedesktop.DBus.Properties", "Get", "ss", ("org.freedesktop.systemd1.Unit", "ActiveState")),
+                ("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "GetNameOwner", "s", ("org.freedesktop.systemd1",)),
+            ],
+        )
+
+    def test_dbus_backend_rejects_hostile_replies_owner_change_timeout_and_unavailable(self) -> None:
+        for replies in (
+            (([":1.20"],) + bus_replies()[1:]),
+            bus_replies(owner_after=":1.21"),
+            ((":1.20",), ("/wrong/path",), ("build.service",), ("active",), (":1.20",)),
+        ):
+            with self.subTest(replies=replies):
+                with self.assertRaises(SystemdReadError):
+                    DbusNextUserManager(FixedQuery(replies)).resolve_unit("build.service", timeout_seconds=1)
+
+        async def forced_timeout(awaitable, timeout):
+            awaitable.close()
+            raise TimeoutError
+
+        with patch("codex_wake.systemd_signals.asyncio.wait_for", new=forced_timeout):
+            with self.assertRaisesRegex(SystemdReadError, "systemd user-manager read failed") as timeout:
+                DbusNextUserManager(FixedQuery(bus_replies())).resolve_unit("build.service", timeout_seconds=1)
+        self.assertEqual(timeout.exception.kind, "timeout")
+        with self.assertRaises(SystemdReadError) as unavailable:
+            DbusNextUserManager(FixedQuery((RuntimeError("private transport failure"),))).resolve_unit("build.service", timeout_seconds=1)
+        self.assertEqual(unavailable.exception.kind, "unavailable")
+
+    def test_default_dbus_backend_is_lazy_and_no_test_touches_a_live_bus(self) -> None:
+        with patch("codex_wake.systemd_signals._dbus_next_query", side_effect=AssertionError("live bus")) as query:
+            with self.assertRaises(SystemdReadError):
+                DbusNextUserManager().resolve_unit("build.service", timeout_seconds=1)
+        self.assertEqual(query.call_count, 1)
+
+    def test_dbus_bridge_rejects_oversized_reply_shape_before_conversion(self) -> None:
+        root_module = ModuleType("dbus_next")
+        aio_module = ModuleType("dbus_next.aio")
+        root_module.BusType = SimpleNamespace(SESSION="session")
+        root_module.MessageType = SimpleNamespace(METHOD_RETURN="return")
+        root_module.Message = lambda **fields: fields
+
+        class FixtureBus:
+            async def connect(self):
+                return self
+
+            async def call(self, _message):
+                return SimpleNamespace(message_type="return", body=["x"] * 10_000)
+
+            def disconnect(self):
+                return None
+
+        aio_module.MessageBus = lambda **_fields: FixtureBus()
+        call = SystemdBusCall(
+            "org.freedesktop.DBus", "/org/freedesktop/DBus",
+            "org.freedesktop.DBus", "GetNameOwner", "s",
+            ("org.freedesktop.systemd1",),
+        )
+        with patch.dict(sys.modules, {"dbus_next": root_module, "dbus_next.aio": aio_module}):
+            with self.assertRaises(SystemdReadError):
+                asyncio.run(_dbus_next_query(call))
+
     def test_already_matching_registration_is_rejected_without_a_baseline(self) -> None:
         manager = FakeUserManager(SystemdUnitState("build.service", "active", "boot-a"))
         selected = adapter(manager)
@@ -332,3 +434,81 @@ class SystemdSignalTests(unittest.TestCase):
 
             self.assertEqual((result.scanned, result.observed, result.degraded), (0, 0, 1))
             self.assertEqual(manager.calls, [])
+
+    def test_runner_rejects_a_tampered_persisted_anchor_before_backend_access(self) -> None:
+        class TamperedLoader:
+            def __init__(self, persisted: ArmedSignal) -> None:
+                self.persisted = persisted
+
+            def load_armed_signal(self, _wake_id):
+                return self.persisted
+
+        with tempfile.TemporaryDirectory() as tmp:
+            manager = FakeUserManager(SystemdUnitState("build.service", "inactive", "boot-a"))
+            selected = adapter(manager)
+            module = make_module(Path(tmp) / "signals.sqlite3")
+            armed = arm(module, selected)
+            tampered = replace(
+                armed,
+                anchor=replace(armed.anchor, source_anchor="systemd:" + ("0" * 64) + ":boot-a"),
+            )
+            manager.calls.clear()
+
+            result = SystemdSignalRunner((selected,), armed_signals=(armed,)).reconcile(
+                TamperedLoader(tampered), NOW, EvaluationLimits(10)
+            )
+
+            self.assertEqual((result.scanned, result.observed, result.degraded), (0, 0, 1))
+            self.assertEqual(manager.calls, [])
+
+    def test_evaluate_rechecks_authority_and_publication_and_runner_rejects_foreign_arm(self) -> None:
+        class MatchModule:
+            def __init__(self, revoke=None, publication=True) -> None:
+                self.revoke = revoke
+                self.publication = publication
+                self.evaluated = 0
+                self.published = 0
+
+            def evaluate(self, wake_id, armed, now, limits):
+                self.evaluated += 1
+                if self.revoke is not None:
+                    self.revoke()
+                return Matched(
+                    wake_id, MatchToken("match"),
+                    EvidenceSummary(ReceiptId("receipt"), 1, None, {}), now,
+                )
+
+            def reconcile_match_publication(self, wake_id):
+                self.published += 1
+                return self.publication
+
+        with tempfile.TemporaryDirectory() as tmp:
+            manager = FakeUserManager(SystemdUnitState("build.service", "inactive", "boot-a"))
+            allowed = {"yes"}
+            selected = adapter(manager, authorizer=lambda descriptor: bool(allowed))
+            armed = arm(make_module(Path(tmp) / "signals.sqlite3"), selected)
+
+            revoked = MatchModule(revoke=allowed.clear)
+            denied = selected.evaluate(revoked, armed, NOW, EvaluationLimits(10))
+            self.assertEqual(denied, Degraded(armed.wake_id, "SYSTEMD_AUTHORIZATION_DENIED", None))
+            self.assertEqual((revoked.evaluated, revoked.published), (1, 0))
+
+            allowed.add("yes")
+            unavailable = MatchModule(publication=False)
+            failed = selected.evaluate(unavailable, armed, NOW, EvaluationLimits(10))
+            self.assertEqual(failed, Degraded(armed.wake_id, "SYSTEMD_PUBLICATION_UNAVAILABLE", None))
+            self.assertEqual((unavailable.evaluated, unavailable.published), (1, 1))
+
+            unsupported = SystemdSignalRunner((), armed_signals=()).evaluate(
+                unavailable, armed, NOW, EvaluationLimits(10)
+            )
+            self.assertIsInstance(unsupported, Invalid)
+            self.assertEqual(unsupported.code, "SYSTEMD_SOURCE_UNSUPPORTED")
+
+            tampered = replace(
+                armed,
+                anchor=replace(armed.anchor, source_anchor="systemd:" + ("0" * 64) + ":boot-a"),
+            )
+            invalid = selected.evaluate(unavailable, tampered, NOW, EvaluationLimits(10))
+            self.assertIsInstance(invalid, Invalid)
+            self.assertEqual(invalid.code, "SYSTEMD_ANCHOR_INVALID")
