@@ -2763,3 +2763,28 @@ open only until PR #56 integrates the receipt and canonical main confirms it.
 Movement is `outcome_progress`. Next action: independently review the closed
 receipt, pass PR checks, merge PR #56, and perform the final P50 reconciliation
 from canonical main.
+
+## Turn 138 | 2026-09-15
+
+Accepted the installed GitHub CI canary and closed P50.
+
+- PR #56 passed the Python 3.11 and 3.12 release gates and squash-merged the
+  verified retry-3 receipt at
+  `30c6f2d721d48cedcb12d0e55374369ece7645a4`.
+- Independent closed-world review found no receipt, redaction, provider-time,
+  counter, custody, or overclaim blocker. Canonical-main readback confirmed
+  `P50-G1-v8` / `P50-G1-C11`, after which issue #37 closed.
+- Fresh final validation from the canonical integration tree passed 349 Python
+  tests on Python 3.12 in 10.843 seconds, 349 on Python 3.11 in 11.147 seconds,
+  12 OpenClaw plugin tests, and Python source compilation.
+- Advanced the goal to `P50-G1-v9` / `P50-G1-C12`, closed the plan and roadmap
+  lane, cleared the active-lane catalog, and updated the evergreen vision to
+  distinguish the verified filesystem/GitHub foundation from future public
+  webhook and additional-source work.
+
+Acceptance state: issues #34 through #37 and #45 are closed; the installed
+canary is verified and rolled back; no P50 live effect or retry remains; the
+product lane is complete. Movement is `outcome_progress`. Next action: merge
+the issue-linked closeout PR after planning audits and both CI gates pass, then
+verify clean synchronized canonical main with no open issue, PR, lane, or
+published branch.

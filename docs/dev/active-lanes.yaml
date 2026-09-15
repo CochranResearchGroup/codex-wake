@@ -1,20 +1,3 @@
 schema_version: 1
 work_item_tracking: required
-lanes:
-  - lane: P50-issue-37-canary-retry
-    work_items:
-      - "#37"
-    branch: chore/issue-37-github-canary-retry-3
-    worktree: /home/ecochran76/workspace.local/codex-wake.issue-37-canary-retry-3
-    owner: primary-orchestrator
-    state: integration-ready
-    plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
-    expected_write_surface:
-      - docs/dev/verification/0076-2026-09-15-installed-github-ci-wake-canary.md
-    live_effect: none; retry 3 succeeded, the wake was archived, exact candidate artifacts were rolled back, and the retry loop is stopped
-    dependencies:
-      - "#45 accepted via PR #48"
-      - "operator authorization for up to five additional attempts on 2026-09-15"
-      - "retry 2 failed-safe receipt accepted via PR #54"
-      - "retry 3 installed canary verified; PR #56 carries the receipt"
-    overlaps: []
+lanes: []

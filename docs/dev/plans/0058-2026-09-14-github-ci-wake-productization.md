@@ -1,12 +1,12 @@
 # GitHub CI wake productization goal campaign
 
-State: OPEN
+State: CLOSED
 Lane: P50
 Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v8
-Checkpoint: P50-G1-C11
+Goal Version: P50-G1-v9
+Checkpoint: P50-G1-C12
 
 ## Goal objective
 
@@ -91,6 +91,15 @@ and every exact candidate runtime artifact was rolled back while the global
 installation remained `0.5.2`. Three replacement retries are consumed and
 three remain unused, but success terminates the loop: no further attempt may be
 registered. Issue #37 now awaits receipt integration and canonical readback.
+
+Checkpoint `P50-G1-C12` accepts the verified receipt through PR #56 at
+`30c6f2d721d48cedcb12d0e55374369ece7645a4`. Both required CI jobs passed;
+independent closed-world review found no blockers; canonical-main readback
+confirmed the receipt, counters, archive, and rollback; and issue #37 closed.
+Issues #34 through #37 and #45 are all closed. The final Python 3.12 and 3.11
+suites each pass 349 tests, the OpenClaw plugin passes 12 tests, compilation and
+planning audits pass, and the lane catalog is empty. P50 is complete without a
+release, deployment, provider mutation, global refresh, or further live wake.
 
 ## Scope
 
@@ -252,7 +261,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v8
+goal_version: P50-G1-v9
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
