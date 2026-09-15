@@ -2418,3 +2418,44 @@ Closed the P49 live canary and rollback.
 
 Final gate: pass planning audits, integrate the issue-closing pull request,
 verify canonical `origin/main`, and confirm issue #30 is closed.
+
+## Turn 126 | 2026-09-14
+
+Opened P50 goal `P50-G1` at checkpoint `P50-G1-C00` through
+[Plan 0058](docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md).
+
+- Reconciled clean local `main` and `origin/main` at
+  `b38678da71a661038c5b29ba503ba0d3504af5d4`, with no open issue, pull request,
+  worktree, or active lane before P50.
+- Graphiti was healthy and returned no P50-specific fact; current repo,
+  CodeGraph, provider documentation, GitHub, tests, and live readback remain
+  authoritative.
+- Opened and assigned issues #34 through #37 with stable idempotency markers.
+  #34 is ready; #35 and #36 depend on #34; #37 depends on both.
+- CodeGraph confirmed that the fixture-only `GitHubPollingAdapter` has no
+  production read client, enabled-source registry, daemon runner, or GitHub
+  registration CLI.
+- The provider/security review found a critical evidence mismatch: GitHub list
+  exhaustion does not prove complete visibility through wall-clock now, and
+  the workflow-run response exposes mutable `updated_at` rather than the
+  immutable `completed_at` assumed by the fixture model. P50 freezes a truthful
+  watermark and timestamp contract before runtime integration.
+- Official GitHub documentation confirms read endpoints for workflow runs and
+  exact attempts and documents list filters/pagination, but does not establish
+  the stronger completeness or immutable completion-time guarantees assumed by
+  the fixtures.
+- Requested model routing was `gpt-6-astra` high for provider/security,
+  `gpt-5.6-sol` high for runtime integration, and `gpt-5.6-luna` medium for
+  canary verification. The runtime worker reported the requested
+  `gpt-5.6-sol` high route; the other effective-model and allocation readbacks
+  were unavailable.
+- Kept public ingress, provider mutation, credential mutation, global install
+  refresh, deployment, tag, and release excluded. The goal permits one bounded
+  read-only provider qualification and, after product acceptance, one isolated
+  installed canary and live tmux dispatch.
+
+Acceptance state: P50 is active; issue #34 is the serialized critical-path
+packet. Movement is `outcome_progress` because the tracker, dependency graph,
+evidence blocker, and recoverable coordination lane now exist. Next action:
+merge this coordination checkpoint, then create issue #34 from exact canonical
+main and implement the smallest safe production-read tracer.
