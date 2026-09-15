@@ -5,8 +5,8 @@ Lane: P50
 Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v7
-Checkpoint: P50-G1-C10
+Goal Version: P50-G1-v8
+Checkpoint: P50-G1-C11
 
 ## Goal objective
 
@@ -80,6 +80,17 @@ the exact credential bytes returned by the authenticated GitHub CLI and that a
 bounded repository Actions read returns HTTP 200. The value and its digest
 remain prohibited from output and evidence. The primary retains all live-effect
 and integration authority.
+
+Checkpoint `P50-G1-C11` records retry 3 as `VERIFIED`. The exact installed
+candidate recovered its source, arm, checkpoint, record, and single-attempt
+bound across restart; successful CI run `34984194234` produced one verified
+post-anchor receipt, one match, one dispatch, an acknowledgement, and
+`visible_prompt_observed` in the intended Codex pane. The source retained the
+truthful positive-only warning `GITHUB_COVERAGE_UNPROVEN`. The wake was archived
+and every exact candidate runtime artifact was rolled back while the global
+installation remained `0.5.2`. Three replacement retries are consumed and
+three remain unused, but success terminates the loop: no further attempt may be
+registered. Issue #37 now awaits receipt integration and canonical readback.
 
 ## Scope
 
@@ -241,7 +252,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v7
+goal_version: P50-G1-v8
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
@@ -251,8 +262,8 @@ concurrency_limit: 2 implementation lanes plus 1 read-only reviewer
 live_provider_mutations: 0
 live_dispatch_attempts: 1
 canary_retries_after_registration: 6
-canary_retries_used: 2
-canary_retries_remaining: 4
+canary_retries_used: 3
+canary_retries_remaining: 3
 authorization_gate: material_departure_or_explicit_action_gate_only
 review_verification_mode: closed_world_if_reviewed
 checkpoint_fields: state_transition, acceptance_state, progress_classification, evidence, material_blockers, next_action_or_stop_reason
