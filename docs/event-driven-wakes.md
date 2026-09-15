@@ -11,12 +11,26 @@ external condition occurs. The design preserves Codex Wake's durable records,
 inspectable evidence, bounded delivery, and narrow resume authority while
 supporting filesystem, GitHub, runtime, data, monitoring, and human signals.
 
-> **Implementation note:** The provider-neutral contract, in-memory engine,
-> SQLite journal, capability-gated schema-v2 record projection, daemon seam,
-> bounded inspection, and fresh-process recovery proof are implemented on the
-> issue #4 delivery lane. Filesystem and GitHub adapters, webhook ingress, and
-> product-facing recipes remain later work; no provider or live-dispatch proof
-> is claimed here.
+> **Implementation note:** The provider-neutral contract, SQLite journal,
+> capability-gated schema-v2 projection, bounded daemon reconciliation,
+> filesystem adapter, and fixture-backed GitHub polling adapter are shipped.
+> GitHub polling is read-only, fixed to `api.github.com` and bounded by the
+> configured page, request, byte, history, and timeout limits. Restart recovery
+> replays from the durable source anchor and checkpoint with overlap; positive
+> observations are verified per exact attempt, while REST list exhaustion is
+> never treated as complete history. The transport-neutral signed webhook
+> ingress core is shipped; public listener exposure, secret provisioning, and
+> live GitHub delivery remain separate, opt-in work.
+
+The shipped operator surface is `codex-wake github-ci source configure|list|show`
+for nonsecret source configuration and `codex-wake github-ci completed` for a
+bounded one-attempt completion wake. The service accepts an owner-only
+`--github-credential-file PATH` and renders that path as systemd
+`EnvironmentFile=`; the file supplies resolver environment variables and is
+never copied into wake records or support output. GitHub polling is
+positive-only: `GITHUB_COVERAGE_UNPROVEN` is an expected warning rather than a
+terminal failure or complete-history claim. Provider-free smokes do not claim a
+live GitHub read, public listener, or live delivery.
 
 ## Product outcome
 
@@ -430,7 +444,7 @@ the catalog.
 | 1 | Provider-free signal module | Arm, ingest, deduplicate, match, reserve, restart, and inspect through deterministic tests. |
 | 2 | Existing predicate compatibility | Route current time, file, and process behavior through the seam without semantic drift. |
 | 3 | Filesystem state adapter | Use notifications for latency and reconciliation for restart or overflow correctness. |
-| 4 | GitHub workflow polling | Verify workflow results with fixtures and a bounded optional live read. |
+| 4 | GitHub workflow polling | Verify workflow results with fixtures and a bounded optional live read; checkpoint and replay limits remain explicit. |
 | 5 | Signed GitHub webhook ingress | Reduce latency while converging with polling through the same receipt identity. |
 | 6 | Local runtime sources | Add process, systemd, socket, mount, and health transitions through declared contracts. |
 | 7 | Governed data and human sources | Add queues, artifacts, approvals, monitoring, and communications only with source-specific privacy and authority rules. |

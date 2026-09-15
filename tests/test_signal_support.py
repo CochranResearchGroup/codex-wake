@@ -10,6 +10,8 @@ from unittest.mock import patch
 from codex_wake.daemon import PollResult, poll_result_dict
 from codex_wake.event_wake import EventWake
 from codex_wake.filesystem_signals import FilesystemSignalAdapter
+from codex_wake.github_polling import GitHubPollingAdapter, GitHubPollingConfig
+from codex_wake.github_source_config import GitHubSourceStore
 from codex_wake.monitor import read_monitor_health, write_monitor_health
 from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
 from codex_wake.signal_store import SQLiteSignalModule
@@ -20,6 +22,7 @@ from codex_wake.signal_support import (
     MAX_SUPPORT_WAKES,
     export_signal_support,
     signal_readiness,
+    github_source_readiness,
 )
 
 
@@ -27,6 +30,53 @@ NOW = datetime(2026, 9, 14, 18, 0, tzinfo=UTC)
 
 
 class SignalSupportTests(unittest.TestCase):
+    def test_github_readiness_is_sanitized_and_separates_support_dimensions(self) -> None:
+        config = type("Config", (), {"enabled": True, "hostname": "github.com"})()
+        result = github_source_readiness(
+            config,
+            health={
+                "credential_capability": "ready",
+                "degraded": 0,
+                "checkpoint_present": True,
+                "replay_lag_seconds": 12,
+                "code": "GITHUB_RATE_LIMITED",
+                "token": "do-not-copy",
+            },
+            checkpoint=object(),
+        )
+        self.assertEqual(result["status"], "warning")
+        self.assertEqual(result["configuration"]["status"], "ready")
+        self.assertEqual(result["credential_capability"]["status"], "ready")
+        self.assertNotIn("value_present", result["credential_capability"])
+        self.assertEqual(result["checkpoint"]["status"], "ready")
+        self.assertEqual(result["replay_lag"]["seconds"], 12)
+        self.assertEqual(result["health_code"], "GITHUB_RATE_LIMITED")
+        self.assertEqual(result["terminal_failure"]["code"], "")
+        self.assertFalse(result["disabled"])
+        self.assertNotIn("do-not-copy", json.dumps(result))
+
+        configured = github_source_readiness(type("Config", (), {"enabled": True, "hostname": "github.com", "credential_ref": "named-ref"})())
+        self.assertEqual(configured["status"], "warning")
+        self.assertEqual(configured["health"]["status"], "warning")
+        self.assertEqual(configured["credential_capability"]["status"], "configured_reference")
+        self.assertNotIn("value_present", json.dumps(configured))
+
+        auth = github_source_readiness(
+            type("Config", (), {"enabled": True, "hostname": "github.com", "credential_ref": "named-ref"})(),
+            health={"code": "GITHUB_AUTH_UNAVAILABLE"},
+        )
+        self.assertEqual(auth["status"], "blocked")
+        self.assertEqual(auth["credential_capability"]["status"], "unavailable")
+        self.assertEqual(auth["terminal_failure"]["status"], "not_present")
+
+    def test_github_readiness_distinguishes_disabled_and_unsupported(self) -> None:
+        disabled = github_source_readiness(type("Config", (), {"enabled": False, "hostname": "github.com"})())
+        unsupported = github_source_readiness(type("Config", (), {"enabled": True, "hostname": "github.example"})())
+        self.assertEqual(disabled["status"], "disabled")
+        self.assertTrue(disabled["disabled"])
+        self.assertEqual(unsupported["status"], "unsupported")
+        self.assertTrue(unsupported["unsupported"])
+
     def test_export_rejects_runtime_destination_without_touching_journal(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             wake_root = Path(tmp) / "wake"
@@ -189,6 +239,81 @@ class SignalSupportTests(unittest.TestCase):
             self.assertEqual(readiness["sources"][0]["source"], "filesystem")
             self.assertEqual(readiness["sources"][0]["status"], "warning")
             self.assertIn("not yet observed", readiness["sources"][0]["message"])
+
+    def test_journal_only_github_projection_does_not_claim_disabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+            config = GitHubPollingConfig(
+                source_instance="github-ci", repository="example/project", repository_id=42,
+                workflow_id=7, refs=frozenset({"refs/heads/main"}),
+                conclusions=frozenset({"success"}), credential_ref="fixture",
+            )
+            class FixtureClient:
+                def list_runs(self, query):
+                    from codex_wake.github_polling import RunPage
+                    return RunPage((), None, None, None)
+                def get_run_attempt(self, repository, run_id, run_attempt):
+                    raise AssertionError("journal-only readiness must not contact provider")
+            runtime = SQLiteSignalModule(
+                signal_journal_path(wake_root),
+                record_publisher=WakeRecordPublisher(
+                    wake_root, ManagedReaderCapability(wake_root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            github = GitHubPollingAdapter(config, FixtureClient())
+            EventWake(runtime, adapters=(github,), clock=lambda: NOW, id_factory=lambda: "github-wake").register(
+                WakeIntent(github.request(ref="refs/heads/main", conclusions=("success",)), Resume("continue", base, {"transport": "tmux"})),
+                idempotency_key="github-journal",
+            )
+            support = signal_readiness(wake_root)["sources"][0]["support"]
+            self.assertEqual(support["status"], "configured_for_journal")
+            self.assertFalse(support["disabled"])
+            self.assertIsNone(support["configuration"]["enabled"])
+
+    def test_configured_github_sources_are_reported_without_journal_and_health_is_sanitized(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            config = GitHubPollingConfig(
+                source_instance="github-ci", repository="example/project", repository_id=42,
+                workflow_id=7, refs=frozenset({"refs/heads/main"}), conclusions=frozenset({"success"}),
+                credential_ref="fixture", enabled=False, evidence_mode="positive_only",
+            )
+            store = GitHubSourceStore(root)
+            store.configure(config)
+            readiness = signal_readiness(root)
+            self.assertEqual(len(readiness["sources"]), 1)
+            support = readiness["sources"][0]["support"]
+            self.assertEqual(support["configuration"]["status"], "disabled")
+            self.assertTrue(support["disabled"])
+            self.assertEqual(support["credential_ref"], "fixture")
+            self.assertNotIn("credential_value", json.dumps(readiness))
+
+    def test_invalid_github_health_is_an_actionable_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            store = GitHubSourceStore(root)
+            store.configure(
+                GitHubPollingConfig(
+                    source_instance="github-ci",
+                    repository="example/project",
+                    repository_id=42,
+                    workflow_id=7,
+                    refs=frozenset({"refs/heads/main"}),
+                    conclusions=frozenset({"success"}),
+                    credential_ref="fixture",
+                    enabled=True,
+                    evidence_mode="positive_only",
+                )
+            )
+            store.health_path.write_text("not-json", encoding="utf-8")
+
+            readiness = signal_readiness(root, now=NOW)
+
+            self.assertEqual(readiness["status"], "blocked")
+            support = readiness["sources"][0]["support"]
+            self.assertEqual(support["terminal_failure"]["code"], "HEALTH_INVALID")
+            self.assertEqual(support["diagnostic"], "GitHub source health is invalid")
 
     def test_support_export_is_deterministic_bounded_and_sanitized(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

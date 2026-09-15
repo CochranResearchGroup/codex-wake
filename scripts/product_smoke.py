@@ -482,10 +482,13 @@ def run_surface_smoke(
         from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
         from codex_wake.signal_store import SQLiteSignalModule
         from codex_wake.signals import EvaluationLimits, Resume, WakeIntent
+        from codex_wake.signal_support import github_source_readiness
+        from codex_wake.github_source_config import GitHubSourceStore
 
         now = datetime(2026, 9, 14, 18, 0, tzinfo=UTC)
         run = WorkflowRun('example/project', 42, 7, 101, 1, 'refs/heads/main', 'a' * 40,
-                          'completed', 'success', now + timedelta(seconds=1))
+                          'completed', 'success', None, now + timedelta(seconds=1),
+                          'github_attempt_started_or_job_completed_lower_bound')
         class FixtureClient:
             def list_runs(self, query):
                 return RunPage((run,), None, now - timedelta(days=1), query.until)
@@ -494,17 +497,23 @@ def run_surface_smoke(
         config = GitHubPollingConfig(
             source_instance='github-ci', repository='example/project', repository_id=42,
             workflow_id=7, refs=frozenset({'refs/heads/main'}),
-            conclusions=frozenset({'success'}), credential_ref='fixture-only'
+            conclusions=frozenset({'success'}), credential_ref='fixture-only',
+            evidence_mode='positive_only'
         )
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / 'wake'
+            source_store = GitHubSourceStore(root)
+            source_store.configure(config)
+            reloaded_config = GitHubSourceStore(root).registry().select('github-ci')
+            if reloaded_config != config:
+                raise SystemExit('GitHub source configuration did not survive reload')
             runtime = SQLiteSignalModule(
                 signal_journal_path(root),
                 record_publisher=WakeRecordPublisher(
                     root, ManagedReaderCapability(root, 'fixture-reader', 1, frozenset({1, 2}), True)
                 ),
             )
-            adapter = GitHubPollingAdapter(config, FixtureClient())
+            adapter = GitHubPollingAdapter(reloaded_config, FixtureClient())
             registration = EventWake(runtime, adapters=(adapter,), clock=lambda: now,
                                      id_factory=lambda: 'wake_github_fixture').register(
                 WakeIntent(adapter.request(ref='refs/heads/main', conclusions=('success',)),
@@ -518,8 +527,17 @@ def run_surface_smoke(
                                        now + timedelta(seconds=2), EvaluationLimits(20))
             if getattr(matched, 'outcome', '') != 'matched':
                 raise SystemExit('fixture-backed GitHub signal did not match')
+            readiness = github_source_readiness(
+                reloaded_config, health={'credential_capability': 'ready',
+                                'checked_at': now.isoformat(),
+                                'checkpoint_present': True,
+                                'replay_lag_seconds': 0},
+                checkpoint=runtime.source_checkpoint('github', 'github-ci'))
+            if readiness['status'] != 'ready' or readiness['credential_capability']['status'] != 'ready':
+                raise SystemExit('GitHub readiness projection did not report the fixture lifecycle as ready')
             print(json.dumps({'status': matched.outcome, 'source': armed.spec.source,
-                              'receipts': len(ingested.receipts)}))
+                              'receipts': len(ingested.receipts),
+                              'readiness': readiness}))
         """
     )
     github_fixture = run_json(
