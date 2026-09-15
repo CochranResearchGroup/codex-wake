@@ -1,22 +1,23 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - lane: P50-coordination
+  - lane: P50-issue-34
     work_items:
       - "#34"
-      - "#35"
-      - "#36"
-      - "#37"
-    branch: docs/p50-github-ci-productization-plan
-    worktree: /home/ecochran76/workspace.local/codex-wake
-    owner: primary
+    branch: feat/issue-34-github-history-evidence
+    worktree: /home/ecochran76/workspace.local/codex-wake.issue-34
+    owner: p50-provider-runtime
     state: active
     plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
     expected_write_surface:
-      - ROADMAP.md
-      - RUNBOOK.md
-      - docs/dev/active-lanes.yaml
+      - src/codex_wake/github_polling.py
+      - src/codex_wake/github_source_config.py
+      - src/codex_wake/github_client.py
+      - src/codex_wake/signal_store.py
+      - tests/test_github_polling.py
+      - tests/test_github_client.py
+      - tests/test_github_source_config.py
       - docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
-    live_effect: none
+    live_effect: bounded read-only GitHub qualification after provider-free gates
     dependencies: []
     overlaps: []

@@ -6,7 +6,7 @@ Issues: #34, #35, #36, #37
 Branch: `docs/p50-github-ci-productization-plan`
 Goal ID: P50-G1
 Goal Version: P50-G1-v1
-Checkpoint: P50-G1-C00
+Checkpoint: P50-G1-C01
 
 ## Goal objective
 
@@ -41,6 +41,14 @@ advancing a production checkpoint.
 Graphiti was healthy but returned no P50-specific facts. Current repository,
 GitHub, CodeGraph, official provider documentation, tests, and live readback
 remain authoritative.
+
+Checkpoint `P50-G1-C01` accepts the coordination merge through PR #38 at
+`dadff6f570a255511feec782db9787ab22fbde85` and claims issue #34 for the
+`feat/issue-34-github-history-evidence` worktree. The provider/security and
+runtime consultations agree that list exhaustion and run `updated_at` cannot
+be promoted into complete history or immutable completion-time evidence. The
+first implementation packet must preserve that distinction and produce the
+smallest safe production-read tracer before later runtime lanes open.
 
 ## Scope
 
