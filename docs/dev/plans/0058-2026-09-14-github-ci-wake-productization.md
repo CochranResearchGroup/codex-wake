@@ -5,8 +5,8 @@ Lane: P50
 Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v4
-Checkpoint: P50-G1-C07
+Goal Version: P50-G1-v5
+Checkpoint: P50-G1-C08
 
 ## Goal objective
 
@@ -49,6 +49,17 @@ runtime consultations agree that list exhaustion and run `updated_at` cannot
 be promoted into complete history or immutable completion-time evidence. The
 first implementation packet must preserve that distinction and produce the
 smallest safe production-read tracer before later runtime lanes open.
+
+Checkpoint `P50-G1-C08` resumes issue #37 after the operator authorized up to
+five additional replacement attempts. The cumulative replacement-retry
+allowance is now six, with one replacement retry consumed and five new attempts
+remaining.
+Each attempt still creates at most one wake with `max_attempts: 1`; success, any
+ambiguous provider or dispatch outcome, or runtime drift ends the current
+attempt immediately. The candidate CLI must use the exact isolated
+`XDG_STATE_HOME` used by the service and must register with
+`--require-monitor`. The primary owns registration, trigger creation, dispatch,
+rollback, integration, and the final acceptance decision.
 
 ## Scope
 
@@ -137,10 +148,10 @@ Issue #34 is serialized because it freezes the provider-evidence contract used
 by every later slice. After #34 merges, #35 and #36 may run in parallel in
 separate worktrees. Issue #37 begins only after both are accepted on
 `origin/main`. Its first registration stopped safely on a local systemd parser
-failure, so #45 is now the sole active corrective lane. A replacement canary
-remains separately gated because `canary_retries_after_registration` is still
-zero. At most two implementation lanes plus one read-only reviewer are active
-at once.
+failure, so #45 became the sole corrective lane and is now accepted. At
+checkpoint C08, issue #37 is the sole active implementation lane; two read-only
+economical verification agents may audit the procedure and preconditions
+without effect authority. The primary remains the only effect owner.
 
 ## Issue packets
 
@@ -210,7 +221,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v4
+goal_version: P50-G1-v5
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
@@ -219,9 +230,9 @@ checkpoint_interval: 1 accepted issue or material gate
 concurrency_limit: 2 implementation lanes plus 1 read-only reviewer
 live_provider_mutations: 0
 live_dispatch_attempts: 1
-canary_retries_after_registration: 1
+canary_retries_after_registration: 6
 canary_retries_used: 1
-canary_retries_remaining: 0
+canary_retries_remaining: 5
 authorization_gate: material_departure_or_explicit_action_gate_only
 review_verification_mode: closed_world_if_reviewed
 checkpoint_fields: state_transition, acceptance_state, progress_classification, evidence, material_blockers, next_action_or_stop_reason
