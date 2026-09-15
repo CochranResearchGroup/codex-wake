@@ -686,12 +686,12 @@ Acceptance target:
 
 State: OPEN
 
-Current State: Checkpoint `P51-G1-C03` records issue #59 checkpoint `37df666`
-as integration-ready in PR #67 after focused, comprehensive, plugin,
-compilation, CI, and fresh adversarial review gates passed. Exact same-user
-process-exit and user-systemd transition adapters remain blocked until that
-contract reaches canonical main; productization joins both, and one isolated
-installed canary is the terminal acceptance slice.
+Current State: Checkpoint `P51-G1-C04` accepts issue #59 through PR #67 at
+canonical commit `2760402`. Exact same-user process-exit lane #60 and read-only
+user-systemd transition lane #61 are now published for parallel work on
+disjoint adapter/config/test surfaces. Shared CLI and daemon wiring is reserved
+to the primary for serialized reconciliation; productization joins both, and
+one isolated installed canary is the terminal acceptance slice.
 
 Plan: [Local runtime event wakes goal campaign](docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md)
 

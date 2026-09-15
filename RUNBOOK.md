@@ -2899,3 +2899,28 @@ Acceptance state: P51 is open at `P51-G1-v4` / `P51-G1-C03`; PR #67 at
 through #63 remain blocked. Movement is `outcome_progress`. Next action: merge
 this exact readiness projection, squash-merge PR #67, verify canonical main,
 then assign #60 and #61 as disjoint parallel lanes.
+
+## Turn 143 | 2026-09-15
+
+Accepted the shared runtime contract and opened both adapter lanes.
+
+- PR #68 first integrated the exact issue #59 readiness projection at
+  `fc4b0d3b41220fdf99a4f7b86bb6658ad904b786`; PR #67 then squash-merged the
+  implementation at `2760402a2dc9818f43d9567c67c64ad51fb745d6` and closed
+  issue #59.
+- Fresh canonical-main validation passed 366 Python tests with no retry. The
+  #59 worktree and local/remote topic branches were removed after integration.
+- Created and published process lane #60 at `12852dc804c52321149d0b05013edf12d0acc486`
+  and user-systemd lane #61 at `47fa1902b3aac650f2d449a2235f821e55328aad`,
+  each with a lane-specific plan and isolated worktree.
+- The lanes may implement disjoint adapter/config/test surfaces concurrently.
+  Both plans reserve overlapping CLI and daemon integration to the primary for
+  serialized reconciliation before either issue can close.
+- No live process or systemd observation, installation, dispatch, provider,
+  release, deployment, or global runtime effect occurred.
+
+Acceptance state: P51 is open at `P51-G1-v5` / `P51-G1-C04`; #59 is accepted,
+#60 and #61 are the two active implementation lanes, and #62/#63 remain
+blocked. Movement is `outcome_progress`. Next action: merge this assignment
+projection, run both pure-adapter implementations in parallel, independently
+review them, then serialize shared CLI/daemon integration.
