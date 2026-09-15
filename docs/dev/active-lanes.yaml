@@ -1,19 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - lane: P50-issue-37
+  - lane: P50-issue-45
     work_items:
-      - "#37"
-    branch: chore/issue-37-installed-github-canary
-    worktree: /home/ecochran76/workspace.local/codex-wake.issue-37
+      - "#45"
+    branch: fix/issue-45-systemd-environment-file
+    worktree: /home/ecochran76/workspace.local/codex-wake.issue-45
     owner: primary-orchestrator
     state: active
     plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
     expected_write_surface:
-      - docs/dev/verification/0072-2026-09-14-installed-github-ci-wake-canary.md
-    live_effect: one bounded read-only GitHub source and one live tmux dispatch
+      - src/codex_wake/service.py
+      - tests/test_service.py
+      - docs/dev/verification/0073-2026-09-14-systemd-environment-file-rendering.md
+    live_effect: one disposable local user-service syntax smoke with a dummy environment key
     dependencies:
-      - "#34"
-      - "#35"
-      - "#36"
+      - "#37 failed-safe receipt via PR #46"
     overlaps: []

@@ -2,11 +2,11 @@
 
 State: OPEN
 Lane: P50
-Issues: #34, #35, #36, #37
+Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v1
-Checkpoint: P50-G1-C03
+Goal Version: P50-G1-v2
+Checkpoint: P50-G1-C04
 
 ## Goal objective
 
@@ -121,6 +121,14 @@ smallest safe production-read tracer before later runtime lanes open.
                          v
               #37 isolated installed canary
                          |
+             failed-safe parser stop
+                         |
+                         v
+       #45 systemd EnvironmentFile correction
+                         |
+                         v
+            replacement #37 canary
+                         |
                          v
               P50 integrated acceptance
 ```
@@ -128,8 +136,11 @@ smallest safe production-read tracer before later runtime lanes open.
 Issue #34 is serialized because it freezes the provider-evidence contract used
 by every later slice. After #34 merges, #35 and #36 may run in parallel in
 separate worktrees. Issue #37 begins only after both are accepted on
-`origin/main`. At most two implementation lanes plus one read-only reviewer are
-active at once.
+`origin/main`. Its first registration stopped safely on a local systemd parser
+failure, so #45 is now the sole active corrective lane. A replacement canary
+remains separately gated because `canary_retries_after_registration` is still
+zero. At most two implementation lanes plus one read-only reviewer are active
+at once.
 
 ## Issue packets
 
@@ -168,6 +179,15 @@ match, one dispatch attempt, hook acknowledgement, and
 `visible_prompt_observed`. Extract a sanitized receipt, archive, uninstall, and
 remove only exact P50 artifacts recoverably.
 
+### Issue #45: systemd EnvironmentFile correction
+
+Render an absolute credential environment-file path in syntax accepted by the
+installed systemd parser, reject paths that cannot be represented safely, and
+prove the result with deterministic rendering tests, `systemd-analyze verify`,
+and one disposable local user-service key-presence smoke. No provider access,
+wake registration, dispatch, credential value, global install, or release is
+part of this correction.
+
 ## Subagent and model routing
 
 - Primary orchestrator: authority, architecture adjudication, shared contract,
@@ -190,7 +210,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v1
+goal_version: P50-G1-v2
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
@@ -264,7 +284,7 @@ record, extract evidence, and roll back without retry.
 
 ## Definition of done
 
-Issues #34 through #37 are closed from accepted evidence; their plans and
+Issues #34 through #37 and #45 are closed from accepted evidence; their plans and
 branches are reconciled; one production-configured GitHub source works through
 supported installed entrypoints; the isolated canary proves one post-anchor
 workflow occurrence and one visible bounded wake; rollback is complete;
@@ -441,3 +461,14 @@ persists and rediscovers a nonsecret source, ingests one verified fixture
 attempt, matches once, reports readiness, and performs no dispatch. Issue #37
 is unblocked as the sole active lane. Its one provider read and one tmux
 dispatch remain bound to the isolated identities and stop rules above.
+
+Checkpoint `P50-G1-C04` records the first issue #37 canary registration as a
+safe failure through PR #46 at `a80f925`. Installed systemd rejected the
+generated quoted `EnvironmentFile=` path before any GitHub provider request or
+trigger pull request existed. Wake `wake_09b5d91add724c5f8cb1ecb39ccec390`
+was cancelled and archived with zero receipts, matches, dispatch attempts,
+acknowledgements, or visibility results; every exact candidate artifact was
+rolled back recoverably. Issue #37 remains open. Corrective issue #45 is the
+sole active lane, and the zero-retry bound remains unchanged. Even after #45
+acceptance, no replacement canary wake may be registered without explicit
+operator authority to revise that bound.
