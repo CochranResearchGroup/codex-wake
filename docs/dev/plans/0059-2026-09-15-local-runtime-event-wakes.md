@@ -5,8 +5,8 @@ Lane: P51
 Issues: #58, #59, #60, #61, #62, #63
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P51-G1
-Goal Version: P51-G1-v2
-Checkpoint: P51-G1-C01
+Goal Version: P51-G1-v3
+Checkpoint: P51-G1-C02
 
 ## Goal objective
 
@@ -22,11 +22,12 @@ Checkpoint: P51-G1-C01
 
 ## Current state
 
-Checkpoint `P51-G1-C01` accepts the goal-start packet through PR #64 at
-canonical commit `0a86c1ffa79e5d1b3c5ef3338f7695881a74ce99`. The exact
-`feat/issue-59-runtime-source-contract` branch is published from that commit
-and is the sole active implementation lane. Issues #60 and #61 wait on its
-accepted contract, #62 joins both adapters, and #63 is acceptance-only.
+Checkpoint `P51-G1-C02` accepts the goal-start packet through PR #64 and the
+lane assignment through PR #65. The exact
+`feat/issue-59-runtime-source-contract` branch is synchronized with canonical
+main and published at `a5e842288bb50a87e591a7f5076b8f95ae18b3d1`; it is the
+sole active implementation lane. Issues #60 and #61 wait on its accepted
+contract, #62 joins both adapters, and #63 is acceptance-only.
 
 CodeGraph is healthy with 94 indexed files, 2,462 nodes, and 9,002 edges. It
 confirms that `SignalSourceAdapter` owns contracts and anchors,
