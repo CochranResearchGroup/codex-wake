@@ -684,14 +684,16 @@ Acceptance target:
 
 ## P51 | Local Runtime Event Wakes
 
-State: OPEN
+State: CLOSED
 
-Current State: Checkpoint `P51-G1-C04` accepts issue #59 through PR #67 at
-canonical commit `2760402`. Exact same-user process-exit lane #60 and read-only
-user-systemd transition lane #61 are now published for parallel work on
-disjoint adapter/config/test surfaces. Shared CLI and daemon wiring is reserved
-to the primary for serialized reconciliation; productization joins both, and
-one isolated installed canary is the terminal acceptance slice.
+Current State: Checkpoint `P51-G1-C11` accepts the runtime contract, exact
+same-user process-exit wake, read-only user-systemd transition wake, shared
+product lifecycle, and installed canary through issues #59 through #63 and PRs
+#67, #71, #73, #77, and #79. The final installed receipt proves one exact
+restart-recovered systemd transition, one acknowledged and visibly observed
+tmux wake, archive, and complete isolated rollback without global or normal
+runtime drift. The active-lane projection is empty and parent issue #58 closes
+with the final coordination merge.
 
 Plan: [Local runtime event wakes goal campaign](docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md)
 
@@ -707,3 +709,15 @@ Acceptance target:
   compatibility surfaces remain truthful and tested.
 - One isolated installed candidate produces one bounded visible wake, archives,
   and rolls back without global or unrelated runtime drift.
+
+Completion evidence:
+
+- Process wake canonical commit:
+  `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3`.
+- User-systemd wake canonical commit:
+  `f41ef0ba6d5b37ab85bea7a1cebbc9bd6b0ad748`.
+- Productization canonical commit:
+  `08447afdfe0384b23d73079e4579ca050dffe2c0`.
+- Installed canary canonical commit:
+  `00af8fa2142ce5adb102f48ba651c6a09c02df1b` and verification receipt
+  [0077](docs/dev/verification/0077-2026-09-15-installed-runtime-wake-canary.md).
