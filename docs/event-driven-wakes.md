@@ -1,6 +1,6 @@
 ---
-last_updated: 2026-09-14
-status: foundation-in-progress
+last_updated: 2026-09-15
+status: filesystem-and-github-foundation-verified
 applies_to: post-v0.5.2 product development
 ---
 
@@ -20,7 +20,10 @@ supporting filesystem, GitHub, runtime, data, monitoring, and human signals.
 > observations are verified per exact attempt, while REST list exhaustion is
 > never treated as complete history. The transport-neutral signed webhook
 > ingress core is shipped; public listener exposure, secret provisioning, and
-> live GitHub delivery remain separate, opt-in work.
+> live webhook delivery remain separate, opt-in work. Isolated installed
+> canaries have now verified restart-correct filesystem and GitHub CI visible
+> wakes through the supported product surfaces, with exact archive and rollback
+> evidence and no global installation refresh.
 
 The shipped operator surface is `codex-wake github-ci source configure|list|show`
 for nonsecret source configuration and `codex-wake github-ci completed` for a
@@ -551,7 +554,11 @@ Completion requires all of these outcomes:
 
 ## Next steps
 
-Implementation starts only after the shared contract becomes an approved issue
-slice. Track the current vision work in
-[GitHub issue #2](https://github.com/CochranResearchGroup/codex-wake/issues/2)
-and the [event-driven wakes product-lane plan](dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md).
+The provider-neutral foundation and installed filesystem and GitHub polling
+proofs are complete. Future work should open new issue-linked slices for public
+signed-webhook deployment, local runtime sources, or governed data and human
+sources, preserving the authority and evidence boundaries in this vision.
+Historical coordination remains in
+[GitHub issue #2](https://github.com/CochranResearchGroup/codex-wake/issues/2),
+the [event-driven wakes product-lane plan](dev/plans/0048-2026-09-14-event-driven-wakes-product-lane.md),
+and the closed P49 and P50 goal plans.

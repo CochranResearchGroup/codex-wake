@@ -651,15 +651,17 @@ Acceptance target:
 
 ## P50 | GitHub CI Wake Productization And Installed Canary
 
-State: OPEN
+State: CLOSED
 
-Current State: Checkpoint `P50-G1-C00` opened issues #34 through #37 from clean
-`origin/main` `b38678d`. The critical path starts with production-safe history
-and timestamp evidence because the accepted fixture adapter currently assumes
-coverage through the poll clock and an immutable completion timestamp that the
-GitHub workflow-run response does not directly provide. Daemon/CLI and
-readiness lanes remain blocked until that contract merges; the installed
-canary remains blocked on both product lanes.
+Current State: Checkpoint `P50-G1-C12` accepts issues #34 through #37 and #45.
+The production source is fixed-origin, bounded, read-only, positive-only, and
+explicitly reports `GITHUB_COVERAGE_UNPROVEN`; it never promotes list exhaustion
+or mutable `updated_at` into complete-history or completion-time evidence. The
+supported CLI, daemon recovery, readiness, support, and installed-wheel paths
+are canonical. Installed retry 3 observed successful run `34984194234`, matched
+once, dispatched once with `visible_prompt_observed`, archived, and rolled back
+without global-runtime drift. PR #56 merged its verified receipt at
+`30c6f2d721d48cedcb12d0e55374369ece7645a4`; no P50 live effect remains.
 
 Plan: [GitHub CI wake productization goal campaign](docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md)
 
