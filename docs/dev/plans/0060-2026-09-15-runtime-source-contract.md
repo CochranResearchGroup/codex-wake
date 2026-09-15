@@ -31,7 +31,7 @@ the existing signal journal and runner lifecycle.
 - Exact descriptor validation and source-specific authorization hooks.
 - Bounded tracer observations for registration, baseline, transition,
   repeated reconciliation, restart reconstruction, revocation, cancellation,
-  timeout, degradation, and resource ceilings.
+  wake expiration, degradation, and resource ceilings.
 - Stable sanitized diagnostic fields and occurrence inputs sufficient for the
   later process and user-systemd adapters.
 - Provider-free unit and crash-boundary tests.
@@ -44,13 +44,16 @@ the existing signal journal and runner lifecycle.
   public ingress, release, deployment, or global runtime change.
 - No new scheduler, dispatch path, arbitrary command, wildcard selector, or
   source-selected executable behavior.
+- No preemptive execution of arbitrary observer callbacks. Observers are
+  trusted product code; each real adapter must enforce a bounded backend call
+  at its own operating-system or client boundary.
 
 ## Write surface
 
-- `src/codex_wake/signals/base.py`
-- `src/codex_wake/signals/runner.py`
-- `src/codex_wake/signals/registry.py`
-- `src/codex_wake/signals/tracer.py`
+- `src/codex_wake/signals.py` only for a minimal shared protocol or type
+  extension proven necessary by focused tests
+- `src/codex_wake/runtime_signals.py`
+- `src/codex_wake/runtime_signal_tracer.py`
 - `tests/test_signal_source_contract.py`
 - `tests/test_signal_source_tracer.py`
 
@@ -62,8 +65,9 @@ reconciliation before editing.
 - Unknown source kinds and fields are rejected deterministically.
 - Requests cannot widen the exact resources authorized in operator-owned
   configuration.
-- Revocation prevents new observation and publication without inventing a
-  match or discarding journal history.
+- Revocation linearizes at the last successful authorization guard, prevents
+  work at the next guarded boundary, and never invents a match, retracts an
+  in-flight or reserved occurrence, or discards journal history.
 - Repeated reconciliation, restart reconstruction, and journal crash points
   preserve one stable logical occurrence and cannot duplicate publication.
 - Observation and diagnostic payloads are bounded, sanitized, and exclude
