@@ -11,17 +11,29 @@ Integration: `squash`
 
 Install the exact accepted P51 candidate into an isolated virtual environment
 and named user service, then prove one exact configured current-user systemd
-unit transition survives one controlled daemon restart and produces exactly one
-bounded visible wake in the captured Codex tmux pane. Archive and roll back all
-canary artifacts without changing the global installation or normal wake root.
+unit transition survives one controlled post-registration daemon restart and
+produces exactly one bounded visible wake in the captured Codex tmux pane.
+Archive and roll back all canary artifacts without changing the global
+installation or normal wake root.
 
 ## Current state
 
 Issues #59 through #62 are closed. Productization PR #77 is merged at canonical
 `origin/main` commit `08447afdfe0384b23d73079e4579ca050dffe2c0`, with both
 Python CI gates green. No P51 installed canary attempt has been registered.
-Preflight, plan review, candidate build, isolated installation, runtime setup,
-registration, transition, dispatch, and rollback remain.
+Preflight, plan review, candidate build, isolated installation, and initial
+runtime setup are complete. The first registration command failed closed before
+writing a wake because the inactive target unit was not loaded in the user
+manager; the isolated journal remains empty and no dispatch occurred. One
+bounded pre-registration fixture repair, registration, transition, dispatch,
+and rollback remain.
+
+The candidate service lifecycle before this amendment comprised its initial
+setup start and one fail-safe stop/start while waiting for the required hook
+confirmation. Applying the fixture repair may consume one more
+pre-registration stop/start. The recovery proof then consumes exactly one
+post-registration restart. These are three total stop/start cycles after the
+initial activation, with no fourth restart path.
 
 ## Source selection
 
@@ -58,6 +70,10 @@ unit completion, process exit status, or exact transition time.
 - dispatch bound: `max_attempts: 1`
 - transport: current live tmux pane captured at registration
 
+The visible tmux target is window index `34` (`wake`), containing internal pane
+ID `%33`; both identifiers and `/dev/pts/38` are captured to avoid conflating a
+window index with a pane ID.
+
 The source archive is created from the exact canonical commit, so this receipt
 branch and its plan do not alter candidate bytes. The candidate daemon uses
 only the venv's absolute `codex-waked`, exact wake root, exact source tree as
@@ -68,7 +84,9 @@ working directory, one-second interval, and isolated `XDG_STATE_HOME`.
 Authorized effects are one isolated venv/build, one named candidate daemon
 service, one disposable same-user target unit, one named delayed transition
 trigger, one systemd source configuration, one wake registration, one
-controlled daemon restart, one target start, and at most one tmux dispatch.
+hook-gate pause/resume already consumed, one pre-registration fixture-repair
+restart, one controlled post-registration recovery restart, one target start,
+and at most one tmux dispatch.
 
 No global tool refresh, normal repo wake-root mutation, supervisor enrollment,
 credential change, provider call or mutation, public ingress, system-manager
@@ -90,9 +108,13 @@ disposable target.
 3. Archive canonical commit `08447afd...` into the exact source root, build one
    wheel, record its SHA-256, create the venv, and install only that wheel.
 4. Write the two exact user-unit files. The target is a benign oneshot with
-   `RemainAfterExit=yes`; it starts inactive. Reload the user manager, start the
-   candidate daemon, and prove unit PID/executable/root/environment plus recent
-   monitor, doctor, readiness, and empty-wake-root state.
+   `RemainAfterExit=yes`; it starts inactive. The candidate daemon unit carries
+   only an `After=codex-wake-p51-target.service` ordering reference to keep the
+   exact inactive target loaded for the observer's fixed `GetUnit` call; this
+   reference does not activate the target. Reload the user manager, start the
+   candidate daemon, and prove unit PID/executable/root/environment, target
+   `LoadState=loaded` with `ActiveState=inactive`, plus recent monitor, doctor,
+   readiness, and empty-wake-root state.
 5. Configure the exact target unit/source with the candidate CLI. Arm one
    `systemd-unit becomes active` wake with `--require-monitor`, the stable
    idempotency key, and `--max-attempts 1`; confirm inactive baseline, exact
@@ -127,6 +149,9 @@ disposable target.
 - Registration observes a nonmatching inactive baseline. One controlled daemon
   restart recovers the same pending identity with zero attempts before the
   target transition.
+- The target remains inactive while the active candidate service's exact
+  ordering reference keeps it loaded; no product call loads, starts, or mutates
+  the target.
 - The delayed owner-controlled target start yields one verified observation,
   stable occurrence identity, one match, exactly one dispatch attempt, hook
   acknowledgement, and `visible_prompt_observed` in the captured pane.
@@ -143,7 +168,12 @@ disposable target.
 
 - installed canary attempts: one; retries after registration: zero
 - live dispatch attempts: one; wake `max_attempts`: one
-- daemon restarts: one before transition
+- candidate-service activations: four total including initial setup, the
+  already-consumed hook-gate resume, one fixture-repair activation, and one
+  post-registration recovery activation
+- candidate-service stop/start cycles after initial activation: three total;
+  hook-gate pause/resume already consumed, fixture repair one, recovery proof
+  one; no additional restart path
 - review: one read-only plan/runtime-boundary review before mutation
 - pre-effect repair: one bounded cycle; implementation defects require a new
   linked corrective issue and no canary registration
@@ -155,11 +185,12 @@ present, the candidate commit differs, the target pane is absent/dead, the hook
 is not installed and loaded in the active pane, or global/normal state cannot
 be captured. Stop before
 registration if wheel/executable/service/root/config identities disagree,
-monitor readiness is false, the target is not inactive, the wake root is not
-otherwise empty, or dispatch cannot be bounded to one. Stop before transition
-if restart recovery, exact source health, pending state, zero-attempt count, or
-target identity is ambiguous. After registration, inspect and roll back the
-original record on any uncertainty; never create a replacement wake.
+monitor readiness is false, the target is not both loaded and inactive, the
+wake root is not otherwise empty, or dispatch cannot be bounded to one. Stop
+before transition if restart recovery, exact source health, pending state,
+zero-attempt count, or target identity is ambiguous. After registration,
+inspect and roll back the original record on any uncertainty; never create a
+replacement wake.
 
 ## Rollback
 
