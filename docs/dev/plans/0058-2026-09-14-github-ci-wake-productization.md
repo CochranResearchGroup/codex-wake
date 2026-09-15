@@ -5,8 +5,8 @@ Lane: P50
 Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v2
-Checkpoint: P50-G1-C05
+Goal Version: P50-G1-v3
+Checkpoint: P50-G1-C06
 
 ## Goal objective
 
@@ -210,7 +210,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v2
+goal_version: P50-G1-v3
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
@@ -219,7 +219,7 @@ checkpoint_interval: 1 accepted issue or material gate
 concurrency_limit: 2 implementation lanes plus 1 read-only reviewer
 live_provider_mutations: 0
 live_dispatch_attempts: 1
-canary_retries_after_registration: 0
+canary_retries_after_registration: 1
 authorization_gate: material_departure_or_explicit_action_gate_only
 review_verification_mode: closed_world_if_reviewed
 checkpoint_fields: state_transition, acceptance_state, progress_classification, evidence, material_blockers, next_action_or_stop_reason
@@ -484,3 +484,12 @@ process, candidate, build, worktree, and branch cleanup completed. Issue #45
 is closed and no implementation lane remains active. Issue #37 is the only
 open P50 item and remains blocked solely on explicit operator authorization to
 revise the zero-retry bound for one replacement canary.
+
+Checkpoint `P50-G1-C06` records the operator's 2026-09-15 `ok go`
+authorization for exactly one replacement isolated P50 GitHub CI canary wake
+and at most one live tmux dispatch under the existing identity, evidence, stop,
+and rollback rules. Goal version `P50-G1-v3` raises
+`canary_retries_after_registration` from zero to one; it does not renew any
+other attempt, review, mutation, or dispatch allowance. Issue #37 returns to
+`IN_PROGRESS` as the sole active lane. Any ambiguity after registration ends
+the replacement attempt without another wake or retry.

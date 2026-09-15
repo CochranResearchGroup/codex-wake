@@ -2604,3 +2604,24 @@ Movement is `blocker_reduction`. Stop reason: the approved plan fixes
 consumed. The next action requires explicit operator authorization for exactly
 one replacement isolated canary wake and at most one live tmux dispatch under
 the existing identities, stop rules, and rollback contract.
+
+## Turn 132 | 2026-09-15
+
+Resumed the replacement installed GitHub wake canary under explicit operator
+authority.
+
+- The operator replied `ok go` to the exact request for one replacement
+  isolated P50 GitHub CI canary wake and at most one live tmux dispatch.
+- Advanced the control record to `P50-G1-v3` / `P50-G1-C06` and changed only
+  `canary_retries_after_registration` from zero to one.
+- Retained the existing one-dispatch maximum, source/repository/workflow/ref
+  binding, max-attempts-one wake record, no-provider-mutation rule, ambiguity
+  stop, sanitized evidence requirements, and exact recoverable rollback.
+- Registered #37 as the sole active lane. Primary owns the live effect; no
+  subagent may arm, trigger, dispatch, archive, or remove canary state.
+
+Acceptance state: issue #37 is authorized to resume but no replacement wake or
+provider occurrence exists yet. Movement is `blocker_reduction`. Next action:
+merge this authority checkpoint, freeze the new canonical candidate identity,
+preflight the exact source/service/target, and arm once before opening the
+receipt pull request that supplies the selected CI completion.
