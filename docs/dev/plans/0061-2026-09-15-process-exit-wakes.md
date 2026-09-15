@@ -1,6 +1,6 @@
 # Restart-correct process-exit wakes
 
-State: OPEN
+State: CLOSED
 Lane: P51-C2
 Issue: #60
 Branch: `feat/issue-60-process-exit-wakes`
@@ -9,11 +9,11 @@ Integration: `squash`
 
 ## Current state
 
-The pure adapter and shared product integration are implemented through
-`2a3258e376ba94952291957caa0e6e0f75fd42a8`. The supported `process-exit`
-recipe registers a schema-v2 arm, and a fresh daemon reconstructs the exact
-descriptor and routes evaluation through the source-owned authorization guard.
-Legacy `process_done` remains a separate, unchanged compatibility path.
+The accepted implementation was squash-merged through PR #71 at canonical
+main commit `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3`, closing issue #60. The
+supported `process-exit` recipe registers a schema-v2 arm, and a fresh daemon
+reconstructs the exact descriptor and routes evaluation through the
+source-owned authorization guard. Legacy `process_done` remains unchanged.
 
 ## Objective
 
@@ -81,5 +81,5 @@ deployment, provider call, or global runtime change.
 
 ## Next action
 
-Publish the issue branch, open the linked pull request, pass required CI, and
-squash-merge only after the active-lane checkpoint is reconciled.
+Continue P51 through the separately governed systemd integration and shared
+product-readiness slice; no process-lane work remains.
