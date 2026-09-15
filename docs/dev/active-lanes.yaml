@@ -9,7 +9,7 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: INTEGRATION_READY
-    checkpoint: 2746c4c5cf1e8e9de0ea7fd9bc20fed39ecb8679
+    checkpoint: 692fb72df6561ca495f2ec6a7285d00aadce208b
     remote_ref: refs/remotes/origin/feat/issue-61-systemd-unit-wakes
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#61]
