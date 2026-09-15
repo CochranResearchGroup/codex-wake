@@ -1,6 +1,6 @@
 # User-systemd unit transition wakes
 
-State: OPEN
+State: CLOSED
 Lane: P51-C3
 Issue: #61
 Branch: `feat/issue-61-systemd-unit-wakes`
@@ -9,8 +9,9 @@ Integration: `squash`
 
 ## Current state
 
-The pure adapter/config and shared product integration are implemented in this
-issue branch after merging canonical process-wake main. The supported
+The pure adapter/config and shared product integration were squash-merged
+through PR #73 at canonical main commit
+`f41ef0ba6d5b37ab85bea7a1cebbc9bd6b0ad748`, closing issue #61. The supported
 `systemd-unit` configuration and `becomes` recipe use one exact current-user
 unit allowlist. A fresh daemon reconstructs that source through a fixed
 read-only session-bus call plan and rechecks durable configuration authority
@@ -86,7 +87,15 @@ release, deployment, provider call, or global runtime change.
 - Independent adversarial review passed after bounded corrections for reply
   shape validation and pre-observation exact-anchor validation.
 
+## Integration receipt
+
+PR #73's initial Python 3.11/3.12 run failed because one hermetic fixture
+hard-coded UID 1000 while the hosted runner used another effective UID. The
+production same-user denial was correct. The fixture now patches the effective
+UID deterministically; the comprehensive 411-test local tier remained green,
+and both CI versions passed on the first authorized retry. The PR was
+squash-merged and canonical-main ancestry was read back at the commit above.
+
 ## Next action
 
-Publish the reviewed checkpoint, reconcile active-lane custody, open the linked
-pull request, and squash-merge only after required Python 3.11/3.12 CI passes.
+Continue through productization join #62. No systemd-adapter work remains.
