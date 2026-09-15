@@ -14,7 +14,7 @@ the supported readiness, status, support, documentation, packaging, and
 provider-free lifecycle surfaces without changing their frozen identity,
 authorization, observation, occurrence, or dispatch contracts.
 
-## Dependency and current state
+## Current state
 
 Process lane #60 is accepted through PR #71 at canonical commit
 `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3`. Systemd lane #61 is accepted
