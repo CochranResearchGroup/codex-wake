@@ -2710,3 +2710,25 @@ is still unmet. Movement is `blocker_reduction`; the attempt was contained and
 the exact procedure fault has a deterministic pre-registration guard. Next
 action: merge the failed-safe receipt, start retry 3 from canonical main, and
 stop on success or any ambiguity.
+
+## Turn 136 | 2026-09-15
+
+Accepted the retry-2 failed-safe receipt and assigned retry 3.
+
+- PR #54 passed the Python 3.11 and 3.12 release gates and squash-merged at
+  `42f3ef36faf710b4a1be9e2c3e1742c6bf8b818b`.
+- Closed-world independent review verified that the receipt exposes no
+  credential value or digest, that the issue counter reports two consumed and
+  four remaining attempts, and that retry 2 retained truthful integration
+  custody until merge.
+- Created and pushed `chore/issue-37-github-canary-retry-3` from exact canonical
+  main before assigning it in the active-lane catalog.
+- Advanced the control record to `P50-G1-v7` / `P50-G1-C10`. Retry 3 adds a
+  pre-registration guard proving service-process credential equality and a
+  bounded HTTP 200 without printing or hashing the value.
+
+Acceptance state: issue #37 remains open; four authorized attempts remain and
+retry 3 is the sole active lane. Movement is `blocker_reduction`. Next action:
+merge this truthful custody checkpoint, fast-forward the retry-3 branch to it,
+freeze the installed candidate identity, and execute one attempt under the
+new credential guard.

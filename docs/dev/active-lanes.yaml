@@ -4,16 +4,16 @@ lanes:
   - lane: P50-issue-37-canary-retry
     work_items:
       - "#37"
-    branch: chore/issue-37-github-canary-retry-2
-    worktree: /home/ecochran76/workspace.local/codex-wake.issue-37-canary-retry-2
+    branch: chore/issue-37-github-canary-retry-3
+    worktree: /home/ecochran76/workspace.local/codex-wake.issue-37-canary-retry-3
     owner: primary-orchestrator
-    state: integration-ready
+    state: active
     plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
     expected_write_surface:
-      - docs/dev/verification/0075-2026-09-15-installed-github-ci-wake-canary.md
-    live_effect: none; retry 2 is terminal and rolled back
+      - docs/dev/verification/0076-2026-09-15-installed-github-ci-wake-canary.md
+    live_effect: up to four remaining isolated GitHub CI canary registrations and at most one live tmux dispatch per attempt; stop on success or ambiguity
     dependencies:
       - "#45 accepted via PR #48"
       - "operator authorization for up to five additional attempts on 2026-09-15"
-      - "retry 2 failed-safe receipt pending integration via PR #54"
+      - "retry 2 failed-safe receipt accepted via PR #54"
     overlaps: []
