@@ -5,8 +5,8 @@ Lane: P50
 Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v3
-Checkpoint: P50-G1-C06
+Goal Version: P50-G1-v4
+Checkpoint: P50-G1-C07
 
 ## Goal objective
 
@@ -210,7 +210,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v3
+goal_version: P50-G1-v4
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
@@ -220,6 +220,8 @@ concurrency_limit: 2 implementation lanes plus 1 read-only reviewer
 live_provider_mutations: 0
 live_dispatch_attempts: 1
 canary_retries_after_registration: 1
+canary_retries_used: 1
+canary_retries_remaining: 0
 authorization_gate: material_departure_or_explicit_action_gate_only
 review_verification_mode: closed_world_if_reviewed
 checkpoint_fields: state_transition, acceptance_state, progress_classification, evidence, material_blockers, next_action_or_stop_reason
@@ -493,3 +495,22 @@ and rollback rules. Goal version `P50-G1-v3` raises
 other attempt, review, mutation, or dispatch allowance. Issue #37 returns to
 `IN_PROGRESS` as the sole active lane. Any ambiguity after registration ends
 the replacement attempt without another wake or retry.
+
+Checkpoint `P50-G1-C07` records the replacement registration as another safe
+stop through PR #51 at `1b1538a5c8cd994331909b64b6b775a93a7a76a0`.
+The candidate CLI ran without the named service's isolated `XDG_STATE_HOME`
+and without `--require-monitor`, so its managed-reader probe returned
+`READER_CAPABILITY_UNAVAILABLE` after preparing the durable arm. The correctly
+isolated daemon then recovered and published the preparation, making the CLI
+failure and runtime state ambiguous. No second registration or trigger pull
+request was created. Wake `wake_c8f2ff1960d74c6e8736f32828393eee` was
+cancelled and archived with zero receipts, matches, dispatch attempts,
+acknowledgements, or visibility results; exact candidate artifacts were rolled
+back recoverably.
+
+Prepared-registration recovery is intentional and no product-code defect is
+claimed. Any future canary must export the exact isolated `XDG_STATE_HOME` for
+every candidate CLI command and use `--require-monitor` so a state-identity
+mismatch fails before durable preparation. Goal version `P50-G1-v4` records
+one retry used and zero remaining. Issue #37 is blocked with no active lane;
+another registration requires fresh explicit operator authority.
