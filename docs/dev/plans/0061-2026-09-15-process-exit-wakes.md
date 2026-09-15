@@ -9,10 +9,11 @@ Integration: `squash`
 
 ## Current state
 
-The shared runtime-source contract is accepted on canonical main
-`2760402a2dc9818f43d9567c67c64ad51fb745d6`. Legacy `process_done` captures
-PID, start ticks, and boot ID but remains a separate compatibility path. This
-lane adds a schema-v2 signal adapter without changing that legacy behavior.
+The pure adapter and shared product integration are implemented through
+`2a3258e376ba94952291957caa0e6e0f75fd42a8`. The supported `process-exit`
+recipe registers a schema-v2 arm, and a fresh daemon reconstructs the exact
+descriptor and routes evaluation through the source-owned authorization guard.
+Legacy `process_done` remains a separate, unchanged compatibility path.
 
 ## Objective
 
@@ -69,7 +70,16 @@ No signaling, killing, tracing, ptrace, namespace entry, process discovery,
 foreign-user access, exit-code promise, installed canary, dispatch, release,
 deployment, provider call, or global runtime change.
 
+## Validation evidence
+
+- Focused process, CLI, and daemon tier: 100 tests passed.
+- Comprehensive Python tier: 383 tests passed.
+- OpenClaw plugin tier: 12 tests passed.
+- Compilation and diff checks passed.
+- Independent adversarial review passed after one bounded correction for
+  explicit process-state validation and capped fixed-field reads.
+
 ## Next action
 
-Implement and review the pure adapter test-first, then let the primary
-serialize shared CLI/daemon integration before publishing the issue PR.
+Publish the issue branch, open the linked pull request, pass required CI, and
+squash-merge only after the active-lane checkpoint is reconciled.
