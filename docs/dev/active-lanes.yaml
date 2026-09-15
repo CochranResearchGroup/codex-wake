@@ -1,23 +1,21 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P51-C4
-    objective: Productize local runtime wake readiness and lifecycle
-    plan: docs/dev/plans/0063-2026-09-15-runtime-wake-productization.md
-    plan_ref: refs/remotes/origin/feat/issue-62-runtime-wake-productization
-    branch: feat/issue-62-runtime-wake-productization
+  - id: P51-C5
+    objective: Qualify one isolated installed local-runtime wake canary
+    plan: docs/dev/plans/0064-2026-09-15-installed-runtime-wake-canary.md
+    plan_ref: refs/remotes/origin/chore/issue-63-runtime-wake-canary
+    branch: chore/issue-63-runtime-wake-canary
     target: main
     plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: 7936cdcf3d906070fc9149b97bf96f02ffca5d7a
-    validation_status: passed
-    validation_ref: 7936cdcf3d906070fc9149b97bf96f02ffca5d7a
-    remote_ref: refs/remotes/origin/feat/issue-62-runtime-wake-productization
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 925460118a45bc26b168fa31e866d84473d7d3a0
+    remote_ref: refs/remotes/origin/chore/issue-63-runtime-wake-canary
     integration: squash
-    work_items: [CochranResearchGroup/codex-wake#62]
+    work_items: [CochranResearchGroup/codex-wake#63]
     owner: primary-orchestrator
-    write_surface: readiness, status, support export, docs, packaging smoke, and combined product tests
-    live_effect: none
+    write_surface: canary procedure and sanitized verification receipt only
+    live_effect: one isolated candidate service and target, one wake with max_attempts 1, and at most one tmux dispatch
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
