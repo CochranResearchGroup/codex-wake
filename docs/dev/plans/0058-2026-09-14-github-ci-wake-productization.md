@@ -6,7 +6,7 @@ Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
 Goal Version: P50-G1-v2
-Checkpoint: P50-G1-C04
+Checkpoint: P50-G1-C05
 
 ## Goal objective
 
@@ -472,3 +472,15 @@ rolled back recoverably. Issue #37 remains open. Corrective issue #45 is the
 sole active lane, and the zero-retry bound remains unchanged. Even after #45
 acceptance, no replacement canary wake may be registered without explicit
 operator authority to revise that bound.
+
+Checkpoint `P50-G1-C05` accepts corrective issue #45 through PR #48 at
+`d3ea7bc292ad7b8f75735429701e40d163572f1b`. The service renderer now emits a
+literal absolute `EnvironmentFile=` path and rejects relative or parser-unsafe
+forms before unit mutation. Comprehensive Python 3.11 and 3.12 suites each
+passed 349 tests; plugin, syntax, compilation, diff, installed-parser, and
+disposable installed-service checks passed. The service process received the
+dummy environment key, only key presence was inspected, and exact service,
+process, candidate, build, worktree, and branch cleanup completed. Issue #45
+is closed and no implementation lane remains active. Issue #37 is the only
+open P50 item and remains blocked solely on explicit operator authorization to
+revise the zero-retry bound for one replacement canary.

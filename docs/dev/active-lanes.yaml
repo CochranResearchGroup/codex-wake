@@ -1,20 +1,3 @@
 schema_version: 1
 work_item_tracking: required
-lanes:
-  - lane: P50-issue-45
-    work_items:
-      - "#45"
-    branch: fix/issue-45-systemd-environment-file
-    worktree: /home/ecochran76/workspace.local/codex-wake.issue-45
-    owner: primary-orchestrator
-    state: active
-    plan: docs/dev/plans/0058-2026-09-14-github-ci-wake-productization.md
-    expected_write_surface:
-      - src/codex_wake/service.py
-      - tests/test_service.py
-      - tests/test_cli.py
-      - docs/dev/verification/0073-2026-09-14-systemd-environment-file-rendering.md
-    live_effect: one disposable local user-service syntax smoke with a dummy environment key
-    dependencies:
-      - "#37 failed-safe receipt via PR #46"
-    overlaps: []
+lanes: []

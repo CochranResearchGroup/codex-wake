@@ -2576,3 +2576,31 @@ active implementation item and #37 remains blocked. Movement is
 `blocker_reduction`. Next action: merge this custody projection, implement and
 accept #45 without provider or wake effects, then stop at the explicit
 replacement-canary authorization gate.
+
+## Turn 131 | 2026-09-14
+
+Accepted the systemd credential environment-file correction and reached the
+replacement-canary authority gate.
+
+- PR #48 passed both release gates and squash-merged at
+  `d3ea7bc292ad7b8f75735429701e40d163572f1b`; GitHub closed issue #45.
+- Absolute credential environment-file paths now render literally; relative,
+  whitespace/control, glob, quote/backslash, systemd-specifier,
+  directive-injection, parent-component, and double-root forms fail before
+  unit mutation.
+- Python 3.11 and 3.12 each passed 349 tests; the plugin, JavaScript syntax,
+  compilation, diff, and installed-host parser gates passed.
+- A built-wheel disposable user service became active with the dummy key
+  present. The value was not inspected or printed. Product uninstall removed
+  the unit, no process remained, and exact candidate/build roots were moved to
+  user trash.
+- Removed the completed issue #45 worktree and local/remote branches after
+  canonical-main and issue-closure readback. No open pull request or active
+  implementation lane remains.
+
+Acceptance state: issue #45 is accepted; issue #37 is the sole open P50 item.
+Movement is `blocker_reduction`. Stop reason: the approved plan fixes
+`canary_retries_after_registration: 0`, and the first registration was already
+consumed. The next action requires explicit operator authorization for exactly
+one replacement isolated canary wake and at most one live tmux dispatch under
+the existing identities, stop rules, and rollback contract.
