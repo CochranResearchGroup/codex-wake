@@ -517,6 +517,8 @@ class SystemdSignalRunner:
         groups: dict[str, list[ArmedSignal]] = {}
         degraded = observed = scanned = 0
         rows: list[SourceInstanceReconcileResult] = []
+        def row(name: str, scanned: int, observed: int, degraded: int, code: str) -> SourceInstanceReconcileResult:
+            return SourceInstanceReconcileResult(_SOURCE, name, scanned, observed, degraded, code, now)
         for armed in self._armed_signals[:limits.max_candidates]:
             if type(armed) is not ArmedSignal or armed.spec.source != _SOURCE:
                 continue
@@ -524,20 +526,20 @@ class SystemdSignalRunner:
                 persisted = module.load_armed_signal(armed.wake_id)  # type: ignore[attr-defined]
             except Exception:
                 degraded += 1
-                rows.append(SourceInstanceReconcileResult(_SOURCE, armed.spec.source_instance, 0, 0, 1))
+                rows.append(row(armed.spec.source_instance, 0, 0, 1, "SYSTEMD_CHECKPOINT_UNAVAILABLE"))
                 continue
             if persisted is None:
                 continue
             if not _valid_persisted_arm(armed, persisted):
                 degraded += 1
-                rows.append(SourceInstanceReconcileResult(_SOURCE, armed.spec.source_instance, 0, 0, 1))
+                rows.append(row(armed.spec.source_instance, 0, 0, 1, "SYSTEMD_ANCHOR_INVALID"))
                 continue
             if persisted.expires_at is not None and now >= persisted.expires_at:
                 continue
             adapter = self._adapters.get(persisted.spec.source_instance)
             if adapter is None or not adapter._valid_arm(persisted):
                 degraded += 1
-                rows.append(SourceInstanceReconcileResult(_SOURCE, persisted.spec.source_instance, 0, 0, 1))
+                rows.append(row(persisted.spec.source_instance, 0, 0, 1, "SYSTEMD_SOURCE_UNSUPPORTED"))
                 continue
             groups.setdefault(adapter.source_instance, []).append(persisted)
         for name, arms in groups.items():
@@ -546,13 +548,13 @@ class SystemdSignalRunner:
             sample = adapter.sample(arms[0].spec, now)
             if isinstance(sample, (Degraded, Invalid)):
                 degraded += 1
-                rows.append(SourceInstanceReconcileResult(_SOURCE, name, 1, 0, 1))
+                rows.append(row(name, 1, 0, 1, sample.code))
                 continue
             prior = module.source_checkpoint(_SOURCE, name)
             previous = _checkpoint_state(prior, adapter)
             if isinstance(prior, Degraded) or (prior is not None and previous is None):
                 degraded += 1
-                rows.append(SourceInstanceReconcileResult(_SOURCE, name, 1, 0, 1))
+                rows.append(row(name, 1, 0, 1, "SYSTEMD_CHECKPOINT_INVALID"))
                 continue
             if previous is None:
                 earliest = min(arms, key=lambda item: item.registered_at)
@@ -560,7 +562,7 @@ class SystemdSignalRunner:
                 previous = _baseline_state(baseline)
                 if previous is None:
                     degraded += 1
-                    rows.append(SourceInstanceReconcileResult(_SOURCE, name, 1, 0, 1))
+                    rows.append(row(name, 1, 0, 1, "SYSTEMD_ANCHOR_INVALID"))
                     continue
             order = prior.checkpoint_order + 1 if isinstance(prior, SourceCommit) else 1
             uncertain = self._reason in {"reconnect", "observation_gap"} or previous.generation != sample.generation
@@ -570,10 +572,10 @@ class SystemdSignalRunner:
             if isinstance(outcome, Ingested):
                 fresh = sum(not receipt.duplicate for receipt in outcome.receipts)
                 observed += fresh
-                rows.append(SourceInstanceReconcileResult(_SOURCE, name, 1, fresh, 0))
+                rows.append(row(name, 1, fresh, 0, "SYSTEMD_READY"))
             else:
                 degraded += 1
-                rows.append(SourceInstanceReconcileResult(_SOURCE, name, 1, 0, 1))
+                rows.append(row(name, 1, 0, 1, "SYSTEMD_INGEST_UNAVAILABLE"))
         self._reason = "periodic"
         self.last_result = SourceReconcileResult(_SOURCE, scanned, observed, degraded, tuple(rows))
         return self.last_result

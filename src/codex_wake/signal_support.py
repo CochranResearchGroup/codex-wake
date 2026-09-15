@@ -36,11 +36,13 @@ _RUNTIME_HEALTH_BY_CODE = {
     "RUNTIME_INGEST_UNAVAILABLE": "unavailable", "RUNTIME_PUBLICATION_UNAVAILABLE": "unavailable",
 }
 _SYSTEMD_HEALTH_BY_CODE = {
+    "SYSTEMD_READY": "ready", "SYSTEMD_SOURCE_UNSUPPORTED": "unsupported",
     "SYSTEMD_CAPABILITY_DENIED": "invalidated", "SYSTEMD_AUTHORIZATION_DENIED": "invalidated",
     "SYSTEMD_SIGNAL_NOT_ALLOWED": "invalidated", "SYSTEMD_BASELINE_MATCHES": "invalidated",
     "SYSTEMD_OBSERVATION_UNAVAILABLE": "unavailable", "SYSTEMD_UNIT_UNAVAILABLE": "unavailable",
     "SYSTEMD_RESOURCE_LIMIT": "unavailable", "SYSTEMD_CHECKPOINT_UNAVAILABLE": "unavailable",
-    "SYSTEMD_CHECKPOINT_INVALID": "invalidated",
+    "SYSTEMD_CHECKPOINT_INVALID": "invalidated", "SYSTEMD_INGEST_UNAVAILABLE": "unavailable",
+    "SYSTEMD_ANCHOR_INVALID": "invalidated",
 }
 _ALLOWED_HEALTH_CODES = frozenset(_RUNTIME_HEALTH_BY_CODE) | frozenset(_SYSTEMD_HEALTH_BY_CODE) | {
     "GITHUB_RATE_LIMITED", "GITHUB_AUTH_UNAVAILABLE", "GITHUB_SOURCE_UNAVAILABLE",
@@ -74,12 +76,12 @@ def _safe_health(value: object) -> dict[str, Any]:
 
 
 def _runtime_source_health(
-    source: str, health: dict[str, Any] | None, *, recent: bool,
+    source: str, health: dict[str, Any] | None, *, now: datetime,
 ) -> tuple[str, str]:
     """Classify only fresh, exact runtime-instance health."""
-    if health is None or not recent:
-        return "unobserved", ""
     observed = _safe_health(health)
+    if not health_is_recent({"checked_at": observed.get("observed_at")}, now=now):
+        return "unobserved", ""
     code = observed.get("code") if isinstance(observed.get("code"), str) else ""
     mapping = _RUNTIME_HEALTH_BY_CODE if source == "runtime" else _SYSTEMD_HEALTH_BY_CODE
     if code in mapping:
@@ -365,7 +367,6 @@ def signal_readiness(
         for item in observed_health
         if isinstance(item, dict) and item.get("source") and not item.get("source_instance")
     }
-    health_is_fresh = health_is_recent(source_health, now=captured_now)
     sources: list[dict[str, Any]] = []
     for row in rows:
         active_arms = int(row["active_arms"] or 0)
@@ -379,7 +380,7 @@ def signal_readiness(
             message = "source has no active arms"
         elif runtime_source:
             status, runtime_code = _runtime_source_health(
-                source_key[0], latest, recent=health_is_fresh
+                source_key[0], latest, now=captured_now
             )
             if latest is None and aggregate is not None:
                 message = "aggregate source health cannot establish this instance's readiness"
@@ -473,7 +474,7 @@ def signal_readiness(
     support_statuses = {str(item.get("support", {}).get("status")) for item in sources}
     if config_error or support_statuses & {"blocked", "unavailable", "invalidated", "unsupported"}:
         overall = "blocked"
-    elif "warning" in support_statuses:
+    elif support_statuses & {"warning", "unobserved"}:
         overall = "warning"
     else:
         overall = "blocked" if any(item["status"] == "blocked" for item in sources) else "ready"

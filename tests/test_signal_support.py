@@ -61,6 +61,7 @@ class SignalSupportTests(unittest.TestCase):
 
             unobserved = signal_readiness(root, now=NOW)
             self.assertEqual({item["status"] for item in unobserved["sources"]}, {"unobserved"})
+            self.assertEqual(unobserved["status"], "warning")
 
             aggregate_only = signal_readiness(root, health={
                 "checked_at": NOW.isoformat(),
@@ -71,8 +72,8 @@ class SignalSupportTests(unittest.TestCase):
             health = {
                 "checked_at": NOW.isoformat(),
                 "signal_sources": [
-                    {"source": "runtime", "source_instance": process_instance, "degraded": 0, "code": "RUNTIME_READY", "pid": 999},
-                    {"source": "systemd", "source_instance": "user-unit-source", "degraded": 0, "code": "SYSTEMD_AUTHORIZATION_DENIED", "unit": "private.service"},
+                    {"source": "runtime", "source_instance": process_instance, "degraded": 0, "code": "RUNTIME_READY", "observed_at": NOW.isoformat(), "pid": 999},
+                    {"source": "systemd", "source_instance": "user-unit-source", "degraded": 0, "code": "SYSTEMD_AUTHORIZATION_DENIED", "observed_at": NOW.isoformat(), "unit": "private.service"},
                 ],
             }
             readiness = signal_readiness(root, health=health, now=NOW)
@@ -83,7 +84,7 @@ class SignalSupportTests(unittest.TestCase):
 
             unavailable = signal_readiness(root, health={
                 "checked_at": NOW.isoformat(),
-                "signal_sources": [{"source": "systemd", "source_instance": "user-unit-source", "degraded": 1, "code": "SYSTEMD_UNIT_UNAVAILABLE"}],
+                "signal_sources": [{"source": "systemd", "source_instance": "user-unit-source", "degraded": 1, "code": "SYSTEMD_UNIT_UNAVAILABLE", "observed_at": NOW.isoformat()}],
             }, now=NOW)
             self.assertEqual(
                 next(item for item in unavailable["sources"] if item["source"] == "systemd")["status"],
@@ -91,7 +92,7 @@ class SignalSupportTests(unittest.TestCase):
             )
             unsupported = signal_readiness(root, health={
                 "checked_at": NOW.isoformat(),
-                "signal_sources": [{"source": "runtime", "source_instance": process_instance, "degraded": 1, "code": "RUNTIME_SOURCE_UNSUPPORTED"}],
+                "signal_sources": [{"source": "runtime", "source_instance": process_instance, "degraded": 1, "code": "RUNTIME_SOURCE_UNSUPPORTED", "observed_at": NOW.isoformat()}],
             }, now=NOW)
             self.assertEqual(
                 next(item for item in unsupported["sources"] if item["source"] == "runtime")["status"],
@@ -99,7 +100,7 @@ class SignalSupportTests(unittest.TestCase):
             )
             stale = signal_readiness(root, health={
                 "checked_at": (NOW - timedelta(seconds=121)).isoformat(),
-                "signal_sources": [{"source": "runtime", "source_instance": process_instance, "degraded": 0, "code": "RUNTIME_READY"}],
+                "signal_sources": [{"source": "runtime", "source_instance": process_instance, "degraded": 0, "code": "RUNTIME_READY", "observed_at": (NOW - timedelta(seconds=121)).isoformat()}],
             }, now=NOW)
             self.assertEqual(
                 next(item for item in stale["sources"] if item["source"] == "runtime")["status"],
