@@ -1,6 +1,6 @@
 # Local runtime wake productization
 
-State: OPEN
+State: CLOSED
 Lane: P51-C4
 Issue: #62
 Branch: `feat/issue-62-runtime-wake-productization`
@@ -21,8 +21,10 @@ Process lane #60 is accepted through PR #71 at canonical commit
 through PR #73 at canonical commit
 `f41ef0ba6d5b37ab85bea7a1cebbc9bd6b0ad748`. This join is implemented and
 reviewed at checkpoint `44244785cfa123a3d234989f23b2dae4201a9dca`.
-Readiness, status, support, documentation, and the installed-wheel fixture are
-integration-ready; GitHub CI and canonical-main integration remain.
+Readiness, status, support, documentation, and the installed-wheel fixture were
+squash-merged through PR #77 at canonical main commit
+`08447afdfe0384b23d73079e4579ca050dffe2c0`, closing issue #62. Both required
+Python CI gates passed.
 
 ## Scope and write surface
 
@@ -141,5 +143,5 @@ release, tag, or deployment effect occurred.
 
 ## Next action
 
-Publish the reviewed checkpoint, reconcile P51-C4 as integration-ready, open
-the linked pull request, and squash-merge only after Python 3.11/3.12 CI passes.
+Continue through the separately governed installed canary in #63. No
+productization implementation work remains.
