@@ -1,6 +1,6 @@
 # Installed local-runtime systemd wake canary
 
-Status: VERIFIED_PENDING_ROLLBACK
+Status: VERIFIED
 
 Issue: `CochranResearchGroup/codex-wake#63`
 
@@ -22,9 +22,9 @@ service to the exact target, keeping it loaded without activating it. The
 second command created the sole durable registration; it was not a replacement
 for an existing wake.
 
-The wake is archived. Exact unit and runtime rollback remains pending at this
-checkpoint so the sanitized receipt can be committed and pushed before source
-evidence is removed.
+The wake was archived before rollback. The sanitized receipt was committed and
+pushed at `703e42d668b200bb3f5e8c251e2856439063237a` before the exact unit files
+and runtime root were moved recoverably to user trash.
 
 ## Frozen installed identity
 
@@ -147,14 +147,30 @@ evidence is removed.
   OpenClaw Gateway checks. Those transports were outside this tmux/systemd
   canary and are not represented as acceptance failures.
 
-## Rollback checkpoint
+## Rollback proof
 
-Pending after this commit: stop and remove only the exact target and candidate
-units, remove any surviving named trigger units, reload the user manager,
-verify their processes and unit files absent, and remove only the validated
-runtime root. Then prove the global installation, normal wake root, normal
-service, and supervisor registry have not drifted, and update this section with
-the final readback.
+- The candidate service was stopped before the target. Both exact unit files
+  and the validated runtime root were moved to user trash, so the removal is
+  recoverable.
+- Fresh user-manager readback reports the candidate, target, transition
+  service, and transition timer all `not-found`, `inactive`, and `dead`.
+- A fresh `/proc` census found zero processes whose command line referenced
+  the exact runtime root or any named P51 canary unit.
+- The global installation remains `codex-wake 0.5.2`; executable SHA-256
+  values remain:
+  - `codex-wake`:
+    `e04c4dc59c1feb4bfb824012e4cefce3ab70342e1f56d19b4a63b72cc164ecea`
+  - `codex-waked`:
+    `209507af842573172a3a08c57b2b50467562fe433a3e0254b61d88e9fda9514a`
+  - `codex-wake-hook`:
+    `ac253bf57ea37ddc6250233b68e692442adde4fd84ca74ab2f2d54fdef99eadf`
+- The normal repo wake root is unchanged at zero active and 23 archived wakes.
+  Its repo service remains loaded, disabled, inactive, and dead.
+- The user supervisor remains loaded, enabled, active, and running with the
+  same three enabled roots. The isolated canary root was never enrolled.
+- No global install, normal wake root, supervisor registry, credential,
+  provider, release, deployment, or unrelated process/service mutation
+  occurred.
 
 ## Acceptance boundary
 

@@ -1,6 +1,6 @@
 # Installed local-runtime wake canary
 
-State: OPEN
+State: CLOSED
 Lane: P51-C5
 Issue: #63
 Branch: `chore/issue-63-runtime-wake-canary`
@@ -20,13 +20,16 @@ installation or normal wake root.
 
 Issues #59 through #62 are closed. Productization PR #77 is merged at canonical
 `origin/main` commit `08447afdfe0384b23d73079e4579ca050dffe2c0`, with both
-Python CI gates green. No P51 installed canary attempt has been registered.
-Preflight, plan review, candidate build, isolated installation, and initial
-runtime setup are complete. The first registration command failed closed before
-writing a wake because the inactive target unit was not loaded in the user
-manager; the isolated journal remains empty and no dispatch occurred. One
-bounded pre-registration fixture repair, registration, transition, dispatch,
-and rollback remain.
+Python CI gates green. The installed canary is verified in
+`docs/dev/verification/0077-2026-09-15-installed-runtime-wake-canary.md`.
+
+The first registration command failed closed before writing because the
+inactive target unit was not loaded. One reviewed fixture repair kept that
+exact unit loaded without activating it. The sole durable wake then survived
+the controlled post-registration daemon restart, matched one verified
+inactive-to-active transition, dispatched once, received hook acknowledgement,
+and recorded `visible_prompt_observed`. The wake was archived and every named
+canary artifact was rolled back without global or normal-runtime drift.
 
 The candidate service lifecycle before this amendment comprised its initial
 setup start and one fail-safe stop/start while waiting for the required hook
@@ -204,5 +207,5 @@ normal wake root, supervisor registry, or unrelated process tree.
 
 ## Next action
 
-Publish this plan checkpoint, perform one independent pre-effect review, and
-advance canonical active-lane custody before any installed mutation.
+Integrate this plan and receipt through the issue #63 pull request, close #63
+from canonical evidence, then reconcile and close the parent P51 goal ledger.
