@@ -1,23 +1,41 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P51-C1
-    objective: Establish the allowlisted runtime-source contract and tracer
-    plan: docs/dev/plans/0060-2026-09-15-runtime-source-contract.md
-    plan_ref: refs/remotes/origin/feat/issue-59-runtime-source-contract
-    branch: feat/issue-59-runtime-source-contract
+  - id: P51-C2
+    objective: Deliver restart-correct process-exit wakes
+    plan: docs/dev/plans/0061-2026-09-15-process-exit-wakes.md
+    plan_ref: refs/remotes/origin/feat/issue-60-process-exit-wakes
+    branch: feat/issue-60-process-exit-wakes
     target: main
     plan_state: OPEN
     custody_state: INTEGRATION_READY
-    checkpoint: 37df666b12a433a63acfb4dfc88a6d27ff521a74
-    remote_ref: refs/remotes/origin/feat/issue-59-runtime-source-contract
+    checkpoint: 57cdaf0345370554d8cbbc2b31560ad2cdecf5f3
+    remote_ref: refs/remotes/origin/feat/issue-60-process-exit-wakes
     integration: squash
-    work_items: [CochranResearchGroup/codex-wake#59]
+    work_items: [CochranResearchGroup/codex-wake#60]
     owner: primary-orchestrator
-    write_surface: signal base, runner, registry, tracer, and focused tests
+    write_surface: process adapter and tests; shared CLI and daemon reserved to primary
     live_effect: none
     dependencies: []
-    overlaps: []
-    validation_status: passed
-    validation_ref: 37df666b12a433a63acfb4dfc88a6d27ff521a74
+    overlaps: [P51-C3]
+    reconciled_overlaps: [P51-C3]
+    updated_at: 2026-09-15
+  - id: P51-C3
+    objective: Deliver user-systemd unit transition wakes
+    plan: docs/dev/plans/0062-2026-09-15-user-systemd-unit-wakes.md
+    plan_ref: refs/remotes/origin/feat/issue-61-systemd-unit-wakes
+    branch: feat/issue-61-systemd-unit-wakes
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 3635704ff9d8a3d445d7527d82ce8d9d27e3ff69
+    remote_ref: refs/remotes/origin/feat/issue-61-systemd-unit-wakes
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#61]
+    owner: primary-orchestrator
+    write_surface: systemd adapter, config, and tests; shared CLI and daemon reserved to primary
+    live_effect: none
+    dependencies: []
+    overlaps: [P51-C2]
+    reconciled_overlaps: [P51-C2]
     updated_at: 2026-09-15

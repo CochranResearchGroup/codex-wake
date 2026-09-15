@@ -29,6 +29,136 @@ from tests.test_signals import make_adapter, make_intent
 
 
 class DaemonTests(unittest.TestCase):
+    def test_default_runner_restores_process_exit_and_publishes_one_transition(self) -> None:
+        from codex_wake.process_signals import ProcessExitAdapter, ProcessExitSample
+        from codex_wake.runtime_signals import RuntimeSourceDescriptor, RuntimeSourceRegistry
+        from codex_wake.signals import Resume, WakeIntent
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            identity = {
+                "boot_id": "01234567-89ab-cdef-0123-456789abcdef",
+                "pid": 123,
+                "start_time_ticks": 456,
+                "owner_uid": 1000,
+            }
+            descriptor = RuntimeSourceDescriptor.parse({
+                "version": 1, "kind": "process.exit",
+                "resource": identity, "target_state": "terminated",
+            })
+            sample = {"value": ProcessExitSample.alive(**identity)}
+            adapter = ProcessExitAdapter(
+                descriptor,
+                RuntimeSourceRegistry({"process.exit": lambda candidate: candidate == descriptor}),
+                lambda: sample["value"],
+                lambda: 1000,
+            )
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root, ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            registration = EventWake(
+                runtime, adapters=(adapter,),
+                clock=lambda: datetime(2026, 9, 15, tzinfo=UTC),
+                id_factory=lambda: "wake_process_v2",
+            ).register(
+                WakeIntent(
+                    adapter.request(),
+                    Resume("continue", Path(tmp), {
+                        "transport": "tmux", "tmux_socket": "/tmp/fixture", "pane": "%1",
+                    }),
+                ),
+                idempotency_key="process-v2",
+            )
+            self.assertIsInstance(registration, Registration)
+            with patch(
+                "codex_wake.process_signals.restore_production_process_exit_adapter",
+                return_value=adapter,
+            ):
+                runners = default_signal_runners(root, runtime)
+            self.assertEqual(len(runners), 1)
+            sample["value"] = ProcessExitSample.zombie(**identity)
+
+            result = poll_once(
+                root,
+                now=datetime(2026, 9, 15, 0, 0, 1, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_runners=runners,
+            )
+
+            self.assertEqual((result.fired, result.pending), (1, 0))
+            self.assertEqual(result.signal_sources[0]["source"], "runtime")
+            self.assertTrue((root / "firing" / "wake_process_v2.json").is_file())
+
+    def test_process_runtime_revocation_blocks_generic_evaluation_and_publication(self) -> None:
+        from codex_wake.process_signals import ProcessExitAdapter, ProcessExitSample
+        from codex_wake.runtime_signals import RuntimeSourceDescriptor, RuntimeSourceRegistry
+        from codex_wake.signals import EvaluationLimits, Resume, WakeIntent
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            identity = {
+                "boot_id": "01234567-89ab-cdef-0123-456789abcdef",
+                "pid": 123,
+                "start_time_ticks": 456,
+                "owner_uid": 1000,
+            }
+            descriptor = RuntimeSourceDescriptor.parse({
+                "version": 1, "kind": "process.exit",
+                "resource": identity, "target_state": "terminated",
+            })
+            allowed = {"value": True}
+            sample = {"value": ProcessExitSample.alive(**identity)}
+            adapter = ProcessExitAdapter(
+                descriptor,
+                RuntimeSourceRegistry({
+                    "process.exit": lambda candidate: allowed["value"] and candidate == descriptor
+                }),
+                lambda: sample["value"],
+                lambda: 1000,
+            )
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root, ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            registration = EventWake(
+                runtime, adapters=(adapter,),
+                clock=lambda: datetime(2026, 9, 15, tzinfo=UTC),
+                id_factory=lambda: "wake_revoked_process",
+            ).register(
+                WakeIntent(
+                    adapter.request(),
+                    Resume("continue", Path(tmp), {
+                        "transport": "tmux", "tmux_socket": "/tmp/fixture", "pane": "%1",
+                    }),
+                ),
+                idempotency_key="revoked-process-v2",
+            )
+            armed = runtime.load_armed_signal(registration.wake_id)
+            sample["value"] = ProcessExitSample.zombie(**identity)
+            adapter.reconcile(
+                runtime, (armed,), datetime(2026, 9, 15, 0, 0, 1, tzinfo=UTC),
+                EvaluationLimits(8),
+            )
+            allowed["value"] = False
+
+            result = poll_once(
+                root,
+                now=datetime(2026, 9, 15, 0, 0, 2, tzinfo=UTC),
+                dispatch=False,
+                signal_runtime=runtime,
+                signal_runners=(adapter.runner((armed,)),),
+            )
+
+            self.assertEqual((result.fired, result.pending), (0, 1))
+            self.assertTrue((root / "pending" / "wake_revoked_process.json").is_file())
+            self.assertFalse((root / "firing" / "wake_revoked_process.json").exists())
+
     def test_github_candidate_budget_is_applied_after_grouping_arms_by_source(self) -> None:
         from dataclasses import replace
         from datetime import timedelta
