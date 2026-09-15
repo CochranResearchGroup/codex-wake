@@ -8,7 +8,12 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from codex_wake.event_wake import EventWake
-from codex_wake.process_signals import ProcessExitAdapter, ProcessExitSample
+from codex_wake.process_signals import (
+    ProcessExitAdapter,
+    ProcessExitSample,
+    observe_process_exit,
+    production_process_exit_adapter,
+)
 from codex_wake.records import cancel_record
 from codex_wake.runtime_signals import RuntimeSourceDescriptor, RuntimeSourceRegistry
 from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
@@ -249,6 +254,78 @@ class ProcessExitAdapterTests(unittest.TestCase):
                 restored.reconcile(fresh, (armed,), NOW + timedelta(seconds=1), EvaluationLimits(8))
                 self.assertEqual(restored.evaluate(fresh, armed, NOW, EvaluationLimits(8)).outcome, "matched")
                 self.assertEqual(self.counts(), (1, 1))
+
+    def test_fixed_field_proc_observer_classifies_alive_zombie_and_absence(self) -> None:
+        proc_root = self.root / "proc"
+        boot_path = proc_root / "sys/kernel/random"
+        process_path = proc_root / "123"
+        boot_path.mkdir(parents=True)
+        process_path.mkdir()
+        (boot_path / "boot_id").write_text(BOOT_ID, encoding="utf-8")
+
+        def write_stat(state: str) -> None:
+            fields = [state, *(["0"] * 18), "456"]
+            (process_path / "stat").write_text(
+                "123 (fixture name) " + " ".join(fields), encoding="utf-8"
+            )
+
+        write_stat("S")
+        alive = observe_process_exit(123, proc_root=proc_root)
+        self.assertEqual(alive.state, "alive")
+        self.assertEqual(alive.identity()["start_time_ticks"], 456)
+        self.assertEqual(alive.identity()["owner_uid"], process_path.stat().st_uid)
+
+        write_stat("Z")
+        self.assertEqual(observe_process_exit(123, proc_root=proc_root).state, "zombie")
+        (process_path / "stat").unlink()
+        process_path.rmdir()
+        disappeared = observe_process_exit(123, proc_root=proc_root)
+        self.assertEqual(disappeared, ProcessExitSample.disappeared(boot_id=BOOT_ID))
+
+    def test_fixed_field_proc_observer_rejects_unknown_state_and_oversized_fields(self) -> None:
+        proc_root = self.root / "proc"
+        boot_path = proc_root / "sys/kernel/random"
+        process_path = proc_root / "123"
+        boot_path.mkdir(parents=True)
+        process_path.mkdir()
+        boot_file = boot_path / "boot_id"
+        stat_file = process_path / "stat"
+        boot_file.write_text(BOOT_ID, encoding="utf-8")
+        fields = ["Q", *(["0"] * 18), "456"]
+        stat_file.write_text("123 (fixture) " + " ".join(fields), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "unsupported state"):
+            observe_process_exit(123, proc_root=proc_root)
+
+        stat_file.write_text("x" * 4097, encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "exceeds its bound"):
+            observe_process_exit(123, proc_root=proc_root)
+
+        boot_file.write_text("x" * 65, encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "exceeds its bound"):
+            observe_process_exit(123, proc_root=proc_root)
+
+    def test_production_factory_rechecks_the_exact_identity_at_registration(self) -> None:
+        proc_root = self.root / "proc"
+        boot_path = proc_root / "sys/kernel/random"
+        process_path = proc_root / "123"
+        boot_path.mkdir(parents=True)
+        process_path.mkdir()
+        (boot_path / "boot_id").write_text(BOOT_ID, encoding="utf-8")
+        fields = ["S", *(["0"] * 18), "456"]
+        (process_path / "stat").write_text(
+            "123 (fixture) " + " ".join(fields), encoding="utf-8"
+        )
+        uid = process_path.stat().st_uid
+        adapter = production_process_exit_adapter(
+            123, proc_root=proc_root, effective_uid=lambda: uid
+        )
+        self.assertEqual(dict(adapter.descriptor.resource), {
+            "boot_id": BOOT_ID,
+            "pid": 123,
+            "start_time_ticks": 456,
+            "owner_uid": uid,
+        })
+        self.assertEqual(adapter.establish_anchor(adapter.request(), NOW).baseline["state"], "alive")
 
 
 if __name__ == "__main__":

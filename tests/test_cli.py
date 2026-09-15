@@ -516,6 +516,69 @@ class CliTests(unittest.TestCase):
             )
         self.assertEqual(raised.exception.code, 2)
 
+    def test_process_exit_registers_exact_schema_v2_identity_without_process_metadata(self) -> None:
+        from codex_wake.process_signals import ProcessExitAdapter, ProcessExitSample
+        from codex_wake.runtime_signals import RuntimeSourceDescriptor, RuntimeSourceRegistry
+        from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            identity = {
+                "boot_id": "01234567-89ab-cdef-0123-456789abcdef",
+                "pid": 321,
+                "start_time_ticks": 654,
+                "owner_uid": os.geteuid(),
+            }
+            descriptor = RuntimeSourceDescriptor.parse({
+                "version": 1,
+                "kind": "process.exit",
+                "resource": identity,
+                "target_state": "terminated",
+            })
+            adapter = ProcessExitAdapter(
+                descriptor,
+                RuntimeSourceRegistry({"process.exit": lambda candidate: candidate == descriptor}),
+                lambda: ProcessExitSample.alive(**identity),
+            )
+            publisher = WakeRecordPublisher(
+                root,
+                ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+            )
+            with (
+                patch(
+                    "codex_wake.process_signals.production_process_exit_adapter",
+                    return_value=adapter,
+                ),
+                patch(
+                    "codex_wake.signal_records.WakeRecordPublisher.for_managed_reader",
+                    return_value=publisher,
+                ),
+            ):
+                code, output, error = self.run_cli(
+                    [
+                        "process-exit", "--idempotency-key", "exact-process",
+                        "--max-attempts", "2", "321", "--", "Continue work",
+                    ],
+                    root,
+                )
+            self.assertEqual(code, 0, error)
+            wake_id = output.split()[0]
+            record = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(record["schema_version"], 2)
+            self.assertEqual(record["max_attempts"], 2)
+            self.assertEqual(record["predicate"]["source"], "runtime")
+            self.assertEqual(record["predicate"]["kind"], "process.exit")
+            encoded = json.dumps(record, sort_keys=True)
+            self.assertNotIn("cmdline", encoded)
+            self.assertNotIn("environ", encoded)
+            self.assertNotIn("exit_code", encoded)
+
+    def test_process_exit_rejects_invalid_attempt_bound(self) -> None:
+        parser = cli.build_parser()
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            parser.parse_args(["process-exit", "--max-attempts", "0", "123", "continue"])
+        self.assertEqual(raised.exception.code, 2)
+
     def test_version_reports_package_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

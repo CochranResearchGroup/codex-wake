@@ -223,6 +223,22 @@ def build_parser() -> argparse.ArgumentParser:
         add_target_options(recipe_parser)
         add_monitor_gate_options(recipe_parser)
 
+    process_exit = subparsers.add_parser(
+        "process-exit",
+        help="arm a durable schema-v2 wake for one exact same-user process identity",
+    )
+    process_exit.add_argument("--idempotency-key")
+    process_exit.add_argument(
+        "--max-attempts",
+        type=bounded_attempt_count,
+        default=3,
+        help="maximum dispatch attempts (1-100; default: 3)",
+    )
+    process_exit.add_argument("pid", type=int)
+    process_exit.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(process_exit)
+    add_monitor_gate_options(process_exit)
+
     github_ci = subparsers.add_parser(
         "github-ci", help="configure and arm durable GitHub Actions completion wakes"
     )
@@ -856,6 +872,48 @@ def create_filesystem_signal(args: argparse.Namespace, root: Path) -> int:
         raise WakeError(f"filesystem signal registration unavailable: {result.code}")
     if isinstance(result, Invalid):
         raise WakeError("filesystem signal registration is invalid")
+    path = root / "pending" / f"{result.wake_id}.json"
+    print(f"{result.wake_id} {path}")
+    return 0
+
+
+def create_process_exit_signal(args: argparse.Namespace, root: Path) -> int:
+    from .event_wake import EventWake
+    from .process_signals import production_process_exit_adapter
+    from .signal_records import WakeRecordPublisher, signal_journal_path
+    from .signal_store import SQLiteSignalModule
+    from .signals import Degraded, Invalid, Resume, WakeIntent
+
+    prompt = normalize_prompt(args.prompt)
+    if getattr(args, "require_monitor", False):
+        readiness = monitor_readiness(wake_root=root, repo_root=Path.cwd())
+        require_monitor_ready(readiness)
+    try:
+        adapter = production_process_exit_adapter(args.pid)
+    except (OSError, TypeError, ValueError) as exc:
+        raise WakeError(f"process exit source is unavailable: {exc}") from None
+    now = utc_now()
+    runtime = SQLiteSignalModule(
+        signal_journal_path(root),
+        record_publisher=WakeRecordPublisher.for_managed_reader(root),
+    )
+    result = EventWake(
+        runtime,
+        adapters=(adapter,),
+        clock=lambda: now,
+        id_factory=lambda: f"wake_{uuid.uuid4().hex}",
+    ).register(
+        WakeIntent(
+            adapter.request(),
+            Resume(prompt, Path.cwd(), target_for_args(args)),
+            max_attempts=args.max_attempts,
+        ),
+        idempotency_key=args.idempotency_key or f"process-exit:{uuid.uuid4().hex}",
+    )
+    if isinstance(result, Degraded):
+        raise WakeError(f"process exit signal registration unavailable: {result.code}")
+    if isinstance(result, Invalid):
+        raise WakeError("process exit signal registration is invalid")
     path = root / "pending" / f"{result.wake_id}.json"
     print(f"{result.wake_id} {path}")
     return 0
@@ -1738,6 +1796,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_changed(args, root)
     if args.command == "filesystem":
         return create_filesystem_signal(args, root)
+    if args.command == "process-exit":
+        return create_process_exit_signal(args, root)
     if args.command == "github-ci":
         return github_ci_command(args, root)
     if args.command == "pid":

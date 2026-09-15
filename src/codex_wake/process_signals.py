@@ -12,6 +12,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import islice
+from pathlib import Path
 from types import MappingProxyType
 from typing import Callable, Iterable, Literal
 
@@ -36,6 +37,57 @@ from .signals import (
 
 
 _DISAPPEARANCE_CLASSIFICATION = "exact_identity_absent_after_alive_baseline"
+_LINUX_PROCESS_STATES = frozenset({"R", "S", "D", "Z", "T", "t", "X", "x", "K", "W", "P", "I"})
+
+
+def _read_bounded_text(path: Path, *, max_bytes: int) -> str:
+    with path.open("rb") as stream:
+        payload = stream.read(max_bytes + 1)
+    if len(payload) > max_bytes:
+        raise ValueError("process observation field exceeds its bound")
+    try:
+        return payload.decode("utf-8")
+    except UnicodeDecodeError:
+        raise ValueError("process observation field is malformed") from None
+
+
+def observe_process_exit(pid: int, *, proc_root: Path = Path("/proc")) -> ProcessExitSample:
+    """Read only the fixed ``/proc`` fields required for exact PID identity.
+
+    Absence is positively classified only after reading the current boot ID.
+    Malformed or inaccessible fixed fields raise and therefore degrade closed at
+    the adapter boundary.
+    """
+
+    if type(pid) is not int or pid < 1:
+        raise ValueError("pid must be a positive integer")
+    boot_id = _read_bounded_text(
+        proc_root / "sys/kernel/random/boot_id", max_bytes=64
+    ).strip()
+    process_dir = proc_root / str(pid)
+    try:
+        owner_uid = process_dir.stat().st_uid
+        text = _read_bounded_text(process_dir / "stat", max_bytes=4096)
+    except (FileNotFoundError, NotADirectoryError):
+        return ProcessExitSample.disappeared(boot_id=boot_id)
+    marker_index = text.rfind(") ")
+    if marker_index < 0:
+        raise ValueError("process stat is malformed")
+    fields_from_state = text[marker_index + 2 :].split()
+    try:
+        state = fields_from_state[0]
+        start_time_ticks = int(fields_from_state[19])
+    except (IndexError, ValueError):
+        raise ValueError("process stat is malformed") from None
+    if state not in _LINUX_PROCESS_STATES:
+        raise ValueError("process stat has an unsupported state")
+    sample_type = ProcessExitSample.zombie if state == "Z" else ProcessExitSample.alive
+    return sample_type(
+        boot_id=boot_id,
+        pid=pid,
+        start_time_ticks=start_time_ticks,
+        owner_uid=owner_uid,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,6 +149,72 @@ class ProcessExitSample:
             "start_time_ticks": self.start_time_ticks,
             "owner_uid": self.owner_uid,
         }
+
+
+def production_process_exit_adapter(
+    pid: int,
+    *,
+    proc_root: Path = Path("/proc"),
+    effective_uid: Callable[[], int] = os.geteuid,
+) -> ProcessExitAdapter:
+    """Create an exactly authorized adapter from one current process identity."""
+
+    sample = observe_process_exit(pid, proc_root=proc_root)
+    if sample.state != "alive" or not sample.valid():
+        raise ValueError("process is not an observable running process")
+    descriptor = RuntimeSourceDescriptor.parse(
+        {
+            "version": 1,
+            "kind": "process.exit",
+            "resource": sample.identity(),
+            "target_state": "terminated",
+        }
+    )
+    registry = RuntimeSourceRegistry(
+        {
+            "process.exit": lambda candidate: (
+                candidate == descriptor
+                and effective_uid() == descriptor.resource["owner_uid"]
+            )
+        }
+    )
+    return ProcessExitAdapter(
+        descriptor,
+        registry,
+        lambda: observe_process_exit(pid, proc_root=proc_root),
+        effective_uid,
+    )
+
+
+def restore_production_process_exit_adapter(
+    armed: ArmedSignal,
+    *,
+    proc_root: Path = Path("/proc"),
+    effective_uid: Callable[[], int] = os.geteuid,
+) -> ProcessExitAdapter:
+    """Restore one adapter from its bounded durable descriptor."""
+
+    raw = armed.anchor.baseline.get("descriptor")
+    if type(raw) is not str or len(raw.encode()) > 1024:
+        raise ValueError("process exit anchor is invalid")
+    try:
+        descriptor = RuntimeSourceDescriptor.parse(json.loads(raw))
+    except (TypeError, ValueError, json.JSONDecodeError):
+        raise ValueError("process exit anchor is invalid") from None
+    registry = RuntimeSourceRegistry(
+        {
+            "process.exit": lambda candidate: (
+                candidate == descriptor
+                and effective_uid() == descriptor.resource["owner_uid"]
+            )
+        }
+    )
+    return ProcessExitAdapter.restore(
+        armed,
+        registry,
+        lambda: observe_process_exit(descriptor.resource["pid"], proc_root=proc_root),
+        effective_uid,
+    )
 
 
 class ProcessExitAdapter:
@@ -397,3 +515,15 @@ class ProcessExitRunner:
     def reconcile(self, module, now: datetime, limits: EvaluationLimits) -> SourceReconcileResult:
         self.last_result = self.adapter.reconcile(module, self.armed_signals, now, limits)
         return self.last_result
+
+    def handles(self, armed: ArmedSignal) -> bool:
+        return (
+            type(armed) is ArmedSignal
+            and armed.spec.source == "runtime"
+            and armed.spec.source_instance == self.adapter.source_instance
+        )
+
+    def evaluate(self, module, armed: ArmedSignal, now: datetime, limits: EvaluationLimits):
+        if not self.handles(armed):
+            return Invalid(armed.wake_id, "RUNTIME_SOURCE_UNSUPPORTED", ("runtime source is not owned by this runner",))
+        return self.adapter.evaluate(module, armed, now, limits)

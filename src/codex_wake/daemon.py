@@ -101,6 +101,8 @@ def default_signal_runners(
     adapters: dict[str, FilesystemSignalAdapter] = {}
     arms: list[ArmedSignal] = []
     github_arms: dict[str, list[ArmedSignal]] = {}
+    process_adapters = {}
+    process_arms: dict[str, list[ArmedSignal]] = {}
     for item in pending_records(root):
         if classify_record(item.record) != "signal_v2":
             continue
@@ -111,6 +113,26 @@ def default_signal_runners(
             continue
         source = predicate.get("source")
         source_instance = predicate.get("source_instance")
+        if source == "runtime" and isinstance(source_instance, str):
+            armed = runtime.load_armed_signal(wake_id)
+            if (
+                armed is not None
+                and armed.spec.source == "runtime"
+                and armed.spec.kind == "process.exit"
+                and armed.spec.source_instance == source_instance
+            ):
+                try:
+                    from .process_signals import restore_production_process_exit_adapter
+
+                    adapter = restore_production_process_exit_adapter(armed)
+                except (OSError, TypeError, ValueError):
+                    continue
+                existing = process_adapters.get(source_instance)
+                if existing is not None and existing.descriptor != adapter.descriptor:
+                    continue
+                process_adapters[source_instance] = adapter
+                process_arms.setdefault(source_instance, []).append(armed)
+            continue
         if source == "github" and isinstance(source_instance, str):
             armed = runtime.load_armed_signal(wake_id)
             if armed is not None and armed.spec.source == "github":
@@ -148,6 +170,8 @@ def default_signal_runners(
         runners.append(FilesystemSignalRunner(
             adapters.values(), armed_signals=arms, initial_reason=initial_reason
         ))
+    for source_instance in sorted(process_arms):
+        runners.append(process_adapters[source_instance].runner(process_arms[source_instance]))
     if github_arms:
         store = GitHubSourceStore(root)
         try:
@@ -186,6 +210,30 @@ def default_signal_runners(
             # authority. Other source classes remain available.
             pass
     return tuple(runners)
+
+
+def _evaluate_signal(
+    runtime: SQLiteSignalModule,
+    armed: ArmedSignal,
+    now: datetime,
+    limits: EvaluationLimits,
+    runners: tuple[SignalSourceRunner, ...],
+):
+    """Use a source-owned guard for runtime sources before publication."""
+
+    if armed.spec.source != "runtime":
+        return runtime.evaluate(armed.wake_id, armed, now, limits), False
+    for runner in runners:
+        handles = getattr(runner, "handles", None)
+        evaluate = getattr(runner, "evaluate", None)
+        if not callable(handles) or not callable(evaluate):
+            continue
+        try:
+            if handles(armed) is True:
+                return evaluate(runtime, armed, now, limits), True
+        except Exception:
+            return Degraded(armed.wake_id, "RUNTIME_OBSERVATION_UNAVAILABLE", None), True
+    return Degraded(armed.wake_id, "RUNTIME_SOURCE_UNSUPPORTED", None), True
 
 
 class GitHubSignalRunner:
@@ -403,14 +451,16 @@ def poll_once(
                     else:
                         pending += 1
                     continue
-                outcome = signal_runtime.evaluate(
-                    wake_id,
+                outcome, source_publishes = _evaluate_signal(
+                    signal_runtime,
                     armed,
                     current,
                     EvaluationLimits(100),
+                    signal_runners,
                 )
                 if isinstance(outcome, Matched):
-                    signal_runtime.reconcile_match_publication(wake_id)
+                    if not source_publishes:
+                        signal_runtime.reconcile_match_publication(wake_id)
                     if (root / "firing" / f"{wake_id}.json").is_file():
                         fired += 1
                     else:
