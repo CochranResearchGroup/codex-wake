@@ -2924,3 +2924,51 @@ Acceptance state: P51 is open at `P51-G1-v5` / `P51-G1-C04`; #59 is accepted,
 blocked. Movement is `outcome_progress`. Next action: merge this assignment
 projection, run both pure-adapter implementations in parallel, independently
 review them, then serialize shared CLI/daemon integration.
+
+## Turn 144 | 2026-09-15
+
+Completed and rolled back the P51 local runtime event-wake campaign.
+
+- Process-exit issue #60 merged through PR #71 at canonical
+  `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3`; user-systemd issue #61 merged
+  through PR #73 at `f41ef0ba6d5b37ab85bea7a1cebbc9bd6b0ad748`. The only
+  systemd CI retry corrected a hermetic UID fixture and then passed.
+- Productization issue #62 merged through PR #77 at canonical
+  `08447afdfe0384b23d73079e4579ca050dffe2c0` after bounded adversarial review,
+  one repair cycle, 414 comprehensive Python tests, 12 plugin tests, installed
+  wheel smoke, and both required CI gates.
+- Installed canary issue #63 used exact candidate commit `08447afd...`, one
+  isolated current-user service, and one disposable target unit. A first
+  registration command failed before write because the inactive target was not
+  loaded; zero wake records or dispatches existed. One reviewed fixture repair
+  added only a non-activating ordering reference and preserved product
+  read-only authority.
+- Wake `wake_ea9a12487da64c86bd2110430f517425` registered against an inactive
+  baseline with attempts `0/1`, survived the controlled daemon restart, matched
+  one verified inactive-to-active transition as `event_000000000001`, and made
+  exactly one dispatch attempt. The hook acknowledged the same wake and tmux
+  visibility was `visible_prompt_observed` for visible window `34`, internal
+  pane `%33`; raw pane text was not stored.
+- The terminal wake was archived. The candidate, target, transient service,
+  and timer all read `not-found`; a fresh process census found no candidate;
+  and the isolated runtime root and unit files were moved recoverably to user
+  trash. Global executable hashes, normal wake counts of zero active and 23
+  archived, normal service state, and the enabled three-root supervisor were
+  unchanged.
+- Receipt PR #79 passed both Python 3.11 and 3.12 release gates on the first
+  run and squash-merged at canonical
+  `00af8fa2142ce5adb102f48ba651c6a09c02df1b`, closing #63. The authoritative
+  installed receipt is
+  `docs/dev/verification/0077-2026-09-15-installed-runtime-wake-canary.md`.
+- The primary owned all installed and live effects. Read-only reviewer
+  `/root/p51_canary_plan_review`, requested on `gpt-5.6-luna` medium, found one
+  restart-accounting ambiguity; the primary made cumulative bounds explicit
+  and closed-world re-review passed. Effective runtime model and allocation
+  were not reported, so no allocation-savings claim is made.
+
+Acceptance state: P51 is closed at `P51-G1-v12` / `P51-G1-C11`; issues #59
+through #63 are accepted, parent issue #58 closes with this coordination merge,
+and no active implementation lane remains. Movement is `outcome_progress`.
+Stop reason: the approved objective and every acceptance criterion are met; no
+release, deployment, provider mutation, public ingress, system-manager access,
+or global installation refresh occurred.
