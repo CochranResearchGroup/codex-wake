@@ -5,8 +5,8 @@ Lane: P50
 Issues: #34, #35, #36, #37, #45
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
-Goal Version: P50-G1-v5
-Checkpoint: P50-G1-C08
+Goal Version: P50-G1-v6
+Checkpoint: P50-G1-C09
 
 ## Goal objective
 
@@ -60,6 +60,17 @@ attempt immediately. The candidate CLI must use the exact isolated
 `XDG_STATE_HOME` used by the service and must register with
 `--require-monitor`. The primary owns registration, trigger creation, dispatch,
 rollback, integration, and the final acceptance decision.
+
+Checkpoint `P50-G1-C09` records retry 2 as `FAILED_SAFE`. The candidate service
+loaded a credential value with one unintended trailing character from the
+ephemeral environment-file writer, so bounded provider reads returned 401.
+The selected CI run completed successfully, but the journal retained zero
+receipts, reservations, dispatch attempts, acknowledgements, or visibility
+results. The original wake was cancelled and archived and exact artifacts were
+rolled back. Two replacement retries are now consumed and four remain. Retry 3
+must prove the service-process credential is byte-equal to the valid source and
+returns HTTP 200 before registration; values and digests remain forbidden from
+output and evidence.
 
 ## Scope
 
@@ -221,7 +232,7 @@ close issues, or release. Nested delegation is disabled.
 
 ```text
 goal_id: P50-G1
-goal_version: P50-G1-v5
+goal_version: P50-G1-v6
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
@@ -231,8 +242,8 @@ concurrency_limit: 2 implementation lanes plus 1 read-only reviewer
 live_provider_mutations: 0
 live_dispatch_attempts: 1
 canary_retries_after_registration: 6
-canary_retries_used: 1
-canary_retries_remaining: 5
+canary_retries_used: 2
+canary_retries_remaining: 4
 authorization_gate: material_departure_or_explicit_action_gate_only
 review_verification_mode: closed_world_if_reviewed
 checkpoint_fields: state_transition, acceptance_state, progress_classification, evidence, material_blockers, next_action_or_stop_reason
