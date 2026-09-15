@@ -1,3 +1,19 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - lane: P51-goal-coordination
+    work_items:
+      - "#58"
+      - "#59"
+    branch: chore/issue-58-p51-goal-start
+    owner: primary-orchestrator
+    state: active
+    plan: docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md
+    expected_write_surface:
+      - ROADMAP.md
+      - RUNBOOK.md
+      - docs/dev/active-lanes.yaml
+      - docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md
+    live_effect: none
+    dependencies: []
+    overlaps: []
