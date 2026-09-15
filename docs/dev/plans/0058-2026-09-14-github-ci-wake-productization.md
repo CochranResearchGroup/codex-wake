@@ -6,7 +6,7 @@ Issues: #34, #35, #36, #37
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
 Goal Version: P50-G1-v1
-Checkpoint: P50-G1-C02
+Checkpoint: P50-G1-C03
 
 ## Goal objective
 
@@ -431,3 +431,13 @@ worktree and branches are removed. Issues #35 and #36 are now ready for two
 disjoint worktrees. #35 owns the persistent configuration, CLI, daemon, retry
 health, and restart path. #36 owns local readiness, support export, installed
 product smoke, and user documentation. Issue #37 remains blocked on both.
+
+Checkpoint `P50-G1-C03` accepts issue #35 through PR #42 at
+`4571e66644968d13a7c519d349492660f4e56989` and issue #36 through PR #43 at
+`0a2c32cea76d17de187ccd558e806090273baf7f`. Both issues are closed; both
+release-gate matrices passed; their worktrees and local/remote branches were
+removed after canonical-main readback. The installed-wheel product smoke now
+persists and rediscovers a nonsecret source, ingests one verified fixture
+attempt, matches once, reports readiness, and performs no dispatch. Issue #37
+is unblocked as the sole active lane. Its one provider read and one tmux
+dispatch remain bound to the isolated identities and stop rules above.
