@@ -79,6 +79,20 @@ class SignalSupportTests(unittest.TestCase):
             readiness = signal_readiness(root, health=health, now=NOW)
             statuses = {item["source"]: item["status"] for item in readiness["sources"]}
             self.assertEqual(statuses, {"runtime": "ready", "systemd": "invalidated"})
+            process_support = next(
+                item["support"] for item in readiness["sources"] if item["source"] == "runtime"
+            )
+            self.assertEqual(
+                process_support["terminal_failure"],
+                {"status": "not_present", "code": ""},
+            )
+            systemd_support = next(
+                item["support"] for item in readiness["sources"] if item["source"] == "systemd"
+            )
+            self.assertEqual(
+                systemd_support["terminal_failure"],
+                {"status": "blocked", "code": "SYSTEMD_AUTHORIZATION_DENIED"},
+            )
             self.assertNotIn("private.service", json.dumps(readiness))
             self.assertNotIn("999", json.dumps(readiness))
 

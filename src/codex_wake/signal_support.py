@@ -435,7 +435,10 @@ def signal_readiness(
                           "health": {"status": status},
                           "checkpoint": {"status": "ready" if row["checkpoint"] is not None else "warning", "present": row["checkpoint"] is not None},
                           "replay_lag": {"status": "unknown", "seconds": None},
-                          "terminal_failure": {"status": "blocked" if runtime_code else "not_present", "code": runtime_code},
+                          "terminal_failure": {
+                              "status": "blocked" if status in {"unavailable", "invalidated", "unsupported"} else "not_present",
+                              "code": runtime_code if status in {"unavailable", "invalidated", "unsupported"} else "",
+                          },
                           "disabled": False, "unsupported": status == "unsupported"}
                     if runtime_source
                     else {"status": "ready" if status in {"ready", "not_needed"} else status,
