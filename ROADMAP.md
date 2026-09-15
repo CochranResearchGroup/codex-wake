@@ -681,3 +681,29 @@ Acceptance target:
 - Issues #34 through #37 integrate through pull requests and required CI; no
   webhook ingress, provider mutation, global refresh, deployment, tag, or
   release occurs.
+
+## P51 | Local Runtime Event Wakes
+
+State: OPEN
+
+Current State: Checkpoint `P51-G1-C00` opens issues #58 through #63 from clean
+canonical main `25b1028`. Issue #59 is the sole ready critical path and owns
+the shared allowlisted runtime-source contract and provider-free tracer. Exact
+same-user process-exit and user-systemd transition adapters remain blocked on
+that contract; productization joins both, and one isolated installed canary is
+the terminal acceptance slice.
+
+Plan: [Local runtime event wakes goal campaign](docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md)
+
+Acceptance target:
+
+- Exact process and user-unit identities are authorization-bound and cannot be
+  widened through a wake request.
+- Runtime observations are read-only, bounded, restart-correct, deduplicated,
+  and fail closed on ambiguity or backend loss.
+- Process wakes never attach to PID reuse or claim unavailable exit code/time;
+  systemd wakes never claim unseen transitions or acquire unit-control power.
+- Supported CLI, daemon, readiness, status, support, packaging, and legacy
+  compatibility surfaces remain truthful and tested.
+- One isolated installed candidate produces one bounded visible wake, archives,
+  and rolls back without global or unrelated runtime drift.
