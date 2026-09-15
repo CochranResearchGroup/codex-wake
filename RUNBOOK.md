@@ -2459,3 +2459,29 @@ packet. Movement is `outcome_progress` because the tracker, dependency graph,
 evidence blocker, and recoverable coordination lane now exist. Next action:
 merge this coordination checkpoint, then create issue #34 from exact canonical
 main and implement the smallest safe production-read tracer.
+
+## Turn 127 | 2026-09-14
+
+Claimed issue #34 at checkpoint `P50-G1-C01`.
+
+- PR #38 passed both Python release gates and squash-merged the P50 control
+  record at `dadff6f570a255511feec782db9787ab22fbde85`; local `main` and
+  `origin/main` then reconciled exactly.
+- Provider/security and runtime consultations independently found the same
+  blocking contract mismatch: GitHub REST does not document complete
+  wall-clock list coverage or an immutable workflow-attempt completion field.
+- Selected a conservative implementation order: explicit source configuration
+  and fixed-origin read transport; truthful positive-attempt versus history
+  coverage semantics; bounded provider-free adversarial tests; then one
+  read-only qualification.
+- Registered only `feat/issue-34-github-history-evidence` as the active
+  implementation lane. Issues #35 through #37 remain dependency blocked.
+- Retained one issue work-unit attempt, one repair attempt, and the single broad
+  review allowance. No production source code, provider read, credential use,
+  installed mutation, or dispatch occurred at this checkpoint.
+
+Acceptance state: issue #34 is claimed and ready. Movement is
+`blocker_reduction` because the undocumented evidence assumption now has an
+explicit implementation boundary. Next action: merge this custody projection,
+create the exact worktree from canonical main, and implement the provider-free
+production tracer before any live read.
