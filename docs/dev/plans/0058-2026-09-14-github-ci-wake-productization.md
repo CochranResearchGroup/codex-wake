@@ -3,10 +3,10 @@
 State: OPEN
 Lane: P50
 Issues: #34, #35, #36, #37
-Branch: `feat/issue-34-github-history-evidence`
+Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P50-G1
 Goal Version: P50-G1-v1
-Checkpoint: P50-G1-C01
+Checkpoint: P50-G1-C02
 
 ## Goal objective
 
@@ -423,3 +423,11 @@ Issue #34 acceptance is ready for integration. This does not claim a daemon,
 CLI, persistent on-disk source registry, webhook production convergence,
 installed runtime, dispatch, or complete GitHub history; those remain owned by
 issues #35 through #37.
+
+Checkpoint `P50-G1-C02` accepts issue #34 through PR #40 at
+`a19af3a3d987b0bdb8cc59c8d4e1053ffe6b951e`. The production client and
+positive-only evidence contract are canonical; issue #34 is closed and its
+worktree and branches are removed. Issues #35 and #36 are now ready for two
+disjoint worktrees. #35 owns the persistent configuration, CLI, daemon, retry
+health, and restart path. #36 owns local readiness, support export, installed
+product smoke, and user documentation. Issue #37 remains blocked on both.
