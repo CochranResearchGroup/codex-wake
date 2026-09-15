@@ -2547,3 +2547,32 @@ delivery item. Movement is `outcome_progress`. Next action: merge this custody
 projection, construct the exact isolated candidate identity, preflight the
 current tmux target and GitHub source, then execute at most one canary wake and
 roll back every exact P50 runtime artifact after evidence extraction.
+
+## Turn 130 | 2026-09-14
+
+Stopped the first installed GitHub wake canary safely and opened the corrective
+systemd rendering lane.
+
+- The candidate wheel, source, unit, wake root, target, and credential reference
+  were frozen before registration; no credential value entered repository or
+  wake evidence.
+- Installed `systemd-analyze --user verify` rejected the quoted
+  `EnvironmentFile=` path as non-absolute. The daemon therefore recorded
+  `GITHUB_AUTH_UNAVAILABLE` before any provider request or trigger pull request.
+- Wake `wake_09b5d91add724c5f8cb1ecb39ccec390` was cancelled and archived with
+  zero receipts, matches, dispatch attempts, acknowledgements, or visibility
+  observations. The exact service, process, candidate root, drop-in, and build
+  root were removed recoverably.
+- PR #46 merged the sanitized `FAILED_SAFE` receipt at `a80f925`; issue #37
+  remains open and blocked.
+- Opened #45 as the sole provider-free corrective lane. It owns safe systemd
+  environment-file rendering, deterministic parser verification, and one
+  disposable local dummy-key service smoke.
+- Preserved `canary_retries_after_registration: 0`; a replacement live canary
+  requires a new explicit operator authorization after #45 is accepted.
+
+Acceptance state: P50 is active at checkpoint `P50-G1-C04`; #45 is the only
+active implementation item and #37 remains blocked. Movement is
+`blocker_reduction`. Next action: merge this custody projection, implement and
+accept #45 without provider or wake effects, then stop at the explicit
+replacement-canary authorization gate.
