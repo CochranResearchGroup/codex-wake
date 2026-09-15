@@ -2682,3 +2682,31 @@ Acceptance state: issue #37 is authorized and ready to resume. Movement is
 `blocker_reduction`. Next action: merge this authority checkpoint, freeze a new
 canonical candidate identity, reconcile both read-only audits, and execute the
 next isolated attempt under the corrected procedure.
+
+## Turn 135 | 2026-09-15
+
+Stopped GitHub CI canary retry 2 safely and prepared retry 3.
+
+- Registered wake `wake_9604b9cf73024b838af1ec0d5751873d` under the exact
+  isolated `XDG_STATE_HOME` and `--require-monitor`. A controlled service
+  restart preserved its record hash, journal, arm, lifecycle, and zero attempts.
+- PR #54 supplied successful CI run `34982337740`, attempt 1, for exact head
+  `2356a34`, but the daemon recorded `GITHUB_AUTH_UNAVAILABLE` and ingested no
+  observation.
+- A bounded diagnostic proved the ephemeral credential writer added one
+  trailing character: the 41-character service value returned HTTP 401, while
+  the unchanged 40-character GitHub CLI value returned HTTP 200. No value or
+  digest was printed or retained.
+- Stopped the exact service, cancelled and archived the original wake with zero
+  receipts, matches, dispatch attempts, acknowledgements, or visibility
+  results, and rolled back the unit, drop-in, process, candidate root, and build
+  root recoverably. The global installation remains `0.5.2`.
+- Advanced the control record to `P50-G1-v6` / `P50-G1-C09`: two replacement
+  retries are consumed and four remain. Retry 3 must prove process credential
+  equality and HTTP 200 before registration.
+
+Acceptance state: issue #37 remains open and the installed visible-wake proof
+is still unmet. Movement is `blocker_reduction`; the attempt was contained and
+the exact procedure fault has a deterministic pre-registration guard. Next
+action: merge the failed-safe receipt, start retry 3 from canonical main, and
+stop on success or any ambiguity.
