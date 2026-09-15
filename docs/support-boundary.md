@@ -19,6 +19,8 @@ Supported productized paths:
 - inspect signal capability and each configured source independently from
   dispatch-target readiness;
 - export a deterministic bounded support artifact with `support export`.
+- register process-exit wakes for one exact same-user process identity;
+- register systemd-unit transitions for one exact configured current-user unit.
 
 Unsupported as product evidence:
 
@@ -31,6 +33,11 @@ Unsupported as product evidence:
 - OpenClaw Slack channel ids treated as Codex app-server thread ids;
 - ack files treated as proof that an operator-visible pane changed;
 - source-tree linked OpenClaw plugin paths treated as durable install evidence.
+- a process-exit match inferred from a PID alone, an exit code, command line,
+  environment, or a stale aggregate health receipt;
+- a systemd transition inferred from a unit name alone, an already-matching
+  baseline, a missing unit, a reconnect/generation change, or an observation
+  gap.
 
 ## Required Evidence
 
@@ -55,6 +62,15 @@ Dispatch-specific proof:
   `dispatch_result.session_id`, and Slack/transcript readback when
   human-visible proof is required.
 
+For `process-exit`, evidence must include the exact source fingerprint and a
+verified alive baseline followed by one terminated observation. The product
+does not expose the PID, boot id, start ticks, command, environment, exit code,
+or exact exit time in aggregate status or support export. For
+`systemd-unit`, evidence must include the bounded source instance, configured
+canonical unit fingerprint, prior non-target state, target state, and manager
+generation continuity. Raw unit names and D-Bus payloads remain excluded from
+aggregate support identities.
+
 ## Manual-Only Cases
 
 Tmux is manual/operator-visible unless the operator captures pane visibility
@@ -64,6 +80,12 @@ when visibility matters.
 
 Live OpenClaw and app-server smokes require local credentials, sessions, and
 readback surfaces. CI should not run those checks.
+
+Process and systemd lifecycle checks may run in a disposable installed-wheel
+fixture with injected fixed observers. Such a fixture proves durable
+registration, fresh-process reconstruction, one provider-free observation and
+match, retirement, and cleanup only; it deliberately disables dispatch and is
+not evidence that a live process, session bus, unit, or target session exists.
 
 ## Cleanup Boundary
 

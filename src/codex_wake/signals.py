@@ -242,6 +242,20 @@ class SignalEngine(Protocol):
     ) -> Matched | NotReady | Degraded | Invalid | Expired: ...
 
 
+_SOURCE_HEALTH_CODES = frozenset({
+    "RUNTIME_NOT_OBSERVED", "RUNTIME_READY", "RUNTIME_SOURCE_UNSUPPORTED",
+    "RUNTIME_AUTHORIZATION_DENIED", "RUNTIME_OBSERVATION_UNAVAILABLE",
+    "RUNTIME_OBSERVATION_AMBIGUOUS", "RUNTIME_BASELINE_MATCHES", "RUNTIME_RESOURCE_LIMIT",
+    "RUNTIME_ANCHOR_INVALID", "RUNTIME_REQUEST_INVALID", "RUNTIME_CHECKPOINT_UNAVAILABLE",
+    "RUNTIME_CHECKPOINT_INVALID", "RUNTIME_INGEST_UNAVAILABLE", "RUNTIME_PUBLICATION_UNAVAILABLE",
+    "SYSTEMD_READY", "SYSTEMD_SOURCE_UNSUPPORTED", "SYSTEMD_CAPABILITY_DENIED",
+    "SYSTEMD_AUTHORIZATION_DENIED", "SYSTEMD_SIGNAL_NOT_ALLOWED", "SYSTEMD_BASELINE_MATCHES",
+    "SYSTEMD_OBSERVATION_UNAVAILABLE", "SYSTEMD_UNIT_UNAVAILABLE", "SYSTEMD_RESOURCE_LIMIT",
+    "SYSTEMD_CHECKPOINT_UNAVAILABLE", "SYSTEMD_CHECKPOINT_INVALID", "SYSTEMD_INGEST_UNAVAILABLE",
+    "SYSTEMD_ANCHOR_INVALID",
+})
+
+
 @dataclass(frozen=True, slots=True)
 class SourceInstanceReconcileResult:
     source: str
@@ -249,6 +263,19 @@ class SourceInstanceReconcileResult:
     scanned: int
     observed: int
     degraded: int
+    health_code: str = ""
+    observed_at: datetime | None = None
+
+    def __post_init__(self) -> None:
+        if (
+            type(self.health_code) is not str
+            or len(self.health_code) > 80
+            or (self.health_code and self.health_code not in _SOURCE_HEALTH_CODES)
+            or self.observed_at is not None
+            and (type(self.observed_at) is not datetime or self.observed_at.tzinfo is None
+                 or self.observed_at.utcoffset() is None)
+        ):
+            raise ValueError("source reconcile health is invalid")
 
 
 @dataclass(frozen=True, slots=True)
@@ -267,6 +294,23 @@ class SignalSourceRunner(Protocol):
         now: datetime,
         limits: EvaluationLimits,
     ) -> SourceReconcileResult: ...
+
+
+class UnavailableSourceRunner:
+    """Publish bounded health for a source that could not be reconstructed."""
+
+    def __init__(self, source: str, source_instance: str, health_code: str) -> None:
+        self.source = source
+        self.source_instance = source_instance
+        self.health_code = health_code
+
+    def reconcile(
+        self, module: SignalEngine, now: datetime, limits: EvaluationLimits,
+    ) -> SourceReconcileResult:
+        row = SourceInstanceReconcileResult(
+            self.source, self.source_instance, 0, 0, 1, self.health_code, now,
+        )
+        return SourceReconcileResult(self.source, 0, 0, 1, (row,))
 
 
 WakeSignalModule = SignalEngine

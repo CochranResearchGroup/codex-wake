@@ -97,6 +97,8 @@ class DaemonTests(unittest.TestCase):
 
             self.assertEqual((result.fired, result.pending), (1, 0))
             self.assertEqual(result.signal_sources[0]["source"], "systemd")
+            self.assertEqual(result.signal_sources[0]["code"], "SYSTEMD_READY")
+            self.assertEqual(result.signal_sources[0]["observed_at"], "2026-09-15T00:00:01+00:00")
             self.assertTrue((root / "firing" / "wake_systemd_v2.json").is_file())
 
     def test_systemd_revocation_blocks_generic_evaluation_and_publication(self) -> None:
@@ -235,6 +237,8 @@ class DaemonTests(unittest.TestCase):
 
             self.assertEqual((result.fired, result.pending), (1, 0))
             self.assertEqual(result.signal_sources[0]["source"], "runtime")
+            self.assertEqual(result.signal_sources[0]["code"], "RUNTIME_READY")
+            self.assertEqual(result.signal_sources[0]["observed_at"], "2026-09-15T00:00:01+00:00")
             self.assertTrue((root / "firing" / "wake_process_v2.json").is_file())
 
     def test_process_runtime_revocation_blocks_generic_evaluation_and_publication(self) -> None:

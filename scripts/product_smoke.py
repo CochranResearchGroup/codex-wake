@@ -472,6 +472,128 @@ def run_surface_smoke(
         "upgrade_reinstall": upgrade_wheel is not None,
         "upgrade_restart": upgrade_wheel is not None,
     }
+    runtime_fixture_code = textwrap.dedent(
+        """
+        import json, os, subprocess, sys, tempfile, textwrap
+        from datetime import UTC, datetime
+        from pathlib import Path
+        from codex_wake.event_wake import EventWake
+        from codex_wake.process_signals import ProcessExitAdapter, ProcessExitSample
+        from codex_wake.runtime_signals import RuntimeSourceDescriptor, RuntimeSourceRegistry
+        from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+        from codex_wake.signal_store import SQLiteSignalModule
+        from codex_wake.signals import Resume, WakeIntent
+        from codex_wake.systemd_signals import SystemdReadCapability, SystemdSignalAdapter, SystemdUnitState
+        from codex_wake.systemd_source_config import SystemdSourceConfig, SystemdSourceStore
+
+        now = datetime(2026, 9, 15, 18, 0, tzinfo=UTC)
+        tmp = Path(tempfile.mkdtemp(prefix="codex-wake-runtime-fixture-"))
+        root = tmp / "wake"
+        uid = os.geteuid()
+        identity = {"boot_id": "01234567-89ab-cdef-0123-456789abcdef", "pid": 321,
+                    "start_time_ticks": 654, "owner_uid": uid}
+        process_descriptor = RuntimeSourceDescriptor.parse(
+            {"version": 1, "kind": "process.exit", "resource": identity, "target_state": "terminated"})
+        process_registry = RuntimeSourceRegistry({"process.exit": lambda candidate: candidate == process_descriptor})
+        process_adapter = ProcessExitAdapter(process_descriptor, process_registry,
+                                              lambda: ProcessExitSample.alive(**identity), lambda: uid)
+
+        class FixtureManager:
+            def resolve_unit(self, unit, *, timeout_seconds): return unit
+            def read_unit(self, unit, *, timeout_seconds): return SystemdUnitState(unit, "inactive", "fixture-manager")
+
+        manager = FixtureManager()
+        systemd_config = SystemdSourceConfig("fixture-state", "build.service", uid,
+                                             frozenset({"active", "inactive", "failed"}))
+        SystemdSourceStore(root).configure(systemd_config)
+        systemd_registry = RuntimeSourceRegistry(
+            {"systemd.unit": lambda candidate: candidate == systemd_config.descriptor("active")})
+        systemd_adapter = SystemdSignalAdapter(
+            systemd_config, manager, systemd_registry, SystemdReadCapability("user", uid))
+        runtime = SQLiteSignalModule(
+            signal_journal_path(root),
+            record_publisher=WakeRecordPublisher(
+                root, ManagedReaderCapability(root, "fixture-reader", 1, frozenset({1, 2}), True)))
+        ids = iter(("wake-process-fixture", "wake-systemd-fixture"))
+        wake = EventWake(runtime, adapters=(process_adapter, systemd_adapter), clock=lambda: now,
+                         id_factory=lambda: next(ids))
+        process_result = wake.register(
+            WakeIntent(process_adapter.request(), Resume("fixture process", tmp, {"transport": "tmux"})),
+            idempotency_key="installed-process-fixture")
+        systemd_result = wake.register(
+            WakeIntent(systemd_adapter.request("active"), Resume("fixture systemd", tmp, {"transport": "tmux"})),
+            idempotency_key="installed-systemd-fixture")
+        if not hasattr(process_result, "wake_id") or not hasattr(systemd_result, "wake_id"):
+            raise SystemExit("fixture arms were not registered")
+        phase_b = textwrap.dedent('''
+            import json, os
+            from datetime import UTC, datetime, timedelta
+            from pathlib import Path
+            from codex_wake.process_signals import ProcessExitAdapter, ProcessExitSample
+            from codex_wake.records import archive_record, cancel_record, cleanup_archived_records
+            from codex_wake.runtime_signals import RuntimeSourceDescriptor, RuntimeSourceRegistry
+            from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+            from codex_wake.signal_store import SQLiteSignalModule
+            from codex_wake.signals import EvaluationLimits, Matched
+            from codex_wake.systemd_signals import SystemdReadCapability, SystemdSignalAdapter, SystemdSignalRunner, SystemdUnitState
+            from codex_wake.systemd_source_config import SystemdSourceStore
+            now = datetime(2026, 9, 15, 18, 0, tzinfo=UTC)
+            root = Path(os.environ["CODEX_WAKE_FIXTURE_ROOT"])
+            uid = os.geteuid()
+            runtime = SQLiteSignalModule(signal_journal_path(root), record_publisher=WakeRecordPublisher(
+                root, ManagedReaderCapability(root, "fixture-reader", 1, frozenset({1, 2}), True)))
+            process_armed = runtime.load_armed_signal("wake-process-fixture")
+            systemd_armed = runtime.load_armed_signal("wake-systemd-fixture")
+            if process_armed is None or systemd_armed is None:
+                raise SystemExit("fresh process could not reconstruct fixture arms")
+            descriptor = RuntimeSourceDescriptor.parse(json.loads(process_armed.anchor.baseline["descriptor"]))
+            identity = dict(descriptor.resource)
+            process_registry = RuntimeSourceRegistry({"process.exit": lambda candidate: candidate == descriptor})
+            process_adapter = ProcessExitAdapter(descriptor, process_registry,
+                lambda: ProcessExitSample.zombie(**identity), lambda: uid)
+            config = SystemdSourceStore(root).registry().select("fixture-state")
+            class FixtureManager:
+                def resolve_unit(self, unit, *, timeout_seconds): return unit
+                def read_unit(self, unit, *, timeout_seconds): return SystemdUnitState(unit, "active", "fixture-manager")
+            systemd_registry = RuntimeSourceRegistry({"systemd.unit": lambda candidate: candidate == config.descriptor("active")})
+            systemd_adapter = SystemdSignalAdapter(config, FixtureManager(), systemd_registry, SystemdReadCapability("user", uid))
+            process_runner = process_adapter.runner((process_armed,))
+            systemd_runner = SystemdSignalRunner((systemd_adapter,), armed_signals=(systemd_armed,))
+            process_runner.reconcile(runtime, now, EvaluationLimits(8))
+            systemd_runner.reconcile(runtime, now, EvaluationLimits(8))
+            process_match = process_runner.evaluate(runtime, process_armed, now, EvaluationLimits(8))
+            systemd_match = systemd_runner.evaluate(runtime, systemd_armed, now, EvaluationLimits(8))
+            process_repeat = process_runner.evaluate(runtime, process_armed, now, EvaluationLimits(8))
+            systemd_repeat = systemd_runner.evaluate(runtime, systemd_armed, now, EvaluationLimits(8))
+            if (not isinstance(process_match, Matched) or not isinstance(systemd_match, Matched)
+                    or process_repeat != process_match or systemd_repeat != systemd_match):
+                raise SystemExit("fixture source-owned transitions did not match once")
+            for wake_id in ("wake-process-fixture", "wake-systemd-fixture"):
+                cancel_record(root, wake_id, now=now)
+                archive_record(root, wake_id, now=now)
+            cleanup = cleanup_archived_records(root, older_than=timedelta(seconds=1), now=now + timedelta(hours=1), delete=True)
+            if {item.wake_id for item in cleanup} != {"wake-process-fixture", "wake-systemd-fixture"}:
+                raise SystemExit("fixture archived records were not cleaned")
+            print(json.dumps({"status": "matched", "sources": ["process.exit", "systemd.unit"],
+                              "wake_ids": ["wake-process-fixture", "wake-systemd-fixture"],
+                              "dispatch_attempted": False, "cleanup_deleted": len(cleanup)}))
+        ''')
+        phase_path = tmp / "phase-b.py"
+        phase_path.write_text(phase_b, encoding="utf-8")
+        completed = subprocess.run([sys.executable, str(phase_path)], text=True, capture_output=True,
+                                   env={**os.environ, "CODEX_WAKE_FIXTURE_ROOT": str(root)}, check=False)
+        if completed.returncode != 0:
+            raise SystemExit(completed.stderr or "fresh fixture process failed")
+        print(completed.stdout.strip())
+        """
+    )
+    runtime_fixture = run_json(
+        [str(codex_wake.parent / "python"), "-c", runtime_fixture_code],
+        artifact_dir=artifact_dir,
+        name="installed-runtime-fixture-lifecycle",
+        env=signal_env,
+    )
+    summary["runtime_fixture_lifecycle"] = runtime_fixture
     github_fixture_code = textwrap.dedent(
         """
         import json, tempfile

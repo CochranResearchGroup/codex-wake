@@ -403,7 +403,11 @@ class ProcessExitAdapter:
         def report(scanned: int = 0, observed: int = 0, degraded: int = 0) -> SourceReconcileResult:
             return SourceReconcileResult(
                 "runtime", scanned, observed, degraded,
-                (SourceInstanceReconcileResult("runtime", self.source_instance, scanned, observed, degraded),),
+                (SourceInstanceReconcileResult(
+                    "runtime", self.source_instance, scanned, observed, degraded,
+                    self.diagnostic.code.value,
+                    now if now.tzinfo is not None and now.utcoffset() is not None else None,
+                ),),
             )
 
         if (

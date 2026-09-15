@@ -35,7 +35,7 @@ from .github_source_config import GitHubSourceStore
 from .signals import (
     ArmedSignal, Degraded, EvaluationLimits, Expired, Ingested,
     Matched, SignalSourceRunner, SourceInstanceReconcileResult,
-    SourceReconcileResult,
+    SourceReconcileResult, UnavailableSourceRunner,
 )
 from .monitor import write_monitor_health
 
@@ -105,6 +105,7 @@ def default_signal_runners(
     process_adapters = {}
     process_arms: dict[str, list[ArmedSignal]] = {}
     systemd_arms: dict[str, list[ArmedSignal]] = {}
+    reconstruction_failures: dict[tuple[str, str], str] = {}
     for item in pending_records(root):
         if classify_record(item.record) != "signal_v2":
             continue
@@ -138,6 +139,7 @@ def default_signal_runners(
 
                     adapter = restore_production_process_exit_adapter(armed)
                 except (OSError, TypeError, ValueError):
+                    reconstruction_failures[("runtime", source_instance)] = "RUNTIME_ANCHOR_INVALID"
                     continue
                 existing = process_adapters.get(source_instance)
                 if existing is not None and existing.descriptor != adapter.descriptor:
@@ -220,6 +222,7 @@ def default_signal_runners(
                         SystemdReadCapability("user", os.geteuid()),
                     ))
                 except (OSError, TypeError, ValueError):
+                    reconstruction_failures[("systemd", source_instance)] = "SYSTEMD_SOURCE_UNSUPPORTED"
                     continue
                 referenced_arms.extend(systemd_arms[source_instance])
             if systemd_adapters:
@@ -229,7 +232,8 @@ def default_signal_runners(
                     initial_reason=initial_reason,
                 ))
         except (OSError, TypeError, ValueError):
-            pass
+            for source_instance in systemd_arms:
+                reconstruction_failures[("systemd", source_instance)] = "SYSTEMD_SOURCE_UNSUPPORTED"
     if github_arms:
         store = GitHubSourceStore(root)
         try:
@@ -267,6 +271,10 @@ def default_signal_runners(
             # A damaged or unsupported configuration cannot create network
             # authority. Other source classes remain available.
             pass
+    runners.extend(
+        UnavailableSourceRunner(source, source_instance, code)
+        for (source, source_instance), code in sorted(reconstruction_failures.items())
+    )
     return tuple(runners)
 
 
@@ -449,6 +457,8 @@ def poll_once(
                             "scanned": item.scanned,
                             "observed": item.observed,
                             "degraded": item.degraded,
+                            "code": item.health_code,
+                            "observed_at": item.observed_at.isoformat() if item.observed_at else None,
                         }
                         for item in source_result.instances
                     )
