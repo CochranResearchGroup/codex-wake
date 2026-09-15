@@ -2516,3 +2516,34 @@ active in parallel. Movement is `outcome_progress`. Next action: merge this
 custody projection, create both exact worktrees, run bounded implementation
 workers, then reconcile their shared read-only configuration assumptions before
 opening either pull request.
+
+## Turn 129 | 2026-09-14
+
+Accepted the P50 runtime and readiness implementations and opened the isolated
+installed canary lane.
+
+- PR #42 passed both release gates and squash-merged at
+  `4571e66644968d13a7c519d349492660f4e56989`; issue #35 closed.
+- PR #43 passed both release gates and squash-merged at
+  `0a2c32cea76d17de187ccd558e806090273baf7f`; issue #36 closed.
+- Runtime acceptance includes atomic nonsecret source configuration, the
+  `github-ci` CLI, enabled-and-referenced daemon construction, positive-only
+  evidence ingestion, absolute retry recovery, and owner-only service
+  credential-file references.
+- Readiness acceptance includes configuration, credential-reference, source
+  health, checkpoint, lag, retry, transient, terminal, disabled, invalid, and
+  support-export projections without credential values or provider payloads.
+- Final source validation passed 344 tests on Python 3.11 and Python 3.12,
+  OpenClaw plugin tests, JavaScript syntax, compilation, and diff checks.
+- A fresh built wheel passed the isolated provider-free product smoke with one
+  rediscovered source, one verified fixture receipt, one match, readiness
+  `ready`, and zero dispatch. The smoke first exposed an invalid `Ingested`
+  attribute assumption; a deterministic replay fixed it before acceptance.
+- Removed both merged worktrees and their local and remote branches after
+  canonical-main and issue-closure readback.
+
+Acceptance state: issues #34 through #36 are accepted; #37 is the only open P50
+delivery item. Movement is `outcome_progress`. Next action: merge this custody
+projection, construct the exact isolated candidate identity, preflight the
+current tmux target and GitHub source, then execute at most one canary wake and
+roll back every exact P50 runtime artifact after evidence extraction.
