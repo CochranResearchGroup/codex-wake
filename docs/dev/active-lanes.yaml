@@ -1,20 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P51-C3
-    objective: Deliver user-systemd unit transition wakes
-    plan: docs/dev/plans/0062-2026-09-15-user-systemd-unit-wakes.md
-    plan_ref: refs/remotes/origin/feat/issue-61-systemd-unit-wakes
-    branch: feat/issue-61-systemd-unit-wakes
+  - id: P51-C4
+    objective: Productize local runtime wake readiness and lifecycle
+    plan: docs/dev/plans/0063-2026-09-15-runtime-wake-productization.md
+    plan_ref: refs/remotes/origin/feat/issue-62-runtime-wake-productization
+    branch: feat/issue-62-runtime-wake-productization
     target: main
     plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: 692fb72df6561ca495f2ec6a7285d00aadce208b
-    remote_ref: refs/remotes/origin/feat/issue-61-systemd-unit-wakes
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: f69dd5bc64aaa9515a27f7b4134dac9b6ea7039c
+    remote_ref: refs/remotes/origin/feat/issue-62-runtime-wake-productization
     integration: squash
-    work_items: [CochranResearchGroup/codex-wake#61]
+    work_items: [CochranResearchGroup/codex-wake#62]
     owner: primary-orchestrator
-    write_surface: systemd adapter, config, and tests; shared CLI and daemon reserved to primary
+    write_surface: readiness, status, support export, docs, packaging smoke, and combined product tests
     live_effect: none
     dependencies: []
     overlaps: []
