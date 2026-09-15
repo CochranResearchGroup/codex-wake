@@ -116,6 +116,11 @@ def module_at_wake_root(wake_root: Path) -> SQLiteSignalModule:
 
 
 class SystemdSignalTests(unittest.TestCase):
+    def setUp(self) -> None:
+        uid = patch("codex_wake.systemd_signals.os.geteuid", return_value=1000)
+        uid.start()
+        self.addCleanup(uid.stop)
+
     def test_dbus_next_backend_uses_only_fixed_call_plan_and_caches_one_sample(self) -> None:
         query = FixedQuery(bus_replies())
         backend = DbusNextUserManager(query)
