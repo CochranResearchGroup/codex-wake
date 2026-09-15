@@ -70,6 +70,48 @@ class FixtureClient:
 
 
 class GitHubPollingTests(unittest.TestCase):
+    def test_fixture_contract_and_receipt_shape_keep_existing_provenance(self):
+        adapter = GitHubPollingAdapter(config(), FixtureClient())
+        self.assertEqual(set(adapter.contract().allowed_attributes),
+                         {"workflow_id", "ref", "conclusion", "run_id", "run_attempt", "head_sha", "completed_at_us"})
+        self.assertNotIn("time_provenance", adapter.normalize_verified_attempt(run()).attributes)
+
+    def test_positive_replay_finds_earlier_attempt_when_latest_is_not_allowed(self):
+        earlier = run(completed_at=None, terminal_proof_at=NOW + timedelta(seconds=1),
+                      time_provenance="github_attempt_started_or_job_completed_lower_bound")
+        latest = replace(earlier, run_attempt=2, status="in_progress", conclusion=None)
+        client = FixtureClient([latest], pages=[RunPage((latest,), None, None, None)],
+                               verified={(101, 1): earlier, (101, 2): latest})
+        adapter = GitHubPollingAdapter(config(evidence_mode="positive_only"), client)
+        anchor = adapter.establish_anchor(adapter.request(ref="refs/heads/main", conclusions=("success",)), NOW)
+        batch = adapter.observe(anchor, checkpoint=None, now=NOW + timedelta(seconds=2))
+        self.assertIsInstance(batch, PollBatch)
+        self.assertEqual([row.occurrence_value for row in batch.observations], ["42:101:1"])
+        replay = adapter.observe(anchor, checkpoint=batch.commit, now=NOW + timedelta(seconds=10))
+        self.assertEqual(batch.observations, replay.observations)
+        self.assertEqual(client.requests[-1].since, NOW)
+
+    def test_positive_only_ingests_lower_bound_without_claiming_coverage(self):
+        value = run(completed_at=None, terminal_proof_at=NOW + timedelta(seconds=1),
+                    time_provenance="github_attempt_started_or_job_completed_lower_bound")
+        client = FixtureClient([value], pages=[RunPage((value,), None, None, None)])
+        adapter = GitHubPollingAdapter(config(evidence_mode="positive_only"), client)
+        with tempfile.TemporaryDirectory() as tmp:
+            module = make_module(Path(tmp) / "signals.sqlite3")
+            spec = adapter.request(ref="refs/heads/main", conclusions=("success",))
+            armed = module.arm(WakeId("wake_positive"), spec,
+                               ArmContext("positive", "positive", NOW, None, make_intent().resume, adapter))
+            batch = adapter.observe(armed.anchor, checkpoint=None, now=NOW + timedelta(seconds=2))
+            self.assertIsInstance(batch, PollBatch)
+            self.assertEqual(batch.coverage, "positive_only")
+            self.assertEqual(batch.health.code, "GITHUB_COVERAGE_UNPROVEN")
+            self.assertEqual(batch.commit.checkpoint_order, 0)
+            self.assertEqual(batch.observations[0].attributes["terminal_proof_at_us"],
+                             armed.anchor.baseline["terminal_proof_at_us"] + 1000000)
+            self.assertNotIn("completed_at_us", batch.observations[0].attributes)
+            self.assertIsInstance(module.ingest(batch.observations, batch.commit), Ingested)
+            self.assertIsInstance(module.evaluate(armed.wake_id, armed, NOW + timedelta(seconds=2), EvaluationLimits(20)), Matched)
+
     def test_hostile_request_and_clause_subclasses_are_rejected_without_equality_dispatch(self):
         class HostileRequest(SignalRequest):
             def __eq__(self, other):
