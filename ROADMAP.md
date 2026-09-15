@@ -686,12 +686,12 @@ Acceptance target:
 
 State: OPEN
 
-Current State: Checkpoint `P51-G1-C02` accepts PRs #64 and #65 and records the
-canonical-main-synchronized issue #59 branch at `a5e8422`. It is the sole active
-critical path and owns the shared allowlisted runtime-source contract and
-provider-free tracer. Exact same-user process-exit and user-systemd transition
-adapters remain blocked on that contract; productization joins both, and one
-isolated installed canary is the terminal acceptance slice.
+Current State: Checkpoint `P51-G1-C03` records issue #59 checkpoint `37df666`
+as integration-ready in PR #67 after focused, comprehensive, plugin,
+compilation, CI, and fresh adversarial review gates passed. Exact same-user
+process-exit and user-systemd transition adapters remain blocked until that
+contract reaches canonical main; productization joins both, and one isolated
+installed canary is the terminal acceptance slice.
 
 Plan: [Local runtime event wakes goal campaign](docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md)
 

@@ -8,8 +8,8 @@ lanes:
     branch: feat/issue-59-runtime-source-contract
     target: main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: a5e842288bb50a87e591a7f5076b8f95ae18b3d1
+    custody_state: INTEGRATION_READY
+    checkpoint: 37df666b12a433a63acfb4dfc88a6d27ff521a74
     remote_ref: refs/remotes/origin/feat/issue-59-runtime-source-contract
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#59]
@@ -18,4 +18,6 @@ lanes:
     live_effect: none
     dependencies: []
     overlaps: []
+    validation_status: passed
+    validation_ref: 37df666b12a433a63acfb4dfc88a6d27ff521a74
     updated_at: 2026-09-15
