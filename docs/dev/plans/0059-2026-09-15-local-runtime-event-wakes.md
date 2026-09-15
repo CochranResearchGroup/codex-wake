@@ -5,8 +5,8 @@ Lane: P51
 Issues: #58, #59, #60, #61, #62, #63
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P51-G1
-Goal Version: P51-G1-v10
-Checkpoint: P51-G1-C09
+Goal Version: P51-G1-v11
+Checkpoint: P51-G1-C10
 
 ## Goal objective
 
@@ -22,16 +22,17 @@ Checkpoint: P51-G1-C09
 
 ## Current state
 
-Checkpoint `P51-G1-C09` accepts process lane #60 through PR #71 at canonical
+Checkpoint `P51-G1-C10` accepts process lane #60 through PR #71 at canonical
 commit `54311f35f9e3b6dd0c21be3d0beaa2eb443616a3` and systemd lane #61 through
 PR #73 at canonical commit `f41ef0ba6d5b37ab85bea7a1cebbc9bd6b0ad748`.
 The systemd PR's first CI attempt exposed only a hosted-runner UID fixture
 assumption; the corrected hermetic fixture passed on the first authorized
-retry. Productization join #62 is integration-ready at reviewed checkpoint
-`7936cdcf3d906070fc9149b97bf96f02ffca5d7a`: 414 comprehensive tests, 12
-plugin tests, a clean installed-wheel two-source lifecycle, and the bounded
-review-repair cycle pass. GitHub CI and canonical integration remain. #63
-remains acceptance-only.
+retry. Productization join #62 is accepted through PR #77 at canonical commit
+`08447afdfe0384b23d73079e4579ca050dffe2c0`: 414 comprehensive tests, 12
+plugin tests, a clean installed-wheel two-source lifecycle, bounded review and
+repair, and both required CI gates pass. Canary #63 is dependency-unblocked and
+active from reviewed plan checkpoint
+`925460118a45bc26b168fa31e866d84473d7d3a0`; no canary registration has occurred.
 
 CodeGraph is healthy with 94 indexed files, 2,462 nodes, and 9,002 edges. It
 confirms that `SignalSourceAdapter` owns contracts and anchors,
