@@ -1,18 +1,21 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - lane: P51-goal-coordination
-    work_items:
-      - "#58"
-    branch: chore/issue-58-p51-goal-start
+  - id: P51-C1
+    objective: Establish the allowlisted runtime-source contract and tracer
+    plan: docs/dev/plans/0060-2026-09-15-runtime-source-contract.md
+    plan_ref: refs/remotes/origin/feat/issue-59-runtime-source-contract
+    branch: feat/issue-59-runtime-source-contract
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 52c4941745149618fac3856974fa84aa52c76535
+    remote_ref: refs/remotes/origin/feat/issue-59-runtime-source-contract
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#59]
     owner: primary-orchestrator
-    state: active
-    plan: docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md
-    expected_write_surface:
-      - ROADMAP.md
-      - RUNBOOK.md
-      - docs/dev/active-lanes.yaml
-      - docs/dev/plans/0059-2026-09-15-local-runtime-event-wakes.md
+    write_surface: signal base, runner, registry, tracer, and focused tests
     live_effect: none
     dependencies: []
     overlaps: []
+    updated_at: 2026-09-15
