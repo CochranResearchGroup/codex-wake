@@ -2732,3 +2732,34 @@ retry 3 is the sole active lane. Movement is `blocker_reduction`. Next action:
 merge this truthful custody checkpoint, fast-forward the retry-3 branch to it,
 freeze the installed candidate identity, and execute one attempt under the
 new credential guard.
+
+## Turn 137 | 2026-09-15
+
+Verified the installed GitHub CI visible-wake canary and stopped the retry loop.
+
+- Built and installed exact candidate commit
+  `99338719d61fe189c3e0030e36f07b5d83e5dfc6`, then proved the isolated service
+  process credential was byte-equal to the authenticated GitHub CLI source and
+  returned HTTP 200 before registration and after controlled restart. No
+  credential value or digest entered output or durable evidence.
+- Registered `wake_d95aaa91211c4648ac540eda7906088b` with `max_attempts: 1`.
+  Restart preserved the record hash, source replay, arm, journal, checkpoint,
+  and zero-attempt state.
+- Ordinary PR CI run `34984194234`, attempt 1, completed successfully for exact
+  head `5899a06cab2e97a36fc4db1cfe85a4d337230db9`. Exact-attempt verification
+  yielded one post-anchor receipt, one match, one dispatch attempt, one
+  acknowledgement, and `visible_prompt_observed` in pane `%33`; raw pane text
+  was not stored.
+- Archived the submitted wake with one receipt and one reservation, tombstoned
+  its arm, uninstalled the exact service, and recoverably removed the isolated
+  runtime and build roots. The normal service remained inactive and the global
+  installation remained `0.5.2`.
+- Advanced the control record to `P50-G1-v8` / `P50-G1-C11`: three replacement
+  retries are consumed and three remain unused. Success terminates the loop, so
+  no further registration is authorized.
+
+Acceptance state: the installed product boundary is verified; issue #37 remains
+open only until PR #56 integrates the receipt and canonical main confirms it.
+Movement is `outcome_progress`. Next action: independently review the closed
+receipt, pass PR checks, merge PR #56, and perform the final P50 reconciliation
+from canonical main.
