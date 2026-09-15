@@ -881,6 +881,38 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["counts_by_target_transport"]["tmux"], 2)
             self.assertEqual(data["counts_by_visibility_classification"], {})
             self.assertTrue(data["earliest_next_attempt_at"])
+            self.assertEqual(data["signal_readiness"]["status"], "ready")
+
+    def test_status_command_reports_source_readiness_without_resource_identity(self) -> None:
+        readiness = {
+            "status": "blocked",
+            "sources": [
+                {
+                    "source": "systemd",
+                    "source_instance": "private-unit-source",
+                    "status": "unavailable",
+                },
+                {
+                    "source": "runtime",
+                    "source_instance": "private-process-source",
+                    "status": "ready",
+                },
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmp, patch(
+            "codex_wake.signal_support.signal_readiness", return_value=readiness
+        ):
+            root = Path(tmp)
+            code, text_out, err = self.run_cli(["status"], root)
+            self.assertEqual(code, 0, err)
+            self.assertIn("signal_readiness=blocked", text_out)
+            self.assertIn("signal_sources=runtime:ready,systemd:unavailable", text_out)
+            self.assertNotIn("private-unit-source", text_out)
+            self.assertNotIn("private-process-source", text_out)
+
+            code, json_out, err = self.run_cli(["status", "--json"], root)
+            self.assertEqual(code, 0, err)
+            self.assertEqual(json.loads(json_out)["signal_readiness"], readiness)
 
     def test_cleanup_dry_run_and_delete_archived_records(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

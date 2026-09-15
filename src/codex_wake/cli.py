@@ -1287,7 +1287,11 @@ def list_records(args: argparse.Namespace, root: Path) -> int:
 
 
 def status_command(args: argparse.Namespace, root: Path) -> int:
+    from .signal_support import signal_readiness
+
     summary = status_summary(root)
+    signals = signal_readiness(root)
+    summary["signal_readiness"] = signals
     if args.as_json:
         print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
@@ -1312,6 +1316,15 @@ def status_command(args: argparse.Namespace, root: Path) -> int:
         + ",".join(f"{key}:{counts_by_visibility[key]}" for key in sorted(counts_by_visibility))
     )
     print(f"earliest_next_attempt_at={summary['earliest_next_attempt_at']}")
+    print(f"signal_readiness={signals['status']}")
+    signal_sources = signals.get("sources", [])
+    if isinstance(signal_sources, list):
+        source_states = sorted(
+            f"{item.get('source', 'unknown')}:{item.get('status', 'unknown')}"
+            for item in signal_sources
+            if isinstance(item, dict)
+        )
+        print("signal_sources=" + ",".join(source_states))
     return 0
 
 
