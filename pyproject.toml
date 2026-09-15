@@ -12,7 +12,9 @@ license = "MIT"
 authors = [
   { name = "Cochran Research Group" }
 ]
-dependencies = []
+dependencies = [
+  "dbus-next>=0.2.3,<0.3",
+]
 
 [project.scripts]
 codex-wake = "codex_wake.cli:main"

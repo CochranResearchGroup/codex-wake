@@ -579,6 +579,78 @@ class CliTests(unittest.TestCase):
             parser.parse_args(["process-exit", "--max-attempts", "0", "123", "continue"])
         self.assertEqual(raised.exception.code, 2)
 
+    def test_systemd_unit_configuration_and_transition_registration_are_bounded(self) -> None:
+        from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher
+        from codex_wake.systemd_signals import SystemdUnitState
+
+        class FixtureManager:
+            def resolve_unit(self, unit: str, *, timeout_seconds: int) -> str:
+                return unit
+
+            def read_unit(self, unit: str, *, timeout_seconds: int) -> SystemdUnitState:
+                return SystemdUnitState(unit, "inactive", "manager-a")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            configured = self.run_cli([
+                "systemd-unit", "source", "configure",
+                "--source", "build-state", "--unit", "build.service",
+                "--target-state", "active", "--target-state", "failed",
+                "--poll-timeout", "4", "--enabled",
+            ], root)
+            self.assertEqual(configured[0], 0, configured[2])
+            mode = (root / "systemd" / "sources.json").stat().st_mode & 0o777
+            self.assertEqual(mode, 0o600)
+
+            code, output, error = self.run_cli(
+                ["systemd-unit", "source", "list", "--json"], root
+            )
+            self.assertEqual(code, 0, error)
+            source = json.loads(output)["sources"][0]
+            self.assertEqual(source["unit"], "build.service")
+            self.assertEqual(source["target_states"], ["active", "failed"])
+            self.assertNotIn("method", output)
+            self.assertNotIn("bus_address", output)
+
+            publisher = WakeRecordPublisher(
+                root,
+                ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+            )
+            with (
+                patch("codex_wake.systemd_signals.SystemdUserBusBackend", return_value=FixtureManager()),
+                patch(
+                    "codex_wake.signal_records.WakeRecordPublisher.for_managed_reader",
+                    return_value=publisher,
+                ),
+            ):
+                code, output, error = self.run_cli([
+                    "systemd-unit", "becomes", "--source", "build-state",
+                    "--state", "active", "--idempotency-key", "build-active",
+                    "--max-attempts", "2", "--", "Continue build",
+                ], root)
+            self.assertEqual(code, 0, error)
+            wake_id = output.split()[0]
+            record = json.loads((root / "pending" / f"{wake_id}.json").read_text())
+            self.assertEqual(record["schema_version"], 2)
+            self.assertEqual(record["max_attempts"], 2)
+            self.assertEqual(record["predicate"]["source"], "systemd")
+            self.assertEqual(record["predicate"]["kind"], "unit.active_state")
+            self.assertEqual(record["predicate"]["subject"], "unit:build.service")
+
+    def test_systemd_unit_configuration_rejects_wildcards_and_unbounded_timeout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            for unit, timeout in (("*.service", "5"), ("build.service", "61")):
+                with self.subTest(unit=unit, timeout=timeout):
+                    code, _output, error = self.run_cli([
+                        "systemd-unit", "source", "configure",
+                        "--source", "build-state", "--unit", unit,
+                        "--target-state", "active", "--poll-timeout", timeout,
+                        "--enabled",
+                    ], root)
+                    self.assertEqual(code, 2)
+                    self.assertIn("configuration is invalid", error)
+
     def test_version_reports_package_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

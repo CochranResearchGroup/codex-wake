@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 import uuid
@@ -238,6 +239,60 @@ def build_parser() -> argparse.ArgumentParser:
     process_exit.add_argument("prompt", nargs=argparse.REMAINDER)
     add_target_options(process_exit)
     add_monitor_gate_options(process_exit)
+
+    systemd_unit = subparsers.add_parser(
+        "systemd-unit",
+        help="configure and arm exact read-only user-systemd transition wakes",
+    )
+    systemd_unit_subparsers = systemd_unit.add_subparsers(
+        dest="systemd_unit_command", required=True
+    )
+    systemd_source = systemd_unit_subparsers.add_parser(
+        "source", help="manage nonsecret exact user-systemd source configuration"
+    )
+    systemd_source_subparsers = systemd_source.add_subparsers(
+        dest="systemd_source_command", required=True
+    )
+    systemd_configure = systemd_source_subparsers.add_parser(
+        "configure", help="persist one exact current-user unit allowlist"
+    )
+    systemd_configure.add_argument("--source", required=True, dest="source_instance")
+    systemd_configure.add_argument("--unit", required=True)
+    systemd_configure.add_argument(
+        "--target-state", required=True, action="append", dest="target_states",
+        choices=("active", "inactive", "failed"),
+    )
+    systemd_configure.add_argument(
+        "--poll-timeout", type=int, default=5, dest="poll_timeout_seconds"
+    )
+    systemd_enabled = systemd_configure.add_mutually_exclusive_group(required=True)
+    systemd_enabled.add_argument("--enabled", "--enable", action="store_true", dest="enabled")
+    systemd_enabled.add_argument("--disabled", "--disable", action="store_false", dest="enabled")
+    systemd_list = systemd_source_subparsers.add_parser(
+        "list", help="list sanitized configured user-systemd sources"
+    )
+    systemd_list.add_argument("--json", action="store_true", dest="as_json")
+    systemd_show = systemd_source_subparsers.add_parser(
+        "show", help="show one sanitized configured user-systemd source"
+    )
+    systemd_show.add_argument("source_instance")
+    systemd_show.add_argument("--json", action="store_true", dest="as_json")
+    systemd_becomes = systemd_unit_subparsers.add_parser(
+        "becomes", help="wake after the exact configured unit transitions to a target state"
+    )
+    systemd_becomes.add_argument("--source", required=True, dest="source_instance")
+    systemd_becomes.add_argument(
+        "--state", required=True, choices=("active", "inactive", "failed"),
+        dest="target_state",
+    )
+    systemd_becomes.add_argument("--idempotency-key")
+    systemd_becomes.add_argument(
+        "--max-attempts", type=bounded_attempt_count, default=3,
+        help="maximum dispatch attempts (1-100; default: 3)",
+    )
+    systemd_becomes.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(systemd_becomes)
+    add_monitor_gate_options(systemd_becomes)
 
     github_ci = subparsers.add_parser(
         "github-ci", help="configure and arm durable GitHub Actions completion wakes"
@@ -917,6 +972,123 @@ def create_process_exit_signal(args: argparse.Namespace, root: Path) -> int:
     path = root / "pending" / f"{result.wake_id}.json"
     print(f"{result.wake_id} {path}")
     return 0
+
+
+def systemd_unit_command(args: argparse.Namespace, root: Path) -> int:
+    from .systemd_source_config import SystemdSourceConfig, SystemdSourceStore
+
+    store = SystemdSourceStore(root)
+    if args.systemd_unit_command == "source":
+        if args.systemd_source_command == "configure":
+            try:
+                source = store.configure(SystemdSourceConfig(
+                    source_instance=args.source_instance,
+                    unit=args.unit,
+                    owner_uid=os.geteuid(),
+                    target_states=frozenset(args.target_states),
+                    enabled=args.enabled,
+                    poll_timeout_seconds=args.poll_timeout_seconds,
+                ))
+            except (OSError, TypeError, ValueError) as exc:
+                raise WakeError(f"systemd source configuration is invalid: {exc}") from None
+            print(f"source={source.source_instance}")
+            print(f"enabled={str(source.enabled).lower()}")
+            print(f"config={store.path}")
+            return 0
+        try:
+            sources = store.sources()
+            if args.systemd_source_command == "show":
+                selected = [item for item in sources if item.source_instance == args.source_instance]
+                if not selected:
+                    raise WakeError(f"systemd source is not configured: {args.source_instance}")
+                summaries = [_systemd_source_summary(selected[0])]
+            else:
+                summaries = [_systemd_source_summary(item) for item in sources]
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        payload = summaries[0] if args.systemd_source_command == "show" else {"sources": summaries}
+        if args.as_json:
+            print(json.dumps(payload, sort_keys=True))
+        elif args.systemd_source_command == "show":
+            for key, value in payload.items():
+                print(f"{key}={value}")
+        else:
+            for source in summaries:
+                print(f"{source['source_instance']} {source['unit']} enabled={str(source['enabled']).lower()}")
+        return 0
+
+    from .event_wake import EventWake
+    from .runtime_signals import RuntimeSourceRegistry
+    from .signal_records import WakeRecordPublisher, signal_journal_path
+    from .signal_store import SQLiteSignalModule
+    from .signals import Degraded, Invalid, Resume, WakeIntent
+    from .systemd_signals import SystemdReadCapability, SystemdSignalAdapter, SystemdUserBusBackend
+
+    try:
+        source = store.registry().select(args.source_instance)
+        adapter = SystemdSignalAdapter(
+            source,
+            SystemdUserBusBackend(),
+            RuntimeSourceRegistry({
+                "systemd.unit": lambda descriptor: _configured_systemd_descriptor(
+                    store, args.source_instance, descriptor
+                )
+            }),
+            SystemdReadCapability("user", os.geteuid()),
+        )
+    except (OSError, TypeError, ValueError) as exc:
+        raise WakeError(f"systemd source is unavailable: {exc}") from None
+    prompt = normalize_prompt(args.prompt)
+    if getattr(args, "require_monitor", False):
+        readiness = monitor_readiness(wake_root=root, repo_root=Path.cwd())
+        require_monitor_ready(readiness)
+    now = utc_now()
+    runtime = SQLiteSignalModule(
+        signal_journal_path(root),
+        record_publisher=WakeRecordPublisher.for_managed_reader(root),
+    )
+    result = EventWake(
+        runtime,
+        adapters=(adapter,),
+        clock=lambda: now,
+        id_factory=lambda: f"wake_{uuid.uuid4().hex}",
+    ).register(
+        WakeIntent(
+            adapter.request(args.target_state),
+            Resume(prompt, Path.cwd(), target_for_args(args)),
+            max_attempts=args.max_attempts,
+        ),
+        idempotency_key=args.idempotency_key or f"systemd-unit:{uuid.uuid4().hex}",
+    )
+    if isinstance(result, Degraded):
+        raise WakeError(f"systemd signal registration unavailable: {result.code}")
+    if isinstance(result, Invalid):
+        raise WakeError("systemd signal registration is invalid")
+    path = root / "pending" / f"{result.wake_id}.json"
+    print(f"{result.wake_id} {path}")
+    return 0
+
+
+def _systemd_source_summary(source) -> dict[str, object]:
+    return {
+        "source_instance": source.source_instance,
+        "unit": source.unit,
+        "owner_uid": source.owner_uid,
+        "target_states": sorted(source.target_states),
+        "enabled": source.enabled,
+        "poll_timeout_seconds": source.poll_timeout_seconds,
+    }
+
+
+def _configured_systemd_descriptor(store, source_instance: str, descriptor) -> bool:
+    try:
+        current = store.registry().select(source_instance)
+        return any(
+            descriptor == current.descriptor(state)
+            for state in current.target_states
+        )
+    except (OSError, TypeError, ValueError):
+        return False
 
 
 def github_ci_command(args: argparse.Namespace, root: Path) -> int:
@@ -1798,6 +1970,8 @@ def run(argv: list[str] | None = None) -> int:
         return create_filesystem_signal(args, root)
     if args.command == "process-exit":
         return create_process_exit_signal(args, root)
+    if args.command == "systemd-unit":
+        return systemd_unit_command(args, root)
     if args.command == "github-ci":
         return github_ci_command(args, root)
     if args.command == "pid":
