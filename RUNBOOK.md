@@ -2658,3 +2658,27 @@ cause and prevention are recorded. Stop reason: the one explicitly authorized
 replacement registration was consumed. Another canary requires fresh operator
 authority for exactly one additional isolated registration and at most one
 live tmux dispatch.
+
+## Turn 134 | 2026-09-15
+
+Resumed the installed GitHub CI wake canary with a bounded five-attempt ceiling.
+
+- The operator authorized up to five additional replacement attempts. This
+  raises the cumulative post-registration retry allowance from one to six;
+  one retry has been consumed and five remain.
+- Advanced the control record to `P50-G1-v5` / `P50-G1-C08` and registered
+  issue #37 as the sole active implementation lane.
+- Preserved `max_attempts: 1` for each wake, the single-dispatch bound per
+  attempt, positive-only read contract, no-provider-mutation boundary,
+  sanitized evidence rules, ambiguity stop, and exact recoverable rollback.
+- Corrected the execution procedure: every candidate CLI command must export
+  the same isolated `XDG_STATE_HOME` as the candidate service, and registration
+  must use `--require-monitor`.
+- Assigned two read-only economical verification agents to audit the procedure
+  and current preconditions. They have no registration, trigger, dispatch,
+  GitHub mutation, service mutation, cleanup, merge, or acceptance authority.
+
+Acceptance state: issue #37 is authorized and ready to resume. Movement is
+`blocker_reduction`. Next action: merge this authority checkpoint, freeze a new
+canonical candidate identity, reconcile both read-only audits, and execute the
+next isolated attempt under the corrected procedure.
