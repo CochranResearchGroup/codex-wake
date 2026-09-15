@@ -8,8 +8,10 @@ lanes:
     branch: feat/issue-62-runtime-wake-productization
     target: main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: f69dd5bc64aaa9515a27f7b4134dac9b6ea7039c
+    custody_state: INTEGRATION_READY
+    checkpoint: 7936cdcf3d906070fc9149b97bf96f02ffca5d7a
+    validation_status: passed
+    validation_ref: 7936cdcf3d906070fc9149b97bf96f02ffca5d7a
     remote_ref: refs/remotes/origin/feat/issue-62-runtime-wake-productization
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#62]
