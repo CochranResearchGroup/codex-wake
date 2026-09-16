@@ -5,8 +5,8 @@ Lane: P52
 Issues: #81, #82, #83, #84, #85
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P52-G1
-Goal Version: P52-G1-v3
-Checkpoint: P52-G1-C03
+Goal Version: P52-G1-v4
+Checkpoint: P52-G1-C04
 
 ## Goal objective
 
@@ -42,6 +42,12 @@ through #85 remain dependency-blocked. Its implementation is integration-ready
 at `e9e55031b2a03d22467c854b80074f3c333ece3f` in PR #89 after 39 focused
 tests, 425 comprehensive Python tests, 12 plugin tests, compilation, required
 Python 3.11/3.12 CI, and independent review with no findings.
+
+PR #89 subsequently squash-merged at canonical
+`f8059cd2390a3459ce6b28073cfb040446ea05ba`, closing #82. Local migration #83
+and GitHub migration #84 are now assigned as disjoint parallel worktrees. Their
+workers own separate family modules and tests; the primary reserves shared
+`daemon.py` catalogue composition and integrates it serially.
 
 Graphiti was healthy but returned no P52-specific durable facts. Current source,
 Git, GitHub, policy, plan, and test evidence are authoritative. Deterministic

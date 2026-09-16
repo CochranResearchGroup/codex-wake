@@ -3048,3 +3048,25 @@ Acceptance state: P52 is open at `P52-G1-v3` / `P52-G1-C03`; PR #89 at
 through #85 remain blocked. Movement is `outcome_progress`. Next action: merge
 this readiness projection, squash-merge PR #89, verify canonical main, then
 assign #83 and #84 as disjoint parallel migrations.
+
+## Turn 148 | 2026-09-15
+
+Accepted the source-registry contract and assigned both migration lanes.
+
+- PR #90 first merged the exact issue #82 readiness projection. PR #89 then
+  squash-merged at canonical `f8059cd2390a3459ce6b28073cfb040446ea05ba`,
+  closing #82; fresh canonical validation passed 425 Python tests.
+- Removed the accepted #82 worktree and local/remote topic branch after merge.
+- CodeGraph confirmed the remaining local and GitHub reconstruction blocks and
+  their distinct batching, dependency, and failure semantics.
+- Published lane plans
+  `docs/dev/plans/0067-2026-09-15-local-source-family-migration.md` and
+  `docs/dev/plans/0068-2026-09-15-github-source-family-migration.md`. Workers
+  own disjoint family modules/tests; the primary exclusively owns shared daemon
+  catalogue integration.
+
+Acceptance state: P52 is open at `P52-G1-v4` / `P52-G1-C04`; #82 is accepted,
+#83 and #84 are the two active implementation lanes, and #85 remains blocked.
+Movement is `outcome_progress`. Next action: merge this assignment projection,
+run both provider-free family implementations in parallel, then serialize and
+review shared daemon integration.
