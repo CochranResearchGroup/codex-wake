@@ -30,6 +30,108 @@ from tests.test_signals import make_adapter, make_intent
 
 
 class DaemonTests(unittest.TestCase):
+    def test_injected_family_restores_durable_fixture_without_construction_effects(self) -> None:
+        from dataclasses import replace
+        from codex_wake.filesystem_signals import FilesystemSignalAdapter, FilesystemSignalRunner
+        from codex_wake.source_registry import BuiltinSourceRegistration, BuiltinSourceRegistry
+        from codex_wake.signals import SourceReconcileResult
+
+        class FixtureRunner:
+            def __init__(self, candidates):
+                self.candidates = candidates
+                self.reconcile_calls = 0
+
+            def reconcile(self, module, now, limits):
+                self.reconcile_calls += 1
+                return SourceReconcileResult("memory", 0, 0, 0)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            runtime = SQLiteSignalModule(
+                signal_journal_path(root),
+                record_publisher=WakeRecordPublisher(
+                    root, ManagedReaderCapability(root, "reader", 1, frozenset({1, 2}), True),
+                ),
+            )
+            adapter = make_adapter()
+            for wake_id in ("wake_z", "wake_a"):
+                registration = EventWake(
+                    runtime, adapters=(adapter,),
+                    clock=lambda: datetime(2026, 9, 15, tzinfo=UTC),
+                    id_factory=lambda wake_id=wake_id: wake_id,
+                ).register(make_intent(), idempotency_key=wake_id)
+                self.assertIsInstance(registration, Registration)
+            filesystem = FilesystemSignalAdapter(Path(tmp), "result.txt")
+            registration = EventWake(
+                runtime, adapters=(filesystem,),
+                clock=lambda: datetime(2026, 9, 15, tzinfo=UTC),
+                id_factory=lambda: "wake_filesystem",
+            ).register(replace(
+                make_intent(), when=filesystem.request("created"),
+                resume=replace(make_intent().resume, cwd=Path(tmp)),
+            ), idempotency_key="filesystem")
+            self.assertIsInstance(registration, Registration)
+            # Reconstruction uses a fresh journal object, not registration memory.
+            runtime = SQLiteSignalModule(signal_journal_path(root))
+            runtime.load_armed_signal("wake_a")
+            before = {path.relative_to(root): path.read_bytes()
+                      for path in root.rglob("*") if path.is_file()}
+            calls = []
+
+            def construct(context, candidates):
+                self.assertEqual(context.root, root)
+                self.assertEqual(context.initial_reason, "periodic")
+                calls.append(candidates)
+                return (FixtureRunner(candidates),)
+
+            registry = BuiltinSourceRegistry((
+                BuiltinSourceRegistration("fixture", {("memory", "job.completed")}, construct),
+            ))
+            with patch("codex_wake.daemon.dispatch_firing_record") as dispatch, patch(
+                "codex_wake.github_client.GitHubRestClient"
+            ) as provider, patch.object(runtime, "ingest") as ingest, patch.object(
+                runtime, "evaluate"
+            ) as evaluate:
+                existing = default_signal_runners(root, runtime)
+                self.assertEqual(tuple(type(runner) for runner in existing), (FilesystemSignalRunner,))
+                with patch.object(runtime, "load_armed_signal", wraps=runtime.load_armed_signal) as loader:
+                    runners = default_signal_runners(
+                        root, runtime, initial_reason="periodic", source_registry=registry,
+                    )
+                    loaded = [call.args[0] for call in loader.call_args_list]
+                    self.assertEqual(sorted(loaded), ["wake_a", "wake_filesystem", "wake_z"])
+                dispatch.assert_not_called()
+                provider.assert_not_called()
+                ingest.assert_not_called()
+                evaluate.assert_not_called()
+
+            self.assertEqual(len(calls), 1)
+            self.assertEqual([item.armed.wake_id for item in calls[0]], ["wake_a", "wake_z"])
+            self.assertEqual(tuple(type(runner) for runner in runners),
+                             (FilesystemSignalRunner, FixtureRunner))
+            self.assertEqual(runners[1].reconcile_calls, 0)
+            self.assertEqual(before, {path.relative_to(root): path.read_bytes()
+                                     for path in root.rglob("*") if path.is_file()})
+
+    def test_empty_registry_preserves_empty_default_reconstruction(self) -> None:
+        from unittest.mock import Mock
+        from codex_wake.source_registry import BuiltinSourceRegistry
+
+        registry = Mock(spec=BuiltinSourceRegistry)
+        extra = Mock()
+        registry.reconstruct.return_value = (extra,)
+        root = Path("/unused")
+        runtime = Mock()
+        # An empty injection must not change the compatibility result.
+        with patch("codex_wake.daemon.pending_records", return_value=[]):
+            self.assertEqual(default_signal_runners(root, runtime), ())
+            self.assertEqual(default_signal_runners(
+                root, runtime, source_registry=BuiltinSourceRegistry(()),
+            ), ())
+            self.assertEqual(default_signal_runners(root, runtime, source_registry=registry), (extra,))
+        registry.reconstruct.assert_called_once()
+        runtime.load_armed_signal.assert_not_called()
+
     def test_default_runner_restores_configured_systemd_transition_and_publishes(self) -> None:
         from codex_wake.runtime_signals import RuntimeSourceRegistry
         from codex_wake.signals import Resume, WakeIntent
