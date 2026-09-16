@@ -10,12 +10,12 @@ lanes:
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     checkpoint: d2de93e
-    validation_status: final_remediation_validated_rereview_pending
-    validation_ref: d2de93e
+    validation_status: independent_review_passed_pr_pending
+    validation_ref: 93ba14afc9c12c04a500f72426d3daa4b5ae3d3c
     remote_ref: refs/remotes/origin/feat/issue-138-managed-webhook-reconciliation
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#138]
-    owner: primary integration owner; initial review changes remediated; exact re-review pending
+    owner: primary integration owner; independent review accepted; hosted integration pending
     write_surface: Plan 0084, managed binding/store/reconciler, provider protocol, CLI/status, tests, roadmap, runbook, and active-lane catalogue
     live_effect: none; all provider, service, secret, ingress, installation, release, and dispatch effects are forbidden
     dependencies: []

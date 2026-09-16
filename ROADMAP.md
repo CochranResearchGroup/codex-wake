@@ -808,7 +808,8 @@ and reconciliation slice. Final remediation checkpoint `d2de93e` implements its 
 binding store, ambiguity-safe reconciler, bounded GitHub.com administration
 adapter, and dry-run-first CLI. Local focused, comprehensive, plugin,
 compilation, and diff gates pass after addressing all eight initial independent
-review findings and the final mismatched-UPDATE variant; exact re-review and hosted integration remain. No provider,
+review findings and the final mismatched-UPDATE variant. Independent review
+accepts checkpoint `93ba14a`; hosted integration and canonical readback remain. No provider,
 service, secret, ingress, installation, release, or dispatch effect is
 authorized by C1.
 
@@ -832,7 +833,7 @@ Acceptance target:
   with canonical GitHub and verification custody.
 
 Acceptance state: P54 planning and its five-child issue graph are canonical;
-#138 is locally remediated and awaiting exact independent re-review. Movement is
-`outcome_progress`. Next action: review and integrate the provider-free
+#138 is locally accepted and awaiting its issue-linked PR gates. Movement is
+`outcome_progress`. Next action: integrate the provider-free
 ownership/reconciliation path through Plan 0084, then unblock #139 and #140.
 Live effects remain separately gated.

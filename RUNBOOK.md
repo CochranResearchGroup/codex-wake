@@ -3898,3 +3898,10 @@ mismatched UPDATE response could replace the preexisting hook ID in `UNKNOWN`.
 Checkpoint `d2de93e` now preserves the pre-write hook ID for every ambiguous
 UPDATE and adds the direct regression. Validation passes 37 focused tests, 602
 comprehensive Python tests, 12 plugin tests, compilation, and diff hygiene.
+
+Final independent re-verification ACCEPTS clean checkpoint `93ba14a`. It
+reproduced the mismatched UPDATE and retained hook 9 in `UNKNOWN` through three
+read-only reconciliations after exactly one mutation. All eight original
+findings are closed; the independent 37-test focused rerun passed with no live
+effect. Acceptance is now gated only by the issue-linked PR, both hosted Python
+release jobs, squash integration, and canonical-main readback.
