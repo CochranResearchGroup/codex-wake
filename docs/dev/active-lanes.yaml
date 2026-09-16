@@ -8,8 +8,10 @@ lanes:
     branch: feat/issue-83-local-source-family-migration
     target: main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: ae3081999ffb6d9cc4d492cb32566c83eb5df17e
+    custody_state: INTEGRATION_READY
+    checkpoint: 618e9ef66e6bca963fe3efb18fabe72ccef16f0a
+    validation_status: passed
+    validation_ref: 618e9ef66e6bca963fe3efb18fabe72ccef16f0a
     remote_ref: refs/remotes/origin/feat/issue-83-local-source-family-migration
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#83]
@@ -28,7 +30,7 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: ae3081999ffb6d9cc4d492cb32566c83eb5df17e
+    checkpoint: e98e44c33957a85719e17b29ae2d0cb23c07d2e5
     remote_ref: refs/remotes/origin/feat/issue-84-github-source-family-migration
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#84]

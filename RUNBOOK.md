@@ -3070,3 +3070,29 @@ Acceptance state: P52 is open at `P52-G1-v4` / `P52-G1-C04`; #82 is accepted,
 Movement is `outcome_progress`. Next action: merge this assignment projection,
 run both provider-free family implementations in parallel, then serialize and
 review shared daemon integration.
+
+## Turn 149 | 2026-09-15
+
+Qualified local-source migration #83 and preserved the parallel GitHub result.
+
+- Terra-high workers independently produced local and GitHub family modules in
+  disjoint worktrees. The GitHub worker corrected an initial reverse dependency
+  by requiring daemon-owned runner injection; its provider-free checkpoint is
+  `e98e44c33957a85719e17b29ae2d0cb23c07d2e5`.
+- The primary integrated local families into the shared daemon, deleting 146
+  lines of filesystem/process/systemd branching while preserving normal runner
+  order and globally appending unavailable runners after GitHub.
+- Independent review found process and systemd pending-projection identity gaps.
+  One repair cycle restored the old source-instance and cwd guards; targeted
+  re-review resolved all findings with no regression.
+- PR #93 at `618e9ef66e6bca963fe3efb18fabe72ccef16f0a` passed 88 focused tests,
+  431 comprehensive Python tests, 12 plugin tests, compilation, diff checks,
+  and both required Python release gates.
+- The existing systemd regression proves a missing or unloaded unit is
+  unavailable, never synthesized as inactive; no authority change was needed.
+
+Acceptance state: P52 is open at `P52-G1-v5` / `P52-G1-C05`; #83 is
+integration-ready, #84 has a published worker checkpoint, and #85 remains
+blocked. Movement is `outcome_progress`. Next action: merge this projection and
+PR #93, then reconcile canonical main into #84 for primary-owned GitHub daemon
+integration.
