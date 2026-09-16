@@ -3804,3 +3804,17 @@ Acceptance state: P54 kickoff planning is active under #135; the implementation
 children are not yet published. Movement is `outcome_progress`. Next action:
 validate and integrate the planning PR, obtain decomposition approval, publish
 the dependency-linked child issues, and start the provider-free C1 slice.
+
+PR #136 resolved the exact published head `63b2296`, had no reviews, comments,
+or unresolved threads, and passed both hosted Python release gates after one
+bounded rerun of the failed 3.11 job. The first 3.11 attempt exposed a
+timing-sensitive existing webhook-runtime test (`COMMIT_FAILED` after the
+intentional provider timeout); Python 3.12 and local 3.11 passed, and the exact
+failed job passed on retry without source changes. The PR squash-merged as
+canonical `8b74e3e`. The short-lived planning lane is now reconciled; #135
+remains open for the product outcome.
+
+Acceptance state: Plan 0083 is canonical and the active-lane catalogue is
+clear while child publication waits for decomposition approval. Movement is
+`outcome_progress`. Next action: approve and publish the five child issues,
+then register and start the provider-free C1 implementation lane.
