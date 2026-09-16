@@ -6,31 +6,40 @@ enter this store, its summaries, or rendered systemd units.
 """
 from __future__ import annotations
 
+import fcntl
+from collections.abc import Iterator
+from contextlib import contextmanager
+from dataclasses import dataclass
+from ipaddress import ip_address
 import json
 import os
+from pathlib import Path
 import re
 import shutil
 import sqlite3
 import stat
 import tempfile
-from ipaddress import ip_address
-from dataclasses import dataclass
-from pathlib import Path
+import threading
 
 from .executables import resolve_stable_executable
 from .records import WakeError
 from .service import _systemd_environment_file_path, systemctl, systemd_quote, user_state_dir, user_systemd_dir
 from .signal_records import signal_journal_path
 from .signal_store import JOURNAL_APPLICATION_ID, JOURNAL_SCHEMA_VERSION
+from .managed_webhook_rotation import PendingEffect, RotationPhase, RotationRecord
+from .managed_webhooks import ManagedWebhookBinding
 
 
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}")
 _ENV = re.compile(r"[A-Z][A-Z0-9_]{0,63}")
 _FIELDS = (
     "source_instance", "address", "port", "path", "secret_ref",
-    "previous_secret_ref", "enabled", "allow_non_loopback", "max_body_bytes", "max_connections",
+    "previous_secret_ref", "current_generation", "previous_generation",
+    "enabled", "allow_non_loopback", "max_body_bytes", "max_connections",
     "request_timeout_seconds", "operation_timeout_seconds", "shutdown_timeout_seconds",
 )
+_V1_FIELDS = tuple(field for field in _FIELDS if field not in {"current_generation", "previous_generation"})
+_MAX_GENERATION = 2**31 - 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +50,8 @@ class WebhookListenerConfig:
     path: str = "/github/webhook"
     secret_ref: str = ""
     previous_secret_ref: str | None = None
+    current_generation: int = 1
+    previous_generation: int | None = None
     enabled: bool = False
     allow_non_loopback: bool = False
     max_body_bytes: int = 262_144
@@ -50,6 +61,11 @@ class WebhookListenerConfig:
     shutdown_timeout_seconds: float = 10.0
 
     def __post_init__(self) -> None:
+        # Preserve the public v1 constructor shape while assigning the same
+        # deterministic generations used when decoding a persisted v1 row.
+        if self.previous_secret_ref is not None and self.current_generation == 1 and self.previous_generation is None:
+            object.__setattr__(self, "current_generation", 2)
+            object.__setattr__(self, "previous_generation", 1)
         if (
             type(self.source_instance) is not str or _NAME.fullmatch(self.source_instance) is None
             or type(self.address) is not str or not _valid_address(self.address, self.allow_non_loopback)
@@ -61,6 +77,13 @@ class WebhookListenerConfig:
                 or _ENV.fullmatch(self.previous_secret_ref) is None
                 or self.previous_secret_ref == self.secret_ref
             )
+            or type(self.current_generation) is not int
+            or not 1 <= self.current_generation <= _MAX_GENERATION
+            or self.previous_generation is not None and (
+                type(self.previous_generation) is not int
+                or not 1 <= self.previous_generation < self.current_generation
+            )
+            or (self.previous_secret_ref is None) != (self.previous_generation is None)
             or type(self.enabled) is not bool
             or type(self.allow_non_loopback) is not bool
             or type(self.max_body_bytes) is not int or not 1_024 <= self.max_body_bytes <= 1_048_576
@@ -89,11 +112,57 @@ def _valid_address(value: str, allow_non_loopback: bool) -> bool:
 class WebhookListenerStore:
     """One immutable listener authority set below one owner wake root."""
 
+    _thread_locks: dict[str, threading.RLock] = {}
+    _thread_locks_guard = threading.Lock()
+
     def __init__(self, wake_root: Path):
         self.wake_root = Path(wake_root).resolve()
         self.path = self.wake_root / "github" / "webhook-listeners.json"
+        self._lock_path = self.wake_root / "github" / ".webhook-listeners.lock"
+
+    @contextmanager
+    def locked(self) -> Iterator[None]:
+        key = str(self._lock_path)
+        with self._thread_locks_guard:
+            lock = self._thread_locks.setdefault(key, threading.RLock())
+        with lock:
+            handle = None
+            try:
+                self.path.parent.mkdir(parents=True, exist_ok=True)
+                parent_meta = self.path.parent.lstat()
+                if (
+                    self.path.parent.is_symlink() or not stat.S_ISDIR(parent_meta.st_mode)
+                    or parent_meta.st_uid != os.getuid()
+                ):
+                    raise ValueError("webhook listener configuration is unavailable")
+                os.chmod(self.path.parent, 0o700)
+                descriptor = os.open(
+                    self._lock_path,
+                    os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0),
+                    0o600,
+                )
+                metadata = os.fstat(descriptor)
+                if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid():
+                    os.close(descriptor)
+                    raise ValueError("webhook listener configuration is unavailable")
+                os.fchmod(descriptor, 0o600)
+                handle = os.fdopen(descriptor, "a+", encoding="utf-8")
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+                yield
+            except OSError:
+                raise ValueError("webhook listener configuration is unavailable") from None
+            finally:
+                if handle is not None:
+                    try:
+                        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+                    finally:
+                        handle.close()
 
     def listeners(self) -> tuple[WebhookListenerConfig, ...]:
+        with self.locked():
+            return self._listeners_unlocked()
+
+    def _listeners_unlocked(self) -> tuple[WebhookListenerConfig, ...]:
         if self.path.is_symlink():
             raise ValueError("webhook listener configuration is invalid")
         if not self.path.exists():
@@ -107,9 +176,10 @@ class WebhookListenerStore:
             if type(payload) is not dict or set(payload) != {"schema_version", "listeners"}:
                 raise ValueError
             rows = payload["listeners"]
-            if payload["schema_version"] != 1 or type(rows) is not list or len(rows) > 16:
+            schema_version = payload["schema_version"]
+            if schema_version not in {1, 2} or type(rows) is not list or len(rows) > 16:
                 raise ValueError
-            listeners = tuple(_decode(row) for row in rows)
+            listeners = tuple(_decode(row, schema_version=schema_version) for row in rows)
             if tuple(item.source_instance for item in listeners) != tuple(sorted(item.source_instance for item in listeners)):
                 raise ValueError
             if len({item.source_instance for item in listeners}) != len(listeners):
@@ -127,19 +197,103 @@ class WebhookListenerStore:
     def configure(self, listener: WebhookListenerConfig) -> WebhookListenerConfig:
         if type(listener) is not WebhookListenerConfig:
             raise ValueError("webhook listener configuration is invalid")
-        selected = {item.source_instance: item for item in self.listeners()}
-        current = selected.get(listener.source_instance)
-        if current == listener:
+        with self.locked():
+            selected = {item.source_instance: item for item in self._listeners_unlocked()}
+            current = selected.get(listener.source_instance)
+            if current == listener:
+                return listener
+            if current is not None:
+                before, after = _encode(current), _encode(listener)
+                before.pop("enabled")
+                after.pop("enabled")
+                if before != after:
+                    raise ValueError("material webhook listener changes require a new source_instance")
+            selected[listener.source_instance] = listener
+            self._write_unlocked(selected)
             return listener
-        if current is not None:
-            before, after = _encode(current), _encode(listener)
-            before.pop("enabled")
-            after.pop("enabled")
-            if before != after:
-                raise ValueError("material webhook listener changes require a new source_instance")
-        selected[listener.source_instance] = listener
-        _atomic_write(self.path, {"schema_version": 1, "listeners": [_encode(item) for item in sorted(selected.values(), key=lambda item: item.source_instance)]})
-        return listener
+
+    def transition_rotation_secrets(
+        self,
+        *,
+        expected: WebhookListenerConfig,
+        replacement: WebhookListenerConfig,
+        rotation: RotationRecord,
+        binding: ManagedWebhookBinding,
+    ) -> WebhookListenerConfig:
+        """Apply one intent-bound secret-reference transition under an exact CAS."""
+        if not all(type(value) is expected_type for value, expected_type in (
+            (expected, WebhookListenerConfig), (replacement, WebhookListenerConfig),
+            (rotation, RotationRecord), (binding, ManagedWebhookBinding),
+        )):
+            raise ValueError("webhook listener rotation authority is invalid")
+        self._validate_rotation_authority(expected, replacement, rotation, binding)
+        with self.locked():
+            selected = {item.source_instance: item for item in self._listeners_unlocked()}
+            if selected.get(expected.source_instance) != expected:
+                raise ValueError("webhook listener rotation preimage is stale")
+            selected[replacement.source_instance] = replacement
+            self._write_unlocked(selected)
+        return replacement
+
+    def _validate_rotation_authority(
+        self,
+        expected: WebhookListenerConfig,
+        replacement: WebhookListenerConfig,
+        rotation: RotationRecord,
+        binding: ManagedWebhookBinding,
+    ) -> None:
+        source = expected.source_instance
+        if (
+            replacement.source_instance != source
+            or rotation.owner_id != binding.owner_id
+            or not (rotation.canonical_root == binding.canonical_root == str(self.wake_root))
+            or rotation.owner_uid != binding.owner_uid
+            or rotation.owner_uid != os.getuid()
+            or rotation.source_instance != binding.source_instance
+            or rotation.source_instance != source
+            or rotation.service_id != binding.service_id
+            or rotation.service_id != webhook_service_name(source)
+            or rotation.binding_revision != binding.generation
+            or rotation.previous_generation != binding.secret_generation
+        ):
+            raise ValueError("webhook listener rotation authority is invalid")
+        before, after = _encode(expected), _encode(replacement)
+        for field in ("secret_ref", "previous_secret_ref", "current_generation", "previous_generation"):
+            before.pop(field)
+            after.pop(field)
+        if before != after:
+            raise ValueError("webhook listener rotation changes unrelated configuration")
+        if rotation.phase is RotationPhase.PREPARED and rotation.pending_effect is PendingEffect.RESTART_DUAL:
+            valid = (
+                expected.current_generation == rotation.previous_generation
+                and expected.previous_generation is None
+                and replacement.current_generation == rotation.target_generation
+                and replacement.previous_generation == rotation.previous_generation
+                and replacement.previous_secret_ref == expected.secret_ref
+                and replacement.secret_ref != expected.secret_ref
+            )
+        elif (
+            rotation.phase is RotationPhase.AWAITING_DELIVERY
+            and rotation.pending_effect is PendingEffect.RESTART_TARGET_ONLY
+        ):
+            valid = (
+                expected.current_generation == rotation.target_generation
+                and expected.previous_generation == rotation.previous_generation
+                and replacement.current_generation == rotation.target_generation
+                and replacement.previous_generation is None
+                and replacement.secret_ref == expected.secret_ref
+                and replacement.previous_secret_ref is None
+            )
+        else:
+            raise ValueError("webhook listener rotation phase is invalid")
+        if not valid:
+            raise ValueError("webhook listener rotation shape is invalid")
+
+    def _write_unlocked(self, selected: dict[str, WebhookListenerConfig]) -> None:
+        _atomic_write(self.path, {
+            "schema_version": 2,
+            "listeners": [_encode(item) for item in sorted(selected.values(), key=lambda item: item.source_instance)],
+        })
 
     def enabled(self, source_instance: str) -> WebhookListenerConfig:
         listener = self.select(source_instance)
@@ -155,6 +309,8 @@ def listener_summary(listener: WebhookListenerConfig, *, include_references: boo
         "port": listener.port,
         "path": listener.path,
         "enabled": listener.enabled,
+        "current_generation": listener.current_generation,
+        "previous_generation": listener.previous_generation,
         "max_body_bytes": listener.max_body_bytes,
         "allow_non_loopback": listener.allow_non_loopback,
         "max_connections": listener.max_connections,
@@ -187,9 +343,15 @@ def _encode(listener: WebhookListenerConfig) -> dict[str, object]:
     return {field: getattr(listener, field) for field in _FIELDS}
 
 
-def _decode(payload: object) -> WebhookListenerConfig:
-    if type(payload) is not dict or set(payload) != set(_FIELDS):
+def _decode(payload: object, *, schema_version: int) -> WebhookListenerConfig:
+    fields = _V1_FIELDS if schema_version == 1 else _FIELDS
+    if type(payload) is not dict or set(payload) != set(fields):
         raise ValueError
+    if schema_version == 1:
+        previous = payload["previous_secret_ref"]
+        payload = dict(payload)
+        payload["current_generation"] = 1 if previous is None else 2
+        payload["previous_generation"] = None if previous is None else 1
     return WebhookListenerConfig(**payload)
 
 
