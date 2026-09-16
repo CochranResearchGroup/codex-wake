@@ -211,9 +211,10 @@ class ProviderHook:
     def __post_init__(self) -> None:
         if (
             type(self.hook_id) is not int or not 0 < self.hook_id < 2**63
-            or not _valid_callback(self.callback_url)
-            or not _valid_events(self.events)
-            or type(self.active) is not bool or self.content_type != "json" or type(self.insecure_ssl) is not bool
+            or not _valid_provider_callback(self.callback_url)
+            or not _valid_provider_events(self.events)
+            or type(self.active) is not bool or self.content_type not in {"json", "form"}
+            or type(self.insecure_ssl) is not bool
         ):
             raise ValueError("provider hook is invalid")
 
@@ -342,6 +343,8 @@ class ManagedWebhookStore:
                 binding.owner_id != prior.owner_id or binding.installation_id != prior.installation_id
                 or binding.canonical_root != prior.canonical_root or binding.owner_uid != prior.owner_uid
                 or binding.provider_host != prior.provider_host or binding.source_instance != prior.source_instance
+                or binding.repository != prior.repository or binding.repository_id != prior.repository_id
+                or binding.service_id != prior.service_id or binding.executable_id != prior.executable_id
             ):
                 raise ValueError("managed webhook ownership is immutable")
             if not _transition_allowed(prior.lifecycle, binding.lifecycle):
@@ -582,6 +585,18 @@ def _valid_callback(value: object) -> bool:
         return False
 
 
+def _valid_provider_callback(value: object) -> bool:
+    if type(value) is not str or not 11 <= len(value) <= 512:
+        return False
+    if any(character in value for character in ("#", "@", "\n", "\r", " ")):
+        return False
+    try:
+        parsed = urlsplit(value)
+        return parsed.scheme in {"http", "https"} and bool(parsed.netloc) and bool(parsed.hostname) and bool(parsed.path)
+    except ValueError:
+        return False
+
+
 def _valid_canonical_root(value: object) -> bool:
     if type(value) is not str or not 1 < len(value) <= 512 or "\x00" in value:
         return False
@@ -600,6 +615,14 @@ def _valid_provider_host(value: object) -> bool:
 
 def _valid_events(events: object) -> bool:
     return type(events) is tuple and 1 <= len(events) <= 8 and tuple(sorted(events)) == events and len(set(events)) == len(events) and all(type(item) is str and _NAME.fullmatch(item) is not None for item in events)
+
+
+def _valid_provider_events(events: object) -> bool:
+    return (
+        type(events) is tuple and 1 <= len(events) <= 8
+        and tuple(sorted(events)) == events and len(set(events)) == len(events)
+        and all(type(item) is str and (item == "*" or _NAME.fullmatch(item) is not None) for item in events)
+    )
 
 
 def _has_attributable_receipt(binding: ManagedWebhookBinding) -> bool:

@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 import uuid
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import UTC
 from pathlib import Path
 
@@ -399,6 +399,34 @@ def build_parser() -> argparse.ArgumentParser:
         probe = github_webhook_subparsers.add_parser(action)
         probe.add_argument("--source", required=True, dest="source_instance")
         probe.add_argument("--json", action="store_true", dest="as_json")
+    webhook_binding = github_webhook_subparsers.add_parser(
+        "binding", help="manage one exact provider webhook binding"
+    )
+    webhook_binding_subparsers = webhook_binding.add_subparsers(
+        dest="github_webhook_binding_command", required=True
+    )
+    binding_configure = webhook_binding_subparsers.add_parser(
+        "configure", help="persist a secret-free desired webhook binding"
+    )
+    binding_configure.add_argument("--source", required=True, dest="source_instance")
+    binding_configure.add_argument("--installation-id", required=True)
+    binding_configure.add_argument("--repository", required=True)
+    binding_configure.add_argument("--repository-id", required=True, type=int)
+    binding_configure.add_argument("--callback-url", required=True)
+    binding_configure.add_argument(
+        "--credential-ref", required=True, dest="provider_credential_ref",
+        help="provider credential resolver reference; never a credential value",
+    )
+    binding_configure.add_argument("--json", action="store_true", dest="as_json")
+    for action in ("show", "status", "reconcile"):
+        binding_action = webhook_binding_subparsers.add_parser(action)
+        binding_action.add_argument("source_instance")
+        binding_action.add_argument("--json", action="store_true", dest="as_json")
+        if action == "reconcile":
+            arm = binding_action.add_mutually_exclusive_group()
+            arm.add_argument("--dry-run", action="store_false", dest="apply")
+            arm.add_argument("--apply", action="store_true", dest="apply")
+            binding_action.set_defaults(apply=False)
 
     pid = subparsers.add_parser("pid", help="create a wake when a process id exits")
     pid.add_argument("pid", type=int)
@@ -1258,11 +1286,11 @@ def _github_source_summary(source) -> dict[str, object]:
     }
 
 
-def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
+def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_factory=None) -> int:
     from .webhook_lifecycle import (
         WebhookListenerConfig, WebhookListenerStore, build_webhook_service_config,
         disable_webhook_listener, install_webhook_service, listener_summary, start_webhook_service, stop_webhook_service,
-        uninstall_webhook_service, webhook_readiness, webhook_service_status, webhook_support,
+        uninstall_webhook_service, webhook_readiness, webhook_service_name, webhook_service_status, webhook_support,
     )
 
     store = WebhookListenerStore(root)
@@ -1296,6 +1324,96 @@ def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
                 for item in summaries:
                     print(f"source={item['source_instance']} enabled={str(item['enabled']).lower()} address={item['address']} port={item['port']} path={item['path']}")
             return 0
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+    if args.github_webhook_command == "binding":
+        from .managed_webhooks import (
+            LifecycleState, ManagedWebhookBinding, ManagedWebhookReconciler,
+            ManagedWebhookStore, PlanAction,
+        )
+
+        managed_store = ManagedWebhookStore(root)
+        action = args.github_webhook_binding_command
+        try:
+            if action == "configure":
+                listener = store.select(args.source_instance)
+                proposed = ManagedWebhookBinding(
+                    owner_id=args.source_instance,
+                    installation_id=args.installation_id,
+                    canonical_root=str(Path(root).resolve()),
+                    owner_uid=os.getuid(),
+                    provider_host="api.github.com",
+                    source_instance=args.source_instance,
+                    repository=args.repository,
+                    repository_id=args.repository_id,
+                    callback_url=args.callback_url,
+                    events=("workflow_run",),
+                    service_id=webhook_service_name(args.source_instance),
+                    executable_id="codex-wake-github-webhook",
+                    provider_credential_ref=args.provider_credential_ref,
+                    secret_generation=1,
+                )
+                current = next(
+                    (item for item in managed_store.bindings() if item.owner_id == proposed.owner_id),
+                    None,
+                )
+                if current is None:
+                    saved = managed_store.save(proposed)
+                else:
+                    proposed = replace(
+                        current,
+                        repository=proposed.repository,
+                        repository_id=proposed.repository_id,
+                        callback_url=proposed.callback_url,
+                        events=proposed.events,
+                        service_id=proposed.service_id,
+                        executable_id=proposed.executable_id,
+                        provider_credential_ref=proposed.provider_credential_ref,
+                        desired_fingerprint="",
+                    )
+                    if proposed.desired_fingerprint == current.desired_fingerprint:
+                        saved = current
+                    else:
+                        if current.lifecycle not in {LifecycleState.UNMANAGED, LifecycleState.ACTIVE}:
+                            raise ValueError("managed webhook desired state cannot change while ownership is unresolved")
+                        saved = managed_store.save(proposed, expected_generation=current.generation)
+                result = _managed_webhook_binding_summary(saved, listener_configured=True)
+                _print_managed_webhook_result(result, as_json=args.as_json)
+                return 0
+
+            binding = managed_store.load(args.source_instance)
+            listener = store.select(binding.source_instance)
+            if action == "show":
+                _print_managed_webhook_result(
+                    _managed_webhook_binding_summary(binding, listener_configured=True),
+                    as_json=args.as_json,
+                )
+                return 0
+            provider = _managed_webhook_provider(
+                binding, listener.secret_ref, provider_factory=provider_factory
+            )
+            reconciler = ManagedWebhookReconciler(managed_store, provider)
+            plan = reconciler.preview(binding.owner_id)
+            result = {
+                "binding": _managed_webhook_binding_summary(binding, listener_configured=True),
+                "plan": plan.to_dict(),
+                "mode": "status" if action == "status" else ("apply" if args.apply else "dry-run"),
+            }
+            if action == "status":
+                _print_managed_webhook_result(result, as_json=args.as_json)
+                return 0 if plan.inventory.value == "EXACT" else 1
+            if action != "reconcile":
+                raise WakeError("unsupported github-webhook binding command")
+            if args.apply:
+                receipt = reconciler.execute(plan)
+                result["receipt"] = receipt.to_dict()
+                result["binding"] = _managed_webhook_binding_summary(
+                    managed_store.load(binding.owner_id), listener_configured=True
+                )
+                _print_managed_webhook_result(result, as_json=args.as_json)
+                return 1 if receipt.state.value == "UNKNOWN" else 0
+            _print_managed_webhook_result(result, as_json=args.as_json)
+            return 1 if plan.action is PlanAction.READ_ONLY else 0
         except ValueError as exc:
             raise WakeError(str(exc)) from None
     if args.github_webhook_command in {"readiness", "support"}:
@@ -1336,6 +1454,69 @@ def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
     else:
         print(" ".join(f"{key}={value}" for key, value in result.items()))
     return 0
+
+
+def _managed_webhook_provider(binding, secret_ref: str, *, provider_factory=None):
+    if provider_factory is None:
+        from .github_webhook_admin import GitHubWebhookAdmin
+
+        provider_factory = GitHubWebhookAdmin
+
+    def credential_resolver(reference: str) -> str:
+        return os.environ[reference]
+
+    def secret_generation_resolver(generation: int) -> str:
+        if generation != 1:
+            raise ValueError("managed webhook secret generation is unavailable")
+        return os.environ[secret_ref]
+
+    return provider_factory(
+        binding,
+        credential_resolver=credential_resolver,
+        secret_generation_resolver=secret_generation_resolver,
+    )
+
+
+def _managed_webhook_binding_summary(binding, *, listener_configured: bool) -> dict[str, object]:
+    return {
+        "owner_id": binding.owner_id,
+        "installation_id": binding.installation_id,
+        "source_instance": binding.source_instance,
+        "repository": binding.repository,
+        "repository_id": binding.repository_id,
+        "provider_host": binding.provider_host,
+        "callback_url": binding.callback_url,
+        "events": list(binding.events),
+        "service_id": binding.service_id,
+        "executable_id": binding.executable_id,
+        "provider_hook_id": binding.provider_hook_id,
+        "lifecycle": binding.lifecycle.value,
+        "generation": binding.generation,
+        "desired_fingerprint": binding.desired_fingerprint,
+        "provider_credential_reference_configured": True,
+        "listener_secret_reference_configured": listener_configured,
+    }
+
+
+def _print_managed_webhook_result(result: dict[str, object], *, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(result, sort_keys=True))
+        return
+    binding = result.get("binding") if isinstance(result.get("binding"), dict) else result
+    assert isinstance(binding, dict)
+    print(
+        f"source={binding['source_instance']} lifecycle={binding['lifecycle']} "
+        f"repository={binding['repository']} hook_id={binding['provider_hook_id']}"
+    )
+    plan = result.get("plan")
+    if isinstance(plan, dict):
+        print(
+            f"mode={result['mode']} inventory={plan['inventory']} "
+            f"action={plan['action']} operation={plan['operation']}"
+        )
+    receipt = result.get("receipt")
+    if isinstance(receipt, dict):
+        print(f"receipt={receipt['state']} code={receipt['code']}")
 
 
 def create_pid(args: argparse.Namespace, root: Path) -> int:
