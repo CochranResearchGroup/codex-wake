@@ -9,16 +9,17 @@ Integration: `squash`
 
 ## Current state
 
-At lane start, issues #82 through #84 were accepted on canonical main at
+Issues #82 through #84 are accepted on canonical main at
 `e0d88620a7bfc9208b97dd29e420639d391c0ecf`. All four production source
-families reconstructed through the immutable built-in registry while operator
-readiness/support still derived source capability independently and the
-internal extension procedure was undocumented.
+families reconstruct through the immutable built-in registry. Operator
+readiness and support still derive source capability independently of that
+catalogue, and the internal extension procedure is not yet documented.
 
-Candidate `c4217b863d68f8e0cd803ed6990e2a6d53af5dac` now provides the shared
-catalogue constructor, pure inventory, additive readiness/support projection,
-focused coverage, and maintainer documentation. Validation passes 438 Python
-and 12 plugin tests plus compilation and independent review with no findings.
+Candidate `bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22` is integration-ready in
+PR #99. It supplies pure catalogue inventory, additive readiness/support
+projection, maintainer documentation, and a provider-free installed-wheel
+conformance gate. Focused, comprehensive, plugin, compilation, planning,
+independent review, and Python 3.11/3.12 CI gates pass.
 
 ## Objective
 
@@ -88,25 +89,22 @@ zero retries.
 
 ## Installed-attempt disposition
 
-The sole local installed attempt built and installed the exact `c4217b8`
-wheel offline. Installed catalogue, readiness, support export, digest, and
-zero-wake-root assertions passed. The harness then exited while rendering its
-receipt because it referenced nonexistent `bytes_written` instead of the
-documented `size_bytes`; installed fixture reconstruction had not yet run.
-This consumed the local attempt and is not retried. Readback retained the wheel
-and support hashes, confirmed no wake root, and cleanup moved the temporary
-venv, wheel tree, and generated build artifacts to user trash.
+The sole local installed attempt built and installed exact candidate
+`c4217b863d68f8e0cd803ed6990e2a6d53af5dac` offline. Catalogue, readiness,
+support export/digest, and zero-wake-root assertions passed. Receipt rendering
+then referenced nonexistent `bytes_written` instead of `size_bytes`, so the
+process exited before installed fixture reconstruction. The attempt was not
+retried. Readback retained exact hashes and cleanup moved the temporary venv,
+wheel tree, and generated build artifacts recoverably to user trash.
 
-The bounded replacement acceptance path is a checked-in provider-free smoke
-script executed by each existing installed-wheel CI matrix job. It exercises
-the same catalogue/readiness/support assertions plus fixture reconstruction and
-temporary-root cleanup through the installed interpreter. This does not grant
-a second local attempt or widen provider, dispatch, observation, installation,
-release, or deployment authority.
+Candidate `bcfcfd5` adds a checked-in provider-free smoke to the existing
+installed-wheel CI jobs. Both matrix jobs reconstructed exactly one fixture
+runner, reported the four built-ins and six ownership pairs, created no wake
+root, and removed the temporary root. This deterministic replacement path did
+not grant another local attempt or any provider, observation, dispatch,
+installation, release, or deployment authority.
 
 ## Next action
 
-Publish the deterministic installed-wheel CI smoke, require both Python 3.11
-and 3.12 release gates on the exact candidate, then record the failed local
-attempt and successful CI replacement path in the verification receipt before
-integration.
+Merge the exact integration-ready projection, squash-merge PR #99, verify
+canonical main, then remove the accepted lane before closing parent #81.
