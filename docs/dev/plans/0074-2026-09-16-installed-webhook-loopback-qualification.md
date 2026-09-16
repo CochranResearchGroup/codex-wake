@@ -1,6 +1,7 @@
 # Installed webhook loopback qualification
 
-State: OPEN
+State: CLOSED
+Outcome: FAILED_SAFE
 Lane: P53-C4
 Issue: #107
 Branch: `chore/issue-107-installed-webhook-canary`
@@ -16,6 +17,15 @@ service/unit or port-8820 listener exists, and the active-lane catalog is
 empty. The user systemd manager is reachable but degraded by unrelated
 pre-existing failed units, so acceptance is scoped to one exact unit/PID/socket
 rather than whole-manager health.
+
+This plan is terminal. Its single service-effect attempt at `da28dee` reached
+the user manager and failed immediately with systemd `203/EXEC` because the
+supported unit has `PrivateTmp=yes` while the ephemeral executable lived under
+host `/tmp`. Product uninstall then proved inactive/disabled/MainPID-zero,
+unit absence, no matching process, released port 8820, unchanged failed-unit
+baseline, and complete temporary-root removal. No provider access, ingress, or
+dispatch occurred. Plan 0075 succeeds this failed-safe packet; Plan 0074 itself
+will not retry.
 
 Correction checkpoint `25b61f3845e954c01c8f72ac2372329e8147580f`
 replaced the initial runner after one independent drift review produced the

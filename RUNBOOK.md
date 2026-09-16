@@ -3558,3 +3558,27 @@ Acceptance state: #107 remains active and its one installed-service attempt is
 unconsumed. Movement is `blocker_reduction`. Next action: publish the repaired
 clean branch, repeat the fresh host preflight, then execute the service attempt
 once without retry after any post-install failure.
+
+## Turn 166 | 2026-09-16
+
+Closed Plan 0074 as `FAILED_SAFE` and opened bounded successor Plan 0075 after
+the single service-effect attempt failed at systemd's executable boundary.
+
+- Exact candidate `da28dee` completed clean provenance, managed-reader
+  readiness/arm/stop, and fixture setup, then consumed the attempt at service
+  installation. The unit exited immediately with systemd status `203/EXEC`.
+- Read-only journal/source inspection proved the cause: the product correctly
+  renders `PrivateTmp=yes`, while the source-only runner placed its executable
+  bootstrap under host `/tmp`, which is unavailable inside that namespace.
+- Product uninstall and fresh host readback prove the unit absent, inactive,
+  disabled, MainPID zero, NRestarts zero, port 8820 free, no matching process,
+  and the six unrelated failed units unchanged. Provider access, ingress, and
+  dispatch remained absent.
+- Plan 0074 will not retry. Plan 0075 permits one successor attempt only after a
+  test-driven owner-only user-state root, external service-stage receipt,
+  narrow independent verification, publication, and fresh preflight.
+
+Acceptance state: #107 remains open under successor Plan 0075; #108 remains
+blocked. Movement is `blocker_reduction`. Next action: implement and validate
+the PrivateTmp-visible execution root and service-effect stage locator before
+any new service effect.

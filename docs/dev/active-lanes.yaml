@@ -1,23 +1,23 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P53-C4
-    objective: Qualify the installed loopback webhook service end to end
-    plan: docs/dev/plans/0074-2026-09-16-installed-webhook-loopback-qualification.md
+  - id: P53-C4-v2
+    objective: Qualify the installed loopback webhook service from a PrivateTmp-visible root
+    plan: docs/dev/plans/0075-2026-09-16-installed-webhook-private-tmp-successor.md
     plan_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     branch: chore/issue-107-installed-webhook-canary
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     checkpoint: 7d18ea40d22ef38c482c85cac28a668305ec1bd3
-    validation_status: candidate_install_repair_validated_pending_live_preflight
+    validation_status: predecessor_failed_safe_successor_planned
     validation_ref: 7d18ea40d22ef38c482c85cac28a668305ec1bd3
     remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#107]
     owner: primary installed-effect owner with one bounded implementation worker and independent reviewer
     write_surface: source-only installed smoke runner, tests, plan, sanitized verification receipt, roadmap, and runbook
-    live_effect: one isolated user-service install/start/restart/uninstall attempt on 127.0.0.1:8820; no provider, ingress, or dispatch
+    live_effect: one successor isolated user-service install/start/restart/uninstall attempt on 127.0.0.1:8820; no provider, ingress, or dispatch
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
