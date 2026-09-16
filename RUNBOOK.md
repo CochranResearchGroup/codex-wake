@@ -3818,3 +3818,90 @@ Acceptance state: Plan 0083 is canonical and the active-lane catalogue is
 clear while child publication waits for decomposition approval. Movement is
 `outcome_progress`. Next action: approve and publish the five child issues,
 then register and start the provider-free C1 implementation lane.
+
+## Turn 175 | 2026-09-16
+
+Published the approved P54 issue graph and started the provider-free ownership
+and reconciliation slice.
+
+- Duplicate-safe GitHub preflight resolved the owned repository, ADMIN actor,
+  existing `enhancement` label, and unique idempotency markers before each
+  create. Readback binds C1 #138, rotation C2 #139, health/qualification C3
+  #140, retained activation C4 #141, and visible dispatch C5 #142.
+- Dependencies are #138 -> #139/#140 -> #141 -> #142; #140 may begin its
+  health work after #138 but its final installed qualification also requires
+  #139. Parent #135 remains open and unmodified.
+- Plan 0084 and branch `feat/issue-138-managed-webhook-reconciliation` own C1.
+  The branch starts from canonical `74dd2e6`; no other issue or PR was open
+  before publication.
+- CodeGraph mapped the existing owner-only listener store, injected GitHub read
+  client, webhook CLI, status conventions, and focused tests. C1 adds a new
+  management seam rather than widening the listener or promoting the P53 live
+  qualifier.
+- Standard-model worker `/root/p54_c1_core` owns only the new provider-free
+  core module and focused tests. Economical read-only worker
+  `/root/p54_c1_cli_contract` owns the minimal CLI/status contract review. The
+  primary retains shared integration, authority, GitHub custody, and acceptance.
+- No provider, service, secret, ingress, installation, release, or dispatch
+  effect is authorized or performed by this packet.
+
+Acceptance state: #138 is in progress on its registered provider-free lane.
+Movement is `outcome_progress`. Next action: integrate the core and CLI
+contracts, run focused and comprehensive validation, obtain independent
+closed-world review, and publish the issue-linked PR.
+
+## Turn 176 | 2026-09-16
+
+Implemented and locally validated P54-C1's provider-free managed webhook
+ownership and reconciliation path.
+
+- Core checkpoint `e28b71b` adds the owner-scoped atomic binding store,
+  generation-bound intent/outcome receipts, exact-ID ownership, deterministic
+  inventory classes, one-write reconciliation, and read-only unknown-effect
+  recovery. Same-URL hooks without an attributable local ID are collisions,
+  never adopted ownership.
+- Integration checkpoint `06db2b7` adds the bounded GitHub.com administration
+  adapter and `github-webhook binding configure|show|status|reconcile` CLI.
+  Reconcile defaults to dry-run; `--apply` is the separate mutation arm.
+- The production adapter is pinned to `api.github.com`, follows no redirects,
+  retries no request, bounds pages/requests/time/bytes, resolves credentials
+  only at request time, and returns only sanitized projections. Foreign hooks
+  with HTTP callbacks, form content, insecure SSL, or wildcard events remain
+  observable without becoming owned.
+- CLI output redacts provider and listener reference names and values.
+  Configuration is idempotent, requires an existing listener source, and
+  prevents rebinding an installation to another repository.
+- Validation passes 32 focused tests, 597 comprehensive Python tests, 12
+  OpenClaw plugin tests, compilation, and diff hygiene. Every provider path is
+  fake-backed; provider, service, secret, ingress, installation, release, and
+  dispatch effects remain zero.
+
+Acceptance state: #138 is locally implementation-complete at `06db2b7` and
+awaiting its independent closed-world review. Movement is `outcome_progress`.
+Next action: review the exact checkpoint, remediate only bounded findings, then
+publish the issue-linked PR and require both hosted Python release gates before
+canonical-main acceptance.
+
+The exact `a2606e6` review returned eight blocking findings: mismatched hook-ID
+readback, unattested repository ID, cross-binding duplicate-create exposure,
+ownership-receipt eviction, successful oversized writes, lock symlink
+following, copied-root loads, and silently ignored installation changes.
+Checkpoint `729f4cc` remediates all eight and adds direct reproductions plus a
+two-process generation race. The corrected gates pass 36 focused tests, 601
+comprehensive Python tests, 12 plugin tests, compilation, and diff hygiene.
+No external or installed effect occurred. Acceptance remains pending exact
+independent re-verification and hosted integration.
+
+Exact re-verification cleared seven findings and the mismatched-GET path, then
+reproduced one remaining variant of the same ownership finding: a rejected
+mismatched UPDATE response could replace the preexisting hook ID in `UNKNOWN`.
+Checkpoint `d2de93e` now preserves the pre-write hook ID for every ambiguous
+UPDATE and adds the direct regression. Validation passes 37 focused tests, 602
+comprehensive Python tests, 12 plugin tests, compilation, and diff hygiene.
+
+Final independent re-verification ACCEPTS clean checkpoint `93ba14a`. It
+reproduced the mismatched UPDATE and retained hook 9 in `UNKNOWN` through three
+read-only reconciliations after exactly one mutation. All eight original
+findings are closed; the independent 37-test focused rerun passed with no live
+effect. Acceptance is now gated only by the issue-linked PR, both hosted Python
+release jobs, squash integration, and canonical-main readback.
