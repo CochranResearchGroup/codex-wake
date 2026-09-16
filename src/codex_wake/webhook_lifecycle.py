@@ -392,7 +392,9 @@ def _journal_is_safe(path: Path) -> bool:
                 if not source.exists():
                     continue
                 sidecar = source.lstat()
-                if not stat.S_ISREG(sidecar.st_mode) or source.is_symlink():
+                if (not stat.S_ISREG(sidecar.st_mode) or source.is_symlink()
+                        or sidecar.st_uid != os.getuid()
+                        or stat.S_IMODE(sidecar.st_mode) & 0o077):
                     return False
                 shutil.copyfile(source, snapshot.with_name(snapshot.name + suffix))
             connection = sqlite3.connect(snapshot.as_uri() + "?mode=ro", uri=True, isolation_level=None)

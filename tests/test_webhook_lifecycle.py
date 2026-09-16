@@ -472,6 +472,12 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 for item in journal.parent.glob("journal.sqlite3*")
             }
             self.assertEqual(after, before)
+            for suffix in ("-wal", "-shm"):
+                sidecar = journal.with_name(journal.name + suffix)
+                self.assertTrue(sidecar.exists())
+                sidecar.chmod(0o644)
+                self.assertFalse(_journal_is_safe(journal))
+                sidecar.chmod(0o600)
             writer.close()
             journal.write_bytes(b"")
             self.assertFalse(_journal_is_safe(journal))
