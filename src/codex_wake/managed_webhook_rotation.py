@@ -301,6 +301,20 @@ class ManagedWebhookRotationStore:
         with self.locked():
             return self._save_unlocked(record, expected_revision=expected_revision)
 
+    def observe_admission(self, owner_id: str, *, now: int) -> RotationRecord:
+        """Durably advance the admission clock under the same owner lock."""
+        _require_name(owner_id, "rotation owner")
+        _require_time(now)
+        with self.locked():
+            record = self._load_unlocked(owner_id)
+            if now < record.last_observed_at:
+                raise ValueError("managed webhook rotation clock moved backwards")
+            if now == record.last_observed_at:
+                return record
+            return self._save_unlocked(
+                replace(record, last_observed_at=now), expected_revision=record.revision,
+            )
+
     def _prepare_directory(self) -> None:
         self.wake_root.mkdir(mode=0o700, parents=True, exist_ok=True)
         root_meta = self.wake_root.lstat()
@@ -439,7 +453,9 @@ class ManagedWebhookRotationCoordinator:
         Consequently an elapsed immutable deadline stops previous-generation
         acceptance even if the rotation coordinator process is absent.
         """
-        record = self.load(owner_id, now=now)
+        # This CAS heartbeat is deliberate: every advancing admission decision
+        # establishes the durable high-water clock even before expiry.
+        record = self.store.observe_admission(owner_id, now=now)
         if record.phase is RotationPhase.COMPLETE:
             return (record.target_generation,)
         if record.phase is RotationPhase.ROLLED_BACK:
@@ -711,7 +727,10 @@ def _stored_consistent(record: RotationRecord) -> bool:
     if not _valid_record(record):
         return False
     if record.pending_effect is not PendingEffect.NONE:
-        if record.effect_revision != record.revision or record.phase in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}:
+        if (
+            record.effect_revision is None or record.effect_revision > record.revision
+            or record.phase in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}
+        ):
             return False
         if record.pending_effect is PendingEffect.ROLLBACK:
             return True
@@ -736,52 +755,100 @@ def _stored_consistent(record: RotationRecord) -> bool:
     if phase is RotationPhase.RETIRING:
         return target and record.delivery_locator is not None and record.terminal_code is None and record.pending_effect is PendingEffect.RETIRE_PREVIOUS
     if phase is RotationPhase.COMPLETE:
-        return target and record.delivery_locator is not None and record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision == record.revision
+        return target and record.delivery_locator is not None and record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision <= record.revision
     if phase is RotationPhase.ROLLED_BACK:
-        return record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision == record.revision
+        return record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision <= record.revision
     if phase is RotationPhase.EXPIRED:
         return record.pending_effect in {PendingEffect.NONE, PendingEffect.ROLLBACK}
     return phase is RotationPhase.UNKNOWN and record.pending_effect in {PendingEffect.NONE, PendingEffect.ROLLBACK}
 
 
 def _stored_transition_allowed(prior: RotationRecord, saved: RotationRecord) -> bool:
+    # Admission heartbeats may advance only time/revision.  They deliberately
+    # cannot be used to attach proof, delivery, or an effect intent.
+    if (
+        saved.phase is prior.phase and saved.pending_effect is prior.pending_effect
+        and saved.effect_revision == prior.effect_revision and saved.runtime_proof == prior.runtime_proof
+        and saved.delivery_locator == prior.delivery_locator and saved.terminal_code == prior.terminal_code
+        and saved.terminal_history == prior.terminal_history and saved.last_observed_at > prior.last_observed_at
+    ):
+        return True
     if saved.pending_effect is PendingEffect.ROLLBACK:
         return (
             prior.pending_effect is not PendingEffect.ROLLBACK and saved.phase is prior.phase
             and saved.runtime_proof == prior.runtime_proof and saved.delivery_locator == prior.delivery_locator
             and saved.terminal_code == prior.terminal_code and saved.terminal_history == prior.terminal_history
+            and saved.effect_revision == saved.revision
         )
     if prior.pending_effect is PendingEffect.ROLLBACK:
-        return saved.pending_effect is PendingEffect.NONE and saved.phase in {RotationPhase.ROLLED_BACK, RotationPhase.UNKNOWN}
+        if saved.pending_effect is not PendingEffect.NONE or saved.phase not in {RotationPhase.ROLLED_BACK, RotationPhase.UNKNOWN}:
+            return False
+        return saved.phase is RotationPhase.UNKNOWN or saved.terminal_history[-1].revision == saved.revision
     if saved.phase is RotationPhase.EXPIRED:
         return saved.pending_effect is PendingEffect.NONE and prior.phase not in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}
     if saved.phase is RotationPhase.UNKNOWN:
         return saved.pending_effect is PendingEffect.NONE and prior.pending_effect is not PendingEffect.NONE
     if prior.phase is RotationPhase.PREPARED:
         return (
-            saved.phase is RotationPhase.PREPARED and prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RESTART_DUAL
+            saved.phase is RotationPhase.PREPARED and prior.pending_effect is PendingEffect.NONE
+            and saved.pending_effect is PendingEffect.RESTART_DUAL and saved.effect_revision == saved.revision
+            and _preserves_evidence(prior, saved)
         ) or (
-            saved.phase is RotationPhase.DUAL_READY and prior.pending_effect is PendingEffect.RESTART_DUAL and saved.pending_effect is PendingEffect.NONE
+            saved.phase is RotationPhase.DUAL_READY and prior.pending_effect is PendingEffect.RESTART_DUAL
+            and saved.pending_effect is PendingEffect.NONE and saved.delivery_locator is None
+            and saved.effect_revision == prior.effect_revision and saved.terminal_history == prior.terminal_history
         )
     if prior.phase is RotationPhase.DUAL_READY:
-        return saved.phase is RotationPhase.PROVIDER_PENDING and saved.pending_effect is PendingEffect.PROVIDER_UPDATE
+        return (
+            saved.phase is RotationPhase.PROVIDER_PENDING and prior.pending_effect is PendingEffect.NONE
+            and saved.pending_effect is PendingEffect.PROVIDER_UPDATE and saved.effect_revision == saved.revision
+            and _preserves_evidence(prior, saved)
+        )
     if prior.phase is RotationPhase.PROVIDER_PENDING:
-        return saved.phase is RotationPhase.AWAITING_DELIVERY and prior.pending_effect is PendingEffect.PROVIDER_UPDATE and saved.pending_effect is PendingEffect.NONE
+        return (
+            saved.phase is RotationPhase.AWAITING_DELIVERY and prior.pending_effect is PendingEffect.PROVIDER_UPDATE
+            and saved.pending_effect is PendingEffect.NONE and _preserves_evidence(prior, saved)
+        )
     if prior.phase is RotationPhase.AWAITING_DELIVERY:
         if saved.phase is RotationPhase.RETIRING:
-            return prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RETIRE_PREVIOUS and prior.delivery_locator is not None and prior.runtime_proof is not None and prior.runtime_proof.loaded_generations == (prior.target_generation,)
+            return (
+                prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RETIRE_PREVIOUS
+                and prior.delivery_locator is not None and prior.runtime_proof is not None
+                and prior.runtime_proof.loaded_generations == (prior.target_generation,)
+                and saved.effect_revision == saved.revision and _preserves_evidence(prior, saved)
+            )
         if saved.phase is not RotationPhase.AWAITING_DELIVERY:
             return False
         return (
-            prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.NONE and prior.delivery_locator is None and saved.delivery_locator is not None and saved.runtime_proof == prior.runtime_proof
+            prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.NONE
+            and prior.delivery_locator is None and saved.delivery_locator is not None
+            and saved.runtime_proof == prior.runtime_proof and saved.effect_revision == prior.effect_revision
+            and saved.terminal_history == prior.terminal_history
         ) or (
-            prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RESTART_TARGET_ONLY and prior.delivery_locator is not None
+            prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RESTART_TARGET_ONLY
+            and prior.delivery_locator is not None and saved.effect_revision == saved.revision
+            and _preserves_evidence(prior, saved)
         ) or (
-            prior.pending_effect is PendingEffect.RESTART_TARGET_ONLY and saved.pending_effect is PendingEffect.NONE and saved.runtime_proof is not None and saved.runtime_proof.loaded_generations == (saved.target_generation,)
+            prior.pending_effect is PendingEffect.RESTART_TARGET_ONLY and saved.pending_effect is PendingEffect.NONE
+            and saved.runtime_proof is not None and saved.runtime_proof.loaded_generations == (saved.target_generation,)
+            and saved.delivery_locator == prior.delivery_locator and saved.effect_revision == prior.effect_revision
+            and saved.terminal_history == prior.terminal_history
         )
     if prior.phase is RotationPhase.RETIRING:
-        return saved.phase is RotationPhase.COMPLETE and prior.pending_effect is PendingEffect.RETIRE_PREVIOUS and saved.pending_effect is PendingEffect.NONE
+        return (
+            saved.phase is RotationPhase.COMPLETE and prior.pending_effect is PendingEffect.RETIRE_PREVIOUS
+            and saved.pending_effect is PendingEffect.NONE and saved.runtime_proof == prior.runtime_proof
+            and saved.delivery_locator == prior.delivery_locator and saved.effect_revision == prior.effect_revision
+            and saved.terminal_history[-1].revision == saved.revision
+        )
     return False
+
+
+def _preserves_evidence(prior: RotationRecord, saved: RotationRecord) -> bool:
+    return (
+        saved.runtime_proof == prior.runtime_proof and saved.delivery_locator == prior.delivery_locator
+        and saved.terminal_code == prior.terminal_code and saved.terminal_history == prior.terminal_history
+    )
 
 
 def _is_successor(prior: RotationRecord, record: RotationRecord) -> bool:

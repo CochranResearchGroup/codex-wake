@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 import multiprocessing
 import os
@@ -240,7 +241,21 @@ class ManagedWebhookRotationCoordinatorTests(unittest.TestCase):
         self.current = self.coordinator.intend_retirement("wake-owner-1", expected_revision=self.current.revision, now=108)
         complete = self.coordinator.observe_retirement("wake-owner-1", expected_revision=self.current.revision, observation=Observation.PROVED, now=109)
         self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=500), (8,))
-        self.assertEqual(self.store.load("wake-owner-1"), complete)
+        observed = self.store.load("wake-owner-1")
+        self.assertEqual((observed.phase, observed.target_generation, observed.terminal_history), (RotationPhase.COMPLETE, 8, complete.terminal_history))
+        self.assertGreater(observed.revision, complete.revision)
+        with self.assertRaisesRegex(ValueError, "clock moved backwards"):
+            ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(self.root)).admitted_generations("wake-owner-1", now=499)
+
+    def test_preexpiry_admission_clock_persists_across_coordinator_restart(self) -> None:
+        admitted = self.coordinator.admitted_generations("wake-owner-1", now=190)
+        self.assertEqual(admitted, (7,))
+        observed = self.store.load("wake-owner-1")
+        self.assertEqual(observed.last_observed_at, 190)
+        self.assertGreater(observed.revision, self.current.revision)
+        replacement = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(self.root))
+        with self.assertRaisesRegex(ValueError, "clock moved backwards"):
+            replacement.admitted_generations("wake-owner-1", now=180)
 
     def test_pending_rollback_fences_every_forward_operation(self) -> None:
         self.provider_ready()
@@ -271,6 +286,26 @@ class ManagedWebhookRotationCoordinatorTests(unittest.TestCase):
                 **record(self.root).to_dict(), "phase": "PROVIDER_PENDING", "pending_effect": "NONE",
                 "runtime_proof": proof().to_dict(), "effect_revision": 1,
             })
+
+    def test_store_rejects_direct_provider_delivery_and_combined_retirement(self) -> None:
+        self.dual_ready()
+        pending = self.coordinator.intend_provider_update("wake-owner-1", expected_revision=self.current.revision, now=103)
+        with self.assertRaisesRegex(ValueError, "transition is invalid"):
+            self.store.save(
+                replace(pending, phase=RotationPhase.AWAITING_DELIVERY, pending_effect=PendingEffect.NONE, delivery_locator="journal-42"),
+                expected_revision=pending.revision,
+            )
+        self.current = self.coordinator.observe_provider_update("wake-owner-1", expected_revision=pending.revision, observation=Observation.PROVED, now=104)
+        self.current = self.coordinator.record_delivery("wake-owner-1", expected_revision=self.current.revision, generation=8, journal_locator="journal-42", now=105)
+        with self.assertRaisesRegex(ValueError, "transition is invalid"):
+            self.store.save(
+                replace(
+                    self.current, phase=RotationPhase.RETIRING, pending_effect=PendingEffect.RETIRE_PREVIOUS,
+                    effect_revision=self.current.revision + 1,
+                    runtime_proof=proof(process_started_at=105, loaded_generations=(8,), evidence_locator="runtime-43"),
+                ),
+                expected_revision=self.current.revision,
+            )
 
     def test_successor_retains_terminal_evidence_and_rejects_active_or_unknown(self) -> None:
         with self.assertRaisesRegex(ValueError, "terminal predecessor"):
