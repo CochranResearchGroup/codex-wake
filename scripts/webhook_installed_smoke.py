@@ -99,7 +99,16 @@ def create_execution_root(env: dict[str, str] | None = None) -> Path:
         if configured_state_home
         else Path.home() / ".local" / "state"
     )
-    qualification_dir = state_home / "codex-wake" / "qualification"
+    if not state_home.is_absolute():
+        raise ValueError("XDG_STATE_HOME must be absolute")
+    qualification_dir = (state_home / "codex-wake" / "qualification").resolve()
+    private_tmp_roots = (Path("/tmp").resolve(), Path("/var/tmp").resolve())
+    if any(
+        qualification_dir == temporary
+        or qualification_dir.is_relative_to(temporary)
+        for temporary in private_tmp_roots
+    ):
+        raise ValueError("execution state must not resolve under a temporary directory")
     owner_only_directory(qualification_dir)
     root = Path(tempfile.mkdtemp(prefix="p53-c4-", dir=qualification_dir))
     os.chmod(root, 0o700)

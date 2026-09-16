@@ -81,18 +81,33 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
         self.assertIn("--execute", stderr.getvalue())
 
     def test_execution_root_uses_owner_only_user_state_not_tmp(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            state_home = Path(tmp) / "state-home"
-            with patch.dict(
-                os.environ, {"XDG_STATE_HOME": str(state_home)}, clear=False,
-            ):
-                root = smoke.create_execution_root()
-            qualification = state_home / "codex-wake" / "qualification"
-            self.assertTrue(root.is_relative_to(qualification))
-            self.assertEqual(root.parent, qualification)
-            self.assertEqual(root.stat().st_mode & 0o777, 0o700)
-            self.assertEqual(qualification.stat().st_mode & 0o777, 0o700)
-            self.assertNotEqual(root.parent, Path(tempfile.gettempdir()))
+        state_home = Path("/home/operator/.state")
+        qualification = state_home / "codex-wake" / "qualification"
+        root = qualification / "p53-c4-fixture"
+        with patch.object(smoke, "owner_only_directory") as make_owner_only, patch.object(
+            smoke.tempfile, "mkdtemp", return_value=str(root),
+        ) as make_root, patch.object(smoke.os, "chmod") as chmod:
+            actual = smoke.create_execution_root({"XDG_STATE_HOME": str(state_home)})
+        self.assertEqual(actual, root)
+        make_owner_only.assert_called_once_with(qualification)
+        make_root.assert_called_once_with(prefix="p53-c4-", dir=qualification)
+        chmod.assert_called_once_with(root, 0o700)
+
+    def test_execution_root_rejects_relative_or_private_tmp_hidden_state(self) -> None:
+        with self.assertRaisesRegex(ValueError, "absolute"):
+            smoke.create_execution_root({"XDG_STATE_HOME": "relative/state"})
+        for state_home in (Path("/tmp/state"), Path("/var/tmp/state")):
+            with self.subTest(state_home=state_home):
+                with self.assertRaisesRegex(ValueError, "temporary"):
+                    smoke.create_execution_root({"XDG_STATE_HOME": str(state_home)})
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
+            alias = Path(tmp).parent / f"{Path(tmp).name}-alias"
+            alias.symlink_to(tmp, target_is_directory=True)
+            try:
+                with self.assertRaisesRegex(ValueError, "temporary"):
+                    smoke.create_execution_root({"XDG_STATE_HOME": str(alias)})
+            finally:
+                alias.unlink()
 
     def test_receipt_redacts_keys_values_and_stages_owner_only(self) -> None:
         secret = "never-publish-this-value"
