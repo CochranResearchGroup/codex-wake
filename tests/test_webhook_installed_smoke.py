@@ -1,17 +1,40 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 import importlib.util
 import io
 import json
+import os
+import sqlite3
+import subprocess
 import sys
 import tempfile
+import threading
 import unittest
+import uuid
+import zipfile
 from contextlib import redirect_stderr
+from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
+from codex_wake.github_polling import (
+    GitHubPollingAdapter,
+    GitHubPollingConfig,
+    RunPage,
+    WorkflowRun,
+)
+from codex_wake.github_webhook_runtime import GitHubWebhookRuntime
+from codex_wake.github_webhooks import WebhookConfig
+from codex_wake.signals import ArmContext, EvaluationLimits, Ingested, Matched, WakeId
+from codex_wake.webhook_http import WebhookHTTPConfig
+from tests.test_signal_store import make_module
+from tests.test_signals import make_intent
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "webhook_installed_smoke.py"
+
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts/webhook_installed_smoke.py"
 SPEC = importlib.util.spec_from_file_location("webhook_installed_smoke", SCRIPT)
 assert SPEC is not None and SPEC.loader is not None
 smoke = importlib.util.module_from_spec(SPEC)
@@ -19,8 +42,34 @@ sys.modules[SPEC.name] = smoke
 SPEC.loader.exec_module(smoke)
 
 
+def context(base: Path, *, manager: Path | None = None) -> smoke.ExecutionContext:
+    return smoke.ExecutionContext(
+        root=base,
+        artifact_dir=base / "evidence",
+        wake_root=base / "wake",
+        manager_unit_dir=manager or base / "manager",
+        fixture_dir=base / "fixture",
+        installed_cli=base / "venv/bin/codex-wake",
+        installed_listener=base / "venv/bin/codex-wake-github-webhook",
+        installed_python=Path(sys.executable).resolve(),
+    )
+
+
+def fixture_at(when: datetime) -> smoke.Fixture:
+    value = smoke.make_fixture()
+    workflow = dict(value.workflow)
+    workflow["terminal_proof_at"] = when.isoformat()
+    body = json.loads(value.body)
+    body["workflow_run"]["updated_at"] = when.isoformat()
+    return replace(
+        value,
+        body=json.dumps(body, separators=(",", ":"), sort_keys=True).encode("utf-8"),
+        workflow=workflow,
+    )
+
+
 class InstalledWebhookSmokeTests(unittest.TestCase):
-    def test_default_refuses_without_creating_or_running_anything(self) -> None:
+    def test_default_refuses_without_execution(self) -> None:
         stderr = io.StringIO()
         with patch.object(smoke, "execute", side_effect=AssertionError("must not execute")):
             with redirect_stderr(stderr):
@@ -29,113 +78,388 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
         self.assertIn("refuses", stderr.getvalue())
         self.assertIn("--execute", stderr.getvalue())
 
-    def test_receipt_redacts_secret_values_payloads_and_environment_text(self) -> None:
-        receipt = smoke.sanitize_receipt(
-            {
-                "token": "provider-token-value",
-                "nested": {"webhook_secret": "webhook-secret-value"},
-                "payload": '{"private": "body"}',
-                "environment_file": "CODEX_WAKE_WEBHOOK_SECRET=webhook-secret-value",
-                "safe": "COMMITTED",
-            },
-            secrets=("provider-token-value", "webhook-secret-value"),
-        )
-        rendered = json.dumps(receipt, sort_keys=True)
-        self.assertNotIn("provider-token-value", rendered)
-        self.assertNotIn("webhook-secret-value", rendered)
-        self.assertNotIn('"private"', rendered)
-        self.assertEqual(receipt["safe"], "COMMITTED")
-        self.assertEqual(receipt["payload"], "[redacted]")
-        self.assertEqual(receipt["environment_file"], "[redacted]")
+    def test_receipt_redacts_keys_values_and_stages_owner_only(self) -> None:
+        secret = "never-publish-this-value"
+        receipt = {
+            "token": secret,
+            "nested": {"webhook_secret": secret},
+            "payload": '{"private":"body"}',
+            "environment_file": f"KEY={secret}",
+            "safe": f"COMMITTED {secret}",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = Path(tmp) / "receipt.json"
+            smoke.stage_receipt(
+                receipt, destination=destination, secret_values=(secret,),
+            )
+            rendered = destination.read_text(encoding="utf-8")
+            mode = destination.stat().st_mode & 0o777
+        self.assertNotIn(secret, rendered)
+        self.assertNotIn("private", rendered)
+        self.assertIn("COMMITTED [redacted]", rendered)
+        self.assertEqual(mode, 0o600)
 
-    def test_command_runner_uses_exact_argv_and_declared_timeout_bound(self) -> None:
+    def test_command_runner_is_bounded_and_never_uses_a_shell(self) -> None:
         calls = []
 
         def fake_run(argv, **kwargs):
             calls.append((argv, kwargs))
-            return smoke.subprocess.CompletedProcess(argv, 0, "{}", "")
+            return subprocess.CompletedProcess(argv, 0, "ok", "")
 
-        with tempfile.TemporaryDirectory() as tmp, patch.object(smoke.subprocess, "run", side_effect=fake_run):
-            artifacts = Path(tmp) / "artifacts"
-            result = smoke.run_command(
-                ["/isolated/bin/codex-wake", "--wake-root", "/isolated/root", "status", "--json"],
-                artifact_dir=artifacts,
-                name="status",
-                timeout=30,
+        with tempfile.TemporaryDirectory() as tmp, patch.object(
+            smoke.subprocess, "run", side_effect=fake_run,
+        ):
+            smoke.run_command(
+                ["/installed/codex-wake", "status"],
+                artifact_dir=Path(tmp), name="status", timeout=30,
             )
-        self.assertEqual(result.returncode, 0)
-        self.assertEqual(calls[0][0], ["/isolated/bin/codex-wake", "--wake-root", "/isolated/root", "status", "--json"])
+        self.assertEqual(calls[0][0], ["/installed/codex-wake", "status"])
         self.assertFalse(calls[0][1].get("shell", False))
         self.assertEqual(calls[0][1]["timeout"], 30)
         with self.assertRaisesRegex(ValueError, "timeout"):
-            smoke.run_command(["/isolated/bin/codex-wake", "status"], artifact_dir=Path("/tmp"), name="too-long", timeout=61)
+            smoke.run_command(
+                ["command"], artifact_dir=Path("/tmp"), name="bad", timeout=61,
+            )
 
-    def test_cleanup_uninstalls_before_removing_temporary_state_and_reports_all_checks(self) -> None:
-        calls = []
+    def test_manager_preflight_accepts_only_running_or_degraded_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx = context(Path(tmp))
+            degraded = subprocess.CompletedProcess([], 1, "degraded\n", "")
+            with patch.object(smoke, "run_command", return_value=degraded), patch.object(
+                smoke, "manager_failed_units", return_value=("preexisting.service",),
+            ):
+                self.assertEqual(
+                    smoke.manager_preflight(ctx),
+                    ("degraded", ("preexisting.service",)),
+                )
+            unreachable = subprocess.CompletedProcess([], 1, "offline\n", "")
+            with patch.object(smoke, "run_command", return_value=unreachable):
+                with self.assertRaisesRegex(RuntimeError, "unreachable"):
+                    smoke.manager_preflight(ctx)
+
+    def test_manager_namespace_is_real_and_all_service_commands_use_exact_unit_dir(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
-            unit = base / "unit.service"
-            root = base / "wake"
-            fixture = base / "sitecustomize.py"
-            for path in (unit, fixture):
-                path.write_text("fixture", encoding="utf-8")
-            root.mkdir()
-            context = smoke.ExecutionContext(
-                root=base,
-                artifact_dir=base / "artifacts",
-                wake_root=root,
-                unit_path=unit,
-                fixture_dir=base,
-                installed_cli=base / "bin" / "codex-wake",
-                installed_listener=base / "bin" / "codex-wake-github-webhook",
-                service_name="codex-wake-github-webhook-p53-c4-installed-canary.service",
-            )
-            context.installed_cli.parent.mkdir()
-            context.installed_cli.write_text("fixture", encoding="utf-8")
+            ctx = context(base, manager=base / "real-manager")
+            with patch.dict(os.environ, {
+                "XDG_CONFIG_HOME": str(base / "real-xdg"),
+                "XDG_STATE_HOME": str(base / "state"),
+            }, clear=False):
+                env = smoke.installed_env(ctx)
+            self.assertEqual(env["XDG_CONFIG_HOME"], str(base / "real-xdg"))
+            self.assertEqual(env["XDG_STATE_HOME"], str(base / "state"))
+            self.assertEqual(env["PYTHONPATH"], str(ctx.fixture_dir))
+            calls = []
 
-            def fake_command(argv, **kwargs):
+            def fake_run(argv, **kwargs):
                 calls.append(argv)
-                return smoke.subprocess.CompletedProcess(argv, 0, "inactive\n", "")
+                return subprocess.CompletedProcess(argv, 0, "", "")
 
-            with patch.object(smoke, "run_command", side_effect=fake_command), patch.object(smoke, "port_is_free", return_value=True), patch.object(smoke, "matching_processes", return_value=()):
-                receipt = smoke.cleanup(context)
+            with patch.object(smoke, "run_command", side_effect=fake_run):
+                for action in ("install", "start", "stop", "uninstall"):
+                    smoke.service_command(
+                        ctx, action, env=env, name=action,
+                        executable_path=ctx.bootstrap_path if action == "install" else None,
+                    )
+            for argv in calls:
+                position = argv.index("--unit-dir")
+                self.assertEqual(argv[position + 1], str(ctx.manager_unit_dir))
+                self.assertIn(str(ctx.wake_root), argv)
 
-            self.assertFalse(unit.exists())
-            self.assertFalse(root.exists())
-            self.assertFalse(fixture.exists())
-            self.assertEqual(calls[0][-5:], ["github-webhook", "service", "uninstall", "--source", smoke.SOURCE])
-            self.assertTrue(receipt["unit_absent"])
-            self.assertTrue(receipt["port_released"])
-            self.assertTrue(receipt["temporary_roots_removed"])
+    def test_fixture_uses_one_valid_protocol_identity_and_secret_encoding(self) -> None:
+        fixture = smoke.make_fixture()
+        self.assertGreaterEqual(len(fixture.secret.encode("utf-8")), 16)
+        uuid.UUID(fixture.delivery_id)
+        uuid.UUID(fixture.restart_delivery_id)
+        self.assertNotEqual(fixture.delivery_id, fixture.restart_delivery_id)
+        signature = hmac.new(
+            fixture.secret.encode("utf-8"), fixture.body, hashlib.sha256,
+        ).hexdigest()
+        self.assertEqual(len(signature), 64)
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx = context(Path(tmp))
+            path = smoke.write_service_environment(ctx, fixture)
+            text = path.read_text(encoding="utf-8")
+        self.assertIn(f"CODEX_WAKE_WEBHOOK_SECRET={fixture.secret}\n", text)
+        self.assertEqual(json.loads(fixture.body)["workflow_run"]["updated_at"],
+                         fixture.workflow["terminal_proof_at"])
 
-    def test_cleanup_preserves_preexisting_unit_when_no_service_attempt_started(self) -> None:
+    def test_failed_explicit_bootstrap_cannot_reach_installed_entrypoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
-            unit = base / "foreign.service"
-            unit.write_text("foreign", encoding="utf-8")
-            context = smoke.ExecutionContext(
-                root=base,
-                artifact_dir=base / "artifacts",
-                wake_root=base / "wake",
-                unit_path=unit,
-                fixture_dir=base / "fixture",
-                installed_cli=base / "missing-cli",
-                installed_listener=base / "missing-listener",
-                service_name="foreign.service",
+            ctx = context(base)
+            ctx.installed_listener.parent.mkdir(parents=True)
+            provider_tripwire = base / "provider-reached"
+            ctx.installed_listener.write_text(
+                "#!/usr/bin/env python3\nfrom pathlib import Path\n"
+                f"Path({str(provider_tripwire)!r}).write_text('reached')\n",
+                encoding="utf-8",
             )
-            with patch.object(smoke, "port_is_free", return_value=True), patch.object(smoke, "matching_processes", return_value=()):
-                receipt = smoke.cleanup(context, service_attempted=False)
-            self.assertTrue(unit.exists())
-            self.assertFalse(receipt["service_uninstall_attempted"])
+            smoke.write_fixture_bootstrap(ctx, smoke.make_fixture())
+            (ctx.fixture_dir / "webhook_fixture_bootstrap.py").write_text(
+                "raise RuntimeError('broken fixture')\n", encoding="utf-8",
+            )
+            result = subprocess.run(
+                [str(ctx.bootstrap_path), "--wake-root", str(ctx.wake_root),
+                 "--source", smoke.SOURCE],
+                env=smoke.installed_env(ctx), text=True, capture_output=True,
+                check=False, timeout=10,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse(provider_tripwire.exists())
 
-    def test_sitecustomize_is_ephemeral_provider_seam_only(self) -> None:
+    def test_clean_candidate_rejects_any_dirty_or_untracked_input(self) -> None:
+        dirty = subprocess.CompletedProcess([], 0, "?? src/new.py\n", "")
+        with patch.object(smoke, "run_command", return_value=dirty):
+            with self.assertRaisesRegex(RuntimeError, "not clean"):
+                smoke.clean_candidate(Path("/repo"), Path("/evidence"))
+
+    def test_build_uses_export_cwd_and_rejects_runner_in_wheel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            path = smoke.write_sitecustomize(Path(tmp))
-            source = path.read_text(encoding="utf-8")
-        self.assertIn("build_webhook_runtime", source)
-        self.assertIn("attempt_client_factory", source)
-        self.assertNotIn("endpoint", source.lower())
-        self.assertNotIn("token", source.lower())
+            base = Path(tmp)
+            export = base / "export"
+            export.mkdir()
+            wheel_dir = base / "wheel"
+            calls = []
+
+            def fake_run(argv, **kwargs):
+                calls.append((argv, kwargs))
+                wheel = Path(argv[argv.index("--out-dir") + 1]) / "codex_wake-1.whl"
+                with zipfile.ZipFile(wheel, "w") as archive:
+                    archive.writestr("codex_wake/__init__.py", "")
+                return subprocess.CompletedProcess(argv, 0, "", "")
+
+            with patch.object(smoke.shutil, "which", return_value="/usr/bin/uv"), patch.object(
+                smoke, "run_command", side_effect=fake_run,
+            ):
+                wheel = smoke.build_wheel(export, wheel_dir, base / "evidence")
+            self.assertTrue(wheel.is_file())
+            self.assertEqual(calls[0][1]["cwd"], export)
+
+    def test_process_identity_requires_exact_pid_executable_start_and_socket(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            proc = base / "proc"
+            pid = 123
+            process = proc / str(pid)
+            (process / "fd").mkdir(parents=True)
+            (proc / "net").mkdir()
+            ctx = replace(
+                context(base), installed_python=base / "venv/bin/python",
+            )
+            ctx.installed_python.parent.mkdir(parents=True)
+            ctx.installed_python.write_text("python", encoding="utf-8")
+            (process / "exe").symlink_to(ctx.installed_python)
+            (process / "fd/7").symlink_to("socket:[456]")
+            (proc / "net/tcp").write_text(
+                "header\n 0: 0100007F:2274 00000000:0000 0A 0 0 0 0 0 456\n",
+                encoding="utf-8",
+            )
+            arguments = [str(ctx.installed_python), str(ctx.bootstrap_path),
+                         "--wake-root", str(ctx.wake_root), "--source", smoke.SOURCE]
+            (process / "cmdline").write_bytes(b"\0".join(
+                value.encode("utf-8") for value in arguments
+            ) + b"\0")
+            (process / "stat").write_text(
+                " ".join([str(pid), "(listener)"] + ["0"] * 19 + ["999"]),
+                encoding="ascii",
+            )
+            values = iter(["active", "enabled", str(pid), "999", "exec", "0"])
+            with patch.object(smoke, "systemctl_value", side_effect=lambda *a, **k: next(values)):
+                identity = smoke.service_identity(ctx, proc_root=proc)
+            self.assertEqual(identity["pid"], str(pid))
+            self.assertEqual(identity["process_start_ticks"], "999")
+            self.assertEqual(identity["socket"]["socket_inode"], "456")
+
+    def test_poll_convergence_rejects_weak_activity_summary(self) -> None:
+        weak = {
+            "before": {"receipts": 1, "arms": 1, "matches": 0, "statuses": {}},
+            "after": {"receipts": 1, "arms": 1, "matches": 1, "statuses": {}},
+            "poll": {"dispatched": 0, "fired": 2, "failed": 1,
+                     "signal_sources": []},
+        }
+        with self.assertRaisesRegex(RuntimeError, "logical wake"):
+            smoke.assert_poll_convergence(weak)
+
+    def test_failed_uninstall_preserves_unit_wake_fixture_and_recovery_root(self) -> None:
+        with tempfile.TemporaryDirectory() as outer:
+            root = Path(outer) / "recovery"
+            root.mkdir()
+            ctx = context(root)
+            ctx.unit_path.parent.mkdir(parents=True)
+            ctx.unit_path.write_text("owned unit", encoding="utf-8")
+            ctx.wake_root.mkdir()
+            ctx.fixture_dir.mkdir()
+            (ctx.fixture_dir / "sidecar").write_text("fixture", encoding="utf-8")
+            failed = subprocess.CompletedProcess([], 1, "", "")
+            with patch.object(smoke, "service_command", return_value=failed), patch.object(
+                smoke, "inactive_service_state",
+                return_value={"active": "active", "enabled": "enabled",
+                              "enabled_observed": "enabled", "pid": "12"},
+            ), patch.object(smoke, "manager_failed_units", return_value=("old.service",)), patch.object(
+                smoke, "matching_processes", return_value=("12 listener",),
+            ), patch.object(smoke, "port_is_free", return_value=False):
+                receipt = smoke.cleanup(
+                    ctx, env={}, service_attempted=True,
+                    failed_units_before=("old.service",),
+                )
+            self.assertFalse(receipt["safe"])
+            self.assertTrue(root.exists())
+            self.assertTrue(ctx.unit_path.exists())
+            self.assertTrue(ctx.wake_root.exists())
+            self.assertTrue((ctx.fixture_dir / "sidecar").exists())
+            self.assertEqual(receipt["recovery_root"], str(root))
+
+    def test_cleanup_success_requires_complete_terminal_readback_and_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as outer:
+            root = Path(outer) / "packet"
+            root.mkdir()
+            ctx = context(root)
+            ctx.unit_path.parent.mkdir(parents=True)
+            ctx.unit_path.write_text("owned", encoding="utf-8")
+
+            def uninstall(*args, **kwargs):
+                ctx.unit_path.unlink()
+                return subprocess.CompletedProcess([], 0, "", "")
+
+            with patch.object(smoke, "service_command", side_effect=uninstall), patch.object(
+                smoke, "inactive_service_state",
+                return_value={"active": "inactive", "enabled": "disabled",
+                              "enabled_observed": "not-found", "pid": "0"},
+            ), patch.object(smoke, "manager_failed_units", return_value=("old.service",)), patch.object(
+                smoke, "matching_processes", return_value=(),
+            ), patch.object(smoke, "port_is_free", return_value=True):
+                receipt = smoke.cleanup(
+                    ctx, env={}, service_attempted=True,
+                    failed_units_before=("old.service",),
+                )
+            self.assertTrue(receipt["safe"])
+            self.assertTrue(receipt["temporary_roots_removed"])
+            self.assertEqual(receipt["failed_units_delta"], [])
+            self.assertFalse(root.exists())
+
+    def test_in_process_ingress_restart_and_poll_share_one_frozen_occurrence(self) -> None:
+        registered = datetime(2026, 9, 16, 12, 0, tzinfo=UTC)
+        fixture = fixture_at(registered + timedelta(seconds=1))
+        workflow = fixture.workflow
+        run = WorkflowRun(
+            str(workflow["repository"]), int(workflow["repository_id"]),
+            int(workflow["workflow_id"]), int(workflow["run_id"]),
+            int(workflow["run_attempt"]), str(workflow["ref"]),
+            str(workflow["head_sha"]), str(workflow["status"]),
+            str(workflow["conclusion"]), None,
+            datetime.fromisoformat(str(workflow["terminal_proof_at"])),
+            "github_attempt_started_or_job_completed_lower_bound",
+        )
+
+        class Client:
+            def list_runs(self, query):
+                return RunPage((run,), None, None, None)
+
+            def get_run_attempt(self, repository, run_id, run_attempt):
+                self.assert_identity = (repository, run_id, run_attempt)
+                return run
+
+        config = GitHubPollingConfig(
+            source_instance=smoke.SOURCE, repository=smoke.REPOSITORY,
+            repository_id=1, workflow_id=1,
+            refs=frozenset({"refs/heads/main"}),
+            conclusions=frozenset({"success"}), credential_ref="TOKEN",
+            evidence_mode="positive_only",
+        )
+
+        def exchange(address, delivery_id):
+            signature = hmac.new(
+                fixture.secret.encode(), fixture.body, hashlib.sha256,
+            ).hexdigest()
+            request = (
+                b"POST /github/webhook HTTP/1.1\r\nHost: localhost\r\n"
+                b"Content-Type: application/json\r\n"
+                + f"Content-Length: {len(fixture.body)}\r\n".encode()
+                + f"X-Hub-Signature-256: sha256={signature}\r\n".encode()
+                + b"X-GitHub-Event: workflow_run\r\n"
+                + f"X-GitHub-Delivery: {delivery_id}\r\n\r\n".encode()
+                + fixture.body
+            )
+            with smoke.socket.create_connection(address, timeout=2) as connection:
+                connection.sendall(request)
+                response = connection.makefile("rb").read()
+            head, body = response.split(b"\r\n\r\n", 1)
+            return int(head.split(b" ", 2)[1]), json.loads(body)["code"]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "signals.sqlite3"
+            module = make_module(database)
+            adapter = GitHubPollingAdapter(config, Client())
+            request = adapter.request(ref="refs/heads/main", conclusions=("success",))
+            armed = module.arm(
+                WakeId("wake_installed_contract"), request,
+                ArmContext("key", "fingerprint", registered, None,
+                           make_intent().resume, adapter),
+            )
+
+            def runtime(store):
+                return GitHubWebhookRuntime(
+                    WebhookHTTPConfig(host="127.0.0.1", port=0,
+                                      request_timeout=2, shutdown_timeout=1),
+                    adapter=adapter, module=store, checkpoints=store,
+                    anchor=armed.anchor,
+                    webhook_config=WebhookConfig(secret_refs=("SECRET",)),
+                    resolve_secret=lambda ref: fixture.secret.encode(),
+                    attempt_client_factory=lambda deadline: Client(),
+                    operation_timeout=1,
+                    now=lambda: datetime.fromisoformat(
+                        str(workflow["terminal_proof_at"])
+                    ),
+                )
+
+            first_runtime = runtime(module)
+            first_results = []
+
+            def first_deliveries():
+                first_results.append(exchange(first_runtime.address, fixture.delivery_id))
+                first_results.append(exchange(first_runtime.address, fixture.delivery_id))
+                first_runtime.shutdown()
+
+            thread = threading.Thread(target=first_deliveries)
+            thread.start()
+            first_runtime.serve()
+            thread.join(2)
+            self.assertFalse(thread.is_alive())
+            self.assertEqual(first_results, [(200, "COMMITTED"), (200, "DUPLICATE")])
+
+            reopened = make_module(database)
+            restarted = runtime(reopened)
+            restart_results = []
+
+            def restart_delivery():
+                restart_results.append(
+                    exchange(restarted.address, fixture.restart_delivery_id)
+                )
+                restarted.shutdown()
+
+            thread = threading.Thread(target=restart_delivery)
+            thread.start()
+            restarted.serve()
+            thread.join(2)
+            self.assertEqual(restart_results, [(200, "DUPLICATE")])
+            polled = adapter.poll_into(
+                reopened, armed.anchor, checkpoints=reopened,
+                now=registered + timedelta(seconds=2),
+            )
+            self.assertIsInstance(polled, Ingested)
+            self.assertTrue(polled.receipts[0].duplicate)
+            matched = reopened.evaluate(
+                armed.wake_id, armed, registered + timedelta(seconds=2),
+                EvaluationLimits(10),
+            )
+            self.assertIsInstance(matched, Matched)
+            with sqlite3.connect(database) as connection:
+                count = connection.execute(
+                    "SELECT COUNT(*) FROM receipts WHERE source='github' AND source_instance=?",
+                    (smoke.SOURCE,),
+                ).fetchone()[0]
+            self.assertEqual(count, 1)
 
 
 if __name__ == "__main__":
