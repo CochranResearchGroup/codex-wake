@@ -3927,3 +3927,34 @@ Acceptance state: #138 is closed and accepted on canonical main. Movement is
 `outcome_progress`. Next action: register bounded C2 rotation and C3 health
 lanes with disjoint initial write surfaces, then integrate their shared
 lifecycle contracts before any installed or provider effect.
+
+## Turn 178 | 2026-09-16
+
+Froze and registered the parallel-safe P54-C2 and P54-C3 execution contracts.
+
+- Plans 0085 and 0086 bind issues #139 and #140 to separate implementation
+  branches. C2 starts with a durable six-phase rotation domain; C3 starts with
+  a pure independent health and cleanup-eligibility projection.
+- CodeGraph confirmed that listener configuration currently rejects secret
+  changes, request admission revalidates the startup listener snapshot, and
+  service readiness proves active/bind state but not loaded secret generation.
+  Provider public state therefore cannot prove or resolve a secret update.
+- C2 requires private process-bound generation readiness and a target-key match
+  recorded only after authoritative attempt verification and journal commit.
+  Its immutable overlap deadline applies even when the controller is absent.
+- C3 keeps provider object, provider delivery, local listener, polling fallback,
+  and dispatch as distinct planes. Health never authorizes cleanup; exact-ID
+  disable/delete remains dry-run-first, intent-before-effect, one-write, and
+  tombstone retaining.
+- Standard implementation workers are allocated only the new disjoint domain
+  modules and focused tests. The primary retains shared schemas, lifecycle,
+  runtime, CLI/support, installed qualification, GitHub custody, authority, and
+  final acceptance. No nested delegation is permitted.
+- No provider, service, secret, ingress, installation, release, or dispatch
+  effect is authorized or performed.
+
+Acceptance state: C2 and C3-A contracts are frozen and their lane-registration
+change is ready for validation and GitHub integration. Movement is
+`outcome_progress`. Next action: merge the registration PR, fast-forward both
+implementation refs to canonical main, then execute the two disjoint initial
+packets in parallel.

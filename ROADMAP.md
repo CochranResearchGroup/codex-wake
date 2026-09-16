@@ -833,7 +833,9 @@ Acceptance target:
   with canonical GitHub and verification custody.
 
 Acceptance state: P54 planning and its five-child issue graph are canonical;
-#138 is closed and accepted on canonical main; #139 and #140 are unblocked.
-Movement is `outcome_progress`. Next action: register restart-correct secret
-rotation and independent health/qualification as bounded lanes, preserving
-their shared-contract serialization. Live effects remain separately gated.
+#138 is closed and accepted on canonical main. Plans 0085 and 0086 register
+#139 rotation and the parallel-safe #140 health packet with disjoint initial
+write surfaces and primary-owned shared integration. Movement is
+`outcome_progress`. Next action: implement the rotation domain and pure health
+projection in parallel, then serialize lifecycle, cleanup, CLI, and installed
+qualification joins. Live effects remain separately gated.
