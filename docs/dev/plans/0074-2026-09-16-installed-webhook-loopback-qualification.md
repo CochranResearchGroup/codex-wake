@@ -17,14 +17,47 @@ empty. The user systemd manager is reachable but degraded by unrelated
 pre-existing failed units, so acceptance is scoped to one exact unit/PID/socket
 rather than whole-manager health.
 
-Source-only runner checkpoint `91797143c11b8a3563fc329111a267fdd8cdf4ef`
-adds the explicit-refusal installed qualification runner and five hermetic
-contract tests. Focused 5/5, comprehensive 497/497, plugin 12/12,
-compilation, diff hygiene, and the active planning audit passed. It has not
-been run with `--execute`: no wheel install, unit, listener, provider access,
-ingress, polling, or dispatch occurred. The next exact gate is an independent
-closed-world source review followed by the fresh live preflight specified in
-this plan; the one service attempt remains unconsumed.
+Correction checkpoint `703134b084cb4852a4e95886ffdcd3d0f0e99f05`
+replaces the initial runner after one independent drift review produced the
+accepted finding ledger C4-R01 through C4-R08 below. Fourteen hermetic tests,
+including a real in-process HTTP/store/restart/polling sequence, now pass;
+comprehensive Python validation is 506/506 and the plugin tier is 12/12.
+Compilation and diff hygiene also pass. The first attempted planning-audit
+command used a nonexistent repo-local script and is retained as a failed
+validation attempt; the actual selector-bundle active planning audit passed,
+while the lane audit correctly remains stale until this correction checkpoint
+is recorded. It has not been run with `--execute`: no wheel install, unit,
+listener, provider access, ingress, polling, port-8820 bind, or dispatch
+occurred. The one service attempt remains unconsumed. The next exact gate is
+closed-world verification of C4-R01 through C4-R08, then a fresh live preflight.
+
+## Accepted review ledger
+
+- `C4-R01`: cleanup must use the product uninstall path with the same
+  environment and unit directory, preserve the owner-only recovery root on any
+  failed or incomplete stop, and prove inactive/disabled/MainPID-zero, no
+  matching process, released port, and an unchanged failed-unit baseline.
+- `C4-R02`: one valid text secret, UUID deliveries, frozen body, and frozen
+  authoritative `WorkflowRun`/terminal proof must drive webhook and polling;
+  only the post-restart delivery id may change.
+- `C4-R03`: the wake root alone is isolated; every lifecycle/readiness/status/
+  support command must resolve the real user-manager unit namespace.
+- `C4-R04`: reachable `degraded` manager state with return code 1 is allowed;
+  unreachable states fail closed and exact unrelated failed units are compared
+  after cleanup.
+- `C4-R05`: fixture installation must be an explicit fail-closed bootstrap
+  before the installed listener entrypoint, with installed-interpreter
+  preflight and a negative subprocess tripwire.
+- `C4-R06`: the wheel is built from an exact clean candidate export/cwd, excludes
+  qualification material, and binds commit, tree, wheel, executable, installed
+  module, interpreter, and version provenance.
+- `C4-R07`: bounded readiness before and after manual restart must prove a new
+  positive PID/start identity, exact executable/command, loopback socket inode,
+  and zero automatic restarts; terminal failure consumes the single attempt.
+- `C4-R08`: polling must prove the exact source reconciliation, unchanged single
+  occurrence, one logical wake/publication, zero dispatch/submission, staged
+  evidence, configuration/unit identity, cleanup baseline/delta, and nonzero
+  outcome for any incomplete packet.
 
 ## Objective
 
@@ -37,10 +70,10 @@ polling convergence, installed readiness/status/support, and complete cleanup.
 
 - Add one source-only `scripts/webhook_installed_smoke.py` runner with narrow
   tests. It is not packaged and requires an explicit execution flag.
-- The runner builds the candidate wheel, records its SHA-256, and installs it
-  into a fresh temporary virtual environment. All configuration and lifecycle
-  commands use the installed `codex-wake`; the service uses the exact installed
-  `codex-wake-github-webhook` path.
+- The runner exports the exact clean candidate commit, builds the wheel from
+  that export, records its SHA-256, and installs it into a fresh temporary
+  virtual environment. All configuration and lifecycle commands use the
+  installed `codex-wake`.
 - Use one fresh owner-only wake root, source instance
   `p53-c4-installed-canary`, canonical service name, `127.0.0.1:8820`, and the
   real user-systemd unit directory. Any occupied port, existing unit, foreign
@@ -48,10 +81,12 @@ polling convergence, installed readiness/status/support, and complete cleanup.
 - Configure the GitHub source and webhook listener and arm one GitHub completed
   wake through installed commands without contacting GitHub. Do not start the
   wake daemon.
-- Provide an ephemeral, untracked `sitecustomize.py` only through `PYTHONPATH`
-  in the owner-only service environment. It patches the installed listener's
-  provider-attempt factory to a deterministic in-memory fixture. It adds no
-  product flag, endpoint, alternate host, or packaged fixture path.
+- Provide an ephemeral, untracked bootstrap only through the owner-only service
+  environment. The exact installed interpreter must explicitly install and
+  verify the deterministic provider-attempt fixture before invoking the exact
+  installed listener entrypoint; bootstrap failure exits before either the
+  listener or provider path. It adds no product flag, endpoint, alternate host,
+  or packaged fixture path.
 - Exercise real loopback signed HTTP through the installed service: first
   delivery `COMMITTED`, identical delivery `DUPLICATE`, stop/start, then a new
   delivery identifier for the same durable occurrence `DUPLICATE`.
