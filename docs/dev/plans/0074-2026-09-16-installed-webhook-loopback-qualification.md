@@ -1,6 +1,7 @@
 # Installed webhook loopback qualification
 
-State: OPEN
+State: CLOSED
+Outcome: FAILED_SAFE
 Lane: P53-C4
 Issue: #107
 Branch: `chore/issue-107-installed-webhook-canary`
@@ -17,6 +18,109 @@ empty. The user systemd manager is reachable but degraded by unrelated
 pre-existing failed units, so acceptance is scoped to one exact unit/PID/socket
 rather than whole-manager health.
 
+This plan is terminal. Its single service-effect attempt at `da28dee` reached
+the user manager and failed immediately with systemd `203/EXEC` because the
+supported unit has `PrivateTmp=yes` while the ephemeral executable lived under
+host `/tmp`. Product uninstall then proved inactive/disabled/MainPID-zero,
+unit absence, no matching process, released port 8820, unchanged failed-unit
+baseline, and complete temporary-root removal. No provider access, ingress, or
+dispatch occurred. Plan 0075 succeeds this failed-safe packet; Plan 0074 itself
+will not retry.
+
+Correction checkpoint `25b61f3845e954c01c8f72ac2372329e8147580f`
+replaced the initial runner after one independent drift review produced the
+accepted finding ledger C4-R01 through C4-R08 below. Pre-effect correction
+`ccfda6c` then exposed C4-R09 after the first explicit runner invocation proved
+that signal registration correctly fails without a live managed reader. The
+first closed-world correction review rejected its ordinary no-dispatch daemon:
+source reconciliation could still reach the provider, failed termination was
+outside cleanup census, and external staging lagged completed transitions.
+Checkpoint `b7e8743` closes all three findings. One source-only bootstrap runs
+the installed daemon module with every signal-source runner disabled before
+`main`; the exact PID/start/argv is tracked by cleanup; and reader-ready,
+armed, and reader-stopped transitions are staged as they occur. The source is
+configured disabled for the reader's first poll, enabled and armed while that
+exact reader is live, and the reader is stopped before webhook service setup
+continues. Twenty-two hermetic tests, including a real in-process
+HTTP/store/restart/polling sequence, now pass. A second pre-effect invocation
+then exposed caller `PYTHONPATH` leaking into the fresh venv's pip process, so
+pip observed worktree metadata and skipped the wheel installation. Checkpoint
+`7d18ea4` removes `PYTHONPATH`/`PYTHONHOME` from build/install subprocesses and
+stages every build/install phase externally. The same exported candidate wheel
+now installs all four entrypoints and imports from the isolated venv.
+Comprehensive Python validation is 515/515 and the plugin tier is 12/12.
+Compilation and diff hygiene also pass. The first attempted planning-audit
+command used a nonexistent repo-local script and is retained as a failed
+validation attempt; the actual selector-bundle active planning audit passed,
+while the lane audit correctly remains stale until this correction checkpoint
+is recorded. One `--execute` invocation at `ff3ceae` built and installed the
+candidate wheel in its disposable environment, then failed before service
+installation with `READER_CAPABILITY_UNAVAILABLE`. Its external receipt proves
+`service_attempted: false`, safe cleanup, absent unit/process/port ownership,
+and retained candidate provenance. No listener, provider access, ingress,
+polling, port-8820 bind, or dispatch occurred, so the one service attempt
+remains unconsumed. A freshly built candidate wheel has since passed the exact
+corrected configure/arm path in a disposable root, including empty post-stop
+process census and the three external checkpoint stages. Closed-world
+re-verification at `b7e8743` accepted all three repairs: two delayed polling
+passes made zero production-client/provider-read calls, simulated stuck
+termination preserved the recovery root, and external snapshots retained the
+three transitions in order. The later `fb6696f` invocation also stopped before
+service installation and is retained separately at
+`/tmp/codex-wake-p53-c4-service-attempt-1.json`. It proved the updated six-unit
+degraded-manager baseline and safe cleanup, but stopped before provenance
+because of the isolated-venv pip issue above. `service_attempted` again remained
+false, so the one service attempt is unconsumed. The next gate is a fresh live
+preflight.
+
+## Accepted review ledger
+
+- `C4-R01`: cleanup must use the product uninstall path with the same
+  environment and unit directory, preserve the owner-only recovery root on any
+  failed or incomplete stop, and prove inactive/disabled/MainPID-zero, no
+  matching process, released port, and an unchanged failed-unit baseline. The
+  process census binds the exact bootstrap/wake-root/source argv plus every
+  previously observed PID/start identity and treats incomplete census as
+  unsafe.
+- `C4-R02`: one valid text secret, UUID deliveries, frozen body, and frozen
+  authoritative `WorkflowRun`/terminal proof must drive webhook and polling;
+  only the post-restart delivery id may change.
+- `C4-R03`: the wake root alone is isolated; every lifecycle/readiness/status/
+  support command must resolve the real user-manager unit namespace.
+- `C4-R04`: reachable `degraded` manager state with return code 1 is allowed;
+  unreachable states fail closed and exact unrelated failed units are compared
+  after cleanup.
+- `C4-R05`: fixture installation must be an explicit fail-closed bootstrap
+  before the installed listener entrypoint, with installed-interpreter
+  preflight and a negative subprocess tripwire.
+- `C4-R06`: the wheel is built from an exact clean candidate export/cwd, excludes
+  qualification material, and binds commit, tree, wheel, executable, installed
+  module, interpreter, and version provenance.
+- `C4-R07`: bounded readiness before and after manual restart must prove a new
+  positive PID/start identity, exact executable/command, loopback socket inode,
+  and zero automatic restarts; all owned listening sockets across IPv4 and IPv6
+  must be exactly `127.0.0.1:8820`, and terminal failure consumes the single
+  attempt.
+- `C4-R08`: polling must prove the exact source reconciliation, unchanged single
+  occurrence, one logical wake/publication, zero dispatch/submission, staged
+  evidence, configuration/unit identity, cleanup baseline/delta, and nonzero
+  outcome for any incomplete packet. Readiness, each validated delivery,
+  restart identity, and polling are written to the external sanitized receipt
+  immediately so a later failure cannot erase completed evidence.
+
+## Pre-effect correction ledger
+
+- `C4-R09`: installed signal registration requires a current managed-reader
+  capability. The runner must use the installed daemon module only through one
+  transient, isolated bootstrap that disables every signal-source runner before
+  daemon `main`; `--no-dispatch` alone is insufficient. The GitHub source
+  remains disabled through its first poll, becomes enabled only after exact
+  reader readiness, and the reader must stop before any service attempt. Its
+  PID/start/argv enters cleanup census immediately, and ready/armed/stopped
+  evidence is persisted in the external receipt at each transition. No
+  persistent daemon/service, provider path, or destructive cleanup under an
+  unproved reader stop is permitted.
+
 ## Objective
 
 Build and hash one wheel from the exact candidate commit, install it only in a
@@ -28,21 +132,26 @@ polling convergence, installed readiness/status/support, and complete cleanup.
 
 - Add one source-only `scripts/webhook_installed_smoke.py` runner with narrow
   tests. It is not packaged and requires an explicit execution flag.
-- The runner builds the candidate wheel, records its SHA-256, and installs it
-  into a fresh temporary virtual environment. All configuration and lifecycle
-  commands use the installed `codex-wake`; the service uses the exact installed
-  `codex-wake-github-webhook` path.
+- The runner exports the exact clean candidate commit, builds the wheel from
+  that export, records its SHA-256, and installs it into a fresh temporary
+  virtual environment. All configuration and lifecycle commands use the
+  installed `codex-wake`.
 - Use one fresh owner-only wake root, source instance
   `p53-c4-installed-canary`, canonical service name, `127.0.0.1:8820`, and the
   real user-systemd unit directory. Any occupied port, existing unit, foreign
   file, or unavailable user manager blocks before the install attempt.
 - Configure the GitHub source and webhook listener and arm one GitHub completed
-  wake through installed commands without contacting GitHub. Do not start the
-  wake daemon.
-- Provide an ephemeral, untracked `sitecustomize.py` only through `PYTHONPATH`
-  in the owner-only service environment. It patches the installed listener's
-  provider-attempt factory to a deterministic in-memory fixture. It adds no
-  product flag, endpoint, alternate host, or packaged fixture path.
+  wake through installed commands without contacting GitHub. Hold one
+  transient installed daemon-module reader under the explicit no-source-runner
+  bootstrap only while arming; keep the source disabled for its first poll,
+  use an isolated XDG state root, then terminate and census the reader before
+  the webhook service attempt.
+- Provide an ephemeral, untracked bootstrap only through the owner-only service
+  environment. The exact installed interpreter must explicitly install and
+  verify the deterministic provider-attempt fixture before invoking the exact
+  installed listener entrypoint; bootstrap failure exits before either the
+  listener or provider path. It adds no product flag, endpoint, alternate host,
+  or packaged fixture path.
 - Exercise real loopback signed HTTP through the installed service: first
   delivery `COMMITTED`, identical delivery `DUPLICATE`, stop/start, then a new
   delivery identifier for the same durable occurrence `DUPLICATE`.
@@ -55,8 +164,8 @@ polling convergence, installed readiness/status/support, and complete cleanup.
 ## Non-goals and effect boundary
 
 - No GitHub request or mutation, public ingress, non-loopback bind, target
-  dispatch, daemon start, normal wake-root mutation, global install, release,
-  deployment, or Cooper change.
+  dispatch, persistent or dispatch-enabled daemon, normal wake-root mutation,
+  global install, release, deployment, or Cooper change.
 - No product test mode, fixture CLI flag, generic provider injection, alternate
   endpoint, or relaxation of source/service/secret/journal authority.
 - The packet permits one service install/start attempt and no automatic retry.
@@ -72,8 +181,9 @@ polling convergence, installed readiness/status/support, and complete cleanup.
    on every exit.
 3. Run focused and comprehensive tests, plugin tests, compilation, diff hygiene,
    and planning audits. Obtain one independent closed-world review.
-4. Build/hash/install the exact wheel and complete all non-effect setup before
-   consuming the one installed-service attempt.
+4. Build/hash/install the exact wheel; arm under the transient installed
+   no-dispatch reader; prove that reader stopped; and complete all other
+   non-effect setup before consuming the one installed-service attempt.
 5. Execute install/start, readiness/status/support, signed commit/duplicates,
    restart, polling convergence, and exact readback once.
 6. In `finally`, uninstall the unit, verify inactive/disabled/no MainPID, release

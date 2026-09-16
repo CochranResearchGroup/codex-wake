@@ -579,6 +579,13 @@ class DaemonTests(unittest.TestCase):
             self.assertEqual(result.signal_sources[0]["observed"], 1)
             self.assertEqual(result.signal_sources[0]["degraded"], 1)
             self.assertEqual(
+                result.signal_sources[0]["code"], "GITHUB_COVERAGE_UNPROVEN",
+            )
+            self.assertEqual(
+                result.signal_sources[0]["observed_at"],
+                (NOW + timedelta(seconds=2)).isoformat(),
+            )
+            self.assertEqual(
                 GitHubSourceStore(root).source_health("github-ci").code,
                 "GITHUB_COVERAGE_UNPROVEN",
             )

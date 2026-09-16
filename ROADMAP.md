@@ -760,10 +760,19 @@ Current State: Issues #104 through #106 accepted the bounded HTTP transport,
 main-thread durable signed-ingest join, and supported product lifecycle on
 canonical main, most recently through PR #116 at `63e3a19`. Issue #107 is the
 active isolated installed-wheel and loopback-service qualification under Plan
-0074; #108 and #109 remain dependency-blocked for Cooper/bastion HTTPS
+0075 after Plan 0074 failed safely at the PrivateTmp executable boundary. The
+source-only successor correction at `710c001` enabled the installed service to
+pass readiness, manual restart, and all three signed delivery checks. Plan 0075
+then failed safely at its final source-only polling projection because the
+fixture omitted the daemon's record publisher. Plans 0076 and 0077 repaired the
+fixture and a dropped GitHub health code/time, then passed strict provider-free
+convergence with zero provider or dispatch calls. The composite #107 evidence
+is accepted locally at `9766004` and awaits issue-linked PR/CI integration;
+#108 and #109 remain
+dependency-blocked for Cooper/bastion HTTPS
 publication and one live GitHub delivery. The shared ingress repository was
 cleaned, validated, structured into two final commits, and pushed at `5fcce95`
-before P53 use. No installed listener, external ingress route, provider
+before P53 use. No retained installed listener, external ingress route, provider
 webhook, or live dispatch exists yet.
 
 Plan: [Signed GitHub webhook ingress goal campaign](docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md)

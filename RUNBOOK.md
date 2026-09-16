@@ -3454,3 +3454,224 @@ Acceptance state: P53 is open at `P53-G1-v2` / `P53-G1-C05`; #107 is the sole
 active lane. Movement is `outcome_progress`. Next action: publish this lane
 assignment, implement and independently review the source-only runner, then
 consume the single installed-service attempt only after a clean preflight.
+
+## Turn 162 | 2026-09-16
+
+Corrected the #107 installed runner at the managed-reader capability gate
+without consuming its service attempt.
+
+- The first explicit runner invocation at `ff3ceae` built and installed the
+  candidate wheel in a disposable environment, then failed during arming with
+  `READER_CAPABILITY_UNAVAILABLE`. The staged receipt proves
+  `service_attempted: false`, safe cleanup, absent unit/process/port ownership,
+  and retained commit/tree/wheel/executable provenance.
+- C4-R09 now holds one transient installed `codex-waked --no-dispatch` reader
+  only while arming. The source is disabled for its first poll, application
+  state is isolated, exact reader PID/readiness is required, and the reader is
+  stopped before webhook configuration and the service-attempt boundary.
+- TDD retained both failures: the missing managed-reader interface and the
+  unsafe enabled-before-first-poll ordering. The correction passes 20 focused
+  tests, 512 comprehensive Python tests, 12 plugin tests, compilation, diff
+  hygiene, and a freshly built candidate-wheel configure/arm proof.
+- Code/test checkpoint is `ccfda6c`; one independent closed-world C4-R09 review
+  is in progress. No systemd mutation, listener, port-8820 bind, provider
+  access, ingress, dispatch, release, deployment, or global install occurred.
+
+Acceptance state: #107 remains active and its one installed-service attempt is
+unconsumed. Movement is `blocker_reduction`. Next action: accept or repair the
+closed-world C4-R09 review, publish the exact checkpoint, run a fresh host
+preflight, then execute the single service attempt once.
+
+## Turn 163 | 2026-09-16
+
+Closed the three blocking findings from the first C4-R09 review at checkpoint
+`b7e8743`.
+
+- The review proved that `--no-dispatch` does not block provider reads, that a
+  termination timeout escaped the bootstrap-only process census, and that
+  reader/arm evidence was staged only after later fixture setup.
+- The reader now enters the installed daemon module through an explicit
+  source-only bootstrap that replaces every signal-source runner with an empty
+  registry before daemon `main`. It therefore supplies the managed-reader
+  capability and record projection seam without any provider path.
+- Reader PID/start identity is tracked immediately and its exact bootstrap argv
+  is part of cleanup census. A surviving simulated reader makes cleanup unsafe
+  and preserves the recovery root.
+- The external receipt now stages `managed_reader_ready`, `armed`, and
+  `managed_reader_stopped` as those transitions occur. A freshly built wheel
+  passed that sequence with a pending wake, enabled source, stopped reader, and
+  empty post-stop census.
+- Validation passes 22 focused tests, 513 comprehensive Python tests, 12 plugin
+  tests, compilation, and diff hygiene. No systemd mutation, listener,
+  port-8820 bind, provider access, ingress, dispatch, release, deployment, or
+  global install occurred.
+
+Acceptance state: #107 remains active and its one installed-service attempt is
+unconsumed. Movement is `blocker_reduction`. Next action: closed-world
+re-verification of the three accepted findings at `b7e8743`, then publish,
+fresh-preflight, and execute the service attempt once.
+
+## Turn 164 | 2026-09-16
+
+Accepted the closed-world C4-R09 repair at exact code commit `b7e8743`.
+
+- Independent re-verification ran the generated reader bootstrap through two
+  delayed provider-free polling passes over an enabled, armed source: production
+  client factory calls, provider-read seam calls, and dispatches were all zero.
+- Injected terminate/kill wait timeouts retained PID/start tracking, exact
+  reader census, `safe: false`, and the recovery root.
+- External receipt snapshots appeared in exact order
+  `managed_reader_ready`, `armed`, `managed_reader_stopped` with wake ID,
+  PID/start identity, and terminal `stopped: true` evidence.
+- Final source validation passes 22 focused tests, 514 comprehensive Python
+  tests, 12 plugin tests, compilation, diff hygiene, and active/goal planning
+  audits. Effective reviewer model/effort and cost telemetry were unavailable.
+
+Acceptance state: the source correction is accepted; #107 and its one
+installed-service attempt remain active/unconsumed. Movement is
+`blocker_reduction`. Next action: publish the exact clean branch, fresh-preflight
+the host/unit/port/process baseline, then run the service attempt once.
+
+## Turn 165 | 2026-09-16
+
+Corrected a second pre-effect #107 setup failure without consuming the service
+attempt.
+
+- The `fb6696f` runner invocation accepted the fresh host preflight, then
+  stopped before provenance and before service installation. Its external
+  receipt proves `service_attempted: false`, absent unit/process/port ownership,
+  safe cleanup, no provider access, and the updated six-unit unrelated failed
+  baseline.
+- Diagnosis showed that the explicit caller `PYTHONPATH=src` propagated into
+  the fresh venv's pip process. Pip therefore saw worktree distribution metadata
+  and skipped installing the exact wheel.
+- Checkpoint `7d18ea4` preserves tool discovery but removes `PYTHONPATH` and
+  `PYTHONHOME` from build, venv, and pip subprocesses. It also stages
+  clean-candidate, build, install, and provenance phases in the external
+  receipt so another setup failure remains locatable.
+- A provider-free exported-tree proof now builds the exact wheel, installs all
+  four console entrypoints, and imports `codex_wake` from the isolated venv.
+  Validation passes 23 focused tests, 515 comprehensive Python tests, 12 plugin
+  tests, compilation, and diff hygiene.
+
+Acceptance state: #107 remains active and its one installed-service attempt is
+unconsumed. Movement is `blocker_reduction`. Next action: publish the repaired
+clean branch, repeat the fresh host preflight, then execute the service attempt
+once without retry after any post-install failure.
+
+## Turn 166 | 2026-09-16
+
+Closed Plan 0074 as `FAILED_SAFE` and opened bounded successor Plan 0075 after
+the single service-effect attempt failed at systemd's executable boundary.
+
+- Exact candidate `da28dee` completed clean provenance, managed-reader
+  readiness/arm/stop, and fixture setup, then consumed the attempt at service
+  installation. The unit exited immediately with systemd status `203/EXEC`.
+- Read-only journal/source inspection proved the cause: the product correctly
+  renders `PrivateTmp=yes`, while the source-only runner placed its executable
+  bootstrap under host `/tmp`, which is unavailable inside that namespace.
+- Product uninstall and fresh host readback prove the unit absent, inactive,
+  disabled, MainPID zero, NRestarts zero, port 8820 free, no matching process,
+  and the six unrelated failed units unchanged. Provider access, ingress, and
+  dispatch remained absent.
+- Plan 0074 will not retry. Plan 0075 permits one successor attempt only after a
+  test-driven owner-only user-state root, external service-stage receipt,
+  narrow independent verification, publication, and fresh preflight.
+
+Acceptance state: #107 remains open under successor Plan 0075; #108 remains
+blocked. Movement is `blocker_reduction`. Next action: implement and validate
+the PrivateTmp-visible execution root and service-effect stage locator before
+any new service effect.
+
+## Turn 167 | 2026-09-16
+
+Accepted the source-only Plan 0075 correction for #107 without consuming its
+successor service-effect attempt.
+
+- Checkpoint `710c001` creates the disposable root beneath the resolved
+  owner-only user-state qualification directory and rejects relative,
+  `/tmp`-backed, `/var/tmp`-backed, and symlink-aliased state paths before
+  creation.
+- External receipts now stage installation, readiness, first delivery, replay,
+  manual restart, post-restart delivery, and provider-free polling boundaries
+  before each corresponding effect.
+- Validation passes 25 focused tests, 517 comprehensive Python tests, 12 plugin
+  tests, compilation, diff hygiene, and active/goal planning audits.
+- Independent review initially identified the temporary-path alias gap, then
+  accepted the exact repair after five rejection fixtures and two valid-root
+  fixtures. No systemd, provider, dispatch, or ingress effect occurred.
+
+Acceptance state: the Plan 0075 source correction is accepted; #107 remains
+open and its one successor service attempt remains unconsumed. Movement is
+`blocker_reduction`. Next action: publish the exact clean candidate, run a fresh
+host/unit/port/process preflight, then execute the successor attempt once.
+
+## Turn 168 | 2026-09-16
+
+Closed Plan 0075 as `FAILED_SAFE` and opened no-service successor Plan 0076.
+
+- Published candidate `2cdfaf7` became ready under `PrivateTmp=yes`, restarted
+  to a new PID/start identity, and returned `COMMITTED`, `DUPLICATE`, and
+  post-restart `DUPLICATE` for the frozen signed occurrence.
+- The final polling subprocess returned zero and retained one receipt, but its
+  strict assertion failed: the explicit fixture module omitted the daemon's
+  record publisher, leaving desired firing revision 2 pending projection.
+- Cleanup removed the exact unit and processes. The immediate bind probe was
+  conservatively false while delivery sockets were in `TIME-WAIT`; fresh
+  readback proves no listener and port 8820 bindable. The private recovery root
+  and failed receipt remain retained.
+- Independent read-only diagnosis accepted exact publisher parity with the
+  daemon default open. Provider access, dispatch, and ingress remained absent.
+  Ambient failed-unit membership changed after the attempt, so only the
+  receipt's exact contemporaneous six-unit before/after baseline is claimed.
+
+Acceptance state: retained service evidence advances #107, but polling
+projection remains unsatisfied. Movement is `blocker_reduction`. Next action:
+test-drive the Plan 0076 source-only publisher correction, validate it without a
+service effect, and complete the issue-linked PR if the combined evidence passes.
+
+## Turn 169 | 2026-09-16
+
+Closed Plan 0076 at product health projection and opened bounded Plan 0077.
+
+- Checkpoint `84d59fd` gives the generated provider-free poll fixture the same
+  current-process record publisher as the daemon default path.
+- Independent execution on a fresh temporary journal proved receipts `1 -> 1`,
+  matches `0 -> 1`, pending `1 -> 0`, firing `0 -> 1`, fired `1`, dispatched
+  `0`, and zero production-provider or dispatch tripwire calls.
+- Strict convergence still failed because `GitHubSignalRunner` discarded the
+  already-persisted health code and observation time when constructing its
+  per-instance result, returning `code=""` and `observed_at=null` instead of
+  `GITHUB_COVERAGE_UNPROVEN` and the aware poll time.
+- The retained Plan 0075 receipt SHA-256 remained
+  `8cbb2508dfb8ee9f96a5051b4cb4953d42e769de493fed3cd19c0ab098b6e605`.
+  No retained evidence, service, provider, dispatch, or ingress effect occurred.
+
+Acceptance state: publisher-backed firing projection is accepted, while the
+product health metadata required by strict #107 qualification remains open.
+Movement is `blocker_reduction`. Next action: test-drive only the GitHub
+per-instance health projection, execute the full tripwired fixture test, and
+close #107 through CI if the composite evidence passes.
+
+## Turn 170 | 2026-09-16
+
+Accepted Plan 0077 and the composite installed webhook qualification for #107.
+
+- Checkpoint `9766004` projects the exact bounded GitHub health code and aware
+  reconciliation time through the daemon result.
+- A durable executable test now runs the generated fixture on a fresh armed
+  journal through the unchanged strict assertion, proving receipts `1 -> 1`,
+  matches `0 -> 1`, pending `1 -> 0`, firing `0 -> 1`, fired `1`, dispatched
+  `0`, and zero production-client or dispatch tripwire calls.
+- Validation passes 519 comprehensive Python tests, 12 plugin tests,
+  compilation, diff hygiene, and active/goal planning audits. Closed-world
+  review accepted P76-R01 and the composite evidence boundary.
+- Verification 0077 preserves the Plan 0075 failed receipt, its immediate
+  `TIME-WAIT` cleanup result, and SHA-256
+  `8cbb2508dfb8ee9f96a5051b4cb4953d42e769de493fed3cd19c0ab098b6e605`
+  while separately recording later unit/process/port cleanup proof.
+
+Acceptance state: #107 is locally accepted and integration-ready; #108 remains
+blocked until the issue-linked PR passes both release gates and canonical-main
+readback. Movement is `outcome_progress`. Next action: publish the exact clean
+branch, open the closing PR, monitor CI, squash merge, and reconcile custody.
