@@ -809,9 +809,9 @@ binding store, ambiguity-safe reconciler, bounded GitHub.com administration
 adapter, and dry-run-first CLI. Local focused, comprehensive, plugin,
 compilation, and diff gates pass after addressing all eight initial independent
 review findings and the final mismatched-UPDATE variant. Independent review
-accepts checkpoint `93ba14a`; hosted integration and canonical readback remain. No provider,
-service, secret, ingress, installation, release, or dispatch effect is
-authorized by C1.
+accepts checkpoint `93ba14a`. PR #143 passed both hosted gates and squash-merged
+as canonical `a3b2c98`; GitHub closed #138. No provider, service, secret,
+ingress, installation, release, or dispatch effect occurred in C1.
 
 Plan: [Managed GitHub webhook wakes goal campaign](docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md)
 
@@ -833,7 +833,7 @@ Acceptance target:
   with canonical GitHub and verification custody.
 
 Acceptance state: P54 planning and its five-child issue graph are canonical;
-#138 is locally accepted and awaiting its issue-linked PR gates. Movement is
-`outcome_progress`. Next action: integrate the provider-free
-ownership/reconciliation path through Plan 0084, then unblock #139 and #140.
-Live effects remain separately gated.
+#138 is closed and accepted on canonical main; #139 and #140 are unblocked.
+Movement is `outcome_progress`. Next action: register restart-correct secret
+rotation and independent health/qualification as bounded lanes, preserving
+their shared-contract serialization. Live effects remain separately gated.
