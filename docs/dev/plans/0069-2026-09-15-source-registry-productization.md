@@ -15,6 +15,12 @@ families reconstruct through the immutable built-in registry. Operator
 readiness and support still derive source capability independently of that
 catalogue, and the internal extension procedure is not yet documented.
 
+Candidate `bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22` is integration-ready in
+PR #99. It supplies pure catalogue inventory, additive readiness/support
+projection, maintainer documentation, and a provider-free installed-wheel
+conformance gate. Focused, comprehensive, plugin, compilation, planning,
+independent review, and Python 3.11/3.12 CI gates pass.
+
 ## Objective
 
 Make the accepted catalogue the side-effect-free authority for built-in source
@@ -81,8 +87,24 @@ review-discovery pass. Nested delegation is disabled. Maximum implementation
 attempts: two; maximum review repair cycles: one; installed attempts: one with
 zero retries.
 
+## Installed-attempt disposition
+
+The sole local installed attempt built and installed exact candidate
+`c4217b863d68f8e0cd803ed6990e2a6d53af5dac` offline. Catalogue, readiness,
+support export/digest, and zero-wake-root assertions passed. Receipt rendering
+then referenced nonexistent `bytes_written` instead of `size_bytes`, so the
+process exited before installed fixture reconstruction. The attempt was not
+retried. Readback retained exact hashes and cleanup moved the temporary venv,
+wheel tree, and generated build artifacts recoverably to user trash.
+
+Candidate `bcfcfd5` adds a checked-in provider-free smoke to the existing
+installed-wheel CI jobs. Both matrix jobs reconstructed exactly one fixture
+runner, reported the four built-ins and six ownership pairs, created no wake
+root, and removed the temporary root. This deterministic replacement path did
+not grant another local attempt or any provider, observation, dispatch,
+installation, release, or deployment authority.
+
 ## Next action
 
-Merge the exact active-lane assignment, then implement pure catalogue
-introspection and additive readiness/support output test-first in the isolated
-#85 worktree. The primary retains the installed smoke and integration gates.
+Merge the exact integration-ready projection, squash-merge PR #99, verify
+canonical main, then remove the accepted lane before closing parent #81.

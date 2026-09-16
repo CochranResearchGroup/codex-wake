@@ -3174,3 +3174,40 @@ are accepted and #85 is the sole active implementation lane at checkpoint
 Next action: merge this assignment projection, execute the bounded #85
 implementation and review, then run the one authorized isolated installed-
 wheel smoke.
+
+## Turn 153 | 2026-09-15
+
+Qualified source-registry productization #85 for integration.
+
+- The bounded Terra-medium worker implemented pure catalogue inventory,
+  shared daemon/operator catalogue construction, additive readiness/support
+  projection, focused tests, and internal extension documentation. The primary
+  reconciled the result without changing its authority boundary.
+- Independent Luna-medium review found no issues across the seven-file product
+  diff. A closed-world follow-up also passed the installed CI smoke addition.
+  Effective runtime model/allocation metadata were not reported, so no model-
+  allocation savings claim is made.
+- The sole local installed attempt built and installed exact candidate
+  `c4217b863d68f8e0cd803ed6990e2a6d53af5dac` offline. Installed catalogue,
+  readiness, support export/digest, and zero-wake-root assertions passed. The
+  harness then exited on a receipt-only field-name error before fixture
+  reconstruction. It was not retried. Readback preserved the failure and exact
+  hashes; the temporary venv, wheel tree, and generated build artifacts were
+  moved recoverably to user trash.
+- Candidate `bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22` added a deterministic
+  provider-free conformance script to both existing installed-wheel CI jobs.
+  Python 3.11 and 3.12 each reported the same four registrations, six ownership
+  pairs, one fixture factory call, one restored runner, no created wake root,
+  and successful temporary-root cleanup.
+- Validation passed 56 focused tests, 438 comprehensive Python tests, 12
+  plugin tests, compilation, diff hygiene, planning/goal audits, both required
+  PR #99 release gates, and independent review with no findings.
+- No provider or network read, source observation, live dispatch, service or
+  global installation, release, deployment, or normal wake-root effect
+  occurred.
+
+Acceptance state: P52 is open at `P52-G1-v9` / `P52-G1-C09`; #82 through #84
+are accepted and #85 is integration-ready at `bcfcfd5`. Movement is
+`outcome_progress`. Next action: merge this readiness projection and PR #99,
+validate canonical main, clean up the accepted lane, then close parent #81 with
+the final empty-lane receipt.
