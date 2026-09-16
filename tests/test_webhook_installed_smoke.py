@@ -376,6 +376,17 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             self.assertTrue(wheel.is_file())
             self.assertEqual(calls[0][1]["cwd"], export)
 
+    def test_build_environment_excludes_python_import_injection(self) -> None:
+        with patch.dict(os.environ, {
+            "PYTHONPATH": "/untrusted/source",
+            "PYTHONHOME": "/untrusted/home",
+            "P53_PRESERVED": "yes",
+        }, clear=False):
+            env = smoke.isolated_build_env()
+        self.assertNotIn("PYTHONPATH", env)
+        self.assertNotIn("PYTHONHOME", env)
+        self.assertEqual(env["P53_PRESERVED"], "yes")
+
     def test_process_identity_requires_exact_pid_executable_start_and_socket(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)

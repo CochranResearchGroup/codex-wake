@@ -90,6 +90,14 @@ def owner_only_directory(path: Path) -> None:
     os.chmod(path, 0o700)
 
 
+def isolated_build_env() -> dict[str, str]:
+    """Preserve tool discovery while excluding caller import injection."""
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    env.pop("PYTHONHOME", None)
+    return env
+
+
 def run_command(
     argv: list[str], *, artifact_dir: Path, name: str,
     timeout: int = MAX_COMMAND_SECONDS, env: dict[str, str] | None = None,
@@ -354,6 +362,7 @@ def build_wheel(export_root: Path, wheel_dir: Path, artifact_dir: Path) -> Path:
     run_command(
         [uv, "build", "--wheel", "--out-dir", str(wheel_dir)],
         artifact_dir=artifact_dir, name="build-wheel", cwd=export_root,
+        env=isolated_build_env(),
     )
     wheels = tuple(wheel_dir.glob("codex_wake-*.whl"))
     if len(wheels) != 1:
@@ -1043,22 +1052,31 @@ def execute(*, receipt_path: Path | None = None) -> int:
         })
         stage_receipt(receipt, destination=receipt_path, secret_values=())
 
+        receipt["setup_stage"] = "clean_candidate"
+        stage_receipt(receipt, destination=receipt_path, secret_values=())
         provenance = clean_candidate(repo_root(), context.artifact_dir)
         export_root = root / "export"
         export_clean_tree(repo_root(), export_root, context.artifact_dir)
+        receipt["setup_stage"] = "build_wheel"
+        stage_receipt(receipt, destination=receipt_path, secret_values=())
         wheel = build_wheel(export_root, root / "wheel", context.artifact_dir)
+        build_env = isolated_build_env()
+        receipt["setup_stage"] = "install_wheel"
+        stage_receipt(receipt, destination=receipt_path, secret_values=())
         run_command(
             [sys.executable, "-m", "venv", str(root / "venv")],
-            artifact_dir=context.artifact_dir, name="create-venv",
+            artifact_dir=context.artifact_dir, name="create-venv", env=build_env,
         )
         run_command(
             [str(root / "venv/bin/pip"), "install", "--no-deps", str(wheel)],
-            artifact_dir=context.artifact_dir, name="install-wheel",
+            artifact_dir=context.artifact_dir, name="install-wheel", env=build_env,
         )
         if not all(path.is_file() for path in (
             context.installed_cli, context.installed_listener, context.installed_python,
         )):
             raise RuntimeError("installed executables are incomplete")
+        receipt["setup_stage"] = "installed_provenance"
+        stage_receipt(receipt, destination=receipt_path, secret_values=())
         provenance.update({
             "wheel_sha256": sha256(wheel),
             "installed_cli_sha256": sha256(context.installed_cli),
