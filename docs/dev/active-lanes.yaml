@@ -9,7 +9,7 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 033d2cc7187e4448e2809299701a2975d0790e80
+    checkpoint: a846ab92be23a184397b0e414238840b901cd9a5
     validation_status: implementation_accepted_live_qualification_ready
     validation_ref: 033d2cc7187e4448e2809299701a2975d0790e80
     remote_ref: refs/remotes/origin/chore/issue-108-ingress-qualification
