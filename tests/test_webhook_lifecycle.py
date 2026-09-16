@@ -12,7 +12,8 @@ from pathlib import Path
 from codex_wake.webhook_lifecycle import (
     WebhookListenerConfig, WebhookListenerStore, WebhookServiceConfig,
     install_webhook_service, render_webhook_unit, stop_webhook_service,
-    uninstall_webhook_service, webhook_http_config_kwargs, webhook_readiness, webhook_service_status, webhook_support,
+    disable_webhook_listener, linux_service_bind_probe, uninstall_webhook_service,
+    webhook_http_config_kwargs, webhook_readiness, webhook_service_status, webhook_support,
 )
 from codex_wake.webhook_listener import run_listener
 from codex_wake.cli import main as cli_main
@@ -84,8 +85,11 @@ class WebhookListenerConfigTests(unittest.TestCase):
             def __init__(self) -> None:
                 self.served = False
                 self.timeout = None
+                self.resolve_secret = None
             def serve(self) -> None:
                 self.served = True
+                assert self.resolve_secret is not None
+                self.resolved = self.resolve_secret("CODEX_WAKE_WEBHOOK_SECRET")
             def shutdown(self) -> None:
                 self.timeout = True
         with tempfile.TemporaryDirectory() as tmp:
@@ -97,12 +101,13 @@ class WebhookListenerConfigTests(unittest.TestCase):
             received = []
             result = run_listener(
                 wake_root=root, source_instance="github-webhook",
-                runtime_factory=lambda config, secrets: received.append((config, secrets)) or runtime,
+                runtime_factory=lambda config, resolve_secret: received.append((config, resolve_secret)) or setattr(runtime, "resolve_secret", resolve_secret) or runtime,
                 env={"CODEX_WAKE_WEBHOOK_SECRET": "fixture-secret"},
             )
             self.assertEqual(result, 0)
             self.assertTrue(runtime.served)
             self.assertTrue(runtime.timeout)
+            self.assertEqual(runtime.resolved, b"fixture-secret")
             self.assertNotIn("fixture-secret", json.dumps(WebhookListenerStore(root).listeners(), default=str))
 
     def test_rendered_unit_and_support_omit_secret_references(self) -> None:
@@ -151,6 +156,47 @@ class WebhookListenerConfigTests(unittest.TestCase):
             config.unit_path.chmod(0o600)
             with self.assertRaisesRegex(Exception, "ownership is invalid"):
                 install_webhook_service(config, runner, start=False)
+
+    def test_disable_stops_active_owner_before_persisting(self) -> None:
+        class Runner:
+            def __init__(self) -> None:
+                self.active = True
+            def run(self, args, *, check=True):
+                if "disable" in args:
+                    self.active = False
+                output = "active\n" if "is-active" in args and self.active else "inactive\n" if "is-active" in args else "disabled\n"
+                return subprocess.CompletedProcess(args, 0, output, "")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            store = WebhookListenerStore(root)
+            enabled = WebhookListenerConfig("github-webhook", secret_ref="CODEX_WAKE_WEBHOOK_SECRET", enabled=True)
+            store.configure(enabled)
+            disabled = disable_webhook_listener(store, replace(enabled, enabled=False), Runner())
+            self.assertFalse(disabled.enabled)
+            self.assertFalse(store.select("github-webhook").enabled)
+
+    def test_install_rejects_disabled_source_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = WebhookServiceConfig("listener.service", base / "wake", "github-webhook", base / "bin", base / "unit", base / "log", source_enabled=False)
+            with self.assertRaisesRegex(Exception, "requires an enabled source"):
+                install_webhook_service(config, start=False)
+
+    def test_linux_probe_requires_main_pid_socket_inode_and_exact_bind(self) -> None:
+        class Runner:
+            def run(self, args, *, check=True):
+                return subprocess.CompletedProcess(args, 0, "42\n", "")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            WebhookListenerStore(root).configure(WebhookListenerConfig("github-webhook", secret_ref="CODEX_WAKE_WEBHOOK_SECRET", enabled=True))
+            proc = Path(tmp) / "proc"
+            fd = proc / "42" / "fd"
+            fd.mkdir(parents=True)
+            (fd / "3").symlink_to("socket:[12345]")
+            (proc / "net").mkdir()
+            (proc / "net" / "tcp").write_text("sl local rem st tx rx tr tm retr uid timeout inode\n0: 0100007F:2274 00000000:0000 0A 00:0 0 0 0 0 12345\n")
+            config = WebhookServiceConfig("listener.service", root, "github-webhook", None, Path(tmp) / "unit", Path(tmp) / "log")
+            self.assertTrue(linux_service_bind_probe(config, Runner(), proc_root=proc))
 
     def test_readiness_requires_runtime_bind_and_safe_journal_proofs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

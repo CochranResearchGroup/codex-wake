@@ -223,6 +223,7 @@ class WebhookServiceConfig:
     executable_path: Path | None
     unit_path: Path
     log_path: Path
+    source_enabled: bool = True
 
 
 def webhook_service_name(source_instance: str) -> str:
@@ -255,6 +256,7 @@ def build_webhook_service_config(
         source_instance=listener.source_instance, executable_path=executable,
         unit_path=unit_base / resolved_name,
         log_path=(log_path or state_base / f"{resolved_name.removesuffix('.service')}.log").expanduser(),
+        source_enabled=listener.enabled,
     )
 
 
@@ -280,6 +282,8 @@ def render_webhook_unit(config: WebhookServiceConfig) -> str:
 
 
 def install_webhook_service(config: WebhookServiceConfig, runner=None, *, start: bool = True) -> None:
+    if not config.source_enabled:
+        raise WakeError("webhook listener service requires an enabled source")
     rendered = render_webhook_unit(config)
     if config.unit_path.exists():
         try:
@@ -296,10 +300,16 @@ def install_webhook_service(config: WebhookServiceConfig, runner=None, *, start:
     os.chmod(config.unit_path, 0o600)
     systemctl(["daemon-reload"], runner)
     if start:
-        systemctl(["enable", "--now", config.name], runner)
-        active = systemctl(["is-active", config.name], runner, check=False).stdout.strip()
-        if active != "active":
-            raise WakeError(f"webhook listener service did not become active: {config.name} ({active or 'unknown'})")
+        start_webhook_service(config, runner)
+
+
+def start_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
+    if not config.source_enabled:
+        raise WakeError("webhook listener service requires an enabled source")
+    systemctl(["enable", "--now", config.name], runner)
+    active = systemctl(["is-active", config.name], runner, check=False).stdout.strip()
+    if active != "active":
+        raise WakeError(f"webhook listener service did not become active: {config.name} ({active or 'unknown'})")
 
 
 def stop_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
@@ -316,6 +326,26 @@ def webhook_service_status(config: WebhookServiceConfig, runner=None) -> tuple[s
     active = systemctl(["is-active", config.name], runner, check=False).stdout.strip() or "unknown"
     enabled = systemctl(["is-enabled", config.name], runner, check=False).stdout.strip() or "unknown"
     return active, enabled
+
+
+def disable_webhook_listener(store: WebhookListenerStore, listener: WebhookListenerConfig, runner=None) -> WebhookListenerConfig:
+    """Stop the exact active owner before persisting its disabled authority."""
+    if listener.enabled:
+        raise ValueError("webhook listener disable request is invalid")
+    current = store.select(listener.source_instance)
+    if not current.enabled:
+        return store.configure(listener)
+    config = build_webhook_service_config(
+        wake_root=store.wake_root, source_instance=current.source_instance,
+        validate_executable=False,
+    )
+    active, _ = webhook_service_status(config, runner)
+    if active == "active":
+        stop_webhook_service(config, runner)
+        active, _ = webhook_service_status(config, runner)
+        if active == "active":
+            raise WakeError("webhook listener service remains active; stop it before disabling source")
+    return store.configure(listener)
 
 
 def _journal_is_safe(path: Path) -> bool:
@@ -338,6 +368,47 @@ def _unit_is_safe(config: WebhookServiceConfig) -> bool:
                 and "Restart=on-failure" in text and "TimeoutStopSec=15" in text)
     except OSError:
         return False
+
+
+def _proc_address(value: str, *, ipv6: bool) -> str:
+    packed = ip_address(value).packed
+    if not ipv6:
+        return packed[::-1].hex().upper()
+    return "".join(packed[index:index + 4][::-1].hex() for index in range(0, 16, 4)).upper()
+
+
+def _service_main_pid(config: WebhookServiceConfig, runner=None) -> int | None:
+    try:
+        value = systemctl(["show", config.name, "--property=MainPID", "--value"], runner, check=False).stdout.strip()
+        return int(value) if value.isdigit() and int(value) > 0 else None
+    except Exception:
+        return None
+
+
+def linux_service_bind_probe(config: WebhookServiceConfig, runner=None, *, proc_root: Path = Path("/proc")) -> bool:
+    """Read-only proof that this unit's MainPID owns the exact listening inode."""
+    pid = _service_main_pid(config, runner)
+    if pid is None:
+        return False
+    try:
+        inodes = {
+            target.removeprefix("socket:[").removesuffix("]")
+            for item in (proc_root / str(pid) / "fd").iterdir()
+            if (target := os.readlink(item)).startswith("socket:[") and target.endswith("]")
+        }
+        address = ip_address(WebhookListenerStore(config.wake_root).select(config.source_instance).address)
+        table = "tcp6" if address.version == 6 else "tcp"
+        expected = _proc_address(str(address), ipv6=address.version == 6)
+        for line in (proc_root / "net" / table).read_text(encoding="utf-8").splitlines()[1:]:
+            fields = line.split()
+            if len(fields) < 10 or fields[3] != "0A" or fields[9] not in inodes:
+                continue
+            local = fields[1].split(":", 1)
+            if len(local) == 2 and local[0].upper() == expected and int(local[1], 16) == WebhookListenerStore(config.wake_root).select(config.source_instance).port:
+                return True
+    except (OSError, ValueError):
+        return False
+    return False
 
 
 def webhook_readiness(*, wake_root: Path, source_instance: str, runner=None,
@@ -363,10 +434,7 @@ def webhook_readiness(*, wake_root: Path, source_instance: str, runner=None,
             runtime_available = False
     journal_path = signal_journal_path(wake_root)
     journal_ok = journal_probe(journal_path) if journal_probe is not None else _journal_is_safe(journal_path)
-    # There is deliberately no ambient socket inspection: it cannot prove the
-    # service owns the expected socket. A platform owner probe is injected by
-    # the installed qualification layer; absent proof fails closed.
-    bind_ok = bind_probe(listener.address, listener.port) if bind_probe is not None else False
+    bind_ok = bind_probe(listener.address, listener.port) if bind_probe is not None else linux_service_bind_probe(config, runner)
     status = "ready" if unit_ok and active == "active" and runtime_available and journal_ok and bind_ok else "blocked"
     if not runtime_available:
         message = "canonical #105 webhook runtime is unavailable"

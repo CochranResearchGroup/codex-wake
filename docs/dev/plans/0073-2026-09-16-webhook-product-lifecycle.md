@@ -72,6 +72,11 @@ Final validation occurs only after merging canonical #105 into this branch.
 - Added `codex-wake-github-webhook` as a deferred-import executable seam and a
   provider-free lifecycle contract test double. It requires a runtime with a
   blocking main-thread `serve()` and bounded runtime-owned `shutdown()`.
+- Corrected the lifecycle packet to use read-only MainPID plus `/proc` socket
+  inode/address/port ownership proof by default (still injection-testable),
+  require enabled sources for install/start, stop and confirm an active owner
+  before a disable persists, and provide a per-request owner secret resolver
+  instead of startup secret bytes.
 - Added user-service render/install/stop/status/uninstall helpers and CLI
   configuration, service, readiness, and support commands. No real service was
   installed during this lane.

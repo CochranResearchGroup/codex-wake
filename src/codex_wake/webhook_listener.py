@@ -12,25 +12,30 @@ from .records import WakeError, default_wake_root
 from .webhook_lifecycle import WebhookListenerStore
 
 
-def _runtime_factory(config, secrets: tuple[bytes, ...]):
+def _runtime_factory(config, resolve_secret):
     """Deferred #105 join point; product construction remains intentionally injected."""
     from .github_webhook_runtime import GitHubWebhookRuntime  # type: ignore[import-not-found,unused-ignore]
-    del GitHubWebhookRuntime, config, secrets
+    del GitHubWebhookRuntime, config, resolve_secret
     raise WakeError("webhook runtime construction requires the canonical #105 join adapter")
 
 
 def run_listener(*, wake_root: Path, source_instance: str,
-                 runtime_factory: Callable[[Any, tuple[bytes, ...]], Any] | None = None,
+                 runtime_factory: Callable[[Any, Callable[[str], bytes]], Any] | None = None,
                  env: dict[str, str] | None = None) -> int:
     listener = WebhookListenerStore(wake_root).enabled(source_instance)
     source_env = env if env is not None else os.environ
-    refs = (listener.secret_ref,) + ((listener.previous_secret_ref,) if listener.previous_secret_ref else ())
-    values = tuple(source_env.get(reference, "").encode("utf-8") for reference in refs)
-    if any(not value for value in values):
-        raise WakeError("webhook listener secret reference is unavailable")
+    refs = frozenset((listener.secret_ref,) + ((listener.previous_secret_ref,) if listener.previous_secret_ref else ()))
+
+    def resolve_secret(reference: str) -> bytes:
+        if reference not in refs:
+            raise WakeError("webhook listener secret reference is invalid")
+        value = source_env.get(reference)
+        if type(value) is not str or not value:
+            raise WakeError("webhook listener secret reference is unavailable")
+        return value.encode("utf-8")
     factory = runtime_factory or _runtime_factory
     try:
-        runtime = factory(listener, values)
+        runtime = factory(listener, resolve_secret)
     except ModuleNotFoundError as exc:
         raise WakeError("webhook runtime is unavailable until canonical #105 is joined") from exc
     if not callable(getattr(runtime, "serve", None)) or not callable(getattr(runtime, "shutdown", None)):

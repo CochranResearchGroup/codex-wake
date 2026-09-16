@@ -385,7 +385,7 @@ def build_parser() -> argparse.ArgumentParser:
     webhook_show.add_argument("--json", action="store_true", dest="as_json")
     webhook_service = github_webhook_subparsers.add_parser("service")
     webhook_service_subparsers = webhook_service.add_subparsers(dest="github_webhook_service_command", required=True)
-    for action in ("install", "stop", "status", "uninstall"):
+    for action in ("install", "start", "stop", "status", "uninstall"):
         service_action = webhook_service_subparsers.add_parser(action)
         service_action.add_argument("--source", required=True, dest="source_instance")
         service_action.add_argument("--name")
@@ -1261,7 +1261,7 @@ def _github_source_summary(source) -> dict[str, object]:
 def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
     from .webhook_lifecycle import (
         WebhookListenerConfig, WebhookListenerStore, build_webhook_service_config,
-        install_webhook_service, listener_summary, stop_webhook_service,
+        disable_webhook_listener, install_webhook_service, listener_summary, start_webhook_service, stop_webhook_service,
         uninstall_webhook_service, webhook_readiness, webhook_service_status, webhook_support,
     )
 
@@ -1270,14 +1270,17 @@ def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
         action = args.github_webhook_source_command
         try:
             if action == "configure":
-                listener = store.configure(WebhookListenerConfig(
+                listener = WebhookListenerConfig(
                     source_instance=args.source_instance, address=args.bind_address, port=args.port,
                     secret_ref=args.secret_ref, previous_secret_ref=args.previous_secret_ref,
                     enabled=args.enabled, allow_non_loopback=args.allow_non_loopback,
                     max_body_bytes=args.max_body_bytes, max_connections=args.max_connections,
                     request_timeout_seconds=args.request_timeout_seconds,
                     shutdown_timeout_seconds=args.shutdown_timeout_seconds,
-                ))
+                )
+                current = next((item for item in store.listeners() if item.source_instance == listener.source_instance), None)
+                listener = (disable_webhook_listener(store, listener) if current is not None and current.enabled and not listener.enabled
+                            else store.configure(listener))
                 print(f"source={listener.source_instance}\nenabled={str(listener.enabled).lower()}\nconfig={store.path}")
                 return 0
             listeners = store.listeners()
@@ -1313,6 +1316,9 @@ def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
         if action == "install":
             install_webhook_service(config, start=not args.no_start)
             result: dict[str, object] = {"service": config.name, "unit": str(config.unit_path), "installed": True}
+        elif action == "start":
+            start_webhook_service(config)
+            result = {"service": config.name, "started": True}
         elif action == "stop":
             stop_webhook_service(config)
             result = {"service": config.name, "stopped": True}
