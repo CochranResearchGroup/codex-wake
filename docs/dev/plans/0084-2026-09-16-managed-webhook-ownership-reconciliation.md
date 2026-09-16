@@ -99,7 +99,7 @@ review/remediation pass are the loop bounds.
 
 ## Implementation checkpoint
 
-Checkpoint `06db2b7` supplies the provider-free end-to-end path. The binding
+Checkpoint `06db2b7` supplied the first provider-free end-to-end path. The binding
 store now preserves exact local custody by provider hook ID and attributable
 operation receipt; an unbound same-URL hook is a collision and is never
 adopted. Reconciliation records intent before one create/update, performs one
@@ -122,11 +122,29 @@ and repository identity. `show` is local, `status` is read-only, and
 calculated zero-or-one provider mutation. Human and JSON output omit provider
 credential and listener-secret reference names as well as their values.
 
-Local checkpoint validation passes 32 focused management tests, 597
-comprehensive Python tests, 12 OpenClaw plugin tests, compilation, and diff
-hygiene. All provider paths use fakes in this checkpoint; provider, service,
-secret, ingress, installation, release, and dispatch effect counts remain
-zero. Independent closed-world review and hosted integration gates remain.
+Independent review of exact checkpoint `a2606e6` returned changes required:
+readback did not compare the returned exact ID; numeric repository identity was
+not provider-attested; separate bindings could preview the same absence;
+rolling observations could evict ownership provenance; an oversized successful
+write could make the store unreadable; the lock followed symlinks; copied-root
+state loaded before failing on save; and CLI reconfiguration silently retained
+a different requested installation ID.
+
+Remediation checkpoint `729f4cc` closes those findings with exact-ID checks in
+the reconciler and adapter, a bounded repository ID/name read before every
+provider operation, conflicting-binding rejection, under-lock inventory
+revalidation before intent, preserved ownership receipts, encoded-size checks
+before replacement, descriptor-level no-follow locking, root/UID validation on
+load, and explicit immutable-installation rejection. It also preserves local
+`show` when listener configuration is missing while preventing an armed apply,
+and admits bounded nonconforming foreign inventory without granting ownership.
+
+Local remediation validation passes 36 focused management tests, including a
+two-process stale-generation race, 601 comprehensive Python tests, 12 OpenClaw
+plugin tests, compilation, and diff hygiene. All provider paths use fakes;
+provider, service, secret, ingress, installation, release, and dispatch effect
+counts remain zero. Exact-checkpoint independent re-verification and hosted
+integration gates remain.
 
 ## Model allocation
 

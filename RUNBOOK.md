@@ -3881,3 +3881,13 @@ awaiting its independent closed-world review. Movement is `outcome_progress`.
 Next action: review the exact checkpoint, remediate only bounded findings, then
 publish the issue-linked PR and require both hosted Python release gates before
 canonical-main acceptance.
+
+The exact `a2606e6` review returned eight blocking findings: mismatched hook-ID
+readback, unattested repository ID, cross-binding duplicate-create exposure,
+ownership-receipt eviction, successful oversized writes, lock symlink
+following, copied-root loads, and silently ignored installation changes.
+Checkpoint `729f4cc` remediates all eight and adds direct reproductions plus a
+two-process generation race. The corrected gates pass 36 focused tests, 601
+comprehensive Python tests, 12 plugin tests, compilation, and diff hygiene.
+No external or installed effect occurred. Acceptance remains pending exact
+independent re-verification and hosted integration.
