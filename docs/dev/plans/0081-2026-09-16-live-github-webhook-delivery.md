@@ -37,6 +37,19 @@ Registration merged through PR #128 at canonical
 continues on the re-anchored runner branch; no runtime or provider effect was
 performed by registration.
 
+Checkpoint `e24afe3f88ddde501297f05b83f8300a93f2d8eb` implements the
+provider-free lifecycle contract and production-local adapter. It binds the
+real squash-trigger delivery to the resulting main merge SHA, stages partial
+runtime progress for fail-closed cleanup, provisions owner-only token/secret
+material, initializes a disabled source before enabling and arming it under a
+no-dispatch daemon, validates the exact loopback service, and reads the durable
+journal before and after one production no-dispatch poll. Its exact candidate
+commit/tree wheel custody, lifecycle-ledger preservation, partial-secret
+retirement, and systemd failure handling passed closed-world review. Focused C6
+tests pass 22/22, comprehensive Python passes 563/563, the OpenClaw plugin
+passes 12/12, and compilation/diff checks pass. PR #130 integration remains
+before the trigger PR and exact provider gate.
+
 ## Objective
 
 Build and validate a provider-safe live qualification runner, then, only after
@@ -116,6 +129,16 @@ Deterministic tools own hashes, schema checks, test execution, GitHub readback,
 polling, and unit/process/socket censuses. Effective model/allocation metadata
 is recorded when available; no cost-savings claim is made from requested model
 labels alone.
+
+Delegation receipts: `/root/p53_c6_provider_preflight` completed the read-only
+provider inventory; `/root/p53_c6_acceptance_audit` found and bounded the
+create/trigger/delete and cleanup counters; `/root/p53_c6_runner_impl` produced
+checkpoint `7d651f4` after one incomplete checkpoint and one closed-world
+remediation pass. The primary rejected the incomplete execution boundary,
+integrated the remediated contract, and added the production-local adapter at
+`ec2fddf`. Effective runtime model/cost metadata was not reported, so no
+allocation claim is made. `/root/p53_c6_runner_review` owns one final
+closed-world review of `ec2fddf`.
 
 ## Work graph
 
@@ -230,7 +253,8 @@ authorize redelivery, a second trigger, or a retry.
   delivery ID/action/status plus exactly one qualifying completed delivery;
 - trigger PR/head/merge SHA and resulting run ID, attempt, head SHA, event,
   status, conclusion, and authoritative terminal proof;
-- normalized occurrence identity `repository_id:run_id:run_attempt`, durable
+- normalized occurrence identity
+  `github:repository:<repository_id>:run:<run_id>:attempt:<run_attempt>`, durable
   receipt count before/after polling, checkpoint movement, wake state, and
   dispatch counters of zero;
 - hook deletion readback, secret retirement, service/root cleanup or preserved
