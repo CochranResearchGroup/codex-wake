@@ -6,6 +6,8 @@ Issue: `CochranResearchGroup/codex-wake#85`
 
 Candidate commit: `bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22`
 
+Canonical merge commit: `2929d934f34ccf9e27eaa28e910a5a6a5e6ada8d`
+
 ## Outcome
 
 The closed built-in catalogue is the shared authority for daemon
@@ -50,6 +52,10 @@ exist at their original paths.
 
 PR #99 run `35044676538` installed the exact candidate wheel and executed
 `scripts/source_registry_smoke.py` through each installed interpreter.
+
+The reconciled PR head `fbb89ad1bfc6b9dc069571612aad6022aa4d95ee`
+subsequently passed the same required matrix in run `35044982722` before the
+canonical squash merge.
 
 - Python 3.11: four expected registrations, six ownership pairs, readiness
   `ready`, journal absent, one fixture factory call, one restored runner, wake
