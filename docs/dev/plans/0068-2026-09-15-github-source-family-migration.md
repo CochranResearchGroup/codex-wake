@@ -1,6 +1,6 @@
 # GitHub source-family registry migration
 
-State: OPEN
+State: CLOSED
 Lane: P52-C3
 Issue: #84
 Branch: `feat/issue-84-github-source-family-migration`
@@ -9,8 +9,8 @@ Integration: `squash`
 
 ## Current state
 
-PR #95 is integration-ready at
-`1be2a395bab644a02c5f4f1f1e868c5bd065f2f7`. The GitHub family factory and
+PR #95 squash-merged at canonical
+`e0d88620a7bfc9208b97dd29e420639d391c0ecf`, closing #84. The GitHub family factory and
 primary-owned daemon integration preserve configured-instance grouping,
 legacy arm order, retry state, health, failure isolation, and injected provider
 clients. Focused, comprehensive, plugin, compilation, installed-wheel CI, and
@@ -60,5 +60,5 @@ dispatch, installation, release, or deployment.
 
 ## Next action
 
-Merge the exact integration-ready projection, squash-merge PR #95, verify
-canonical main, then remove the accepted topic branch and worktree before #85.
+Accepted. Continue through the serialized #85 productization and installed-
+compatibility join.
