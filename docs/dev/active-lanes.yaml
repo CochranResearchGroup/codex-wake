@@ -9,7 +9,7 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: PAUSED_REF
-    checkpoint: f821f6fe5065961cabff6f68de806a7080544816
+    checkpoint: f821f6f4a778495c89c66690038c45fc5f0bb1f1
     validation_status: pending
     validation_ref: f4a5404889250050cf12cd3f11c810b78b8aad20
     remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
