@@ -28,10 +28,11 @@ running process must restart into the intended secret generation, while the
 event-source and journal identities remain stable.
 
 PR #136 passed both hosted release gates and squash-merged the kickoff as
-canonical `8b74e3eea3ae02b9f60833bc5941add2b15a9f68`. Child issue publication
-remains pending operator review of the decomposition; no provider, service,
-secret, ingress, release, installation, or dispatch effect is authorized by
-this plan.
+canonical `8b74e3eea3ae02b9f60833bc5941add2b15a9f68`; PR #137 reconciled custody at
+canonical `74dd2e6c3db6745fc91384c08ea8aa40c7ad964c`. The approved child graph is
+published as #138 through #142. C1 issue #138 and Plan 0084 own the active
+provider-free implementation lane. No provider, service, secret, ingress,
+release, installation, or dispatch effect is authorized by that lane.
 
 ## Objective
 
@@ -123,11 +124,11 @@ Their final GitHub locators will be added only after decomposition review.
 
 | Slice | Outcome | Depends on | Parallelism and write surface | Exit evidence |
 | --- | --- | --- | --- | --- |
-| P54-C1 | Managed binding, provider protocol, and reconciliation controller | #135 | Critical path; product modules, codec, fake transport, CLI/status, focused tests | Exact ownership and lifecycle transitions; absent/exact/duplicate/foreign/drifted/ambiguous inventories; no second write after ambiguity |
-| P54-C2 | Restart-correct secret rotation and local lifecycle join | C1 | May begin design in parallel; implementation serializes on C1 contracts; listener lifecycle, service join, rotation tests | Stable source/journal identity, dual-key restart/readiness, new-key proof, bounded retirement/rollback, polling continuity |
-| P54-C3 | Unified health, fallback, disable/delete, and installed provider-free qualification | C1; integrates C2 | Health projection can parallel C2 after C1; status/support, cleanup controller, installed fixture | Independent health planes, exact-ID-only cleanup, tombstone retention, fresh unit/PID/port census, zero provider/dispatch effects |
-| P54-C4 | Retained managed GitHub activation | C1-C3 integrated | Primary-only gated provider/deployment packet | One exact retained hook and service, signed delivery, restart/readback, recurring health and polling fallback evidence, reversible disable/delete receipt |
-| P54-C5 | One visible webhook-origin wake | C4 accepted | Primary-only dispatch packet | One fresh exact wake reaches one named existing target once; webhook/poll/restart duplication suppressed; rollback/readback recorded |
+| P54-C1 / #138 | Managed binding, provider protocol, and reconciliation controller | #135 | Critical path; product modules, codec, fake transport, CLI/status, focused tests | Exact ownership and lifecycle transitions; absent/exact/duplicate/foreign/drifted/ambiguous inventories; no second write after ambiguity |
+| P54-C2 / #139 | Restart-correct secret rotation and local lifecycle join | #138 | May begin design in parallel; implementation serializes on C1 contracts; listener lifecycle, service join, rotation tests | Stable source/journal identity, dual-key restart/readiness, new-key proof, bounded retirement/rollback, polling continuity |
+| P54-C3 / #140 | Unified health, fallback, disable/delete, and installed provider-free qualification | #138; integrates #139 | Health projection can parallel C2 after C1; status/support, cleanup controller, installed fixture | Independent health planes, exact-ID-only cleanup, tombstone retention, fresh unit/PID/port census, zero provider/dispatch effects |
+| P54-C4 / #141 | Retained managed GitHub activation | #138-#140 integrated | Primary-only gated provider/deployment packet | One exact retained hook and service, signed delivery, restart/readback, recurring health and polling fallback evidence, reversible disable/delete receipt |
+| P54-C5 / #142 | One visible webhook-origin wake | #141 accepted | Primary-only dispatch packet | One fresh exact wake reaches one named existing target once; webhook/poll/restart duplication suppressed; rollback/readback recorded |
 
 The critical path is C1 -> C2/C3 integration -> C4 -> C5. C2 rotation work
 and C3 health projection may run in parallel only after C1 freezes their shared

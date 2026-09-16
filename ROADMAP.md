@@ -802,10 +802,10 @@ verification, and polling convergence are reusable foundations, but the live
 hook, secret, service, and isolated root were intentionally removed. P54 must
 add durable exact ownership, provider reconciliation, restart-correct secret
 rotation, independent health/fallback, safe rollback, one retained activation,
-and one separately gated visible dispatch. Its proposed five child slices are
-awaiting decomposition review before child issues are published. No provider,
-service, secret, ingress, installation, release, or dispatch effect is
-authorized by the kickoff packet.
+and one separately gated visible dispatch. The approved child graph is #138
+through #142. Issue #138 and Plan 0084 own the active provider-free ownership
+and reconciliation slice. No provider, service, secret, ingress, installation,
+release, or dispatch effect is authorized by C1.
 
 Plan: [Managed GitHub webhook wakes goal campaign](docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md)
 
@@ -826,8 +826,7 @@ Acceptance target:
   one later exact visible webhook-origin wake reaches one named target once,
   with canonical GitHub and verification custody.
 
-Acceptance state: P54 planning is canonical under #135 and PR #136 at
-`8b74e3e`. Movement is `outcome_progress`. Next action: approve the proposed
-five-slice issue graph, publish its dependency-linked child issues, then begin
-the provider-free ownership and reconciliation slice. Live effects remain
-separately gated.
+Acceptance state: P54 planning and its five-child issue graph are canonical;
+#138 is active. Movement is `outcome_progress`. Next action: implement and
+accept the provider-free ownership/reconciliation path through Plan 0084, then
+unblock #139 and #140. Live effects remain separately gated.

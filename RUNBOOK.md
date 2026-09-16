@@ -3818,3 +3818,34 @@ Acceptance state: Plan 0083 is canonical and the active-lane catalogue is
 clear while child publication waits for decomposition approval. Movement is
 `outcome_progress`. Next action: approve and publish the five child issues,
 then register and start the provider-free C1 implementation lane.
+
+## Turn 175 | 2026-09-16
+
+Published the approved P54 issue graph and started the provider-free ownership
+and reconciliation slice.
+
+- Duplicate-safe GitHub preflight resolved the owned repository, ADMIN actor,
+  existing `enhancement` label, and unique idempotency markers before each
+  create. Readback binds C1 #138, rotation C2 #139, health/qualification C3
+  #140, retained activation C4 #141, and visible dispatch C5 #142.
+- Dependencies are #138 -> #139/#140 -> #141 -> #142; #140 may begin its
+  health work after #138 but its final installed qualification also requires
+  #139. Parent #135 remains open and unmodified.
+- Plan 0084 and branch `feat/issue-138-managed-webhook-reconciliation` own C1.
+  The branch starts from canonical `74dd2e6`; no other issue or PR was open
+  before publication.
+- CodeGraph mapped the existing owner-only listener store, injected GitHub read
+  client, webhook CLI, status conventions, and focused tests. C1 adds a new
+  management seam rather than widening the listener or promoting the P53 live
+  qualifier.
+- Standard-model worker `/root/p54_c1_core` owns only the new provider-free
+  core module and focused tests. Economical read-only worker
+  `/root/p54_c1_cli_contract` owns the minimal CLI/status contract review. The
+  primary retains shared integration, authority, GitHub custody, and acceptance.
+- No provider, service, secret, ingress, installation, release, or dispatch
+  effect is authorized or performed by this packet.
+
+Acceptance state: #138 is in progress on its registered provider-free lane.
+Movement is `outcome_progress`. Next action: integrate the core and CLI
+contracts, run focused and comprehensive validation, obtain independent
+closed-world review, and publish the issue-linked PR.
