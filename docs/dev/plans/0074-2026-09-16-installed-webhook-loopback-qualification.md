@@ -17,7 +17,7 @@ empty. The user systemd manager is reachable but degraded by unrelated
 pre-existing failed units, so acceptance is scoped to one exact unit/PID/socket
 rather than whole-manager health.
 
-Correction checkpoint `703134b084cb4852a4e95886ffdcd3d0f0e99f05`
+Correction checkpoint `1d8671f28b9e49170b9ad710532365ba938066f9`
 replaces the initial runner after one independent drift review produced the
 accepted finding ledger C4-R01 through C4-R08 below. Fourteen hermetic tests,
 including a real in-process HTTP/store/restart/polling sequence, now pass;
