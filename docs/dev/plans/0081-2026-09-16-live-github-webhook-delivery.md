@@ -230,7 +230,8 @@ authorize redelivery, a second trigger, or a retry.
   delivery ID/action/status plus exactly one qualifying completed delivery;
 - trigger PR/head/merge SHA and resulting run ID, attempt, head SHA, event,
   status, conclusion, and authoritative terminal proof;
-- normalized occurrence identity `repository_id:run_id:run_attempt`, durable
+- normalized occurrence identity
+  `github:repository:<repository_id>:run:<run_id>:attempt:<run_attempt>`, durable
   receipt count before/after polling, checkpoint movement, wake state, and
   dispatch counters of zero;
 - hook deletion readback, secret retirement, service/root cleanup or preserved

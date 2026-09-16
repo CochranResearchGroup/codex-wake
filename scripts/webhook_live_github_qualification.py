@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import secrets
 import shutil
 import stat
@@ -42,6 +43,7 @@ RECEIPT_VERSION = 2
 PRIVATE_ROOT_PREFIX = "p53-c6-live-github-"
 _COUNTERS = ("create", "trigger", "delete", "redelivery", "dispatch")
 _RUNTIME_COUNTERS = ("establish", "cleanup", "secret_provision", "secret_retirement", "observation")
+_ENV_VALUE = re.compile(r"[A-Za-z0-9_.=-]+")
 
 
 @dataclass(frozen=True)
@@ -316,8 +318,14 @@ def environment_path(root: Path) -> Path:
     return root / "wake" / "github" / "webhook.env"
 
 
+def provider_payload_path(root: Path) -> Path:
+    return root / "provider" / "create-hook.json"
+
+
 def write_webhook_environment(root: Path, *, token: str, secret: str) -> dict[str, Any]:
-    if not token or not secret:
+    if (type(token) is not str or type(secret) is not str
+            or _ENV_VALUE.fullmatch(token) is None
+            or _ENV_VALUE.fullmatch(secret) is None):
         raise RuntimeError("webhook environment requires fresh token and secret bytes")
     path = environment_path(root)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -333,19 +341,35 @@ def write_webhook_environment(root: Path, *, token: str, secret: str) -> dict[st
             "token_ref": TOKEN_REF, "secret_ref": SECRET_REF}
 
 
+def write_provider_payload(root: Path, *, secret: str) -> dict[str, Any]:
+    request = build_provider_request("create", secret=secret)
+    path = provider_payload_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    os.chmod(path.parent, 0o700)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(request.body, sort_keys=True) + "\n", encoding="utf-8")
+    os.chmod(temporary, 0o600)
+    temporary.replace(path)
+    if path.stat().st_uid != os.getuid() or stat.S_IMODE(path.stat().st_mode) != 0o600:
+        raise RuntimeError("provider payload ownership or mode is unsafe")
+    return {"path": str(path), "owner_uid": path.stat().st_uid, "mode": "0o600",
+            "request_sha256": sanitized_request_summary(request, secrets=(secret,))["request_sha256"]}
+
+
 def retire_webhook_environment(root: Path) -> bool:
-    path = environment_path(root)
-    if not path.exists():
+    paths = (environment_path(root), provider_payload_path(root))
+    if any(not path.exists() for path in paths):
         return False
-    if path.is_symlink() or path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o077:
-        raise RuntimeError("webhook environment ownership or mode is unsafe")
-    size = path.stat().st_size
-    with path.open("r+b") as handle:
-        handle.write(b"\0" * size)
-        handle.flush()
-        os.fsync(handle.fileno())
-    path.unlink()
-    return not path.exists()
+    for path in paths:
+        if path.is_symlink() or path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o077:
+            raise RuntimeError("secret material ownership or mode is unsafe")
+        size = path.stat().st_size
+        with path.open("r+b") as handle:
+            handle.write(b"\0" * size)
+            handle.flush()
+            os.fsync(handle.fileno())
+        path.unlink()
+    return not any(path.exists() for path in paths)
 
 
 def _count_runtime(state: Mapping[str, Any], action: str) -> dict[str, Any]:
@@ -393,34 +417,62 @@ def prepare_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEff
         raise RuntimeError("secret factory did not produce a fresh HMAC secret")
     state = _count_runtime(state, "secret_provision")
     environment = write_webhook_environment(root, token=token, secret=secret)
+    provider_payload = write_provider_payload(root, secret=secret)
     state["environment"] = environment
+    state["provider_payload"] = provider_payload
     _stage_state(root, state, secrets=(token, secret), env=env)
     try:
+        state = _count_runtime(state, "establish")
+        state["runtime_stage"] = "candidate"
+        _stage_state(root, state, secrets=(token, secret), env=env)
         candidate = _validate_candidate(effectors.canonical_candidate(root))
+        state.update({"candidate": candidate, "runtime_stage": "wheel"})
+        _stage_state(root, state, secrets=(token, secret), env=env)
         wheel = dict(effectors.build_wheel(root, candidate))
         if type(wheel.get("wheel_sha256")) is not str or len(wheel["wheel_sha256"]) != 64:
             raise RuntimeError("isolated wheel evidence is invalid")
+        state.update({"wheel": {"wheel_sha256": wheel["wheel_sha256"]},
+                      "runtime_stage": "venv"})
+        _stage_state(root, state, secrets=(token, secret), env=env)
         venv = dict(effectors.create_venv(root))
         if venv.get("isolated") is not True:
             raise RuntimeError("virtual environment is not isolated")
+        state["runtime_stage"] = "install"
+        _stage_state(root, state, secrets=(token, secret), env=env)
         install = dict(effectors.install_wheel(root, wheel))
         if install.get("global_install_mutations", 0) != 0:
             raise RuntimeError("ordinary global install mutation is forbidden")
+        state["runtime_stage"] = "source_disabled"
+        _stage_state(root, state, secrets=(token, secret), env=env)
         source = _expect(effectors.configure_source(root, environment), source=SOURCE, enabled=False)
+        state["runtime_stage"] = "anchor"
+        _stage_state(root, state, secrets=(token, secret), env=env)
         daemon = _expect(effectors.initialize_daemon(root, environment), dispatch_enabled=False)
-        if not isinstance(daemon.get("anchor"), str) or not daemon["anchor"]:
+        if (not isinstance(daemon.get("anchor"), str) or not daemon["anchor"]
+                or daemon.get("source_enabled") is not True
+                or not isinstance(daemon.get("wake_id"), str)
+                or not daemon["wake_id"].startswith("wake_")):
             raise RuntimeError("durable no-dispatch anchor is absent")
+        state.update({"anchor": daemon["anchor"], "wake_id": daemon["wake_id"],
+                      "runtime_stage": "listener"})
+        _stage_state(root, state, secrets=(token, secret), env=env)
         listener = _expect(effectors.configure_listener(root, environment), source=SOURCE,
                            address="127.0.0.1", port=8820)
+        state["runtime_stage"] = "service_install"
+        _stage_state(root, state, secrets=(token, secret), env=env)
         service = _expect(effectors.install_service(root, environment), unit=UNIT)
+        state.update({"service_attempted": True, "runtime_stage": "readiness"})
+        _stage_state(root, state, secrets=(token, secret), env=env)
         readiness = _expect(effectors.readiness(root, environment), ready=True, source=SOURCE,
                             dispatch_enabled=False)
-        state = _count_runtime(state, "establish")
         state.update({"phase": "runtime_ready", "candidate": candidate,
             "wheel": {"wheel_sha256": wheel["wheel_sha256"]}, "anchor": daemon["anchor"],
+            "wake_id": daemon["wake_id"], "runtime_established": True,
+            "runtime_stage": "ready",
             "runtime_evidence": {"venv": {"isolated": True}, "install": install,
                 "source": source, "listener": listener, "service": service,
-                "readiness": readiness, "environment": environment}})
+                "readiness": readiness, "environment": environment,
+                "provider_payload": provider_payload}})
         _stage_state(root, state, secrets=(token, secret), env=env)
         return receipt_for(state)
     except Exception:
@@ -477,7 +529,12 @@ def reconcile_ambiguous_write(state: Mapping[str, Any], action: str,
     if state.get("requires_exact_readback") is not True or state.get("ambiguous_action") != action:
         raise RuntimeError("no matching ambiguous provider write is pending")
     if action == "create":
-        matches = [validate_hook_response(item) for item in readbacks]
+        matches: list[dict[str, Any]] = []
+        for item in readbacks:
+            try:
+                matches.append(validate_hook_response(item))
+            except RuntimeError:
+                continue
         if len(matches) != 1:
             raise RuntimeError("ambiguous create requires one exact hook readback")
         observed = matches[0]
@@ -506,7 +563,17 @@ def freeze_trigger(state: Mapping[str, Any], trigger: Mapping[str, Any]) -> dict
     return {**dict(state), "trigger": frozen, "phase": "trigger_frozen"}
 
 
+def record_trigger_result(state: Mapping[str, Any], *, merge_sha: str) -> dict[str, Any]:
+    """Bind the already-counted merge to its resulting canonical main commit."""
+    trigger = state.get("trigger")
+    if state["counters"].get("trigger") != 1 or not isinstance(trigger, Mapping):
+        raise RuntimeError("trigger result requires one frozen merge attempt")
+    updated_trigger = {**dict(trigger), "merge_sha": _exact_sha(merge_sha, "trigger merge")}
+    return {**dict(state), "phase": "trigger_merged", "trigger": updated_trigger}
+
+
 def validate_delivery_window(deliveries: tuple[Mapping[str, Any], ...], *, trigger: Mapping[str, Any]) -> dict[str, Any]:
+    merge_sha = _exact_sha(trigger.get("merge_sha"), "trigger merge")
     qualifying: list[Mapping[str, Any]] = []
     seen: list[str] = []
     for delivery in deliveries:
@@ -520,19 +587,23 @@ def validate_delivery_window(deliveries: tuple[Mapping[str, Any], ...], *, trigg
         required = {"event": "workflow_run", "action": "completed", "authenticated": True,
                     "status_code": 200, "repository": REPOSITORY, "repository_id": REPOSITORY_ID,
                     "workflow_id": WORKFLOW_ID, "ref": REF, "conclusion": CONCLUSION,
-                    "head_sha": trigger.get("head_sha"), "hook_id": trigger.get("hook_id"),
+                    "head_sha": merge_sha, "hook_id": trigger.get("hook_id"),
                     "terminal_after_anchor": True}
-        if all(delivery.get(key) == value for key, value in required.items()) and run.get("status") == "completed":
+        if (all(delivery.get(key) == value for key, value in required.items())
+                and run.get("status") == "completed" and run.get("event") == "push"):
             if type(run.get("run_id")) is int and run["run_id"] > 0 and type(run.get("run_attempt")) is int and run["run_attempt"] > 0:
                 qualifying.append(delivery)
     if len(qualifying) != 1:
         raise RuntimeError("delivery window requires exactly one qualifying completed workflow_run")
     value = qualifying[0]
     run = value["run"]
-    occurrence = f"{REPOSITORY_ID}:{run['run_id']}:{run['run_attempt']}"
+    occurrence = (
+        f"github:repository:{REPOSITORY_ID}:run:{run['run_id']}:"
+        f"attempt:{run['run_attempt']}"
+    )
     return {"delivery_ids": tuple(seen), "qualifying_delivery_id": value["delivery_id"],
             "occurrence": occurrence, "run_id": run["run_id"], "run_attempt": run["run_attempt"],
-            "head_sha": trigger["head_sha"]}
+            "head_sha": merge_sha}
 
 
 def record_convergence(state: Mapping[str, Any], delivery: Mapping[str, Any], *, journal_before: int,
@@ -564,8 +635,9 @@ def cleanup_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEff
         raise RuntimeError("runtime cleanup requires explicit execution arm")
     root = exact_private_root(root, env=env)
     state = load_private_state(root, env=env)
-    if state["runtime_counters"]["establish"] != 1:
-        raise RuntimeError("runtime cleanup requires one established runtime")
+    if (state["runtime_counters"]["establish"] != 1
+            and state["runtime_counters"]["secret_provision"] != 1):
+        raise RuntimeError("runtime cleanup requires one attempted runtime")
     state = _count_runtime(state, "cleanup")
     _stage_state(root, state, env=env)
     try:

@@ -52,7 +52,8 @@ def effectors(calls: list[str], *, bad_census: bool = False) -> runner.RuntimeEf
         create_venv=effect("venv", {"isolated": True}),
         install_wheel=effect("install", {"global_install_mutations": 0}),
         configure_source=effect("source", {"source": runner.SOURCE, "enabled": False}),
-        initialize_daemon=effect("daemon", {"dispatch_enabled": False, "anchor": "anchor-p53-c6"}),
+        initialize_daemon=effect("daemon", {"dispatch_enabled": False, "anchor": "anchor-p53-c6",
+                                              "source_enabled": True, "wake_id": "wake_p53_c6"}),
         configure_listener=effect("listener", {"source": runner.SOURCE, "address": "127.0.0.1", "port": 8820}),
         install_service=effect("service", {"unit": runner.UNIT}),
         readiness=effect("readiness", {"ready": True, "source": runner.SOURCE, "dispatch_enabled": False}),
@@ -117,8 +118,11 @@ class LiveGitHubQualificationTests(unittest.TestCase):
                 "establish": 1, "cleanup": 0, "secret_provision": 1, "secret_retirement": 0, "observation": 0,
             })
             environment = runner.environment_path(root)
+            provider_payload = runner.provider_payload_path(root)
             self.assertEqual(environment.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(provider_payload.stat().st_mode & 0o777, 0o600)
             self.assertIn("s" * 32, environment.read_text(encoding="utf-8"))
+            self.assertIn("s" * 32, provider_payload.read_text(encoding="utf-8"))
             staged = receipt.read_text(encoding="utf-8")
             self.assertNotIn("s" * 32, staged)
             self.assertNotIn("token-private", staged)
@@ -175,20 +179,26 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             "pr_number": 88, "head_sha": "d" * 40, "base_ref": runner.REF,
             "docs_only": True, "green": True, "merge_method": "squash",
         })
+        state = runner.record_trigger_result(state, merge_sha="e" * 40)
         deliveries = (
             {"delivery_id": "ping", "event": "ping", "action": "created", "status_code": 200},
             {"delivery_id": "qualified", "event": "workflow_run", "action": "completed",
              "authenticated": True, "status_code": 200, "repository": runner.REPOSITORY,
              "repository_id": runner.REPOSITORY_ID, "workflow_id": runner.WORKFLOW_ID,
-             "ref": runner.REF, "conclusion": runner.CONCLUSION, "head_sha": "d" * 40, "hook_id": 456,
-             "terminal_after_anchor": True, "run": {"status": "completed", "run_id": 701, "run_attempt": 2}},
+             "ref": runner.REF, "conclusion": runner.CONCLUSION, "head_sha": "e" * 40, "hook_id": 456,
+             "terminal_after_anchor": True,
+             "run": {"status": "completed", "event": "push", "run_id": 701, "run_attempt": 2}},
         )
         delivery = runner.validate_delivery_window(deliveries, trigger=state["trigger"])
-        self.assertEqual(delivery["occurrence"], "1242753508:701:2")
+        self.assertEqual(
+            delivery["occurrence"],
+            "github:repository:1242753508:run:701:attempt:2",
+        )
         state = runner.record_convergence(state, delivery, journal_before=0, journal_after_webhook=1,
                                           journal_after_poll=1, wake_before="pending",
                                           wake_after="firing_local", dispatch_calls=0)
         self.assertEqual(state["runtime_counters"]["observation"], 1)
+        self.assertEqual(state["delivery"]["head_sha"], "e" * 40)
         with self.assertRaisesRegex(RuntimeError, "exactly one"):
             runner.validate_delivery_window(deliveries + (deliveries[1] | {"delivery_id": "second"},),
                                             trigger=state["trigger"])
@@ -219,6 +229,8 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             state = runner.record_provider_result(state, "delete", response={"hook_id": 456, "absent": True})
             runner.write_private_state(root, state, env=env)
             runner.cleanup_runtime(root, env=env, effectors=effectors(calls), armed=True)
+            self.assertFalse(runner.environment_path(root).exists())
+            self.assertFalse(runner.provider_payload_path(root).exists())
             result = runner.cleanup_local(root, env=env, armed=True)
             self.assertTrue(result["safe"])
             self.assertTrue(result["root_removed"])
