@@ -75,6 +75,13 @@ Final validation occurs only after merging canonical #105 into this branch.
   require enabled sources for install/start, stop and confirm an active owner
   before a disable persists, and provide a per-request owner secret resolver
   instead of startup secret bytes.
+- Closed-world follow-up: every runtime secret or provider credential resolution
+  reloads the enabled listener and its matching GitHub source authority and
+  verifies the existing SQLite journal before continuing. Service names are
+  fixed from source ownership; stop/uninstall require inactive-and-disabled
+  readback before deletion. Readiness checks the configured GitHub source,
+  required nonempty environment references, and an openable supported SQLite
+  journal without exposing values.
 - Joined canonical #105 behind the unchanged executable interface. The deep
   builder selects the same enabled GitHub source, opens the existing signal
   journal, derives a source-bound no-coverage seed without a provider call,

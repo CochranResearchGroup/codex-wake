@@ -58,6 +58,18 @@ def build_webhook_runtime(
 ) -> GitHubWebhookRuntime:
     """Construct one source-bound runtime from durable product authority."""
     source_env = environment if environment is not None else os.environ
+    def require_current_authority() -> tuple[WebhookListenerConfig, object]:
+        try:
+            current_listener = WebhookListenerStore(wake_root).enabled(listener.source_instance)
+            current_source = GitHubSourceStore(wake_root).registry().select(listener.source_instance)
+            if current_listener != listener or current_source != source:
+                raise ValueError("webhook listener authority changed")
+            if SQLiteSignalModule.open_existing(signal_journal_path(wake_root)) is None:
+                raise SignalStoreError("webhook listener signal journal is unavailable")
+            return current_listener, current_source
+        except (ValueError, SignalStoreError) as exc:
+            raise WakeError("webhook listener authority is unavailable") from exc
+
     try:
         source = GitHubSourceStore(wake_root).registry().select(listener.source_instance)
         module = SQLiteSignalModule.open_existing(signal_journal_path(wake_root))
@@ -75,7 +87,8 @@ def build_webhook_runtime(
         raise WakeError("webhook listener source anchor is invalid")
 
     def resolve_credential(reference: str) -> str:
-        if reference != source.credential_ref:
+        _, current_source = require_current_authority()
+        if reference != current_source.credential_ref:
             raise GitHubReadError("auth")
         value = source_env.get(reference)
         if type(value) is not str or not value:
@@ -103,7 +116,7 @@ def build_webhook_runtime(
             secret_refs=secrets,
             max_body_bytes=listener.max_body_bytes,
         ),
-        resolve_secret=_secret_resolver(listener, source_env),
+        resolve_secret=lambda reference: (require_current_authority(), _secret_resolver(listener, source_env)(reference))[1],
         attempt_client_factory=make_client,
         operation_timeout=listener.operation_timeout_seconds,
         now=now,

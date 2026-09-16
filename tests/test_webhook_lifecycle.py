@@ -17,7 +17,7 @@ from codex_wake.webhook_lifecycle import (
     WebhookListenerConfig, WebhookListenerStore, WebhookServiceConfig,
     build_webhook_service_config, install_webhook_service, render_webhook_unit, stop_webhook_service,
     disable_webhook_listener, linux_service_bind_probe, uninstall_webhook_service,
-    webhook_http_config_kwargs, webhook_readiness, webhook_service_status, webhook_support,
+    _journal_is_safe, webhook_http_config_kwargs, webhook_readiness, webhook_service_status, webhook_support,
 )
 from codex_wake.webhook_listener import run_listener
 from codex_wake.webhook_listener import build_webhook_runtime
@@ -62,6 +62,7 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 secret_ref="CODEX_WAKE_WEBHOOK_SECRET",
                 enabled=True,
             )
+            WebhookListenerStore(root).configure(listener)
             runtime = build_webhook_runtime(
                 wake_root=root,
                 listener=listener,
@@ -93,6 +94,34 @@ class WebhookListenerConfigTests(unittest.TestCase):
             self.assertFalse(client.is_alive())
             self.assertEqual(result, [(200, "COMMITTED")])
             self.assertIsNotNone(module.source_checkpoint("github", source.source_instance))
+
+    def test_real_socket_revokes_listener_and_github_source_before_ingest(self) -> None:
+        for revoke in ("listener", "source"):
+            with self.subTest(revoke=revoke), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp) / "wake"
+                source = github_config(evidence_mode="positive_only")
+                GitHubSourceStore(root).configure(source)
+                make_module(signal_journal_path(root))
+                with socket.socket() as reservation:
+                    reservation.bind(("127.0.0.1", 0))
+                    port = reservation.getsockname()[1]
+                listener = WebhookListenerConfig(source.source_instance, port=port, secret_ref="CODEX_WAKE_WEBHOOK_SECRET", enabled=True)
+                WebhookListenerStore(root).configure(listener)
+                runtime = build_webhook_runtime(
+                    wake_root=root, listener=listener,
+                    environment={"CODEX_WAKE_WEBHOOK_SECRET": SECRET.decode(), source.credential_ref: "fixture-provider-token"},
+                )
+                if revoke == "listener":
+                    WebhookListenerStore(root).configure(replace(listener, enabled=False))
+                else:
+                    GitHubSourceStore(root).configure(replace(source, enabled=False))
+                body, signature = signed_body()
+                result = []
+                client = threading.Thread(target=lambda: (result.append(exchange(runtime.address, body, signature)), runtime.shutdown()))
+                client.start()
+                runtime.serve()
+                client.join(2)
+                self.assertEqual(result, [(503, "SECRET_UNAVAILABLE")])
 
     def test_owner_store_persists_bounded_configuration_and_only_opaque_refs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -230,9 +259,13 @@ class WebhookListenerConfigTests(unittest.TestCase):
         class Runner:
             def __init__(self) -> None:
                 self.calls = []
+                self.active = "active"
+                self.enabled = "enabled"
             def run(self, args, *, check=True):
                 self.calls.append((args, check))
-                output = "active\n" if "is-active" in args else "enabled\n" if "is-enabled" in args else ""
+                if "disable" in args:
+                    self.active, self.enabled = "inactive", "disabled"
+                output = self.active + "\n" if "is-active" in args else self.enabled + "\n" if "is-enabled" in args else ""
                 return subprocess.CompletedProcess(args, 0, output, "")
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -341,6 +374,26 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 uninstall_webhook_service(config, runner=lambda *args, **kwargs: None)
             self.assertTrue(config.unit_path.exists())
 
+    def test_stop_and_uninstall_preserve_unit_when_readback_is_not_inactive_disabled(self) -> None:
+        class Runner:
+            def run(self, args, *, check=True):
+                return subprocess.CompletedProcess(args, 0, "active\n" if "is-active" in args else "enabled\n", "")
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = WebhookServiceConfig("listener.service", base / "wake", "github-webhook", None, base / "listener.service", base / "log")
+            config.unit_path.write_text('EnvironmentFile=' + str(base / 'wake/github/webhook.env') + '\nExecStart="x" --wake-root "' + str(base / 'wake') + '" --source github-webhook\nRestart=on-failure\nTimeoutStopSec=15\n')
+            config.unit_path.chmod(0o600)
+            with self.assertRaisesRegex(Exception, "did not stop and disable"):
+                uninstall_webhook_service(config, Runner())
+            self.assertTrue(config.unit_path.exists())
+
+    def test_custom_webhook_service_name_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            WebhookListenerStore(root).configure(WebhookListenerConfig("github-webhook", secret_ref="CODEX_WAKE_WEBHOOK_SECRET", enabled=True))
+            with self.assertRaisesRegex(Exception, "name is fixed"):
+                build_webhook_service_config(wake_root=root, source_instance="github-webhook", name="other.service", validate_executable=False)
+
     def test_install_rejects_disabled_source_config(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -369,6 +422,7 @@ class WebhookListenerConfigTests(unittest.TestCase):
             root = Path(tmp) / "wake"
             store = WebhookListenerStore(root)
             store.configure(WebhookListenerConfig("github-webhook", secret_ref="CODEX_WAKE_WEBHOOK_SECRET", enabled=True))
+            GitHubSourceStore(root).configure(github_config(source_instance="github-webhook", evidence_mode="positive_only"))
             blocked = webhook_readiness(
                 wake_root=root, source_instance="github-webhook", runtime_available=True,
                 bind_probe=lambda address, port: False, journal_probe=lambda path: True,
@@ -381,6 +435,21 @@ class WebhookListenerConfigTests(unittest.TestCase):
             )
             self.assertEqual(blocked_journal["status"], "blocked")
             self.assertEqual(blocked_journal["journal_access"], "unsafe")
+
+    def test_readiness_fails_closed_for_missing_source_empty_environment_and_invalid_journal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            listener = WebhookListenerConfig("github-webhook", secret_ref="CODEX_WAKE_WEBHOOK_SECRET", enabled=True)
+            WebhookListenerStore(root).configure(listener)
+            missing = webhook_readiness(wake_root=root, source_instance=listener.source_instance, runtime_available=True)
+            self.assertEqual(missing["status"], "blocked")
+            source = github_config(source_instance="github-webhook", evidence_mode="positive_only")
+            GitHubSourceStore(root).configure(source)
+            journal = signal_journal_path(root)
+            journal.parent.mkdir(exist_ok=True)
+            journal.write_text("not sqlite", encoding="utf-8")
+            journal.chmod(0o600)
+            self.assertFalse(_journal_is_safe(journal))
 
     def test_readiness_requires_restart_safe_secret_environment(self) -> None:
         class Runner:
@@ -398,9 +467,11 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 enabled=True,
             )
             store.configure(listener)
+            source = github_config(source_instance="github-webhook", evidence_mode="positive_only")
+            GitHubSourceStore(root).configure(source)
             environment_file = root / "github" / "webhook.env"
             environment_file.write_text(
-                "CODEX_WAKE_WEBHOOK_SECRET=fixture-only\n",
+                f"CODEX_WAKE_WEBHOOK_SECRET=fixture-only\n{source.credential_ref}=fixture-provider-token\n",
                 encoding="utf-8",
             )
             environment_file.chmod(0o600)

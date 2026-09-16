@@ -389,7 +389,6 @@ def build_parser() -> argparse.ArgumentParser:
     for action in ("install", "start", "stop", "status", "uninstall"):
         service_action = webhook_service_subparsers.add_parser(action)
         service_action.add_argument("--source", required=True, dest="source_instance")
-        service_action.add_argument("--name")
         service_action.add_argument("--executable-path")
         service_action.add_argument("--unit-dir", type=Path)
         service_action.add_argument("--log-path", type=Path)
@@ -1310,7 +1309,7 @@ def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
         return 0 if result.get("status", result.get("webhook_listener", {}).get("status")) != "blocked" else 1
     try:
         config = build_webhook_service_config(
-            wake_root=root, source_instance=args.source_instance, name=args.name,
+            wake_root=root, source_instance=args.source_instance,
             executable_path=args.executable_path, unit_dir=args.unit_dir, log_path=args.log_path,
             validate_executable=args.github_webhook_service_command == "install",
         )

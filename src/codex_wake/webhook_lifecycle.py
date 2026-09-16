@@ -19,6 +19,7 @@ from .executables import resolve_stable_executable
 from .records import WakeError
 from .service import _systemd_environment_file_path, systemctl, systemd_quote, user_state_dir, user_systemd_dir
 from .signal_records import signal_journal_path
+from .signal_store import SQLiteSignalModule, SignalStoreError
 
 
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}")
@@ -247,12 +248,10 @@ def build_webhook_service_config(
     executable_path: str | None = None, unit_dir: Path | None = None,
     log_path: Path | None = None, validate_executable: bool = True,
 ) -> WebhookServiceConfig:
+    if name is not None:
+        raise WakeError("webhook listener service name is fixed by source ownership")
     listener = WebhookListenerStore(wake_root).select(source_instance)
-    resolved_name = name or webhook_service_name(listener.source_instance)
-    if not resolved_name.endswith(".service"):
-        resolved_name += ".service"
-    if "/" in resolved_name:
-        raise WakeError("webhook listener service name must not contain '/'")
+    resolved_name = webhook_service_name(listener.source_instance)
     executable = None
     if validate_executable:
         executable = Path(resolve_stable_executable(
@@ -323,14 +322,17 @@ def start_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
     _require_secret_environment(config)
     _require_owned_unit(config)
     systemctl(["enable", "--now", config.name], runner)
-    active = systemctl(["is-active", config.name], runner, check=False).stdout.strip()
-    if active != "active":
-        raise WakeError(f"webhook listener service did not become active: {config.name} ({active or 'unknown'})")
+    active, enabled = webhook_service_status(config, runner)
+    if (active, enabled) != ("active", "enabled"):
+        raise WakeError(f"webhook listener service did not become active and enabled: {config.name} ({active}, {enabled})")
 
 
 def stop_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
     _require_owned_unit(config)
     systemctl(["disable", "--now", config.name], runner, check=False)
+    active, enabled = webhook_service_status(config, runner)
+    if (active, enabled) != ("inactive", "disabled"):
+        raise WakeError(f"webhook listener service did not stop and disable: {config.name} ({active}, {enabled})")
 
 
 def uninstall_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
@@ -377,9 +379,11 @@ def disable_webhook_listener(
 def _journal_is_safe(path: Path) -> bool:
     try:
         metadata = path.stat()
-        return (path.is_file() and not path.is_symlink() and metadata.st_uid == os.getuid()
-                and not stat.S_IMODE(metadata.st_mode) & 0o077)
-    except OSError:
+        if not (path.is_file() and not path.is_symlink() and metadata.st_uid == os.getuid()
+                and not stat.S_IMODE(metadata.st_mode) & 0o077):
+            return False
+        return SQLiteSignalModule.open_existing(path) is not None
+    except (OSError, SignalStoreError):
         return False
 
 
@@ -420,6 +424,28 @@ def _secret_environment_is_safe(config: WebhookServiceConfig) -> bool:
 def _require_secret_environment(config: WebhookServiceConfig) -> None:
     if not _secret_environment_is_safe(config):
         raise WakeError("webhook listener secret environment file must be an owner-only regular file")
+
+
+def required_secret_references(listener: WebhookListenerConfig, source) -> frozenset[str]:
+    refs = {listener.secret_ref, source.credential_ref}
+    if listener.previous_secret_ref:
+        refs.add(listener.previous_secret_ref)
+    return frozenset(refs)
+
+
+def secret_environment_has_references(config: WebhookServiceConfig, listener: WebhookListenerConfig, source) -> bool:
+    if not _secret_environment_is_safe(config):
+        return False
+    try:
+        values: dict[str, str] = {}
+        for line in webhook_secret_environment_path(config.wake_root).read_text(encoding="utf-8").splitlines():
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            values[key] = value
+        return all(values.get(reference, "") for reference in required_secret_references(listener, source))
+    except OSError:
+        return False
 
 
 def _proc_address(value: str, *, ipv6: bool) -> str:
@@ -468,6 +494,8 @@ def webhook_readiness(*, wake_root: Path, source_instance: str, runner=None,
     """Read nonsecret local ownership state; never contacts GitHub or dispatches."""
     try:
         listener = WebhookListenerStore(wake_root).enabled(source_instance)
+        from .github_source_config import GitHubSourceStore
+        source = GitHubSourceStore(wake_root).registry().select(listener.source_instance)
         config = build_webhook_service_config(
             wake_root=wake_root, source_instance=source_instance, validate_executable=False,
         )
@@ -486,7 +514,7 @@ def webhook_readiness(*, wake_root: Path, source_instance: str, runner=None,
             runtime_available = False
     journal_path = signal_journal_path(wake_root)
     journal_ok = journal_probe(journal_path) if journal_probe is not None else _journal_is_safe(journal_path)
-    secret_environment_ok = _secret_environment_is_safe(config)
+    secret_environment_ok = secret_environment_has_references(config, listener, source)
     bind_ok = bind_probe(listener.address, listener.port) if bind_probe is not None else linux_service_bind_probe(config, runner)
     status = "ready" if unit_ok and active == "active" and runtime_available and journal_ok and bind_ok and secret_environment_ok else "blocked"
     if not runtime_available:
