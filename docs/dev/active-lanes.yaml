@@ -8,7 +8,7 @@ lanes:
     branch: feat/issue-104-webhook-http-transport
     target: main
     plan_state: OPEN
-    custody_state: ASSIGNED
+    custody_state: ACTIVE_WORKTREE
     checkpoint: 72e0965b2545f670cb3fc553c97a0bdd1b3cf7d2
     validation_status: planned
     validation_ref: dad2d80a4ce74e030ef604cc430449e76b636286
