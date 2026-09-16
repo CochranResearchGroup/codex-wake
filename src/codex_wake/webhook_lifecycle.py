@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import sqlite3
 import stat
 import tempfile
@@ -378,27 +379,36 @@ def disable_webhook_listener(
 
 
 def _journal_is_safe(path: Path) -> bool:
-    """Inspect an already-initialized journal without WAL creation or migration."""
-    connection: sqlite3.Connection | None = None
+    """Inspect a disposable WAL-aware snapshot without touching the journal."""
     try:
         metadata = path.stat()
         if not (path.is_file() and not path.is_symlink() and metadata.st_uid == os.getuid()
                 and not stat.S_IMODE(metadata.st_mode) & 0o077):
             return False
-        connection = sqlite3.connect(path.as_uri() + "?mode=ro&immutable=1", uri=True, isolation_level=None)
-        application_id = int(connection.execute("PRAGMA application_id").fetchone()[0])
-        user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
-        if application_id != JOURNAL_APPLICATION_ID or user_version != JOURNAL_SCHEMA_VERSION:
-            return False
-        row = connection.execute(
-            "SELECT schema_version, journal_uuid FROM journal_meta WHERE singleton = 1"
-        ).fetchone()
-        return row is not None and int(row[0]) == JOURNAL_SCHEMA_VERSION and isinstance(row[1], str) and bool(row[1])
+        with tempfile.TemporaryDirectory(prefix="codex-wake-journal-read-") as temporary:
+            snapshot = Path(temporary) / path.name
+            for suffix in ("", "-wal", "-shm"):
+                source = path.with_name(path.name + suffix)
+                if not source.exists():
+                    continue
+                sidecar = source.lstat()
+                if not stat.S_ISREG(sidecar.st_mode) or source.is_symlink():
+                    return False
+                shutil.copyfile(source, snapshot.with_name(snapshot.name + suffix))
+            connection = sqlite3.connect(snapshot.as_uri() + "?mode=ro", uri=True, isolation_level=None)
+            try:
+                application_id = int(connection.execute("PRAGMA application_id").fetchone()[0])
+                user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
+                if application_id != JOURNAL_APPLICATION_ID or user_version != JOURNAL_SCHEMA_VERSION:
+                    return False
+                row = connection.execute(
+                    "SELECT schema_version, journal_uuid FROM journal_meta WHERE singleton = 1"
+                ).fetchone()
+                return row is not None and int(row[0]) == JOURNAL_SCHEMA_VERSION and isinstance(row[1], str) and bool(row[1])
+            finally:
+                connection.close()
     except (OSError, sqlite3.Error, ValueError):
         return False
-    finally:
-        if connection is not None:
-            connection.close()
 
 
 def _unit_is_safe(config: WebhookServiceConfig) -> bool:

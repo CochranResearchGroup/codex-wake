@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import hashlib
 import socket
+import sqlite3
 import threading
 import subprocess
 import tempfile
@@ -457,6 +458,10 @@ class WebhookListenerConfigTests(unittest.TestCase):
             root = Path(tmp) / "wake"
             journal = signal_journal_path(root)
             make_module(journal)
+            writer = sqlite3.connect(journal)
+            writer.execute("PRAGMA journal_mode=WAL")
+            writer.execute("UPDATE journal_meta SET migrated_at = migrated_at WHERE singleton = 1")
+            writer.commit()
             before = {
                 item.name: hashlib.sha256(item.read_bytes()).hexdigest()
                 for item in journal.parent.glob("journal.sqlite3*")
@@ -467,6 +472,7 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 for item in journal.parent.glob("journal.sqlite3*")
             }
             self.assertEqual(after, before)
+            writer.close()
             journal.write_bytes(b"")
             self.assertFalse(_journal_is_safe(journal))
 
