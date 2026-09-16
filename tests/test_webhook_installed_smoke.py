@@ -164,6 +164,8 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             for argv in calls:
                 position = argv.index("--unit-dir")
                 self.assertEqual(argv[position + 1], str(ctx.manager_unit_dir))
+                log_position = argv.index("--log-path")
+                self.assertEqual(argv[log_position + 1], str(ctx.log_path))
                 self.assertIn(str(ctx.wake_root), argv)
 
     def test_fixture_uses_one_valid_protocol_identity_and_secret_encoding(self) -> None:

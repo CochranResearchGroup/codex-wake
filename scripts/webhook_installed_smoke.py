@@ -66,6 +66,10 @@ class ExecutionContext:
     def bootstrap_path(self) -> Path:
         return self.fixture_dir / "webhook-fixture-bootstrap"
 
+    @property
+    def log_path(self) -> Path:
+        return self.root / "logs" / "webhook-listener.log"
+
 
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
@@ -441,6 +445,7 @@ def service_command(
         str(context.installed_cli), "--wake-root", str(context.wake_root),
         "github-webhook", "service", action, "--source", SOURCE,
         "--unit-dir", str(context.manager_unit_dir),
+        "--log-path", str(context.log_path),
     ]
     if executable_path is not None:
         argv.extend(["--executable-path", str(executable_path)])
@@ -892,7 +897,8 @@ def execute(*, receipt_path: Path | None = None) -> int:
         receipt.update({
             "configuration_identity": {
                 "source": SOURCE, "wake_id": wake_id,
-                "unit": str(context.unit_path), "address": HOST, "port": PORT,
+                "unit": str(context.unit_path), "log": str(context.log_path),
+                "address": HOST, "port": PORT,
             },
             "readiness": readiness, "status": status, "support": support,
             "initial_service": initial, "restarted_service": restarted,
