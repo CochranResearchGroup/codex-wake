@@ -54,7 +54,9 @@ def competing_save(root: str, ready, release, results) -> None:
     ready.put(True)
     release.wait(5)
     try:
-        store.save(current, expected_revision=current.revision)
+        ManagedWebhookRotationCoordinator(store).intend_dual_restart(
+            "wake-owner-1", expected_revision=current.revision, now=101,
+        )
         results.put("saved")
     except ValueError as exc:
         results.put(str(exc))
@@ -149,6 +151,7 @@ class ManagedWebhookRotationCoordinatorTests(unittest.TestCase):
         self.current = self.coordinator.intend_dual_restart("wake-owner-1", expected_revision=self.current.revision, now=101)
         self.assertEqual((self.current.phase, self.current.pending_effect), (RotationPhase.PREPARED, PendingEffect.RESTART_DUAL))
         self.current = self.coordinator.observe_dual_restart("wake-owner-1", expected_revision=self.current.revision, proof=proof(), now=102)
+        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=102), (7, 8))
         return self.current
 
     def provider_ready(self) -> RotationRecord:
@@ -164,16 +167,20 @@ class ManagedWebhookRotationCoordinatorTests(unittest.TestCase):
         self.assertEqual(self.current.phase, RotationPhase.AWAITING_DELIVERY)
         with self.assertRaisesRegex(ValueError, "runtime proof is required"):
             self.coordinator.intend_retirement("wake-owner-1", expected_revision=self.current.revision, now=106)
-        self.current = self.coordinator.record_target_runtime(
-            "wake-owner-1", expected_revision=self.current.revision,
-            proof=proof(process_started_at=105, loaded_generations=(8,), evidence_locator="runtime-43"), now=106,
+        self.current = self.coordinator.intend_target_restart(
+            "wake-owner-1", expected_revision=self.current.revision, now=106,
         )
-        self.current = self.coordinator.intend_retirement("wake-owner-1", expected_revision=self.current.revision, now=107)
+        self.current = self.coordinator.observe_target_restart(
+            "wake-owner-1", expected_revision=self.current.revision,
+            proof=proof(process_started_at=106, loaded_generations=(8,), evidence_locator="runtime-43"), now=107,
+        )
+        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=107), (8,))
+        self.current = self.coordinator.intend_retirement("wake-owner-1", expected_revision=self.current.revision, now=108)
         self.assertEqual((self.current.phase, self.current.pending_effect), (RotationPhase.RETIRING, PendingEffect.RETIRE_PREVIOUS))
-        completed = self.coordinator.observe_retirement("wake-owner-1", expected_revision=self.current.revision, observation=Observation.PROVED, now=108)
+        completed = self.coordinator.observe_retirement("wake-owner-1", expected_revision=self.current.revision, observation=Observation.PROVED, now=109)
         self.assertEqual(completed.phase, RotationPhase.COMPLETE)
         self.assertEqual(completed.terminal_code, "RETIRED")
-        self.assertEqual(self.coordinator.observe_retirement("wake-owner-1", expected_revision=completed.revision, observation=Observation.PROVED, now=108), completed)
+        self.assertEqual(self.coordinator.observe_retirement("wake-owner-1", expected_revision=completed.revision, observation=Observation.PROVED, now=109), completed)
 
     def test_crash_boundaries_do_not_repeat_or_skip_effects(self) -> None:
         pending = self.coordinator.intend_dual_restart("wake-owner-1", expected_revision=self.current.revision, now=101)
@@ -209,18 +216,103 @@ class ManagedWebhookRotationCoordinatorTests(unittest.TestCase):
                 coordinator.record_delivery("wake-owner-1", expected_revision=current.revision, generation=7, journal_locator="journal-42", now=105)
 
     def test_expiry_admission_backward_clock_and_rollback(self) -> None:
-        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=100), (7, 8))
+        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=100), (7,))
         with self.assertRaisesRegex(ValueError, "clock moved backwards"):
             self.coordinator.load("wake-owner-1", now=99)
         self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=201), ())
-        with self.assertRaisesRegex(ValueError, "overlap is expired"):
-            self.coordinator.intend_dual_restart("wake-owner-1", expected_revision=self.current.revision, now=201)
-        expired = self.coordinator.expire("wake-owner-1", expected_revision=self.current.revision, now=201)
+        expired = self.store.load("wake-owner-1")
         self.assertEqual(expired.phase, RotationPhase.EXPIRED)
+        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=201), ())
+        self.assertEqual(self.store.load("wake-owner-1").revision, expired.revision)
+        with self.assertRaisesRegex(ValueError, "clock moved backwards"):
+            self.coordinator.admitted_generations("wake-owner-1", now=200)
         rollback = self.coordinator.rollback("wake-owner-1", expected_revision=expired.revision, now=202)
         self.assertEqual(rollback.pending_effect, PendingEffect.ROLLBACK)
         rolled_back = self.coordinator.observe_rollback("wake-owner-1", expected_revision=rollback.revision, observation=Observation.PROVED, now=203)
         self.assertEqual(rolled_back.phase, RotationPhase.ROLLED_BACK)
+        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=500), (7,))
+
+    def test_terminal_admission_survives_old_overlap_deadline(self) -> None:
+        self.provider_ready()
+        self.current = self.coordinator.record_delivery("wake-owner-1", expected_revision=self.current.revision, generation=8, journal_locator="journal-42", now=105)
+        self.current = self.coordinator.intend_target_restart("wake-owner-1", expected_revision=self.current.revision, now=106)
+        self.current = self.coordinator.observe_target_restart("wake-owner-1", expected_revision=self.current.revision, proof=proof(process_started_at=106, loaded_generations=(8,), evidence_locator="runtime-43"), now=107)
+        self.current = self.coordinator.intend_retirement("wake-owner-1", expected_revision=self.current.revision, now=108)
+        complete = self.coordinator.observe_retirement("wake-owner-1", expected_revision=self.current.revision, observation=Observation.PROVED, now=109)
+        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=500), (8,))
+        self.assertEqual(self.store.load("wake-owner-1"), complete)
+
+    def test_pending_rollback_fences_every_forward_operation(self) -> None:
+        self.provider_ready()
+        self.current = self.coordinator.record_delivery("wake-owner-1", expected_revision=self.current.revision, generation=8, journal_locator="journal-42", now=105)
+        rollback = self.coordinator.rollback("wake-owner-1", expected_revision=self.current.revision, now=106)
+        with self.assertRaisesRegex(ValueError, "rollback is pending"):
+            self.coordinator.intend_target_restart("wake-owner-1", expected_revision=rollback.revision, now=106)
+        with self.assertRaisesRegex(ValueError, "rollback is pending"):
+            self.coordinator.record_target_runtime("wake-owner-1", expected_revision=rollback.revision, proof=proof(loaded_generations=(8,)), now=106)
+        with self.assertRaisesRegex(ValueError, "rollback is pending"):
+            self.coordinator.intend_retirement("wake-owner-1", expected_revision=rollback.revision, now=106)
+
+    def test_rollback_uncertainty_is_durable_from_expired_origin(self) -> None:
+        expired = self.coordinator.expire("wake-owner-1", expected_revision=self.current.revision, now=201)
+        rollback = self.coordinator.rollback("wake-owner-1", expected_revision=expired.revision, now=202)
+        unknown = self.coordinator.observe_rollback("wake-owner-1", expected_revision=rollback.revision, observation=Observation.UNKNOWN, now=203)
+        self.assertEqual((unknown.phase, unknown.pending_effect, unknown.terminal_code), (RotationPhase.UNKNOWN, PendingEffect.NONE, "ROLLBACK_UNKNOWN"))
+        self.assertEqual(self.store.load("wake-owner-1"), unknown)
+
+    def test_store_cannot_bypass_intent_or_phase_specific_proof(self) -> None:
+        with self.assertRaisesRegex(ValueError, "transition is invalid"):
+            self.store.save(
+                record(self.root, phase=RotationPhase.DUAL_READY, runtime_proof=proof(), effect_revision=1),
+                expected_revision=self.current.revision,
+            )
+        with self.assertRaisesRegex(ValueError, "record is invalid"):
+            RotationRecord.from_dict({
+                **record(self.root).to_dict(), "phase": "PROVIDER_PENDING", "pending_effect": "NONE",
+                "runtime_proof": proof().to_dict(), "effect_revision": 1,
+            })
+
+    def test_successor_retains_terminal_evidence_and_rejects_active_or_unknown(self) -> None:
+        with self.assertRaisesRegex(ValueError, "terminal predecessor"):
+            self.coordinator.begin_successor("wake-owner-1", expected_revision=self.current.revision, binding_revision=12, target_generation=9, overlap_deadline=300, now=101)
+        self.provider_ready()
+        self.current = self.coordinator.record_delivery("wake-owner-1", expected_revision=self.current.revision, generation=8, journal_locator="journal-42", now=105)
+        self.current = self.coordinator.intend_target_restart("wake-owner-1", expected_revision=self.current.revision, now=106)
+        self.current = self.coordinator.observe_target_restart("wake-owner-1", expected_revision=self.current.revision, proof=proof(process_started_at=106, loaded_generations=(8,), evidence_locator="runtime-43"), now=107)
+        self.current = self.coordinator.intend_retirement("wake-owner-1", expected_revision=self.current.revision, now=108)
+        complete = self.coordinator.observe_retirement("wake-owner-1", expected_revision=self.current.revision, observation=Observation.PROVED, now=109)
+        successor = self.coordinator.begin_successor("wake-owner-1", expected_revision=complete.revision, binding_revision=12, target_generation=9, overlap_deadline=300, now=110)
+        self.assertEqual((successor.phase, successor.previous_generation, successor.target_generation), (RotationPhase.PREPARED, 8, 9))
+        self.assertEqual(successor.terminal_history[-1].phase, RotationPhase.COMPLETE)
+        self.assertEqual(successor.terminal_history[-1].revision, complete.revision)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            coordinator = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(root))
+            current = coordinator.begin(record(root), now=100)
+            current = coordinator.intend_dual_restart("wake-owner-1", expected_revision=current.revision, now=101)
+            unknown = coordinator.observe_dual_restart("wake-owner-1", expected_revision=current.revision, proof=proof(loaded_generations=(8,)), now=102)
+            with self.assertRaisesRegex(ValueError, "terminal predecessor"):
+                coordinator.begin_successor("wake-owner-1", expected_revision=unknown.revision, binding_revision=12, target_generation=9, overlap_deadline=300, now=103)
+
+    def test_target_restart_requires_intent_and_provider_ambiguity_never_reopens_write(self) -> None:
+        self.provider_ready()
+        self.current = self.coordinator.record_delivery("wake-owner-1", expected_revision=self.current.revision, generation=8, journal_locator="journal-42", now=105)
+        with self.assertRaisesRegex(ValueError, "target runtime is not awaited"):
+            self.coordinator.observe_target_restart("wake-owner-1", expected_revision=self.current.revision, proof=proof(loaded_generations=(8,)), now=106)
+        self.current = self.coordinator.intend_target_restart("wake-owner-1", expected_revision=self.current.revision, now=106)
+        self.assertEqual(self.coordinator.intend_target_restart("wake-owner-1", expected_revision=self.current.revision, now=106), self.current)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            coordinator = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(root))
+            current = coordinator.begin(record(root), now=100)
+            current = coordinator.intend_dual_restart("wake-owner-1", expected_revision=current.revision, now=101)
+            current = coordinator.observe_dual_restart("wake-owner-1", expected_revision=current.revision, proof=proof(), now=102)
+            pending = coordinator.intend_provider_update("wake-owner-1", expected_revision=current.revision, now=103)
+            self.assertEqual(coordinator.intend_provider_update("wake-owner-1", expected_revision=pending.revision, now=103), pending)
+            unknown = coordinator.observe_provider_update("wake-owner-1", expected_revision=pending.revision, observation=Observation.UNKNOWN, now=104)
+            with self.assertRaisesRegex(ValueError, "not actionable"):
+                coordinator.intend_provider_update("wake-owner-1", expected_revision=unknown.revision, now=104)
 
     def test_rollback_can_finish_from_a_pending_effect_without_replaying_it(self) -> None:
         pending = self.coordinator.intend_dual_restart("wake-owner-1", expected_revision=self.current.revision, now=101)

@@ -47,6 +47,7 @@ class RotationPhase(str, Enum):
 class PendingEffect(str, Enum):
     NONE = "NONE"
     RESTART_DUAL = "RESTART_DUAL"
+    RESTART_TARGET_ONLY = "RESTART_TARGET_ONLY"
     PROVIDER_UPDATE = "PROVIDER_UPDATE"
     RETIRE_PREVIOUS = "RETIRE_PREVIOUS"
     ROLLBACK = "ROLLBACK"
@@ -109,6 +110,51 @@ class RuntimeProof:
 
 
 @dataclass(frozen=True, slots=True)
+class TerminalEvidence:
+    """Attributable, non-secret evidence retained across successor rotations."""
+
+    phase: RotationPhase
+    revision: int
+    code: str
+    previous_generation: int
+    target_generation: int
+    binding_revision: int
+
+    def __post_init__(self) -> None:
+        if (
+            self.phase not in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}
+            or type(self.revision) is not int or self.revision < 1
+            or type(self.code) is not str or _CODE.fullmatch(self.code) is None
+            or type(self.previous_generation) is not int or not 1 <= self.previous_generation <= _MAX_GENERATION
+            or type(self.target_generation) is not int or not 1 <= self.target_generation <= _MAX_GENERATION
+            or type(self.binding_revision) is not int or self.binding_revision < 0
+        ):
+            raise ValueError("rotation terminal evidence is invalid")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "phase": self.phase.value, "revision": self.revision, "code": self.code,
+            "previous_generation": self.previous_generation, "target_generation": self.target_generation,
+            "binding_revision": self.binding_revision,
+        }
+
+    @classmethod
+    def from_dict(cls, value: object) -> "TerminalEvidence":
+        if type(value) is not dict or set(value) != {
+            "phase", "revision", "code", "previous_generation", "target_generation", "binding_revision"
+        }:
+            raise ValueError("rotation terminal evidence is invalid")
+        try:
+            return cls(
+                phase=RotationPhase(value["phase"]), revision=value["revision"], code=value["code"],
+                previous_generation=value["previous_generation"], target_generation=value["target_generation"],
+                binding_revision=value["binding_revision"],
+            )
+        except (TypeError, ValueError):
+            raise ValueError("rotation terminal evidence is invalid") from None
+
+
+@dataclass(frozen=True, slots=True)
 class RotationRecord:
     """One owner-scoped rotation transaction; it contains no secret values."""
 
@@ -129,6 +175,7 @@ class RotationRecord:
     delivery_locator: str | None = None
     terminal_code: str | None = None
     last_observed_at: int = 0
+    terminal_history: tuple[TerminalEvidence, ...] = ()
 
     def __post_init__(self) -> None:
         if not _valid_record(self):
@@ -153,6 +200,7 @@ class RotationRecord:
             "delivery_locator": self.delivery_locator,
             "terminal_code": self.terminal_code,
             "last_observed_at": self.last_observed_at,
+            "terminal_history": [item.to_dict() for item in self.terminal_history],
         }
 
     def summary(self) -> dict[str, object]:
@@ -173,12 +221,13 @@ class RotationRecord:
             "owner_id", "canonical_root", "owner_uid", "source_instance", "service_id", "binding_revision",
             "previous_generation", "target_generation", "overlap_deadline", "phase", "revision", "pending_effect",
             "effect_revision", "runtime_proof", "delivery_locator", "terminal_code", "last_observed_at",
+            "terminal_history",
         }
         if type(value) is not dict or set(value) != fields:
             raise ValueError("managed webhook rotation record is invalid")
         try:
             proof_value = value["runtime_proof"]
-            return cls(
+            decoded = cls(
                 owner_id=value["owner_id"], canonical_root=value["canonical_root"], owner_uid=value["owner_uid"],
                 source_instance=value["source_instance"], service_id=value["service_id"],
                 binding_revision=value["binding_revision"], previous_generation=value["previous_generation"],
@@ -187,8 +236,13 @@ class RotationRecord:
                 pending_effect=PendingEffect(value["pending_effect"]), effect_revision=value["effect_revision"],
                 runtime_proof=None if proof_value is None else RuntimeProof.from_dict(proof_value),
                 delivery_locator=value["delivery_locator"], terminal_code=value["terminal_code"],
-                last_observed_at=value["last_observed_at"],
+                last_observed_at=value["last_observed_at"], terminal_history=tuple(
+                    TerminalEvidence.from_dict(item) for item in value["terminal_history"]
+                ),
             )
+            if not _stored_consistent(decoded):
+                raise ValueError
+            return decoded
         except (TypeError, ValueError):
             raise ValueError("managed webhook rotation record is invalid") from None
 
@@ -279,11 +333,16 @@ class ManagedWebhookRotationStore:
         else:
             if type(expected_revision) is not int or expected_revision != prior.revision:
                 raise ValueError("managed webhook rotation revision is stale")
-            if _immutable_facts(prior) != _immutable_facts(record):
+            successor = _is_successor(prior, record)
+            if _immutable_facts(prior) != _immutable_facts(record) and not successor:
                 raise ValueError("managed webhook rotation ownership is immutable")
-            if not _phase_allowed(prior.phase, record.phase):
+            if not successor and not _phase_allowed(prior.phase, record.phase):
                 raise ValueError("managed webhook rotation phase is invalid")
             saved = replace(record, revision=prior.revision + 1)
+            if not successor and not _stored_transition_allowed(prior, saved):
+                raise ValueError("managed webhook rotation transition is invalid")
+        if not _stored_consistent(saved):
+            raise ValueError("managed webhook rotation record is invalid")
         if any(item.owner_id != saved.owner_id and _conflicts(item, saved) for item in selected.values()):
             raise ValueError("managed webhook rotation conflicts with existing ownership")
         selected[saved.owner_id] = saved
@@ -316,6 +375,8 @@ class ManagedWebhookRotationStore:
             if len({item.owner_id for item in records}) != len(records):
                 raise ValueError
             if any(item.canonical_root != str(self.wake_root) or item.owner_uid != os.getuid() for item in records):
+                raise ValueError
+            if any(not _stored_consistent(item) for item in records):
                 raise ValueError
             if any(_conflicts(left, right) for index, left in enumerate(records) for right in records[index + 1:]):
                 raise ValueError
@@ -379,12 +440,30 @@ class ManagedWebhookRotationCoordinator:
         acceptance even if the rotation coordinator process is absent.
         """
         record = self.load(owner_id, now=now)
-        if record.phase in {RotationPhase.UNKNOWN, RotationPhase.EXPIRED} or now > record.overlap_deadline:
-            return ()
         if record.phase is RotationPhase.COMPLETE:
             return (record.target_generation,)
         if record.phase is RotationPhase.ROLLED_BACK:
             return (record.previous_generation,)
+        if record.pending_effect is PendingEffect.ROLLBACK:
+            return ()
+        if record.phase in {RotationPhase.UNKNOWN, RotationPhase.EXPIRED}:
+            return ()
+        if now > record.overlap_deadline:
+            # This is the one durable admission-side mutation.  Once observed,
+            # expiry becomes a clock fence, so a later backwards clock cannot
+            # revive either old or dual-key admission.
+            record = self._expire_record(record, now)
+            return ()
+        if record.phase is RotationPhase.PREPARED:
+            return (record.previous_generation,)
+        if record.phase in {RotationPhase.DUAL_READY, RotationPhase.PROVIDER_PENDING}:
+            return (record.previous_generation, record.target_generation)
+        if record.phase is RotationPhase.AWAITING_DELIVERY:
+            if record.runtime_proof is not None and record.runtime_proof.loaded_generations == (record.target_generation,):
+                return (record.target_generation,)
+            return (record.previous_generation, record.target_generation)
+        if record.phase is RotationPhase.RETIRING:
+            return (record.target_generation,)
         return (record.previous_generation, record.target_generation)
 
     def intend_dual_restart(self, owner_id: str, *, expected_revision: int, now: int) -> RotationRecord:
@@ -423,16 +502,28 @@ class ManagedWebhookRotationCoordinator:
             raise ValueError("managed webhook rotation delivery proof is invalid")
         return self.store.save(replace(record, delivery_locator=journal_locator, last_observed_at=now), expected_revision=record.revision)
 
-    def record_target_runtime(self, owner_id: str, *, expected_revision: int, proof: RuntimeProof, now: int) -> RotationRecord:
-        """Bind a post-journal, target-only process proof before retirement."""
+    def intend_target_restart(self, owner_id: str, *, expected_revision: int, now: int) -> RotationRecord:
         record = self._current(owner_id, expected_revision, now)
-        if record.phase is not RotationPhase.AWAITING_DELIVERY or record.delivery_locator is None:
-            raise ValueError("managed webhook rotation target runtime is not awaited")
-        if record.runtime_proof == proof:
+        if record.pending_effect is PendingEffect.RESTART_TARGET_ONLY:
             return record
+        if record.phase is not RotationPhase.AWAITING_DELIVERY or record.delivery_locator is None:
+            raise ValueError("managed webhook rotation target restart is not available")
+        if record.runtime_proof is None or record.runtime_proof.loaded_generations != (record.previous_generation, record.target_generation):
+            raise ValueError("managed webhook rotation dual runtime proof is required")
+        return self._save_intent(record, RotationPhase.AWAITING_DELIVERY, PendingEffect.RESTART_TARGET_ONLY, now)
+
+    def observe_target_restart(self, owner_id: str, *, expected_revision: int, proof: RuntimeProof, now: int) -> RotationRecord:
+        """Observe the target-only restart after its durable intent boundary."""
+        record = self._current(owner_id, expected_revision, now)
+        if record.phase is not RotationPhase.AWAITING_DELIVERY or record.pending_effect is not PendingEffect.RESTART_TARGET_ONLY:
+            raise ValueError("managed webhook rotation target runtime is not awaited")
         if not self._is_target_proof(record, proof):
             return self._unknown(record, now, "TARGET_RUNTIME_PROOF_REJECTED")
-        return self.store.save(replace(record, runtime_proof=proof, last_observed_at=now), expected_revision=record.revision)
+        return self.store.save(replace(record, pending_effect=PendingEffect.NONE, runtime_proof=proof, last_observed_at=now), expected_revision=record.revision)
+
+    def record_target_runtime(self, owner_id: str, *, expected_revision: int, proof: RuntimeProof, now: int) -> RotationRecord:
+        """Compatibility observation name; it still requires target-restart intent."""
+        return self.observe_target_restart(owner_id, expected_revision=expected_revision, proof=proof, now=now)
 
     def intend_retirement(self, owner_id: str, *, expected_revision: int, now: int) -> RotationRecord:
         record = self._current(owner_id, expected_revision, now)
@@ -451,11 +542,11 @@ class ManagedWebhookRotationCoordinator:
         if record.phase is not RotationPhase.RETIRING or record.pending_effect is not PendingEffect.RETIRE_PREVIOUS:
             raise ValueError("managed webhook rotation retirement is not pending")
         if observation is Observation.PROVED:
-            return self.store.save(replace(record, phase=RotationPhase.COMPLETE, pending_effect=PendingEffect.NONE, terminal_code="RETIRED", last_observed_at=now), expected_revision=record.revision)
+            return self._terminal(record, RotationPhase.COMPLETE, "RETIRED", now)
         return self._unknown(record, now, "RETIREMENT_REJECTED" if observation is Observation.REJECTED else "RETIREMENT_UNKNOWN")
 
     def rollback(self, owner_id: str, *, expected_revision: int, now: int) -> RotationRecord:
-        record = self._current(owner_id, expected_revision, now, allow_expired=True)
+        record = self._current(owner_id, expected_revision, now, allow_expired=True, allow_rollback=True)
         if record.phase is RotationPhase.ROLLED_BACK:
             return record
         if record.phase is RotationPhase.COMPLETE:
@@ -465,13 +556,13 @@ class ManagedWebhookRotationCoordinator:
         return self._save_intent(record, record.phase, PendingEffect.ROLLBACK, now)
 
     def observe_rollback(self, owner_id: str, *, expected_revision: int, observation: Observation, now: int) -> RotationRecord:
-        record = self._current(owner_id, expected_revision, now, allow_expired=True)
+        record = self._current(owner_id, expected_revision, now, allow_expired=True, allow_rollback=True)
         if record.phase is RotationPhase.ROLLED_BACK and observation is Observation.PROVED:
             return record
         if record.pending_effect is not PendingEffect.ROLLBACK:
             raise ValueError("managed webhook rotation rollback is not pending")
         if observation is Observation.PROVED:
-            return self.store.save(replace(record, phase=RotationPhase.ROLLED_BACK, pending_effect=PendingEffect.NONE, terminal_code="ROLLED_BACK", last_observed_at=now), expected_revision=record.revision)
+            return self._terminal(record, RotationPhase.ROLLED_BACK, "ROLLED_BACK", now)
         return self._unknown(record, now, "ROLLBACK_REJECTED" if observation is Observation.REJECTED else "ROLLBACK_UNKNOWN")
 
     def expire(self, owner_id: str, *, expected_revision: int, now: int) -> RotationRecord:
@@ -480,7 +571,29 @@ class ManagedWebhookRotationCoordinator:
             return record
         if now <= record.overlap_deadline:
             raise ValueError("managed webhook rotation overlap is not expired")
-        return self.store.save(replace(record, phase=RotationPhase.EXPIRED, pending_effect=PendingEffect.NONE, terminal_code="OVERLAP_EXPIRED", last_observed_at=now), expected_revision=record.revision)
+        return self._expire_record(record, now)
+
+    def begin_successor(
+        self, owner_id: str, *, expected_revision: int, binding_revision: int,
+        target_generation: int, overlap_deadline: int, now: int,
+    ) -> RotationRecord:
+        """Start a new transaction only after a retained terminal predecessor."""
+        prior = self._current(owner_id, expected_revision, now, allow_expired=True, allow_rollback=True)
+        if prior.phase not in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}:
+            raise ValueError("managed webhook rotation successor requires a terminal predecessor")
+        _require_time(overlap_deadline)
+        if overlap_deadline < now or type(binding_revision) is not int or binding_revision < 0:
+            raise ValueError("managed webhook rotation successor is invalid")
+        previous = prior.target_generation if prior.phase is RotationPhase.COMPLETE else prior.previous_generation
+        if type(target_generation) is not int or not 1 <= target_generation <= _MAX_GENERATION or target_generation == previous:
+            raise ValueError("managed webhook rotation successor is invalid")
+        successor = RotationRecord(
+            owner_id=prior.owner_id, canonical_root=prior.canonical_root, owner_uid=prior.owner_uid,
+            source_instance=prior.source_instance, service_id=prior.service_id, binding_revision=binding_revision,
+            previous_generation=previous, target_generation=target_generation, overlap_deadline=overlap_deadline,
+            revision=prior.revision, last_observed_at=now, terminal_history=prior.terminal_history,
+        )
+        return self.store.save(successor, expected_revision=prior.revision)
 
     def _intend(self, owner_id: str, expected_revision: int, now: int, phase: RotationPhase, effect: PendingEffect) -> RotationRecord:
         record = self._current(owner_id, expected_revision, now)
@@ -496,7 +609,7 @@ class ManagedWebhookRotationCoordinator:
     def _save_intent(self, record: RotationRecord, phase: RotationPhase, effect: PendingEffect, now: int) -> RotationRecord:
         return self.store.save(replace(record, phase=phase, pending_effect=effect, effect_revision=record.revision + 1, last_observed_at=now), expected_revision=record.revision)
 
-    def _current(self, owner_id: str, expected_revision: int, now: int, *, allow_expired: bool = False) -> RotationRecord:
+    def _current(self, owner_id: str, expected_revision: int, now: int, *, allow_expired: bool = False, allow_rollback: bool = False) -> RotationRecord:
         record = self.load(owner_id, now=now)
         if type(expected_revision) is not int or expected_revision != record.revision:
             raise ValueError("managed webhook rotation revision is stale")
@@ -504,6 +617,8 @@ class ManagedWebhookRotationCoordinator:
             raise ValueError("managed webhook rotation overlap is expired")
         if record.phase in {RotationPhase.UNKNOWN, RotationPhase.EXPIRED, RotationPhase.ROLLED_BACK} and not allow_expired:
             raise ValueError("managed webhook rotation is not actionable")
+        if record.pending_effect is PendingEffect.ROLLBACK and not allow_rollback:
+            raise ValueError("managed webhook rotation rollback is pending")
         return record
 
     @staticmethod
@@ -530,6 +645,23 @@ class ManagedWebhookRotationCoordinator:
     def _unknown(self, record: RotationRecord, now: int, code: str) -> RotationRecord:
         return self.store.save(replace(record, phase=RotationPhase.UNKNOWN, pending_effect=PendingEffect.NONE, terminal_code=code, last_observed_at=now), expected_revision=record.revision)
 
+    def _expire_record(self, record: RotationRecord, now: int) -> RotationRecord:
+        if record.phase is RotationPhase.EXPIRED:
+            return record
+        return self.store.save(replace(record, phase=RotationPhase.EXPIRED, pending_effect=PendingEffect.NONE, terminal_code="OVERLAP_EXPIRED", last_observed_at=now), expected_revision=record.revision)
+
+    def _terminal(self, record: RotationRecord, phase: RotationPhase, code: str, now: int) -> RotationRecord:
+        evidence = TerminalEvidence(
+            phase=phase, revision=record.revision + 1, code=code,
+            previous_generation=record.previous_generation, target_generation=record.target_generation,
+            binding_revision=record.binding_revision,
+        )
+        return self.store.save(
+            replace(record, phase=phase, pending_effect=PendingEffect.NONE, terminal_code=code,
+                    last_observed_at=now, terminal_history=(record.terminal_history + (evidence,))[-_MAX_LOCATORS:]),
+            expected_revision=record.revision,
+        )
+
 
 def _valid_record(record: RotationRecord) -> bool:
     return (
@@ -538,7 +670,7 @@ def _valid_record(record: RotationRecord) -> bool:
         and type(record.binding_revision) is int and 0 <= record.binding_revision < 2**63
         and type(record.previous_generation) is int and 1 <= record.previous_generation <= _MAX_GENERATION
         and type(record.target_generation) is int and 1 <= record.target_generation <= _MAX_GENERATION
-        and record.previous_generation != record.target_generation and type(record.overlap_deadline) is int and record.overlap_deadline >= 0
+        and record.previous_generation < record.target_generation and type(record.overlap_deadline) is int and record.overlap_deadline >= 0
         and isinstance(record.phase, RotationPhase) and type(record.revision) is int and 0 <= record.revision < 2**63
         and isinstance(record.pending_effect, PendingEffect)
         and (record.effect_revision is None or type(record.effect_revision) is int and 1 <= record.effect_revision < 2**63)
@@ -546,28 +678,123 @@ def _valid_record(record: RotationRecord) -> bool:
         and (record.delivery_locator is None or type(record.delivery_locator) is str and _LOCATOR.fullmatch(record.delivery_locator) is not None)
         and (record.terminal_code is None or type(record.terminal_code) is str and _CODE.fullmatch(record.terminal_code) is not None)
         and type(record.last_observed_at) is int and record.last_observed_at >= 0
+        and type(record.terminal_history) is tuple and len(record.terminal_history) <= _MAX_LOCATORS
+        and all(type(item) is TerminalEvidence for item in record.terminal_history)
         and _consistent(record)
     )
 
 
 def _consistent(record: RotationRecord) -> bool:
-    terminal = {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}
-    if record.phase in terminal and record.pending_effect is not PendingEffect.NONE:
+    if tuple(item.revision for item in record.terminal_history) != tuple(sorted(item.revision for item in record.terminal_history)):
         return False
-    if record.pending_effect is PendingEffect.NONE and record.effect_revision is not None and record.effect_revision > record.revision:
+    if len({item.revision for item in record.terminal_history}) != len(record.terminal_history):
         return False
-    if record.phase in {RotationPhase.DUAL_READY, RotationPhase.PROVIDER_PENDING, RotationPhase.AWAITING_DELIVERY, RotationPhase.RETIRING, RotationPhase.COMPLETE}:
-        if record.runtime_proof is None:
+    if record.phase in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}:
+        if record.pending_effect is not PendingEffect.NONE or not record.terminal_history:
             return False
-    if record.phase in {RotationPhase.RETIRING, RotationPhase.COMPLETE} and record.delivery_locator is None:
-        return False
-    if record.phase is RotationPhase.COMPLETE and record.terminal_code != "RETIRED":
+        last = record.terminal_history[-1]
+        if (last.phase, last.code, last.previous_generation, last.target_generation, last.binding_revision) != (
+            record.phase, record.terminal_code, record.previous_generation, record.target_generation, record.binding_revision
+        ):
+            return False
+    if record.phase is RotationPhase.COMPLETE and (record.terminal_code != "RETIRED" or record.delivery_locator is None):
         return False
     if record.phase is RotationPhase.EXPIRED and record.terminal_code != "OVERLAP_EXPIRED":
         return False
     if record.phase is RotationPhase.ROLLED_BACK and record.terminal_code != "ROLLED_BACK":
         return False
     return True
+
+
+def _stored_consistent(record: RotationRecord) -> bool:
+    """Validate the post-CAS form, where revision/effect facts are durable."""
+    if not _valid_record(record):
+        return False
+    if record.pending_effect is not PendingEffect.NONE:
+        if record.effect_revision != record.revision or record.phase in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}:
+            return False
+        if record.pending_effect is PendingEffect.ROLLBACK:
+            return True
+    elif record.effect_revision is not None and record.effect_revision >= record.revision:
+        return False
+    phase = record.phase
+    proof = record.runtime_proof
+    dual = proof is not None and proof.authority_revision == record.binding_revision and proof.loaded_generations == (record.previous_generation, record.target_generation)
+    target = proof is not None and proof.authority_revision == record.binding_revision and proof.loaded_generations == (record.target_generation,)
+    if phase is RotationPhase.PREPARED:
+        return proof is None and record.delivery_locator is None and record.terminal_code is None and record.pending_effect in {PendingEffect.NONE, PendingEffect.RESTART_DUAL}
+    if phase is RotationPhase.DUAL_READY:
+        return dual and record.delivery_locator is None and record.terminal_code is None and record.pending_effect is PendingEffect.NONE
+    if phase is RotationPhase.PROVIDER_PENDING:
+        return dual and record.delivery_locator is None and record.terminal_code is None and record.pending_effect is PendingEffect.PROVIDER_UPDATE
+    if phase is RotationPhase.AWAITING_DELIVERY:
+        return (
+            record.terminal_code is None
+            and ((record.pending_effect is PendingEffect.NONE and (dual or target))
+                 or (record.pending_effect is PendingEffect.RESTART_TARGET_ONLY and dual and record.delivery_locator is not None))
+        )
+    if phase is RotationPhase.RETIRING:
+        return target and record.delivery_locator is not None and record.terminal_code is None and record.pending_effect is PendingEffect.RETIRE_PREVIOUS
+    if phase is RotationPhase.COMPLETE:
+        return target and record.delivery_locator is not None and record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision == record.revision
+    if phase is RotationPhase.ROLLED_BACK:
+        return record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision == record.revision
+    if phase is RotationPhase.EXPIRED:
+        return record.pending_effect in {PendingEffect.NONE, PendingEffect.ROLLBACK}
+    return phase is RotationPhase.UNKNOWN and record.pending_effect in {PendingEffect.NONE, PendingEffect.ROLLBACK}
+
+
+def _stored_transition_allowed(prior: RotationRecord, saved: RotationRecord) -> bool:
+    if saved.pending_effect is PendingEffect.ROLLBACK:
+        return (
+            prior.pending_effect is not PendingEffect.ROLLBACK and saved.phase is prior.phase
+            and saved.runtime_proof == prior.runtime_proof and saved.delivery_locator == prior.delivery_locator
+            and saved.terminal_code == prior.terminal_code and saved.terminal_history == prior.terminal_history
+        )
+    if prior.pending_effect is PendingEffect.ROLLBACK:
+        return saved.pending_effect is PendingEffect.NONE and saved.phase in {RotationPhase.ROLLED_BACK, RotationPhase.UNKNOWN}
+    if saved.phase is RotationPhase.EXPIRED:
+        return saved.pending_effect is PendingEffect.NONE and prior.phase not in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}
+    if saved.phase is RotationPhase.UNKNOWN:
+        return saved.pending_effect is PendingEffect.NONE and prior.pending_effect is not PendingEffect.NONE
+    if prior.phase is RotationPhase.PREPARED:
+        return (
+            saved.phase is RotationPhase.PREPARED and prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RESTART_DUAL
+        ) or (
+            saved.phase is RotationPhase.DUAL_READY and prior.pending_effect is PendingEffect.RESTART_DUAL and saved.pending_effect is PendingEffect.NONE
+        )
+    if prior.phase is RotationPhase.DUAL_READY:
+        return saved.phase is RotationPhase.PROVIDER_PENDING and saved.pending_effect is PendingEffect.PROVIDER_UPDATE
+    if prior.phase is RotationPhase.PROVIDER_PENDING:
+        return saved.phase is RotationPhase.AWAITING_DELIVERY and prior.pending_effect is PendingEffect.PROVIDER_UPDATE and saved.pending_effect is PendingEffect.NONE
+    if prior.phase is RotationPhase.AWAITING_DELIVERY:
+        if saved.phase is RotationPhase.RETIRING:
+            return prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RETIRE_PREVIOUS and prior.delivery_locator is not None and prior.runtime_proof is not None and prior.runtime_proof.loaded_generations == (prior.target_generation,)
+        if saved.phase is not RotationPhase.AWAITING_DELIVERY:
+            return False
+        return (
+            prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.NONE and prior.delivery_locator is None and saved.delivery_locator is not None and saved.runtime_proof == prior.runtime_proof
+        ) or (
+            prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RESTART_TARGET_ONLY and prior.delivery_locator is not None
+        ) or (
+            prior.pending_effect is PendingEffect.RESTART_TARGET_ONLY and saved.pending_effect is PendingEffect.NONE and saved.runtime_proof is not None and saved.runtime_proof.loaded_generations == (saved.target_generation,)
+        )
+    if prior.phase is RotationPhase.RETIRING:
+        return saved.phase is RotationPhase.COMPLETE and prior.pending_effect is PendingEffect.RETIRE_PREVIOUS and saved.pending_effect is PendingEffect.NONE
+    return False
+
+
+def _is_successor(prior: RotationRecord, record: RotationRecord) -> bool:
+    return (
+        prior.phase in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}
+        and record.phase is RotationPhase.PREPARED and record.pending_effect is PendingEffect.NONE
+        and record.runtime_proof is None and record.delivery_locator is None and record.terminal_code is None
+        and record.terminal_history == prior.terminal_history
+        and (record.owner_id, record.canonical_root, record.owner_uid, record.source_instance, record.service_id)
+        == (prior.owner_id, prior.canonical_root, prior.owner_uid, prior.source_instance, prior.service_id)
+        and record.previous_generation == (prior.target_generation if prior.phase is RotationPhase.COMPLETE else prior.previous_generation)
+        and record.target_generation != record.previous_generation
+    )
 
 
 def _valid_generations(value: object) -> bool:
@@ -603,7 +830,7 @@ def _phase_allowed(before: RotationPhase, after: RotationPhase) -> bool:
         RotationPhase.AWAITING_DELIVERY: {RotationPhase.AWAITING_DELIVERY, RotationPhase.RETIRING, RotationPhase.UNKNOWN, RotationPhase.EXPIRED, RotationPhase.ROLLED_BACK},
         RotationPhase.RETIRING: {RotationPhase.RETIRING, RotationPhase.COMPLETE, RotationPhase.UNKNOWN, RotationPhase.EXPIRED, RotationPhase.ROLLED_BACK},
         RotationPhase.UNKNOWN: {RotationPhase.UNKNOWN, RotationPhase.ROLLED_BACK},
-        RotationPhase.EXPIRED: {RotationPhase.EXPIRED, RotationPhase.ROLLED_BACK},
+        RotationPhase.EXPIRED: {RotationPhase.EXPIRED, RotationPhase.UNKNOWN, RotationPhase.ROLLED_BACK},
         RotationPhase.COMPLETE: {RotationPhase.COMPLETE},
         RotationPhase.ROLLED_BACK: {RotationPhase.ROLLED_BACK},
     }[before]
