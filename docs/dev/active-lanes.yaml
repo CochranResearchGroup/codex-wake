@@ -7,11 +7,11 @@ lanes:
     plan_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     branch: chore/issue-107-installed-webhook-canary
     target: main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 84d59fd374e8ce66b589797777df1e2071f39732
-    validation_status: publisher_fixed_product_health_projection_pending
-    validation_ref: 84d59fd374e8ce66b589797777df1e2071f39732
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    checkpoint: 97660040b0d85a9eef1eb29cfd6b76bb8dfe41f5
+    validation_status: accepted_composite_ci_pending
+    validation_ref: 97660040b0d85a9eef1eb29cfd6b76bb8dfe41f5
     remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#107]

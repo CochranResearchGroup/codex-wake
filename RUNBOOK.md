@@ -3652,3 +3652,26 @@ product health metadata required by strict #107 qualification remains open.
 Movement is `blocker_reduction`. Next action: test-drive only the GitHub
 per-instance health projection, execute the full tripwired fixture test, and
 close #107 through CI if the composite evidence passes.
+
+## Turn 170 | 2026-09-16
+
+Accepted Plan 0077 and the composite installed webhook qualification for #107.
+
+- Checkpoint `9766004` projects the exact bounded GitHub health code and aware
+  reconciliation time through the daemon result.
+- A durable executable test now runs the generated fixture on a fresh armed
+  journal through the unchanged strict assertion, proving receipts `1 -> 1`,
+  matches `0 -> 1`, pending `1 -> 0`, firing `0 -> 1`, fired `1`, dispatched
+  `0`, and zero production-client or dispatch tripwire calls.
+- Validation passes 519 comprehensive Python tests, 12 plugin tests,
+  compilation, diff hygiene, and active/goal planning audits. Closed-world
+  review accepted P76-R01 and the composite evidence boundary.
+- Verification 0077 preserves the Plan 0075 failed receipt, its immediate
+  `TIME-WAIT` cleanup result, and SHA-256
+  `8cbb2508dfb8ee9f96a5051b4cb4953d42e769de493fed3cd19c0ab098b6e605`
+  while separately recording later unit/process/port cleanup proof.
+
+Acceptance state: #107 is locally accepted and integration-ready; #108 remains
+blocked until the issue-linked PR passes both release gates and canonical-main
+readback. Movement is `outcome_progress`. Next action: publish the exact clean
+branch, open the closing PR, monitor CI, squash merge, and reconcile custody.
