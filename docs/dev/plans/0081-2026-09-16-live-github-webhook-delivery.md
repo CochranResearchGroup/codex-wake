@@ -37,6 +37,17 @@ Registration merged through PR #128 at canonical
 continues on the re-anchored runner branch; no runtime or provider effect was
 performed by registration.
 
+Checkpoint `ec2fddf47ca76370b6fc4c69ed94b6f444835856` implements the
+provider-free lifecycle contract and production-local adapter. It binds the
+real squash-trigger delivery to the resulting main merge SHA, stages partial
+runtime progress for fail-closed cleanup, provisions owner-only token/secret
+material, initializes a disabled source before enabling and arming it under a
+no-dispatch daemon, validates the exact loopback service, and reads the durable
+journal before and after one production no-dispatch poll. Focused C6 tests
+pass 16/16, comprehensive Python passes 557/557, the OpenClaw plugin passes
+12/12, and compilation/diff checks pass. PR #130 and closed-world review remain
+before the trigger PR and exact provider gate.
+
 ## Objective
 
 Build and validate a provider-safe live qualification runner, then, only after
@@ -116,6 +127,16 @@ Deterministic tools own hashes, schema checks, test execution, GitHub readback,
 polling, and unit/process/socket censuses. Effective model/allocation metadata
 is recorded when available; no cost-savings claim is made from requested model
 labels alone.
+
+Delegation receipts: `/root/p53_c6_provider_preflight` completed the read-only
+provider inventory; `/root/p53_c6_acceptance_audit` found and bounded the
+create/trigger/delete and cleanup counters; `/root/p53_c6_runner_impl` produced
+checkpoint `7d651f4` after one incomplete checkpoint and one closed-world
+remediation pass. The primary rejected the incomplete execution boundary,
+integrated the remediated contract, and added the production-local adapter at
+`ec2fddf`. Effective runtime model/cost metadata was not reported, so no
+allocation claim is made. `/root/p53_c6_runner_review` owns one final
+closed-world review of `ec2fddf`.
 
 ## Work graph
 
