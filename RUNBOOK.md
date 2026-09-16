@@ -3002,3 +3002,24 @@ ready implementation slice and #83 through #85 are dependency-blocked.
 Movement is `outcome_progress`. Next action: publish this coordination checkpoint,
 merge it through required CI, then create the isolated #82 implementation lane
 from canonical main and implement the contract test-first.
+
+## Turn 146 | 2026-09-15
+
+Accepted the P52 coordination checkpoint and assigned the contract slice.
+
+- PR #86 passed both Python 3.11 and 3.12 release gates and squash-merged at
+  canonical `b554a0f2cf1bee75d8c8268575055c6652112919`.
+- CodeGraph confirmed that `default_signal_runners` has eight callers and that
+  filesystem, process, user-systemd, and GitHub CI reconstruction shapes differ.
+  The exact #82 seam is therefore an injected family-level factory catalogue;
+  production migration remains reserved for #83 and #84.
+- Lane plan `docs/dev/plans/0066-2026-09-15-built-in-source-registry-contract.md`
+  limits writes to the new contract module, one generic daemon seam, and focused
+  tests. Provider access, runtime observation, dispatch, installation, release,
+  and deployment remain excluded.
+
+Acceptance state: P52 is open at `P52-G1-v2` / `P52-G1-C02`; #82 is assigned
+as the sole active implementation lane and #83 through #85 remain blocked.
+Movement is `outcome_progress`. Next action: merge this assignment projection,
+create the exact #82 branch from canonical main, and implement its provider-free
+contract and conformance fixture test-first.
