@@ -103,3 +103,14 @@ This artifact qualifies installed loopback behavior and provider-free polling
 for #107. It does not prove external HTTPS ingress, provider webhook mutation,
 live GitHub delivery, wake dispatch, release, deployment, or global runtime
 installation. Those remain separate #108 and #109 gates.
+
+## Integration
+
+- PR #119 targeted `main`, linked `Closes #107`, and resolved the exact
+  published head `6962a76f608be6b0282356d91301cf4520f1852d`.
+- Release gates passed on Python 3.11 and 3.12; no unresolved review threads,
+  reviews, or conversation comments remained.
+- The PR squash-merged as
+  `920e5b84314a8063c8a7f3ed1c9d3523d32ab92c`, and GitHub closed #107.
+- Post-merge canonical-main validation passed 519 Python tests, 12 plugin tests,
+  compilation, diff hygiene, and active/goal planning audits.
