@@ -1,3 +1,24 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P54-P1
+    objective: Freeze the managed GitHub webhook wake campaign and issue graph
+    plan: docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md
+    plan_ref: refs/heads/docs/issue-135-managed-webhook-plan
+    branch: docs/issue-135-managed-webhook-plan
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 8171220259e33064b86d0be871b221607cbfc980
+    validation_status: kickoff_plan_drafting
+    validation_ref: 8171220259e33064b86d0be871b221607cbfc980
+    remote_ref: refs/remotes/origin/docs/issue-135-managed-webhook-plan
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#135]
+    owner: primary campaign owner with bounded security and lifecycle design reviewers
+    write_surface: Plan 0083, P54 roadmap projection, active-lane catalogue, and runbook
+    live_effect: none; provider, deployment, secret, ingress, release, and dispatch effects remain separately gated
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-16
