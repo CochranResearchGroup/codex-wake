@@ -1,3 +1,24 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P53-C5
+    objective: Publish the exact signed GitHub webhook path through Cooper and bastion
+    plan: docs/dev/plans/0078-2026-09-16-cooper-webhook-ingress-publication.md
+    plan_ref: refs/heads/feat/issue-108-cooper-ingress
+    branch: feat/issue-108-cooper-ingress
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 31b2e6c9f64661a0b12b8433cfc3d9da7655ac39
+    validation_status: preflight_renderer_correction_required
+    validation_ref: 31b2e6c9f64661a0b12b8433cfc3d9da7655ac39
+    remote_ref: refs/remotes/origin/feat/issue-108-cooper-ingress
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#108]
+    owner: primary ingress-effect owner with one bounded implementation worker and independent reviewer
+    write_surface: Plan 0078, Cooper exact-path renderer and inventory, isolated C5 runtime, verification receipt, roadmap, and runbook
+    live_effect: one provider-free loopback canary establishment and one exact Cooper/bastion HTTPS publication; no provider mutation or dispatch
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-16
