@@ -4,11 +4,12 @@ REST list exhaustion is not a completeness watermark. Run updated_at is never
 used. Exact terminal attempts use the latest known attempt start/job completion
 as a lower bound on workflow completion, not an immutable completion timestamp.
 """
-from contextlib import contextmanager
-from dataclasses import replace
+from contextlib import contextmanager, nullcontext
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from http.client import HTTPSConnection
 import json
+import math
 import signal
 import threading
 import time
@@ -21,9 +22,21 @@ from .github_polling import (
 )
 
 
+_active_deadline: "GitHubReadDeadline | None" = None
+
+
+@dataclass(frozen=True, slots=True)
+class GitHubReadDeadline:
+    """A main-thread timer lease that a nested read may consume, not replace."""
+
+    expires_at: float
+    owner: threading.Thread
+
+
 class GitHubRestClient:
     def __init__(self, config: GitHubPollingConfig, *, credential_resolver: Callable[[str], str],
-                 connection_factory=HTTPSConnection, monotonic=time.monotonic):
+                 connection_factory=HTTPSConnection, monotonic=time.monotonic,
+                 deadline: GitHubReadDeadline | None = None):
         if (not _valid_config(config) or not config.enabled or config.evidence_mode != "positive_only"
                 or any(not ref.startswith("refs/heads/") for ref in config.refs)):
             raise ValueError("GitHub production source is invalid")
@@ -33,7 +46,15 @@ class GitHubRestClient:
         self._clock = monotonic
         self._requests = 0
         self._bytes = 0
-        self._deadline = self._clock() + config.poll_timeout_seconds
+        if deadline is not None and (type(deadline) is not GitHubReadDeadline
+                                     or deadline.owner is not threading.current_thread()
+                                     or deadline.owner is not threading.main_thread()
+                                     or not math.isfinite(deadline.expires_at)
+                                     or deadline is not _active_deadline):
+            raise ValueError("GitHub read deadline is invalid")
+        self._external_deadline = deadline
+        self._deadline = (deadline.expires_at if deadline is not None
+                          else self._clock() + config.poll_timeout_seconds)
 
     def list_runs(self, query: RunQuery) -> RunPage:
         if (type(query) is not RunQuery
@@ -43,7 +64,7 @@ class GitHubRestClient:
                 or query.per_page != self.config.page_size or not _aware(query.since) or not _aware(query.until)
                 or not timedelta(0) <= query.until - query.since <= timedelta(seconds=self.config.max_history_seconds)):
             raise GitHubReadError("malformed")
-        if query.page == 1:
+        if query.page == 1 and self._external_deadline is None:
             self._requests = 0
             self._bytes = 0
             self._deadline = self._clock() + self.config.poll_timeout_seconds
@@ -94,8 +115,15 @@ class GitHubRestClient:
         remaining = self._deadline - self._clock()
         if self._requests >= self.config.max_requests or remaining <= 0:
             raise GitHubReadError("budget")
+        if self._external_deadline is not None and self._external_deadline is not _active_deadline:
+            raise GitHubReadError("unavailable")
         self._requests += 1
-        with _absolute_deadline(min(self.config.request_timeout_seconds, remaining)):
+        # Polling owns its timer as before. A delivery runtime can instead pass
+        # the lease it already owns, so this client never installs a nested
+        # SIGALRM handler or silently falls back to an inactivity timeout.
+        timer = (nullcontext() if self._external_deadline is not None else
+                 _absolute_deadline(min(self.config.request_timeout_seconds, remaining)))
+        with timer:
             return self._read_transaction(path, query, remaining)
 
     def _read_transaction(self, path, query, remaining):
@@ -206,9 +234,12 @@ def _absolute_deadline(seconds):
     timer. Never steal another alarm or start credentials/network on unsupported
     threads/platforms. A socket inactivity timeout alone is not an absolute bound.
     """
+    global _active_deadline
     if (threading.current_thread() is not threading.main_thread()
             or not hasattr(signal, "setitimer") or not hasattr(signal, "SIGALRM")):
         raise GitHubReadError("unavailable")
+    if type(seconds) not in (int, float) or not math.isfinite(seconds) or seconds <= 0:
+        raise GitHubReadError("budget")
     previous_timer = signal.getitimer(signal.ITIMER_REAL)
     if previous_timer != (0.0, 0.0):
         raise GitHubReadError("unavailable")
@@ -221,10 +252,14 @@ def _absolute_deadline(seconds):
         raise GitHubReadError("budget")
 
     signal.signal(signal.SIGALRM, expired)
+    deadline = GitHubReadDeadline(time.monotonic() + seconds, threading.current_thread())
     try:
+        _active_deadline = deadline
         signal.setitimer(signal.ITIMER_REAL, seconds)
-        yield
+        yield deadline
     finally:
+        if _active_deadline is deadline:
+            _active_deadline = None
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, previous_handler)
 
