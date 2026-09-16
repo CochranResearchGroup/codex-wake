@@ -8,8 +8,10 @@ lanes:
     branch: feat/issue-82-source-registry-contract
     target: main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 76b3d23e9b43349210a74e6c77a8533b5c4dc953
+    custody_state: INTEGRATION_READY
+    checkpoint: e9e55031b2a03d22467c854b80074f3c333ece3f
+    validation_status: passed
+    validation_ref: e9e55031b2a03d22467c854b80074f3c333ece3f
     remote_ref: refs/remotes/origin/feat/issue-82-source-registry-contract
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#82]

@@ -3023,3 +3023,28 @@ as the sole active implementation lane and #83 through #85 remain blocked.
 Movement is `outcome_progress`. Next action: merge this assignment projection,
 create the exact #82 branch from canonical main, and implement its provider-free
 contract and conformance fixture test-first.
+
+## Turn 147 | 2026-09-15
+
+Qualified the issue #82 source-registry contract for integration.
+
+- The assigned `gpt-6-astra` high worker implemented only the four-file source
+  and test surface. The primary reconciled the contract and retained dependency
+  injection in registration closures rather than exposing a generic bag.
+- The immutable catalogue rejects empty ownership, duplicate registration IDs,
+  and overlapping `(source, kind)` pairs. It loads each durable arm at most
+  once, selects by authoritative armed identity, preserves pending and catalogue
+  order, invokes each nonempty family once, and isolates ordinary construction
+  failures without retry or mutation while preserving process interruptions.
+- The optional daemon injection appends provider-free catalogue runners after
+  unchanged production reconstruction. With no injection, the production path
+  and runner order remain unchanged.
+- Validation passed 39 focused tests, 425 comprehensive Python tests, 12
+  OpenClaw plugin tests, compilation, `git diff --check`, both PR #89 Python
+  release gates, and independent closed-world review with no findings.
+
+Acceptance state: P52 is open at `P52-G1-v3` / `P52-G1-C03`; PR #89 at
+`e9e55031b2a03d22467c854b80074f3c333ece3f` is integration-ready while #83
+through #85 remain blocked. Movement is `outcome_progress`. Next action: merge
+this readiness projection, squash-merge PR #89, verify canonical main, then
+assign #83 and #84 as disjoint parallel migrations.

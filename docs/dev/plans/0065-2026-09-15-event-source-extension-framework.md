@@ -5,8 +5,8 @@ Lane: P52
 Issues: #81, #82, #83, #84, #85
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P52-G1
-Goal Version: P52-G1-v2
-Checkpoint: P52-G1-C02
+Goal Version: P52-G1-v3
+Checkpoint: P52-G1-C03
 
 ## Goal objective
 
@@ -38,7 +38,10 @@ PR #86 passed both required release gates and merged the coordination state at
 `b554a0f2cf1bee75d8c8268575055c6652112919`. Issue #82 is now the sole ready
 implementation slice under lane plan
 `docs/dev/plans/0066-2026-09-15-built-in-source-registry-contract.md`; #83
-through #85 remain dependency-blocked.
+through #85 remain dependency-blocked. Its implementation is integration-ready
+at `e9e55031b2a03d22467c854b80074f3c333ece3f` in PR #89 after 39 focused
+tests, 425 comprehensive Python tests, 12 plugin tests, compilation, required
+Python 3.11/3.12 CI, and independent review with no findings.
 
 Graphiti was healthy but returned no P52-specific durable facts. Current source,
 Git, GitHub, policy, plan, and test evidence are authoritative. Deterministic
