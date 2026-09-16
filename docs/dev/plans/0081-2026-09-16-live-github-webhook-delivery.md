@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P53-C6
 Issue: #109
-Branch: `feat/issue-109-live-github-delivery`
+Branch: `feat/issue-109-live-qualification-runner`
 Target: `main`
 Integration: `squash`
 Parent plan: `docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md`
@@ -31,6 +31,11 @@ one authoritative attempt read per admitted delivery, commit-before-ack, and a
 shared durable journal for polling convergence. What remains is a tested,
 fail-closed live qualification runner, an isolated canonical-main runtime, one
 separately authorized provider lifecycle, and a durable closeout receipt.
+
+Registration merged through PR #128 at canonical
+`75484bbe18d2f1e43c84368805556aba85d8424f`. The provider-free implementation
+continues on the re-anchored runner branch; no runtime or provider effect was
+performed by registration.
 
 ## Objective
 
