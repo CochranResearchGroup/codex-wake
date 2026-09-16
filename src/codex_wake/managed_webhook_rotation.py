@@ -22,7 +22,10 @@ import threading
 
 
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,95}")
-_LOCATOR = re.compile(r"[a-z][a-z0-9-]{0,95}")
+# Journal receipt IDs use the canonical ``event_000...`` form.  Locators are
+# still bounded opaque identifiers; admitting underscores keeps the rotation
+# contract aligned with the durable signal store without exposing paths.
+_LOCATOR = re.compile(r"[a-z][a-z0-9_-]{0,95}")
 _CODE = re.compile(r"[A-Z][A-Z0-9_]{0,63}")
 _MAX_RECORDS = 32
 _MAX_FILE_BYTES = 262_144
@@ -65,7 +68,11 @@ class RuntimeProof:
 
     ``loaded_generations`` is numeric by design.  Generation values are the
     only key identity this package admits; references and key material never
-    enter the record.
+    enter the record. ``process_started_at`` is a Unix-epoch second derived
+    from the attested Linux boot time plus the process start ticks. Rotation
+    intent clocks use the same Unix-epoch-second domain; the private
+    attestation retains the exact boot identity and tick value needed to
+    reject PID reuse before this sanitized projection is persisted.
     """
 
     process_id: int
