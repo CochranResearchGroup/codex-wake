@@ -423,27 +423,47 @@ def installed_provenance(context: ExecutionContext, env: dict[str, str]) -> dict
     return {key: str(item) for key, item in value.items()}
 
 
-def write_fixture_bootstrap(context: ExecutionContext, fixture: Fixture) -> Path:
+def write_fixture_bootstrap(
+    context: ExecutionContext, fixture: Fixture, *,
+    counter_path: Path | None = None,
+) -> Path:
     """Create an explicit bootstrap that must succeed before the entrypoint."""
     owner_only_directory(context.fixture_dir)
     module_path = context.fixture_dir / "webhook_fixture_bootstrap.py"
     workflow_json = json.dumps(fixture.workflow, sort_keys=True)
+    counter_expression = (
+        f"Path({str(counter_path)!r})" if counter_path is not None else "None"
+    )
     module_path.write_text(
+        "import os\n"
         "import json\n"
         "from datetime import datetime\n"
         "from pathlib import Path\n"
         "_installed = False\n"
         f"_workflow = json.loads({workflow_json!r})\n"
         f"_tripwire = Path({str(context.fixture_dir / 'tripwire')!r})\n"
+        f"_counter = {counter_expression}\n"
+        "def _increment_counter(name):\n"
+        "    if _counter is None: return\n"
+        "    value = json.loads(_counter.read_text(encoding='utf-8'))\n"
+        "    value[name] += 1\n"
+        "    _counter.write_text(json.dumps(value, sort_keys=True) + '\\n', encoding='utf-8')\n"
+        "    os.chmod(_counter, 0o600)\n"
+        "def _count_fixture_read(): _increment_counter('authoritative_attempt_reads')\n"
+        "def _blocked_production_provider_factory(*args, **kwargs):\n"
+        "    _increment_counter('production_provider_factory_calls')\n"
+        "    raise RuntimeError('production provider factory is forbidden in the provider-free fixture')\n"
         "def install():\n"
         "    global _installed\n"
         "    import codex_wake.webhook_listener as listener\n"
         "    from codex_wake.github_polling import WorkflowRun\n"
         "    original = listener.build_webhook_runtime\n"
         "    if not callable(original): raise RuntimeError('installed runtime seam is unavailable')\n"
+        "    listener.GitHubRestClient = _blocked_production_provider_factory\n"
         "    class FixtureClient:\n"
         "        def __init__(self, deadline): self.deadline = deadline\n"
         "        def get_run_attempt(self, repository, run_id, run_attempt):\n"
+        "            _count_fixture_read()\n"
         "            value = _workflow\n"
         "            if (repository, run_id, run_attempt) != (value['repository'], value['run_id'], value['run_attempt']): raise RuntimeError('unexpected provider identity')\n"
         "            return WorkflowRun(value['repository'], value['repository_id'], value['workflow_id'], value['run_id'], value['run_attempt'], value['ref'], value['head_sha'], value['status'], value['conclusion'], None, datetime.fromisoformat(value['terminal_proof_at']), 'github_attempt_started_or_job_completed_lower_bound')\n"
@@ -956,6 +976,7 @@ def cleanup(
     context: ExecutionContext, *, env: dict[str, str], service_attempted: bool,
     failed_units_before: tuple[str, ...] | None,
     tracked_identities: tuple[tuple[int, str], ...] = (),
+    preserve_root_on_safe: bool = False,
 ) -> dict[str, Any]:
     """Use product cleanup once; preserve the private root on uncertainty."""
     result: dict[str, Any] = {
@@ -982,9 +1003,16 @@ def cleanup(
             "unit_absent": unit_absent, "port_released": port_released,
             "no_matching_process": no_process, "safe": safe,
         })
-        if safe:
+        if safe and not preserve_root_on_safe:
             shutil.rmtree(context.root)
             result["temporary_roots_removed"] = not context.root.exists()
+        elif safe:
+            os.chmod(context.root, stat.S_IRWXU)
+            result.update({
+                "temporary_roots_removed": False,
+                "evidence_root_retained": True,
+                "recovery_root": str(context.root),
+            })
         else:
             result["recovery_root"] = str(context.root)
         return result
@@ -1028,9 +1056,16 @@ def cleanup(
     except Exception as exc:
         safe = False
         result["cleanup_error"] = type(exc).__name__
-    if safe:
+    if safe and not preserve_root_on_safe:
         shutil.rmtree(context.root)
         result["temporary_roots_removed"] = not context.root.exists()
+    elif safe:
+        os.chmod(context.root, stat.S_IRWXU)
+        result.update({
+            "temporary_roots_removed": False,
+            "evidence_root_retained": True,
+            "recovery_root": str(context.root),
+        })
     else:
         # Never unlink a unit or recursively remove evidence after a failed or
         # unproved product stop/uninstall.
