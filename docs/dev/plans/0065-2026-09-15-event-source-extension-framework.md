@@ -5,8 +5,8 @@ Lane: P52
 Issues: #81, #82, #83, #84, #85
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P52-G1
-Goal Version: P52-G1-v6
-Checkpoint: P52-G1-C06
+Goal Version: P52-G1-v7
+Checkpoint: P52-G1-C07
 
 ## Goal objective
 
@@ -56,6 +56,12 @@ migration #84 is integration-ready in PR #95 at
 preserving legacy instance/arm ordering, and passing 68 focused tests, 435
 comprehensive Python tests, 12 plugin tests, compilation, installed-wheel CI on
 Python 3.11/3.12, and independent review with no findings.
+
+GitHub migration #84 subsequently squash-merged at canonical
+`e0d88620a7bfc9208b97dd29e420639d391c0ecf`, closing the issue. Canonical main
+passes 435 Python and 12 plugin tests. Issue #85 is now the sole ready slice;
+its bounded plan is
+`docs/dev/plans/0069-2026-09-15-source-registry-productization.md`.
 
 Graphiti was healthy but returned no P52-specific durable facts. Current source,
 Git, GitHub, policy, plan, and test evidence are authoritative. Deterministic

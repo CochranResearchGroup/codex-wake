@@ -3124,3 +3124,30 @@ accepted, #84 is integration-ready at
 canonical #84 acceptance. Movement is `outcome_progress`. Next action: merge
 this readiness projection and PR #95, clean up the accepted lane, then start
 the bounded #85 productization and installed-compatibility join.
+
+## Turn 151 | 2026-09-15
+
+Accepted GitHub migration #84 and bounded the final P52 productization join.
+
+- Readiness PR #96 squash-merged at canonical `bd52d02651540c5153b6415e478c5472bc27ef14`.
+  PR #95 then squash-merged at canonical
+  `e0d88620a7bfc9208b97dd29e420639d391c0ecf`, closing #84.
+- Canonical main passed 435 comprehensive Python tests, 12 plugin tests,
+  compilation, and diff hygiene. The accepted #84 worktree plus local and
+  remote topic branches were removed.
+- CodeGraph located the #85 operator boundary in `signal_readiness` and the
+  support export that consumes it. The accepted direction is pure catalogue
+  introspection with additive output; introspection may not invoke factories,
+  create provider clients, read a provider, or mutate runtime state.
+- Graphiti was healthy but returned no P52-specific productization facts, so
+  current source, plans, Git, GitHub, and tests remain authoritative.
+- Published bounded plan
+  `docs/dev/plans/0069-2026-09-15-source-registry-productization.md` for issue
+  #85. No provider, dispatch, install, release, deployment, or global runtime
+  effect occurred.
+
+Acceptance state: P52 is open at `P52-G1-v7` / `P52-G1-C07`; #82 through #84
+are accepted, #85 is the sole ready slice, and no implementation lane is yet
+active. Movement is `outcome_progress`. Next action: merge this plan checkpoint,
+create the exact #85 branch from canonical main, publish its active-lane
+assignment, then run the bounded standard-tier implementation and review.
