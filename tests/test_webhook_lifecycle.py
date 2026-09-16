@@ -462,6 +462,9 @@ class WebhookListenerConfigTests(unittest.TestCase):
             writer.execute("PRAGMA journal_mode=WAL")
             writer.execute("UPDATE journal_meta SET migrated_at = migrated_at WHERE singleton = 1")
             writer.commit()
+            journal.chmod(0o600)
+            for suffix in ("-wal", "-shm"):
+                journal.with_name(journal.name + suffix).chmod(0o600)
             before = {
                 item.name: hashlib.sha256(item.read_bytes()).hexdigest()
                 for item in journal.parent.glob("journal.sqlite3*")
