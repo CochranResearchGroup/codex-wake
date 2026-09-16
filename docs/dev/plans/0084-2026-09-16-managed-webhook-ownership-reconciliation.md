@@ -1,6 +1,6 @@
 # Managed webhook ownership and reconciliation
 
-State: OPEN
+State: CLOSED
 Lane: P54-C1
 Issue: #138
 Branch: `feat/issue-138-managed-webhook-reconciliation`
@@ -9,6 +9,15 @@ Integration: `squash`
 Parent plan: `docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md`
 
 ## Current state
+
+Accepted on canonical `origin/main` at
+`a3b2c985d9b3d9ef4e1db53d7fbc8479c08455c2` through PR #143. GitHub closed
+issue #138 after both hosted Python release gates passed on exact PR head
+`51b13da1ce7bdd8dfbf4d4232c61a498a7646d92`. Verification 0082 owns the
+canonical receipt. Issues #139 and #140 are unblocked; all provider, service,
+secret, ingress, installation, release, and dispatch effects remained zero.
+
+Historical implementation context follows.
 
 Plan 0083 is canonical at `74dd2e6`, parent issue #135 is open, and the
 approved child graph is published as #138 through #142. Issue #138 is the
@@ -150,7 +159,8 @@ provider, service, secret, ingress, installation, release, and dispatch effect
 counts remain zero. Independent review ACCEPTS clean checkpoint `93ba14a`:
 all eight original findings and the residual UPDATE variant are closed, its
 37-test focused rerun passes, and no remediation regression or live effect was
-found. Hosted integration gates and canonical-main readback remain.
+found. Both hosted integration gates and canonical-main readback passed through
+PR #143 and merge `a3b2c98`.
 
 ## Model allocation
 
