@@ -26,6 +26,7 @@ from .signals import Degraded, Ingested, Invalid, SignalEngine, SourceAnchor
 @dataclass(frozen=True, slots=True)
 class WebhookConfig:
     secret_refs: tuple[str, ...]
+    secret_generations: tuple[int, ...] = ()
     max_body_bytes: int = 262144
     max_age_seconds: int = 900
     future_skew_seconds: int = 30
@@ -43,12 +44,24 @@ class WebhookResult:
 class GitHubWebhookIngress:
     def __init__(self, adapter: GitHubPollingAdapter, client: GitHubReadClient, module: SignalEngine, *,
                  checkpoints: CheckpointReader, anchor: SourceAnchor, config: WebhookConfig,
-                 resolve_secret: Callable[[str], bytes], monotonic: Callable[[], float] = time.monotonic):
+                 resolve_secret: Callable[[str], bytes], monotonic: Callable[[], float] = time.monotonic,
+                 admitted_generations: Callable[[datetime], tuple[int, ...]] | None = None,
+                 committed_delivery: Callable[[int, str], None] | None = None):
         if (type(config) is not WebhookConfig or type(config.secret_refs) is not tuple
                 or not 1 <= len(config.secret_refs) <= 2
                 or not all(type(ref) is str and re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,63}", ref)
                            for ref in config.secret_refs)
                 or len(set(config.secret_refs)) != len(config.secret_refs)
+                or type(config.secret_generations) is not tuple
+                or config.secret_generations and (
+                    len(config.secret_generations) != len(config.secret_refs)
+                    or len(set(config.secret_generations)) != len(config.secret_generations)
+                    or not all(type(item) is int and 1 <= item < 2**31 for item in config.secret_generations)
+                )
+                or (admitted_generations is None) != (committed_delivery is None)
+                or admitted_generations is not None and (
+                    not config.secret_generations or not callable(admitted_generations) or not callable(committed_delivery)
+                )
                 or any(type(value) is not int or not low <= value <= high for value, low, high in (
                     (config.max_body_bytes, 1024, 1048576), (config.max_age_seconds, 1, 86400),
                     (config.future_skew_seconds, 0, 300), (config.requests_per_window, 1, 10000),
@@ -61,6 +74,8 @@ class GitHubWebhookIngress:
         self.anchor = anchor
         self.config = config
         self.resolve_secret = resolve_secret
+        self.admitted_generations = admitted_generations
+        self.committed_delivery = committed_delivery
         self._monotonic = monotonic
         self._inflight = threading.Lock()
         self._window_start = None
@@ -133,25 +148,44 @@ class GitHubWebhookIngress:
                     return WebhookResult(400, "HEADERS_INVALID")
                 selected[key] = value
             signature = selected.get("x-hub-signature-256", "")
+            admitted = None
+            if self.admitted_generations is not None:
+                try:
+                    admitted = self.admitted_generations(now)
+                    if (type(admitted) is not tuple or not admitted
+                            or len(set(admitted)) != len(admitted)
+                            or not all(type(item) is int and item in self.config.secret_generations for item in admitted)):
+                        return WebhookResult(503, "ROTATION_UNAVAILABLE")
+                except Exception:
+                    return WebhookResult(503, "ROTATION_UNAVAILABLE")
             if not re.fullmatch(r"sha256=[0-9a-f]{64}", signature):
                 return WebhookResult(401, "SIGNATURE_INVALID")
         except Exception:
             return WebhookResult(400, "PAYLOAD_INVALID")
         matched = False
+        matched_generations = []
         unavailable = False
-        for ref in self.config.secret_refs:
+        pairs = zip(self.config.secret_refs, self.config.secret_generations or (0,) * len(self.config.secret_refs))
+        for ref, generation in pairs:
+            if admitted is not None and generation not in admitted:
+                continue
             try:
                 secret = self.resolve_secret(ref)
                 if type(secret) is not bytes or not 16 <= len(secret) <= 4096:
                     raise ValueError("unavailable secret")
                 expected = "sha256=" + hmac.new(secret, body, hashlib.sha256).hexdigest()
-                matched |= hmac.compare_digest(expected, signature)
+                selected_match = hmac.compare_digest(expected, signature)
+                matched |= selected_match
+                if selected_match and generation:
+                    matched_generations.append(generation)
             except Exception:
                 unavailable = True
         if not matched:
             if unavailable:
                 return WebhookResult(503, "SECRET_UNAVAILABLE")
             return WebhookResult(401, "SIGNATURE_INVALID")
+        if admitted is not None and len(matched_generations) != 1:
+            return WebhookResult(503, "SIGNATURE_AMBIGUOUS")
         if selected.get("x-github-event") != "workflow_run":
             return WebhookResult(403, "EVENT_NOT_ALLOWED")
         if not re.fullmatch(r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}",
@@ -217,6 +251,11 @@ class GitHubWebhookIngress:
             return WebhookResult(503, "COMMIT_FAILED")
         if not isinstance(result, Ingested) or len(result.receipts) != 1:
             return WebhookResult(503, "COMMIT_FAILED")
+        if self.committed_delivery is not None:
+            try:
+                self.committed_delivery(matched_generations[0], str(result.receipts[0].receipt_id))
+            except Exception:
+                return WebhookResult(503, "ROTATION_COMMIT_FAILED")
         self._deliveries[delivery] = digest
         self._deliveries.move_to_end(delivery)
         while len(self._deliveries) > self.config.delivery_cache_size:
