@@ -3629,3 +3629,26 @@ Acceptance state: retained service evidence advances #107, but polling
 projection remains unsatisfied. Movement is `blocker_reduction`. Next action:
 test-drive the Plan 0076 source-only publisher correction, validate it without a
 service effect, and complete the issue-linked PR if the combined evidence passes.
+
+## Turn 169 | 2026-09-16
+
+Closed Plan 0076 at product health projection and opened bounded Plan 0077.
+
+- Checkpoint `84d59fd` gives the generated provider-free poll fixture the same
+  current-process record publisher as the daemon default path.
+- Independent execution on a fresh temporary journal proved receipts `1 -> 1`,
+  matches `0 -> 1`, pending `1 -> 0`, firing `0 -> 1`, fired `1`, dispatched
+  `0`, and zero production-provider or dispatch tripwire calls.
+- Strict convergence still failed because `GitHubSignalRunner` discarded the
+  already-persisted health code and observation time when constructing its
+  per-instance result, returning `code=""` and `observed_at=null` instead of
+  `GITHUB_COVERAGE_UNPROVEN` and the aware poll time.
+- The retained Plan 0075 receipt SHA-256 remained
+  `8cbb2508dfb8ee9f96a5051b4cb4953d42e769de493fed3cd19c0ab098b6e605`.
+  No retained evidence, service, provider, dispatch, or ingress effect occurred.
+
+Acceptance state: publisher-backed firing projection is accepted, while the
+product health metadata required by strict #107 qualification remains open.
+Movement is `blocker_reduction`. Next action: test-drive only the GitHub
+per-instance health projection, execute the full tripwired fixture test, and
+close #107 through CI if the composite evidence passes.

@@ -764,8 +764,10 @@ active isolated installed-wheel and loopback-service qualification under Plan
 source-only successor correction at `710c001` enabled the installed service to
 pass readiness, manual restart, and all three signed delivery checks. Plan 0075
 then failed safely at its final source-only polling projection because the
-fixture omitted the daemon's record publisher. Plan 0076 repairs and proves
-that isolated projection without repeating the service effect. #108 and #109 remain
+fixture omitted the daemon's record publisher. Plan 0076 repaired and proved
+that projection, exposing a dropped GitHub health code/time in the product
+daemon result. Plan 0077 corrects that bounded metadata defect without repeating
+the service effect. #108 and #109 remain
 dependency-blocked for Cooper/bastion HTTPS
 publication and one live GitHub delivery. The shared ingress repository was
 cleaned, validated, structured into two final commits, and pushed at `5fcce95`

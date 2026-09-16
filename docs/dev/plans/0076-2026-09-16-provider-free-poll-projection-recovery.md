@@ -1,6 +1,7 @@
 # Provider-free poll projection recovery
 
-State: OPEN
+State: CLOSED
+Outcome: BLOCKED_BY_PRODUCT_HEALTH_PROJECTION
 Lane: P53-C4-v3
 Issue: #107
 Predecessor: Plan 0075 (`FAILED_SAFE`)
@@ -24,6 +25,18 @@ original receipt/root remain retained, and no provider, dispatch, or ingress
 effect occurred. Independent read-only diagnosis accepted one exact correction:
 construct the fixture module with `WakeRecordPublisher(root,
 current_reader_capability(root))`, matching the product daemon's default open.
+
+Checkpoint `84d59fd374e8ce66b589797777df1e2071f39732` implements that
+publisher parity and proves publisher-backed pending-to-firing projection.
+Closed-world review executed the generated script on a fresh temporary journal:
+receipts stayed `1`, matches changed `0` to `1`, pending changed `1` to `0`,
+firing changed `0` to `1`, `fired` was `1`, and provider-client, dispatch, and
+`dispatched` counts were all zero. Strict convergence still rejected the result
+because `GitHubSignalRunner` left per-instance `health_code` empty and
+`observed_at` null rather than projecting its persisted
+`GITHUB_COVERAGE_UNPROVEN` health. This is a product runtime metadata defect,
+not a publisher or source-only fixture defect. Plan 0077 succeeds this packet;
+Plan 0076 will not weaken the assertion or expand into product code.
 
 ## Objective
 
