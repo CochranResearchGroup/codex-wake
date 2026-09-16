@@ -1,20 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P52-C0
-    objective: Establish P52 architecture, issue graph, and bounded execution controls
-    plan: docs/dev/plans/0065-2026-09-15-event-source-extension-framework.md
-    plan_ref: refs/remotes/origin/chore/issue-81-p52-goal-start
-    branch: chore/issue-81-p52-goal-start
+  - id: P52-C1
+    objective: Implement the closed built-in source registry and provider-free conformance tracer
+    plan: docs/dev/plans/0066-2026-09-15-built-in-source-registry-contract.md
+    plan_ref: refs/remotes/origin/feat/issue-82-source-registry-contract
+    branch: feat/issue-82-source-registry-contract
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: a59f2e60e68a83872dec72ef04b1473c8e0f8b8b
-    remote_ref: refs/remotes/origin/chore/issue-81-p52-goal-start
+    checkpoint: b12d4254173a70b44ddbf7929a7ec35051db6dbd
+    remote_ref: refs/remotes/origin/feat/issue-82-source-registry-contract
     integration: squash
-    work_items: [CochranResearchGroup/codex-wake#81]
-    owner: primary-orchestrator
-    write_surface: P52 plan, roadmap, runbook, active-lane projection, and GitHub coordination only
+    work_items: [CochranResearchGroup/codex-wake#82]
+    owner: primary-orchestrator with one bounded gpt-6-astra high implementation worker
+    write_surface: source registry contract, generic daemon injection seam, focused tests, and lane documentation
     live_effect: none
     dependencies: []
     overlaps: []
