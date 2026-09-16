@@ -35,6 +35,12 @@ _SPEC.loader.exec_module(contract)
 
 MAX_COMMAND_SECONDS = 120
 READY_SECONDS = 30
+_CONSOLE_SCRIPTS = {
+    "codex-wake": "codex_wake.cli:main",
+    "codex-waked": "codex_wake.daemon:main",
+    "codex-wake-hook": "codex_wake.hook:main",
+    "codex-wake-github-webhook": "codex_wake.webhook_listener:main",
+}
 
 
 @dataclass(frozen=True)
@@ -48,6 +54,7 @@ class LocalContext:
     venv: Path
     cli: Path
     daemon: Path
+    hook: Path
     listener: Path
     python: Path
     unit_dir: Path
@@ -69,6 +76,7 @@ def context_for(root: Path, *, repo_root: Path | None = None,
         artifact_dir=root / "evidence", wheel_dir=root / "wheel",
         export_root=root / "export", venv=venv,
         cli=venv / "bin/codex-wake", daemon=venv / "bin/codex-waked",
+        hook=venv / "bin/codex-wake-hook",
         listener=venv / "bin/codex-wake-github-webhook",
         python=venv / "bin/python", unit_dir=unit_dir,
         unit_path=unit_dir / contract.UNIT,
@@ -250,11 +258,44 @@ class ProductionLocalAdapter:
         path = Path(str(wheel.get("wheel_path", "")))
         if path.parent != self.context.wheel_dir or not path.is_file():
             raise RuntimeError("wheel path escaped the isolated build")
-        self._command(
-            [str(self.context.venv / "bin/pip"), "install", "--no-deps", str(path)],
-            name="install-wheel",
-        )
-        required = (self.context.cli, self.context.daemon, self.context.listener, self.context.python)
+        install_env = dict(self.env)
+        install_env.pop("PYTHONPATH", None)
+        install_env.pop("PYTHONHOME", None)
+        previous = self.env
+        self.env = install_env
+        try:
+            self._command(
+                [str(self.context.venv / "bin/pip"), "install", "--no-deps", "--force-reinstall", str(path)],
+                name="install-wheel",
+            )
+            installed = self._json(
+                [str(self.context.python), "-c", """
+import importlib.metadata as metadata
+import json
+from pathlib import Path
+
+distribution = metadata.distribution(\"codex-wake\")
+entries = {
+    entry.name: entry.value
+    for entry in distribution.entry_points
+    if entry.group == \"console_scripts\"
+}
+print(json.dumps({
+    \"location\": str(Path(distribution.locate_file(\"\")).resolve()),
+    \"console_scripts\": entries,
+}, sort_keys=True))
+"""],
+                name="verify-wheel-install",
+            )
+        finally:
+            self.env = previous
+        location = Path(str(installed.get("location", "")))
+        if not location.is_dir() or not location.is_relative_to(self.context.venv.resolve()):
+            raise RuntimeError("installed distribution is outside the isolated virtual environment")
+        if installed.get("console_scripts") != _CONSOLE_SCRIPTS:
+            raise RuntimeError("installed distribution console scripts are incomplete")
+        required = (self.context.cli, self.context.daemon, self.context.hook,
+                    self.context.listener, self.context.python)
         if not all(item.is_file() for item in required):
             raise RuntimeError("installed qualification executables are incomplete")
         return {"global_install_mutations": 0,
@@ -417,24 +458,26 @@ class ProductionLocalAdapter:
     def runtime_census(self, _root: Path, _state: Mapping[str, Any]) -> Mapping[str, Any]:
         active_result = self._command(
             ["systemctl", "--user", "is-active", contract.UNIT], name="cleanup-active",
-            allow=(0, 3),
+            allow=(0, 3, 4),
         )
         active = active_result.stdout.strip()
-        if not active or (active_result.returncode == 3 and active != "inactive"):
+        if (active_result.returncode, active) not in {(0, "active"), (3, "inactive"), (4, "inactive")}:
             raise RuntimeError("cleanup active-state systemctl query is invalid")
         enabled_result = self._command(
             ["systemctl", "--user", "is-enabled", contract.UNIT], name="cleanup-enabled",
-            allow=(0, 1),
+            allow=(0, 1, 4),
         )
         enabled_raw = enabled_result.stdout.strip()
-        if not enabled_raw or (enabled_result.returncode == 1 and enabled_raw not in {"disabled", "not-found"}):
+        if (enabled_result.returncode, enabled_raw) not in {
+            (0, "enabled"), (1, "disabled"), (1, "not-found"), (4, "not-found"),
+        }:
             raise RuntimeError("cleanup enabled-state systemctl query is invalid")
         pid_result = self._command(
             ["systemctl", "--user", "show", contract.UNIT, "--property=MainPID", "--value"],
             name="cleanup-pid",
         )
         pid_text = pid_result.stdout.strip()
-        if not pid_text or not pid_text.isdigit():
+        if (pid_result.returncode, pid_text) != (0, "0"):
             raise RuntimeError("cleanup PID systemctl query is invalid")
         failed_units = self._failed_units("cleanup-failed-units")
         return {"unit_absent": not self.context.unit_path.exists() and not self.context.unit_path.is_symlink(),

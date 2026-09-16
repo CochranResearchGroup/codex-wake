@@ -5,8 +5,8 @@ Lane: P53
 Issues: #103, #104, #105, #106, #107, #108, #109
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P53-G1
-Goal Version: P53-G1-v3
-Checkpoint: P53-G1-C06
+Goal Version: P53-G1-v4
+Checkpoint: P53-G1-C07
 
 ## Goal objective
 
@@ -64,10 +64,14 @@ listener, provider webhook, or live dispatch currently exists.
 
 The #109 read-only provider preflight confirms actor `ecochran76`, repository
 `CochranResearchGroup/codex-wake` / ID `1242753508`, active CI workflow
-`CI` / ID `279450573`, and no existing repository webhook. Plan 0081 owns the
-provider-free runner and the later exact lifecycle packet. Creation, the
-post-anchor main-CI trigger, and deletion are distinct bounded effects; current
-capability evidence does not authorize them.
+`CI` / ID `279450573`, and no existing repository webhook. Plan 0081 integrated
+the provider-free runner, then truthfully closed on its one no-retry live
+failure before any provider effect: caller `PYTHONPATH` contaminated isolated
+wheel installation, and the cleanup census rejected legitimate systemd rc 4
+unit-absent semantics. Secret retirement completed, the failure root remains
+owner-only, hook and trigger counters remain zero, and PR #131 closed unmerged.
+Plan 0082 owns the provider-free correction and fresh successor preparation;
+it does not inherit or renew Plan 0081's consumed effect authority.
 
 ## Architecture and security decisions
 

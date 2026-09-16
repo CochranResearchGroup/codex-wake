@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -38,6 +39,66 @@ class FakeAdapter(local.ProductionLocalAdapter):
 
 
 class LiveGitHubLocalAdapterTests(unittest.TestCase):
+    @staticmethod
+    def _write_wheel(path: Path, *, include_hook: bool = True) -> None:
+        scripts = {
+            "codex-wake": "codex_wake.cli:main",
+            "codex-waked": "codex_wake.daemon:main",
+            "codex-wake-github-webhook": "codex_wake.webhook_listener:main",
+        }
+        if include_hook:
+            scripts["codex-wake-hook"] = "codex_wake.hook:main"
+        modules = {entry.split(":", 1)[0] for entry in scripts.values()}
+        with zipfile.ZipFile(path, "w") as wheel:
+            wheel.writestr("codex_wake/__init__.py", "")
+            for module in modules:
+                wheel.writestr(module.replace(".", "/") + ".py", "def main(): return 0\n")
+            wheel.writestr("codex_wake-0.5.2.dist-info/METADATA", "Metadata-Version: 2.1\nName: codex-wake\nVersion: 0.5.2\n")
+            wheel.writestr("codex_wake-0.5.2.dist-info/WHEEL", "Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: true\nTag: py3-none-any\n")
+            wheel.writestr("codex_wake-0.5.2.dist-info/entry_points.txt", "[console_scripts]\n" + "".join(
+                f"{name} = {target}\n" for name, target in scripts.items()
+            ))
+            wheel.writestr("codex_wake-0.5.2.dist-info/RECORD", "")
+
+    def test_install_wheel_ignores_pythonpath_egg_info_and_proves_distribution(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root, repo = base / "root", base / "repo"
+            root.mkdir(); repo.mkdir()
+            adapter = local.ProductionLocalAdapter(root, repo_root=repo, env={})
+            adapter.create_venv(root)
+            adapter.context.wheel_dir.mkdir()
+            wheel = adapter.context.wheel_dir / "codex_wake-0.5.2-py3-none-any.whl"
+            self._write_wheel(wheel)
+            contaminated = base / "contaminated"
+            egg_info = contaminated / "codex_wake.egg-info"
+            egg_info.mkdir(parents=True)
+            (egg_info / "PKG-INFO").write_text(
+                "Metadata-Version: 2.1\nName: codex-wake\nVersion: 0.5.2\n", encoding="utf-8",
+            )
+            adapter.env.update({"PYTHONPATH": str(contaminated), "PYTHONHOME": sys.base_prefix})
+
+            installed = adapter.install_wheel(root, {"wheel_path": str(wheel)})
+
+            self.assertEqual(installed["global_install_mutations"], 0)
+            self.assertEqual(adapter.env["PYTHONPATH"], str(contaminated))
+            self.assertEqual(adapter.env["PYTHONHOME"], sys.base_prefix)
+            self.assertTrue((adapter.context.venv / "bin/codex-wake-hook").is_file())
+
+    def test_install_wheel_rejects_distribution_missing_a_console_script(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root, repo = base / "root", base / "repo"
+            root.mkdir(); repo.mkdir()
+            adapter = local.ProductionLocalAdapter(root, repo_root=repo, env={})
+            adapter.create_venv(root)
+            adapter.context.wheel_dir.mkdir()
+            wheel = adapter.context.wheel_dir / "codex_wake-0.5.2-py3-none-any.whl"
+            self._write_wheel(wheel, include_hook=False)
+
+            with self.assertRaisesRegex(RuntimeError, "console scripts"):
+                adapter.install_wheel(root, {"wheel_path": str(wheel)})
+
     def test_source_configuration_is_exact_disabled_then_enabled(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -95,7 +156,7 @@ class LiveGitHubLocalAdapterTests(unittest.TestCase):
             root, repo = base / "root", base / "repo"
             root.mkdir(); repo.mkdir()
             adapter = FakeAdapter(root, repo, {})
-            adapter.queue((3, "inactive\n"), (1, "not-found\n"), (0, "0\n"), (0, ""))
+            adapter.queue((4, "inactive\n"), (4, "not-found\n"), (0, "0\n"), (0, ""))
             with patch.object(adapter, "_matching_processes", return_value=0), \
                     patch.object(adapter, "_port_free", return_value=True):
                 value = adapter.runtime_census(root, {})
@@ -103,7 +164,7 @@ class LiveGitHubLocalAdapterTests(unittest.TestCase):
                 "unit_absent": True, "active": "inactive", "enabled": "disabled",
                 "pid": 0, "matching_processes": 0, "port_8820_released": True,
                 "unit_query": {"ok": True, "returncode": 0,
-                               "observed_returncodes": {"active": 3, "enabled": 1, "pid": 0}},
+                               "observed_returncodes": {"active": 4, "enabled": 4, "pid": 0}},
                 "failed_units_query": {"ok": True, "returncode": 0, "units": []},
             })
 
@@ -114,6 +175,14 @@ class LiveGitHubLocalAdapterTests(unittest.TestCase):
             root.mkdir(); repo.mkdir()
             adapter = FakeAdapter(root, repo, {})
             adapter.queue((3, "inactive\n"), (1, ""))
+            with self.assertRaisesRegex(RuntimeError, "enabled-state"):
+                adapter.runtime_census(root, {})
+            adapter = FakeAdapter(root, repo, {})
+            adapter.queue((4, "active\n"))
+            with self.assertRaisesRegex(RuntimeError, "active-state"):
+                adapter.runtime_census(root, {})
+            adapter = FakeAdapter(root, repo, {})
+            adapter.queue((4, "inactive\n"), (4, "disabled\n"))
             with self.assertRaisesRegex(RuntimeError, "enabled-state"):
                 adapter.runtime_census(root, {})
             adapter = FakeAdapter(root, repo, {})
