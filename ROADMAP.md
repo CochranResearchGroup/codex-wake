@@ -730,8 +730,9 @@ Current State: PR #89 accepted issue #82 at canonical `f8059cd`, freezing the
 closed built-in source-family registry plus provider-free conformance fixture.
 PR #93 accepted local-source migration #83 at canonical `3c30947`; PR #95
 accepted GitHub migration #84 at canonical `e0d8862`. Issue #85 is now the sole
-ready serialized join for catalogue-backed operator surfaces, maintainer docs,
-and one isolated provider-free installed-wheel smoke. No new
+active serialized join in an isolated worktree for catalogue-backed operator
+surfaces, maintainer docs, and one isolated provider-free installed-wheel
+smoke. No new
 source, provider effect, live dispatch, arbitrary plugin loading, release,
 deployment, or global installation refresh is authorized.
 

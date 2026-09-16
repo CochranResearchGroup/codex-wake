@@ -3151,3 +3151,26 @@ are accepted, #85 is the sole ready slice, and no implementation lane is yet
 active. Movement is `outcome_progress`. Next action: merge this plan checkpoint,
 create the exact #85 branch from canonical main, publish its active-lane
 assignment, then run the bounded standard-tier implementation and review.
+
+## Turn 152 | 2026-09-15
+
+Published and assigned the final P52 implementation lane.
+
+- Plan PR #97 passed both Python 3.11/3.12 release gates and squash-merged at
+  canonical `606bc3b9d7090a979035ecbf587c1252727af70e`.
+- Created and published branch
+  `feat/issue-85-source-registry-productization` from that exact canonical
+  commit in an isolated worktree.
+- Assigned the bounded implementation and focused-test surface to the planned
+  `gpt-5.6-terra` medium route. The primary retains architecture, shared
+  reconciliation, installed-wheel effects, GitHub integration, and final
+  acceptance; one fresh economical reviewer remains available.
+- No provider read or mutation, live observation, dispatch, installation,
+  release, deployment, or global runtime effect occurred.
+
+Acceptance state: P52 is open at `P52-G1-v8` / `P52-G1-C08`; #82 through #84
+are accepted and #85 is the sole active implementation lane at checkpoint
+`606bc3b9d7090a979035ecbf587c1252727af70e`. Movement is `outcome_progress`.
+Next action: merge this assignment projection, execute the bounded #85
+implementation and review, then run the one authorized isolated installed-
+wheel smoke.
