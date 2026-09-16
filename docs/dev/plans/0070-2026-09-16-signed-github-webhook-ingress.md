@@ -5,7 +5,7 @@ Lane: P53
 Issues: #103, #104, #105, #106, #107, #108, #109
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P53-G1
-Goal Version: P53-G1-v2
+Goal Version: P53-G1-v3
 Checkpoint: P53-G1-C06
 
 ## Goal objective
@@ -61,6 +61,13 @@ public HTTPS. Bastion commit `4e7bc69` retains the exact route; the canary is
 removed with no process or listener. #109 is now eligible for its separately
 gated GitHub provider mutation and one live delivery observation. No installed
 listener, provider webhook, or live dispatch currently exists.
+
+The #109 read-only provider preflight confirms actor `ecochran76`, repository
+`CochranResearchGroup/codex-wake` / ID `1242753508`, active CI workflow
+`CI` / ID `279450573`, and no existing repository webhook. Plan 0081 owns the
+provider-free runner and the later exact lifecycle packet. Creation, the
+post-anchor main-CI trigger, and deletion are distinct bounded effects; current
+capability evidence does not authorize them.
 
 ## Architecture and security decisions
 
@@ -167,7 +174,7 @@ not reported, so no allocation-savings claim is made.
 
 ```text
 goal_id: P53-G1
-goal_version: P53-G1-v2
+goal_version: P53-G1-v3
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_review_discovery_passes: 1
@@ -180,8 +187,18 @@ c5_ingress_canary_establishments: 2
 c5_ingress_canary_retries: 1
 external_ingress_publications: 1
 external_ingress_retries: 0
-github_webhook_mutation_attempts: 1
-github_webhook_mutation_retries: 0
+github_webhook_create_attempts: 1
+github_webhook_create_retries: 0
+github_workflow_trigger_attempts: 1
+github_workflow_trigger_retries: 0
+github_webhook_delete_attempts: 1
+github_webhook_delete_retries: 0
+github_webhook_redelivery_attempts: 0
+c6_runtime_establishments: 1
+c6_runtime_retries: 0
+c6_runtime_cleanup_attempts: 1
+c6_secret_provisions: 1
+c6_secret_retirements: 1
 live_delivery_observation_attempts: 1
 live_dispatch_attempts: 0
 release_attempts: 0

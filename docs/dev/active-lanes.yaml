@@ -1,3 +1,24 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P53-C6
+    objective: Qualify one real signed GitHub workflow completion and polling convergence
+    plan: docs/dev/plans/0081-2026-09-16-live-github-webhook-delivery.md
+    plan_ref: refs/heads/feat/issue-109-live-github-delivery
+    branch: feat/issue-109-live-github-delivery
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: fd038ebaea5fb1e9a7e81d3f48d18417430258dc
+    validation_status: provider_free_runner_required
+    validation_ref: fd038ebaea5fb1e9a7e81d3f48d18417430258dc
+    remote_ref: refs/remotes/origin/feat/issue-109-live-github-delivery
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#109]
+    owner: primary live-lifecycle owner with one bounded implementation worker and one closed-world reviewer
+    write_surface: Plan 0081, live qualification runner and tests, isolated C6 runtime, verification receipt, roadmap, and runbook
+    live_effect: after exact gate only, one hook create, one main CI trigger, one hook delete, zero redeliveries, and zero dispatch
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-16
