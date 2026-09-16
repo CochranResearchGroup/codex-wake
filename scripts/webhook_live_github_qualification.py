@@ -283,7 +283,11 @@ def receipt_for(state: Mapping[str, Any], *, cleanup: Mapping[str, Any] | None =
         "provider_transport": "primary_owned_injected_only"}
     for key in ("candidate", "wheel", "anchor", "trigger", "delivery", "runtime_evidence"):
         if key in state:
-            receipt[key] = state[key]
+            receipt[key] = (
+                {name: value for name, value in state[key].items() if name != "wheel_path"}
+                if key == "wheel" and isinstance(state[key], Mapping)
+                else state[key]
+            )
     if cleanup is not None:
         receipt["cleanup"] = dict(cleanup)
     return receipt
@@ -415,7 +419,10 @@ def _validate_wheel_evidence(value: Mapping[str, Any], candidate: Mapping[str, A
     digest = value.get("wheel_sha256")
     if type(digest) is not str or len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
         raise RuntimeError("isolated wheel evidence is invalid")
-    return {**expected, "wheel_sha256": digest}
+    wheel_path = value.get("wheel_path")
+    if type(wheel_path) is not str or not wheel_path:
+        raise RuntimeError("isolated wheel path is invalid")
+    return {**expected, "wheel_path": wheel_path, "wheel_sha256": digest}
 
 
 def prepare_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEffectors,
@@ -679,13 +686,15 @@ def cleanup_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEff
     try:
         uninstall = _expect(effectors.uninstall_service(root, state), unit=UNIT, uninstalled=True)
         census = effectors.runtime_census(root, state)
-        unrelated = effectors.unrelated_state(root, state)
-        evidence = _validate_cleanup_census(census, unrelated)
         retired = retire_webhook_environment(root)
         if not retired:
             raise RuntimeError("webhook secret environment was not retired")
         state = _count_runtime(state, "secret_retirement")
-        state.update({"phase": "runtime_cleaned", "secret_retired": True,
+        state.update({"secret_retired": True, "secret_retirement_evidence": {"artifacts_absent": True}})
+        _stage_state(root, state, env=env)
+        unrelated = effectors.unrelated_state(root, state)
+        evidence = _validate_cleanup_census(census, unrelated)
+        state.update({"phase": "runtime_cleaned",
                       "runtime_cleanup_evidence": {"uninstall": uninstall, **evidence}})
         _stage_state(root, state, env=env)
         return receipt_for(state)

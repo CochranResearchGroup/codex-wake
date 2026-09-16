@@ -49,6 +49,7 @@ def effectors(calls: list[str], *, bad_census: bool = False, bad_query: bool = F
     def build_wheel(_root, candidate):
         calls.append("wheel")
         return {
+            "wheel_path": "/private/p53-c6-live-github-test/wheel/codex_wake.whl",
             "wheel_sha256": "c" * 64,
             "archive_ref": candidate["canonical_ref"],
             "archive_commit": candidate["commit"],
@@ -134,8 +135,13 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             })
             self.assertEqual(result["wheel"], {
                 "archive_ref": "refs/remotes/origin/main", "archive_commit": "a" * 40,
-                "archive_tree": "b" * 40, "build_commit": "a" * 40, "wheel_sha256": "c" * 64,
+                "archive_tree": "b" * 40, "build_commit": "a" * 40,
+                "wheel_sha256": "c" * 64,
             })
+            self.assertEqual(
+                runner.load_private_state(root, env=env)["wheel"]["wheel_path"],
+                "/private/p53-c6-live-github-test/wheel/codex_wake.whl",
+            )
             environment = runner.environment_path(root)
             provider_payload = runner.provider_payload_path(root)
             self.assertEqual(environment.stat().st_mode & 0o777, 0o600)
@@ -146,6 +152,7 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             self.assertNotIn("s" * 32, staged)
             self.assertNotIn("token-private", staged)
             self.assertIn(runner.SECRET_REF, staged)
+            self.assertNotIn("wheel_path", staged)
 
     def test_prepare_refuses_existing_state_or_packet_material(self) -> None:
         with private_packet() as (root, receipt, env):
@@ -175,6 +182,23 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             self.assertFalse(runner.environment_path(root).exists())
             self.assertFalse(runner.provider_payload_path(root).exists())
             self.assertEqual(runner.load_private_state(root, env=env)["runtime_counters"]["secret_retirement"], 1)
+
+    def test_cleanup_retires_secret_before_missing_unrelated_state_baseline(self) -> None:
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            calls: list[str] = []
+            runner.prepare_runtime(root, env=env, effectors=effectors(calls), secret_factory=lambda: "s" * 32, armed=True)
+            adapter = effectors(calls)
+            adapter = runner.RuntimeEffectors(
+                **{**adapter.__dict__, "unrelated_state": lambda *_args: (_ for _ in ()).throw(RuntimeError("baseline missing"))}
+            )
+            with self.assertRaisesRegex(RuntimeError, "baseline missing"):
+                runner.cleanup_runtime(root, env=env, effectors=adapter, armed=True)
+            state = runner.load_private_state(root, env=env)
+            self.assertTrue(state["secret_retired"])
+            self.assertEqual(state["runtime_counters"]["secret_retirement"], 1)
+            self.assertFalse(runner.environment_path(root).exists())
+            self.assertFalse(runner.provider_payload_path(root).exists())
 
     def test_wheel_must_bind_the_validated_candidate_not_mutable_head(self) -> None:
         with private_packet() as (root, receipt, env):

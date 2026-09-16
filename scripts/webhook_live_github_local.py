@@ -141,7 +141,7 @@ class ProductionLocalAdapter:
     def _failed_units(self, name: str) -> tuple[str, ...]:
         result = self._command(
             ["systemctl", "--user", "--failed", "--no-legend", "--plain"],
-            name=name, allow=(0, 1),
+            name=name,
         )
         return tuple(sorted(line.split()[0] for line in result.stdout.splitlines() if line.split()))
 
@@ -158,12 +158,12 @@ class ProductionLocalAdapter:
             ["git", "-C", str(self.context.repo_root), "rev-parse", "refs/remotes/origin/main"],
             name="candidate-canonical",
         ).stdout.strip()
-        tree = self._command(
-            ["git", "-C", str(self.context.repo_root), "rev-parse", "HEAD^{tree}"],
-            name="candidate-tree",
-        ).stdout.strip()
         if status or commit != canonical:
             raise RuntimeError("candidate is not clean exact origin/main")
+        tree = self._command(
+            ["git", "-C", str(self.context.repo_root), "rev-parse", f"{commit}^{{tree}}"],
+            name="candidate-tree",
+        ).stdout.strip()
         before = self._failed_units("failed-units-before")
         _owner_directory(self.context.artifact_dir)
         (self.context.artifact_dir / "failed-units-before-state.json").write_text(
@@ -172,11 +172,38 @@ class ProductionLocalAdapter:
         return {"clean": True, "canonical_ref": "refs/remotes/origin/main",
                 "commit": commit, "tree": tree}
 
-    def build_wheel(self, _root: Path, _candidate: Mapping[str, Any]) -> Mapping[str, Any]:
-        result = self._command(
-            ["git", "-C", str(self.context.repo_root), "archive", "--format=tar", "HEAD"],
+    def _archive_binding(self, candidate: Mapping[str, Any]) -> dict[str, str]:
+        commit = str(candidate.get("commit", ""))
+        tree = str(candidate.get("tree", ""))
+        ref = str(candidate.get("canonical_ref", ""))
+        if ref != "refs/remotes/origin/main" or len(commit) != 40 or len(tree) != 40:
+            raise RuntimeError("candidate archive binding is malformed")
+        observed_ref = self._command(
+            ["git", "-C", str(self.context.repo_root), "rev-parse", ref],
+            name="archive-canonical-ref",
+        ).stdout.strip()
+        observed_commit = self._command(
+            ["git", "-C", str(self.context.repo_root), "rev-parse", commit],
+            name="archive-candidate-commit",
+        ).stdout.strip()
+        observed_tree = self._command(
+            ["git", "-C", str(self.context.repo_root), "rev-parse", f"{commit}^{{tree}}"],
+            name="archive-candidate-tree",
+        ).stdout.strip()
+        if (observed_ref, observed_commit, observed_tree) != (commit, commit, tree):
+            raise RuntimeError("candidate archive is no longer bound to exact origin/main")
+        return {"archive_ref": ref, "archive_commit": commit, "archive_tree": tree,
+                "build_commit": commit}
+
+    def _archive_candidate(self, binding: Mapping[str, str]) -> subprocess.CompletedProcess:
+        return self._command(
+            ["git", "-C", str(self.context.repo_root), "archive", "--format=tar", binding["archive_commit"]],
             name="candidate-archive", binary=True,
         )
+
+    def build_wheel(self, _root: Path, candidate: Mapping[str, Any]) -> Mapping[str, Any]:
+        binding = self._archive_binding(candidate)
+        result = self._archive_candidate(binding)
         self.context.export_root.mkdir(mode=0o700)
         with tempfile.NamedTemporaryFile(dir=self.context.root, delete=False) as handle:
             handle.write(result.stdout)
@@ -213,7 +240,7 @@ class ProductionLocalAdapter:
             if any("sitecustomize" in name or "webhook_live_github" in name
                    for name in archive.namelist()):
                 raise RuntimeError("wheel contains qualification runner material")
-        return {"wheel_path": str(wheels[0]), "wheel_sha256": _sha256(wheels[0])}
+        return {**binding, "wheel_path": str(wheels[0]), "wheel_sha256": _sha256(wheels[0])}
 
     def create_venv(self, _root: Path) -> Mapping[str, Any]:
         self._command([sys.executable, "-m", "venv", str(self.context.venv)], name="create-venv")
@@ -388,24 +415,40 @@ class ProductionLocalAdapter:
         return True
 
     def runtime_census(self, _root: Path, _state: Mapping[str, Any]) -> Mapping[str, Any]:
-        active = self._command(
+        active_result = self._command(
             ["systemctl", "--user", "is-active", contract.UNIT], name="cleanup-active",
-            allow=(0, 1, 2, 3, 4),
-        ).stdout.strip() or "inactive"
-        enabled_raw = self._command(
+            allow=(0, 3),
+        )
+        active = active_result.stdout.strip()
+        if not active or (active_result.returncode == 3 and active != "inactive"):
+            raise RuntimeError("cleanup active-state systemctl query is invalid")
+        enabled_result = self._command(
             ["systemctl", "--user", "is-enabled", contract.UNIT], name="cleanup-enabled",
-            allow=(0, 1, 2, 3, 4),
-        ).stdout.strip()
-        pid_text = self._command(
+            allow=(0, 1),
+        )
+        enabled_raw = enabled_result.stdout.strip()
+        if not enabled_raw or (enabled_result.returncode == 1 and enabled_raw not in {"disabled", "not-found"}):
+            raise RuntimeError("cleanup enabled-state systemctl query is invalid")
+        pid_result = self._command(
             ["systemctl", "--user", "show", contract.UNIT, "--property=MainPID", "--value"],
-            name="cleanup-pid", allow=(0, 1, 2, 3, 4),
-        ).stdout.strip() or "0"
+            name="cleanup-pid",
+        )
+        pid_text = pid_result.stdout.strip()
+        if not pid_text or not pid_text.isdigit():
+            raise RuntimeError("cleanup PID systemctl query is invalid")
+        failed_units = self._failed_units("cleanup-failed-units")
         return {"unit_absent": not self.context.unit_path.exists() and not self.context.unit_path.is_symlink(),
-                "active": "inactive" if active in {"inactive", "unknown"} else active,
-                "enabled": "disabled" if enabled_raw in {"disabled", "not-found", ""} else enabled_raw,
-                "pid": int(pid_text) if pid_text.isdigit() else -1,
+                "active": active,
+                "enabled": "disabled" if enabled_raw in {"disabled", "not-found"} else enabled_raw,
+                "pid": int(pid_text),
                 "matching_processes": self._matching_processes(),
-                "port_8820_released": self._port_free()}
+                "port_8820_released": self._port_free(),
+                "unit_query": {"ok": True, "returncode": 0,
+                               "observed_returncodes": {"active": active_result.returncode,
+                                                        "enabled": enabled_result.returncode,
+                                                        "pid": pid_result.returncode}},
+                "failed_units_query": {"ok": True, "returncode": 0,
+                                       "units": list(failed_units)}}
 
     def unrelated_state(self, _root: Path, _state: Mapping[str, Any]) -> Mapping[str, Any]:
         before_path = self.context.artifact_dir / "failed-units-before-state.json"

@@ -95,14 +95,52 @@ class LiveGitHubLocalAdapterTests(unittest.TestCase):
             root, repo = base / "root", base / "repo"
             root.mkdir(); repo.mkdir()
             adapter = FakeAdapter(root, repo, {})
-            adapter.queue((3, "inactive\n"), (1, "not-found\n"), (1, "0\n"))
+            adapter.queue((3, "inactive\n"), (1, "not-found\n"), (0, "0\n"), (0, ""))
             with patch.object(adapter, "_matching_processes", return_value=0), \
                     patch.object(adapter, "_port_free", return_value=True):
                 value = adapter.runtime_census(root, {})
             self.assertEqual(value, {
                 "unit_absent": True, "active": "inactive", "enabled": "disabled",
                 "pid": 0, "matching_processes": 0, "port_8820_released": True,
+                "unit_query": {"ok": True, "returncode": 0,
+                               "observed_returncodes": {"active": 3, "enabled": 1, "pid": 0}},
+                "failed_units_query": {"ok": True, "returncode": 0, "units": []},
             })
+
+    def test_runtime_census_rejects_empty_or_bus_failed_systemctl_queries(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root, repo = base / "root", base / "repo"
+            root.mkdir(); repo.mkdir()
+            adapter = FakeAdapter(root, repo, {})
+            adapter.queue((3, "inactive\n"), (1, ""))
+            with self.assertRaisesRegex(RuntimeError, "enabled-state"):
+                adapter.runtime_census(root, {})
+            adapter = FakeAdapter(root, repo, {})
+            adapter.queue((3, "inactive\n"), (1, "not-found\n"), (0, "0\n"), (1, "failed to connect to bus"))
+            with self.assertRaisesRegex(RuntimeError, "failed-units"):
+                adapter.runtime_census(root, {})
+
+    def test_archive_binding_and_argv_use_exact_candidate_not_head(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            root, repo = base / "root", base / "repo"
+            root.mkdir(); repo.mkdir()
+            adapter = FakeAdapter(root, repo, {})
+            candidate = {"canonical_ref": "refs/remotes/origin/main", "commit": "a" * 40, "tree": "b" * 40}
+            adapter.queue((0, "a" * 40 + "\n"), (0, "a" * 40 + "\n"), (0, "b" * 40 + "\n"))
+            binding = adapter._archive_binding(candidate)
+            self.assertEqual(binding, {
+                "archive_ref": "refs/remotes/origin/main", "archive_commit": "a" * 40,
+                "archive_tree": "b" * 40, "build_commit": "a" * 40,
+            })
+            adapter._archive_candidate(binding)
+            self.assertEqual(adapter.commands[-1][-1], "a" * 40)
+            self.assertNotEqual(adapter.commands[-1][-1], "HEAD")
+            adapter = FakeAdapter(root, repo, {})
+            adapter.queue((0, "c" * 40 + "\n"), (0, "a" * 40 + "\n"), (0, "b" * 40 + "\n"))
+            with self.assertRaisesRegex(RuntimeError, "no longer bound"):
+                adapter._archive_binding(candidate)
 
     def test_module_has_no_github_transport_merge_redelivery_or_dispatch_path(self) -> None:
         source = SCRIPT.read_text(encoding="utf-8")
