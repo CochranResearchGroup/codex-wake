@@ -57,12 +57,16 @@ coordination ledger. Issue #104 is the sole ready implementation slice.
    type. Reject aliases, query strings, redirects, unsupported encodings,
    ambiguous request targets, and every other method/path.
 4. Require one valid bounded `Content-Length`; reject transfer encoding,
-   duplicate/conflicting framing headers, incomplete bodies, hidden suffixes,
-   pipelining, and duplicate security headers before core ingestion. Preserve
-   raw header multiplicity until validation.
+   duplicate/conflicting framing headers, incomplete bodies, suffix/pipeline
+   bytes already buffered or immediately observable at admission, and duplicate
+   security headers before core ingestion. Later bytes can never become a
+   second request; the transport does not wait for or claim to predict future
+   writes. Preserve raw header multiplicity until validation.
 5. Bound request line, header count/bytes, accepted sockets, workers, body
    bytes/reads, absolute time, provider/store time, and shutdown. One source
-   admits one ingest operation and queues none.
+   admits one ingest operation and queues none. C1 bounds transport reads,
+   callback response lifetime, and shutdown; C2 proves absolute provider/store
+   execution budgets when those dependencies are introduced.
 6. Forwarded headers and client IP never authenticate, select a source, change
    admission, build redirects, or establish freshness. Routing comes only from
    frozen operator configuration.
@@ -104,10 +108,11 @@ coordination ledger. Issue #104 is the sole ready implementation slice.
 #109 live GitHub delivery qualification
 ```
 
-- #104 proves real-socket framing, routing, budgets, proxy distrust, and bounded
-  shutdown without provider or journal effects.
+- #104 proves real-socket framing, routing, transport/callback-response budgets,
+  proxy distrust, and bounded shutdown without provider or journal effects.
 - #105 connects the listener to the existing ingress core and durable journal,
-  including replay, failure, restart, and polling convergence.
+  including absolute provider/store execution budgets, replay, failure, restart,
+  and polling convergence.
 - #106 provides validated configuration, dedicated executable/service,
   owner-only secret references, readiness/status/support, and documentation.
 - #107 proves the exact installed wheel and loopback service with provider-free
