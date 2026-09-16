@@ -20,14 +20,20 @@ rather than whole-manager health.
 Correction checkpoint `25b61f3845e954c01c8f72ac2372329e8147580f`
 replaced the initial runner after one independent drift review produced the
 accepted finding ledger C4-R01 through C4-R08 below. Pre-effect correction
-`ccfda6c` then resolved C4-R09 after the first explicit runner invocation
-proved that signal registration correctly fails without a live managed reader.
-The source is configured disabled for the reader's first poll, one transient
-installed `codex-waked --no-dispatch` process advertises the isolated reader
-capability, the source is enabled and armed while that exact PID is live, and
-the reader is stopped before webhook service setup continues. Twenty hermetic
-tests, including a real in-process HTTP/store/restart/polling sequence, now
-pass; comprehensive Python validation is 512/512 and the plugin tier is 12/12.
+`ccfda6c` then exposed C4-R09 after the first explicit runner invocation proved
+that signal registration correctly fails without a live managed reader. The
+first closed-world correction review rejected its ordinary no-dispatch daemon:
+source reconciliation could still reach the provider, failed termination was
+outside cleanup census, and external staging lagged completed transitions.
+Checkpoint `b7e8743` closes all three findings. One source-only bootstrap runs
+the installed daemon module with every signal-source runner disabled before
+`main`; the exact PID/start/argv is tracked by cleanup; and reader-ready,
+armed, and reader-stopped transitions are staged as they occur. The source is
+configured disabled for the reader's first poll, enabled and armed while that
+exact reader is live, and the reader is stopped before webhook service setup
+continues. Twenty-two hermetic tests, including a real in-process
+HTTP/store/restart/polling sequence, now pass; comprehensive Python validation
+is 513/513 and the plugin tier is 12/12.
 Compilation and diff hygiene also pass. The first attempted planning-audit
 command used a nonexistent repo-local script and is retained as a failed
 validation attempt; the actual selector-bundle active planning audit passed,
@@ -39,8 +45,10 @@ installation with `READER_CAPABILITY_UNAVAILABLE`. Its external receipt proves
 and retained candidate provenance. No listener, provider access, ingress,
 polling, port-8820 bind, or dispatch occurred, so the one service attempt
 remains unconsumed. A freshly built candidate wheel has since passed the exact
-corrected configure/arm path in a disposable root. The next gate is one
-closed-world review of C4-R09, then a fresh live preflight.
+corrected configure/arm path in a disposable root, including empty post-stop
+process census and the three external checkpoint stages. The next gate is
+closed-world re-verification of the three accepted C4-R09 findings, then a
+fresh live preflight.
 
 ## Accepted review ledger
 
@@ -80,12 +88,15 @@ closed-world review of C4-R09, then a fresh live preflight.
 ## Pre-effect correction ledger
 
 - `C4-R09`: installed signal registration requires a current managed-reader
-  capability. The runner must use the installed daemon only as one transient,
-  isolated, long-interval `--no-dispatch` reader while arming; the GitHub source
+  capability. The runner must use the installed daemon module only through one
+  transient, isolated bootstrap that disables every signal-source runner before
+  daemon `main`; `--no-dispatch` alone is insufficient. The GitHub source
   remains disabled through its first poll, becomes enabled only after exact
   reader readiness, and the reader must stop before any service attempt. Its
-  PID/mode/no-dispatch evidence and setup stage are persisted in the external
-  receipt. No persistent daemon/service or provider path is permitted.
+  PID/start/argv enters cleanup census immediately, and ready/armed/stopped
+  evidence is persisted in the external receipt at each transition. No
+  persistent daemon/service, provider path, or destructive cleanup under an
+  unproved reader stop is permitted.
 
 ## Objective
 
@@ -108,9 +119,10 @@ polling convergence, installed readiness/status/support, and complete cleanup.
   file, or unavailable user manager blocks before the install attempt.
 - Configure the GitHub source and webhook listener and arm one GitHub completed
   wake through installed commands without contacting GitHub. Hold one
-  transient installed `codex-waked --no-dispatch` reader only while arming;
-  keep the source disabled for its first poll, use an isolated XDG state root,
-  then terminate the reader before the webhook service attempt.
+  transient installed daemon-module reader under the explicit no-source-runner
+  bootstrap only while arming; keep the source disabled for its first poll,
+  use an isolated XDG state root, then terminate and census the reader before
+  the webhook service attempt.
 - Provide an ephemeral, untracked bootstrap only through the owner-only service
   environment. The exact installed interpreter must explicitly install and
   verify the deterministic provider-attempt fixture before invoking the exact

@@ -3481,3 +3481,32 @@ Acceptance state: #107 remains active and its one installed-service attempt is
 unconsumed. Movement is `blocker_reduction`. Next action: accept or repair the
 closed-world C4-R09 review, publish the exact checkpoint, run a fresh host
 preflight, then execute the single service attempt once.
+
+## Turn 163 | 2026-09-16
+
+Closed the three blocking findings from the first C4-R09 review at checkpoint
+`b7e8743`.
+
+- The review proved that `--no-dispatch` does not block provider reads, that a
+  termination timeout escaped the bootstrap-only process census, and that
+  reader/arm evidence was staged only after later fixture setup.
+- The reader now enters the installed daemon module through an explicit
+  source-only bootstrap that replaces every signal-source runner with an empty
+  registry before daemon `main`. It therefore supplies the managed-reader
+  capability and record projection seam without any provider path.
+- Reader PID/start identity is tracked immediately and its exact bootstrap argv
+  is part of cleanup census. A surviving simulated reader makes cleanup unsafe
+  and preserves the recovery root.
+- The external receipt now stages `managed_reader_ready`, `armed`, and
+  `managed_reader_stopped` as those transitions occur. A freshly built wheel
+  passed that sequence with a pending wake, enabled source, stopped reader, and
+  empty post-stop census.
+- Validation passes 22 focused tests, 513 comprehensive Python tests, 12 plugin
+  tests, compilation, and diff hygiene. No systemd mutation, listener,
+  port-8820 bind, provider access, ingress, dispatch, release, deployment, or
+  global install occurred.
+
+Acceptance state: #107 remains active and its one installed-service attempt is
+unconsumed. Movement is `blocker_reduction`. Next action: closed-world
+re-verification of the three accepted findings at `b7e8743`, then publish,
+fresh-preflight, and execute the service attempt once.
