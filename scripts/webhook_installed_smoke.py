@@ -90,6 +90,22 @@ def owner_only_directory(path: Path) -> None:
     os.chmod(path, 0o700)
 
 
+def create_execution_root(env: dict[str, str] | None = None) -> Path:
+    """Create an owner-only root visible to a PrivateTmp systemd service."""
+    source = os.environ if env is None else env
+    configured_state_home = source.get("XDG_STATE_HOME")
+    state_home = (
+        Path(configured_state_home).expanduser()
+        if configured_state_home
+        else Path.home() / ".local" / "state"
+    )
+    qualification_dir = state_home / "codex-wake" / "qualification"
+    owner_only_directory(qualification_dir)
+    root = Path(tempfile.mkdtemp(prefix="p53-c4-", dir=qualification_dir))
+    os.chmod(root, 0o700)
+    return root
+
+
 def isolated_build_env() -> dict[str, str]:
     """Preserve tool discovery while excluding caller import injection."""
     env = dict(os.environ)
@@ -1015,8 +1031,7 @@ def cleanup(
 
 
 def execute(*, receipt_path: Path | None = None) -> int:
-    root = Path(tempfile.mkdtemp(prefix="codex-wake-p53-c4-"))
-    os.chmod(root, 0o700)
+    root = create_execution_root()
     context = ExecutionContext(
         root=root, artifact_dir=root / "evidence", wake_root=root / "wake",
         manager_unit_dir=manager_unit_dir(), fixture_dir=root / "fixture",
@@ -1114,8 +1129,10 @@ def execute(*, receipt_path: Path | None = None) -> int:
             receipt, destination=receipt_path, secret_values=(fixture.secret,),
         )
 
+        receipt.update({
+            "effect_stage": "service_install_start", "service_attempts": 1,
+        })
         service_attempted = True
-        receipt["service_attempts"] = 1
         stage_receipt(
             receipt, destination=receipt_path, secret_values=(fixture.secret,),
         )
@@ -1123,12 +1140,21 @@ def execute(*, receipt_path: Path | None = None) -> int:
             context, "install", env=env, name="install-start",
             executable_path=context.bootstrap_path,
         )
+        receipt["effect_stage"] = "service_install_returned"
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
         if not context.unit_path.is_file() or context.unit_path.is_symlink():
             raise RuntimeError("installed unit ownership is invalid")
         receipt["unit_sha256"] = sha256(context.unit_path)
+        receipt["effect_stage"] = "service_readiness"
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
         readiness, status, support, initial = wait_ready(context, env)
         tracked_identities.append((int(initial["pid"]), initial["process_start_ticks"]))
         receipt.update({
+            "effect_stage": "service_ready",
             "configuration_identity": {
                 "source": SOURCE, "wake_id": wake_id,
                 "unit": str(context.unit_path), "log": str(context.log_path),
@@ -1141,6 +1167,10 @@ def execute(*, receipt_path: Path | None = None) -> int:
             receipt, destination=receipt_path, secret_values=(fixture.secret,),
         )
 
+        receipt["effect_stage"] = "first_delivery"
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
         first = signed_loopback_delivery(fixture, fixture.delivery_id)
         receipt["deliveries"].append({"status": first[0], "code": first[1]})
         stage_receipt(
@@ -1149,6 +1179,10 @@ def execute(*, receipt_path: Path | None = None) -> int:
         if first != (200, "COMMITTED"):
             raise RuntimeError("first signed delivery did not commit")
 
+        receipt["effect_stage"] = "delivery_replay"
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
         same_delivery = signed_loopback_delivery(fixture, fixture.delivery_id)
         receipt["deliveries"].append({
             "status": same_delivery[0], "code": same_delivery[1],
@@ -1159,6 +1193,10 @@ def execute(*, receipt_path: Path | None = None) -> int:
         if same_delivery != (200, "DUPLICATE"):
             raise RuntimeError("same delivery replay was not duplicate")
 
+        receipt["effect_stage"] = "manual_restart"
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
         service_command(context, "stop", env=env, name="manual-stop")
         service_command(context, "start", env=env, name="manual-start")
         _, _, _, restarted = wait_ready(context, env, prior_identity=initial)
@@ -1168,6 +1206,10 @@ def execute(*, receipt_path: Path | None = None) -> int:
             receipt, destination=receipt_path, secret_values=(fixture.secret,),
         )
 
+        receipt["effect_stage"] = "post_restart_delivery"
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
         after_restart = signed_loopback_delivery(fixture, fixture.restart_delivery_id)
         receipt["deliveries"].append({
             "status": after_restart[0], "code": after_restart[1],
@@ -1178,8 +1220,14 @@ def execute(*, receipt_path: Path | None = None) -> int:
         if after_restart != (200, "DUPLICATE"):
             raise RuntimeError("post-restart occurrence replay was not duplicate")
 
+        receipt["effect_stage"] = "provider_free_poll"
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
         polling = provider_free_poll(context, env, fixture, wake_id)
-        receipt.update({"polling": polling, "overall": "accepted"})
+        receipt.update({
+            "effect_stage": "accepted", "polling": polling, "overall": "accepted",
+        })
         stage_receipt(
             receipt, destination=receipt_path, secret_values=(fixture.secret,),
         )

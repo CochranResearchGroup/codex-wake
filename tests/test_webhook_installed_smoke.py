@@ -80,6 +80,20 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
         self.assertIn("refuses", stderr.getvalue())
         self.assertIn("--execute", stderr.getvalue())
 
+    def test_execution_root_uses_owner_only_user_state_not_tmp(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state_home = Path(tmp) / "state-home"
+            with patch.dict(
+                os.environ, {"XDG_STATE_HOME": str(state_home)}, clear=False,
+            ):
+                root = smoke.create_execution_root()
+            qualification = state_home / "codex-wake" / "qualification"
+            self.assertTrue(root.is_relative_to(qualification))
+            self.assertEqual(root.parent, qualification)
+            self.assertEqual(root.stat().st_mode & 0o777, 0o700)
+            self.assertEqual(qualification.stat().st_mode & 0o777, 0o700)
+            self.assertNotEqual(root.parent, Path(tempfile.gettempdir()))
+
     def test_receipt_redacts_keys_values_and_stages_owner_only(self) -> None:
         secret = "never-publish-this-value"
         receipt = {
@@ -628,6 +642,7 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             wheel = base / "candidate.whl"
             wheel.write_bytes(b"wheel")
             staged_before_failure = {}
+            observed_effect_stages = []
             identities = iter((
                 ({"status": "ready"}, {"active": "active"},
                  {"webhook_listener": {"status": "ready"}},
@@ -653,6 +668,10 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 return ctx.bootstrap_path
 
             def fake_service(ctx, action, **kwargs):
+                observed_effect_stages.append((
+                    f"service:{action}",
+                    json.loads(receipt_path.read_text(encoding="utf-8"))["effect_stage"],
+                ))
                 if action == "install":
                     ctx.unit_path.parent.mkdir(parents=True, exist_ok=True)
                     ctx.unit_path.write_text("owned unit", encoding="utf-8")
@@ -673,13 +692,37 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 })
                 return "wake_stage", {"pid": 4321, "stopped": True}
 
+            def fake_wait_ready(*args, **kwargs):
+                observed_effect_stages.append((
+                    "wait_ready",
+                    json.loads(receipt_path.read_text(encoding="utf-8"))["effect_stage"],
+                ))
+                return next(identities)
+
+            def fake_delivery(*args, **kwargs):
+                observed_effect_stages.append((
+                    "delivery",
+                    json.loads(receipt_path.read_text(encoding="utf-8"))["effect_stage"],
+                ))
+                return next(deliveries)
+
             def fail_poll(*args, **kwargs):
                 staged_before_failure.update(json.loads(
                     receipt_path.read_text(encoding="utf-8")
                 ))
+                observed_effect_stages.append((
+                    "poll", staged_before_failure["effect_stage"],
+                ))
                 raise RuntimeError("poll failed")
 
-            with patch.object(smoke, "manager_unit_dir", return_value=base / "manager"), patch.object(
+            def fake_execution_root():
+                root = base / "packet"
+                root.mkdir()
+                return root
+
+            with patch.object(smoke, "create_execution_root", side_effect=fake_execution_root), patch.object(
+                smoke, "manager_unit_dir", return_value=base / "manager",
+            ), patch.object(
                 smoke, "manager_preflight", return_value=("degraded", ("old.service",)),
             ), patch.object(smoke, "port_is_free", return_value=True), patch.object(
                 smoke, "matching_processes", return_value=(),
@@ -697,8 +740,8 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 smoke, "write_fixture_bootstrap", side_effect=fake_bootstrap,
             ), patch.object(smoke, "fixture_preflight"), patch.object(
                 smoke, "service_command", side_effect=fake_service,
-            ), patch.object(smoke, "wait_ready", side_effect=lambda *a, **k: next(identities)), patch.object(
-                smoke, "signed_loopback_delivery", side_effect=lambda *a, **k: next(deliveries),
+            ), patch.object(smoke, "wait_ready", side_effect=fake_wait_ready), patch.object(
+                smoke, "signed_loopback_delivery", side_effect=fake_delivery,
             ), patch.object(smoke, "provider_free_poll", side_effect=fail_poll), patch.object(
                 smoke, "cleanup", return_value={"safe": True, "temporary_roots_removed": True},
             ):
@@ -714,6 +757,20 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             self.assertEqual(staged_before_failure["restarted_service"]["pid"], "102")
             self.assertEqual(staged_before_failure["wake_id"], "wake_stage")
             self.assertTrue(staged_before_failure["managed_reader"]["stopped"])
+            self.assertEqual(
+                staged_before_failure["effect_stage"], "provider_free_poll",
+            )
+            self.assertEqual(observed_effect_stages, [
+                ("service:install", "service_install_start"),
+                ("wait_ready", "service_readiness"),
+                ("delivery", "first_delivery"),
+                ("delivery", "delivery_replay"),
+                ("service:stop", "manual_restart"),
+                ("service:start", "manual_restart"),
+                ("wait_ready", "manual_restart"),
+                ("delivery", "post_restart_delivery"),
+                ("poll", "provider_free_poll"),
+            ])
             final = json.loads(receipt_path.read_text(encoding="utf-8"))
             self.assertEqual(final["overall"], "failed")
             self.assertEqual(final["error"], "RuntimeError")
