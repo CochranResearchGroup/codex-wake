@@ -14,6 +14,7 @@ import threading
 import unittest
 import uuid
 import zipfile
+from contextlib import contextmanager
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
@@ -121,6 +122,94 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 ["command"], artifact_dir=Path("/tmp"), name="bad", timeout=61,
             )
 
+    def test_managed_reader_is_no_dispatch_isolated_and_stopped(self) -> None:
+        class FakeProcess:
+            pid = 4321
+
+            def __init__(self) -> None:
+                self.returncode = None
+                self.terminated = False
+
+            def poll(self):
+                return self.returncode
+
+            def terminate(self) -> None:
+                self.terminated = True
+                self.returncode = 0
+
+            def wait(self, timeout=None):
+                return self.returncode
+
+            def kill(self) -> None:
+                self.returncode = -9
+
+        process = FakeProcess()
+        readiness = {
+            "monitor_ready": True,
+            "monitor_source": "codex-waked",
+            "health": {
+                "pid": process.pid,
+                "mode": "loop",
+                "recent": True,
+                "persistent": True,
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx = context(Path(tmp))
+            env = smoke.installed_env(ctx)
+            with patch.object(
+                smoke.subprocess, "Popen", return_value=process,
+            ) as popen, patch.object(
+                smoke, "json_command", return_value=readiness,
+            ):
+                with smoke.managed_reader(ctx, env) as evidence:
+                    self.assertEqual(evidence["pid"], process.pid)
+                    self.assertIsNone(process.poll())
+
+            argv = popen.call_args.args[0]
+            self.assertEqual(argv[0], str(ctx.installed_cli.parent / "codex-waked"))
+            self.assertIn("--no-dispatch", argv)
+            self.assertEqual(argv[argv.index("--interval") + 1], "60")
+            self.assertEqual(env["XDG_STATE_HOME"], str(ctx.root / "state"))
+            self.assertTrue(process.terminated)
+
+    def test_arm_runs_only_while_no_dispatch_reader_is_active(self) -> None:
+        events = []
+        commands = {}
+
+        @contextmanager
+        def fake_reader(_context, _env):
+            events.append("reader-enter")
+            try:
+                yield {"pid": 4321, "dispatch": "disabled"}
+            finally:
+                events.append("reader-exit")
+
+        def fake_run(argv, **kwargs):
+            name = kwargs["name"]
+            events.append(name)
+            commands[name] = argv
+            stdout = "wake_qualified /tmp/pending/wake_qualified.json\n" if name == "arm" else ""
+            return subprocess.CompletedProcess(argv, 0, stdout, "")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx = context(Path(tmp))
+            with patch.object(smoke, "managed_reader", side_effect=fake_reader), patch.object(
+                smoke, "run_command", side_effect=fake_run,
+            ):
+                wake_id, reader = smoke.configure_and_arm(
+                    ctx, smoke.installed_env(ctx),
+                )
+
+        self.assertEqual(wake_id, "wake_qualified")
+        self.assertEqual(reader["dispatch"], "disabled")
+        self.assertEqual(events, [
+            "configure-source-disabled", "reader-enter", "enable-source",
+            "arm", "reader-exit", "configure-webhook",
+        ])
+        self.assertIn("--disabled", commands["configure-source-disabled"])
+        self.assertIn("--enabled", commands["enable-source"])
+
     def test_manager_preflight_accepts_only_running_or_degraded_contract(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             ctx = context(Path(tmp))
@@ -137,13 +226,13 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, "unreachable"):
                     smoke.manager_preflight(ctx)
 
-    def test_manager_namespace_is_real_and_all_service_commands_use_exact_unit_dir(self) -> None:
+    def test_manager_namespace_is_real_while_application_state_is_isolated(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
             ctx = context(base, manager=base / "real-manager")
             with patch.dict(os.environ, {
                 "XDG_CONFIG_HOME": str(base / "real-xdg"),
-                "XDG_STATE_HOME": str(base / "state"),
+                "XDG_STATE_HOME": str(base / "host-state"),
             }, clear=False):
                 env = smoke.installed_env(ctx)
             self.assertEqual(env["XDG_CONFIG_HOME"], str(base / "real-xdg"))
@@ -486,7 +575,9 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                     "module_sha256": "c" * 64, "version": "0.5.2",
                     "interpreter": "/isolated/python",
                 },
-            ), patch.object(smoke, "configure_and_arm", return_value="wake_stage"), patch.object(
+            ), patch.object(smoke, "configure_and_arm", return_value=(
+                "wake_stage", {"pid": 4321, "dispatch": "disabled"},
+            )), patch.object(
                 smoke, "write_fixture_bootstrap", side_effect=fake_bootstrap,
             ), patch.object(smoke, "fixture_preflight"), patch.object(
                 smoke, "service_command", side_effect=fake_service,

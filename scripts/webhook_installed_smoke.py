@@ -23,6 +23,7 @@ import tempfile
 import time
 import uuid
 import zipfile
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from ipaddress import ip_address
@@ -423,9 +424,76 @@ def write_fixture_bootstrap(context: ExecutionContext, fixture: Fixture) -> Path
 def installed_env(context: ExecutionContext) -> dict[str, str]:
     env = dict(os.environ)
     # Do not redirect XDG_CONFIG_HOME: all lifecycle commands must address the
-    # same real user-manager namespace. The explicit wake root isolates state.
+    # same real user-manager namespace. Isolate application state separately.
+    env["XDG_STATE_HOME"] = str(context.root / "state")
     env["PYTHONPATH"] = str(context.fixture_dir)
     return env
+
+
+@contextmanager
+def managed_reader(
+    context: ExecutionContext, env: dict[str, str],
+):
+    """Hold one installed no-dispatch reader active only while arming."""
+    owner_only_directory(context.artifact_dir)
+    owner_only_directory(context.root / "state")
+    stdout_path = context.artifact_dir / "managed-reader.stdout"
+    stderr_path = context.artifact_dir / "managed-reader.stderr"
+    argv = [
+        str(context.installed_cli.parent / "codex-waked"),
+        "--wake-root", str(context.wake_root),
+        "--interval", "60", "--no-dispatch",
+    ]
+    with stdout_path.open("w", encoding="utf-8") as stdout, stderr_path.open(
+        "w", encoding="utf-8",
+    ) as stderr:
+        process = subprocess.Popen(
+            argv, text=True, stdout=stdout, stderr=stderr, env=env,
+            start_new_session=True,
+        )
+        try:
+            deadline = time.monotonic() + READY_SECONDS
+            evidence: dict[str, Any] | None = None
+            while time.monotonic() < deadline:
+                if process.poll() is not None:
+                    raise RuntimeError("installed managed reader exited before readiness")
+                readiness = json_command(
+                    [str(context.installed_cli), "--wake-root", str(context.wake_root),
+                     "monitor", "check", "--json"],
+                    context=context, name="managed-reader-readiness", env=env,
+                    allow_returncodes=(0, 1),
+                )
+                health = readiness.get("health")
+                if (
+                    readiness.get("monitor_ready") is True
+                    and readiness.get("monitor_source") == "codex-waked"
+                    and type(health) is dict
+                    and health.get("pid") == process.pid
+                    and health.get("mode") == "loop"
+                    and health.get("recent") is True
+                    and health.get("persistent") is True
+                ):
+                    evidence = {
+                        "pid": process.pid,
+                        "mode": "loop",
+                        "dispatch": "disabled",
+                        "poll_interval_seconds": 60,
+                    }
+                    break
+                time.sleep(0.1)
+            if evidence is None:
+                raise RuntimeError("installed managed reader did not become ready")
+            yield evidence
+        finally:
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=5)
+            if process.poll() is None:
+                raise RuntimeError("installed managed reader did not stop")
 
 
 def fixture_preflight(context: ExecutionContext, env: dict[str, str]) -> None:
@@ -439,26 +507,34 @@ def fixture_preflight(context: ExecutionContext, env: dict[str, str]) -> None:
         raise RuntimeError("fixture seam was not active in the installed interpreter")
 
 
-def configure_and_arm(context: ExecutionContext, env: dict[str, str]) -> str:
+def configure_and_arm(
+    context: ExecutionContext, env: dict[str, str],
+) -> tuple[str, dict[str, Any]]:
     common = [str(context.installed_cli), "--wake-root", str(context.wake_root)]
+    source_configuration = [
+        "github-ci", "source", "configure", "--source", SOURCE,
+        "--repository", REPOSITORY, "--repository-id", "1",
+        "--workflow-id", "1", "--ref", "refs/heads/main",
+        "--conclusion", "success", "--credential-ref",
+        "CODEX_WAKE_GITHUB_TOKEN",
+    ]
     run_command(
-        common + [
-            "github-ci", "source", "configure", "--source", SOURCE,
-            "--repository", REPOSITORY, "--repository-id", "1",
-            "--workflow-id", "1", "--ref", "refs/heads/main",
-            "--conclusion", "success", "--credential-ref",
-            "CODEX_WAKE_GITHUB_TOKEN", "--enabled",
-        ],
-        artifact_dir=context.artifact_dir, name="configure-source", env=env,
+        common + source_configuration + ["--disabled"],
+        artifact_dir=context.artifact_dir, name="configure-source-disabled", env=env,
     )
-    armed = run_command(
-        common + [
-            "github-ci", "completed", "--source", SOURCE, "--ref",
-            "refs/heads/main", "--conclusion", "success", "--idempotency-key",
-            SOURCE, "--", "installed qualification; dispatch disabled",
-        ],
-        artifact_dir=context.artifact_dir, name="arm", env=env,
-    )
+    with managed_reader(context, env) as reader:
+        run_command(
+            common + source_configuration + ["--enabled"],
+            artifact_dir=context.artifact_dir, name="enable-source", env=env,
+        )
+        armed = run_command(
+            common + [
+                "github-ci", "completed", "--source", SOURCE, "--ref",
+                "refs/heads/main", "--conclusion", "success", "--idempotency-key",
+                SOURCE, "--", "installed qualification; dispatch disabled",
+            ],
+            artifact_dir=context.artifact_dir, name="arm", env=env,
+        )
     wake_id = armed.stdout.split(maxsplit=1)[0]
     if not wake_id.startswith("wake_"):
         raise RuntimeError("installed arm did not return a wake identity")
@@ -470,7 +546,7 @@ def configure_and_arm(context: ExecutionContext, env: dict[str, str]) -> str:
         ],
         artifact_dir=context.artifact_dir, name="configure-webhook", env=env,
     )
-    return wake_id
+    return wake_id, reader
 
 
 def write_service_environment(context: ExecutionContext, fixture: Fixture) -> Path:
@@ -941,13 +1017,17 @@ def execute(*, receipt_path: Path | None = None) -> int:
         receipt["provenance"] = provenance
         stage_receipt(receipt, destination=receipt_path, secret_values=())
 
-        wake_id = configure_and_arm(context, env)
+        receipt["setup_stage"] = "configure_and_arm"
+        stage_receipt(receipt, destination=receipt_path, secret_values=())
+        wake_id, reader = configure_and_arm(context, env)
         fixture = make_fixture()
         write_fixture_bootstrap(context, fixture)
         fixture_preflight(context, env)
         write_service_environment(context, fixture)
         receipt.update({
-            "wake_id": wake_id, "configuration": "armed", "service_attempts": 0,
+            "wake_id": wake_id, "configuration": "armed",
+            "managed_reader": reader, "setup_stage": "service_ready_to_attempt",
+            "service_attempts": 0,
         })
         stage_receipt(
             receipt, destination=receipt_path, secret_values=(fixture.secret,),
