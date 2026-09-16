@@ -155,6 +155,32 @@ class GitHubWebhookTests(unittest.TestCase):
             self.assertEqual(ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=5)).code, "DUPLICATE")
             self.assertEqual(commits[0], commits[1])
 
+    def test_rotation_attribution_requires_every_admitted_key_to_resolve(self):
+        for refs, generations, unavailable_ref in (
+            (("current", "previous"), (8, 7), "previous"),
+            (("previous", "current"), (7, 8), "previous"),
+        ):
+            with self.subTest(refs=refs), tempfile.TemporaryDirectory() as tmp:
+                commits = []
+                database = Path(tmp) / "signals.sqlite3"
+                settings = WebhookConfig(secret_refs=refs, secret_generations=generations)
+
+                def resolver(ref):
+                    if ref == unavailable_ref:
+                        raise RuntimeError("fixture secret unavailable")
+                    return SECRET
+
+                ingress = self.setup_ingress(
+                    database, settings=settings, resolver=resolver,
+                    admitted_generations=lambda now: (7, 8),
+                    committed_delivery=lambda generation, receipt: commits.append((generation, receipt)),
+                )
+                body = payload()
+                result = ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=2))
+                self.assertEqual((result.status, result.code), (503, "SECRET_UNAVAILABLE"))
+                self.assertEqual(commits, [])
+                self.assertIsNone(self.module.source_checkpoint("github", "github-ci"))
+
     def test_claim_allowlists_freshness_and_authoritative_identity_fail_before_commit(self):
         variants = (
             ({"action": "requested"}, {}, "EVENT_NOT_ALLOWED"),

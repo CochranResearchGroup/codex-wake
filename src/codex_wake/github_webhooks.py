@@ -180,6 +180,13 @@ class GitHubWebhookIngress:
                     matched_generations.append(generation)
             except Exception:
                 unavailable = True
+        # Managed attribution requires proof that every admitted key was
+        # available for comparison.  A matching key cannot establish an exact
+        # generation while another admitted key remains unresolved: the
+        # unresolved value could be identical and make the signature
+        # ambiguous.  Legacy ingress keeps its historical any-key behavior.
+        if admitted is not None and unavailable:
+            return WebhookResult(503, "SECRET_UNAVAILABLE")
         if not matched:
             if unavailable:
                 return WebhookResult(503, "SECRET_UNAVAILABLE")
