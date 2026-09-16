@@ -46,6 +46,12 @@ additional negative census probes and no critical regression. Worker
 effective runtime cost telemetry remains unavailable, so no allocation-saving
 claim is made. Integration and the fresh trigger candidate remain.
 
+Corrective PR #132 passed both hosted Python release gates and squash-merged as
+canonical `27dedc00228c4ff99820dfa4b84e7895f62075a1`. The correction is now a
+prerequisite of the fresh docs-only successor trigger. No successor runtime,
+secret, service, hook, trigger, observation, cleanup, or dispatch effect has
+occurred.
+
 ## Objective
 
 Repair both adapter defects, prove the exact live failure shapes with
@@ -102,10 +108,12 @@ successor_redeliveries: 0
 successor_dispatches: 0
 ```
 
-Any later authorized successor packet uses a fresh root, receipt, secret,
-source instance suffix, service unit, wake, journal, and trigger PR. It may not
-reuse or reset Plan 0081 state. Provider writes remain one-shot: ambiguity
-permits exact readback only, never retry.
+Any later authorized successor packet uses a fresh root, receipt, secret, wake,
+journal, and trigger PR. The frozen source/service identity may remain
+`p53-c6-live-github` because the predecessor failed before creating that source,
+service, wake, or journal; current absence must be re-proved before execution.
+It may not reuse or reset Plan 0081 state. Provider writes remain one-shot:
+ambiguity permits exact readback only, never retry.
 
 ## Execution graph
 

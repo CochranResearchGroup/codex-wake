@@ -4,19 +4,19 @@ lanes:
   - id: P53-C7
     objective: Repair live-only adapter failures and prepare a fresh bounded qualification successor
     plan: docs/dev/plans/0082-2026-09-16-live-github-adapter-successor.md
-    plan_ref: refs/heads/fix/issue-109-live-adapter-runtime
-    branch: fix/issue-109-live-adapter-runtime
+    plan_ref: refs/heads/docs/issue-109-live-trigger-successor
+    branch: docs/issue-109-live-trigger-successor
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 2e6bf2dc31f886d24f995e13b8380988e5590f76
-    validation_status: adapter_correction_validated_integration_pending
-    validation_ref: 2e6bf2dc31f886d24f995e13b8380988e5590f76
-    remote_ref: refs/remotes/origin/fix/issue-109-live-adapter-runtime
+    checkpoint: 27dedc00228c4ff99820dfa4b84e7895f62075a1
+    validation_status: successor_trigger_preparing_new_gate_pending
+    validation_ref: 27dedc00228c4ff99820dfa4b84e7895f62075a1
+    remote_ref: refs/remotes/origin/docs/issue-109-live-trigger-successor
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#109]
     owner: primary live-lifecycle owner with one bounded implementation worker and one closed-world reviewer
-    write_surface: Plan 0082, local qualification adapter and tests, failure custody, successor trigger registration, verification receipt, roadmap, and runbook
+    write_surface: Plan 0082, predecessor failure custody, fresh successor trigger registration, verification receipt, roadmap, and runbook
     live_effect: none during correction; a fresh successor packet requires a new exact gate
     dependencies: []
     overlaps: []
