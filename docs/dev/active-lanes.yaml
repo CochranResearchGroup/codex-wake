@@ -10,7 +10,7 @@ lanes:
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     checkpoint: b7e8743a876ecb5568a2f9728c7a385c71154a34
-    validation_status: closed_world_repair_validated_pending_reverification
+    validation_status: closed_world_repair_accepted_pending_live_preflight
     validation_ref: b7e8743a876ecb5568a2f9728c7a385c71154a34
     remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     integration: squash

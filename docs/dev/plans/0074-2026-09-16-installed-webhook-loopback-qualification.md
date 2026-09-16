@@ -33,7 +33,7 @@ configured disabled for the reader's first poll, enabled and armed while that
 exact reader is live, and the reader is stopped before webhook service setup
 continues. Twenty-two hermetic tests, including a real in-process
 HTTP/store/restart/polling sequence, now pass; comprehensive Python validation
-is 513/513 and the plugin tier is 12/12.
+is 514/514 and the plugin tier is 12/12.
 Compilation and diff hygiene also pass. The first attempted planning-audit
 command used a nonexistent repo-local script and is retained as a failed
 validation attempt; the actual selector-bundle active planning audit passed,
@@ -46,9 +46,11 @@ and retained candidate provenance. No listener, provider access, ingress,
 polling, port-8820 bind, or dispatch occurred, so the one service attempt
 remains unconsumed. A freshly built candidate wheel has since passed the exact
 corrected configure/arm path in a disposable root, including empty post-stop
-process census and the three external checkpoint stages. The next gate is
-closed-world re-verification of the three accepted C4-R09 findings, then a
-fresh live preflight.
+process census and the three external checkpoint stages. Closed-world
+re-verification at `b7e8743` accepted all three repairs: two delayed polling
+passes made zero production-client/provider-read calls, simulated stuck
+termination preserved the recovery root, and external snapshots retained the
+three transitions in order. The next gate is a fresh live preflight.
 
 ## Accepted review ledger
 

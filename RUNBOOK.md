@@ -3510,3 +3510,24 @@ Acceptance state: #107 remains active and its one installed-service attempt is
 unconsumed. Movement is `blocker_reduction`. Next action: closed-world
 re-verification of the three accepted findings at `b7e8743`, then publish,
 fresh-preflight, and execute the service attempt once.
+
+## Turn 164 | 2026-09-16
+
+Accepted the closed-world C4-R09 repair at exact code commit `b7e8743`.
+
+- Independent re-verification ran the generated reader bootstrap through two
+  delayed provider-free polling passes over an enabled, armed source: production
+  client factory calls, provider-read seam calls, and dispatches were all zero.
+- Injected terminate/kill wait timeouts retained PID/start tracking, exact
+  reader census, `safe: false`, and the recovery root.
+- External receipt snapshots appeared in exact order
+  `managed_reader_ready`, `armed`, `managed_reader_stopped` with wake ID,
+  PID/start identity, and terminal `stopped: true` evidence.
+- Final source validation passes 22 focused tests, 514 comprehensive Python
+  tests, 12 plugin tests, compilation, diff hygiene, and active/goal planning
+  audits. Effective reviewer model/effort and cost telemetry were unavailable.
+
+Acceptance state: the source correction is accepted; #107 and its one
+installed-service attempt remain active/unconsumed. Movement is
+`blocker_reduction`. Next action: publish the exact clean branch, fresh-preflight
+the host/unit/port/process baseline, then run the service attempt once.
