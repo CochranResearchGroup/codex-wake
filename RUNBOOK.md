@@ -3096,3 +3096,31 @@ integration-ready, #84 has a published worker checkpoint, and #85 remains
 blocked. Movement is `outcome_progress`. Next action: merge this projection and
 PR #93, then reconcile canonical main into #84 for primary-owned GitHub daemon
 integration.
+
+## Turn 150 | 2026-09-15
+
+Qualified GitHub source migration #84 for integration after accepting #83.
+
+- PR #93 squash-merged at canonical
+  `3c30947ffedb1e87a312e6377d75353b9d5361a6`, closing #83. Its worktree and
+  topic branch were removed after canonical readback.
+- Reconciled canonical main into the GitHub worktree. Documentation conflicts
+  were resolved to canonical-main intent while retaining only the #84 source
+  and test delta.
+- The primary composed local and GitHub registrations through one built-in
+  registry and removed the remaining daemon-local GitHub selection branch.
+  A final parity correction retained legacy sorted source-instance order and
+  durable pending order within each instance.
+- Validation passed 68 focused tests, 435 comprehensive Python tests, 12
+  plugin tests, compilation, diff hygiene, both PR #95 Python 3.11/3.12
+  release gates including installed-wheel smoke, and independent review with
+  no findings.
+- No provider read or mutation, live dispatch, installation, release,
+  deployment, credential change, or global runtime effect occurred.
+
+Acceptance state: P52 is open at `P52-G1-v6` / `P52-G1-C06`; #82 and #83 are
+accepted, #84 is integration-ready at
+`1be2a395bab644a02c5f4f1f1e868c5bd065f2f7`, and #85 remains blocked pending
+canonical #84 acceptance. Movement is `outcome_progress`. Next action: merge
+this readiness projection and PR #95, clean up the accepted lane, then start
+the bounded #85 productization and installed-compatibility join.
