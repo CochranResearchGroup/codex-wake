@@ -17,11 +17,12 @@ empty. The user systemd manager is reachable but degraded by unrelated
 pre-existing failed units, so acceptance is scoped to one exact unit/PID/socket
 rather than whole-manager health.
 
-Correction checkpoint `1d8671f28b9e49170b9ad710532365ba938066f9`
+Correction checkpoint `25b61f3845e954c01c8f72ac2372329e8147580f`
 replaces the initial runner after one independent drift review produced the
 accepted finding ledger C4-R01 through C4-R08 below. Fourteen hermetic tests,
 including a real in-process HTTP/store/restart/polling sequence, now pass;
-comprehensive Python validation is 506/506 and the plugin tier is 12/12.
+the final narrow remediation expands that tier to 18/18, comprehensive Python
+validation is 510/510, and the plugin tier is 12/12.
 Compilation and diff hygiene also pass. The first attempted planning-audit
 command used a nonexistent repo-local script and is retained as a failed
 validation attempt; the actual selector-bundle active planning audit passed,
@@ -36,7 +37,10 @@ closed-world verification of C4-R01 through C4-R08, then a fresh live preflight.
 - `C4-R01`: cleanup must use the product uninstall path with the same
   environment and unit directory, preserve the owner-only recovery root on any
   failed or incomplete stop, and prove inactive/disabled/MainPID-zero, no
-  matching process, released port, and an unchanged failed-unit baseline.
+  matching process, released port, and an unchanged failed-unit baseline. The
+  process census binds the exact bootstrap/wake-root/source argv plus every
+  previously observed PID/start identity and treats incomplete census as
+  unsafe.
 - `C4-R02`: one valid text secret, UUID deliveries, frozen body, and frozen
   authoritative `WorkflowRun`/terminal proof must drive webhook and polling;
   only the post-restart delivery id may change.
@@ -53,11 +57,15 @@ closed-world verification of C4-R01 through C4-R08, then a fresh live preflight.
   module, interpreter, and version provenance.
 - `C4-R07`: bounded readiness before and after manual restart must prove a new
   positive PID/start identity, exact executable/command, loopback socket inode,
-  and zero automatic restarts; terminal failure consumes the single attempt.
+  and zero automatic restarts; all owned listening sockets across IPv4 and IPv6
+  must be exactly `127.0.0.1:8820`, and terminal failure consumes the single
+  attempt.
 - `C4-R08`: polling must prove the exact source reconciliation, unchanged single
   occurrence, one logical wake/publication, zero dispatch/submission, staged
   evidence, configuration/unit identity, cleanup baseline/delta, and nonzero
-  outcome for any incomplete packet.
+  outcome for any incomplete packet. Readiness, each validated delivery,
+  restart identity, and polling are written to the external sanitized receipt
+  immediately so a later failure cannot erase completed evidence.
 
 ## Objective
 
