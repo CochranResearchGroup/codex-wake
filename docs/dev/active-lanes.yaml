@@ -18,7 +18,7 @@ lanes:
     live_effect: none
     dependencies: []
     overlaps: [P52-C3]
-    reconciled_overlaps: [daemon integration reserved to primary after P52-C2 implementation]
+    reconciled_overlaps: [P52-C3]
     updated_at: 2026-09-15
   - id: P52-C3
     objective: Migrate GitHub CI source reconstruction through the registry
@@ -37,5 +37,5 @@ lanes:
     live_effect: none
     dependencies: []
     overlaps: [P52-C2]
-    reconciled_overlaps: [daemon integration reserved to primary after P52-C2 acceptance]
+    reconciled_overlaps: [P52-C2]
     updated_at: 2026-09-15
