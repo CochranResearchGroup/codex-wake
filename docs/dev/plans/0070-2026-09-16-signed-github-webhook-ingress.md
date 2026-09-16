@@ -1,12 +1,12 @@
 # Signed GitHub webhook ingress goal campaign
 
-State: OPEN
+State: CLOSED
 Lane: P53
 Issues: #103, #104, #105, #106, #107, #108, #109
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P53-G1
-Goal Version: P53-G1-v4
-Checkpoint: P53-G1-C07
+Goal Version: P53-G1-v5
+Checkpoint: P53-G1-C08
 
 ## Goal objective
 
@@ -72,6 +72,26 @@ unit-absent semantics. Secret retirement completed, the failure root remains
 owner-only, hook and trigger counters remain zero, and PR #131 closed unmerged.
 Plan 0082 owns the provider-free correction and fresh successor preparation;
 it does not inherit or renew Plan 0081's consumed effect authority.
+
+The explicitly authorized Plan 0082 successor then completed the live boundary
+once. Corrected canonical candidate `27dedc00228c4ff99820dfa4b84e7895f62075a1`
+established a fresh isolated dispatch-disabled runtime and wake. Exact
+`workflow_run` hook `680422493` received the completed CI run for the docs-only
+PR #133 squash merge `5f21ed1a3bf80804a95b4e26b5bb154071411b42` as provider
+delivery `80e50480-b201-11f1-9387-9a306ef1c969` with HTTP 200. GitHub run
+`35138287516`, attempt 1, was an exact successful `push` run for workflow
+`279450573`, repository `1242753508`, and `refs/heads/main` after the frozen
+anchor. The durable occurrence converged `0 -> 1 -> 1`; the no-dispatch poll
+moved the wake from pending to local firing without another receipt.
+
+Cleanup deleted the exact hook once, retired the successor secret once,
+uninstalled the service, and removed the fresh successor root. Independent
+readback shows an empty hook inventory, unit inactive/not-found with MainPID
+zero, no listener on port 8820, and zero redelivery or dispatch. The predecessor
+failure root remains owner-only and secret-free. Verification 0081 binds the
+external receipt and exact lifecycle identities. Issues #109 and #103 are ready
+to close through this final evidence PR; no release, global install, ingress
+mutation, or live target dispatch occurred.
 
 ## Architecture and security decisions
 
@@ -178,7 +198,7 @@ not reported, so no allocation-savings claim is made.
 
 ```text
 goal_id: P53-G1
-goal_version: P53-G1-v3
+goal_version: P53-G1-v5
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_review_discovery_passes: 1
@@ -198,11 +218,11 @@ github_workflow_trigger_retries: 0
 github_webhook_delete_attempts: 1
 github_webhook_delete_retries: 0
 github_webhook_redelivery_attempts: 0
-c6_runtime_establishments: 1
-c6_runtime_retries: 0
-c6_runtime_cleanup_attempts: 1
-c6_secret_provisions: 1
-c6_secret_retirements: 1
+c6_runtime_establishments_total: 2
+c6_runtime_successor_attempts: 1
+c6_runtime_cleanup_attempts_total: 2
+c6_secret_provisions_total: 2
+c6_secret_retirements_total: 2
 live_delivery_observation_attempts: 1
 live_dispatch_attempts: 0
 release_attempts: 0

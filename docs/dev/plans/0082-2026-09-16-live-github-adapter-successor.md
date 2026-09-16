@@ -1,9 +1,9 @@
 # Live GitHub adapter correction and qualification successor
 
-State: OPEN
+State: CLOSED
 Lane: P53-C7
 Issue: #109
-Branch: `fix/issue-109-live-adapter-runtime`
+Branch: `fix/issue-109-live-adapter-runtime`; trigger PR #133; closeout `docs/issue-109-live-closeout`
 Target: `main`
 Integration: `squash`
 Parent plan: `docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md`
@@ -47,10 +47,23 @@ effective runtime cost telemetry remains unavailable, so no allocation-saving
 claim is made. Integration and the fresh trigger candidate remain.
 
 Corrective PR #132 passed both hosted Python release gates and squash-merged as
-canonical `27dedc00228c4ff99820dfa4b84e7895f62075a1`. The correction is now a
-prerequisite of the fresh docs-only successor trigger. No successor runtime,
-secret, service, hook, trigger, observation, cleanup, or dispatch effect has
-occurred.
+canonical `27dedc00228c4ff99820dfa4b84e7895f62075a1`. At the successor gate, the
+correction was the prerequisite of the fresh docs-only trigger, and no
+successor runtime, secret, service, hook, trigger, observation, cleanup, or
+dispatch effect had yet occurred.
+
+After the new exact gate was explicitly authorized, C7-R5 completed once.
+The fresh runtime established on corrected canonical commit `27dedc0`; hook
+`680422493` was created for only `workflow_run`; and green docs-only PR #133
+squash-merged as `5f21ed1a3bf80804a95b4e26b5bb154071411b42`. Provider delivery
+`80e50480-b201-11f1-9387-9a306ef1c969` returned 200 for successful CI run
+`35138287516`, attempt 1. The durable journal converged `0 -> 1 -> 1`, and the
+no-dispatch poll moved the wake from pending to local firing with dispatch and
+redelivery counters still zero. The exact hook was deleted once, the successor
+secret retired once, the service uninstalled, and the successor root removed.
+Fresh readback reports no hook, no exact unit or process, MainPID zero, and no
+listener on port 8820. The predecessor evidence remained unchanged and
+secret-free. Verification 0081 is the durable closeout receipt.
 
 ## Objective
 
@@ -146,8 +159,9 @@ closed-world remediation verification are the loop bounds.
 
 ## Definition of done
 
-The correction is canonical, the predecessor failure remains attributable and
-secret-free, a fresh successor trigger candidate is frozen, GitHub reports no
-hook, no successor runtime exists, and the lane stops at a new exact lifecycle
-authorization gate. Issue #109 and parent #103 remain open until one live
-delivery is accepted or the wider program records a truthful terminal failure.
+The correction and accepted live delivery are canonical. The predecessor
+failure remains attributable and secret-free; the successor hook, runtime, and
+secret are removed; the external receipt is retained; and zero dispatch,
+redelivery, global-install, release, or ingress-mutation effects occurred.
+Issue #109 and parent #103 close through the final evidence PR after hosted
+checks and canonical-main readback.
