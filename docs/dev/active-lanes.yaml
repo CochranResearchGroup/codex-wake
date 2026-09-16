@@ -1,23 +1,23 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P53-C5
-    objective: Publish the exact signed GitHub webhook path through Cooper and bastion
-    plan: docs/dev/plans/0078-2026-09-16-cooper-webhook-ingress-publication.md
-    plan_ref: refs/heads/chore/issue-108-ingress-qualification
-    branch: chore/issue-108-ingress-qualification
+  - id: P53-C5R1
+    objective: Qualify the existing exact public webhook route after certificate provisioning
+    plan: docs/dev/plans/0080-2026-09-16-public-ingress-certificate-race-successor.md
+    plan_ref: refs/heads/fix/issue-108-public-qualification-retry-1
+    branch: fix/issue-108-public-qualification-retry-1
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: a846ab92be23a184397b0e414238840b901cd9a5
-    validation_status: implementation_accepted_live_qualification_ready
-    validation_ref: 033d2cc7187e4448e2809299701a2975d0790e80
-    remote_ref: refs/remotes/origin/chore/issue-108-ingress-qualification
+    checkpoint: 285053c42071efc5af9b51aba16cceb2131a1649
+    validation_status: cleanup_correction_accepted_live_retry_ready
+    validation_ref: 7c2836377eae0eb271636fcafb14c0cdd454c766
+    remote_ref: refs/remotes/origin/fix/issue-108-public-qualification-retry-1
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#108]
-    owner: primary ingress-effect owner with one bounded implementation worker and independent reviewer
-    write_surface: Plan 0078, Cooper exact-path renderer and inventory, isolated C5 runtime, verification receipt, roadmap, and runbook
-    live_effect: one provider-free loopback canary establishment and one exact Cooper/bastion HTTPS publication; no provider mutation or dispatch
+    owner: primary qualification owner with one bounded implementation worker and independent reviewer
+    write_surface: Plan 0080, isolated C5 successor runtime, verification receipt, roadmap, and runbook
+    live_effect: one provider-free loopback canary and one ordered public qualification attempt; zero ingress publication, provider mutation, or dispatch
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
