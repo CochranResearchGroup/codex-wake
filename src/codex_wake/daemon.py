@@ -99,149 +99,39 @@ def default_signal_runners(
 ) -> tuple[SignalSourceRunner, ...]:
     """Reconstruct referenced sources, then append an optional closed catalogue."""
 
-    from .filesystem_signals import FilesystemSignalAdapter, FilesystemSignalRunner
     from .github_client import GitHubRestClient
+    from .local_source_families import local_source_registrations
 
-    load_armed_signal = runtime.load_armed_signal
-    if source_registry is not None:
-        # Share one durable arm read across compatibility and injected paths.
-        load_armed_signal = cache(load_armed_signal)
-    adapters: dict[str, FilesystemSignalAdapter] = {}
-    arms: list[ArmedSignal] = []
-    github_arms: dict[str, list[ArmedSignal]] = {}
-    process_adapters = {}
-    process_arms: dict[str, list[ArmedSignal]] = {}
-    systemd_arms: dict[str, list[ArmedSignal]] = {}
-    reconstruction_failures: dict[tuple[str, str], str] = {}
+    # All registered families share one authoritative arm read per wake.
+    load_armed_signal = cache(runtime.load_armed_signal)
+    context = ReconstructionContext(root, load_armed_signal, initial_reason)
     pending = pending_records(root)
+    local_registry = BuiltinSourceRegistry(local_source_registrations(
+        systemd_backend_factory=systemd_backend_factory,
+    ))
+    local_runners = local_registry.reconstruct(context, pending)
+    runners: list[SignalSourceRunner] = [
+        runner for runner in local_runners
+        if not isinstance(runner, UnavailableSourceRunner)
+    ]
+    unavailable_runners = [
+        runner for runner in local_runners
+        if isinstance(runner, UnavailableSourceRunner)
+    ]
+    github_arms: dict[str, list[ArmedSignal]] = {}
     for item in pending:
         if classify_record(item.record) != "signal_v2":
             continue
         wake_id = item.record.get("id")
-        cwd = item.record.get("cwd")
         predicate = item.record.get("predicate")
-        if not isinstance(wake_id, str) or not isinstance(cwd, str) or not isinstance(predicate, dict):
+        if not isinstance(wake_id, str) or not isinstance(predicate, dict):
             continue
         source = predicate.get("source")
         source_instance = predicate.get("source_instance")
-        if source == "systemd" and isinstance(source_instance, str):
-            armed = load_armed_signal(wake_id)
-            if (
-                armed is not None
-                and armed.spec.source == "systemd"
-                and armed.spec.kind == "unit.active_state"
-                and armed.spec.source_instance == source_instance
-            ):
-                systemd_arms.setdefault(source_instance, []).append(armed)
-            continue
-        if source == "runtime" and isinstance(source_instance, str):
-            armed = load_armed_signal(wake_id)
-            if (
-                armed is not None
-                and armed.spec.source == "runtime"
-                and armed.spec.kind == "process.exit"
-                and armed.spec.source_instance == source_instance
-            ):
-                try:
-                    from .process_signals import restore_production_process_exit_adapter
-
-                    adapter = restore_production_process_exit_adapter(armed)
-                except (OSError, TypeError, ValueError):
-                    reconstruction_failures[("runtime", source_instance)] = "RUNTIME_ANCHOR_INVALID"
-                    continue
-                existing = process_adapters.get(source_instance)
-                if existing is not None and existing.descriptor != adapter.descriptor:
-                    continue
-                process_adapters[source_instance] = adapter
-                process_arms.setdefault(source_instance, []).append(armed)
-            continue
         if source == "github" and isinstance(source_instance, str):
             armed = load_armed_signal(wake_id)
             if armed is not None and armed.spec.source == "github":
                 github_arms.setdefault(source_instance, []).append(armed)
-            continue
-        if source != "filesystem":
-            continue
-        subject = predicate.get("subject")
-        if (
-            not isinstance(subject, str)
-            or not subject.startswith("path:")
-            or not isinstance(source_instance, str)
-        ):
-            continue
-        armed = load_armed_signal(wake_id)
-        if armed is None:
-            continue
-        try:
-            adapter = FilesystemSignalAdapter(
-                Path(cwd),
-                subject.removeprefix("path:"),
-                source_instance=source_instance,
-            )
-        except ValueError:
-            continue
-        existing = adapters.get(source_instance)
-        if existing is not None and (
-            existing.root != adapter.root or existing.relative_path != adapter.relative_path
-        ):
-            continue
-        adapters[source_instance] = adapter
-        arms.append(armed)
-    runners: list[SignalSourceRunner] = []
-    if arms:
-        runners.append(FilesystemSignalRunner(
-            adapters.values(), armed_signals=arms, initial_reason=initial_reason
-        ))
-    for source_instance in sorted(process_arms):
-        runners.append(process_adapters[source_instance].runner(process_arms[source_instance]))
-    if systemd_arms:
-        from .runtime_signals import RuntimeSourceRegistry
-        from .systemd_signals import (
-            SystemdReadCapability,
-            SystemdSignalAdapter,
-            SystemdSignalRunner,
-            SystemdUserBusBackend,
-        )
-        from .systemd_source_config import SystemdSourceStore
-
-        try:
-            configuration_store = SystemdSourceStore(root)
-            registry = configuration_store.registry()
-            systemd_adapters = []
-            referenced_arms = []
-            for source_instance in sorted(systemd_arms):
-                try:
-                    source_config = registry.select(source_instance)
-                    backend = (
-                        systemd_backend_factory(source_config)
-                        if systemd_backend_factory is not None
-                        else SystemdUserBusBackend()
-                    )
-                    systemd_adapters.append(SystemdSignalAdapter(
-                        source_config,
-                        backend,
-                        RuntimeSourceRegistry({
-                            "systemd.unit": lambda descriptor, source_instance=source_instance: (
-                                _configured_systemd_descriptor(
-                                    configuration_store, source_instance, descriptor
-                                )
-                            )
-                        }),
-                        SystemdReadCapability("user", os.geteuid()),
-                    ))
-                except (OSError, TypeError, ValueError):
-                    reconstruction_failures[("systemd", source_instance)] = "SYSTEMD_SOURCE_UNSUPPORTED"
-                    continue
-                referenced_arms.extend(systemd_arms[source_instance])
-            if systemd_adapters:
-                runners.append(SystemdSignalRunner(
-                    systemd_adapters,
-                    armed_signals=tuple(referenced_arms),
-                    initial_reason=initial_reason,
-                ))
-        except (OSError, TypeError, ValueError):
-            for source_instance in systemd_arms:
-                reconstruction_failures[("systemd", source_instance)] = "SYSTEMD_SOURCE_UNSUPPORTED"
     if github_arms:
         store = GitHubSourceStore(root)
         try:
@@ -279,26 +169,10 @@ def default_signal_runners(
             # A damaged or unsupported configuration cannot create network
             # authority. Other source classes remain available.
             pass
-    runners.extend(
-        UnavailableSourceRunner(source, source_instance, code)
-        for (source, source_instance), code in sorted(reconstruction_failures.items())
-    )
+    runners.extend(unavailable_runners)
     if source_registry is not None:
-        runners.extend(source_registry.reconstruct(
-            ReconstructionContext(root, load_armed_signal, initial_reason), pending,
-        ))
+        runners.extend(source_registry.reconstruct(context, pending))
     return tuple(runners)
-
-
-def _configured_systemd_descriptor(store, source_instance: str, descriptor) -> bool:
-    try:
-        current = store.registry().select(source_instance)
-        return any(
-            descriptor == current.descriptor(state)
-            for state in current.target_states
-        )
-    except (OSError, TypeError, ValueError):
-        return False
 
 
 def _evaluate_signal(
