@@ -18,19 +18,29 @@ pre-existing failed units, so acceptance is scoped to one exact unit/PID/socket
 rather than whole-manager health.
 
 Correction checkpoint `25b61f3845e954c01c8f72ac2372329e8147580f`
-replaces the initial runner after one independent drift review produced the
-accepted finding ledger C4-R01 through C4-R08 below. Fourteen hermetic tests,
-including a real in-process HTTP/store/restart/polling sequence, now pass;
-the final narrow remediation expands that tier to 18/18, comprehensive Python
-validation is 510/510, and the plugin tier is 12/12.
+replaced the initial runner after one independent drift review produced the
+accepted finding ledger C4-R01 through C4-R08 below. Pre-effect correction
+`ccfda6c` then resolved C4-R09 after the first explicit runner invocation
+proved that signal registration correctly fails without a live managed reader.
+The source is configured disabled for the reader's first poll, one transient
+installed `codex-waked --no-dispatch` process advertises the isolated reader
+capability, the source is enabled and armed while that exact PID is live, and
+the reader is stopped before webhook service setup continues. Twenty hermetic
+tests, including a real in-process HTTP/store/restart/polling sequence, now
+pass; comprehensive Python validation is 512/512 and the plugin tier is 12/12.
 Compilation and diff hygiene also pass. The first attempted planning-audit
 command used a nonexistent repo-local script and is retained as a failed
 validation attempt; the actual selector-bundle active planning audit passed,
 while the lane audit correctly remains stale until this correction checkpoint
-is recorded. It has not been run with `--execute`: no wheel install, unit,
-listener, provider access, ingress, polling, port-8820 bind, or dispatch
-occurred. The one service attempt remains unconsumed. The next exact gate is
-closed-world verification of C4-R01 through C4-R08, then a fresh live preflight.
+is recorded. One `--execute` invocation at `ff3ceae` built and installed the
+candidate wheel in its disposable environment, then failed before service
+installation with `READER_CAPABILITY_UNAVAILABLE`. Its external receipt proves
+`service_attempted: false`, safe cleanup, absent unit/process/port ownership,
+and retained candidate provenance. No listener, provider access, ingress,
+polling, port-8820 bind, or dispatch occurred, so the one service attempt
+remains unconsumed. A freshly built candidate wheel has since passed the exact
+corrected configure/arm path in a disposable root. The next gate is one
+closed-world review of C4-R09, then a fresh live preflight.
 
 ## Accepted review ledger
 
@@ -67,6 +77,16 @@ closed-world verification of C4-R01 through C4-R08, then a fresh live preflight.
   restart identity, and polling are written to the external sanitized receipt
   immediately so a later failure cannot erase completed evidence.
 
+## Pre-effect correction ledger
+
+- `C4-R09`: installed signal registration requires a current managed-reader
+  capability. The runner must use the installed daemon only as one transient,
+  isolated, long-interval `--no-dispatch` reader while arming; the GitHub source
+  remains disabled through its first poll, becomes enabled only after exact
+  reader readiness, and the reader must stop before any service attempt. Its
+  PID/mode/no-dispatch evidence and setup stage are persisted in the external
+  receipt. No persistent daemon/service or provider path is permitted.
+
 ## Objective
 
 Build and hash one wheel from the exact candidate commit, install it only in a
@@ -87,8 +107,10 @@ polling convergence, installed readiness/status/support, and complete cleanup.
   real user-systemd unit directory. Any occupied port, existing unit, foreign
   file, or unavailable user manager blocks before the install attempt.
 - Configure the GitHub source and webhook listener and arm one GitHub completed
-  wake through installed commands without contacting GitHub. Do not start the
-  wake daemon.
+  wake through installed commands without contacting GitHub. Hold one
+  transient installed `codex-waked --no-dispatch` reader only while arming;
+  keep the source disabled for its first poll, use an isolated XDG state root,
+  then terminate the reader before the webhook service attempt.
 - Provide an ephemeral, untracked bootstrap only through the owner-only service
   environment. The exact installed interpreter must explicitly install and
   verify the deterministic provider-attempt fixture before invoking the exact
@@ -107,8 +129,8 @@ polling convergence, installed readiness/status/support, and complete cleanup.
 ## Non-goals and effect boundary
 
 - No GitHub request or mutation, public ingress, non-loopback bind, target
-  dispatch, daemon start, normal wake-root mutation, global install, release,
-  deployment, or Cooper change.
+  dispatch, persistent or dispatch-enabled daemon, normal wake-root mutation,
+  global install, release, deployment, or Cooper change.
 - No product test mode, fixture CLI flag, generic provider injection, alternate
   endpoint, or relaxation of source/service/secret/journal authority.
 - The packet permits one service install/start attempt and no automatic retry.
@@ -124,8 +146,9 @@ polling convergence, installed readiness/status/support, and complete cleanup.
    on every exit.
 3. Run focused and comprehensive tests, plugin tests, compilation, diff hygiene,
    and planning audits. Obtain one independent closed-world review.
-4. Build/hash/install the exact wheel and complete all non-effect setup before
-   consuming the one installed-service attempt.
+4. Build/hash/install the exact wheel; arm under the transient installed
+   no-dispatch reader; prove that reader stopped; and complete all other
+   non-effect setup before consuming the one installed-service attempt.
 5. Execute install/start, readiness/status/support, signed commit/duplicates,
    restart, polling convergence, and exact readback once.
 6. In `finally`, uninstall the unit, verify inactive/disabled/no MainPID, release

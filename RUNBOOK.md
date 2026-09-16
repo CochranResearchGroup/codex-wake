@@ -3454,3 +3454,30 @@ Acceptance state: P53 is open at `P53-G1-v2` / `P53-G1-C05`; #107 is the sole
 active lane. Movement is `outcome_progress`. Next action: publish this lane
 assignment, implement and independently review the source-only runner, then
 consume the single installed-service attempt only after a clean preflight.
+
+## Turn 162 | 2026-09-16
+
+Corrected the #107 installed runner at the managed-reader capability gate
+without consuming its service attempt.
+
+- The first explicit runner invocation at `ff3ceae` built and installed the
+  candidate wheel in a disposable environment, then failed during arming with
+  `READER_CAPABILITY_UNAVAILABLE`. The staged receipt proves
+  `service_attempted: false`, safe cleanup, absent unit/process/port ownership,
+  and retained commit/tree/wheel/executable provenance.
+- C4-R09 now holds one transient installed `codex-waked --no-dispatch` reader
+  only while arming. The source is disabled for its first poll, application
+  state is isolated, exact reader PID/readiness is required, and the reader is
+  stopped before webhook configuration and the service-attempt boundary.
+- TDD retained both failures: the missing managed-reader interface and the
+  unsafe enabled-before-first-poll ordering. The correction passes 20 focused
+  tests, 512 comprehensive Python tests, 12 plugin tests, compilation, diff
+  hygiene, and a freshly built candidate-wheel configure/arm proof.
+- Code/test checkpoint is `ccfda6c`; one independent closed-world C4-R09 review
+  is in progress. No systemd mutation, listener, port-8820 bind, provider
+  access, ingress, dispatch, release, deployment, or global install occurred.
+
+Acceptance state: #107 remains active and its one installed-service attempt is
+unconsumed. Movement is `blocker_reduction`. Next action: accept or repair the
+closed-world C4-R09 review, publish the exact checkpoint, run a fresh host
+preflight, then execute the single service attempt once.
