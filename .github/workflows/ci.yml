@@ -52,6 +52,8 @@ jobs:
           /tmp/codex-wake-ci/bin/python -m pip install --upgrade pip
           /tmp/codex-wake-ci/bin/python -m pip install dist/*.whl
 
+          /tmp/codex-wake-ci/bin/python scripts/source_registry_smoke.py --json
+
           python scripts/product_smoke.py \
             --codex-wake-bin /tmp/codex-wake-ci/bin/codex-wake \
             --codex-waked-bin /tmp/codex-wake-ci/bin/codex-waked \

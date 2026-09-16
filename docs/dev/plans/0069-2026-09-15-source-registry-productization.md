@@ -9,11 +9,16 @@ Integration: `squash`
 
 ## Current state
 
-Issues #82 through #84 are accepted on canonical main at
+At lane start, issues #82 through #84 were accepted on canonical main at
 `e0d88620a7bfc9208b97dd29e420639d391c0ecf`. All four production source
-families reconstruct through the immutable built-in registry. Operator
-readiness and support still derive source capability independently of that
-catalogue, and the internal extension procedure is not yet documented.
+families reconstructed through the immutable built-in registry while operator
+readiness/support still derived source capability independently and the
+internal extension procedure was undocumented.
+
+Candidate `c4217b863d68f8e0cd803ed6990e2a6d53af5dac` now provides the shared
+catalogue constructor, pure inventory, additive readiness/support projection,
+focused coverage, and maintainer documentation. Validation passes 438 Python
+and 12 plugin tests plus compilation and independent review with no findings.
 
 ## Objective
 
@@ -81,8 +86,27 @@ review-discovery pass. Nested delegation is disabled. Maximum implementation
 attempts: two; maximum review repair cycles: one; installed attempts: one with
 zero retries.
 
+## Installed-attempt disposition
+
+The sole local installed attempt built and installed the exact `c4217b8`
+wheel offline. Installed catalogue, readiness, support export, digest, and
+zero-wake-root assertions passed. The harness then exited while rendering its
+receipt because it referenced nonexistent `bytes_written` instead of the
+documented `size_bytes`; installed fixture reconstruction had not yet run.
+This consumed the local attempt and is not retried. Readback retained the wheel
+and support hashes, confirmed no wake root, and cleanup moved the temporary
+venv, wheel tree, and generated build artifacts to user trash.
+
+The bounded replacement acceptance path is a checked-in provider-free smoke
+script executed by each existing installed-wheel CI matrix job. It exercises
+the same catalogue/readiness/support assertions plus fixture reconstruction and
+temporary-root cleanup through the installed interpreter. This does not grant
+a second local attempt or widen provider, dispatch, observation, installation,
+release, or deployment authority.
+
 ## Next action
 
-Merge the exact active-lane assignment, then implement pure catalogue
-introspection and additive readiness/support output test-first in the isolated
-#85 worktree. The primary retains the installed smoke and integration gates.
+Publish the deterministic installed-wheel CI smoke, require both Python 3.11
+and 3.12 release gates on the exact candidate, then record the failed local
+attempt and successful CI replacement path in the verification receipt before
+integration.
