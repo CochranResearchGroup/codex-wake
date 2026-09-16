@@ -726,13 +726,13 @@ Completion evidence:
 
 State: OPEN
 
-Current State: P51 is closed and canonical main is clean at `0df3386`. Parent
-issue #81 and child issues #82 through #85 define a contract-first campaign:
-freeze a closed built-in source-family registry, migrate local and GitHub source
-families in parallel after that contract, then join operator surfaces and one
-isolated provider-free installed-wheel compatibility smoke. No new source,
-provider effect, live dispatch, arbitrary plugin loading, release, deployment,
-or global installation refresh is authorized.
+Current State: PR #86 accepted the P52 coordination checkpoint at canonical
+`b554a0f`. Issue #82 is the sole ready implementation slice and freezes the
+closed built-in source-family registry plus provider-free conformance fixture.
+Issues #83 and #84 remain blocked pending that contract; #85 joins their output
+into operator surfaces and one isolated provider-free installed-wheel smoke. No
+new source, provider effect, live dispatch, arbitrary plugin loading, release,
+deployment, or global installation refresh is authorized.
 
 Plan: [Event source extension framework goal campaign](docs/dev/plans/0065-2026-09-15-event-source-extension-framework.md)
 

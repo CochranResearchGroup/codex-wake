@@ -5,8 +5,8 @@ Lane: P52
 Issues: #81, #82, #83, #84, #85
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P52-G1
-Goal Version: P52-G1-v1
-Checkpoint: P52-G1-C01
+Goal Version: P52-G1-v2
+Checkpoint: P52-G1-C02
 
 ## Goal objective
 
@@ -33,6 +33,12 @@ runner shape. Filesystem, user-systemd, and GitHub CI batch candidates; process
 creates runners per configured instance. The extension seam must therefore be
 a family-level runner factory over the complete ordered candidate set, not a
 generic per-arm adapter constructor.
+
+PR #86 passed both required release gates and merged the coordination state at
+`b554a0f2cf1bee75d8c8268575055c6652112919`. Issue #82 is now the sole ready
+implementation slice under lane plan
+`docs/dev/plans/0066-2026-09-15-built-in-source-registry-contract.md`; #83
+through #85 remain dependency-blocked.
 
 Graphiti was healthy but returned no P52-specific durable facts. Current source,
 Git, GitHub, policy, plan, and test evidence are authoritative. Deterministic
