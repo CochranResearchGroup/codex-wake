@@ -721,3 +721,30 @@ Completion evidence:
 - Installed canary canonical commit:
   `00af8fa2142ce5adb102f48ba651c6a09c02df1b` and verification receipt
   [0077](docs/dev/verification/0077-2026-09-15-installed-runtime-wake-canary.md).
+
+## P52 | Event Source Extension Framework
+
+State: OPEN
+
+Current State: P51 is closed and canonical main is clean at `0df3386`. Parent
+issue #81 and child issues #82 through #85 define a contract-first campaign:
+freeze a closed built-in source-family registry, migrate local and GitHub source
+families in parallel after that contract, then join operator surfaces and one
+isolated provider-free installed-wheel compatibility smoke. No new source,
+provider effect, live dispatch, arbitrary plugin loading, release, deployment,
+or global installation refresh is authorized.
+
+Plan: [Event source extension framework goal campaign](docs/dev/plans/0065-2026-09-15-event-source-extension-framework.md)
+
+Acceptance target:
+
+- One immutable built-in source-family catalogue replaces source-specific
+  daemon reconstruction branches without changing source semantics.
+- A provider-free fixture proves extension, collision rejection, ordering,
+  batching, failure isolation, recovery, and side-effect-free introspection.
+- Filesystem, process, user-systemd, and GitHub CI sources preserve their exact
+  configuration, authorization, anchors, retry, health, and recovery behavior.
+- Readiness/support, documentation, and an isolated dispatch-disabled installed
+  wheel agree with runtime registration.
+- GitHub issues, short-lived branches, pull requests, CI, and canonical-main
+  readback provide custody and acceptance evidence.
