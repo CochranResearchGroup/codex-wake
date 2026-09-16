@@ -3891,3 +3891,10 @@ two-process generation race. The corrected gates pass 36 focused tests, 601
 comprehensive Python tests, 12 plugin tests, compilation, and diff hygiene.
 No external or installed effect occurred. Acceptance remains pending exact
 independent re-verification and hosted integration.
+
+Exact re-verification cleared seven findings and the mismatched-GET path, then
+reproduced one remaining variant of the same ownership finding: a rejected
+mismatched UPDATE response could replace the preexisting hook ID in `UNKNOWN`.
+Checkpoint `d2de93e` now preserves the pre-write hook ID for every ambiguous
+UPDATE and adds the direct regression. Validation passes 37 focused tests, 602
+comprehensive Python tests, 12 plugin tests, compilation, and diff hygiene.

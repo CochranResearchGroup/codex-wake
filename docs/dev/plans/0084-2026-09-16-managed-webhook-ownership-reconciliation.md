@@ -135,15 +135,19 @@ the reconciler and adapter, a bounded repository ID/name read before every
 provider operation, conflicting-binding rejection, under-lock inventory
 revalidation before intent, preserved ownership receipts, encoded-size checks
 before replacement, descriptor-level no-follow locking, root/UID validation on
-load, and explicit immutable-installation rejection. It also preserves local
+load, and explicit immutable-installation rejection. Exact re-verification
+found one remaining variant: a rejected mismatched UPDATE response could
+replace the already-owned ID in its `UNKNOWN` receipt. Checkpoint `d2de93e`
+closes that hole by retaining the pre-write exact ID for every ambiguous
+UPDATE while allowing only CREATE to acquire a returned ID. It also preserves local
 `show` when listener configuration is missing while preventing an armed apply,
 and admits bounded nonconforming foreign inventory without granting ownership.
 
-Local remediation validation passes 36 focused management tests, including a
-two-process stale-generation race, 601 comprehensive Python tests, 12 OpenClaw
+Local remediation validation passes 37 focused management tests, including a
+two-process stale-generation race, 602 comprehensive Python tests, 12 OpenClaw
 plugin tests, compilation, and diff hygiene. All provider paths use fakes;
 provider, service, secret, ingress, installation, release, and dispatch effect
-counts remain zero. Exact-checkpoint independent re-verification and hosted
+counts remain zero. Final exact-checkpoint independent re-verification and hosted
 integration gates remain.
 
 ## Model allocation

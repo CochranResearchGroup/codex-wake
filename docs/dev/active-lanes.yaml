@@ -9,9 +9,9 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 729f4cc
-    validation_status: remediation_validated_rereview_pending
-    validation_ref: 729f4cc
+    checkpoint: d2de93e
+    validation_status: final_remediation_validated_rereview_pending
+    validation_ref: d2de93e
     remote_ref: refs/remotes/origin/feat/issue-138-managed-webhook-reconciliation
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#138]

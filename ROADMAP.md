@@ -804,11 +804,11 @@ add durable exact ownership, provider reconciliation, restart-correct secret
 rotation, independent health/fallback, safe rollback, one retained activation,
 and one separately gated visible dispatch. The approved child graph is #138
 through #142. Issue #138 and Plan 0084 own the active provider-free ownership
-and reconciliation slice. Remediation checkpoint `729f4cc` implements its provider-free
+and reconciliation slice. Final remediation checkpoint `d2de93e` implements its provider-free
 binding store, ambiguity-safe reconciler, bounded GitHub.com administration
 adapter, and dry-run-first CLI. Local focused, comprehensive, plugin,
 compilation, and diff gates pass after addressing all eight initial independent
-review findings; exact re-review and hosted integration remain. No provider,
+review findings and the final mismatched-UPDATE variant; exact re-review and hosted integration remain. No provider,
 service, secret, ingress, installation, release, or dispatch effect is
 authorized by C1.
 
