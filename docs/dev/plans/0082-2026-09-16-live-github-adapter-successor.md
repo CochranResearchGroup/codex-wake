@@ -31,6 +31,21 @@ A bounded implementation worker owns only adapter code and tests. The primary
 owns this plan, failure custody, integration, and any later authority gate.
 No successor runtime or provider effect is authorized by this plan.
 
+Checkpoint `2e6bf2dc31f886d24f995e13b8380988e5590f76` resolves both reproduced
+defects. Installation now strips caller `PYTHONPATH` and `PYTHONHOME`,
+force-installs the exact local wheel, binds installed distribution metadata to
+the isolated venv, and proves all four exact console-script mappings and
+files. Cleanup accepts the host's exact rc 4 absent-unit tuple while rejecting
+contradictory or failed reads. The real-venv regression reproduces pip's former
+zero-exit/no-install result against the pre-fix implementation. Focused tests
+pass 24/24, comprehensive Python passes 565/565, the plugin tier passes 12/12,
+compilation and diff hygiene pass, and active/goal planning audits pass.
+Closed-world reviewer `/root/p53_c6_runner_review` accepted F1 and F2 with 15
+additional negative census probes and no critical regression. Worker
+`/root/p53_c7_adapter_fix` completed its single bounded implementation attempt;
+effective runtime cost telemetry remains unavailable, so no allocation-saving
+claim is made. Integration and the fresh trigger candidate remain.
+
 ## Objective
 
 Repair both adapter defects, prove the exact live failure shapes with
