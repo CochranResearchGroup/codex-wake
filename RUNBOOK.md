@@ -3675,3 +3675,23 @@ Acceptance state: #107 is locally accepted and integration-ready; #108 remains
 blocked until the issue-linked PR passes both release gates and canonical-main
 readback. Movement is `outcome_progress`. Next action: publish the exact clean
 branch, open the closing PR, monitor CI, squash merge, and reconcile custody.
+
+## Turn 171 | 2026-09-16
+
+Integrated and closed #107 through PR #119, then reconciled its active lane.
+
+- PR #119 resolved the exact published head `6962a76`, linked `Closes #107`,
+  had a clean merge state, and had no unresolved review threads, reviews, or
+  conversation comments.
+- Both Python 3.11 and 3.12 release gates passed. The PR squash-merged as
+  `920e5b84314a8063c8a7f3ed1c9d3523d32ab92c`, and GitHub closed #107.
+- Canonical `origin/main` and the clean primary worktree resolve to `920e5b8`.
+  Post-merge validation passes 519 Python tests, 12 plugin tests, compilation,
+  diff hygiene, and active/goal planning audits.
+- The stale P53-C4-v4 integration-ready projection was removed after merge;
+  Verification 0077 now carries the final integration receipt.
+
+Acceptance state: #107 is closed and accepted on canonical main; #108 is now
+eligible for its required ingress skill, while #109 remains blocked on #108.
+Movement is `outcome_progress`. Next action: finish this docs-only custody PR,
+remove the merged #107 branch/worktree, then begin #108 with the ingress skill.

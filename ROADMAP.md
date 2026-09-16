@@ -766,11 +766,11 @@ pass readiness, manual restart, and all three signed delivery checks. Plan 0075
 then failed safely at its final source-only polling projection because the
 fixture omitted the daemon's record publisher. Plans 0076 and 0077 repaired the
 fixture and a dropped GitHub health code/time, then passed strict provider-free
-convergence with zero provider or dispatch calls. The composite #107 evidence
-is accepted locally at `9766004` and awaits issue-linked PR/CI integration;
-#108 and #109 remain
-dependency-blocked for Cooper/bastion HTTPS
-publication and one live GitHub delivery. The shared ingress repository was
+convergence with zero provider or dispatch calls. PR #119 passed both release
+gates and squash-merged as `920e5b8`; canonical-main validation passed and
+GitHub closed #107. Issue #108 is now eligible for its required Cooper/bastion
+HTTPS ingress skill, while #109 remains dependency-blocked on that publication
+for one live GitHub delivery. The shared ingress repository was
 cleaned, validated, structured into two final commits, and pushed at `5fcce95`
 before P53 use. No retained installed listener, external ingress route, provider
 webhook, or live dispatch exists yet.

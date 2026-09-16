@@ -1,24 +1,3 @@
 schema_version: 1
 work_item_tracking: required
-lanes:
-  - id: P53-C4-v4
-    objective: Correct GitHub source health projection and finish strict provider-free qualification
-    plan: docs/dev/plans/0077-2026-09-16-github-health-projection-correction.md
-    plan_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
-    branch: chore/issue-107-installed-webhook-canary
-    target: main
-    plan_state: CLOSED
-    custody_state: INTEGRATION_READY
-    checkpoint: 97660040b0d85a9eef1eb29cfd6b76bb8dfe41f5
-    validation_status: accepted_composite_ci_pending
-    validation_ref: 97660040b0d85a9eef1eb29cfd6b76bb8dfe41f5
-    remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
-    integration: squash
-    work_items: [CochranResearchGroup/codex-wake#107]
-    owner: primary installed-effect owner with one bounded implementation worker and independent reviewer
-    write_surface: source-only installed smoke runner, tests, plan, sanitized verification receipt, roadmap, and runbook
-    live_effect: none; product health metadata and provider-free qualification only
-    dependencies: []
-    overlaps: []
-    reconciled_overlaps: []
-    updated_at: 2026-09-16
+lanes: []
