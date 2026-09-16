@@ -1,19 +1,20 @@
 # GitHub webhook product lifecycle
 
-State: OPEN
+State: CLOSED
 Lane: P53-C3
 Issue: #106
 Branch: `feat/issue-106-webhook-product-lifecycle`
 Target: `main`
-Integration: `squash-after-#105-join`
+Integration: `PR #116; squash 63e3a19089bd25d4bea09c1b664d467562db14b3`
 
 ## Current state
 
-Canonical main `1d32bb1d12531ab41fb36c0180fc0510be8e1c88`
-contains the accepted provider-neutral HTTP transport and durable signed-ingest
-runtime from #105. This branch joined that exact commit and now owns the
-supported configuration, executable construction, user service,
-readiness/status/support, packaging, and operator lifecycle acceptance.
+Canonical main `63e3a19089bd25d4bea09c1b664d467562db14b3`
+contains the accepted provider-neutral HTTP transport, durable signed-ingest
+runtime, and supported configuration, executable construction, user service,
+readiness/status/support, packaging, and operator lifecycle. PR #116 passed
+both required release gates and issue #106 is closed. Installed qualification
+remains separately owned by #107.
 
 ## Objective
 
@@ -82,12 +83,12 @@ Final validation occurs only after merging canonical #105 into this branch.
   readback before deletion. Readiness checks the configured GitHub source,
   required nonempty environment references, and an openable supported SQLite
   journal without exposing values.
-- R4 hardening: readiness opens the exact journal through SQLite immutable
-  read-only mode and accepts only the current application id, schema version,
-  and initialized metadata row; it cannot create WAL files, initialize a
-  zero-byte database, or migrate. Secret environment parsing accepts only a
-  minimal unquoted `KEY=value` subset and rejects quoted-empty and unsupported
-  systemd syntax.
+- R4 hardening: readiness copies only owner-scoped, owner-only regular SQLite
+  database/WAL/SHM files into an ephemeral snapshot, opens that snapshot
+  read-only, and accepts only the current application id, schema version, and
+  initialized metadata row. It cannot mutate, initialize, or migrate the live
+  journal. Secret environment parsing accepts only a minimal unquoted
+  `KEY=value` subset and rejects quoted-empty and unsupported systemd syntax.
 - Joined canonical #105 behind the unchanged executable interface. The deep
   builder selects the same enabled GitHub source, opens the existing signal
   journal, derives a source-bound no-coverage seed without a provider call,
@@ -128,7 +129,7 @@ Final validation occurs only after merging canonical #105 into this branch.
 - No real service install, provider call, non-loopback bind, Cooper route,
   release, deployment, or dispatch effect.
 
-## Combined local validation | 2026-09-16
+## Acceptance evidence | 2026-09-16
 
 - Joined lifecycle, runtime, and client focused suites passed: 18, 10, and 12
   tests respectively.
@@ -141,8 +142,22 @@ Final validation occurs only after merging canonical #105 into this branch.
   `86c4d59fcbdca38409d7a198bbdfa454d7e3d36b656aa44ecdee98a60624e766`.
   An isolated target install read back version `0.5.2` and entry point
   `codex-wake-github-webhook = codex_wake.webhook_listener:main`.
-- This evidence is local and provider-free. Independent review and required
-  Python 3.11/3.12 PR checks remain before #106 acceptance.
+- Independent combined review found four lifecycle-authority blockers. Two
+  bounded correction passes established per-request authority revocation,
+  verified stop/uninstall, canonical service ownership, and side-effect-free
+  operational readiness. Closed-world review accepted C3-R1 through C3-R4.
+- Final validation passed 492 comprehensive Python tests, 46 focused
+  lifecycle/runtime/client tests, 12 plugin tests, compilation, diff hygiene,
+  and the planning audit. CI release gates passed on Python 3.11 and 3.12 at
+  published head `1e56892c3e3f466905903d3b17b646a5d23a1555`.
+- The first two hosted runs retained their failures: the new positive journal
+  fixture depended on the local owner-only umask. The final fixture establishes
+  mode-0600 DB/WAL/SHM custody explicitly, while negative tests retain
+  permissive-mode rejection. No product guard was weakened.
+- PR #116 squash-merged as
+  `63e3a19089bd25d4bea09c1b664d467562db14b3`; issue #106 closed. No real
+  service, provider, ingress, non-loopback, dispatch, release, or deployment
+  effect occurred.
 
 ## Stop conditions
 
