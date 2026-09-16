@@ -222,6 +222,8 @@ class WebhookIngressCanaryTests(unittest.TestCase):
             self.assertTrue(root.exists())
             self.assertTrue(cleanup.call_args.kwargs["service_attempted"])
             self.assertTrue(cleanup.call_args.kwargs["preserve_root_on_safe"])
+            self.assertTrue(cleanup.call_args.kwargs["reuse_address_for_port_check"])
+            self.assertTrue(cleanup.call_args.kwargs["failed_unit_delta_is_noncausal"])
             external = json.loads(receipt_path.read_text(encoding="utf-8"))
             self.assertEqual(external["phase"], "cleanup_uncertain")
             self.assertEqual(external["cleanup"]["recovery_root"], str(root))

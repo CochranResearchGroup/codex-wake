@@ -665,6 +665,8 @@ def cleanup(root: Path) -> int:
             failed_units_before=tuple(state.get("failed_units_before", [])),
             tracked_identities=tracked,
             preserve_root_on_safe=not acceptance,
+            reuse_address_for_port_check=True,
+            failed_unit_delta_is_noncausal=True,
         )
     receipt["cleanup"] = result
     receipt["phase"] = "cleaned" if result.get("safe") else "cleanup_uncertain"

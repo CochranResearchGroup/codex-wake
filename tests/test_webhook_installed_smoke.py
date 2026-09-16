@@ -7,6 +7,7 @@ import io
 import json
 import os
 import runpy
+import socket
 import sqlite3
 import subprocess
 import sys
@@ -78,6 +79,34 @@ def fixture_at(when: datetime) -> smoke.Fixture:
 
 
 class InstalledWebhookSmokeTests(unittest.TestCase):
+    def test_port_probe_matches_server_reuse_after_closed_connection(self) -> None:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            listener.bind((smoke.HOST, 0))
+            port = listener.getsockname()[1]
+            listener.listen(1)
+            with socket.create_connection((smoke.HOST, port), timeout=2) as client:
+                connection, _ = listener.accept()
+                connection.close()
+                self.assertEqual(client.recv(1), b"")
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as control:
+            with self.assertRaises(OSError):
+                control.bind((smoke.HOST, port))
+        with patch.object(smoke, "PORT", port):
+            self.assertFalse(smoke.port_is_free())
+            self.assertTrue(smoke.port_is_free(reuse_address=True))
+
+    def test_port_probe_rejects_an_active_loopback_listener(self) -> None:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            listener.bind((smoke.HOST, 0))
+            port = listener.getsockname()[1]
+            listener.listen(1)
+            with patch.object(smoke, "PORT", port):
+                self.assertFalse(smoke.port_is_free())
+                self.assertFalse(smoke.port_is_free(reuse_address=True))
+
     def test_default_refuses_without_execution(self) -> None:
         stderr = io.StringIO()
         with patch.object(smoke, "execute", side_effect=AssertionError("must not execute")):
@@ -708,6 +737,49 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             self.assertFalse(receipt["temporary_roots_removed"])
             self.assertEqual(root.stat().st_mode & 0o777, 0o700)
             self.assertTrue(root.exists())
+
+    def test_cleanup_keeps_failed_unit_delta_strict_unless_explicitly_noncausal(self) -> None:
+        cases = (
+            (False, True, False),
+            (True, False, False),
+            (True, True, True),
+        )
+        for noncausal, port_released, expected_safe in cases:
+            with self.subTest(
+                noncausal=noncausal, port_released=port_released,
+            ), tempfile.TemporaryDirectory() as outer:
+                root = Path(outer) / "packet"
+                root.mkdir()
+                ctx = context(root)
+                ctx.unit_path.parent.mkdir(parents=True)
+                ctx.unit_path.write_text("owned", encoding="utf-8")
+
+                def uninstall(*args, **kwargs):
+                    ctx.unit_path.unlink()
+                    return subprocess.CompletedProcess([], 0, "", "")
+
+                with patch.object(smoke, "service_command", side_effect=uninstall), patch.object(
+                    smoke, "inactive_service_state",
+                    return_value={"active": "inactive", "enabled": "disabled",
+                                  "enabled_observed": "not-found", "pid": "0"},
+                ), patch.object(
+                    smoke, "manager_failed_units", return_value=("unrelated.service",),
+                ), patch.object(smoke, "matching_processes", return_value=()), patch.object(
+                    smoke, "port_is_free", return_value=port_released,
+                ):
+                    receipt = smoke.cleanup(
+                        ctx, env={}, service_attempted=True,
+                        failed_units_before=(), preserve_root_on_safe=True,
+                        reuse_address_for_port_check=True,
+                        failed_unit_delta_is_noncausal=noncausal,
+                    )
+                self.assertEqual(receipt["safe"], expected_safe)
+                self.assertEqual(
+                    receipt["failed_units_acceptance"],
+                    "noncausal_evidence" if noncausal else "blocking",
+                )
+                self.assertEqual(receipt["port_released"], port_released)
+                self.assertTrue(root.exists())
 
     def test_cleanup_preserves_recovery_on_matching_bootstrap_or_census_failure(self) -> None:
         for mode in ("match", "failure"):

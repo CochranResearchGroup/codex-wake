@@ -53,10 +53,13 @@ now canonical. #105 merged through PR #115 at `1d32bb1`; #106 joined it, passed
 independent combined review and both required CI release gates, and merged
 through PR #116 at `63e3a19`. Issues #104 through #106 are accepted. #107 is
 accepted through PR #119 plus verification 0077, and its disposable qualifier
-is removed. #108 is the sole eligible next slice; Plan 0078 owns one distinct
-provider-free C5 ingress-canary establishment and the one external publication.
-#109 remains dependency-blocked. No installed listener, public ingress route,
-provider webhook, or live dispatch currently exists.
+is removed. #108's Plan 0078 canary passed raw, local, and Cooper-Host checks,
+then consumed its one external publication and failed the first public TLS
+handshake without retry. The exact route is durable at bastion commit `4e7bc69`
+and its hostname certificate is now present, but public acceptance remains
+unproven. Plan 0080 owns one explicitly dispositioned qualification-only retry;
+it may not mutate or restart ingress. #109 remains dependency-blocked. No
+installed listener, provider webhook, or live dispatch currently exists.
 
 ## Architecture and security decisions
 
@@ -172,8 +175,8 @@ checkpoint_interval: 1 accepted issue or material effect gate
 concurrency_limit: 2 implementation lanes plus 1 read-only reviewer
 installed_service_attempts: 1
 installed_service_retries: 0
-c5_ingress_canary_establishments: 1
-c5_ingress_canary_retries: 0
+c5_ingress_canary_establishments: 2
+c5_ingress_canary_retries: 1
 external_ingress_publications: 1
 external_ingress_retries: 0
 github_webhook_mutation_attempts: 1

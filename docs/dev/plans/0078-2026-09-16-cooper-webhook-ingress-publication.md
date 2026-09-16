@@ -1,6 +1,6 @@
 # Cooper webhook ingress publication
 
-State: OPEN
+State: CLOSED
 Lane: P53-C5
 Issue: #108
 Branch: `chore/issue-108-ingress-qualification`
@@ -10,6 +10,26 @@ External repository: `CochranResearchGroup/cooper-webservices`
 External branch: `feat/codex-wake-webhook-ingress-108`
 
 ## Current state
+
+The bounded publication attempt ended without acceptance. Raw, local, and
+Cooper-Host checkpoints passed with one frozen signed occurrence, zero provider
+factory calls, and zero dispatch calls. The one authorized bastion copy and
+restart installed the exact reviewed route, but the first public TLS handshake
+failed with `SSLError`; no public retry was issued. The ACME store subsequently
+contained the exact hostname certificate, so the evidence is consistent with a
+first-handshake certificate provisioning race, but that inference is not public
+acceptance.
+
+Cleanup uninstalled the unit and a fresh OS census proved the process absent
+and port 8820 free. Its immediate receipt remained fail-closed because a bind
+probe observed the connected socket's teardown state and an unrelated failed
+user unit appeared during the evidence window. The private root and external
+receipt are retained. Bastion commit
+`4e7bc6966870a592fc8b30c17889269e98134d0a` durably records the route and
+failed qualification; unrelated Odoo dirt was preserved. Plan 0080 owns the
+single qualification-only successor and the cleanup-proof correction.
+
+The historical pre-attempt state follows.
 
 Issue #107 is accepted and its disposable qualifier is removed. The #108
 runner and evidence contract are accepted on canonical Codex Wake main at
