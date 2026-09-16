@@ -8,14 +8,14 @@ lanes:
     branch: feat/issue-104-webhook-http-transport
     target: main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 72e0965b2545f670cb3fc553c97a0bdd1b3cf7d2
-    validation_status: planned
-    validation_ref: dad2d80a4ce74e030ef604cc430449e76b636286
+    custody_state: INTEGRATION_READY
+    checkpoint: db63fec4c7d7198fd8ea96223986fdb29242fb8b
+    validation_status: passed
+    validation_ref: db63fec4c7d7198fd8ea96223986fdb29242fb8b
     remote_ref: refs/remotes/origin/feat/issue-104-webhook-http-transport
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#104]
-    owner: primary or bounded gpt-6-astra high security implementation worker
+    owner: primary with bounded security implementation and independent review
     write_surface: one HTTP transport module, one real-socket test module, and branch-local plan evidence
     live_effect: ephemeral loopback test sockets only; no provider, journal, service, ingress, or dispatch effect
     dependencies: []
