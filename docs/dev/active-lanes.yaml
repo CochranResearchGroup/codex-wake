@@ -8,8 +8,8 @@ lanes:
     branch: chore/issue-107-installed-webhook-canary
     target: main
     plan_state: OPEN
-    custody_state: PAUSED_REF
-    checkpoint: f821f6f4a778495c89c66690038c45fc5f0bb1f1
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 02537db9b55e7889cac63a82714b540eace200f7
     validation_status: pending
     validation_ref: f4a5404889250050cf12cd3f11c810b78b8aad20
     remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
