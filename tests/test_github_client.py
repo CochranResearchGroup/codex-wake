@@ -11,7 +11,7 @@ from datetime import timedelta
 from http.client import HTTPConnection
 from pathlib import Path
 
-from codex_wake.github_client import GitHubRestClient
+from codex_wake.github_client import GitHubRestClient, _absolute_deadline
 from codex_wake.github_polling import GitHubPollingAdapter, GitHubReadError, PollBatch
 from codex_wake.signals import ArmContext, Ingested, WakeId
 from tests.test_github_polling import NOW, config
@@ -78,6 +78,32 @@ class FixtureHTTPS:
 
 
 class GitHubClientTests(unittest.TestCase):
+    def test_delivery_client_reuses_the_main_thread_deadline_without_replacing_it(self):
+        selected = config(evidence_mode="positive_only")
+        http = FixtureHTTPS([Response(payload()), Response({"jobs": [], "total_count": 0})])
+        original_handler = signal.getsignal(signal.SIGALRM)
+        original_timer = signal.getitimer(signal.ITIMER_REAL)
+        try:
+            with _absolute_deadline(1) as deadline:
+                client = GitHubRestClient(selected, credential_resolver=lambda ref: "fixture-secret",
+                                          connection_factory=http, deadline=deadline)
+                verified = client.get_run_attempt(selected.repository, 101, 1)
+                self.assertEqual((verified.run_id, verified.run_attempt), (101, 1))
+                self.assertNotEqual(signal.getsignal(signal.SIGALRM), original_handler)
+                self.assertGreater(signal.getitimer(signal.ITIMER_REAL)[0], 0)
+            self.assertIs(signal.getsignal(signal.SIGALRM), original_handler)
+            self.assertEqual(signal.getitimer(signal.ITIMER_REAL), original_timer)
+        finally:
+            signal.signal(signal.SIGALRM, original_handler)
+            signal.setitimer(signal.ITIMER_REAL, *original_timer)
+
+    def test_delivery_deadline_cannot_be_reused_after_its_owner_exits(self):
+        selected = config(evidence_mode="positive_only")
+        with _absolute_deadline(1) as deadline:
+            pass
+        with self.assertRaisesRegex(ValueError, "deadline is invalid"):
+            GitHubRestClient(selected, credential_resolver=lambda ref: "fixture-secret", deadline=deadline)
+
     def test_deadline_restores_handler_and_timer_after_success_and_failure(self):
         original = signal.getsignal(signal.SIGALRM)
         def previous_handler(signum, frame):
