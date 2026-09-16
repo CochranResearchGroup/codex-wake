@@ -3582,3 +3582,26 @@ Acceptance state: #107 remains open under successor Plan 0075; #108 remains
 blocked. Movement is `blocker_reduction`. Next action: implement and validate
 the PrivateTmp-visible execution root and service-effect stage locator before
 any new service effect.
+
+## Turn 167 | 2026-09-16
+
+Accepted the source-only Plan 0075 correction for #107 without consuming its
+successor service-effect attempt.
+
+- Checkpoint `710c001` creates the disposable root beneath the resolved
+  owner-only user-state qualification directory and rejects relative,
+  `/tmp`-backed, `/var/tmp`-backed, and symlink-aliased state paths before
+  creation.
+- External receipts now stage installation, readiness, first delivery, replay,
+  manual restart, post-restart delivery, and provider-free polling boundaries
+  before each corresponding effect.
+- Validation passes 25 focused tests, 517 comprehensive Python tests, 12 plugin
+  tests, compilation, diff hygiene, and active/goal planning audits.
+- Independent review initially identified the temporary-path alias gap, then
+  accepted the exact repair after five rejection fixtures and two valid-root
+  fixtures. No systemd, provider, dispatch, or ingress effect occurred.
+
+Acceptance state: the Plan 0075 source correction is accepted; #107 remains
+open and its one successor service attempt remains unconsumed. Movement is
+`blocker_reduction`. Next action: publish the exact clean candidate, run a fresh
+host/unit/port/process preflight, then execute the successor attempt once.

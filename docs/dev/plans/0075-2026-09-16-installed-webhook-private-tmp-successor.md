@@ -25,6 +25,17 @@ execution-root placement and missing service-effect stage locator require
 correction. No second service effect is permitted until that correction is
 test-driven, validated, published, and freshly preflighted.
 
+Checkpoint `710c001b5873552c0b85618c8506ca742b9f127a` implements the
+source-only correction. It creates owner-only roots beneath the resolved user
+state qualification directory, rejects relative state paths and paths resolving
+beneath `/tmp` or `/var/tmp` (including symlink aliases), and stages every
+service/delivery/poll effect boundary in the external receipt. Validation passes
+25 focused tests, 517 comprehensive Python tests, 12 plugin tests, compilation,
+diff hygiene, and active/goal planning audits. Narrow independent review
+accepted the root selector, effect-stage ordering, and cleanup regression; no
+systemd, provider, dispatch, or ingress effect occurred. The successor service
+attempt remains unconsumed pending publication and fresh host preflight.
+
 ## Objective
 
 Run one successor installed qualification from an owner-only disposable root
