@@ -6,6 +6,7 @@ import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
+from functools import cache
 from pathlib import Path
 from typing import Callable, Literal, Mapping
 
@@ -38,6 +39,7 @@ from .signals import (
     SourceReconcileResult, UnavailableSourceRunner,
 )
 from .monitor import write_monitor_health
+from .source_registry import BuiltinSourceRegistry, ReconstructionContext
 
 
 @dataclass(frozen=True)
@@ -93,12 +95,17 @@ def default_signal_runners(
     initial_reason: Literal["startup", "periodic"] = "startup",
     github_client_factory: Callable[[GitHubPollingConfig], GitHubReadClient] | None = None,
     systemd_backend_factory: Callable[[object], object] | None = None,
+    source_registry: BuiltinSourceRegistry | None = None,
 ) -> tuple[SignalSourceRunner, ...]:
-    """Reconstruct only configured source adapters referenced by durable arms."""
+    """Reconstruct referenced sources, then append an optional closed catalogue."""
 
     from .filesystem_signals import FilesystemSignalAdapter, FilesystemSignalRunner
     from .github_client import GitHubRestClient
 
+    load_armed_signal = runtime.load_armed_signal
+    if source_registry is not None:
+        # Share one durable arm read across compatibility and injected paths.
+        load_armed_signal = cache(load_armed_signal)
     adapters: dict[str, FilesystemSignalAdapter] = {}
     arms: list[ArmedSignal] = []
     github_arms: dict[str, list[ArmedSignal]] = {}
@@ -106,7 +113,8 @@ def default_signal_runners(
     process_arms: dict[str, list[ArmedSignal]] = {}
     systemd_arms: dict[str, list[ArmedSignal]] = {}
     reconstruction_failures: dict[tuple[str, str], str] = {}
-    for item in pending_records(root):
+    pending = pending_records(root)
+    for item in pending:
         if classify_record(item.record) != "signal_v2":
             continue
         wake_id = item.record.get("id")
@@ -117,7 +125,7 @@ def default_signal_runners(
         source = predicate.get("source")
         source_instance = predicate.get("source_instance")
         if source == "systemd" and isinstance(source_instance, str):
-            armed = runtime.load_armed_signal(wake_id)
+            armed = load_armed_signal(wake_id)
             if (
                 armed is not None
                 and armed.spec.source == "systemd"
@@ -127,7 +135,7 @@ def default_signal_runners(
                 systemd_arms.setdefault(source_instance, []).append(armed)
             continue
         if source == "runtime" and isinstance(source_instance, str):
-            armed = runtime.load_armed_signal(wake_id)
+            armed = load_armed_signal(wake_id)
             if (
                 armed is not None
                 and armed.spec.source == "runtime"
@@ -148,7 +156,7 @@ def default_signal_runners(
                 process_arms.setdefault(source_instance, []).append(armed)
             continue
         if source == "github" and isinstance(source_instance, str):
-            armed = runtime.load_armed_signal(wake_id)
+            armed = load_armed_signal(wake_id)
             if armed is not None and armed.spec.source == "github":
                 github_arms.setdefault(source_instance, []).append(armed)
             continue
@@ -161,7 +169,7 @@ def default_signal_runners(
             or not isinstance(source_instance, str)
         ):
             continue
-        armed = runtime.load_armed_signal(wake_id)
+        armed = load_armed_signal(wake_id)
         if armed is None:
             continue
         try:
@@ -275,6 +283,10 @@ def default_signal_runners(
         UnavailableSourceRunner(source, source_instance, code)
         for (source, source_instance), code in sorted(reconstruction_failures.items())
     )
+    if source_registry is not None:
+        runners.extend(source_registry.reconstruct(
+            ReconstructionContext(root, load_armed_signal, initial_reason), pending,
+        ))
     return tuple(runners)
 
 
