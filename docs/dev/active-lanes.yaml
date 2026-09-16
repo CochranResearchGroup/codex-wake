@@ -1,3 +1,45 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P53-C2
+    objective: Join signed HTTP delivery to authoritative durable ingestion
+    plan: docs/dev/plans/0072-2026-09-16-signed-webhook-durable-ingest.md
+    plan_ref: refs/remotes/origin/feat/issue-105-signed-webhook-ingest
+    branch: feat/issue-105-signed-webhook-ingest
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 39e30301b9a1a1617f6d0fd6e5ae7ffdd55804fe
+    validation_status: planned
+    validation_ref: 558ae15723a9dfcd4b79b31c7a66e53439328707
+    remote_ref: refs/remotes/origin/feat/issue-105-signed-webhook-ingest
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#105]
+    owner: bounded gpt-5.6-terra high implementation worker; primary owns architecture and integration
+    write_surface: webhook runtime join, minimal GitHub client deadline seam, focused durable-ingest tests, and plan evidence
+    live_effect: ephemeral loopback sockets and temporary journals only; no provider, service, ingress, or dispatch effect
+    dependencies: []
+    overlaps: [shared_runtime_lifecycle_interface]
+    reconciled_overlaps: [shared_runtime_lifecycle_interface]
+    updated_at: 2026-09-16
+  - id: P53-C3
+    objective: Productize webhook configuration, executable, service, and operator evidence
+    plan: docs/dev/plans/0073-2026-09-16-webhook-product-lifecycle.md
+    plan_ref: refs/remotes/origin/feat/issue-106-webhook-product-lifecycle
+    branch: feat/issue-106-webhook-product-lifecycle
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: ab4d50e2520922dc8142e2835b0172342f8f6b6f
+    validation_status: planned
+    validation_ref: 558ae15723a9dfcd4b79b31c7a66e53439328707
+    remote_ref: refs/remotes/origin/feat/issue-106-webhook-product-lifecycle
+    integration: squash-after-#105-join
+    work_items: [CochranResearchGroup/codex-wake#106]
+    owner: bounded gpt-5.6-terra medium implementation worker; primary owns shared schema and join
+    write_surface: webhook config, CLI, executable, service, packaging, readiness, support, docs, tests, and plan evidence
+    live_effect: provider-free fixtures and isolated package/service rendering only; no installed service, ingress, or dispatch
+    dependencies: [P53-C2]
+    overlaps: [shared_runtime_lifecycle_interface]
+    reconciled_overlaps: [shared_runtime_lifecycle_interface]
+    updated_at: 2026-09-16
