@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import socket
 import threading
 import subprocess
@@ -17,7 +18,7 @@ from codex_wake.webhook_lifecycle import (
     WebhookListenerConfig, WebhookListenerStore, WebhookServiceConfig,
     build_webhook_service_config, install_webhook_service, render_webhook_unit, stop_webhook_service,
     disable_webhook_listener, linux_service_bind_probe, uninstall_webhook_service,
-    _journal_is_safe, webhook_http_config_kwargs, webhook_readiness, webhook_service_status, webhook_support,
+    _journal_is_safe, secret_environment_has_references, webhook_http_config_kwargs, webhook_readiness, webhook_service_status, webhook_support,
 )
 from codex_wake.webhook_listener import run_listener
 from codex_wake.webhook_listener import build_webhook_runtime
@@ -443,13 +444,46 @@ class WebhookListenerConfigTests(unittest.TestCase):
             WebhookListenerStore(root).configure(listener)
             missing = webhook_readiness(wake_root=root, source_instance=listener.source_instance, runtime_available=True)
             self.assertEqual(missing["status"], "blocked")
-            source = github_config(source_instance="github-webhook", evidence_mode="positive_only")
+            source = replace(github_config(source_instance="github-webhook", evidence_mode="positive_only"), credential_ref="CODEX_WAKE_GITHUB_TOKEN")
             GitHubSourceStore(root).configure(source)
             journal = signal_journal_path(root)
             journal.parent.mkdir(exist_ok=True)
             journal.write_text("not sqlite", encoding="utf-8")
             journal.chmod(0o600)
             self.assertFalse(_journal_is_safe(journal))
+
+    def test_readonly_journal_validation_never_initializes_or_changes_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            journal = signal_journal_path(root)
+            make_module(journal)
+            before = {
+                item.name: hashlib.sha256(item.read_bytes()).hexdigest()
+                for item in journal.parent.glob("journal.sqlite3*")
+            }
+            self.assertTrue(_journal_is_safe(journal))
+            after = {
+                item.name: hashlib.sha256(item.read_bytes()).hexdigest()
+                for item in journal.parent.glob("journal.sqlite3*")
+            }
+            self.assertEqual(after, before)
+            journal.write_bytes(b"")
+            self.assertFalse(_journal_is_safe(journal))
+
+    def test_secret_environment_rejects_quoted_empty_and_unsupported_syntax(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            listener = WebhookListenerConfig("github-webhook", secret_ref="CODEX_WAKE_WEBHOOK_SECRET", enabled=True)
+            source = github_config(source_instance="github-webhook", evidence_mode="positive_only")
+            config = WebhookServiceConfig("listener.service", root, listener.source_instance, None, Path(tmp) / "unit", Path(tmp) / "log")
+            env_path = root / "github" / "webhook.env"
+            env_path.parent.mkdir(parents=True)
+            for empty in ('""', "''"):
+                env_path.write_text(f"CODEX_WAKE_WEBHOOK_SECRET={empty}\n{source.credential_ref}=token\n", encoding="utf-8")
+                env_path.chmod(0o600)
+                self.assertFalse(secret_environment_has_references(config, listener, source))
+            env_path.write_text(f"CODEX_WAKE_WEBHOOK_SECRET=token\n{source.credential_ref}=token\nUNSUPPORTED LINE\n", encoding="utf-8")
+            self.assertFalse(secret_environment_has_references(config, listener, source))
 
     def test_readiness_requires_restart_safe_secret_environment(self) -> None:
         class Runner:
@@ -467,7 +501,7 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 enabled=True,
             )
             store.configure(listener)
-            source = github_config(source_instance="github-webhook", evidence_mode="positive_only")
+            source = replace(github_config(source_instance="github-webhook", evidence_mode="positive_only"), credential_ref="CODEX_WAKE_GITHUB_TOKEN")
             GitHubSourceStore(root).configure(source)
             environment_file = root / "github" / "webhook.env"
             environment_file.write_text(

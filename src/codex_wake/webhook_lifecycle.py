@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sqlite3
 import stat
 import tempfile
 from ipaddress import ip_address
@@ -19,7 +20,7 @@ from .executables import resolve_stable_executable
 from .records import WakeError
 from .service import _systemd_environment_file_path, systemctl, systemd_quote, user_state_dir, user_systemd_dir
 from .signal_records import signal_journal_path
-from .signal_store import SQLiteSignalModule, SignalStoreError
+from .signal_store import JOURNAL_APPLICATION_ID, JOURNAL_SCHEMA_VERSION
 
 
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}")
@@ -377,14 +378,27 @@ def disable_webhook_listener(
 
 
 def _journal_is_safe(path: Path) -> bool:
+    """Inspect an already-initialized journal without WAL creation or migration."""
+    connection: sqlite3.Connection | None = None
     try:
         metadata = path.stat()
         if not (path.is_file() and not path.is_symlink() and metadata.st_uid == os.getuid()
                 and not stat.S_IMODE(metadata.st_mode) & 0o077):
             return False
-        return SQLiteSignalModule.open_existing(path) is not None
-    except (OSError, SignalStoreError):
+        connection = sqlite3.connect(path.as_uri() + "?mode=ro&immutable=1", uri=True, isolation_level=None)
+        application_id = int(connection.execute("PRAGMA application_id").fetchone()[0])
+        user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
+        if application_id != JOURNAL_APPLICATION_ID or user_version != JOURNAL_SCHEMA_VERSION:
+            return False
+        row = connection.execute(
+            "SELECT schema_version, journal_uuid FROM journal_meta WHERE singleton = 1"
+        ).fetchone()
+        return row is not None and int(row[0]) == JOURNAL_SCHEMA_VERSION and isinstance(row[1], str) and bool(row[1])
+    except (OSError, sqlite3.Error, ValueError):
         return False
+    finally:
+        if connection is not None:
+            connection.close()
 
 
 def _unit_is_safe(config: WebhookServiceConfig) -> bool:
@@ -437,15 +451,26 @@ def secret_environment_has_references(config: WebhookServiceConfig, listener: We
     if not _secret_environment_is_safe(config):
         return False
     try:
-        values: dict[str, str] = {}
-        for line in webhook_secret_environment_path(config.wake_root).read_text(encoding="utf-8").splitlines():
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, value = line.split("=", 1)
-            values[key] = value
+        values = _parse_secret_environment(webhook_secret_environment_path(config.wake_root))
         return all(values.get(reference, "") for reference in required_secret_references(listener, source))
-    except OSError:
+    except (OSError, ValueError):
         return False
+
+
+def _parse_secret_environment(path: Path) -> dict[str, str]:
+    """Accept only unquoted KEY=value lines; all richer systemd syntax is unsafe here."""
+    values: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            raise ValueError("unsupported environment syntax")
+        key, value = line.split("=", 1)
+        if (_ENV.fullmatch(key) is None or key in values or not value
+                or value != value.strip() or any(char in value for char in "'\"\\\r\n")):
+            raise ValueError("unsupported environment syntax")
+        values[key] = value
+    return values
 
 
 def _proc_address(value: str, *, ipv6: bool) -> str:

@@ -82,6 +82,12 @@ Final validation occurs only after merging canonical #105 into this branch.
   readback before deletion. Readiness checks the configured GitHub source,
   required nonempty environment references, and an openable supported SQLite
   journal without exposing values.
+- R4 hardening: readiness opens the exact journal through SQLite immutable
+  read-only mode and accepts only the current application id, schema version,
+  and initialized metadata row; it cannot create WAL files, initialize a
+  zero-byte database, or migrate. Secret environment parsing accepts only a
+  minimal unquoted `KEY=value` subset and rejects quoted-empty and unsupported
+  systemd syntax.
 - Joined canonical #105 behind the unchanged executable interface. The deep
   builder selects the same enabled GitHub source, opens the existing signal
   journal, derives a source-bound no-coverage seed without a provider call,
