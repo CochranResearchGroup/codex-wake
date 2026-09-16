@@ -6,7 +6,7 @@ Issues: #103, #104, #105, #106, #107, #108, #109
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P53-G1
 Goal Version: P53-G1-v2
-Checkpoint: P53-G1-C04
+Checkpoint: P53-G1-C05
 
 ## Goal objective
 
@@ -48,16 +48,13 @@ required release gates and squash-merged at canonical
 `4bac44b69794ce762b39136096eaf229062af7fd`. Its remote branch, isolated
 worktree, local branch, and active-lane entry are removed.
 
-The bounded provider-free HTTP seam is now canonical. Issues #105 and #106 are
-assigned in disjoint worktrees and may proceed in parallel. #105 plan 0072 is
-published at `39e3030` and owns signed durable ingestion plus absolute
-provider/store budgets. #106 plan 0073 is published at `ab4d50e` and owns
-executable, configuration, secret-reference, readiness, support, packaging,
-and service lifecycle. The primary has frozen their only shared seam as bound
-address readback, blocking main-thread serve, and bounded shutdown. #106 may
-develop against that interface but cannot integrate until canonical #105 is
-joined and its full validation is rerun. #107 through #109 remain blocked on
-the accepted #105/#106 join.
+The bounded HTTP seam, durable signed-ingest runtime, and product lifecycle are
+now canonical. #105 merged through PR #115 at `1d32bb1`; #106 joined it, passed
+independent combined review and both required CI release gates, and merged
+through PR #116 at `63e3a19`. Issues #104 through #106 are accepted. #107 is
+now the sole eligible next slice for isolated installed-wheel and loopback
+service qualification; #108 and #109 remain dependency-blocked. No installed
+listener, public ingress route, provider webhook, or live dispatch exists.
 
 ## Architecture and security decisions
 

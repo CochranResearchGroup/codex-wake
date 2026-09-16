@@ -3400,3 +3400,31 @@ Acceptance state: P53 remains open; #105 is accepted and cleaned up, while #106
 is in combined local validation before independent review and PR. Movement is
 `outcome_progress`. Next action: complete comprehensive/plugin/package checks,
 run one fresh closed-world review, then publish #106 for required CI.
+
+## Turn 160 | 2026-09-16
+
+Accepted the P53 product-lifecycle join and closed issue #106.
+
+- Independent combined review found and closed four lifecycle-authority
+  blockers: stale source revocation, unverified stop/uninstall, alternate
+  service ownership, and readiness that did not prove operational inputs.
+- Readiness now validates current listener/source authority, exact required
+  secret references, and a supported SQLite journal through an ephemeral
+  read-only snapshot without mutating live DB/WAL/SHM bytes. Service ownership
+  is canonical and stop/uninstall require inactive-and-disabled readback.
+- Final provider-free validation passed 492 comprehensive Python tests, 46
+  focused lifecycle/runtime/client tests, 12 plugin tests, compilation, diff
+  hygiene, planning audit, package build/import/entry-point proof, and both
+  required Python 3.11/3.12 CI release gates.
+- Two failed hosted runs were retained as evidence. They exposed a positive
+  test that inherited runner umask; the fixture now establishes mode-0600
+  DB/WAL/SHM custody explicitly while product rejection of permissive files
+  remains unchanged.
+- PR #116 squash-merged at canonical
+  `63e3a19089bd25d4bea09c1b664d467562db14b3`; issue #106 closed. No installed
+  service, provider mutation, external ingress, non-loopback bind, wake
+  dispatch, release, deployment, or global installation occurred.
+
+Acceptance state: P53 remains open; #104 through #106 are accepted. Movement
+is `outcome_progress`. Next action: execute #107 as one isolated installed
+wheel and loopback-service qualification before any external ingress work.
