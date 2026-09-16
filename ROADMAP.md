@@ -826,7 +826,8 @@ Acceptance target:
   one later exact visible webhook-origin wake reaches one named target once,
   with canonical GitHub and verification custody.
 
-Acceptance state: P54 planning is in progress under #135. Movement is
-`outcome_progress`. Next action: integrate Plan 0083, approve the proposed
-five-slice issue graph, then begin the provider-free ownership and
-reconciliation slice. Live effects remain separately gated.
+Acceptance state: P54 planning is canonical under #135 and PR #136 at
+`8b74e3e`. Movement is `outcome_progress`. Next action: approve the proposed
+five-slice issue graph, publish its dependency-linked child issues, then begin
+the provider-free ownership and reconciliation slice. Live effects remain
+separately gated.

@@ -27,10 +27,11 @@ polling health. Editing the listener environment is not rotation proof: the
 running process must restart into the intended secret generation, while the
 event-source and journal identities remain stable.
 
-This kickoff freezes the campaign and proposed child graph. Child issue
-publication remains pending operator review of the decomposition; no provider,
-service, secret, ingress, release, installation, or dispatch effect is
-authorized by this plan.
+PR #136 passed both hosted release gates and squash-merged the kickoff as
+canonical `8b74e3eea3ae02b9f60833bc5941add2b15a9f68`. Child issue publication
+remains pending operator review of the decomposition; no provider, service,
+secret, ingress, release, installation, or dispatch effect is authorized by
+this plan.
 
 ## Objective
 
