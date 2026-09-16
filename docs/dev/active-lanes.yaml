@@ -1,27 +1,6 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P52-C2
-    objective: Migrate filesystem, process, and user-systemd source families through the registry
-    plan: docs/dev/plans/0067-2026-09-15-local-source-family-migration.md
-    plan_ref: refs/remotes/origin/feat/issue-83-local-source-family-migration
-    branch: feat/issue-83-local-source-family-migration
-    target: main
-    plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: 618e9ef66e6bca963fe3efb18fabe72ccef16f0a
-    validation_status: passed
-    validation_ref: 618e9ef66e6bca963fe3efb18fabe72ccef16f0a
-    remote_ref: refs/remotes/origin/feat/issue-83-local-source-family-migration
-    integration: squash
-    work_items: [CochranResearchGroup/codex-wake#83]
-    owner: bounded gpt-5.6-terra high worker; primary owns daemon integration
-    write_surface: local source-family module and focused tests; daemon integration reserved to primary
-    live_effect: none
-    dependencies: []
-    overlaps: [P52-C3]
-    reconciled_overlaps: [P52-C3]
-    updated_at: 2026-09-15
   - id: P52-C3
     objective: Migrate GitHub CI source reconstruction through the registry
     plan: docs/dev/plans/0068-2026-09-15-github-source-family-migration.md
@@ -29,8 +8,10 @@ lanes:
     branch: feat/issue-84-github-source-family-migration
     target: main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: e98e44c33957a85719e17b29ae2d0cb23c07d2e5
+    custody_state: INTEGRATION_READY
+    checkpoint: 1be2a395bab644a02c5f4f1f1e868c5bd065f2f7
+    validation_status: passed
+    validation_ref: 1be2a395bab644a02c5f4f1f1e868c5bd065f2f7
     remote_ref: refs/remotes/origin/feat/issue-84-github-source-family-migration
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#84]
@@ -38,6 +19,6 @@ lanes:
     write_surface: GitHub source-family module and provider-free focused tests; daemon integration reserved to primary
     live_effect: none
     dependencies: []
-    overlaps: [P52-C2]
-    reconciled_overlaps: [P52-C2]
+    overlaps: []
+    reconciled_overlaps: []
     updated_at: 2026-09-15

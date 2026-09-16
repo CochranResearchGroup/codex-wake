@@ -7,6 +7,15 @@ Branch: `feat/issue-84-github-source-family-migration`
 Target: `main`
 Integration: `squash`
 
+## Current state
+
+PR #95 is integration-ready at
+`1be2a395bab644a02c5f4f1f1e868c5bd065f2f7`. The GitHub family factory and
+primary-owned daemon integration preserve configured-instance grouping,
+legacy arm order, retry state, health, failure isolation, and injected provider
+clients. Focused, comprehensive, plugin, compilation, installed-wheel CI, and
+independent review gates pass with no provider or live effect.
+
 ## Objective
 
 Move GitHub CI reconstruction into one registered built-in family factory while
@@ -51,5 +60,5 @@ dispatch, installation, release, or deployment.
 
 ## Next action
 
-Publish the exact lane checkpoint and implement the provider-free GitHub family
-module in parallel with #83; wait for primary-owned serialized daemon integration.
+Merge the exact integration-ready projection, squash-merge PR #95, verify
+canonical main, then remove the accepted topic branch and worktree before #85.

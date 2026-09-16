@@ -1,11 +1,19 @@
 # Local source-family registry migration
 
-State: OPEN
+State: CLOSED
 Lane: P52-C2
 Issue: #83
 Branch: `feat/issue-83-local-source-family-migration`
 Target: `main`
 Integration: `squash`
+
+## Current state
+
+PR #93 squash-merged at canonical
+`3c30947ffedb1e87a312e6377d75353b9d5361a6`, closing #83. Filesystem,
+process-exit, and user-systemd reconstruction now use registered built-in family
+factories. One bounded repair cycle restored pending-projection identity parity;
+focused, comprehensive, plugin, compilation, and required CI gates passed.
 
 ## Objective
 

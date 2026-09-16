@@ -728,12 +728,12 @@ State: OPEN
 
 Current State: PR #89 accepted issue #82 at canonical `f8059cd`, freezing the
 closed built-in source-family registry plus provider-free conformance fixture.
-Issues #83 and #84 are assigned as disjoint parallel migrations with shared
-daemon integration reserved to the primary. Issue #83 is integration-ready in
-PR #93 at `618e9ef`; #84 has a published provider-free family checkpoint and
-waits for serialized daemon integration. Issue #85 joins their output
-into operator surfaces and one isolated provider-free installed-wheel smoke. No
-new source, provider effect, live dispatch, arbitrary plugin loading, release,
+PR #93 accepted local-source migration #83 at canonical `3c30947`. GitHub
+migration #84 is integration-ready in PR #95 at `1be2a39` after full
+provider-free validation, installed-wheel CI on Python 3.11/3.12, and
+independent review with no findings. Issue #85 remains the serialized join for
+operator surfaces and one isolated provider-free installed-wheel smoke. No new
+source, provider effect, live dispatch, arbitrary plugin loading, release,
 deployment, or global installation refresh is authorized.
 
 Plan: [Event source extension framework goal campaign](docs/dev/plans/0065-2026-09-15-event-source-extension-framework.md)

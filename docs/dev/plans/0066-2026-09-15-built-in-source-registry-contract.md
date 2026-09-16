@@ -1,6 +1,6 @@
 # Built-in source registry contract and conformance tracer
 
-State: OPEN
+State: CLOSED
 Lane: P52-C1
 Issue: #82
 Branch: `feat/issue-82-source-registry-contract`
@@ -9,13 +9,11 @@ Integration: `squash`
 
 ## Current state
 
-P52 is open at canonical coordination commit
-`b554a0f2cf1bee75d8c8268575055c6652112919`. Issue #82 is the only ready
-implementation slice. Its implementation is integration-ready in PR #89 at
-`e9e55031b2a03d22467c854b80074f3c333ece3f`.
-`default_signal_runners` still owns production-specific reconstruction branches;
-the accepted P52 architecture requires a closed family-level factory seam
-before any production family migrates.
+PR #89 squash-merged at canonical
+`f8059cd2390a3459ce6b28073cfb040446ea05ba`, closing #82. The immutable
+built-in family registry, reconstruction context, provider-free conformance
+fixture, and optional daemon injection seam are accepted. Production-family
+migration remained in #83 and #84.
 
 ## Objective
 
