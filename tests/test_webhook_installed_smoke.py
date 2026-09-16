@@ -6,6 +6,7 @@ import importlib.util
 import io
 import json
 import os
+import runpy
 import sqlite3
 import subprocess
 import sys
@@ -144,6 +145,7 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 self.returncode = -9
 
         process = FakeProcess()
+        checkpoints = []
         readiness = {
             "monitor_ready": True,
             "monitor_source": "codex-waked",
@@ -161,28 +163,69 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 smoke.subprocess, "Popen", return_value=process,
             ) as popen, patch.object(
                 smoke, "json_command", return_value=readiness,
+            ), patch.object(
+                smoke, "_process_start_identity", return_value="9876",
             ):
-                with smoke.managed_reader(ctx, env) as evidence:
+                tracked = []
+                with smoke.managed_reader(
+                    ctx, env, checkpoint=lambda stage, value: checkpoints.append(
+                        (stage, dict(value))
+                    ), tracked_identities=tracked,
+                ) as evidence:
                     self.assertEqual(evidence["pid"], process.pid)
                     self.assertIsNone(process.poll())
 
             argv = popen.call_args.args[0]
-            self.assertEqual(argv[0], str(ctx.installed_cli.parent / "codex-waked"))
+            self.assertEqual(argv[:2], [
+                str(ctx.installed_python), str(ctx.reader_bootstrap_path),
+            ])
             self.assertIn("--no-dispatch", argv)
-            self.assertEqual(argv[argv.index("--interval") + 1], "60")
             self.assertEqual(env["XDG_STATE_HOME"], str(ctx.root / "state"))
+            self.assertEqual(tracked, [(process.pid, "9876")])
             self.assertTrue(process.terminated)
+            self.assertEqual([stage for stage, _ in checkpoints], [
+                "managed_reader_ready", "managed_reader_stopped",
+            ])
+            self.assertTrue(checkpoints[-1][1]["stopped"])
+
+    def test_managed_reader_bootstrap_blocks_signal_sources_before_daemon_main(self) -> None:
+        from codex_wake import daemon
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx = context(Path(tmp))
+            path = smoke.write_managed_reader_bootstrap(ctx)
+            observed = []
+            original = daemon.default_signal_runners
+
+            def fake_main(argv=None):
+                observed.append((argv, daemon.default_signal_runners(None, None)))
+                return 0
+
+            try:
+                with patch.object(daemon, "main", side_effect=fake_main), patch.object(
+                    sys, "argv", [str(path), "--no-dispatch"],
+                ), self.assertRaises(SystemExit) as stopped:
+                    runpy.run_path(str(path), run_name="__main__")
+            finally:
+                daemon.default_signal_runners = original
+
+        self.assertEqual(stopped.exception.code, 0)
+        self.assertEqual(observed, [(["--no-dispatch"], ())])
 
     def test_arm_runs_only_while_no_dispatch_reader_is_active(self) -> None:
         events = []
         commands = {}
 
         @contextmanager
-        def fake_reader(_context, _env):
+        def fake_reader(_context, _env, **kwargs):
             events.append("reader-enter")
+            kwargs["checkpoint"]("managed_reader_ready", {"pid": 4321})
             try:
                 yield {"pid": 4321, "dispatch": "disabled"}
             finally:
+                kwargs["checkpoint"](
+                    "managed_reader_stopped", {"pid": 4321, "stopped": True},
+                )
                 events.append("reader-exit")
 
         def fake_run(argv, **kwargs):
@@ -199,13 +242,19 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             ):
                 wake_id, reader = smoke.configure_and_arm(
                     ctx, smoke.installed_env(ctx),
+                    checkpoint=lambda stage, value: events.append(
+                        f"checkpoint-{stage}-{value.get('wake_id', '')}"
+                    ),
                 )
 
         self.assertEqual(wake_id, "wake_qualified")
         self.assertEqual(reader["dispatch"], "disabled")
         self.assertEqual(events, [
-            "configure-source-disabled", "reader-enter", "enable-source",
-            "arm", "reader-exit", "configure-webhook",
+            "configure-source-disabled", "reader-enter",
+            "checkpoint-managed_reader_ready-", "enable-source",
+            "arm", "checkpoint-armed-wake_qualified",
+            "checkpoint-managed_reader_stopped-", "reader-exit",
+            "configure-webhook",
         ])
         self.assertIn("--disabled", commands["configure-source-disabled"])
         self.assertIn("--enabled", commands["enable-source"])
@@ -387,12 +436,16 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             process(102, ["codex-wake-github-webhook", "--wake-root", "/other",
                           "--source", smoke.SOURCE], 1002)
             process(103, ["renamed-process"], 1003)
+            reader = [str(ctx.installed_python), str(ctx.reader_bootstrap_path),
+                      "--wake-root", str(ctx.wake_root), "--no-dispatch"]
+            process(104, reader, 1004)
             matches = smoke.matching_processes(
                 ctx, tracked_identities=((103, "1003"),), proc_root=proc,
             )
-            self.assertEqual([item["pid"] for item in matches], ["101", "103"])
+            self.assertEqual([item["pid"] for item in matches], ["101", "103", "104"])
             self.assertEqual(matches[0]["reason"], "exact_bootstrap_argv")
             self.assertEqual(matches[1]["reason"], "tracked_pid_start")
+            self.assertEqual(matches[2]["reason"], "exact_reader_argv")
             with self.assertRaisesRegex(RuntimeError, "census"):
                 smoke.matching_processes(ctx, proc_root=base / "missing-proc")
 
@@ -518,6 +571,45 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 self.assertEqual(receipt["recovery_root"], str(root))
                 self.assertTrue(root.exists())
 
+    def test_pre_service_cleanup_preserves_root_for_surviving_reader(self) -> None:
+        with tempfile.TemporaryDirectory() as outer:
+            root = Path(outer) / "packet"
+            root.mkdir()
+            ctx = context(root)
+            proc = Path(outer) / "proc"
+            process = proc / "4321"
+            process.mkdir(parents=True)
+            arguments = [
+                str(ctx.installed_python), str(ctx.reader_bootstrap_path),
+                "--wake-root", str(ctx.wake_root), "--no-dispatch",
+            ]
+            (process / "cmdline").write_bytes(
+                b"\0".join(value.encode() for value in arguments) + b"\0"
+            )
+            (process / "stat").write_text(
+                " ".join(["4321", "(reader)"] + ["0"] * 19 + ["9876"]),
+                encoding="ascii",
+            )
+            census = smoke.matching_processes
+
+            def synthetic_census(context, *, tracked_identities=()):
+                return census(
+                    context, tracked_identities=tracked_identities, proc_root=proc,
+                )
+
+            with patch.object(
+                smoke, "matching_processes", side_effect=synthetic_census,
+            ), patch.object(smoke, "port_is_free", return_value=True):
+                receipt = smoke.cleanup(
+                    ctx, env={}, service_attempted=False,
+                    failed_units_before=None, tracked_identities=((4321, "9876"),),
+                )
+
+            self.assertFalse(receipt["safe"])
+            self.assertFalse(receipt["no_matching_process"])
+            self.assertEqual(receipt["recovery_root"], str(root))
+            self.assertTrue(root.exists())
+
     def test_polling_failure_retains_every_completed_stage_after_safe_cleanup(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -555,6 +647,21 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                     ctx.unit_path.write_text("owned unit", encoding="utf-8")
                 return subprocess.CompletedProcess([], 0, "", "")
 
+            def fake_configure(ctx, env, *, checkpoint, tracked_identities):
+                checkpoint("managed_reader_ready", {
+                    "pid": 4321, "process_start_ticks": "9876",
+                    "dispatch": "disabled", "signal_sources": "blocked",
+                })
+                checkpoint("armed", {
+                    "wake_id": "wake_stage", "configuration": "armed",
+                })
+                checkpoint("managed_reader_stopped", {
+                    "pid": 4321, "process_start_ticks": "9876",
+                    "dispatch": "disabled", "signal_sources": "blocked",
+                    "stopped": True,
+                })
+                return "wake_stage", {"pid": 4321, "stopped": True}
+
             def fail_poll(*args, **kwargs):
                 staged_before_failure.update(json.loads(
                     receipt_path.read_text(encoding="utf-8")
@@ -575,9 +682,7 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                     "module_sha256": "c" * 64, "version": "0.5.2",
                     "interpreter": "/isolated/python",
                 },
-            ), patch.object(smoke, "configure_and_arm", return_value=(
-                "wake_stage", {"pid": 4321, "dispatch": "disabled"},
-            )), patch.object(
+            ), patch.object(smoke, "configure_and_arm", side_effect=fake_configure), patch.object(
                 smoke, "write_fixture_bootstrap", side_effect=fake_bootstrap,
             ), patch.object(smoke, "fixture_preflight"), patch.object(
                 smoke, "service_command", side_effect=fake_service,
@@ -596,6 +701,8 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             )
             self.assertEqual(staged_before_failure["initial_service"]["pid"], "101")
             self.assertEqual(staged_before_failure["restarted_service"]["pid"], "102")
+            self.assertEqual(staged_before_failure["wake_id"], "wake_stage")
+            self.assertTrue(staged_before_failure["managed_reader"]["stopped"])
             final = json.loads(receipt_path.read_text(encoding="utf-8"))
             self.assertEqual(final["overall"], "failed")
             self.assertEqual(final["error"], "RuntimeError")

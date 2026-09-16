@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from ipaddress import ip_address
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 SOURCE = "p53-c4-installed-canary"
 HOST = "127.0.0.1"
@@ -67,6 +67,10 @@ class ExecutionContext:
     @property
     def bootstrap_path(self) -> Path:
         return self.fixture_dir / "webhook-fixture-bootstrap"
+
+    @property
+    def reader_bootstrap_path(self) -> Path:
+        return self.fixture_dir / "managed-reader-bootstrap"
 
     @property
     def log_path(self) -> Path:
@@ -271,12 +275,25 @@ def matching_processes(
             and arguments.index("--source") + 1 < len(arguments)
             and arguments[arguments.index("--source") + 1] == SOURCE
         )
+        reader_exact = (
+            len(arguments) >= 2
+            and arguments[0] == str(context.installed_python)
+            and arguments[1] == str(context.reader_bootstrap_path)
+            and "--wake-root" in arguments
+            and arguments.index("--wake-root") + 1 < len(arguments)
+            and arguments[arguments.index("--wake-root") + 1] == str(context.wake_root)
+            and "--no-dispatch" in arguments
+        )
         tracked_match = (pid, start) in tracked
-        if exact or tracked_match:
+        if exact or reader_exact or tracked_match:
             matches.append({
                 "pid": str(pid),
                 "process_start_ticks": start,
-                "reason": "exact_bootstrap_argv" if exact else "tracked_pid_start",
+                "reason": (
+                    "exact_bootstrap_argv" if exact
+                    else "exact_reader_argv" if reader_exact
+                    else "tracked_pid_start"
+                ),
             })
     return tuple(sorted(matches, key=lambda item: int(item["pid"])))
 
@@ -432,15 +449,18 @@ def installed_env(context: ExecutionContext) -> dict[str, str]:
 
 @contextmanager
 def managed_reader(
-    context: ExecutionContext, env: dict[str, str],
+    context: ExecutionContext, env: dict[str, str], *,
+    checkpoint: Callable[[str, dict[str, Any]], None] = lambda _stage, _value: None,
+    tracked_identities: list[tuple[int, str]] | None = None,
 ):
     """Hold one installed no-dispatch reader active only while arming."""
     owner_only_directory(context.artifact_dir)
     owner_only_directory(context.root / "state")
+    bootstrap = write_managed_reader_bootstrap(context)
     stdout_path = context.artifact_dir / "managed-reader.stdout"
     stderr_path = context.artifact_dir / "managed-reader.stderr"
     argv = [
-        str(context.installed_cli.parent / "codex-waked"),
+        str(context.installed_python), str(bootstrap),
         "--wake-root", str(context.wake_root),
         "--interval", "60", "--no-dispatch",
     ]
@@ -451,9 +471,12 @@ def managed_reader(
             argv, text=True, stdout=stdout, stderr=stderr, env=env,
             start_new_session=True,
         )
+        evidence: dict[str, Any] | None = None
         try:
+            process_start = _process_start_identity(Path("/proc") / str(process.pid) / "stat")
+            if tracked_identities is not None:
+                tracked_identities.append((process.pid, process_start))
             deadline = time.monotonic() + READY_SECONDS
-            evidence: dict[str, Any] | None = None
             while time.monotonic() < deadline:
                 if process.poll() is not None:
                     raise RuntimeError("installed managed reader exited before readiness")
@@ -475,10 +498,13 @@ def managed_reader(
                 ):
                     evidence = {
                         "pid": process.pid,
+                        "process_start_ticks": process_start,
                         "mode": "loop",
                         "dispatch": "disabled",
+                        "signal_sources": "blocked_by_explicit_bootstrap",
                         "poll_interval_seconds": 60,
                     }
+                    checkpoint("managed_reader_ready", evidence)
                     break
                 time.sleep(0.1)
             if evidence is None:
@@ -494,6 +520,25 @@ def managed_reader(
                     process.wait(timeout=5)
             if process.poll() is None:
                 raise RuntimeError("installed managed reader did not stop")
+            if evidence is not None:
+                evidence["stopped"] = True
+                checkpoint("managed_reader_stopped", evidence)
+
+
+def write_managed_reader_bootstrap(context: ExecutionContext) -> Path:
+    """Create a fail-closed installed daemon bootstrap with no source runners."""
+    owner_only_directory(context.fixture_dir)
+    context.reader_bootstrap_path.write_text(
+        f"#!{context.installed_python}\n"
+        "import sys\n"
+        "from codex_wake import daemon\n"
+        "def no_signal_sources(*args, **kwargs): return ()\n"
+        "daemon.default_signal_runners = no_signal_sources\n"
+        "raise SystemExit(daemon.main(sys.argv[1:]))\n",
+        encoding="utf-8",
+    )
+    os.chmod(context.reader_bootstrap_path, 0o700)
+    return context.reader_bootstrap_path
 
 
 def fixture_preflight(context: ExecutionContext, env: dict[str, str]) -> None:
@@ -508,7 +553,9 @@ def fixture_preflight(context: ExecutionContext, env: dict[str, str]) -> None:
 
 
 def configure_and_arm(
-    context: ExecutionContext, env: dict[str, str],
+    context: ExecutionContext, env: dict[str, str], *,
+    checkpoint: Callable[[str, dict[str, Any]], None] = lambda _stage, _value: None,
+    tracked_identities: list[tuple[int, str]] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     common = [str(context.installed_cli), "--wake-root", str(context.wake_root)]
     source_configuration = [
@@ -522,7 +569,10 @@ def configure_and_arm(
         common + source_configuration + ["--disabled"],
         artifact_dir=context.artifact_dir, name="configure-source-disabled", env=env,
     )
-    with managed_reader(context, env) as reader:
+    with managed_reader(
+        context, env, checkpoint=checkpoint,
+        tracked_identities=tracked_identities,
+    ) as reader:
         run_command(
             common + source_configuration + ["--enabled"],
             artifact_dir=context.artifact_dir, name="enable-source", env=env,
@@ -535,9 +585,10 @@ def configure_and_arm(
             ],
             artifact_dir=context.artifact_dir, name="arm", env=env,
         )
-    wake_id = armed.stdout.split(maxsplit=1)[0]
-    if not wake_id.startswith("wake_"):
-        raise RuntimeError("installed arm did not return a wake identity")
+        wake_id = armed.stdout.split(maxsplit=1)[0]
+        if not wake_id.startswith("wake_"):
+            raise RuntimeError("installed arm did not return a wake identity")
+        checkpoint("armed", {"wake_id": wake_id, "configuration": "armed"})
     run_command(
         common + [
             "github-webhook", "source", "configure", "--source", SOURCE,
@@ -1019,7 +1070,19 @@ def execute(*, receipt_path: Path | None = None) -> int:
 
         receipt["setup_stage"] = "configure_and_arm"
         stage_receipt(receipt, destination=receipt_path, secret_values=())
-        wake_id, reader = configure_and_arm(context, env)
+
+        def setup_checkpoint(stage: str, value: dict[str, Any]) -> None:
+            receipt["setup_stage"] = stage
+            if stage.startswith("managed_reader"):
+                receipt["managed_reader"] = dict(value)
+            else:
+                receipt.update(value)
+            stage_receipt(receipt, destination=receipt_path, secret_values=())
+
+        wake_id, reader = configure_and_arm(
+            context, env, checkpoint=setup_checkpoint,
+            tracked_identities=tracked_identities,
+        )
         fixture = make_fixture()
         write_fixture_bootstrap(context, fixture)
         fixture_preflight(context, env)
