@@ -787,8 +787,46 @@ Acceptance target:
 - Public ingress exposes only the HMAC-authenticated webhook path; provider
   mutation and target dispatch remain separate authorities.
 
-Acceptance state: P53 is accepted and in final integration. Movement is
-`outcome_progress`. Next action: merge the final evidence PR through both
-hosted gates, close #109 and #103 from canonical readback, and reconcile the
-short-lived closeout branch/worktree without changing the retained ingress
-route or predecessor evidence.
+Acceptance state: P53 is closed and accepted at canonical `8171220`. Movement
+is `outcome_progress`. The retained ingress route and predecessor evidence
+remain unchanged; no P53 hook, secret, listener service, or isolated successor
+root remains.
+
+## P54 | Managed GitHub Webhook Wakes
+
+State: OPEN
+
+Current State: Issue #135 and Plan 0083 own the managed-production successor to
+P53. The accepted P53 route, listener, journal join, authoritative GitHub
+verification, and polling convergence are reusable foundations, but the live
+hook, secret, service, and isolated root were intentionally removed. P54 must
+add durable exact ownership, provider reconciliation, restart-correct secret
+rotation, independent health/fallback, safe rollback, one retained activation,
+and one separately gated visible dispatch. Its proposed five child slices are
+awaiting decomposition review before child issues are published. No provider,
+service, secret, ingress, installation, release, or dispatch effect is
+authorized by the kickoff packet.
+
+Plan: [Managed GitHub webhook wakes goal campaign](docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md)
+
+Acceptance target:
+
+- One owner-scoped, nonsecret binding and operation journal prove the exact
+  repository, hook, callback, service, source, executable, desired generation,
+  last observed state, and sanitized receipt history.
+- Reconciliation is idempotent and crash-recoverable, classifies drift and
+  collisions, and never repeats an ambiguous provider write.
+- Secret rotation preserves source/journal/checkpoint identity, restarts into
+  bounded dual-key acceptance, proves a new-key delivery, and safely retires or
+  rolls back the prior generation.
+- Local listener, provider delivery, polling coverage, and dispatch health are
+  projected independently; polling remains the correctness fallback without
+  duplicate occurrence or dispatch.
+- One installed managed activation is intentionally retained and reversible;
+  one later exact visible webhook-origin wake reaches one named target once,
+  with canonical GitHub and verification custody.
+
+Acceptance state: P54 planning is in progress under #135. Movement is
+`outcome_progress`. Next action: integrate Plan 0083, approve the proposed
+five-slice issue graph, then begin the provider-free ownership and
+reconciliation slice. Live effects remain separately gated.

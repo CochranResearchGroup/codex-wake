@@ -3762,3 +3762,45 @@ ready to close through the final evidence PR after both hosted release gates
 and canonical-main readback. Movement is `outcome_progress`. Next action:
 publish the closeout branch, pass CI, squash merge, verify issue/ref custody,
 and remove the short-lived closeout worktree.
+
+## Turn 174 | 2026-09-16
+
+Opened the issue-backed P54 managed GitHub webhook wake campaign and froze its
+initial safety and execution architecture.
+
+- Canonical `main` is clean and synchronized at `8171220`; P53 issue #109 and
+  parent #103 are closed, PR #134 is merged, and the active-lane catalogue was
+  empty before P54 registration.
+- GitHub issue #135 now owns the outcome. Duplicate-safe preflight resolved the
+  owned `CochranResearchGroup/codex-wake` target, ADMIN actor, and `enhancement`
+  label before creation.
+- [Plan 0083](docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md)
+  defines exact durable ownership, observe/intent/execute/readback
+  reconciliation, unknown-effect recovery, provider credential separation,
+  restart-correct secret generations, independent polling fallback, rollback,
+  and a separate visible-dispatch gate.
+- Two read-only design reviews examined security/causality and operator
+  lifecycle. They agreed that P53's disposable qualifier must not become the
+  production manager, environment-file replacement is not rotation proof, URL
+  matching is not ownership proof, and provider administration must remain out
+  of the listener environment.
+- The campaign proposes five vertical slices: managed ownership/reconciliation;
+  rotation/local lifecycle; health/fallback and provider-free installed
+  qualification; separately gated retained activation; and separately gated
+  visible dispatch. Child issue publication waits for decomposition review.
+- Model allocation uses the strongest specialist only for security/causality,
+  a standard implementation model for lifecycle work, and an economical model
+  for deterministic fixtures and drafting. The intended economical issue
+  slicer was not started because the concurrent-agent limit was occupied; the
+  primary performed the bounded decomposition.
+- No provider, service, secret, ingress, installation, release, or dispatch
+  effect occurred. The retained Cooper route and P53 evidence remain unchanged.
+- Validation passes 565 comprehensive Python tests, 12 OpenClaw plugin tests,
+  diff hygiene, the goal contract audit, and the active planning audit. The
+  full historical planning audit continues to report only the known legacy
+  unclassified-plan baseline outside this active slice.
+
+Acceptance state: P54 kickoff planning is active under #135; the implementation
+children are not yet published. Movement is `outcome_progress`. Next action:
+validate and integrate the planning PR, obtain decomposition approval, publish
+the dependency-linked child issues, and start the provider-free C1 slice.
