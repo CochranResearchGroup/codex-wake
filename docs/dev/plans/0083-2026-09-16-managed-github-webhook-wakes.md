@@ -32,9 +32,12 @@ canonical `8b74e3eea3ae02b9f60833bc5941add2b15a9f68`; PR #137 reconciled custody
 canonical `74dd2e6c3db6745fc91384c08ea8aa40c7ad964c`. The approved child graph is
 published as #138 through #142. C1 issue #138 and Plan 0084 are accepted on
 canonical `a3b2c985d9b3d9ef4e1db53d7fbc8479c08455c2`; PR #143 passed both hosted
-release gates and GitHub closed #138. C2 #139 and C3 #140 are now unblocked.
-No provider, service, secret, ingress, release, installation, or dispatch
-effect occurred in C1.
+release gates and GitHub closed #138. Plans 0085 and 0086 now register C2 #139
+and the parallel-safe C3-A health packet. Their initial new-module surfaces are
+disjoint; the primary serializes shared lifecycle, runtime, CLI, cleanup, and
+installed-qualification integration. C3's final qualification remains blocked
+on C2 acceptance. No provider, service, secret, ingress, release,
+installation, or dispatch effect occurred in C1.
 
 ## Objective
 

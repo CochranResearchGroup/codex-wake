@@ -1,3 +1,45 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P54-C2
+    objective: Deliver restart-correct managed webhook secret rotation
+    plan: docs/dev/plans/0085-2026-09-16-managed-webhook-secret-rotation.md
+    plan_ref: refs/heads/docs/issues-139-140-lane-registration
+    branch: feat/issue-139-webhook-secret-rotation
+    target: main
+    plan_state: OPEN
+    custody_state: PAUSED_REF
+    checkpoint: fbd142d077f204beded3b025951ce73265e035ef
+    validation_status: contract_frozen_implementation_pending
+    validation_ref: fbd142d077f204beded3b025951ce73265e035ef
+    remote_ref: refs/remotes/origin/feat/issue-139-webhook-secret-rotation
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#139]
+    owner: primary integration owner with one bounded rotation implementation worker
+    write_surface: rotation domain and tests; primary-owned managed binding, listener/runtime/lifecycle, CLI, tests, docs, and receipts
+    live_effect: none; provider, service, secret, ingress, installation, release, and dispatch effects are forbidden
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-16
+  - id: P54-C3
+    objective: Deliver truthful webhook health, exact cleanup, and provider-free qualification
+    plan: docs/dev/plans/0086-2026-09-16-managed-webhook-health-cleanup.md
+    plan_ref: refs/heads/docs/issues-139-140-lane-registration
+    branch: feat/issue-140-webhook-health-cleanup
+    target: main
+    plan_state: OPEN
+    custody_state: PAUSED_REF
+    checkpoint: fbd142d077f204beded3b025951ce73265e035ef
+    validation_status: health_contract_frozen_initial_packet_pending
+    validation_ref: fbd142d077f204beded3b025951ce73265e035ef
+    remote_ref: refs/remotes/origin/feat/issue-140-webhook-health-cleanup
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#140]
+    owner: primary integration owner with one bounded health implementation worker
+    write_surface: pure health domain and tests; primary-owned cleanup lifecycle CLI support installed fixture docs and receipts
+    live_effect: none; provider, service, secret, ingress, installation, release, and dispatch effects are forbidden
+    dependencies: [P54-C2]
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-16
