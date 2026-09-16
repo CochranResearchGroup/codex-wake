@@ -3249,3 +3249,41 @@ active-lane catalogue is empty. Movement is `outcome_progress`. Next action:
 merge this closure projection, close parent #81 from canonical evidence, and
 verify synchronized clean main with no P52 issue, pull request, topic branch,
 or worktree.
+
+## Turn 155 | 2026-09-16
+
+Opened P53 for signed GitHub webhook listener and external-ingress
+productization.
+
+- Reconfirmed clean synchronized Codex Wake main at `9808926`, with no open
+  issue, pull request, active lane, or P52 topic ref before creating P53.
+- CodeGraph located the existing authenticated/commit-before-ack core at
+  `GitHubWebhookIngress.ingest` and confirmed listener, service, and CLI seams
+  remain unimplemented.
+- Security consultation froze exact-route, HTTP framing, deadline, admission,
+  secret, proxy-distrust, response, shutdown, and polling-convergence
+  invariants. Ingress consultation selected candidate port 8820 and the
+  path-specific Authelia bypass, while preserving a loopback default and a
+  separate explicit bridge-reachable deployment state.
+- Before using the shared ingress repository, validated its four dirty files,
+  split them into `1065482` implementation and `5fcce95` documentation commits,
+  and pushed clean synchronized organization main at exact
+  `5fcce954e2acca1bce5b1fd0e49eca9fda2a2cab`. Six tests, Python compilation,
+  helper read-only checks, renderer regeneration, and diff hygiene passed. A
+  Windows-mounted global Git-config read fault was bypassed without host-state
+  mutation by using the existing commit identity and explicit GitHub credential
+  helper.
+- Forge preflight found the owned GitHub target writable, issue creation and
+  existing `enhancement` label available, and no duplicate. Created parent
+  issue #103 and dependency-ordered child issues #104 through #109. The
+  controlling plan is
+  `docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md`.
+- No Codex Wake implementation, listener/service installation, Cooper P53
+  inventory, local/bastion route, GitHub webhook, provider mutation, live
+  delivery, dispatch, release, deployment, or global installation occurred.
+
+Acceptance state: P53 is open at `P53-G1-v1` / `P53-G1-C01`; issue #104 is the
+sole ready slice and #105 through #109 are dependency-blocked. Movement is
+`outcome_progress`. Next action: merge this coordination checkpoint, create the
+isolated #104 contract lane from canonical main, and implement the bounded
+provider-free HTTP transport tracer test-first.

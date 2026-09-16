@@ -751,3 +751,34 @@ Acceptance target:
   wheel agree with runtime registration.
 - GitHub issues, short-lived branches, pull requests, CI, and canonical-main
   readback provide custody and acceptance evidence.
+
+## P53 | Signed GitHub Webhook Ingress
+
+State: OPEN
+
+Current State: P52 left the authenticated webhook core, polling convergence,
+and built-in source registry accepted on canonical main, but no supported HTTP
+listener or external route exists. Parent issue #103 and child issues #104
+through #109 define a bounded transport, durable ingest, product lifecycle,
+installed loopback proof, Cooper/bastion HTTPS publication, and one live GitHub
+delivery. The shared ingress repository was cleaned, validated, structured into
+two final commits, and pushed at `5fcce95` before P53 use. Issue #104 is the sole
+ready implementation slice; no listener, ingress route, provider webhook, or
+live dispatch exists yet.
+
+Plan: [Signed GitHub webhook ingress goal campaign](docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md)
+
+Acceptance target:
+
+- A dedicated loopback-first listener rejects ambiguous HTTP framing and
+  untrusted proxy claims within fixed connection, byte, time, and shutdown
+  budgets.
+- Signed GitHub deliveries retain authoritative attempt reads, commit-before-
+  ack, durable deduplication, restart correctness, and polling convergence.
+- CLI, service, readiness, status, support, packaging, and owner-only secret
+  references form one supported product lifecycle.
+- One installed service, one exact Cooper/bastion HTTPS route, and one exact
+  live GitHub delivery are independently proven and cleaned up or retained by
+  explicit receipt.
+- Public ingress exposes only the HMAC-authenticated webhook path; provider
+  mutation and target dispatch remain separate authorities.
