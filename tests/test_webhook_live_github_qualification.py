@@ -38,17 +38,28 @@ def hook_response(hook_id: int = 456) -> dict:
     }
 
 
-def effectors(calls: list[str], *, bad_census: bool = False) -> runner.RuntimeEffectors:
+def effectors(calls: list[str], *, bad_census: bool = False, bad_query: bool = False,
+              bad_wheel: bool = False) -> runner.RuntimeEffectors:
     def effect(name, value):
         def call(*_args):
             calls.append(name)
             return value
         return call
 
+    def build_wheel(_root, candidate):
+        calls.append("wheel")
+        return {
+            "wheel_sha256": "c" * 64,
+            "archive_ref": candidate["canonical_ref"],
+            "archive_commit": candidate["commit"],
+            "archive_tree": candidate["tree"],
+            "build_commit": "f" * 40 if bad_wheel else candidate["commit"],
+        }
+
     return runner.RuntimeEffectors(
         canonical_candidate=effect("candidate", {"clean": True, "canonical_ref": "refs/remotes/origin/main",
                                                   "commit": "a" * 40, "tree": "b" * 40}),
-        build_wheel=effect("wheel", {"wheel_sha256": "c" * 64}),
+        build_wheel=build_wheel,
         create_venv=effect("venv", {"isolated": True}),
         install_wheel=effect("install", {"global_install_mutations": 0}),
         configure_source=effect("source", {"source": runner.SOURCE, "enabled": False}),
@@ -61,6 +72,10 @@ def effectors(calls: list[str], *, bad_census: bool = False) -> runner.RuntimeEf
         runtime_census=effect("census", {
             "unit_absent": True, "active": "inactive", "enabled": "disabled", "pid": 0,
             "matching_processes": 0, "port_8820_released": not bad_census,
+            "unit_query": {"ok": not bad_query, "returncode": 1 if bad_query else 0,
+                           "bus_error": "failed to connect" if bad_query else None},
+            "failed_units_query": {"ok": not bad_query, "returncode": 1 if bad_query else 0,
+                                   "bus_error": "failed to connect" if bad_query else None},
         }),
         unrelated_state=effect("unrelated", {"failed_units_delta": [], "route_hash": "retained"}),
     )
@@ -117,6 +132,10 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             self.assertEqual(result["runtime_counters"], {
                 "establish": 1, "cleanup": 0, "secret_provision": 1, "secret_retirement": 0, "observation": 0,
             })
+            self.assertEqual(result["wheel"], {
+                "archive_ref": "refs/remotes/origin/main", "archive_commit": "a" * 40,
+                "archive_tree": "b" * 40, "build_commit": "a" * 40, "wheel_sha256": "c" * 64,
+            })
             environment = runner.environment_path(root)
             provider_payload = runner.provider_payload_path(root)
             self.assertEqual(environment.stat().st_mode & 0o777, 0o600)
@@ -127,6 +146,46 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             self.assertNotIn("s" * 32, staged)
             self.assertNotIn("token-private", staged)
             self.assertIn(runner.SECRET_REF, staged)
+
+    def test_prepare_refuses_existing_state_or_packet_material(self) -> None:
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            with self.assertRaisesRegex(RuntimeError, "existing lifecycle"):
+                runner.prepare_local(root, receipt, env=env, armed=True)
+        with private_packet() as (root, receipt, env):
+            (root / "orphaned-packet-material").write_text("present", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "existing lifecycle"):
+                runner.prepare_local(root, receipt, env=env, armed=True)
+
+    def test_secret_provision_is_persisted_before_partial_write_and_cleanup_removes_present_artifacts(self) -> None:
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            calls: list[str] = []
+            with patch.object(runner, "write_provider_payload", side_effect=RuntimeError("payload write failed")):
+                with self.assertRaisesRegex(RuntimeError, "payload write failed"):
+                    runner.prepare_runtime(root, env=env, effectors=effectors(calls),
+                                           secret_factory=lambda: "s" * 32, armed=True)
+            state = runner.load_private_state(root, env=env)
+            self.assertEqual(state["phase"], "runtime_prepare_uncertain")
+            self.assertEqual(state["runtime_counters"]["secret_provision"], 1)
+            self.assertEqual(state["secret_material"]["created"], ["webhook_env"])
+            self.assertTrue(runner.environment_path(root).exists())
+            self.assertFalse(runner.provider_payload_path(root).exists())
+            runner.cleanup_runtime(root, env=env, effectors=effectors(calls), armed=True)
+            self.assertFalse(runner.environment_path(root).exists())
+            self.assertFalse(runner.provider_payload_path(root).exists())
+            self.assertEqual(runner.load_private_state(root, env=env)["runtime_counters"]["secret_retirement"], 1)
+
+    def test_wheel_must_bind_the_validated_candidate_not_mutable_head(self) -> None:
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            calls: list[str] = []
+            with self.assertRaisesRegex(RuntimeError, "wheel archive"):
+                runner.prepare_runtime(root, env=env, effectors=effectors(calls, bad_wheel=True),
+                                       secret_factory=lambda: "s" * 32, armed=True)
+            state = runner.load_private_state(root, env=env)
+            self.assertEqual(state["candidate"]["commit"], "a" * 40)
+            self.assertEqual(state["runtime_counters"]["establish"], 1)
 
     def test_runtime_requires_environment_token_and_fakes_all_effectors(self) -> None:
         with private_packet() as (root, receipt, env):
@@ -216,6 +275,14 @@ class LiveGitHubQualificationTests(unittest.TestCase):
             runner.write_private_state(root, state, env=env)
             with self.assertRaisesRegex(RuntimeError, "census"):
                 runner.cleanup_runtime(root, env=env, effectors=effectors(calls, bad_census=True), armed=True)
+            self.assertTrue(root.exists())
+
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            calls: list[str] = []
+            runner.prepare_runtime(root, env=env, effectors=effectors(calls), secret_factory=lambda: "s" * 32, armed=True)
+            with self.assertRaisesRegex(RuntimeError, "systemctl query"):
+                runner.cleanup_runtime(root, env=env, effectors=effectors(calls, bad_query=True), armed=True)
             self.assertTrue(root.exists())
 
         with private_packet() as (root, receipt, env):

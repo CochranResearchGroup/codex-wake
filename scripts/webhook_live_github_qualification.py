@@ -302,6 +302,8 @@ def prepare_local(root: Path, receipt: Path, *, env: Mapping[str, str] | None = 
     root = exact_private_root(root, env=env)
     if receipt.resolve().is_relative_to(root):
         raise RuntimeError("receipt must remain outside the private root")
+    if any(root.iterdir()):
+        raise RuntimeError("fresh preparation refuses existing lifecycle state or packet material")
     state = new_state(root, receipt)
     _stage_state(root, state, env=env)
     return receipt_for(state)
@@ -358,9 +360,9 @@ def write_provider_payload(root: Path, *, secret: str) -> dict[str, Any]:
 
 def retire_webhook_environment(root: Path) -> bool:
     paths = (environment_path(root), provider_payload_path(root))
-    if any(not path.exists() for path in paths):
-        return False
     for path in paths:
+        if not path.exists():
+            continue
         if path.is_symlink() or path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o077:
             raise RuntimeError("secret material ownership or mode is unsafe")
         size = path.stat().st_size
@@ -401,6 +403,21 @@ def _expect(value: Mapping[str, Any], **expected: Any) -> dict[str, Any]:
     return dict(value)
 
 
+def _validate_wheel_evidence(value: Mapping[str, Any], candidate: Mapping[str, Any]) -> dict[str, Any]:
+    expected = {
+        "archive_ref": candidate["canonical_ref"],
+        "archive_commit": candidate["commit"],
+        "archive_tree": candidate["tree"],
+        "build_commit": candidate["commit"],
+    }
+    if any(value.get(key) != item for key, item in expected.items()):
+        raise RuntimeError("wheel archive is not bound to the validated canonical candidate")
+    digest = value.get("wheel_sha256")
+    if type(digest) is not str or len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+        raise RuntimeError("isolated wheel evidence is invalid")
+    return {**expected, "wheel_sha256": digest}
+
+
 def prepare_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEffectors,
                     secret_factory: Callable[[], str] = lambda: secrets.token_urlsafe(32),
                     armed: bool = False) -> dict[str, Any]:
@@ -416,22 +433,31 @@ def prepare_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEff
     if type(secret) is not str or len(secret) < 32:
         raise RuntimeError("secret factory did not produce a fresh HMAC secret")
     state = _count_runtime(state, "secret_provision")
-    environment = write_webhook_environment(root, token=token, secret=secret)
-    provider_payload = write_provider_payload(root, secret=secret)
-    state["environment"] = environment
-    state["provider_payload"] = provider_payload
+    state.update({
+        "phase": "secret_provisioning",
+        "secret_material": {
+            "expected_paths": [str(environment_path(root)), str(provider_payload_path(root))],
+            "created": [],
+        },
+    })
     _stage_state(root, state, secrets=(token, secret), env=env)
     try:
+        environment = write_webhook_environment(root, token=token, secret=secret)
+        state["environment"] = environment
+        state["secret_material"] = {**state["secret_material"], "created": ["webhook_env"]}
+        _stage_state(root, state, secrets=(token, secret), env=env)
+        provider_payload = write_provider_payload(root, secret=secret)
+        state["provider_payload"] = provider_payload
+        state["secret_material"] = {**state["secret_material"], "created": ["webhook_env", "provider_payload"]}
+        _stage_state(root, state, secrets=(token, secret), env=env)
         state = _count_runtime(state, "establish")
         state["runtime_stage"] = "candidate"
         _stage_state(root, state, secrets=(token, secret), env=env)
         candidate = _validate_candidate(effectors.canonical_candidate(root))
         state.update({"candidate": candidate, "runtime_stage": "wheel"})
         _stage_state(root, state, secrets=(token, secret), env=env)
-        wheel = dict(effectors.build_wheel(root, candidate))
-        if type(wheel.get("wheel_sha256")) is not str or len(wheel["wheel_sha256"]) != 64:
-            raise RuntimeError("isolated wheel evidence is invalid")
-        state.update({"wheel": {"wheel_sha256": wheel["wheel_sha256"]},
+        wheel = _validate_wheel_evidence(effectors.build_wheel(root, candidate), candidate)
+        state.update({"wheel": wheel,
                       "runtime_stage": "venv"})
         _stage_state(root, state, secrets=(token, secret), env=env)
         venv = dict(effectors.create_venv(root))
@@ -466,7 +492,7 @@ def prepare_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEff
         readiness = _expect(effectors.readiness(root, environment), ready=True, source=SOURCE,
                             dispatch_enabled=False)
         state.update({"phase": "runtime_ready", "candidate": candidate,
-            "wheel": {"wheel_sha256": wheel["wheel_sha256"]}, "anchor": daemon["anchor"],
+            "wheel": wheel, "anchor": daemon["anchor"],
             "wake_id": daemon["wake_id"], "runtime_established": True,
             "runtime_stage": "ready",
             "runtime_evidence": {"venv": {"isolated": True}, "install": install,
@@ -624,9 +650,19 @@ def record_convergence(state: Mapping[str, Any], delivery: Mapping[str, Any], *,
 def _validate_cleanup_census(census: Mapping[str, Any], unrelated: Mapping[str, Any]) -> dict[str, Any]:
     expected = {"unit_absent": True, "active": "inactive", "enabled": "disabled", "pid": 0,
                 "matching_processes": 0, "port_8820_released": True}
+    query_names = ("unit_query", "failed_units_query")
+    queries = {name: census.get(name) for name in query_names}
+    if any(
+        not isinstance(query, Mapping)
+        or query.get("ok") is not True
+        or query.get("returncode") != 0
+        or query.get("bus_error") not in (None, "")
+        for query in queries.values()
+    ):
+        raise RuntimeError("runtime cleanup systemctl query is unavailable or failed")
     if any(census.get(key) != value for key, value in expected.items()) or not unrelated:
         raise RuntimeError("runtime cleanup census is incomplete")
-    return {**expected, "unrelated_state": dict(unrelated)}
+    return {**expected, "systemctl_queries": queries, "unrelated_state": dict(unrelated)}
 
 
 def cleanup_runtime(root: Path, *, env: Mapping[str, str], effectors: RuntimeEffectors,
