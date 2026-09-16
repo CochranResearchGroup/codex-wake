@@ -1,24 +1,43 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P52-C1
-    objective: Implement the closed built-in source registry and provider-free conformance tracer
-    plan: docs/dev/plans/0066-2026-09-15-built-in-source-registry-contract.md
-    plan_ref: refs/remotes/origin/feat/issue-82-source-registry-contract
-    branch: feat/issue-82-source-registry-contract
+  - id: P52-C2
+    objective: Migrate filesystem, process, and user-systemd source families through the registry
+    plan: docs/dev/plans/0067-2026-09-15-local-source-family-migration.md
+    plan_ref: refs/remotes/origin/feat/issue-83-local-source-family-migration
+    branch: feat/issue-83-local-source-family-migration
     target: main
     plan_state: OPEN
     custody_state: INTEGRATION_READY
-    checkpoint: e9e55031b2a03d22467c854b80074f3c333ece3f
+    checkpoint: 618e9ef66e6bca963fe3efb18fabe72ccef16f0a
     validation_status: passed
-    validation_ref: e9e55031b2a03d22467c854b80074f3c333ece3f
-    remote_ref: refs/remotes/origin/feat/issue-82-source-registry-contract
+    validation_ref: 618e9ef66e6bca963fe3efb18fabe72ccef16f0a
+    remote_ref: refs/remotes/origin/feat/issue-83-local-source-family-migration
     integration: squash
-    work_items: [CochranResearchGroup/codex-wake#82]
-    owner: primary-orchestrator with one bounded gpt-6-astra high implementation worker
-    write_surface: source registry contract, generic daemon injection seam, focused tests, and lane documentation
+    work_items: [CochranResearchGroup/codex-wake#83]
+    owner: bounded gpt-5.6-terra high worker; primary owns daemon integration
+    write_surface: local source-family module and focused tests; daemon integration reserved to primary
     live_effect: none
     dependencies: []
-    overlaps: []
-    reconciled_overlaps: []
+    overlaps: [P52-C3]
+    reconciled_overlaps: [P52-C3]
+    updated_at: 2026-09-15
+  - id: P52-C3
+    objective: Migrate GitHub CI source reconstruction through the registry
+    plan: docs/dev/plans/0068-2026-09-15-github-source-family-migration.md
+    plan_ref: refs/remotes/origin/feat/issue-84-github-source-family-migration
+    branch: feat/issue-84-github-source-family-migration
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: e98e44c33957a85719e17b29ae2d0cb23c07d2e5
+    remote_ref: refs/remotes/origin/feat/issue-84-github-source-family-migration
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#84]
+    owner: bounded gpt-5.6-terra high worker; primary owns daemon integration
+    write_surface: GitHub source-family module and provider-free focused tests; daemon integration reserved to primary
+    live_effect: none
+    dependencies: []
+    overlaps: [P52-C2]
+    reconciled_overlaps: [P52-C2]
     updated_at: 2026-09-15

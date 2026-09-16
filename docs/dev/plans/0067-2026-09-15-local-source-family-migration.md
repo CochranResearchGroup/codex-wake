@@ -56,5 +56,5 @@ unit control, dispatch, installation, provider effect, release, or deployment.
 
 ## Next action
 
-Publish the exact lane checkpoint, implement the local factories in the
-isolated worktree, then let the primary serialize daemon integration and review.
+Merge the exact integration-ready projection, squash-merge PR #93, verify
+canonical main, and remove the accepted #83 worktree before reconciling #84.

@@ -5,8 +5,8 @@ Lane: P52
 Issues: #81, #82, #83, #84, #85
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P52-G1
-Goal Version: P52-G1-v4
-Checkpoint: P52-G1-C04
+Goal Version: P52-G1-v5
+Checkpoint: P52-G1-C05
 
 ## Goal objective
 
@@ -48,6 +48,12 @@ PR #89 subsequently squash-merged at canonical
 and GitHub migration #84 are now assigned as disjoint parallel worktrees. Their
 workers own separate family modules and tests; the primary reserves shared
 `daemon.py` catalogue composition and integrates it serially.
+
+Local migration #83 is integration-ready in PR #93 at
+`618e9ef66e6bca963fe3efb18fabe72ccef16f0a` after one bounded repair cycle
+restored pending-projection identity parity. GitHub worker checkpoint
+`e98e44c33957a85719e17b29ae2d0cb23c07d2e5` is published and awaits the
+primary's post-#83 daemon integration.
 
 Graphiti was healthy but returned no P52-specific durable facts. Current source,
 Git, GitHub, policy, plan, and test evidence are authoritative. Deterministic
