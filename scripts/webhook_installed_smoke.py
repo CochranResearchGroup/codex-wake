@@ -249,8 +249,12 @@ def manager_preflight(context: ExecutionContext) -> tuple[str, tuple[str, ...]]:
     return state, manager_failed_units(context.artifact_dir, name="failed-units-before")
 
 
-def port_is_free() -> bool:
+def port_is_free(*, reuse_address: bool = False) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        if reuse_address:
+            # Opt-in qualification paths may match the production listener's
+            # bind semantics to distinguish TIME_WAIT residue from LISTEN.
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             probe.bind((HOST, PORT))
         except OSError:
@@ -977,6 +981,8 @@ def cleanup(
     failed_units_before: tuple[str, ...] | None,
     tracked_identities: tuple[tuple[int, str], ...] = (),
     preserve_root_on_safe: bool = False,
+    reuse_address_for_port_check: bool = False,
+    failed_unit_delta_is_noncausal: bool = False,
 ) -> dict[str, Any]:
     """Use product cleanup once; preserve the private root on uncertainty."""
     result: dict[str, Any] = {
@@ -996,7 +1002,9 @@ def cleanup(
             })
             return result
         unit_absent = not context.unit_path.exists() and not context.unit_path.is_symlink()
-        port_released = port_is_free()
+        port_released = port_is_free(
+            reuse_address=reuse_address_for_port_check,
+        )
         no_process = not matches
         safe = unit_absent and port_released and no_process
         result.update({
@@ -1032,7 +1040,9 @@ def cleanup(
             context, tracked_identities=tracked_identities,
         )
         no_process = not matches
-        port_released = port_is_free()
+        port_released = port_is_free(
+            reuse_address=reuse_address_for_port_check,
+        )
         failed_unchanged = (
             failed_units_before is not None and failed_units_after == failed_units_before
         )
@@ -1040,7 +1050,7 @@ def cleanup(
             command.returncode == 0 and unit_absent
             and state["active"] == "inactive" and state["enabled"] == "disabled"
             and state["pid"] == "0" and no_process and port_released
-            and failed_unchanged
+            and (failed_unchanged or failed_unit_delta_is_noncausal)
         )
         result.update({
             "uninstall_returncode": command.returncode, "state": state,
@@ -1052,6 +1062,10 @@ def cleanup(
                 set(failed_units_after) ^ set(failed_units_before or ())
             ),
             "failed_units_unchanged": failed_unchanged, "safe": safe,
+            "failed_units_acceptance": (
+                "noncausal_evidence"
+                if failed_unit_delta_is_noncausal else "blocking"
+            ),
         })
     except Exception as exc:
         safe = False
