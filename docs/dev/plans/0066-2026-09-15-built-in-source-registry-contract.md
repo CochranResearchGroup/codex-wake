@@ -11,9 +11,11 @@ Integration: `squash`
 
 P52 is open at canonical coordination commit
 `b554a0f2cf1bee75d8c8268575055c6652112919`. Issue #82 is the only ready
-implementation slice. `default_signal_runners` still owns production-specific
-reconstruction branches; the accepted P52 architecture requires a closed
-family-level factory seam before any production family migrates.
+implementation slice. Its implementation is integration-ready in PR #89 at
+`e9e55031b2a03d22467c854b80074f3c333ece3f`.
+`default_signal_runners` still owns production-specific reconstruction branches;
+the accepted P52 architecture requires a closed family-level factory seam
+before any production family migrates.
 
 ## Objective
 
@@ -81,6 +83,6 @@ Nested delegation and live effects are disabled.
 
 ## Next action
 
-Publish this exact assignment, merge its custody checkpoint, create the
-implementation branch from refreshed canonical main, implement tests first,
-then obtain one independent review and required CI before accepting #82.
+Merge the exact integration-ready projection, squash-merge PR #89, verify the
+canonical result, then close the #82 lane and assign #83 and #84 as disjoint
+parallel migrations.
