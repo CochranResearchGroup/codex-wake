@@ -33,7 +33,8 @@ external ingress/provider mutation outside this slice.
   never persist secret bytes.
 - Material authority changes require a new source instance. A narrow enabled
   toggle and exact idempotent rewrite may reuse an instance.
-- Default bind is `127.0.0.1`; non-loopback requires an explicit named option.
+- Default bind is `127.0.0.1:8820`; non-loopback requires persisted explicit
+  `allow_non_loopback` authority. Wildcard binds remain forbidden.
   Port is explicit, exact route remains `/github/webhook`, and no public
   health, UI, status, config, metrics, or secret endpoint is added.
 - Add a dedicated executable that constructs the #105 runtime only from one
@@ -58,6 +59,26 @@ the #105 integration module, or #105's focused tests. During parallel work it
 may use an import seam or test double matching the frozen #105 lifecycle:
 bound address, blocking main-thread `serve()`, and bounded `shutdown()`.
 Final validation occurs only after merging canonical #105 into this branch.
+
+## 2026-09-16 implementation evidence
+
+- Added `webhook_lifecycle.py`: owner-scoped bounded configuration at
+  `github/webhook-listeners.json`, fixed route, loopback-default/no-wildcard
+  validation, idempotent rewrites, enabled-only reuse, current/previous
+  opaque environment-reference rotation. The store and support projection do
+  not contain secret values. The schema persists `allow_non_loopback`, has a
+  262144-byte body default/1048576-byte ceiling, and exposes bounded
+  `max_connections` rather than a worker or queue setting.
+- Added `codex-wake-github-webhook` as a deferred-import executable seam and a
+  provider-free lifecycle contract test double. It requires a runtime with a
+  blocking main-thread `serve()` and bounded runtime-owned `shutdown()`.
+- Added user-service render/install/stop/status/uninstall helpers and CLI
+  configuration, service, readiness, and support commands. No real service was
+  installed during this lane.
+- Focused lifecycle tests and compilation pass before the #105 join. Final
+  executable acceptance remains blocked: canonical #105 must provide
+  `github_webhook_runtime` construction contract (or the join must adapt this
+  deferred factory) with the frozen bind/serve/shutdown lifecycle contract.
 
 ## TDD sequence
 

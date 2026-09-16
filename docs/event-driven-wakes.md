@@ -35,6 +35,29 @@ positive-only: `GITHUB_COVERAGE_UNPROVEN` is an expected warning rather than a
 terminal failure or complete-history claim. Provider-free smokes do not claim a
 live GitHub read, public listener, or live delivery.
 
+### Bounded GitHub webhook listener lifecycle
+
+`codex-wake github-webhook source configure|list|show` stores an owner-only
+listener configuration below the selected wake root. It stores the exact source
+instance, address, port, fixed `/github/webhook` path, bounded request settings,
+enabled state, a persisted `allow_non_loopback` flag, and one current plus
+optional previous *environment-variable reference*. It never stores secret
+values. The default is `127.0.0.1:8820`; a non-loopback numeric address requires
+both `--bind-address` and `--allow-non-loopback`. Wildcard binds and public
+diagnostics are unsupported. Body input defaults to 262144 bytes and cannot
+exceed the transport's 1048576-byte ceiling; `--max-connections` is bounded and
+the listener remains single-worker with no queue configuration.
+
+`codex-wake-github-webhook --wake-root ROOT --source NAME` is the dedicated
+listener executable. `codex-wake github-webhook service install|stop|status|uninstall`
+renders and manages only a user-systemd unit; it never creates a system service.
+The unit contains its config path but no secret reference or value. Readiness and
+support are local, nonsecret projections: they prove neither GitHub delivery nor
+wake dispatch, and readiness fails closed unless an installed owner probe proves
+the expected socket and journal are safe. The executable awaits the canonical #105 runtime join before it
+can be qualified; do not install or expose it before that join and a separate
+loopback qualification.
+
 ## Product outcome
 
 You will be able to describe when work should resume without choosing a polling
