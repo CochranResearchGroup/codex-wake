@@ -762,8 +762,9 @@ listener or external route exists. Parent issue #103 and child issues #104
 through #109 define a bounded transport, durable ingest, product lifecycle,
 installed loopback proof, Cooper/bastion HTTPS publication, and one live GitHub
 delivery. The shared ingress repository was cleaned, validated, structured into
-two final commits, and pushed at `5fcce95` before P53 use. Issue #104 is the sole
-ready implementation slice; no listener, ingress route, provider webhook, or
+two final commits, and pushed at `5fcce95` before P53 use. Coordination PR #110
+merged at `dad2d80`; issue #104 is the sole assigned implementation slice at
+branch checkpoint `72e0965`. No listener, ingress route, provider webhook, or
 live dispatch exists yet.
 
 Plan: [Signed GitHub webhook ingress goal campaign](docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md)

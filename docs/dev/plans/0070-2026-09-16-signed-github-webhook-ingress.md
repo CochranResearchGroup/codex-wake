@@ -5,8 +5,8 @@ Lane: P53
 Issues: #103, #104, #105, #106, #107, #108, #109
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P53-G1
-Goal Version: P53-G1-v1
-Checkpoint: P53-G1-C01
+Goal Version: P53-G1-v2
+Checkpoint: P53-G1-C02
 
 ## Goal objective
 
@@ -44,6 +44,12 @@ route has been created yet.
 
 Parent issue #103 and dependency-ordered child issues #104 through #109 are the
 coordination ledger. Issue #104 is the sole ready implementation slice.
+
+Coordination PR #110 passed both required release gates and squash-merged at
+canonical `dad2d80a4ce74e030ef604cc430449e76b636286`. Issue #104 is assigned in
+the isolated `feat/issue-104-webhook-http-transport` worktree. Its branch-local
+plan is published at `72e0965b2545f670cb3fc553c97a0bdd1b3cf7d2`; the primary
+retains architecture, integration, GitHub operations, and acceptance.
 
 ## Architecture and security decisions
 
@@ -150,7 +156,7 @@ not reported, so no allocation-savings claim is made.
 
 ```text
 goal_id: P53-G1
-goal_version: P53-G1-v1
+goal_version: P53-G1-v2
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_review_discovery_passes: 1
