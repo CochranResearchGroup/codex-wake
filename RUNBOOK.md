@@ -3207,7 +3207,8 @@ Qualified source-registry productization #85 for integration.
   occurred.
 
 Acceptance state: P52 is open at `P52-G1-v9` / `P52-G1-C09`; #82 through #84
-are accepted and #85 is integration-ready at `bcfcfd5`. Movement is
+are accepted and #85 is integration-ready at reconciled head `fbb89ad` with
+product commit `bcfcfd5`. Movement is
 `outcome_progress`. Next action: merge this readiness projection and PR #99,
 validate canonical main, clean up the accepted lane, then close parent #81 with
 the final empty-lane receipt.
