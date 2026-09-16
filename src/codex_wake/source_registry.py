@@ -44,6 +44,14 @@ FamilyFactory = Callable[
 
 
 @dataclass(frozen=True, slots=True)
+class BuiltinSourceInventory:
+    """Nonsecret, deterministic description of one closed built-in family."""
+
+    registration_id: str
+    ownership: tuple[tuple[str, str], ...]
+
+
+@dataclass(frozen=True, slots=True)
 class BuiltinSourceRegistration:
     registration_id: str
     ownership: frozenset[tuple[str, str]]
@@ -85,6 +93,23 @@ class BuiltinSourceRegistry:
             identities.add(registration.registration_id)
             ownership.update(registration.ownership)
         object.__setattr__(self, "registrations", registrations)
+
+    @property
+    def inventory(self) -> tuple[BuiltinSourceInventory, ...]:
+        """Return the closed catalogue without invoking a family factory.
+
+        This projection deliberately contains only stable registration and
+        source-kind ownership labels.  It neither examines runtime state nor
+        exposes factory closures or their dependency bindings.
+        """
+
+        return tuple(
+            BuiltinSourceInventory(
+                registration.registration_id,
+                tuple(sorted(registration.ownership)),
+            )
+            for registration in self.registrations
+        )
 
     def reconstruct(
         self,
@@ -136,3 +161,39 @@ class BuiltinSourceRegistry:
                 continue
             runners.extend(family_runners)
         return tuple(runners)
+
+
+def _unavailable_github_runner(*_args: object, **_kwargs: object) -> SignalSourceRunner:
+    """Keep operator catalogue inspection independent of daemon runner types."""
+
+    raise RuntimeError("GitHub runner construction requires daemon wiring")
+
+
+def builtin_source_registry(
+    *,
+    github_runner_factory: Callable[..., SignalSourceRunner] | None = None,
+    github_client_factory: Callable[..., object] | None = None,
+    systemd_backend_factory: Callable[[object], object] | None = None,
+) -> BuiltinSourceRegistry:
+    """Construct the one fixed production built-in source catalogue.
+
+    The daemon supplies its GitHub runner dependency when it reconstructs
+    pending arms.  Operator inventory may use the same construction path with
+    the inert fallback because it only reads :attr:`BuiltinSourceRegistry.inventory`.
+    No external registration or package discovery is supported.
+    """
+
+    from .github_source_family import github_source_family_registration
+    from .local_source_families import local_source_registrations
+
+    return BuiltinSourceRegistry((
+        *local_source_registrations(systemd_backend_factory=systemd_backend_factory),
+        github_source_family_registration(
+            runner_factory=(
+                github_runner_factory
+                if github_runner_factory is not None
+                else _unavailable_github_runner
+            ),
+            client_factory=github_client_factory,
+        ),
+    ))

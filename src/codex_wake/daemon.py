@@ -38,7 +38,7 @@ from .signals import (
     SourceReconcileResult, UnavailableSourceRunner,
 )
 from .monitor import write_monitor_health
-from .source_registry import BuiltinSourceRegistry, ReconstructionContext
+from .source_registry import BuiltinSourceRegistry, ReconstructionContext, builtin_source_registry
 
 
 @dataclass(frozen=True)
@@ -98,20 +98,15 @@ def default_signal_runners(
 ) -> tuple[SignalSourceRunner, ...]:
     """Reconstruct referenced sources, then append an optional closed catalogue."""
 
-    from .github_source_family import github_source_family_registration
-    from .local_source_families import local_source_registrations
-
     # All registered families share one authoritative arm read per wake.
     load_armed_signal = cache(runtime.load_armed_signal)
     context = ReconstructionContext(root, load_armed_signal, initial_reason)
     pending = pending_records(root)
-    builtin_registry = BuiltinSourceRegistry((
-        *local_source_registrations(systemd_backend_factory=systemd_backend_factory),
-        github_source_family_registration(
-            runner_factory=GitHubSignalRunner,
-            client_factory=github_client_factory,
-        ),
-    ))
+    builtin_registry = builtin_source_registry(
+        github_runner_factory=GitHubSignalRunner,
+        github_client_factory=github_client_factory,
+        systemd_backend_factory=systemd_backend_factory,
+    )
     builtin_runners = builtin_registry.reconstruct(context, pending)
     runners: list[SignalSourceRunner] = [
         runner for runner in builtin_runners

@@ -168,6 +168,32 @@ class SignalSupportTests(unittest.TestCase):
         self.assertEqual(unsupported["status"], "unsupported")
         self.assertTrue(unsupported["unsupported"])
 
+    def test_readiness_and_support_export_include_the_closed_builtin_inventory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "wake"
+
+            readiness = signal_readiness(wake_root)
+            inventory = readiness["builtin_inventory"]
+            self.assertEqual(
+                [item["registration_id"] for item in inventory],
+                ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci"],
+            )
+            self.assertEqual(
+                inventory[0]["ownership"],
+                [
+                    {"source": "filesystem", "kind": "file.changed"},
+                    {"source": "filesystem", "kind": "file.created"},
+                    {"source": "filesystem", "kind": "file.exists"},
+                ],
+            )
+            self.assertFalse(wake_root.exists())
+
+            destination = base / "support.json"
+            export_signal_support(wake_root, destination, max_bytes=16_384)
+            support = json.loads(destination.read_text(encoding="utf-8"))
+            self.assertEqual(support["signal_readiness"]["builtin_inventory"], inventory)
+
     def test_export_rejects_runtime_destination_without_touching_journal(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             wake_root = Path(tmp) / "wake"
