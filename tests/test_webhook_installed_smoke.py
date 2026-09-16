@@ -20,7 +20,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from codex_wake.github_polling import (
     GitHubPollingAdapter,
@@ -28,8 +28,15 @@ from codex_wake.github_polling import (
     RunPage,
     WorkflowRun,
 )
+from codex_wake.github_source_config import GitHubSourceStore
 from codex_wake.github_webhook_runtime import GitHubWebhookRuntime
 from codex_wake.github_webhooks import WebhookConfig
+from codex_wake.signal_records import (
+    ManagedReaderCapability,
+    WakeRecordPublisher,
+    signal_journal_path,
+)
+from codex_wake.signal_store import SQLiteSignalModule
 from codex_wake.signals import ArmContext, EvaluationLimits, Ingested, Matched, WakeId
 from codex_wake.webhook_http import WebhookHTTPConfig
 from tests.test_signal_store import make_module
@@ -532,6 +539,89 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             "record_publisher=WakeRecordPublisher(root, current_reader_capability(root))",
             body,
         )
+
+    def test_generated_poll_fixture_passes_strict_provider_free_convergence(self) -> None:
+        registered = datetime(2026, 9, 16, 12, 0, tzinfo=UTC)
+        fixture = fixture_at(registered + timedelta(seconds=1))
+        workflow = fixture.workflow
+        run = WorkflowRun(
+            str(workflow["repository"]), int(workflow["repository_id"]),
+            int(workflow["workflow_id"]), int(workflow["run_id"]),
+            int(workflow["run_attempt"]), str(workflow["ref"]),
+            str(workflow["head_sha"]), str(workflow["status"]),
+            str(workflow["conclusion"]), None,
+            datetime.fromisoformat(str(workflow["terminal_proof_at"])),
+            "github_attempt_started_or_job_completed_lower_bound",
+        )
+
+        class Client:
+            def list_runs(self, query):
+                return RunPage((run,), None, None, None)
+
+            def get_run_attempt(self, repository, run_id, run_attempt):
+                return run
+
+        config = GitHubPollingConfig(
+            source_instance=smoke.SOURCE, repository=smoke.REPOSITORY,
+            repository_id=1, workflow_id=1,
+            refs=frozenset({"refs/heads/main"}),
+            conclusions=frozenset({"success"}), credential_ref="TOKEN",
+            evidence_mode="positive_only",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            ctx = context(base)
+            ctx.fixture_dir.mkdir(parents=True)
+            GitHubSourceStore(ctx.wake_root).configure(config)
+            module = SQLiteSignalModule(
+                signal_journal_path(ctx.wake_root),
+                record_publisher=WakeRecordPublisher(
+                    ctx.wake_root,
+                    ManagedReaderCapability(
+                        ctx.wake_root, "reader", 1, frozenset({1, 2}), True,
+                    ),
+                ),
+            )
+            adapter = GitHubPollingAdapter(config, Client())
+            request = adapter.request(
+                ref="refs/heads/main", conclusions=("success",),
+            )
+            armed = module.arm(
+                WakeId("wake_generated_fixture"), request,
+                ArmContext(
+                    "key", "fingerprint", registered, None,
+                    make_intent().resume, adapter,
+                ),
+            )
+            observation = adapter.normalize_verified_attempt(run)
+            ingested = module.ingest(
+                (observation,), adapter.checkpoint_for_anchor(armed.anchor),
+            )
+            self.assertIsInstance(ingested, Ingested)
+            script = smoke.write_poll_fixture(ctx, fixture, str(armed.wake_id))
+            production_client = Mock(
+                side_effect=AssertionError("production client must remain unreachable"),
+            )
+            dispatch = Mock(
+                side_effect=AssertionError("dispatch must remain unreachable"),
+            )
+            stdout = io.StringIO()
+            argv = [
+                str(script), str(ctx.wake_root),
+                str(ctx.fixture_dir / "workflow.json"), str(armed.wake_id),
+            ]
+            with patch(
+                "codex_wake.github_source_family._production_client",
+                production_client,
+            ), patch("codex_wake.daemon.dispatch_firing_record", dispatch), patch.object(
+                sys, "argv", argv,
+            ), redirect_stdout(stdout):
+                runpy.run_path(str(script), run_name="__main__")
+            production_client.assert_not_called()
+            dispatch.assert_not_called()
+            evidence = json.loads(stdout.getvalue())
+            smoke.assert_poll_convergence(evidence)
+            self.assertEqual(evidence["poll"]["dispatched"], 0)
 
     def test_failed_uninstall_preserves_unit_wake_fixture_and_recovery_root(self) -> None:
         with tempfile.TemporaryDirectory() as outer:

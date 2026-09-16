@@ -208,7 +208,10 @@ class GitHubSignalRunner:
             degraded += instance_degraded
             instances.append(
                 SourceInstanceReconcileResult(
-                    "github", source_instance, 1, instance_observed, instance_degraded
+                    "github", source_instance, 1, instance_observed,
+                    instance_degraded,
+                    health.code if isinstance(health, Degraded) else "",
+                    now,
                 )
             )
         return SourceReconcileResult(
