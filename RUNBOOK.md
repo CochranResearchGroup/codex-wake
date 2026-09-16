@@ -3347,3 +3347,28 @@ Acceptance state: P53 is open at `P53-G1-v2` / `P53-G1-C03`; #104 is accepted
 and cleaned up. Movement is `outcome_progress`. Next action: open disjoint #105
 and #106 worktrees from canonical main, implement them in parallel, then join
 through one independent review before installed qualification #107.
+
+## Turn 158 | 2026-09-16
+
+Assigned the parallel P53 durable-ingest and product-lifecycle lanes.
+
+- Created isolated #105 and #106 worktrees from canonical `558ae15` and
+  published plan-only checkpoints `39e3030` and `ab4d50e`.
+- CodeGraph confirmed the existing provider client owns a POSIX main-thread
+  timer and fails closed on callback threads. #105 therefore owns a bounded
+  no-queue bridge that keeps the complete secret/provider/store operation on
+  the main thread under one absolute deadline; it may not weaken polling
+  deadlines or use an unkillable background provider worker.
+- #106 owns only configuration, CLI, executable, service, packaging,
+  readiness, support, documentation, and their tests. It may develop in
+  parallel against the primary-frozen lifecycle interface but must join
+  canonical #105 before integration acceptance.
+- No implementation beyond branch-local plans, provider call, service install,
+  non-loopback bind, Cooper route, live delivery, dispatch, release,
+  deployment, or global install occurred.
+
+Acceptance state: P53 is open at `P53-G1-v2` / `P53-G1-C04`; #105 and #106 are
+the two active implementation lanes within the configured WIP limit. Movement
+is `outcome_progress`. Next action: merge this assignment projection, execute
+both lanes in parallel, integrate #105 first, join #106 to canonical main, and
+run one independent review over the combined product surface.
