@@ -94,13 +94,13 @@ class GitHubSourceFamilyTests(unittest.TestCase):
             self.assertEqual(list(runner_factory.call_args.args[0]), ["github-a", "github-b"])
             self.assertEqual(
                 [arm.wake_id for arm in runner_factory.call_args.kwargs["armed_signals"]],
-                ["wake_b_first", "wake_a", "wake_b_second"],
+                ["wake_a", "wake_b_first", "wake_b_second"],
             )
             self.assertEqual(runner_factory.call_args.kwargs["health_store"].wake_root, root)
             self.assertEqual(list(runner._adapters), ["github-a", "github-b"])
             self.assertEqual(
                 [arm.wake_id for arm in runner._armed_signals],
-                ["wake_b_first", "wake_a", "wake_b_second"],
+                ["wake_a", "wake_b_first", "wake_b_second"],
             )
             self.assertEqual(
                 [(client.list_calls, client.attempt_calls) for client in clients.values()],

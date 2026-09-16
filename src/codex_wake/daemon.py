@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 import time
 from dataclasses import dataclass
@@ -99,76 +98,29 @@ def default_signal_runners(
 ) -> tuple[SignalSourceRunner, ...]:
     """Reconstruct referenced sources, then append an optional closed catalogue."""
 
-    from .github_client import GitHubRestClient
+    from .github_source_family import github_source_family_registration
     from .local_source_families import local_source_registrations
 
     # All registered families share one authoritative arm read per wake.
     load_armed_signal = cache(runtime.load_armed_signal)
     context = ReconstructionContext(root, load_armed_signal, initial_reason)
     pending = pending_records(root)
-    local_registry = BuiltinSourceRegistry(local_source_registrations(
-        systemd_backend_factory=systemd_backend_factory,
+    builtin_registry = BuiltinSourceRegistry((
+        *local_source_registrations(systemd_backend_factory=systemd_backend_factory),
+        github_source_family_registration(
+            runner_factory=GitHubSignalRunner,
+            client_factory=github_client_factory,
+        ),
     ))
-    local_runners = local_registry.reconstruct(context, pending)
+    builtin_runners = builtin_registry.reconstruct(context, pending)
     runners: list[SignalSourceRunner] = [
-        runner for runner in local_runners
+        runner for runner in builtin_runners
         if not isinstance(runner, UnavailableSourceRunner)
     ]
     unavailable_runners = [
-        runner for runner in local_runners
+        runner for runner in builtin_runners
         if isinstance(runner, UnavailableSourceRunner)
     ]
-    github_arms: dict[str, list[ArmedSignal]] = {}
-    for item in pending:
-        if classify_record(item.record) != "signal_v2":
-            continue
-        wake_id = item.record.get("id")
-        predicate = item.record.get("predicate")
-        if not isinstance(wake_id, str) or not isinstance(predicate, dict):
-            continue
-        source = predicate.get("source")
-        source_instance = predicate.get("source_instance")
-        if source == "github" and isinstance(source_instance, str):
-            armed = load_armed_signal(wake_id)
-            if armed is not None and armed.spec.source == "github":
-                github_arms.setdefault(source_instance, []).append(armed)
-    if github_arms:
-        store = GitHubSourceStore(root)
-        try:
-            registry = store.registry()
-            github_adapters = {}
-            referenced_arms = []
-            for source_instance in sorted(github_arms):
-                try:
-                    selected = registry.select(source_instance)
-                    client = (
-                        github_client_factory(selected)
-                        if github_client_factory is not None
-                        else GitHubRestClient(
-                            selected,
-                            credential_resolver=lambda ref: os.environ.get(ref, ""),
-                        )
-                    )
-                    github_adapters[source_instance] = GitHubPollingAdapter(
-                        selected,
-                        client,
-                        previous_failure=store.retry_failure(source_instance),
-                    )
-                except (OSError, TypeError, ValueError):
-                    continue
-                referenced_arms.extend(github_arms[source_instance])
-            if github_adapters:
-                runners.append(
-                    GitHubSignalRunner(
-                        github_adapters,
-                        armed_signals=tuple(referenced_arms),
-                        health_store=store,
-                    )
-                )
-        except (OSError, TypeError, ValueError):
-            # A damaged or unsupported configuration cannot create network
-            # authority. Other source classes remain available.
-            pass
     runners.extend(unavailable_runners)
     if source_registry is not None:
         runners.extend(source_registry.reconstruct(context, pending))

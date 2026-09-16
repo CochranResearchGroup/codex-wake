@@ -101,11 +101,14 @@ def _construct_github_family(
     if not adapters:
         return ()
 
-    # Candidates arrive in durable pending order.  Configuration/client
-    # construction is sorted independently above, so grouping cannot reorder
-    # the arms given to reconciliation.
-    referenced_arms = tuple(candidate.armed for candidate in candidates
-                            if candidate.armed.spec.source_instance in adapters)
+    # Preserve the legacy daemon order: sorted configured source instances,
+    # with durable pending order retained inside each instance batch.
+    referenced_arms = tuple(
+        candidate.armed
+        for source_instance in sorted(grouped)
+        if source_instance in adapters
+        for candidate in grouped[source_instance]
+    )
 
     return (runner_factory(adapters, armed_signals=referenced_arms, health_store=store),)
 
