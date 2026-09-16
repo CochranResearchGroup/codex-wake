@@ -1,6 +1,6 @@
 # Live GitHub webhook delivery qualification
 
-State: OPEN
+State: CLOSED
 Lane: P53-C6
 Issue: #109
 Branch: `feat/issue-109-live-qualification-runner`
@@ -49,6 +49,35 @@ retirement, and systemd failure handling passed closed-world review. Focused C6
 tests pass 22/22, comprehensive Python passes 563/563, the OpenClaw plugin
 passes 12/12, and compilation/diff checks pass. PR #130 integration remains
 before the trigger PR and exact provider gate.
+
+## No-retry failure disposition
+
+The provider-free runner integrated through PR #130 at canonical
+`858ccdb339c4acb45f3d4db7e2b33fd6f54a3a12`. Trigger PR #131 was green and
+frozen but never merged. After the exact lifecycle gate, the single isolated
+runtime establishment attempted candidate tree
+`15c11e27d12e50522e600053ec9e0f34d2b146d7` and stopped at the install stage:
+pip returned zero while caller `PYTHONPATH` caused the source checkout's
+metadata to satisfy the request, leaving no installed distribution or console
+scripts in the isolated venv. No source, listener, service, hook, trigger,
+observation, or dispatch effect followed.
+
+The single cleanup attempt then failed closed because the local adapter
+rejected systemd's legitimate unit-absent readback (`is-active` rc 4 with
+`inactive`, `is-enabled` rc 4 with `not-found`, and MainPID 0). A targeted
+authorized secret retirement removed both owner-only secret artifacts without
+retrying cleanup. The retained owner-only root is
+`/home/ecochran76/.local/state/codex-wake/qualification/p53-c6-live-github-1ndna5z1`;
+the external receipt is
+`/home/ecochran76/.local/state/codex-wake/qualification-receipts/p53-c6-live-github.json`.
+Its counters are establish 1, cleanup 1, secret provision 1, secret retirement
+1, observation 0, and zero for hook create, trigger, delete, redelivery, and
+dispatch. Fresh readback found no unit, PID, port listener, hook, or trigger
+merge. The root remains as failure custody because safe root-removal evidence
+did not complete.
+
+Plan 0082 owns the provider-free repair and any fresh successor preparation.
+This plan's counters and authority do not reset or transfer to that successor.
 
 ## Objective
 
