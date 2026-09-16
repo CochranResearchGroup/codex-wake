@@ -1,3 +1,24 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P53-C1
+    objective: Harden the bounded webhook HTTP transport contract
+    plan: docs/dev/plans/0071-2026-09-16-bounded-webhook-http-transport.md
+    plan_ref: refs/remotes/origin/feat/issue-104-webhook-http-transport
+    branch: feat/issue-104-webhook-http-transport
+    target: main
+    plan_state: OPEN
+    custody_state: ASSIGNED
+    checkpoint: 72e0965b2545f670cb3fc553c97a0bdd1b3cf7d2
+    validation_status: planned
+    validation_ref: dad2d80a4ce74e030ef604cc430449e76b636286
+    remote_ref: refs/remotes/origin/feat/issue-104-webhook-http-transport
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#104]
+    owner: primary or bounded gpt-6-astra high security implementation worker
+    write_surface: one HTTP transport module, one real-socket test module, and branch-local plan evidence
+    live_effect: ephemeral loopback test sockets only; no provider, journal, service, ingress, or dispatch effect
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-16
