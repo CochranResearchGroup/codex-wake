@@ -47,8 +47,14 @@ journal before and after one production no-dispatch poll. Its exact candidate
 commit/tree wheel custody, lifecycle-ledger preservation, partial-secret
 retirement, and systemd failure handling passed closed-world review. Focused C6
 tests pass 22/22, comprehensive Python passes 563/563, the OpenClaw plugin
-passes 12/12, and compilation/diff checks pass. PR #130 integration remains
-before the trigger PR and exact provider gate.
+passes 12/12, and compilation/diff checks pass. PR #130 integration was the
+remaining prerequisite before the trigger PR and exact provider gate.
+
+PR #130 subsequently passed both hosted release gates and squash-merged as
+canonical `858ccdb339c4acb45f3d4db7e2b33fd6f54a3a12`. The lane now moves to a
+separate docs-only trigger pull request. Opening and validating that request
+does not authorize its merge, any provider hook mutation, local runtime
+establishment, secret provisioning, delivery observation, or dispatch.
 
 ## Objective
 
