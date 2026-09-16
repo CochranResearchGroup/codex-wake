@@ -17,6 +17,7 @@ from .github_source_config import GitHubSourceStore
 from .records import ACTIVE_STATUS_DIRS
 from .signal_records import decode_signal_record, signal_journal_path
 from .signal_store import JOURNAL_APPLICATION_ID, JOURNAL_SCHEMA_VERSION
+from .source_registry import builtin_source_registry
 
 
 MAX_SUPPORT_WAKES = 100
@@ -179,6 +180,21 @@ def _outcome(status: str, message: str, **extra: Any) -> dict[str, Any]:
     return {"status": status, "message": message, **extra}
 
 
+def _builtin_inventory() -> list[dict[str, Any]]:
+    """Project the closed reconstruction catalogue without runtime access."""
+
+    return [
+        {
+            "registration_id": item.registration_id,
+            "ownership": [
+                {"source": source, "kind": kind}
+                for source, kind in item.ownership
+            ],
+        }
+        for item in builtin_source_registry().inventory
+    ]
+
+
 def signal_readiness(
     wake_root: Path,
     *,
@@ -203,6 +219,7 @@ def signal_readiness(
         "included": False,
         "message": "dispatch-target readiness is reported separately",
     }
+    builtin_inventory = _builtin_inventory()
     captured_now = now or datetime.now(UTC)
     configured_github: list[dict[str, Any]] = []
     config_error = ""
@@ -269,6 +286,7 @@ def signal_readiness(
             "sources": source_entries,
             "sources_omitted": 0,
             "dispatch_readiness": dispatch,
+            "builtin_inventory": builtin_inventory,
         }
 
     connection: sqlite3.Connection | None = None
@@ -300,6 +318,7 @@ def signal_readiness(
                 "sources": [],
                 "sources_omitted": 0,
                 "dispatch_readiness": dispatch,
+                "builtin_inventory": builtin_inventory,
             }
         source_count = int(
             connection.execute("SELECT COUNT(*) FROM source_instances").fetchone()[0]
@@ -345,6 +364,7 @@ def signal_readiness(
             "sources": [],
             "sources_omitted": 0,
             "dispatch_readiness": dispatch,
+            "builtin_inventory": builtin_inventory,
         }
     finally:
         if connection is not None:
@@ -488,6 +508,7 @@ def signal_readiness(
         "sources": sources,
         "sources_omitted": sources_omitted,
         "dispatch_readiness": dispatch,
+        "builtin_inventory": builtin_inventory,
     }
 
 

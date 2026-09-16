@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import unittest
 from dataclasses import FrozenInstanceError, replace
 from pathlib import Path
@@ -10,10 +11,12 @@ from codex_wake.records import WakePath
 from codex_wake.signal_records import build_signal_record
 from codex_wake.signals import ArmId, ArmedSignal, SourceAnchor, WakeId
 from codex_wake.source_registry import (
+    BuiltinSourceInventory,
     BuiltinSourceRegistration,
     BuiltinSourceRegistry,
     ReconstructionCandidate,
     ReconstructionContext,
+    builtin_source_registry,
 )
 from tests.test_signals import NOW, make_intent
 
@@ -33,6 +36,37 @@ def candidate(wake_id: str, *, source: str = "memory", kind: str = "job.complete
 
 
 class SourceRegistryTests(unittest.TestCase):
+    def test_builtin_inventory_is_closed_deterministic_and_inert(self) -> None:
+        runner_factory = Mock()
+        client_factory = Mock()
+        with tempfile.TemporaryDirectory() as tmp:
+            runtime_root = Path(tmp) / "wake"
+            catalogue = builtin_source_registry(
+                github_runner_factory=runner_factory,
+                github_client_factory=client_factory,
+            )
+            first = catalogue.inventory
+            second = catalogue.inventory
+
+            self.assertFalse(runtime_root.exists())
+        self.assertEqual(first, second)
+        self.assertEqual(
+            [item.registration_id for item in first],
+            ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci"],
+        )
+        self.assertEqual(
+            first[0].ownership,
+            (("filesystem", "file.changed"), ("filesystem", "file.created"),
+             ("filesystem", "file.exists")),
+        )
+        self.assertTrue(all(isinstance(item, BuiltinSourceInventory) for item in first))
+        with self.assertRaises(FrozenInstanceError):
+            first[0].registration_id = "external"
+        with self.assertRaises(TypeError):
+            first[0].ownership[0] = ("external", "kind")
+        runner_factory.assert_not_called()
+        client_factory.assert_not_called()
+
     def test_catalogue_is_immutable_and_introspection_never_constructs(self) -> None:
         factory = Mock(return_value=())
         ownership = {("memory", "job.completed")}

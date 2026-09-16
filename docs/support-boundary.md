@@ -99,6 +99,18 @@ Support exports contain bounded identifiers, source health, schema posture,
 and sanitized match references. They exclude prompts, targets, credentials,
 idempotency keys, raw provider payloads, and filesystem contents.
 
+## Internal Built-in Source Families
+
+The built-in inventory in signal readiness and support exports is a fixed,
+nonsecret projection of the same registrations the daemon uses to reconstruct
+pending source runners. To add an internal family, add its immutable ownership
+and factory to the single `builtin_source_registry` construction path, keep
+the factory side-effect-free until reconstruction receives eligible durable
+candidates, and add focused registry, readiness, support, and daemon-parity
+tests. This is deliberately not an extension or plugin API: external
+registration, package discovery, dynamic imports, hot reload, and arbitrary
+provider authority are unsupported.
+
 The export destination must resolve outside the wake root. Export configuration
 is capped at 100 wakes and 1 MiB of output. Collection enumerates at most 2,048
 directory entries, retains at most 512 selected record paths, reads at most 64 KiB from each record,

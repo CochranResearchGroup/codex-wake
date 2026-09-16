@@ -10,7 +10,7 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from codex_wake.daemon import PollResult, default_signal_runners, format_poll_result, poll_once, poll_result_has_activity, run
 from codex_wake.event_wake import EventWake
@@ -130,6 +130,28 @@ class DaemonTests(unittest.TestCase):
             ), ())
             self.assertEqual(default_signal_runners(root, runtime, source_registry=registry), (extra,))
         registry.reconstruct.assert_called_once()
+        runtime.load_armed_signal.assert_not_called()
+
+    def test_default_runner_uses_the_shared_builtin_catalogue(self) -> None:
+        from codex_wake.daemon import GitHubSignalRunner
+        from codex_wake.source_registry import builtin_source_registry
+
+        runtime = Mock()
+        captured = []
+
+        def construct_catalogue(**kwargs):
+            catalogue = builtin_source_registry(**kwargs)
+            captured.append(catalogue)
+            return catalogue
+
+        with patch("codex_wake.daemon.pending_records", return_value=[]), patch(
+            "codex_wake.daemon.builtin_source_registry", side_effect=construct_catalogue,
+        ) as constructor:
+            self.assertEqual(default_signal_runners(Path("/unused"), runtime), ())
+
+        constructor.assert_called_once()
+        self.assertIs(constructor.call_args.kwargs["github_runner_factory"], GitHubSignalRunner)
+        self.assertEqual(captured[0].inventory, builtin_source_registry().inventory)
         runtime.load_armed_signal.assert_not_called()
 
     def test_default_runner_restores_configured_systemd_transition_and_publishes(self) -> None:
