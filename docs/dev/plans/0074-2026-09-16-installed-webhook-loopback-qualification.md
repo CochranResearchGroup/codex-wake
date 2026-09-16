@@ -32,8 +32,13 @@ armed, and reader-stopped transitions are staged as they occur. The source is
 configured disabled for the reader's first poll, enabled and armed while that
 exact reader is live, and the reader is stopped before webhook service setup
 continues. Twenty-two hermetic tests, including a real in-process
-HTTP/store/restart/polling sequence, now pass; comprehensive Python validation
-is 514/514 and the plugin tier is 12/12.
+HTTP/store/restart/polling sequence, now pass. A second pre-effect invocation
+then exposed caller `PYTHONPATH` leaking into the fresh venv's pip process, so
+pip observed worktree metadata and skipped the wheel installation. Checkpoint
+`7d18ea4` removes `PYTHONPATH`/`PYTHONHOME` from build/install subprocesses and
+stages every build/install phase externally. The same exported candidate wheel
+now installs all four entrypoints and imports from the isolated venv.
+Comprehensive Python validation is 515/515 and the plugin tier is 12/12.
 Compilation and diff hygiene also pass. The first attempted planning-audit
 command used a nonexistent repo-local script and is retained as a failed
 validation attempt; the actual selector-bundle active planning audit passed,
@@ -50,7 +55,13 @@ process census and the three external checkpoint stages. Closed-world
 re-verification at `b7e8743` accepted all three repairs: two delayed polling
 passes made zero production-client/provider-read calls, simulated stuck
 termination preserved the recovery root, and external snapshots retained the
-three transitions in order. The next gate is a fresh live preflight.
+three transitions in order. The later `fb6696f` invocation also stopped before
+service installation and is retained separately at
+`/tmp/codex-wake-p53-c4-service-attempt-1.json`. It proved the updated six-unit
+degraded-manager baseline and safe cleanup, but stopped before provenance
+because of the isolated-venv pip issue above. `service_attempted` again remained
+false, so the one service attempt is unconsumed. The next gate is a fresh live
+preflight.
 
 ## Accepted review ledger
 

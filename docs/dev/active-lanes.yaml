@@ -9,9 +9,9 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: b7e8743a876ecb5568a2f9728c7a385c71154a34
-    validation_status: closed_world_repair_accepted_pending_live_preflight
-    validation_ref: b7e8743a876ecb5568a2f9728c7a385c71154a34
+    checkpoint: 7d18ea40d22ef38c482c85cac28a668305ec1bd3
+    validation_status: candidate_install_repair_validated_pending_live_preflight
+    validation_ref: 7d18ea40d22ef38c482c85cac28a668305ec1bd3
     remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#107]

@@ -3531,3 +3531,30 @@ Acceptance state: the source correction is accepted; #107 and its one
 installed-service attempt remain active/unconsumed. Movement is
 `blocker_reduction`. Next action: publish the exact clean branch, fresh-preflight
 the host/unit/port/process baseline, then run the service attempt once.
+
+## Turn 165 | 2026-09-16
+
+Corrected a second pre-effect #107 setup failure without consuming the service
+attempt.
+
+- The `fb6696f` runner invocation accepted the fresh host preflight, then
+  stopped before provenance and before service installation. Its external
+  receipt proves `service_attempted: false`, absent unit/process/port ownership,
+  safe cleanup, no provider access, and the updated six-unit unrelated failed
+  baseline.
+- Diagnosis showed that the explicit caller `PYTHONPATH=src` propagated into
+  the fresh venv's pip process. Pip therefore saw worktree distribution metadata
+  and skipped installing the exact wheel.
+- Checkpoint `7d18ea4` preserves tool discovery but removes `PYTHONPATH` and
+  `PYTHONHOME` from build, venv, and pip subprocesses. It also stages
+  clean-candidate, build, install, and provenance phases in the external
+  receipt so another setup failure remains locatable.
+- A provider-free exported-tree proof now builds the exact wheel, installs all
+  four console entrypoints, and imports `codex_wake` from the isolated venv.
+  Validation passes 23 focused tests, 515 comprehensive Python tests, 12 plugin
+  tests, compilation, and diff hygiene.
+
+Acceptance state: #107 remains active and its one installed-service attempt is
+unconsumed. Movement is `blocker_reduction`. Next action: publish the repaired
+clean branch, repeat the fresh host preflight, then execute the service attempt
+once without retry after any post-install failure.
