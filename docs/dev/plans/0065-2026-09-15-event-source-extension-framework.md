@@ -1,12 +1,12 @@
 # Event source extension framework goal campaign
 
-State: OPEN
+State: CLOSED
 Lane: P52
 Issues: #81, #82, #83, #84, #85
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P52-G1
-Goal Version: P52-G1-v9
-Checkpoint: P52-G1-C09
+Goal Version: P52-G1-v10
+Checkpoint: P52-G1-C10
 
 ## Goal objective
 
@@ -76,6 +76,14 @@ tests, 438 comprehensive Python tests, 12 plugin tests, compilation, planning
 audits, independent review, and installed-wheel conformance on Python 3.11 and
 3.12. The installed receipt is
 `docs/dev/verification/0078-2026-09-15-source-registry-installed-compatibility.md`.
+
+PR #99 subsequently squash-merged at canonical
+`2929d934f34ccf9e27eaa28e910a5a6a5e6ada8d`, closing #85. Canonical main
+retains the four-family registry, provider-free conformance fixture, local and
+GitHub migrations, shared operator inventory, extension documentation, and the
+installed-wheel CI gate. All child issues and implementation lanes are closed;
+the active-lane catalogue is empty and the P52 topic worktree and branch were
+removed.
 
 Graphiti was healthy but returned no P52-specific durable facts. Current source,
 Git, GitHub, policy, plan, and test evidence are authoritative. Deterministic
@@ -188,7 +196,7 @@ made.
 
 ```text
 goal_id: P52-G1
-goal_version: P52-G1-v1
+goal_version: P52-G1-v10
 max_work_unit_attempts: 2
 max_review_rework_cycles: 1
 max_hardening_checkpoints: 2
@@ -263,3 +271,12 @@ closed; the active-lane catalogue is empty; comprehensive and plugin validation
 passes on canonical integration state; installed compatibility is proven and
 cleaned up; and synchronized `origin/main` has no P52 topic branch, open issue,
 or pull request.
+
+## Final acceptance
+
+Accepted at `P52-G1-v10` / `P52-G1-C10`. Issues #82 through #85 are closed from
+canonical implementation evidence, PR #99 is merged at `2929d934`, and the
+parent #81 is ready to close after this final empty-lane projection reaches
+canonical main. The recorded local installed-harness failure remains preserved;
+the deterministic installed-wheel CI replacement passed on Python 3.11 and
+3.12 without broadening authority or consuming another local attempt.

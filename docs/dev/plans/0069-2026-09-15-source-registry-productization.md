@@ -1,6 +1,6 @@
 # Source registry productization and installed compatibility
 
-State: OPEN
+State: CLOSED
 Lane: P52-C4
 Issue: #85
 Branch: `feat/issue-85-source-registry-productization`
@@ -20,6 +20,10 @@ PR #99. It supplies pure catalogue inventory, additive readiness/support
 projection, maintainer documentation, and a provider-free installed-wheel
 conformance gate. Focused, comprehensive, plugin, compilation, planning,
 independent review, and Python 3.11/3.12 CI gates pass.
+
+PR #99 squash-merged at canonical
+`2929d934f34ccf9e27eaa28e910a5a6a5e6ada8d`, closing #85. The implementation
+worktree and local/remote topic branches were removed after clean readback.
 
 ## Objective
 
@@ -106,5 +110,5 @@ installation, release, or deployment authority.
 
 ## Next action
 
-Merge the exact integration-ready projection, squash-merge PR #99, verify
-canonical main, then remove the accepted lane before closing parent #81.
+None for this lane. Parent #81 may close after the final empty-lane projection
+is accepted on canonical main.

@@ -1,24 +1,3 @@
 schema_version: 1
 work_item_tracking: required
-lanes:
-  - id: P52-C4
-    objective: Productize the source registry and prove installed compatibility
-    plan: docs/dev/plans/0069-2026-09-15-source-registry-productization.md
-    plan_ref: refs/remotes/origin/feat/issue-85-source-registry-productization
-    branch: feat/issue-85-source-registry-productization
-    target: main
-    plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: fbb89ad1bfc6b9dc069571612aad6022aa4d95ee
-    validation_status: passed
-    validation_ref: fbb89ad1bfc6b9dc069571612aad6022aa4d95ee
-    remote_ref: refs/remotes/origin/feat/issue-85-source-registry-productization
-    integration: squash
-    work_items: [CochranResearchGroup/codex-wake#85]
-    owner: bounded gpt-5.6-terra medium worker; primary owns architecture, installed smoke, and integration
-    write_surface: registry introspection, production catalogue composition, readiness/support, focused tests, and maintainer docs
-    live_effect: isolated provider-free temporary venv and wake root only; dispatch disabled
-    dependencies: []
-    overlaps: []
-    reconciled_overlaps: []
-    updated_at: 2026-09-15
+lanes: []

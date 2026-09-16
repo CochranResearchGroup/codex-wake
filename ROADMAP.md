@@ -724,17 +724,18 @@ Completion evidence:
 
 ## P52 | Event Source Extension Framework
 
-State: OPEN
+State: CLOSED
 
 Current State: PR #89 accepted issue #82 at canonical `f8059cd`, freezing the
 closed built-in source-family registry plus provider-free conformance fixture.
 PR #93 accepted local-source migration #83 at canonical `3c30947`; PR #95
-accepted GitHub migration #84 at canonical `e0d8862`. Issue #85 is now the sole
-integration-ready in PR #99 at `bcfcfd5`. Its shared catalogue inventory,
+accepted GitHub migration #84 at canonical `e0d8862`. PR #99 accepted
+productization #85 at canonical `2929d93`. Its shared catalogue inventory,
 additive readiness/support projection, maintainer docs, and provider-free
-installed-wheel conformance pass both Python 3.11/3.12 release gates. No new
-source, provider effect, live dispatch, arbitrary plugin loading, release,
-deployment, or global installation refresh is authorized.
+installed-wheel conformance pass both Python 3.11/3.12 release gates. All four
+child issues and implementation lanes are closed. No new source, provider
+effect, live dispatch, arbitrary plugin loading, release, deployment, or global
+installation refresh occurred.
 
 Plan: [Event source extension framework goal campaign](docs/dev/plans/0065-2026-09-15-event-source-extension-framework.md)
 
