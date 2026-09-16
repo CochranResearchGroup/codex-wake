@@ -52,9 +52,11 @@ The bounded HTTP seam, durable signed-ingest runtime, and product lifecycle are
 now canonical. #105 merged through PR #115 at `1d32bb1`; #106 joined it, passed
 independent combined review and both required CI release gates, and merged
 through PR #116 at `63e3a19`. Issues #104 through #106 are accepted. #107 is
-now the sole eligible next slice for isolated installed-wheel and loopback
-service qualification; #108 and #109 remain dependency-blocked. No installed
-listener, public ingress route, provider webhook, or live dispatch exists.
+accepted through PR #119 plus verification 0077, and its disposable qualifier
+is removed. #108 is the sole eligible next slice; Plan 0078 owns one distinct
+provider-free C5 ingress-canary establishment and the one external publication.
+#109 remains dependency-blocked. No installed listener, public ingress route,
+provider webhook, or live dispatch currently exists.
 
 ## Architecture and security decisions
 
@@ -170,6 +172,8 @@ checkpoint_interval: 1 accepted issue or material effect gate
 concurrency_limit: 2 implementation lanes plus 1 read-only reviewer
 installed_service_attempts: 1
 installed_service_retries: 0
+c5_ingress_canary_establishments: 1
+c5_ingress_canary_retries: 0
 external_ingress_publications: 1
 external_ingress_retries: 0
 github_webhook_mutation_attempts: 1
