@@ -175,6 +175,7 @@ class RotationRecord:
     delivery_locator: str | None = None
     terminal_code: str | None = None
     last_observed_at: int = 0
+    restart_intended_at: int | None = None
     terminal_history: tuple[TerminalEvidence, ...] = ()
 
     def __post_init__(self) -> None:
@@ -200,6 +201,7 @@ class RotationRecord:
             "delivery_locator": self.delivery_locator,
             "terminal_code": self.terminal_code,
             "last_observed_at": self.last_observed_at,
+            "restart_intended_at": self.restart_intended_at,
             "terminal_history": [item.to_dict() for item in self.terminal_history],
         }
 
@@ -221,7 +223,7 @@ class RotationRecord:
             "owner_id", "canonical_root", "owner_uid", "source_instance", "service_id", "binding_revision",
             "previous_generation", "target_generation", "overlap_deadline", "phase", "revision", "pending_effect",
             "effect_revision", "runtime_proof", "delivery_locator", "terminal_code", "last_observed_at",
-            "terminal_history",
+            "restart_intended_at", "terminal_history",
         }
         if type(value) is not dict or set(value) != fields:
             raise ValueError("managed webhook rotation record is invalid")
@@ -236,7 +238,7 @@ class RotationRecord:
                 pending_effect=PendingEffect(value["pending_effect"]), effect_revision=value["effect_revision"],
                 runtime_proof=None if proof_value is None else RuntimeProof.from_dict(proof_value),
                 delivery_locator=value["delivery_locator"], terminal_code=value["terminal_code"],
-                last_observed_at=value["last_observed_at"], terminal_history=tuple(
+                last_observed_at=value["last_observed_at"], restart_intended_at=value["restart_intended_at"], terminal_history=tuple(
                     TerminalEvidence.from_dict(item) for item in value["terminal_history"]
                 ),
             )
@@ -623,7 +625,8 @@ class ManagedWebhookRotationCoordinator:
         return self._save_intent(record, target_phase, effect, now)
 
     def _save_intent(self, record: RotationRecord, phase: RotationPhase, effect: PendingEffect, now: int) -> RotationRecord:
-        return self.store.save(replace(record, phase=phase, pending_effect=effect, effect_revision=record.revision + 1, last_observed_at=now), expected_revision=record.revision)
+        restart_intended_at = now if effect in {PendingEffect.RESTART_DUAL, PendingEffect.RESTART_TARGET_ONLY} else record.restart_intended_at
+        return self.store.save(replace(record, phase=phase, pending_effect=effect, effect_revision=record.revision + 1, last_observed_at=now, restart_intended_at=restart_intended_at), expected_revision=record.revision)
 
     def _current(self, owner_id: str, expected_revision: int, now: int, *, allow_expired: bool = False, allow_rollback: bool = False) -> RotationRecord:
         record = self.load(owner_id, now=now)
@@ -642,7 +645,7 @@ class ManagedWebhookRotationCoordinator:
         return (
             proof.authority_revision == record.binding_revision
             and proof.loaded_generations == (record.previous_generation, record.target_generation)
-            and proof.process_started_at >= record.last_observed_at
+            and record.restart_intended_at is not None and proof.process_started_at >= record.restart_intended_at
         )
 
     @staticmethod
@@ -650,7 +653,7 @@ class ManagedWebhookRotationCoordinator:
         return (
             proof.authority_revision == record.binding_revision
             and proof.loaded_generations == (record.target_generation,)
-            and proof.process_started_at >= record.last_observed_at
+            and record.restart_intended_at is not None and proof.process_started_at >= record.restart_intended_at
         )
 
     @staticmethod
@@ -694,6 +697,7 @@ def _valid_record(record: RotationRecord) -> bool:
         and (record.delivery_locator is None or type(record.delivery_locator) is str and _LOCATOR.fullmatch(record.delivery_locator) is not None)
         and (record.terminal_code is None or type(record.terminal_code) is str and _CODE.fullmatch(record.terminal_code) is not None)
         and type(record.last_observed_at) is int and record.last_observed_at >= 0
+        and (record.restart_intended_at is None or type(record.restart_intended_at) is int and 0 <= record.restart_intended_at <= record.last_observed_at)
         and type(record.terminal_history) is tuple and len(record.terminal_history) <= _MAX_LOCATORS
         and all(type(item) is TerminalEvidence for item in record.terminal_history)
         and _consistent(record)
@@ -740,22 +744,27 @@ def _stored_consistent(record: RotationRecord) -> bool:
     proof = record.runtime_proof
     dual = proof is not None and proof.authority_revision == record.binding_revision and proof.loaded_generations == (record.previous_generation, record.target_generation)
     target = proof is not None and proof.authority_revision == record.binding_revision and proof.loaded_generations == (record.target_generation,)
+    fresh_runtime = proof is not None and record.restart_intended_at is not None and proof.process_started_at >= record.restart_intended_at
     if phase is RotationPhase.PREPARED:
-        return proof is None and record.delivery_locator is None and record.terminal_code is None and record.pending_effect in {PendingEffect.NONE, PendingEffect.RESTART_DUAL}
+        return (
+            proof is None and record.delivery_locator is None and record.terminal_code is None
+            and ((record.pending_effect is PendingEffect.NONE and record.restart_intended_at is None)
+                 or (record.pending_effect is PendingEffect.RESTART_DUAL and record.restart_intended_at is not None))
+        )
     if phase is RotationPhase.DUAL_READY:
-        return dual and record.delivery_locator is None and record.terminal_code is None and record.pending_effect is PendingEffect.NONE
+        return dual and fresh_runtime and record.delivery_locator is None and record.terminal_code is None and record.pending_effect is PendingEffect.NONE
     if phase is RotationPhase.PROVIDER_PENDING:
-        return dual and record.delivery_locator is None and record.terminal_code is None and record.pending_effect is PendingEffect.PROVIDER_UPDATE
+        return dual and fresh_runtime and record.delivery_locator is None and record.terminal_code is None and record.pending_effect is PendingEffect.PROVIDER_UPDATE
     if phase is RotationPhase.AWAITING_DELIVERY:
         return (
             record.terminal_code is None
-            and ((record.pending_effect is PendingEffect.NONE and (dual or target))
+            and ((record.pending_effect is PendingEffect.NONE and fresh_runtime and (dual or target))
                  or (record.pending_effect is PendingEffect.RESTART_TARGET_ONLY and dual and record.delivery_locator is not None))
         )
     if phase is RotationPhase.RETIRING:
-        return target and record.delivery_locator is not None and record.terminal_code is None and record.pending_effect is PendingEffect.RETIRE_PREVIOUS
+        return target and fresh_runtime and record.delivery_locator is not None and record.terminal_code is None and record.pending_effect is PendingEffect.RETIRE_PREVIOUS
     if phase is RotationPhase.COMPLETE:
-        return target and record.delivery_locator is not None and record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision <= record.revision
+        return target and fresh_runtime and record.delivery_locator is not None and record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision <= record.revision
     if phase is RotationPhase.ROLLED_BACK:
         return record.pending_effect is PendingEffect.NONE and record.terminal_history[-1].revision <= record.revision
     if phase is RotationPhase.EXPIRED:
@@ -770,14 +779,16 @@ def _stored_transition_allowed(prior: RotationRecord, saved: RotationRecord) -> 
         saved.phase is prior.phase and saved.pending_effect is prior.pending_effect
         and saved.effect_revision == prior.effect_revision and saved.runtime_proof == prior.runtime_proof
         and saved.delivery_locator == prior.delivery_locator and saved.terminal_code == prior.terminal_code
-        and saved.terminal_history == prior.terminal_history and saved.last_observed_at > prior.last_observed_at
+        and saved.restart_intended_at == prior.restart_intended_at and saved.terminal_history == prior.terminal_history
+        and saved.last_observed_at > prior.last_observed_at
     ):
         return True
     if saved.pending_effect is PendingEffect.ROLLBACK:
         return (
             prior.pending_effect is not PendingEffect.ROLLBACK and saved.phase is prior.phase
             and saved.runtime_proof == prior.runtime_proof and saved.delivery_locator == prior.delivery_locator
-            and saved.terminal_code == prior.terminal_code and saved.terminal_history == prior.terminal_history
+            and saved.terminal_code == prior.terminal_code and saved.restart_intended_at == prior.restart_intended_at
+            and saved.terminal_history == prior.terminal_history
             and saved.effect_revision == saved.revision
         )
     if prior.pending_effect is PendingEffect.ROLLBACK:
@@ -785,18 +796,19 @@ def _stored_transition_allowed(prior: RotationRecord, saved: RotationRecord) -> 
             return False
         return saved.phase is RotationPhase.UNKNOWN or saved.terminal_history[-1].revision == saved.revision
     if saved.phase is RotationPhase.EXPIRED:
-        return saved.pending_effect is PendingEffect.NONE and prior.phase not in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK}
+        return saved.pending_effect is PendingEffect.NONE and prior.phase not in {RotationPhase.COMPLETE, RotationPhase.ROLLED_BACK} and _preserves_evidence(prior, saved, preserve_outcome=False)
     if saved.phase is RotationPhase.UNKNOWN:
-        return saved.pending_effect is PendingEffect.NONE and prior.pending_effect is not PendingEffect.NONE
+        return saved.pending_effect is PendingEffect.NONE and prior.pending_effect is not PendingEffect.NONE and _preserves_evidence(prior, saved, preserve_outcome=False)
     if prior.phase is RotationPhase.PREPARED:
         return (
             saved.phase is RotationPhase.PREPARED and prior.pending_effect is PendingEffect.NONE
             and saved.pending_effect is PendingEffect.RESTART_DUAL and saved.effect_revision == saved.revision
-            and _preserves_evidence(prior, saved)
+            and _preserves_evidence(prior, saved, preserve_restart=False)
+            and saved.restart_intended_at == saved.last_observed_at
         ) or (
             saved.phase is RotationPhase.DUAL_READY and prior.pending_effect is PendingEffect.RESTART_DUAL
             and saved.pending_effect is PendingEffect.NONE and saved.delivery_locator is None
-            and saved.effect_revision == prior.effect_revision and saved.terminal_history == prior.terminal_history
+            and saved.effect_revision == prior.effect_revision and _preserves_evidence(prior, saved, preserve_runtime=False)
         )
     if prior.phase is RotationPhase.DUAL_READY:
         return (
@@ -823,31 +835,38 @@ def _stored_transition_allowed(prior: RotationRecord, saved: RotationRecord) -> 
             prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.NONE
             and prior.delivery_locator is None and saved.delivery_locator is not None
             and saved.runtime_proof == prior.runtime_proof and saved.effect_revision == prior.effect_revision
-            and saved.terminal_history == prior.terminal_history
+            and saved.restart_intended_at == prior.restart_intended_at and saved.terminal_history == prior.terminal_history
         ) or (
             prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.RESTART_TARGET_ONLY
             and prior.delivery_locator is not None and saved.effect_revision == saved.revision
-            and _preserves_evidence(prior, saved)
+            and _preserves_evidence(prior, saved, preserve_restart=False)
+            and saved.restart_intended_at == saved.last_observed_at
         ) or (
             prior.pending_effect is PendingEffect.RESTART_TARGET_ONLY and saved.pending_effect is PendingEffect.NONE
             and saved.runtime_proof is not None and saved.runtime_proof.loaded_generations == (saved.target_generation,)
             and saved.delivery_locator == prior.delivery_locator and saved.effect_revision == prior.effect_revision
-            and saved.terminal_history == prior.terminal_history
+            and saved.restart_intended_at == prior.restart_intended_at and saved.terminal_history == prior.terminal_history
         )
     if prior.phase is RotationPhase.RETIRING:
         return (
             saved.phase is RotationPhase.COMPLETE and prior.pending_effect is PendingEffect.RETIRE_PREVIOUS
             and saved.pending_effect is PendingEffect.NONE and saved.runtime_proof == prior.runtime_proof
             and saved.delivery_locator == prior.delivery_locator and saved.effect_revision == prior.effect_revision
-            and saved.terminal_history[-1].revision == saved.revision
+            and saved.restart_intended_at == prior.restart_intended_at and saved.terminal_history[-1].revision == saved.revision
         )
     return False
 
 
-def _preserves_evidence(prior: RotationRecord, saved: RotationRecord) -> bool:
+def _preserves_evidence(
+    prior: RotationRecord, saved: RotationRecord, *, preserve_restart: bool = True,
+    preserve_runtime: bool = True, preserve_outcome: bool = True,
+) -> bool:
     return (
-        saved.runtime_proof == prior.runtime_proof and saved.delivery_locator == prior.delivery_locator
-        and saved.terminal_code == prior.terminal_code and saved.terminal_history == prior.terminal_history
+        (not preserve_runtime or saved.runtime_proof == prior.runtime_proof)
+        and saved.delivery_locator == prior.delivery_locator
+        and (not preserve_outcome or saved.terminal_code == prior.terminal_code)
+        and saved.terminal_history == prior.terminal_history
+        and (not preserve_restart or saved.restart_intended_at == prior.restart_intended_at)
     )
 
 

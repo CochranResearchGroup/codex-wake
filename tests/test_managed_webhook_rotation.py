@@ -257,6 +257,37 @@ class ManagedWebhookRotationCoordinatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "clock moved backwards"):
             replacement.admitted_generations("wake-owner-1", now=180)
 
+    def test_runtime_freshness_uses_restart_intent_not_admission_heartbeat(self) -> None:
+        dual_intent = self.coordinator.intend_dual_restart("wake-owner-1", expected_revision=self.current.revision, now=101)
+        self.assertEqual(dual_intent.restart_intended_at, 101)
+        self.assertEqual(self.coordinator.admitted_generations("wake-owner-1", now=103), (7,))
+        after_admission = self.store.load("wake-owner-1")
+        with self.assertRaisesRegex(ValueError, "clock moved backwards"):
+            ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(self.root)).admitted_generations("wake-owner-1", now=102)
+        dual_ready = self.coordinator.observe_dual_restart(
+            "wake-owner-1", expected_revision=after_admission.revision, proof=proof(process_started_at=102), now=104,
+        )
+        self.assertEqual(dual_ready.phase, RotationPhase.DUAL_READY)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            coordinator = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(root))
+            current = coordinator.begin(record(root), now=80)
+            current = coordinator.intend_dual_restart("wake-owner-1", expected_revision=current.revision, now=81)
+            current = coordinator.observe_dual_restart("wake-owner-1", expected_revision=current.revision, proof=proof(process_started_at=82), now=82)
+            current = coordinator.intend_provider_update("wake-owner-1", expected_revision=current.revision, now=83)
+            current = coordinator.observe_provider_update("wake-owner-1", expected_revision=current.revision, observation=Observation.PROVED, now=84)
+            current = coordinator.record_delivery("wake-owner-1", expected_revision=current.revision, generation=8, journal_locator="journal-42", now=85)
+            target_intent = coordinator.intend_target_restart("wake-owner-1", expected_revision=current.revision, now=101)
+            self.assertEqual(target_intent.restart_intended_at, 101)
+            self.assertEqual(coordinator.admitted_generations("wake-owner-1", now=103), (7, 8))
+            after_admission = coordinator.store.load("wake-owner-1")
+            target_ready = coordinator.observe_target_restart(
+                "wake-owner-1", expected_revision=after_admission.revision,
+                proof=proof(process_started_at=102, loaded_generations=(8,), evidence_locator="runtime-43"), now=104,
+            )
+            self.assertEqual(target_ready.phase, RotationPhase.AWAITING_DELIVERY)
+
     def test_pending_rollback_fences_every_forward_operation(self) -> None:
         self.provider_ready()
         self.current = self.coordinator.record_delivery("wake-owner-1", expected_revision=self.current.revision, generation=8, journal_locator="journal-42", now=105)
