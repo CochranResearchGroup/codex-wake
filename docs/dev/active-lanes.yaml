@@ -1,24 +1,3 @@
 schema_version: 1
 work_item_tracking: required
-lanes:
-  - id: P53-C1
-    objective: Harden the bounded webhook HTTP transport contract
-    plan: docs/dev/plans/0071-2026-09-16-bounded-webhook-http-transport.md
-    plan_ref: refs/remotes/origin/feat/issue-104-webhook-http-transport
-    branch: feat/issue-104-webhook-http-transport
-    target: main
-    plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: db63fec4c7d7198fd8ea96223986fdb29242fb8b
-    validation_status: passed
-    validation_ref: db63fec4c7d7198fd8ea96223986fdb29242fb8b
-    remote_ref: refs/remotes/origin/feat/issue-104-webhook-http-transport
-    integration: squash
-    work_items: [CochranResearchGroup/codex-wake#104]
-    owner: primary with bounded security implementation and independent review
-    write_surface: one HTTP transport module, one real-socket test module, and branch-local plan evidence
-    live_effect: ephemeral loopback test sockets only; no provider, journal, service, ingress, or dispatch effect
-    dependencies: []
-    overlaps: []
-    reconciled_overlaps: []
-    updated_at: 2026-09-16
+lanes: []

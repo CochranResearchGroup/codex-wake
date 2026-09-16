@@ -1,6 +1,6 @@
 # Bounded webhook HTTP transport contract
 
-State: OPEN
+State: CLOSED
 Lane: P53-C1
 Issue: #104
 Branch: `feat/issue-104-webhook-http-transport`
@@ -9,17 +9,18 @@ Integration: `squash`
 
 ## Current state
 
-Canonical main at `dad2d80a4ce74e030ef604cc430449e76b636286`
-contains the accepted `GitHubWebhookIngress` core and controlling P53 plan, but
-no socket listener. The core accepts exact bytes or a bounded binary stream and
-returns a sanitized `WebhookResult`; it must remain unaware of sockets, proxy
-headers, bind policy, or HTTP parsing.
+PR #112 passed both required release gates and squash-merged the accepted
+provider-free transport at canonical main commit
+`4bac44b69794ce762b39136096eaf229062af7fd`. Issue #104 is closed. The remote
+topic branch, isolated implementation worktree, and local topic branch are
+removed, and the active-lane entry is removed by the closeout projection.
 
-Implementation checkpoint: the isolated issue branch now contains the
-provider-free transport and 18 focused public-interface socket tests. Independent
-review findings have received one bounded correction pass; closed-world review
-verification, published CI, and integration remain with the primary coordination
-owner. This plan remains OPEN.
+The accepted surface is `WebhookHTTPConfig` plus `WebhookHTTPServer`, backed by
+18 focused real-socket tests. Independent findings received one bounded
+correction pass and closed-world verification. No provider, journal, installed
+service, non-loopback listener, ingress publication, or dispatch effect was
+part of this slice. Provider/store execution budgets remain a blocking #105
+acceptance requirement.
 
 ## Objective
 
@@ -267,3 +268,15 @@ pipeline behavior is superseded by the accepted finding and correction above.
 No provider calls, runtime installation, non-loopback socket bind, push, PR,
 or other external mutation occurred during remediation. The unpublished local
 implementation commit is amended for the primary owner's closed-world review.
+
+## Integration receipt | 2026-09-16
+
+- Published head: `c1480adb25b63d2eb639edc2a80ef919bfd5289e`.
+- Pull request: #112, squash-merged with no unresolved review thread.
+- Required CI: `Release gates (3.11)` and `Release gates (3.12)` passed.
+- Canonical integration: `4bac44b69794ce762b39136096eaf229062af7fd`.
+- Work item: #104 closed automatically from the merged PR.
+- Cleanup: remote topic ref absent; isolated worktree and local topic branch
+  removed; active-lane entry removed by the closeout PR.
+- Deferred boundary: #105 must prove callback-thread-compatible absolute
+  provider and durable-store budgets before the listener can be productized.

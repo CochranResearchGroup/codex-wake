@@ -6,7 +6,7 @@ Issues: #103, #104, #105, #106, #107, #108, #109
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P53-G1
 Goal Version: P53-G1-v2
-Checkpoint: P53-G1-C02
+Checkpoint: P53-G1-C03
 
 ## Goal objective
 
@@ -43,13 +43,17 @@ pushed cleanly to `CochranResearchGroup/cooper-webservices` main at exact commit
 route has been created yet.
 
 Parent issue #103 and dependency-ordered child issues #104 through #109 are the
-coordination ledger. Issue #104 is the sole ready implementation slice.
+coordination ledger. Issue #104 is accepted and closed: PR #112 passed both
+required release gates and squash-merged at canonical
+`4bac44b69794ce762b39136096eaf229062af7fd`. Its remote branch, isolated
+worktree, local branch, and active-lane entry are removed.
 
-Coordination PR #110 passed both required release gates and squash-merged at
-canonical `dad2d80a4ce74e030ef604cc430449e76b636286`. Issue #104 is assigned in
-the isolated `feat/issue-104-webhook-http-transport` worktree. Its branch-local
-plan is published at `72e0965b2545f670cb3fc553c97a0bdd1b3cf7d2`; the primary
-retains architecture, integration, GitHub operations, and acceptance.
+The bounded provider-free HTTP seam is now canonical. Issues #105 and #106 are
+the next disjoint implementation slices and may proceed in parallel from this
+checkpoint. #105 owns signed durable ingestion plus absolute provider/store
+budgets; #106 owns executable, configuration, secret-reference, readiness,
+support, packaging, and service lifecycle. #107 through #109 remain blocked on
+their join.
 
 ## Architecture and security decisions
 
