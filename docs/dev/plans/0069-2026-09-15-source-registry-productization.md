@@ -83,5 +83,6 @@ zero retries.
 
 ## Next action
 
-Merge this plan checkpoint, create the exact branch from canonical main, and
-publish the active-lane assignment before implementation starts.
+Merge the exact active-lane assignment, then implement pure catalogue
+introspection and additive readiness/support output test-first in the isolated
+#85 worktree. The primary retains the installed smoke and integration gates.
