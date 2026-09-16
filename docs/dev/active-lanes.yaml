@@ -1,3 +1,22 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P52-C0
+    objective: Establish P52 architecture, issue graph, and bounded execution controls
+    plan: docs/dev/plans/0065-2026-09-15-event-source-extension-framework.md
+    plan_ref: refs/remotes/origin/chore/issue-81-p52-goal-start
+    branch: chore/issue-81-p52-goal-start
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: a59f2e60e68a83872dec72ef04b1473c8e0f8b8b
+    remote_ref: refs/remotes/origin/chore/issue-81-p52-goal-start
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#81]
+    owner: primary-orchestrator
+    write_surface: P52 plan, roadmap, runbook, active-lane projection, and GitHub coordination only
+    live_effect: none
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-15

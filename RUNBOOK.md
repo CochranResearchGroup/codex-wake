@@ -2972,3 +2972,33 @@ and no active implementation lane remains. Movement is `outcome_progress`.
 Stop reason: the approved objective and every acceptance criterion are met; no
 release, deployment, provider mutation, public ingress, system-manager access,
 or global installation refresh occurred.
+
+## Turn 145 | 2026-09-15
+
+Opened the P52 event-source extension framework from a clean canonical state.
+
+- Confirmed canonical main and `origin/main` at
+  `0df33860562fea1ab7136e9fa5104b3e761e0807`, with no open issue, pull
+  request, or active lane. The consumed P51 runtime-canary root was already
+  absent after its documented rollback.
+- CodeGraph located the remaining extension bottleneck in source-specific
+  daemon reconstruction and bespoke readiness/support wiring. The accepted
+  seam is an immutable built-in source-family catalogue with whole-family
+  runner factories, preserving existing batching and ordering.
+- Graphiti returned no relevant P52 facts, so current repository, Git, GitHub,
+  and test evidence remain authoritative. Deterministic planning, goal-policy,
+  active-lane, and forge-create preflights passed.
+- Created parent issue #81 and vertical child issues #82 through #85. #82 owns
+  the contract and provider-free tracer; #83 and #84 are dependency-blocked
+  local and GitHub migrations; #85 is the productization and installed-
+  compatibility join. The controlling plan is
+  `docs/dev/plans/0065-2026-09-15-event-source-extension-framework.md`.
+- Two read-only model-routed reviews confirmed the family-level factory,
+  collision/authority invariants, provider-free acceptance, and hard exclusion
+  of arbitrary plugin loading, provider effects, and live dispatch.
+
+Acceptance state: P52 is open at `P52-G1-v1` / `P52-G1-C01`; #82 is the sole
+ready implementation slice and #83 through #85 are dependency-blocked.
+Movement is `outcome_progress`. Next action: publish this coordination checkpoint,
+merge it through required CI, then create the isolated #82 implementation lane
+from canonical main and implement the contract test-first.
