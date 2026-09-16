@@ -135,6 +135,31 @@ class LocalSourceFamilyTests(unittest.TestCase):
                 ("runtime", "bad", "RUNTIME_ANCHOR_INVALID"),
             )
 
+    def test_process_and_systemd_reject_projection_identity_or_cwd_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            process = candidate(
+                "wake_process", source="runtime", kind="process.exit",
+                source_instance="process-a", cwd=root, subject="process:a",
+            )
+            systemd = candidate(
+                "wake_systemd", source="systemd", kind="unit.active_state",
+                source_instance="unit-a", cwd=root, subject="unit:a.service",
+            )
+            process.pending.record["predicate"]["source_instance"] = "process-b"
+            systemd.pending.record["cwd"] = None
+
+            with patch(
+                "codex_wake.process_signals.restore_production_process_exit_adapter",
+            ) as restore, patch(
+                "codex_wake.systemd_source_config.SystemdSourceStore",
+            ) as store:
+                self.assertEqual(process_exit_family(self.context(root), (process,)), ())
+                self.assertEqual(user_systemd_family(self.context(root), (systemd,)), ())
+
+            restore.assert_not_called()
+            store.assert_not_called()
+
     def test_user_systemd_family_sorts_configured_instances_and_uses_injected_backend(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

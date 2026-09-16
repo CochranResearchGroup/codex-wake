@@ -92,6 +92,14 @@ def process_exit_family(
         if armed.spec.source != "runtime" or armed.spec.kind != "process.exit":
             continue
         source_instance = armed.spec.source_instance
+        predicate = candidate.pending.record.get("predicate")
+        if (
+            not isinstance(candidate.pending.record.get("cwd"), str)
+            or not isinstance(predicate, dict)
+            or predicate.get("source") != "runtime"
+            or predicate.get("source_instance") != source_instance
+        ):
+            continue
         try:
             adapter = restore_production_process_exit_adapter(armed)
         except (OSError, TypeError, ValueError):
@@ -133,8 +141,17 @@ def user_systemd_family(
     arms: dict[str, list] = {}
     for candidate in candidates:
         armed = candidate.armed
-        if armed.spec.source == "systemd" and armed.spec.kind == "unit.active_state":
-            arms.setdefault(armed.spec.source_instance, []).append(armed)
+        if armed.spec.source != "systemd" or armed.spec.kind != "unit.active_state":
+            continue
+        predicate = candidate.pending.record.get("predicate")
+        if (
+            not isinstance(candidate.pending.record.get("cwd"), str)
+            or not isinstance(predicate, dict)
+            or predicate.get("source") != "systemd"
+            or predicate.get("source_instance") != armed.spec.source_instance
+        ):
+            continue
+        arms.setdefault(armed.spec.source_instance, []).append(armed)
     if not arms:
         return ()
     failures: dict[str, str] = {}
