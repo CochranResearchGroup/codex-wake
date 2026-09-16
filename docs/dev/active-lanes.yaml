@@ -4,15 +4,15 @@ lanes:
   - id: P53-C6
     objective: Qualify one real signed GitHub workflow completion and polling convergence
     plan: docs/dev/plans/0081-2026-09-16-live-github-webhook-delivery.md
-    plan_ref: refs/heads/feat/issue-109-live-github-delivery
-    branch: feat/issue-109-live-github-delivery
+    plan_ref: refs/heads/feat/issue-109-live-qualification-runner
+    branch: feat/issue-109-live-qualification-runner
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: fd038ebaea5fb1e9a7e81d3f48d18417430258dc
+    checkpoint: 75484bbe18d2f1e43c84368805556aba85d8424f
     validation_status: provider_free_runner_required
-    validation_ref: fd038ebaea5fb1e9a7e81d3f48d18417430258dc
-    remote_ref: refs/remotes/origin/feat/issue-109-live-github-delivery
+    validation_ref: 75484bbe18d2f1e43c84368805556aba85d8424f
+    remote_ref: refs/remotes/origin/feat/issue-109-live-qualification-runner
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#109]
     owner: primary live-lifecycle owner with one bounded implementation worker and one closed-world reviewer
