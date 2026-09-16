@@ -9,9 +9,9 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: INTEGRATION_READY
-    checkpoint: bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22
+    checkpoint: fbb89ad1bfc6b9dc069571612aad6022aa4d95ee
     validation_status: passed
-    validation_ref: bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22
+    validation_ref: fbb89ad1bfc6b9dc069571612aad6022aa4d95ee
     remote_ref: refs/remotes/origin/feat/issue-85-source-registry-productization
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#85]

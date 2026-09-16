@@ -69,8 +69,9 @@ isolated `feat/issue-85-source-registry-productization` worktree from that exact
 commit. The bounded standard-tier worker owns implementation and focused tests;
 the primary retains architecture, installed smoke, GitHub, and acceptance.
 
-Issue #85 is integration-ready in PR #99 at
-`bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22`. The candidate passes 56 focused
+Issue #85's product commit is `bcfcfd5ec9b1b1c2b84879a4c89d0d526f17be22`;
+its reconciled integration head is
+`fbb89ad1bfc6b9dc069571612aad6022aa4d95ee` in PR #99. The candidate passes 56 focused
 tests, 438 comprehensive Python tests, 12 plugin tests, compilation, planning
 audits, independent review, and installed-wheel conformance on Python 3.11 and
 3.12. The installed receipt is
