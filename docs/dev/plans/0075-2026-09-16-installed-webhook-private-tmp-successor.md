@@ -1,6 +1,7 @@
 # Installed webhook PrivateTmp successor qualification
 
-State: OPEN
+State: CLOSED
+Outcome: FAILED_SAFE
 Lane: P53-C4-v2
 Issue: #107
 Predecessor: Plan 0074 (`FAILED_SAFE`)
@@ -35,6 +36,22 @@ diff hygiene, and active/goal planning audits. Narrow independent review
 accepted the root selector, effect-stage ordering, and cleanup regression; no
 systemd, provider, dispatch, or ingress effect occurred. The successor service
 attempt remains unconsumed pending publication and fresh host preflight.
+
+The published candidate `2cdfaf75308f21f7b8464b94a5762668a46411f9`
+then consumed the successor attempt. Installed readiness, restart identity, and
+the signed `COMMITTED`, `DUPLICATE`, `DUPLICATE` sequence all passed. The final
+provider-free polling assertion failed because the source-only fixture supplied
+an explicit `SQLiteSignalModule` without the `WakeRecordPublisher` that the
+normal daemon opening path installs. The retained journal proves one verified
+receipt and one match reservation, but firing revision 2 remained pending.
+Cleanup removed the unit and processes; the immediate bind probe was false
+while the three delivery sockets were in `TIME-WAIT`, so the owner-only recovery
+root was retained. Fresh readback later proved the exact unit absent/inactive,
+PID zero, no matching process or listener, and port 8820 bindable. The receipt's
+contemporaneous failed-unit sets are identical; later ambient failed-unit drift
+does not rewrite that evidence. No provider, dispatch, or ingress effect
+occurred. Plan 0076 succeeds this terminal failed-safe packet without another
+service attempt.
 
 ## Objective
 

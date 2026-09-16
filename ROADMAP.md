@@ -761,10 +761,11 @@ main-thread durable signed-ingest join, and supported product lifecycle on
 canonical main, most recently through PR #116 at `63e3a19`. Issue #107 is the
 active isolated installed-wheel and loopback-service qualification under Plan
 0075 after Plan 0074 failed safely at the PrivateTmp executable boundary. The
-source-only successor correction is independently accepted at `710c001`: it
-uses an owner-only user-state root, rejects temporary-backed aliases, and
-persists pre-effect stage locators. Its one service-effect attempt remains
-unconsumed pending publication and fresh preflight. #108 and #109 remain
+source-only successor correction at `710c001` enabled the installed service to
+pass readiness, manual restart, and all three signed delivery checks. Plan 0075
+then failed safely at its final source-only polling projection because the
+fixture omitted the daemon's record publisher. Plan 0076 repairs and proves
+that isolated projection without repeating the service effect. #108 and #109 remain
 dependency-blocked for Cooper/bastion HTTPS
 publication and one live GitHub delivery. The shared ingress repository was
 cleaned, validated, structured into two final commits, and pushed at `5fcce95`

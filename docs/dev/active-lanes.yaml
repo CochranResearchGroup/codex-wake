@@ -1,23 +1,23 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P53-C4-v2
-    objective: Qualify the installed loopback webhook service from a PrivateTmp-visible root
-    plan: docs/dev/plans/0075-2026-09-16-installed-webhook-private-tmp-successor.md
+  - id: P53-C4-v3
+    objective: Recover provider-free firing projection without repeating the installed service effect
+    plan: docs/dev/plans/0076-2026-09-16-provider-free-poll-projection-recovery.md
     plan_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     branch: chore/issue-107-installed-webhook-canary
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     checkpoint: 710c001b5873552c0b85618c8506ca742b9f127a
-    validation_status: successor_fix_accepted_service_effect_pending
-    validation_ref: 710c001b5873552c0b85618c8506ca742b9f127a
+    validation_status: predecessor_failed_safe_poll_recovery_planned
+    validation_ref: 2cdfaf75308f21f7b8464b94a5762668a46411f9
     remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#107]
     owner: primary installed-effect owner with one bounded implementation worker and independent reviewer
     write_surface: source-only installed smoke runner, tests, plan, sanitized verification receipt, roadmap, and runbook
-    live_effect: one successor isolated user-service install/start/restart/uninstall attempt on 127.0.0.1:8820; no provider, ingress, or dispatch
+    live_effect: none; retained installed evidence plus provider-free source correction only
     dependencies: []
     overlaps: []
     reconciled_overlaps: []

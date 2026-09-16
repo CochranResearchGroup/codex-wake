@@ -3605,3 +3605,27 @@ Acceptance state: the Plan 0075 source correction is accepted; #107 remains
 open and its one successor service attempt remains unconsumed. Movement is
 `blocker_reduction`. Next action: publish the exact clean candidate, run a fresh
 host/unit/port/process preflight, then execute the successor attempt once.
+
+## Turn 168 | 2026-09-16
+
+Closed Plan 0075 as `FAILED_SAFE` and opened no-service successor Plan 0076.
+
+- Published candidate `2cdfaf7` became ready under `PrivateTmp=yes`, restarted
+  to a new PID/start identity, and returned `COMMITTED`, `DUPLICATE`, and
+  post-restart `DUPLICATE` for the frozen signed occurrence.
+- The final polling subprocess returned zero and retained one receipt, but its
+  strict assertion failed: the explicit fixture module omitted the daemon's
+  record publisher, leaving desired firing revision 2 pending projection.
+- Cleanup removed the exact unit and processes. The immediate bind probe was
+  conservatively false while delivery sockets were in `TIME-WAIT`; fresh
+  readback proves no listener and port 8820 bindable. The private recovery root
+  and failed receipt remain retained.
+- Independent read-only diagnosis accepted exact publisher parity with the
+  daemon default open. Provider access, dispatch, and ingress remained absent.
+  Ambient failed-unit membership changed after the attempt, so only the
+  receipt's exact contemporaneous six-unit before/after baseline is claimed.
+
+Acceptance state: retained service evidence advances #107, but polling
+projection remains unsatisfied. Movement is `blocker_reduction`. Next action:
+test-drive the Plan 0076 source-only publisher correction, validate it without a
+service effect, and complete the issue-linked PR if the combined evidence passes.
