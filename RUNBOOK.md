@@ -3774,7 +3774,8 @@ initial safety and execution architecture.
 - GitHub issue #135 now owns the outcome. Duplicate-safe preflight resolved the
   owned `CochranResearchGroup/codex-wake` target, ADMIN actor, and `enhancement`
   label before creation.
-- Plan 0083 defines exact durable ownership, observe/intent/execute/readback
+- [Plan 0083](docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md)
+  defines exact durable ownership, observe/intent/execute/readback
   reconciliation, unknown-effect recovery, provider credential separation,
   restart-correct secret generations, independent polling fallback, rollback,
   and a separate visible-dispatch gate.
@@ -3794,6 +3795,10 @@ initial safety and execution architecture.
   primary performed the bounded decomposition.
 - No provider, service, secret, ingress, installation, release, or dispatch
   effect occurred. The retained Cooper route and P53 evidence remain unchanged.
+- Validation passes 565 comprehensive Python tests, 12 OpenClaw plugin tests,
+  diff hygiene, the goal contract audit, and the active planning audit. The
+  full historical planning audit continues to report only the known legacy
+  unclassified-plan baseline outside this active slice.
 
 Acceptance state: P54 kickoff planning is active under #135; the implementation
 children are not yet published. Movement is `outcome_progress`. Next action:

@@ -1,7 +1,7 @@
 # Managed GitHub webhook wakes goal campaign
 
 State: OPEN
-Lane: P54-P1
+Lane: P54
 Issue: #135
 Branch: `docs/issue-135-managed-webhook-plan`
 Target: `main`
