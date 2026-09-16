@@ -17,6 +17,15 @@ empty. The user systemd manager is reachable but degraded by unrelated
 pre-existing failed units, so acceptance is scoped to one exact unit/PID/socket
 rather than whole-manager health.
 
+Source-only runner checkpoint `91797143c11b8a3563fc329111a267fdd8cdf4ef`
+adds the explicit-refusal installed qualification runner and five hermetic
+contract tests. Focused 5/5, comprehensive 497/497, plugin 12/12,
+compilation, diff hygiene, and the active planning audit passed. It has not
+been run with `--execute`: no wheel install, unit, listener, provider access,
+ingress, polling, or dispatch occurred. The next exact gate is an independent
+closed-world source review followed by the fresh live preflight specified in
+this plan; the one service attempt remains unconsumed.
+
 ## Objective
 
 Build and hash one wheel from the exact candidate commit, install it only in a
