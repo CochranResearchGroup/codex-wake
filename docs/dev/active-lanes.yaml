@@ -1,3 +1,24 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: P53-C4
+    objective: Qualify the installed loopback webhook service end to end
+    plan: docs/dev/plans/0074-2026-09-16-installed-webhook-loopback-qualification.md
+    plan_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
+    branch: chore/issue-107-installed-webhook-canary
+    target: main
+    plan_state: OPEN
+    custody_state: PLANNED
+    checkpoint: f4a5404889250050cf12cd3f11c810b78b8aad20
+    validation_status: pending
+    validation_ref: f4a5404889250050cf12cd3f11c810b78b8aad20
+    remote_ref: refs/remotes/origin/chore/issue-107-installed-webhook-canary
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#107]
+    owner: primary installed-effect owner with one bounded implementation worker and independent reviewer
+    write_surface: source-only installed smoke runner, tests, plan, sanitized verification receipt, roadmap, and runbook
+    live_effect: one isolated user-service install/start/restart/uninstall attempt on 127.0.0.1:8820; no provider, ingress, or dispatch
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-16

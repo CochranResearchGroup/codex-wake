@@ -3428,3 +3428,29 @@ Accepted the P53 product-lifecycle join and closed issue #106.
 Acceptance state: P53 remains open; #104 through #106 are accepted. Movement
 is `outcome_progress`. Next action: execute #107 as one isolated installed
 wheel and loopback-service qualification before any external ingress work.
+
+## Turn 161 | 2026-09-16
+
+Assigned the P53 installed loopback qualification as issue #107 / Plan 0074.
+
+- Canonical main is clean at `f4a5404`; #104 through #106 are accepted and
+  their topic branches/worktree are removed. No webhook unit or port-8820
+  listener exists.
+- The user systemd manager is reachable but degraded by unrelated pre-existing
+  failed units. Acceptance therefore binds one exact unit, PID, and socket and
+  does not claim whole-manager health.
+- A bounded Terra-high read-only design review selected a source-only installed
+  smoke runner. An ephemeral `sitecustomize` sidecar supplies only the
+  provider-attempt fixture to the exact installed listener process; no product
+  fixture flag, alternate endpoint, provider traffic, or packaged backdoor is
+  introduced. Effective runtime model identity was not exposed.
+- The packet permits one installed-service attempt with no automatic retry.
+  All build/install/config/arm and collision evidence must pass before that
+  effect, and cleanup is mandatory on every terminal path.
+- External ingress remains blocked and the ingress skill is intentionally not
+  used until #107 is accepted.
+
+Acceptance state: P53 is open at `P53-G1-v2` / `P53-G1-C05`; #107 is the sole
+active lane. Movement is `outcome_progress`. Next action: publish this lane
+assignment, implement and independently review the source-only runner, then
+consume the single installed-service attempt only after a clean preflight.
