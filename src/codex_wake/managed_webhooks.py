@@ -292,8 +292,17 @@ class ManagedWebhookStore:
                 if self.path.parent.is_symlink():
                     raise ValueError("managed webhook store is unavailable")
                 os.chmod(self.path.parent, 0o700)
-                handle = open(self._lock_path, "a+", encoding="utf-8")
-                os.chmod(self._lock_path, 0o600)
+                descriptor = os.open(
+                    self._lock_path,
+                    os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0),
+                    0o600,
+                )
+                metadata = os.fstat(descriptor)
+                if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid():
+                    os.close(descriptor)
+                    raise ValueError("managed webhook store is unavailable")
+                os.fchmod(descriptor, 0o600)
+                handle = os.fdopen(descriptor, "a+", encoding="utf-8")
                 fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
                 yield
             except OSError:
@@ -350,6 +359,11 @@ class ManagedWebhookStore:
             if not _transition_allowed(prior.lifecycle, binding.lifecycle):
                 raise ValueError("managed webhook lifecycle transition is invalid")
             saved = replace(binding, generation=prior.generation + 1)
+        for other in selected.values():
+            if other.owner_id == saved.owner_id:
+                continue
+            if _bindings_conflict(other, saved):
+                raise ValueError("managed webhook binding conflicts with existing ownership")
         selected[saved.owner_id] = saved
         if len(selected) > _MAX_BINDINGS:
             raise ValueError("managed webhook store is full")
@@ -379,6 +393,17 @@ class ManagedWebhookStore:
                 raise ValueError
             if len({item.owner_id for item in bindings}) != len(bindings):
                 raise ValueError
+            if any(
+                item.canonical_root != str(self.wake_root) or item.owner_uid != os.getuid()
+                for item in bindings
+            ):
+                raise ValueError
+            if any(
+                _bindings_conflict(left, right)
+                for index, left in enumerate(bindings)
+                for right in bindings[index + 1:]
+            ):
+                raise ValueError
             return bindings
         except (OSError, TypeError, ValueError, json.JSONDecodeError):
             raise ValueError("managed webhook store is invalid") from None
@@ -386,11 +411,17 @@ class ManagedWebhookStore:
     def _write_unlocked(self, bindings: tuple[ManagedWebhookBinding, ...]) -> None:
         temporary: Path | None = None
         try:
+            rendered = json.dumps(
+                {"schema_version": 1, "bindings": [item.to_dict() for item in bindings]},
+                sort_keys=True,
+                separators=(",", ":"),
+            ) + "\n"
+            if len(rendered.encode("utf-8")) > _MAX_FILE_BYTES:
+                raise ValueError("managed webhook store is full")
             with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=self.path.parent, prefix=".managed-webhooks-", delete=False) as handle:
                 temporary = Path(handle.name)
                 os.chmod(temporary, 0o600)
-                json.dump({"schema_version": 1, "bindings": [item.to_dict() for item in bindings]}, handle, sort_keys=True, separators=(",", ":"))
-                handle.write("\n")
+                handle.write(rendered)
                 handle.flush()
                 os.fsync(handle.fileno())
             os.replace(temporary, self.path)
@@ -474,6 +505,22 @@ class ManagedWebhookReconciler:
                 raise ValueError("managed webhook reconciliation plan is stale")
             if plan.action is not PlanAction.WRITE:
                 return self._complete_read_only(binding, plan)
+            try:
+                current_hooks = self.provider.list_hooks(repository_id=binding.repository_id)
+            except Exception:
+                raise ValueError("provider hook inventory is unavailable") from None
+            current_inventory = self.classify(binding, current_hooks)
+            current_hook = next(
+                (item for item in current_hooks if item.hook_id == binding.provider_hook_id),
+                None,
+            )
+            if (
+                current_inventory is not plan.inventory
+                or plan.operation is OperationKind.CREATE and current_inventory is not InventoryClass.ABSENT
+                or plan.operation is OperationKind.UPDATE and current_inventory is not InventoryClass.DRIFTED
+                or plan.hook_id != (current_hook.hook_id if current_hook else None)
+            ):
+                raise ValueError("managed webhook reconciliation plan is stale")
             return self._write_once(binding, plan)
 
     def _complete_read_only(self, binding: ManagedWebhookBinding, plan: ReconciliationPlan) -> OperationReceipt:
@@ -517,7 +564,11 @@ class ManagedWebhookReconciler:
             if plan.operation is OperationKind.UPDATE and returned_hook_id != plan.hook_id:
                 raise RuntimeError("provider update returned another hook")
             observed = self.provider.get_hook(repository_id=pending_binding.repository_id, hook_id=result.hook_id)
-            if type(observed) is not ProviderHook or not observed.matches(pending_binding):
+            if (
+                type(observed) is not ProviderHook
+                or observed.hook_id != returned_hook_id
+                or not observed.matches(pending_binding)
+            ):
                 raise RuntimeError("provider readback did not prove desired hook")
         except Exception:
             receipt = OperationReceipt(
@@ -586,7 +637,7 @@ def _valid_callback(value: object) -> bool:
 
 
 def _valid_provider_callback(value: object) -> bool:
-    if type(value) is not str or not 11 <= len(value) <= 512:
+    if type(value) is not str or not 11 <= len(value) <= 2_048:
         return False
     if any(character in value for character in ("#", "@", "\n", "\r", " ")):
         return False
@@ -619,7 +670,7 @@ def _valid_events(events: object) -> bool:
 
 def _valid_provider_events(events: object) -> bool:
     return (
-        type(events) is tuple and 1 <= len(events) <= 8
+        type(events) is tuple and 1 <= len(events) <= 128
         and tuple(sorted(events)) == events and len(set(events)) == len(events)
         and all(type(item) is str and (item == "*" or _NAME.fullmatch(item) is not None) for item in events)
     )
@@ -633,6 +684,25 @@ def _has_attributable_receipt(binding: ManagedWebhookBinding) -> bool:
         and receipt.operation in {OperationKind.CREATE, OperationKind.UPDATE}
         and receipt.state in {OperationState.SUCCEEDED, OperationState.UNKNOWN}
         for receipt in binding.receipts
+    )
+
+
+def _bindings_conflict(left: ManagedWebhookBinding, right: ManagedWebhookBinding) -> bool:
+    return (
+        left.installation_id == right.installation_id
+        or left.source_instance == right.source_instance
+        or (
+            left.provider_host == right.provider_host
+            and left.repository_id == right.repository_id
+            and left.callback_url == right.callback_url
+        )
+        or (
+            left.provider_hook_id is not None
+            and right.provider_hook_id is not None
+            and left.provider_host == right.provider_host
+            and left.repository_id == right.repository_id
+            and left.provider_hook_id == right.provider_hook_id
+        )
     )
 
 
@@ -654,7 +724,23 @@ def _operation_id(binding: ManagedWebhookBinding, operation: OperationKind) -> s
 
 
 def _with_receipt(binding: ManagedWebhookBinding, receipt: OperationReceipt) -> ManagedWebhookBinding:
-    return replace(binding, receipts=(binding.receipts + (receipt,))[-_MAX_RECEIPTS:])
+    receipts = binding.receipts + (receipt,)
+    if len(receipts) > _MAX_RECEIPTS:
+        bounded = receipts[-_MAX_RECEIPTS:]
+        anchor = next(
+            (
+                item for item in reversed(receipts)
+                if binding.provider_hook_id is not None
+                and item.hook_id == binding.provider_hook_id
+                and item.operation in {OperationKind.CREATE, OperationKind.UPDATE}
+                and item.state in {OperationState.SUCCEEDED, OperationState.UNKNOWN}
+            ),
+            None,
+        )
+        if anchor is not None and anchor not in bounded:
+            bounded = (anchor,) + bounded[-(_MAX_RECEIPTS - 1):]
+        receipts = bounded
+    return replace(binding, receipts=receipts)
 
 
 def _transition_allowed(before: LifecycleState, after: LifecycleState) -> bool:

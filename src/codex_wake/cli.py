@@ -1360,6 +1360,8 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
                 if current is None:
                     saved = managed_store.save(proposed)
                 else:
+                    if current.installation_id != proposed.installation_id:
+                        raise ValueError("managed webhook ownership is immutable")
                     proposed = replace(
                         current,
                         repository=proposed.repository,
@@ -1382,20 +1384,24 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
                 return 0
 
             binding = managed_store.load(args.source_instance)
-            listener = store.select(binding.source_instance)
+            listener = next(
+                (item for item in store.listeners() if item.source_instance == binding.source_instance),
+                None,
+            )
             if action == "show":
                 _print_managed_webhook_result(
-                    _managed_webhook_binding_summary(binding, listener_configured=True),
+                    _managed_webhook_binding_summary(binding, listener_configured=listener is not None),
                     as_json=args.as_json,
                 )
                 return 0
             provider = _managed_webhook_provider(
-                binding, listener.secret_ref, provider_factory=provider_factory
+                binding, listener.secret_ref if listener is not None else None,
+                provider_factory=provider_factory,
             )
             reconciler = ManagedWebhookReconciler(managed_store, provider)
             plan = reconciler.preview(binding.owner_id)
             result = {
-                "binding": _managed_webhook_binding_summary(binding, listener_configured=True),
+                "binding": _managed_webhook_binding_summary(binding, listener_configured=listener is not None),
                 "plan": plan.to_dict(),
                 "mode": "status" if action == "status" else ("apply" if args.apply else "dry-run"),
             }
@@ -1405,6 +1411,8 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
             if action != "reconcile":
                 raise WakeError("unsupported github-webhook binding command")
             if args.apply:
+                if listener is None:
+                    raise ValueError("webhook listener is not configured")
                 receipt = reconciler.execute(plan)
                 result["receipt"] = receipt.to_dict()
                 result["binding"] = _managed_webhook_binding_summary(
@@ -1456,7 +1464,7 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
     return 0
 
 
-def _managed_webhook_provider(binding, secret_ref: str, *, provider_factory=None):
+def _managed_webhook_provider(binding, secret_ref: str | None, *, provider_factory=None):
     if provider_factory is None:
         from .github_webhook_admin import GitHubWebhookAdmin
 
@@ -1466,7 +1474,7 @@ def _managed_webhook_provider(binding, secret_ref: str, *, provider_factory=None
         return os.environ[reference]
 
     def secret_generation_resolver(generation: int) -> str:
-        if generation != 1:
+        if generation != 1 or secret_ref is None:
             raise ValueError("managed webhook secret generation is unavailable")
         return os.environ[secret_ref]
 

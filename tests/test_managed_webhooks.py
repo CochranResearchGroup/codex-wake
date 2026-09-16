@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from dataclasses import replace
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+
+import codex_wake.managed_webhooks as managed_webhooks
 
 from codex_wake.managed_webhooks import (
     InventoryClass,
@@ -48,6 +52,7 @@ class FakeProvider:
         self.calls: list[tuple[str, int | None]] = []
         self.fail_write = False
         self.fail_readback = False
+        self.readback_hook_id: int | None = None
 
     def list_hooks(self, *, repository_id: int) -> tuple[ProviderHook, ...]:
         self.calls.append(("list", repository_id))
@@ -73,6 +78,8 @@ class FakeProvider:
         self.calls.append(("get", hook_id))
         if self.fail_readback:
             raise RuntimeError("provider readback unavailable")
+        if self.readback_hook_id is not None:
+            return hook_for(binding(), self.readback_hook_id)
         return next((item for item in self.hooks if item.hook_id == hook_id), None)
 
 
@@ -96,6 +103,21 @@ def attributed(item: ManagedWebhookBinding, hook_id: int, *, state: OperationSta
         hook_id=hook_id, code="READBACK_EXACT" if state is OperationState.SUCCEEDED else "WRITE_OR_READBACK_UNRESOLVED",
     )
     return replace(item, provider_hook_id=hook_id, receipts=item.receipts + (receipt,))
+
+
+def concurrent_store_save(root: str, ready, release, results) -> None:
+    store = ManagedWebhookStore(Path(root))
+    current = store.load("wake-owner-1")
+    ready.put(True)
+    release.wait(5)
+    try:
+        store.save(
+            replace(current, lifecycle=LifecycleState.DISABLED),
+            expected_generation=current.generation,
+        )
+        results.put("saved")
+    except ValueError as exc:
+        results.put(str(exc))
 
 
 class ManagedWebhookBindingTests(unittest.TestCase):
@@ -126,6 +148,72 @@ class ManagedWebhookBindingTests(unittest.TestCase):
             self.assertEqual(payload["schema_version"], 1)
             with self.assertRaisesRegex(ValueError, "owner"):
                 store.load("another-owner")
+
+    def test_store_rejects_copied_root_symlink_lock_conflicts_and_oversize(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            first = ManagedWebhookStore(base / "first")
+            first.save(binding(canonical_root=str(first.wake_root)))
+
+            copied = ManagedWebhookStore(base / "copied")
+            copied.path.parent.mkdir(parents=True)
+            copied.path.write_bytes(first.path.read_bytes())
+            copied.path.chmod(0o600)
+            with self.assertRaisesRegex(ValueError, "store is invalid"):
+                copied.bindings()
+
+            locked = ManagedWebhookStore(base / "locked")
+            locked.path.parent.mkdir(parents=True)
+            target = base / "unrelated"
+            target.write_text("unchanged", encoding="utf-8")
+            target.chmod(0o644)
+            locked._lock_path.symlink_to(target)
+            with self.assertRaisesRegex(ValueError, "store is unavailable"):
+                locked.save(binding(canonical_root=str(locked.wake_root)))
+            self.assertEqual(target.stat().st_mode & 0o777, 0o644)
+            self.assertEqual(target.read_text(encoding="utf-8"), "unchanged")
+
+            limited = ManagedWebhookStore(base / "limited")
+            with patch.object(managed_webhooks, "_MAX_FILE_BYTES", 64):
+                with self.assertRaisesRegex(ValueError, "store is full"):
+                    limited.save(binding(canonical_root=str(limited.wake_root)))
+            self.assertFalse(limited.path.exists())
+
+            conflict = ManagedWebhookStore(base / "conflict")
+            conflict.save(binding(canonical_root=str(conflict.wake_root)))
+            with self.assertRaisesRegex(ValueError, "conflicts"):
+                conflict.save(binding(
+                    owner_id="wake-owner-2", installation_id="wake-install-2",
+                    source_instance="github-workflow-2",
+                    service_id="codex-wake-github-webhook-github-workflow-2.service",
+                    canonical_root=str(conflict.wake_root),
+                ))
+
+    def test_store_serializes_cross_process_generation_updates(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            store = ManagedWebhookStore(Path(temporary) / "wake")
+            store.save(binding(canonical_root=str(store.wake_root)))
+            context = multiprocessing.get_context("fork")
+            ready = context.Queue()
+            release = context.Event()
+            results = context.Queue()
+            processes = [
+                context.Process(
+                    target=concurrent_store_save,
+                    args=(str(store.wake_root), ready, release, results),
+                )
+                for _ in range(2)
+            ]
+            for process in processes:
+                process.start()
+            self.assertTrue(ready.get(timeout=5))
+            self.assertTrue(ready.get(timeout=5))
+            release.set()
+            outcomes = sorted(results.get(timeout=5) for _ in processes)
+            for process in processes:
+                process.join(timeout=5)
+                self.assertEqual(process.exitcode, 0)
+            self.assertEqual(outcomes, ["managed webhook generation is stale", "saved"])
 
     def test_inventory_classes_are_deterministic(self) -> None:
         item = binding()
@@ -159,7 +247,7 @@ class ManagedWebhookReconciliationTests(unittest.TestCase):
         plan = self.reconciler.preview("wake-owner-1")
         receipt = self.reconciler.execute(plan)
         self.assertEqual(receipt.state.value, "SUCCEEDED")
-        self.assertEqual([name for name, _ in self.provider.calls], ["list", "create", "get"])
+        self.assertEqual([name for name, _ in self.provider.calls], ["list", "list", "create", "get"])
         saved = self.store.load("wake-owner-1")
         self.assertEqual(saved.lifecycle, LifecycleState.ACTIVE)
         self.assertEqual(saved.provider_hook_id, 101)
@@ -180,7 +268,22 @@ class ManagedWebhookReconciliationTests(unittest.TestCase):
         plan = self.reconciler.preview("wake-owner-1")
         self.assertEqual((plan.inventory, plan.operation), (InventoryClass.DRIFTED, OperationKind.UPDATE))
         self.reconciler.execute(plan)
-        self.assertEqual([name for name, _ in self.provider.calls], ["list", "update", "get"])
+        self.assertEqual([name for name, _ in self.provider.calls], ["list", "list", "update", "get"])
+
+    def test_write_revalidates_inventory_and_readback_exact_id(self) -> None:
+        plan = self.reconciler.preview("wake-owner-1")
+        self.provider.hooks = [hook_for(self.item, 88)]
+        with self.assertRaisesRegex(ValueError, "stale"):
+            self.reconciler.execute(plan)
+        self.assertEqual([name for name, _ in self.provider.calls], ["list", "list"])
+
+        self.provider = FakeProvider()
+        self.provider.readback_hook_id = 999
+        self.reconciler = ManagedWebhookReconciler(self.store, self.provider)
+        receipt = self.reconciler.execute(self.reconciler.preview("wake-owner-1"))
+        self.assertEqual((receipt.state, receipt.hook_id), (OperationState.UNKNOWN, 101))
+        saved = self.store.load("wake-owner-1")
+        self.assertEqual((saved.lifecycle, saved.provider_hook_id), (LifecycleState.UNKNOWN, 101))
 
     def test_ambiguous_write_enters_unknown_and_rejects_second_write(self) -> None:
         self.provider.fail_write = True
@@ -250,6 +353,22 @@ class ManagedWebhookReconciliationTests(unittest.TestCase):
         self.assertEqual((recovered.inventory, recovered.action), (InventoryClass.EXACT, PlanAction.READ_ONLY))
         self.reconciler.execute(recovered)
         self.assertEqual(self.store.load("wake-owner-1").lifecycle, LifecycleState.ACTIVE)
+
+    def test_observations_never_evict_ownership_provenance(self) -> None:
+        owned = self.store.save(
+            replace(attributed(self.item, 9), lifecycle=LifecycleState.ACTIVE),
+            expected_generation=self.item.generation,
+        )
+        self.provider.hooks = [hook_for(owned, 9)]
+        for _ in range(40):
+            self.reconciler.execute(self.reconciler.preview("wake-owner-1"))
+        saved = self.store.load("wake-owner-1")
+        self.assertEqual(saved.lifecycle, LifecycleState.ACTIVE)
+        self.assertLessEqual(len(saved.receipts), 32)
+        self.assertTrue(any(
+            receipt.hook_id == 9 and receipt.operation in {OperationKind.CREATE, OperationKind.UPDATE}
+            for receipt in saved.receipts
+        ))
 
 
 if __name__ == "__main__":

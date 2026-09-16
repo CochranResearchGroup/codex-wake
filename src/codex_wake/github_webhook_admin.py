@@ -117,6 +117,7 @@ class GitHubWebhookAdmin(WebhookProviderManager):
     def list_hooks(self, *, repository_id: int) -> tuple[ProviderHook, ...]:
         self._require_repository(repository_id)
         self._begin()
+        self._attest_repository()
         hooks: list[ProviderHook] = []
         seen: set[int] = set()
         for page in range(1, self._max_pages + 1):
@@ -137,18 +138,26 @@ class GitHubWebhookAdmin(WebhookProviderManager):
         self._require_repository(repository_id)
         self._require_hook_id(hook_id)
         self._begin()
+        self._attest_repository()
         status, data = self._request_json_status("GET", self._hook_path(hook_id), accepted={200, 404})
-        return None if status == 404 else self._hook(data)
+        if status == 404:
+            return None
+        result = self._hook(data)
+        if result.hook_id != hook_id:
+            self._fail()
+        return result
 
     def create_hook(self, binding: ManagedWebhookBinding) -> ProviderHook:
         self._require_create_binding(binding)
         self._begin()
+        self._attest_repository()
         return self._hook(self._request_json("POST", self._hooks_path(), body=self._write_body(binding), expected=201))
 
     def update_hook(self, *, hook_id: int, binding: ManagedWebhookBinding) -> ProviderHook:
         self._require_hook_id(hook_id)
         self._require_update_binding(hook_id, binding)
         self._begin()
+        self._attest_repository()
         result = self._hook(self._request_json("PATCH", self._hook_path(hook_id), body=self._write_body(binding)))
         if result.hook_id != hook_id:
             self._fail()
@@ -161,6 +170,7 @@ class GitHubWebhookAdmin(WebhookProviderManager):
         self._require_repository(repository_id)
         self._require_hook_id(hook_id)
         self._begin()
+        self._attest_repository()
         result = self._hook(self._request_json("PATCH", self._hook_path(hook_id), body={"active": False}))
         if result.hook_id != hook_id or result.active:
             self._fail()
@@ -170,12 +180,14 @@ class GitHubWebhookAdmin(WebhookProviderManager):
         self._require_repository(repository_id)
         self._require_hook_id(hook_id)
         self._begin()
+        self._attest_repository()
         self._request_empty("DELETE", self._hook_path(hook_id), expected=204)
 
     def list_deliveries(self, *, repository_id: int, hook_id: int) -> tuple[GitHubWebhookDelivery, ...]:
         self._require_repository(repository_id)
         self._require_hook_id(hook_id)
         self._begin()
+        self._attest_repository()
         deliveries: list[GitHubWebhookDelivery] = []
         seen: set[int] = set()
         for page in range(1, self._max_pages + 1):
@@ -201,6 +213,15 @@ class GitHubWebhookAdmin(WebhookProviderManager):
             self._fail()
         self._requests = 0
         self._deadline = float(now) + self._deadline_seconds
+
+    def _attest_repository(self) -> None:
+        row = self._request_json("GET", self._repository_path())
+        if (
+            type(row) is not dict
+            or row.get("id") != self._repository_id
+            or row.get("full_name") != self._repository
+        ):
+            self._fail()
 
     def _request_json(self, method: str, path: str, *, query: dict[str, int] | None = None,
                       body: dict[str, object] | None = None, expected: int = 200) -> object:
@@ -348,7 +369,7 @@ class GitHubWebhookAdmin(WebhookProviderManager):
                 or set(config) - {"url", "content_type", "insecure_ssl", "secret", "token", "digest"}
                 or type(row.get("id")) is not int or not 0 < row["id"] < 2**63
                 or type(row.get("active")) is not bool
-                or type(row.get("events")) is not list or not 1 <= len(row["events"]) <= 8
+                or type(row.get("events")) is not list or not 1 <= len(row["events"]) <= 128
                 or any(type(event) is not str for event in row["events"])
                 or config.get("url") is None or config.get("content_type") not in {"json", "form"}
                 or config.get("insecure_ssl") not in {"0", "1", 0, 1, False, True}
@@ -385,6 +406,9 @@ class GitHubWebhookAdmin(WebhookProviderManager):
 
     def _hooks_path(self) -> str:
         return f"/repos/{self._repository}/hooks"
+
+    def _repository_path(self) -> str:
+        return f"/repos/{self._repository}"
 
     def _hook_path(self, hook_id: int) -> str:
         return f"{self._hooks_path()}/{hook_id}"

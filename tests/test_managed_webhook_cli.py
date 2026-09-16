@@ -141,6 +141,11 @@ class ManagedWebhookCliTests(unittest.TestCase):
         self.assertNotIn("WEBHOOK_SECRET_VALUE", rendered)
         self.assertEqual(json.loads(rendered)["repository_id"], 42)
 
+        WebhookListenerStore(self.root).path.unlink()
+        code, rendered, factory = self.invoke("show", "github-workflow", "--json")
+        self.assertEqual((code, factory.calls), (0, 0))
+        self.assertFalse(json.loads(rendered)["listener_secret_reference_configured"])
+
     def test_dry_run_lists_once_and_never_writes(self) -> None:
         self.configure()
         provider = FakeProvider()
@@ -165,7 +170,7 @@ class ManagedWebhookCliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(result["receipt"]["state"], "SUCCEEDED")
         self.assertEqual(result["binding"]["lifecycle"], "ACTIVE")
-        self.assertEqual(provider.calls, [("list", 42), ("create", None), ("get", 101)])
+        self.assertEqual(provider.calls, [("list", 42), ("list", 42), ("create", None), ("get", 101)])
 
     def test_status_and_collision_are_nonready_without_provider_write(self) -> None:
         self.configure()
@@ -202,6 +207,15 @@ class ManagedWebhookCliTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(WakeError, "ownership is immutable"):
             github_webhook_command(args, self.root)
+
+        installation = self.args(
+            "configure", "--source", "github-workflow", "--installation-id", "install-2",
+            "--repository", "octo/example", "--repository-id", "42",
+            "--callback-url", "https://hooks.example.test/github/webhook",
+            "--credential-ref", "GITHUB_ADMIN_TOKEN_VALUE",
+        )
+        with self.assertRaisesRegex(WakeError, "ownership is immutable"):
+            github_webhook_command(installation, self.root)
 
 
 if __name__ == "__main__":
