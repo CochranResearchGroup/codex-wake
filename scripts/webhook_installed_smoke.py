@@ -25,6 +25,7 @@ import uuid
 import zipfile
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from ipaddress import ip_address
 from pathlib import Path
 from typing import Any
 
@@ -219,15 +220,64 @@ def port_is_free() -> bool:
     return True
 
 
-def matching_processes() -> tuple[str, ...]:
-    result = subprocess.run(
-        ["ps", "-eo", "pid=,args="], text=True, capture_output=True,
-        check=False, timeout=10,
-    )
-    return tuple(
-        line.strip() for line in result.stdout.splitlines()
-        if UNIT in line or "codex-wake-github-webhook --wake-root" in line
-    )
+def _process_start_identity(path: Path) -> str:
+    text = path.read_text(encoding="ascii")
+    _, separator, remainder = text.rpartition(")")
+    fields = remainder.split()
+    if not separator or len(fields) < 20 or not fields[19].isdigit():
+        raise RuntimeError("process start identity is invalid")
+    return fields[19]
+
+
+def matching_processes(
+    context: ExecutionContext, *,
+    tracked_identities: tuple[tuple[int, str], ...] = (),
+    proc_root: Path = Path("/proc"),
+) -> tuple[dict[str, str], ...]:
+    """Find only this packet's exact bootstrap or already observed processes.
+
+    A missing process during enumeration is a normal race. Any other census
+    failure is unsafe because absence could not be proved.
+    """
+    tracked = {(int(pid), str(start)) for pid, start in tracked_identities}
+    matches: list[dict[str, str]] = []
+    try:
+        entries = tuple(proc_root.iterdir())
+    except OSError as exc:
+        raise RuntimeError("listener process census is unavailable") from exc
+    for entry in entries:
+        if not entry.name.isdigit():
+            continue
+        pid = int(entry.name)
+        try:
+            arguments = tuple(
+                value.decode("utf-8")
+                for value in (entry / "cmdline").read_bytes().split(b"\0")
+                if value
+            )
+            start = _process_start_identity(entry / "stat")
+        except FileNotFoundError:
+            continue
+        except (OSError, UnicodeError, RuntimeError) as exc:
+            raise RuntimeError("listener process census is incomplete") from exc
+        exact = (
+            len(arguments) >= 2
+            and arguments[1] == str(context.bootstrap_path)
+            and "--wake-root" in arguments
+            and arguments.index("--wake-root") + 1 < len(arguments)
+            and arguments[arguments.index("--wake-root") + 1] == str(context.wake_root)
+            and "--source" in arguments
+            and arguments.index("--source") + 1 < len(arguments)
+            and arguments[arguments.index("--source") + 1] == SOURCE
+        )
+        tracked_match = (pid, start) in tracked
+        if exact or tracked_match:
+            matches.append({
+                "pid": str(pid),
+                "process_start_ticks": start,
+                "reason": "exact_bootstrap_argv" if exact else "tracked_pid_start",
+            })
+    return tuple(sorted(matches, key=lambda item: int(item["pid"])))
 
 
 def clean_candidate(root: Path, artifact_dir: Path) -> dict[str, str]:
@@ -463,6 +513,17 @@ def systemctl_value(context: ExecutionContext, property_name: str, *, name: str)
     ).stdout.strip()
 
 
+def _decode_proc_address(value: str, *, ipv6: bool) -> str:
+    packed = bytes.fromhex(value)
+    if ipv6:
+        packed = b"".join(
+            packed[index:index + 4][::-1] for index in range(0, 16, 4)
+        )
+    else:
+        packed = packed[::-1]
+    return str(ip_address(packed))
+
+
 def _socket_identity(pid: int, *, proc_root: Path = Path("/proc")) -> dict[str, str]:
     inodes: set[str] = set()
     for item in (proc_root / str(pid) / "fd").iterdir():
@@ -472,16 +533,26 @@ def _socket_identity(pid: int, *, proc_root: Path = Path("/proc")) -> dict[str, 
             continue
         if target.startswith("socket:[") and target.endswith("]"):
             inodes.add(target[8:-1])
-    matches = []
-    for line in (proc_root / "net/tcp").read_text(encoding="utf-8").splitlines()[1:]:
-        fields = line.split()
-        if len(fields) >= 10 and fields[3] == "0A" and fields[9] in inodes:
-            address, port = fields[1].split(":", 1)
-            if (address.upper(), port.upper()) == ("0100007F", f"{PORT:04X}"):
-                matches.append(fields[9])
-    if len(matches) != 1:
-        raise RuntimeError("service PID does not own exactly one loopback listener")
-    return {"address": HOST, "port": str(PORT), "socket_inode": matches[0]}
+    listeners: list[dict[str, str]] = []
+    for table, ipv6 in (("tcp", False), ("tcp6", True)):
+        for line in (proc_root / "net" / table).read_text(encoding="utf-8").splitlines()[1:]:
+            fields = line.split()
+            if len(fields) < 10 or fields[3] != "0A" or fields[9] not in inodes:
+                continue
+            encoded_address, encoded_port = fields[1].split(":", 1)
+            listeners.append({
+                "address": _decode_proc_address(encoded_address, ipv6=ipv6),
+                "port": str(int(encoded_port, 16)),
+                "socket_inode": fields[9],
+            })
+    expected = [{"address": HOST, "port": str(PORT)}]
+    actual = [
+        {"address": item["address"], "port": item["port"]}
+        for item in listeners
+    ]
+    if actual != expected:
+        raise RuntimeError("service PID must own exactly the declared loopback listener")
+    return listeners[0]
 
 
 def service_identity(
@@ -515,11 +586,9 @@ def service_identity(
         "--source", SOURCE,
     )):
         raise RuntimeError("service command identity is invalid")
-    fields = (proc_root / str(pid) / "stat").read_text(encoding="ascii").split()
-    if len(fields) < 22 or not fields[21].isdigit():
-        raise RuntimeError("service process start identity is invalid")
+    process_start = _process_start_identity(proc_root / str(pid) / "stat")
     return {
-        **values, "executable": str(executable), "process_start_ticks": fields[21],
+        **values, "executable": str(executable), "process_start_ticks": process_start,
         "command": list(arguments), "socket": _socket_identity(pid, proc_root=proc_root),
     }
 
@@ -725,6 +794,7 @@ def inactive_service_state(context: ExecutionContext) -> dict[str, str]:
 def cleanup(
     context: ExecutionContext, *, env: dict[str, str], service_attempted: bool,
     failed_units_before: tuple[str, ...] | None,
+    tracked_identities: tuple[tuple[int, str], ...] = (),
 ) -> dict[str, Any]:
     """Use product cleanup once; preserve the private root on uncertainty."""
     result: dict[str, Any] = {
@@ -733,9 +803,19 @@ def cleanup(
         "safe": False,
     }
     if not service_attempted:
+        try:
+            matches = matching_processes(
+                context, tracked_identities=tracked_identities,
+            )
+        except RuntimeError as exc:
+            result.update({
+                "cleanup_error": type(exc).__name__,
+                "recovery_root": str(context.root),
+            })
+            return result
         unit_absent = not context.unit_path.exists() and not context.unit_path.is_symlink()
         port_released = port_is_free()
-        no_process = not matching_processes()
+        no_process = not matches
         safe = unit_absent and port_released and no_process
         result.update({
             "unit_absent": unit_absent, "port_released": port_released,
@@ -759,7 +839,10 @@ def cleanup(
             context.artifact_dir, name="failed-units-after",
         )
         unit_absent = not context.unit_path.exists() and not context.unit_path.is_symlink()
-        no_process = not matching_processes()
+        matches = matching_processes(
+            context, tracked_identities=tracked_identities,
+        )
+        no_process = not matches
         port_released = port_is_free()
         failed_unchanged = (
             failed_units_before is not None and failed_units_after == failed_units_before
@@ -810,6 +893,7 @@ def execute(*, receipt_path: Path | None = None) -> int:
     env = installed_env(context)
     fixture: Fixture | None = None
     service_attempted = False
+    tracked_identities: list[tuple[int, str]] = []
     failed_units_before: tuple[str, ...] | None = None
     receipt: dict[str, Any] = {
         "source": SOURCE, "unit": UNIT,
@@ -824,7 +908,7 @@ def execute(*, receipt_path: Path | None = None) -> int:
             raise RuntimeError("exact service unit already exists")
         if not port_is_free():
             raise RuntimeError("exact loopback port is occupied")
-        if matching_processes():
+        if matching_processes(context):
             raise RuntimeError("matching listener process already exists")
         receipt.update({
             "manager_state": manager_state,
@@ -882,18 +966,7 @@ def execute(*, receipt_path: Path | None = None) -> int:
             raise RuntimeError("installed unit ownership is invalid")
         receipt["unit_sha256"] = sha256(context.unit_path)
         readiness, status, support, initial = wait_ready(context, env)
-        first = signed_loopback_delivery(fixture, fixture.delivery_id)
-        same_delivery = signed_loopback_delivery(fixture, fixture.delivery_id)
-        service_command(context, "stop", env=env, name="manual-stop")
-        service_command(context, "start", env=env, name="manual-start")
-        _, _, _, restarted = wait_ready(context, env, prior_identity=initial)
-        after_restart = signed_loopback_delivery(fixture, fixture.restart_delivery_id)
-        deliveries = (first, same_delivery, after_restart)
-        if deliveries != (
-            (200, "COMMITTED"), (200, "DUPLICATE"), (200, "DUPLICATE"),
-        ):
-            raise RuntimeError("signed loopback sequence violated duplicate semantics")
-        polling = provider_free_poll(context, env, fixture, wake_id)
+        tracked_identities.append((int(initial["pid"]), initial["process_start_ticks"]))
         receipt.update({
             "configuration_identity": {
                 "source": SOURCE, "wake_id": wake_id,
@@ -901,10 +974,51 @@ def execute(*, receipt_path: Path | None = None) -> int:
                 "address": HOST, "port": PORT,
             },
             "readiness": readiness, "status": status, "support": support,
-            "initial_service": initial, "restarted_service": restarted,
-            "deliveries": [code for _, code in deliveries],
-            "polling": polling, "overall": "accepted",
+            "initial_service": initial, "deliveries": [],
         })
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
+
+        first = signed_loopback_delivery(fixture, fixture.delivery_id)
+        receipt["deliveries"].append({"status": first[0], "code": first[1]})
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
+        if first != (200, "COMMITTED"):
+            raise RuntimeError("first signed delivery did not commit")
+
+        same_delivery = signed_loopback_delivery(fixture, fixture.delivery_id)
+        receipt["deliveries"].append({
+            "status": same_delivery[0], "code": same_delivery[1],
+        })
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
+        if same_delivery != (200, "DUPLICATE"):
+            raise RuntimeError("same delivery replay was not duplicate")
+
+        service_command(context, "stop", env=env, name="manual-stop")
+        service_command(context, "start", env=env, name="manual-start")
+        _, _, _, restarted = wait_ready(context, env, prior_identity=initial)
+        tracked_identities.append((int(restarted["pid"]), restarted["process_start_ticks"]))
+        receipt["restarted_service"] = restarted
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
+
+        after_restart = signed_loopback_delivery(fixture, fixture.restart_delivery_id)
+        receipt["deliveries"].append({
+            "status": after_restart[0], "code": after_restart[1],
+        })
+        stage_receipt(
+            receipt, destination=receipt_path, secret_values=(fixture.secret,),
+        )
+        if after_restart != (200, "DUPLICATE"):
+            raise RuntimeError("post-restart occurrence replay was not duplicate")
+
+        polling = provider_free_poll(context, env, fixture, wake_id)
+        receipt.update({"polling": polling, "overall": "accepted"})
         stage_receipt(
             receipt, destination=receipt_path, secret_values=(fixture.secret,),
         )
@@ -915,6 +1029,7 @@ def execute(*, receipt_path: Path | None = None) -> int:
         receipt["cleanup"] = cleanup(
             context, env=env, service_attempted=service_attempted,
             failed_units_before=failed_units_before,
+            tracked_identities=tuple(tracked_identities),
         )
         if receipt["overall"] != "accepted" or not receipt["cleanup"].get("safe"):
             receipt["overall"] = "failed"

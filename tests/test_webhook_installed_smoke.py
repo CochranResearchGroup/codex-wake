@@ -14,7 +14,7 @@ import threading
 import unittest
 import uuid
 import zipfile
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -257,6 +257,7 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 "header\n 0: 0100007F:2274 00000000:0000 0A 0 0 0 0 0 456\n",
                 encoding="utf-8",
             )
+            (proc / "net/tcp6").write_text("header\n", encoding="utf-8")
             arguments = [str(ctx.installed_python), str(ctx.bootstrap_path),
                          "--wake-root", str(ctx.wake_root), "--source", smoke.SOURCE]
             (process / "cmdline").write_bytes(b"\0".join(
@@ -272,6 +273,57 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             self.assertEqual(identity["pid"], str(pid))
             self.assertEqual(identity["process_start_ticks"], "999")
             self.assertEqual(identity["socket"]["socket_inode"], "456")
+
+    def test_process_census_matches_exact_bootstrap_argv_and_tracked_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            proc = base / "proc"
+            proc.mkdir()
+            ctx = context(base)
+
+            def process(pid, arguments, start):
+                directory = proc / str(pid)
+                directory.mkdir()
+                (directory / "cmdline").write_bytes(
+                    b"\0".join(value.encode() for value in arguments) + b"\0"
+                )
+                (directory / "stat").write_text(
+                    " ".join([str(pid), "(listener)"] + ["0"] * 19 + [str(start)]),
+                    encoding="ascii",
+                )
+
+            exact = [str(ctx.installed_python), str(ctx.bootstrap_path),
+                     "--wake-root", str(ctx.wake_root), "--source", smoke.SOURCE]
+            process(101, exact, 1001)
+            process(102, ["codex-wake-github-webhook", "--wake-root", "/other",
+                          "--source", smoke.SOURCE], 1002)
+            process(103, ["renamed-process"], 1003)
+            matches = smoke.matching_processes(
+                ctx, tracked_identities=((103, "1003"),), proc_root=proc,
+            )
+            self.assertEqual([item["pid"] for item in matches], ["101", "103"])
+            self.assertEqual(matches[0]["reason"], "exact_bootstrap_argv")
+            self.assertEqual(matches[1]["reason"], "tracked_pid_start")
+            with self.assertRaisesRegex(RuntimeError, "census"):
+                smoke.matching_processes(ctx, proc_root=base / "missing-proc")
+
+    def test_socket_identity_rejects_any_additional_owned_listener(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            proc = Path(tmp)
+            pid = 123
+            (proc / str(pid) / "fd").mkdir(parents=True)
+            (proc / "net").mkdir()
+            (proc / str(pid) / "fd/7").symlink_to("socket:[456]")
+            (proc / str(pid) / "fd/8").symlink_to("socket:[789]")
+            (proc / "net/tcp").write_text(
+                "header\n"
+                " 0: 0100007F:2274 00000000:0000 0A 0 0 0 0 0 456\n"
+                " 1: 00000000:2275 00000000:0000 0A 0 0 0 0 0 789\n",
+                encoding="utf-8",
+            )
+            (proc / "net/tcp6").write_text("header\n", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "exactly"):
+                smoke._socket_identity(pid, proc_root=proc)
 
     def test_poll_convergence_rejects_weak_activity_summary(self) -> None:
         weak = {
@@ -339,6 +391,124 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             self.assertTrue(receipt["temporary_roots_removed"])
             self.assertEqual(receipt["failed_units_delta"], [])
             self.assertFalse(root.exists())
+
+    def test_cleanup_preserves_recovery_on_matching_bootstrap_or_census_failure(self) -> None:
+        for mode in ("match", "failure"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as outer:
+                root = Path(outer) / "packet"
+                root.mkdir()
+                ctx = context(root)
+                ctx.unit_path.parent.mkdir(parents=True)
+                ctx.unit_path.write_text("owned", encoding="utf-8")
+
+                def uninstall(*args, **kwargs):
+                    ctx.unit_path.unlink()
+                    return subprocess.CompletedProcess([], 0, "", "")
+
+                census = (
+                    RuntimeError("census unavailable")
+                    if mode == "failure"
+                    else ({"pid": "12", "process_start_ticks": "34",
+                           "reason": "exact_bootstrap_argv"},)
+                )
+                with patch.object(smoke, "service_command", side_effect=uninstall), patch.object(
+                    smoke, "inactive_service_state",
+                    return_value={"active": "inactive", "enabled": "disabled",
+                                  "enabled_observed": "not-found", "pid": "0"},
+                ), patch.object(smoke, "manager_failed_units", return_value=("old.service",)), patch.object(
+                    smoke, "matching_processes",
+                    side_effect=census if isinstance(census, Exception) else None,
+                    return_value=() if isinstance(census, Exception) else census,
+                ), patch.object(smoke, "port_is_free", return_value=True):
+                    receipt = smoke.cleanup(
+                        ctx, env={}, service_attempted=True,
+                        failed_units_before=("old.service",),
+                        tracked_identities=((12, "34"),),
+                    )
+                self.assertFalse(receipt["safe"])
+                self.assertEqual(receipt["recovery_root"], str(root))
+                self.assertTrue(root.exists())
+
+    def test_polling_failure_retains_every_completed_stage_after_safe_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            receipt_path = base / "external-receipt.json"
+            wheel = base / "candidate.whl"
+            wheel.write_bytes(b"wheel")
+            staged_before_failure = {}
+            identities = iter((
+                ({"status": "ready"}, {"active": "active"},
+                 {"webhook_listener": {"status": "ready"}},
+                 {"pid": "101", "process_start_ticks": "1001"}),
+                ({"status": "ready"}, {"active": "active"},
+                 {"webhook_listener": {"status": "ready"}},
+                 {"pid": "102", "process_start_ticks": "1002"}),
+            ))
+            deliveries = iter(((200, "COMMITTED"), (200, "DUPLICATE"),
+                               (200, "DUPLICATE")))
+
+            def fake_run(argv, **kwargs):
+                if argv[1:3] == ["-m", "venv"]:
+                    venv = Path(argv[3])
+                    (venv / "bin").mkdir(parents=True)
+                    for name in ("python", "codex-wake", "codex-wake-github-webhook"):
+                        (venv / "bin" / name).write_text(name, encoding="utf-8")
+                return subprocess.CompletedProcess(argv, 0, "", "")
+
+            def fake_bootstrap(ctx, fixture):
+                ctx.bootstrap_path.parent.mkdir(parents=True, exist_ok=True)
+                ctx.bootstrap_path.write_text("bootstrap", encoding="utf-8")
+                return ctx.bootstrap_path
+
+            def fake_service(ctx, action, **kwargs):
+                if action == "install":
+                    ctx.unit_path.parent.mkdir(parents=True, exist_ok=True)
+                    ctx.unit_path.write_text("owned unit", encoding="utf-8")
+                return subprocess.CompletedProcess([], 0, "", "")
+
+            def fail_poll(*args, **kwargs):
+                staged_before_failure.update(json.loads(
+                    receipt_path.read_text(encoding="utf-8")
+                ))
+                raise RuntimeError("poll failed")
+
+            with patch.object(smoke, "manager_unit_dir", return_value=base / "manager"), patch.object(
+                smoke, "manager_preflight", return_value=("degraded", ("old.service",)),
+            ), patch.object(smoke, "port_is_free", return_value=True), patch.object(
+                smoke, "matching_processes", return_value=(),
+            ), patch.object(smoke, "clean_candidate", return_value={
+                "commit": "a" * 40, "tree": "b" * 40,
+            }), patch.object(smoke, "export_clean_tree"), patch.object(
+                smoke, "build_wheel", return_value=wheel,
+            ), patch.object(smoke, "run_command", side_effect=fake_run), patch.object(
+                smoke, "installed_provenance", return_value={
+                    "module": "/isolated/codex_wake/__init__.py",
+                    "module_sha256": "c" * 64, "version": "0.5.2",
+                    "interpreter": "/isolated/python",
+                },
+            ), patch.object(smoke, "configure_and_arm", return_value="wake_stage"), patch.object(
+                smoke, "write_fixture_bootstrap", side_effect=fake_bootstrap,
+            ), patch.object(smoke, "fixture_preflight"), patch.object(
+                smoke, "service_command", side_effect=fake_service,
+            ), patch.object(smoke, "wait_ready", side_effect=lambda *a, **k: next(identities)), patch.object(
+                smoke, "signed_loopback_delivery", side_effect=lambda *a, **k: next(deliveries),
+            ), patch.object(smoke, "provider_free_poll", side_effect=fail_poll), patch.object(
+                smoke, "cleanup", return_value={"safe": True, "temporary_roots_removed": True},
+            ):
+                with redirect_stdout(io.StringIO()):
+                    result = smoke.execute(receipt_path=receipt_path)
+
+            self.assertEqual(result, 1)
+            self.assertEqual(
+                [item["code"] for item in staged_before_failure["deliveries"]],
+                ["COMMITTED", "DUPLICATE", "DUPLICATE"],
+            )
+            self.assertEqual(staged_before_failure["initial_service"]["pid"], "101")
+            self.assertEqual(staged_before_failure["restarted_service"]["pid"], "102")
+            final = json.loads(receipt_path.read_text(encoding="utf-8"))
+            self.assertEqual(final["overall"], "failed")
+            self.assertEqual(final["error"], "RuntimeError")
+            self.assertTrue(final["cleanup"]["safe"])
 
     def test_in_process_ingress_restart_and_poll_share_one_frozen_occurrence(self) -> None:
         registered = datetime(2026, 9, 16, 12, 0, tzinfo=UTC)
