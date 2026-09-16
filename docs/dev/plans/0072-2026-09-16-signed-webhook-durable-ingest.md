@@ -138,13 +138,17 @@ GREEN after the minimal controller was added. Follow-on focused integration
 tests cover commit-before-`200`, same and changed delivery replay, poll-first
 and reopened-journal convergence, timeout recovery, disconnect after admission,
 secret/provider/store failures, no-queue bridge saturation, and occupied-port
-ownership. They use temporary SQLite journals, loopback only, and provider-free
-fakes; no wake evaluation, dispatch, provider request, installed runtime,
-non-loopback bind, GitHub mutation, push, or merge occurred.
+ownership. One additional real-socket regression constructs a fresh concrete
+`GitHubRestClient` per delivery over fixture HTTPS responses; its positive-only
+terminal proof is exposed to the ingress freshness guard without changing the
+normalizer's stored proof provenance. Tests use temporary SQLite journals,
+loopback only, and provider-free fakes; no wake evaluation, dispatch, provider
+request, installed runtime, non-loopback bind, GitHub mutation, push, or merge
+occurred.
 
 Validation on local Python 3.12.13:
 
-- `PYTHONPATH=src python -m unittest discover -s tests -p test_github_webhook_runtime.py`: 9 passed.
+- `PYTHONPATH=src python -m unittest discover -s tests -p test_github_webhook_runtime.py`: 10 passed.
 - `PYTHONPATH=src python -m unittest discover -s tests -p test_github_client.py`: 12 passed.
 - Existing webhook core, HTTP transport, and polling focused suites: 12, 18,
   and 21 passed respectively.

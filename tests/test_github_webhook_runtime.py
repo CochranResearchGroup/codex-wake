@@ -11,12 +11,14 @@ import unittest
 from datetime import timedelta
 from pathlib import Path
 
+from codex_wake.github_client import GitHubRestClient
 from codex_wake.github_polling import GitHubPollingAdapter
 from codex_wake.github_webhook_runtime import GitHubWebhookRuntime
 from codex_wake.github_webhooks import WebhookConfig
 from codex_wake.signals import ArmContext, EvaluationLimits, Matched, WakeId
 from codex_wake.webhook_http import WebhookHTTPConfig
 from tests.test_github_polling import NOW, FixtureClient, config, run
+from tests.test_github_client import FixtureHTTPS, Response, payload as rest_payload
 from tests.test_signal_store import make_module
 from tests.test_signals import make_intent
 
@@ -403,6 +405,42 @@ class GitHubWebhookRuntimeTests(unittest.TestCase):
                     GitHubWebhookRuntime(occupied, **common)
             finally:
                 first.shutdown()
+
+    def test_runtime_uses_a_fresh_production_rest_client_under_its_deadline(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            module = make_module(Path(tmp) / "signals.sqlite3")
+            selected = config(evidence_mode="positive_only")
+            adapter = GitHubPollingAdapter(selected, FixtureClient([]))
+            spec = adapter.request(ref="refs/heads/main", conclusions=("success",))
+            armed = module.arm(WakeId("runtime-production-client"), spec,
+                               ArmContext("runtime", "runtime", NOW, None, make_intent().resume, adapter))
+            clients = []
+            def attempt_client(deadline):
+                http = FixtureHTTPS([Response(rest_payload()), Response({"jobs": [], "total_count": 0})])
+                client = GitHubRestClient(selected, credential_resolver=lambda ref: "fixture-secret",
+                                          connection_factory=http, deadline=deadline)
+                clients.append((client, http))
+                return client
+            runtime = GitHubWebhookRuntime(
+                WebhookHTTPConfig(request_timeout=2, shutdown_timeout=1), adapter=adapter,
+                module=module, checkpoints=module, anchor=armed.anchor,
+                webhook_config=WebhookConfig(secret_refs=("current",)),
+                resolve_secret=lambda ref: SECRET, attempt_client_factory=attempt_client,
+                operation_timeout=1, now=lambda: NOW + timedelta(seconds=2),
+            )
+            body, signature = signed_body()
+            result = []
+            def deliver():
+                result.append(exchange(runtime.address, body, signature))
+                runtime.shutdown()
+            thread = threading.Thread(target=deliver)
+            thread.start()
+            runtime.serve()
+            thread.join(2)
+            self.assertFalse(thread.is_alive())
+            self.assertEqual(result, [(200, "COMMITTED")])
+            self.assertEqual(len(clients), 1)
+            self.assertEqual(len(clients[0][1].requests), 2)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from dataclasses import replace
 from datetime import UTC, datetime
 import math
 import threading
@@ -30,7 +31,15 @@ class _DeliveryClient:
         client = self._runtime._attempt_client_factory(deadline)
         if not callable(getattr(client, "get_run_attempt", None)):
             raise GitHubReadError("unavailable")
-        return client.get_run_attempt(repository, run_id, run_attempt)
+        verified = client.get_run_attempt(repository, run_id, run_attempt)
+        # The positive-only production client exposes its authoritative
+        # lower-bound completion proof separately. The frozen ingress uses
+        # ``completed_at`` solely for its freshness guard, while normalization
+        # below still persists the unchanged terminal-proof provenance.
+        if (self._runtime._positive_only and type(verified) is WorkflowRun
+                and verified.completed_at is None and verified.terminal_proof_at is not None):
+            return replace(verified, completed_at=verified.terminal_proof_at)
+        return verified
 
 
 class _Delivery:
@@ -70,6 +79,7 @@ class GitHubWebhookRuntime:
         self._processing = False
         self._deadline: GitHubReadDeadline | None = None
         self._operation_timeout = float(operation_timeout)
+        self._positive_only = adapter.config.evidence_mode == "positive_only"
         self._now = now
         self._attempt_client_factory = attempt_client_factory
         self._ingress = GitHubWebhookIngress(
