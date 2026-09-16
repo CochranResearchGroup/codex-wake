@@ -88,7 +88,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_private_state_requires_exact_identity_owner_and_mode(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt = Path(tmp) / "receipt.json"
             value = private_state(root, receipt)
             canary.write_private(root, value)
@@ -100,7 +100,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_start_consumes_attempt_before_install_and_preserves_uncertain_root(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path)
             for name in (
@@ -150,7 +150,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_probe_records_only_sanitized_bounded_observations(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             canary.write_private(root, state)
@@ -187,7 +187,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_probe_is_ordered_and_a_failed_network_attempt_is_not_retryable(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             canary.write_private(root, state)
@@ -209,7 +209,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_cleanup_uses_product_uninstall_and_keeps_evidence_on_uncertainty(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             canary.write_private(root, state)
@@ -229,7 +229,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_cleanup_succeeds_only_after_all_acceptance_and_safe_teardown(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             state["successful_checkpoints"] = list(canary.CHECKPOINTS)
@@ -261,7 +261,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_checkpoint_endpoint_contract_rejects_mismatch_before_socket(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             canary.write_private(root, state)
@@ -279,7 +279,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_full_success_progression_freezes_identity_and_counters(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             canary.write_private(root, state)
@@ -328,7 +328,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_prior_failed_receipt_locks_out_later_checkpoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             state["successful_checkpoints"] = ["raw"]
@@ -363,7 +363,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_receipt_identity_binds_root_unit_loopback_and_wake(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path)
             canary.write_private(root, state)
@@ -383,7 +383,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_cooper_checkpoint_requires_ten_minute_publication_window(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             receipt_path = Path(tmp) / "receipt.json"
             state = private_state(root, receipt_path, phase="running", attempts=1)
             state["successful_checkpoints"] = ["raw", "local"]
@@ -407,7 +407,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_counted_bootstrap_updates_owner_only_authoritative_read_counter(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             context = canary.context_for(root)
             context.fixture_dir.mkdir()
             canary.initialize_counters(context)
@@ -428,7 +428,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_counted_bootstrap_blocks_and_counts_production_provider_factory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             context = canary.context_for(root)
             context.fixture_dir.mkdir()
             canary.initialize_counters(context)
@@ -450,7 +450,7 @@ class WebhookIngressCanaryTests(unittest.TestCase):
     def test_snapshot_reads_the_canonical_journal_and_rejects_dispatch_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "p53-c5-ingress-fixture"
-            root.mkdir()
+            root.mkdir(mode=0o700)
             context = canary.context_for(root)
             context.wake_root.mkdir()
             database = context.wake_root / "signals" / "journal.sqlite3"
