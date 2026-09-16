@@ -97,6 +97,37 @@ CLI and integration decisions. At most two workers plus the primary are active;
 no nested delegation is allowed. One implementation pass and one bounded
 review/remediation pass are the loop bounds.
 
+## Implementation checkpoint
+
+Checkpoint `06db2b7` supplies the provider-free end-to-end path. The binding
+store now preserves exact local custody by provider hook ID and attributable
+operation receipt; an unbound same-URL hook is a collision and is never
+adopted. Reconciliation records intent before one create/update, performs one
+independent exact-ID readback, and preserves a returned create ID in `UNKNOWN`
+when readback cannot prove the effect. Pending, unknown, duplicate, collision,
+and missing states cannot issue a second provider write.
+
+The production transport is a serial, bounded GitHub.com adapter pinned to
+`api.github.com` and API version `2026-03-10`. It resolves token and listener
+secret values only at request time, follows no redirects, performs no retries,
+does not expose raw response bodies, and can inventory nonconforming foreign
+hooks without confusing them for the desired hook. Disable/delete/delivery
+methods are present only as exact-ID transport primitives for the later C3
+lifecycle slice; C1 does not invoke them.
+
+The supported CLI is `github-webhook binding configure|show|status|reconcile`.
+Configuration joins an existing listener source to one immutable installation
+and repository identity. `show` is local, `status` is read-only, and
+`reconcile` defaults to dry-run; only explicit `--apply` may execute the
+calculated zero-or-one provider mutation. Human and JSON output omit provider
+credential and listener-secret reference names as well as their values.
+
+Local checkpoint validation passes 32 focused management tests, 597
+comprehensive Python tests, 12 OpenClaw plugin tests, compilation, and diff
+hygiene. All provider paths use fakes in this checkpoint; provider, service,
+secret, ingress, installation, release, and dispatch effect counts remain
+zero. Independent closed-world review and hosted integration gates remain.
+
 ## Model allocation
 
 - Core implementation uses the standard calibrated tier, `gpt-5.6-terra` at

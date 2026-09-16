@@ -804,8 +804,12 @@ add durable exact ownership, provider reconciliation, restart-correct secret
 rotation, independent health/fallback, safe rollback, one retained activation,
 and one separately gated visible dispatch. The approved child graph is #138
 through #142. Issue #138 and Plan 0084 own the active provider-free ownership
-and reconciliation slice. No provider, service, secret, ingress, installation,
-release, or dispatch effect is authorized by C1.
+and reconciliation slice. Checkpoint `06db2b7` implements its provider-free
+binding store, ambiguity-safe reconciler, bounded GitHub.com administration
+adapter, and dry-run-first CLI. Local focused, comprehensive, plugin,
+compilation, and diff gates pass; independent review and hosted integration
+remain. No provider, service, secret, ingress, installation, release, or
+dispatch effect is authorized by C1.
 
 Plan: [Managed GitHub webhook wakes goal campaign](docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md)
 
@@ -827,6 +831,7 @@ Acceptance target:
   with canonical GitHub and verification custody.
 
 Acceptance state: P54 planning and its five-child issue graph are canonical;
-#138 is active. Movement is `outcome_progress`. Next action: implement and
-accept the provider-free ownership/reconciliation path through Plan 0084, then
-unblock #139 and #140. Live effects remain separately gated.
+#138 is locally implemented and awaiting independent review. Movement is
+`outcome_progress`. Next action: review and integrate the provider-free
+ownership/reconciliation path through Plan 0084, then unblock #139 and #140.
+Live effects remain separately gated.

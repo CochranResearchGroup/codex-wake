@@ -3849,3 +3849,35 @@ Acceptance state: #138 is in progress on its registered provider-free lane.
 Movement is `outcome_progress`. Next action: integrate the core and CLI
 contracts, run focused and comprehensive validation, obtain independent
 closed-world review, and publish the issue-linked PR.
+
+## Turn 176 | 2026-09-16
+
+Implemented and locally validated P54-C1's provider-free managed webhook
+ownership and reconciliation path.
+
+- Core checkpoint `e28b71b` adds the owner-scoped atomic binding store,
+  generation-bound intent/outcome receipts, exact-ID ownership, deterministic
+  inventory classes, one-write reconciliation, and read-only unknown-effect
+  recovery. Same-URL hooks without an attributable local ID are collisions,
+  never adopted ownership.
+- Integration checkpoint `06db2b7` adds the bounded GitHub.com administration
+  adapter and `github-webhook binding configure|show|status|reconcile` CLI.
+  Reconcile defaults to dry-run; `--apply` is the separate mutation arm.
+- The production adapter is pinned to `api.github.com`, follows no redirects,
+  retries no request, bounds pages/requests/time/bytes, resolves credentials
+  only at request time, and returns only sanitized projections. Foreign hooks
+  with HTTP callbacks, form content, insecure SSL, or wildcard events remain
+  observable without becoming owned.
+- CLI output redacts provider and listener reference names and values.
+  Configuration is idempotent, requires an existing listener source, and
+  prevents rebinding an installation to another repository.
+- Validation passes 32 focused tests, 597 comprehensive Python tests, 12
+  OpenClaw plugin tests, compilation, and diff hygiene. Every provider path is
+  fake-backed; provider, service, secret, ingress, installation, release, and
+  dispatch effects remain zero.
+
+Acceptance state: #138 is locally implementation-complete at `06db2b7` and
+awaiting its independent closed-world review. Movement is `outcome_progress`.
+Next action: review the exact checkpoint, remediate only bounded findings, then
+publish the issue-linked PR and require both hosted Python release gates before
+canonical-main acceptance.
