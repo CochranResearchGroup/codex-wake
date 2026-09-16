@@ -7,8 +7,9 @@ import os
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stderr
+from contextlib import contextmanager, redirect_stderr
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/webhook_live_github_qualification.py"
@@ -19,11 +20,15 @@ sys.modules[SPEC.name] = runner
 SPEC.loader.exec_module(runner)
 
 
-def private_root(base: Path) -> Path:
-    root = base / "p53-c6-live-github-test"
-    root.mkdir(mode=0o700)
-    os.chmod(root, 0o700)
-    return root
+@contextmanager
+def private_packet() -> tuple[Path, Path, dict[str, str]]:
+    """A hermetic filesystem packet; the production temporary-root guard is mocked."""
+    with tempfile.TemporaryDirectory() as tmp, patch.object(runner, "_is_temporary", return_value=False):
+        base = Path(tmp)
+        env = {"XDG_STATE_HOME": str(base / "state"), runner.TOKEN_REF: "token-private"}
+        root = runner.create_private_root(env=env, armed=True)
+        receipt = base / "receipt.json"
+        yield root, receipt, env
 
 
 def hook_response(hook_id: int = 456) -> dict:
@@ -33,102 +38,193 @@ def hook_response(hook_id: int = 456) -> dict:
     }
 
 
+def effectors(calls: list[str], *, bad_census: bool = False) -> runner.RuntimeEffectors:
+    def effect(name, value):
+        def call(*_args):
+            calls.append(name)
+            return value
+        return call
+
+    return runner.RuntimeEffectors(
+        canonical_candidate=effect("candidate", {"clean": True, "canonical_ref": "refs/remotes/origin/main",
+                                                  "commit": "a" * 40, "tree": "b" * 40}),
+        build_wheel=effect("wheel", {"wheel_sha256": "c" * 64}),
+        create_venv=effect("venv", {"isolated": True}),
+        install_wheel=effect("install", {"global_install_mutations": 0}),
+        configure_source=effect("source", {"source": runner.SOURCE, "enabled": False}),
+        initialize_daemon=effect("daemon", {"dispatch_enabled": False, "anchor": "anchor-p53-c6"}),
+        configure_listener=effect("listener", {"source": runner.SOURCE, "address": "127.0.0.1", "port": 8820}),
+        install_service=effect("service", {"unit": runner.UNIT}),
+        readiness=effect("readiness", {"ready": True, "source": runner.SOURCE, "dispatch_enabled": False}),
+        uninstall_service=effect("uninstall", {"unit": runner.UNIT, "uninstalled": True}),
+        runtime_census=effect("census", {
+            "unit_absent": True, "active": "inactive", "enabled": "disabled", "pid": 0,
+            "matching_processes": 0, "port_8820_released": not bad_census,
+        }),
+        unrelated_state=effect("unrelated", {"failed_units_delta": [], "route_hash": "retained"}),
+    )
+
+
 class LiveGitHubQualificationTests(unittest.TestCase):
     def test_frozen_identity_and_create_request_are_exact(self) -> None:
         identity = runner.frozen_identity()
-        self.assertEqual(identity.github_host, "github.com")
-        self.assertEqual(identity.actor, "ecochran76")
-        self.assertEqual(identity.repository, "CochranResearchGroup/codex-wake")
-        self.assertEqual(identity.repository_id, 1242753508)
-        self.assertEqual(identity.workflow_id, 279450573)
-        self.assertEqual(identity.callback_url, "https://codex-wake.ecochran.dyndns.org/github/webhook")
-        self.assertEqual(identity.source_instance, "p53-c6-live-github")
-        self.assertEqual(identity.listener, "127.0.0.1:8820")
+        self.assertEqual((identity.github_host, identity.actor, identity.repository_id, identity.workflow_id),
+                         ("github.com", "ecochran76", 1242753508, 279450573))
+        self.assertEqual((identity.callback_url, identity.source_instance, identity.listener),
+                         ("https://codex-wake.ecochran.dyndns.org/github/webhook",
+                          "p53-c6-live-github", "127.0.0.1:8820"))
         request = runner.build_provider_request("create", secret="very-private")
-        self.assertEqual(request.method, "POST")
-        self.assertEqual(request.path, "/repos/CochranResearchGroup/codex-wake/hooks")
+        self.assertEqual((request.method, request.path), ("POST", "/repos/CochranResearchGroup/codex-wake/hooks"))
         self.assertEqual(request.body["events"], ["workflow_run"])
-        self.assertEqual(request.body["config"]["url"], identity.callback_url)
-        self.assertEqual(request.body["config"]["content_type"], "json")
-        self.assertEqual(request.body["config"]["insecure_ssl"], "0")
-        self.assertTrue(request.body["active"])
+        self.assertEqual(request.body["config"], {
+            "url": runner.CALLBACK_URL, "content_type": "json", "insecure_ssl": "0", "secret": "very-private",
+        })
 
-    def test_provider_request_and_receipts_redact_secret_bytes(self) -> None:
+    def test_provider_request_and_staged_receipt_redact_recursive_secret_values(self) -> None:
         request = runner.build_provider_request("create", secret="very-private")
-        sanitized = runner.sanitize_for_receipt({"request": request.body, "token": "very-private"}, secrets=("very-private",))
-        rendered = json.dumps(sanitized, sort_keys=True)
+        rendered = json.dumps(runner.sanitized_request_summary(request, secrets=("very-private",)), sort_keys=True)
         self.assertNotIn("very-private", rendered)
-        self.assertEqual(sanitized["token"], "[redacted]")
-        self.assertEqual(sanitized["request"]["config"]["secret"], "[redacted]")
-        self.assertIn("request_sha256", runner.sanitized_request_summary(request, secrets=("very-private",)))
+        self.assertIn("request_sha256", rendered)
+        with private_packet() as (root, receipt, _):
+            runner.stage_receipt({"nested": ["very-private", {"note": "very-private"}],
+                                  "secret_ref": runner.SECRET_REF}, receipt, root=root, secrets=("very-private",))
+            staged = receipt.read_text(encoding="utf-8")
+            self.assertNotIn("very-private", staged)
+            self.assertIn(runner.SECRET_REF, staged)
+            with self.assertRaisesRegex(RuntimeError, "outside"):
+                runner.stage_receipt({}, root / "inside.json", root=root)
 
-    def test_exact_hook_response_validation_is_pure_and_fail_closed(self) -> None:
-        response = hook_response(987)
-        observed = runner.validate_hook_response(response)
-        self.assertEqual(observed["hook_id"], 987)
-        response["config"]["url"] = "https://wrong.invalid/github/webhook"
-        with self.assertRaisesRegex(RuntimeError, "hook response mismatch"):
-            runner.validate_hook_response(response)
+    def test_governed_private_root_rejects_temporary_and_non_child_paths(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "temporary"):
+            runner.qualification_directory({"XDG_STATE_HOME": "/tmp/nope"})
+        with private_packet() as (root, _, env):
+            self.assertEqual(root.parent, runner.qualification_directory(env))
+            impostor = root.parent.parent / "p53-c6-live-github-impostor"
+            impostor.mkdir(mode=0o700)
+            with self.assertRaisesRegex(RuntimeError, "governed"):
+                runner.exact_private_root(impostor, env=env)
 
-    def test_counters_are_separate_and_redelivery_dispatch_are_zero_only(self) -> None:
+    def test_injected_runtime_preparation_is_bounded_and_does_not_expose_secret(self) -> None:
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            calls: list[str] = []
+            result = runner.prepare_runtime(
+                root, env=env, effectors=effectors(calls), secret_factory=lambda: "s" * 32, armed=True,
+            )
+            self.assertEqual(calls, ["candidate", "wheel", "venv", "install", "source", "daemon", "listener", "service", "readiness"])
+            self.assertEqual(result["phase"], "runtime_ready")
+            self.assertEqual(result["runtime_counters"], {
+                "establish": 1, "cleanup": 0, "secret_provision": 1, "secret_retirement": 0, "observation": 0,
+            })
+            environment = runner.environment_path(root)
+            self.assertEqual(environment.stat().st_mode & 0o777, 0o600)
+            self.assertIn("s" * 32, environment.read_text(encoding="utf-8"))
+            staged = receipt.read_text(encoding="utf-8")
+            self.assertNotIn("s" * 32, staged)
+            self.assertNotIn("token-private", staged)
+            self.assertIn(runner.SECRET_REF, staged)
+
+    def test_runtime_requires_environment_token_and_fakes_all_effectors(self) -> None:
+        with private_packet() as (root, receipt, env):
+            with self.assertRaisesRegex(RuntimeError, "execution arm"):
+                runner.prepare_local(root, receipt, env=env)
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            env.pop(runner.TOKEN_REF)
+            calls: list[str] = []
+            with self.assertRaisesRegex(RuntimeError, "environment"):
+                runner.prepare_runtime(root, env=env, effectors=effectors(calls), secret_factory=lambda: "s" * 32, armed=True)
+            self.assertEqual(calls, [])
+
+    def test_runner_has_no_direct_provider_network_subprocess_or_service_path(self) -> None:
+        source = SCRIPT.read_text(encoding="utf-8")
+        for forbidden in ("import subprocess", "import socket", "import requests", "http.client", "urllib.request"):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, source)
+
+    def test_counters_are_separate_and_ambiguous_writes_reconcile_without_retry(self) -> None:
         state = runner.new_state(Path("/private/p53-c6-live-github-test"), Path("/receipt.json"))
         state = runner.record_attempt(state, "create")
-        state = runner.record_provider_result(state, "create", response=hook_response())
-        state = runner.record_attempt(state, "trigger")
+        uncertain = runner.record_provider_result(state, "create", response=None, ambiguous=True)
+        with self.assertRaisesRegex(RuntimeError, "ambiguous"):
+            runner.record_attempt(uncertain, "create")
+        reconciled = runner.reconcile_ambiguous_write(uncertain, "create", (hook_response(),))
+        self.assertEqual(reconciled["counters"], {
+            "create": 1, "trigger": 0, "delete": 0, "redelivery": 0, "dispatch": 0,
+        })
+        state = runner.record_attempt(reconciled, "trigger")
         state = runner.record_attempt(state, "delete")
         self.assertEqual(state["counters"], {
             "create": 1, "trigger": 1, "delete": 1, "redelivery": 0, "dispatch": 0,
         })
         for forbidden in ("redelivery", "dispatch"):
-            with self.subTest(action=forbidden):
-                with self.assertRaisesRegex(RuntimeError, "forbidden"):
-                    runner.record_attempt(state, forbidden)
+            with self.subTest(action=forbidden), self.assertRaisesRegex(RuntimeError, "forbidden"):
+                runner.record_attempt(state, forbidden)
+        delete_ambiguous = runner.record_provider_result(state, "delete", response=None, ambiguous=True)
+        deleted = runner.reconcile_ambiguous_write(
+            delete_ambiguous, "delete", ({"hook_id": 456, "absent": True},),
+        )
+        self.assertTrue(deleted["delete_readback_absent"])
+        self.assertEqual(deleted["counters"]["delete"], 1)
 
-    def test_ambiguous_write_fails_closed_without_retry(self) -> None:
+    def test_delivery_and_poll_convergence_require_one_exact_post_anchor_occurrence(self) -> None:
         state = runner.new_state(Path("/private/p53-c6-live-github-test"), Path("/receipt.json"))
         state = runner.record_attempt(state, "create")
-        uncertain = runner.record_provider_result(state, "create", response=None, ambiguous=True)
-        self.assertEqual(uncertain["phase"], "provider_write_ambiguous")
-        self.assertTrue(uncertain["requires_exact_readback"])
-        with self.assertRaisesRegex(RuntimeError, "ambiguous"):
-            runner.record_attempt(uncertain, "create")
+        state = runner.record_provider_result(state, "create", response=hook_response())
+        state = runner.record_attempt(state, "trigger")
+        state = runner.freeze_trigger(state, {
+            "pr_number": 88, "head_sha": "d" * 40, "base_ref": runner.REF,
+            "docs_only": True, "green": True, "merge_method": "squash",
+        })
+        deliveries = (
+            {"delivery_id": "ping", "event": "ping", "action": "created", "status_code": 200},
+            {"delivery_id": "qualified", "event": "workflow_run", "action": "completed",
+             "authenticated": True, "status_code": 200, "repository": runner.REPOSITORY,
+             "repository_id": runner.REPOSITORY_ID, "workflow_id": runner.WORKFLOW_ID,
+             "ref": runner.REF, "conclusion": runner.CONCLUSION, "head_sha": "d" * 40, "hook_id": 456,
+             "terminal_after_anchor": True, "run": {"status": "completed", "run_id": 701, "run_attempt": 2}},
+        )
+        delivery = runner.validate_delivery_window(deliveries, trigger=state["trigger"])
+        self.assertEqual(delivery["occurrence"], "1242753508:701:2")
+        state = runner.record_convergence(state, delivery, journal_before=0, journal_after_webhook=1,
+                                          journal_after_poll=1, wake_before="pending",
+                                          wake_after="firing_local", dispatch_calls=0)
+        self.assertEqual(state["runtime_counters"]["observation"], 1)
+        with self.assertRaisesRegex(RuntimeError, "exactly one"):
+            runner.validate_delivery_window(deliveries + (deliveries[1] | {"delivery_id": "second"},),
+                                            trigger=state["trigger"])
 
-    def test_receipt_is_staged_redacted_and_local_prepare_requires_exact_root(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp)
-            root = private_root(base)
-            receipt = base / "receipt.json"
-            result = runner.prepare_local(root, receipt)
-            self.assertEqual(result["phase"], "prepared")
-            rendered = receipt.read_text(encoding="utf-8")
-            self.assertIn("p53-c6-live-github", rendered)
-            self.assertIn(runner.SECRET_REF, rendered)
-            self.assertNotIn('"secret":', rendered)
-            self.assertEqual((root / runner.STATE_FILE).stat().st_mode & 0o777, 0o600)
-            with self.assertRaisesRegex(RuntimeError, "exact private root"):
-                runner.prepare_local(base / "wrong-root", receipt)
-
-    def test_cleanup_interlock_preserves_root_until_exact_delete_readback(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp)
-            root = private_root(base)
-            receipt = base / "receipt.json"
-            runner.prepare_local(root, receipt)
-            state = runner.load_private_state(root)
+    def test_cleanup_interlock_requires_runtime_secret_hook_and_fresh_census(self) -> None:
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            calls: list[str] = []
+            runner.prepare_runtime(root, env=env, effectors=effectors(calls), secret_factory=lambda: "s" * 32, armed=True)
+            state = runner.load_private_state(root, env=env)
             state = runner.record_attempt(state, "create")
             state = runner.record_provider_result(state, "create", response=hook_response())
             state = runner.record_attempt(state, "delete")
-            runner.write_private_state(root, state)
-            unsafe = runner.cleanup_local(root)
-            self.assertFalse(unsafe["safe"])
+            state = runner.record_provider_result(state, "delete", response={"hook_id": 456, "absent": True})
+            runner.write_private_state(root, state, env=env)
+            with self.assertRaisesRegex(RuntimeError, "census"):
+                runner.cleanup_runtime(root, env=env, effectors=effectors(calls, bad_census=True), armed=True)
             self.assertTrue(root.exists())
-            state = runner.record_provider_result(
-                state, "delete", response={"hook_id": 456, "absent": True},
-            )
-            runner.write_private_state(root, state)
-            safe = runner.cleanup_local(root)
-            self.assertTrue(safe["safe"])
+
+        with private_packet() as (root, receipt, env):
+            runner.prepare_local(root, receipt, env=env, armed=True)
+            calls: list[str] = []
+            runner.prepare_runtime(root, env=env, effectors=effectors(calls), secret_factory=lambda: "s" * 32, armed=True)
+            state = runner.load_private_state(root, env=env)
+            state = runner.record_attempt(state, "create")
+            state = runner.record_provider_result(state, "create", response=hook_response())
+            state = runner.record_attempt(state, "delete")
+            state = runner.record_provider_result(state, "delete", response={"hook_id": 456, "absent": True})
+            runner.write_private_state(root, state, env=env)
+            runner.cleanup_runtime(root, env=env, effectors=effectors(calls), armed=True)
+            result = runner.cleanup_local(root, env=env, armed=True)
+            self.assertTrue(result["safe"])
+            self.assertTrue(result["root_removed"])
             self.assertFalse(root.exists())
+            self.assertIn("uninstall", calls)
+            self.assertIn("census", calls)
 
     def test_cli_defaults_to_read_only_preflight_and_effects_require_arm_and_root(self) -> None:
         stderr = io.StringIO()
