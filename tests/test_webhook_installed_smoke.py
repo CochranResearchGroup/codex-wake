@@ -680,6 +680,35 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
             self.assertEqual(receipt["failed_units_delta"], [])
             self.assertFalse(root.exists())
 
+    def test_cleanup_can_retain_owner_only_evidence_after_safe_teardown(self) -> None:
+        with tempfile.TemporaryDirectory() as outer:
+            root = Path(outer) / "packet"
+            root.mkdir()
+            ctx = context(root)
+            ctx.unit_path.parent.mkdir(parents=True)
+            ctx.unit_path.write_text("owned", encoding="utf-8")
+
+            def uninstall(*args, **kwargs):
+                ctx.unit_path.unlink()
+                return subprocess.CompletedProcess([], 0, "", "")
+
+            with patch.object(smoke, "service_command", side_effect=uninstall), patch.object(
+                smoke, "inactive_service_state",
+                return_value={"active": "inactive", "enabled": "disabled",
+                              "enabled_observed": "not-found", "pid": "0"},
+            ), patch.object(smoke, "manager_failed_units", return_value=()), patch.object(
+                smoke, "matching_processes", return_value=(),
+            ), patch.object(smoke, "port_is_free", return_value=True):
+                receipt = smoke.cleanup(
+                    ctx, env={}, service_attempted=True, failed_units_before=(),
+                    preserve_root_on_safe=True,
+                )
+            self.assertTrue(receipt["safe"])
+            self.assertTrue(receipt["evidence_root_retained"])
+            self.assertFalse(receipt["temporary_roots_removed"])
+            self.assertEqual(root.stat().st_mode & 0o777, 0o700)
+            self.assertTrue(root.exists())
+
     def test_cleanup_preserves_recovery_on_matching_bootstrap_or_census_failure(self) -> None:
         for mode in ("match", "failure"):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory() as outer:
