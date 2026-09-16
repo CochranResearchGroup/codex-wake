@@ -17,16 +17,16 @@ from pathlib import Path
 
 from .executables import resolve_stable_executable
 from .records import WakeError
-from .service import systemctl, systemd_environment_assignment, systemd_quote, user_state_dir, user_systemd_dir
+from .service import _systemd_environment_file_path, systemctl, systemd_quote, user_state_dir, user_systemd_dir
 from .signal_records import signal_journal_path
 
 
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}")
-_ENV = re.compile(r"[A-Z][A-Z0-9_]{0,127}")
+_ENV = re.compile(r"[A-Z][A-Z0-9_]{0,63}")
 _FIELDS = (
     "source_instance", "address", "port", "path", "secret_ref",
     "previous_secret_ref", "enabled", "allow_non_loopback", "max_body_bytes", "max_connections",
-    "request_timeout_seconds", "shutdown_timeout_seconds",
+    "request_timeout_seconds", "operation_timeout_seconds", "shutdown_timeout_seconds",
 )
 
 
@@ -43,6 +43,7 @@ class WebhookListenerConfig:
     max_body_bytes: int = 262_144
     max_connections: int = 8
     request_timeout_seconds: float = 15.0
+    operation_timeout_seconds: float = 8.0
     shutdown_timeout_seconds: float = 10.0
 
     def __post_init__(self) -> None:
@@ -59,12 +60,16 @@ class WebhookListenerConfig:
             )
             or type(self.enabled) is not bool
             or type(self.allow_non_loopback) is not bool
-            or type(self.max_body_bytes) is not int or not 1 <= self.max_body_bytes <= 1_048_576
+            or type(self.max_body_bytes) is not int or not 1_024 <= self.max_body_bytes <= 1_048_576
             or type(self.max_connections) is not int or not 1 <= self.max_connections <= 256
             or type(self.request_timeout_seconds) not in {int, float}
             or not 0 < self.request_timeout_seconds <= 60
             or type(self.shutdown_timeout_seconds) not in {int, float}
             or not 0 < self.shutdown_timeout_seconds <= 60
+            or type(self.operation_timeout_seconds) not in {int, float}
+            or not 0 < self.operation_timeout_seconds <= min(
+                self.request_timeout_seconds, self.shutdown_timeout_seconds
+            )
         ):
             raise ValueError("webhook listener configuration is invalid")
 
@@ -151,6 +156,7 @@ def listener_summary(listener: WebhookListenerConfig, *, include_references: boo
         "allow_non_loopback": listener.allow_non_loopback,
         "max_connections": listener.max_connections,
         "request_timeout_seconds": listener.request_timeout_seconds,
+        "operation_timeout_seconds": listener.operation_timeout_seconds,
         "shutdown_timeout_seconds": listener.shutdown_timeout_seconds,
     }
     if include_references:
@@ -232,6 +238,10 @@ def webhook_service_name(source_instance: str) -> str:
     return f"codex-wake-github-webhook-{source_instance}.service"
 
 
+def webhook_secret_environment_path(wake_root: Path) -> Path:
+    return Path(wake_root).resolve() / "github" / "webhook.env"
+
+
 def build_webhook_service_config(
     *, wake_root: Path, source_instance: str, name: str | None = None,
     executable_path: str | None = None, unit_dir: Path | None = None,
@@ -263,8 +273,11 @@ def build_webhook_service_config(
 def render_webhook_unit(config: WebhookServiceConfig) -> str:
     if config.executable_path is None:
         raise WakeError("GitHub webhook listener executable must be resolved before rendering")
-    # Config is read from the owner wake root.  No secret ref/value is copied to
-    # the unit; the executable resolves configured names from its environment.
+    # The owner-only environment file carries values for configured references.
+    # Its path is nonsecret; no reference name or secret value enters the unit.
+    environment_file = _systemd_environment_file_path(
+        webhook_secret_environment_path(config.wake_root)
+    )
     return (
         "[Unit]\n"
         "Description=Codex Wake GitHub webhook listener for one source\n"
@@ -272,7 +285,7 @@ def render_webhook_unit(config: WebhookServiceConfig) -> str:
         "After=default.target\n"
         f"ConditionPathIsDirectory={config.wake_root}\n\n"
         "[Service]\nType=simple\n"
-        f"Environment={systemd_environment_assignment('CODEX_WAKE_WEBHOOK_CONFIG', str(config.wake_root / 'github' / 'webhook-listeners.json'))}\n"
+        f"EnvironmentFile={environment_file}\n"
         f"ExecStart={systemd_quote(config.executable_path)} --wake-root {systemd_quote(config.wake_root)} --source {config.source_instance}\n"
         "Restart=on-failure\nRestartSec=5\nTimeoutStopSec=15\n"
         "NoNewPrivileges=yes\nPrivateTmp=yes\n"
@@ -284,6 +297,7 @@ def render_webhook_unit(config: WebhookServiceConfig) -> str:
 def install_webhook_service(config: WebhookServiceConfig, runner=None, *, start: bool = True) -> None:
     if not config.source_enabled:
         raise WakeError("webhook listener service requires an enabled source")
+    _require_secret_environment(config)
     rendered = render_webhook_unit(config)
     if config.unit_path.exists():
         try:
@@ -306,6 +320,8 @@ def install_webhook_service(config: WebhookServiceConfig, runner=None, *, start:
 def start_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
     if not config.source_enabled:
         raise WakeError("webhook listener service requires an enabled source")
+    _require_secret_environment(config)
+    _require_owned_unit(config)
     systemctl(["enable", "--now", config.name], runner)
     active = systemctl(["is-active", config.name], runner, check=False).stdout.strip()
     if active != "active":
@@ -313,6 +329,7 @@ def start_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
 
 
 def stop_webhook_service(config: WebhookServiceConfig, runner=None) -> None:
+    _require_owned_unit(config)
     systemctl(["disable", "--now", config.name], runner, check=False)
 
 
@@ -328,23 +345,32 @@ def webhook_service_status(config: WebhookServiceConfig, runner=None) -> tuple[s
     return active, enabled
 
 
-def disable_webhook_listener(store: WebhookListenerStore, listener: WebhookListenerConfig, runner=None) -> WebhookListenerConfig:
+def disable_webhook_listener(
+    store: WebhookListenerStore,
+    listener: WebhookListenerConfig,
+    runner=None,
+    *,
+    unit_dir: Path | None = None,
+) -> WebhookListenerConfig:
     """Stop the exact active owner before persisting its disabled authority."""
     if listener.enabled:
         raise ValueError("webhook listener disable request is invalid")
     current = store.select(listener.source_instance)
-    if not current.enabled:
-        return store.configure(listener)
+    before, after = _encode(current), _encode(listener)
+    before.pop("enabled")
+    after.pop("enabled")
+    if before != after:
+        raise ValueError("material webhook listener changes require a new source_instance")
     config = build_webhook_service_config(
         wake_root=store.wake_root, source_instance=current.source_instance,
-        validate_executable=False,
+        unit_dir=unit_dir, validate_executable=False,
     )
-    active, _ = webhook_service_status(config, runner)
-    if active == "active":
+    active, enabled = webhook_service_status(config, runner)
+    if (active, enabled) != ("inactive", "disabled"):
         stop_webhook_service(config, runner)
-        active, _ = webhook_service_status(config, runner)
-        if active == "active":
-            raise WakeError("webhook listener service remains active; stop it before disabling source")
+        active, enabled = webhook_service_status(config, runner)
+        if (active, enabled) != ("inactive", "disabled"):
+            raise WakeError("webhook listener service remains owned; stop it before disabling source")
     return store.configure(listener)
 
 
@@ -365,9 +391,35 @@ def _unit_is_safe(config: WebhookServiceConfig) -> bool:
             return False
         text = config.unit_path.read_text(encoding="utf-8")
         return (f"--wake-root {systemd_quote(config.wake_root)} --source {config.source_instance}" in text
+                and f"EnvironmentFile={_systemd_environment_file_path(webhook_secret_environment_path(config.wake_root))}" in text
                 and "Restart=on-failure" in text and "TimeoutStopSec=15" in text)
+    except (OSError, WakeError):
+        return False
+
+
+def _require_owned_unit(config: WebhookServiceConfig) -> None:
+    if not _unit_is_safe(config):
+        raise WakeError("webhook listener service ownership is invalid")
+
+
+def _secret_environment_is_safe(config: WebhookServiceConfig) -> bool:
+    path = webhook_secret_environment_path(config.wake_root)
+    try:
+        metadata = path.lstat()
+        return (
+            stat.S_ISREG(metadata.st_mode)
+            and not path.is_symlink()
+            and metadata.st_uid == os.getuid()
+            and not stat.S_IMODE(metadata.st_mode) & 0o077
+            and metadata.st_size <= 16_384
+        )
     except OSError:
         return False
+
+
+def _require_secret_environment(config: WebhookServiceConfig) -> None:
+    if not _secret_environment_is_safe(config):
+        raise WakeError("webhook listener secret environment file must be an owner-only regular file")
 
 
 def _proc_address(value: str, *, ipv6: bool) -> str:
@@ -434,8 +486,9 @@ def webhook_readiness(*, wake_root: Path, source_instance: str, runner=None,
             runtime_available = False
     journal_path = signal_journal_path(wake_root)
     journal_ok = journal_probe(journal_path) if journal_probe is not None else _journal_is_safe(journal_path)
+    secret_environment_ok = _secret_environment_is_safe(config)
     bind_ok = bind_probe(listener.address, listener.port) if bind_probe is not None else linux_service_bind_probe(config, runner)
-    status = "ready" if unit_ok and active == "active" and runtime_available and journal_ok and bind_ok else "blocked"
+    status = "ready" if unit_ok and active == "active" and runtime_available and journal_ok and bind_ok and secret_environment_ok else "blocked"
     if not runtime_available:
         message = "canonical #105 webhook runtime is unavailable"
     elif not unit_ok or active != "active":
@@ -444,6 +497,8 @@ def webhook_readiness(*, wake_root: Path, source_instance: str, runner=None,
         message = "webhook listener bind ownership is unproven"
     elif not journal_ok:
         message = "webhook listener journal is inaccessible or unsafe"
+    elif not secret_environment_ok:
+        message = "webhook listener secret environment file is inaccessible or unsafe"
     else:
         message = "webhook listener ownership is locally ready"
     return {
@@ -454,6 +509,7 @@ def webhook_readiness(*, wake_root: Path, source_instance: str, runner=None,
         "unit": str(config.unit_path), "runtime_available": runtime_available,
         "bind_ownership": "proven" if bind_ok else "unproven",
         "journal": str(journal_path), "journal_access": "safe" if journal_ok else "unsafe",
+        "secret_environment_access": "safe" if secret_environment_ok else "unsafe",
         "provider_delivery": "unproven", "dispatch": "not_included",
     }
 

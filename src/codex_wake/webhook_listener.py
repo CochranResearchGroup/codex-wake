@@ -4,19 +4,110 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from .github_client import GitHubRestClient, GitHubReadDeadline
+from .github_polling import GitHubPollingAdapter, GitHubReadClient, GitHubReadError
+from .github_source_config import GitHubSourceStore
+from .github_webhook_runtime import GitHubWebhookRuntime
+from .github_webhooks import WebhookConfig
 from .records import WakeError, default_wake_root
-from .webhook_lifecycle import WebhookListenerStore
+from .signal_records import signal_journal_path
+from .signal_store import SQLiteSignalModule, SignalStoreError
+from .signals import Invalid, SourceAnchor
+from .webhook_http import WebhookHTTPConfig
+from .webhook_lifecycle import WebhookListenerConfig, WebhookListenerStore, webhook_http_config_kwargs
 
 
-def _runtime_factory(config, resolve_secret):
-    """Deferred #105 join point; product construction remains intentionally injected."""
-    from .github_webhook_runtime import GitHubWebhookRuntime  # type: ignore[import-not-found,unused-ignore]
-    del GitHubWebhookRuntime, config, resolve_secret
-    raise WakeError("webhook runtime construction requires the canonical #105 join adapter")
+class _UnavailablePollingClient:
+    """Construction-only adapter; webhook reads use a fresh deadline client."""
+
+    def list_runs(self, query):
+        raise GitHubReadError("unavailable")
+
+    def get_run_attempt(self, repository: str, run_id: int, run_attempt: int):
+        raise GitHubReadError("unavailable")
+
+
+def _secret_resolver(listener: WebhookListenerConfig,
+                     environment: Mapping[str, str]) -> Callable[[str], bytes]:
+    references = frozenset(
+        (listener.secret_ref,)
+        + ((listener.previous_secret_ref,) if listener.previous_secret_ref else ())
+    )
+
+    def resolve(reference: str) -> bytes:
+        if reference not in references:
+            raise WakeError("webhook listener secret reference is invalid")
+        value = environment.get(reference)
+        if type(value) is not str or not value:
+            raise WakeError("webhook listener secret reference is unavailable")
+        return value.encode("utf-8")
+
+    return resolve
+
+
+def build_webhook_runtime(
+    *, wake_root: Path, listener: WebhookListenerConfig,
+    environment: Mapping[str, str] | None = None,
+    attempt_client_factory: Callable[[GitHubReadDeadline], GitHubReadClient] | None = None,
+    now: Callable[[], datetime] = lambda: datetime.now(UTC),
+) -> GitHubWebhookRuntime:
+    """Construct one source-bound runtime from durable product authority."""
+    source_env = environment if environment is not None else os.environ
+    try:
+        source = GitHubSourceStore(wake_root).registry().select(listener.source_instance)
+        module = SQLiteSignalModule.open_existing(signal_journal_path(wake_root))
+    except (ValueError, SignalStoreError) as exc:
+        raise WakeError(str(exc)) from None
+    if module is None:
+        raise WakeError("webhook listener signal journal is unavailable")
+    adapter = GitHubPollingAdapter(source, _UnavailablePollingClient())
+    request = adapter.request(
+        ref=sorted(source.refs)[0],
+        conclusions=tuple(sorted(source.conclusions)),
+    )
+    anchor = adapter.establish_anchor(request, now())
+    if isinstance(anchor, Invalid) or type(anchor) is not SourceAnchor:
+        raise WakeError("webhook listener source anchor is invalid")
+
+    def resolve_credential(reference: str) -> str:
+        if reference != source.credential_ref:
+            raise GitHubReadError("auth")
+        value = source_env.get(reference)
+        if type(value) is not str or not value:
+            raise GitHubReadError("auth")
+        return value
+
+    make_client = attempt_client_factory or (
+        lambda deadline: GitHubRestClient(
+            source,
+            credential_resolver=resolve_credential,
+            deadline=deadline,
+        )
+    )
+    secrets = tuple(
+        reference for reference in (listener.secret_ref, listener.previous_secret_ref)
+        if reference is not None
+    )
+    return GitHubWebhookRuntime(
+        WebhookHTTPConfig(**webhook_http_config_kwargs(listener)),
+        adapter=adapter,
+        module=module,
+        checkpoints=module,
+        anchor=anchor,
+        webhook_config=WebhookConfig(
+            secret_refs=secrets,
+            max_body_bytes=listener.max_body_bytes,
+        ),
+        resolve_secret=_secret_resolver(listener, source_env),
+        attempt_client_factory=make_client,
+        operation_timeout=listener.operation_timeout_seconds,
+        now=now,
+    )
 
 
 def run_listener(*, wake_root: Path, source_instance: str,
@@ -24,18 +115,17 @@ def run_listener(*, wake_root: Path, source_instance: str,
                  env: dict[str, str] | None = None) -> int:
     listener = WebhookListenerStore(wake_root).enabled(source_instance)
     source_env = env if env is not None else os.environ
-    refs = frozenset((listener.secret_ref,) + ((listener.previous_secret_ref,) if listener.previous_secret_ref else ()))
-
-    def resolve_secret(reference: str) -> bytes:
-        if reference not in refs:
-            raise WakeError("webhook listener secret reference is invalid")
-        value = source_env.get(reference)
-        if type(value) is not str or not value:
-            raise WakeError("webhook listener secret reference is unavailable")
-        return value.encode("utf-8")
-    factory = runtime_factory or _runtime_factory
+    resolve_secret = _secret_resolver(listener, source_env)
     try:
-        runtime = factory(listener, resolve_secret)
+        runtime = (
+            runtime_factory(listener, resolve_secret)
+            if runtime_factory is not None
+            else build_webhook_runtime(
+                wake_root=wake_root,
+                listener=listener,
+                environment=source_env,
+            )
+        )
     except ModuleNotFoundError as exc:
         raise WakeError("webhook runtime is unavailable until canonical #105 is joined") from exc
     if not callable(getattr(runtime, "serve", None)) or not callable(getattr(runtime, "shutdown", None)):

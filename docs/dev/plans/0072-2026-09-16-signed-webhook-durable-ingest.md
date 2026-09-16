@@ -1,6 +1,6 @@
 # Signed webhook durable-ingest join
 
-State: OPEN
+State: CLOSED
 Lane: P53-C2
 Issue: #105
 Branch: `feat/issue-105-signed-webhook-ingest`
@@ -159,6 +159,10 @@ Validation on local Python 3.12.13:
   the active planning-contract audit: passed (the audit reports only its
   accepted legacy baseline findings).
 
-Remaining boundary: this is a local implementation receipt only. Required
-Python 3.11/3.12 CI, review, PR integration, and the #106 executable/service
-construction remain outside this branch's authority and are not claimed here.
+## Integration receipt | 2026-09-16
+
+PR #115 passed the required Python 3.11 and 3.12 release gates and squash-
+merged at canonical `1d32bb1d12531ab41fb36c0180fc0510be8e1c88`. Issue
+#105 closed, and its remote topic branch, local branch, and isolated worktree
+were removed. Runtime construction remains owned by #106; no provider, service,
+external ingress, release, deployment, or dispatch effect occurred.

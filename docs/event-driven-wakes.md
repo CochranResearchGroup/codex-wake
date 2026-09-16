@@ -45,24 +45,30 @@ optional previous *environment-variable reference*. It never stores secret
 values. The default is `127.0.0.1:8820`; a non-loopback numeric address requires
 both `--bind-address` and `--allow-non-loopback`. Wildcard binds and public
 diagnostics are unsupported. Body input defaults to 262144 bytes and cannot
-exceed the transport's 1048576-byte ceiling; `--max-connections` is bounded and
-the listener remains single-worker with no queue configuration.
+exceed the signed core's 1048576-byte ceiling; `--max-connections` is bounded,
+`--operation-timeout` explicitly nests provider/store work inside request and
+shutdown deadlines, and the listener remains single-worker with no queue
+configuration.
 
 `codex-wake-github-webhook --wake-root ROOT --source NAME` is the dedicated
 listener executable. It gives the joined runtime an owner resolver for the
 configured secret-reference names; the runtime resolves a reference per request
 to support rotation, while listener startup never materializes secret bytes.
+Before installation, create the fixed `WAKE_ROOT/github/webhook.env` as an
+owner-only regular systemd environment file containing the configured webhook
+reference names and the selected GitHub source's credential reference. Its path
+may appear in the user unit; its values never do.
 `codex-wake github-webhook service install|start|stop|status|uninstall`
 renders and manages only a user-systemd unit; it never creates a system service.
 The unit contains its config path but no secret reference or value. Readiness and
 support are local, nonsecret projections: they prove neither GitHub delivery nor
 wake dispatch, and readiness fails closed unless a read-only Linux proof ties
 the user service MainPID to the exact `/proc` listening-socket inode/address/
-port and the journal is safe. Disabling an enabled source first stops and
+port, journal, and secret environment file are safe. Disabling an enabled source first stops and
 confirms the exact owner service; a stop failure leaves the configuration
-enabled. The executable awaits the canonical #105 runtime join before it
-can be qualified; do not install or expose it before that join and a separate
-loopback qualification.
+enabled. The executable constructs canonical #105 only from the same enabled
+GitHub source and existing journal. Do not expose it before the separate
+installed loopback qualification.
 
 ## Product outcome
 

@@ -374,6 +374,7 @@ def build_parser() -> argparse.ArgumentParser:
     webhook_configure.add_argument("--max-body-bytes", type=int, default=262_144)
     webhook_configure.add_argument("--max-connections", type=int, default=8)
     webhook_configure.add_argument("--request-timeout", type=float, default=15.0, dest="request_timeout_seconds")
+    webhook_configure.add_argument("--operation-timeout", type=float, default=8.0, dest="operation_timeout_seconds")
     webhook_configure.add_argument("--shutdown-timeout", type=float, default=10.0, dest="shutdown_timeout_seconds")
     webhook_enabled = webhook_configure.add_mutually_exclusive_group(required=True)
     webhook_enabled.add_argument("--enabled", action="store_true", dest="enabled")
@@ -1276,6 +1277,7 @@ def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
                     enabled=args.enabled, allow_non_loopback=args.allow_non_loopback,
                     max_body_bytes=args.max_body_bytes, max_connections=args.max_connections,
                     request_timeout_seconds=args.request_timeout_seconds,
+                    operation_timeout_seconds=args.operation_timeout_seconds,
                     shutdown_timeout_seconds=args.shutdown_timeout_seconds,
                 )
                 current = next((item for item in store.listeners() if item.source_instance == listener.source_instance), None)

@@ -756,16 +756,15 @@ Acceptance target:
 
 State: OPEN
 
-Current State: P52 left the authenticated webhook core, polling convergence,
-and built-in source registry accepted on canonical main, but no supported HTTP
-listener or external route exists. Parent issue #103 and child issues #104
-through #109 define a bounded transport, durable ingest, product lifecycle,
-installed loopback proof, Cooper/bastion HTTPS publication, and one live GitHub
-delivery. The shared ingress repository was cleaned, validated, structured into
-two final commits, and pushed at `5fcce95` before P53 use. Coordination PR #110
-merged at `dad2d80`; issue #104 is the sole assigned implementation slice at
-branch checkpoint `72e0965`. No listener, ingress route, provider webhook, or
-live dispatch exists yet.
+Current State: Issues #104 and #105 accepted the bounded HTTP transport and the
+main-thread durable signed-ingest join on canonical main, most recently through
+PR #115 at `1d32bb1`. Issue #106 is joining those layers into the supported
+configuration, executable, user-service, and local evidence lifecycle. Issues
+#107 through #109 remain dependency-blocked for installed loopback proof,
+Cooper/bastion HTTPS publication, and one live GitHub delivery. The shared
+ingress repository was cleaned, validated, structured into two final commits,
+and pushed at `5fcce95` before P53 use. No installed listener, external ingress
+route, provider webhook, or live dispatch exists yet.
 
 Plan: [Signed GitHub webhook ingress goal campaign](docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md)
 

@@ -9,13 +9,11 @@ Integration: `squash-after-#105-join`
 
 ## Current state
 
-Canonical main `558ae15723a9dfcd4b79b31c7a66e53439328707`
-contains the accepted provider-neutral HTTP transport but no supported webhook
-configuration, executable, user service, readiness/status/support projection,
-packaging entry point, or operator lifecycle. Issue #105 is implementing the
-durable runtime join on a disjoint branch. This lane may build its product
-surfaces in parallel but cannot integrate or claim executable acceptance until
-it joins #105's canonical runtime.
+Canonical main `1d32bb1d12531ab41fb36c0180fc0510be8e1c88`
+contains the accepted provider-neutral HTTP transport and durable signed-ingest
+runtime from #105. This branch joined that exact commit and now owns the
+supported configuration, executable construction, user service,
+readiness/status/support, packaging, and operator lifecycle acceptance.
 
 ## Objective
 
@@ -77,13 +75,23 @@ Final validation occurs only after merging canonical #105 into this branch.
   require enabled sources for install/start, stop and confirm an active owner
   before a disable persists, and provide a per-request owner secret resolver
   instead of startup secret bytes.
+- Joined canonical #105 behind the unchanged executable interface. The deep
+  builder selects the same enabled GitHub source, opens the existing signal
+  journal, derives a source-bound no-coverage seed without a provider call,
+  creates a fresh deadline-leased `GitHubRestClient` per delivery, and passes
+  explicit transport, signed-core, and provider/store budgets to one runtime.
+- Added the fixed owner-only `github/webhook.env` service contract. The unit
+  persists only its path; installation/start and readiness reject missing,
+  symlinked, foreign-owned, permissive, or oversized files without reading or
+  projecting secret values.
 - Added user-service render/install/stop/status/uninstall helpers and CLI
   configuration, service, readiness, and support commands. No real service was
   installed during this lane.
-- Focused lifecycle tests and compilation pass before the #105 join. Final
-  executable acceptance remains blocked: canonical #105 must provide
-  `github_webhook_runtime` construction contract (or the join must adapt this
-  deferred factory) with the frozen bind/serve/shutdown lifecycle contract.
+- A real-socket builder tracer uses configured source authority, an existing
+  temporary SQLite journal, a signed fixture, and a provider-free authoritative
+  attempt fake to prove commit-before-ack through the joined executable module.
+  The executable interface remains bound address, blocking main-thread
+  `serve()`, and bounded no-argument `shutdown()`.
 
 ## TDD sequence
 
@@ -106,6 +114,22 @@ Final validation occurs only after merging canonical #105 into this branch.
   required Python 3.11/3.12 CI after the #105 join.
 - No real service install, provider call, non-loopback bind, Cooper route,
   release, deployment, or dispatch effect.
+
+## Combined local validation | 2026-09-16
+
+- Joined lifecycle, runtime, and client focused suites passed: 18, 10, and 12
+  tests respectively.
+- Comprehensive Python passed 486 tests in 17.939 seconds; the OpenClaw plugin
+  tier passed 12 tests. Compilation, diff hygiene, and the active planning
+  audit passed with only its accepted legacy baseline.
+- The first packaging command failed because the selected interpreter's
+  installed `build` package has no executable module. The failure was retained;
+  `uv build --wheel` then produced the isolated candidate wheel with SHA-256
+  `86c4d59fcbdca38409d7a198bbdfa454d7e3d36b656aa44ecdee98a60624e766`.
+  An isolated target install read back version `0.5.2` and entry point
+  `codex-wake-github-webhook = codex_wake.webhook_listener:main`.
+- This evidence is local and provider-free. Independent review and required
+  Python 3.11/3.12 PR checks remain before #106 acceptance.
 
 ## Stop conditions
 
