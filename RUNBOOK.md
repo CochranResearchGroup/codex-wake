@@ -3372,3 +3372,31 @@ the two active implementation lanes within the configured WIP limit. Movement
 is `outcome_progress`. Next action: merge this assignment projection, execute
 both lanes in parallel, integrate #105 first, join #106 to canonical main, and
 run one independent review over the combined product surface.
+
+## Turn 159 | 2026-09-16
+
+Accepted #105 and joined its canonical runtime into the #106 product lane.
+
+- The Terra-high #105 worker returned a bounded no-queue, main-thread deadline
+  bridge and production-client proof. Effective runtime identity was not
+  exposed, so no allocation claim is made.
+- PR #115 passed required Python 3.11/3.12 release gates and squash-merged at
+  canonical `1d32bb1d12531ab41fb36c0180fc0510be8e1c88`; issue #105 closed and
+  its remote branch, local branch, and isolated worktree were removed.
+- The Terra-medium #106 worker produced configuration, CLI, executable,
+  user-service, readiness/support, packaging, and tests. Primary correction
+  passes added explicit non-loopback authority, fixed transport limits,
+  MainPID-plus-proc socket ownership, safe disable/start/uninstall custody, a
+  per-request secret resolver, explicit provider/store timeout, and the fixed
+  owner-only `github/webhook.env` contract.
+- The combined real-socket tracer now constructs canonical #105 from one
+  enabled GitHub source and an existing temporary journal, verifies a signed
+  provider-free attempt, durably commits, and only then acknowledges success.
+- No provider call, installed service, non-loopback bind, Cooper route, live
+  delivery, wake evaluation/dispatch, release, deployment, or global install
+  occurred.
+
+Acceptance state: P53 remains open; #105 is accepted and cleaned up, while #106
+is in combined local validation before independent review and PR. Movement is
+`outcome_progress`. Next action: complete comprehensive/plugin/package checks,
+run one fresh closed-world review, then publish #106 for required CI.

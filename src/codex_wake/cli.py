@@ -349,6 +349,57 @@ def build_parser() -> argparse.ArgumentParser:
     add_target_options(github_completed)
     add_monitor_gate_options(github_completed)
 
+    github_webhook = subparsers.add_parser(
+        "github-webhook", help="configure and operate one bounded local GitHub webhook listener"
+    )
+    github_webhook_subparsers = github_webhook.add_subparsers(
+        dest="github_webhook_command", required=True
+    )
+    webhook_source = github_webhook_subparsers.add_parser(
+        "source", help="manage owner-only nonsecret webhook listener configuration"
+    )
+    webhook_source_subparsers = webhook_source.add_subparsers(
+        dest="github_webhook_source_command", required=True
+    )
+    webhook_configure = webhook_source_subparsers.add_parser("configure")
+    webhook_configure.add_argument("--source", required=True, dest="source_instance")
+    webhook_configure.add_argument("--bind-address", default="127.0.0.1")
+    webhook_configure.add_argument("--port", type=int, default=8820)
+    webhook_configure.add_argument(
+        "--allow-non-loopback", action="store_true",
+        help="explicitly allow one non-loopback numeric bind address",
+    )
+    webhook_configure.add_argument("--secret-ref", required=True)
+    webhook_configure.add_argument("--previous-secret-ref")
+    webhook_configure.add_argument("--max-body-bytes", type=int, default=262_144)
+    webhook_configure.add_argument("--max-connections", type=int, default=8)
+    webhook_configure.add_argument("--request-timeout", type=float, default=15.0, dest="request_timeout_seconds")
+    webhook_configure.add_argument("--operation-timeout", type=float, default=8.0, dest="operation_timeout_seconds")
+    webhook_configure.add_argument("--shutdown-timeout", type=float, default=10.0, dest="shutdown_timeout_seconds")
+    webhook_enabled = webhook_configure.add_mutually_exclusive_group(required=True)
+    webhook_enabled.add_argument("--enabled", action="store_true", dest="enabled")
+    webhook_enabled.add_argument("--disabled", action="store_false", dest="enabled")
+    webhook_list = webhook_source_subparsers.add_parser("list")
+    webhook_list.add_argument("--json", action="store_true", dest="as_json")
+    webhook_show = webhook_source_subparsers.add_parser("show")
+    webhook_show.add_argument("source_instance")
+    webhook_show.add_argument("--json", action="store_true", dest="as_json")
+    webhook_service = github_webhook_subparsers.add_parser("service")
+    webhook_service_subparsers = webhook_service.add_subparsers(dest="github_webhook_service_command", required=True)
+    for action in ("install", "start", "stop", "status", "uninstall"):
+        service_action = webhook_service_subparsers.add_parser(action)
+        service_action.add_argument("--source", required=True, dest="source_instance")
+        service_action.add_argument("--executable-path")
+        service_action.add_argument("--unit-dir", type=Path)
+        service_action.add_argument("--log-path", type=Path)
+        service_action.add_argument("--json", action="store_true", dest="as_json")
+        if action == "install":
+            service_action.add_argument("--no-start", action="store_true")
+    for action in ("readiness", "support"):
+        probe = github_webhook_subparsers.add_parser(action)
+        probe.add_argument("--source", required=True, dest="source_instance")
+        probe.add_argument("--json", action="store_true", dest="as_json")
+
     pid = subparsers.add_parser("pid", help="create a wake when a process id exits")
     pid.add_argument("pid", type=int)
     pid.add_argument("prompt", nargs=argparse.REMAINDER)
@@ -1207,6 +1258,86 @@ def _github_source_summary(source) -> dict[str, object]:
     }
 
 
+def github_webhook_command(args: argparse.Namespace, root: Path) -> int:
+    from .webhook_lifecycle import (
+        WebhookListenerConfig, WebhookListenerStore, build_webhook_service_config,
+        disable_webhook_listener, install_webhook_service, listener_summary, start_webhook_service, stop_webhook_service,
+        uninstall_webhook_service, webhook_readiness, webhook_service_status, webhook_support,
+    )
+
+    store = WebhookListenerStore(root)
+    if args.github_webhook_command == "source":
+        action = args.github_webhook_source_command
+        try:
+            if action == "configure":
+                listener = WebhookListenerConfig(
+                    source_instance=args.source_instance, address=args.bind_address, port=args.port,
+                    secret_ref=args.secret_ref, previous_secret_ref=args.previous_secret_ref,
+                    enabled=args.enabled, allow_non_loopback=args.allow_non_loopback,
+                    max_body_bytes=args.max_body_bytes, max_connections=args.max_connections,
+                    request_timeout_seconds=args.request_timeout_seconds,
+                    operation_timeout_seconds=args.operation_timeout_seconds,
+                    shutdown_timeout_seconds=args.shutdown_timeout_seconds,
+                )
+                current = next((item for item in store.listeners() if item.source_instance == listener.source_instance), None)
+                listener = (disable_webhook_listener(store, listener) if current is not None and current.enabled and not listener.enabled
+                            else store.configure(listener))
+                print(f"source={listener.source_instance}\nenabled={str(listener.enabled).lower()}\nconfig={store.path}")
+                return 0
+            listeners = store.listeners()
+            if action == "show":
+                listeners = tuple(item for item in listeners if item.source_instance == args.source_instance)
+                if not listeners:
+                    raise WakeError("webhook listener is not configured")
+            summaries = [listener_summary(item) for item in listeners]
+            if args.as_json:
+                print(json.dumps(summaries[0] if action == "show" else {"listeners": summaries}, sort_keys=True))
+            else:
+                for item in summaries:
+                    print(f"source={item['source_instance']} enabled={str(item['enabled']).lower()} address={item['address']} port={item['port']} path={item['path']}")
+            return 0
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+    if args.github_webhook_command in {"readiness", "support"}:
+        result = (webhook_readiness if args.github_webhook_command == "readiness" else webhook_support)(
+            wake_root=root, source_instance=args.source_instance
+        )
+        if args.as_json:
+            print(json.dumps(result, sort_keys=True))
+        else:
+            print(f"status={result.get('status', result.get('webhook_listener', {}).get('status', 'unknown'))}")
+        return 0 if result.get("status", result.get("webhook_listener", {}).get("status")) != "blocked" else 1
+    try:
+        config = build_webhook_service_config(
+            wake_root=root, source_instance=args.source_instance,
+            executable_path=args.executable_path, unit_dir=args.unit_dir, log_path=args.log_path,
+            validate_executable=args.github_webhook_service_command == "install",
+        )
+        action = args.github_webhook_service_command
+        if action == "install":
+            install_webhook_service(config, start=not args.no_start)
+            result: dict[str, object] = {"service": config.name, "unit": str(config.unit_path), "installed": True}
+        elif action == "start":
+            start_webhook_service(config)
+            result = {"service": config.name, "started": True}
+        elif action == "stop":
+            stop_webhook_service(config)
+            result = {"service": config.name, "stopped": True}
+        elif action == "uninstall":
+            uninstall_webhook_service(config)
+            result = {"service": config.name, "uninstalled": True}
+        else:
+            active, enabled = webhook_service_status(config)
+            result = {"service": config.name, "active": active, "enabled": enabled, "unit": str(config.unit_path)}
+    except (ValueError, WakeError) as exc:
+        raise WakeError(str(exc)) from None
+    if args.as_json:
+        print(json.dumps(result, sort_keys=True))
+    else:
+        print(" ".join(f"{key}={value}" for key, value in result.items()))
+    return 0
+
+
 def create_pid(args: argparse.Namespace, root: Path) -> int:
     pid = args.pid
     if pid <= 0:
@@ -1987,6 +2118,8 @@ def run(argv: list[str] | None = None) -> int:
         return systemd_unit_command(args, root)
     if args.command == "github-ci":
         return github_ci_command(args, root)
+    if args.command == "github-webhook":
+        return github_webhook_command(args, root)
     if args.command == "pid":
         return create_pid(args, root)
     if args.command == "list":

@@ -20,6 +20,7 @@ dependencies = [
 codex-wake = "codex_wake.cli:main"
 codex-waked = "codex_wake.daemon:main"
 codex-wake-hook = "codex_wake.hook:main"
+codex-wake-github-webhook = "codex_wake.webhook_listener:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
