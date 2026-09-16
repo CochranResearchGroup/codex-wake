@@ -113,3 +113,48 @@ PR and CI accept the signed durable-ingest join on canonical main; issue #105
 closes from exact evidence; branch/worktree/active-lane custody is cleaned up;
 and the #106 join can construct the accepted runtime without weakening its
 deadlines or authority boundary.
+
+## Local implementation evidence | 2026-09-16
+
+Implementation branch base was refreshed by a non-rewriting merge of
+`origin/main` at `b94ba448fdf2db7b4862ae17a511aa995c586393`. The new internal
+join is `codex_wake.github_webhook_runtime.GitHubWebhookRuntime`. Its public
+lifecycle is the actual `address` readback, blocking main-thread `serve()`,
+and bounded `shutdown()`; the latter uses the existing immutable
+`WebhookHTTPConfig.shutdown_timeout` budget.
+
+`WebhookHTTPServer` serves sockets on `github-webhook-http`. Its injected
+callback can admit only one bridge delivery and otherwise returns `503 BUSY`;
+it has no application queue. The main-thread controller performs secret
+resolution, a fresh attempt-client factory call, verified attempt read,
+checkpoint lookup, and journal ingestion under one POSIX absolute deadline.
+The persisted ingress object remains singular for its bounded rate and
+delivery caches. `GitHubRestClient` defaults remain polling-owned; its optional
+deadline lease is accepted only while the owning main-thread timer context is
+active, so it cannot install a nested timer or be reused after the owner exits.
+
+The first real-socket tracer was RED with the new runtime module absent and
+GREEN after the minimal controller was added. Follow-on focused integration
+tests cover commit-before-`200`, same and changed delivery replay, poll-first
+and reopened-journal convergence, timeout recovery, disconnect after admission,
+secret/provider/store failures, no-queue bridge saturation, and occupied-port
+ownership. They use temporary SQLite journals, loopback only, and provider-free
+fakes; no wake evaluation, dispatch, provider request, installed runtime,
+non-loopback bind, GitHub mutation, push, or merge occurred.
+
+Validation on local Python 3.12.13:
+
+- `PYTHONPATH=src python -m unittest discover -s tests -p test_github_webhook_runtime.py`: 9 passed.
+- `PYTHONPATH=src python -m unittest discover -s tests -p test_github_client.py`: 12 passed.
+- Existing webhook core, HTTP transport, and polling focused suites: 12, 18,
+  and 21 passed respectively.
+- `PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'`:
+  467 passed in 15.209 seconds.
+- `npm --prefix plugins/openclaw-codex-wake test`: 12 passed.
+- `python -m compileall -q src tests .codex/hooks`, `git diff --check`, and
+  the active planning-contract audit: passed (the audit reports only its
+  accepted legacy baseline findings).
+
+Remaining boundary: this is a local implementation receipt only. Required
+Python 3.11/3.12 CI, review, PR integration, and the #106 executable/service
+construction remain outside this branch's authority and are not claimed here.
