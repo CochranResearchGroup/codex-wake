@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P53-C5
 Issue: #108
-Branch: `feat/issue-108-cooper-ingress`
+Branch: `chore/issue-108-ingress-qualification`
 Target: `main`
 Integration: `squash`
 External repository: `CochranResearchGroup/cooper-webservices`
@@ -11,17 +11,19 @@ External branch: `feat/codex-wake-webhook-ingress-108`
 
 ## Current state
 
-Issue #107 is accepted at canonical `31b2e6c9f64661a0b12b8433cfc3d9da7655ac39`.
-Its disposable qualifier is removed: no matching user unit or process exists,
-port 8820 is free, and the ordinary user installation does not contain the
-qualified webhook executable. The retained #107 recovery root is immutable
-failed-attempt evidence and will not be reused.
+Issue #107 is accepted and its disposable qualifier is removed. The #108
+runner and evidence contract are accepted on canonical Codex Wake main at
+`033d2cc7187e4448e2809299701a2975d0790e80` after both hosted release gates
+passed. The clean Cooper authority is `CochranResearchGroup/cooper-webservices`
+main at `cd0d60f91d870c1372b2d7d5f8e16602f52f1d6a`; its reviewed inventory and
+renderer emit only the frozen exact path-plus-method routes. The generated
+bastion snippet has SHA-256
+`ffcb4efabc644d9da705e3369be043de28fe5c8f3b4850681e002ca2f5a68a64`.
 
-The clean Cooper authority is `CochranResearchGroup/cooper-webservices` main at
-`5fcce954e2acca1bce5b1fd0e49eca9fda2a2cab`. Its inventory schema validates
-exact path and method selectors, but the external render paths still assume
-`path_prefix` and both Cooper and bastion render unconditional host catchalls.
-That gap blocks safe publication until it is corrected and reviewed.
+No #108 live effect has occurred. Port 8820 remains unclaimed, no matching C5
+unit or process exists, the local route has not been rendered, and the bastion
+target remains absent. The live qualification must re-read those boundaries
+before consuming the one canary establishment or the one external publication.
 
 A disposable network probe proved that Docker Desktop Traefik can reach a WSL
 service bound only to `127.0.0.1`; no non-loopback bind or wildcard authority is
