@@ -9,7 +9,7 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: b12d4254173a70b44ddbf7929a7ec35051db6dbd
+    checkpoint: 76b3d23e9b43349210a74e6c77a8533b5c4dc953
     remote_ref: refs/remotes/origin/feat/issue-82-source-registry-contract
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#82]
