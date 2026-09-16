@@ -53,6 +53,7 @@ class FakeProvider:
         self.fail_write = False
         self.fail_readback = False
         self.readback_hook_id: int | None = None
+        self.update_result_hook_id: int | None = None
 
     def list_hooks(self, *, repository_id: int) -> tuple[ProviderHook, ...]:
         self.calls.append(("list", repository_id))
@@ -70,7 +71,7 @@ class FakeProvider:
         self.calls.append(("update", hook_id))
         if self.fail_write:
             raise RuntimeError("provider result uncertain")
-        hook = hook_for(binding, hook_id)
+        hook = hook_for(binding, self.update_result_hook_id or hook_id)
         self.hooks = [hook if item.hook_id == hook_id else item for item in self.hooks]
         return hook
 
@@ -284,6 +285,18 @@ class ManagedWebhookReconciliationTests(unittest.TestCase):
         self.assertEqual((receipt.state, receipt.hook_id), (OperationState.UNKNOWN, 101))
         saved = self.store.load("wake-owner-1")
         self.assertEqual((saved.lifecycle, saved.provider_hook_id), (LifecycleState.UNKNOWN, 101))
+
+    def test_update_ambiguity_never_replaces_owned_hook_id(self) -> None:
+        owned = self.store.save(
+            replace(attributed(self.item, 9), lifecycle=LifecycleState.ACTIVE),
+            expected_generation=self.item.generation,
+        )
+        self.provider.hooks = [hook_for(owned, 9, active=False)]
+        self.provider.update_result_hook_id = 999
+        receipt = self.reconciler.execute(self.reconciler.preview("wake-owner-1"))
+        self.assertEqual((receipt.state, receipt.hook_id), (OperationState.UNKNOWN, 9))
+        saved = self.store.load("wake-owner-1")
+        self.assertEqual((saved.lifecycle, saved.provider_hook_id), (LifecycleState.UNKNOWN, 9))
 
     def test_ambiguous_write_enters_unknown_and_rejects_second_write(self) -> None:
         self.provider.fail_write = True

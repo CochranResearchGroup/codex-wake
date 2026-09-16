@@ -571,10 +571,13 @@ class ManagedWebhookReconciler:
             ):
                 raise RuntimeError("provider readback did not prove desired hook")
         except Exception:
+            ambiguous_hook_id = (
+                returned_hook_id if plan.operation is OperationKind.CREATE else plan.hook_id
+            )
             receipt = OperationReceipt(
                 operation_id=intent.operation_id, operation=plan.operation, state=OperationState.UNKNOWN,
                 generation=pending_binding.generation + 1, inventory=plan.inventory,
-                hook_id=returned_hook_id if returned_hook_id is not None else plan.hook_id,
+                hook_id=ambiguous_hook_id,
                 code="WRITE_OR_READBACK_UNRESOLVED",
             )
             saved = self.store._save_unlocked(
