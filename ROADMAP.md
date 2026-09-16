@@ -726,10 +726,10 @@ Completion evidence:
 
 State: OPEN
 
-Current State: PR #86 accepted the P52 coordination checkpoint at canonical
-`b554a0f`. Issue #82 is integration-ready in PR #89 at `e9e5503` and freezes
-the closed built-in source-family registry plus provider-free conformance fixture.
-Issues #83 and #84 remain blocked pending that contract; #85 joins their output
+Current State: PR #89 accepted issue #82 at canonical `f8059cd`, freezing the
+closed built-in source-family registry plus provider-free conformance fixture.
+Issues #83 and #84 are assigned as disjoint parallel migrations with shared
+daemon integration reserved to the primary; #85 joins their output
 into operator surfaces and one isolated provider-free installed-wheel smoke. No
 new source, provider effect, live dispatch, arbitrary plugin loading, release,
 deployment, or global installation refresh is authorized.
