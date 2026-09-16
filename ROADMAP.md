@@ -758,13 +758,13 @@ State: OPEN
 
 Current State: Issues #104 through #106 accepted the bounded HTTP transport,
 main-thread durable signed-ingest join, and supported product lifecycle on
-canonical main, most recently through PR #116 at `63e3a19`. Issue #107 is now
-eligible for isolated installed-wheel and loopback service qualification;
-#108 and #109 remain dependency-blocked for Cooper/bastion HTTPS publication
-and one live GitHub delivery. The shared ingress repository was cleaned,
-validated, structured into two final commits, and pushed at `5fcce95` before
-P53 use. No installed listener, external ingress route, provider webhook, or
-live dispatch exists yet.
+canonical main, most recently through PR #116 at `63e3a19`. Issue #107 is the
+active isolated installed-wheel and loopback-service qualification under Plan
+0074; #108 and #109 remain dependency-blocked for Cooper/bastion HTTPS
+publication and one live GitHub delivery. The shared ingress repository was
+cleaned, validated, structured into two final commits, and pushed at `5fcce95`
+before P53 use. No installed listener, external ingress route, provider
+webhook, or live dispatch exists yet.
 
 Plan: [Signed GitHub webhook ingress goal campaign](docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md)
 
