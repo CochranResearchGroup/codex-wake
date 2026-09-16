@@ -517,6 +517,22 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "logical wake"):
             smoke.assert_poll_convergence(weak)
 
+    def test_generated_poll_fixture_opens_module_with_current_reader_publisher(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx = context(Path(tmp))
+            ctx.fixture_dir.mkdir(parents=True)
+            script = smoke.write_poll_fixture(ctx, smoke.make_fixture(), "wake_fixture")
+            body = script.read_text(encoding="utf-8")
+        self.assertIn(
+            "from codex_wake.signal_records import WakeRecordPublisher, "
+            "current_reader_capability, signal_journal_path",
+            body,
+        )
+        self.assertIn(
+            "record_publisher=WakeRecordPublisher(root, current_reader_capability(root))",
+            body,
+        )
+
     def test_failed_uninstall_preserves_unit_wake_fixture_and_recovery_root(self) -> None:
         with tempfile.TemporaryDirectory() as outer:
             root = Path(outer) / "recovery"
@@ -907,6 +923,10 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
                 EvaluationLimits(10),
             )
             self.assertIsInstance(matched, Matched)
+            self.assertTrue(reopened.reconcile_match_publication(armed.wake_id))
+            wake_root = database.parent / "wake"
+            self.assertFalse((wake_root / "pending" / f"{armed.wake_id}.json").exists())
+            self.assertTrue((wake_root / "firing" / f"{armed.wake_id}.json").is_file())
             with sqlite3.connect(database) as connection:
                 count = connection.execute(
                     "SELECT COUNT(*) FROM receipts WHERE source='github' AND source_instance=?",
