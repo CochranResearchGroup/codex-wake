@@ -754,21 +754,21 @@ Acceptance target:
 
 ## P53 | Signed GitHub Webhook Ingress
 
-State: OPEN
+State: CLOSED
 
-Current State: Issues #104 through #106 accepted the bounded HTTP transport,
-main-thread durable signed-ingest join, and supported product lifecycle on
-canonical main, most recently through PR #116 at `63e3a19`. Issue #107 accepted
-the isolated installed-wheel/service lifecycle and provider-free polling join
-through PR #119 and verification 0077. Issue #108 is now accepted through Plans
-0078/0080 and verification 0079: the exact Cooper/bastion route is durable at
-bastion commit `4e7bc69`, raw/local/Cooper/public checks preserve one frozen
-signed occurrence, and provider/dispatch counters remained zero. Its bounded
-successor cleanup removed the canary and a fresh OS census proves no unit,
-process, or 8820 listener. The first TLS-race receipt/root remain preserved as
-failed evidence. Issue #109 is now eligible for the separately gated GitHub
-provider mutation and one live delivery observation; no provider webhook or
-live dispatch exists yet.
+Current State: Issues #104 through #109 are accepted. The bounded listener,
+durable signed-ingest join, supported lifecycle, installed qualification, and
+exact Cooper/bastion route are canonical. The separately gated live successor
+created one exact `workflow_run` hook, squash-merged docs-only PR #133 as
+`5f21ed1`, and accepted provider delivery
+`80e50480-b201-11f1-9387-9a306ef1c969` for successful run `35138287516/1`.
+The durable occurrence converged `0 -> 1 -> 1`; the wake moved pending to local
+firing with dispatch disabled. The hook was deleted, the successor secret
+retired, and the isolated service and root removed. Fresh readback shows no
+hook, unit, process, or port-8820 listener. Retained failed predecessor evidence
+remains owner-only and secret-free. Verification 0081 binds the accepted
+receipt. No release, global install, ingress mutation, redelivery, or live
+target dispatch occurred.
 
 Plan: [Signed GitHub webhook ingress goal campaign](docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md)
 
@@ -787,8 +787,8 @@ Acceptance target:
 - Public ingress exposes only the HMAC-authenticated webhook path; provider
   mutation and target dispatch remain separate authorities.
 
-Acceptance state: #108 is locally accepted and integration-ready; its exact
-route remains intentionally available for #109 while the qualification canary
-is absent. Movement is `outcome_progress`. Next action: merge the #108 closeout
-through required CI, close the issue from canonical readback, then begin #109's
-provider preflight without reusing canary state or inferring dispatch authority.
+Acceptance state: P53 is accepted and in final integration. Movement is
+`outcome_progress`. Next action: merge the final evidence PR through both
+hosted gates, close #109 and #103 from canonical readback, and reconcile the
+short-lived closeout branch/worktree without changing the retained ingress
+route or predecessor evidence.

@@ -3729,3 +3729,36 @@ eligible only after the closeout PR passes required CI and canonical-main
 readback. Movement is `outcome_progress`. Next action: publish and merge the
 #108 closeout, close the issue, then preflight #109's separate provider mutation
 without reusing canary state or dispatch authority.
+
+## Turn 173 | 2026-09-16
+
+Accepted the separately gated live GitHub webhook lifecycle for #109 and moved
+P53 to final closeout.
+
+- Corrective PR #132 had already merged as `27dedc0`. An independent
+  provider-free check installed that exact wheel with `--no-deps` in a fresh
+  venv without `dbus-next` and launched both CLI and daemon entry points,
+  confirming the bounded GitHub path before the one successor effect attempt.
+- The fresh dispatch-disabled runtime armed wake
+  `wake_3da51cbdd28d4bde9bb7e482e4c6c4d5`; exact hook `680422493` was created
+  for only `workflow_run` with the accepted callback and fresh secret.
+- Green docs-only PR #133 squash-merged once as `5f21ed1`. GitHub run
+  `35138287516/1` completed successfully for that exact SHA, and provider
+  delivery `80e50480-b201-11f1-9387-9a306ef1c969` returned 200.
+- The verified durable occurrence converged `0 -> 1 -> 1`; the no-dispatch
+  poll moved the wake `pending -> firing_local`. Redelivery and dispatch
+  counters remained zero.
+- Hook deletion, successor secret retirement, service uninstall, and isolated
+  root removal each completed once. Fresh readback proves hook inventory empty,
+  unit inactive/not-found, MainPID zero, and no port-8820 listener. The retained
+  predecessor root remains owner-only and secret-free.
+- Verification 0081 binds the sanitized external receipt at SHA-256
+  `06326bf8e561f445ca4ee7ded088b7a11a101e180c6ec75f60be89f155a7b385`.
+  No release, global install, ingress mutation, redelivery, or live target
+  dispatch occurred.
+
+Acceptance state: #109 and parent #103 satisfy their stated outcomes and are
+ready to close through the final evidence PR after both hosted release gates
+and canonical-main readback. Movement is `outcome_progress`. Next action:
+publish the closeout branch, pass CI, squash merge, verify issue/ref custody,
+and remove the short-lived closeout worktree.
