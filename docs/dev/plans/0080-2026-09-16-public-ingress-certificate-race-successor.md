@@ -1,6 +1,6 @@
 # Public ingress certificate-race successor
 
-State: OPEN
+State: CLOSED
 Lane: P53-C5R1
 Issue: #108
 Branch: `fix/issue-108-public-qualification-retry-1`
@@ -9,6 +9,17 @@ Integration: `squash`
 Predecessor: `docs/dev/plans/0078-2026-09-16-cooper-webhook-ingress-publication.md`
 
 ## Current state
+
+The qualification-only successor is accepted. Exact canonical candidate
+`3a4dbd44af9231848b722fbc5127affe9412bdda` passed raw, local, Cooper-Host,
+and public certificate-verifying HTTPS checkpoints in order with one frozen
+occurrence, zero provider factory calls, zero dispatch calls, and leak-free
+responses. Cleanup proved the exact unit/process/listener absent and removed
+the successor root; a fresh OS census independently confirmed that result.
+Verification 0079 records both the accepted receipt and the preserved first
+failure. The public route remains durable and unchanged for #109.
+
+The historical pre-successor state follows.
 
 Plan 0078 consumed its one canary establishment and one bastion publication.
 Raw, local, and Cooper-Host checkpoints passed; the first public TLS handshake

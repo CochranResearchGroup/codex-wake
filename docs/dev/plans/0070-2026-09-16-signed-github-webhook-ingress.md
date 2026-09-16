@@ -6,7 +6,7 @@ Issues: #103, #104, #105, #106, #107, #108, #109
 Branch: `multi-lane; see docs/dev/active-lanes.yaml`
 Goal ID: P53-G1
 Goal Version: P53-G1-v2
-Checkpoint: P53-G1-C05
+Checkpoint: P53-G1-C06
 
 ## Goal objective
 
@@ -53,13 +53,14 @@ now canonical. #105 merged through PR #115 at `1d32bb1`; #106 joined it, passed
 independent combined review and both required CI release gates, and merged
 through PR #116 at `63e3a19`. Issues #104 through #106 are accepted. #107 is
 accepted through PR #119 plus verification 0077, and its disposable qualifier
-is removed. #108's Plan 0078 canary passed raw, local, and Cooper-Host checks,
-then consumed its one external publication and failed the first public TLS
-handshake without retry. The exact route is durable at bastion commit `4e7bc69`
-and its hostname certificate is now present, but public acceptance remains
-unproven. Plan 0080 owns one explicitly dispositioned qualification-only retry;
-it may not mutate or restart ingress. #109 remains dependency-blocked. No
-installed listener, provider webhook, or live dispatch currently exists.
+is removed. #108 is accepted through Plans 0078/0080 and verification 0079.
+The first public TLS handshake failed without retry after the single external
+publication; the bounded qualification-only successor then proved the same
+frozen occurrence across raw, local, Cooper-Host, and certificate-verifying
+public HTTPS. Bastion commit `4e7bc69` retains the exact route; the canary is
+removed with no process or listener. #109 is now eligible for its separately
+gated GitHub provider mutation and one live delivery observation. No installed
+listener, provider webhook, or live dispatch currently exists.
 
 ## Architecture and security decisions
 

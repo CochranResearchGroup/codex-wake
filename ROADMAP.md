@@ -758,22 +758,17 @@ State: OPEN
 
 Current State: Issues #104 through #106 accepted the bounded HTTP transport,
 main-thread durable signed-ingest join, and supported product lifecycle on
-canonical main, most recently through PR #116 at `63e3a19`. Issue #107 is the
-active isolated installed-wheel and loopback-service qualification under Plan
-0075 after Plan 0074 failed safely at the PrivateTmp executable boundary. The
-source-only successor correction at `710c001` enabled the installed service to
-pass readiness, manual restart, and all three signed delivery checks. Plan 0075
-then failed safely at its final source-only polling projection because the
-fixture omitted the daemon's record publisher. Plans 0076 and 0077 repaired the
-fixture and a dropped GitHub health code/time, then passed strict provider-free
-convergence with zero provider or dispatch calls. PR #119 passed both release
-gates and squash-merged as `920e5b8`; canonical-main validation passed and
-GitHub closed #107. Issue #108 is now eligible for its required Cooper/bastion
-HTTPS ingress skill, while #109 remains dependency-blocked on that publication
-for one live GitHub delivery. The shared ingress repository was
-cleaned, validated, structured into two final commits, and pushed at `5fcce95`
-before P53 use. No retained installed listener, external ingress route, provider
-webhook, or live dispatch exists yet.
+canonical main, most recently through PR #116 at `63e3a19`. Issue #107 accepted
+the isolated installed-wheel/service lifecycle and provider-free polling join
+through PR #119 and verification 0077. Issue #108 is now accepted through Plans
+0078/0080 and verification 0079: the exact Cooper/bastion route is durable at
+bastion commit `4e7bc69`, raw/local/Cooper/public checks preserve one frozen
+signed occurrence, and provider/dispatch counters remained zero. Its bounded
+successor cleanup removed the canary and a fresh OS census proves no unit,
+process, or 8820 listener. The first TLS-race receipt/root remain preserved as
+failed evidence. Issue #109 is now eligible for the separately gated GitHub
+provider mutation and one live delivery observation; no provider webhook or
+live dispatch exists yet.
 
 Plan: [Signed GitHub webhook ingress goal campaign](docs/dev/plans/0070-2026-09-16-signed-github-webhook-ingress.md)
 
@@ -791,3 +786,9 @@ Acceptance target:
   explicit receipt.
 - Public ingress exposes only the HMAC-authenticated webhook path; provider
   mutation and target dispatch remain separate authorities.
+
+Acceptance state: #108 is locally accepted and integration-ready; its exact
+route remains intentionally available for #109 while the qualification canary
+is absent. Movement is `outcome_progress`. Next action: merge the #108 closeout
+through required CI, close the issue from canonical readback, then begin #109's
+provider preflight without reusing canary state or inferring dispatch authority.

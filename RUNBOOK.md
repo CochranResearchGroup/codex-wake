@@ -3695,3 +3695,37 @@ Acceptance state: #107 is closed and accepted on canonical main; #108 is now
 eligible for its required ingress skill, while #109 remains blocked on #108.
 Movement is `outcome_progress`. Next action: finish this docs-only custody PR,
 remove the merged #107 branch/worktree, then begin #108 with the ingress skill.
+
+## Turn 172 | 2026-09-16
+
+Accepted the exact Cooper/bastion webhook ingress for #108 through one retained
+failure and one bounded qualification-only successor.
+
+- Cooper renderer/inventory PR #1 merged at `cd0d60f`; Codex Wake runner PR
+  #122 merged at `033d2cc`. The generated exact route has SHA-256
+  `ffcb4efabc644d9da705e3369be043de28fe5c8f3b4850681e002ca2f5a68a64`.
+- Plan 0078 raw/local/Cooper-Host checks passed, then its one bastion
+  copy/restart produced a first-handshake `SSLError`. No public retry was made.
+  Bastion commit `4e7bc69` durably records the route and failed qualification;
+  the first receipt/root remain preserved.
+- PR #125 corrected only C5 cleanup evidence: production-equivalent bind proof
+  distinguishes TIME_WAIT from an active listener, and unrelated failed-unit
+  drift is separately recorded. Shared C4 defaults remain strict. Both hosted
+  gates passed and the correction merged at `7c28363`.
+- Plan 0080 retry 1 used a fresh root, fixture, secret, delivery, wake, and
+  receipt without rendering, copying, or restarting ingress. Raw returned
+  `COMMITTED`; local, Cooper-Host, and certificate-verifying public HTTPS each
+  returned `DUPLICATE`. Unsigned requests returned 401 and wrong proxy selectors
+  returned 404. Provider-factory and dispatch counters remained zero.
+- Cleanup returned safe, removed the successor root, and fresh OS readback
+  proved unit not found, PID zero, no matching process, and no 8820 listener.
+  Verification 0079 binds the accepted receipt SHA-256
+  `f1d38ac56623afeb3d3d66b0072a7c0117a0209c97149849f778d42b88ad8154`
+  and the retained failure SHA-256
+  `3642b316abb16cb529da095b3f4706a08b9a4cd640d4786fd1ff5339d2d2c8e9`.
+
+Acceptance state: #108 is locally accepted and integration-ready; #109 is
+eligible only after the closeout PR passes required CI and canonical-main
+readback. Movement is `outcome_progress`. Next action: publish and merge the
+#108 closeout, close the issue, then preflight #109's separate provider mutation
+without reusing canary state or dispatch authority.
