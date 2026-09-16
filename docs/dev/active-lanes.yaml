@@ -9,9 +9,9 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: ec2fddf47ca76370b6fc4c69ed94b6f444835856
+    checkpoint: e24afe3f88ddde501297f05b83f8300a93f2d8eb
     validation_status: runner_validated_provider_gate_pending
-    validation_ref: ec2fddf47ca76370b6fc4c69ed94b6f444835856
+    validation_ref: e24afe3f88ddde501297f05b83f8300a93f2d8eb
     remote_ref: refs/remotes/origin/feat/issue-109-live-qualification-runner
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#109]

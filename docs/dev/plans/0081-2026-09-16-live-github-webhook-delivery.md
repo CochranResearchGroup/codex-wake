@@ -37,15 +37,17 @@ Registration merged through PR #128 at canonical
 continues on the re-anchored runner branch; no runtime or provider effect was
 performed by registration.
 
-Checkpoint `ec2fddf47ca76370b6fc4c69ed94b6f444835856` implements the
+Checkpoint `e24afe3f88ddde501297f05b83f8300a93f2d8eb` implements the
 provider-free lifecycle contract and production-local adapter. It binds the
 real squash-trigger delivery to the resulting main merge SHA, stages partial
 runtime progress for fail-closed cleanup, provisions owner-only token/secret
 material, initializes a disabled source before enabling and arming it under a
 no-dispatch daemon, validates the exact loopback service, and reads the durable
-journal before and after one production no-dispatch poll. Focused C6 tests
-pass 16/16, comprehensive Python passes 557/557, the OpenClaw plugin passes
-12/12, and compilation/diff checks pass. PR #130 and closed-world review remain
+journal before and after one production no-dispatch poll. Its exact candidate
+commit/tree wheel custody, lifecycle-ledger preservation, partial-secret
+retirement, and systemd failure handling passed closed-world review. Focused C6
+tests pass 22/22, comprehensive Python passes 563/563, the OpenClaw plugin
+passes 12/12, and compilation/diff checks pass. PR #130 integration remains
 before the trigger PR and exact provider gate.
 
 ## Objective
