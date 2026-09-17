@@ -64,7 +64,9 @@ class GitHubWebhookRuntime:
                  webhook_config: WebhookConfig, resolve_secret: Callable[[str], bytes],
                  attempt_client_factory: Callable[[GitHubReadDeadline], GitHubReadClient],
                  operation_timeout: float = 10.0,
-                 now: Callable[[], datetime] = lambda: datetime.now(UTC)):
+                 now: Callable[[], datetime] = lambda: datetime.now(UTC),
+                 admitted_generations: Callable[[datetime], tuple[int, ...]] | None = None,
+                 committed_delivery: Callable[[int, str], None] | None = None):
         if (type(http_config) is not WebhookHTTPConfig or not isinstance(adapter, GitHubPollingAdapter)
                 or type(webhook_config) is not WebhookConfig or not callable(resolve_secret)
                 or not callable(attempt_client_factory) or not callable(now)
@@ -85,6 +87,7 @@ class GitHubWebhookRuntime:
         self._ingress = GitHubWebhookIngress(
             adapter, _DeliveryClient(self), module, checkpoints=checkpoints, anchor=anchor,
             config=webhook_config, resolve_secret=resolve_secret,
+            admitted_generations=admitted_generations, committed_delivery=committed_delivery,
         )
         self._http = WebhookHTTPServer(http_config, self._transfer)
         self.address = self._http.address

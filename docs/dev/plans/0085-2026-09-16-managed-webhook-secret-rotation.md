@@ -10,15 +10,26 @@ Parent plan: `docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md`
 
 ## Current state
 
-C1 is accepted on canonical `origin/main` and #139 is unblocked. The product
-has exact hook ownership, ambiguity-safe reconciliation, dual secret
-references, stale-listener rejection, and local service lifecycle. It lacks a
-durable rotation transaction, generation-specific process readiness,
-committed-delivery generation proof, deadline enforcement, and rollback.
+C1 is accepted on canonical `origin/main` and #139 is unblocked. C2 is locally
+implementation-complete at `23eaba0` and independently accepted for review.
+It now has a durable six-phase rotation transaction, generation-specific
+request attribution, process-bound runtime readiness, committed-delivery
+proof, immutable deadline enforcement, explicit expiry/rollback, polling
+identity continuity, and sanitized effect-free CLI status/preview.
 
-This provider-free lane starts from `fbd142d`. Injected provider, service,
+The public CLI intentionally exposes no rotation apply command. Provider GET
+cannot prove an HMAC generation, and the current binding contract has neither
+a secret-retirement effect adapter nor a terminal binding-consolidation
+transition. Publishing apply before those contracts exist would make provider
+rollback and durable authority disagree. Generic binding `reconcile --apply`
+is therefore fenced for the full preview/mutation/readback window whenever a
+rotation record owns the source.
+
+This provider-free lane started from `fbd142d`. Injected provider, service,
 secret, clock, and runtime boundaries are allowed; provider, service, secret,
-ingress, installation, release, and dispatch effects are not.
+ingress, installation, release, and dispatch effects are not. Canonical
+acceptance still requires the issue-linked PR, hosted gates, squash merge, and
+`origin/main` readback.
 
 ## Objective
 
@@ -83,6 +94,27 @@ and occurrence identity.
 C2-A may run beside C3-A because their initial files are disjoint. The primary
 owns shared schemas, lifecycle, runtime, CLI, authority, integration, and final
 acceptance. No nested delegation is allowed.
+
+## Implementation checkpoint
+
+- `fe727de` establishes the persisted rotation domain, durable admission
+  clock, legal phase graph, explicit rollback/expiry, and successor rules.
+- `e7f5b38` joins listener generations, exact-one HMAC attribution, durable
+  ingest callbacks, owner/source/repository/service/binding fences, process
+  attestation, delivery proof, and safe proof refresh after a pre-delivery
+  restart.
+- `23eaba0` adds redacted local status/preview, numeric generation resolution,
+  a full-duration generic-reconcile fence, and the polling occurrence-identity
+  regression through expiry and rollback.
+- Specialist review accepted the rotation causality contract. Economical
+  review accepted the final runtime-attestation and CLI/remediation checkpoints
+  after direct race and drift reproductions. The primary retained shared
+  architecture, authority, CLI, integration, and acceptance ownership.
+- Final validation passes 638 comprehensive Python tests, 12 OpenClaw plugin
+  tests, compilation, and diff hygiene on the documented checkpoint plus
+  closeout changes.
+- Provider, service, secret, ingress, installation, release, and dispatch
+  effect counts are all zero.
 
 ## Validation
 

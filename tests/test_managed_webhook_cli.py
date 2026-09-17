@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 from contextlib import redirect_stdout
+from dataclasses import replace
 from io import StringIO
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
 
 from codex_wake.cli import build_parser, github_webhook_command
+from codex_wake.github_source_config import GitHubSourceStore
+from codex_wake.managed_webhook_rotation import ManagedWebhookRotationStore, RotationRecord
+from codex_wake.managed_webhook_rotation_preview import ManagedWebhookRotationPreviewer
 from codex_wake.managed_webhooks import ManagedWebhookBinding, ManagedWebhookStore, ProviderHook
 from codex_wake.records import WakeError
 from codex_wake.webhook_lifecycle import WebhookListenerConfig, WebhookListenerStore
+from tests.test_github_polling import config as github_config
 
 
 class FakeProvider:
@@ -74,12 +80,19 @@ class ManagedWebhookCliTests(unittest.TestCase):
                 enabled=True,
             )
         )
+        GitHubSourceStore(self.root).configure(github_config(
+            source_instance="github-workflow", repository="octo/example", repository_id=42,
+            evidence_mode="positive_only",
+        ))
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
     def args(self, *values: str):
         return build_parser().parse_args(["github-webhook", "binding", *values])
+
+    def rotation_args(self, *values: str):
+        return build_parser().parse_args(["github-webhook", "rotation", *values])
 
     def configure(self, *, as_json: bool = True) -> tuple[int, str]:
         values = [
@@ -216,6 +229,81 @@ class ManagedWebhookCliTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(WakeError, "ownership is immutable"):
             github_webhook_command(installation, self.root)
+
+    def test_rotation_preview_is_local_redacted_and_fences_generic_apply(self) -> None:
+        self.configure()
+        setup_provider = FakeProvider()
+        setup_code, _, _ = self.invoke(
+            "reconcile", "github-workflow", "--apply", "--json", provider=setup_provider,
+        )
+        self.assertEqual(setup_code, 0)
+        provider = FakeProvider()
+        factory = ProviderFactory(provider)
+        output = StringIO()
+        with redirect_stdout(output):
+            code = github_webhook_command(self.rotation_args(
+                "preview", "--source", "github-workflow",
+                "--target-generation", "2", "--overlap-seconds", "900", "--json",
+            ), self.root, provider_factory=factory)
+        result = json.loads(output.getvalue())
+        self.assertEqual((code, factory.calls, provider.calls), (0, 0, []))
+        self.assertEqual(result["next_action"], "PREPARE_ROTATION")
+        self.assertEqual((result["previous_generation"], result["target_generation"]), (1, 2))
+        self.assertFalse(result["apply_supported"])
+        rendered = output.getvalue()
+        for forbidden in (
+            "WEBHOOK_SECRET_VALUE", "GITHUB_ADMIN_TOKEN_VALUE", "journal", "attestation",
+        ):
+            self.assertNotIn(forbidden, rendered)
+
+        listener_store = WebhookListenerStore(self.root)
+        listener_store.path.unlink()
+        listener_store.configure(WebhookListenerConfig(
+            source_instance="github-workflow", secret_ref="UNTRACKED_TARGET",
+            previous_secret_ref="WEBHOOK_SECRET_VALUE", enabled=True,
+        ))
+        with self.assertRaisesRegex(WakeError, "rotation authority is invalid"):
+            github_webhook_command(self.rotation_args(
+                "status", "--source", "github-workflow", "--json",
+            ), self.root, provider_factory=factory)
+        listener_store.path.unlink()
+        listener_store.configure(WebhookListenerConfig(
+            source_instance="github-workflow", secret_ref="WEBHOOK_SECRET_VALUE", enabled=True,
+        ))
+
+        binding = ManagedWebhookStore(self.root).load("github-workflow")
+        ManagedWebhookRotationStore(self.root).save(RotationRecord(
+            owner_id=binding.owner_id, canonical_root=str(self.root.resolve()), owner_uid=os.getuid(),
+            source_instance=binding.source_instance, service_id=binding.service_id,
+            binding_revision=binding.generation, previous_generation=1, target_generation=2,
+            overlap_deadline=2_000_000_000,
+        ))
+        output = StringIO()
+        with redirect_stdout(output):
+            code = github_webhook_command(self.rotation_args(
+                "status", "--source", "github-workflow", "--json",
+            ), self.root, provider_factory=factory)
+        status = json.loads(output.getvalue())
+        self.assertEqual((code, factory.calls, provider.calls), (0, 0, []))
+        self.assertEqual((status["phase"], status["next_action"]), ("PREPARED", "INTEND_DUAL_RESTART"))
+
+        previewer = ManagedWebhookRotationPreviewer(self.root)
+        with self.assertRaisesRegex(ValueError, "clock moved backwards"):
+            # Replace the fixture only in memory: persisted state remains the
+            # authoritative input used by the previewer.
+            current = ManagedWebhookRotationStore(self.root).load("github-workflow")
+            ManagedWebhookRotationStore(self.root).save(
+                replace(current, last_observed_at=10),
+                expected_revision=current.revision,
+            )
+            previewer.preview("github-workflow", now=9)
+        expired = previewer.preview("github-workflow", now=2_000_000_001)
+        self.assertEqual((expired.deadline_state, expired.next_action), ("expired", "ROLLBACK_REQUIRED"))
+
+        reconcile = self.args("reconcile", "github-workflow", "--apply", "--json")
+        with self.assertRaisesRegex(WakeError, "blocked while rotation authority exists"):
+            github_webhook_command(reconcile, self.root, provider_factory=factory)
+        self.assertEqual((factory.calls, provider.calls), (0, []))
 
 
 if __name__ == "__main__":

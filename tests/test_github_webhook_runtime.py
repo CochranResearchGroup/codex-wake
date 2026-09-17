@@ -66,6 +66,42 @@ def exchange(address, body, signature, delivery="aaaaaaaa-bbbb-cccc-dddd-eeeeeee
 
 
 class GitHubWebhookRuntimeTests(unittest.TestCase):
+    def test_rotation_callbacks_cross_the_runtime_boundary_after_durable_ingest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            module = make_module(Path(tmp) / "signals.sqlite3")
+            adapter = GitHubPollingAdapter(config(), FixtureClient([]))
+            spec = adapter.request(ref="refs/heads/main", conclusions=("success",))
+            armed = module.arm(WakeId("runtime-rotation"), spec,
+                               ArmContext("runtime", "runtime", NOW, None, make_intent().resume, adapter))
+            admissions, commits = [], []
+            runtime = GitHubWebhookRuntime(
+                WebhookHTTPConfig(request_timeout=2, shutdown_timeout=1), adapter=adapter,
+                module=module, checkpoints=module, anchor=armed.anchor,
+                webhook_config=WebhookConfig(secret_refs=("current",), secret_generations=(8,)),
+                resolve_secret=lambda ref: SECRET,
+                attempt_client_factory=lambda deadline: FixtureClient([run()]),
+                operation_timeout=1, now=lambda: NOW + timedelta(seconds=2),
+                admitted_generations=lambda now: admissions.append(now) or (8,),
+                committed_delivery=lambda generation, receipt: commits.append((generation, receipt)),
+            )
+            body, signature = signed_body()
+            result = []
+
+            def deliver():
+                result.append(exchange(runtime.address, body, signature))
+                runtime.shutdown()
+
+            client = threading.Thread(target=deliver)
+            client.start()
+            runtime.serve()
+            client.join(2)
+            self.assertFalse(client.is_alive())
+            self.assertEqual(result, [(200, "COMMITTED")])
+            self.assertEqual(admissions, [NOW + timedelta(seconds=2)])
+            self.assertEqual(len(commits), 1)
+            self.assertEqual(commits[0][0], 8)
+            self.assertIsNotNone(module.source_checkpoint("github", "github-ci"))
+
     def test_signed_loopback_delivery_commits_before_committed_response(self):
         with tempfile.TemporaryDirectory() as tmp:
             module = make_module(Path(tmp) / "signals.sqlite3")

@@ -47,7 +47,8 @@ def headers(body, secret=SECRET, **changes):
 
 
 class GitHubWebhookTests(unittest.TestCase):
-    def setup_ingress(self, database, *, client=None, settings=None, resolver=None, monotonic=None, **store_options):
+    def setup_ingress(self, database, *, client=None, settings=None, resolver=None, monotonic=None,
+                      admitted_generations=None, committed_delivery=None, **store_options):
         self.client = client or FixtureClient([run()])
         self.adapter = GitHubPollingAdapter(config(), self.client)
         self.module = make_module(database, **store_options)
@@ -58,6 +59,7 @@ class GitHubWebhookTests(unittest.TestCase):
             self.adapter, self.client, self.module, checkpoints=self.module, anchor=self.armed.anchor,
             config=settings or WebhookConfig(secret_refs=("current",)),
             resolve_secret=resolver or (lambda ref: SECRET), **({"monotonic": monotonic} if monotonic else {}),
+            admitted_generations=admitted_generations, committed_delivery=committed_delivery,
         )
 
     def test_signed_delivery_is_durable_before_ack_and_polling_is_exact_duplicate(self):
@@ -101,6 +103,83 @@ class GitHubWebhookTests(unittest.TestCase):
                                     now=NOW + timedelta(seconds=2))
             self.assertEqual(result.status, 200)
             self.assertEqual(calls[-2:], ["current", "previous"])
+
+    def test_rotation_admission_attributes_the_committed_generation_and_receipt(self):
+        admissions, committed = [], []
+        old = b"prior-fixture-only-webhook-secret"
+        settings = WebhookConfig(secret_refs=("current", "previous"), secret_generations=(8, 7))
+        with tempfile.TemporaryDirectory() as tmp:
+            ingress = self.setup_ingress(
+                Path(tmp) / "signals.sqlite3", settings=settings,
+                resolver=lambda ref: {"current": SECRET, "previous": old}[ref],
+                admitted_generations=lambda now: admissions.append(now) or (7, 8),
+                committed_delivery=lambda generation, receipt: committed.append((generation, receipt)),
+            )
+            body = payload()
+            self.assertEqual(ingress.ingest(body, headers(body, old), now=NOW + timedelta(seconds=2)).code, "COMMITTED")
+            self.assertEqual(ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=3)).code, "DUPLICATE")
+            self.assertEqual(len(admissions), 2)
+            self.assertEqual([item[0] for item in committed], [7, 8])
+            self.assertEqual(committed[0][1], committed[1][1])
+
+    def test_rotation_admission_and_commit_fail_closed_without_false_ack(self):
+        admissions, resolutions, commits = [], [], []
+        settings = WebhookConfig(secret_refs=("current", "previous"), secret_generations=(8, 7))
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "signals.sqlite3"
+            ingress = self.setup_ingress(
+                database, settings=settings,
+                resolver=lambda ref: resolutions.append(ref) or SECRET,
+                admitted_generations=lambda now: admissions.append(now) or (),
+                committed_delivery=lambda generation, receipt: commits.append((generation, receipt)),
+            )
+            body = payload()
+            self.assertEqual(ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=2)).code, "ROTATION_UNAVAILABLE")
+            self.assertEqual(resolutions, [])
+            self.assertEqual(commits, [])
+            self.assertEqual(len(admissions), 1)
+
+            ingress.admitted_generations = lambda now: (7, 8)
+            self.assertEqual(ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=3)).code, "SIGNATURE_AMBIGUOUS")
+            self.assertIsNone(self.module.source_checkpoint("github", "github-ci"))
+
+            ingress.resolve_secret = lambda ref: {"current": SECRET, "previous": b"prior-fixture-only-webhook-secret"}[ref]
+            fail = [True]
+            def commit(generation, receipt):
+                commits.append((generation, receipt))
+                if fail[0]:
+                    fail[0] = False
+                    raise RuntimeError("private callback failure")
+            ingress.committed_delivery = commit
+            self.assertEqual(ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=4)).code, "ROTATION_COMMIT_FAILED")
+            self.assertEqual(ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=5)).code, "DUPLICATE")
+            self.assertEqual(commits[0], commits[1])
+
+    def test_rotation_attribution_requires_every_admitted_key_to_resolve(self):
+        for refs, generations, unavailable_ref in (
+            (("current", "previous"), (8, 7), "previous"),
+            (("previous", "current"), (7, 8), "previous"),
+        ):
+            with self.subTest(refs=refs), tempfile.TemporaryDirectory() as tmp:
+                commits = []
+                database = Path(tmp) / "signals.sqlite3"
+                settings = WebhookConfig(secret_refs=refs, secret_generations=generations)
+
+                def resolver(ref):
+                    if ref == unavailable_ref:
+                        raise RuntimeError("fixture secret unavailable")
+                    return SECRET
+
+                ingress = self.setup_ingress(
+                    database, settings=settings, resolver=resolver,
+                    admitted_generations=lambda now: (7, 8),
+                    committed_delivery=lambda generation, receipt: commits.append((generation, receipt)),
+                )
+                body = payload()
+                result = ingress.ingest(body, headers(body), now=NOW + timedelta(seconds=2))
+                self.assertEqual((result.status, result.code), (503, "SECRET_UNAVAILABLE"))
+                self.assertEqual(commits, [])
+                self.assertIsNone(self.module.source_checkpoint("github", "github-ci"))
 
     def test_claim_allowlists_freshness_and_authoritative_identity_fail_before_commit(self):
         variants = (
