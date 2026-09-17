@@ -56,7 +56,7 @@ from .records import (
     utc_now,
     write_record,
 )
-from .service import build_service_config, install_service, read_log_tail, service_status, stop_service, uninstall_service
+from .service import build_service_config, install_service, read_log_tail, service_dispatch_mode, service_status, stop_service, uninstall_service
 from .service import service_app_server_readiness
 from .supervisor import (
     build_supervisor_config,
@@ -516,6 +516,10 @@ def build_parser() -> argparse.ArgumentParser:
     service_install = service_subparsers.add_parser("install", help="install and start a user systemd service")
     add_service_options(service_install)
     service_install.add_argument("--no-start", action="store_true", help="write the unit but do not enable or start it")
+    service_install.add_argument(
+        "--no-dispatch", action="store_false", dest="dispatch_enabled",
+        help="persist a daemon unit that evaluates wakes without dispatching them",
+    )
 
     service_status_cmd = service_subparsers.add_parser("status", help="show user service state")
     add_service_options(service_status_cmd)
@@ -1989,6 +1993,7 @@ def service_config_for_args(args: argparse.Namespace, root: Path, *, validate_ex
         daemon_path=args.daemon_path,
         codex_path=args.codex_path,
         github_credential_file=args.github_credential_file,
+        dispatch_enabled=getattr(args, "dispatch_enabled", True),
         resolve_default_codex=validate_executables,
         log_path=args.log_path,
         validate_executables=validate_executables,
@@ -2016,6 +2021,7 @@ def service_command(args: argparse.Namespace, root: Path) -> int:
         print(f"enabled={enabled}")
         print(f"unit={config.unit_path}")
         print(f"log={config.log_path}")
+        print(f"dispatch={service_dispatch_mode(config)}")
         print(f"app_server_codex_cmd={getattr(config, 'codex_path', None) or 'missing'}")
         return 0
     if args.service_command == "logs":

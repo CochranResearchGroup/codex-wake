@@ -18,6 +18,7 @@ from codex_wake.service import (
     read_log_tail,
     render_unit,
     service_app_server_readiness,
+    service_dispatch_mode,
     service_status,
     slugify,
     stop_service,
@@ -68,6 +69,60 @@ class ServiceTests(unittest.TestCase):
             self.assertIn(f'ExecStart="/bin/sh" --wake-root "{base / "repo" / ".codex" / "wake"}" --interval 1', unit)
             self.assertIn(f"StandardOutput=append:{base / 'state' / 'wake.log'}", unit)
             self.assertNotIn(APP_SERVER_CODEX_ENV, unit)
+
+    def test_render_unit_persists_dispatch_disabled_daemon_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_service_config(
+                repo_root=base / "repo",
+                wake_root=base / "repo" / ".codex" / "wake",
+                name="wake-test",
+                daemon_path="/bin/sh",
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+                dispatch_enabled=False,
+            )
+
+            unit = render_unit(config)
+
+            self.assertIn('Environment="CODEX_WAKE_DISPATCH_MODE=disabled"', unit)
+            self.assertIn(" --no-dispatch\n", unit)
+
+    def test_service_dispatch_readback_proves_persisted_disabled_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_service_config(
+                repo_root=base / "repo",
+                wake_root=base / "repo" / ".codex" / "wake",
+                name="wake-test",
+                daemon_path="/bin/sh",
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+                dispatch_enabled=False,
+            )
+            config.unit_path.parent.mkdir(parents=True)
+            config.unit_path.write_text(render_unit(config), encoding="utf-8")
+
+            self.assertEqual(service_dispatch_mode(config), "disabled")
+
+    def test_service_dispatch_readback_rejects_a_marker_command_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_service_config(
+                repo_root=base / "repo",
+                wake_root=base / "repo" / ".codex" / "wake",
+                name="wake-test",
+                daemon_path="/bin/sh",
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+                dispatch_enabled=False,
+            )
+            config.unit_path.parent.mkdir(parents=True)
+            config.unit_path.write_text(
+                render_unit(config).replace(" --no-dispatch\n", "\n"), encoding="utf-8",
+            )
+
+            self.assertEqual(service_dispatch_mode(config), "unknown")
 
     def test_render_unit_skips_start_when_repo_directory_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

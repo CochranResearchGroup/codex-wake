@@ -38,6 +38,7 @@ class ServiceConfig:
     log_path: Path
     codex_path: Path | None = None
     github_credential_file: Path | None = None
+    dispatch_enabled: bool = True
 
 
 @dataclass(frozen=True)
@@ -111,6 +112,7 @@ def build_service_config(
     daemon_path: str | None = None,
     codex_path: str | None = None,
     github_credential_file: Path | None = None,
+    dispatch_enabled: bool = True,
     resolve_default_codex: bool = False,
     unit_dir: Path | None = None,
     log_path: Path | None = None,
@@ -124,6 +126,8 @@ def build_service_config(
         raise WakeError("service name must not contain '/'")
     if interval <= 0:
         raise WakeError("--interval must be greater than zero")
+    if type(dispatch_enabled) is not bool:
+        raise WakeError("service dispatch mode is invalid")
     resolved_codex = ""
     if validate_executables and codex_path:
         resolved_codex = resolve_stable_executable(
@@ -169,6 +173,7 @@ def build_service_config(
         log_path=resolved_log_path,
         codex_path=Path(resolved_codex) if resolved_codex else None,
         github_credential_file=resolved_github_credentials,
+        dispatch_enabled=dispatch_enabled,
     )
 
 
@@ -192,6 +197,8 @@ def render_unit(config: ServiceConfig) -> str:
     if config.github_credential_file:
         environment_file = _systemd_environment_file_path(config.github_credential_file)
         environment += f"EnvironmentFile={environment_file}\n"
+    dispatch_mode = "enabled" if config.dispatch_enabled else "disabled"
+    dispatch_flag = "" if config.dispatch_enabled else " --no-dispatch"
     return (
         "[Unit]\n"
         "Description=Codex Wake daemon for one repository\n"
@@ -203,7 +210,8 @@ def render_unit(config: ServiceConfig) -> str:
         "Type=simple\n"
         f"WorkingDirectory={config.repo_root}\n"
         f"{environment}"
-        f"ExecStart={systemd_quote(config.daemon_path)} --wake-root {systemd_quote(config.wake_root)} --interval {config.interval:g}\n"
+        f"Environment={systemd_environment_assignment('CODEX_WAKE_DISPATCH_MODE', dispatch_mode)}\n"
+        f"ExecStart={systemd_quote(config.daemon_path)} --wake-root {systemd_quote(config.wake_root)} --interval {config.interval:g}{dispatch_flag}\n"
         "Restart=on-failure\n"
         "RestartPreventExitStatus=200\n"
         "RestartSec=5\n"
@@ -246,6 +254,37 @@ def service_status(config: ServiceConfig, runner: CommandRunner | None = None) -
     active = systemctl(["is-active", config.name], runner, check=False).stdout.strip() or "unknown"
     enabled = systemctl(["is-enabled", config.name], runner, check=False).stdout.strip() or "unknown"
     return active, enabled
+
+
+def service_dispatch_mode(config: ServiceConfig) -> str:
+    """Return the persisted daemon mode only when unit marker and command agree."""
+    try:
+        text = config.unit_path.read_text(encoding="utf-8")
+        environment = parse_unit_environment(config.unit_path)
+        exec_start = [
+            line.removeprefix("ExecStart=")
+            for line in text.splitlines()
+            if line.startswith("ExecStart=")
+        ]
+        if len(exec_start) != 1:
+            return "unknown"
+        arguments = shlex.split(exec_start[0])
+        root_index = arguments.index("--wake-root")
+        if (
+            root_index + 1 >= len(arguments)
+            or arguments[root_index + 1] != str(config.wake_root)
+            or arguments.count("--no-dispatch") > 1
+        ):
+            return "unknown"
+        marker = environment.get("CODEX_WAKE_DISPATCH_MODE")
+        has_no_dispatch = "--no-dispatch" in arguments
+        if marker == "disabled" and has_no_dispatch:
+            return "disabled"
+        if marker == "enabled" and not has_no_dispatch:
+            return "enabled"
+    except (OSError, ValueError):
+        pass
+    return "unknown"
 
 
 def parse_unit_environment(unit_path: Path) -> dict[str, str]:
