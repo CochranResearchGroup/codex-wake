@@ -846,4 +846,8 @@ retention. Provider-free correction precedes a separately named cleanup
 rehearsal and one final retained installation. GitHub hook, scoped secret,
 installed runtime, local service, and ingress activation effects are explicitly
 authorized but remain gated by those product checks; dispatch remains excluded
-until C5.
+until C5. The product correction is locally complete and independently
+accepted at `47ce753`; 680 Python tests, 12 plugin tests, provider-free cleanup
+qualification, compilation, audits, wheel build, and diff hygiene pass. Hosted
+integration and canonical-main readback are the remaining gates before live
+C4 activation.

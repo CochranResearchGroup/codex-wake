@@ -8,10 +8,10 @@ lanes:
     branch: feat/issue-141-retained-webhook-activation
     target: main
     plan_state: OPEN
-    custody_state: PLANNED
-    checkpoint: null
-    validation_status: preflight_blockers_frozen
-    validation_ref: 7bdef169bde17cbac568f84729bca6a78f1ca171
+    custody_state: INTEGRATION_READY
+    checkpoint: 47ce753
+    validation_status: product_gate_accepted_live_effects_pending
+    validation_ref: 47ce753
     remote_ref: refs/remotes/origin/feat/issue-141-retained-webhook-activation
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#141]
@@ -21,4 +21,4 @@ lanes:
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
-    updated_at: 2026-09-16
+    updated_at: 2026-09-17
