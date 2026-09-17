@@ -3958,3 +3958,38 @@ change is ready for validation and GitHub integration. Movement is
 `outcome_progress`. Next action: merge the registration PR, fast-forward both
 implementation refs to canonical main, then execute the two disjoint initial
 packets in parallel.
+
+## Turn 179 | 2026-09-16
+
+Implemented and independently accepted the provider-free P54-C2 managed
+webhook secret-rotation path.
+
+- Checkpoint `fe727de` adds the durable six-phase transaction, legal
+  ambiguity/expiry/rollback states, immutable overlap deadline, crash-safe
+  intent/effect handling, and successor transactions.
+- Checkpoint `e7f5b38` joins exact-one HMAC generation attribution, durable
+  ingest callbacks, owner/source/repository/service/binding authority, exact
+  process and socket attestation, restarted-process proof refresh, and
+  committed target-key delivery.
+- Checkpoint `23eaba0` adds local redacted `rotation status|preview`, numeric
+  generation resolution, a full-duration fence against generic binding apply,
+  and an occurrence-identity regression across expiry and rollback.
+- Public rotation apply remains unsupported: provider GET cannot prove a
+  secret generation, and terminal binding consolidation plus rollback-safe
+  provider effects are not yet product contracts. Status and preview resolve
+  no secret and contact no provider.
+- Specialist causality review and economical runtime/CLI re-review both
+  accepted their final exact checkpoints. The primary retained architecture,
+  authority, shared runtime/CLI integration, and final acceptance.
+- Final validation passes 638 comprehensive Python tests, 12 OpenClaw plugin
+  tests, compilation, and diff hygiene on the documented checkpoint plus
+  closeout changes.
+- Provider, service, secret, ingress, installation, release, and dispatch
+  effect counts remain zero.
+
+Acceptance state: #139 is locally implementation-complete and independently
+accepted, with canonical acceptance pending its issue-linked PR, hosted Python
+gates, squash merge, issue closure, and `origin/main` readback. Movement is
+`outcome_progress`. Next action: publish and integrate that PR, then rebase the
+#140 lane and complete shared cleanup, CLI, and installed provider-free
+qualification without live effects.
