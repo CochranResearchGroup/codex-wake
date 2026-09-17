@@ -11,7 +11,9 @@ Parent plan: `docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md`
 ## Current state
 
 C1-C3 are accepted on canonical `origin/main` through
-`7bdef169bde17cbac568f84729bca6a78f1ca171`. Fresh C4 preflight confirms the
+`7bdef169bde17cbac568f84729bca6a78f1ca171`, and the C4 registration merged
+through PR #151 as canonical
+`7ceb93ceaab2e256bae99aea678bad68428c09b5`. Fresh C4 preflight confirms the
 GitHub actor `ecochran76` (user ID `8397615`) has administration capability on
 the unarchived repository `CochranResearchGroup/codex-wake` (repository ID
 `1242753508`), and the provider hook inventory is empty. The retained Cooper
@@ -33,6 +35,17 @@ rehearsed and then silently reversed on the retained owner. C4 therefore starts
 with a bounded provider-free correction. Live cleanup proof uses a separately
 named rehearsal installation, whose tombstone remains terminal, followed by
 one fresh final installation that remains active.
+
+The provider-free correction is implementation-complete at `47ce753`. It adds
+an explicit persistent no-dispatch service marker, command flag, and
+fail-closed status readback plus owner-bound current-generation delivery and
+polling evidence written only after durable ingest. Independent review found
+and verified repairs for generation succession, recurring deliveries, unsafe
+files, cross-root ownership, symlink/FIFO blocking, and the installed fixture's
+expired wall-clock anchor. Final local gates pass 680 Python tests, 12 plugin
+tests, compilation, planning/goal audits, provider-free cleanup qualification,
+wheel build, and diff hygiene. No live effect has occurred; hosted integration
+and canonical-main readback precede C4-D.
 
 ## Objective
 

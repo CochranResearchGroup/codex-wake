@@ -31,6 +31,8 @@ from codex_wake.managed_webhook_rotation import (
     ManagedWebhookRotationCoordinator, ManagedWebhookRotationStore, Observation,
     PendingEffect, RotationPhase, RotationRecord, RuntimeProof,
 )
+from codex_wake.managed_webhook_health import ProviderDeliveryHealth
+from codex_wake.managed_webhook_health_evidence import ManagedWebhookHealthEvidenceStore
 from codex_wake.managed_webhooks import ManagedWebhookBinding, ManagedWebhookStore
 from codex_wake.signal_records import signal_journal_path
 from codex_wake.signals import ArmContext, WakeId
@@ -71,6 +73,16 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 enabled=True,
             )
             WebhookListenerStore(root).configure(listener)
+            binding = ManagedWebhookStore(root).save(ManagedWebhookBinding(
+                owner_id="managed-owner", installation_id="managed-install",
+                canonical_root=str(root.resolve()), owner_uid=os.getuid(),
+                provider_host="api.github.com", source_instance=source.source_instance,
+                repository=source.repository, repository_id=source.repository_id,
+                callback_url="https://hooks.example.test/github/webhook", events=("workflow_run",),
+                service_id="codex-wake-github-webhook-github-ci.service",
+                executable_id="codex-wake-github-webhook",
+                provider_credential_ref="GITHUB_ADMIN_TOKEN", secret_generation=1,
+            ))
             runtime = build_webhook_runtime(
                 wake_root=root,
                 listener=listener,
@@ -102,6 +114,10 @@ class WebhookListenerConfigTests(unittest.TestCase):
             self.assertFalse(client.is_alive())
             self.assertEqual(result, [(200, "COMMITTED")])
             self.assertIsNotNone(module.source_checkpoint("github", source.source_instance))
+            delivery, _ = ManagedWebhookHealthEvidenceStore(root).project(
+                binding, now=int((NOW + timedelta(seconds=2)).timestamp()),
+            )
+            self.assertEqual(delivery, ProviderDeliveryHealth.OBSERVED)
 
     def test_real_socket_revokes_listener_and_github_source_before_ingest(self) -> None:
         for revoke in ("listener", "source"):

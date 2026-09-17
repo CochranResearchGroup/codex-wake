@@ -591,6 +591,62 @@ class DaemonTests(unittest.TestCase):
             )
             self.assertTrue((root / "firing" / "wake_github.json").is_file())
 
+    def test_managed_github_poll_records_fresh_owner_bound_health_evidence(self) -> None:
+        from dataclasses import replace
+        from datetime import timedelta
+
+        from codex_wake.daemon import GitHubSignalRunner
+        from codex_wake.github_polling import GitHubPollingAdapter
+        from codex_wake.github_source_config import GitHubSourceStore
+        from codex_wake.managed_webhook_health import (
+            PollingFallbackHealth, ProviderDeliveryHealth,
+        )
+        from codex_wake.managed_webhook_health_evidence import ManagedWebhookHealthEvidenceStore
+        from codex_wake.managed_webhooks import ManagedWebhookBinding, ManagedWebhookStore
+        from codex_wake.signals import ArmContext, EvaluationLimits, WakeId
+        from tests.test_github_polling import FixtureClient, NOW, config, run as github_run
+        from tests.test_signal_store import make_module
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            source = config(evidence_mode="positive_only")
+            GitHubSourceStore(root).configure(source)
+            binding = ManagedWebhookStore(root).save(ManagedWebhookBinding(
+                owner_id="managed-owner", installation_id="managed-install",
+                canonical_root=str(root.resolve()), owner_uid=os.getuid(),
+                provider_host="api.github.com", source_instance=source.source_instance,
+                repository=source.repository, repository_id=source.repository_id,
+                callback_url="https://hooks.example.test/github/webhook", events=("workflow_run",),
+                service_id="codex-wake-github-webhook-github-ci.service",
+                executable_id="codex-wake-github-webhook",
+                provider_credential_ref="GITHUB_ADMIN_TOKEN", secret_generation=1,
+            ))
+            module = make_module(signal_journal_path(root))
+            adapter = GitHubPollingAdapter(source, FixtureClient([
+                github_run(
+                    completed_at=None, terminal_proof_at=NOW + timedelta(seconds=1),
+                    time_provenance="github_attempt_started_or_job_completed_lower_bound",
+                ),
+            ]))
+            request = adapter.request(ref="refs/heads/main", conclusions=("success",))
+            armed = module.arm(
+                WakeId("managed-poll-health"), request,
+                ArmContext("managed-poll-health", "managed-poll-health", NOW, None,
+                           make_intent().resume, adapter),
+            )
+            self.assertEqual(type(armed).__name__, "ArmedSignal")
+            runner = GitHubSignalRunner(
+                {source.source_instance: adapter}, armed_signals=(armed,),
+                health_store=GitHubSourceStore(root),
+            )
+            runner.reconcile(module, NOW + timedelta(seconds=2), EvaluationLimits(1))
+
+            delivery, polling = ManagedWebhookHealthEvidenceStore(root).project(
+                binding, now=int((NOW + timedelta(seconds=2)).timestamp()),
+            )
+            self.assertEqual(delivery, ProviderDeliveryHealth.UNPROVEN)
+            self.assertEqual(polling, PollingFallbackHealth.READY)
+
     def test_github_retry_deadline_survives_runner_restart_and_degradation_cannot_match(self) -> None:
         from dataclasses import replace
         from datetime import timedelta

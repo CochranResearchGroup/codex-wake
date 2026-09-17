@@ -55,6 +55,17 @@ class CliTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 0)
         self.assertIn("stable OpenClaw executable path", stdout.getvalue())
 
+    def test_service_install_exposes_a_persistent_no_dispatch_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            args = cli.build_parser().parse_args(
+                ["service", "install", "--no-start", "--no-dispatch"]
+            )
+
+            config = cli.service_config_for_args(args, root)
+
+            self.assertFalse(config.dispatch_enabled)
+
     def test_github_ci_source_configure_persists_an_explicit_enabled_allowlist(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"
@@ -1539,7 +1550,8 @@ class CliTests(unittest.TestCase):
             log_path = Path(tmp) / "service.log"
             stdout = io.StringIO()
             stderr = io.StringIO()
-            with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
+            with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")), \
+                    patch("codex_wake.cli.service_dispatch_mode", return_value="disabled"):
                 with patch("codex_wake.cli.build_service_config") as build_config:
                     build_config.return_value = type(
                         "Config",
@@ -1556,6 +1568,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0, stderr.getvalue())
             self.assertIn("name=wake-test.service", stdout.getvalue())
             self.assertIn(f"unit={unit_path}", stdout.getvalue())
+            self.assertIn("dispatch=disabled", stdout.getvalue())
 
     def test_monitor_check_json_reports_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

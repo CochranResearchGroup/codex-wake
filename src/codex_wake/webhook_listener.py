@@ -222,6 +222,49 @@ def build_webhook_runtime(
                 )
     except ValueError as exc:
         raise WakeError("managed webhook rotation authority is unavailable") from exc
+    if rotation_context is None:
+        try:
+            bindings = tuple(
+                binding for binding in ManagedWebhookStore(wake_root).bindings()
+                if binding.source_instance == listener.source_instance
+            )
+            if len(bindings) > 1:
+                raise ValueError("managed webhook health ownership is ambiguous")
+            if bindings:
+                binding = bindings[0]
+                canonical_root = str(Path(wake_root).resolve())
+                if (
+                    binding.canonical_root != canonical_root
+                    or binding.owner_uid != os.getuid()
+                    or binding.service_id != webhook_service_name(listener.source_instance)
+                    or binding.repository != source.repository
+                    or binding.repository_id != source.repository_id
+                    or binding.provider_host != "api.github.com"
+                    or source.hostname != "github.com"
+                    or binding.secret_generation != listener.current_generation
+                    or listener.previous_generation is not None
+                ):
+                    raise ValueError("managed webhook health authority is invalid")
+
+                def admitted_generations(_: datetime) -> tuple[int, ...]:
+                    current = ManagedWebhookStore(wake_root).load(binding.owner_id)
+                    if current != binding:
+                        return ()
+                    return (binding.secret_generation,)
+
+                def committed_delivery(generation: int, receipt_id: str) -> None:
+                    from .managed_webhook_health_evidence import ManagedWebhookHealthEvidenceStore
+
+                    observed_at = int(now().timestamp())
+                    current = ManagedWebhookStore(wake_root).load(binding.owner_id)
+                    if current != binding:
+                        raise ValueError("managed webhook health authority changed")
+                    ManagedWebhookHealthEvidenceStore(wake_root).record_delivery(
+                        binding, generation=generation, journal_locator=receipt_id,
+                        observed_at=observed_at,
+                    )
+        except ValueError as exc:
+            raise WakeError("managed webhook health authority is unavailable") from exc
     # Re-read all durable authorities immediately before constructing the
     # runtime. The same check is repeated by the resolver on every admission.
     require_current_authority()

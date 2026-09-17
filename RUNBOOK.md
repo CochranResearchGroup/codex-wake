@@ -4094,3 +4094,36 @@ Acceptance state: #141 is `IN_PROGRESS` only after this registration reaches
 canonical main. Movement is `outcome_progress`. Next action: integrate the
 registration PR, then test-drive the dispatch-disabled service and truthful
 current-generation health seams before any live provider or deployment effect.
+
+## Turn 184 | 2026-09-17
+
+Completed and independently accepted C4's provider-free product gate.
+
+- PR #151 passed both hosted Python release jobs and squash-merged Plan 0087
+  and the C4 active lane as canonical
+  `7ceb93ceaab2e256bae99aea678bad68428c09b5`.
+- `service install --no-dispatch` now persists both a mode marker and the real
+  daemon flag. Status reports `disabled` only when marker, command, and exact
+  wake root agree; legacy or malformed units are `unknown`.
+- Managed health now records polling only after durable poll ingestion and
+  signed delivery only after authoritative attempt verification and journal
+  commit. Evidence is bound to owner, root, UID, source, binding/secret
+  generation, and desired fingerprint.
+- Specialist review reproduced and closed binding-generation rollover,
+  recurring-delivery refresh, unsafe-mode, cross-root, symlink-lock, and FIFO
+  blocking defects. Exact successor generations start fresh rather than
+  inheriting proof, and listener authority remains captured and rechecked.
+- The full Python tier initially exposed a stale installed-fixture date after
+  UTC rollover. The deterministic reproduction returned
+  `GITHUB_HISTORY_GAP`; anchoring the test two seconds behind execution restored
+  the intended current-window proof without changing runtime behavior.
+- Final gates pass 680 Python tests, 12 OpenClaw plugin tests, 107 combined
+  focused tests, compilation, diff hygiene, active/goal planning audits,
+  provider-free managed cleanup qualification, and wheel build.
+- No provider, service, secret, ingress, installed-runtime, release, or
+  dispatch effect occurred in this product packet.
+
+Acceptance state: the C4 product gate is implementation-complete at `47ce753`
+and independently accepted. Movement is `outcome_progress`. Next action:
+publish the issue-linked feature PR, require both hosted gates and canonical
+merge, then freeze and execute the exact two-owner live activation manifest.
