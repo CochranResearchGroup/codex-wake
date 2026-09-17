@@ -833,9 +833,14 @@ Acceptance target:
   with canonical GitHub and verification custody.
 
 Acceptance state: P54 planning and its five-child issue graph are canonical;
-#138 is closed and accepted on canonical main. Plans 0085 and 0086 register
-#139 rotation and the parallel-safe #140 health packet with disjoint initial
-write surfaces and primary-owned shared integration. Movement is
-`outcome_progress`. Next action: implement the rotation domain and pure health
-projection in parallel, then serialize lifecycle, cleanup, CLI, and installed
-qualification joins. Live effects remain separately gated.
+#138 is closed and accepted on canonical main. Plan 0085's #139 rotation lane
+is locally implementation-complete and independently accepted at `23eaba0`;
+Plan 0086's parallel-safe #140 pure health checkpoint is accepted and published
+at `d45c6da`. Rotation includes durable restart/expiry/rollback state,
+process-bound generation readiness, committed target-key delivery proof,
+polling identity continuity, and effect-free redacted status/preview. A public
+rotation apply command remains intentionally unsupported until provider effect
+and terminal binding-consolidation contracts exist. Movement is
+`outcome_progress`. Next action: integrate #139 through its issue-linked PR,
+then rebase #140 and serialize cleanup, CLI, and installed provider-free
+qualification. Live effects remain separately gated.
