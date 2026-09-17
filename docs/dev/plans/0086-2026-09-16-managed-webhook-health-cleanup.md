@@ -10,15 +10,20 @@ Parent plan: `docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md`
 
 ## Current state
 
-C1 is accepted on canonical `origin/main`; #140 is unblocked for a pure health
-packet. Exact-ID disable/delete methods are transport primitives, not an
-authorized cleanup workflow. Status does not yet project provider object,
-provider delivery, listener, polling fallback, and dispatch independently.
+C1 and C2 are accepted on canonical `origin/main`. C3 is implementation-ready
+at `f0fe41d746ff9ad9356fa031e5b16aedc76a63b7` and independently accepted. It
+adds independent local/provider/delivery/polling/dispatch health, explicitly
+armed exact-ID disable/delete, durable sanitized cleanup intent and tombstones,
+runtime/reconcile/rotation fences, and a provider-free qualification.
 
-C3-A may proceed beside C2 using new files only. Cleanup integration and
-provider-free installed qualification wait for C2's frozen rotation,
-generation-readiness, and absence-census contracts. No external or installed
-effect is authorized.
+Final validation passes 665 Python tests, 12 plugin tests, compilation, diff
+hygiene, and a rebuilt isolated-wheel qualification. The qualification applies
+fixture disable/delete, proves a production-adapter unit/PID/socket absence
+census, and hashes retained product-path fixtures across cleanup. Rotation is
+truthfully `preview_only`; no provider, service, secret, ingress, installed
+runtime, release, or dispatch effect is authorized or performed. Canonical
+acceptance still requires the issue-linked PR, hosted gates, squash merge,
+issue closure, and `origin/main` readback.
 
 ## Objective
 

@@ -3993,3 +3993,49 @@ gates, squash merge, issue closure, and `origin/main` readback. Movement is
 `outcome_progress`. Next action: publish and integrate that PR, then rebase the
 #140 lane and complete shared cleanup, CLI, and installed provider-free
 qualification without live effects.
+
+## Turn 180 | 2026-09-16
+
+Integrated and closed the provider-free P54-C2 secret-rotation slice.
+
+- Custody PR #146 reconciled the exact accepted feature tip
+  `ab398ff5b431ddbda193bd140256af0ca18d1f75` before feature integration.
+- Feature PR #147 passed both hosted Python release gates on run `35175108471`
+  and squash-merged as canonical
+  `143b1d3d6f1bedf7ea41ae0a422f1d5300aae5a1`; GitHub closed #139.
+- Canonical C2 retains restart-correct rotation, process-bound readiness,
+  committed target-generation delivery proof, bounded rollback/expiry, and
+  effect-free status/preview. Public rotation apply remains unsupported.
+- No provider, service, secret, ingress, installation, release, or dispatch
+  effect occurred.
+
+Acceptance state: #139 is closed and accepted on canonical main. Movement is
+`outcome_progress`. Next action: integrate the rebased #140 health/cleanup
+packet without live effects.
+
+## Turn 181 | 2026-09-16
+
+Implemented and independently accepted the provider-free P54-C3 health and
+cleanup packet.
+
+- Checkpoint `f0fe41d746ff9ad9356fa031e5b16aedc76a63b7` adds independent health
+  planes, explicitly armed exact-ID disable/delete, durable cleanup history and
+  tombstones, and persistent runtime/reconcile/rotation fences.
+- Review remediation removed listener-lock recursion, scoped cleanup authority
+  per owner, made provider failure independent of local health, and hardened
+  unit/PID/socket absence against both supported orphan-process launch forms.
+- The isolated-wheel qualification applies fixture disable/delete, derives
+  effect counters from instrumented seams, proves production-adapter absence,
+  and hashes journal/wake/checkpoint/polling fixtures under the wake root.
+  Rotation is explicitly preview-only in this C3 receipt.
+- Independent specialist review accepted the final checkpoint. Final gates
+  pass 665 Python tests, 12 plugin tests, compilation, diff hygiene, and the
+  rebuilt installed-wheel qualification.
+- External provider, service, secret, ingress, installed-runtime, release, and
+  dispatch effect counts remain zero.
+
+Acceptance state: #140 is locally implementation-complete and independently
+accepted. Canonical acceptance is gated by its issue-linked PR, hosted Python
+gates, squash merge, issue closure, and `origin/main` readback. Movement is
+`outcome_progress`. Next action: publish the C3 custody update, then integrate
+the feature PR and stop at C4's fresh retained-activation authority gate.

@@ -31,14 +31,14 @@ PR #136 passed both hosted release gates and squash-merged the kickoff as
 canonical `8b74e3eea3ae02b9f60833bc5941add2b15a9f68`; PR #137 reconciled custody at
 canonical `74dd2e6c3db6745fc91384c08ea8aa40c7ad964c`. The approved child graph is
 published as #138 through #142. C1 issue #138 and Plan 0084 are accepted on
-canonical `a3b2c985d9b3d9ef4e1db53d7fbc8479c08455c2`; PR #143 passed both hosted
-release gates and GitHub closed #138. Plans 0085 and 0086 register C2 #139 and
-C3 #140. C2 is locally implementation-complete and independently accepted at
-`23eaba0`; C3's pure health projection is accepted and published at `d45c6da`.
-Their shared lifecycle, cleanup, CLI, and installed-qualification integration
-still serialize after C2 reaches canonical main. No provider, service, secret,
-ingress, release, installation, or dispatch effect occurred in C1-C3 work to
-date.
+canonical `a3b2c985d9b3d9ef4e1db53d7fbc8479c08455c2`. C2 issue #139 and Plan
+0085 are accepted on canonical
+`143b1d3d6f1bedf7ea41ae0a422f1d5300aae5a1`; PR #147 passed both hosted
+release gates and GitHub closed #139. C3 issue #140 and Plan 0086 are locally
+implementation-complete and independently accepted at
+`f0fe41d746ff9ad9356fa031e5b16aedc76a63b7`, with canonical acceptance pending
+its issue-linked PR and hosted gates. No provider, service, secret, ingress,
+release, installed-runtime, or dispatch effect occurred in C1-C3 work to date.
 
 ## Objective
 
