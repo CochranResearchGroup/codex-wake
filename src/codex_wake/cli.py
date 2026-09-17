@@ -1361,10 +1361,10 @@ def github_webhook_command(
             classify_provider_object,
         )
         from .managed_webhook_health import (
-            ListenerHealth, PollingFallbackHealth, ProviderDeliveryHealth,
+            ListenerHealth,
             ProviderObjectHealth, project_health,
         )
-        from .managed_webhook_rotation import ManagedWebhookRotationStore
+        from .managed_webhook_health_evidence import ManagedWebhookHealthEvidenceStore
         from .managed_webhooks import ManagedWebhookStore
 
         try:
@@ -1395,25 +1395,16 @@ def github_webhook_command(
                 LocalCleanupState.PROVEN_ABSENT: ListenerHealth.DISABLED,
                 LocalCleanupState.UNKNOWN: ListenerHealth.UNKNOWN,
             }[local_state]
-            try:
-                rotations = tuple(
-                    item for item in ManagedWebhookRotationStore(root).records()
-                    if item.owner_id == binding.owner_id
-                )
-                delivery = (
-                    ProviderDeliveryHealth.OBSERVED
-                    if len(rotations) == 1 and rotations[0].delivery_locator is not None
-                    else ProviderDeliveryHealth.UNPROVEN
-                )
-            except ValueError:
-                delivery = ProviderDeliveryHealth.UNKNOWN
+            delivery, polling = ManagedWebhookHealthEvidenceStore(root).project(
+                binding, now=int(utc_now().timestamp()),
+            )
             result = project_health(
                 generation=binding.generation,
                 desired_fingerprint=binding.desired_fingerprint,
                 local_listener=local_health,
                 provider_object=provider_object,
                 provider_delivery=delivery,
-                polling_fallback=PollingFallbackHealth.UNOBSERVED,
+                polling_fallback=polling,
             ).to_dict()
             if args.as_json:
                 print(json.dumps(result, sort_keys=True))

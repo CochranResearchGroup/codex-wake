@@ -7,10 +7,12 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import time
 import unittest
 
 from codex_wake.cli import build_parser, github_webhook_command
 from codex_wake.github_source_config import GitHubSourceStore
+from codex_wake.managed_webhook_health_evidence import ManagedWebhookHealthEvidenceStore
 from codex_wake.managed_webhook_cleanup import LocalCleanupState
 from codex_wake.managed_webhook_rotation import ManagedWebhookRotationStore, RotationRecord
 from codex_wake.managed_webhook_rotation_preview import ManagedWebhookRotationPreviewer
@@ -437,6 +439,129 @@ class ManagedWebhookCliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(factory_health["local_listener"], "READY")
         self.assertEqual(factory_health["provider_object"], "UNAVAILABLE")
+
+    def test_health_projects_current_generation_delivery_and_fresh_polling_evidence(self) -> None:
+        self.configure()
+        provider = FakeProvider()
+        setup_code, _, _ = self.invoke(
+            "reconcile", "github-workflow", "--apply", "--json", provider=provider,
+        )
+        self.assertEqual(setup_code, 0)
+        binding = ManagedWebhookStore(self.root).load("github-workflow")
+        evidence = ManagedWebhookHealthEvidenceStore(self.root)
+        observed_at = int(time.time())
+        evidence.record_delivery(
+            binding, generation=binding.secret_generation,
+            journal_locator="event_000000000001", observed_at=observed_at,
+        )
+        evidence.record_polling(binding, observed_at=observed_at)
+
+        output = StringIO()
+        with redirect_stdout(output):
+            code = github_webhook_command(
+                self.health_args("--source", "github-workflow", "--json"),
+                self.root, provider_factory=ProviderFactory(provider),
+                cleanup_local_factory=lambda root: FakeCleanupLocal(),
+            )
+        health = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(health["provider_delivery"], "OBSERVED")
+        self.assertEqual(health["polling_fallback"], "READY")
+        self.assertEqual(health["dispatch"], "NOT_INCLUDED")
+
+    def test_health_fails_closed_for_stale_evidence(self) -> None:
+        self.configure()
+        provider = FakeProvider()
+        setup_code, _, _ = self.invoke(
+            "reconcile", "github-workflow", "--apply", "--json", provider=provider,
+        )
+        self.assertEqual(setup_code, 0)
+        binding = ManagedWebhookStore(self.root).load("github-workflow")
+        evidence = ManagedWebhookHealthEvidenceStore(self.root)
+        evidence.record_delivery(
+            binding, generation=binding.secret_generation,
+            journal_locator="event_000000000001", observed_at=0,
+        )
+        evidence.record_polling(binding, observed_at=0)
+
+        output = StringIO()
+        with redirect_stdout(output):
+            code = github_webhook_command(
+                self.health_args("--source", "github-workflow", "--json"),
+                self.root, provider_factory=ProviderFactory(provider),
+                cleanup_local_factory=lambda root: FakeCleanupLocal(),
+            )
+        health = json.loads(output.getvalue())
+        self.assertEqual(code, 1)
+        self.assertEqual(health["provider_delivery"], "UNPROVEN")
+        self.assertEqual(health["polling_fallback"], "DEGRADED")
+        self.assertEqual(health["dispatch"], "NOT_INCLUDED")
+
+    def test_health_fails_closed_for_owner_mismatched_evidence(self) -> None:
+        self.configure()
+        provider = FakeProvider()
+        setup_code, _, _ = self.invoke(
+            "reconcile", "github-workflow", "--apply", "--json", provider=provider,
+        )
+        self.assertEqual(setup_code, 0)
+        binding = ManagedWebhookStore(self.root).load("github-workflow")
+        foreign = replace(binding, owner_id="foreign-owner", desired_fingerprint="")
+        evidence = ManagedWebhookHealthEvidenceStore(self.root)
+        observed_at = int(time.time())
+        evidence.record_delivery(
+            foreign, generation=foreign.secret_generation,
+            journal_locator="event_000000000001", observed_at=observed_at,
+        )
+        evidence.record_polling(foreign, observed_at=observed_at)
+        with self.assertRaisesRegex(ValueError, "ambiguous"):
+            evidence.record_polling(binding, observed_at=observed_at)
+
+        output = StringIO()
+        with redirect_stdout(output):
+            code = github_webhook_command(
+                self.health_args("--source", "github-workflow", "--json"),
+                self.root, provider_factory=ProviderFactory(provider),
+                cleanup_local_factory=lambda root: FakeCleanupLocal(),
+            )
+        health = json.loads(output.getvalue())
+        self.assertEqual(code, 1)
+        self.assertEqual(health["provider_delivery"], "UNKNOWN")
+        self.assertEqual(health["polling_fallback"], "UNKNOWN")
+        self.assertEqual(health["dispatch"], "NOT_INCLUDED")
+
+    def test_health_fails_closed_for_source_or_generation_mismatched_evidence(self) -> None:
+        self.configure()
+        provider = FakeProvider()
+        setup_code, _, _ = self.invoke(
+            "reconcile", "github-workflow", "--apply", "--json", provider=provider,
+        )
+        self.assertEqual(setup_code, 0)
+        binding = ManagedWebhookStore(self.root).load("github-workflow")
+        observed_at = int(time.time())
+        for changes in (
+            {"source_instance": "other-source"},
+            {"generation": binding.generation + 1},
+        ):
+            with self.subTest(changes=changes):
+                foreign = replace(binding, **changes, desired_fingerprint="")
+                evidence = ManagedWebhookHealthEvidenceStore(self.root)
+                evidence.record_delivery(
+                    foreign, generation=foreign.secret_generation,
+                    journal_locator="event_000000000001", observed_at=observed_at,
+                )
+                evidence.record_polling(foreign, observed_at=observed_at)
+                output = StringIO()
+                with redirect_stdout(output):
+                    code = github_webhook_command(
+                        self.health_args("--source", "github-workflow", "--json"),
+                        self.root, provider_factory=ProviderFactory(provider),
+                        cleanup_local_factory=lambda root: FakeCleanupLocal(),
+                    )
+                health = json.loads(output.getvalue())
+                self.assertEqual(code, 1)
+                self.assertEqual(health["provider_delivery"], "UNKNOWN")
+                self.assertEqual(health["polling_fallback"], "UNKNOWN")
+                evidence.path.unlink()
 
 
 if __name__ == "__main__":

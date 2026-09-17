@@ -194,6 +194,12 @@ class GitHubSignalRunner:
                 if isinstance(ingested, Ingested):
                     instance_observed = len(outcome.observations)
                     health = outcome.health
+                    try:
+                        _record_managed_polling_evidence(
+                            self._health_store, source_instance, now,
+                        )
+                    except ValueError:
+                        instance_degraded = 1
                 else:
                     health = ingested if isinstance(ingested, Degraded) else Degraded(None, "STORE_UNAVAILABLE", None)
             else:
@@ -217,6 +223,37 @@ class GitHubSignalRunner:
         return SourceReconcileResult(
             "github", scanned, observed, degraded, tuple(instances)
         )
+
+
+def _record_managed_polling_evidence(
+    health_store: GitHubSourceStore, source_instance: str, now: datetime,
+) -> None:
+    """Persist only a completed poll for one exact managed source binding."""
+    from .managed_webhook_health_evidence import ManagedWebhookHealthEvidenceStore
+    from .managed_webhooks import ManagedWebhookStore
+
+    if now.tzinfo is None or now.utcoffset() is None:
+        raise ValueError("managed webhook polling evidence is invalid")
+    source = health_store.registry().select(source_instance)
+    bindings = tuple(
+        binding for binding in ManagedWebhookStore(health_store.wake_root).bindings()
+        if binding.source_instance == source_instance
+    )
+    if not bindings:
+        return
+    if len(bindings) != 1:
+        raise ValueError("managed webhook polling evidence is ambiguous")
+    binding = bindings[0]
+    if (
+        binding.repository != source.repository
+        or binding.repository_id != source.repository_id
+        or binding.provider_host != "api.github.com"
+        or source.hostname != "github.com"
+    ):
+        raise ValueError("managed webhook polling evidence is invalid")
+    ManagedWebhookHealthEvidenceStore(health_store.wake_root).record_polling(
+        binding, observed_at=int(now.timestamp()),
+    )
 
 
 def pending_records(root: Path) -> list[WakePath]:
