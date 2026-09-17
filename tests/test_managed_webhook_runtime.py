@@ -424,6 +424,44 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
                 now=lambda: NOW + timedelta(seconds=2),
             )
 
+    def test_polling_occurrence_identity_survives_rotation_expiry_and_rollback(self) -> None:
+        source = github_config(evidence_mode="positive_only")
+        module = make_module(signal_journal_path(self.root))
+        verified = replace(
+            run(), completed_at=None, terminal_proof_at=run().completed_at,
+            time_provenance="github_attempt_started_or_job_completed_lower_bound",
+        )
+        adapter = GitHubPollingAdapter(source, FixtureClient([verified]))
+        spec = adapter.request(ref="refs/heads/main", conclusions=("success",))
+        armed = module.arm(
+            WakeId("rotation-rollback"), spec,
+            ArmContext("rotation-rollback", "rotation-rollback", NOW, None, make_intent().resume, adapter),
+        )
+        observation = adapter.normalize_verified_attempt(verified)
+        first = module.ingest((observation,), adapter.checkpoint_for_anchor(armed.anchor)).receipts[0]
+        coordinator = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(self.root))
+        current = coordinator.begin(rotation(
+            self.root, source_instance=source.source_instance,
+            service_id=f"codex-wake-github-webhook-{source.source_instance}.service",
+            overlap_deadline=100,
+        ), now=100)
+        current = coordinator.expire(current.owner_id, expected_revision=current.revision, now=101)
+        current = coordinator.rollback(current.owner_id, expected_revision=current.revision, now=102)
+        rolled_back = coordinator.observe_rollback(
+            current.owner_id, expected_revision=current.revision,
+            observation=Observation.PROVED, now=103,
+        )
+        batch = adapter.observe(
+            armed.anchor, checkpoint=module.source_checkpoint("github", source.source_instance),
+            now=NOW + timedelta(seconds=3),
+        )
+        duplicate = module.ingest(batch.observations, batch.commit).receipts[0]
+        self.assertEqual(rolled_back.phase.value, "ROLLED_BACK")
+        self.assertTrue(duplicate.duplicate)
+        self.assertEqual(duplicate.receipt_id, first.receipt_id)
+        self.assertEqual(armed.wake_id, WakeId("rotation-rollback"))
+        self.assertIsNotNone(module.source_checkpoint("github", source.source_instance))
+
 
 if __name__ == "__main__":
     unittest.main()

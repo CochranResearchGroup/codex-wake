@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import uuid
+from contextlib import nullcontext
 from dataclasses import asdict, replace
 from datetime import UTC
 from pathlib import Path
@@ -399,6 +400,20 @@ def build_parser() -> argparse.ArgumentParser:
         probe = github_webhook_subparsers.add_parser(action)
         probe.add_argument("--source", required=True, dest="source_instance")
         probe.add_argument("--json", action="store_true", dest="as_json")
+    webhook_rotation = github_webhook_subparsers.add_parser(
+        "rotation", help="preview sanitized managed-secret rotation state"
+    )
+    webhook_rotation_subparsers = webhook_rotation.add_subparsers(
+        dest="github_webhook_rotation_command", required=True
+    )
+    rotation_status = webhook_rotation_subparsers.add_parser("status")
+    rotation_status.add_argument("--source", required=True, dest="source_instance")
+    rotation_status.add_argument("--json", action="store_true", dest="as_json")
+    rotation_preview = webhook_rotation_subparsers.add_parser("preview")
+    rotation_preview.add_argument("--source", required=True, dest="source_instance")
+    rotation_preview.add_argument("--target-generation", required=True, type=int)
+    rotation_preview.add_argument("--overlap-seconds", required=True, type=int)
+    rotation_preview.add_argument("--json", action="store_true", dest="as_json")
     webhook_binding = github_webhook_subparsers.add_parser(
         "binding", help="manage one exact provider webhook binding"
     )
@@ -1294,6 +1309,27 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
     )
 
     store = WebhookListenerStore(root)
+    if args.github_webhook_command == "rotation":
+        from .managed_webhook_rotation_preview import ManagedWebhookRotationPreviewer
+
+        try:
+            previewer = ManagedWebhookRotationPreviewer(root)
+            action = args.github_webhook_rotation_command
+            result = previewer.preview(
+                args.source_instance, now=int(utc_now().timestamp()),
+                target_generation=(args.target_generation if action == "preview" else None),
+                overlap_seconds=(args.overlap_seconds if action == "preview" else None),
+            ).to_dict()
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        if args.as_json:
+            print(json.dumps(result, sort_keys=True))
+        else:
+            print(
+                f"source={result['source_instance']} phase={result['phase']} "
+                f"action={result['next_action']} deadline={result['deadline_state']}"
+            )
+        return 0 if result["next_action"] not in {"BLOCKED", "ROLLBACK_REQUIRED"} else 1
     if args.github_webhook_command == "source":
         action = args.github_webhook_source_command
         try:
@@ -1394,33 +1430,45 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
                     as_json=args.as_json,
                 )
                 return 0
-            provider = _managed_webhook_provider(
-                binding, listener, provider_factory=provider_factory,
-            )
-            reconciler = ManagedWebhookReconciler(managed_store, provider)
-            plan = reconciler.preview(binding.owner_id)
-            result = {
-                "binding": _managed_webhook_binding_summary(binding, listener_configured=listener is not None),
-                "plan": plan.to_dict(),
-                "mode": "status" if action == "status" else ("apply" if args.apply else "dry-run"),
-            }
-            if action == "status":
-                _print_managed_webhook_result(result, as_json=args.as_json)
-                return 0 if plan.inventory.value == "EXACT" else 1
-            if action != "reconcile":
-                raise WakeError("unsupported github-webhook binding command")
-            if args.apply:
-                if listener is None:
-                    raise ValueError("webhook listener is not configured")
-                receipt = reconciler.execute(plan)
-                result["receipt"] = receipt.to_dict()
-                result["binding"] = _managed_webhook_binding_summary(
-                    managed_store.load(binding.owner_id), listener_configured=True
+            applying = action == "reconcile" and args.apply
+            if applying:
+                from .managed_webhook_rotation import ManagedWebhookRotationStore
+                rotation_store = ManagedWebhookRotationStore(root)
+            else:
+                rotation_store = None
+            with rotation_store.locked() if rotation_store is not None else nullcontext():
+                if rotation_store is not None and any(
+                    item.source_instance == binding.source_instance
+                    for item in rotation_store._records_unlocked()
+                ):
+                    raise ValueError("generic webhook reconciliation is blocked while rotation authority exists")
+                provider = _managed_webhook_provider(
+                    binding, listener, provider_factory=provider_factory,
                 )
+                reconciler = ManagedWebhookReconciler(managed_store, provider)
+                plan = reconciler.preview(binding.owner_id)
+                result = {
+                    "binding": _managed_webhook_binding_summary(binding, listener_configured=listener is not None),
+                    "plan": plan.to_dict(),
+                    "mode": "status" if action == "status" else ("apply" if args.apply else "dry-run"),
+                }
+                if action == "status":
+                    _print_managed_webhook_result(result, as_json=args.as_json)
+                    return 0 if plan.inventory.value == "EXACT" else 1
+                if action != "reconcile":
+                    raise WakeError("unsupported github-webhook binding command")
+                if args.apply:
+                    if listener is None:
+                        raise ValueError("webhook listener is not configured")
+                    receipt = reconciler.execute(plan)
+                    result["receipt"] = receipt.to_dict()
+                    result["binding"] = _managed_webhook_binding_summary(
+                        managed_store.load(binding.owner_id), listener_configured=True
+                    )
+                    _print_managed_webhook_result(result, as_json=args.as_json)
+                    return 1 if receipt.state.value == "UNKNOWN" else 0
                 _print_managed_webhook_result(result, as_json=args.as_json)
-                return 1 if receipt.state.value == "UNKNOWN" else 0
-            _print_managed_webhook_result(result, as_json=args.as_json)
-            return 1 if plan.action is PlanAction.READ_ONLY else 0
+                return 1 if plan.action is PlanAction.READ_ONLY else 0
         except ValueError as exc:
             raise WakeError(str(exc)) from None
     if args.github_webhook_command in {"readiness", "support"}:
