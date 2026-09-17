@@ -1,27 +1,6 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P54-C2
-    objective: Deliver restart-correct managed webhook secret rotation
-    plan: docs/dev/plans/0085-2026-09-16-managed-webhook-secret-rotation.md
-    plan_ref: refs/heads/feat/issue-139-webhook-secret-rotation
-    branch: feat/issue-139-webhook-secret-rotation
-    target: main
-    plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: ab398ff5b431ddbda193bd140256af0ca18d1f75
-    validation_status: passed
-    validation_ref: ab398ff5b431ddbda193bd140256af0ca18d1f75
-    remote_ref: refs/remotes/origin/feat/issue-139-webhook-secret-rotation
-    integration: squash
-    work_items: [CochranResearchGroup/codex-wake#139]
-    owner: primary integration owner with one bounded rotation implementation worker
-    write_surface: rotation domain and tests; primary-owned managed binding, listener/runtime/lifecycle, CLI, tests, docs, and receipts
-    live_effect: none; provider, service, secret, ingress, installation, release, and dispatch effects are forbidden
-    dependencies: []
-    overlaps: []
-    reconciled_overlaps: []
-    updated_at: 2026-09-16
   - id: P54-C3
     objective: Deliver truthful webhook health, exact cleanup, and provider-free qualification
     plan: docs/dev/plans/0086-2026-09-16-managed-webhook-health-cleanup.md
@@ -29,17 +8,17 @@ lanes:
     branch: feat/issue-140-webhook-health-cleanup
     target: main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: d45c6dab9c9ada8e5b388e847c122aa20103d706
-    validation_status: health_domain_accepted_shared_integration_pending
-    validation_ref: d45c6dab9c9ada8e5b388e847c122aa20103d706
+    custody_state: INTEGRATION_READY
+    checkpoint: f0fe41d746ff9ad9356fa031e5b16aedc76a63b7
+    validation_status: passed
+    validation_ref: f0fe41d746ff9ad9356fa031e5b16aedc76a63b7
     remote_ref: refs/remotes/origin/feat/issue-140-webhook-health-cleanup
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#140]
     owner: primary integration owner with one bounded health implementation worker
     write_surface: pure health domain and tests; primary-owned cleanup lifecycle CLI support installed fixture docs and receipts
     live_effect: none; provider, service, secret, ingress, installation, release, and dispatch effects are forbidden
-    dependencies: [P54-C2]
+    dependencies: []
     overlaps: []
     reconciled_overlaps: []
     updated_at: 2026-09-16

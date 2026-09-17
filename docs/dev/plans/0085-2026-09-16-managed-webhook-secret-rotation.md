@@ -1,6 +1,6 @@
 # Managed webhook secret rotation
 
-State: OPEN
+State: CLOSED
 Lane: P54-C2
 Issue: #139
 Branch: `feat/issue-139-webhook-secret-rotation`
@@ -10,9 +10,10 @@ Parent plan: `docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md`
 
 ## Current state
 
-C1 is accepted on canonical `origin/main` and #139 is unblocked. C2 is locally
-implementation-complete at `23eaba0` and independently accepted for review.
-It now has a durable six-phase rotation transaction, generation-specific
+C2 is accepted on canonical `origin/main` at
+`143b1d3d6f1bedf7ea41ae0a422f1d5300aae5a1`; PR #147 passed both hosted
+Python release gates and GitHub closed #139. It has a durable six-phase
+rotation transaction, generation-specific
 request attribution, process-bound runtime readiness, committed-delivery
 proof, immutable deadline enforcement, explicit expiry/rollback, polling
 identity continuity, and sanitized effect-free CLI status/preview.
@@ -25,11 +26,12 @@ rollback and durable authority disagree. Generic binding `reconcile --apply`
 is therefore fenced for the full preview/mutation/readback window whenever a
 rotation record owns the source.
 
-This provider-free lane started from `fbd142d`. Injected provider, service,
-secret, clock, and runtime boundaries are allowed; provider, service, secret,
-ingress, installation, release, and dispatch effects are not. Canonical
-acceptance still requires the issue-linked PR, hosted gates, squash merge, and
-`origin/main` readback.
+The accepted provider-free feature tip is
+`ab398ff5b431ddbda193bd140256af0ca18d1f75`; its local validation passed 638
+Python tests, 12 plugin tests, compilation, and diff hygiene. Provider,
+service, secret, ingress, installation, release, and dispatch effects remained
+zero. C3 owns the next provider-free integration; live activation remains a
+separate C4 gate.
 
 ## Objective
 
