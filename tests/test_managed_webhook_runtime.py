@@ -228,6 +228,11 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
             current.owner_id, expected_revision=current.revision,
             observation=Observation.PROVED, now=observed_at,
         )
+        live_dual_proof = RuntimeProof(
+            process_id=124, process_started_at=observed_at,
+            authority_revision=managed_binding.generation, loaded_generations=(7, 8),
+            evidence_locator="replacement-runtime",
+        )
         runtime = build_webhook_runtime(
             wake_root=self.root, listener=listener,
             environment={
@@ -242,7 +247,7 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
                 )
             ]),
             now=lambda: NOW + timedelta(seconds=2),
-            runtime_proof_verifier=lambda: current.runtime_proof,
+            runtime_proof_verifier=lambda: live_dual_proof,
         )
         body, signature = signed_body()
         result = []
@@ -261,6 +266,7 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
         persisted = ManagedWebhookRotationStore(self.root).load("wake-owner-1")
         self.assertEqual(persisted.phase.value, "AWAITING_DELIVERY")
         self.assertIsNotNone(persisted.delivery_locator)
+        self.assertEqual(persisted.runtime_proof, live_dual_proof)
         self.assertTrue(runtime_attestation_path(self.root, source.source_instance).is_file())
 
         pending_target = coordinator.intend_target_restart(

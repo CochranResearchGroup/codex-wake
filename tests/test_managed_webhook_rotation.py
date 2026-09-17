@@ -183,6 +183,32 @@ class ManagedWebhookRotationCoordinatorTests(unittest.TestCase):
         self.assertEqual(completed.terminal_code, "RETIRED")
         self.assertEqual(self.coordinator.observe_retirement("wake-owner-1", expected_revision=completed.revision, observation=Observation.PROVED, now=109), completed)
 
+    def test_awaiting_delivery_can_refresh_a_verified_dual_process_after_restart(self) -> None:
+        self.provider_ready()
+        for invalid in (
+            proof(process_id=789, process_started_at=100, evidence_locator="runtime-45"),
+            proof(process_id=789, process_started_at=105, loaded_generations=(8,), evidence_locator="runtime-45"),
+            proof(process_id=789, process_started_at=105, authority_revision=12, evidence_locator="runtime-45"),
+        ):
+            with self.subTest(proof=invalid), self.assertRaisesRegex(ValueError, "refresh is invalid"):
+                self.coordinator.refresh_awaiting_runtime(
+                    "wake-owner-1", expected_revision=self.current.revision,
+                    proof=invalid, now=105,
+                )
+        refreshed_proof = proof(
+            process_id=456, process_started_at=105, evidence_locator="runtime-44",
+        )
+        refreshed = self.coordinator.refresh_awaiting_runtime(
+            "wake-owner-1", expected_revision=self.current.revision,
+            proof=refreshed_proof, now=105,
+        )
+        self.assertEqual(refreshed.runtime_proof, refreshed_proof)
+        delivered = self.coordinator.record_delivery(
+            "wake-owner-1", expected_revision=refreshed.revision,
+            generation=8, journal_locator="event_000000000001", now=105,
+        )
+        self.assertEqual(delivered.delivery_locator, "event_000000000001")
+
     def test_crash_boundaries_do_not_repeat_or_skip_effects(self) -> None:
         pending = self.coordinator.intend_dual_restart("wake-owner-1", expected_revision=self.current.revision, now=101)
         resumed = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(self.root)).load("wake-owner-1", now=101)

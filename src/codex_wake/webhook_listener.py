@@ -203,8 +203,13 @@ def build_webhook_runtime(
                 if prove_runtime is None or current.runtime_proof is None:
                     raise ValueError("managed webhook rotation runtime proof is unavailable")
                 live_proof = prove_runtime()
-                if type(live_proof) is not RuntimeProof or live_proof != current.runtime_proof:
+                if type(live_proof) is not RuntimeProof:
                     raise ValueError("managed webhook rotation runtime proof changed")
+                if live_proof != current.runtime_proof:
+                    current = coordinator.refresh_awaiting_runtime(
+                        rotation.owner_id, expected_revision=current.revision,
+                        proof=live_proof, now=observed_at,
+                    )
                 coordinator.record_delivery(
                     rotation.owner_id, expected_revision=current.revision,
                     generation=generation, journal_locator=receipt_id, now=observed_at,

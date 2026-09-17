@@ -527,6 +527,39 @@ class ManagedWebhookRotationCoordinator:
             raise ValueError("managed webhook rotation delivery proof is invalid")
         return self.store.save(replace(record, delivery_locator=journal_locator, last_observed_at=now), expected_revision=record.revision)
 
+    def refresh_awaiting_runtime(
+        self, owner_id: str, *, expected_revision: int, proof: RuntimeProof, now: int,
+    ) -> RotationRecord:
+        """Replace a stale dual-process proof after an unplanned service restart.
+
+        This narrow recovery is available only while target delivery is still
+        absent.  The caller must independently verify the private live
+        attestation; this state machine accepts only the same authority and
+        dual generation set with a non-regressing process identity.
+        """
+        record = self._current(owner_id, expected_revision, now)
+        if (
+            record.phase is not RotationPhase.AWAITING_DELIVERY
+            or record.pending_effect is not PendingEffect.NONE
+            or record.delivery_locator is not None
+            or record.runtime_proof is None
+            or proof.authority_revision != record.binding_revision
+            or proof.loaded_generations != (record.previous_generation, record.target_generation)
+            or proof.process_started_at < record.runtime_proof.process_started_at
+            or (
+                proof.process_started_at == record.runtime_proof.process_started_at
+                and proof.process_id == record.runtime_proof.process_id
+                and proof != record.runtime_proof
+            )
+        ):
+            raise ValueError("managed webhook rotation runtime refresh is invalid")
+        if proof == record.runtime_proof:
+            return record
+        return self.store.save(
+            replace(record, runtime_proof=proof, last_observed_at=now),
+            expected_revision=record.revision,
+        )
+
     def intend_target_restart(self, owner_id: str, *, expected_revision: int, now: int) -> RotationRecord:
         record = self._current(owner_id, expected_revision, now)
         if record.pending_effect is PendingEffect.RESTART_TARGET_ONLY:
@@ -839,6 +872,22 @@ def _stored_transition_allowed(prior: RotationRecord, saved: RotationRecord) -> 
         if saved.phase is not RotationPhase.AWAITING_DELIVERY:
             return False
         return (
+            prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.NONE
+            and prior.delivery_locator is None and saved.delivery_locator is None
+            and prior.runtime_proof is not None and saved.runtime_proof is not None
+            and saved.runtime_proof.loaded_generations == (saved.previous_generation, saved.target_generation)
+            and saved.runtime_proof.authority_revision == saved.binding_revision
+            and saved.runtime_proof.process_started_at >= prior.runtime_proof.process_started_at
+            and not (
+                saved.runtime_proof.process_started_at == prior.runtime_proof.process_started_at
+                and saved.runtime_proof.process_id == prior.runtime_proof.process_id
+                and saved.runtime_proof != prior.runtime_proof
+            )
+            and saved.effect_revision == prior.effect_revision
+            and saved.restart_intended_at == prior.restart_intended_at
+            and saved.terminal_history == prior.terminal_history
+            and saved.terminal_code == prior.terminal_code
+        ) or (
             prior.pending_effect is PendingEffect.NONE and saved.pending_effect is PendingEffect.NONE
             and prior.delivery_locator is None and saved.delivery_locator is not None
             and saved.runtime_proof == prior.runtime_proof and saved.effect_revision == prior.effect_revision
