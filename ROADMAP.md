@@ -833,13 +833,12 @@ Acceptance target:
   with canonical GitHub and verification custody.
 
 Acceptance state: P54 planning and its five-child issue graph are canonical;
-#138 and #139 are closed and accepted on canonical main, with C2 integrated at
-`143b1d3`. Plan 0086's #140 full health/cleanup checkpoint is independently
-accepted and published at `f0fe41d`. Rotation includes durable restart/expiry/rollback state,
+#138-#140 are closed and accepted on canonical main. C2 integrated at
+`143b1d3`; C3 integrated at `b0d4a85`. Rotation includes durable restart/expiry/rollback state,
 process-bound generation readiness, committed target-key delivery proof,
 polling identity continuity, and effect-free redacted status/preview. A public
 rotation apply command remains intentionally unsupported until provider effect
 and terminal binding-consolidation contracts exist. Movement is
-`outcome_progress`. Next action: integrate #140 through its issue-linked PR and
-hosted gates, then stop at C4's fresh retained-activation authority gate. Live
-effects remain separately gated.
+`outcome_progress`. The active-lane catalog is empty. Next action: stop at C4
+#141's fresh retained-activation authority gate. Live provider, service,
+secret, ingress, installation, and dispatch effects remain separately gated.

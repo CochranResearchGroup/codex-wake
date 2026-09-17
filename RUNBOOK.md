@@ -4039,3 +4039,26 @@ accepted. Canonical acceptance is gated by its issue-linked PR, hosted Python
 gates, squash merge, issue closure, and `origin/main` readback. Movement is
 `outcome_progress`. Next action: publish the C3 custody update, then integrate
 the feature PR and stop at C4's fresh retained-activation authority gate.
+
+## Turn 182 | 2026-09-16
+
+Integrated and closed the provider-free P54-C3 health and cleanup slice.
+
+- Custody PR #148 passed hosted run `35177281729` and reconciled exact feature
+  tip `f0fe41d746ff9ad9356fa031e5b16aedc76a63b7` before feature integration.
+- Feature PR #149 passed both hosted Python release gates on run `35177389023`
+  and squash-merged as canonical
+  `b0d4a8517f6075e1b848d94a5aa471010cecba46`; GitHub closed #140.
+- Canonical readback contains the independently accepted health planes,
+  exact-ID cleanup controller, durable ambiguity/tombstone contract, runtime
+  fences, hardened absence census, and provider-free qualification.
+- Verification 0083 records the local, installed-wheel, independent-review,
+  hosted-gate, issue, and canonical ancestry evidence. The C3 active lane is
+  removed.
+- No provider, service, secret, ingress, installed-runtime, release, or
+  dispatch effect occurred.
+
+Acceptance state: #140 is closed and accepted on canonical main. Movement is
+`outcome_progress`. The next packet is C4 #141, but retained provider and local
+service activation requires fresh explicit authority; no active lane is
+registered yet.
