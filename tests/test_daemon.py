@@ -432,6 +432,7 @@ class DaemonTests(unittest.TestCase):
             self.assertFalse((root / "firing" / "wake_revoked_process.json").exists())
 
     def test_github_candidate_budget_is_applied_after_grouping_arms_by_source(self) -> None:
+        from dataclasses import replace
         from datetime import timedelta
 
         from codex_wake.github_polling import GitHubPollingAdapter
