@@ -153,6 +153,15 @@ def verify_runtime_attestation(
     )
     if not probe():
         raise ValueError("managed webhook runtime bind ownership is unproven")
+    # Fence the complete socket inspection window.  The numeric PID can be
+    # reused while procfs is being traversed, so both systemd ownership and
+    # the exact boot/start identity must still match after the bind proof.
+    if (
+        _main_pid(config, runner) != main_pid
+        or _read_boot_id(proc_root) != attestation.boot_id
+        or _read_process_start_ticks(proc_root, main_pid) != attestation.process_start_ticks
+    ):
+        raise ValueError("managed webhook runtime process changed during verification")
     ticks_per_second = os.sysconf("SC_CLK_TCK")
     if type(ticks_per_second) is not int or ticks_per_second <= 0:
         raise ValueError("managed webhook runtime clock is unavailable")

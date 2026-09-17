@@ -126,7 +126,7 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
             rotation=self.rotation, process_id=self.pid, proc_root=self.proc,
         )
         path = runtime_attestation_path(self.root, self.listener.source_instance)
-        cases = ("mode", "pid", "boot", "ticks", "socket")
+        cases = ("mode", "pid", "boot", "ticks", "socket", "pid-reuse-during-probe")
         for case in cases:
             with self.subTest(case=case):
                 path.chmod(0o600)
@@ -150,8 +150,16 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
                     (self.proc / str(self.pid) / "stat").write_text(
                         f"{self.pid} (webhook worker) " + " ".join(tail) + "\n"
                     )
-                else:
+                elif case == "socket":
                     probe = lambda: False
+                else:
+                    def replace_same_pid() -> bool:
+                        replaced = ["S"] + ["0"] * 18 + ["251"]
+                        (self.proc / str(self.pid) / "stat").write_text(
+                            f"{self.pid} (replacement worker) " + " ".join(replaced) + "\n"
+                        )
+                        return True
+                    probe = replace_same_pid
                 with self.assertRaisesRegex(ValueError, "managed webhook runtime"):
                     verify_runtime_attestation(
                         config=self.config, listener=self.listener, binding=self.binding,
@@ -254,6 +262,67 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
         self.assertEqual(persisted.phase.value, "AWAITING_DELIVERY")
         self.assertIsNotNone(persisted.delivery_locator)
         self.assertTrue(runtime_attestation_path(self.root, source.source_instance).is_file())
+
+        pending_target = coordinator.intend_target_restart(
+            persisted.owner_id, expected_revision=persisted.revision, now=observed_at + 1,
+        )
+        target_listener = replace(
+            listener, previous_secret_ref=None, previous_generation=None,
+        )
+        WebhookListenerStore(self.root).transition_rotation_secrets(
+            expected=listener, replacement=target_listener,
+            rotation=pending_target, binding=managed_binding,
+        )
+        target_proof = RuntimeProof(
+            process_id=999, process_started_at=observed_at + 1,
+            authority_revision=managed_binding.generation, loaded_generations=(8,),
+            evidence_locator="target-runtime",
+        )
+        current = coordinator.observe_target_restart(
+            persisted.owner_id, expected_revision=pending_target.revision,
+            proof=target_proof, now=observed_at + 2,
+        )
+        current = coordinator.intend_retirement(
+            current.owner_id, expected_revision=current.revision, now=observed_at + 3,
+        )
+        complete = coordinator.observe_retirement(
+            current.owner_id, expected_revision=current.revision,
+            observation=Observation.PROVED, now=observed_at + 4,
+        )
+        restarted = build_webhook_runtime(
+            wake_root=self.root, listener=target_listener,
+            environment={
+                "TARGET_SECRET": SECRET.decode(),
+                source.credential_ref: "fixture-provider-token",
+            },
+            attempt_client_factory=lambda deadline: FixtureClient([
+                replace(
+                    run(), completed_at=None, terminal_proof_at=run().completed_at,
+                    time_provenance="github_attempt_started_or_job_completed_lower_bound",
+                )
+            ]),
+            now=lambda: NOW + timedelta(seconds=6),
+            runtime_proof_verifier=lambda: RuntimeProof(
+                process_id=1000, process_started_at=observed_at + 5,
+                authority_revision=managed_binding.generation, loaded_generations=(8,),
+                evidence_locator="new-runtime",
+            ),
+        )
+        restarted_result = []
+
+        def deliver_restarted() -> None:
+            restarted_result.append(exchange(
+                restarted.address, body, signature,
+                delivery="11111111-2222-3333-4444-555555555555",
+            ))
+            restarted.shutdown()
+
+        restarted_client = threading.Thread(target=deliver_restarted)
+        restarted_client.start()
+        restarted.serve()
+        restarted_client.join(2)
+        self.assertEqual(complete.phase.value, "COMPLETE")
+        self.assertEqual(restarted_result, [(200, "DUPLICATE")])
 
     def test_rotation_runtime_requires_all_distinct_secrets_before_attesting(self) -> None:
         source = github_config(evidence_mode="positive_only")
