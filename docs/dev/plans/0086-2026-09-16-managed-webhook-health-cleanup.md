@@ -1,6 +1,6 @@
 # Managed webhook health, cleanup, and provider-free qualification
 
-State: OPEN
+State: CLOSED
 Lane: P54-C3
 Issue: #140
 Branch: `feat/issue-140-webhook-health-cleanup`
@@ -10,9 +10,11 @@ Parent plan: `docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md`
 
 ## Current state
 
-C1 and C2 are accepted on canonical `origin/main`. C3 is implementation-ready
-at `f0fe41d746ff9ad9356fa031e5b16aedc76a63b7` and independently accepted. It
-adds independent local/provider/delivery/polling/dispatch health, explicitly
+C1-C3 are accepted on canonical `origin/main`. C3 squash-merged through PR
+#149 as `b0d4a8517f6075e1b848d94a5aa471010cecba46`; both hosted Python release
+gates passed on run `35177389023`, GitHub closed #140, and Verification 0083
+records the acceptance evidence. It adds independent
+local/provider/delivery/polling/dispatch health, explicitly
 armed exact-ID disable/delete, durable sanitized cleanup intent and tombstones,
 runtime/reconcile/rotation fences, and a provider-free qualification.
 
@@ -21,9 +23,9 @@ hygiene, and a rebuilt isolated-wheel qualification. The qualification applies
 fixture disable/delete, proves a production-adapter unit/PID/socket absence
 census, and hashes retained product-path fixtures across cleanup. Rotation is
 truthfully `preview_only`; no provider, service, secret, ingress, installed
-runtime, release, or dispatch effect is authorized or performed. Canonical
-acceptance still requires the issue-linked PR, hosted gates, squash merge,
-issue closure, and `origin/main` readback.
+runtime, release, or dispatch effect was authorized or performed. The active
+lane is reconciled. C4 retained activation remains a separate fresh authority
+gate.
 
 ## Objective
 
