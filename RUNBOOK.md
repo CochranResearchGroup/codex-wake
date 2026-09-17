@@ -4062,3 +4062,35 @@ Acceptance state: #140 is closed and accepted on canonical main. Movement is
 `outcome_progress`. The next packet is C4 #141, but retained provider and local
 service activation requires fresh explicit authority; no active lane is
 registered yet.
+
+## Turn 183 | 2026-09-16
+
+Authorized and froze the corrected P54-C4 retained-activation packet.
+
+- The operator explicitly authorized the exact C4 GitHub hook, scoped secrets,
+  installed runtime, local service, and external-ingress activation effects;
+  visible target dispatch remains excluded until C5.
+- Fresh provider readback identifies actor `ecochran76` / `8397615`, repository
+  `CochranResearchGroup/codex-wake` / `1242753508`, admin capability, and an
+  empty hook inventory. No C4 live effect has occurred.
+- Fresh ingress readback proves the accepted exact POST route and valid public
+  certificate remain loaded. Loopback port `8820` has no listener, so local,
+  Cooper-host, and public HTTPS exact POST currently return the expected `502`;
+  no ingress drift or mutation was found.
+- Independent specialist review found three blockers to truthful activation:
+  the installed daemon service cannot persist `--no-dispatch`, health hardcodes
+  polling unobserved and cannot attribute first-generation delivery, and a
+  cleanup tombstone correctly fences subsequent reconciliation on that owner.
+- Plan 0087 therefore gates all live effects behind two provider-free TDD
+  corrections and an independent review. Live disable/delete proof uses a
+  distinct rehearsal owner whose tombstone stays terminal; a fresh final owner
+  is then retained-active. The mutation ceiling is two creates, one disable,
+  one delete, and zero dispatch.
+- The active lane records one primary owner, at most two disjoint standard
+  implementation workers, and one bounded specialist review with no nested
+  delegation.
+
+Acceptance state: #141 is `IN_PROGRESS` only after this registration reaches
+canonical main. Movement is `outcome_progress`. Next action: integrate the
+registration PR, then test-drive the dispatch-disabled service and truthful
+current-generation health seams before any live provider or deployment effect.
