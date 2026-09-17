@@ -570,7 +570,7 @@ class InstalledWebhookSmokeTests(unittest.TestCase):
         )
 
     def test_generated_poll_fixture_passes_strict_provider_free_convergence(self) -> None:
-        registered = datetime(2026, 9, 16, 12, 0, tzinfo=UTC)
+        registered = datetime.now(UTC) - timedelta(seconds=2)
         fixture = fixture_at(registered + timedelta(seconds=1))
         workflow = fixture.workflow
         run = WorkflowRun(
