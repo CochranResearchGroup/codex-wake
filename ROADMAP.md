@@ -839,6 +839,11 @@ process-bound generation readiness, committed target-key delivery proof,
 polling identity continuity, and effect-free redacted status/preview. A public
 rotation apply command remains intentionally unsupported until provider effect
 and terminal binding-consolidation contracts exist. Movement is
-`outcome_progress`. The active-lane catalog is empty. Next action: stop at C4
-#141's fresh retained-activation authority gate. Live provider, service,
-secret, ingress, installation, and dispatch effects remain separately gated.
+`outcome_progress`. Plan 0087 registers C4 #141 after fresh preflight found
+three truthful-activation blockers: persistent no-dispatch service mode,
+first-generation delivery/polling health evidence, and terminal cleanup versus
+retention. Provider-free correction precedes a separately named cleanup
+rehearsal and one final retained installation. GitHub hook, scoped secret,
+installed runtime, local service, and ingress activation effects are explicitly
+authorized but remain gated by those product checks; dispatch remains excluded
+until C5.
