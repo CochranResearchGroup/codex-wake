@@ -500,28 +500,36 @@ class ManagedWebhookReconciler:
         if type(plan) is not ReconciliationPlan:
             raise ValueError("managed webhook reconciliation plan is invalid")
         with self.store.locked():
-            binding = self.store._load_unlocked(plan.owner_id)
-            if binding.generation != plan.generation or binding.desired_fingerprint != plan.desired_fingerprint:
-                raise ValueError("managed webhook reconciliation plan is stale")
-            if plan.action is not PlanAction.WRITE:
-                return self._complete_read_only(binding, plan)
-            try:
-                current_hooks = self.provider.list_hooks(repository_id=binding.repository_id)
-            except Exception:
-                raise ValueError("provider hook inventory is unavailable") from None
-            current_inventory = self.classify(binding, current_hooks)
-            current_hook = next(
-                (item for item in current_hooks if item.hook_id == binding.provider_hook_id),
-                None,
-            )
-            if (
-                current_inventory is not plan.inventory
-                or plan.operation is OperationKind.CREATE and current_inventory is not InventoryClass.ABSENT
-                or plan.operation is OperationKind.UPDATE and current_inventory is not InventoryClass.DRIFTED
-                or plan.hook_id != (current_hook.hook_id if current_hook else None)
-            ):
-                raise ValueError("managed webhook reconciliation plan is stale")
-            return self._write_once(binding, plan)
+            from .managed_webhook_cleanup import ManagedWebhookCleanupStore
+            cleanup_store = ManagedWebhookCleanupStore(self.store.wake_root)
+            with cleanup_store.locked():
+                if any(
+                    item.intent.owner_id == plan.owner_id
+                    for item in cleanup_store._records_unlocked()
+                ):
+                    raise ValueError("generic webhook reconciliation is blocked while cleanup authority exists")
+                binding = self.store._load_unlocked(plan.owner_id)
+                if binding.generation != plan.generation or binding.desired_fingerprint != plan.desired_fingerprint:
+                    raise ValueError("managed webhook reconciliation plan is stale")
+                if plan.action is not PlanAction.WRITE:
+                    return self._complete_read_only(binding, plan)
+                try:
+                    current_hooks = self.provider.list_hooks(repository_id=binding.repository_id)
+                except Exception:
+                    raise ValueError("provider hook inventory is unavailable") from None
+                current_inventory = self.classify(binding, current_hooks)
+                current_hook = next(
+                    (item for item in current_hooks if item.hook_id == binding.provider_hook_id),
+                    None,
+                )
+                if (
+                    current_inventory is not plan.inventory
+                    or plan.operation is OperationKind.CREATE and current_inventory is not InventoryClass.ABSENT
+                    or plan.operation is OperationKind.UPDATE and current_inventory is not InventoryClass.DRIFTED
+                    or plan.hook_id != (current_hook.hook_id if current_hook else None)
+                ):
+                    raise ValueError("managed webhook reconciliation plan is stale")
+                return self._write_once(binding, plan)
 
     def _complete_read_only(self, binding: ManagedWebhookBinding, plan: ReconciliationPlan) -> OperationReceipt:
         if plan.inventory is InventoryClass.EXACT and plan.hook_id is not None:
@@ -756,7 +764,10 @@ def _transition_allowed(before: LifecycleState, after: LifecycleState) -> bool:
         LifecycleState.ACTIVE: {LifecycleState.ACTIVE, LifecycleState.UPDATING, LifecycleState.DISABLED, LifecycleState.UNKNOWN},
         LifecycleState.UPDATING: {LifecycleState.UPDATING, LifecycleState.ACTIVE, LifecycleState.UNKNOWN},
         LifecycleState.UNKNOWN: {LifecycleState.UNKNOWN, LifecycleState.ACTIVE, LifecycleState.DISABLED},
-        LifecycleState.DISABLED: {LifecycleState.DISABLED, LifecycleState.CREATING, LifecycleState.UNKNOWN},
+        LifecycleState.DISABLED: {
+            LifecycleState.DISABLED, LifecycleState.CREATING,
+            LifecycleState.DELETED, LifecycleState.UNKNOWN,
+        },
         LifecycleState.DELETED: {LifecycleState.DELETED},
     }[before]
 

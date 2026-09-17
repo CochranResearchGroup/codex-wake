@@ -349,6 +349,16 @@ class ManagedWebhookRotationStore:
             raise ValueError("managed webhook rotation ownership is invalid")
         selected = {item.owner_id: item for item in self._records_unlocked()}
         prior = selected.get(record.owner_id)
+        successor = prior is not None and _is_successor(prior, record)
+        if prior is None or successor:
+            from .managed_webhook_cleanup import ManagedWebhookCleanupStore
+            cleanup_store = ManagedWebhookCleanupStore(self.wake_root)
+            with cleanup_store.locked():
+                if any(
+                    item.intent.owner_id == record.owner_id
+                    for item in cleanup_store._records_unlocked()
+                ):
+                    raise ValueError("managed webhook rotation is blocked while cleanup authority exists")
         if prior is None:
             if expected_revision is not None or record.revision != 0:
                 raise ValueError("managed webhook rotation revision is stale")
@@ -356,7 +366,6 @@ class ManagedWebhookRotationStore:
         else:
             if type(expected_revision) is not int or expected_revision != prior.revision:
                 raise ValueError("managed webhook rotation revision is stale")
-            successor = _is_successor(prior, record)
             if _immutable_facts(prior) != _immutable_facts(record) and not successor:
                 raise ValueError("managed webhook rotation ownership is immutable")
             if not successor and not _phase_allowed(prior.phase, record.phase):

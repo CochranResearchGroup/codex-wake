@@ -70,6 +70,12 @@ def build_webhook_runtime(
     rotation_context = None
     def require_current_authority() -> tuple[WebhookListenerConfig, object]:
         try:
+            from .managed_webhook_cleanup import ManagedWebhookCleanupStore
+            if any(
+                item.source_instance == listener.source_instance
+                for item in ManagedWebhookCleanupStore(wake_root).records()
+            ):
+                raise ValueError("managed webhook cleanup authority is active")
             current_listener = WebhookListenerStore(wake_root).enabled(listener.source_instance)
             current_source = GitHubSourceStore(wake_root).registry().select(listener.source_instance)
             if current_listener != listener or current_source != source:
@@ -216,7 +222,14 @@ def build_webhook_runtime(
                 )
     except ValueError as exc:
         raise WakeError("managed webhook rotation authority is unavailable") from exc
-    resolver = _secret_resolver(listener, source_env)
+    # Re-read all durable authorities immediately before constructing the
+    # runtime. The same check is repeated by the resolver on every admission.
+    require_current_authority()
+    base_resolver = _secret_resolver(listener, source_env)
+
+    def resolver(reference: str) -> bytes:
+        require_current_authority()
+        return base_resolver(reference)
     try:
         loaded_secrets = {reference: resolver(reference) for reference in secrets}
         if (

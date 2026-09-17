@@ -400,6 +400,11 @@ def build_parser() -> argparse.ArgumentParser:
         probe = github_webhook_subparsers.add_parser(action)
         probe.add_argument("--source", required=True, dest="source_instance")
         probe.add_argument("--json", action="store_true", dest="as_json")
+    webhook_health = github_webhook_subparsers.add_parser(
+        "health", help="project independent managed webhook health planes"
+    )
+    webhook_health.add_argument("--source", required=True, dest="source_instance")
+    webhook_health.add_argument("--json", action="store_true", dest="as_json")
     webhook_rotation = github_webhook_subparsers.add_parser(
         "rotation", help="preview sanitized managed-secret rotation state"
     )
@@ -414,6 +419,19 @@ def build_parser() -> argparse.ArgumentParser:
     rotation_preview.add_argument("--target-generation", required=True, type=int)
     rotation_preview.add_argument("--overlap-seconds", required=True, type=int)
     rotation_preview.add_argument("--json", action="store_true", dest="as_json")
+    webhook_cleanup = github_webhook_subparsers.add_parser(
+        "cleanup", help="preview or explicitly apply exact managed cleanup"
+    )
+    webhook_cleanup_subparsers = webhook_cleanup.add_subparsers(
+        dest="github_webhook_cleanup_command", required=True
+    )
+    for action in ("preview", "apply"):
+        cleanup = webhook_cleanup_subparsers.add_parser(action)
+        cleanup.add_argument("--source", required=True, dest="source_instance")
+        cleanup.add_argument("--action", required=True, choices=("disable", "delete"))
+        cleanup.add_argument("--json", action="store_true", dest="as_json")
+        if action == "apply":
+            cleanup.add_argument("--expected-intent", required=True)
     webhook_binding = github_webhook_subparsers.add_parser(
         "binding", help="manage one exact provider webhook binding"
     )
@@ -1301,7 +1319,10 @@ def _github_source_summary(source) -> dict[str, object]:
     }
 
 
-def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_factory=None) -> int:
+def github_webhook_command(
+    args: argparse.Namespace, root: Path, *, provider_factory=None,
+    cleanup_local_factory=None,
+) -> int:
     from .webhook_lifecycle import (
         WebhookListenerConfig, WebhookListenerStore, build_webhook_service_config,
         disable_webhook_listener, install_webhook_service, listener_summary, start_webhook_service, stop_webhook_service,
@@ -1330,6 +1351,118 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
                 f"action={result['next_action']} deadline={result['deadline_state']}"
             )
         return 0 if result["next_action"] not in {"BLOCKED", "ROLLBACK_REQUIRED"} else 1
+    if args.github_webhook_command == "health":
+        from .managed_webhook_cleanup import (
+            LocalCleanupState, SystemdCleanupAdapter,
+            classify_provider_object,
+        )
+        from .managed_webhook_health import (
+            ListenerHealth, PollingFallbackHealth, ProviderDeliveryHealth,
+            ProviderObjectHealth, project_health,
+        )
+        from .managed_webhook_rotation import ManagedWebhookRotationStore
+        from .managed_webhooks import ManagedWebhookStore
+
+        try:
+            binding = ManagedWebhookStore(root).load(args.source_instance)
+            listener = store.select(binding.source_instance)
+            local = (
+                cleanup_local_factory(root)
+                if cleanup_local_factory is not None
+                else SystemdCleanupAdapter(root)
+            )
+            try:
+                provider = _managed_webhook_provider(
+                    binding, listener, provider_factory=provider_factory,
+                )
+                hooks = provider.list_hooks(repository_id=binding.repository_id)
+                provider_object, _ = classify_provider_object(binding, hooks)
+            except Exception:
+                provider_object = ProviderObjectHealth.UNAVAILABLE
+            try:
+                local_state = local.observe(
+                    listener=listener,
+                    service_id=binding.service_id,
+                )
+            except Exception:
+                local_state = LocalCleanupState.UNKNOWN
+            local_health = {
+                LocalCleanupState.OWNED_ACTIVE: ListenerHealth.READY,
+                LocalCleanupState.PROVEN_ABSENT: ListenerHealth.DISABLED,
+                LocalCleanupState.UNKNOWN: ListenerHealth.UNKNOWN,
+            }[local_state]
+            try:
+                rotations = tuple(
+                    item for item in ManagedWebhookRotationStore(root).records()
+                    if item.owner_id == binding.owner_id
+                )
+                delivery = (
+                    ProviderDeliveryHealth.OBSERVED
+                    if len(rotations) == 1 and rotations[0].delivery_locator is not None
+                    else ProviderDeliveryHealth.UNPROVEN
+                )
+            except ValueError:
+                delivery = ProviderDeliveryHealth.UNKNOWN
+            result = project_health(
+                generation=binding.generation,
+                desired_fingerprint=binding.desired_fingerprint,
+                local_listener=local_health,
+                provider_object=provider_object,
+                provider_delivery=delivery,
+                polling_fallback=PollingFallbackHealth.UNOBSERVED,
+            ).to_dict()
+            if args.as_json:
+                print(json.dumps(result, sort_keys=True))
+            else:
+                print(
+                    f"source={binding.source_instance} aggregate={result['aggregate']} "
+                    f"provider={result['provider_object']} polling={result['polling_fallback']}"
+                )
+            return 0 if result["aggregate"] == "HEALTHY" else 1
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+    if args.github_webhook_command == "cleanup":
+        from .managed_webhook_cleanup import (
+            ManagedWebhookCleanupController, SystemdCleanupAdapter,
+        )
+        from .managed_webhook_health import CleanupAction
+        from .managed_webhooks import ManagedWebhookStore
+
+        try:
+            binding = ManagedWebhookStore(root).load(args.source_instance)
+            listener = store.select(binding.source_instance)
+            provider = _managed_webhook_provider(
+                binding, listener, provider_factory=provider_factory,
+            )
+            local = (
+                cleanup_local_factory(root)
+                if cleanup_local_factory is not None
+                else SystemdCleanupAdapter(root)
+            )
+            controller = ManagedWebhookCleanupController(
+                root, provider=provider, local=local,
+            )
+            plan = controller.preview(
+                args.source_instance, CleanupAction(args.action.upper()),
+            )
+            result: dict[str, object] = {
+                "mode": args.github_webhook_cleanup_command,
+                **plan.to_dict(),
+            }
+            if args.github_webhook_cleanup_command == "apply":
+                if args.expected_intent != plan.intent.intent_id:
+                    raise ValueError("managed webhook cleanup plan is stale")
+                result["tombstone"] = controller.execute(plan).to_dict()
+            if args.as_json:
+                print(json.dumps(result, sort_keys=True))
+            else:
+                print(
+                    f"source={args.source_instance} action={args.action} "
+                    f"eligibility={plan.eligibility.value} mode={result['mode']}"
+                )
+            return 0 if plan.eligibility.value == "ELIGIBLE_FOR_EXPLICIT_PLAN" else 1
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
     if args.github_webhook_command == "source":
         action = args.github_webhook_source_command
         try:
