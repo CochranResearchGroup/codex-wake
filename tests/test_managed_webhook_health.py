@@ -169,11 +169,38 @@ class CleanupModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "health data is invalid"):
             CleanupHistory(**IDENTITY, entries=tuple(event for _ in range(33)))
 
+    def test_tombstone_state_must_match_the_completed_action(self) -> None:
+        disabling = intent(action=CleanupAction.DISABLE)
+        deleting = intent(action=CleanupAction.DELETE)
+        with self.assertRaisesRegex(ValueError, "health data is invalid"):
+            CleanupTombstone.from_intent(
+                disabling, state=CleanupTombstoneState.DELETED_PROVEN,
+            )
+        with self.assertRaisesRegex(ValueError, "health data is invalid"):
+            CleanupTombstone.from_intent(
+                deleting, state=CleanupTombstoneState.DISABLED_PROVEN,
+            )
+
     def test_cleanup_plan_remains_ineligible_for_all_c1_nonexact_states(self) -> None:
         item = intent()
         for inventory in (ProviderObjectHealth.DUPLICATE, ProviderObjectHealth.COLLISION, ProviderObjectHealth.MISSING, ProviderObjectHealth.UNKNOWN):
             with self.subTest(inventory=inventory):
                 self.assertEqual(CleanupPlan(item, inventory).eligibility, CleanupEligibility.NOT_AUTHORIZED)
+
+    def test_only_an_exact_provider_object_can_be_explicitly_cleanup_eligible(self) -> None:
+        item = intent()
+        eligible = CleanupPlan(
+            item, ProviderObjectHealth.EXACT,
+            CleanupEligibility.ELIGIBLE_FOR_EXPLICIT_PLAN,
+        )
+        self.assertEqual(
+            eligible.eligibility, CleanupEligibility.ELIGIBLE_FOR_EXPLICIT_PLAN,
+        )
+        with self.assertRaisesRegex(ValueError, "health data is invalid"):
+            CleanupPlan(
+                item, ProviderObjectHealth.DUPLICATE,
+                CleanupEligibility.ELIGIBLE_FOR_EXPLICIT_PLAN,
+            )
 
 
 if __name__ == "__main__":

@@ -42,6 +42,7 @@ class ProviderObjectHealth(str, Enum):
     DISABLED = "DISABLED"
     DELETED = "DELETED"
     BLOCKED = "BLOCKED"
+    UNAVAILABLE = "UNAVAILABLE"
     UNKNOWN = "UNKNOWN"
 
 
@@ -79,6 +80,7 @@ class AggregateHealth(str, Enum):
 
 class CleanupEligibility(str, Enum):
     NOT_AUTHORIZED = "NOT_AUTHORIZED"
+    ELIGIBLE_FOR_EXPLICIT_PLAN = "ELIGIBLE_FOR_EXPLICIT_PLAN"
 
 
 class CleanupAction(str, Enum):
@@ -199,7 +201,13 @@ class CleanupPlan:
     eligibility: CleanupEligibility = CleanupEligibility.NOT_AUTHORIZED
 
     def __post_init__(self) -> None:
-        if type(self.intent) is not CleanupIntent or not isinstance(self.inventory, ProviderObjectHealth) or self.eligibility is not CleanupEligibility.NOT_AUTHORIZED:
+        if (
+            type(self.intent) is not CleanupIntent
+            or not isinstance(self.inventory, ProviderObjectHealth)
+            or not isinstance(self.eligibility, CleanupEligibility)
+            or self.eligibility is CleanupEligibility.ELIGIBLE_FOR_EXPLICIT_PLAN
+            and self.inventory is not ProviderObjectHealth.EXACT
+        ):
             raise ValueError("managed webhook health data is invalid")
 
     def to_dict(self) -> dict[str, object]:
@@ -233,6 +241,8 @@ class CleanupTombstone:
         if (
             not _valid_cleanup_identity(self.owner_id, self.repository_id, self.hook_id, self.service_id, self.generation, self.desired_fingerprint)
             or not isinstance(self.action, CleanupAction) or not isinstance(self.state, CleanupTombstoneState)
+            or self.state is CleanupTombstoneState.DISABLED_PROVEN and self.action is not CleanupAction.DISABLE
+            or self.state is CleanupTombstoneState.DELETED_PROVEN and self.action is not CleanupAction.DELETE
             or self.intent_id != _intent_id(self.owner_id, self.repository_id, self.hook_id, self.service_id, self.generation, self.desired_fingerprint, self.action)
         ):
             raise ValueError("managed webhook health data is invalid")

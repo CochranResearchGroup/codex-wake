@@ -11,6 +11,7 @@ import unittest
 
 from codex_wake.cli import build_parser, github_webhook_command
 from codex_wake.github_source_config import GitHubSourceStore
+from codex_wake.managed_webhook_cleanup import LocalCleanupState
 from codex_wake.managed_webhook_rotation import ManagedWebhookRotationStore, RotationRecord
 from codex_wake.managed_webhook_rotation_preview import ManagedWebhookRotationPreviewer
 from codex_wake.managed_webhooks import ManagedWebhookBinding, ManagedWebhookStore, ProviderHook
@@ -44,6 +45,22 @@ class FakeProvider:
         self.calls.append(("get", hook_id))
         return next((item for item in self.hooks if item.hook_id == hook_id), None)
 
+    def disable_hook(self, *, repository_id: int, hook_id: int) -> ProviderHook:
+        self.calls.append(("disable", hook_id))
+        selected = next(item for item in self.hooks if item.hook_id == hook_id)
+        disabled = replace(selected, active=False)
+        self.hooks = [disabled if item.hook_id == hook_id else item for item in self.hooks]
+        return disabled
+
+    def delete_hook(self, *, repository_id: int, hook_id: int) -> None:
+        self.calls.append(("delete", hook_id))
+        self.hooks = [item for item in self.hooks if item.hook_id != hook_id]
+
+
+class UnavailableProvider(FakeProvider):
+    def list_hooks(self, *, repository_id: int) -> tuple[ProviderHook, ...]:
+        raise RuntimeError("provider unavailable")
+
 
 def matching_hook(binding: ManagedWebhookBinding, hook_id: int) -> ProviderHook:
     return ProviderHook(
@@ -67,6 +84,25 @@ class ProviderFactory:
         self.credential_resolver = credential_resolver
         self.secret_generation_resolver = secret_generation_resolver
         return self.provider
+
+
+class FakeCleanupLocal:
+    def __init__(self) -> None:
+        self.state = LocalCleanupState.OWNED_ACTIVE
+        self.calls: list[str] = []
+
+    def observe(self, *, listener, service_id: str) -> LocalCleanupState:
+        self.calls.append("observe")
+        return self.state
+
+    def disable_and_prove_absent(self, *, listener, service_id: str) -> LocalCleanupState:
+        self.calls.append("disable")
+        self.state = LocalCleanupState.PROVEN_ABSENT
+        return self.state
+
+    def delete_and_prove_absent(self, *, listener, service_id: str) -> LocalCleanupState:
+        self.calls.append("delete")
+        return self.state
 
 
 class ManagedWebhookCliTests(unittest.TestCase):
@@ -93,6 +129,12 @@ class ManagedWebhookCliTests(unittest.TestCase):
 
     def rotation_args(self, *values: str):
         return build_parser().parse_args(["github-webhook", "rotation", *values])
+
+    def cleanup_args(self, *values: str):
+        return build_parser().parse_args(["github-webhook", "cleanup", *values])
+
+    def health_args(self, *values: str):
+        return build_parser().parse_args(["github-webhook", "health", *values])
 
     def configure(self, *, as_json: bool = True) -> tuple[int, str]:
         values = [
@@ -304,6 +346,97 @@ class ManagedWebhookCliTests(unittest.TestCase):
         with self.assertRaisesRegex(WakeError, "blocked while rotation authority exists"):
             github_webhook_command(reconcile, self.root, provider_factory=factory)
         self.assertEqual((factory.calls, provider.calls), (0, []))
+
+    def test_cleanup_is_preview_first_explicitly_armed_and_redacted(self) -> None:
+        self.configure()
+        provider = FakeProvider()
+        setup_code, _, _ = self.invoke(
+            "reconcile", "github-workflow", "--apply", "--json", provider=provider,
+        )
+        self.assertEqual(setup_code, 0)
+        factory = ProviderFactory(provider)
+        local = FakeCleanupLocal()
+
+        health_output = StringIO()
+        with redirect_stdout(health_output):
+            code = github_webhook_command(
+                self.health_args("--source", "github-workflow", "--json"),
+                self.root, provider_factory=factory,
+                cleanup_local_factory=lambda root: local,
+            )
+        health = json.loads(health_output.getvalue())
+        self.assertEqual(code, 1)
+        self.assertEqual(health["provider_object"], "EXACT")
+        self.assertEqual(health["provider_delivery"], "UNPROVEN")
+        self.assertEqual(health["polling_fallback"], "UNOBSERVED")
+        self.assertEqual(health["dispatch"], "NOT_INCLUDED")
+
+        preview_output = StringIO()
+        with redirect_stdout(preview_output):
+            code = github_webhook_command(
+                self.cleanup_args(
+                    "preview", "--source", "github-workflow",
+                    "--action", "disable", "--json",
+                ),
+                self.root, provider_factory=factory,
+                cleanup_local_factory=lambda root: local,
+            )
+        preview = json.loads(preview_output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(preview["eligibility"], "ELIGIBLE_FOR_EXPLICIT_PLAN")
+
+        apply_output = StringIO()
+        with redirect_stdout(apply_output):
+            code = github_webhook_command(
+                self.cleanup_args(
+                    "apply", "--source", "github-workflow",
+                    "--action", "disable", "--expected-intent",
+                    preview["intent"]["intent_id"], "--json",
+                ),
+                self.root, provider_factory=factory,
+                cleanup_local_factory=lambda root: local,
+            )
+        result = json.loads(apply_output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(result["tombstone"]["state"], "DISABLED_PROVEN")
+        rendered = preview_output.getvalue() + apply_output.getvalue()
+        self.assertNotIn("WEBHOOK_SECRET_VALUE", rendered)
+        self.assertNotIn("GITHUB_ADMIN_TOKEN_VALUE", rendered)
+
+    def test_health_serializes_local_plane_when_provider_is_unavailable(self) -> None:
+        self.configure()
+        provider = FakeProvider()
+        setup_code, _, _ = self.invoke(
+            "reconcile", "github-workflow", "--apply", "--json", provider=provider,
+        )
+        self.assertEqual(setup_code, 0)
+        output = StringIO()
+        with redirect_stdout(output):
+            code = github_webhook_command(
+                self.health_args("--source", "github-workflow", "--json"),
+                self.root, provider_factory=ProviderFactory(UnavailableProvider()),
+                cleanup_local_factory=lambda root: FakeCleanupLocal(),
+            )
+        health = json.loads(output.getvalue())
+        self.assertEqual(code, 1)
+        self.assertEqual(health["local_listener"], "READY")
+        self.assertEqual(health["provider_object"], "UNAVAILABLE")
+        self.assertEqual(health["provider_delivery"], "UNPROVEN")
+
+        factory_output = StringIO()
+        with redirect_stdout(factory_output):
+            code = github_webhook_command(
+                self.health_args("--source", "github-workflow", "--json"),
+                self.root,
+                provider_factory=lambda *args, **kwargs: (_ for _ in ()).throw(
+                    RuntimeError("provider construction unavailable")
+                ),
+                cleanup_local_factory=lambda root: FakeCleanupLocal(),
+            )
+        factory_health = json.loads(factory_output.getvalue())
+        self.assertEqual(code, 1)
+        self.assertEqual(factory_health["local_listener"], "READY")
+        self.assertEqual(factory_health["provider_object"], "UNAVAILABLE")
 
 
 if __name__ == "__main__":

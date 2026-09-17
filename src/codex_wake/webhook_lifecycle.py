@@ -200,6 +200,15 @@ class WebhookListenerStore:
         if type(listener) is not WebhookListenerConfig:
             raise ValueError("webhook listener configuration is invalid")
         with self.locked():
+            if listener.enabled:
+                from .managed_webhook_cleanup import ManagedWebhookCleanupStore
+                cleanup_store = ManagedWebhookCleanupStore(self.wake_root)
+                with cleanup_store.locked():
+                    if any(
+                        item.source_instance == listener.source_instance
+                        for item in cleanup_store._records_unlocked()
+                    ):
+                        raise ValueError("webhook listener enable is blocked while cleanup authority exists")
             selected = {item.source_instance: item for item in self._listeners_unlocked()}
             current = selected.get(listener.source_instance)
             if current == listener:
@@ -678,18 +687,24 @@ def _service_main_pid(config: WebhookServiceConfig, runner=None) -> int | None:
 def linux_service_bind_probe(
     config: WebhookServiceConfig, runner=None, *, proc_root: Path = Path("/proc"),
     expected_pid: int | None = None,
+    listener: WebhookListenerConfig | None = None,
 ) -> bool:
     """Read-only proof that this unit's MainPID owns the exact listening inode."""
     pid = _service_main_pid(config, runner)
     if pid is None or expected_pid is not None and pid != expected_pid:
         return False
     try:
+        selected = listener or WebhookListenerStore(config.wake_root).select(
+            config.source_instance
+        )
+        if selected.source_instance != config.source_instance:
+            return False
         inodes = {
             target.removeprefix("socket:[").removesuffix("]")
             for item in (proc_root / str(pid) / "fd").iterdir()
             if (target := os.readlink(item)).startswith("socket:[") and target.endswith("]")
         }
-        address = ip_address(WebhookListenerStore(config.wake_root).select(config.source_instance).address)
+        address = ip_address(selected.address)
         table = "tcp6" if address.version == 6 else "tcp"
         expected = _proc_address(str(address), ipv6=address.version == 6)
         for line in (proc_root / "net" / table).read_text(encoding="utf-8").splitlines()[1:]:
@@ -697,7 +712,11 @@ def linux_service_bind_probe(
             if len(fields) < 10 or fields[3] != "0A" or fields[9] not in inodes:
                 continue
             local = fields[1].split(":", 1)
-            if len(local) == 2 and local[0].upper() == expected and int(local[1], 16) == WebhookListenerStore(config.wake_root).select(config.source_instance).port:
+            if (
+                len(local) == 2
+                and local[0].upper() == expected
+                and int(local[1], 16) == selected.port
+            ):
                 return True
     except (OSError, ValueError):
         return False
