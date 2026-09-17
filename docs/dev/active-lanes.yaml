@@ -4,14 +4,14 @@ lanes:
   - id: P54-C2
     objective: Deliver restart-correct managed webhook secret rotation
     plan: docs/dev/plans/0085-2026-09-16-managed-webhook-secret-rotation.md
-    plan_ref: refs/heads/docs/issues-139-140-lane-registration
+    plan_ref: refs/heads/feat/issue-139-webhook-secret-rotation
     branch: feat/issue-139-webhook-secret-rotation
     target: main
     plan_state: OPEN
-    custody_state: PAUSED_REF
-    checkpoint: fbd142d077f204beded3b025951ce73265e035ef
-    validation_status: contract_frozen_implementation_pending
-    validation_ref: fbd142d077f204beded3b025951ce73265e035ef
+    custody_state: INTEGRATION_READY
+    checkpoint: ab398ff5b431ddbda193bd140256af0ca18d1f75
+    validation_status: passed
+    validation_ref: ab398ff5b431ddbda193bd140256af0ca18d1f75
     remote_ref: refs/remotes/origin/feat/issue-139-webhook-secret-rotation
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#139]
@@ -25,14 +25,14 @@ lanes:
   - id: P54-C3
     objective: Deliver truthful webhook health, exact cleanup, and provider-free qualification
     plan: docs/dev/plans/0086-2026-09-16-managed-webhook-health-cleanup.md
-    plan_ref: refs/heads/docs/issues-139-140-lane-registration
+    plan_ref: refs/heads/feat/issue-140-webhook-health-cleanup
     branch: feat/issue-140-webhook-health-cleanup
     target: main
     plan_state: OPEN
-    custody_state: PAUSED_REF
-    checkpoint: fbd142d077f204beded3b025951ce73265e035ef
-    validation_status: health_contract_frozen_initial_packet_pending
-    validation_ref: fbd142d077f204beded3b025951ce73265e035ef
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: d45c6dab9c9ada8e5b388e847c122aa20103d706
+    validation_status: health_domain_accepted_shared_integration_pending
+    validation_ref: d45c6dab9c9ada8e5b388e847c122aa20103d706
     remote_ref: refs/remotes/origin/feat/issue-140-webhook-health-cleanup
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#140]
