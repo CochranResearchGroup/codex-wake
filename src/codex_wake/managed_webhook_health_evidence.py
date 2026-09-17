@@ -249,7 +249,8 @@ class ManagedWebhookHealthEvidenceStore:
         descriptor: int | None = None
         try:
             descriptor = os.open(
-                self.path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                self.path,
+                os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0),
             )
             metadata = os.fstat(descriptor)
             if (

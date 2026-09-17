@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import multiprocessing
 from dataclasses import replace
 from pathlib import Path
 import tempfile
@@ -24,6 +25,12 @@ def binding(root: Path) -> ManagedWebhookBinding:
         executable_id="codex-wake-github-webhook",
         provider_credential_ref="GITHUB_ADMIN_TOKEN", secret_generation=1,
     )
+
+
+def project_fifo(root: str, result: multiprocessing.queues.Queue) -> None:
+    store = ManagedWebhookHealthEvidenceStore(Path(root))
+    delivery, polling = store.project(binding(Path(root)), now=1)
+    result.put((delivery.value, polling.value))
 
 
 class ManagedWebhookHealthEvidenceStoreTests(unittest.TestCase):
@@ -109,6 +116,27 @@ class ManagedWebhookHealthEvidenceStoreTests(unittest.TestCase):
                         store.project(foreign, now=1),
                         (ProviderDeliveryHealth.UNKNOWN, PollingFallbackHealth.UNKNOWN),
                     )
+
+    def test_fifo_evidence_file_does_not_block_health_projection(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            store = ManagedWebhookHealthEvidenceStore(root)
+            store.path.parent.mkdir(parents=True)
+            os.mkfifo(store.path, 0o600)
+            context = multiprocessing.get_context()
+            result = context.Queue()
+            child = context.Process(target=project_fifo, args=(str(root), result))
+            child.start()
+            child.join(1)
+            if child.is_alive():
+                child.terminate()
+                child.join(1)
+                self.fail("FIFO-backed health projection blocked")
+            self.assertEqual(child.exitcode, 0)
+            self.assertEqual(
+                result.get(timeout=1),
+                (ProviderDeliveryHealth.UNKNOWN.value, PollingFallbackHealth.UNKNOWN.value),
+            )
 
 
 if __name__ == "__main__":
