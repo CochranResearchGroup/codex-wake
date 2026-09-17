@@ -192,12 +192,23 @@ class ManagedWebhookHealthEvidenceStore:
         descriptor: int | None = None
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            if self.path.parent.is_symlink() or self.lock_path.is_symlink():
+            parent_metadata = self.path.parent.lstat()
+            if (
+                self.path.parent.is_symlink()
+                or not stat.S_ISDIR(parent_metadata.st_mode)
+                or parent_metadata.st_uid != os.getuid()
+            ):
                 raise ValueError("managed webhook health evidence is invalid")
-            descriptor = os.open(self.lock_path, os.O_CREAT | os.O_RDWR, 0o600)
-            if stat.S_ISLNK(os.fstat(descriptor).st_mode):
+            os.chmod(self.path.parent, 0o700)
+            descriptor = os.open(
+                self.lock_path,
+                os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+            )
+            metadata = os.fstat(descriptor)
+            if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid():
                 raise ValueError("managed webhook health evidence is invalid")
-            os.chmod(self.lock_path, 0o600)
+            os.fchmod(descriptor, 0o600)
             fcntl.flock(descriptor, fcntl.LOCK_EX)
             yield
         except ValueError:
