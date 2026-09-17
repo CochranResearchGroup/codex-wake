@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import os
+from dataclasses import replace
 from pathlib import Path
 import tempfile
 import unittest
 
+from codex_wake.managed_webhook_health import (
+    PollingFallbackHealth, ProviderDeliveryHealth,
+)
 from codex_wake.managed_webhook_health_evidence import ManagedWebhookHealthEvidenceStore
 from codex_wake.managed_webhooks import ManagedWebhookBinding
 
@@ -34,6 +38,77 @@ class ManagedWebhookHealthEvidenceStoreTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "health evidence"):
                 store.record_polling(binding(root), observed_at=1)
+
+    def test_exact_binding_generation_successor_starts_fresh_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            store = ManagedWebhookHealthEvidenceStore(root)
+            initial = binding(root)
+            store.record_polling(initial, observed_at=10)
+            successor = replace(initial, generation=initial.generation + 1)
+
+            self.assertEqual(
+                store.project(successor, now=11),
+                (ProviderDeliveryHealth.UNPROVEN, PollingFallbackHealth.UNOBSERVED),
+            )
+            store.record_polling(successor, observed_at=11)
+            self.assertEqual(
+                store.project(successor, now=11),
+                (ProviderDeliveryHealth.UNPROVEN, PollingFallbackHealth.READY),
+            )
+
+    def test_later_exact_delivery_replaces_the_prior_locator_but_not_the_clock(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            store = ManagedWebhookHealthEvidenceStore(root)
+            current = binding(root)
+            store.record_delivery(
+                current, generation=current.secret_generation,
+                journal_locator="event_000000000001", observed_at=10,
+            )
+
+            latest = store.record_delivery(
+                current, generation=current.secret_generation,
+                journal_locator="event_000000000002", observed_at=11,
+            )
+            self.assertEqual(
+                (latest.delivery_locator, latest.delivery_observed_at),
+                ("event_000000000002", 11),
+            )
+            with self.assertRaisesRegex(ValueError, "clock moved backwards"):
+                store.record_delivery(
+                    current, generation=current.secret_generation,
+                    journal_locator="event_000000000003", observed_at=9,
+                )
+
+    def test_world_writable_evidence_file_projects_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            store = ManagedWebhookHealthEvidenceStore(root)
+            current = binding(root)
+            store.record_polling(current, observed_at=1)
+            store.path.chmod(0o666)
+
+            self.assertEqual(
+                store.project(current, now=2),
+                (ProviderDeliveryHealth.UNKNOWN, PollingFallbackHealth.UNKNOWN),
+            )
+
+    def test_cross_root_or_owner_binding_cannot_record_or_project_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "wake"
+            store = ManagedWebhookHealthEvidenceStore(root)
+            for foreign in (
+                binding(Path(temporary) / "other-wake"),
+                replace(binding(root), owner_uid=os.getuid() + 1, desired_fingerprint=""),
+            ):
+                with self.subTest(foreign=foreign.canonical_root, uid=foreign.owner_uid):
+                    with self.assertRaisesRegex(ValueError, "health evidence"):
+                        store.record_polling(foreign, observed_at=1)
+                    self.assertEqual(
+                        store.project(foreign, now=1),
+                        (ProviderDeliveryHealth.UNKNOWN, PollingFallbackHealth.UNKNOWN),
+                    )
 
 
 if __name__ == "__main__":

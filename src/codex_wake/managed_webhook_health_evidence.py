@@ -73,6 +73,16 @@ class ManagedWebhookHealthEvidence:
             binding.secret_generation, binding.desired_fingerprint,
         )
 
+    def is_exact_authority_successor(self, binding: ManagedWebhookBinding) -> bool:
+        """Permit only a later revision of otherwise identical authority."""
+        return type(binding) is ManagedWebhookBinding and (
+            self.owner_id, self.source_instance, self.secret_generation,
+            self.desired_fingerprint,
+        ) == (
+            binding.owner_id, binding.source_instance, binding.secret_generation,
+            binding.desired_fingerprint,
+        ) and binding.generation > self.binding_generation
+
     def to_dict(self) -> dict[str, object]:
         return {
             "kind": "managed_webhook_health_evidence", "version": 1,
@@ -117,14 +127,12 @@ class ManagedWebhookHealthEvidenceStore:
         self, binding: ManagedWebhookBinding, *, generation: int, journal_locator: str,
         observed_at: int,
     ) -> ManagedWebhookHealthEvidence:
-        _require_binding(binding)
+        self._require_owned_binding(binding)
         if generation != binding.secret_generation or type(journal_locator) is not str or _LOCATOR.fullmatch(journal_locator) is None or not _valid_time(observed_at):
             raise ValueError("managed webhook health evidence is invalid")
         with self._locked():
             current = self._load_unlocked()
             evidence = self._exact_or_new(current, binding)
-            if evidence.delivery_locator is not None and evidence.delivery_locator != journal_locator:
-                raise ValueError("managed webhook health evidence is ambiguous")
             if evidence.delivery_observed_at is not None and observed_at < evidence.delivery_observed_at:
                 raise ValueError("managed webhook health evidence clock moved backwards")
             saved = replace(
@@ -136,7 +144,7 @@ class ManagedWebhookHealthEvidenceStore:
     def record_polling(
         self, binding: ManagedWebhookBinding, *, observed_at: int,
     ) -> ManagedWebhookHealthEvidence:
-        _require_binding(binding)
+        self._require_owned_binding(binding)
         if not _valid_time(observed_at):
             raise ValueError("managed webhook health evidence is invalid")
         with self._locked():
@@ -151,7 +159,8 @@ class ManagedWebhookHealthEvidenceStore:
     def project(
         self, binding: ManagedWebhookBinding, *, now: int,
     ) -> tuple[ProviderDeliveryHealth, PollingFallbackHealth]:
-        _require_binding(binding)
+        if not self._owns_binding(binding):
+            return ProviderDeliveryHealth.UNKNOWN, PollingFallbackHealth.UNKNOWN
         if not _valid_time(now):
             return ProviderDeliveryHealth.UNKNOWN, PollingFallbackHealth.UNKNOWN
         try:
@@ -160,6 +169,8 @@ class ManagedWebhookHealthEvidenceStore:
         except ValueError:
             return ProviderDeliveryHealth.UNKNOWN, PollingFallbackHealth.UNKNOWN
         if evidence is None:
+            return ProviderDeliveryHealth.UNPROVEN, PollingFallbackHealth.UNOBSERVED
+        if evidence.is_exact_authority_successor(binding):
             return ProviderDeliveryHealth.UNPROVEN, PollingFallbackHealth.UNOBSERVED
         if not evidence.matches(binding):
             return ProviderDeliveryHealth.UNKNOWN, PollingFallbackHealth.UNKNOWN
@@ -183,9 +194,21 @@ class ManagedWebhookHealthEvidenceStore:
     ) -> ManagedWebhookHealthEvidence:
         if current is None:
             return ManagedWebhookHealthEvidence.for_binding(binding)
+        if current.is_exact_authority_successor(binding):
+            return ManagedWebhookHealthEvidence.for_binding(binding)
         if not current.matches(binding):
             raise ValueError("managed webhook health evidence is ambiguous")
         return current
+
+    def _owns_binding(self, binding: object) -> bool:
+        return type(binding) is ManagedWebhookBinding and (
+            binding.canonical_root == str(self.wake_root)
+            and binding.owner_uid == os.getuid()
+        )
+
+    def _require_owned_binding(self, binding: object) -> None:
+        if not self._owns_binding(binding):
+            raise ValueError("managed webhook health evidence is invalid")
 
     @contextmanager
     def _locked(self) -> Iterator[None]:
@@ -223,18 +246,34 @@ class ManagedWebhookHealthEvidenceStore:
                     os.close(descriptor)
 
     def _load_unlocked(self) -> ManagedWebhookHealthEvidence | None:
-        if self.path.is_symlink():
-            raise ValueError("managed webhook health evidence is invalid")
-        if not self.path.exists():
-            return None
+        descriptor: int | None = None
         try:
-            if not self.path.is_file() or self.path.stat().st_size > _MAX_FILE_BYTES:
+            descriptor = os.open(
+                self.path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+            )
+            metadata = os.fstat(descriptor)
+            if (
+                not stat.S_ISREG(metadata.st_mode)
+                or metadata.st_uid != os.getuid()
+                or stat.S_IMODE(metadata.st_mode) & 0o077
+                or metadata.st_size > _MAX_FILE_BYTES
+            ):
+                raise ValueError
+            with os.fdopen(descriptor, "r", encoding="utf-8") as handle:
+                descriptor = None
+                rendered = handle.read(_MAX_FILE_BYTES + 1)
+            if len(rendered.encode("utf-8")) > _MAX_FILE_BYTES:
                 raise ValueError
             return ManagedWebhookHealthEvidence.from_dict(json.loads(
-                self.path.read_text(encoding="utf-8"), object_pairs_hook=_unique_object,
+                rendered, object_pairs_hook=_unique_object,
             ))
+        except FileNotFoundError:
+            return None
         except (OSError, TypeError, ValueError, json.JSONDecodeError):
             raise ValueError("managed webhook health evidence is invalid") from None
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
 
     def _save_unlocked(self, evidence: ManagedWebhookHealthEvidence) -> None:
         temporary: Path | None = None
