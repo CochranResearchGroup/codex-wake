@@ -27,8 +27,11 @@ from codex_wake.webhook_listener import build_webhook_runtime
 from codex_wake.cli import main as cli_main
 from codex_wake.github_polling import GitHubPollingAdapter
 from codex_wake.github_source_config import GitHubSourceStore
-from codex_wake.managed_webhook_rotation import PendingEffect, RotationPhase, RotationRecord
-from codex_wake.managed_webhooks import ManagedWebhookBinding
+from codex_wake.managed_webhook_rotation import (
+    ManagedWebhookRotationCoordinator, ManagedWebhookRotationStore, Observation,
+    PendingEffect, RotationPhase, RotationRecord, RuntimeProof,
+)
+from codex_wake.managed_webhooks import ManagedWebhookBinding, ManagedWebhookStore
 from codex_wake.signal_records import signal_journal_path
 from codex_wake.signals import ArmContext, WakeId
 from tests.test_github_polling import NOW, FixtureClient, config as github_config, run
@@ -193,9 +196,11 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 current_generation=7,
             )
             store.configure(original)
-            binding = self._rotation_binding(root)
-            dual_intent = self._rotation_record(
-                root, phase=RotationPhase.PREPARED, pending_effect=PendingEffect.RESTART_DUAL,
+            binding = ManagedWebhookStore(root).save(self._rotation_binding(root))
+            coordinator = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(root))
+            current = coordinator.begin(self._rotation_record(root), now=100)
+            dual_intent = coordinator.intend_dual_restart(
+                current.owner_id, expected_revision=current.revision, now=101,
             )
             dual = replace(
                 original, secret_ref="WEBHOOK_SECRET_G8", previous_secret_ref="WEBHOOK_SECRET_G7",
@@ -205,9 +210,23 @@ class WebhookListenerConfigTests(unittest.TestCase):
             self.assertEqual(store.transition_rotation_secrets(
                 expected=original, replacement=dual, rotation=dual_intent, binding=binding,
             ), dual)
-            target_intent = self._rotation_record(
-                root, phase=RotationPhase.AWAITING_DELIVERY,
-                pending_effect=PendingEffect.RESTART_TARGET_ONLY,
+            current = coordinator.observe_dual_restart(
+                current.owner_id, expected_revision=dual_intent.revision,
+                proof=RuntimeProof(123, 101, 0, (7, 8), "runtime-fixture"), now=102,
+            )
+            current = coordinator.intend_provider_update(
+                current.owner_id, expected_revision=current.revision, now=103,
+            )
+            current = coordinator.observe_provider_update(
+                current.owner_id, expected_revision=current.revision,
+                observation=Observation.PROVED, now=104,
+            )
+            current = coordinator.record_delivery(
+                current.owner_id, expected_revision=current.revision,
+                generation=8, journal_locator="event_000000000001", now=105,
+            )
+            target_intent = coordinator.intend_target_restart(
+                current.owner_id, expected_revision=current.revision, now=106,
             )
             target = replace(dual, previous_secret_ref=None, previous_generation=None)
             self.assertEqual(store.transition_rotation_secrets(
@@ -223,9 +242,11 @@ class WebhookListenerConfigTests(unittest.TestCase):
                 "github-workflow", secret_ref="WEBHOOK_SECRET_G7", current_generation=7,
             )
             store.configure(original)
-            binding = self._rotation_binding(root)
-            intent = self._rotation_record(
-                root, phase=RotationPhase.PREPARED, pending_effect=PendingEffect.RESTART_DUAL,
+            binding = ManagedWebhookStore(root).save(self._rotation_binding(root))
+            coordinator = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(root))
+            current = coordinator.begin(self._rotation_record(root), now=100)
+            intent = coordinator.intend_dual_restart(
+                current.owner_id, expected_revision=current.revision, now=101,
             )
             dual = replace(
                 original, secret_ref="WEBHOOK_SECRET_G8", previous_secret_ref="WEBHOOK_SECRET_G7",
@@ -253,6 +274,13 @@ class WebhookListenerConfigTests(unittest.TestCase):
                     store.transition_rotation_secrets(
                         expected=original, replacement=dual, rotation=replace(intent, **changes), binding=binding,
                     )
+            coordinator.rollback(
+                intent.owner_id, expected_revision=intent.revision, now=102,
+            )
+            with self.assertRaisesRegex(ValueError, "authority is stale"):
+                store.transition_rotation_secrets(
+                    expected=original, replacement=dual, rotation=intent, binding=binding,
+                )
 
     def test_rotation_transition_rejects_illegal_phase_shape_and_generic_configure(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -294,7 +322,7 @@ class WebhookListenerConfigTests(unittest.TestCase):
             service_id="codex-wake-github-webhook-github-workflow.service",
             executable_id="codex-wake-github-webhook",
             provider_credential_ref="CODEX_WAKE_GITHUB_ADMIN_TOKEN",
-            secret_generation=7, generation=11,
+            secret_generation=7, generation=0,
         )
 
     @staticmethod
@@ -303,12 +331,13 @@ class WebhookListenerConfigTests(unittest.TestCase):
             "owner_id": "wake-owner-1", "canonical_root": str(root.resolve()),
             "owner_uid": os.getuid(), "source_instance": "github-workflow",
             "service_id": "codex-wake-github-webhook-github-workflow.service",
-            "binding_revision": 11, "previous_generation": 7, "target_generation": 8,
-            "overlap_deadline": 200, "revision": 3, "effect_revision": None,
+            "binding_revision": 0, "previous_generation": 7, "target_generation": 8,
+            "overlap_deadline": 200, "revision": 0, "effect_revision": None,
         }
         values.update(changes)
         if values.get("pending_effect", PendingEffect.NONE) is not PendingEffect.NONE:
-            values["effect_revision"] = 3
+            values["revision"] = values["revision"] or 1
+            values["effect_revision"] = values["revision"]
         return RotationRecord(**values)
 
     def test_only_enabled_toggle_may_reuse_a_listener_instance(self) -> None:
@@ -579,6 +608,9 @@ class WebhookListenerConfigTests(unittest.TestCase):
             (proc / "net" / "tcp").write_text("sl local rem st tx rx tr tm retr uid timeout inode\n0: 0100007F:2274 00000000:0000 0A 00:0 0 0 0 0 12345\n")
             config = WebhookServiceConfig("listener.service", root, "github-webhook", None, Path(tmp) / "unit", Path(tmp) / "log")
             self.assertTrue(linux_service_bind_probe(config, Runner(), proc_root=proc))
+            self.assertFalse(linux_service_bind_probe(
+                config, Runner(), proc_root=proc, expected_pid=43,
+            ))
 
     def test_readiness_requires_runtime_bind_and_safe_journal_proofs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

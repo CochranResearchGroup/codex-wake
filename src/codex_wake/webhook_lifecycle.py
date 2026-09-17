@@ -26,8 +26,10 @@ from .records import WakeError
 from .service import _systemd_environment_file_path, systemctl, systemd_quote, user_state_dir, user_systemd_dir
 from .signal_records import signal_journal_path
 from .signal_store import JOURNAL_APPLICATION_ID, JOURNAL_SCHEMA_VERSION
-from .managed_webhook_rotation import PendingEffect, RotationPhase, RotationRecord
-from .managed_webhooks import ManagedWebhookBinding
+from .managed_webhook_rotation import (
+    ManagedWebhookRotationStore, PendingEffect, RotationPhase, RotationRecord,
+)
+from .managed_webhooks import ManagedWebhookBinding, ManagedWebhookStore
 
 
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}")
@@ -227,12 +229,23 @@ class WebhookListenerStore:
         )):
             raise ValueError("webhook listener rotation authority is invalid")
         self._validate_rotation_authority(expected, replacement, rotation, binding)
-        with self.locked():
-            selected = {item.source_instance: item for item in self._listeners_unlocked()}
-            if selected.get(expected.source_instance) != expected:
-                raise ValueError("webhook listener rotation preimage is stale")
-            selected[replacement.source_instance] = replacement
-            self._write_unlocked(selected)
+        rotation_store = ManagedWebhookRotationStore(self.wake_root)
+        binding_store = ManagedWebhookStore(self.wake_root)
+        # Freeze all three authorities in one fixed lock order.  This prevents
+        # a rollback or binding revision from landing between validation and
+        # the listener CAS even though the stores remain separately durable.
+        with rotation_store.locked():
+            with binding_store.locked():
+                with self.locked():
+                    if rotation_store._load_unlocked(rotation.owner_id) != rotation:
+                        raise ValueError("webhook listener rotation authority is stale")
+                    if binding_store._load_unlocked(binding.owner_id) != binding:
+                        raise ValueError("webhook listener binding authority is stale")
+                    selected = {item.source_instance: item for item in self._listeners_unlocked()}
+                    if selected.get(expected.source_instance) != expected:
+                        raise ValueError("webhook listener rotation preimage is stale")
+                    selected[replacement.source_instance] = replacement
+                    self._write_unlocked(selected)
         return replacement
 
     def _validate_rotation_authority(
@@ -662,10 +675,13 @@ def _service_main_pid(config: WebhookServiceConfig, runner=None) -> int | None:
         return None
 
 
-def linux_service_bind_probe(config: WebhookServiceConfig, runner=None, *, proc_root: Path = Path("/proc")) -> bool:
+def linux_service_bind_probe(
+    config: WebhookServiceConfig, runner=None, *, proc_root: Path = Path("/proc"),
+    expected_pid: int | None = None,
+) -> bool:
     """Read-only proof that this unit's MainPID owns the exact listening inode."""
     pid = _service_main_pid(config, runner)
-    if pid is None:
+    if pid is None or expected_pid is not None and pid != expected_pid:
         return False
     try:
         inodes = {

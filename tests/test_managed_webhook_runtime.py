@@ -194,6 +194,7 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
         service_id = f"codex-wake-github-webhook-{source.source_instance}.service"
         managed_binding = ManagedWebhookStore(self.root).save(binding(
             self.root, source_instance=source.source_instance, service_id=service_id,
+            repository=source.repository, repository_id=source.repository_id,
         ))
         observed_at = int((NOW + timedelta(seconds=2)).timestamp())
         coordinator = ManagedWebhookRotationCoordinator(ManagedWebhookRotationStore(self.root))
@@ -215,7 +216,7 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
         current = coordinator.intend_provider_update(
             current.owner_id, expected_revision=current.revision, now=observed_at - 1,
         )
-        coordinator.observe_provider_update(
+        current = coordinator.observe_provider_update(
             current.owner_id, expected_revision=current.revision,
             observation=Observation.PROVED, now=observed_at,
         )
@@ -233,7 +234,82 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
                 )
             ]),
             now=lambda: NOW + timedelta(seconds=2),
+            runtime_proof_verifier=lambda: current.runtime_proof,
         )
+        body, signature = signed_body()
+        result = []
+
+        def deliver() -> None:
+            result.append(exchange(runtime.address, body, signature))
+            result.append(exchange(runtime.address, body, signature))
+            runtime.shutdown()
+
+        client = threading.Thread(target=deliver)
+        client.start()
+        runtime.serve()
+        client.join(2)
+        self.assertFalse(client.is_alive())
+        self.assertEqual(result, [(200, "COMMITTED"), (200, "DUPLICATE")])
+        persisted = ManagedWebhookRotationStore(self.root).load("wake-owner-1")
+        self.assertEqual(persisted.phase.value, "AWAITING_DELIVERY")
+        self.assertIsNotNone(persisted.delivery_locator)
+        self.assertTrue(runtime_attestation_path(self.root, source.source_instance).is_file())
+
+    def test_rotation_runtime_requires_all_distinct_secrets_before_attesting(self) -> None:
+        source = github_config(evidence_mode="positive_only")
+        GitHubSourceStore(self.root).configure(source)
+        make_module(signal_journal_path(self.root))
+        with socket.socket() as reservation:
+            reservation.bind(("127.0.0.1", 0))
+            port = reservation.getsockname()[1]
+        listener = WebhookListenerConfig(
+            source.source_instance, port=port, secret_ref="TARGET_SECRET",
+            previous_secret_ref="PREVIOUS_SECRET", current_generation=8,
+            previous_generation=7, enabled=True,
+        )
+        WebhookListenerStore(self.root).configure(listener)
+        for environment in (
+            {"TARGET_SECRET": SECRET.decode()},
+            {"TARGET_SECRET": SECRET.decode(), "PREVIOUS_SECRET": SECRET.decode()},
+        ):
+            with self.subTest(keys=tuple(environment)), self.assertRaisesRegex(
+                Exception, "secret generation set is unavailable",
+            ):
+                build_webhook_runtime(
+                    wake_root=self.root, listener=listener, environment=environment,
+                    attempt_client_factory=lambda deadline: FixtureClient([run()]),
+                    now=lambda: NOW + timedelta(seconds=2),
+                )
+        self.assertFalse(runtime_attestation_path(self.root, source.source_instance).exists())
+
+    def test_pre_rotation_runtime_is_revoked_when_rotation_authority_appears(self) -> None:
+        source = github_config(evidence_mode="positive_only")
+        GitHubSourceStore(self.root).configure(source)
+        make_module(signal_journal_path(self.root))
+        with socket.socket() as reservation:
+            reservation.bind(("127.0.0.1", 0))
+            port = reservation.getsockname()[1]
+        listener = WebhookListenerConfig(
+            source.source_instance, port=port, secret_ref="CURRENT_SECRET",
+            current_generation=7, enabled=True,
+        )
+        WebhookListenerStore(self.root).configure(listener)
+        runtime = build_webhook_runtime(
+            wake_root=self.root, listener=listener,
+            environment={"CURRENT_SECRET": SECRET.decode()},
+            attempt_client_factory=lambda deadline: FixtureClient([run()]),
+            now=lambda: NOW + timedelta(seconds=2),
+        )
+        service_id = f"codex-wake-github-webhook-{source.source_instance}.service"
+        managed_binding = ManagedWebhookStore(self.root).save(binding(
+            self.root, source_instance=source.source_instance, service_id=service_id,
+            repository=source.repository, repository_id=source.repository_id,
+        ))
+        ManagedWebhookRotationStore(self.root).save(rotation(
+            self.root, source_instance=source.source_instance, service_id=service_id,
+            binding_revision=managed_binding.generation,
+            overlap_deadline=int((NOW + timedelta(minutes=1)).timestamp()),
+        ))
         body, signature = signed_body()
         result = []
 
@@ -245,12 +321,33 @@ class ManagedWebhookRuntimeTests(unittest.TestCase):
         client.start()
         runtime.serve()
         client.join(2)
-        self.assertFalse(client.is_alive())
-        self.assertEqual(result, [(200, "COMMITTED")])
-        persisted = ManagedWebhookRotationStore(self.root).load("wake-owner-1")
-        self.assertEqual(persisted.phase.value, "AWAITING_DELIVERY")
-        self.assertIsNotNone(persisted.delivery_locator)
-        self.assertTrue(runtime_attestation_path(self.root, source.source_instance).is_file())
+        self.assertEqual(result, [(503, "SECRET_UNAVAILABLE")])
+
+    def test_rotation_runtime_rejects_foreign_binding_repository(self) -> None:
+        source = github_config(evidence_mode="positive_only")
+        GitHubSourceStore(self.root).configure(source)
+        make_module(signal_journal_path(self.root))
+        listener = WebhookListenerConfig(
+            source.source_instance, secret_ref="CURRENT_SECRET", current_generation=7, enabled=True,
+        )
+        WebhookListenerStore(self.root).configure(listener)
+        service_id = f"codex-wake-github-webhook-{source.source_instance}.service"
+        managed_binding = ManagedWebhookStore(self.root).save(binding(
+            self.root, source_instance=source.source_instance, service_id=service_id,
+            repository="foreign/repository", repository_id=999,
+        ))
+        ManagedWebhookRotationStore(self.root).save(rotation(
+            self.root, source_instance=source.source_instance, service_id=service_id,
+            binding_revision=managed_binding.generation,
+            overlap_deadline=int((NOW + timedelta(minutes=1)).timestamp()),
+        ))
+        with self.assertRaisesRegex(Exception, "rotation authority is unavailable"):
+            build_webhook_runtime(
+                wake_root=self.root, listener=listener,
+                environment={"CURRENT_SECRET": SECRET.decode()},
+                attempt_client_factory=lambda deadline: FixtureClient([run()]),
+                now=lambda: NOW + timedelta(seconds=2),
+            )
 
 
 if __name__ == "__main__":

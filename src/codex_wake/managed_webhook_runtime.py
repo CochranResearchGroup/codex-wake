@@ -98,7 +98,10 @@ def write_runtime_attestation(
     rotation: RotationRecord, process_id: int | None = None, proc_root: Path = Path("/proc"),
 ) -> RuntimeAttestation:
     """Persist private evidence after the caller has bound the listener socket."""
-    root = Path(wake_root).resolve()
+    supplied_root = Path(wake_root)
+    if supplied_root.is_symlink():
+        raise ValueError("managed webhook runtime authority is invalid")
+    root = supplied_root.resolve()
     generations = _listener_generations(listener)
     _validate_authority(root, listener, binding, rotation, generations)
     pid = os.getpid() if process_id is None else process_id
@@ -120,6 +123,8 @@ def verify_runtime_attestation(
     proc_root: Path = Path("/proc"), bind_probe=None,
 ) -> RuntimeProof:
     """Verify live systemd, procfs, and socket ownership before projecting proof."""
+    if config.wake_root.is_symlink():
+        raise ValueError("managed webhook runtime authority is invalid")
     root = config.wake_root.resolve()
     generations = _listener_generations(listener)
     _validate_authority(root, listener, binding, rotation, generations)
@@ -141,7 +146,11 @@ def verify_runtime_attestation(
         or _read_process_start_ticks(proc_root, main_pid) != attestation.process_start_ticks
     ):
         raise ValueError("managed webhook runtime process is stale")
-    probe = bind_probe or (lambda: linux_service_bind_probe(config, runner, proc_root=proc_root))
+    probe = bind_probe or (
+        lambda: linux_service_bind_probe(
+            config, runner, proc_root=proc_root, expected_pid=main_pid,
+        )
+    )
     if not probe():
         raise ValueError("managed webhook runtime bind ownership is unproven")
     ticks_per_second = os.sysconf("SC_CLK_TCK")

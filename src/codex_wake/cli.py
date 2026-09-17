@@ -1395,8 +1395,7 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
                 )
                 return 0
             provider = _managed_webhook_provider(
-                binding, listener.secret_ref if listener is not None else None,
-                provider_factory=provider_factory,
+                binding, listener, provider_factory=provider_factory,
             )
             reconciler = ManagedWebhookReconciler(managed_store, provider)
             plan = reconciler.preview(binding.owner_id)
@@ -1464,7 +1463,7 @@ def github_webhook_command(args: argparse.Namespace, root: Path, *, provider_fac
     return 0
 
 
-def _managed_webhook_provider(binding, secret_ref: str | None, *, provider_factory=None):
+def _managed_webhook_provider(binding, listener, *, provider_factory=None):
     if provider_factory is None:
         from .github_webhook_admin import GitHubWebhookAdmin
 
@@ -1474,9 +1473,15 @@ def _managed_webhook_provider(binding, secret_ref: str | None, *, provider_facto
         return os.environ[reference]
 
     def secret_generation_resolver(generation: int) -> str:
-        if generation != 1 or secret_ref is None:
+        if listener is None:
             raise ValueError("managed webhook secret generation is unavailable")
-        return os.environ[secret_ref]
+        references = {listener.current_generation: listener.secret_ref}
+        if listener.previous_generation is not None and listener.previous_secret_ref is not None:
+            references[listener.previous_generation] = listener.previous_secret_ref
+        reference = references.get(generation)
+        if reference is None:
+            raise ValueError("managed webhook secret generation is unavailable")
+        return os.environ[reference]
 
     return provider_factory(
         binding,

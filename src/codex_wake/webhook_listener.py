@@ -14,8 +14,10 @@ from .github_polling import GitHubPollingAdapter, GitHubReadClient, GitHubReadEr
 from .github_source_config import GitHubSourceStore
 from .github_webhook_runtime import GitHubWebhookRuntime
 from .github_webhooks import WebhookConfig
-from .managed_webhook_rotation import ManagedWebhookRotationCoordinator, ManagedWebhookRotationStore
-from .managed_webhook_runtime import write_runtime_attestation
+from .managed_webhook_rotation import (
+    ManagedWebhookRotationCoordinator, ManagedWebhookRotationStore, RuntimeProof,
+)
+from .managed_webhook_runtime import verify_runtime_attestation, write_runtime_attestation
 from .managed_webhooks import ManagedWebhookStore
 from .records import WakeError, default_wake_root
 from .signal_records import signal_journal_path
@@ -23,7 +25,8 @@ from .signal_store import SQLiteSignalModule, SignalStoreError
 from .signals import Invalid, SourceAnchor
 from .webhook_http import WebhookHTTPConfig
 from .webhook_lifecycle import (
-    WebhookListenerConfig, WebhookListenerStore, webhook_http_config_kwargs, webhook_service_name,
+    WebhookListenerConfig, WebhookListenerStore, build_webhook_service_config,
+    webhook_http_config_kwargs, webhook_service_name,
 )
 
 
@@ -60,6 +63,7 @@ def build_webhook_runtime(
     environment: Mapping[str, str] | None = None,
     attempt_client_factory: Callable[[GitHubReadDeadline], GitHubReadClient] | None = None,
     now: Callable[[], datetime] = lambda: datetime.now(UTC),
+    runtime_proof_verifier: Callable[[], RuntimeProof] | None = None,
 ) -> GitHubWebhookRuntime:
     """Construct one source-bound runtime from durable product authority."""
     source_env = environment if environment is not None else os.environ
@@ -70,10 +74,18 @@ def build_webhook_runtime(
             current_source = GitHubSourceStore(wake_root).registry().select(listener.source_instance)
             if current_listener != listener or current_source != source:
                 raise ValueError("webhook listener authority changed")
+            current_rotations = tuple(
+                record for record in ManagedWebhookRotationStore(wake_root).records()
+                if record.source_instance == listener.source_instance
+            )
+            if rotation_context is None and current_rotations:
+                raise ValueError("managed webhook rotation authority appeared after startup")
             if rotation_context is not None:
                 binding, rotation = rotation_context
+                if len(current_rotations) != 1 or current_rotations[0].owner_id != rotation.owner_id:
+                    raise ValueError("managed webhook rotation authority changed")
                 current_binding = ManagedWebhookStore(wake_root).load(rotation.owner_id)
-                current_rotation = ManagedWebhookRotationStore(wake_root).load(rotation.owner_id)
+                current_rotation = current_rotations[0]
                 if (
                     current_binding != binding
                     or current_rotation.canonical_root != rotation.canonical_root
@@ -133,6 +145,7 @@ def build_webhook_runtime(
     )
     admitted_generations = None
     committed_delivery = None
+    prove_runtime = runtime_proof_verifier
     try:
         rotations = tuple(
             record for record in ManagedWebhookRotationStore(wake_root).records()
@@ -159,6 +172,10 @@ def build_webhook_runtime(
                 or rotation.service_id != webhook_service_name(listener.source_instance)
                 or binding.service_id != rotation.service_id
                 or binding.generation != rotation.binding_revision
+                or binding.repository != source.repository
+                or binding.repository_id != source.repository_id
+                or binding.provider_host != "api.github.com"
+                or source.hostname != "github.com"
                 or not generations
             ):
                 raise ValueError("managed webhook rotation authority is invalid")
@@ -177,12 +194,29 @@ def build_webhook_runtime(
                     raise ValueError("managed webhook rotation binding changed")
                 if generation != current.target_generation:
                     return
+                if prove_runtime is None or current.runtime_proof is None:
+                    raise ValueError("managed webhook rotation runtime proof is unavailable")
+                live_proof = prove_runtime()
+                if type(live_proof) is not RuntimeProof or live_proof != current.runtime_proof:
+                    raise ValueError("managed webhook rotation runtime proof changed")
+                if current.delivery_locator is not None:
+                    return
                 coordinator.record_delivery(
                     rotation.owner_id, expected_revision=current.revision,
                     generation=generation, journal_locator=receipt_id, now=observed_at,
                 )
     except ValueError as exc:
         raise WakeError("managed webhook rotation authority is unavailable") from exc
+    resolver = _secret_resolver(listener, source_env)
+    try:
+        loaded_secrets = {reference: resolver(reference) for reference in secrets}
+        if (
+            any(type(value) is not bytes or not 16 <= len(value) <= 4096 for value in loaded_secrets.values())
+            or len(set(loaded_secrets.values())) != len(loaded_secrets)
+        ):
+            raise ValueError
+    except (ValueError, WakeError):
+        raise WakeError("webhook listener secret generation set is unavailable") from None
     runtime = GitHubWebhookRuntime(
         WebhookHTTPConfig(**webhook_http_config_kwargs(listener)),
         adapter=adapter,
@@ -194,7 +228,7 @@ def build_webhook_runtime(
             secret_generations=generations,
             max_body_bytes=listener.max_body_bytes,
         ),
-        resolve_secret=lambda reference: (require_current_authority(), _secret_resolver(listener, source_env)(reference))[1],
+        resolve_secret=lambda reference: (require_current_authority(), loaded_secrets[reference])[1],
         attempt_client_factory=make_client,
         operation_timeout=listener.operation_timeout_seconds,
         now=now,
@@ -207,6 +241,15 @@ def build_webhook_runtime(
             write_runtime_attestation(
                 wake_root=wake_root, listener=listener, binding=binding, rotation=rotation,
             )
+            if prove_runtime is None:
+                service = build_webhook_service_config(
+                    wake_root=wake_root, source_instance=listener.source_instance,
+                    validate_executable=False,
+                )
+                prove_runtime = lambda: verify_runtime_attestation(
+                    config=service, listener=listener, binding=binding,
+                    rotation=ManagedWebhookRotationStore(wake_root).load(rotation.owner_id),
+                )
         except ValueError as exc:
             runtime.shutdown()
             raise WakeError("managed webhook runtime attestation is unavailable") from exc
