@@ -4228,6 +4228,14 @@ Validated and completed the installed-runtime rollout for issue #156.
 - Every enrolled root remained at zero active and firing wakes; the repo service
   remained inactive and disabled. No live dispatch, OpenClaw, provider,
   release, other-service, or other-host effect occurred.
+- PR #158's first hosted run exposed a pre-existing 50 ms timing assumption in
+  the webhook timeout-recovery test: both Python jobs returned the correct
+  fail-closed `COMMIT_FAILED` result when the second request's SQLite commit
+  exhausted the same synthetic deadline. A 75 ms injected-delay loop reproduced
+  the exact failure. Widening only the test fixture's bounded deadline to 250 ms
+  preserved the provider-timeout assertion and passed 10 delayed plus 20 normal
+  repetitions, the 11-test runtime file, and all 688 Python tests. Product
+  runtime code and the installed wheel were unchanged.
 
 Acceptance state: the installed candidate, process replacement, readiness
 correction, and effect boundaries are accepted. Movement is

@@ -118,3 +118,37 @@ restart of `codex-wake-supervisor.service`. There was no wake dispatch, visible
 turn, OpenClaw operation, enrolled-root change, wake-record rewrite, provider
 mutation, package publication, release, other service mutation, or other-host
 deployment.
+
+## Hosted closeout gate stabilization
+
+PR #158's first hosted run failed the same existing
+`test_provider_timeout_runs_on_main_thread_and_fails_closed` assertion on
+Python 3.11 and 3.12. The first request correctly returned
+`VERIFICATION_UNAVAILABLE`; the second returned the fail-closed
+`COMMIT_FAILED` result instead of the fixture's expected `COMMITTED` result.
+
+The test had assigned a 50 ms absolute deadline to the complete second request,
+including its SQLite commit. A closed-world harness injected 75 ms immediately
+before that commit and deterministically reproduced the exact result. No stale
+timer or database lock was involved: the runtime clears the prior timer in a
+`finally` block, the first request never reaches the store, and requests are
+serialized.
+
+The correction changes only the test fixture: its deliberately slow provider
+now sleeps for two seconds, while the runtime operation budget is 250 ms and
+the elapsed-time ceiling remains below one second. This still proves a real
+absolute provider timeout and same-runtime recovery, while leaving bounded room
+for the successful request's durable commit under hosted scheduling variance.
+
+Post-correction evidence:
+
+- Injected 75 ms commit-delay loop: 10 of 10 passed.
+- Normal exact test loop: 20 of 20 passed.
+- `tests.test_github_webhook_runtime`: 11 tests passed.
+- Comprehensive Python tier: 688 tests passed in 33.307 seconds.
+- Plugin tier: 12 tests passed.
+- Compilation and diff hygiene: passed.
+
+No product source or installed-runtime artifact changed during this test-only
+stabilization. The installed candidate remains bound to canonical source
+`5aad4e0c4a44da0fd647d861cd2fd7bd73a55c9c` and its recorded wheel hash.
