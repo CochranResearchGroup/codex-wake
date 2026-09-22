@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 import tempfile
 import threading
 import unittest
@@ -143,6 +144,101 @@ class SupervisorTests(unittest.TestCase):
             dispatch = json.loads(path.read_text())["dispatch"]
             self.assertEqual(dispatch["codex_cmd"], str(codex))
             self.assertEqual(dispatch["openclaw_cmd"], str(openclaw))
+
+    def test_supervisor_dispatch_uses_enrolled_codex_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            wake_root = base / "repo" / ".codex" / "wake"
+            codex = base / "bin" / "codex"
+            codex.parent.mkdir(parents=True)
+            codex.write_text(
+                f"""#!{sys.executable}
+import json
+import sys
+
+for line in sys.stdin:
+    request = json.loads(line)
+    method = request["method"]
+    if method == "initialize":
+        result = {{"userAgent": "fake"}}
+    elif method == "thread/resume":
+        result = {{"thread": {{"id": request["params"]["threadId"], "status": {{"type": "idle"}}}}}}
+    elif method == "turn/start":
+        result = {{"turn": {{"id": "turn_supervisor"}}}}
+    else:
+        result = {{}}
+    print(json.dumps({{"jsonrpc": "2.0", "id": request["id"], "result": result}}), flush=True)
+""",
+                encoding="utf-8",
+            )
+            codex.chmod(0o755)
+            config = build_supervisor_config(
+                unit_dir=base / "systemd",
+                registry_dir=base / "registry",
+                state_dir=base / "state" / "supervisor",
+                validate_executable=False,
+            )
+            enroll_root(
+                wake_root=wake_root,
+                repo_root=base / "repo",
+                registry_dir=config.registry_dir,
+                codex_cmd=str(codex),
+            )
+            record = build_record(
+                predicate={"type": "not_before", "due_at": "2000-01-01T00:00:00Z"},
+                prompt="supervisor default command",
+                cwd=base / "repo",
+                target={
+                    "transport": "app-server",
+                    "endpoint": "stdio://",
+                    "thread_id": "thread_supervisor",
+                },
+                now=datetime(2000, 1, 1, tzinfo=UTC),
+            )
+            record["id"] = "wake_supervisor"
+            write_record(wake_root, record)
+
+            with patch.dict("os.environ", {"PATH": "/definitely/missing"}, clear=True):
+                results = supervisor_poll_once(config, mode="once")
+
+            self.assertTrue(results[0]["ok"])
+            health = json.loads(Path(results[0]["health_path"]).read_text(encoding="utf-8"))
+            self.assertTrue(health["transports"]["app_server"]["codex_cmd_ready"])
+            self.assertEqual(
+                health["transports"]["app_server"]["codex_cmd_source"],
+                "supervisor_registry",
+            )
+            submitted = json.loads(
+                (wake_root / "submitted" / "wake_supervisor.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(submitted["dispatch_result"]["turn_id"], "turn_supervisor")
+            self.assertNotIn("codex_cmd", submitted["target"])
+
+    def test_supervisor_health_rejects_stale_enrolled_codex_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            codex = self.make_executable(base / "bin" / "codex")
+            config = build_supervisor_config(
+                unit_dir=base / "systemd",
+                registry_dir=base / "registry",
+                state_dir=base / "state" / "supervisor",
+                validate_executable=False,
+            )
+            enroll_root(
+                wake_root=base / "repo" / ".codex" / "wake",
+                repo_root=base / "repo",
+                registry_dir=config.registry_dir,
+                codex_cmd=str(codex),
+            )
+            codex.unlink()
+
+            results = supervisor_poll_once(config, mode="loop", dispatch=False)
+
+            health = json.loads(Path(results[0]["health_path"]).read_text(encoding="utf-8"))
+            app_server = health["transports"]["app_server"]
+            self.assertFalse(app_server["codex_cmd_ready"])
+            self.assertEqual(app_server["codex_cmd_source"], "supervisor_registry")
+            self.assertIn("does not exist", app_server["message"])
 
     def test_enroll_rejects_version_managed_node_commands(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

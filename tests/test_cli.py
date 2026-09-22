@@ -1743,6 +1743,41 @@ class CliTests(unittest.TestCase):
             self.assertEqual(data["service_app_server"]["codex_cmd"], "/usr/bin/codex")
             self.assertIn("restart or resume", data["trust"])
 
+    def test_doctor_uses_supervisor_owned_app_server_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            root = repo / ".codex" / "wake"
+            supervisor_app_server = {
+                "codex_cmd_ready": False,
+                "codex_cmd_source": "supervisor_registry_missing",
+                "codex_cmd": "",
+                "unit_codex_cmd": "",
+                "user_manager_codex_cmd": "",
+                "interactive_codex_cmd": "",
+                "message": "supervisor root registration does not set dispatch.codex_cmd",
+            }
+            monitor = {
+                "monitor_ready": True,
+                "monitor_source": "supervisor",
+                "transports": {"app_server": supervisor_app_server},
+                "signals": {"capability": {"status": "ready"}, "sources": []},
+            }
+            with patch("codex_wake.cli.service_status", return_value=("inactive", "disabled")):
+                with patch("codex_wake.cli.service_app_server_readiness", return_value=self.readiness()):
+                    with patch("codex_wake.cli.monitor_readiness", return_value=monitor):
+                        code, out, err = self.run_cli(
+                            ["doctor", "--repo-root", str(repo), "--json"],
+                            root,
+                        )
+
+            self.assertEqual(code, 0, err)
+            data = json.loads(out)
+            self.assertFalse(data["service_app_server"]["codex_cmd_ready"])
+            self.assertEqual(
+                data["service_app_server"]["codex_cmd_source"],
+                "supervisor_registry_missing",
+            )
+
     def test_doctor_json_reports_duplicate_hook_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp) / "repo"

@@ -2302,6 +2302,16 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
         daemon_path=str(config.daemon_path) if config.daemon_path else None,
         log_path=config.log_path,
     )
+    app_server_summary = asdict(app_server_readiness)
+    if monitor.get("monitor_source") not in {"", "repo_service"}:
+        monitor_transports = monitor.get("transports")
+        monitor_app_server = (
+            monitor_transports.get("app_server")
+            if isinstance(monitor_transports, dict)
+            else None
+        )
+        if isinstance(monitor_app_server, dict):
+            app_server_summary = dict(monitor_app_server)
     return {
         "repo_root": str(repo_root),
         "wake_root": str(root),
@@ -2343,7 +2353,7 @@ def doctor_summary(args: argparse.Namespace, root: Path) -> dict[str, object]:
             "unit": str(config.unit_path),
             "log": str(config.log_path),
         },
-        "service_app_server": asdict(app_server_readiness),
+        "service_app_server": app_server_summary,
         "monitor": monitor,
         "signals": monitor["signals"],
         "trust": hook_review_note(),

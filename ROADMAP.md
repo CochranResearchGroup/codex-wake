@@ -851,3 +851,28 @@ accepted at `47ce753`; 680 Python tests, 12 plugin tests, provider-free cleanup
 qualification, compilation, audits, wheel build, and diff hygiene pass. Hosted
 integration and canonical-main readback are the remaining gates before live
 C4 activation.
+
+## P55 | App-Server Dispatch Readiness Correction
+
+State: OPEN
+
+Current State: Issue #153 reproduces two ways for configured app-server command
+readiness to disagree with the process that dispatches a wake. Plan 0088 owns a
+provider-free correction on `fix/issue-153-app-server-command-readiness`.
+Supervisor dispatch and owner-specific readiness, changed-unit repo-service
+restart, and focused regression coverage are locally implemented. Canonical
+integration and installed-runtime rollout remain pending and separate.
+
+Plan: [App-server dispatch readiness correction](docs/dev/plans/0088-2026-09-21-app-server-dispatch-readiness.md)
+
+Acceptance target:
+
+- Supervisor-owned app-server wakes consume the exact enrolled stable Codex
+  command when the durable target omits one.
+- Repo-service installation restarts an already-active daemon when its rendered
+  unit changes, so the process environment cannot remain older than readiness.
+- Monitor and doctor command readiness are derived from the actual dispatch
+  owner and fail closed for missing or stale supervisor commands.
+- Provider-free focused, comprehensive, plugin, compilation, planning, and
+  hosted checks pass before canonical integration; no live dispatch, service,
+  installation, provider, release, or deployment effect occurs.

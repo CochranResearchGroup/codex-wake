@@ -81,6 +81,16 @@ The service unit persists `CODEX_WAKE_CODEX_CMD` when a Codex CLI command can be
 resolved. `doctor` reports whether the installed unit or user-systemd manager
 environment can resolve the Codex CLI used for app-server dispatch. It reports
 only the relevant command-resolution fields, not the full service environment.
+Reinstalling a changed unit restarts an already-active repo daemon so its live
+environment agrees with the rewritten unit before readiness is accepted.
+
+For supervisor-owned wake roots, `supervisor enroll --codex-path ...` stores a
+validated stable command in the exact root registration. The supervisor passes
+that command as a dispatch default when an app-server record does not contain
+`target.codex_cmd`; an explicit record command still takes precedence. Fresh
+supervisor health records whether the enrolled command remains usable, and
+`doctor` reports that supervisor-owned result instead of borrowing command
+readiness from an inactive repo service unit.
 
 Dispatch preflight resumes the target thread, records `app_server_preflight`
 status evidence, and only calls `turn/start` when the resumed thread reports

@@ -66,9 +66,11 @@ def resolve_codex_cmd(
     if candidate:
         if "/" in candidate:
             resolved = Path(candidate).expanduser()
-            if resolved.exists():
+            if resolved.is_file() and os.access(resolved, os.X_OK):
                 return str(resolved.resolve())
             if required:
+                if resolved.exists():
+                    raise WakeError(f"configured Codex CLI path is not executable: {candidate}")
                 raise WakeError(f"configured Codex CLI path does not exist: {candidate}")
             return ""
         found = shutil.which(candidate, path=path)
@@ -128,12 +130,17 @@ class StdioAppServerClient:
             ) from exc
 
     def close(self) -> None:
-        if self.process.poll() is None:
-            self.process.terminate()
-            try:
-                self.process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                self.process.kill()
+        try:
+            if self.process.poll() is None:
+                self.process.terminate()
+                try:
+                    self.process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    self.process.kill()
+        finally:
+            for stream in (self.process.stdin, self.process.stdout, self.process.stderr):
+                if stream is not None:
+                    stream.close()
 
     def request(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         if self.process.stdin is None or self.process.stdout is None:
@@ -370,6 +377,7 @@ def dispatch_app_server_record(
     found: WakePath,
     *,
     client: AppServerClient | None = None,
+    default_codex_cmd: str | None = None,
     now: datetime | None = None,
 ) -> AppServerDispatchResult:
     current = now or utc_now()
@@ -401,7 +409,10 @@ def dispatch_app_server_record(
         codex_cmd = target.get("codex_cmd")
         if codex_cmd is not None and not isinstance(codex_cmd, str):
             raise WakeError("app-server target codex_cmd must be a string when provided")
-        app_client = client or StdioAppServerClient(command=command, codex_cmd=codex_cmd)
+        app_client = client or StdioAppServerClient(
+            command=command,
+            codex_cmd=codex_cmd or default_codex_cmd,
+        )
         try:
             app_client.initialize()
             resume_result = app_client.resume_thread(thread_id, cwd=cwd)

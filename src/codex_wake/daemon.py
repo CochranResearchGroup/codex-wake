@@ -289,6 +289,7 @@ def poll_once(
     dispatch: bool = True,
     runner: TmuxRunner | None = None,
     ack_timeout_override: float | None = None,
+    app_server_codex_cmd: str | None = None,
     signal_runtime: SQLiteSignalModule | None = None,
     signal_runners: tuple[SignalSourceRunner, ...] = (),
     signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
@@ -471,6 +472,7 @@ def poll_once(
                 runner=runner,
                 now=current,
                 ack_timeout_override=ack_timeout_override,
+                app_server_codex_cmd=app_server_codex_cmd,
                 signal_authorizer=(
                     signal_runtime.authorize_firing_record
                     if signal_runtime is not None

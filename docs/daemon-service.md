@@ -135,6 +135,14 @@ executable contract as repo service generation. Bare command names are resolved
 through the enrolling shell's `PATH`; use explicit stable paths when `PATH`
 points into a Node version manager.
 
+The registered `dispatch.codex_cmd` is an active supervisor dispatch default,
+not documentation-only metadata. App-server records may omit `target.codex_cmd`;
+the supervisor then uses the exact enrolled stable command without rewriting
+the durable record. Each supervisor health sample validates that command and
+publishes app-server transport readiness for the same root. Monitor and doctor
+readiness use that fresh owner-specific projection rather than an inactive
+repo-service unit.
+
 Root registry replacement uses a unique same-directory temporary file, flushes
 the file, atomically replaces the registration, and syncs the registry
 directory. Concurrent enrollments therefore leave one complete last-writer
