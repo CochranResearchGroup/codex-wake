@@ -4127,3 +4127,32 @@ Acceptance state: the C4 product gate is implementation-complete at `47ce753`
 and independently accepted. Movement is `outcome_progress`. Next action:
 publish the issue-linked feature PR, require both hosted gates and canonical
 merge, then freeze and execute the exact two-owner live activation manifest.
+
+## Turn 185 | 2026-09-21
+
+Planned and implemented the provider-free correction for issue #153.
+
+- Two deterministic reproductions established that supervisor registration
+  commands were stored but unused and that changed active repo-service units
+  were reloaded without restarting their existing process.
+- Plan 0088 and lane I153 bind the corrective work to the issue and the
+  dedicated `fix/issue-153-app-server-command-readiness` worktree.
+- Supervisor polling now carries the enrolled stable Codex command through the
+  existing daemon/injector seam without mutating durable wake records; explicit
+  target commands retain precedence.
+- Fresh supervisor health validates and projects the exact root's app-server
+  command. Monitor and doctor readiness select that owner-specific evidence
+  instead of borrowing an inactive repo unit's configuration.
+- Repo-service installation restarts an already-active daemon only when the
+  rendered unit changed. First install, unchanged reinstall, and `--no-start`
+  behavior remain bounded.
+- Focused validation passes 173 affected Python tests plus the real temporary
+  app-server regression under `ResourceWarning`-as-error. Comprehensive
+  validation passes 688 Python tests, 12 plugin tests, compilation, diff
+  hygiene, and active/goal planning audits. No live wake, service,
+  installation, provider, release, or deployment effect occurred.
+
+Acceptance state: implementation and focused validation are complete locally.
+Movement is `outcome_progress`. Next action: run comprehensive and policy gates,
+publish the issue-linked PR, require hosted checks, then reconcile canonical
+main before closing #153.

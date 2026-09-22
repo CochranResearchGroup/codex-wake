@@ -95,6 +95,26 @@ class AppServerTests(unittest.TestCase):
 
             self.assertEqual(command, [str(codex.resolve()), "app-server", "--listen", "stdio://"])
 
+    def test_app_server_command_prefers_explicit_target_over_default_environment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            explicit = base / "explicit" / "codex"
+            fallback = base / "fallback" / "codex"
+            for command in (explicit, fallback):
+                command.parent.mkdir(parents=True)
+                command.write_text("#!/bin/sh\n", encoding="utf-8")
+                command.chmod(0o755)
+
+            result = app_server_command(
+                codex_cmd=str(explicit),
+                env={APP_SERVER_CODEX_ENV: str(fallback)},
+            )
+
+            self.assertEqual(
+                result,
+                [str(explicit.resolve()), "app-server", "--listen", "stdio://"],
+            )
+
     def test_dispatch_records_missing_app_server_command_as_operator_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"
@@ -111,6 +131,25 @@ class AppServerTests(unittest.TestCase):
             data = json.loads((root / "failed" / "wake_app.json").read_text())
             self.assertIn("app-server command not found: codex", data["last_error"])
             self.assertEqual(data["events"][-1]["type"], "failed")
+
+    def test_dispatch_rejects_non_executable_supervisor_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            codex = Path(tmp) / "codex"
+            codex.write_text("#!/bin/sh\n", encoding="utf-8")
+            codex.chmod(0o600)
+            found = self.make_record(root, Path(tmp))
+
+            result = dispatch_app_server_record(
+                root,
+                found,
+                default_codex_cmd=str(codex),
+                now=datetime(2026, 5, 18, 21, 0, tzinfo=UTC),
+            )
+
+            self.assertEqual(result.status, "failed")
+            data = json.loads((root / "failed" / "wake_app.json").read_text())
+            self.assertIn("not executable", data["last_error"])
 
     def test_dispatch_app_server_record_fails_active_thread_by_default_without_starting_turn(self) -> None:
         class ActiveClient(FakeAppServerClient):

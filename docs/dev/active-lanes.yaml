@@ -22,3 +22,24 @@ lanes:
     overlaps: []
     reconciled_overlaps: []
     updated_at: 2026-09-17
+  - id: I153
+    objective: Make app-server readiness agree with the monitor that performs dispatch
+    plan: docs/dev/plans/0088-2026-09-21-app-server-dispatch-readiness.md
+    plan_ref: refs/heads/fix/issue-153-app-server-command-readiness
+    branch: fix/issue-153-app-server-command-readiness
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: f90b6c8
+    validation_status: local_comprehensive_green_publication_pending
+    validation_ref: f90b6c8
+    remote_ref: ""
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#153]
+    owner: primary implementation and integration owner
+    write_surface: supervisor dispatch defaults, daemon and injector seam, repo-service lifecycle, monitor readiness, focused tests, docs
+    live_effect: none; provider-free temporary fixtures only
+    dependencies: []
+    overlaps: [P54-C4]
+    reconciled_overlaps: [P54-C4 implementation landed on the f90b6c8 base before this lane opened]
+    updated_at: 2026-09-21

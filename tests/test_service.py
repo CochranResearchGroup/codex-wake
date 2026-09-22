@@ -455,6 +455,69 @@ class ServiceTests(unittest.TestCase):
             self.assertFalse(config.unit_path.exists())
             self.assertEqual(runner.calls[-2:], [["systemctl", "--user", "disable", "--now", "wake-test.service"], ["systemctl", "--user", "daemon-reload"]])
 
+    def test_reinstall_restarts_active_service_when_unit_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            codex = base / "bin" / "codex"
+            codex.parent.mkdir()
+            codex.write_text("#!/bin/sh\n", encoding="utf-8")
+            codex.chmod(0o755)
+            common = {
+                "repo_root": base / "repo",
+                "wake_root": base / "repo" / ".codex" / "wake",
+                "name": "wake-test",
+                "daemon_path": "/bin/sh",
+                "unit_dir": base / "systemd",
+                "log_path": base / "state" / "wake.log",
+            }
+            initial = build_service_config(**common)
+            initial.unit_path.parent.mkdir(parents=True)
+            initial.unit_path.write_text(render_unit(initial), encoding="utf-8")
+            updated = build_service_config(**common, codex_path=str(codex))
+            runner = FakeRunner(active="active")
+
+            install_service(updated, runner)
+
+            self.assertIn(
+                ["systemctl", "--user", "restart", "wake-test.service"],
+                runner.calls,
+            )
+            self.assertEqual(
+                parse_unit_environment(updated.unit_path)[APP_SERVER_CODEX_ENV],
+                str(codex),
+            )
+
+    def test_install_does_not_restart_unchanged_or_no_start_service(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_service_config(
+                repo_root=base / "repo",
+                wake_root=base / "repo" / ".codex" / "wake",
+                name="wake-test",
+                daemon_path="/bin/sh",
+                unit_dir=base / "systemd",
+                log_path=base / "state" / "wake.log",
+            )
+            config.unit_path.parent.mkdir(parents=True)
+            config.unit_path.write_text(render_unit(config), encoding="utf-8")
+            unchanged = FakeRunner(active="active")
+
+            install_service(config, unchanged)
+
+            self.assertNotIn(
+                ["systemctl", "--user", "restart", "wake-test.service"],
+                unchanged.calls,
+            )
+            changed = replace(config, interval=2)
+            no_start = FakeRunner(active="active")
+
+            install_service(changed, no_start, start=False)
+
+            self.assertEqual(
+                no_start.calls,
+                [["systemctl", "--user", "daemon-reload"]],
+            )
+
     def test_service_status_and_log_tail(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)

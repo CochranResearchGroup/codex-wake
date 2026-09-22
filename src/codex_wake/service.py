@@ -229,12 +229,22 @@ def systemctl(args: list[str], runner: CommandRunner | None = None, *, check: bo
 
 
 def install_service(config: ServiceConfig, runner: CommandRunner | None = None, *, start: bool = True) -> None:
+    rendered = render_unit(config)
+    previous_unit = config.unit_path.read_text(encoding="utf-8") if config.unit_path.exists() else None
+    restart_active = False
+    if start and previous_unit is not None and previous_unit != rendered:
+        restart_active = (
+            systemctl(["is-active", config.name], runner, check=False).stdout.strip()
+            == "active"
+        )
     config.unit_path.parent.mkdir(parents=True, exist_ok=True)
     config.log_path.parent.mkdir(parents=True, exist_ok=True)
-    config.unit_path.write_text(render_unit(config), encoding="utf-8")
+    config.unit_path.write_text(rendered, encoding="utf-8")
     systemctl(["daemon-reload"], runner)
     if start:
         systemctl(["enable", "--now", config.name], runner)
+        if restart_active:
+            systemctl(["restart", config.name], runner)
         active = systemctl(["is-active", config.name], runner, check=False).stdout.strip()
         if active != "active":
             raise WakeError(f"service did not become active: {config.name} ({active or 'unknown'})")

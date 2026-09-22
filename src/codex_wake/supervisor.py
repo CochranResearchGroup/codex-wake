@@ -285,6 +285,46 @@ def find_registry_entry_for_root(wake_root: Path, registry_dir: Path | None = No
     return None
 
 
+def supervisor_app_server_readiness(entry: dict[str, Any]) -> dict[str, Any]:
+    dispatch = entry.get("dispatch")
+    raw = dispatch.get("codex_cmd") if isinstance(dispatch, dict) else None
+    common = {
+        "unit_codex_cmd": "",
+        "user_manager_codex_cmd": "",
+        "interactive_codex_cmd": "",
+    }
+    if not isinstance(raw, str) or not raw:
+        return {
+            **common,
+            "codex_cmd_ready": False,
+            "codex_cmd_source": "supervisor_registry_missing",
+            "codex_cmd": "",
+            "message": "supervisor root registration does not set dispatch.codex_cmd",
+        }
+    try:
+        resolved = resolve_stable_executable(
+            raw,
+            default_command="codex",
+            label="Codex CLI",
+            reject_node_versioned=True,
+        )
+    except WakeError as exc:
+        return {
+            **common,
+            "codex_cmd_ready": False,
+            "codex_cmd_source": "supervisor_registry",
+            "codex_cmd": raw,
+            "message": str(exc),
+        }
+    return {
+        **common,
+        "codex_cmd_ready": True,
+        "codex_cmd_source": "supervisor_registry",
+        "codex_cmd": resolved,
+        "message": "supervisor root registration sets dispatch.codex_cmd",
+    }
+
+
 def unenroll_root(*, wake_root: Path | None = None, root_id: str | None = None, registry_dir: Path | None = None) -> Path:
     resolved_registry = (registry_dir or default_registry_dir()).expanduser()
     if bool(wake_root) == bool(root_id):
@@ -378,10 +418,19 @@ def supervisor_poll_once(
         wake_root = Path(wake_root_text).expanduser().resolve()
         repo_root_text = entry.get("repo_root")
         repo_root = Path(repo_root_text).expanduser().resolve() if isinstance(repo_root_text, str) and repo_root_text else None
+        dispatch_config = entry.get("dispatch")
+        codex_cmd = (
+            dispatch_config.get("codex_cmd")
+            if isinstance(dispatch_config, dict)
+            and isinstance(dispatch_config.get("codex_cmd"), str)
+            else None
+        )
+        transports = {"app_server": supervisor_app_server_readiness(entry)}
         try:
             result = poll_once(
                 wake_root,
                 dispatch=dispatch,
+                app_server_codex_cmd=codex_cmd,
                 signal_reconcile_reason=signal_reconcile_reason,
             )
             poll_summary = poll_result_dict(result)
@@ -392,7 +441,10 @@ def supervisor_poll_once(
                 mode=mode,
                 poll_result=poll_summary,
                 state_dir=monitor_dir,
-                extra={"root_id": entry.get("root_id", "")},
+                extra={
+                    "root_id": entry.get("root_id", ""),
+                    "transports": transports,
+                },
             )
             results.append(
                 {
@@ -413,7 +465,11 @@ def supervisor_poll_once(
                 mode=mode,
                 poll_result={},
                 state_dir=monitor_dir,
-                extra={"root_id": entry.get("root_id", ""), "last_error": str(exc)},
+                extra={
+                    "root_id": entry.get("root_id", ""),
+                    "transports": transports,
+                    "last_error": str(exc),
+                },
             )
             results.append(
                 {

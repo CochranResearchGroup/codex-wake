@@ -17,6 +17,11 @@ from codex_wake.monitor import (
 )
 from codex_wake.signal_records import probe_managed_reader_capability
 from codex_wake.service import build_service_config, render_unit
+from codex_wake.supervisor import (
+    build_supervisor_config,
+    enroll_root,
+    supervisor_poll_once,
+)
 
 
 class FakeRunner:
@@ -229,6 +234,60 @@ class MonitorTests(unittest.TestCase):
             self.assertTrue(readiness["health"]["recent"])
             self.assertTrue(readiness["health"]["persistent"])
             self.assertTrue(monitor_health_path(wake_root, state_dir).exists())
+
+    def test_supervisor_readiness_does_not_borrow_repo_service_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            wake_root = repo / ".codex" / "wake"
+            daemon = self.make_executable(base / "bin" / "codex-waked")
+            codex = self.make_executable(base / "bin" / "codex")
+            service = build_service_config(
+                repo_root=repo,
+                wake_root=wake_root,
+                daemon_path=str(daemon),
+                codex_path=str(codex),
+                unit_dir=base / "config" / "systemd" / "user",
+                log_path=base / "state" / "wake.log",
+            )
+            service.unit_path.parent.mkdir(parents=True)
+            service.unit_path.write_text(render_unit(service), encoding="utf-8")
+            supervisor = build_supervisor_config(
+                unit_dir=base / "config" / "systemd" / "user",
+                registry_dir=base / "registry",
+                state_dir=base / "state" / "supervisor",
+                validate_executable=False,
+            )
+            enroll_root(
+                wake_root=wake_root,
+                repo_root=repo,
+                registry_dir=supervisor.registry_dir,
+            )
+            state_dir = supervisor.state_dir.parent / "monitors"
+
+            with patch.dict(
+                "os.environ",
+                {"XDG_CONFIG_HOME": str(base / "config"), "PATH": str(daemon.parent)},
+                clear=True,
+            ):
+                supervisor_poll_once(supervisor, mode="loop", dispatch=False)
+                for active in ("inactive", "active"):
+                    with self.subTest(repo_service=active):
+                        readiness = monitor_readiness(
+                            wake_root=wake_root,
+                            repo_root=repo,
+                            daemon_path=str(daemon),
+                            runner=FakeRunner(active=active, enabled="enabled"),
+                            state_dir=state_dir,
+                        )
+
+                        app_server = readiness["transports"]["app_server"]
+                        self.assertEqual(readiness["monitor_source"], "supervisor")
+                        self.assertFalse(app_server["codex_cmd_ready"])
+                        self.assertEqual(
+                            app_server["codex_cmd_source"],
+                            "supervisor_registry_missing",
+                        )
 
     def test_stale_once_health_is_not_ready(self) -> None:
         health = {"mode": "once", "checked_at": "2026-05-25T20:00:00Z"}

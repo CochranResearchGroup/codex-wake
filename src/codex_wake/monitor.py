@@ -217,7 +217,7 @@ def monitor_readiness(
         "matches_wake_root": service_matches_root,
         "config_error": config_error,
     }
-    transports: dict[str, Any] = {}
+    service_transports: dict[str, Any] = {}
     if config is not None:
         service_unit = str(config.unit_path)
         service_log = str(config.log_path)
@@ -237,7 +237,7 @@ def monitor_readiness(
             "matches_wake_root": service_matches_root,
             "config_error": "",
         }
-        transports = transport_readiness(config)
+        service_transports = transport_readiness(config)
     health = read_monitor_health(resolved_root, state_dir)
     from .signal_support import signal_readiness
 
@@ -248,10 +248,35 @@ def monitor_readiness(
     health_ready = recent_health and persistent_health
     monitor_ready = service_ready or health_ready
     source = ""
-    if service_ready:
+    health_source = str(health.get("source") or "health") if health else ""
+    if health_ready and health_source == "supervisor":
+        source = "supervisor"
+    elif service_ready:
         source = "repo_service"
     elif health_ready and health:
-        source = str(health.get("source") or "health")
+        source = health_source
+    transports = service_transports
+    if source == "supervisor":
+        health_transports = health.get("transports") if isinstance(health, dict) else None
+        supervisor_app_server = (
+            health_transports.get("app_server")
+            if isinstance(health_transports, dict)
+            else None
+        )
+        if not isinstance(supervisor_app_server, dict):
+            supervisor_app_server = {
+                "codex_cmd_ready": False,
+                "codex_cmd_source": "supervisor_health_missing",
+                "codex_cmd": "",
+                "unit_codex_cmd": "",
+                "user_manager_codex_cmd": "",
+                "interactive_codex_cmd": "",
+                "message": "fresh supervisor health does not report app-server command readiness",
+            }
+        transports = {
+            **service_transports,
+            "app_server": supervisor_app_server,
+        }
     return {
         "wake_root": str(resolved_root),
         "repo_root": str(resolved_repo),

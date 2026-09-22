@@ -243,6 +243,7 @@ def dispatch_firing_record(
     runner: TmuxRunner | None = None,
     now: datetime | None = None,
     ack_timeout_override: float | None = None,
+    app_server_codex_cmd: str | None = None,
     signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
 ) -> DispatchResult:
     record = found.record
@@ -254,6 +255,7 @@ def dispatch_firing_record(
             runner=runner,
             now=now,
             ack_timeout_override=ack_timeout_override,
+            app_server_codex_cmd=app_server_codex_cmd,
             signal_authorizer=signal_authorizer,
         )
     with WakeLifecycleLock(root, wake_id):
@@ -270,6 +272,7 @@ def dispatch_firing_record(
             runner=runner,
             now=now,
             ack_timeout_override=ack_timeout_override,
+            app_server_codex_cmd=app_server_codex_cmd,
             signal_authorizer=signal_authorizer,
         )
 
@@ -281,6 +284,7 @@ def _dispatch_firing_record_unlocked(
     runner: TmuxRunner | None = None,
     now: datetime | None = None,
     ack_timeout_override: float | None = None,
+    app_server_codex_cmd: str | None = None,
     signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
 ) -> DispatchResult:
     current = now or utc_now()
@@ -312,7 +316,12 @@ def _dispatch_firing_record_unlocked(
     if isinstance(target, dict) and target.get("transport") == "app-server":
         from .app_server import dispatch_app_server_record
 
-        result = dispatch_app_server_record(root, found, now=current)
+        result = dispatch_app_server_record(
+            root,
+            found,
+            default_codex_cmd=app_server_codex_cmd,
+            now=current,
+        )
         return DispatchResult(result.status, result.message)
     if isinstance(target, dict) and target.get("transport") == "openclaw_gateway":
         from .openclaw_gateway import dispatch_openclaw_gateway_record
