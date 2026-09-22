@@ -4241,3 +4241,33 @@ Acceptance state: the installed candidate, process replacement, readiness
 correction, and effect boundaries are accepted. Movement is
 `outcome_completion`. Verification receipt 0084 carries the detailed rollout
 and rollback evidence; the closing PR removes lane I156 and closes issue #156.
+
+## Turn 189 | 2026-09-22
+
+Reconciled the stale P54-C4 custody projection and opened a fresh live-rollout
+successor.
+
+- PR #152 had already passed both hosted gates and squash-merged the complete
+  provider-free branch tip `299942e` as canonical `f90b6c8`; the catalog's
+  earlier `47ce753` checkpoint and `INTEGRATION_READY` state were stale.
+- Read-only current state shows zero GitHub hooks, no listener on port `8820`,
+  and none of the four planned C4 units. The prior effect receipt records one
+  isolated runtime installation but zero provider writes, service starts,
+  ingress mutations, and dispatches.
+- Fourteen files under the prior rehearsal and retained roots remain owner-only
+  mode `0600`. Their manifests target `f90b6c8` and are retained as immutable
+  history rather than reused after canonical main advanced.
+- Plan 0087 is cancelled as a combined product-and-live packet. Plan 0090 and
+  branch `chore/issue-141-retained-webhook-rollout` own the fresh successor from
+  canonical `919fd2affd88216e1b3fc5359e6c175899921797`.
+- The successor preserves the authorized ceilings of two creates, one
+  rehearsal disable/delete, bounded owner-scoped service and secret effects,
+  ingress mutation only on proven drift, and zero dispatch. It requires a new
+  exact manifest and distinct repository-scoped read credential before any
+  service or provider effect.
+
+Acceptance state: reconciliation and successor planning are complete; no new
+runtime, secret, service, provider, ingress, release, or dispatch effect has
+occurred. Movement is `outcome_progress`. Next action: integrate Plan 0090,
+then freeze and validate the exact successor candidate before crossing the
+credential or live-effect gates.

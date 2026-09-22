@@ -35,10 +35,13 @@ canonical `a3b2c985d9b3d9ef4e1db53d7fbc8479c08455c2`. C2 issue #139 and Plan
 0085 are accepted on canonical
 `143b1d3d6f1bedf7ea41ae0a422f1d5300aae5a1`; C3 issue #140 and Plan 0086 are
 accepted on canonical `b0d4a8517f6075e1b848d94a5aa471010cecba46` through
-PR #149. GitHub closed #138-#140 and the active-lane catalog is empty. C4 #141
-is the next bounded packet and requires fresh retained-activation authority.
-No provider, service, secret, ingress, release, installed-runtime, or dispatch
-effect occurred in C1-C3 work.
+PR #149. GitHub closed #138-#140. C4's provider-free correction merged through
+PR #152 as canonical `f90b6c85b500a3ab422733b4e466717296893812`, but its
+first live attempt stopped after isolated-runtime and owner-config preparation
+with zero provider writes, service starts, ingress mutations, or dispatches.
+Plan 0090 owns the fresh retained-activation successor from canonical
+`919fd2affd88216e1b3fc5359e6c175899921797`; C5 remains blocked until C4 is
+truthfully retained and accepted.
 
 ## Objective
 
