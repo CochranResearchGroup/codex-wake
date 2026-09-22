@@ -854,14 +854,14 @@ C4 activation.
 
 ## P55 | App-Server Dispatch Readiness Correction
 
-State: OPEN
+State: CLOSED
 
-Current State: Issue #153 reproduces two ways for configured app-server command
-readiness to disagree with the process that dispatches a wake. Plan 0088 owns a
-provider-free correction on `fix/issue-153-app-server-command-readiness`.
-Supervisor dispatch and owner-specific readiness, changed-unit repo-service
-restart, and focused regression coverage are locally implemented. Canonical
-integration and installed-runtime rollout remain pending and separate.
+Current State: Complete on canonical `main` at
+`781e4e7cff304d3189537b27c519fe60fcc01a6e` through PR #154. Supervisor
+dispatch and owner-specific readiness, changed-unit repo-service restart, and
+regression coverage passed local and hosted gates; issue #153 is closed as
+completed. No live or installed-runtime effect occurred, and any rollout
+remains separate.
 
 Plan: [App-server dispatch readiness correction](docs/dev/plans/0088-2026-09-21-app-server-dispatch-readiness.md)
 
