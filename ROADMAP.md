@@ -834,23 +834,17 @@ Acceptance target:
 
 Acceptance state: P54 planning and its five-child issue graph are canonical;
 #138-#140 are closed and accepted on canonical main. C2 integrated at
-`143b1d3`; C3 integrated at `b0d4a85`. Rotation includes durable restart/expiry/rollback state,
-process-bound generation readiness, committed target-key delivery proof,
-polling identity continuity, and effect-free redacted status/preview. A public
-rotation apply command remains intentionally unsupported until provider effect
-and terminal binding-consolidation contracts exist. Movement is
-`outcome_progress`. Plan 0087 registers C4 #141 after fresh preflight found
-three truthful-activation blockers: persistent no-dispatch service mode,
-first-generation delivery/polling health evidence, and terminal cleanup versus
-retention. Provider-free correction precedes a separately named cleanup
-rehearsal and one final retained installation. GitHub hook, scoped secret,
-installed runtime, local service, and ingress activation effects are explicitly
-authorized but remain gated by those product checks; dispatch remains excluded
-until C5. The product correction is locally complete and independently
-accepted at `47ce753`; 680 Python tests, 12 plugin tests, provider-free cleanup
-qualification, compilation, audits, wheel build, and diff hygiene pass. Hosted
-integration and canonical-main readback are the remaining gates before live
-C4 activation.
+`143b1d3`; C3 integrated at `b0d4a85`. C4's provider-free correction passed
+680 Python tests, 12 plugin tests, provider-free qualification, independent
+review, and both hosted gates before PR #152 squash-merged it as canonical
+`f90b6c8`. The first live attempt froze that candidate and prepared an isolated
+runtime plus owner-scoped local configuration, then stopped before the distinct
+read credential gate with zero provider writes, service starts, ingress
+mutations, or dispatches. Current readback still finds zero hooks, no port 8820
+listener, and no C4 units. Plan 0087 is cancelled as a combined packet; Plan
+0090 owns a fresh-manifest successor from canonical `919fd2a`. The retained
+activation remains explicitly authorized and bounded, while dispatch remains
+excluded until C5.
 
 ## P55 | App-Server Dispatch Readiness Correction
 

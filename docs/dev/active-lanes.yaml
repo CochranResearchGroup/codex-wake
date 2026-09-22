@@ -2,23 +2,23 @@ schema_version: 1
 work_item_tracking: required
 lanes:
   - id: P54-C4
-    objective: Correct and retain one managed GitHub webhook activation with zero dispatch
-    plan: docs/dev/plans/0087-2026-09-16-retained-managed-webhook-activation.md
-    plan_ref: refs/heads/feat/issue-141-retained-webhook-activation
-    branch: feat/issue-141-retained-webhook-activation
+    objective: Re-freeze and complete one retained managed GitHub webhook activation with zero dispatch
+    plan: docs/dev/plans/0090-2026-09-22-retained-webhook-rollout-successor.md
+    plan_ref: refs/heads/docs/issue-141-rollout-successor-plan
+    branch: chore/issue-141-retained-webhook-rollout
     target: main
     plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: 47ce753
-    validation_status: product_gate_accepted_live_effects_pending
-    validation_ref: 47ce753
-    remote_ref: refs/remotes/origin/feat/issue-141-retained-webhook-activation
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 919fd2affd88216e1b3fc5359e6c175899921797
+    validation_status: successor_plan_ready_fresh_manifest_pending
+    validation_ref: 919fd2affd88216e1b3fc5359e6c175899921797
+    remote_ref: refs/remotes/origin/chore/issue-141-retained-webhook-rollout
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#141]
     owner: primary integration and live-effect owner with at most two disjoint implementation workers and one bounded specialist reviewer
-    write_surface: dispatch-disabled service option, current-generation health evidence, shared CLI and tests, exact deployment, provider operations, receipts, docs
-    live_effect: authorized but gated; two exact creates, one rehearsal disable/delete, scoped install/service/secret/ingress readback, zero dispatch
+    write_surface: fresh manifest, isolated runtime and owner roots, exact deployment, provider operations, receipts, docs
+    live_effect: authorized successor; at most two exact creates, one rehearsal disable/delete, scoped install/service/secret effects, ingress mutation only on proven drift, zero dispatch
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
-    updated_at: 2026-09-17
+    updated_at: 2026-09-22

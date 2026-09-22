@@ -1,51 +1,36 @@
 # Retained managed webhook activation
 
-State: OPEN
+State: CANCELLED
 Lane: P54-C4
 Issue: #141
 Branch: `feat/issue-141-retained-webhook-activation`
 Target: `main`
 Integration: `squash`
 Parent plan: `docs/dev/plans/0083-2026-09-16-managed-github-webhook-wakes.md`
+Successor plan: `docs/dev/plans/0090-2026-09-22-retained-webhook-rollout-successor.md`
 
 ## Current state
 
-C1-C3 are accepted on canonical `origin/main` through
-`7bdef169bde17cbac568f84729bca6a78f1ca171`, and the C4 registration merged
-through PR #151 as canonical
-`7ceb93ceaab2e256bae99aea678bad68428c09b5`. Fresh C4 preflight confirms the
-GitHub actor `ecochran76` (user ID `8397615`) has administration capability on
-the unarchived repository `CochranResearchGroup/codex-wake` (repository ID
-`1242753508`), and the provider hook inventory is empty. The retained Cooper
-route already maps exact `POST /github/webhook` from
-`https://codex-wake.ecochran.dyndns.org` to loopback port `8820`; both ingress
-layers and the certificate are loaded, while the absent listener truthfully
-returns `502`. No live C4 effect has occurred.
+The provider-free correction completed at branch tip `299942e` and PR #152
+passed both hosted gates before squash-merging as canonical
+`f90b6c85b500a3ab422733b4e466717296893812`. That integration preserves the
+dispatch-disabled service mode and current-generation health evidence described
+below. The original plan did not complete its live activation objective.
 
-The operator explicitly authorized the C4 GitHub hook, secret, installed
-runtime, local service, and external-ingress activation effects on 2026-09-16.
-Target dispatch remains excluded until C5. That authority does not waive the
-provider-free gates below.
+A partial live attempt then froze two manifests against `f90b6c8`, installed
+one isolated runtime, and prepared owner-scoped local configuration. Its durable
+effect receipt records zero provider writes, zero service starts, zero ingress
+mutations, and zero dispatches. It stopped before provisioning the distinct
+repository-scoped read credential required by the next gate.
 
-Preflight also found three product blockers to truthful activation: managed
-health cannot consume first-generation delivery or polling observations; the
-standard persistent daemon service cannot freeze `--no-dispatch`; and a
-cleanup tombstone correctly makes an owner terminal, so cleanup cannot be
-rehearsed and then silently reversed on the retained owner. C4 therefore starts
-with a bounded provider-free correction. Live cleanup proof uses a separately
-named rehearsal installation, whose tombstone remains terminal, followed by
-one fresh final installation that remains active.
-
-The provider-free correction is implementation-complete at `47ce753`. It adds
-an explicit persistent no-dispatch service marker, command flag, and
-fail-closed status readback plus owner-bound current-generation delivery and
-polling evidence written only after durable ingest. Independent review found
-and verified repairs for generation succession, recurring deliveries, unsafe
-files, cross-root ownership, symlink/FIFO blocking, and the installed fixture's
-expired wall-clock anchor. Final local gates pass 680 Python tests, 12 plugin
-tests, compilation, planning/goal audits, provider-free cleanup qualification,
-wheel build, and diff hygiene. No live effect has occurred; hosted integration
-and canonical-main readback precede C4-D.
+Read-only reconciliation on 2026-09-22 found zero GitHub hooks, no listener on
+port `8820`, and none of the four planned C4 units. Canonical `origin/main` has
+advanced to `919fd2affd88216e1b3fc5359e6c175899921797`, so the old frozen
+candidate is not an executable authority for a resumed rollout. This combined
+product-and-live plan is cancelled in favor of Plan 0090. The successor retains
+the accepted product evidence and explicit live-effect bounds, preserves the
+old manifests and effect receipt as history, and requires fresh identities and
+a fresh manifest before any further effect.
 
 ## Objective
 
