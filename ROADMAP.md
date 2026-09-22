@@ -876,3 +876,28 @@ Acceptance target:
 - Provider-free focused, comprehensive, plugin, compilation, planning, and
   hosted checks pass before canonical integration; no live dispatch, service,
   installation, provider, release, or deployment effect occurs.
+
+## P56 | App-Server Readiness Installed Rollout
+
+State: OPEN
+
+Current State: Issue #156 and Plan 0089 own a bounded rollout of the completed
+#153 correction to the installed user-scoped Codex Wake tool and active
+supervisor. The baseline census confirms the older `0.5.2` runtime still
+projects supervisor readiness as `unit_environment`; all enrolled roots have
+zero active and firing wakes. Provider-free validation, exact candidate and
+rollback artifacts, installation, one supervisor restart, installed readback,
+and canonical closeout remain.
+
+Plan: [App-server readiness installed rollout](docs/dev/plans/0089-2026-09-22-app-server-readiness-installed-rollout.md)
+
+Acceptance target:
+
+- Candidate and rollback wheels are built from exact Git refs and bound by
+  SHA-256 before the installed tool changes.
+- The installed candidate passes the exact supervisor regression, replaces the
+  active supervisor process, and reports all enrolled roots ready.
+- Doctor attributes the codex-wake root's app-server command to
+  `supervisor_registry` while the repo-scoped service remains inactive.
+- No live wake, OpenClaw, provider, release, other-service, or other-host effect
+  occurs; failure performs one bounded rollback and records that outcome.

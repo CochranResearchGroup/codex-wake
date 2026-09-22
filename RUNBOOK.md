@@ -4177,3 +4177,26 @@ Acceptance state: the implementation, publication, hosted validation,
 canonical integration, issue closure, and ledger reconciliation are complete.
 Movement is `outcome_completion`. Any installed-runtime rollout remains a
 separate authorized effect with its own readback.
+
+## Turn 187 | 2026-09-22
+
+Opened the bounded installed-runtime rollout for the completed issue #153
+correction.
+
+- Issue #156, Plan 0089, P56, and lane I156 separate installed rollout from the
+  already-complete product implementation and closeout.
+- Canonical source is `1c05e4bf09dea1808299dca5d903afc9cebd3734` before
+  plan publication. The installed CLI remains `0.5.2` at the user uv-tool path.
+- `codex-wake-supervisor.service` is active and enabled with PID 1073 from
+  2026-09-16; the repo-scoped service is inactive and disabled.
+- The pre-effect doctor readback is supervisor-owned but still reports
+  `codex_cmd_source=unit_environment`, reproducing the stale installed behavior
+  corrected by #153.
+- All four enrolled roots have zero active and zero firing wakes. The planned
+  effect is limited to an exact candidate install and one supervisor restart,
+  with a prebuilt `v0.5.2` rollback wheel and no dispatch.
+
+Acceptance state: planning and pre-effect census are complete; no installed or
+service mutation has occurred. Movement is `outcome_progress`. Next action:
+publish and integrate the plan, validate canonical source, build candidate and
+rollback artifacts, then execute the bounded installed rollout.
