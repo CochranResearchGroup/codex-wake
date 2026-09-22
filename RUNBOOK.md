@@ -4200,3 +4200,36 @@ Acceptance state: planning and pre-effect census are complete; no installed or
 service mutation has occurred. Movement is `outcome_progress`. Next action:
 publish and integrate the plan, validate canonical source, build candidate and
 rollback artifacts, then execute the bounded installed rollout.
+
+## Turn 188 | 2026-09-22
+
+Validated and completed the installed-runtime rollout for issue #156.
+
+- PR #157 passed hosted Python 3.11 and 3.12 gates and integrated Plan 0089 as
+  canonical `5aad4e0c4a44da0fd647d861cd2fd7bd73a55c9c` before mutation.
+- Canonical validation passed 173 affected Python tests, the exact
+  ResourceWarning-strict supervisor regression, 688 comprehensive Python tests,
+  12 plugin tests, compilation, and diff hygiene.
+- Candidate wheel SHA-256 is
+  `97f5e93d8322e33509b37433e24060af2eb9ad2237acdc212895a4b635da20a5`;
+  rollback tag `v0.5.2` resolves to `99079e629a83c206f91f47455cd4691d484d6b34`
+  and its wheel SHA-256 is
+  `db013caed98622e7d80719cb8b2a36f422d50a51e429bc43ce7ad5d215ba4c64`.
+- The supported uv installer replaced the existing user tool with the exact
+  candidate. All four affected installed module hashes match the wheel, and the
+  exact regression passes under the installed interpreter.
+- The authorized supervisor restart replaced PID 1073 with PID 3278 at
+  2026-09-22 06:08:54 CDT. The unit hash remained
+  `b2b46c78462e52e176e415e02d928bb160d6f0e8f69b7e3aff6cd1ffb6fbcc23`.
+- All four enrolled roots report fresh ready health. The codex-wake root's
+  doctor and monitor readbacks report `monitor_source=supervisor`,
+  `codex_cmd_source=supervisor_registry`, and the enrolled
+  `/home/ecochran76/.local/bin/codex` command as ready.
+- Every enrolled root remained at zero active and firing wakes; the repo service
+  remained inactive and disabled. No live dispatch, OpenClaw, provider,
+  release, other-service, or other-host effect occurred.
+
+Acceptance state: the installed candidate, process replacement, readiness
+correction, and effect boundaries are accepted. Movement is
+`outcome_completion`. Verification receipt 0084 carries the detailed rollout
+and rollback evidence; the closing PR removes lane I156 and closes issue #156.

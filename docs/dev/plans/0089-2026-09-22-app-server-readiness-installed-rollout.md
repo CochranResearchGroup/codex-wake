@@ -1,6 +1,6 @@
 # App-server readiness installed rollout
 
-State: OPEN
+State: CLOSED
 Lane: I156
 Issue: #156
 Branch: `chore/issue-156-app-server-readiness-rollout`
@@ -9,18 +9,20 @@ Integration: `squash`
 
 ## Current state
 
-Issue #153 is complete on canonical `main`: PR #154 integrated the product
-correction at `781e4e7cff304d3189537b27c519fe60fcc01a6e`, and PR #155 closed its
-delivery ledger at `1c05e4bf09dea1808299dca5d903afc9cebd3734`. The installed user tool
-is still Codex Wake `0.5.2`, and `codex-wake-supervisor.service` is active from
-the older installation with PID 1073 and a September 16 start timestamp.
+Accepted on the installed user runtime from canonical source
+`5aad4e0c4a44da0fd647d861cd2fd7bd73a55c9c`. The candidate wheel
+`97f5e93d8322e33509b37433e24060af2eb9ad2237acdc212895a4b635da20a5`
+was installed into the existing Codex Wake uv-tool environment, its four
+affected module hashes match the wheel, and the exact installed supervisor
+regression passed.
 
-The pre-rollout doctor readback reproduces the stale installed behavior: this
-root is supervisor-owned, but app-server readiness is attributed to
-`unit_environment`. The repo-scoped service is inactive and disabled. All four
-enrolled roots report zero active and zero firing wakes, so a brief bounded
-supervisor restart has a clean execution window. No installation or service
-mutation has occurred in this plan yet.
+`codex-wake-supervisor.service` restarted from baseline PID 1073 to PID 3278
+at 2026-09-22 06:08:54 CDT. All four enrolled roots report fresh ready health,
+and the codex-wake root now reports `codex_cmd_source=supervisor_registry` with
+the exact enrolled `/home/ecochran76/.local/bin/codex` command. Active and
+firing wake counts remain zero. The repo service remains inactive and disabled;
+no live dispatch, OpenClaw, provider, release, other-service, or other-host
+effect occurred. Verification receipt 0084 holds the complete evidence.
 
 ## Objective
 
@@ -112,7 +114,7 @@ and canonical closeout evidence.
 
 ## Definition of done
 
-The plan closes only after the installed candidate and restarted supervisor
-pass every postcondition, the rollback boundary is discharged, the closing PR
-passes hosted gates and integrates into canonical `origin/main`, lane I156 is
-removed, and issue #156 closes from the recorded rollout evidence.
+Satisfied by the installed-runtime evidence in verification receipt 0084 and
+the issue #156 closing change. The installed candidate and restarted supervisor
+passed every postcondition, the rollback boundary is discharged, lane I156 is
+removed by the closeout, and no excluded effect occurred.

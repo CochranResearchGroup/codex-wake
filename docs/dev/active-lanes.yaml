@@ -22,24 +22,3 @@ lanes:
     overlaps: []
     reconciled_overlaps: []
     updated_at: 2026-09-17
-  - id: I156
-    objective: Validate and roll out the issue 153 app-server readiness fix to the installed user supervisor
-    plan: docs/dev/plans/0089-2026-09-22-app-server-readiness-installed-rollout.md
-    plan_ref: refs/heads/chore/issue-156-app-server-readiness-rollout
-    branch: chore/issue-156-app-server-readiness-rollout
-    target: main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 1c05e4b
-    validation_status: baseline_census_complete_live_effect_pending
-    validation_ref: 1c05e4b
-    remote_ref: ""
-    integration: squash
-    work_items: [CochranResearchGroup/codex-wake#156]
-    owner: primary rollout and integration owner
-    write_surface: installed user codex-wake tool, codex-wake-supervisor service, rollout receipts and ledgers
-    live_effect: authorized exact candidate install and one supervisor restart; zero dispatch, OpenClaw, provider, release, or other-service effect
-    dependencies: [CochranResearchGroup/codex-wake#153]
-    overlaps: [P54-C4]
-    reconciled_overlaps: [P54-C4 remains untouched; execute only with zero active wakes and restrict mutation to the user tool plus supervisor restart]
-    updated_at: 2026-09-22
