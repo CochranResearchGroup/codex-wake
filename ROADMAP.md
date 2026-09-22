@@ -879,15 +879,15 @@ Acceptance target:
 
 ## P56 | App-Server Readiness Installed Rollout
 
-State: OPEN
+State: CLOSED
 
-Current State: Issue #156 and Plan 0089 own a bounded rollout of the completed
-#153 correction to the installed user-scoped Codex Wake tool and active
-supervisor. The baseline census confirms the older `0.5.2` runtime still
-projects supervisor readiness as `unit_environment`; all enrolled roots have
-zero active and firing wakes. Provider-free validation, exact candidate and
-rollback artifacts, installation, one supervisor restart, installed readback,
-and canonical closeout remain.
+Current State: Accepted on the installed user runtime from canonical
+`5aad4e0c4a44da0fd647d861cd2fd7bd73a55c9c`. The candidate wheel is installed,
+the exact installed regression passes, the supervisor restarted from PID 1073
+to PID 3278, and all four roots have fresh ready health. Doctor now attributes
+the enrolled command to `supervisor_registry`; active/firing counts remain
+zero. Verification receipt 0084 records the bounded effect and absent
+dispatch, OpenClaw, provider, release, other-service, and other-host effects.
 
 Plan: [App-server readiness installed rollout](docs/dev/plans/0089-2026-09-22-app-server-readiness-installed-rollout.md)
 

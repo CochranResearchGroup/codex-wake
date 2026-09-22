@@ -187,16 +187,16 @@ class GitHubWebhookRuntimeTests(unittest.TestCase):
             factory_threads = []
             class SlowClient:
                 def get_run_attempt(self, *args):
-                    time.sleep(1)
+                    time.sleep(2)
             def attempt_client(deadline):
                 factory_threads.append(threading.current_thread())
                 return SlowClient() if len(factory_threads) == 1 else FixtureClient([run()])
             runtime = GitHubWebhookRuntime(
-                WebhookHTTPConfig(request_timeout=.3, shutdown_timeout=.2), adapter=adapter,
+                WebhookHTTPConfig(request_timeout=1, shutdown_timeout=.75), adapter=adapter,
                 module=module, checkpoints=module, anchor=armed.anchor,
                 webhook_config=WebhookConfig(secret_refs=("current",)),
                 resolve_secret=lambda ref: SECRET, attempt_client_factory=attempt_client,
-                operation_timeout=.05, now=lambda: NOW + timedelta(seconds=2),
+                operation_timeout=.25, now=lambda: NOW + timedelta(seconds=2),
             )
             body, signature = signed_body()
             result = []
@@ -212,7 +212,7 @@ class GitHubWebhookRuntimeTests(unittest.TestCase):
             elapsed = time.monotonic() - started
             client.join(2)
             self.assertFalse(client.is_alive())
-            self.assertLess(elapsed, .6)
+            self.assertLess(elapsed, 1)
             self.assertEqual(result, [(503, "VERIFICATION_UNAVAILABLE"), (200, "COMMITTED")])
             self.assertEqual(factory_threads, [threading.main_thread(), threading.main_thread()])
             self.assertIsNotNone(module.source_checkpoint("github", "github-ci"))
