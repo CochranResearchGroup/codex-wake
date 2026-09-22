@@ -4156,3 +4156,24 @@ Acceptance state: implementation and focused validation are complete locally.
 Movement is `outcome_progress`. Next action: run comprehensive and policy gates,
 publish the issue-linked PR, require hosted checks, then reconcile canonical
 main before closing #153.
+
+## Turn 186 | 2026-09-21
+
+Integrated and closed the provider-free correction for issue #153.
+
+- PR #154 published head `2f6e2e07e531e21ce102fdfedc84d604fd1836ff`
+  with the bounded Plan 0088 implementation and its local validation receipt.
+- Hosted release gates passed for Python 3.11 and 3.12 on that exact head; the
+  optional `[code]smith` check was skipped.
+- PR #154 was squash-merged into canonical `main` as
+  `781e4e7cff304d3189537b27c519fe60fcc01a6e`, and GitHub closed issue #153 as
+  completed.
+- Plan 0088 and P55 are closed, and lane I153 is removed from the active-lane
+  projection. The unrelated P54-C4 catalog state is preserved unchanged.
+- No live wake, installed-runtime refresh, service restart, provider mutation,
+  release, or deployment effect occurred.
+
+Acceptance state: the implementation, publication, hosted validation,
+canonical integration, issue closure, and ledger reconciliation are complete.
+Movement is `outcome_completion`. Any installed-runtime rollout remains a
+separate authorized effect with its own readback.

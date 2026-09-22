@@ -1,6 +1,6 @@
 # App-server dispatch readiness correction
 
-State: OPEN
+State: CLOSED
 Lane: I153
 Issue: #153
 Branch: `fix/issue-153-app-server-command-readiness`
@@ -9,20 +9,17 @@ Integration: `squash`
 
 ## Current state
 
-Issue #153 is reproduced against canonical `f90b6c8` through two deterministic
-provider-free paths. A supervisor-owned wake root stores a valid
-`dispatch.codex_cmd`, but `supervisor_poll_once` does not pass it to app-server
-dispatch. Independently, reinstalling an already-active repo service rewrites
-and reloads its unit but does not restart the process, so the daemon can retain
-an older environment. Monitor readiness can then combine fresh supervisor
-health with the inactive repo unit's command configuration and report a command
-that the actual dispatcher cannot use.
+Complete on canonical `main` at squash commit
+`781e4e7cff304d3189537b27c519fe60fcc01a6e` through PR #154. Both hosted
+release-gate jobs passed on published head
+`2f6e2e07e531e21ce102fdfedc84d604fd1836ff`, and GitHub closed issue #153 as
+completed after the merge. Focused validation passed 173 affected Python tests;
+comprehensive validation passed 688 Python tests, 12 plugin tests, compilation,
+diff hygiene, and active/goal planning audits.
 
-The provider-free implementation is complete locally. Focused validation passes
-173 affected Python tests; comprehensive validation passes 688 Python tests,
-12 plugin tests, compilation, diff hygiene, and active/goal planning audits.
-No production or provider mutation occurred. Publication, hosted checks,
-canonical integration, issue closure, and any installed-runtime rollout remain.
+No live wake, installed-runtime refresh, service restart, release, deployment,
+or provider mutation occurred. Any installed-runtime rollout remains a separate
+effect requiring its own authority and readback.
 
 ## Objective
 
@@ -107,8 +104,6 @@ small overlapping write surface.
 
 ## Definition of done
 
-The plan closes only after the issue-linked branch is published, the pull
-request records validation and zero live effects, hosted checks pass, the
-accepted change is integrated into canonical `origin/main`, and issue #153 has
-truthful completion evidence. Release and installed-runtime rollout remain
-separate effects.
+Satisfied by PR #154, hosted release gates for Python 3.11 and 3.12, canonical
+commit `781e4e7cff304d3189537b27c519fe60fcc01a6e`, and completed issue #153.
+Release and installed-runtime rollout remain separate effects.
