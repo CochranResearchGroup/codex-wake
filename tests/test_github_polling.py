@@ -112,6 +112,32 @@ class GitHubPollingTests(unittest.TestCase):
             self.assertIsInstance(module.ingest(batch.observations, batch.commit), Ingested)
             self.assertIsInstance(module.evaluate(armed.wake_id, armed, NOW + timedelta(seconds=2), EvaluationLimits(20)), Matched)
 
+    def test_positive_only_returns_verified_match_before_unrelated_history_exhausts_budget(self):
+        value = run(
+            completed_at=None,
+            terminal_proof_at=NOW + timedelta(seconds=1),
+            time_provenance="github_attempt_started_or_job_completed_lower_bound",
+        )
+        client = FixtureClient(
+            [value],
+            pages=[
+                RunPage((value,), 2, None, None),
+                GitHubReadError("budget"),
+            ],
+        )
+        adapter = GitHubPollingAdapter(config(evidence_mode="positive_only"), client)
+        anchor = adapter.establish_anchor(
+            adapter.request(ref="refs/heads/main", conclusions=("success",)), NOW,
+        )
+
+        batch = adapter.observe(anchor, checkpoint=None, now=NOW + timedelta(seconds=2))
+
+        self.assertIsInstance(batch, PollBatch)
+        self.assertEqual([item.occurrence_value for item in batch.observations], ["42:101:1"])
+        self.assertEqual(batch.coverage, "positive_only")
+        self.assertEqual(batch.health.code, "GITHUB_COVERAGE_UNPROVEN")
+        self.assertEqual([query.page for query in client.requests], [1])
+
     def test_hostile_request_and_clause_subclasses_are_rejected_without_equality_dispatch(self):
         class HostileRequest(SignalRequest):
             def __eq__(self, other):
