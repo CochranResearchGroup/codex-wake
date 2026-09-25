@@ -1,14 +1,31 @@
 # Retained webhook rollout successor
 
-State: OPEN
+State: CANCELLED
 Lane: P54-C4
 Issue: #141
 Branch: `chore/issue-141-retained-webhook-rollout`
 Target: `main`
 Integration: `squash`
 Parent plan: `docs/dev/plans/0087-2026-09-16-retained-managed-webhook-activation.md`
+Successor plan: `docs/dev/plans/0091-2026-09-24-retained-webhook-rollout-second-successor.md`
 
 ## Current state
+
+The 2026-09-24 rehearsal consumed its one create and trigger, then stopped
+fail-closed. The listener had started against the pre-create `UNMANAGED`
+binding, so the successful provider create advanced durable authority beyond
+the listener's captured generation and all provider deliveries returned HTTP
+503. The one permitted workflow rerun then failed the timing-sensitive Python
+3.11 runtime test while Python 3.12 passed. Exact disable/delete and local
+cleanup completed, GitHub hook inventory returned empty, all four planned
+units were absent, port 8820 was free, and zero dispatch occurred. Verification
+receipt 0085 preserves the bounded failure and rollback.
+
+This plan is cancelled because its effect counters are terminal. Plan 0091
+uses fresh identities and corrects the lifecycle order by reconciling each
+provider hook before starting its listener.
+
+### Original pre-execution state
 
 PR #152 integrated C4's provider-free product gate as canonical `f90b6c8`.
 The prior live attempt froze manifests against that commit, installed one

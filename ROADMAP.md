@@ -840,11 +840,16 @@ review, and both hosted gates before PR #152 squash-merged it as canonical
 `f90b6c8`. The first live attempt froze that candidate and prepared an isolated
 runtime plus owner-scoped local configuration, then stopped before the distinct
 read credential gate with zero provider writes, service starts, ingress
-mutations, or dispatches. Current readback still finds zero hooks, no port 8820
-listener, and no C4 units. Plan 0087 is cancelled as a combined packet; Plan
-0090 owns a fresh-manifest successor from canonical `919fd2a`. The retained
-activation remains explicitly authorized and bounded, while dispatch remains
-excluded until C5.
+mutations, or dispatches. Plan 0090's later rehearsal created one hook and
+started one dispatch-disabled service pair, but the listener had captured the
+pre-create binding generation; provider deliveries failed closed with HTTP 503.
+The sole workflow rerun failed one timing-sensitive Python 3.11 test. Exact
+disable/delete and local cleanup restored zero hooks, no port 8820 listener,
+no C4 units, and zero dispatch. Receipt 0085 preserves the evidence. Plan 0091
+owns a fresh-identity second successor that reconciles each provider hook before
+starting its listener and preserves the durable repository-scoped read
+credential. The retained activation remains explicitly authorized and bounded,
+while dispatch remains excluded until C5.
 
 ## P55 | App-Server Dispatch Readiness Correction
 
