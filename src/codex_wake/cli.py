@@ -318,8 +318,8 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("success", "failure", "cancelled", "timed_out", "neutral", "skipped", "action_required", "startup_failure"),
     )
     github_source_configure.add_argument(
-        "--credential-ref", required=True,
-        help="credential resolver reference; never a credential value",
+        "--credential-ref", default="GH_CLI",
+        help="credential reference (default: GH_CLI; never a credential value)",
     )
     enabled = github_source_configure.add_mutually_exclusive_group(required=True)
     enabled.add_argument("--enabled", "--enable", action="store_true", dest="enabled")
@@ -447,8 +447,8 @@ def build_parser() -> argparse.ArgumentParser:
     binding_configure.add_argument("--repository-id", required=True, type=int)
     binding_configure.add_argument("--callback-url", required=True)
     binding_configure.add_argument(
-        "--credential-ref", required=True, dest="provider_credential_ref",
-        help="provider credential resolver reference; never a credential value",
+        "--credential-ref", default="GH_CLI", dest="provider_credential_ref",
+        help="provider credential reference (default: GH_CLI; never a credential value)",
     )
     binding_configure.add_argument("--json", action="store_true", dest="as_json")
     for action in ("show", "status", "reconcile"):
@@ -1646,7 +1646,9 @@ def _managed_webhook_provider(binding, listener, *, provider_factory=None):
         provider_factory = GitHubWebhookAdmin
 
     def credential_resolver(reference: str) -> str:
-        return os.environ[reference]
+        from .github_credentials import resolve_github_credential
+
+        return resolve_github_credential(reference, hostname=binding.provider_host)
 
     def secret_generation_resolver(generation: int) -> str:
         if listener is None:

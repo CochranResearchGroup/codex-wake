@@ -637,7 +637,9 @@ def _require_secret_environment(config: WebhookServiceConfig) -> None:
 
 
 def required_secret_references(listener: WebhookListenerConfig, source) -> frozenset[str]:
-    refs = {listener.secret_ref, source.credential_ref}
+    refs = {listener.secret_ref}
+    if source.credential_ref != "GH_CLI":
+        refs.add(source.credential_ref)
     if listener.previous_secret_ref:
         refs.add(listener.previous_secret_ref)
     return frozenset(refs)

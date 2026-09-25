@@ -37,6 +37,19 @@ If both project and user hooks are installed, `doctor` may report `hook_duplicat
 - Put logs and marker files under `.codex/events/` unless the repo has a stronger convention.
 - Keep prompts short, idempotent, and evidence-oriented: tell the future agent what to verify first.
 - Never put secrets, raw credentials, or private transcript bodies in wake prompts or tracked docs.
+- GitHub CI sources and managed webhook bindings default to the `GH_CLI`
+  credential backend. Check `gh auth status --hostname github.com` for the
+  same user that runs the poller/listener and verify `gh` is available to the
+  user service, either on its `PATH` or at a supported Homebrew location. Each
+  repository, workflow, ref, conclusion, and binding still needs explicit
+  configuration; `gh` access does not install hooks on its own.
+- For stricter security or headless deployment, pass `--credential-ref NAME`
+  when configuring the source and binding, and supply the limited token through
+  an owner-only service environment file. Keep the webhook HMAC secret separate.
+- A user service that can read the same user's `gh` configuration has the
+  user's GitHub authority. Use service isolation plus a limited token when a
+  narrower credential boundary is required. Never put a resolved token into
+  wake records, prompts, logs, or tracked docs.
 - Use `codex-waked --once` for bounded checks, or `codex-wake service install/status/logs` for longer monitoring.
 - Before scheduling any unattended wake, prove that an active monitor owns the selected wake root with `codex-wake --wake-root .codex/wake monitor check --json`; use `--require-monitor` when creating wakes that must fire without a manual daemon pass.
 - Do not call a wake smoke successful when using `codex-waked --no-dispatch`; that only proves predicate evaluation.

@@ -4382,3 +4382,13 @@ canonical-readback gate.
 Acceptance state: C4 implementation and bounded rollout are closed pending the
 canonical merge's exact runtime readback. Movement is `outcome_progress`.
 Dispatch remains separately gated under C5 (#142).
+
+## Turn 194 | 2026-09-25
+
+Started issue #166 in a fresh worktree from canonical main. The implementation
+adds `GH_CLI` as the default GitHub source and managed binding credential
+reference, resolves the same user's `gh` token at request time, accepts an
+HMAC-only service environment, and keeps explicit environment references.
+README and the Codex Wake skill now describe the same-user trust model and
+the systemd `PATH` requirement. Provider free and comprehensive checks are
+underway; merge and installed rollout remain subject to their exact readback.
