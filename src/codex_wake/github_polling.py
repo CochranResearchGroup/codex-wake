@@ -255,6 +255,10 @@ class GitHubPollingAdapter:
                     if key in observations and observations[key] != observation:
                         return Degraded(None, "GITHUB_VERIFICATION_FAILED", None)
                     observations[key] = observation
+                if self.config.evidence_mode == "positive_only" and observations:
+                    ordered = tuple(sorted(observations.values(), key=lambda item: (item.occurred_at, item.occurrence_value)))
+                    return PollBatch(ordered, self.checkpoint_for_anchor(anchor), "positive_only",
+                                     Degraded(None, "GITHUB_COVERAGE_UNPROVEN", None))
                 if result.next_page is None:
                     if self.config.evidence_mode == "positive_only":
                         ordered = tuple(sorted(observations.values(), key=lambda item: (item.occurred_at, item.occurrence_value)))
