@@ -853,8 +853,12 @@ delivery and passing hosted gates, but positive-only polling exhausted its
 fixed 200-request ceiling while walking 334 retained workflow runs. Exact
 rollback again restored zero hooks, services, listeners, and dispatch; receipt
 0086 preserves the evidence and the durable read credential remains owner-only.
-Plan 0092 now owns the bounded polling correction and fresh v5 successor.
-Dispatch remains excluded until C5.
+Plan 0092 landed the polling correction at canonical `f2a4c3c`; its v5
+rehearsal proved signed delivery and one successful poll, then rolled back when
+no pending wake remained to drive the required second cycle. Receipt 0087
+preserves the clean rollback. Plan 0093 owns a fresh v6 successor with a
+pre-armed nonmatching sentinel for recurring-poll proof. Dispatch remains
+excluded until C5.
 
 ## P55 | App-Server Dispatch Readiness Correction
 

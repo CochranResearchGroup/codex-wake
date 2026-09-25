@@ -4328,3 +4328,27 @@ Acceptance state: the live environment is clean and the retained objective is
 blocked on a reproduced product defect. Movement is `blocker_identification`.
 Next action: integrate Plan 0092, prove the regression red then green, and run
 the full qualification before any new live effect.
+
+## Turn 192 | 2026-09-24
+
+Landed the positive-only polling correction, proved one live corrected cycle,
+and rolled back when no pending record remained for a second cycle.
+
+- Canonical `f2a4c3c` passed 22 focused, 689 comprehensive, 12 plugin, installed
+  wheel, and hosted Python 3.11/3.12 gates.
+- Fresh hook `685362682`, current-generation services, five 401 ingress paths,
+  rerun `36090958645` attempt 2, and completed signed delivery
+  `3844656287021334500` all passed with zero dispatch.
+- Polling returned the verified positive early and health became READY. After
+  the target entered `firing`, service and one-shot evaluation had zero pending
+  records, so a distinct second polling cycle could not be claimed.
+- Exact disable/delete and service cleanup restored zero hooks, units, and port
+  listeners. The persistent read token remains owner-only mode 0600.
+- Receipt 0087 records the failure. Plan 0093 adds a provider-free-proven
+  nonmatching sentinel to keep recurring polling active through the evidence
+  window.
+
+Acceptance state: the product correction is canonical and the environment is
+clean; retained activation remains open behind one operational proof design.
+Movement is `blocker_reduction`. Next action: integrate Plan 0093, prove the
+sentinel fixture, then use fresh v6 identities and counters.
