@@ -919,12 +919,14 @@ Acceptance target:
 
 ## P57 | GitHub CLI Credential Backend
 
-State: OPEN
+State: CLOSED
 
-Current State: Issue #166 and Plan 0094 own the same-user `gh` credential
-backend. Implementation and provider free tests are in the isolated
-`feat/issue-166-gh-auth-backend` worktree. Hosted integration and user-scope
-installation remain.
+Current State: PR #167 merged the same-user `gh` backend as canonical
+`8ae3a024`. The canonical wheel is installed in user scope; its changed module
+hashes and CLI default match the artifact. One supervisor restart left all
+four enrolled roots ready. The retained #141 owner remains on its isolated
+runtime and explicit limited token. Receipt 0090 records the qualification
+and rollout; live multi-repository proof remains separately gated.
 
 Plan: [GitHub CLI credential backend](docs/dev/plans/0094-2026-09-25-gh-auth-credential-backend.md)
 
