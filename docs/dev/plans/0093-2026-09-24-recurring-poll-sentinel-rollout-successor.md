@@ -10,6 +10,14 @@ Parent plan: `docs/dev/plans/0092-2026-09-24-positive-polling-retained-rollout-s
 
 ## Current state
 
+The v6-sentinel rehearsal has now passed: signed completed delivery returned
+HTTP 200, two distinct successful polling timestamps were recorded with the
+nonmatching failure sentinel pending, dispatch stayed zero, and exact cleanup
+cancelled that sentinel, disabled/deleted the rehearsal hook, removed both
+units, and freed port 8820. The fresh retained hook and current-generation
+dispatch-disabled services are active with target and sentinel wakes armed.
+Receipt 0088 records this pre-natural-occurrence checkpoint.
+
 Canonical `f2a4c3c` fixes positive-only polling so a verified qualifying page
 returns before unrelated history exhausts the request budget. The v5 rehearsal
 proved that fix with signed HTTP 200 delivery and one successful poll, then
