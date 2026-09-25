@@ -1,6 +1,6 @@
 # GitHub CLI credential backend
 
-State: OPEN
+State: CLOSED
 Lane: I166
 Issue: #166
 Branch: `feat/issue-166-gh-auth-backend`
@@ -9,10 +9,12 @@ Integration: `squash`
 
 ## Current state
 
-Issue #166 is accepted for implementation. Existing GitHub source and binding
-records hold credential reference names. A fresh worktree from canonical main
-contains the implementation and provider free tests; hosted checks, merge,
-install, and post-install readback remain.
+PR #167 passed both hosted Python gates and merged as canonical `8ae3a024`.
+The exact canonical wheel is installed in the user tool, and the supervisor
+restart left all four enrolled roots ready. Installed source hashes, credential
+resolution, CLI defaults, and the two installed skill copies were read back.
+Receipt 0090 records the implementation and installed rollout. The retained
+#141 listener and poller continue on their prior isolated runtime and binding.
 
 ## Objective
 

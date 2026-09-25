@@ -4392,3 +4392,23 @@ HMAC-only service environment, and keeps explicit environment references.
 README and the Codex Wake skill now describe the same-user trust model and
 the systemd `PATH` requirement. Provider free and comprehensive checks are
 underway; merge and installed rollout remain subject to their exact readback.
+
+## Turn 195 | 2026-09-25
+
+Integrated and installed issue #166's `gh` credential backend.
+
+- PR #167 passed hosted Python 3.11 and 3.12 and merged as canonical
+  `8ae3a024`; main run `36130577196` passed.
+- Canonical wheel SHA-256 is `26fe6d0`; the prior installed source matched
+  rollback wheel SHA-256 `7f2176c` on four checked modules.
+- The user tool was reinstalled from the canonical wheel; five changed module
+  hashes, installed CLI default, and same-user `gh` resolver readback passed.
+- The user supervisor changed PID `26291` to `22222`; all four enrolled roots
+  returned ready. Both installed Codex Wake skill copies match the tracked
+  canonical skill hash.
+- The retained #141 hook and isolated listener/poller remain active with their
+  explicit limited token. No provider write, redelivery, or dispatch occurred.
+
+Acceptance state: Plan 0094 and P57 are closed with receipt 0090. The I166
+lane is removed. Live multi-repository qualification remains a separate
+bounded operation.
