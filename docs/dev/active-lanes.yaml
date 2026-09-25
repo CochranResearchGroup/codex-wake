@@ -2,22 +2,22 @@ schema_version: 1
 work_item_tracking: required
 lanes:
   - id: P54-C4
-    objective: Complete the second-successor retained managed GitHub webhook activation with provider-create-before-listener-start and zero dispatch
-    plan: docs/dev/plans/0091-2026-09-24-retained-webhook-rollout-second-successor.md
-    plan_ref: refs/heads/docs/issue-141-rollout-successor-2
-    branch: chore/issue-141-retained-webhook-rollout-v2
+    objective: Correct positive-only polling convergence and complete the fresh retained managed GitHub webhook activation with zero dispatch
+    plan: docs/dev/plans/0092-2026-09-24-positive-polling-retained-rollout-successor.md
+    plan_ref: refs/heads/docs/issue-141-rollout-successor-3
+    branch: fix/issue-141-positive-polling-rollout-v3
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: cbb1a7538755011528cef667ee840cfb840b4b2c
-    validation_status: first_successor_rolled_back_second_successor_plan_pending_canonical_merge
-    validation_ref: cbb1a7538755011528cef667ee840cfb840b4b2c
-    remote_ref: refs/remotes/origin/chore/issue-141-retained-webhook-rollout-v2
+    checkpoint: 3a53c0a8aca490928ef26a986b4584b2f688c7df
+    validation_status: second_rehearsal_signed_delivery_passed_polling_budget_blocked_rolled_back_successor_plan_pending
+    validation_ref: 3a53c0a8aca490928ef26a986b4584b2f688c7df
+    remote_ref: refs/remotes/origin/fix/issue-141-positive-polling-rollout-v3
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#141]
     owner: primary integration and live-effect owner with at most two disjoint implementation workers and one bounded specialist reviewer
-    write_surface: Plan 0091, fresh manifest, isolated runtime and owner roots, exact deployment, provider operations, receipts, docs
-    live_effect: authorized second successor; at most two exact creates, one rehearsal disable/delete, one explicit rehearsal workflow rerun, scoped install/service/secret effects, ingress mutation only on proven drift, zero dispatch
+    write_surface: polling adapter and tests, Plan 0092, fresh v5 manifest/runtime/owner roots, exact deployment, provider operations, receipts, docs
+    live_effect: authorized successor objective; after correction qualification, at most two fresh creates, one rehearsal disable/delete, one explicit rehearsal workflow rerun, scoped install/service/secret effects, ingress mutation only on proven drift, zero dispatch
     dependencies: []
     overlaps: []
     reconciled_overlaps: []

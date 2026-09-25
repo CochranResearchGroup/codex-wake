@@ -1,6 +1,6 @@
 # Retained webhook rollout second successor
 
-State: OPEN
+State: CANCELLED
 Lane: P54-C4
 Issue: #141
 Branch: `chore/issue-141-retained-webhook-rollout-v2`
@@ -9,6 +9,15 @@ Integration: `squash`
 Parent plan: `docs/dev/plans/0090-2026-09-22-retained-webhook-rollout-successor.md`
 
 ## Current state
+
+The second-successor rehearsal is terminally rolled back. It proved the
+provider-create-before-listener ordering, signed HTTP 200 delivery, successful
+hosted Python 3.11 and 3.12 gates, and zero dispatch, but its positive-only
+polling path exhausted the fixed 200-request budget while walking 334
+historical workflow runs. Receipt 0086 preserves the failure and exact
+disable/delete cleanup. Plan 0092 supersedes this plan with a test-driven
+polling correction and fresh rollout identities; the retained owner defined
+here never started.
 
 Canonical Plan 0090's rehearsal created exactly one GitHub hook and one
 workflow rerun, then failed closed because its listener captured the binding

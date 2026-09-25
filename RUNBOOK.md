@@ -4299,3 +4299,32 @@ Acceptance state: prior effects are terminally rolled back and the retained
 objective remains open. Movement is `blocker_reduction`. Next action: integrate
 Plan 0091, freeze current canonical source, validate a fresh isolated runtime,
 then execute provider-create-before-listener-start for the rehearsal owner.
+
+## Turn 191 | 2026-09-24
+
+Proved corrected webhook ordering and signed delivery, then rolled back on a
+new positive-only polling budget blocker.
+
+- Plan 0091 froze canonical `3a53c0a`, built wheel SHA-256
+  `4010d4e64133533770ed835167ad22bd83df39ec7915b316a5b4a9fe8f3ca9ee`,
+  and passed 91 focused, 688 comprehensive, and 12 provider-free plugin tests.
+- Hook `685357376` was created before either service. The dispatch-disabled
+  poller established reader capability, the wake registered idempotently, and
+  the listener first loaded active generation-2 authority.
+- The sole rerun of run `36089822519` became attempt 2 and passed both Python
+  gates. Completed delivery `3844654355179372500` returned HTTP 200 and fired
+  the wake with zero dispatch.
+- Polling could not complete: 334 historical workflow runs exceeded the fixed
+  200-request positive-only verification ceiling, leaving fallback health
+  unobserved. No retry, redelivery, provider update, or retained start ran.
+- Exact cleanup disabled/deleted the hook, removed both services, freed port
+  8820, and retired only rehearsal secret material. The persistent read token
+  remains owner-only mode 0600.
+- Receipt 0086 preserves the failure. Plan 0092 scopes one test-driven early-
+  positive polling correction followed by fresh v5 rehearsal and retained
+  identities under zero dispatch.
+
+Acceptance state: the live environment is clean and the retained objective is
+blocked on a reproduced product defect. Movement is `blocker_identification`.
+Next action: integrate Plan 0092, prove the regression red then green, and run
+the full qualification before any new live effect.
