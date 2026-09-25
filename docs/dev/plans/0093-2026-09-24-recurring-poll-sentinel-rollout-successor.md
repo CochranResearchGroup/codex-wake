@@ -10,13 +10,19 @@ Parent plan: `docs/dev/plans/0092-2026-09-24-positive-polling-retained-rollout-s
 
 ## Current state
 
-The v6-sentinel rehearsal has now passed: signed completed delivery returned
-HTTP 200, two distinct successful polling timestamps were recorded with the
-nonmatching failure sentinel pending, dispatch stayed zero, and exact cleanup
-cancelled that sentinel, disabled/deleted the rehearsal hook, removed both
-units, and freed port 8820. The fresh retained hook and current-generation
-dispatch-disabled services are active with target and sentinel wakes armed.
-Receipt 0088 records this pre-natural-occurrence checkpoint.
+The v6-sentinel rehearsal and retained natural occurrence have passed. The
+retained target fired from signed completed delivery while the nonmatching
+failure sentinel remained pending across two successful polling timestamps.
+The one authorized listener restart changed its PID without changing binding,
+generation, service, or loopback-only socket identity. All five shaped invalid-
+signature ingress checks returned HTTP 401. Dispatch remains zero, the retained
+hook and services remain active, and receipt 0089 is collecting the final three
+fresh health samples before sentinel cancellation and canonical closeout.
+
+Receipt 0088 records the rehearsal acceptance and retained pre-occurrence
+checkpoint. The v6-sentinel rehearsal is now exactly absent: its sentinel was
+cancelled, its hook disabled and deleted, its units removed, its port freed,
+and only its sanitized history remains.
 
 Canonical `f2a4c3c` fixes positive-only polling so a verified qualifying page
 returns before unrelated history exhausts the request budget. The v5 rehearsal
