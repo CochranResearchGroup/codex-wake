@@ -10,8 +10,8 @@ lanes:
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     checkpoint: f2a4c3ceda4c86ce8befe1e392e79ab68c8be116
-    validation_status: v5_signed_delivery_and_one_poll_passed_second_cycle_blocked_rolled_back_sentinel_successor_pending
-    validation_ref: f2a4c3ceda4c86ce8befe1e392e79ab68c8be116
+    validation_status: v6s_rehearsal_accepted_and_cleaned_retained_active_awaiting_evidence_merge
+    validation_ref: 450834c92d8865d2e0b551182cc2b8e3bf4903de
     remote_ref: refs/remotes/origin/chore/issue-141-retained-webhook-rollout-v4
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#141]
