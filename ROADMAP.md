@@ -848,8 +848,13 @@ disable/delete and local cleanup restored zero hooks, no port 8820 listener,
 no C4 units, and zero dispatch. Receipt 0085 preserves the evidence. Plan 0091
 owns a fresh-identity second successor that reconciles each provider hook before
 starting its listener and preserves the durable repository-scoped read
-credential. The retained activation remains explicitly authorized and bounded,
-while dispatch remains excluded until C5.
+credential. Plan 0091's corrected ordering then proved signed completed
+delivery and passing hosted gates, but positive-only polling exhausted its
+fixed 200-request ceiling while walking 334 retained workflow runs. Exact
+rollback again restored zero hooks, services, listeners, and dispatch; receipt
+0086 preserves the evidence and the durable read credential remains owner-only.
+Plan 0092 now owns the bounded polling correction and fresh v5 successor.
+Dispatch remains excluded until C5.
 
 ## P55 | App-Server Dispatch Readiness Correction
 
