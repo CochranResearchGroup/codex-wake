@@ -1,6 +1,6 @@
 # Recurring poll sentinel rollout successor
 
-State: OPEN
+State: CLOSED
 Lane: P54-C4
 Issue: #141
 Branch: `chore/issue-141-retained-webhook-rollout-v4`
@@ -10,14 +10,16 @@ Parent plan: `docs/dev/plans/0092-2026-09-24-positive-polling-retained-rollout-s
 
 ## Current state
 
-The v6-sentinel rehearsal and retained natural occurrence have passed. The
+The v6-sentinel rehearsal and retained natural occurrence passed. The
 retained target fired from signed completed delivery while the nonmatching
 failure sentinel remained pending across two successful polling timestamps.
 The one authorized listener restart changed its PID without changing binding,
 generation, service, or loopback-only socket identity. All five shaped invalid-
 signature ingress checks returned HTTP 401. Dispatch remains zero, the retained
-hook and services remain active, and receipt 0089 is collecting the final three
-fresh health samples before sentinel cancellation and canonical closeout.
+hook and services remain active. Receipt 0089 records the bounded closeout;
+canonical integration supplies the final normal `main` occurrence, after which
+issue closure remains withheld until three fresh health samples pass and the
+retained sentinel is cancelled exactly once.
 
 Receipt 0088 records the rehearsal acceptance and retained pre-occurrence
 checkpoint. The v6-sentinel rehearsal is now exactly absent: its sentinel was

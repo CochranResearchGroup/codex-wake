@@ -3,7 +3,7 @@
 Date: 2026-09-24
 Issue: #141
 Plan: `docs/dev/plans/0093-2026-09-24-recurring-poll-sentinel-rollout-successor.md`
-Outcome: RETAINED_ACTIVE_CLOSEOUT_SAMPLING_PENDING
+Outcome: RETAINED_ACTIVE_CANONICAL_READBACK_REQUIRED
 
 ## Frozen candidate and qualification
 
@@ -48,11 +48,19 @@ public certificate-verifying HTTPS. No ingress mutation occurred.
 
 ## Final gate
 
-The final closeout PR supplies a normal GitHub Actions delivery without a
-manual workflow trigger or redelivery. Before merge, three fresh recurring
-health samples must show the current generation, ready listener, observed
-provider delivery, ready polling fallback, and dispatch not included. The
-retained failure sentinel is then cancelled exactly once; the hook, listener,
-poller, success occurrence, and durable repository-scoped read credential
-remain retained. This receipt remains pending until those exact readbacks are
-inserted.
+The final closeout PR supplies a normal `main` GitHub Actions delivery without
+a manual workflow trigger or redelivery. Its merge commit and resulting run
+cannot be named truthfully in pre-merge content. Issue closure is therefore
+withheld until the owner-only activation manifest and issue readback record
+that exact signed delivery, three fresh recurring health samples at the current
+generation, and one retained-sentinel cancellation. The hook, listener,
+dispatch-disabled poller, success occurrence, and durable repository-scoped
+read credential remain retained.
+
+The final bounded counters at canonical-readback entry are two provider
+creates, one rehearsal disable, one rehearsal delete, zero provider updates,
+zero redeliveries, one explicit workflow rerun, one rehearsal service
+install/start and stop/uninstall, one retained service install/start, one
+retained listener restart, one of two sentinel cancellations, and zero
+dispatch. The closeout merge and second sentinel cancellation consume their
+remaining ceilings only after their exact postconditions are observable.

@@ -857,8 +857,15 @@ Plan 0092 landed the polling correction at canonical `f2a4c3c`; its v5
 rehearsal proved signed delivery and one successful poll, then rolled back when
 no pending wake remained to drive the required second cycle. Receipt 0087
 preserves the clean rollback. Plan 0093 owns a fresh v6 successor with a
-pre-armed nonmatching sentinel for recurring-poll proof. Dispatch remains
-excluded until C5.
+pre-armed nonmatching sentinel for recurring-poll proof. Its rehearsal passed
+signed delivery, two polling cycles, sentinel continuity, and exact cleanup.
+Retained hook `685366419` and its dispatch-disabled listener and poller remain
+active after signed delivery, two fresh polling timestamps, one bounded
+listener restart, and five HTTP-401 ingress readbacks. Receipt 0089 closes the
+C4 execution lane through the final closeout PR; issue #141 remains open until
+the merge-generated normal `main` occurrence supplies three current health
+samples and the retained sentinel is cancelled. Dispatch remains excluded
+until separately gated C5 (#142).
 
 ## P55 | App-Server Dispatch Readiness Correction
 
