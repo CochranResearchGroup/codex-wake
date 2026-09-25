@@ -4352,3 +4352,33 @@ Acceptance state: the product correction is canonical and the environment is
 clean; retained activation remains open behind one operational proof design.
 Movement is `blocker_reduction`. Next action: integrate Plan 0093, prove the
 sentinel fixture, then use fresh v6 identities and counters.
+
+## Turn 193 | 2026-09-24
+
+Accepted the v6-sentinel rehearsal and advanced retained activation to its
+canonical-readback gate.
+
+- Canonical `f2a4c3c` and its isolated wheel passed 22 focused polling tests,
+  689 comprehensive Python tests, 12 plugin tests, installed smoke, and hosted
+  Python 3.11/3.12 gates.
+- Rehearsal hook `685365102` accepted signed completed delivery and two polling
+  cycles while its failure sentinel stayed pending. Exact cleanup cancelled
+  that sentinel, disabled/deleted the hook, removed both units and port owner,
+  and retired only its secret environment.
+- Retained hook `685366419` accepted completed delivery
+  `3844658156756050000` for canonical `579d276`; polling succeeded twice, the
+  success target fired, the failure sentinel remained pending, and dispatch
+  stayed zero.
+- The one retained listener restart changed PID `80441` to `751` while the
+  exact unit stayed active/enabled and loopback-only. Raw, local, Cooper-host,
+  bastion, and public HTTPS invalid-signature checks each returned HTTP 401
+  with no ingress mutation.
+- Receipt 0089 and the final closeout PR remove the P54-C4 execution lane. The
+  normal merge-generated `main` run is the only remaining delivery freshness
+  source; issue #141 stays open until its signed delivery, three current health
+  samples, retained-sentinel cancellation, and exact retained-state readback
+  pass. The durable read credential remains owner-only mode 0600.
+
+Acceptance state: C4 implementation and bounded rollout are closed pending the
+canonical merge's exact runtime readback. Movement is `outcome_progress`.
+Dispatch remains separately gated under C5 (#142).
