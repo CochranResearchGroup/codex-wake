@@ -2,22 +2,22 @@ schema_version: 1
 work_item_tracking: required
 lanes:
   - id: P54-C4
-    objective: Correct positive-only polling convergence and complete the fresh retained managed GitHub webhook activation with zero dispatch
-    plan: docs/dev/plans/0092-2026-09-24-positive-polling-retained-rollout-successor.md
-    plan_ref: refs/heads/docs/issue-141-rollout-successor-3
-    branch: fix/issue-141-positive-polling-rollout-v3
+    objective: Prove recurring polling with a pre-armed nonmatching sentinel and complete the retained managed GitHub webhook activation with zero dispatch
+    plan: docs/dev/plans/0093-2026-09-24-recurring-poll-sentinel-rollout-successor.md
+    plan_ref: refs/heads/docs/issue-141-rollout-successor-4
+    branch: chore/issue-141-retained-webhook-rollout-v4
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 3a53c0a8aca490928ef26a986b4584b2f688c7df
-    validation_status: second_rehearsal_signed_delivery_passed_polling_budget_blocked_rolled_back_successor_plan_pending
-    validation_ref: 3a53c0a8aca490928ef26a986b4584b2f688c7df
-    remote_ref: refs/remotes/origin/fix/issue-141-positive-polling-rollout-v3
+    checkpoint: f2a4c3ceda4c86ce8befe1e392e79ab68c8be116
+    validation_status: v5_signed_delivery_and_one_poll_passed_second_cycle_blocked_rolled_back_sentinel_successor_pending
+    validation_ref: f2a4c3ceda4c86ce8befe1e392e79ab68c8be116
+    remote_ref: refs/remotes/origin/chore/issue-141-retained-webhook-rollout-v4
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#141]
     owner: primary integration and live-effect owner with at most two disjoint implementation workers and one bounded specialist reviewer
-    write_surface: polling adapter and tests, Plan 0092, fresh v5 manifest/runtime/owner roots, exact deployment, provider operations, receipts, docs
-    live_effect: authorized successor objective; after correction qualification, at most two fresh creates, one rehearsal disable/delete, one explicit rehearsal workflow rerun, scoped install/service/secret effects, ingress mutation only on proven drift, zero dispatch
+    write_surface: Plan 0093, provider-free sentinel fixture, fresh v6 manifest/runtime/owner roots, exact deployment, provider operations, receipts, docs
+    live_effect: authorized successor objective; at most two fresh creates, one rehearsal disable/delete, one explicit rehearsal workflow rerun, two local wakes and one sentinel cancellation per owner, scoped service/secret effects, zero dispatch
     dependencies: []
     overlaps: []
     reconciled_overlaps: []

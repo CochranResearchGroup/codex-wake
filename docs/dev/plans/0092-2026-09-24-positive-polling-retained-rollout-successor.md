@@ -1,6 +1,6 @@
 # Positive polling retained rollout successor
 
-State: OPEN
+State: CANCELLED
 Lane: P54-C4
 Issue: #141
 Branch: `fix/issue-141-positive-polling-rollout-v3`
@@ -9,6 +9,14 @@ Integration: `squash`
 Parent plan: `docs/dev/plans/0091-2026-09-24-retained-webhook-rollout-second-successor.md`
 
 ## Current state
+
+The polling correction landed canonically at `f2a4c3c` and the fresh v5
+rehearsal proved signed delivery plus one successful bounded poll. It then
+failed closed because the only wake moved to `firing`; the daemon correctly
+stopped polling with no pending records, so a distinct second cycle could not
+be proved. Receipt 0087 records exact rollback. Plan 0093 supersedes this plan
+with a pre-armed nonmatching sentinel that keeps the dispatch-disabled source
+runner active for repeated polling evidence.
 
 Plan 0091's rehearsal used fresh authority and correctly created the provider
 hook before starting its listener. Main workflow run `36089822519` attempt 2
