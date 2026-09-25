@@ -1,3 +1,22 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: I166
+    objective: Add the same-user gh credential backend for GitHub CI and managed webhooks
+    plan: docs/dev/plans/0094-2026-09-25-gh-auth-credential-backend.md
+    branch: feat/issue-166-gh-auth-backend
+    target: main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 4fc4f4d726a48557d7b632a7f17b0287886427aa
+    validation_status: local_provider_free_tests_passed_hosted_pending
+    validation_ref: 4fc4f4d726a48557d7b632a7f17b0287886427aa
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#166]
+    owner: primary implementation and integration owner
+    write_surface: GitHub credential resolver, source and binding defaults, listener service readiness, tests, docs, skill, installed rollout
+    live_effect: canonical user tool installation only after hosted gates; retained webhook configuration unchanged
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-25

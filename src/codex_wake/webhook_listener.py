@@ -129,7 +129,15 @@ def build_webhook_runtime(
         _, current_source = require_current_authority()
         if reference != current_source.credential_ref:
             raise GitHubReadError("auth")
-        value = source_env.get(reference)
+        if reference == "GH_CLI":
+            from .github_credentials import resolve_github_credential
+
+            try:
+                value = resolve_github_credential(reference, hostname=current_source.hostname)
+            except ValueError:
+                raise GitHubReadError("auth") from None
+        else:
+            value = source_env.get(reference)
         if type(value) is not str or not value:
             raise GitHubReadError("auth")
         return value

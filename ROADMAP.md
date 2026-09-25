@@ -916,3 +916,24 @@ Acceptance target:
   `supervisor_registry` while the repo-scoped service remains inactive.
 - No live wake, OpenClaw, provider, release, other-service, or other-host effect
   occurs; failure performs one bounded rollback and records that outcome.
+
+## P57 | GitHub CLI Credential Backend
+
+State: OPEN
+
+Current State: Issue #166 and Plan 0094 own the same-user `gh` credential
+backend. Implementation and provider free tests are in the isolated
+`feat/issue-166-gh-auth-backend` worktree. Hosted integration and user-scope
+installation remain.
+
+Plan: [GitHub CLI credential backend](docs/dev/plans/0094-2026-09-25-gh-auth-credential-backend.md)
+
+Acceptance target:
+
+- New GitHub CI sources and managed webhook bindings default to `GH_CLI`.
+- Polling, signed delivery verification, and explicit provider operations
+  resolve that backend without persisting token values.
+- Explicit limited token references continue to work for headless or isolated
+  service use.
+- The canonical wheel is installed in user scope, and the installed CLI and
+  credential resolver pass readback without changing the retained #141 owner.

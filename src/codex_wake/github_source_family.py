@@ -6,7 +6,6 @@ registry supplies eligible durable candidates.
 """
 from __future__ import annotations
 
-import os
 from collections.abc import Callable
 
 from .github_polling import GitHubPollingAdapter, GitHubPollingConfig, GitHubReadClient
@@ -120,5 +119,15 @@ def _production_client(config: GitHubPollingConfig) -> GitHubReadClient:
 
     return GitHubRestClient(
         config,
-        credential_resolver=lambda ref: os.environ.get(ref, ""),
+        credential_resolver=lambda ref: _resolve_github_credential(ref),
     )
+
+
+def _resolve_github_credential(reference: str) -> str:
+    from .github_credentials import resolve_github_credential
+    from .github_polling import GitHubReadError
+
+    try:
+        return resolve_github_credential(reference)
+    except (KeyError, ValueError):
+        raise GitHubReadError("auth") from None

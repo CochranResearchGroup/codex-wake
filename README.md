@@ -557,9 +557,27 @@ operator-visible readback. The full matrix is documented in
 
 GitHub CI sources are managed with the supported commands
 `codex-wake github-ci source configure`, `list`, and `show`; arm a completion
-wake with `codex-wake github-ci completed`. Configure the daemon service with
+wake with `codex-wake github-ci completed`. The default credential reference
+is `GH_CLI`, resolved at read time with `gh auth token --hostname github.com`.
+The same default applies to `github-webhook binding configure`. Run `gh auth
+login` as the same user that runs the service, and explicitly configure each
+repository, workflow, ref, conclusion, and webhook binding. Access to a
+repository through `gh` does not configure it automatically. Provider writes
+still require explicit reconciliation or cleanup commands. The webhook HMAC
+secret remains separate.
+
+For a limited token or headless service, pass `--credential-ref NAME` to source
+and binding configuration. Configure the daemon service with
 `--github-credential-file PATH` to render an owner-only systemd
 `EnvironmentFile=` containing the referenced credential environment variables.
+The `GH_CLI` backend uses the same-user `gh` credential store; it is a
+convenience, not credential isolation. Service installations requiring isolation
+must use an explicit limited token and restrict access to the user's `gh`
+store. The resolver first uses the service's `PATH`, then checks standard
+Linuxbrew and Homebrew executable locations when `gh` is absent from that
+`PATH`. Check the installed unit environment and executable availability before
+starting an unattended `GH_CLI` source. Existing explicit references remain
+compatible.
 The poller uses positive-only evidence: `GITHUB_COVERAGE_UNPROVEN` is an
 expected coverage warning, not proof of complete history. No public listener or
 live GitHub delivery is claimed by the provider-free smoke.
