@@ -2,23 +2,23 @@ schema_version: 1
 work_item_tracking: required
 lanes:
   - id: P54-C4
-    objective: Re-freeze and complete one retained managed GitHub webhook activation with zero dispatch
-    plan: docs/dev/plans/0090-2026-09-22-retained-webhook-rollout-successor.md
-    plan_ref: refs/heads/docs/issue-141-rollout-successor-plan
-    branch: chore/issue-141-retained-webhook-rollout
+    objective: Complete the second-successor retained managed GitHub webhook activation with provider-create-before-listener-start and zero dispatch
+    plan: docs/dev/plans/0091-2026-09-24-retained-webhook-rollout-second-successor.md
+    plan_ref: refs/heads/docs/issue-141-rollout-successor-2
+    branch: chore/issue-141-retained-webhook-rollout-v2
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 919fd2affd88216e1b3fc5359e6c175899921797
-    validation_status: successor_plan_ready_fresh_manifest_pending
-    validation_ref: 919fd2affd88216e1b3fc5359e6c175899921797
-    remote_ref: refs/remotes/origin/chore/issue-141-retained-webhook-rollout
+    checkpoint: cbb1a7538755011528cef667ee840cfb840b4b2c
+    validation_status: first_successor_rolled_back_second_successor_plan_pending_canonical_merge
+    validation_ref: cbb1a7538755011528cef667ee840cfb840b4b2c
+    remote_ref: refs/remotes/origin/chore/issue-141-retained-webhook-rollout-v2
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#141]
     owner: primary integration and live-effect owner with at most two disjoint implementation workers and one bounded specialist reviewer
-    write_surface: fresh manifest, isolated runtime and owner roots, exact deployment, provider operations, receipts, docs
-    live_effect: authorized successor; at most two exact creates, one rehearsal disable/delete, scoped install/service/secret effects, ingress mutation only on proven drift, zero dispatch
+    write_surface: Plan 0091, fresh manifest, isolated runtime and owner roots, exact deployment, provider operations, receipts, docs
+    live_effect: authorized second successor; at most two exact creates, one rehearsal disable/delete, one explicit rehearsal workflow rerun, scoped install/service/secret effects, ingress mutation only on proven drift, zero dispatch
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
-    updated_at: 2026-09-22
+    updated_at: 2026-09-24

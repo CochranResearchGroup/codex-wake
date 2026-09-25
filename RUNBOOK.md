@@ -4271,3 +4271,31 @@ runtime, secret, service, provider, ingress, release, or dispatch effect has
 occurred. Movement is `outcome_progress`. Next action: integrate Plan 0090,
 then freeze and validate the exact successor candidate before crossing the
 credential or live-effect gates.
+
+## Turn 190 | 2026-09-24
+
+Rolled back Plan 0090's failed rehearsal and opened the corrected second
+successor.
+
+- The rehearsal created hook `685323162` exactly once with exact readback, but
+  its listener had started against the pre-create `UNMANAGED` binding. Provider
+  reconciliation advanced durable authority to `ACTIVE`, so the listener's
+  captured binding was stale and GitHub deliveries returned HTTP 503.
+- The one authorized workflow rerun reached attempt 2. Python 3.12 passed;
+  Python 3.11 failed the timing-sensitive provider-timeout recovery test, so
+  the success-only occurrence did not converge. No retry or redelivery ran.
+- Exact cleanup disabled and deleted the rehearsal hook once, removed both
+  rehearsal units, freed port 8820, and preserved terminal `DELETED_PROVEN`.
+  Retained services never started. Provider update, ingress mutation, and
+  dispatch counters remained zero.
+- Receipt 0085 records the sanitized failure and rollback. A repository-scoped
+  read credential now persists owner-only under the user configuration root;
+  it remains distinct from the administrative provider credential.
+- Plan 0091 uses fresh identities and counters and orders each provider create
+  before first listener start. One explicit rehearsal rerun remains bounded;
+  the normal evidence-PR merge supplies the retained natural main occurrence.
+
+Acceptance state: prior effects are terminally rolled back and the retained
+objective remains open. Movement is `blocker_reduction`. Next action: integrate
+Plan 0091, freeze current canonical source, validate a fresh isolated runtime,
+then execute provider-create-before-listener-start for the rehearsal owner.
