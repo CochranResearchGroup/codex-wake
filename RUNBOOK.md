@@ -4412,3 +4412,24 @@ Integrated and installed issue #166's `gh` credential backend.
 Acceptance state: Plan 0094 and P57 are closed with receipt 0090. The I166
 lane is removed. Live multi-repository qualification remains a separate
 bounded operation.
+
+## Turn 196 | 2026-09-27
+
+Started issue #169 in a fresh worktree from canonical `185f3a7`.
+
+- Opened P58 and Plan 0095 for the first-class AuraCall terminal-response wake
+  source; paired producer issue `ecochran76/auracall#93` remains outside this
+  repository's write authority.
+- Registered lane I169 with the primary agent owning the shared receipt,
+  configuration, source-family, CLI, readiness, test, and documentation seam.
+- Froze provider-free and dispatch-disabled effect boundaries. No live
+  AuraCall session, provider access, service/install change, release, or target
+  dispatch is authorized by this packet.
+- Graphiti was healthy but returned no Issue 169 or Codex Wake source-specific
+  recall. CodeGraph is not initialized in the new worktree, so current GitHub,
+  repository, and test evidence remain authoritative.
+
+Acceptance state: P58 is open at the contract-test checkpoint. Movement is
+`outcome_progress`. Next action: add red tests for atomic receipt completion,
+result verification, confinement, state filtering, and restart deduplication,
+then implement the smallest source seam that makes them pass.

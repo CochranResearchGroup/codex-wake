@@ -939,3 +939,27 @@ Acceptance target:
   service use.
 - The canonical wheel is installed in user scope, and the installed CLI and
   credential resolver pass readback without changing the retained #141 owner.
+
+## P58 | AuraCall Terminal-Response Wake Source
+
+State: OPEN
+
+Current State: Issue #169 and Plan 0095 own the provider-free consumer for
+immutable AuraCall terminal receipts. The paired producer contract remains in
+`ecochran76/auracall#93`. The implementation lane starts from canonical
+`185f3a7` with no live AuraCall, dispatch, service, installation, provider, or
+release effect authorized.
+
+Plan: [AuraCall terminal-response wake source](docs/dev/plans/0095-2026-09-27-auracall-terminal-response-source.md)
+
+Acceptance target:
+
+- A versioned, atomically completed receipt becomes eligible only after its
+  confined result locator passes exact durability verification.
+- Immutable session/event identity produces one wake across repeated polls and
+  daemon restart while configured terminal-state and profile/session/slug
+  filters remain explicit.
+- Malformed, truncated, incompatible, unauthorized, traversing, or symlink-
+  escaped receipts fail closed with bounded source health and zero dispatch.
+- CLI setup/readback, signal journaling, readiness, and tmux/app-server routing
+  reuse existing governed seams and keep prompts free of private response data.
