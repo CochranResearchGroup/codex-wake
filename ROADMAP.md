@@ -944,22 +944,22 @@ Acceptance target:
 
 State: OPEN
 
-Current State: Issue #169 and Plan 0095 own the provider-free consumer for
-immutable AuraCall terminal receipts. The paired producer contract remains in
-`ecochran76/auracall#93`. The implementation lane starts from canonical
-`185f3a7` with no live AuraCall, dispatch, service, installation, provider, or
-release effect authorized.
+Current State: Issue #169 and Plan 0096 now own a reusable HTTP/JSON completion
+source. AuraCall already exposes durable generic run status through HTTP, CLI,
+and MCP, so it will be the first compatibility case rather than a bespoke
+producer. Plan 0095 was cancelled before implementation. The lane has no live
+AuraCall, dispatch, service, installation, provider, or release effect
+authorized.
 
-Plan: [AuraCall terminal-response wake source](docs/dev/plans/0095-2026-09-27-auracall-terminal-response-source.md)
+Plan: [Generic HTTP/JSON completion wakes](docs/dev/plans/0096-2026-09-27-generic-http-json-completion-wakes.md)
 
 Acceptance target:
 
-- A versioned, atomically completed receipt becomes eligible only after its
-  confined result locator passes exact durability verification.
-- Immutable session/event identity produces one wake across repeated polls and
-  daemon restart while configured terminal-state and profile/session/slug
-  filters remain explicit.
-- Malformed, truncated, incompatible, unauthorized, traversing, or symlink-
-  escaped receipts fail closed with bounded source health and zero dispatch.
+- A fixed-origin HTTP/JSON job-status resource can produce one wake when a
+  selected field reaches an allowed terminal value.
+- The source is reusable across products; AuraCall works through its existing
+  generic run-status API without a Codex-Wake-specific producer contract.
+- Polling is bounded, restart-correct, deduplicated, credential-safe, and
+  resistant to redirect, origin, response-size, and parsing failures.
 - CLI setup/readback, signal journaling, readiness, and tmux/app-server routing
-  reuse existing governed seams and keep prompts free of private response data.
+  reuse existing governed seams and retain only bounded selected metadata.

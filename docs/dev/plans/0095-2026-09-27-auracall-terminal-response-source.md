@@ -1,6 +1,6 @@
 # AuraCall terminal-response wake source
 
-State: OPEN
+State: CANCELLED
 Lane: I169
 Issue: #169
 Branch: `feat/issue-169-auracall-terminal-source`
@@ -9,13 +9,9 @@ Integration: `squash`
 
 ## Current state
 
-Codex Wake has a closed built-in source registry, durable schema-v2 signal
-journal, restart-correct occurrence deduplication, generic tmux/app-server
-dispatch, and separate signal/monitor/dispatch readiness. AuraCall terminal
-responses currently have no typed source family or governed configuration;
-operators must bridge them through generic file predicates. Paired producer
-issue `ecochran76/auracall#93` owns publication of immutable receipts only after
-durable session persistence.
+Superseded before implementation by Plan 0096. The receipt-directory design
+was too specific to AuraCall and would have required producer behavior created
+only for Codex Wake. No implementation was performed from this plan.
 
 ## Objective
 

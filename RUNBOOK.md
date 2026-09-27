@@ -4433,3 +4433,22 @@ Acceptance state: P58 is open at the contract-test checkpoint. Movement is
 `outcome_progress`. Next action: add red tests for atomic receipt completion,
 result verification, confinement, state filtering, and restart deduplication,
 then implement the smallest source seam that makes them pass.
+
+## Turn 197 | 2026-09-27
+
+Reframed issue #169 around a reusable standard integration rather than an
+AuraCall-only producer contract.
+
+- Current AuraCall source confirms one durable run status is already available
+  through HTTP `GET /v1/runs/{run_id}/status`, CLI, and MCP.
+- Current Codex Wake source confirms its normalized signal journal and source
+  registry can host another built-in family, but it lacks a generic HTTP/JSON
+  completion watcher.
+- Cancelled Plan 0095 before implementation and opened Plan 0096 for a bounded,
+  fixed-origin HTTP/JSON source using standard JSON Pointer selection.
+- AuraCall becomes the first compatibility fixture. Other job APIs with stable
+  JSON status resources can use the same source without custom producer code.
+
+Acceptance state: P58 remains open under goal version P58-G1-v2. Movement is
+`scope_correction`. Next action: freeze and test the generic HTTP/JSON source
+contract before implementing the transport or CLI.

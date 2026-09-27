@@ -2,21 +2,21 @@ schema_version: 1
 work_item_tracking: required
 lanes:
   - id: I169
-    objective: Add a first-class AuraCall terminal-response wake source
-    plan: docs/dev/plans/0095-2026-09-27-auracall-terminal-response-source.md
+    objective: Add reusable HTTP/JSON completion wakes and prove AuraCall compatibility
+    plan: docs/dev/plans/0096-2026-09-27-generic-http-json-completion-wakes.md
     branch: feat/issue-169-auracall-terminal-source
     target: main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     checkpoint: 185f3a70d917233e4f49f4850880e5051cd6733c
-    validation_status: planning_complete_contract_tests_pending
-    validation_ref: 185f3a70d917233e4f49f4850880e5051cd6733c
+    validation_status: generic_design_replanned_contract_tests_pending
+    validation_ref: 5e02f25483f11750948fac633abf3d6bc3b1063e
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#169, ecochran76/auracall#93]
     owner: primary implementation and integration owner
-    write_surface: AuraCall receipt configuration and source family, registry, CLI, readiness, tests, and docs
+    write_surface: generic HTTP JSON source configuration and family, registry, CLI, readiness, tests, and docs
     live_effect: none; provider-free and dispatch-disabled implementation only
-    dependencies: [ecochran76/auracall#93 producer contract]
+    dependencies: []
     overlaps: []
     reconciled_overlaps: []
     updated_at: 2026-09-27
