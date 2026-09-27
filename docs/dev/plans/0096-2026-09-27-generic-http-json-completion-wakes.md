@@ -1,6 +1,6 @@
 # Generic HTTP/JSON completion wakes
 
-State: OPEN
+State: CLOSED
 Lane: I169
 Issue: #169
 Branch: `feat/issue-169-auracall-terminal-source`
@@ -19,8 +19,10 @@ AuraCall-specific runtime code was added.
 
 Local acceptance is complete: 705 comprehensive Python tests and 12 OpenClaw
 plugin tests pass; compilation, diff hygiene, active/goal planning audits,
-source-registry smoke, and an isolated installed-wheel smoke also pass. Hosted
-CI and integration remain pending.
+source-registry smoke, and an isolated installed-wheel smoke also pass. PR #170
+passed hosted Python 3.11 and 3.12 gates and squash-merged as canonical
+`0cae470950119c79cdfbfa404dc31c45d27bb90b`. Canonical main run
+`36356569300` passed both release gates, and issue #169 is closed.
 
 Plan 0095 is cancelled before implementation because its private receipt-
 directory contract was unnecessarily product-specific.
@@ -146,5 +148,5 @@ checkpoint_fields: state_transition, acceptance_state, progress_classification, 
 
 ## Next action
 
-Publish the implementation, open the issue-linked pull request, and require the
-hosted Python 3.11 and 3.12 release gates before squash integration.
+No further action is required for Plan 0096. Release, installation, live
+provider qualification, or visible-delivery dogfood require separate scope.

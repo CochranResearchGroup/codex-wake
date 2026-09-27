@@ -942,14 +942,14 @@ Acceptance target:
 
 ## P58 | Generic HTTP/JSON Completion Wakes
 
-State: OPEN
+State: CLOSED
 
-Current State: Issue #169 and Plan 0096 now own a reusable HTTP/JSON completion
-source. The provider-free implementation and local acceptance checks pass;
-hosted CI and integration are still pending. AuraCall's existing HTTP status
-envelope is one compatibility fixture rather than a bespoke producer contract.
-The lane has no live dispatch, service, installation, provider, or release
-effect authorized.
+Current State: Issue #169 and Plan 0096 are complete. PR #170 passed hosted
+Python 3.11 and 3.12 gates and squash-merged as canonical `0cae470`; its main
+CI run `36356569300` also passed both gates. AuraCall's existing HTTP status
+envelope remains one compatibility fixture rather than a bespoke producer
+contract. No live dispatch, service, installation, provider, release, or
+deployment effect occurred.
 
 Plan: [Generic HTTP/JSON completion wakes](docs/dev/plans/0096-2026-09-27-generic-http-json-completion-wakes.md)
 
