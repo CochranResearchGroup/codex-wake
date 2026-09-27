@@ -93,6 +93,7 @@ def default_signal_runners(
     *,
     initial_reason: Literal["startup", "periodic"] = "startup",
     github_client_factory: Callable[[GitHubPollingConfig], GitHubReadClient] | None = None,
+    http_json_client_factory: Callable[[object], object] | None = None,
     systemd_backend_factory: Callable[[object], object] | None = None,
     source_registry: BuiltinSourceRegistry | None = None,
 ) -> tuple[SignalSourceRunner, ...]:
@@ -105,6 +106,7 @@ def default_signal_runners(
     builtin_registry = builtin_source_registry(
         github_runner_factory=GitHubSignalRunner,
         github_client_factory=github_client_factory,
+        http_json_client_factory=http_json_client_factory,
         systemd_backend_factory=systemd_backend_factory,
     )
     builtin_runners = builtin_registry.reconstruct(context, pending)

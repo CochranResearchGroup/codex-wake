@@ -939,3 +939,27 @@ Acceptance target:
   service use.
 - The canonical wheel is installed in user scope, and the installed CLI and
   credential resolver pass readback without changing the retained #141 owner.
+
+## P58 | Generic HTTP/JSON Completion Wakes
+
+State: OPEN
+
+Current State: Issue #169 and Plan 0096 now own a reusable HTTP/JSON completion
+source. The provider-free implementation and local acceptance checks pass;
+hosted CI and integration are still pending. AuraCall's existing HTTP status
+envelope is one compatibility fixture rather than a bespoke producer contract.
+The lane has no live dispatch, service, installation, provider, or release
+effect authorized.
+
+Plan: [Generic HTTP/JSON completion wakes](docs/dev/plans/0096-2026-09-27-generic-http-json-completion-wakes.md)
+
+Acceptance target:
+
+- A fixed-origin HTTP/JSON job-status resource can produce one wake when a
+  selected field reaches an allowed terminal value.
+- The source is reusable across products; AuraCall works through its existing
+  generic run-status API without a Codex-Wake-specific producer contract.
+- Polling is bounded, restart-correct, deduplicated, credential-safe, and
+  resistant to redirect, origin, response-size, and parsing failures.
+- CLI setup/readback, signal journaling, readiness, and tmux/app-server routing
+  reuse existing governed seams and retain only bounded selected metadata.

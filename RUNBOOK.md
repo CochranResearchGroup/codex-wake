@@ -4412,3 +4412,64 @@ Integrated and installed issue #166's `gh` credential backend.
 Acceptance state: Plan 0094 and P57 are closed with receipt 0090. The I166
 lane is removed. Live multi-repository qualification remains a separate
 bounded operation.
+
+## Turn 196 | 2026-09-27
+
+Started issue #169 in a fresh worktree from canonical `185f3a7`.
+
+- Opened P58 and Plan 0095 for the first-class AuraCall terminal-response wake
+  source; paired producer issue `ecochran76/auracall#93` remains outside this
+  repository's write authority.
+- Registered lane I169 with the primary agent owning the shared receipt,
+  configuration, source-family, CLI, readiness, test, and documentation seam.
+- Froze provider-free and dispatch-disabled effect boundaries. No live
+  AuraCall session, provider access, service/install change, release, or target
+  dispatch is authorized by this packet.
+- Graphiti was healthy but returned no Issue 169 or Codex Wake source-specific
+  recall. CodeGraph is not initialized in the new worktree, so current GitHub,
+  repository, and test evidence remain authoritative.
+
+Acceptance state: P58 is open at the contract-test checkpoint. Movement is
+`outcome_progress`. Next action: add red tests for atomic receipt completion,
+result verification, confinement, state filtering, and restart deduplication,
+then implement the smallest source seam that makes them pass.
+
+## Turn 197 | 2026-09-27
+
+Reframed issue #169 around a reusable standard integration rather than an
+AuraCall-only producer contract.
+
+- Current AuraCall source confirms one durable run status is already available
+  through HTTP `GET /v1/runs/{run_id}/status`, CLI, and MCP.
+- Current Codex Wake source confirms its normalized signal journal and source
+  registry can host another built-in family, but it lacks a generic HTTP/JSON
+  completion watcher.
+- Cancelled Plan 0095 before implementation and opened Plan 0096 for a bounded,
+  fixed-origin HTTP/JSON source using standard JSON Pointer selection.
+- AuraCall becomes the first compatibility fixture. Other job APIs with stable
+  JSON status resources can use the same source without custom producer code.
+
+Acceptance state: P58 remains open under goal version P58-G1-v2. Movement is
+`scope_correction`. Next action: freeze and test the generic HTTP/JSON source
+contract before implementing the transport or CLI.
+
+## Turn 198 | 2026-09-27
+
+Implemented the reusable HTTP/JSON completion source for issue #169.
+
+- Added fixed-URL source configuration, standard JSON Pointer field selection,
+  bounded terminal values/selectors, optional environment credential reference,
+  and configure/list/show/check/remove commands.
+- Added a fixed-method bounded HTTP reader, address and redirect confinement,
+  response limits, raw-body exclusion, restart-stable event identity, registry
+  construction, daemon reconciliation, and separate readiness projection.
+- Proved an ordinary AuraCall status envelope without adding AuraCall-specific
+  runtime logic. Existing tmux and app-server dispatch boundaries are reused.
+- Comprehensive validation passed: 705 Python tests, 12 plugin tests,
+  compilation, diff hygiene, active/goal planning audits, registry smoke, and
+  an isolated installed-wheel smoke. No provider read, dispatch, install,
+  service, release, or deployment effect occurred.
+
+Acceptance state: local Plan 0096 acceptance is complete. P58 remains open
+pending the issue-linked pull request, hosted Python 3.11/3.12 gates, and
+squash integration. Movement is `outcome_progress`.

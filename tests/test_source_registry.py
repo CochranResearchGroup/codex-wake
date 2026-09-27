@@ -52,7 +52,7 @@ class SourceRegistryTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(
             [item.registration_id for item in first],
-            ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci"],
+            ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci", "http-json-completion"],
         )
         self.assertEqual(
             first[0].ownership,
@@ -60,6 +60,7 @@ class SourceRegistryTests(unittest.TestCase):
              ("filesystem", "file.exists")),
         )
         self.assertTrue(all(isinstance(item, BuiltinSourceInventory) for item in first))
+        self.assertEqual(first[-1].ownership, (("http-json", "job.terminal"),))
         with self.assertRaises(FrozenInstanceError):
             first[0].registration_id = "external"
         with self.assertRaises(TypeError):

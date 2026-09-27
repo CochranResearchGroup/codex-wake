@@ -35,6 +35,18 @@ positive-only: `GITHUB_COVERAGE_UNPROVEN` is an expected warning rather than a
 terminal failure or complete-history claim. Provider-free smokes do not claim a
 live GitHub read, public listener, or live delivery.
 
+The generic `codex-wake http-json` source covers the common asynchronous-job
+pattern without product-specific integration. It watches one fixed HTTP(S)
+JSON status resource, selects state and identity with standard JSON Pointer,
+and emits the existing normalized occurrence when an allowed terminal value is
+observed. AuraCall's existing `GET /v1/runs/{run_id}/status` is one compatible
+resource; no AuraCall-only receipt, callback, or marker file is required.
+
+The source is deliberately declarative: fixed `GET`, fixed origin, exact
+selectors, bounded response and time limits, no redirects, no scripts, and no
+raw response retention. Repeated polling and daemon reconstruction converge on
+the same event identity through the existing signal journal.
+
 ### Bounded GitHub webhook listener lifecycle
 
 `codex-wake github-webhook source configure|list|show` stores an owner-only
