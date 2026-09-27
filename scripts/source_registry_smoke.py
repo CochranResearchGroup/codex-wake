@@ -39,6 +39,7 @@ EXPECTED_REGISTRATIONS = (
     "local-process-exit",
     "local-user-systemd",
     "github-ci",
+    "http-json-completion",
 )
 
 

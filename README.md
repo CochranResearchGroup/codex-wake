@@ -582,6 +582,49 @@ The poller uses positive-only evidence: `GITHUB_COVERAGE_UNPROVEN` is an
 expected coverage warning, not proof of complete history. No public listener or
 live GitHub delivery is claimed by the provider-free smoke.
 
+### Generic HTTP/JSON completion wakes
+
+Use `http-json` for services that already expose a stable JSON job-status
+resource. The service does not need a Codex Wake plugin or callback. Configure
+the fixed URL and standard JSON Pointers, then arm a normal wake:
+
+```bash
+codex-wake http-json source configure \
+  --source auracall-response \
+  --url http://127.0.0.1:8080/v1/runs/resp_123/status \
+  --state-pointer /status \
+  --event-id-pointer /id \
+  --completed-at-pointer /completedAt \
+  --selector /kind=response \
+  --terminal-value succeeded \
+  --terminal-value failed \
+  --terminal-value cancelled \
+  --enabled
+
+codex-wake http-json source check auracall-response --json
+codex-wake http-json completed --source auracall-response --require-monitor
+```
+
+The same commands work with any fixed HTTP(S) endpoint returning a JSON object.
+Selectors use RFC 6901 JSON Pointer syntax and exact string equality. The
+reader performs only `GET`, follows no redirects, caps time and response bytes,
+pins the resolved address for the connection, and stores only the selected
+event ID and terminal state. Loopback is allowed by default. Public addresses
+require `--allow-non-loopback`; private, link-local, multicast, wildcard, and
+mixed DNS answers remain blocked. URLs containing credentials, queries, or
+fragments are rejected.
+
+For bearer authentication, configure an uppercase environment-variable name
+with `--credential-ref NAME`. The value is resolved only at request time and is
+not included in configuration readback, readiness, wake records, or support
+exports. Plain HTTP credentials are allowed only for a loopback destination.
+
+Use `http-json source list|show|check|remove` for local lifecycle operations.
+`check` performs one bounded read without creating a wake. A successful HTTP
+read is source evidence only; monitor readiness, submission acknowledgement,
+and visible delivery remain separate states. Removal fails while the source has
+pending or firing wakes; cancel those wakes first.
+
 ## Development
 
 Run the focused test suite:

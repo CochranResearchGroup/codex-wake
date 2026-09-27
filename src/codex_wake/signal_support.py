@@ -14,6 +14,7 @@ from typing import Any
 
 from .monitor import health_is_recent, read_monitor_health
 from .github_source_config import GitHubSourceStore
+from .http_json_source_config import HTTPJSONSourceStore
 from .records import ACTIVE_STATUS_DIRS
 from .signal_records import decode_signal_record, signal_journal_path
 from .signal_store import JOURNAL_APPLICATION_ID, JOURNAL_SCHEMA_VERSION
@@ -200,6 +201,7 @@ def signal_readiness(
     *,
     health: dict[str, Any] | None = None,
     github_store: GitHubSourceStore | None = None,
+    http_json_store: HTTPJSONSourceStore | None = None,
     max_journal_schema: int = JOURNAL_SCHEMA_VERSION,
     max_sources: int | None = None,
     now: datetime | None = None,
@@ -256,6 +258,39 @@ def signal_readiness(
     except ValueError as exc:
         config_error = str(exc)
         configured_github.append({"status": "blocked", "source_instance": "", "configuration": {"status": "invalid", "enabled": None}, "credential_capability": {"status": "unknown"}, "health": {"status": "blocked"}, "checkpoint": {"status": "unknown", "present": False}, "replay_lag": {"status": "unknown", "seconds": None}, "terminal_failure": {"status": "blocked", "code": "CONFIG_INVALID"}, "disabled": False, "unsupported": False, "diagnostic": "GitHub source configuration is invalid"})
+    configured_http: list[dict[str, Any]] = []
+    try:
+        for source in (http_json_store or HTTPJSONSourceStore(root)).sources():
+            credential_ready = source.credential_ref is None or bool(os.environ.get(source.credential_ref))
+            status = "ready" if source.enabled and credential_ready else "warning" if not source.enabled else "blocked"
+            configured_http.append({
+                "source_instance": source.source_instance,
+                "status": status,
+                "configuration": {"status": "ready", "enabled": source.enabled},
+                "credential_capability": {
+                    "status": "not_applicable" if source.credential_ref is None else "ready" if credential_ready else "blocked",
+                    "configured": source.credential_ref is not None,
+                },
+                "health": {"status": "unobserved"},
+                "checkpoint": {"status": "warning", "present": False},
+                "replay_lag": {"status": "unknown", "seconds": None},
+                "terminal_failure": {"status": "not_present", "code": ""},
+                "disabled": not source.enabled,
+                "unsupported": False,
+                "url": source.url,
+            })
+    except ValueError:
+        config_error = "HTTP JSON source configuration is invalid"
+        configured_http.append({
+            "source_instance": "", "status": "blocked",
+            "configuration": {"status": "invalid", "enabled": None},
+            "credential_capability": {"status": "unknown"},
+            "health": {"status": "blocked"},
+            "checkpoint": {"status": "unknown", "present": False},
+            "replay_lag": {"status": "unknown", "seconds": None},
+            "terminal_failure": {"status": "blocked", "code": "CONFIG_INVALID"},
+            "disabled": False, "unsupported": False,
+        })
     if not journal_path.is_file():
         source_entries = [
             {"source": "github", "source_instance": item.get("source_instance", ""),
@@ -266,7 +301,16 @@ def signal_readiness(
              "support": item}
             for item in configured_github
         ]
-        source_statuses = {str(item.get("status")) for item in configured_github}
+        source_entries.extend(
+            {"source": "http-json", "source_instance": item.get("source_instance", ""),
+             "status": item.get("status", "blocked"),
+             "message": "configured HTTP JSON source has no signal journal or active arm",
+             "active_arms": 0, "checkpoint_present": False, "checkpoint_order": None,
+             "observed_through": "", "latest_reconcile": {}, "health_scope": "none",
+             "support": item}
+            for item in configured_http
+        )
+        source_statuses = {str(item.get("status")) for item in (*configured_github, *configured_http)}
         aggregate_status = "blocked" if config_error or "blocked" in source_statuses else "warning" if "warning" in source_statuses else "ready"
         return {
             "status": aggregate_status,
@@ -275,7 +319,7 @@ def signal_readiness(
                 "not_needed",
                 (
                     "no signal journal exists; configured sources have no active arm"
-                    if configured_github
+                    if configured_github or configured_http
                     else "no signal journal exists because no signal source is configured"
                 ),
                 exists=False,
@@ -494,6 +538,33 @@ def signal_readiness(
     for item in configured_github:
         if item.get("source_instance") not in seen_instances:
             sources.append({"source": "github", "source_instance": item.get("source_instance", ""), "status": item.get("status", "blocked"), "message": "configured GitHub source has no active signal arm", "active_arms": 0, "checkpoint_present": False, "checkpoint_order": None, "observed_through": "", "latest_reconcile": {}, "health_scope": "none", "support": item})
+    configured_http_by_instance = {
+        item.get("source_instance"): item for item in configured_http if item.get("source_instance")
+    }
+    seen_http = set()
+    for item in sources:
+        if item.get("source") != "http-json":
+            continue
+        instance = item.get("source_instance")
+        seen_http.add(instance)
+        configured_item = configured_http_by_instance.get(instance)
+        if configured_item is not None:
+            item["support"] = dict(configured_item)
+            item["support"]["health"] = {"status": item.get("status", "warning")}
+            item["support"]["checkpoint"] = {
+                "status": "ready" if item.get("checkpoint_present") else "warning",
+                "present": bool(item.get("checkpoint_present")),
+            }
+    for item in configured_http:
+        if item.get("source_instance") not in seen_http:
+            sources.append({
+                "source": "http-json", "source_instance": item.get("source_instance", ""),
+                "status": item.get("status", "blocked"),
+                "message": "configured HTTP JSON source has no active signal arm",
+                "active_arms": 0, "checkpoint_present": False, "checkpoint_order": None,
+                "observed_through": "", "latest_reconcile": {}, "health_scope": "none",
+                "support": item,
+            })
     support_statuses = {str(item.get("support", {}).get("status")) for item in sources}
     if config_error or support_statuses & {"blocked", "unavailable", "invalidated", "unsupported"}:
         overall = "blocked"

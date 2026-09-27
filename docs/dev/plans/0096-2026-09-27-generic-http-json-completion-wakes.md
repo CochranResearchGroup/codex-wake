@@ -9,13 +9,18 @@ Integration: `squash`
 
 ## Current state
 
-Codex Wake can react to time, files, local process exit, user-systemd state,
-and GitHub-specific events. It cannot watch a normal HTTP job-status resource
-and wake when that resource reaches a selected terminal state. AuraCall already
-publishes durable run state through `GET /v1/runs/{run_id}/status`, its CLI,
-and MCP. A reusable HTTP/JSON completion source can therefore support AuraCall
-without adding a Codex-Wake-specific producer contract and can support other
-systems with the same common pattern.
+The reusable HTTP/JSON completion source is implemented. Operators can save a
+bounded fixed URL and JSON Pointer contract, inspect or check it, arm a normal
+wake, and remove it after dependent wakes are cancelled. The built-in source
+family reads terminal state through the shared journal and dispatch path, with
+restart-stable deduplication and separate readiness reporting. AuraCall's
+existing status envelope is covered as an ordinary compatibility fixture; no
+AuraCall-specific runtime code was added.
+
+Local acceptance is complete: 705 comprehensive Python tests and 12 OpenClaw
+plugin tests pass; compilation, diff hygiene, active/goal planning audits,
+source-registry smoke, and an isolated installed-wheel smoke also pass. Hosted
+CI and integration remain pending.
 
 Plan 0095 is cancelled before implementation because its private receipt-
 directory contract was unnecessarily product-specific.
@@ -141,7 +146,5 @@ checkpoint_fields: state_transition, acceptance_state, progress_classification, 
 
 ## Next action
 
-Write provider-free contract tests for fixed-origin HTTP reads, bounded JSON
-Pointer extraction, terminal-state matching, immutable occurrence identity,
-and restart deduplication. Include AuraCall's existing run-status envelope as
-one compatibility fixture.
+Publish the implementation, open the issue-linked pull request, and require the
+hosted Python 3.11 and 3.12 release gates before squash integration.

@@ -940,16 +940,16 @@ Acceptance target:
 - The canonical wheel is installed in user scope, and the installed CLI and
   credential resolver pass readback without changing the retained #141 owner.
 
-## P58 | AuraCall Terminal-Response Wake Source
+## P58 | Generic HTTP/JSON Completion Wakes
 
 State: OPEN
 
 Current State: Issue #169 and Plan 0096 now own a reusable HTTP/JSON completion
-source. AuraCall already exposes durable generic run status through HTTP, CLI,
-and MCP, so it will be the first compatibility case rather than a bespoke
-producer. Plan 0095 was cancelled before implementation. The lane has no live
-AuraCall, dispatch, service, installation, provider, or release effect
-authorized.
+source. The provider-free implementation and local acceptance checks pass;
+hosted CI and integration are still pending. AuraCall's existing HTTP status
+envelope is one compatibility fixture rather than a bespoke producer contract.
+The lane has no live dispatch, service, installation, provider, or release
+effect authorized.
 
 Plan: [Generic HTTP/JSON completion wakes](docs/dev/plans/0096-2026-09-27-generic-http-json-completion-wakes.md)
 

@@ -173,6 +173,7 @@ def builtin_source_registry(
     *,
     github_runner_factory: Callable[..., SignalSourceRunner] | None = None,
     github_client_factory: Callable[..., object] | None = None,
+    http_json_client_factory: Callable[..., object] | None = None,
     systemd_backend_factory: Callable[[object], object] | None = None,
 ) -> BuiltinSourceRegistry:
     """Construct the one fixed production built-in source catalogue.
@@ -184,6 +185,7 @@ def builtin_source_registry(
     """
 
     from .github_source_family import github_source_family_registration
+    from .http_json_source_family import http_json_source_family_registration
     from .local_source_families import local_source_registrations
 
     return BuiltinSourceRegistry((
@@ -196,4 +198,5 @@ def builtin_source_registry(
             ),
             client_factory=github_client_factory,
         ),
+        http_json_source_family_registration(client_factory=http_json_client_factory),
     ))

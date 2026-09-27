@@ -4452,3 +4452,24 @@ AuraCall-only producer contract.
 Acceptance state: P58 remains open under goal version P58-G1-v2. Movement is
 `scope_correction`. Next action: freeze and test the generic HTTP/JSON source
 contract before implementing the transport or CLI.
+
+## Turn 198 | 2026-09-27
+
+Implemented the reusable HTTP/JSON completion source for issue #169.
+
+- Added fixed-URL source configuration, standard JSON Pointer field selection,
+  bounded terminal values/selectors, optional environment credential reference,
+  and configure/list/show/check/remove commands.
+- Added a fixed-method bounded HTTP reader, address and redirect confinement,
+  response limits, raw-body exclusion, restart-stable event identity, registry
+  construction, daemon reconciliation, and separate readiness projection.
+- Proved an ordinary AuraCall status envelope without adding AuraCall-specific
+  runtime logic. Existing tmux and app-server dispatch boundaries are reused.
+- Comprehensive validation passed: 705 Python tests, 12 plugin tests,
+  compilation, diff hygiene, active/goal planning audits, registry smoke, and
+  an isolated installed-wheel smoke. No provider read, dispatch, install,
+  service, release, or deployment effect occurred.
+
+Acceptance state: local Plan 0096 acceptance is complete. P58 remains open
+pending the issue-linked pull request, hosted Python 3.11/3.12 gates, and
+squash integration. Movement is `outcome_progress`.

@@ -111,6 +111,12 @@ tests. This is deliberately not an extension or plugin API: external
 registration, package discovery, dynamic imports, hot reload, and arbitrary
 provider authority are unsupported.
 
+The `http-json-completion` family is a built-in generic transport, not a
+product plugin. Its configuration may expose a fixed safe URL, JSON Pointer
+selectors, terminal values, and whether a credential reference is configured.
+Support output must not contain the credential reference name, credential
+value, raw HTTP body, unselected response fields, or authorization headers.
+
 The export destination must resolve outside the wake root. Export configuration
 is capped at 100 wakes and 1 MiB of output. Collection enumerates at most 2,048
 directory entries, retains at most 512 selected record paths, reads at most 64 KiB from each record,

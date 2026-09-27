@@ -177,7 +177,7 @@ class SignalSupportTests(unittest.TestCase):
             inventory = readiness["builtin_inventory"]
             self.assertEqual(
                 [item["registration_id"] for item in inventory],
-                ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci"],
+                ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci", "http-json-completion"],
             )
             self.assertEqual(
                 inventory[0]["ownership"],

@@ -350,6 +350,54 @@ def build_parser() -> argparse.ArgumentParser:
     add_target_options(github_completed)
     add_monitor_gate_options(github_completed)
 
+    http_json = subparsers.add_parser(
+        "http-json", help="configure and arm generic HTTP/JSON completion wakes"
+    )
+    http_json_subparsers = http_json.add_subparsers(dest="http_json_command", required=True)
+    http_json_source = http_json_subparsers.add_parser(
+        "source", help="manage bounded HTTP/JSON status sources"
+    )
+    http_json_source_subparsers = http_json_source.add_subparsers(
+        dest="http_json_source_command", required=True
+    )
+    http_json_configure = http_json_source_subparsers.add_parser("configure")
+    http_json_configure.add_argument("--source", required=True, dest="source_instance")
+    http_json_configure.add_argument("--url", required=True)
+    http_json_configure.add_argument("--state-pointer", required=True)
+    http_json_configure.add_argument("--event-id-pointer", default=None)
+    http_json_configure.add_argument("--completed-at-pointer", default=None)
+    http_json_configure.add_argument("--terminal-value", required=True, action="append", dest="terminal_values")
+    http_json_configure.add_argument(
+        "--selector", action="append", default=[],
+        help="bounded JSON Pointer equality selector in POINTER=VALUE form",
+    )
+    http_json_configure.add_argument("--credential-ref", default=None)
+    http_json_configure.add_argument("--allow-non-loopback", action="store_true")
+    http_json_configure.add_argument("--request-timeout", type=int, default=10, dest="request_timeout_seconds")
+    http_json_configure.add_argument("--max-response-bytes", type=int, default=1_048_576)
+    http_json_enabled = http_json_configure.add_mutually_exclusive_group(required=True)
+    http_json_enabled.add_argument("--enabled", "--enable", action="store_true", dest="enabled")
+    http_json_enabled.add_argument("--disabled", "--disable", action="store_false", dest="enabled")
+    http_json_list = http_json_source_subparsers.add_parser("list")
+    http_json_list.add_argument("--json", action="store_true", dest="as_json")
+    http_json_show = http_json_source_subparsers.add_parser("show")
+    http_json_show.add_argument("source_instance")
+    http_json_show.add_argument("--json", action="store_true", dest="as_json")
+    http_json_check = http_json_source_subparsers.add_parser("check")
+    http_json_check.add_argument("source_instance")
+    http_json_check.add_argument("--json", action="store_true", dest="as_json")
+    http_json_remove = http_json_source_subparsers.add_parser("remove")
+    http_json_remove.add_argument("source_instance")
+    http_json_completed = http_json_subparsers.add_parser(
+        "completed", help="wake when one configured HTTP/JSON job reaches a terminal value"
+    )
+    http_json_completed.add_argument("--source", required=True, dest="source_instance")
+    http_json_completed.add_argument("--idempotency-key")
+    http_json_completed.add_argument("--max-attempts", type=bounded_attempt_count, default=3)
+    http_json_completed.add_argument("prompt", nargs=argparse.REMAINDER)
+    add_target_options(http_json_completed)
+    add_monitor_gate_options(http_json_completed)
+
     github_webhook = subparsers.add_parser(
         "github-webhook", help="configure and operate one bounded local GitHub webhook listener"
     )
@@ -1320,6 +1368,162 @@ def _github_source_summary(source) -> dict[str, object]:
         "enabled": source.enabled,
         "hostname": source.hostname,
         "evidence_mode": source.evidence_mode,
+    }
+
+
+def http_json_command(args: argparse.Namespace, root: Path) -> int:
+    from .event_wake import EventWake
+    from .http_json_signals import HTTPJSONClient, HTTPJSONSignalAdapter
+    from .http_json_source_config import HTTPJSONSourceConfig, HTTPJSONSourceStore
+    from .signal_records import WakeRecordPublisher, signal_journal_path
+    from .signal_store import SQLiteSignalModule
+    from .signals import Degraded, Invalid, Resume, WakeIntent
+
+    store = HTTPJSONSourceStore(root)
+    if args.http_json_command == "completed":
+        try:
+            source = store.select(args.source_instance)
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        adapter = HTTPJSONSignalAdapter(source, HTTPJSONClient(source))
+        prompt = (
+            normalize_prompt(args.prompt)
+            if args.prompt
+            else (
+                f"HTTP JSON source {source.source_instance} reached a configured terminal state. "
+                f"Verify the authoritative status at {source.url} before acting."
+            )
+        )
+        if getattr(args, "require_monitor", False):
+            require_monitor_ready(monitor_readiness(wake_root=root, repo_root=Path.cwd()))
+        now = utc_now()
+        runtime = SQLiteSignalModule(
+            signal_journal_path(root),
+            record_publisher=WakeRecordPublisher.for_managed_reader(root),
+        )
+        result = EventWake(
+            runtime,
+            adapters=(adapter,),
+            clock=lambda: now,
+            id_factory=lambda: f"wake_{uuid.uuid4().hex}",
+        ).register(
+            WakeIntent(
+                adapter.request(),
+                Resume(prompt, Path.cwd(), target_for_args(args)),
+                max_attempts=args.max_attempts,
+            ),
+            idempotency_key=args.idempotency_key or f"http-json:{uuid.uuid4().hex}",
+        )
+        if isinstance(result, Degraded):
+            raise WakeError(f"HTTP JSON signal registration unavailable: {result.code}")
+        if isinstance(result, Invalid):
+            raise WakeError("HTTP JSON signal registration is invalid")
+        path = root / "pending" / f"{result.wake_id}.json"
+        print(f"{result.wake_id} {path}")
+        return 0
+
+    if args.http_json_command != "source":
+        raise WakeError("unsupported http-json command")
+    command = args.http_json_source_command
+    if command in {"list", "show"}:
+        try:
+            sources = store.sources()
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        if command == "show":
+            sources = tuple(item for item in sources if item.source_instance == args.source_instance)
+            if not sources:
+                raise WakeError("HTTP JSON source is not configured")
+        summaries = [_http_json_source_summary(item) for item in sources]
+        if args.as_json:
+            print(json.dumps(summaries[0] if command == "show" else {"sources": summaries}, sort_keys=True))
+        else:
+            for item in summaries:
+                print(f"source={item['source_instance']} enabled={str(item['enabled']).lower()} url={item['url']}")
+        return 0
+    if command == "remove":
+        active = [
+            item for item in iter_records(root)
+            if item.record.get("status") in {"pending", "firing"}
+            and isinstance(item.record.get("predicate"), dict)
+            and item.record["predicate"].get("source") == "http-json"
+            and item.record["predicate"].get("source_instance") == args.source_instance
+        ]
+        if active:
+            raise WakeError("HTTP JSON source has active wakes; cancel them before removal")
+        try:
+            removed = store.remove(args.source_instance)
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        if not removed:
+            raise WakeError("HTTP JSON source is not configured")
+        print(f"removed={args.source_instance}")
+        return 0
+    if command == "check":
+        try:
+            source = store.select(args.source_instance)
+            event = HTTPJSONSignalAdapter(source, HTTPJSONClient(source)).observe(utc_now())
+        except ValueError as exc:
+            raise WakeError(str(exc)) from None
+        payload = {
+            "source_instance": source.source_instance,
+            "reachable": True,
+            "terminal": event is not None,
+            "state": event.state if event else None,
+            "event_id": event.event_id if event else None,
+        }
+        if args.as_json:
+            print(json.dumps(payload, sort_keys=True))
+        else:
+            for key, value in payload.items():
+                print(f"{key}={value if value is not None else 'none'}")
+        return 0
+    if command != "configure":
+        raise WakeError("unsupported http-json source command")
+    selectors = []
+    for raw in args.selector:
+        if "=" not in raw:
+            raise WakeError("selector must use POINTER=VALUE")
+        pointer, value = raw.split("=", 1)
+        selectors.append((pointer, value))
+    try:
+        source = HTTPJSONSourceConfig(
+            source_instance=args.source_instance,
+            url=args.url,
+            state_pointer=args.state_pointer,
+            event_id_pointer=args.event_id_pointer,
+            terminal_values=frozenset(args.terminal_values),
+            selectors=tuple(selectors),
+            completed_at_pointer=args.completed_at_pointer,
+            credential_ref=args.credential_ref,
+            allow_non_loopback=args.allow_non_loopback,
+            enabled=args.enabled,
+            request_timeout_seconds=args.request_timeout_seconds,
+            max_response_bytes=args.max_response_bytes,
+        )
+        store.configure(source)
+    except ValueError as exc:
+        raise WakeError(str(exc)) from None
+    print(f"source={source.source_instance}")
+    print(f"enabled={str(source.enabled).lower()}")
+    print(f"config={store.path}")
+    return 0
+
+
+def _http_json_source_summary(source) -> dict[str, object]:
+    return {
+        "source_instance": source.source_instance,
+        "url": source.url,
+        "state_pointer": source.state_pointer,
+        "event_id_pointer": source.event_id_pointer,
+        "terminal_values": sorted(source.terminal_values),
+        "selectors": [[pointer, value] for pointer, value in source.selectors],
+        "completed_at_pointer": source.completed_at_pointer,
+        "credential_configured": source.credential_ref is not None,
+        "allow_non_loopback": source.allow_non_loopback,
+        "enabled": source.enabled,
+        "request_timeout_seconds": source.request_timeout_seconds,
+        "max_response_bytes": source.max_response_bytes,
     }
 
 
@@ -2502,6 +2706,8 @@ def run(argv: list[str] | None = None) -> int:
         return systemd_unit_command(args, root)
     if args.command == "github-ci":
         return github_ci_command(args, root)
+    if args.command == "http-json":
+        return http_json_command(args, root)
     if args.command == "github-webhook":
         return github_webhook_command(args, root)
     if args.command == "pid":
