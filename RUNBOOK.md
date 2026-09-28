@@ -4535,3 +4535,28 @@ Closed the session-aware tmux routing implementation.
 
 Acceptance state: Plan 0097 and P59 are closed. The session-aware routing fix
 is present on canonical main. Movement is `outcome_progress`.
+
+## Turn 202 | 2026-09-27
+
+Opened the v0.6.0 release and installed-deployment lane.
+
+- Issue #175, P60,
+  `docs/dev/plans/0098-2026-09-27-v060-release-and-deployment.md`, and lane
+  I175 bind the exact release objective to branch
+  `chore/issue-175-v060-release` from canonical `e90b587`.
+- Public and user-installed package metadata remain `0.5.2`; release
+  preparation updates Python and OpenClaw plugin identities to `0.6.0`.
+- Preflight found the user supervisor active/enabled with four ready enrolled
+  roots. The legacy repo-scoped service remains inactive/disabled and covered
+  by the supervisor.
+- Release scope includes public tag publication, user install, skill/plugin
+  synchronization, and an already-active supervisor restart. Live dispatch,
+  provider mutation, OpenClaw Gateway start, and unrelated services remain
+  excluded.
+- Local release gates pass: 713 Python tests, 12 plugin tests, compilation,
+  package build, installed-wheel source-registry/product smokes, diff hygiene,
+  and active/goal planning audits.
+
+Acceptance state: local release preparation is accepted; hosted gates and
+canonical integration remain. Movement is `outcome_progress`. Next action:
+publish and merge the release-preparation PR before creating the public tag.

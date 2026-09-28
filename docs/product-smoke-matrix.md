@@ -53,7 +53,7 @@ To validate a public GitHub tag without mutating the user-scoped `uv tool`
 install, install the tag into a temporary virtual environment:
 
 ```bash
-python scripts/product_smoke.py --public-tag v0.5.2 --json
+python scripts/product_smoke.py --public-tag v0.6.0 --json
 ```
 
 This covers package installability from GitHub, CLI version reporting, schema
@@ -63,7 +63,7 @@ smoke explicitly arms its fixture wake, and no provider or dispatch is used.
 The release closeout should still include the final user-scoped install command:
 
 ```bash
-uv tool install --force --reinstall git+https://github.com/CochranResearchGroup/codex-wake.git@v0.5.2
+uv tool install --force --reinstall git+https://github.com/CochranResearchGroup/codex-wake.git@v0.6.0
 ```
 
 ## Live Codex App-Server Smoke
