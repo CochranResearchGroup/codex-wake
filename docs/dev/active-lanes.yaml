@@ -9,9 +9,9 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: IN_PROGRESS
-    checkpoint: e90b587ecb12049500f52d7f4bfe74cd0288ae6f
+    checkpoint: 3169057ce5d866ba32e6caf4a523178cd5f31b77
     validation_status: local_release_gates_passed
-    validation_ref: e90b587ecb12049500f52d7f4bfe74cd0288ae6f
+    validation_ref: 3169057ce5d866ba32e6caf4a523178cd5f31b77
     remote_ref: ""
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#175]
