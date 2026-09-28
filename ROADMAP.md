@@ -794,7 +794,7 @@ root remains.
 
 ## P54 | Managed GitHub Webhook Wakes
 
-State: OPEN
+State: CLOSED
 
 Current State: Issue #135 and Plan 0083 own the managed-production successor to
 P53. The accepted P53 route, listener, journal join, authoritative GitHub
@@ -968,14 +968,16 @@ Acceptance target:
 
 State: OPEN
 
-Current State: Issue #172 is implemented and locally accepted on
-`fix/issue-172-session-aware-tmux`. Session-aware creation resolves the exact
+Current State: Issue #172 and Plan 0097 are complete. PR #173 passed hosted
+Python 3.11 and 3.12 gates and squash-merged as canonical `f18ca5e`; canonical
+main run `36364547676` passed both gates. Session-aware creation resolves the exact
 Codex thread to its current tmux pane and stores the TUI client PID plus process
 start-time ticks. Dispatch validates that process identity, finds a unique
 relocated pane within the captured session, or falls back to the same exact
 app-server thread; ambiguous and unavailable targets fail closed. All 713
 Python tests, compilation, diff hygiene, and active/goal planning audits pass.
-Hosted CI and canonical integration remain.
+Issue #172 is closed. No live dispatch, installation, service change, release,
+or deployment occurred.
 
 Plan: [Session-aware tmux wake routing](docs/dev/plans/0097-2026-09-27-session-aware-tmux-routing.md)
 

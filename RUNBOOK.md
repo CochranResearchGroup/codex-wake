@@ -4519,3 +4519,19 @@ Implemented session-aware tmux routing for issue #172.
 Acceptance state: local Plan 0097 acceptance is complete. P59 remains open
 pending the issue-linked pull request, hosted Python 3.11/3.12 gates, and
 squash integration. Movement is `outcome_progress`.
+
+## Turn 201 | 2026-09-27
+
+Closed the session-aware tmux routing implementation.
+
+- PR #173 passed required hosted Python 3.11 and 3.12 release gates and
+  squash-merged as canonical `f18ca5ef4cac4c32df3ef744b20d1c67ec851356`.
+- Canonical main run `36364547676` passed both release gates, including unit,
+  plugin, package-build, and installed-wheel smoke steps.
+- GitHub issue #172 closed from verified integration. The I172 active lane is
+  removed and Plan 0097/P59 are closed.
+- No live wake dispatch, installation, service change, release, or deployment
+  occurred. Installed rollout and live qualification remain separate scope.
+
+Acceptance state: Plan 0097 and P59 are closed. The session-aware routing fix
+is present on canonical main. Movement is `outcome_progress`.

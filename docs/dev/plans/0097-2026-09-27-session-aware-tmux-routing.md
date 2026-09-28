@@ -1,6 +1,6 @@
 # Session-aware tmux wake routing
 
-State: OPEN
+State: CLOSED
 Lane: I172
 Issue: #172
 Branch: `fix/issue-172-session-aware-tmux`
@@ -15,14 +15,15 @@ Codex thread that created the wake. Codex exposes the durable thread ID at
 creation and the app-server can read that exact thread's current identity
 metadata, while tmux exposes the panes within the captured session.
 
-The implementation and provider-free local acceptance are complete. Creation
+The implementation and provider-free acceptance are complete. Creation
 resolves inherited tmux location hints to the exact thread's unique pane and
 stores the Codex client PID plus process start-time ticks. Dispatch validates
 that process identity and exact-thread metadata before paste, finds a unique
 relocation, or uses exact-thread app-server fallback. Focused tests pass
 117/117 and the comprehensive suite passes 713/713; compilation, diff hygiene,
-and active/goal planning audits pass. Hosted CI and canonical integration
-remain.
+and active/goal planning audits pass. PR #173 passed hosted Python 3.11 and
+3.12 gates and squash-merged as canonical `f18ca5e`; canonical main run
+`36364547676` passed both gates and issue #172 is closed.
 
 ## Objective
 
@@ -109,5 +110,5 @@ checkpoint_fields: state_transition, acceptance_state, progress_classification, 
 
 ## Next action
 
-Open the issue-linked pull request, require hosted Python 3.11 and 3.12 gates,
-then squash-integrate and reconcile the issue, plan, roadmap, and lane state.
+No further action is required for Plan 0097. Release, installation, or live
+dispatch qualification remains separate scope.
