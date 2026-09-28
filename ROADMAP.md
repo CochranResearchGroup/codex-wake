@@ -966,7 +966,7 @@ Acceptance target:
 
 ## P59 | Session-Aware Tmux Wake Routing
 
-State: OPEN
+State: CLOSED
 
 Current State: Issue #172 and Plan 0097 are complete. PR #173 passed hosted
 Python 3.11 and 3.12 gates and squash-merged as canonical `f18ca5e`; canonical
@@ -991,3 +991,26 @@ Acceptance target:
 - Routing, acknowledgement, and visibility remain separate evidence axes.
 - Provider-free focused and comprehensive tests, compilation, planning, and
   hosted checks pass before canonical integration.
+
+## P60 | v0.6.0 Release And Deployment
+
+State: OPEN
+
+Current State: Issue #175 and Plan 0098 own one bounded release and installed
+deployment from canonical `e90b587`. Public and installed metadata remain
+`0.5.2`; the active/enabled supervisor owns four ready roots while the legacy
+repo service remains inactive/disabled. No release or installation mutation
+has occurred yet.
+
+Plan: [v0.6.0 release and deployment](docs/dev/plans/0098-2026-09-27-v060-release-and-deployment.md)
+
+Acceptance target:
+
+- Publish `v0.6.0` from an exact pull-request-integrated canonical commit after
+  local and hosted release gates pass.
+- Prove public-tag installation and refresh the user-scoped installed product,
+  skills, and plugin source to exact release identity.
+- Restart only the already-active user supervisor, keep the repo service
+  inactive/disabled, and retain all four existing roots as ready.
+- Record a durable deployment receipt with no live wake dispatch, provider
+  mutation, OpenClaw Gateway start, or unrelated service change.
