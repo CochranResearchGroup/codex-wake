@@ -36,6 +36,10 @@ codex-wake schema --json
   operator-visibility evidence. `visible_prompt_observed` means the wake marker
   newly appeared in captured pane scrollback after ack; `ack_observed_visibility_unproven`
   means ack was observed but visible-pane evidence was not proven.
+- Session-aware records include `route_selection`, which identifies whether
+  delivery selected the original pane, a uniquely relocated pane, exact-thread
+  app-server fallback, an ambiguous match, or no valid target. This routing
+  evidence does not imply tmux visibility or app-server acknowledgement.
 - `logs/` and `locks/` are operational artifacts and should not be treated as durable source of truth.
 
 ## Safety Rules

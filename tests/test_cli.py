@@ -33,10 +33,13 @@ class CliTests(unittest.TestCase):
             **os.environ,
             "TMUX_PANE": "%11",
             "TMUX": "/tmp/tmux-1000/default,123,0",
+            "CODEX_THREAD_ID": "thread_cli",
         }
         stdout = io.StringIO()
         stderr = io.StringIO()
-        with patch.dict(os.environ, env, clear=False):
+        with patch.dict(os.environ, env, clear=False), patch(
+            "codex_wake.records.resolve_tmux_thread_pane", return_value=("%11", 1234, 5678)
+        ):
             with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                 code = cli.main(["--wake-root", str(root), *argv])
         return code, stdout.getvalue(), stderr.getvalue()
@@ -313,6 +316,9 @@ class CliTests(unittest.TestCase):
             data = json.loads(record_path.read_text())
             self.assertEqual(data["predicate"]["type"], "not_before")
             self.assertEqual(data["target"]["pane"], "%11")
+            self.assertEqual(data["target"]["thread_id"], "thread_cli")
+            self.assertEqual(data["target"]["client_pid"], 1234)
+            self.assertEqual(data["target"]["client_start_time_ticks"], 5678)
             self.assertEqual(data["prompt"], "Continue later")
             self.assertEqual(data["status"], "pending")
 

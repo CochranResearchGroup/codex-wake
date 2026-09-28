@@ -90,9 +90,24 @@ Tmux target:
 {
   "transport": "tmux",
   "tmux_socket": "/tmp/tmux-1000/default",
-  "pane": "%11"
+  "pane": "%11",
+  "thread_id": "thread_abc",
+  "client_pid": 12345,
+  "client_start_time_ticks": 987654
 }
 ```
+
+`thread_id` is the durable Codex delivery identity. Creation resolves that
+exact thread to one pane and stores the Codex TUI client PID plus Linux process
+start-time ticks. The stored pane is then only a location hint. Dispatch reads
+the exact thread's current name and cwd through app-server, searches the
+captured tmux session, and pastes only when one pane has the same thread
+metadata and the same live client-process identity. This prevents a reused
+pane with the same title and cwd from inheriting delivery authority. The
+original pane and a relocated pane are handled identically after selection.
+Zero matches selects app-server fallback for the same `thread_id`; multiple
+matches fail closed. Records created by older releases without `thread_id`
+also fail closed because their pane location cannot prove delivery identity.
 
 App-server target:
 
@@ -211,6 +226,10 @@ Current optional fields include:
   when returned; for OpenClaw Gateway dispatch, sanitized Gateway metadata
   such as `run_id`, `status`, `summary`, `session_id`, provider/model, payload
   counts, and text summaries. It must not store raw assistant transcript text.
+- `route_selection`: sanitized delivery-routing evidence. Its `outcome` is
+  `original_pane`, `relocated_pane`, `app_server_fallback`,
+  `ambiguous_match`, or `no_target`; it may include pane IDs and bounded error
+  text but never raw pane or transcript content.
 - `visibility_result`: sanitized tmux operator-visibility evidence when checked.
 - app-server target `codex_cmd`: optional command path for launching local
   stdio app-server dispatch.

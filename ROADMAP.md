@@ -963,3 +963,29 @@ Acceptance target:
   resistant to redirect, origin, response-size, and parsing failures.
 - CLI setup/readback, signal journaling, readiness, and tmux/app-server routing
   reuse existing governed seams and retain only bounded selected metadata.
+
+## P59 | Session-Aware Tmux Wake Routing
+
+State: OPEN
+
+Current State: Issue #172 is implemented and locally accepted on
+`fix/issue-172-session-aware-tmux`. Session-aware creation resolves the exact
+Codex thread to its current tmux pane and stores the TUI client PID plus process
+start-time ticks. Dispatch validates that process identity, finds a unique
+relocated pane within the captured session, or falls back to the same exact
+app-server thread; ambiguous and unavailable targets fail closed. All 713
+Python tests, compilation, diff hygiene, and active/goal planning audits pass.
+Hosted CI and canonical integration remain.
+
+Plan: [Session-aware tmux wake routing](docs/dev/plans/0097-2026-09-27-session-aware-tmux-routing.md)
+
+Acceptance target:
+
+- Tmux wake creation records durable thread and TUI client-process identity.
+- A stale or reused pane never inherits delivery authority; one uniquely moved
+  client is found within the captured tmux session.
+- Zero pane matches uses exact-thread app-server fallback with existing writer
+  and retry safety; ambiguity and unavailable fallback fail closed.
+- Routing, acknowledgement, and visibility remain separate evidence axes.
+- Provider-free focused and comprehensive tests, compilation, planning, and
+  hosted checks pass before canonical integration.

@@ -17,8 +17,10 @@ from .records import (
     WakeLifecycleLock,
     append_event,
     format_utc,
+    find_record,
     replace_record,
     utc_now,
+    codex_client_identity_for_tty,
 )
 
 
@@ -31,11 +33,23 @@ class DispatchResult:
     message: str
 
 
+@dataclass(frozen=True)
+class TmuxPane:
+    pane: str
+    title: str
+    cwd: str
+    client_pid: int
+    client_start_time_ticks: int
+
+
 class TmuxRunner(Protocol):
     def capture_pane(self, socket: str, pane: str) -> str:
         ...
 
     def paste_prompt(self, socket: str, pane: str, wake_id: str, prompt: str) -> None:
+        ...
+
+    def list_session_panes(self, socket: str, pane: str) -> list[TmuxPane]:
         ...
 
 
@@ -85,6 +99,60 @@ class SubprocessTmuxRunner:
             )
         finally:
             Path(prompt_path).unlink(missing_ok=True)
+
+    def list_session_panes(self, socket: str, pane: str) -> list[TmuxPane]:
+        session = subprocess.run(
+            ["tmux", "-S", socket, "display-message", "-p", "-t", pane, "#{session_id}"],
+            check=True,
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        if not session:
+            raise WakeError("tmux did not return a session id for the captured pane")
+        result = subprocess.run(
+            [
+                "tmux", "-S", socket, "list-panes", "-s", "-t", session,
+                "-F", "#{pane_id}\t#{pane_title}\t#{pane_current_path}\t#{pane_tty}",
+            ],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+        panes: list[TmuxPane] = []
+        for line in result.stdout.splitlines():
+            fields = line.split("\t", 3)
+            if len(fields) != 4 or not all(fields):
+                continue
+            try:
+                client_pid, start_ticks = codex_client_identity_for_tty(fields[3])
+            except WakeError:
+                continue
+            panes.append(TmuxPane(fields[0], fields[1], fields[2], client_pid, start_ticks))
+        return panes
+
+
+def canonical_pane_title(title: str) -> str:
+    normalized = title.strip()
+    if normalized and 0x2800 <= ord(normalized[0]) <= 0x28FF:
+        normalized = normalized[1:].lstrip()
+    return normalized.split(" | ", 1)[0].strip()
+
+
+def matching_thread_panes(
+    panes: list[TmuxPane],
+    identity: dict[str, str],
+    *,
+    client_pid: int,
+    client_start_time_ticks: int,
+) -> list[TmuxPane]:
+    return [
+        pane
+        for pane in panes
+        if pane.client_pid == client_pid
+        and pane.client_start_time_ticks == client_start_time_ticks
+        and pane.cwd == identity["cwd"]
+        and canonical_pane_title(pane.title) == identity["name"]
+    ]
 
 
 def canonical_prompt(wake_id: str, wake_root: Path) -> str:
@@ -245,6 +313,8 @@ def dispatch_firing_record(
     ack_timeout_override: float | None = None,
     app_server_codex_cmd: str | None = None,
     signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
+    thread_identity_resolver: Callable[[str], dict[str, str]] | None = None,
+    app_server_client: Any | None = None,
 ) -> DispatchResult:
     record = found.record
     wake_id = record.get("id")
@@ -257,6 +327,8 @@ def dispatch_firing_record(
             ack_timeout_override=ack_timeout_override,
             app_server_codex_cmd=app_server_codex_cmd,
             signal_authorizer=signal_authorizer,
+            thread_identity_resolver=thread_identity_resolver,
+            app_server_client=app_server_client,
         )
     with WakeLifecycleLock(root, wake_id):
         try:
@@ -274,6 +346,8 @@ def dispatch_firing_record(
             ack_timeout_override=ack_timeout_override,
             app_server_codex_cmd=app_server_codex_cmd,
             signal_authorizer=signal_authorizer,
+            thread_identity_resolver=thread_identity_resolver,
+            app_server_client=app_server_client,
         )
 
 
@@ -286,6 +360,8 @@ def _dispatch_firing_record_unlocked(
     ack_timeout_override: float | None = None,
     app_server_codex_cmd: str | None = None,
     signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
+    thread_identity_resolver: Callable[[str], dict[str, str]] | None = None,
+    app_server_client: Any | None = None,
 ) -> DispatchResult:
     current = now or utc_now()
     record = dict(found.record)
@@ -319,6 +395,7 @@ def _dispatch_firing_record_unlocked(
         result = dispatch_app_server_record(
             root,
             found,
+            client=app_server_client,
             default_codex_cmd=app_server_codex_cmd,
             now=current,
         )
@@ -337,6 +414,123 @@ def _dispatch_firing_record_unlocked(
         replace_record(root, found, record)
         return DispatchResult("failed", str(exc))
     tmux = runner or SubprocessTmuxRunner()
+
+    thread_id = target.get("thread_id") if isinstance(target, dict) else None
+    if not isinstance(thread_id, str) or not thread_id:
+        message = "tmux target missing durable Codex thread identity"
+        record["status"] = "failed"
+        record["updated_at"] = format_utc(current)
+        record["last_error"] = message
+        record["route_selection"] = {"outcome": "no_target", "captured_pane": pane}
+        record = append_event(record, "route_unavailable", message, current, **record["route_selection"])
+        replace_record(root, found, record)
+        return DispatchResult("failed", message)
+    if isinstance(thread_id, str) and thread_id:
+        client_pid = target.get("client_pid")
+        client_start_time_ticks = target.get("client_start_time_ticks")
+        try:
+            if not isinstance(client_pid, int) or not isinstance(client_start_time_ticks, int):
+                raise WakeError("session-aware tmux target missing Codex client process identity")
+            if thread_identity_resolver is None:
+                from .app_server import read_app_server_thread_identity
+
+                identity = read_app_server_thread_identity(thread_id, codex_cmd=app_server_codex_cmd)
+            else:
+                identity = thread_identity_resolver(thread_id)
+            if identity.get("thread_id") != thread_id:
+                raise WakeError("thread identity resolver returned a different thread")
+            matches = matching_thread_panes(
+                tmux.list_session_panes(socket, pane),
+                identity,
+                client_pid=client_pid,
+                client_start_time_ticks=client_start_time_ticks,
+            )
+        except (WakeError, OSError, subprocess.SubprocessError) as exc:
+            matches = []
+            resolution_error = str(exc)
+        else:
+            resolution_error = ""
+        if len(matches) > 1:
+            message = f"ambiguous tmux thread match: {len(matches)} panes"
+            record["status"] = "failed"
+            record["updated_at"] = format_utc(current)
+            record["last_error"] = message
+            record["route_selection"] = {
+                "outcome": "ambiguous_match",
+                "thread_id": thread_id,
+                "candidate_panes": [item.pane for item in matches],
+            }
+            record = append_event(record, "route_ambiguous", message, current, **record["route_selection"])
+            replace_record(root, found, record)
+            return DispatchResult("failed", message)
+        if len(matches) == 1:
+            selected = matches[0].pane
+            outcome = "original_pane" if selected == pane else "relocated_pane"
+            record["route_selection"] = {
+                "outcome": outcome,
+                "thread_id": thread_id,
+                "captured_pane": pane,
+                "selected_pane": selected,
+            }
+            record = append_event(
+                record,
+                "route_selected",
+                f"Selected {outcome.replace('_', ' ')} {selected}",
+                current,
+                **record["route_selection"],
+            )
+            replace_record(root, found, record)
+            pane = selected
+        else:
+            fallback_target: dict[str, Any] = {
+                "transport": "app-server",
+                "endpoint": "stdio://",
+                "thread_id": thread_id,
+                "retry_active_writer": True,
+            }
+            record["target"] = fallback_target
+            record["route_selection"] = {
+                "outcome": "app_server_fallback",
+                "thread_id": thread_id,
+                "captured_pane": pane,
+            }
+            if resolution_error:
+                record["route_selection"]["tmux_resolution_error"] = resolution_error
+            record = append_event(
+                record,
+                "route_selected",
+                "No exact tmux pane match; selected app-server fallback",
+                current,
+                **record["route_selection"],
+            )
+            fallback_found = WakePath(root / "firing" / f"{wake_id}.json", record)
+            replace_record(root, found, record)
+            from .app_server import dispatch_app_server_record
+
+            result = dispatch_app_server_record(
+                root,
+                fallback_found,
+                client=app_server_client,
+                default_codex_cmd=app_server_codex_cmd,
+                now=current,
+            )
+            if result.status == "failed":
+                failed = find_record(root, wake_id)
+                failed_record = dict(failed.record)
+                failed_record["route_selection"] = {
+                    **failed_record.get("route_selection", {}),
+                    "outcome": "no_target",
+                    "attempted_route": "app_server_fallback",
+                }
+                failed_record = append_event(
+                    failed_record,
+                    "route_unavailable",
+                    "No exact tmux pane or eligible app-server target was available",
+                    current,
+                    **failed_record["route_selection"],
+                )
+                replace_record(root, failed, failed_record)
+            return DispatchResult(result.status, result.message)
 
     try:
         with PaneLock(root, socket, pane):

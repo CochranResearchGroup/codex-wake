@@ -4489,3 +4489,29 @@ Closed the generic HTTP/JSON completion-wake implementation.
 
 Acceptance state: Plan 0096 and P58 are closed. The generic source is present
 on canonical main; any installed rollout or live use remains separately gated.
+
+## Turn 200 | 2026-09-27
+
+Implemented session-aware tmux routing for issue #172.
+
+- Opened P59 and Plan 0097 from fresh canonical `bbdc264`; registered lane
+  I172 and claimed the existing GitHub issue.
+- Creation now binds the exact Codex thread to a uniquely resolved tmux pane
+  and stores the TUI client PID plus Linux process start-time ticks. Live
+  readback caught inherited `TMUX_PANE=%28` while the exact thread occupied
+  `%30`; the resolver selected `%30`.
+- Dispatch treats the pane as a location hint, searches the captured session
+  for the same live client process and exact-thread metadata, routes a unique
+  relocation, fails closed on ambiguity, or uses exact-thread app-server
+  fallback with the existing active-writer and bounded retry behavior.
+- Route selection is separate from tmux visibility and app-server
+  acknowledgement evidence. A reused pane with the same title and cwd but a
+  different process identity receives no text.
+- Focused tests passed 117/117. The comprehensive suite passed 713/713;
+  compilation, diff hygiene, active planning audit, and goal audit also pass.
+  No live dispatch, installation, service change, release, or deployment
+  occurred.
+
+Acceptance state: local Plan 0097 acceptance is complete. P59 remains open
+pending the issue-linked pull request, hosted Python 3.11/3.12 gates, and
+squash integration. Movement is `outcome_progress`.
