@@ -4511,6 +4511,10 @@ Implemented session-aware tmux routing for issue #172.
   compilation, diff hygiene, active planning audit, and goal audit also pass.
   No live dispatch, installation, service change, release, or deployment
   occurred.
+- The first hosted run passed both unit lanes but exposed two obsolete
+  pane-only installed-smoke fixtures. Those fixtures now create explicit
+  provider-free app-server targets; an isolated built-wheel product smoke and
+  the affected 103-test selection pass. Hosted rerun is pending.
 
 Acceptance state: local Plan 0097 acceptance is complete. P59 remains open
 pending the issue-linked pull request, hosted Python 3.11/3.12 gates, and
