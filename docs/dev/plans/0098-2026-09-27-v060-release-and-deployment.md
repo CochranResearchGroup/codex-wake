@@ -1,6 +1,6 @@
 # v0.6.0 release and deployment
 
-State: OPEN
+State: CLOSED
 Lane: P60
 Issue: #175
 Branch: `chore/issue-175-v060-release`
@@ -9,19 +9,24 @@ Integration: `squash`
 
 ## Current state
 
-Canonical `origin/main` is `e90b587`, with issue #172 integrated and its
-Python 3.11/3.12 main gates passing. Public and user-installed package metadata
-remain `0.5.2`. Release preparation now reports `0.6.0` and passes 713 Python
-tests, 12 OpenClaw plugin tests, compilation, package build, installed-wheel
+Complete. PR #176 passed Python 3.11/3.12 release gates and squash-merged as
+canonical `d0a277b`; main run `36365595386` passed both gates. Public tag and
+latest release `v0.6.0` resolve to that exact commit, and the public-tag product
+smoke reports CLI `0.6.0`, schema `1`, accepted provider-free source
+lifecycles, and no dispatch. Local preparation passed 713 Python tests, 12
+OpenClaw plugin tests, compilation, package build, installed-wheel
 source-registry/product smokes, diff hygiene, and active/goal planning audits.
-Candidate artifact SHA-256 is
+Candidate artifact SHA-256 was
 `c671012eac5ae109073f09f7c51e92862b8d623978cc1d0b134ddecc71b3f5b5`
 for the wheel and
 `10c25783ddc44cd6dfd446cfdc17eb95528cf337633516e54b40f72cb5de752d`
-for the source archive. The user supervisor is active/enabled with four ready
-enrolled roots, including this repository; the legacy repo-scoped service is
-inactive/disabled and covered by the supervisor. OpenClaw Gateway is stopped
-and outside this deployment.
+for the source archive. The user install resolves tag `v0.6.0` to `d0a277b`;
+the exact installed module and all three skill copies match tracked release
+hashes. The plugin is active at `0.6.0` with zero diagnostics. The user
+supervisor restarted from PID `14250` to `68539` and all four enrolled roots
+are ready. The legacy repo-scoped service remains inactive/disabled and covered
+by the supervisor; active and firing wake counts are zero. OpenClaw Gateway
+remains stopped and outside this deployment.
 
 ## Objective
 
@@ -97,5 +102,5 @@ checkpoint_fields: state_transition, acceptance_state, progress_classification, 
 
 ## Next action
 
-Validate the release preparation, publish its issue-linked pull request, and
-wait for both hosted release gates before integration.
+No further action is required for Plan 0098. Release, installation, service
+reconciliation, and closeout are complete.
