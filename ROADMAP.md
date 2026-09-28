@@ -994,13 +994,15 @@ Acceptance target:
 
 ## P60 | v0.6.0 Release And Deployment
 
-State: OPEN
+State: CLOSED
 
-Current State: Issue #175 and Plan 0098 own one bounded release and installed
-deployment from canonical `e90b587`. Public and installed metadata remain
-`0.5.2`; the active/enabled supervisor owns four ready roots while the legacy
-repo service remains inactive/disabled. No release or installation mutation
-has occurred yet.
+Current State: Complete. PR #176 merged release preparation as canonical
+`d0a277b`; main run `36365595386` passed Python 3.11/3.12 gates. Public latest
+release `v0.6.0`, public-tag smoke, user tool install, all three skill copies,
+and the OpenClaw plugin resolve to the release identity. The supervisor
+restarted from PID `14250` to `68539` with all four roots ready. The repo
+service remains inactive/disabled; active/firing wakes remain zero. Receipt
+0092 records the result and the intentionally stopped OpenClaw Gateway.
 
 Plan: [v0.6.0 release and deployment](docs/dev/plans/0098-2026-09-27-v060-release-and-deployment.md)
 

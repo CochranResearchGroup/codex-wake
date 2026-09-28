@@ -4560,3 +4560,29 @@ Opened the v0.6.0 release and installed-deployment lane.
 Acceptance state: local release preparation is accepted; hosted gates and
 canonical integration remain. Movement is `outcome_progress`. Next action:
 publish and merge the release-preparation PR before creating the public tag.
+
+## Turn 203 | 2026-09-27
+
+Published and deployed Codex Wake v0.6.0.
+
+- PR #176 passed both hosted release gates and squash-merged as canonical
+  `d0a277bf81a48d799581ba5dbbff61af70768568`; main run `36365595386`
+  passed Python 3.11 and 3.12 unit, plugin, build, and installed-wheel steps.
+- Public latest release `v0.6.0` is non-draft/non-prerelease and resolves
+  exactly to `d0a277b`. Public-tag product smoke reports CLI `0.6.0`, schema
+  `1`, accepted provider-free source lifecycles, and no dispatch.
+- The user tool install resolves requested tag `v0.6.0` to `d0a277b`. The
+  installed Python module, user hook, three skill copies, materialized plugin,
+  and installed plugin all match release identity; plugin diagnostics are zero.
+- The supervisor restarted from PID `14250` to `68539` and all four existing
+  roots report fresh ready health. The canonical repo service remains
+  loaded/inactive/disabled and covered by the supervisor.
+- Active and firing wake counts remain zero. No live wake, provider mutation,
+  OpenClaw Gateway start, enrolled-root change, or unrelated service change
+  occurred. Overall readiness remains blocked only because the intentionally
+  stopped OpenClaw Gateway is outside this deployment.
+- Verification receipt 0092 records the exact release, install provenance,
+  hashes, service state, and residual boundary.
+
+Acceptance state: Plan 0098 and P60 are complete. Movement is
+`outcome_progress`. No further release or deployment action remains.
