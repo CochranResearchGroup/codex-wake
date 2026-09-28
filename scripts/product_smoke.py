@@ -309,7 +309,6 @@ def run_surface_smoke(
         env=env,
     )
     signal_env = dict(env)
-    signal_env.update({"TMUX_PANE": "%smoke", "TMUX": "/tmp/codex-wake-smoke,1,0"})
     signal_work = artifact_dir / "signal-work"
     signal_work.mkdir(parents=True, exist_ok=True)
     daemon_stdout_path = artifact_dir / "commands" / "signal-monitor.stdout"
@@ -351,6 +350,7 @@ def run_surface_smoke(
                 [
                     str(codex_wake), "--wake-root", str(surface_root),
                     "filesystem", "created", "--idempotency-key", "product-smoke-signal",
+                    "--app-server-thread-id", "thread_product_smoke",
                     "ready.flag", "--", "provider-free signal smoke",
                 ],
                 artifact_dir=artifact_dir,

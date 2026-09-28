@@ -1,3 +1,24 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: I172
+    objective: Route tmux wakes by durable Codex thread identity with exact-thread app-server fallback
+    plan: docs/dev/plans/0097-2026-09-27-session-aware-tmux-routing.md
+    plan_ref: refs/heads/fix/issue-172-session-aware-tmux
+    branch: fix/issue-172-session-aware-tmux
+    target: main
+    plan_state: OPEN
+    custody_state: IN_PROGRESS
+    checkpoint: bbdc264
+    validation_status: focused_regressions_pending
+    validation_ref: bbdc264
+    remote_ref: ""
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#172]
+    owner: primary implementation and integration owner
+    write_surface: tmux target capture, dispatch routing, route evidence, focused tests, schema and operator docs
+    live_effect: none; provider-free implementation and validation only
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-27

@@ -8,9 +8,11 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import patch
 
 from codex_wake.injector import (
     PaneLock,
+    TmuxPane,
     canonical_prompt,
     dispatch_firing_record,
     lock_name_for_pane,
@@ -18,7 +20,7 @@ from codex_wake.injector import (
 )
 from codex_wake.daemon import poll_once
 from codex_wake.event_wake import EventWake
-from codex_wake.records import WakePath, build_record, cancel_record, find_record, write_record
+from codex_wake.records import WakeError, WakePath, build_record, cancel_record, find_record, write_record
 from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
 from codex_wake.signal_store import SQLiteSignalModule
 from codex_wake.signals import SourceCommit
@@ -27,10 +29,20 @@ from tests.test_signals import make_adapter, make_intent
 
 
 class FakeTmuxRunner:
-    def __init__(self, capture: str = "Codex ready", captures: list[str | BaseException] | None = None) -> None:
+    def __init__(
+        self,
+        capture: str = "Codex ready",
+        captures: list[str | BaseException] | None = None,
+        panes: list[TmuxPane] | None = None,
+    ) -> None:
         self.captures: list[str | BaseException] = list(captures) if captures is not None else [capture]
         self.capture_calls = 0
         self.pastes: list[tuple[str, str, str, str]] = []
+        self.panes = (
+            panes
+            if panes is not None
+            else [TmuxPane("%1", "Owning session | repo", "/repo", 101, 202)]
+        )
 
     def capture_pane(self, socket: str, pane: str) -> str:
         self.capture_calls += 1
@@ -45,8 +57,46 @@ class FakeTmuxRunner:
     def paste_prompt(self, socket: str, pane: str, wake_id: str, prompt: str) -> None:
         self.pastes.append((socket, pane, wake_id, prompt))
 
+    def list_session_panes(self, socket: str, pane: str) -> list[TmuxPane]:
+        return self.panes
+
+
+class FakeAppServerClient:
+    def __init__(self, *, status: str = "idle", fail: bool = False) -> None:
+        self.status = status
+        self.fail = fail
+        self.calls: list[tuple[str, object]] = []
+
+    def initialize(self) -> dict:
+        if self.fail:
+            raise WakeError("app-server unavailable")
+        return {}
+
+    def resume_thread(self, thread_id: str, cwd: str | None = None) -> dict:
+        self.calls.append(("resume", thread_id))
+        return {"thread": {"id": thread_id, "status": {"type": self.status}}}
+
+    def read_thread(self, thread_id: str, include_turns: bool = False) -> dict:
+        self.calls.append(("read", thread_id))
+        return {"thread": {"id": thread_id, "status": {"type": self.status}}}
+
+    def start_turn(self, thread_id: str, prompt: str, cwd: str | None = None) -> dict:
+        self.calls.append(("turn", thread_id))
+        return {"turn": {"id": "turn_123"}}
+
+    def close(self) -> None:
+        return None
+
 
 class InjectorTests(unittest.TestCase):
+    def setUp(self) -> None:
+        patcher = patch(
+            "codex_wake.app_server.read_app_server_thread_identity",
+            side_effect=self.identity,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_signal_cancellation_holds_lifecycle_lock_until_dispatch_reloads_authority(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"
@@ -185,13 +235,20 @@ class InjectorTests(unittest.TestCase):
         prompt: str = "full continuation prompt",
         *,
         max_attempts: int = 3,
+        thread_id: str | None = "thread_abc",
     ) -> WakePath:
         now = datetime(2026, 5, 18, 20, 30, tzinfo=UTC)
         record = build_record(
             predicate={"type": "not_before", "due_at": "2026-05-18T21:15:00Z"},
             prompt=prompt,
             cwd=cwd,
-            target={"transport": "tmux", "tmux_socket": "/tmp/tmux/default", "pane": "%1"},
+            target={
+                "transport": "tmux",
+                "tmux_socket": "/tmp/tmux/default",
+                "pane": "%1",
+                **({"thread_id": thread_id} if thread_id else {}),
+                **({"client_pid": 101, "client_start_time_ticks": 202} if thread_id else {}),
+            },
             now=now,
         )
         record["id"] = "wake_test"
@@ -199,6 +256,139 @@ class InjectorTests(unittest.TestCase):
         record["max_attempts"] = max_attempts
         path = write_record(root, record)
         return WakePath(path=path, record=record)
+
+    @staticmethod
+    def identity(thread_id: str, **_kwargs: object) -> dict[str, str]:
+        return {"thread_id": thread_id, "name": "Owning session", "cwd": "/repo"}
+
+    def test_session_aware_dispatch_uses_unchanged_original_pane(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), thread_id="thread_abc")
+            (root / "acks").mkdir(parents=True, exist_ok=True)
+            (root / "acks" / "wake_test.submitted").write_text("{}", encoding="utf-8")
+            runner = FakeTmuxRunner(panes=[TmuxPane("%1", "Owning session | repo", "/repo", 101, 202)])
+
+            result = dispatch_firing_record(
+                root, found, runner=runner, thread_identity_resolver=self.identity,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), ack_timeout_override=0,
+            )
+
+            self.assertEqual(result.status, "submitted")
+            self.assertEqual(runner.pastes[0][1], "%1")
+            data = json.loads((root / "submitted" / "wake_test.json").read_text())
+            self.assertEqual(data["route_selection"]["outcome"], "original_pane")
+
+    def test_session_aware_dispatch_routes_to_unique_relocated_pane(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), thread_id="thread_abc")
+            (root / "acks").mkdir(parents=True, exist_ok=True)
+            (root / "acks" / "wake_test.submitted").write_text("{}", encoding="utf-8")
+            runner = FakeTmuxRunner(panes=[
+                TmuxPane("%1", "Foreign session | repo", "/repo", 303, 404),
+                TmuxPane("%9", "⠋ Owning session | repo", "/repo", 101, 202),
+            ])
+
+            result = dispatch_firing_record(
+                root, found, runner=runner, thread_identity_resolver=self.identity,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), ack_timeout_override=0,
+            )
+
+            self.assertEqual(result.status, "submitted")
+            self.assertEqual([paste[1] for paste in runner.pastes], ["%9"])
+            data = json.loads((root / "submitted" / "wake_test.json").read_text())
+            self.assertEqual(data["route_selection"]["outcome"], "relocated_pane")
+
+    def test_session_aware_dispatch_fails_closed_on_ambiguous_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), thread_id="thread_abc")
+            runner = FakeTmuxRunner(panes=[
+                TmuxPane("%1", "Owning session", "/repo", 101, 202),
+                TmuxPane("%9", "Owning session", "/repo", 101, 202),
+            ])
+
+            result = dispatch_firing_record(
+                root, found, runner=runner, thread_identity_resolver=self.identity,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC), ack_timeout_override=0,
+            )
+
+            self.assertEqual(result.status, "failed")
+            self.assertEqual(runner.pastes, [])
+            data = json.loads((root / "failed" / "wake_test.json").read_text())
+            self.assertEqual(data["route_selection"]["outcome"], "ambiguous_match")
+
+    def test_foreign_reused_pane_falls_back_to_exact_app_server_thread(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), thread_id="thread_abc")
+            runner = FakeTmuxRunner(panes=[TmuxPane("%1", "Owning session", "/repo", 303, 404)])
+            client = FakeAppServerClient()
+
+            result = dispatch_firing_record(
+                root, found, runner=runner, thread_identity_resolver=self.identity,
+                app_server_client=client, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+            )
+
+            self.assertEqual(result.status, "submitted")
+            self.assertEqual(runner.pastes, [])
+            self.assertIn(("turn", "thread_abc"), client.calls)
+            data = json.loads((root / "submitted" / "wake_test.json").read_text())
+            self.assertEqual(data["route_selection"]["outcome"], "app_server_fallback")
+            self.assertNotIn("visibility_result", data)
+
+    def test_app_server_fallback_requeues_active_writer_contention(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), thread_id="thread_abc")
+            client = FakeAppServerClient(status="active")
+
+            result = dispatch_firing_record(
+                root, found, runner=FakeTmuxRunner(panes=[]), thread_identity_resolver=self.identity,
+                app_server_client=client, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+            )
+
+            self.assertEqual(result.status, "requeued")
+            data = json.loads((root / "pending" / "wake_test.json").read_text())
+            self.assertEqual(data["route_selection"]["outcome"], "app_server_fallback")
+            self.assertIn("active writer", data["last_error"])
+
+    def test_no_matching_pane_or_valid_fallback_records_no_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), thread_id="thread_abc")
+            client = FakeAppServerClient(fail=True)
+
+            result = dispatch_firing_record(
+                root, found, runner=FakeTmuxRunner(panes=[]), thread_identity_resolver=self.identity,
+                app_server_client=client, now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+            )
+
+            self.assertEqual(result.status, "failed")
+            data = json.loads((root / "failed" / "wake_test.json").read_text())
+            self.assertEqual(data["route_selection"]["outcome"], "no_target")
+            self.assertEqual(data["route_selection"]["attempted_route"], "app_server_fallback")
+
+    def test_legacy_tmux_record_without_thread_identity_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), thread_id=None)
+            runner = FakeTmuxRunner()
+
+            result = dispatch_firing_record(
+                root,
+                found,
+                runner=runner,
+                now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+                ack_timeout_override=0,
+            )
+
+            self.assertEqual(result.status, "failed")
+            self.assertEqual(runner.pastes, [])
+            data = json.loads((root / "failed" / "wake_test.json").read_text())
+            self.assertEqual(data["route_selection"]["outcome"], "no_target")
+            self.assertIn("missing durable Codex thread identity", data["last_error"])
 
     def test_canonical_prompt_routes_to_owning_wake_root(self) -> None:
         root = Path("/tmp/a wake root")

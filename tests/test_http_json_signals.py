@@ -285,8 +285,15 @@ class HTTPJSONCliTests(unittest.TestCase):
     def run_cli(self, root: Path, *argv: str) -> tuple[int, str, str]:
         stdout = io.StringIO()
         stderr = io.StringIO()
-        environment = {**os.environ, "TMUX_PANE": "%11", "TMUX": "/tmp/tmux/default,1,0"}
-        with patch.dict(os.environ, environment, clear=False):
+        environment = {
+            **os.environ,
+            "TMUX_PANE": "%11",
+            "TMUX": "/tmp/tmux/default,1,0",
+            "CODEX_THREAD_ID": "thread_http_json",
+        }
+        with patch.dict(os.environ, environment, clear=False), patch(
+            "codex_wake.records.resolve_tmux_thread_pane", return_value=("%11", 1234, 5678)
+        ):
             with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                 code = cli.main(["--wake-root", str(root), *argv])
         return code, stdout.getvalue(), stderr.getvalue()

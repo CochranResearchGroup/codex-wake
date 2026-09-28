@@ -245,10 +245,32 @@ def thread_summary_from_response(response: dict[str, Any]) -> dict[str, Any]:
     active_flags = status.get("activeFlags")
     if isinstance(active_flags, list):
         summary["active_flags"] = active_flags
-    for key in ("cwd", "sessionId", "updatedAt"):
+    for key in ("cwd", "name", "sessionId", "updatedAt"):
         if key in thread:
             summary[key] = thread[key]
     return summary
+
+
+def read_app_server_thread_identity(
+    thread_id: str,
+    *,
+    client: AppServerClient | None = None,
+    codex_cmd: str | None = None,
+) -> dict[str, str]:
+    summary = read_app_server_thread_status(
+        thread_id,
+        client=client,
+        codex_cmd=codex_cmd,
+    )
+    if summary.get("thread_id") != thread_id:
+        raise WakeError("app-server returned a different thread identity")
+    name = summary.get("name")
+    cwd = summary.get("cwd")
+    if not isinstance(name, str) or not name:
+        raise WakeError("app-server thread identity missing name")
+    if not isinstance(cwd, str) or not cwd:
+        raise WakeError("app-server thread identity missing cwd")
+    return {"thread_id": thread_id, "name": name, "cwd": cwd}
 
 
 def read_app_server_thread_status(

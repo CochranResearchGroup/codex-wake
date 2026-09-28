@@ -140,7 +140,14 @@ Codex may require a one-time `/hooks` review before a new repo-local hook runs. 
 
 ## Basic Usage
 
-Run these commands inside a tmux pane that is hosting the Codex TUI you want to wake. `codex-wake` captures `TMUX_PANE` and the tmux socket from the environment.
+Run these commands inside a tmux pane that is hosting the Codex TUI you want
+to wake. `codex-wake` captures `CODEX_THREAD_ID` (or the compatible
+`CODEX_SESSION_ID`), `TMUX_PANE`, and the tmux socket from the environment.
+When the wake fires, the captured pane is only a location hint: Codex Wake
+validates exact thread metadata and the original Codex client-process identity,
+searches the captured tmux session for one unique relocated match, then falls
+back to app-server delivery for that same thread. Ambiguous matches fail closed
+without pasting.
 
 Agents can use the bundled `$codex-wake` skill for workflow guidance and wake
 cycle examples. The skill lives at `skills/codex-wake/` in this repo and can be

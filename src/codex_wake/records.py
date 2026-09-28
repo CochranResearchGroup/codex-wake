@@ -4,6 +4,7 @@ import json
 import fcntl
 import hashlib
 import os
+import subprocess
 import re
 import secrets
 from dataclasses import dataclass
@@ -153,7 +154,81 @@ def normalize_prompt(parts: list[str]) -> str:
     return prompt
 
 
-def capture_tmux_target(env: dict[str, str] | None = None) -> dict[str, str]:
+def codex_client_identity_for_tty(tty: str) -> tuple[int, int]:
+    matches: list[tuple[int, int]] = []
+    proc_root = Path("/proc")
+    for entry in proc_root.iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            if os.readlink(entry / "fd" / "0") != tty:
+                continue
+            command = (entry / "comm").read_text(encoding="utf-8").strip()
+            if command != "codex":
+                continue
+            stat = (entry / "stat").read_text(encoding="utf-8").split()
+            matches.append((int(entry.name), int(stat[21])))
+        except (FileNotFoundError, OSError, IndexError, ValueError):
+            continue
+    if len(matches) != 1:
+        raise WakeError(f"expected one Codex client on {tty}, found {len(matches)}")
+    return matches[0]
+
+
+def _canonical_tmux_title(title: str) -> str:
+    normalized = title.strip()
+    if normalized and 0x2800 <= ord(normalized[0]) <= 0x28FF:
+        normalized = normalized[1:].lstrip()
+    return normalized.split(" | ", 1)[0].strip()
+
+
+def resolve_tmux_thread_pane(socket: str, pane: str, thread_id: str) -> tuple[str, int, int]:
+    from .app_server import read_app_server_thread_identity
+
+    identity = read_app_server_thread_identity(thread_id)
+    try:
+        session_result = subprocess.run(
+            ["tmux", "-S", socket, "display-message", "-p", "-t", pane, "#{session_id}"],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise WakeError(f"cannot inspect captured tmux session: {exc}") from exc
+    session = session_result.stdout.strip()
+    try:
+        panes_result = subprocess.run(
+            [
+                "tmux", "-S", socket, "list-panes", "-s", "-t", session,
+                "-F", "#{pane_id}\t#{pane_title}\t#{pane_current_path}\t#{pane_tty}",
+            ],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise WakeError(f"cannot enumerate captured tmux session: {exc}") from exc
+    matches: list[tuple[str, str]] = []
+    for line in panes_result.stdout.splitlines():
+        fields = line.split("\t", 3)
+        if (
+            len(fields) == 4
+            and fields[2] == identity["cwd"]
+            and _canonical_tmux_title(fields[1]) == identity["name"]
+        ):
+            matches.append((fields[0], fields[3]))
+    if len(matches) != 1:
+        raise WakeError(f"expected one tmux pane for Codex thread {thread_id}, found {len(matches)}")
+    selected_pane, tty = matches[0]
+    client_pid, start_ticks = codex_client_identity_for_tty(tty)
+    return selected_pane, client_pid, start_ticks
+
+
+def capture_tmux_target(
+    env: dict[str, str] | None = None,
+    *,
+    pane_resolver: Callable[[str, str, str], tuple[str, int, int]] | None = None,
+) -> dict[str, Any]:
     source = env if env is not None else os.environ
     pane = source.get("TMUX_PANE")
     tmux_env = source.get("TMUX")
@@ -161,13 +236,24 @@ def capture_tmux_target(env: dict[str, str] | None = None) -> dict[str, str]:
         raise WakeError("TMUX_PANE is required to create a tmux-targeted wake")
     if not tmux_env:
         raise WakeError("TMUX is required to resolve the tmux socket")
+    thread_id = source.get("CODEX_THREAD_ID") or source.get("CODEX_SESSION_ID")
+    if not thread_id:
+        raise WakeError(
+            "CODEX_THREAD_ID or CODEX_SESSION_ID is required to create a session-aware tmux wake"
+        )
     socket = tmux_env.split(",", 1)[0]
     if not socket:
         raise WakeError("TMUX did not contain a socket path")
+    pane, client_pid, client_start_time_ticks = (pane_resolver or resolve_tmux_thread_pane)(
+        socket, pane, thread_id
+    )
     return {
         "transport": "tmux",
         "tmux_socket": socket,
         "pane": pane,
+        "thread_id": thread_id,
+        "client_pid": client_pid,
+        "client_start_time_ticks": client_start_time_ticks,
     }
 
 
@@ -261,6 +347,7 @@ def schema_summary() -> dict[str, Any]:
             "previous_status",
             "archived_at",
             "dispatch_result",
+            "route_selection",
             "visibility_result",
         ],
         "schema_bump_required_for": [

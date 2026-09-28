@@ -168,10 +168,21 @@ class RecordTests(unittest.TestCase):
             parse_timestamp("2026-05-18T17:30:00")
 
     def test_capture_tmux_target_from_environment(self) -> None:
-        target = capture_tmux_target({"TMUX_PANE": "%11", "TMUX": "/tmp/tmux-1000/default,123,0"})
+        target = capture_tmux_target({
+            "TMUX_PANE": "%11",
+            "TMUX": "/tmp/tmux-1000/default,123,0",
+            "CODEX_THREAD_ID": "thread_abc",
+        }, pane_resolver=lambda _socket, _pane, _thread: ("%11", 1234, 5678))
         self.assertEqual(target["transport"], "tmux")
         self.assertEqual(target["pane"], "%11")
         self.assertEqual(target["tmux_socket"], "/tmp/tmux-1000/default")
+        self.assertEqual(target["thread_id"], "thread_abc")
+        self.assertEqual(target["client_pid"], 1234)
+        self.assertEqual(target["client_start_time_ticks"], 5678)
+
+    def test_capture_tmux_target_requires_codex_thread_identity(self) -> None:
+        with self.assertRaisesRegex(ValueError, "CODEX_THREAD_ID"):
+            capture_tmux_target({"TMUX_PANE": "%11", "TMUX": "/tmp/tmux-1000/default,123,0"})
 
     def test_schema_summary_documents_version_and_compatibility(self) -> None:
         summary = schema_summary()
@@ -182,6 +193,7 @@ class RecordTests(unittest.TestCase):
         self.assertIn("process_done", summary["predicate_types"])
         self.assertIn("openclaw_gateway", summary["target_transports"])
         self.assertIn("dispatch_result", summary["optional_fields"])
+        self.assertIn("route_selection", summary["optional_fields"])
         self.assertIn("visibility_result", summary["optional_fields"])
         self.assertIn("incompatible_predicate_semantics_change", summary["schema_bump_required_for"])
 

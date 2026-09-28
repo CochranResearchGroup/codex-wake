@@ -66,6 +66,6 @@ jobs:
           hook_output="$(printf '{"prompt":"hello","cwd":"%s"}' "$PWD" | /tmp/codex-wake-ci/bin/codex-wake-hook)"
           test -z "$hook_output"
 
-          TMUX_PANE='%11' TMUX='/tmp/tmux-1000/default,123,0' \
-            /tmp/codex-wake-ci/bin/codex-wake --wake-root /tmp/codex-wake-ci-runtime after 1m -- "CI smoke wake"
+          /tmp/codex-wake-ci/bin/codex-wake --wake-root /tmp/codex-wake-ci-runtime \
+            after --app-server-thread-id thread_ci_smoke 1m -- "CI smoke wake"
           /tmp/codex-wake-ci/bin/codex-wake --wake-root /tmp/codex-wake-ci-runtime list
