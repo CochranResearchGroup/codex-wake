@@ -9,9 +9,9 @@ lanes:
     target: main
     plan_state: OPEN
     custody_state: IN_PROGRESS
-    checkpoint: a95b987cf226889a2f96f6706fdbc0c62e938613
-    validation_status: deterministic_reproducer_red
-    validation_ref: a95b987cf226889a2f96f6706fdbc0c62e938613
+    checkpoint: 437b7b9
+    validation_status: local_product_acceptance_passed
+    validation_ref: 437b7b9
     remote_ref: ""
     integration: squash
     work_items: [CochranResearchGroup/codex-wake#178]
