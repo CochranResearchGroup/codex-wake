@@ -4586,3 +4586,40 @@ Published and deployed Codex Wake v0.6.0.
 
 Acceptance state: Plan 0098 and P60 are complete. Movement is
 `outcome_progress`. No further release or deployment action remains.
+
+## Turn 204 | 2026-09-29
+
+Opened the tmux active-UI safety correction for Issue #178.
+
+- Branch `fix/issue-178-tmux-safety-gate` starts from canonical `a95b987`.
+- The minimal classifier reproducer fails for benign AuraCall flags and prose
+  while genuine `Approve command?` remains correctly unsafe.
+- A dispatch reproducer proves unsafe preflight increments `attempts` and makes
+  `max_attempts: 1` terminal despite zero prompt pastes.
+- Plan 0099 freezes bounded active-region classification, privacy-safe rule
+  evidence, and separate safety-versus-delivery accounting.
+- No live dispatch, installation, service change, provider mutation, release,
+  or deployment is included in the local implementation packet.
+
+Acceptance state: Plan 0099/P61 are open. Movement is `outcome_progress`.
+Next action: add the first benign-transcript regression and make it pass.
+
+## Turn 205 | 2026-09-29
+
+Accepted the local Issue #178 product correction.
+
+- Tmux safety classification is bounded to the final 12 non-empty pane lines
+  and approval/confirmation rules require recognizable interactive structure.
+- Unsafe events record only stable rule, region, count, and offset metadata;
+  raw capture text and matching lines remain absent.
+- Unsafe preflight uses an independent three-deferral bound and preserves the
+  actual delivery-attempt budget. Persistent unsafe state still terminates.
+- RED evidence covered benign AuraCall flags/prose and sole-attempt exhaustion.
+  GREEN validation passes 24 focused injector tests, 716 comprehensive Python
+  tests, 12 plugin tests, compilation, diff hygiene, and planning audits.
+- No live dispatch, installation, service change, provider mutation, release,
+  or deployment occurred in this checkpoint.
+
+Acceptance state: deterministic product criteria pass locally. P61 remains
+open for hosted integration and the fresh live AuraCall/tmux gate. Movement is
+`outcome_progress`.

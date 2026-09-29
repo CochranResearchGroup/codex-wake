@@ -451,6 +451,12 @@ was watching. For tmux dispatches, check `visibility_result` on the wake record:
 scrollback after ack, while `ack_observed_visibility_unproven` means the hook
 ack was real but operator-visible display was not proven.
 
+Before a tmux paste, Codex Wake inspects only a bounded active pane region for
+recognizable approval, confirmation, running-tool, or foreign-shell surfaces.
+An unsafe preflight records privacy-safe rule and region metadata, requeues
+under its own three-deferral bound, and does not consume a delivery attempt.
+Raw pane text and matching lines are never stored.
+
 Inspect and manage wakes:
 
 ```bash

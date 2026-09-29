@@ -1016,3 +1016,23 @@ Acceptance target:
   inactive/disabled, and retain all four existing roots as ready.
 - Record a durable deployment receipt with no live wake dispatch, provider
   mutation, OpenClaw Gateway start, or unrelated service change.
+
+## P61 | Tmux Active-UI Safety
+
+State: OPEN
+
+Current State: Issue #178 and Plan 0099 are active on
+`fix/issue-178-tmux-safety-gate`. Local implementation passes 24 focused and
+716 comprehensive Python tests, 12 plugin tests, compilation, diff hygiene,
+and planning audits. Hosted integration and the separately gated live
+AuraCall/tmux acceptance remain.
+
+Plan: [Tmux active-UI safety and dispatch accounting](docs/dev/plans/0099-2026-09-29-tmux-active-ui-safety.md)
+
+Acceptance target:
+
+- Recognize active approval/confirmation UI without treating inert transcript
+  words as interactive state.
+- Preserve privacy-safe explainability and bounded fail-closed behavior.
+- Do not consume an actual delivery attempt before any prompt paste.
+- Pass focused, comprehensive, hosted, and separately authorized live checks.

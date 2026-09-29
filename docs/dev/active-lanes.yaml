@@ -1,3 +1,24 @@
 schema_version: 1
 work_item_tracking: required
-lanes: []
+lanes:
+  - id: I178
+    objective: Distinguish active tmux safety UI from inert transcript history without consuming delivery attempts
+    plan: docs/dev/plans/0099-2026-09-29-tmux-active-ui-safety.md
+    plan_ref: refs/heads/fix/issue-178-tmux-safety-gate
+    branch: fix/issue-178-tmux-safety-gate
+    target: main
+    plan_state: OPEN
+    custody_state: IN_PROGRESS
+    checkpoint: a95b987cf226889a2f96f6706fdbc0c62e938613
+    validation_status: deterministic_reproducer_red
+    validation_ref: a95b987cf226889a2f96f6706fdbc0c62e938613
+    remote_ref: ""
+    integration: squash
+    work_items: [CochranResearchGroup/codex-wake#178]
+    owner: primary implementation and integration owner
+    write_surface: tmux pane safety classification, dispatch attempt accounting, privacy-safe evidence, focused tests, planning closeout
+    live_effect: none in local packet; live AuraCall tmux acceptance remains separately gated
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-09-29
