@@ -20,7 +20,7 @@ from codex_wake.injector import (
 )
 from codex_wake.daemon import poll_once
 from codex_wake.event_wake import EventWake
-from codex_wake.records import WakeError, WakePath, build_record, cancel_record, find_record, write_record
+from codex_wake.records import WakeError, WakePath, build_record, cancel_record, find_record, replace_record, write_record
 from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
 from codex_wake.signal_store import SQLiteSignalModule
 from codex_wake.signals import SourceCommit
@@ -404,6 +404,22 @@ class InjectorTests(unittest.TestCase):
         self.assertEqual(unsafe_pane_reason("user@host:~/repo$ "), "pane appears to be a shell prompt")
         self.assertIsNone(unsafe_pane_reason("Codex\nready for input"))
 
+    def test_unsafe_pane_reason_ignores_approval_words_in_inert_history(self) -> None:
+        self.assertIsNone(
+            unsafe_pane_reason(
+                "Completed configuration:\n"
+                "--browser-chatgpt-tool-approval allow-once\n"
+                "No approval prompt was shown.\n"
+                "Codex\n"
+                "ready for input"
+            )
+        )
+
+    def test_unsafe_pane_reason_ignores_prompt_structure_outside_active_region(self) -> None:
+        historical_prompt = "Approve command?\n"
+        recent_idle_region = "\n".join(f"completed output {index}" for index in range(13))
+        self.assertIsNone(unsafe_pane_reason(historical_prompt + recent_idle_region))
+
     def test_pane_lock_rejects_concurrent_lock(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -562,10 +578,24 @@ class InjectorTests(unittest.TestCase):
             self.assertEqual(result.status, "requeued")
             self.assertEqual(runner.pastes, [])
             data = json.loads((root / "pending" / "wake_test.json").read_text())
-            self.assertEqual(data["attempts"], 1)
+            self.assertEqual(data["attempts"], 0)
+            self.assertEqual(data["safety_deferrals"], 1)
             self.assertEqual(data["events"][-2]["type"], "unsafe_pane")
+            self.assertEqual(
+                data["events"][-2]["pane_safety"],
+                {
+                    "active_region_line_limit": 12,
+                    "active_region_start_offset": 0,
+                    "inspected_line_count": 1,
+                    "matched_line_offset": 0,
+                    "region": "last_nonempty_lines",
+                    "rule_id": "approval_question",
+                    "total_nonempty_line_count": 1,
+                },
+            )
+            self.assertNotIn("Approve command?", json.dumps(data["events"][-2]))
 
-    def test_one_attempt_bound_fails_terminally_without_requeue(self) -> None:
+    def test_unsafe_preflight_does_not_consume_sole_delivery_attempt(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "wake"
             found = self.make_firing_record(root, Path(tmp), max_attempts=1)
@@ -579,12 +609,44 @@ class InjectorTests(unittest.TestCase):
                 ack_timeout_override=0,
             )
 
+            self.assertEqual(result.status, "requeued")
+            self.assertEqual(runner.pastes, [])
+            data = json.loads((root / "pending" / "wake_test.json").read_text())
+            self.assertEqual(data["attempts"], 0)
+            self.assertEqual(data["max_attempts"], 1)
+            self.assertEqual(data["safety_deferrals"], 1)
+            self.assertEqual(data["max_safety_deferrals"], 3)
+            self.assertNotIn("dispatch_attempt", [event["type"] for event in data["events"]])
+
+    def test_persistent_unsafe_preflight_exhausts_separate_safety_bound(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "wake"
+            found = self.make_firing_record(root, Path(tmp), max_attempts=1)
+            runner = FakeTmuxRunner(capture="Approve command?")
+
+            for index in range(3):
+                result = dispatch_firing_record(
+                    root,
+                    found,
+                    runner=runner,
+                    now=datetime(2026, 5, 18, 21, 15 + index, tzinfo=UTC),
+                    ack_timeout_override=0,
+                )
+                if index < 2:
+                    self.assertEqual(result.status, "requeued")
+                    found = find_record(root, "wake_test")
+                    record = dict(found.record)
+                    record["status"] = "firing"
+                    replace_record(root, found, record)
+                    found = find_record(root, "wake_test")
+
             self.assertEqual(result.status, "failed")
             self.assertEqual(runner.pastes, [])
             data = json.loads((root / "failed" / "wake_test.json").read_text())
-            self.assertEqual(data["attempts"], 1)
-            self.assertEqual(data["max_attempts"], 1)
-            self.assertNotIn("requeued", [event["type"] for event in data["events"]])
+            self.assertEqual(data["attempts"], 0)
+            self.assertEqual(data["safety_deferrals"], 3)
+            self.assertEqual(data["max_safety_deferrals"], 3)
+            self.assertEqual(data["events"][-1]["message"], "Maximum pane safety deferrals reached")
 
 
 if __name__ == "__main__":

@@ -58,6 +58,10 @@ payloads, but never derives live authority from JSON alone.
 - `max_attempts`: bounded retry limit. Schema-v2 signal registrations default
   to `3`; supported callers may select an integer from `1` through `100`, and
   the selected value participates in idempotency identity.
+- `safety_deferrals`: optional count of tmux pane-safety preflights that
+  deferred delivery before any prompt paste.
+- `max_safety_deferrals`: optional independent pane-safety retry bound. It
+  defaults to `3` when the first unsafe-pane result is recorded.
 - `ack_timeout_seconds`: ack wait limit.
 - `next_attempt_at`: UTC timestamp for the next dispatch attempt or predicate check.
 - `events`: ordered audit events.
@@ -241,6 +245,16 @@ Current optional fields include:
 Event objects may also include extra metadata such as accepted app-server turn
 identifiers or `created_by` provenance. The OpenClaw plugin uses
 `created_by: "openclaw-plugin:codex-wake"` on the initial `created` event.
+An `unsafe_pane` event includes privacy-safe `pane_safety` metadata with a
+stable `rule_id`, the bounded active-region policy, total and inspected
+non-empty line counts, and the matched offset within that region. It must not
+include the matching line or any other raw pane text.
+
+Pane-safety deferrals are preflight results, not delivery attempts. They do
+not increment `attempts` or emit `dispatch_attempt`; persistent unsafe state
+fails after `max_safety_deferrals` so the record cannot requeue indefinitely.
+These optional fields preserve schema compatibility and do not change the
+schema version.
 
 ## Tmux Visibility Result
 

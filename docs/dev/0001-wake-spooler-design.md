@@ -138,6 +138,8 @@ Optional fields:
 - `created_by_profile`
 - `expires_at`
 - `last_error`
+- `safety_deferrals`
+- `max_safety_deferrals`
 - `context_paths`
 - `evidence_paths`
 - `result_summary`
@@ -255,10 +257,14 @@ These heuristics are intentionally conservative. False negatives are worse than 
 Default policy:
 
 - set `status=firing` before injection
-- attempt dispatch
+- inspect the bounded active tmux region before injection
+- requeue an unsafe pane under the independent safety-deferral bound without
+  consuming a delivery attempt
+- record a delivery attempt only when the pane is eligible for prompt paste
 - wait up to `ack_timeout_seconds`
 - if no ack, requeue with bounded backoff
 - after `max_attempts`, mark `failed`
+- after `max_safety_deferrals`, mark a persistently unsafe pane `failed`
 
 Backoff:
 

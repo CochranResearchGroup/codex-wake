@@ -206,24 +206,55 @@ def tmux_visibility_result(
     return result
 
 
-def unsafe_pane_reason(text: str) -> str | None:
-    lowered = text.lower()
-    patterns = (
-        (r"\bapprove\b|\bapproval\b", "approval prompt visible"),
-        (r"\ballow\b.*\bcommand\b", "command approval prompt visible"),
-        (r"\bdeny\b.*\ballow\b", "confirmation prompt visible"),
-        (r"\brunning\b.*\bcommand\b|\btool\b.*\brunning\b", "tool appears to be running"),
-        (r"\bpress enter to continue\b|\bcontinue\?\b", "confirmation prompt visible"),
-    )
-    for pattern, reason in patterns:
-        if re.search(pattern, lowered, re.MULTILINE):
-            return reason
+ACTIVE_PANE_LINE_LIMIT = 12
+
+
+def active_pane_region(text: str) -> tuple[list[str], int, int]:
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
+    start = max(0, len(lines) - ACTIVE_PANE_LINE_LIMIT)
+    return lines[start:], start, len(lines)
+
+
+def classify_pane_safety(text: str) -> tuple[str, dict[str, Any]] | None:
+    lines, _start, total_lines = active_pane_region(text)
+    patterns = (
+        (r"^\s*approve(?: this)? command\?\s*$", "approval_question", "approval prompt visible"),
+        (r"^\s*allow\b.*\bcommand\b.*\?\s*$", "command_permission_question", "command approval prompt visible"),
+        (r"^\s*deny\b.*\ballow\b.*\?\s*$", "deny_allow_question", "confirmation prompt visible"),
+        (r"\brunning\b.*\bcommand\b|\btool\b.*\brunning\b", "running_tool_status", "tool appears to be running"),
+        (r"^\s*press enter to continue\s*$|^\s*continue\?\s*$", "continue_question", "confirmation prompt visible"),
+    )
+    for offset, line in enumerate(lines):
+        lowered = line.lower()
+        for pattern, rule_id, reason in patterns:
+            if re.search(pattern, lowered):
+                return reason, {
+                    "rule_id": rule_id,
+                    "region": "last_nonempty_lines",
+                    "active_region_line_limit": ACTIVE_PANE_LINE_LIMIT,
+                    "active_region_start_offset": _start,
+                    "total_nonempty_line_count": total_lines,
+                    "inspected_line_count": len(lines),
+                    "matched_line_offset": offset,
+                }
     if lines:
         last = lines[-1]
-        if re.search(r"[$#%>]\s*$", last) and "codex" not in lowered:
-            return "pane appears to be a shell prompt"
+        if re.search(r"[$#%>]\s*$", last) and not any("codex" in line.lower() for line in lines):
+            return "pane appears to be a shell prompt", {
+                "rule_id": "foreign_shell_prompt",
+                "region": "last_nonempty_lines",
+                "active_region_line_limit": ACTIVE_PANE_LINE_LIMIT,
+                "active_region_start_offset": _start,
+                "total_nonempty_line_count": total_lines,
+                "inspected_line_count": len(lines),
+                "matched_line_offset": len(lines) - 1,
+            }
     return None
+
+
+def unsafe_pane_reason(text: str) -> str | None:
+    classification = classify_pane_safety(text)
+    return classification[0] if classification is not None else None
 
 
 def lock_name_for_pane(socket: str, pane: str) -> str:
@@ -534,6 +565,22 @@ def _dispatch_firing_record_unlocked(
 
     try:
         with PaneLock(root, socket, pane):
+            try:
+                captured = tmux.capture_pane(socket, pane)
+            except (WakeError, OSError, subprocess.SubprocessError):
+                record["attempts"] = int(record.get("attempts") or 0) + 1
+                raise
+            unsafe = classify_pane_safety(captured)
+            if unsafe:
+                reason, evidence = unsafe
+                return requeue_unsafe_pane(
+                    root,
+                    WakePath(root / "firing" / f"{wake_id}.json", record),
+                    record,
+                    f"unsafe pane: {reason}",
+                    current,
+                    evidence,
+                )
             attempt = int(record.get("attempts") or 0) + 1
             record["attempts"] = attempt
             record["updated_at"] = format_utc(current)
@@ -545,10 +592,6 @@ def _dispatch_firing_record_unlocked(
                 attempt=attempt,
             )
             replace_record(root, found, record)
-            captured = tmux.capture_pane(socket, pane)
-            unsafe = unsafe_pane_reason(captured)
-            if unsafe:
-                return requeue_or_fail(root, WakePath(root / "firing" / f"{wake_id}.json", record), record, f"unsafe pane: {unsafe}", current, "unsafe_pane")
             tmux.paste_prompt(socket, pane, wake_id, canonical_prompt(wake_id, root))
             timeout = ack_timeout_override
             if timeout is None:
@@ -593,6 +636,56 @@ def _dispatch_firing_record_unlocked(
         return requeue_or_fail(root, found, record, str(exc), current, "failed")
     except (OSError, subprocess.SubprocessError) as exc:
         return requeue_or_fail(root, found, record, f"tmux dispatch failed: {exc}", current, "failed")
+
+
+def requeue_unsafe_pane(
+    root: Path,
+    found: WakePath,
+    record: dict,
+    message: str,
+    now: datetime,
+    evidence: dict[str, Any],
+) -> DispatchResult:
+    deferrals = int(record.get("safety_deferrals") or 0) + 1
+    max_deferrals = int(record.get("max_safety_deferrals") or 3)
+    record["safety_deferrals"] = deferrals
+    record["max_safety_deferrals"] = max_deferrals
+    record["updated_at"] = format_utc(now)
+    record["last_error"] = message
+    record = append_event(
+        record,
+        "unsafe_pane",
+        message,
+        now,
+        attempt=int(record.get("attempts") or 0),
+        safety_deferral=deferrals,
+        pane_safety=evidence,
+    )
+    if deferrals >= max_deferrals:
+        record["status"] = "failed"
+        record = append_event(
+            record,
+            "failed",
+            "Maximum pane safety deferrals reached",
+            now,
+            attempt=int(record.get("attempts") or 0),
+            safety_deferral=deferrals,
+        )
+        replace_record(root, found, record)
+        return DispatchResult("failed", message)
+    delay = backoff_for_attempt(deferrals)
+    record["status"] = "pending"
+    record["next_attempt_at"] = format_utc(now + timedelta(seconds=delay))
+    record = append_event(
+        record,
+        "requeued",
+        f"Wake requeued after {delay} seconds",
+        now,
+        attempt=int(record.get("attempts") or 0),
+        safety_deferral=deferrals,
+    )
+    replace_record(root, found, record)
+    return DispatchResult("requeued", message)
 
 
 def requeue_or_fail(
