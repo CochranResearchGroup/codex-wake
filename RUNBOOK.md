@@ -4623,3 +4623,26 @@ Accepted the local Issue #178 product correction.
 Acceptance state: deterministic product criteria pass locally. P61 remains
 open for hosted integration and the fresh live AuraCall/tmux gate. Movement is
 `outcome_progress`.
+
+## Turn 206 | 2026-09-29
+
+Closed the Issue #178 tmux safety correction with live acceptance.
+
+- Plan `docs/dev/plans/0099-2026-09-29-tmux-active-ui-safety.md` is closed.
+- PR #179 passed hosted Python 3.11 and 3.12 checks and squash-merged as
+  canonical `5abbc098d4c0f6832b10818755602630f2528ecc`.
+- One bounded AuraCall API request reached the provider and terminated with
+  `credit_balance_exhausted`; it was not retried. AuraCall published terminal
+  `error` event `evt_73ed7d78bab77c5cf12940979a79eef9e1dd25bb5f2af5e4b9184ccbe20410c7`.
+- The merged source ran as an isolated monitor against a disposable wake root
+  and disposable Codex tmux pane `%27`; installed services and existing user
+  panes were unchanged.
+- Wake `wake_59378fecd82144b288c326d4e95b6f98` used one actual delivery attempt,
+  recorded `ack_observed`, verified the bounded HTTP/JSON match, and classified
+  visibility as `visible_prompt_observed` without retaining raw pane text.
+- The target Codex session explicitly acknowledged the expected terminal error
+  receipt and confirmed AuraCall was not retried.
+
+Acceptance state: Plan 0099 and P61 are complete. Verification receipt 0093
+records the live gate. Movement is `outcome_progress`; no successor lane is
+required.
