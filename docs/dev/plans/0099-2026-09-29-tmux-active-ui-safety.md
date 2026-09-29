@@ -1,15 +1,19 @@
 # Tmux active-UI safety and dispatch accounting
 
-State: OPEN
+State: CLOSED
 Lane: P61
 Issue: #178
-Branch: `fix/issue-178-tmux-safety-gate`
+Branch: `chore/issue-178-live-acceptance`
 Target: `main`
 Integration: `squash`
 
 ## Current state
 
-Local implementation is accepted on branch `fix/issue-178-tmux-safety-gate`.
+The product correction squash-merged through PR #179 as canonical
+`5abbc098d4c0f6832b10818755602630f2528ecc`. Hosted Python 3.11 and 3.12
+checks passed. A separately isolated live acceptance consumed one genuine
+AuraCall terminal `error` receipt without retrying AuraCall and delivered wake
+`wake_59378fecd82144b288c326d4e95b6f98` to disposable tmux pane `%27`.
 The classifier now inspects the final 12 non-empty lines, requires recognizable
 question structure for approval/confirmation rules, and emits privacy-safe rule
 and region metadata. Unsafe-pane preflight increments a separate bounded
@@ -17,8 +21,10 @@ and region metadata. Unsafe-pane preflight increments a separate bounded
 `attempts`; three consecutive unsafe results fail deterministically. Focused
 injector tests pass 24/24, the comprehensive Python suite passes 716/716, the
 OpenClaw plugin suite passes 12/12, and compilation, diff hygiene, active
-planning, and goal audits pass. Hosted integration and the separately gated
-live AuraCall/tmux receipt remain.
+planning, and goal audits pass. The live record reports `attempts: 1`,
+`ack_observed`, verified bounded HTTP/JSON evidence, and
+`visible_prompt_observed`; raw pane text was not stored. Verification receipt
+0093 contains the bounded closeout evidence.
 
 ## Objective
 
@@ -63,7 +69,7 @@ separate from actual prompt-delivery attempts.
 - `max_review_rework_cycles: 1`
 - `max_hardening_checkpoints: 2`
 - `checkpoint_interval: 2 slices`
-- `live_dispatch_attempts: 0` in this local implementation packet
+- `live_dispatch_attempts: 1` in the separately frozen acceptance packet
 
 ## Acceptance criteria
 
@@ -83,7 +89,6 @@ separate from actual prompt-delivery attempts.
 ## Definition of done
 
 The product fix and deterministic regressions are integrated through the
-issue-linked pull request with hosted checks passing. Issue #178 closes only
-after the separately gated live AuraCall/tmux acceptance receipt is recorded,
-or after the issue contract is explicitly split so that live acceptance has a
-durable successor locator.
+issue-linked pull request with hosted checks passing. The separately gated
+live AuraCall/tmux acceptance receipt is recorded in verification 0093, so no
+successor issue is required.

@@ -1019,13 +1019,14 @@ Acceptance target:
 
 ## P61 | Tmux Active-UI Safety
 
-State: OPEN
+State: CLOSED
 
-Current State: Issue #178 and Plan 0099 are active on
-`fix/issue-178-tmux-safety-gate`. Local implementation passes 24 focused and
-716 comprehensive Python tests, 12 plugin tests, compilation, diff hygiene,
-and planning audits. Hosted integration and the separately gated live
-AuraCall/tmux acceptance remain.
+Current State: PR #179 is integrated as canonical `5abbc098`. Local validation
+passes 24 focused and 716 comprehensive Python tests, 12 plugin tests,
+compilation, diff hygiene, and planning audits; hosted Python 3.11 and 3.12
+checks pass. Verification 0093 records a genuine AuraCall terminal receipt
+delivered to and acknowledged by a disposable tmux Codex target with
+`visible_prompt_observed` on the sole delivery attempt.
 
 Plan: [Tmux active-UI safety and dispatch accounting](docs/dev/plans/0099-2026-09-29-tmux-active-ui-safety.md)
 
