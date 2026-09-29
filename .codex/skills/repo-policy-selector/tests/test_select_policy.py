@@ -674,9 +674,11 @@ class SelectPolicyRegressionTests(unittest.TestCase):
         installed_library = self.select_policy.enumerate_policy_library(self.policy_root)
         body = installed_library["parsed_modules"]["codegraph-usage"]["body"]
 
-        self.assertIn("missing index in a verified local worktree", body)
-        self.assertIn("Do not require a fresh approval solely because the worktree is new", body)
+        self.assertIn("Whenever codegraph is needed for the task", body)
+        self.assertIn("the repository has not been initialized before", body)
+        self.assertIn("do not require separate approval solely to initialize codegraph", body)
         self.assertIn("run the documented explicit sync once", body)
+        self.assertNotIn("codegraph has not been established for the repo", body)
         self.assertIn("unexpected tracked-file changes", body)
 
     def test_graphiti_runtime_policy_maps_to_memory_service_runtime_module(self):
@@ -855,6 +857,53 @@ class SelectPolicyRegressionTests(unittest.TestCase):
                 profile.get("modules", []),
                 profile_id,
             )
+
+    def test_policy_context_pilot_requires_narrow_affirmative_signal(self):
+        ordinary_repo = self.make_repo(
+            readme_text="# Efficient MCP Repo\n\nUse MCP tools and reduce token usage.\n"
+        )
+        pilot_repo = self.make_repo(
+            agents_text="""
+            # Policy Pilot
+
+            For a supported task, call gov_policy with the declared profile and
+            task kind. Use canonical fallback paths on a stale result.
+            """,
+        )
+        manifest = pilot_repo / ".governance" / "policy-context.json"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text("{}\n", encoding="utf-8")
+
+        ordinary_signals = self.select_policy.detect_signals(ordinary_repo)
+        pilot_signals = self.select_policy.detect_signals(pilot_repo)
+        installed_library = self.select_policy.enumerate_policy_library(self.policy_root)
+        ordinary_modules = self.select_policy.choose_profile(
+            ordinary_signals, installed_library
+        )[4]
+        _purpose, _subtype, _bias, _profile, pilot_modules, reasons = (
+            self.select_policy.choose_profile(pilot_signals, installed_library)
+        )
+
+        self.assertFalse(ordinary_signals["mentions_policy_context_pilot"])
+        self.assertNotIn("policy-context-pilot", ordinary_modules)
+        self.assertTrue(pilot_signals["has_policy_context_manifest"])
+        self.assertTrue(pilot_signals["mentions_policy_context_pilot"])
+        self.assertIn("policy-context-pilot", pilot_modules, reasons)
+
+    def test_policy_context_pilot_metadata_is_machine_readable_and_not_default(self):
+        installed_library = self.select_policy.enumerate_policy_library(self.policy_root)
+        module = installed_library["parsed_modules"]["policy-context-pilot"]
+        catalog_entry = next(
+            item for item in installed_library["modules"]
+            if item["id"] == "policy-context-pilot"
+        )
+
+        self.assertEqual(module["category"], "pilots")
+        self.assertEqual(module["status"], "pilot")
+        self.assertEqual(catalog_entry["category"], "pilots")
+        self.assertEqual(catalog_entry["status"], "pilot")
+        for profile_id, profile in installed_library["parsed_profiles"].items():
+            self.assertNotIn("policy-context-pilot", profile.get("modules", []), profile_id)
 
 
 if __name__ == "__main__":
