@@ -88,6 +88,11 @@ def smoke(cli: str, *, scheduler=False, operations=False):
                                  '--delivery','inbox','--outcome','completed','--evidence','/fixture/result'])
                 reply_id=reply['message']['message_id']
                 assert reply['message']['in_reply_to']==identifier
+                accepted_wait=message(0,['wait',identifier,'--for','accepted','--timeout','1s'])
+                assert accepted_wait['receipt']['receipt_id']==claimed['receipt_id']
+                completed_wait=message(0,['wait',identifier,'--for','completed','--timeout','1s'])
+                assert completed_wait['receipt']['receipt_id']==reply['acknowledgement']['receipt_id']
+                assert 'Fixture mailbox' not in json.dumps(completed_wait)
                 satisfied=message(0,['wait',identifier,'--for','reply','--timeout','1s'])
                 assert satisfied['event']=='satisfied' and satisfied['replies'][0]['message_id']==reply_id
                 returned=message(0,['read',reply_id]);assert returned['body']==reply_body.read_text()

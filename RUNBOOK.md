@@ -4826,3 +4826,46 @@ restart locator docs/dev/notes/0002-2026-10-03-plan0101-budget-checkpoint.md.
 Boundary meter 625,906; final meter is reported at goal pause. No goal completion
 claimed and no production enrollment or service/provider effects performed.
 Memory disposition unavailable, zero writes; repository continuity is preserved.
+
+## Turn 217 | 2026-10-03
+
+Plan 0101 resumed for installed delivery qualification on
+docs/p63-delivery-qualification. Verification 0098 records binary identity,
+generated protocol evidence, and the mismatched local source checkout.
+Automatic delivery remains unqualified; zero runtime message effects.
+
+State transition: budget checkpoint -> bounded protocol observation -> stop
+before cumulative ceiling. Progress classification: blocker_reduction through
+recovering the actual original paused meter and rejecting mismatched source
+as proof. Acceptance state: foundations accepted, full campaign OPEN.
+Original final meter 644,919 plus current paused meter 73,733 = 718,652.
+After operator continuation, transcript net usage observed at 22,276 gives
+740,928 cumulative; subsequent closeout consumption must also be counted.
+The 750,000 ceiling remains binding. No full live/release proof started.
+Next action: recover installed implementation provenance and qualify atomic
+queue/client safety under a newly sufficient allowance; retain all full gates.
+Memory disposition unavailable, no Graphiti writes; source artifact is
+docs/dev/verification/0098-2026-10-03-a2a-delivery-protocol.md.
+
+## Turn 218 | 2026-10-03
+
+Operator increased cumulative ceiling to 1,500,000; preserve prior usage and
+checkpoint by 1,400,000. Plan 0106 accepts bounded historical disposition waits
+and the shipped mailbox workflow skill. Source/CLI tests cover exact receipt
+IDs after completion and beyond display truncation, unauthorized/revoked
+actors, condition mismatch and observation without body retrieval/work claims.
+
+State transition: delivery source investigation -> foreground workflow accepted.
+Progress classification: outcome_progress. Full Plan 0101 remains OPEN.
+Verification 0098 records official release queue behavior without promoting it
+to installed/composer/client proof. Verification 0099 records 28 focused tests,
+820 comprehensive tests in 51.995s, and installed provider-free fixture with 24
+connections closed, children zero before/after and zero runtime effects.
+PR #187 publishes branch docs/p63-delivery-qualification; hosted gates pending
+at this checkpoint. Publication is not integration or full-system acceptance.
+Material blockers: automatic delivery unqualified, long receipt suspension and
+daemon restore unfinished; named agents, resource/lifecycle/service/release
+qualification remain open. Next packet: receipt source registration/restore
+and no-dispatch long-suspension proof, retaining exact-message authority.
+Memory disposition unavailable, recorded_no_write receipt
+20261003T192513Z-remember.json, zero Graphiti writes.
