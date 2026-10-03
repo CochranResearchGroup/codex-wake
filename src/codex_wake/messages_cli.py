@@ -53,7 +53,7 @@ def add_messages_parser(subparsers):
             command.add_argument('--limit', type=int, default=100)
             command.add_argument('--state')
         if verb == 'wait':
-            command.add_argument('--for', dest='wait_for', choices=['received','reply'], required=True)
+            command.add_argument('--for', dest='wait_for', choices=['received','reply','accepted','declined','completed','failed'], required=True)
             command.add_argument('--timeout', default='5m')
         if verb == 'watch':
             command.add_argument('message_id', nargs='?')
@@ -89,9 +89,11 @@ def observe_receipts(mailbox, actor, args):
         while True:
             value = mailbox.show(actor, args.message_id) if args.message_id else mailbox.list(actor)
             if args.messages_command == 'wait':
-                if args.wait_for == 'received' and value['received_receipt_id']:
-                    result(dict(event='satisfied', message=value, condition='received'))
-                    return 0
+                if args.wait_for != 'reply':
+                    receipt = mailbox.disposition_receipt(actor, args.message_id, args.wait_for)
+                    if receipt:
+                        result(dict(event='satisfied', message=value, condition=args.wait_for, receipt=receipt))
+                        return 0
                 if args.wait_for == 'reply':
                     replies = mailbox.replies(actor, args.message_id)
                     if replies:

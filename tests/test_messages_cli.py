@@ -90,6 +90,28 @@ class MessageCLITests(unittest.TestCase):
         self.assertEqual([item['event'] for item in watch],['initial','summary'])
         self.assertEqual(self.invoke(['show',identifier])[1][0]['message']['state']['recipient'],'unread')
 
+    def test_disposition_waits_return_exact_historical_receipts_without_reading(self):
+        for terminal in ('completed', 'failed', 'declined'):
+            with self.subTest(terminal=terminal):
+                identifier = self.send(key='disposition-' + terminal)
+                if terminal != 'declined':
+                    code, accepted = self.invoke(['ack', identifier, '--outcome', 'accepted'], actor=1)
+                    self.assertEqual(code, 0)
+                code, disposed = self.invoke(['ack', identifier, '--outcome', terminal], actor=1)
+                self.assertEqual(code, 0)
+                code, waited = self.invoke(['wait', identifier, '--for', terminal, '--timeout', '1s'])
+                self.assertEqual(code, 0)
+                self.assertEqual(waited[0]['receipt']['receipt_id'], disposed[0]['receipt_id'])
+                self.assertNotIn('Fixture body', json.dumps(waited))
+                self.assertIsNone(waited[0]['message']['received_receipt_id'])
+                if terminal != 'declined':
+                    code, waited = self.invoke(['wait', identifier, '--for', 'accepted', '--timeout', '1s'])
+                    self.assertEqual(code, 0)
+                    self.assertEqual(waited[0]['receipt']['receipt_id'], accepted[0]['receipt_id'])
+                with patch('codex_wake.messages_cli.time.monotonic', side_effect=[0, 2]):
+                    code, waited = self.invoke(['wait', identifier, '--for', 'received', '--timeout', '1s'])
+                self.assertEqual(code, 10)
+
     def test_cancelled_message_stays_inspectable(self):
         identifier=self.send()
         self.assertEqual(self.invoke(['cancel',identifier])[0],0)

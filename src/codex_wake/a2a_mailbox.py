@@ -423,6 +423,20 @@ class Mailbox:
             database.execute('COMMIT')
             return dict(messages=values, next_cursor=next_cursor)
 
+    def disposition_receipt(self, actor, identifier, condition):
+        """Find historical recipient evidence without relying on display limits."""
+        if condition not in ('received', 'accepted', 'declined', 'completed', 'failed'):
+            raise BusError('invalid_argument', 'unsupported recipient receipt condition')
+        with self.transaction(actor) as database:
+            row = self._row(database, identifier)
+            self._participant(row, actor)
+            receipt = database.execute(
+                'SELECT receipt_id,kind,created FROM mail_receipts '
+                'WHERE message_id=? AND kind=? AND actor_key=? ORDER BY receipt_seq LIMIT 1',
+                (identifier, condition, row['recipient_key'])).fetchone()
+            database.execute('ROLLBACK')
+            return dict(receipt) if receipt else None
+
     def replies(self, actor, identifier):
         with self.transaction(actor) as database:
             original = self._row(database, identifier)

@@ -31,6 +31,25 @@ class MailboxTests(unittest.TestCase):
     def send(self, key='request', **kwargs):
         return self.mailbox.send(self.sender, self.identities[1], body='Fixture request', idempotency_key=key, **kwargs)
 
+    def test_disposition_lookup_survives_display_truncation_and_checks_authority(self):
+        identifier = self.send()['message']['message_id']
+        with self.mailbox.transaction() as database:
+            for _ in range(100):
+                self.mailbox._record(database, identifier, 'deferred', 'scheduler', self.now)
+            database.execute('COMMIT')
+        accepted = self.mailbox.ack(self.recipient, identifier, outcome='accepted')
+        self.mailbox.ack(self.recipient, identifier, outcome='completed')
+        displayed = self.mailbox.show(self.sender, identifier)
+        self.assertTrue(displayed['receipts_truncated'])
+        self.assertFalse(any(r['kind'] == 'accepted' for r in displayed['receipts']))
+        receipt = self.mailbox.disposition_receipt(self.sender, identifier, 'accepted')
+        self.assertEqual(receipt['receipt_id'], accepted['receipt_id'])
+        with self.assertRaises(BusError):
+            self.mailbox.disposition_receipt(self.foreign, identifier, 'accepted')
+        self.bus.revoke_actor(self.sender.actor_id, self.operator)
+        with self.assertRaises(BusError):
+            self.mailbox.disposition_receipt(self.sender, identifier, 'accepted')
+
     def test_durable_envelope_separate_notification_and_received_receipts(self):
         admitted = self.send()
         identifier = admitted['message']['message_id']

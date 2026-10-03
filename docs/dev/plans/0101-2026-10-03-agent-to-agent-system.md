@@ -436,3 +436,15 @@ budget instruction; it is not acceptance or a request to narrow the goal.
 State remains OPEN. Continuation locator:
 `docs/dev/notes/0002-2026-10-03-plan0101-budget-checkpoint.md`.
 No automatic notification or actual live two-agent acceptance is claimed.
+
+## Resumption with increased cumulative ceiling
+
+Operator raised the cumulative ceiling to 1,500,000 on 2026-10-03. Preserve
+prior usage; checkpoint by 1,400,000 to retain margin. The earlier 750,000
+records remain historical evidence, not the current execution ceiling.
+Plan 0106 accepts the bounded foreground disposition workflow only, with
+verification 0099. Verification 0098 records installed schema and official
+release-source queue behavior; automatic delivery remains unqualified because
+composer/client identity and installed provenance are not established.
+Full system acceptance, long receipt suspension, daemon restore, actual named
+agents, lifecycle/resource qualification, service and release remain open.

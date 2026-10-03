@@ -75,3 +75,30 @@ source provenance matching the installed queue implementation, or an equally
 authoritative safe-operation contract. No effects are justified by the current
 schema and source evidence. Preserve the completed observation without claiming
 delivery acceptance or narrowing the full Plan 0101 outcome.
+
+## Official release source observation
+
+Read the official tag rust-v0.160.0 at peeled commit
+a956835d020762cb2b570053af06f643a11c0ecc. The installed package manifest does
+not include a source revision, so this is release-source evidence, not proven
+installed binary provenance.
+
+`codex-rs/app-server/src/request_processors/thread_queue_processor.rs` start
+requires a loaded thread, calls the queue service, and rejects NotIdle or
+PendingTriggerTurn with "thread already has an active or pending turn".
+Its SHA256 is c5b6119ad7a5416b4b7b850e15a1f6c0024207975ff8dfa374578cae178698a4.
+`codex-rs/ext/queue/src/service.rs` start takes a per-thread dispatch guard,
+selects the specified queued ID, calls start_turn_if_idle, and deletes the
+queued item only after Started. SHA256:
+110253b6c2b74de1ad8610b347ac331479d4f09873a1c8f9793a6921438d6ae1.
+
+The release test queue_start_while_active_returns_busy_and_preserves_the_queue
+also shows the added item starts automatically after the active turn completes.
+Therefore queue/add is not a passive mailbox operation. These observations
+improve the busy-state evidence but do not establish composer ownership,
+thread-to-client attestation, or installed provenance. Automatic delivery stays
+unqualified. Source tests were inspected, not executed; no runtime queue effect
+was performed.
+
+Source locators: official openai/codex GitHub repository, the exact commit above,
+app-server/tests/suite/v2/thread_queue.rs, queue processor and queue service.
