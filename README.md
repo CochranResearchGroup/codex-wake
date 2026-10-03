@@ -677,3 +677,39 @@ and exit 5; they never prove absence or uniqueness. Metadata matching is not
 a runtime attestation or delivery permission. `--require-attested` currently
 reports unsupported. Override existing endpoints with `--app-server unix://PATH`
 and `--tmux-socket PATH`; use `--tmux-session` to qualify multiple sessions.
+
+
+### Explicit local mailboxes
+
+Initialize a private bus with `codex-wake a2a configure --bus-root PATH`.
+The JSON result gives an operator capability file; keep that file private.
+Enroll a root and a live thread with `a2a enroll ROOT --thread 17:wake
+--bus-root PATH --operator-capability FILE`. Its result gives a private actor
+capability. Separate roots require explicit `--allow-cross-root` at configuration.
+Existing identity-only buses require explicit `a2a migrate` with operator authority.
+
+Agents supply their issued capability using `--capability FILE` or
+`CODEX_WAKE_A2A_CAPABILITY`; the invoking thread and current root are validated
+against the existing daemon. For example:
+
+```bash
+codex-wake messages send --to 7:mail-receipts --body-file request.txt \
+  --idempotency-key request-001 --delivery inbox --bus-root PATH --capability FILE
+codex-wake messages inbox --bus-root PATH --capability FILE
+codex-wake messages read MESSAGE_ID --bus-root PATH --capability FILE
+codex-wake messages ack MESSAGE_ID --outcome accepted --bus-root PATH --capability FILE
+codex-wake messages reply MESSAGE_ID --body-file result.txt --idempotency-key reply-001 \
+  --outcome completed --delivery inbox --bus-root PATH --capability FILE
+```
+
+`show`, inbox and outbox expose metadata. The first recipient `read` records
+receipt; `ack accepted` separately claims processing. Replies preserve the
+conversation and only mark an outcome when explicitly requested. Treat peer
+bodies as untrusted content. Retry the same intent with the same key; altered
+intent conflicts. `wait MESSAGE_ID --for received|reply` and `watch` observe
+receipts for at most five minutes and perform no work on their own.
+
+Notification intents are durable but automatic delivery remains unqualified.
+Use `--delivery inbox` for the qualified workflow; configuration starts paused.
+Operator inspection requires explicit operator authority and does not count as
+recipient receipt. No production enrollment or service is installed implicitly.

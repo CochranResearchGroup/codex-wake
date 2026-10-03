@@ -4728,3 +4728,40 @@ Qualified installed P62 discovery and recorded verification 0094.
   evidence for P63 identity design, not a reason to trust environment as a
   runtime-issued client binding.
 - No mailbox or delivery operation performed. Hosted integration follows.
+
+## Turn 212 | 2026-10-03
+
+Integrated P62 via PR #182 after Python 3.11/3.12 hosted success, verified
+canonical 9b43ab7a0d653dfcb05c8978e78971220cf4e9bf, and opened the bounded
+P63.2 identity/enrollment packet on feat/p63-identity-mailbox.
+
+- Added private versioned bus policy storage, canonical-root binding, operator
+  and exact-thread capabilities, enrollment, revocation and pause controls.
+- Namespace uses daemon-reported codexHome and exact thread modelProvider.
+  An issued actor capability adds authority; inherited pane environment does not.
+- Read-only reviewer /root/identity_review completed; primary accepted/reproduced
+  F1 and verified the bounded failure-receipt correction. No worker edits.
+- Disposable installed operator smoke passed without actors, production roots,
+  messages, notification or service installation.
+- Goal meter reached 324,615; adopted 700,000 checkpoint threshold as margin
+  before the user's 750,000 stop. Campaign remains active and incomplete.
+
+
+## Turn 213 | 2026-10-03
+
+Implemented P63.3 durable private mailbox and public message verbs, preserving
+independent admission, notification and recipient state. Added explicit mailbox
+migration without altering legacy wake schemas or dispatch behavior.
+
+- Comprehensive suite passed 792 tests in 41.768 seconds without retries.
+- Installed provider-free workflow passed across two disposable enrolled roots;
+  one request/reply, two received receipts, explicit claim/outcome, wrong actor
+  denied, sixteen connections closed and zero residual children.
+- /root/identity_review completed the disjoint seven-test fault packet; primary
+  accepted its coverage and included it in the full suite. Prior identity F1
+  remains corrected. This is not a second broad review.
+- Goal meter readback: 433,773. Checkpoint threshold remains 700,000.
+- Automatic notification, scheduler integration and actual two-agent delivery
+  remain unqualified. Full Plan 0101 stays OPEN; hosted integration follows.
+- Memory disposition: unavailable; bounded discovery has not established an
+  authorized repo memory group. No memory write attempted.

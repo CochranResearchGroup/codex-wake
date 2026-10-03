@@ -405,3 +405,14 @@ time budget, owned-socket checks, paginated population bounds, exact thread
 identity checks, and an explicit metadata field allowlist. Eight targeted tests
 pass. Discovery CLI, supported default endpoint locator, Byobu selectors, and
 installed read-only acceptance remain pending. No message delivery performed.
+
+## Execution checkpoint 2
+
+P62 discovery accepted and PR #182 merged at canonical
+9b43ab7a0d653dfcb05c8978e78971220cf4e9bf after both hosted Python gates.
+P63.2 identity/enrollment is underway on feat/p63-identity-mailbox under child
+Plan 0102. Private bus, explicit capabilities, namespace/thread/root checks,
+revocation, copied-root refusal and honest partial receipts are implemented.
+Mailbox admission and delivery have not started. Goal meter: 324,615 tokens
+at this checkpoint's validation start. Checkpoint at or before 700,000 tokens
+to provide margin below the operator's 750,000 stop boundary.

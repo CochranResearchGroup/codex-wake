@@ -98,6 +98,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
     from .sessions_cli import add_sessions_parser
     add_sessions_parser(subparsers)
+    from .a2a_cli import add_a2a_parser
+    add_a2a_parser(subparsers)
+    from .messages_cli import add_messages_parser
+    add_messages_parser(subparsers)
 
     after = subparsers.add_parser("after", help="create a wake after a duration such as 45m or 1h30m")
     after.add_argument("duration")
@@ -2686,6 +2690,12 @@ def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     root = resolve_root(args)
+    if args.command == "messages":
+        from .messages_cli import messages_command
+        return messages_command(args)
+    if args.command == "a2a":
+        from .a2a_cli import a2a_command
+        return a2a_command(args)
     if args.command == "sessions":
         from .sessions_cli import sessions_command
         return sessions_command(args)
