@@ -410,7 +410,7 @@ installed read-only acceptance remain pending. No message delivery performed.
 
 P62 discovery accepted and PR #182 merged at canonical
 9b43ab7a0d653dfcb05c8978e78971220cf4e9bf after both hosted Python gates.
-P63.2 identity/enrollment is underway on feat/p63-mailbox-operations under child
+P63.2 identity/enrollment is underway on docs/p63-budget-checkpoint under child
 Plan 0102. Private bus, explicit capabilities, namespace/thread/root checks,
 revocation, copied-root refusal and honest partial receipts are implemented.
 Mailbox admission and delivery have not started. Goal meter: 324,615 tokens
@@ -422,3 +422,17 @@ P63.2/P63.3 integrated in PR #183, canonical 42893b190eb19c30dc702b2377893b1ba57
 
 
 PR #184 integrated bounded scheduler/receipt library at 6d4c399e11f3c08b5a048c61579675657cabcb08. Plan 0105 implements independent operations foundations; live delivery, receipt CLI/restore, service and release gates remain OPEN.
+
+
+## Budget checkpoint and continuation authority
+
+User instruction remains execute the full plan and stop/checkpoint before
+750,000 goal tokens. The working threshold is at or before 700,000. At the
+625,906-token packet boundary, integrated the operations foundation and prepared
+a restart-safe checkpoint before beginning the materially larger live-delivery
+proof. Final meter is reported at pause. This stop follows the explicit user
+budget instruction; it is not acceptance or a request to narrow the goal.
+
+State remains OPEN. Continuation locator:
+`docs/dev/notes/0002-2026-10-03-plan0101-budget-checkpoint.md`.
+No automatic notification or actual live two-agent acceptance is claimed.
