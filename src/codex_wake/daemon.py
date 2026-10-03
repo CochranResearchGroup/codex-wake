@@ -133,7 +133,7 @@ def _evaluate_signal(
 ):
     """Use a source-owned guard for runtime sources before publication."""
 
-    if armed.spec.source not in {"runtime", "systemd"}:
+    if armed.spec.source not in {"runtime", "systemd", "a2a.receipt"}:
         return runtime.evaluate(armed.wake_id, armed, now, limits), False
     for runner in runners:
         handles = getattr(runner, "handles", None)
