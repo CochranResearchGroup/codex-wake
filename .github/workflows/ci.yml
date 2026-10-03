@@ -54,7 +54,7 @@ jobs:
 
           /tmp/codex-wake-ci/bin/python scripts/source_registry_smoke.py --json
           /tmp/codex-wake-ci/bin/python scripts/session_discovery_smoke.py --cli /tmp/codex-wake-ci/bin/codex-wake
-          /tmp/codex-wake-ci/bin/python scripts/a2a_mailbox_smoke.py --scheduler --cli /tmp/codex-wake-ci/bin/codex-wake
+          /tmp/codex-wake-ci/bin/python scripts/a2a_mailbox_smoke.py --scheduler --operations --cli /tmp/codex-wake-ci/bin/codex-wake
 
           python scripts/product_smoke.py \
             --codex-wake-bin /tmp/codex-wake-ci/bin/codex-wake \

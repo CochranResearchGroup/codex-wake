@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -35,7 +35,11 @@ def add_a2a_parser(subparsers):
             command.add_argument('--no-send', action='store_true')
             command.add_argument('--no-receive', action='store_true')
             command.add_argument('--notify', action='store_true')
-        if verb == 'revoke':
+        if verb == 'retention':
+            command.add_argument('--cursor',type=int,default=0)
+            command.add_argument('--limit',type=int,default=100)
+            command.add_argument('--apply-fingerprint')
+        if verb in ('revoke','rotate'):
             command.add_argument('actor_id')
 
 
@@ -118,6 +122,18 @@ def a2a_command(args):
         elif args.a2a_command in ('pause', 'resume'):
             receipt = store.set_paused(args.a2a_command == 'pause', args.operator_capability)
             result(dict(bus_id=store.bus_id, receipt_id=receipt, paused=store.status()['paused']))
+        elif args.a2a_command == 'rotate':
+            capability, receipt = store.rotate_actor(args.actor_id, args.operator_capability)
+            result(dict(bus_id=store.bus_id,actor_capability_file=str(capability),receipt_id=receipt))
+        elif args.a2a_command == 'retention':
+            from .a2a_mailbox import Mailbox
+            from .a2a_operations import MailOperations
+            result(dict(retention=MailOperations(Mailbox(store),args.operator_capability).retention(
+                cursor=args.cursor,limit=args.limit,apply_fingerprint=args.apply_fingerprint)))
+        elif args.a2a_command == 'doctor':
+            from .a2a_mailbox import Mailbox
+            from .a2a_operations import MailOperations
+            result(dict(bus=store.status(),mailbox=MailOperations(Mailbox(store),args.operator_capability).diagnostics()))
         elif args.a2a_command == 'revoke':
             receipt = store.revoke_actor(args.actor_id, args.operator_capability)
             result(dict(bus_id=store.bus_id, receipt_id=receipt))
