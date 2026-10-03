@@ -1,6 +1,6 @@
 # A2A mailbox operations foundation
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Parent: Plan 0101 / independent foundation of P63.7
 Depends-On: Plans 0102-0104 integrated; delivery-dependent acceptance remains open
@@ -63,3 +63,5 @@ those remain conservative until the source/restore integration qualifies exact
 projection acknowledgements. Pruning is logical body-row removal; SQLite pages,
 WAL files and backups are not secure-erased. Physical compaction, compact
 ninety-day tombstones and restart/restore qualification remain wider gates.
+
+Hosted Python 3.11/3.12 SUCCESS, run 37145185923. PR #185 merged at 2026-10-03T18:43:51Z; canonical f3050bde52301518f5ac061835b5ac502198ed1c. Bounded operations foundation accepted; parent campaign remains OPEN.
