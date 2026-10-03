@@ -92,6 +92,8 @@ class ConfiguredReceiptTests(unittest.TestCase):
         mailbox, actor = ConfiguredReceiptAuthority(self.config, self.wake_root).resolve(armed)
         before = self.mailbox_counts()
         with mailbox.transaction(actor) as database:
+            # Read-only authority must survive a callback toggling this pragma.
+            database.execute('PRAGMA query_only=OFF')
             with self.assertRaises(sqlite3.OperationalError):
                 database.execute("UPDATE meta SET value='true' WHERE key='paused'")
             database.execute('ROLLBACK')

@@ -117,7 +117,7 @@ class _ObserverMailbox(Mailbox):
         if (actor != self.actor or permission != 'inspect'
                 or self.authority.grants().get(self.grant['source_instance']) != self.grant):
             raise _unavailable()
-        with self.bus.connection() as database:
+        with self.bus.connection(read_only=True) as database:
             database.execute('PRAGMA query_only=ON')
             database.execute('BEGIN')
             self._schema(database)

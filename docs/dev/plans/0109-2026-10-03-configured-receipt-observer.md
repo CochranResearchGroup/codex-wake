@@ -32,7 +32,8 @@ claims to be a live actor and never authenticates using fabricated runtime
 metadata. Its mailbox transactions enforce SQLite read-only mode and cannot
 send, acknowledge, reply, enroll, or modify the mailbox.
 
-Write surface: a receipt-authority module, daemon wiring, focused tests,
+Write surface: a receipt-authority module, daemon wiring, an optional read-only
+bus connection mode, focused tests,
 README, parent plan, verification 0101, runbook and lane projection. No live
 configuration is written; all acceptance uses synthetic temporary buses.
 
@@ -71,7 +72,9 @@ is a separate state. Full Plan 0101 and long-suspension delivery stay OPEN.
 Transition: configuration absent -> locally accepted / awaiting hosted gate.
 Progress classification: outcome_progress; executable production daemon wiring
 now reconstructs exact receipt arms only with independently granted authority.
-47 focused tests, 830 full tests, six installed tests; FD 5 -> 5 and children
+The one targeted repair makes read-only enforcement irreversible at the
+SQLite connection mode, even when a callback toggles query_only. Final:
+63 focused tests, 830 full tests, six installed tests; FD 5 -> 5 and children
 0 -> 0. The next dependent packet is receipt arming and qualified suspension
 delivery, preserving the current generic-dispatch hold until its own acceptance.
 No inherited review allowance was reset and no subagent was launched.

@@ -156,7 +156,7 @@ class BusStore:
         return json.loads(row[0])
 
     @contextmanager
-    def connection(self):
+    def connection(self, *, read_only: bool = False):
         private_path(self.root, directory=True)
         private_path(self.path)
         for suffix in ('-wal', '-shm'):
@@ -165,7 +165,9 @@ class BusStore:
                 private_path(sidecar)
         database = None
         try:
-            database = sqlite3.connect(self.path.as_uri() + '?mode=rw', uri=True, isolation_level=None, timeout=1)
+            mode = 'ro' if read_only else 'rw'
+            database = sqlite3.connect(self.path.as_uri() + '?mode=' + mode,
+                                       uri=True, isolation_level=None, timeout=1)
             database.row_factory = sqlite3.Row
             database.execute('PRAGMA foreign_keys=ON')
             version = self.meta(database, 'schema_version')

@@ -768,7 +768,7 @@ contains no raw secrets, and permits at most 100 grants / 64 KiB:
 Replace placeholders with the exact existing identities and receipt source
 instance. The operator capability delegates inspection; the observer's pinned
 actor value does not authenticate the daemon as that actor. Mailbox transactions
-are read-only and cannot send, read-as-recipient, acknowledge, or reply. Removing
+use SQLite `mode=ro` and cannot send, read-as-recipient, acknowledge, or reply. Removing
 the grant or revoking/rotating its actor fences even an already-created runner.
 Missing, invalid, stale or cross-root authority keeps the receipt wake pending.
 

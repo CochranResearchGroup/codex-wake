@@ -64,3 +64,31 @@ current primary ownership, with no competing local worktree.
 
 Memory disposition: unavailable. No applicable authorized repository group was
 established by the bounded Graphiti atlas discovery; zero Graphiti writes.
+
+## Targeted read-only boundary repair
+
+The first published head d28c14580e13ee5c94fdcae57fd9939fa0f3ef72 passed
+both hosted gates in run 37155906994. Before integration, a stricter callback
+probe disabled PRAGMA query_only and attempted a mailbox UPDATE. It went red
+with `OperationalError not raised` in 0.124s: query-only alone is reversible.
+This consumed the packet's one targeted repair, not a new discovery allowance.
+
+BusStore.connection now has an optional read_only mode; its existing ownership,
+sidecar, schema and canonical-root checks still apply. The observer opens the
+connection with SQLite URI mode=ro as well as query_only. The same real database
+write is now refused even after changing the pragma. Default actor/operator
+connections keep their existing mode=rw; no schema or capability migration.
+
+Final checks after this source change:
+
+- Python 3.12 focused authority/receipt/bus/daemon: 63 tests in 4.449s.
+- Python 3.11 authority/bus: 22 tests in 1.534s.
+- Full Python suite: 830 tests in 36.842s, passed without retry.
+- Rebuilt isolated wheel SHA256:
+  9cce809aeeb22d3c76e1545c2039ae06aaa0150cf548cbdf54eff3506e3941e8.
+- Reinstalled final wheel: six tests in 1.143s; installed module path checked,
+  initialized descriptors 5 -> 5 and children 0 -> 0 again.
+- Source/test/hook compilation and diff hygiene passed.
+
+The initial wheel/sample and initial hosted result above remain historical;
+only final-head hosted gates can establish integration readiness.
