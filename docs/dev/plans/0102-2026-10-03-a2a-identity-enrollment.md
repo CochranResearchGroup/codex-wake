@@ -1,6 +1,6 @@
 # A2A identity and enrollment
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Parent: Plan 0101 / P63.2
 Depends-On: Plan 0100 accepted in PR #182
@@ -75,3 +75,5 @@ invoking-context case. Installed disposable operator configure/enroll/resume/
 pause/status passed, with no actors issued and no production roots enrolled.
 Existing-daemon metadata supplies server codexHome and thread modelProvider.
 Hosted integration and full mailbox API acceptance remain pending.
+
+Hosted integration: PR #183 merged at 2026-10-03T18:19:14Z after Python 3.11/3.12 success (run 37143648918). Canonical commit 42893b190eb19c30dc702b2377893b1ba5736b88. Parent Plan 0101 remains OPEN.

@@ -15,13 +15,15 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
         command.add_argument('--json', action='store_true', dest='as_json')
         if verb != 'configure':
             command.add_argument('--operator-capability', type=Path, required=True)
+        if verb == 'tick':
+            command.add_argument('--projection-root', type=Path, required=True)
         if verb == 'configure':
             command.add_argument('--allow-cross-root', action='store_true')
         if verb == 'enroll':
@@ -94,6 +96,22 @@ def a2a_command(args):
                 value.update(actor_capability_file=str(capability), actor_receipt_id=issuance,
                              namespace=identity.namespace, thread_id=identity.thread_id)
             result(value)
+        elif args.a2a_command == 'tick':
+            from .a2a_mailbox import Mailbox
+            from .a2a_scheduler import MailScheduler
+            scheduler = MailScheduler(Mailbox(store), args.operator_capability)
+            lease = scheduler.acquire()
+            if lease is None:
+                result(dict(bus_id=store.bus_id, status='busy', dispatched=0))
+            else:
+                try:
+                    recovered = scheduler.recover(lease)
+                    published = scheduler.publish(lease, args.projection_root)
+                    result(dict(bus_id=store.bus_id, status='projection_only', published=published,
+                                uncertain_recovered=recovered, dispatched=0,
+                                notification_capability='unqualified'))
+                finally:
+                    scheduler.release(lease)
         elif args.a2a_command == 'migrate':
             from .a2a_mailbox import Mailbox
             result(dict(bus_id=store.bus_id, receipt_id=Mailbox.migrate(store, args.operator_capability)))

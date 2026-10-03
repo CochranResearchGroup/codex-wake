@@ -713,3 +713,11 @@ Notification intents are durable but automatic delivery remains unqualified.
 Use `--delivery inbox` for the qualified workflow; configuration starts paused.
 Operator inspection requires explicit operator authority and does not count as
 recipient receipt. No production enrollment or service is installed implicitly.
+
+
+`a2a tick --projection-root PRIVATE_ABSOLUTE_PATH --bus-root PATH
+--operator-capability FILE` performs one bounded scheduler reconciliation and
+publishes body-free job metadata. It holds expired dispatch claims as uncertain
+and performs zero live dispatches while notification capability is unqualified.
+Repeated publication reconciles identical bytes; cancelled jobs confer no
+journal authority even when an old projection remains on disk.

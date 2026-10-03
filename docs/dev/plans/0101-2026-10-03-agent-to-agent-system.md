@@ -410,9 +410,12 @@ installed read-only acceptance remain pending. No message delivery performed.
 
 P62 discovery accepted and PR #182 merged at canonical
 9b43ab7a0d653dfcb05c8978e78971220cf4e9bf after both hosted Python gates.
-P63.2 identity/enrollment is underway on feat/p63-identity-mailbox under child
+P63.2 identity/enrollment is underway on feat/p63-scheduler-bridge under child
 Plan 0102. Private bus, explicit capabilities, namespace/thread/root checks,
 revocation, copied-root refusal and honest partial receipts are implemented.
 Mailbox admission and delivery have not started. Goal meter: 324,615 tokens
 at this checkpoint's validation start. Checkpoint at or before 700,000 tokens
 to provide margin below the operator's 750,000 stop boundary.
+
+
+P63.2/P63.3 integrated in PR #183, canonical 42893b190eb19c30dc702b2377893b1ba5736b88, hosted Python 3.11/3.12 gates successful. Plan 0104 now owns the scheduler bridge; full campaign remains OPEN.

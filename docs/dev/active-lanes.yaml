@@ -6,15 +6,15 @@ lanes:
     objective: Local agent-to-agent communication starting with P62 discovery
     work_item: https://github.com/CochranResearchGroup/codex-wake/issues/181
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
-    source_ref: feat/p63-identity-mailbox
-    branch: feat/p63-identity-mailbox
+    source_ref: feat/p63-scheduler-bridge
+    branch: feat/p63-scheduler-bridge
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    published_checkpoint: e15641bd3fda5e654e7ddc4b849a6898d1030d5f
-    remote_ref: origin/feat/p63-identity-mailbox
+    published_checkpoint: 8784bdcac204c4254d3009a8568b256f13c87904
+    remote_ref: origin/feat/p63-scheduler-bridge
     integration_method: squash_pr
     dependencies: []
     overlaps: []
     reconciliation_date: 2026-10-03
-    disposition: P62 integrated; identity/enrollment and mailbox slice in progress
+    disposition: P62 and P63.2-3 integrated; scheduler bridge in progress

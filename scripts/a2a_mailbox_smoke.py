@@ -13,7 +13,7 @@ import threading
 from websockets.sync.server import unix_serve
 
 
-def smoke(cli: str):
+def smoke(cli: str, *, scheduler=False):
     methods, closed = [], []
     with tempfile.TemporaryDirectory(prefix='wake-mailbox-smoke-') as temporary:
         root=Path(temporary)
@@ -98,18 +98,40 @@ def smoke(cli: str):
                 original=message(0,['show',identifier])['message']
                 assert original['state']['recipient']=='completed'
                 received_ids=[retrieved['receipt_id'],returned['receipt_id']]
+                projected=[]
+                if scheduler:
+                    pending=message(0,['send','--to','thread:'+thread_ids[1],'--body-file',str(request_body),
+                                       '--idempotency-key','installed-projection','--delivery','notify'])
+                    projection_root=root/'jobs'
+                    for _ in range(2):
+                        tick=invoke(['a2a','tick','--operator-capability',operator,
+                                     '--projection-root',str(projection_root)])
+                        assert tick['status']=='projection_only' and tick['dispatched']==0
+                        assert tick['notification_capability']=='unqualified'
+                        projected=tick['published'];assert len(projected)==1
+                    path=Path(projected[0]['path'])
+                    assert path.stat().st_mode & 0o777 == 0o600
+                    job=json.loads(path.read_text())
+                    assert job['message_id']==pending['message']['message_id']
+                    assert 'Fixture mailbox request' not in path.read_text()
+                    message(0,['cancel',job['message_id']])
+                    tick=invoke(['a2a','tick','--operator-capability',operator,
+                                 '--projection-root',str(projection_root)])
+                    assert tick['published']==[] and tick['dispatched']==0
+
             finally:
                 server.shutdown();worker.join(timeout=5);assert not worker.is_alive()
         children_after=len(children_path.read_text().split())
         assert children_after==children_before
     assert set(methods)<={'initialize','initialized','thread/loaded/list','thread/read'}
     assert len(closed)==methods.count('initialize')
-    return dict(schema_version=1,status='accepted_provider_free',mode='inbox_only',requests=1,replies=1,
+    return dict(schema_version=1,status='accepted_provider_free',mode='inbox_and_projection' if scheduler else 'inbox_only',requests=2 if scheduler else 1,replies=1,
+                scheduler_projections=len(projected),scheduler_dispatches=0,
                 received_receipts=len(received_ids),explicit_completion_claim=True,cross_root_policy='explicit',
                 wrong_actor_denied=True,runtime_effect_methods=0,connections_closed=len(closed),
                 children_before=children_before,children_after=children_after,cleanup='temporary_bus_and_roots_removed')
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--cli',required=True);args=parser.parse_args()
-    print(json.dumps(smoke(args.cli),sort_keys=True))
+    parser=argparse.ArgumentParser();parser.add_argument('--cli',required=True);parser.add_argument('--scheduler',action='store_true');args=parser.parse_args()
+    print(json.dumps(smoke(args.cli,scheduler=args.scheduler),sort_keys=True))
