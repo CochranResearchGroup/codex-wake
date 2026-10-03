@@ -12,7 +12,8 @@ Existing `app candidates` scans saved rollouts and is not a live inventory.
 A read-only host probe successfully queried the existing shared daemon through
 WebSocket over its Unix socket with `thread/loaded/list` and `thread/read`.
 Byobu window indices, window names, pane IDs, titles, and working directories
-are available through tmux. No session verbs have been implemented.
+are available through tmux. All five session verbs now have an initial implementation; final installed
+acceptance and remaining contract qualification are pending.
 
 ## Objective
 
@@ -203,3 +204,20 @@ Design: this contract, roadmap lane, and dated runbook entry are coherent and
 pass documentation hygiene. Implementation: all packets and acceptance above
 pass, then update plan state with installed evidence. Design completion is not
 runtime delivery or implementation completion.
+
+## Implementation checkpoint | 2026-10-03
+
+- Supported read-only locator: `codex app-server daemon version` reports
+  socketPath. The owned control symlink is resolved only through this locator;
+  explicit socket endpoints reject symlinks. No daemon start/restart occurs.
+- Session inventory, exact selectors, current-thread validation, bounded JSONL
+  watch, metadata-only output, and source-failure exits are implemented.
+- Live metadata read resolved 17:wake and 7:mail-receipts; duplicate mapocock
+  returned ambiguity. One-second pinned watch completed. These reads establish
+  source behavior, not message delivery or comprehensive installed acceptance.
+- Focused checks: 11 session tests and 10 shared reader tests pass. Existing
+  CLI checks: 66 pass. Comprehensive suite: 733 tests, 36.459 seconds, no retries;
+  run preceded the final locator/watch test additions and title normalization.
+- Remaining P62 gates: exact unloaded-thread query semantics, status/protocol
+  compatibility, complete generation/source-race qualification, installed
+  package acceptance, and final documentation/CI checks.

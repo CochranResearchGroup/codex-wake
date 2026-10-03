@@ -5,9 +5,11 @@ from pathlib import Path
 import socket
 import tempfile
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 
 from codex_wake.records import WakeError
-from codex_wake.shared_app_server import SharedAppServerReader, SharedSourceError
+from codex_wake.shared_app_server import SharedAppServerReader, SharedSourceError, locate_shared_endpoint
 
 
 class FakeConnection:
@@ -120,3 +122,18 @@ class SharedReaderTests(unittest.TestCase):
         for endpoint in ['stdio://', 'unix://', 'unix://relative']:
             with self.assertRaises(WakeError):
                 SharedAppServerReader(endpoint)
+
+    def test_supported_locator_resolves_owned_control_symlink(self):
+        link = Path(self.tmp.name) / 'control.sock'
+        link.symlink_to(self.path)
+        response = SimpleNamespace(stdout=json.dumps(dict(status='running', socketPath=str(link))))
+        with patch('codex_wake.shared_app_server.subprocess.run', return_value=response) as run:
+            self.assertEqual(locate_shared_endpoint(), 'unix://' + str(self.path))
+        self.assertEqual(run.call_args.args[0], ['codex', 'app-server', 'daemon', 'version'])
+
+    def test_stopped_locator_does_not_start_daemon(self):
+        response = SimpleNamespace(stdout=json.dumps(dict(status='stopped')))
+        with patch('codex_wake.shared_app_server.subprocess.run', return_value=response) as run:
+            with self.assertRaises(SharedSourceError):
+                locate_shared_endpoint()
+        self.assertEqual(run.call_count, 1)

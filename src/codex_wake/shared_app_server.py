@@ -10,6 +10,7 @@ import math
 import os
 from pathlib import Path
 import stat
+import subprocess
 import time
 from typing import Any, Callable
 
@@ -145,3 +146,27 @@ class SharedAppServerReader:
 
     def __exit__(self, *_: Any) -> None:
         self.close()
+
+
+def locate_shared_endpoint(*, timeout: float = 10.0, codex_cmd: str = "codex") -> str:
+    """Use the installed CLI's read-only locator; never bootstrap a daemon."""
+    try:
+        result = subprocess.run([codex_cmd, "app-server", "daemon", "version"],
+                                capture_output=True, text=True, timeout=timeout, check=True)
+        metadata = json.loads(result.stdout)
+        if metadata.get("status") != "running":
+            raise SharedSourceError("shared daemon is not running")
+        path = Path(metadata["socketPath"])
+        if not path.is_absolute() or path.lstat().st_uid != os.geteuid():
+            raise SharedSourceError("daemon locator returned an invalid socket")
+        # Codex's supported control locator is an owned symlink to its socket.
+        # Only this locator resolves it; explicit endpoints still reject links.
+        resolved = path.resolve(strict=True)
+        info = resolved.lstat()
+        if info.st_uid != os.geteuid() or not stat.S_ISSOCK(info.st_mode):
+            raise SharedSourceError("daemon locator target is not an owned socket")
+        return "unix://" + str(resolved)
+    except WakeError:
+        raise
+    except Exception as exc:
+        raise SharedSourceError(f"daemon locator unavailable: {type(exc).__name__}") from None

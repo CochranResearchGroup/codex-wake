@@ -11,8 +11,8 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    published_checkpoint: null
-    remote_ref: null
+    published_checkpoint: 57c049cd28e5898480565879c505bc80fbd9181c
+    remote_ref: origin/feat/p63-session-discovery
     integration_method: squash_pr
     dependencies: [P62]
     overlaps: []

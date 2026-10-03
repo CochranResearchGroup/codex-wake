@@ -4699,3 +4699,16 @@ goal tokens. Initial meter readback: 18,593 tokens.
   planning changes remain attached to this lane; no unrelated dirty changes.
 - P62 and P63 are OPEN. First implementation packet: bounded existing-daemon
   read-only transport and discovery; no runtime restart or message delivery.
+
+## Turn 210 | 2026-10-03
+
+Continued Plan 0101/P62 discovery. Added the installed CLI daemon locator,
+tmux metadata inventory, exact Byobu selectors, all five session CLI verbs,
+and bounded polling watch. Maintained metadata matching as discovery evidence.
+
+- Complete live read resolved wake and mail-receipts by qualified tab; duplicate
+  mapocock failed ambiguous. No lifecycle or message operations were invoked.
+- Focused session/transport/CLI checks pass; comprehensive suite passed 733
+  tests in 36.459 seconds before final targeted additions.
+- Goal meter readback during packet: 108,523 tokens; 750,000 checkpoint bound
+  remains active. Discovery acceptance is incomplete; mailbox work follows P62.
