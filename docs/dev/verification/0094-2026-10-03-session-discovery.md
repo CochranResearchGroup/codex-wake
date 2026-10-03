@@ -1,6 +1,6 @@
 # Session discovery qualification
 
-State: ACCEPTED_LOCAL_PENDING_HOSTED
+State: ACCEPTED
 Plan: 0100 / P62, dependency of Plan 0101 / P63
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/181
 
@@ -42,3 +42,7 @@ optional missing tmux remains visible, while tab selection requires both.
 
 Hosted CI and canonical integration remain pending. No mailbox, delivery,
 production enrollment, installed service change, or release is claimed.
+
+Hosted gate readback: Python 3.11 and 3.12 SUCCESS, run 37140283103.
+PR #182 MERGED at 2026-10-03T17:24:39Z, canonical merge
+9b43ab7a0d653dfcb05c8978e78971220cf4e9bf. No installed service release yet.

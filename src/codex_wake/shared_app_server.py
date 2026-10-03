@@ -38,6 +38,7 @@ class SharedAppServerReader:
         self.connection: Any = None
         self.deadline = 0.0
         self.sequence = 0
+        self.server_metadata: dict[str, Any] = {}
 
     def __enter__(self) -> SharedAppServerReader:
         self.deadline = time.monotonic() + self.timeout
@@ -52,10 +53,11 @@ class SharedAppServerReader:
             self.connection = connector(str(self.path), open_timeout=self.remaining(),
                                         close_timeout=min(1.0, self.timeout),
                                         compression=None, max_size=4 * 1024 * 1024)
-            self.request("initialize", {
+            initialization = self.request("initialize", {
                 "clientInfo": {"name": "codex_wake_discovery", "version": "0.6.0"},
                 "capabilities": {"experimentalApi": True},
             })
+            self.server_metadata = {key: initialization.get(key) for key in ("codexHome", "userAgent", "platformFamily", "platformOs")}
             self.connection.send(json.dumps({"method": "initialized"}))
             return self
         except Exception as exc:

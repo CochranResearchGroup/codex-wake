@@ -1040,7 +1040,7 @@ Acceptance target:
 
 ## P62 | Session Discovery And Byobu Selectors
 
-State: OPEN
+State: CLOSED
 
 Current State: Session verb design is complete. A read-only probe verified
 shared-daemon loaded-thread discovery and tmux tab enumeration. Product

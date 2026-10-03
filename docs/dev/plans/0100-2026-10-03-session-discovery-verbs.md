@@ -1,6 +1,6 @@
 # Session discovery and Byobu selectors
 
-State: OPEN
+State: CLOSED
 Lane: P62
 Parent: P63 / Plan 0101
 
@@ -232,3 +232,7 @@ in sources and complete=false without preventing an exact identity read. Tab
 selectors still require complete sources. Unloaded identities are not resumed:
 this installed runtime rejects metadata reads of unloaded threads. Discovery
 reports absent live identity, rather than pretending history is a loaded target.
+
+Hosted Python 3.11/3.12 release gates passed. PR #182 squash-merged as
+9b43ab7a0d653dfcb05c8978e78971220cf4e9bf, verified against origin/main. P62
+implementation is accepted; remaining campaign capabilities belong to P63.
