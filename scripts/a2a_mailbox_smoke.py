@@ -13,7 +13,7 @@ import threading
 from websockets.sync.server import unix_serve
 
 
-def smoke(cli: str, *, scheduler=False):
+def smoke(cli: str, *, scheduler=False, operations=False):
     methods, closed = [], []
     with tempfile.TemporaryDirectory(prefix='wake-mailbox-smoke-') as temporary:
         root=Path(temporary)
@@ -119,6 +119,21 @@ def smoke(cli: str, *, scheduler=False):
                                  '--projection-root',str(projection_root)])
                     assert tick['published']==[] and tick['dispatched']==0
 
+                if operations:
+                    diagnostic=invoke(['a2a','doctor','--operator-capability',operator])
+                    assert diagnostic['mailbox']['metadata_only']
+                    assert 'Fixture mailbox request' not in json.dumps(diagnostic)
+                    preview=invoke(['a2a','retention','--operator-capability',operator])['retention']
+                    assert preview['eligible']==[] and not preview['applied']
+                    applied=invoke(['a2a','retention','--operator-capability',operator,
+                                    '--apply-fingerprint',preview['fingerprint']])['retention']
+                    assert applied['applied'] and applied['pruned']==0
+                    actor_id=json.loads(Path(capabilities[0]).read_text())['actor_id']
+                    rotated=invoke(['a2a','rotate',actor_id,'--operator-capability',operator])
+                    denied=message(0,['inbox'],expected=7)
+                    assert denied['error']['code']=='authorization_denied'
+                    capabilities[0]=rotated['actor_capability_file']
+                    assert message(0,['inbox'])['success']
             finally:
                 server.shutdown();worker.join(timeout=5);assert not worker.is_alive()
         children_after=len(children_path.read_text().split())
@@ -126,12 +141,12 @@ def smoke(cli: str, *, scheduler=False):
     assert set(methods)<={'initialize','initialized','thread/loaded/list','thread/read'}
     assert len(closed)==methods.count('initialize')
     return dict(schema_version=1,status='accepted_provider_free',mode='inbox_and_projection' if scheduler else 'inbox_only',requests=2 if scheduler else 1,replies=1,
-                scheduler_projections=len(projected),scheduler_dispatches=0,
+                scheduler_projections=len(projected),scheduler_dispatches=0,operator_operations=operations,
                 received_receipts=len(received_ids),explicit_completion_claim=True,cross_root_policy='explicit',
                 wrong_actor_denied=True,runtime_effect_methods=0,connections_closed=len(closed),
                 children_before=children_before,children_after=children_after,cleanup='temporary_bus_and_roots_removed')
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--cli',required=True);parser.add_argument('--scheduler',action='store_true');args=parser.parse_args()
-    print(json.dumps(smoke(args.cli,scheduler=args.scheduler),sort_keys=True))
+    parser=argparse.ArgumentParser();parser.add_argument('--cli',required=True);parser.add_argument('--scheduler',action='store_true');parser.add_argument('--operations',action='store_true');args=parser.parse_args()
+    print(json.dumps(smoke(args.cli,scheduler=args.scheduler,operations=args.operations),sort_keys=True))

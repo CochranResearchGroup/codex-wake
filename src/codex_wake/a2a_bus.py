@@ -230,6 +230,25 @@ class BusStore:
             database.execute('COMMIT')
             return capability, receipt
 
+    def rotate_actor(self, actor_id: str, operator_capability: Path) -> tuple[Path, str]:
+        secret = secrets.token_urlsafe(32)
+        with self.connection() as database:
+            database.execute('BEGIN IMMEDIATE')
+            self.operator(database, operator_capability)
+            row = database.execute('SELECT * FROM actors WHERE actor_id=?', (actor_id,)).fetchone()
+            if row is None:
+                raise BusError('not_found', 'actor not found')
+            generation = row['generation'] + 1
+            directory = self.root / 'capabilities'
+            private_path(directory, directory=True)
+            capability = directory / (actor_id + '_g' + str(generation) + '.json')
+            write_capability(capability, dict(schema_version=1, bus_id=self.bus_id, actor_id=actor_id, secret=secret))
+            database.execute('UPDATE actors SET token_digest=?,generation=?,revoked=0 WHERE actor_id=?',
+                             (digest(secret), generation, actor_id))
+            receipt = self.event(database, 'operator', 'rotate_actor', dict(actor_id=actor_id, generation=generation))
+            database.execute('COMMIT')
+            return capability, receipt
+
     def authenticate(self, capability: Path, identity: RuntimeIdentity, *, invoking_cwd: Path) -> Actor:
         value = read_capability(capability)
         with self.connection() as database:

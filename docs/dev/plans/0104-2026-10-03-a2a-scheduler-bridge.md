@@ -1,6 +1,6 @@
 # A2A scheduler journal and projection bridge
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Parent: Plan 0101 / P63.4
 Depends-On: Plan 0103 mailbox integration
@@ -68,3 +68,5 @@ suite includes it. No core defects reproduced and no second broad review ran.
 Receipt bridge tests additionally cover already-committed receipts, foreign
 actor denial, revocation, corrupt intents and interrupted signal acknowledgement.
 All evidence is synthetic/provider-free; no live acceptance is claimed.
+
+Bounded scheduler/library qualification integrated in PR #184, hosted Python 3.11/3.12 SUCCESS (run 37144543820), canonical 6d4c399e11f3c08b5a048c61579675657cabcb08. Full P63.4 delivery-dependent acceptance remains in Plan 0101.

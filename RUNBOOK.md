@@ -4790,3 +4790,22 @@ Wake fixtures and reconciles interrupted signal acknowledgement. Long-running
 CLI/source restore and delivery remain unqualified. Worker fault packet returned
 eight passing tests in 1.006 seconds; primary accepted after source inspection.
 Memory disposition: unavailable; no authorized repo memory group established.
+
+
+## Turn 215 | 2026-10-03
+
+Integrated PR #184 after hosted Python 3.11/3.12 success, run 37144543820;
+canonical 6d4c399e11f3c08b5a048c61579675657cabcb08. Opened Plan 0105 on
+feat/p63-mailbox-operations for independent operator foundations. Full delivery,
+receipt source/restore, live resource, service and release gates remain open.
+
+- Implemented explicit generation rotation, body-free doctor and fingerprinted
+  bounded retention preview/apply, preserving receipt and dedup history.
+- Six focused operations tests and full 818-test suite pass (42.501 seconds).
+- Installed fixture: doctor/preview/apply/rotation pass, old token denied, new
+  token accepted; 22 read connections close, zero children/effect methods.
+- Logical pruning has conservative production signal pins; physical compaction,
+  secure erase and compact tombstones are not claimed.
+- Goal meter readback 606,668; maintain checkpoint margin before 700,000.
+- Memory disposition unavailable: recorded_no_write machine receipt with zero
+  attempted Graphiti writes; no authorized repository group established.

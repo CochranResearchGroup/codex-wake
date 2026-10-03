@@ -721,3 +721,17 @@ publishes body-free job metadata. It holds expired dispatch claims as uncertain
 and performs zero live dispatches while notification capability is unqualified.
 Repeated publication reconciles identical bytes; cancelled jobs confer no
 journal authority even when an old projection remains on disk.
+
+
+`a2a doctor` provides body-free mailbox counters, backlog, lease generations and
+observer descriptor usage. `a2a rotate ACTOR_ID` requires operator authority and
+issues a new private capability, invalidating old credentials. Existing work
+claims remain recorded and require reconciliation across capability generations.
+
+`a2a retention` previews eligible bodies and their pins. Apply only the exact
+returned fingerprint with `--apply-fingerprint VALUE`; eligibility is rechecked
+atomically. Bodies require thirty days since terminal resolution and no pending
+signal, uncertain attempt, open claim or active conversation. Metadata/dedup
+history remains intact. Current receipt source integration conservatively holds
+unprojected pins; pruning removes logical rows without erasing backups or pages.
+All operator commands require `--bus-root PATH --operator-capability FILE`.
