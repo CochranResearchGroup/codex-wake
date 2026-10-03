@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import signal
 import socket
 import tempfile
 import threading
@@ -180,23 +181,34 @@ class GitHubWebhookRuntimeTests(unittest.TestCase):
     def test_provider_timeout_runs_on_main_thread_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
             module = make_module(Path(tmp) / "signals.sqlite3")
+            ingest = module.ingest
+            def slower_ingest(*args, **kwargs):
+                # Recovery proves durable ingest, not a sub-250 ms disk benchmark.
+                time.sleep(.3)
+                return ingest(*args, **kwargs)
+            module.ingest = slower_ingest
             adapter = GitHubPollingAdapter(config(), FixtureClient([]))
             spec = adapter.request(ref="refs/heads/main", conclusions=("success",))
             armed = module.arm(WakeId("runtime-timeout"), spec,
                                ArmContext("runtime", "runtime", NOW, None, make_intent().resume, adapter))
             factory_threads = []
+            factory_timers = []
+            slow_returned = []
+            previous_handler = signal.getsignal(signal.SIGALRM)
             class SlowClient:
                 def get_run_attempt(self, *args):
-                    time.sleep(2)
+                    time.sleep(10)
+                    slow_returned.append(True)
             def attempt_client(deadline):
                 factory_threads.append(threading.current_thread())
+                factory_timers.append(signal.getitimer(signal.ITIMER_REAL))
                 return SlowClient() if len(factory_threads) == 1 else FixtureClient([run()])
             runtime = GitHubWebhookRuntime(
-                WebhookHTTPConfig(request_timeout=1, shutdown_timeout=.75), adapter=adapter,
+                WebhookHTTPConfig(request_timeout=3, shutdown_timeout=2), adapter=adapter,
                 module=module, checkpoints=module, anchor=armed.anchor,
                 webhook_config=WebhookConfig(secret_refs=("current",)),
                 resolve_secret=lambda ref: SECRET, attempt_client_factory=attempt_client,
-                operation_timeout=.25, now=lambda: NOW + timedelta(seconds=2),
+                operation_timeout=1, now=lambda: NOW + timedelta(seconds=2),
             )
             body, signature = signed_body()
             result = []
@@ -212,10 +224,19 @@ class GitHubWebhookRuntimeTests(unittest.TestCase):
             elapsed = time.monotonic() - started
             client.join(2)
             self.assertFalse(client.is_alive())
-            self.assertLess(elapsed, 1)
+            self.assertLess(elapsed, 3)
             self.assertEqual(result, [(503, "VERIFICATION_UNAVAILABLE"), (200, "COMMITTED")])
             self.assertEqual(factory_threads, [threading.main_thread(), threading.main_thread()])
-            self.assertIsNotNone(module.source_checkpoint("github", "github-ci"))
+            self.assertEqual(slow_returned, [])
+            self.assertEqual(len(factory_timers), 2)
+            self.assertTrue(all(0 < remaining <= 1 and interval == 0
+                                for remaining, interval in factory_timers))
+            self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0, 0))
+            self.assertEqual(signal.getsignal(signal.SIGALRM), previous_handler)
+            checkpoint = module.source_checkpoint("github", "github-ci")
+            self.assertIsNotNone(checkpoint)
+            reopened = make_module(Path(tmp) / "signals.sqlite3")
+            self.assertEqual(reopened.source_checkpoint("github", "github-ci"), checkpoint)
 
     def test_poll_first_and_restart_both_preserve_the_durable_duplicate(self):
         with tempfile.TemporaryDirectory() as tmp:

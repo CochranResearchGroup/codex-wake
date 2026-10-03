@@ -448,3 +448,7 @@ release-source queue behavior; automatic delivery remains unqualified because
 composer/client identity and installed provenance are not established.
 Full system acceptance, long receipt suspension, daemon restore, actual named
 agents, lifecycle/resource qualification, service and release remain open.
+
+Plan 0107 qualifies the explicit receipt restore/source-guard seam, verification
+0100. Production authority configuration and long-suspension CLI remain
+unfinished; default daemon receipt discovery is not implied by registration.
