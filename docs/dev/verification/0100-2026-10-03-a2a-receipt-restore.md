@@ -34,3 +34,9 @@ Remaining: production authority resolver/configuration, long-suspension CLI and
 installed process restart; safe notification, named agents, lifecycle/multiroot
 resource soak, supervisor, migrations/rollback and release. Memory disposition
 unavailable; no authorized healthy Graphiti write path.
+
+Pre-integration transport boundary check: generic dispatch now explicitly holds
+A2A receipt firing records with "A2A receipt delivery is unqualified" before
+transport selection. Receipt matching cannot silently route through the older
+tmux/stdin/app-server transports. The real published fixture remains in firing
+without an effect. This is a held delivery outcome, not successful suspension.

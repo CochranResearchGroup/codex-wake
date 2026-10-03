@@ -3,12 +3,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 import tempfile
 import unittest
+import json
 
 from codex_wake.a2a_bus import BusStore
 from codex_wake.a2a_identity import BusError, RuntimeIdentity
 from codex_wake.a2a_mailbox import Mailbox
 from codex_wake.a2a_receipt_signals import ReceiptSignalAdapter, ReceiptSignalRunner
 from codex_wake.daemon import poll_once, default_signal_runners
+from codex_wake.injector import dispatch_firing_record
+from codex_wake.records import WakePath
 from codex_wake.a2a_receipt_family import receipt_source_registration
 from codex_wake.source_registry import BuiltinSourceRegistry
 from codex_wake.event_wake import EventWake
@@ -113,6 +116,13 @@ class ReceiptBridgeTests(unittest.TestCase):
         self.assertEqual(second.fired, 0)
         self.assertEqual(len(list((wake_root / 'firing').glob('*.json'))), 1)
         self.assertNotIn('private fixture', (wake_root / 'firing' / (armed.wake_id + '.json')).read_text())
+        path = wake_root / 'firing' / (armed.wake_id + '.json')
+        found = WakePath(path, json.loads(path.read_text()))
+        held = dispatch_firing_record(wake_root, found,
+                                      signal_authorizer=restored_module.authorize_firing_record)
+        self.assertEqual(held.status, 'skipped')
+        self.assertEqual(held.message, 'A2A receipt delivery is unqualified')
+        self.assertTrue(path.exists())
 
     def test_revoked_cached_receipt_cannot_publish_with_or_without_runner(self):
         armed = self.arm()

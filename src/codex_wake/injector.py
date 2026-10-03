@@ -419,6 +419,9 @@ def _dispatch_firing_record_unlocked(
                 authorized = False
         if not authorized:
             return DispatchResult("skipped", "signal firing authority unavailable")
+        predicate = record.get("predicate")
+        if isinstance(predicate, dict) and predicate.get("source") == "a2a.receipt":
+            return DispatchResult("skipped", "A2A receipt delivery is unqualified")
     target = record.get("target")
     if isinstance(target, dict) and target.get("transport") == "app-server":
         from .app_server import dispatch_app_server_record
