@@ -735,3 +735,49 @@ signal, uncertain attempt, open claim or active conversation. Metadata/dedup
 history remains intact. Current receipt source integration conservatively holds
 unprojected pins; pruning removes logical rows without erasing backups or pages.
 All operator commands require `--bus-root PATH --operator-capability FILE`.
+
+For an already-armed receipt wake, the daemon can restore an explicitly
+delegated observer with `--a2a-receipt-authority FILE`. The operator prepares
+this private mode-0600 JSON file from independently verified bus/actor/message
+authority; paths and capabilities are never discovered from the wake arm.
+All paths must be absolute and free of symlinks. The file pins one wake root,
+contains no raw secrets, and permits at most 100 grants / 64 KiB:
+
+```json
+{
+  "schema_version": 1,
+  "wake_root": "/absolute/wake/root",
+  "grants": [{
+    "source_instance": "mailbox-<32 hex digits>",
+    "bus_root": "/absolute/private/bus",
+    "bus_id": "local",
+    "operator_capability": "/absolute/private/operator-capability.json",
+    "actor": {
+      "bus_id": "local",
+      "namespace": "<verified runtime namespace>",
+      "thread_id": "<exact enrolled thread>",
+      "root": "/absolute/enrolled/root",
+      "generation": 1,
+      "actor_id": "<exact enrolled actor>"
+    },
+    "message_id": "<exact existing message>"
+  }]
+}
+```
+
+Replace placeholders with the exact existing identities and receipt source
+instance. The operator capability delegates inspection; the observer's pinned
+actor value does not authenticate the daemon as that actor. Mailbox transactions
+use SQLite `mode=ro` and cannot send, read-as-recipient, acknowledge, or reply. Removing
+the grant or revoking/rotating its actor fences even an already-created runner.
+Missing, invalid, stale or cross-root authority keeps the receipt wake pending.
+
+```bash
+codex-waked --once --no-dispatch --wake-root /absolute/wake/root \
+  --a2a-receipt-authority /absolute/private/receipt-authority.json
+```
+
+This qualifies configured replay and firing after process restart. The receipt
+arming CLI and actual long agent suspension remain unfinished; receipt firing
+does not establish delivery. Generic A2A receipt dispatch remains held as
+unqualified. No bus, enrollment, actor, or service is created by this option.
