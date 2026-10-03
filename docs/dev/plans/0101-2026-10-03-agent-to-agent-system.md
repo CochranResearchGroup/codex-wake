@@ -479,3 +479,9 @@ bounded receipt arming and suspension prerequisite; existing live-effect gates
 remain in force. Current cumulative ceiling is 2,250,000 tokens, carrying prior
 usage and packet allowances forward. No active goal meter exists after reboot;
 no new exact usage total or allowance reset is asserted.
+
+Integration reconciliation: API recovered and confirmed PR #189 OPEN before
+the SHA-fenced retry. The retry succeeded, and fresh origin/main readback
+confirmed squash commit 75686bac66abd4be11cfbe865cb8918addfd0af5. Earlier timeout
+evidence is retained as history. Next bounded prerequisite remains receipt
+arming and suspension; full campaign OPEN and live-effect gates unchanged.

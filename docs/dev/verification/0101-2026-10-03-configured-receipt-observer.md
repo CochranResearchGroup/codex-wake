@@ -105,3 +105,9 @@ refs are retained remotely. This docs-only branch does not contain the new code.
 Memory disposition: unavailable. Receipt
 /home/ecochran76/.graphiti-openclaw/state/closeout-memory/20261003T215158Z-remember.json
 records zero writes: no authorized codex-wake Graphiti group was discovered.
+
+Integration reconciliation: API recovered and confirmed PR #189 OPEN before
+the SHA-fenced retry. The retry succeeded, and fresh origin/main readback
+confirmed squash commit 75686bac66abd4be11cfbe865cb8918addfd0af5. Earlier timeout
+evidence is retained as history. Next bounded prerequisite remains receipt
+arming and suspension; full campaign OPEN and live-effect gates unchanged.

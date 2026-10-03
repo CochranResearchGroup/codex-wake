@@ -10,11 +10,12 @@ lanes:
     branch: feat/p63-receipt-authority
     target: origin/main
     plan_state: OPEN
-    custody_state: PAUSED_REF
+    custody_state: INTEGRATED
     checkpoint: e967871f8e60b4115aa605247b097c02cf97e1cb
     remote_ref: refs/remotes/origin/feat/p63-receipt-authority
     integration: squash_pr
+    integration_receipt: 75686bac66abd4be11cfbe865cb8918addfd0af5
     dependencies: []
     overlaps: []
     updated_at: 2026-10-03
-    disposition: Observer locally and hosted accepted; PR 189 merge unconfirmed; full campaign OPEN
+    disposition: Observer integrated through PR 189; full campaign OPEN

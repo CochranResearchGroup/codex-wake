@@ -4901,3 +4901,9 @@ reconcile before another mutation. Candidate lane catalog repairs obsolete
 field names and records frozen source custody, not a goal pause. Full campaign
 OPEN; actual suspension, arming CLI and qualified delivery remain pending.
 Memory unavailable: receipt 20261003T215158Z-remember.json, zero writes.
+
+Integration reconciliation: API recovered and confirmed PR #189 OPEN before
+the SHA-fenced retry. The retry succeeded, and fresh origin/main readback
+confirmed squash commit 75686bac66abd4be11cfbe865cb8918addfd0af5. Earlier timeout
+evidence is retained as history. Next bounded prerequisite remains receipt
+arming and suspension; full campaign OPEN and live-effect gates unchanged.
