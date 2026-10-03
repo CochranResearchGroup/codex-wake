@@ -1,11 +1,13 @@
 """Public listener contract exercised over ephemeral loopback sockets."""
 from contextlib import contextmanager
 from dataclasses import FrozenInstanceError
+import errno
 import json
 import socket
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 from codex_wake.github_webhooks import WebhookResult
 from codex_wake.webhook_http import WebhookHTTPConfig, WebhookHTTPServer
@@ -58,7 +60,12 @@ class WebhookHTTPTests(unittest.TestCase):
     def exchange(self, server, raw):
         with socket.create_connection(server.address, timeout=2) as sock:
             sock.sendall(raw)
-            sock.shutdown(socket.SHUT_WR)
+            try:
+                sock.shutdown(socket.SHUT_WR)
+            except OSError as exc:
+                # Admission may send its complete response and close first.
+                if exc.errno != errno.ENOTCONN:
+                    raise
             return receive(sock)
 
     def test_exact_body_and_committed_result_cross_public_seam(self):
@@ -185,6 +192,13 @@ class WebhookHTTPTests(unittest.TestCase):
             entered.set()
             release.wait(2)
             return WebhookResult(200, 'COMMITTED')
+        shutdown = socket.socket.shutdown
+        def peer_closed_shutdown(sock, how):
+            # The rejected peer may close before the fixture's half-close.
+            # Keep the real listener/response and make that ordering explicit.
+            if how == socket.SHUT_WR:
+                raise OSError(errno.ENOTCONN, 'Transport endpoint is not connected')
+            return shutdown(sock, how)
         for limits in ({'max_connections': 1, 'max_workers': 1},
                        {'max_connections': 2, 'max_workers': 1}):
             entered.clear()
@@ -195,11 +209,13 @@ class WebhookHTTPTests(unittest.TestCase):
                     first.sendall(request())
                     self.assertTrue(entered.wait(1))
                     try:
-                        self.assertEqual(self.exchange(server, request()), (503, 'ADMISSION'))
+                        with patch.object(socket.socket, 'shutdown', peer_closed_shutdown):
+                            self.assertEqual(self.exchange(server, request()), (503, 'ADMISSION'))
                         self.assertEqual(len(calls), 1)
                     finally:
                         release.set()
                     self.assertEqual(receive(first), (200, 'COMMITTED'))
+                    self.assertEqual(len(calls), 1)
 
     def test_shutdown_is_truthful_about_blocked_callback(self):
         entered, release = threading.Event(), threading.Event()
