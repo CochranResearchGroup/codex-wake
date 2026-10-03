@@ -96,6 +96,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="wake runtime root; defaults to .codex/wake under the current directory",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from .sessions_cli import add_sessions_parser
+    add_sessions_parser(subparsers)
 
     after = subparsers.add_parser("after", help="create a wake after a duration such as 45m or 1h30m")
     after.add_argument("duration")
@@ -2684,6 +2686,9 @@ def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     root = resolve_root(args)
+    if args.command == "sessions":
+        from .sessions_cli import sessions_command
+        return sessions_command(args)
     if args.command == "after":
         return create_after(args, root)
     if args.command == "at":

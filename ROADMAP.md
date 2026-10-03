@@ -1037,3 +1037,39 @@ Acceptance target:
 - Preserve privacy-safe explainability and bounded fail-closed behavior.
 - Do not consume an actual delivery attempt before any prompt paste.
 - Pass focused, comprehensive, hosted, and separately authorized live checks.
+
+## P62 | Session Discovery And Byobu Selectors
+
+State: OPEN
+
+Current State: Session verb design is complete. A read-only probe verified
+shared-daemon loaded-thread discovery and tmux tab enumeration. Product
+implementation, identity-binding acceptance, and installed qualification remain
+pending. Agent messaging depends on this discovery boundary.
+
+Plan: [Session Discovery Verbs](docs/dev/plans/0100-2026-10-03-session-discovery-verbs.md)
+
+Deliverables:
+
+- Read-only `sessions list`, `show`, `resolve`, `current`, and `watch`.
+- Exact Byobu tab/pane selectors with explicit ambiguity and binding evidence.
+- Stable JSON observations and exact-thread resolution for future messaging.
+
+## P63 | Local Agent-to-Agent Communication
+
+State: OPEN
+
+Current State: Full system plan defines exact-thread addressing, enrolled
+cross-repository mailboxes, durable receipts, bounded notifications, reply/wait,
+crash reconciliation, operational limits, retention, and rollout. Implementation
+starts with P62 discovery; no mailbox, notification, or live-send acceptance is
+claimed by the planning slice.
+
+Plan: [Agent-to-Agent System](docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md)
+
+Deliverables:
+
+- Discovery and identity/enrollment before mailbox and delivery.
+- Durable CLI primitives with attributable recipient acknowledgements/replies.
+- Scheduler outbox and transport reconciliation with explicit uncertain effects.
+- Installed two-agent, restart, multi-root, resource, and release qualification.

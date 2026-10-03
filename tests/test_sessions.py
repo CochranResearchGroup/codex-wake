@@ -1,0 +1,148 @@
+import copy
+import io
+import unittest
+from unittest.mock import patch
+
+from codex_wake.cli import main
+from codex_wake.sessions import build_snapshot, resolve, revalidate_attachment, SelectionError
+
+
+def pane(index='17', name='wake', pid=123, identifier='%15', title='Session | repo'):
+    return dict(socket='/tmp/example', session_id='$1', session_name='byobu', window_id='@' + index,
+                window_index=index, window_name=name, pane_id=identifier, pane_index='0',
+                pane_title=title, pane_current_path='/repo', pane_tty='/dev/pts/1',
+                client_pid=pid, client_start_time_ticks=456, evidence='process_generation')
+
+
+def snapshot(threads=None, panes=None):
+    if threads is None:
+        threads = [dict(id='full-thread-id', name='Session', cwd='/repo', status={'type': 'idle'})]
+    return build_snapshot(threads, [pane()] if panes is None else panes,
+                          {key: dict(availability='available') for key in ['tmux', 'app_server']})
+
+
+class SessionTests(unittest.TestCase):
+    def test_all_exact_selector_forms(self):
+        s = snapshot()
+        for selector in ['17', 'wake', '17:wake', '17.0', '17:wake.0', 'tab:wake',
+                         'pane:%15', 'window:@17', 'thread:full-thread-id']:
+            with self.subTest(selector=selector):
+                self.assertEqual(resolve(s, selector)['thread_id'], 'full-thread-id')
+
+    def test_duplicate_name_including_shell_requires_qualification(self):
+        s = snapshot(panes=[pane(), pane('27', 'wake', None, '%27')])
+        with self.assertRaises(SelectionError) as error:
+            resolve(s, 'wake')
+        self.assertEqual(error.exception.code, 4)
+        self.assertEqual(resolve(s, '17:wake')['thread_id'], 'full-thread-id')
+
+    def test_collision_does_not_prefer_active_thread(self):
+        s = snapshot(threads=[dict(id='a', name='Session', cwd='/repo', status={'type': 'idle'}),
+                              dict(id='b', name='Session', cwd='/repo', status={'type': 'active'})])
+        with self.assertRaises(SelectionError) as error:
+            resolve(s, '17')
+        self.assertEqual(error.exception.code, 4)
+
+    def test_shell_show_and_resolve_have_distinct_outcomes(self):
+        s = snapshot(panes=[pane(pid=None)])
+        self.assertEqual(resolve(s, '17', eligible=False)['binding_status'], 'not_codex')
+        with self.assertRaises(SelectionError) as error:
+            resolve(s, '17')
+        self.assertEqual(error.exception.code, 6)
+
+    def test_source_loss_never_proves_not_found_or_unique(self):
+        s = snapshot()
+        s['complete'] = False
+        s['sources']['app_server']['availability'] = 'unavailable'
+        for ref in ['missing', '17', 'thread:full-thread-id']:
+            with self.assertRaises(SelectionError) as error:
+                resolve(s, ref)
+            self.assertEqual(error.exception.code, 5)
+
+    def test_split_window_requires_explicit_pane(self):
+        second = pane(identifier='%16')
+        second['pane_index'] = '1'
+        s = snapshot(panes=[pane(), second])
+        with self.assertRaises(SelectionError):
+            resolve(s, '17')
+        self.assertEqual(resolve(s, '17.1')['thread_id'], 'full-thread-id')
+        self.assertEqual(len(resolve(s, 'thread:full-thread-id')['attachments']), 2)
+
+    def test_literal_names_and_index_guard(self):
+        s = snapshot(panes=[pane(name='16.name:literal')])
+        self.assertEqual(resolve(s, 'tab:16.name:literal')['thread_id'], 'full-thread-id')
+        with self.assertRaises(SelectionError) as error:
+            resolve(s, '17:wake')
+        self.assertEqual(error.exception.code, 3)
+
+    def test_cli_json_exit_and_limit_do_not_change_resolution(self):
+        with patch('codex_wake.sessions_cli.observe', return_value=snapshot()), patch('sys.stdout', new_callable=io.StringIO) as out:
+            self.assertEqual(main(['sessions', 'resolve', '17:wake', '--json']), 0)
+            self.assertIn('full-thread-id', out.getvalue())
+        s = snapshot()
+        s['complete'] = False
+        with patch('codex_wake.sessions_cli.observe', return_value=s), patch('sys.stdout', new_callable=io.StringIO) as out:
+            self.assertEqual(main(['sessions', 'list', '--json', '--limit', '1']), 5)
+            self.assertIn('"complete": false', out.getvalue())
+
+    def test_current_conflicting_inherited_parent_pane(self):
+        s = snapshot(threads=[dict(id='parent', name='Session', cwd='/repo'), dict(id='child', name='Child', cwd='/repo')])
+        with patch.dict('os.environ', {'CODEX_THREAD_ID': 'child', 'TMUX_PANE': '%15'}), patch('codex_wake.sessions_cli.observe', return_value=s), patch('sys.stdout', new_callable=io.StringIO):
+            self.assertEqual(main(['sessions', 'current', '--json']), 6)
+
+    def test_watch_pins_thread_across_tab_replacement(self):
+        original = snapshot()
+        changed = snapshot(threads=[dict(id='new-thread', name='Session', cwd='/repo')])
+        with patch('codex_wake.sessions_cli.observe', side_effect=[original, changed]), patch('codex_wake.sessions_cli.time.sleep'), patch('codex_wake.sessions_cli.time.monotonic', side_effect=[0, 0, 2]), patch('sys.stdout', new_callable=io.StringIO) as out:
+            self.assertEqual(main(['sessions', 'watch', '17:wake', '--duration', '1s', '--interval', '1', '--json']), 0)
+        self.assertIn('"event": "session_removed"', out.getvalue())
+        self.assertNotIn('new-thread', out.getvalue())
+
+    def test_watch_source_loss_is_not_thread_removal(self):
+        original = snapshot()
+        unavailable = snapshot(threads=[], panes=[])
+        unavailable['complete'] = False
+        unavailable['sources']['app_server']['availability'] = 'unavailable'
+        with patch('codex_wake.sessions_cli.observe', side_effect=[original, unavailable]), patch('codex_wake.sessions_cli.time.sleep'), patch('codex_wake.sessions_cli.time.monotonic', side_effect=[0, 0, 2]), patch('sys.stdout', new_callable=io.StringIO) as out:
+            self.assertEqual(main(['sessions', 'watch', '--duration', '1s', '--interval', '1', '--json']), 5)
+        self.assertIn('source_unavailable', out.getvalue())
+        self.assertNotIn('session_removed', out.getvalue())
+
+    def test_reused_pane_fails_generation_revalidation(self):
+        observed = pane()
+        changed = dict(observed, client_start_time_ticks=999)
+        with patch('codex_wake.sessions.tmux_inventory', return_value=[changed]):
+            self.assertFalse(revalidate_attachment(observed))
+        changed = dict(observed, window_index='18', window_name='renamed')
+        with patch('codex_wake.sessions.tmux_inventory', return_value=[changed]):
+            self.assertTrue(revalidate_attachment(observed))
+
+    def test_subagent_path_and_unloaded_provider_status_are_preserved(self):
+        s = snapshot(threads=[dict(id='child', name='Child', cwd='/repo', parentThreadId='parent',
+                                  source={'subAgent': {'thread_spawn': {'agent_path': '/root/child'}}},
+                                  status={'type': 'notLoaded'})], panes=[])
+        row = s['sessions'][0]
+        self.assertEqual(row['parent_thread_id'], 'parent')
+        self.assertEqual(row['agent_path'], '/root/child')
+        self.assertEqual(row['runtime_state'], 'not_loaded')
+
+    def test_headless_exact_thread_requires_only_daemon_source(self):
+        s = snapshot(panes=[])
+        s['complete'] = False
+        s['sources']['tmux']['availability'] = 'unavailable'
+        self.assertEqual(resolve(s, 'thread:full-thread-id')['thread_id'], 'full-thread-id')
+        with self.assertRaises(SelectionError) as error:
+            resolve(s, 'wake')
+        self.assertEqual(error.exception.code, 5)
+
+    def test_invalid_reserved_selectors_are_argument_errors(self):
+        for selector in ['thread:', 'tab:', 'pane:bad', 'window:17']:
+            with self.assertRaises(SelectionError) as error:
+                resolve(snapshot(), selector)
+            self.assertEqual(error.exception.code, 2)
+
+    def test_invalid_timeout_emits_json_before_observation(self):
+        with patch('codex_wake.sessions_cli.observe') as observe, patch('sys.stdout', new_callable=io.StringIO) as out:
+            self.assertEqual(main(['sessions', 'list', '--timeout', 'nan', '--json']), 2)
+        observe.assert_not_called()
+        self.assertIn('"code": 2', out.getvalue())

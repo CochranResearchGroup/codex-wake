@@ -4646,3 +4646,85 @@ Closed the Issue #178 tmux safety correction with live acceptance.
 Acceptance state: Plan 0099 and P61 are complete. Verification receipt 0093
 records the live gate. Movement is `outcome_progress`; no successor lane is
 required.
+
+## Turn 207 | 2026-10-03
+
+Designed session discovery as the prerequisite for agent-to-agent messaging.
+
+- Plan 0100/P62 defines five read-only session verbs, exact Byobu selectors,
+  source availability, binding evidence, JSON output, and exit semantics.
+- Tab names and indices select current locations; exact thread IDs remain the
+  durable identity. Duplicate names and split panes require qualification.
+- Shared-daemon discovery uses its existing Unix WebSocket endpoint and loaded
+  thread APIs. Saved-rollout candidates do not establish live presence.
+- Current-thread claims, inherited parent panes, title/cwd collisions, and
+  process generation remain explicit identity boundaries.
+- No session CLI implementation, lifecycle operation, message delivery, or
+  installed runtime change is included in this design slice.
+
+Acceptance state: design complete; Plan 0100/P62 remains PLANNED for product
+implementation. Next packet: bounded shared-daemon read-only discovery.
+
+## Turn 208 | 2026-10-03
+
+Planned the complete local A2A system under Plan 0101/P63.
+
+- P62/Plan 0100 remains the discovery dependency; tab selection pins a durable
+  runtime-namespaced thread key before message acceptance.
+- One user-scoped mailbox journal owns envelopes, idempotency, recipient claims,
+  receipts, cancellation, and outbox; existing Wake owns notification scheduling.
+- Defined busy/offline holding, exact-thread delivery, peer-content trust,
+  ambiguous-effect reconciliation, reply correlation, limits, and retention.
+- Eight dependency-ordered work items separate deterministic implementation,
+  disposable live acceptance, operational enrollment, and installed release.
+- Graphiti was healthy; one bounded atlas search returned no applicable design
+  authority. The plan derives from current repo contracts and runtime probes.
+- No message was sent, session resumed, daemon restarted, root enrolled, or
+  implementation started during this planning slice.
+
+Acceptance state: full system planning complete; Plan 0101/P63 is PLANNED.
+Next action: bounded P62 shared-daemon discovery implementation packet.
+
+## Turn 209 | 2026-10-03
+
+Started operator-authorized Plan 0101 execution, checkpointing before 750,000
+goal tokens. Initial meter readback: 18,593 tokens.
+
+- Fetched canonical origin/main; local main and origin/main agree at
+  9703b25c58abf887c9e131cb82225fe8e72f4248.
+- Created and read back Issue #181 after registry, actor, repository capability,
+  contribution-surface, label, and duplicate preflight. Actor: ecochran76.
+  Marker: codex-wake-work-item:P63-plan0101-20261003.
+- Claimed the initial discovery slice on feat/p63-session-discovery. Existing
+  planning changes remain attached to this lane; no unrelated dirty changes.
+- P62 and P63 are OPEN. First implementation packet: bounded existing-daemon
+  read-only transport and discovery; no runtime restart or message delivery.
+
+## Turn 210 | 2026-10-03
+
+Continued Plan 0101/P62 discovery. Added the installed CLI daemon locator,
+tmux metadata inventory, exact Byobu selectors, all five session CLI verbs,
+and bounded polling watch. Maintained metadata matching as discovery evidence.
+
+- Complete live read resolved wake and mail-receipts by qualified tab; duplicate
+  mapocock failed ambiguous. No lifecycle or message operations were invoked.
+- Focused session/transport/CLI checks pass; comprehensive suite passed 733
+  tests in 36.459 seconds before final targeted additions.
+- Goal meter readback during packet: 108,523 tokens; 750,000 checkpoint bound
+  remains active. Discovery acceptance is incomplete; mailbox work follows P62.
+
+## Turn 211 | 2026-10-03
+
+Qualified installed P62 discovery and recorded verification 0094.
+
+- Installed provider-free WebSocket smoke: all five verbs, no lifecycle or
+  transcript calls, 18 connections closed, client descriptors 5 to 5 and
+  threads 1 to 1 across ten reads. Added this gate to hosted CI.
+- Comprehensive suite passed 740 tests in 33.667 seconds before two final
+  focused argument-error cases; all 16 session cases pass afterward.
+- Runtime protocol exposes parentThreadId, subagent source path, notLoaded,
+  active flags, and canAcceptDirectInput; preserved those metadata boundaries.
+- Native current-thread call rejects the inherited launcher pane. This is
+  evidence for P63 identity design, not a reason to trust environment as a
+  runtime-issued client binding.
+- No mailbox or delivery operation performed. Hosted integration follows.

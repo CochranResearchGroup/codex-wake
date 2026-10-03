@@ -660,3 +660,20 @@ PYTHONPATH=src python -m codex_wake.cli app after thread_abc 45m -- "Resume the 
 ```
 
 Design and validation notes live under `docs/dev/`.
+
+### Live session discovery
+
+Use `codex-wake sessions list --json` for live daemon threads and Codex TUI
+candidates. Address Byobu tabs with `sessions resolve 17:wake`, literal names
+with `tab:NAME`, split panes with `17.1`, or exact identities with
+`thread:FULL_ID`. Duplicate names require qualification. `sessions show REF`
+includes binding evidence; `sessions current` validates the invoking thread
+claim and rejects an inherited conflicting pane.
+
+`sessions watch REF --duration 5m --json` pins the initial thread and emits
+metadata changes as JSONL. Reads use the existing daemon locator and never
+start/resume/subscribe to a thread. Missing sources produce partial inventory
+and exit 5; they never prove absence or uniqueness. Metadata matching is not
+a runtime attestation or delivery permission. `--require-attested` currently
+reports unsupported. Override existing endpoints with `--app-server unix://PATH`
+and `--tmux-socket PATH`; use `--tmux-session` to qualify multiple sessions.
