@@ -56,7 +56,7 @@ before 750,000 goal tokens remains applicable. No live runtime restart.
 ## Identity checkpoint
 
 Bus identity/capability library and explicit operator CLI are implemented. Core
-policy schema is version 1; mailbox domain tables are not yet installed.
+policy schema is version 1; mailbox domain version 1 now has an explicit operator migration.
 Configure starts paused, cross-root disabled unless explicitly selected, and
 notification capability unqualified. No peer body or discovery result grants
 operator authority. Actor grants are explicit and are published before their

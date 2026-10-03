@@ -11,7 +11,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    published_checkpoint: 9b43ab7a0d653dfcb05c8978e78971220cf4e9bf
+    published_checkpoint: e15641bd3fda5e654e7ddc4b849a6898d1030d5f
     remote_ref: origin/feat/p63-identity-mailbox
     integration_method: squash_pr
     dependencies: []

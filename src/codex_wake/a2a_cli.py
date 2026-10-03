@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -70,7 +70,10 @@ def a2a_command(args):
             store, capability = BusStore.configure(root, bus_id=args.bus_id, allow_cross_root=args.allow_cross_root)
             with store.connection() as database:
                 receipt = store.meta(database, 'bootstrap_receipt')
-            result(dict(bus=store.status(), operator_capability_file=str(capability), receipt_id=receipt))
+            partial_receipts.append(receipt)
+            from .a2a_mailbox import Mailbox
+            migration = Mailbox.migrate(store, capability)
+            result(dict(bus=store.status(), operator_capability_file=str(capability), receipt_id=receipt, mailbox_migration_receipt=migration))
             return 0
         store = BusStore(root)
         # Validate explicit operator authority before observing or changing peers.
@@ -91,6 +94,9 @@ def a2a_command(args):
                 value.update(actor_capability_file=str(capability), actor_receipt_id=issuance,
                              namespace=identity.namespace, thread_id=identity.thread_id)
             result(value)
+        elif args.a2a_command == 'migrate':
+            from .a2a_mailbox import Mailbox
+            result(dict(bus_id=store.bus_id, receipt_id=Mailbox.migrate(store, args.operator_capability)))
         elif args.a2a_command in ('pause', 'resume'):
             receipt = store.set_paused(args.a2a_command == 'pause', args.operator_capability)
             result(dict(bus_id=store.bus_id, receipt_id=receipt, paused=store.status()['paused']))

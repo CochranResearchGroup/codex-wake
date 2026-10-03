@@ -176,7 +176,7 @@ class BusStore:
             yield database
         except BusError:
             raise
-        except (sqlite3.Error, ValueError, TypeError):
+        except (sqlite3.Error, ValueError, TypeError, KeyError, IndexError):
             raise BusError('store_unavailable', 'bus journal unavailable; no automatic repair attempted') from None
         finally:
             if database is not None:
