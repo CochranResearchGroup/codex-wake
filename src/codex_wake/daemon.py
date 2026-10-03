@@ -96,6 +96,7 @@ def default_signal_runners(
     http_json_client_factory: Callable[[object], object] | None = None,
     systemd_backend_factory: Callable[[object], object] | None = None,
     source_registry: BuiltinSourceRegistry | None = None,
+    receipt_authority_path: Path | None = None,
 ) -> tuple[SignalSourceRunner, ...]:
     """Reconstruct referenced sources, then append an optional closed catalogue."""
 
@@ -121,6 +122,12 @@ def default_signal_runners(
     runners.extend(unavailable_runners)
     if source_registry is not None:
         runners.extend(source_registry.reconstruct(context, pending))
+    if receipt_authority_path is not None:
+        from .a2a_receipt_authority import ConfiguredReceiptAuthority
+        from .a2a_receipt_family import receipt_source_registration
+        authority = ConfiguredReceiptAuthority(receipt_authority_path, root)
+        receipt_registry = BuiltinSourceRegistry((receipt_source_registration(authority.resolve),))
+        runners.extend(receipt_registry.reconstruct(context, pending))
     return tuple(runners)
 
 
@@ -295,6 +302,7 @@ def poll_once(
     signal_runtime: SQLiteSignalModule | None = None,
     signal_runners: tuple[SignalSourceRunner, ...] = (),
     signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
+    receipt_authority_path: Path | None = None,
 ) -> PollResult:
     current = now or utc_now()
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
@@ -314,7 +322,8 @@ def poll_once(
     if signal_runtime is not None:
         if not signal_runners:
             signal_runners = default_signal_runners(
-                root, signal_runtime, initial_reason=signal_reconcile_reason
+                root, signal_runtime, initial_reason=signal_reconcile_reason,
+                receipt_authority_path=receipt_authority_path,
             )
         firing_before = {item.record.get("id") for item in firing_records(root)}
         signal_runtime.reconcile_publications(limit=100, include_matches=False)
@@ -513,6 +522,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--once", action="store_true", help="run one polling pass and exit")
     parser.add_argument("--interval", type=float, default=5.0, help="poll interval in seconds")
     parser.add_argument("--no-dispatch", action="store_true", help="evaluate predicates but do not dispatch firing records")
+    parser.add_argument("--a2a-receipt-authority", type=Path, default=None,
+                        help="private explicit receipt observer grants; never enrolls actors or roots")
     parser.add_argument(
         "--ack-timeout",
         type=float,
@@ -527,7 +538,8 @@ def run(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     root = (args.wake_root or default_wake_root()).resolve()
     if args.once:
-        result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout)
+        result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout,
+                           receipt_authority_path=args.a2a_receipt_authority)
         write_monitor_health(
             wake_root=root,
             repo_root=Path.cwd(),
@@ -546,6 +558,7 @@ def run(argv: list[str] | None = None) -> int:
             dispatch=not args.no_dispatch,
             ack_timeout_override=args.ack_timeout,
             signal_reconcile_reason=signal_reconcile_reason,
+            receipt_authority_path=args.a2a_receipt_authority,
         )
         signal_reconcile_reason = "periodic"
         write_monitor_health(

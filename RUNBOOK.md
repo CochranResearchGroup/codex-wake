@@ -4884,3 +4884,26 @@ resolver/configuration and long-suspension CLI remain the next dependent unit.
 Delivery and named-agent/lifecycle/resource/service/release gates remain unmet.
 Cumulative ceiling 1,500,000, prior usage carried forward. Memory disposition
 unavailable, zero Graphiti writes.
+
+## Turn 220 | 2026-10-03
+
+After reboot, reproduced the two PR #188 Python 3.12 fixture failures under
+controlled socket/store timing. Plan 0108's test-only repair retained exact
+response framing, real POSIX timeout enforcement and durable recovery. PR #188
+merged at ff37005b0271b631c5dffa2e1c630d241761826a after both release gates
+passed on e107ee39d467244def698d9336208144eced3631, run 37154989267.
+Verification 0100 preserves the original failed hosted run and diagnosis limits.
+
+Plan 0109 adds an explicit private receipt observer configuration to codex-waked.
+It delegates operator inspection without actor impersonation, opens only
+independently configured roots, and enforces read-only mailbox transactions.
+Verification 0101 records 47 focused tests, 830 comprehensive tests, six
+installed-wheel tests and fresh FD/child census 5 -> 5 / 0 -> 0. No global
+package/service, live actor, provider or delivery effect.
+
+State transition: restore integrated -> configured observer locally accepted.
+Progress classification: outcome_progress. Hosted integration pending; actual
+long agent suspension, receipt arming CLI and qualified exact-thread delivery
+remain separate next gates. Full Plan 0101 / issue #181 remain OPEN. Preserve
+prior cumulative usage and 2,250,000 ceiling; current goal meter is absent.
+Memory disposition unavailable, zero Graphiti writes.

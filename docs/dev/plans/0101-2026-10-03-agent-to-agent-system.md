@@ -452,3 +452,17 @@ agents, lifecycle/resource qualification, service and release remain open.
 Plan 0107 qualifies the explicit receipt restore/source-guard seam, verification
 0100. Production authority configuration and long-suspension CLI remain
 unfinished; default daemon receipt discovery is not implied by registration.
+
+## Post-reboot integration and configured observer packet
+
+PR #188 integrated at ff37005b0271b631c5dffa2e1c630d241761826a after
+Python 3.11/3.12 gates passed on repaired head e107ee39d467244def698d9336208144eced3631,
+run 37154989267. Verification 0100 retains the original hosted failure and
+the diagnosed test-fixture sensitivities. Integration does not close Plan 0101.
+
+Plan 0109 owns opt-in independent receipt observer configuration and executable
+no-dispatch restart proof. It delegates operator inspection rather than
+fabricating live actor runtime metadata. Long agent suspension and its arming
+CLI remain separate successors because exact-thread delivery is unqualified.
+The latest operator cumulative ceiling is 2,250,000; prior budget records and
+usage remain preserved. No active goal meter is present in this session.
