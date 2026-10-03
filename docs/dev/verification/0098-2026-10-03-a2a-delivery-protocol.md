@@ -48,3 +48,30 @@ and prior review/attempt bounds remain unchanged.
 Graphiti discovery doctor reported degraded MCP ingress and persistence defect.
 Memory disposition: unavailable; no authorized repository group or healthy
 write path established, zero Graphiti writes.
+
+## Continuation and accounting correction
+
+The operator authorized continuation beyond the 700,000 working threshold,
+retaining the 750,000 cumulative stop ceiling. Recovered the original goal's
+paused tool receipt from session 01a0ff37-b363-7cb3-a424-d51835f538b1:
+final tokensUsed **644,919**. The current session's paused receipt is **73,733**.
+Thus the verified combined meter baseline is **718,652**, superseding the
+699,639 minimum reported at the first continuation checkpoint.
+
+The goal service still reports paused after the user's continuation message;
+it cannot be resumed through update_goal. Track subsequent effort using the
+current turn's transcript usage (input minus cached input plus output), rather
+than treating that frozen goal meter as zero additional consumption.
+
+Located the local Codex source checkout, commit
+bdd282f3bbd55df3a869a5438519cd948c134d4d, dated 2026-06-27. Its turn processor
+submits Op::UserInput; no ThreadQueueStart implementation was found in the
+app-server/core search. This is not source qualification for the installed
+0.160.0 binary: the installed package manifest gives version/target/layout but
+no source revision. Do not use this mismatched checkout as runtime authority.
+
+Remaining acceptance gaps are unchanged. Next meaningful delivery step needs
+source provenance matching the installed queue implementation, or an equally
+authoritative safe-operation contract. No effects are justified by the current
+schema and source evidence. Preserve the completed observation without claiming
+delivery acceptance or narrowing the full Plan 0101 outcome.
