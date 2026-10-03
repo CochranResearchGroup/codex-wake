@@ -4884,3 +4884,20 @@ resolver/configuration and long-suspension CLI remain the next dependent unit.
 Delivery and named-agent/lifecycle/resource/service/release gates remain unmet.
 Cumulative ceiling 1,500,000, prior usage carried forward. Memory disposition
 unavailable, zero Graphiti writes.
+
+## Turn 220 | 2026-10-03
+
+PR #188 merged at ff37005 after hosted gates passed. Plan 0109 accepted explicit
+read-only observer configuration in synthetic fresh daemon no-dispatch tests.
+PR #189 source e967871f8e60b4115aa605247b097c02cf97e1cb passed final hosted run
+37156177683 on Python 3.11/3.12; 830 local tests and isolated installed-command
+checks passed. Verification 0101 preserves the read-only boundary regression
+and repair, resource readbacks and scope limitations.
+
+The single SHA-fenced PR #189 merge request timed out with no result. API
+readback was unavailable and fetched main remained ff37005; integration is
+unconfirmed. Retain published source custody and docs/p63-observer-closeout;
+reconcile before another mutation. Candidate lane catalog repairs obsolete
+field names and records frozen source custody, not a goal pause. Full campaign
+OPEN; actual suspension, arming CLI and qualified delivery remain pending.
+Memory unavailable: receipt 20261003T215158Z-remember.json, zero writes.

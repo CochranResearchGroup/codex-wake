@@ -4,6 +4,9 @@ State: OPEN
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
+Branch: feat/p63-receipt-authority
+Target: origin/main
+Integration: squash_pr
 
 ## Current state
 
@@ -452,3 +455,27 @@ agents, lifecycle/resource qualification, service and release remain open.
 Plan 0107 qualifies the explicit receipt restore/source-guard seam, verification
 0100. Production authority configuration and long-suspension CLI remain
 unfinished; default daemon receipt discovery is not implied by registration.
+
+## Restart checkpoint | 2026-10-03
+
+PR #188 integrated at ff37005b0271b631c5dffa2e1c630d241761826a.
+Plan 0109 is locally accepted: explicit configured observer grants reconstruct
+receipt wakes across fresh daemon processes using SQLite mode=ro. Source custody
+is feat/p63-receipt-authority at e967871f8e60b4115aa605247b097c02cf97e1cb,
+published as PR #189. Final hosted run 37156177683 passed Python 3.11 and 3.12;
+830 local tests passed. These synthetic no-dispatch checks do not qualify actual
+suspension, agent delivery, arming CLI, service installation or full P63 acceptance.
+
+A single SHA-fenced squash merge request for PR #189 timed out (exit 124)
+without a response. Subsequent API readback also timed out; git fetch still
+showed main at ff37005. Integration is unconfirmed. Reconcile PR state and main
+before repeating any merge mutation. The documentation checkpoint branch
+docs/p63-observer-closeout contains continuity artifacts, not observer source.
+Its lane catalog is a proposed reconciliation until integrated. PAUSED_REF
+describes frozen Git custody, not an operator-requested goal pause.
+
+Full campaign remains OPEN. Next dependency after merge reconciliation is a
+bounded receipt arming and suspension prerequisite; existing live-effect gates
+remain in force. Current cumulative ceiling is 2,250,000 tokens, carrying prior
+usage and packet allowances forward. No active goal meter exists after reboot;
+no new exact usage total or allowance reset is asserted.

@@ -3,18 +3,18 @@ work_item_tracking: required
 lanes:
   - id: P63
     owner: primary
-    objective: Local agent-to-agent communication starting with P62 discovery
-    work_item: https://github.com/CochranResearchGroup/codex-wake/issues/181
+    objective: Local agent-to-agent communication with exact receipt authority
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/181]
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
-    source_ref: docs/p63-budget-checkpoint
-    branch: docs/p63-budget-checkpoint
+    plan_ref: docs/p63-observer-closeout
+    branch: feat/p63-receipt-authority
     target: origin/main
     plan_state: OPEN
     custody_state: PAUSED_REF
-    published_checkpoint: f3050bde52301518f5ac061835b5ac502198ed1c
-    remote_ref: origin/docs/p63-budget-checkpoint
-    integration_method: squash_pr
+    checkpoint: e967871f8e60b4115aa605247b097c02cf97e1cb
+    remote_ref: refs/remotes/origin/feat/p63-receipt-authority
+    integration: squash_pr
     dependencies: []
     overlaps: []
-    reconciliation_date: 2026-10-03
-    disposition: Foundations integrated; budget checkpoint before full delivery and release qualification
+    updated_at: 2026-10-03
+    disposition: Observer locally and hosted accepted; PR 189 merge unconfirmed; full campaign OPEN
