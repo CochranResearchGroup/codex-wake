@@ -4780,3 +4780,13 @@ Seven scheduler tests pass. Added operator projection-only tick, without live
 transport effects. /root/identity_review owns a disjoint test-only fault packet
 with an eight-minute bound. Main owner retains acceptance and implementation.
 Goal meter reached 504,621; checkpoint remains at or before 700,000.
+
+
+Scheduler checkpoint qualification: 812 tests pass in 38.270 seconds. Installed
+projection-only tick reconciles deterministic files and skips cancelled jobs;
+twenty read connections closed, zero residual children and zero transport calls.
+ReceiptSignalAdapter matches exact committed replies/receipts in real SQLite
+Wake fixtures and reconciles interrupted signal acknowledgement. Long-running
+CLI/source restore and delivery remain unqualified. Worker fault packet returned
+eight passing tests in 1.006 seconds; primary accepted after source inspection.
+Memory disposition: unavailable; no authorized repo memory group established.

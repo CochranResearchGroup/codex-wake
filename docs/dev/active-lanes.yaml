@@ -11,7 +11,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    published_checkpoint: 42893b190eb19c30dc702b2377893b1ba5736b88
+    published_checkpoint: 8784bdcac204c4254d3009a8568b256f13c87904
     remote_ref: origin/feat/p63-scheduler-bridge
     integration_method: squash_pr
     dependencies: []

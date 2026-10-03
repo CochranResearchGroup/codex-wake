@@ -189,6 +189,13 @@ class MailScheduler:
             attempt = database.execute('SELECT * FROM mail_attempts WHERE attempt_id=?', (attempt_id,)).fetchone()
             if not attempt or attempt['owner'] != self.owner or attempt['generation'] != recipient_lease.generation or recipient_lease.name != 'recipient:' + attempt['recipient_key'] or attempt['state'] != 'dispatching':
                 raise BusError('stale_attempt', 'attempt ownership or state changed')
+            exact_thread = json.loads(attempt['recipient_key'])[1]
+            if outcome == 'submitted' and (evidence.get('exact_thread_id') != exact_thread or
+                    not isinstance(evidence.get('transport'), str) or not evidence['transport'] or
+                    not isinstance(evidence.get('receipt_id'), str) or not evidence['receipt_id']):
+                raise BusError('transport_evidence_invalid', 'submission requires an exact-thread transport receipt')
+            if outcome == 'unsent' and evidence.get('reason') not in {'pre_io_failure','explicit_not_sent','fixture_pre_io'}:
+                raise BusError('transport_evidence_invalid', 'only qualified provably-unsent evidence permits retry')
             database.execute('UPDATE mail_attempts SET state=?,evidence=? WHERE attempt_id=?', (outcome, encoded(evidence), attempt_id))
             for message_id in json.loads(attempt['message_ids']):
                 intent = database.execute("SELECT * FROM mail_outbox WHERE message_id=? AND kind='notification'", (message_id,)).fetchone()

@@ -45,3 +45,26 @@ implementation attempts and one closed-world rework packet. Default scan 100,
 batch 20, tick 5 seconds; 10 notification attempts per recipient/hour. Preserve
 all unaffected accepted samples if a later packet fails. Campaign checkpoint
 at or before 700,000 goal tokens, below the user's 750,000 stop.
+
+
+## Current State
+
+Journal scheduler and projection-only operator tick are implemented. Actual
+transport invocation remains unavailable pending Plan 0101/P63.5 qualification.
+Exact-message ReceiptSignalAdapter replays committed outbox-backed receipt IDs
+into the existing SQLite Wake signal journal; matching never creates recipient
+receipts. This is a library seam with provider-free qualification, not an exposed
+long-running CLI wait or automatic daemon source registration. Restore/dispatch
+qualification and production service integration remain P63.6/P63.7 gates.
+
+Full suite: 812 tests passed in 38.270 seconds. Installed fixture: two roots,
+request/reply, one repeated identical private projection, cancellation followed
+by an empty tick, zero transport effects, twenty connections closed, children
+zero before/after and temporary state removed. Hosted integration follows.
+
+Worker /root/identity_review completed the disjoint eight-test fault packet in
+1.006 seconds. Primary inspected its source and accepted coverage as-is; full
+suite includes it. No core defects reproduced and no second broad review ran.
+Receipt bridge tests additionally cover already-committed receipts, foreign
+actor denial, revocation, corrupt intents and interrupted signal acknowledgement.
+All evidence is synthetic/provider-free; no live acceptance is claimed.

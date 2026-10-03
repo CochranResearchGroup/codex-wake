@@ -95,7 +95,7 @@ class SchedulerTests(unittest.TestCase):
         with self.assertRaises(BusError) as error: self.scheduler.claim(dispatcher, recipient, ['notify_' + second])
         self.assertEqual(error.exception.code, 'fifo_conflict')
         claim = self.scheduler.claim(dispatcher, recipient, ['notify_' + first, 'notify_' + second])
-        self.scheduler.finish(dispatcher, recipient, claim['attempt_id'], outcome='submitted', evidence={'receipt_id':'fixture'})
+        self.scheduler.finish(dispatcher, recipient, claim['attempt_id'], outcome='submitted', evidence={'receipt_id':'fixture','transport':'fixture','exact_thread_id':'recipient'})
         for identifier in (first, second):
             state = self.mailbox.show(self.actors[0], identifier)['state']
             self.assertEqual(state['notification'], 'submitted')
