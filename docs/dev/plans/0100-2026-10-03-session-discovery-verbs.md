@@ -221,3 +221,14 @@ runtime delivery or implementation completion.
 - Remaining P62 gates: exact unloaded-thread query semantics, status/protocol
   compatibility, complete generation/source-race qualification, installed
   package acceptance, and final documentation/CI checks.
+
+## Discovery acceptance checkpoint
+
+Local implementation qualification is recorded in verification 0094. The
+existing-runtime probe and installed provider-free protocol/resource smoke
+passed; hosted gates and canonical integration remain pending. Exact headless
+selectors require only an available daemon; missing optional tmux is reported
+in sources and complete=false without preventing an exact identity read. Tab
+selectors still require complete sources. Unloaded identities are not resumed:
+this installed runtime rejects metadata reads of unloaded threads. Discovery
+reports absent live identity, rather than pretending history is a loaded target.

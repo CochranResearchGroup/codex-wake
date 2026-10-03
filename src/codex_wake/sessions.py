@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import time
 from typing import Any
 
 from .records import WakeError, _canonical_tmux_title, codex_client_identity_for_tty
@@ -23,6 +24,7 @@ def now() -> str:
 
 
 def tmux_inventory(socket_path: str | None, timeout: float) -> list[dict[str, Any]]:
+    deadline = time.monotonic() + timeout
     command = ['tmux'] + (['-S', socket_path] if socket_path else [])
     fields = ['session_id', 'session_name', 'window_id', 'window_index', 'window_name',
               'pane_id', 'pane_index', 'pane_title', 'pane_current_path', 'pane_tty']
@@ -30,6 +32,8 @@ def tmux_inventory(socket_path: str | None, timeout: float) -> list[dict[str, An
                             capture_output=True, text=True, timeout=timeout, check=True)
     rows = []
     for line in result.stdout.splitlines():
+        if time.monotonic() >= deadline:
+            raise SharedSourceError('tmux observation timed out')
         values = line.split('\t')
         if len(values) != len(fields):
             raise SharedSourceError('tmux metadata cannot be parsed unambiguously')
@@ -53,11 +57,17 @@ def build_snapshot(threads: list[dict[str, Any]], panes: list[dict[str, Any]], s
     for thread in threads:
         status = thread.get('status')
         raw = status.get('type') if isinstance(status, dict) else status
-        state = raw if raw in ('active', 'idle') else 'unknown'
+        state = raw if raw in ('active', 'idle') else 'not_loaded' if raw == 'notLoaded' else 'unknown'
+        source = thread.get('source')
+        spawn = source.get('subAgent', {}) if isinstance(source, dict) else {}
+        spawn = spawn.get('thread_spawn', {}) if isinstance(spawn, dict) else {}
         flags = status.get('activeFlags', []) if isinstance(status, dict) else []
         row = dict(thread_id=thread['id'], name=thread.get('name'), cwd=thread.get('cwd'),
                    source=thread.get('source'), parent_thread_id=thread.get('parentThreadId'),
-                   agent_path=thread.get('agentPath'), runtime_state=state, provider_status=status,
+                   agent_path=thread.get('agentPath') or spawn.get('agent_path'),
+                   can_accept_direct_input=thread.get('canAcceptDirectInput'),
+                   model_provider=thread.get('modelProvider'), agent_nickname=thread.get('agentNickname'),
+                   agent_role=thread.get('agentRole'), runtime_state=state, provider_status=status,
                    active_flags=flags, binding_status='unbound', attachments=[], warnings=[])
         rows.append(row)
         by_id[thread['id']] = row
@@ -104,10 +114,14 @@ def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeou
 
 def resolve(snapshot: dict[str, Any], selector: str, *, session: str | None = None,
             eligible: bool = True, require_attested: bool = False) -> dict[str, Any]:
+    if not selector or selector in ('thread:', 'tab:') or (selector.startswith('pane:') and not re.fullmatch(r'pane:%\d+', selector)) or (selector.startswith('window:') and not re.fullmatch(r'window:@\d+', selector)):
+        raise SelectionError(2, 'invalid selector syntax', selector)
     if require_attested:
         raise SelectionError(5, 'runtime-issued binding is unsupported', selector)
-    if not snapshot['complete']:
-        raise SelectionError(5, 'selection requires complete sources', selector)
+    exact_thread = selector.startswith('thread:')
+    required_available = snapshot['sources'].get('app_server', {}).get('availability') == 'available'
+    if not required_available or (not exact_thread and not snapshot['complete']):
+        raise SelectionError(5, 'selection requires complete required sources', selector)
     rows = snapshot['sessions']
     if selector.startswith('thread:'):
         matches = [row for row in rows if row['thread_id'] == selector[7:]]
@@ -154,3 +168,19 @@ def resolve(snapshot: dict[str, Any], selector: str, *, session: str | None = No
         raise SelectionError(4 if row['binding_status'] == 'ambiguous' else 6,
                              'selection has no unique Codex identity', selector, row.get('candidates'))
     return row
+
+
+def revalidate_attachment(attachment: dict[str, Any]) -> bool:
+    """Recheck an observed client generation without capturing pane contents."""
+    try:
+        current = tmux_inventory(attachment['socket'], 10)
+        candidates = [p for p in current if p['pane_id'] == attachment['pane_id']]
+        if len(candidates) != 1:
+            return False
+        pane = candidates[0]
+        return (pane['client_pid'] is not None and all(
+            pane[key] == attachment[key] for key in (
+                'client_pid', 'client_start_time_ticks', 'pane_current_path', 'pane_title',
+            )))
+    except (OSError, subprocess.SubprocessError, SharedSourceError):
+        return False

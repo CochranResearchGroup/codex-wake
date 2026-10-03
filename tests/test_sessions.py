@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from codex_wake.cli import main
-from codex_wake.sessions import build_snapshot, resolve, SelectionError
+from codex_wake.sessions import build_snapshot, resolve, revalidate_attachment, SelectionError
 
 
 def pane(index='17', name='wake', pid=123, identifier='%15', title='Session | repo'):
@@ -53,6 +53,7 @@ class SessionTests(unittest.TestCase):
     def test_source_loss_never_proves_not_found_or_unique(self):
         s = snapshot()
         s['complete'] = False
+        s['sources']['app_server']['availability'] = 'unavailable'
         for ref in ['missing', '17', 'thread:full-thread-id']:
             with self.assertRaises(SelectionError) as error:
                 resolve(s, ref)
@@ -106,3 +107,42 @@ class SessionTests(unittest.TestCase):
             self.assertEqual(main(['sessions', 'watch', '--duration', '1s', '--interval', '1', '--json']), 5)
         self.assertIn('source_unavailable', out.getvalue())
         self.assertNotIn('session_removed', out.getvalue())
+
+    def test_reused_pane_fails_generation_revalidation(self):
+        observed = pane()
+        changed = dict(observed, client_start_time_ticks=999)
+        with patch('codex_wake.sessions.tmux_inventory', return_value=[changed]):
+            self.assertFalse(revalidate_attachment(observed))
+        changed = dict(observed, window_index='18', window_name='renamed')
+        with patch('codex_wake.sessions.tmux_inventory', return_value=[changed]):
+            self.assertTrue(revalidate_attachment(observed))
+
+    def test_subagent_path_and_unloaded_provider_status_are_preserved(self):
+        s = snapshot(threads=[dict(id='child', name='Child', cwd='/repo', parentThreadId='parent',
+                                  source={'subAgent': {'thread_spawn': {'agent_path': '/root/child'}}},
+                                  status={'type': 'notLoaded'})], panes=[])
+        row = s['sessions'][0]
+        self.assertEqual(row['parent_thread_id'], 'parent')
+        self.assertEqual(row['agent_path'], '/root/child')
+        self.assertEqual(row['runtime_state'], 'not_loaded')
+
+    def test_headless_exact_thread_requires_only_daemon_source(self):
+        s = snapshot(panes=[])
+        s['complete'] = False
+        s['sources']['tmux']['availability'] = 'unavailable'
+        self.assertEqual(resolve(s, 'thread:full-thread-id')['thread_id'], 'full-thread-id')
+        with self.assertRaises(SelectionError) as error:
+            resolve(s, 'wake')
+        self.assertEqual(error.exception.code, 5)
+
+    def test_invalid_reserved_selectors_are_argument_errors(self):
+        for selector in ['thread:', 'tab:', 'pane:bad', 'window:17']:
+            with self.assertRaises(SelectionError) as error:
+                resolve(snapshot(), selector)
+            self.assertEqual(error.exception.code, 2)
+
+    def test_invalid_timeout_emits_json_before_observation(self):
+        with patch('codex_wake.sessions_cli.observe') as observe, patch('sys.stdout', new_callable=io.StringIO) as out:
+            self.assertEqual(main(['sessions', 'list', '--timeout', 'nan', '--json']), 2)
+        observe.assert_not_called()
+        self.assertIn('"code": 2', out.getvalue())

@@ -4712,3 +4712,19 @@ and bounded polling watch. Maintained metadata matching as discovery evidence.
   tests in 36.459 seconds before final targeted additions.
 - Goal meter readback during packet: 108,523 tokens; 750,000 checkpoint bound
   remains active. Discovery acceptance is incomplete; mailbox work follows P62.
+
+## Turn 211 | 2026-10-03
+
+Qualified installed P62 discovery and recorded verification 0094.
+
+- Installed provider-free WebSocket smoke: all five verbs, no lifecycle or
+  transcript calls, 18 connections closed, client descriptors 5 to 5 and
+  threads 1 to 1 across ten reads. Added this gate to hosted CI.
+- Comprehensive suite passed 740 tests in 33.667 seconds before two final
+  focused argument-error cases; all 16 session cases pass afterward.
+- Runtime protocol exposes parentThreadId, subagent source path, notLoaded,
+  active flags, and canAcceptDirectInput; preserved those metadata boundaries.
+- Native current-thread call rejects the inherited launcher pane. This is
+  evidence for P63 identity design, not a reason to trust environment as a
+  runtime-issued client binding.
+- No mailbox or delivery operation performed. Hosted integration follows.

@@ -66,7 +66,7 @@ def emit(value, as_json):
         print(json.dumps(value, indent=2, sort_keys=True), flush=True)
 
 
-def sessions_command(args):
+def _sessions_command(args):
     if not 0 < args.timeout <= 60:
         raise WakeError('--timeout must be positive and at most 60 seconds')
     kwargs = dict(endpoint=args.app_server, socket_path=args.tmux_socket, timeout=args.timeout)
@@ -88,12 +88,14 @@ def sessions_command(args):
                       require_attested=getattr(args, 'require_attested', False))
         # An inherited pane is never attached to the current thread by claim alone.
         if verb == 'current' and os.environ.get('TMUX_PANE'):
+            if snapshot['sources']['tmux']['availability'] != 'available':
+                raise SelectionError(5, 'invoking pane source is unavailable', 'current')
             pane = os.environ['TMUX_PANE']
             other = [r for r in snapshot['sessions'] for p in r['attachments']
                      if p['pane_id'] == pane and r['thread_id'] != row['thread_id']]
             if other:
                 raise SelectionError(6, 'inherited pane conflicts with invoking thread', 'current')
-        emit(dict(schema_version=1, observed_at=snapshot['observed_at'], complete=True,
+        emit(dict(schema_version=1, observed_at=snapshot['observed_at'], complete=snapshot['complete'],
                   sources=snapshot['sources'], session=row), args.as_json)
         return 0
     except SelectionError as exc:
@@ -127,7 +129,8 @@ def watch(args, snapshot, kwargs):
                     after = report['availability']
                     if before != after:
                         emit(dict(event='source_recovered' if after == 'available' else 'source_unavailable',
-                                  source=source, observed_at=current['observed_at']), args.as_json)
+                                  source=source, observed_at=current['observed_at'],
+                                  snapshot=current if after == 'available' else None), args.as_json)
                 if current['complete'] and previous['complete'] and not current['truncated'] and not previous['truncated']:
                     def keyed(value):
                         return {r['thread_id'] or 'pane:' + r['attachments'][0]['pane_id']: r for r in value['sessions']}
@@ -151,3 +154,12 @@ def watch(args, snapshot, kwargs):
     emit(dict(event='summary', observations=count, pinned_thread_id=pinned,
               complete=snapshot['complete']), args.as_json)
     return 0 if snapshot['complete'] else 5
+
+
+def sessions_command(args):
+    try:
+        return _sessions_command(args)
+    except WakeError as exc:
+        emit(dict(code=2, message=str(exc), selector=getattr(args, 'selector', None),
+                  candidates=[], sources={}), args.as_json)
+        return 2

@@ -73,6 +73,8 @@ class SharedAppServerReader:
     def request(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         if method not in self.ALLOWED_METHODS:
             raise WakeError("discovery method is not read-only")
+        if method == "thread/read" and params.get("includeTurns") is not False:
+            raise WakeError("discovery excludes conversation history")
         if self.connection is None:
             raise SharedSourceError("shared connection is not open")
         self.sequence += 1
@@ -134,6 +136,7 @@ class SharedAppServerReader:
         # Explicit allowlist prevents transcripts or future response fields leaking.
         return {key: thread.get(key) for key in (
             "id", "name", "cwd", "status", "source", "parentThreadId", "agentPath",
+            "canAcceptDirectInput", "modelProvider", "agentNickname", "agentRole",
         )}
 
     def close(self) -> None:
