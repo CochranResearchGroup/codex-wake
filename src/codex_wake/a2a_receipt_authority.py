@@ -85,6 +85,23 @@ class ConfiguredReceiptAuthority:
         except (OSError, ValueError, TypeError, KeyError, RecursionError, BusError):
             raise _unavailable() from None
 
+    def adapter(self, source_instance):
+        """Authorize a new exact-message arm solely from independent configuration."""
+        try:
+            grant = self.grants()[source_instance]
+            actor = Actor(**grant['actor'])
+            bus = BusStore(Path(grant['bus_root']))
+            if bus.bus_id != grant['bus_id']:
+                raise _unavailable()
+            mailbox = _ObserverMailbox(bus, self, grant, actor)
+            from .a2a_receipt_signals import ReceiptSignalAdapter
+            adapter = ReceiptSignalAdapter(mailbox, actor, grant['message_id'])
+            if adapter.source_instance != source_instance:
+                raise _unavailable()
+            return adapter
+        except (OSError, ValueError, TypeError, KeyError, BusError):
+            raise _unavailable() from None
+
     def resolve(self, armed):
         # Only this independent allowlist supplies filesystem paths/authority.
         try:

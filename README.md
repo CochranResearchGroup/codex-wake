@@ -781,3 +781,26 @@ This qualifies configured replay and firing after process restart. The receipt
 arming CLI and actual long agent suspension remain unfinished; receipt firing
 does not establish delivery. Generic A2A receipt dispatch remains held as
 unqualified. No bus, enrollment, actor, or service is created by this option.
+
+Arm an exact receipt from an existing private observer grant with:
+
+```bash
+codex-wake a2a arm-receipt --wake-root /absolute/wake \
+  --receipt-authority /absolute/receipt-authority.json \
+  --source-instance mailbox-EXACT_INSTANCE_FROM_GRANT \
+  --condition reply --idempotency-key request-42-reply \
+  --expires-at 2026-10-04T18:00:00Z \
+  --prompt 'Inspect the exact receipt evidence.' \
+  --tmux-pane '%17' --tmux-socket /absolute/tmux/socket
+```
+
+The selected wake root must have an active managed reader advertisement. The
+command uses the existing grant for read-only mailbox inspection and writes
+Wake state; it does not create grants or authenticate as the pinned actor.
+Reuse all arguments, including the absolute expiry, for an idempotent retry;
+changed intent under the same key is refused. The resume cwd is the actor's
+explicitly enrolled root. The command reports `dispatch_qualified: false`.
+Generic receipt dispatch remains held; a pending arm or no-dispatch firing does
+not establish actual agent suspension or delivery. An expired timestamp creates
+an arm that the reader can retire as expired. Use `codex-waked --once
+--no-dispatch --wake-root ... --a2a-receipt-authority ...` for bounded observation.

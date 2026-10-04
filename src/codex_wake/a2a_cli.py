@@ -42,6 +42,17 @@ def add_a2a_parser(subparsers):
         if verb in ('revoke','rotate'):
             command.add_argument('actor_id')
 
+    command = commands.add_parser('arm-receipt', help='register an explicitly granted receipt wake; dispatch remains unqualified')
+    command.add_argument('--wake-root', type=Path, required=True)
+    command.add_argument('--receipt-authority', type=Path, required=True)
+    command.add_argument('--source-instance', required=True)
+    command.add_argument('--condition', choices=['received', 'reply', 'accepted', 'declined', 'completed', 'failed'], default='reply')
+    command.add_argument('--idempotency-key', required=True)
+    command.add_argument('--expires-at', required=True, help='absolute timezone-aware ISO timestamp; reuse it for retries')
+    command.add_argument('--prompt', required=True)
+    command.add_argument('--tmux-pane', required=True)
+    command.add_argument('--tmux-socket', required=True)
+
 
 def resolve_identity(selector: str, *, endpoint: str = 'unix://', socket_path=None, session=None) -> RuntimeIdentity:
     snapshot = observe(endpoint=endpoint, socket_path=socket_path)
@@ -71,6 +82,8 @@ def result(value: dict, *, success=True):
 def a2a_command(args):
     partial_receipts = []
     try:
+        if args.a2a_command == 'arm-receipt':
+            return arm_receipt(args)
         root = args.bus_root or default_bus_root(args.bus_id)
         if args.a2a_command == 'configure':
             store, capability = BusStore.configure(root, bus_id=args.bus_id, allow_cross_root=args.allow_cross_root)
@@ -159,3 +172,38 @@ def a2a_command(args):
         result(dict(error=dict(code='store_unavailable', message='operation unavailable; inspect existing state before retry'),
                     partial_receipt_ids=partial_receipts, reconciliation_required=bool(partial_receipts)), success=False)
         return 8
+
+
+def arm_receipt(args):
+    from datetime import datetime, timezone
+    import uuid
+    from .a2a_receipt_authority import ConfiguredReceiptAuthority
+    from .event_wake import EventWake
+    from .signal_records import WakeRecordPublisher, signal_journal_path
+    from .signal_store import SQLiteSignalModule
+    from .signals import Resume, WakeIntent, Degraded, Invalid
+    try:
+        expiry = datetime.fromisoformat(args.expires_at)
+        if expiry.tzinfo is None or expiry.utcoffset() is None:
+            raise ValueError()
+        if (not args.idempotency_key or len(args.idempotency_key.encode()) > 256
+                or not args.prompt.strip() or len(args.prompt.encode()) > 16384
+                or not args.tmux_pane.startswith('%') or not args.tmux_pane[1:].isdigit()
+                or not Path(args.tmux_socket).is_absolute()):
+            raise ValueError()
+    except ValueError:
+        raise BusError('invalid_argument', 'receipt arming arguments are invalid') from None
+    root = args.wake_root.resolve()
+    adapter = ConfiguredReceiptAuthority(args.receipt_authority, root).adapter(args.source_instance)
+    module = SQLiteSignalModule(signal_journal_path(root),
+        record_publisher=WakeRecordPublisher.for_managed_reader(root))
+    outcome = EventWake(module, adapters=[adapter], clock=lambda: datetime.now(timezone.utc),
+        id_factory=lambda: 'wake_' + uuid.uuid4().hex).register(
+            WakeIntent(adapter.request(args.condition), Resume(args.prompt.strip(), Path(adapter.actor.root),
+                dict(transport='tmux', tmux_socket=args.tmux_socket, pane=args.tmux_pane)), expires_at=expiry),
+            idempotency_key=args.idempotency_key)
+    if isinstance(outcome, (Invalid, Degraded)):
+        raise BusError(outcome.code, 'receipt wake registration is unavailable')
+    result(dict(wake_id=outcome.wake_id, arm_id=outcome.arm_id, source_instance=outcome.source_instance,
+                status='registered', dispatch_qualified=False, recovery=outcome.recovery))
+    return 0
