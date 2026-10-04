@@ -4,7 +4,7 @@ State: OPEN
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
-Branch: feat/p63-retention-lifecycle
+Branch: feat/p63-backup-recovery
 Target: origin/main
 Integration: squash_pr
 
@@ -546,3 +546,11 @@ and is clean. PR197/198 integrated8414adc0/dc248e7; retention acceptance remains
 bounded. Note0005 records restart custody, current meter423,203 before writing,
 and the next backup/restore preparation packet. Stop/checkpoint before the
 additional500k ceiling; full campaignOPEN and live authority unanswered.
+
+## Continuation to one-million ceiling and backup preparation
+
+Current live goal resumed at452,467 with stop/checkpoint before1,000,000; prior
+meters and review/rework bounds persist. Plan0116 adds versioned private snapshot
+creation and read-only verification. Old snapshots may retain revoked actor
+authority or omit newer outcomes; verification is never activation. Only owned
+disposable fixtures are used. Full restore/service/live/soak/release remainOPEN.

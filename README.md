@@ -844,3 +844,28 @@ and a receipt pointer; inspect that receipt before retrying. This clears only
 projection pins: body pruning still requires the existing retention preview/apply
 guard, and active claims/conversations retain their other pins. Observers cannot
 write or prune. No automatic body removal or physical secure erasure is implied.
+
+### Versioned mailbox backup preparation
+
+Pause the bus, then use `codex-wake a2a backup --bus-root /private/bus
+--operator-capability /private/operator.json --snapshot /private/new-snapshot`
+to create a private, versioned SQLite online snapshot. Its parent must already
+be owner-only (0700) on a qualified local filesystem; the snapshot directory must
+be new and outside the bus root. The copy includes committed WAL contents,
+message bodies, token digests, receipts, actor generations and unresolved attempts.
+It does not export capability secret files. Files are0600; protect the snapshot
+as private bus data. Copy/verification have ten-second and one-GiB bounds.
+
+`a2a verify-backup` takes the same arguments and reads the snapshot without
+activation. It checks the manifest commitment, schema, integrity, foreign keys,
+original canonical identity, pause and request provenance, and independently
+supplied current operator authority. Verification currently requires the original
+readable bus; it is preparation evidence, not recovery of a corrupted source.
+An older snapshot may contain revoked actor authority or omit later outcomes.
+`activation_qualified` is always false. No root rebinding, downgrade, replacement,
+resume or notification replay occurs. Copied-root writer refusal remains active.
+
+A failed copy or completion audit returns `backup_incomplete` and the committed
+request receipt pointer. Keep the directory and receipt for reconciliation;
+partial artifacts are refused and repeated creation never overwrites an existing
+snapshot. A verified snapshot can exist even if completion audit failed.
