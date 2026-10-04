@@ -388,3 +388,14 @@ dispatching or uncertain attempt. A pending effect instead stops for exact
 reconciliation. Count committed submissions from the same journal so an error
 after submission cannot expand the worker effect budget. This is a direct remedy
 for the observed zero-effect worker exit, not relaxed expiry or replay policy.
+
+### M1 attempt1: TTL rejected before admission | 2026-10-04
+
+The actual wakeA native send returned operation_unavailable and stopped without
+arming or retry. Read-only reproduction identifies operator-supplied `--ttl120`
+as invalid; this CLI requires a duration unit such as120s. Authorized exact
+journal reconciliation proves zero envelopes and zero transport attempts for the
+original intent. This is M1 failure1/3, not a passed exchange. Preserve the agent
+turn, native output and reconciliation. The zero-effect owned worker was stopped;
+attempt2 retries the same intent key with120s and a fresh bounded worker. No
+controller prompt followed an admitted request.
