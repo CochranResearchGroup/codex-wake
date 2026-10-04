@@ -485,3 +485,11 @@ allowances are not reset. PR #190 integrated at 9c3bbe8. Plan 0111 / verificatio
 confirm shared daemon metadata reads in the isolated installed environment.
 Composer/client ownership and named disposable live delivery remain unqualified.
 Prepared live boundary in verification 0103 does not authorize execution.
+
+## Multiroot resource qualification
+
+Plan 0112 / verification 0104 qualifies a bounded synthetic workload with default
+limits, cross-root deny/allow, FIFO/idempotency, correlated replies, ten fresh
+process reopens, copied-root refusal and installed resource census. No runtime
+code changes or live actors. This advances operations/resource acceptance; full
+live, service, retention, soak and release requirements remain OPEN.
