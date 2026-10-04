@@ -112,3 +112,33 @@ Private `tmux-plan119/M2-1/guard-observations.jsonl` retains observations;
 clearing only that fixture, restoration of window@72 to index18/namewakeB, and
 terminal workerPID89282. Retry requires observing before admission and verifying
 the actual fixture before using it. M2 attempt1/3 consumed; M2-M4 remain open.
+
+## M2 attempt2 checkpoint
+
+Request `msg_42faa5a1f873449595389fe884a763fa` was observed admitted while
+B was active, with the complete owned `P119_M2_DRAFT` unchanged and zero
+transport attempts. At monotonic34013.327886601 B was idle, the draft still
+present, notification deferred, and still zero attempts. The controller cleared
+only that exact owned fixture. Product dispatch then submitted exactly once:
+`attempt_01702234a46e43e28281413b17baaca1` to unchanged B thread/PID6145/pane%72,
+with B's window renamed/moved. B read (`receipt_0ba022478f2d49519404af7a5c21d821`),
+claimed (`receipt_070b92addcb84f54be066277d4aa5791`), and completed the request,
+sending one correlated reply `msg_8221be2f67804df69f524e536edf1a78`.
+
+The observer wrongly re-applied its pre-clear busy assertion when the actual
+notification started B's response turn. Its failure ended the launcher and owned
+workerPID73857 before return delivery. This is a failed test orchestration,
+not acceptance of the 120-second exchange. Exact read-only reconciliation found
+one submitted request, no reply attempt, and no uncertain effect. A bounded
+replacement workerPID8264 exited0; the expired reply arm
+`wake_3e47f27b23f8463384e9067b29bcebd2` kept the reply deferred/unread with no
+return attempt. No arm was extended, no controller return prompt was sent, and
+no request/reply was replayed. Original Byobu window name/index were restored.
+
+Private `M2-2/fixture-verified.json`, `guard-observations.jsonl`,
+`fixture-clear.json`, `mailbox-final-proof.json`, `cleanup-proof.json` and
+both worker journals retain these boundaries. Busy/draft/rename/move guard
+behavior has live evidence; M2 remains partial pending unloaded/cancel checks.
+Two of three M2 live attempts are consumed. Before attempt3, designated idle
+B exited normally via its empty composer's C-d; PID6145 is terminal. The existing
+B thread/history is preserved and must be explicitly reconnected, not replaced.
