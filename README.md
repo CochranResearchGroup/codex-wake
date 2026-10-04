@@ -886,3 +886,36 @@ state-equivalent same-root activation, not corrupt-source recovery or arbitrary
 rollback to older authority/outcomes. `restore_incomplete` preserves its request
 receipt and stage for explicit inspection before retry; it never resumes or
 replays notifications automatically.
+
+### Damaged-source recovery under a persistent hold
+
+Use `a2a recover-backup --apply --accept-unbacked-state-hold` only with the
+original `--bus-root`, independently supplied `--operator-capability`, selected
+`--snapshot`, and its reviewed `--expected-database-sha256`. This explicitly
+acknowledges that newer state may be absent from the backup. Recovery preserves
+the old main/WAL/SHM files in an owner-only quarantine and installs the reviewed
+image at the original root under fresh operator authority. The result returns
+private capability and completion-receipt paths; secret contents are never
+printed. Old actor IDs/capabilities/operator secret and leases are fenced.
+
+Recovered bus schema2 refuses prior readers. A private authority anchor survives
+future journal damage and prevents revoked operators starting another recovery.
+Fresh backups record the actual bus schema and current operator authority; older
+snapshots do not grant a revoked key new recovery permission. Quarantine preserves
+all source artifacts and known snapshot message IDs, bodies, receipts and unknown
+notification intent. It does not prove that newer missing outcomes were recovered.
+
+The recovered bus stays paused with `recovery_hold=true`. Participant operations,
+scheduler acquisition and resume are refused. This packet provides no hold release
+or automatic notification replay; gap reconciliation is a separate required step.
+Stop old binaries/raw SQLite writers independently; the lifecycle lock covers
+upgraded clients only. Each file is bounded to one GiB and image verification/copy
+to ten seconds; original file commitments are checked before and after quarantine.
+
+If recovery is interrupted, its private intent marker blocks normal connections
+and returns `recovery_incomplete` with an attributable receipt pointer. Run
+`a2a reconcile-recovery --apply` with the original approval capability and the
+same reviewed `--expected-database-sha256` to finish that exact transition.
+Changed artifacts, malformed intent, conflicts or partial receipts stay held for
+inspection. Reconciliation never discards evidence, clears the gap hold, starts
+a different recovery, or silently overwrites another canonical image.

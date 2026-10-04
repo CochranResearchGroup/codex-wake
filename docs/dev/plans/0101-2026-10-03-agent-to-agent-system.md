@@ -4,7 +4,7 @@ State: OPEN
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
-Branch: feat/p63-quiesced-restore
+Branch: feat/p63-held-recovery
 Target: origin/main
 Integration: squash_pr
 
@@ -582,3 +582,15 @@ advances only that restore axis; corrupt-source recovery, old/raw-client
 quiescence, actual service/live/suspension/soak/release remainOPEN. Next ready
 non-live packet: independent recovery authority and quarantine/hold contract
 for a damaged source, preserving source artifacts and refusing automatic replay.
+
+## Held damaged-source recovery packet
+
+Plan0118 / verification0110 adds independently pinned backup recovery with
+source quarantine, external fresh-operator anchor, old-participant/readers fenced
+and explicit interruption reconciliation. Recovered authority stays paused/held
+because newer missing state is unknown. Local882 source tests and installed
+held-recovery passed; hosted gates pending. This does not reconcile missing
+outcomes, release recovery hold, deliver to actual agents, install a supervisor,
+qualify soak or publish the final release. Full campaignOPEN; ceiling1,000,000
+and inherited bounds persist. Next ready packet: explicit gap disposition and
+legacy-notification fencing before release into manual fresh-authority operation.

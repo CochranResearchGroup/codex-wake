@@ -33,6 +33,8 @@ class MailScheduler:
 
     def _operator(self, database):
         self.mailbox.bus.operator(database, self.operator_capability)
+        if self.mailbox.bus.recovery_held(database):
+            raise BusError('recovery_hold', 'scheduler is held pending recovery gap reconciliation')
 
     def acquire(self, name='dispatcher'):
         with self.mailbox.transaction() as database:

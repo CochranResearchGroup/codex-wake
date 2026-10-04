@@ -11,7 +11,7 @@ import sqlite3
 import time
 import uuid
 
-from .a2a_bus import BusStore, SCHEMA_VERSION, local_filesystem, private_path
+from .a2a_bus import BusStore, SCHEMA_VERSION, SUPPORTED_BUS_SCHEMAS, local_filesystem, private_path
 from .a2a_identity import BusError
 from .a2a_mailbox import Mailbox, MAILBOX_SCHEMA
 
@@ -87,6 +87,7 @@ class MailBackup:
                 Mailbox._schema(source)
                 if self.bus.meta(source, 'paused') is not True:
                     raise BusError('pause_required', 'source resumed before snapshot boundary')
+                bus_schema = self.bus.meta(source, 'schema_version')
                 page_size = source.execute('PRAGMA page_size').fetchone()[0]
                 target = sqlite3.connect(database_path, isolation_level=None)
                 try:
@@ -104,7 +105,7 @@ class MailBackup:
             with database_path.open('rb') as stream:
                 os.fsync(stream.fileno())
             manifest = dict(format_version=FORMAT, snapshot_id='snapshot_' + uuid.uuid4().hex,
-                bus_id=self.bus.bus_id, canonical_root=str(self.bus.root), bus_schema=SCHEMA_VERSION,
+                bus_id=self.bus.bus_id, canonical_root=str(self.bus.root), bus_schema=bus_schema,
                 mailbox_schema=MAILBOX_SCHEMA, database_bytes=database_path.stat().st_size,
                 database_sha256=_hash(database_path, deadline), request_receipt_id=request)
             _manifest(directory / 'manifest.json', manifest)
@@ -150,7 +151,7 @@ class MailBackup:
                 raise ValueError('manifest types')
             if any(not isinstance(manifest[key], str) or not manifest[key] for key in FIELDS - {'format_version', 'bus_schema', 'mailbox_schema', 'database_bytes'}):
                 raise ValueError('manifest strings')
-            if (manifest['format_version'], manifest['bus_schema'], manifest['mailbox_schema']) != (FORMAT, SCHEMA_VERSION, MAILBOX_SCHEMA):
+            if manifest['format_version'] != FORMAT or manifest['bus_schema'] not in SUPPORTED_BUS_SCHEMAS or manifest['mailbox_schema'] != MAILBOX_SCHEMA:
                 raise ValueError('unsupported versions')
             if manifest['bus_id'] != self.bus.bus_id or manifest['canonical_root'] != str(self.bus.root):
                 raise BusError('bus_identity_mismatch', 'backup belongs to a different canonical bus')
@@ -165,7 +166,7 @@ class MailBackup:
                 if database.execute('PRAGMA integrity_check').fetchall() != [('ok',)] or database.execute('PRAGMA foreign_key_check').fetchone():
                     raise ValueError('snapshot integrity')
                 version = self.bus.meta(database, 'schema_version')
-                if type(version) is not int or version != SCHEMA_VERSION:
+                if type(version) is not int or version != manifest['bus_schema']:
                     raise ValueError('bus schema')
                 Mailbox._schema(database)
                 if self.bus.meta(database, 'bus_id') != self.bus.bus_id or self.bus.meta(database, 'canonical_root') != str(self.bus.root):

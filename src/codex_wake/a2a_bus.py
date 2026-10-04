@@ -23,6 +23,7 @@ import uuid
 from .a2a_identity import Actor, BusError, RuntimeIdentity
 
 SCHEMA_VERSION = 1
+SUPPORTED_BUS_SCHEMAS = (1, 2)
 LOCAL_FILESYSTEMS = frozenset({'ext2', 'ext3', 'ext4', 'btrfs', 'xfs', 'zfs', 'tmpfs', 'ramfs', 'overlay', 'f2fs'})
 
 
@@ -98,7 +99,8 @@ class BusStore:
         self.path = self.root / 'mailbox.sqlite'
         private_path(self.root, directory=True)
         local_filesystem(self.root)
-        private_path(self.path)
+        # The connection checks recovery intent before canonical-file existence.
+        # Missing files during an interrupted publication must retain its pointer.
         with self.connection() as database:
             self.bus_id = self.meta(database, 'bus_id')
 
@@ -201,6 +203,19 @@ class BusStore:
     @contextmanager
     def _connection(self, *, read_only: bool = False):
         private_path(self.root, directory=True)
+        marker = self.root / '.recovery-in-progress.json'
+        if marker.exists() or marker.is_symlink():
+            error = BusError('recovery_incomplete', 'recovery intent blocks normal connections; reconcile preserved artifacts')
+            try:
+                private_path(marker)
+                if marker.stat().st_size <= 16384:
+                    intent = json.loads(marker.read_text())
+                    receipt = intent.get('receipt_id') if isinstance(intent, dict) else None
+                    if isinstance(receipt, str) and re.fullmatch(r'receipt_[0-9a-f]{32}', receipt):
+                        error.details = dict(receipt_id=receipt)
+            except (BusError, OSError, ValueError):
+                pass
+            raise error
         private_path(self.path)
         for suffix in ('-wal', '-shm'):
             sidecar = Path(str(self.path) + suffix)
@@ -214,10 +229,25 @@ class BusStore:
             database.row_factory = sqlite3.Row
             database.execute('PRAGMA foreign_keys=ON')
             version = self.meta(database, 'schema_version')
-            if type(version) is not int or version != SCHEMA_VERSION:
+            if type(version) is not int or version not in SUPPORTED_BUS_SCHEMAS:
                 raise BusError('unsupported_schema', 'unsupported bus schema; no downgrade attempted')
+            if version == 2:
+                epoch = self.meta(database, 'recovery_epoch')
+                if not isinstance(epoch, str) or not re.fullmatch(r'recovery_[0-9a-f]{32}', epoch):
+                    raise BusError('store_unavailable', 'recovered epoch metadata is invalid')
+                self.recovery_held(database)
             if self.meta(database, 'canonical_root') != str(self.root):
                 raise BusError('bus_identity_mismatch', 'copied bus root cannot become another active writer')
+            if version == 2:
+                anchor_path = self.root / '.recovery-authority.json'
+                private_path(anchor_path)
+                if anchor_path.stat().st_size > 4096:
+                    raise BusError('store_unavailable', 'recovery authority anchor oversized')
+                anchor = json.loads(anchor_path.read_text())
+                if (type(anchor) is not dict or anchor.get('format_version') != 1 or anchor.get('canonical_root') != str(self.root) or
+                    anchor.get('bus_id') != self.meta(database, 'bus_id') or anchor.get('operator_digest') != self.meta(database, 'operator_digest') or
+                    anchor.get('recovery_epoch') != self.meta(database, 'recovery_epoch')):
+                    raise BusError('store_unavailable', 'recovery authority anchor differs from canonical image')
             yield database
         except BusError:
             raise
@@ -226,6 +256,16 @@ class BusStore:
         finally:
             if database is not None:
                 database.close()
+
+    @staticmethod
+    def recovery_held(database):
+        row = database.execute("SELECT value FROM meta WHERE key='recovery_hold'").fetchone()
+        if row is None:
+            return False
+        value = json.loads(row[0])
+        if type(value) is not bool:
+            raise BusError('store_unavailable', 'recovery hold metadata is invalid')
+        return value
 
     def operator(self, database, capability: Path) -> None:
         value = read_capability(capability)
@@ -297,6 +337,8 @@ class BusStore:
     def authenticate(self, capability: Path, identity: RuntimeIdentity, *, invoking_cwd: Path) -> Actor:
         value = read_capability(capability)
         with self.connection() as database:
+            if self.recovery_held(database):
+                raise BusError('recovery_hold', 'participant authority is held pending gap reconciliation')
             row = database.execute('SELECT * FROM actors WHERE actor_id=?', (value.get('actor_id'),)).fetchone()
             if (row is None or value.get('bus_id') != self.bus_id or row['revoked'] or
                 not secrets.compare_digest(row['token_digest'], digest(value['secret'])) or
@@ -318,6 +360,8 @@ class BusStore:
             return receipt
 
     def validate_actor(self, database, actor: Actor, *, permission: str = 'inspect'):
+        if self.recovery_held(database):
+            raise BusError('recovery_hold', 'participant operations are held pending gap reconciliation')
         row = database.execute('SELECT a.*, e.can_send,e.can_receive,e.can_notify FROM actors a JOIN enrollments e ON a.root=e.root WHERE a.actor_id=?', (actor.actor_id,)).fetchone()
         if (row is None or actor.bus_id != self.bus_id or row['revoked'] or
             row['namespace'] != actor.namespace or row['thread_id'] != actor.thread_id or
@@ -349,6 +393,8 @@ class BusStore:
         with self.connection() as database:
             database.execute('BEGIN IMMEDIATE')
             self.operator(database, operator_capability)
+            if not paused and self.recovery_held(database):
+                raise BusError('recovery_hold', 'recovered bus cannot resume before gap reconciliation')
             database.execute("UPDATE meta SET value=? WHERE key='paused'", (json.dumps(bool(paused)),))
             receipt = self.event(database, 'operator', 'pause' if paused else 'resume', dict(paused=bool(paused)))
             database.execute('COMMIT')
@@ -356,7 +402,8 @@ class BusStore:
 
     def status(self) -> dict:
         with self.connection() as database:
-            return dict(schema_version=1, bus_id=self.bus_id, store_schema=SCHEMA_VERSION,
+            return dict(schema_version=1, bus_id=self.bus_id, store_schema=self.meta(database, 'schema_version'),
+                        recovery_hold=self.recovery_held(database),
                         paused=self.meta(database, 'paused'),
                         allow_cross_root=self.meta(database, 'allow_cross_root'),
                         enrolled_roots=database.execute('SELECT count(*) FROM enrollments').fetchone()[0],

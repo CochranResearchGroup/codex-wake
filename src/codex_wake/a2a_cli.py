@@ -15,14 +15,19 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
         command.add_argument('--json', action='store_true', dest='as_json')
         if verb != 'configure':
             command.add_argument('--operator-capability', type=Path, required=True)
-        if verb in ('backup', 'verify-backup', 'restore-backup'):
+        if verb in ('recover-backup', 'reconcile-recovery'):
+            command.add_argument('--expected-database-sha256', required=True)
+            command.add_argument('--apply', action='store_true', required=True)
+        if verb == 'recover-backup':
+            command.add_argument('--accept-unbacked-state-hold', action='store_true', required=True)
+        if verb in ('backup', 'verify-backup', 'restore-backup', 'recover-backup'):
             command.add_argument('--snapshot', type=Path, required=True)
         if verb == 'restore-backup':
             command.add_argument('--apply', action='store_true', required=True)
@@ -96,6 +101,13 @@ def a2a_command(args):
         if args.a2a_command == 'arm-receipt':
             return arm_receipt(args)
         root = args.bus_root or default_bus_root(args.bus_id)
+        if args.a2a_command in ('recover-backup', 'reconcile-recovery'):
+            from .a2a_recovery import MailRecovery
+            recovery = MailRecovery(root, args.operator_capability)
+            value = recovery.recover(args.snapshot, expected_sha256=args.expected_database_sha256,
+                acknowledge_gap=args.accept_unbacked_state_hold) if args.a2a_command == 'recover-backup' else recovery.reconcile(expected_sha256=args.expected_database_sha256)
+            result(dict(recovery=value))
+            return 0
         if args.a2a_command == 'configure':
             store, capability = BusStore.configure(root, bus_id=args.bus_id, allow_cross_root=args.allow_cross_root)
             with store.connection() as database:
@@ -190,7 +202,7 @@ def a2a_command(args):
         return exc.code
     except BusError as exc:
         result(dict(error=dict(code=exc.code, message=str(exc)), partial_receipt_ids=partial_receipts,
-                    reconciliation_required=bool(partial_receipts) or exc.code in ('effect_uncertain', 'maintenance_incomplete', 'backup_incomplete', 'restore_incomplete'),
+                    reconciliation_required=bool(partial_receipts) or exc.code in ('effect_uncertain', 'maintenance_incomplete', 'backup_incomplete', 'restore_incomplete', 'recovery_incomplete'),
                     reconciliation_pointer={key: value for key, value in getattr(exc, 'details', {}).items()
                         if key in ('message_id', 'receipt_id')}), success=False)
         return 7 if exc.code in ('authorization_denied', 'cross_root_denied') else 8
