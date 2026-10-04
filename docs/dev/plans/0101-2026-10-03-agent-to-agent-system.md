@@ -4,13 +4,18 @@ State: OPEN
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
+Branch: feat/p63-rollback-qualification
+Target: origin/main
+Integration: squash_pr
 
 ## Current state
 
 Execution authorized by the operator under the active Plan 0101 goal.
-Checkpoint before 750,000 goal tokens. Effect-specific live gates below remain
-applicable. Work item: https://github.com/CochranResearchGroup/codex-wake/issues/181.
-Branch: feat/p63-session-discovery; target: origin/main; integration: squash PR.
+The current operator ceiling is 500,000 goal tokens, with a working checkpoint
+at 450,000. Earlier ceilings below are historical. Effect-specific live gates
+remain applicable. Work item: https://github.com/CochranResearchGroup/codex-wake/issues/181.
+The initial discovery branch was feat/p63-session-discovery. Current custody
+and integrated packet evidence are recorded in docs/dev/active-lanes.yaml.
 Plan 0100 defines session discovery and Byobu selectors; its implementation is
 pending. Existing Wake supplies durable wake records, bounded scheduling,
 exact-thread tmux routing, safety classification, and transport receipts.
