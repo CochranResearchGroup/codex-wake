@@ -64,3 +64,17 @@ The objective remains the full Plan 0101, including busy/restart/multiroot/resou
 migration/rollback and release gates. Current automatic delivery remains unavailable
 until composer/client ownership or an authoritative supported safe-operation
 contract is established. Do not replace this requirement with a synthetic firing.
+
+## Integration checkpoint
+
+PR #191 head 1121ac2f2c514a00a4430198e2cf6f1b432eb44b passed both hosted
+Python gates. SHA-fenced squash merge succeeded at
+0049a2a19925e33b7bba6031e530691f09a10e64; fetched main confirmed the commit
+and identical qualification artifacts. Installed session-list observation
+returned complete=true, 17 rows: 11 metadata_matched, four unbound, two candidates.
+No runtime-issued composer binding was established. The proposed disposable
+pair/root scope was submitted to the operator and remains pending. Continue
+independent operations/resource qualification while awaiting that answer.
+Memory unavailable: receipt 20261004T013918Z-remember.json, zero writes.
+Current goal meter observed 41,763 at the packet checkpoint; full goal active,
+not complete. Checkpoint before the operator's 500k stop threshold.
