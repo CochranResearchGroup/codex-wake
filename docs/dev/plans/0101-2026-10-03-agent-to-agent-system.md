@@ -572,3 +572,13 @@ Verification0109 preserves fixture and mocked-clock failures and their bounded
 corrections. Actual upgraded-client fixture qualification is pending; no old
 binary fleet, corrupt-source recovery, live/service/soak/release acceptance.
 Full campaignOPEN with ceiling1,000,000 and inherited allowances unchanged.
+
+## Bounded state-equivalent restore accepted
+
+Plan0117 CLOSED / verification0109 after PR202 integratedfdc67e9. Paused
+same-root SQLite activation preserves current identity/audit/unknown intent
+under upgraded-client fencing and refuses later canonical mutations. This
+advances only that restore axis; corrupt-source recovery, old/raw-client
+quiescence, actual service/live/suspension/soak/release remainOPEN. Next ready
+non-live packet: independent recovery authority and quarantine/hold contract
+for a damaged source, preserving source artifacts and refusing automatic replay.

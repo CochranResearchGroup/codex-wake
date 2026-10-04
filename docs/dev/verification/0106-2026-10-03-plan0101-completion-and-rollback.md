@@ -103,3 +103,12 @@ installed workloads. This reduces the backup-format gap only. Verification
 requires the original readable bus and always refuses to qualify activation;
 corrupt-source recovery, preventing revived old actor authority and preserving
 later receipts during activation remain unqualified. No full acceptance claim.
+
+## State-equivalent restore after PR202
+
+Verification0109 accepts paused same-root activation under cooperative upgraded
+BusStore connection fencing, later audit preservation, exact canonical state
+equivalence, newer-authority/receipt refusal and interruption evidence. Both
+hosted versions passed871 tests and installed restore. Snapshot preparation
+and this narrow activation are accepted; corrupted-source recovery and old/raw
+writer quiescence remain unqualified. Full Plan0101 remains NOT COMPLETE.

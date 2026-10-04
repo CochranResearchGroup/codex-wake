@@ -1,6 +1,6 @@
 # Quiesced same-root restore evidence
 
-Verdict: IMPLEMENTED_QUALIFICATION_PENDING
+Verdict: ACCEPTED_BOUNDED_STATE_EQUIVALENT_RESTORE
 Plan:0117
 Campaign:0101 OPEN
 Base:1108be728822683b279443c2d71a8ee642faea75
@@ -53,3 +53,18 @@ Wheel SHA256:40bbffa105a66ea2a07358cbd967e0fb10b3f284addb180127ba8bd56ae1dfbb.
 The existing interrupted-copy fixture now interrupts actual SQLite page copying
 using a genuine Connection subclass rather than merely throwing before copying.
 Final focused check and hosted exact-head gates still required.
+
+## Exact-head hosted and integration receipt
+
+Final focused17 cases3.310s,PASS after the actual interrupted-page fixture.
+Source9d9cb867c1e0d737225609b2b3d63e4cee2ad34a: hosted run37224899191
+SUCCESS on both Python versions. Python3.12:871 tests37.362s, installed restore
+2.467s. Python3.11:871 tests41.742s, installed restore2.464s. Both workloads:
+184320byte snapshot, two messages/one unknown intent retained, FD6->7 within+2,
+no children/transport, private fixture cleanup. Copied-root refusal, same inode,
+participating reader fencing and newer actor authority refusal passed. Complete
+release/installed smoke steps passed. No retry or exclusion. PR202 SHA-fenced
+squashfdc67e9c73839dd3794cc9f151e4bd78be794ff3. Plan0117 CLOSED; full
+campaignOPEN. This is state-equivalent restore qualification only: no corrupt
+source recovery, unupgraded/raw-writer fence, actual service or live acceptance.
+Memory disposition unavailable: no authorized repository group; zero writes.

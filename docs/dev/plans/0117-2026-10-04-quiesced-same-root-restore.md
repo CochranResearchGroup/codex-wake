@@ -1,6 +1,6 @@
 # Quiesced same-root restore
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Owner: primary
 Branch: feat/p63-quiesced-restore
@@ -38,3 +38,12 @@ retains snapshot/request evidence on interruption or completion-audit failure.
 Use fresh installed CLI processes and both hosted Python versions. A passing
 packet accepts only state-equivalent activation in disposable fixtures; full
 corrupt-source recovery, real runtime/service and long-soak gates remain OPEN.
+
+## Integrated bounded acceptance
+
+PR202 source9d9cb867c1e0d737225609b2b3d63e4cee2ad34a passed hosted run
+37224899191 on both Python versions, all871 tests and installed restore.
+Squashfdc67e9c73839dd3794cc9f151e4bd78be794ff3; verification0109 accepted
+only state-equivalent same-root activation and upgraded-client fencing. Full
+corrupt-source recovery, old/raw-client quiescence, service/live/soak/release
+remainOPEN. Source worktree clean, remote equal, ref retained.

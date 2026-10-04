@@ -6,16 +6,16 @@ lanes:
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/181]
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
-    plan_ref: docs/p63-backup-closeout
-    branch: feat/p63-backup-recovery
+    plan_ref: docs/p63-restore-closeout
+    branch: feat/p63-quiesced-restore
     target: origin/main
     plan_state: OPEN
     custody_state: INTEGRATED
-    checkpoint: 0e7c94655c55b51b96468972a31ecfd02bc8d4d6
-    remote_ref: refs/remotes/origin/feat/p63-backup-recovery
+    checkpoint: 9d9cb867c1e0d737225609b2b3d63e4cee2ad34a
+    remote_ref: refs/remotes/origin/feat/p63-quiesced-restore
     integration: squash_pr
-    integration_receipt: a7d46967728e270577ca80fb9fbf1d94327a4090
+    integration_receipt: fdc67e9c73839dd3794cc9f151e4bd78be794ff3
     dependencies: []
     overlaps: []
     updated_at: 2026-10-04
-    disposition: PR200 integrated; bounded backup preparation accepted; activation and campaign OPEN
+    disposition: PR202 integrated; bounded state-equivalent restore accepted; full recovery and campaign OPEN
