@@ -1,6 +1,6 @@
 # Held damaged-source recovery evidence
 
-Verdict: LOCAL_QUALIFICATION_HOSTED_PENDING
+Verdict: ACCEPTED_BOUNDED_HELD_RECOVERY
 Plan:0118
 Campaign:0101 OPEN
 Base:0ec069072bca81e95ad7156ffbc28578bf87ac2a
@@ -53,3 +53,16 @@ under held-recovery limits. Actual pinned legacy source94e17a68 installed in
 a separate venv; recovered bus schema2 refused by that executable.
 Wheel SHA256:5de016d492dc340690398da9f08984938fa3fc790c6c03d79a350b1384abf966.
 No source change followed these checks; hosted exact-head gates pending.
+
+## Final hosted and integration receipt
+
+Exact source928effef29648d1c082e94ef6c482b073cab5ffd: hosted run37227096598
+SUCCESS. Python3.11:882 tests42.206s, installed recovery2.237s; Python3.12:
+882 tests40.957s, installed recovery2.438s. Both installed workloads: two cases,
+each preserving3 source artifacts/2 messages/1 unknown intent; old reader refused,
+new authority/hold confirmed, interruption reconciled; FD6->6/children0/transport0.
+Complete installed and release gates passed. No retries or exclusions. PR204
+SHA-fenced squashef59ca2b34397c24a192dc36ef57f6e165a47cfa. Plan0118 CLOSED.
+Gap reconciliation/release and live/service/soak/release remain separateOPEN
+requirements. Memory disposition unavailable: no authorized repository group,
+zero Graphiti writes; emit one non-write receipt for this closeout.

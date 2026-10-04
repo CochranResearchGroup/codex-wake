@@ -594,3 +594,13 @@ outcomes, release recovery hold, deliver to actual agents, install a supervisor,
 qualify soak or publish the final release. Full campaignOPEN; ceiling1,000,000
 and inherited bounds persist. Next ready packet: explicit gap disposition and
 legacy-notification fencing before release into manual fresh-authority operation.
+
+## Held recovery accepted and one-million checkpoint
+
+Plan0118 CLOSED / verification0110 accepted after PR204 integratedef59ca2.
+Held recovery preserves source artifacts and known backup history under fresh
+authority, with actual old-reader refusal and interruption reconciliation.
+Full campaign remainsOPEN. Note0006 records restart custody and next bounded
+gap-disposition/legacy-notification-fencing packet. Live meter850,776 before
+checkpoint writing; stop/pause before1,000,000 as instructed, with final usage
+in chat. Earlier meters/ceilings and all inherited bounds remain history.
