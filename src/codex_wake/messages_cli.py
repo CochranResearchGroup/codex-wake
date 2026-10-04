@@ -22,9 +22,9 @@ def add_messages_parser(subparsers):
     commands = parser.add_subparsers(dest='messages_command', required=True)
     for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile']:
         command = commands.add_parser(verb)
-        command.add_argument('--bus-root', type=Path)
+        command.add_argument('--bus-root', type=Path, default=os.environ.get('CODEX_WAKE_A2A_BUS_ROOT'))
         command.add_argument('--bus-id', default='local')
-        command.add_argument('--capability', type=Path)
+        command.add_argument('--capability', type=Path, default=os.environ.get('CODEX_WAKE_A2A_CAPABILITY'))
         command.add_argument('--app-server', default='unix://')
         command.add_argument('--json', action='store_true', dest='as_json')
         if verb in ('show','read','reconcile'):

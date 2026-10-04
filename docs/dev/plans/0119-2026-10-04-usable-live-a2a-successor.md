@@ -227,3 +227,26 @@ User must explicitly resume or raise the ceiling before further execution.
 Memory discovery:skip,current canonical evidence sufficient.
 Memory disposition:not_durable;this startup investigation is transient and
 adds no accepted product behavior or durable design decision.
+
+## Implementation authority update | 2026-10-04
+
+User resumed with ceiling1800000; inherited carried total996214 remains part
+of the accounting. Previous checkpoint changed source authority and located
+current runtime seams; no live acceptance passed. M1 remains the critical path.
+
+Current release-mapped source demonstrates turn/start calls start_or_steer_turn;
+therefore a read-only idle preflight cannot prevent steering when another turn
+starts. Candidate patch adds a narrow turn/startIfIdle operation with existing
+parameters/response and Core's atomic start_turn_if_idle, plus an opt-in TUI
+Unix socket whose owning event loop checks draft/modal/pending-input/current
+thread/root and offline state. Existing turn/start semantics remain unchanged.
+Wake connects the existing MailScheduler to this binding with native bind-client,
+dispatch and bounded worker commands. No mailbox schema change or new broker.
+The patch is retained under runtime/codex with pinned upstream provenance and
+a reproducible build helper; compilation and acceptance are still pending.
+
+Only the owned candidate source/build and Wake worktree are mutated. No shared
+daemon/client restart or global installation is authorized by this artifact.
+Once the candidate is built and its concrete rollout is reviewable, resolve
+any exact shared-runtime activation gate. No unqualified transport fallback.
+Live attempts remain0/3; no notification or message was sent this continuation.

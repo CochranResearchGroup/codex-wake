@@ -5101,3 +5101,15 @@ code,live attempt or notification; M1-M4 unproven. Plan0119 records exact
 locators and next owning-binding implementation seam. Conservative carried
 tokens988860 before checkpoint; stopping under the user one-million ceiling.
 Memory not_durable: transient startup investigation,no accepted product outcome.
+
+## Turn 239 | 2026-10-04 | implementation checkpoint
+
+Plan0119 candidate now contains an owning TUI binding, atomic idle-only server
+operation and native Wake notification worker. Rust check and executable build
+passed; 139 focused Wake tests and six transport guards passed. Reproduction
+applies the retained pinned patch. Verification0112 records evidence and pending
+Rust guard test. Installed daemon rejects the new operation without submission;
+live attempts remain0/3 and M1-M4 remainunproven. No shared restart, reconnect,
+global install or notification. Sender receipt-arm delivery is still unwired.
+Progress:blocker_reduction. Carried budget1167279 before checkpoint writing,
+ceiling1800000; goalactive. Memorynot_durable, receipted inverification0112.
