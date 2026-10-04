@@ -90,7 +90,18 @@ def add_a2a_parser(subparsers):
     command.add_argument('--tmux-socket', required=True)
 
 
-def resolve_identity(selector: str, *, endpoint: str = 'unix://', socket_path=None, session=None) -> RuntimeIdentity:
+def resolve_identity(selector: str, *, endpoint: str = 'unix://', socket_path=None, session=None,
+                     allow_offline: bool = False) -> RuntimeIdentity:
+    # Admission to an exact thread does not require a live client. Read stored
+    # identity only; mailbox authorization and notification eligibility remain
+    # independent checks. Enrollment and fuzzy selectors retain live discovery.
+    if allow_offline and selector.startswith('thread:') and selector[7:]:
+        actual_endpoint = locate_shared_endpoint() if endpoint == 'unix://' else endpoint
+        with SharedAppServerReader(actual_endpoint) as reader:
+            thread = reader.read_thread(selector[7:])
+            if thread.get('id') != selector[7:]:
+                raise BusError('identity_unavailable', 'runtime returned a different thread identity')
+            return RuntimeIdentity.from_metadata(thread, reader.server_metadata)
     snapshot = observe(endpoint=endpoint, socket_path=socket_path)
     row = resolve(snapshot, selector, session=session)
     actual_endpoint = snapshot['sources']['app_server']['endpoint']

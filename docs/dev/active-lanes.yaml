@@ -20,8 +20,8 @@ lanes:
     updated_at: 2026-10-04
     execution_successor: docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md
     successor_state: OPEN
-    successor_branch: feat/p63-live-stock-checkpoint
+    successor_branch: fix/p63-offline-admission
     successor_source_checkpoint: 0c0293e5ee3cfd553781e7edd01979ddf2294f34
     successor_integration_receipt: dcc893404252c68fcd2a6304919892b0c5e86361
     successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/209
-    disposition: Original custody retained; Plan0119 stock-Codex M1 PASS on attempt2/3; M2-M4 unproven; custom-runtime activation superseded; campaign OPEN
+    disposition: Original custody retained; Plan0119 M1 PASS; M2 partial with offline admission repair in progress after closed three-attempt loop; M3-M4 unproven; campaign OPEN
