@@ -5147,3 +5147,14 @@ shared restart, selection change, reconnect or live dispatch occurred. Exact
 wakeA/B remain idle with empty composers. Approval persists; remaining gate is
 shared idle state, not permission. M1-M4 UNPROVEN, round-trip attempts0/3.
 Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
+
+### Plan0119 operator correction: existing wake mechanism | 2026-10-04
+
+Operator rejected the custom Codex patch as unnecessary. Plan0119 now selects
+the existing Byobu/tmux wake mechanism and preserves M1-M4 safety and behavior
+criteria. Note0007 activation is superseded; candidate remains staged and
+inactive. Official0.160.0 current link and absent daemon settings reverified; no
+shared restart, client reconnect, update pin, message or notification. Source
+trace confirms existing wake submission and the outstanding A2A receipt fence.
+Automatic round-trip remains unproven, attempts0/3. Memory dispositionunavailable:
+no reviewed Codex Wake Graphiti target group; no graph write attempted.

@@ -1,5 +1,10 @@
 # Opt-in Codex owning-client binding
 
+Disposition: inactive historical candidate. The operator rejected a custom Codex
+runtime dependency for Plan0119; use the existing Wake transport instead. Do not
+activate this patch or pin Codex updates. The build and launch instructions below
+are retained as provenance, not the current product installation path.
+
 This candidate patch is pinned to the official source revision in `manifest.json`.
 It is **not the installed Codex release**, and compilation is not live acceptance.
 Upstream source retains its Apache 2.0 license in `LICENSE.upstream`.
