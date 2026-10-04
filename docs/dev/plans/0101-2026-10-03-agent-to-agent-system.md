@@ -502,3 +502,14 @@ seam. Observer authority remains read-only; writer authority is independent.
 Missing/compacted/corrupt/mismatched proof holds pins, uncertain writes return an
 operator receipt pointer. Existing retention preview/apply still governs pruning.
 Full campaign and live/service/soak/compaction/release acceptance remain OPEN.
+
+## Completion audit and pause rollback
+
+Plan 0114 / verification 0106 audits every original requirement family against
+current evidence. Full completion is unproven: actual two-agent/suspension,
+composer-safe delivery, service/soak, complete restore/compaction and release
+remain missing. Installed synthetic pause rollback preserves accepted and
+unknown records, inspection and retry identity; no downgrade/backup activation
+claimed. Existing ninety-day dedup boundary already visibly rejects stale keys.
+Current 17:wake resolves by metadata; 7:mail-receipts does not uniquely resolve.
+Pending disposable scope remains the live gate; do not silently use other sessions.
