@@ -1,6 +1,6 @@
 # Versioned backup preparation
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Owner: primary
 Branch: feat/p63-backup-recovery
@@ -40,3 +40,11 @@ except attributable audit events. Completion-audit failure preserves snapshot
 and request pointer. Verification never activates the backup or changes its
 canonical root. Installed fresh-process CLI qualification and hosted3.11/3.12
 checks required. Close only on that bounded axis; full recovery remains OPEN.
+
+## Integrated acceptance
+
+PR200 source0e7c94655c55b51b96468972a31ecfd02bc8d4d6 passed hosted run
+37223760540, all864 tests and installed snapshot qualification on3.11/3.12.
+Squash a7d46967728e270577ca80fb9fbf1d94327a4090. Verification0108 accepts
+backup preparation only. Full recovery activation, service/live/soak/release
+remain separate OPEN campaign gates. Source branch retained and clean.

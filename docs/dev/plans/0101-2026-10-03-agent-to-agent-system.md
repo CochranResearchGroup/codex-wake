@@ -554,3 +554,11 @@ meters and review/rework bounds persist. Plan0116 adds versioned private snapsho
 creation and read-only verification. Old snapshots may retain revoked actor
 authority or omit newer outcomes; verification is never activation. Only owned
 disposable fixtures are used. Full restore/service/live/soak/release remainOPEN.
+
+## Backup preparation accepted
+
+PR200 integrateda7d4696; Plan0116 CLOSED and verification0108 accepts private
+versioned paused snapshots and read-only independent-authority verification.
+Full activation needs lifecycle/write fencing and explicit preservation of
+post-snapshot authority/outcomes. Remaining live/service/soak/release gates
+remainOPEN. Continued ceiling1,000,000 and all inherited limits persist.
