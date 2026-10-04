@@ -4,8 +4,7 @@ lanes:
   - id: P63
     owner: primary
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance
-    work_items:
-      - https://github.com/CochranResearchGroup/codex-wake/issues/181
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/181]
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
     plan_ref: docs/p63-rollback-closeout
     branch: feat/p63-rollback-qualification
