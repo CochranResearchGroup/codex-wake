@@ -474,3 +474,14 @@ accepts an explicit independently granted receipt arming CLI, retaining the
 active managed-reader gate and generic-dispatch hold. Verification 0102 records
 fresh-command pending/replay/expiry/idempotency evidence and installed checks.
 Actual agent suspension and qualified delivery remain OPEN.
+
+## Active goal and delivery provenance refresh
+
+Operator's current active goal is complete Plan 0101 and checkpoint before
+500k on the current meter; working checkpoint 450k. Older cumulative ceilings
+remain history, not the current stop instruction; inherited review and attempt
+allowances are not reset. PR #190 integrated at 9c3bbe8. Plan 0111 / verification
+0103 prove installed Codex identity against its official release asset and
+confirm shared daemon metadata reads in the isolated installed environment.
+Composer/client ownership and named disposable live delivery remain unqualified.
+Prepared live boundary in verification 0103 does not authorize execution.

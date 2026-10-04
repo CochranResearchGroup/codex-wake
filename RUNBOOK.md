@@ -4918,3 +4918,13 @@ corrections. No live effects; actual suspension/delivery and full Plan 0101
 remain OPEN. Progress: outcome_progress, arming absent -> locally accepted.
 Campaign allowances carried forward without reset. Memory unavailable because
 no authorized repository Graphiti group exists.
+
+## Turn 222 | 2026-10-03
+
+Plan 0111 reduced delivery blockers: installed Codex exactly matches official
+release executable; archive digest and release source mapping verified. Shared
+daemon metadata reads succeeded in isolated installed environment; bare Python
+unavailability was a missing dependency. Verification 0103 records evidence
+and a concrete disposable live boundary without effects. Automatic delivery
+and full campaign OPEN. Current goal checkpoint before 500k, working 450k;
+prior meters preserved as history. Progress classification: blocker_reduction.
