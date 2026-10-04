@@ -466,3 +466,11 @@ fabricating live actor runtime metadata. Long agent suspension and its arming
 CLI remain separate successors because exact-thread delivery is unqualified.
 The latest operator cumulative ceiling is 2,250,000; prior budget records and
 usage remain preserved. No active goal meter is present in this session.
+
+## Receipt arming prerequisite
+
+PR #189 integrated at 75686bac66abd4be11cfbe865cb8918addfd0af5. Plan 0110
+accepts an explicit independently granted receipt arming CLI, retaining the
+active managed-reader gate and generic-dispatch hold. Verification 0102 records
+fresh-command pending/replay/expiry/idempotency evidence and installed checks.
+Actual agent suspension and qualified delivery remain OPEN.

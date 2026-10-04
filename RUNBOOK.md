@@ -4907,3 +4907,14 @@ long agent suspension, receipt arming CLI and qualified exact-thread delivery
 remain separate next gates. Full Plan 0101 / issue #181 remain OPEN. Preserve
 prior cumulative usage and 2,250,000 ceiling; current goal meter is absent.
 Memory disposition unavailable, zero Graphiti writes.
+
+## Turn 221 | 2026-10-03
+
+Plan 0110 accepted explicit read-only observer-granted receipt arming CLI after
+PR #189 integration. Fresh-command idempotency, pending/replay, expiry, reader
+and grant refusal verified; 25 focused, 834 comprehensive and four isolated
+installed tests passed. Verification 0102 preserves first failures and fixture
+corrections. No live effects; actual suspension/delivery and full Plan 0101
+remain OPEN. Progress: outcome_progress, arming absent -> locally accepted.
+Campaign allowances carried forward without reset. Memory unavailable because
+no authorized repository Graphiti group exists.
