@@ -112,3 +112,14 @@ equivalence, newer-authority/receipt refusal and interruption evidence. Both
 hosted versions passed871 tests and installed restore. Snapshot preparation
 and this narrow activation are accepted; corrupted-source recovery and old/raw
 writer quiescence remain unqualified. Full Plan0101 remains NOT COMPLETE.
+
+## Held damaged-source recovery after PR204
+
+Verification0110 / Plan0118 accepts independently pinned snapshot recovery,
+private preservation of damaged source main/WAL/SHM, fresh external authority
+anchor, old-actor/operator/reader fencing and exact interrupted-transition
+reconciliation. Both hosted versions passed882 tests and installed workloads.
+Recovered canonical history is readable under fresh operator authority but
+paused/held: newer missing state stays unknown. This advances recovery without
+claiming gap disposition, hold release, actual service/live/suspension/soak or
+final release. Full Plan0101 remains NOT COMPLETE.

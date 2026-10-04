@@ -1,6 +1,6 @@
 # Held damaged-source recovery
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Owner: primary
 Branch: feat/p63-held-recovery
@@ -74,3 +74,12 @@ approved transition. Recovered bus schema2 requires matching external anchor
 before normal connections. New backups record actual bus schema1/2. Reusing an
 old snapshot with newly rotated operator authority is refused; create a current
 qualified backup under the fresh operator. No bypass of revoked authority.
+
+## Final bounded acceptance
+
+PR204 source928effef29648d1c082e94ef6c482b073cab5ffd passed run37227096598
+on Python3.11/3.12, all882 tests and installed recovery/reconciliation plus
+actual old-reader refusal. SHA-fenced squashef59ca2b34397c24a192dc36ef57f6e165a47cfa.
+Verification0110 ACCEPTED_BOUNDED_HELD_RECOVERY. Source/authority retention and
+held recovery are qualified; gap disposition/release and full campaign remainOPEN.
+Source branch retained clean/remote-equal. No actual service or live effects.

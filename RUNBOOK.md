@@ -5064,3 +5064,14 @@ fresh external operator anchor, old reader/authority denied, hold/resume fence,
 FD5->5/children0/transport0. Hosted/integration pending. Progress:outcome_progress
 on held recovery only; full campaignOPEN. Next: gap disposition and legacy
 notification fencing, not automatic delivery or live authorization.
+
+## Turn 236 | 2026-10-04
+
+Accepted Plan0118 held recovery: PR204 source928effe passed882 tests and
+installed recovery/reconciliation on3.11/3.12, run37227096598; integratedef59ca2.
+Verification0110 preserves failure history, source artifacts, fresh authority
+fencing and gap hold. Progress:outcome_progress on held damaged-source recovery.
+Note0006 checkpoints before1,000,000 (live850,776 before writing). Full campaign
+OPEN; next packet gap disposition/legacy-notification fence, no implicit replay
+or live/service authority. Source refs clean/remote-equal and retained; root
+untracked note0003 preserved. Memory unavailable/no authorized group.
