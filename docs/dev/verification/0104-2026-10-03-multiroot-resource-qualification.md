@@ -51,3 +51,18 @@ production retention-pin acknowledgement, compact tombstones, physical compactio
 and release/install/rollback remain unqualified. Current Plan 0101 remains OPEN.
 Named disposable live scope is still awaiting operator answer; the prepared gate
 is verification 0103. Never use existing idle threads by default.
+
+## Hosted integration
+
+PR #192 head ddcb28e12df69075efbcf236c64c1ee890d8e81f passed both Python
+release gates in run 37169042344, including installed resource qualification.
+SHA-fenced squash merge succeeded at b0684e31c1777d10d03789dbac7a38dde7f57e96;
+fresh origin/main fetch confirmed the commit and identical script/CI definitions.
+Integration receipt published on docs/p63-resource-closeout.
+Memory unavailable: 20261004T014625Z-remember.json, zero writes.
+Full campaign remains OPEN. Next independent gap is production acknowledgement
+of exact durable receipt projections: current operations pruning tests simulate
+mail_outbox receipt_signal status=published, while the production observer is
+read-only. Implement an independently operator-authorized bounded reconciliation
+from durable source-journal receipt evidence; never loosen the observer's authority
+or clear pins from a wake firing alone. Preserve live scope as pending.
