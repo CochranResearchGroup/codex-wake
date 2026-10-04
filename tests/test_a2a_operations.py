@@ -309,3 +309,18 @@ class OperationsTests(unittest.TestCase):
                 (error.exception.details['receipt_id'],)).fetchone()
             self.assertEqual(row['action'], 'space_reclaim_requested')
         self.assertTrue(self.mailbox.show(self.actors[0], self.identifier)['body_retained'])
+
+    def test_compaction_projects_expiry_before_clearing_pending_notification(self):
+        identifier = self.mailbox.send(self.actors[0], self.identities[1], body='expired notification fixture',
+            idempotency_key='notify-expiry', delivery='notify')['message']['message_id']
+        self.mailbox.ack(self.actors[1], identifier, outcome='declined')
+        self.now += 31 * 86400
+        with self.bus.connection() as database:
+            database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+        preview = self.ops.compaction()
+        self.assertNotIn(identifier, preview['eligible'])
+        candidate = next(item for item in preview['candidates'] if item['message_id']==identifier)
+        self.assertIn('unprojected_receipt_signal', candidate['pins'])
+        with self.bus.connection() as database:
+            state = database.execute('SELECT admission,notification FROM mail_state WHERE message_id=?', (identifier,)).fetchone()
+            self.assertEqual(tuple(state), ('expired','suppressed'))
