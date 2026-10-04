@@ -24,7 +24,7 @@ evidence. A message admitted to SQLite is not a delivered notification.
 
 ## Current state
 
-Current main: f104c2f86b37ac548ba1f798aa0d65abd8d37322. Discovery, explicit
+Baseline at plan creation: f104c2f86b37ac548ba1f798aa0d65abd8d37322. Discovery, explicit
 membership/capabilities, durable mailboxes, replies, acknowledgements, foreground
 waits, scheduler/outbox foundations, receipt projection, retention and bounded
 backup/recovery implementation already exist. Reuse them.
@@ -47,6 +47,31 @@ Evidence: [live demo receipt](../verification/0111-2026-10-04-wakeA-wakeB-live-r
 The global installed 0.6.0 command still lacks A2A verbs. The demo used an isolated
 wheel built from current main. Automatic A2A transport and generic receipt dispatch
 remain unqualified. The demo bus is paused; the two user-owned sessions are idle.
+
+## Current execution decision | 2026-10-04
+
+The operator rejected the custom Codex runtime dependency as unnecessary. Do not
+activate the staged patch, replace the shared runtime, disable Codex updates or
+restart the shared daemon for this plan. Note0007 is superseded. Its earlier
+approval is not authority to continue the rejected activation path. The installed
+official Codex0.160.0 package and updater settings remain unchanged.
+
+Use the existing codex-wake Byobu/tmux wake mechanism for the next bounded probe.
+It already supports waking idle sessions. The outstanding feature is connecting
+message notifications and durable reply arms to that mechanism so that the
+request/reply exchange requires no controller intervention after send. MCP reload
+is not evidence of this behavior. Preserve exact identity/process binding, busy
+and composer checks, cancellation, expiry, uncertainty and the M1-M4 acceptance
+criteria. Do not bypass the existing A2A receipt dispatch fence merely to produce
+a demo. Qualify the existing path and change only the Wake integration seam
+required by an observed failure. A future runtime patch requires a separately
+explained need and explicit operator direction.
+
+Current integrated source:835990a4ba31a1a774b5fa72332fe05db17b7b28 via PR206.
+The retained patch and compiled package are inactive historical artifacts, not
+a product prerequisite. Existing owning-client commands depend on that inactive
+patch and do not constitute the selected stock-runtime transport. M1-M4 remain
+UNPROVEN and actual automatic round-trip attempts remain0/3.
 
 ## Scope and architecture
 
@@ -308,3 +333,13 @@ idle with original identities and empty composers. Do not restart across those
 active turns or request this approval again. Execute the approved gate after
 fresh complete all-idle readback, then perform the bounded M1 attempt. No live
 round-trip was attempted; M1-M4 remain UNPROVEN.
+
+### Operator correction: use existing wake transport | 2026-10-04
+
+The custom-runtime activation path is superseded by the execution decision above.
+The distinction is existing idle-session wake capability versus still-unproven
+automatic mailbox/receipt integration. Source trace confirms existing tmux wake
+prompt submission and process-bound routing; it also confirms an explicit A2A
+receipt dispatch fence. No message, notification, restart or reconnect occurred
+in this correction turn. Next packet targets the existing Wake integration and
+one bounded automatic round-trip probe, retaining all acceptance obligations.

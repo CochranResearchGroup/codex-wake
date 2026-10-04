@@ -1,8 +1,12 @@
 # Plan 0119 runtime activation gate
 
-Status: user approved activation and reconnect on 2026-10-04. Package staged;
-runtime selection and restart await the shared idle gate. Candidate source is integrated by
-PR206 at `835990a4ba31a1a774b5fa72332fe05db17b7b28` onorigin/main.
+Status: SUPERSEDED by the operator's instruction to use the existing wake
+mechanism. Do not execute this activation gate. The package remains staged and
+inactive; the official shared runtime and updater configuration are unchanged.
+The previous approval does not apply to continuing this rejected approach.
+See Plan0119's current execution decision. The historical gate below is retained
+for provenance and rollback context. Candidate source was integrated by PR206
+at `835990a4ba31a1a774b5fa72332fe05db17b7b28` on origin/main.
 Verification0114 records hosted checks and the current runtime gate;
 verification0112 retains the initial build and unloaded-thread rejection.
 This gate is necessary for M1; it does not close any milestone.
