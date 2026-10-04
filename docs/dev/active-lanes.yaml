@@ -20,8 +20,8 @@ lanes:
     updated_at: 2026-10-04
     execution_successor: docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md
     successor_state: OPEN
-    successor_branch: feat/p63-tmux-delivery
-    successor_source_checkpoint: 08e82c3d47eb8a2cae980152a7ff592e2ba21398
-    successor_integration_receipt: 835990a4ba31a1a774b5fa72332fe05db17b7b28
-    successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/206
-    disposition: Original custody retained; Plan0119 candidate source integrated with hosted checks; M1-M4 unproven; operator selected existing Byobu transport; custom-runtime activation superseded; campaign OPEN
+    successor_branch: feat/p63-live-stock-checkpoint
+    successor_source_checkpoint: 0c0293e5ee3cfd553781e7edd01979ddf2294f34
+    successor_integration_receipt: dcc893404252c68fcd2a6304919892b0c5e86361
+    successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/209
+    disposition: Original custody retained; Plan0119 stock-Codex M1 PASS on attempt2/3; M2-M4 unproven; custom-runtime activation superseded; campaign OPEN

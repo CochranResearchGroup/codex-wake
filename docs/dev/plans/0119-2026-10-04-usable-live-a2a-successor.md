@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: feat/p63-tmux-delivery
+Branch: feat/p63-live-stock-checkpoint
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -67,11 +67,17 @@ a demo. Qualify the existing path and change only the Wake integration seam
 required by an observed failure. A future runtime patch requires a separately
 explained need and explicit operator direction.
 
-Current integrated source:835990a4ba31a1a774b5fa72332fe05db17b7b28 via PR206.
+Current integrated source:dcc893404252c68fcd2a6304919892b0c5e86361 via PR209.
 The retained patch and compiled package are inactive historical artifacts, not
 a product prerequisite. Existing owning-client commands depend on that inactive
-patch and do not constitute the selected stock-runtime transport. M1-M4 remain
-UNPROVEN and actual automatic round-trip attempts remain0/3.
+patch and do not constitute the selected stock-runtime transport. M1 now passes
+on attempt2/3. M2 has live busy/draft/rename/move and expiry evidence but remains
+PARTIAL: after three attempts, disconnected enrolled-recipient admission rejects
+the exact thread as session not found, preventing the cancellation test. M3-M4
+remain UNPROVEN. Verification0115 records actual failures and restored runtime.
+Next packet: narrow exact-thread offline admission repair with enrollment/root
+checks preserved, then explicitly bounded requalification. No unchanged fourth
+M2 trial, custom runtime activation, automatic resume or shared-daemon restart.
 
 ## Scope and architecture
 
@@ -388,3 +394,27 @@ dispatching or uncertain attempt. A pending effect instead stops for exact
 reconciliation. Count committed submissions from the same journal so an error
 after submission cannot expand the worker effect budget. This is a direct remedy
 for the observed zero-effect worker exit, not relaxed expiry or replay policy.
+
+### M1 attempt1: TTL rejected before admission | 2026-10-04
+
+The actual wakeA native send returned operation_unavailable and stopped without
+arming or retry. Read-only reproduction identifies operator-supplied `--ttl120`
+as invalid; this CLI requires a duration unit such as120s. Authorized exact
+journal reconciliation proves zero envelopes and zero transport attempts for the
+original intent. This is M1 failure1/3, not a passed exchange. Preserve the agent
+turn, native output and reconciliation. The zero-effect owned worker was stopped;
+attempt2 retries the same intent key with120s and a fresh bounded worker. No
+controller prompt followed an admitted request.
+
+### M1 stock-runtime behavioral acceptance | 2026-10-04
+
+M1 PASS on attempt2/3: actual requestmsg_c33d4cdf87544e138fedb286896fb9bb,
+B read/accepted/replymsg_fe28d90d70c144ae8cec2a07f6c6ba77, automatic A read
+receipt_c0308cf295f14ff089e7dade82c44488. Durable reply arm submitted; exactly
+two transport submissions, same original threads/PIDs; worker exited normally.
+No controller prompt/body relay/inbox polling after admission. Deadline proven
+by90.576-second monotonic upper bound from BEFORE admission to actual A read;
+wall receipt delta56.006 seconds is labeled separately. Verification0115 retains
+exact receipts/turns, first failure and all setup/clock observations. Extra A
+terminal ack failed claim_required; read criterion passed, terminal ack not claimed.
+M2-M4 and wider campaign remain OPEN. Next packet is live session safety.
