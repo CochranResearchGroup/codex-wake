@@ -5124,3 +5124,37 @@ and built. Verification0113 retains failures and current hashes. Presubmitpendin
 source integration and explicit shared-runtime approval required before M1.
 Carried budget1344086 before writing; ceiling1800000; goalactive. No liveattempt.
 Memorynot_durable remains the single receipted disposition for this in-progress turn.
+
+### Turn 239 source integration and activation gate
+
+PR206 source08e82c3 passed hosted3.11/3.12 release gates,895 tests each, and
+integrated835990a onorigin/main. Continued checkpoint custody on
+feat/p63-activation-gate in the existing worktree; earlier source refs retained.
+Verification0114 records exact candidate hashes, installed candidate CLI, fresh
+idle wakeA/wakeB readback and unchanged shared runtime. M1-M4unproven; issue181OPEN;
+liveattempts0/3. Explicit shared-runtime approval pending. Goalactive; carried
+1520577 before writing, ceiling1800000. No more supporting matrices before this
+concrete activation gate resolves. Final memory dispositionunavailable: healthy
+runtime, bounded atlas found no appropriate reviewed Codex Wake target group;
+supersedes provisionalnot_durable, with no graph write.
+
+### Plan0119 approved activation preflight | 2026-10-04 21:43 UTC
+
+User approved the prepared note0007 gate. Verified binary staged in the private
+standalone candidate package; original link/settings absence saved for rollback.
+Complete shared inventory and repeated checks show unrelated active turns. No
+shared restart, selection change, reconnect or live dispatch occurred. Exact
+wakeA/B remain idle with empty composers. Approval persists; remaining gate is
+shared idle state, not permission. M1-M4 UNPROVEN, round-trip attempts0/3.
+Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
+
+### Plan0119 operator correction: existing wake mechanism | 2026-10-04
+
+Operator rejected the custom Codex patch as unnecessary. Plan0119 now selects
+the existing Byobu/tmux wake mechanism and preserves M1-M4 safety and behavior
+criteria. Note0007 activation is superseded; candidate remains staged and
+inactive. Official0.160.0 current link and absent daemon settings reverified; no
+shared restart, client reconnect, update pin, message or notification. Source
+trace confirms existing wake submission and the outstanding A2A receipt fence.
+Automatic round-trip remains unproven, attempts0/3. Memory dispositionunavailable:
+no reviewed Codex Wake Graphiti target group; no graph write attempted.

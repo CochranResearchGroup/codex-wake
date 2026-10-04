@@ -1,5 +1,10 @@
 # Opt-in Codex owning-client binding
 
+Disposition: inactive historical candidate. The operator rejected a custom Codex
+runtime dependency for Plan0119; use the existing Wake transport instead. Do not
+activate this patch or pin Codex updates. The build and launch instructions below
+are retained as provenance, not the current product installation path.
+
 This candidate patch is pinned to the official source revision in `manifest.json`.
 It is **not the installed Codex release**, and compilation is not live acceptance.
 Upstream source retains its Apache 2.0 license in `LICENSE.upstream`.
@@ -89,3 +94,21 @@ The Plan 119 live packet must still prove both resumed turns and acknowledgement
 Shared-daemon activation, reconnecting user-owned clients, release and installed
 acceptance have their own concrete authority gates. Do not restart the shared
 daemon merely to run this candidate.
+
+## Selected stock-runtime alternative
+
+Use the installed Wake CLI's explicit tmux binding for each enrolled client:
+
+```sh
+codex-wake a2a bind-tmux --bus-root /ENROLLED/BUS \
+  --operator-capability /ISSUED/OPERATOR.json --thread EXISTING_THREAD_ID \
+  --tmux-socket /OWNED/TMUX/SOCKET --bindings-file /OWNED/BINDINGS.json --json
+```
+
+Run the existing bounded `a2a worker` with those bindings and independently
+delegated sender receipt authority. It submits the exact inbox retrieval pointer
+through the existing paste transport, with metadata and empty-composer checks.
+A visible pasted prompt is transport evidence; the live agent must separately
+read, acknowledge and reply. Checks before paste are observational and cannot
+provide atomic protection against simultaneous human input. Unknown composers
+are deferred and ambiguous delivery is never automatically retried.

@@ -132,17 +132,17 @@ class ReplyWakeGate:
                                                    (row['attempt_id'],)).fetchone()
                         evidence = json.loads(row['evidence'])
                         if (row['message_id'] in json.loads(attempt['message_ids'])
-                                and evidence.get('transport') == 'owning_client_v1'
+                                and evidence.get('transport') in ('owning_client_v1', 'tmux_notification_v1')
                                 and evidence.get('exact_thread_id') == target.get('thread_id')
                                 and isinstance(evidence.get('receipt_id'), str) and evidence['receipt_id']):
-                            reconciled = (row['message_id'], row['attempt_id'], evidence['receipt_id'])
+                            reconciled = (row['message_id'], row['attempt_id'], evidence['receipt_id'], evidence['transport'])
                             break
                     database.execute('ROLLBACK')
                 if reconciled:
-                    message_id, attempt_id, receipt_id = reconciled
-                    self.submitted(current, dict(message_id=message_id), attempt_id, receipt_id)
+                    message_id, attempt_id, receipt_id, transport = reconciled
+                    self.submitted(current, dict(message_id=message_id), attempt_id, receipt_id, transport=transport)
 
-    def submitted(self, found, job, attempt_id, receipt_id):
+    def submitted(self, found, job, attempt_id, receipt_id, *, transport='owning_client_v1'):
         from .records import replace_record, append_event, format_utc, utc_now
         if found is None:
             return
@@ -150,8 +150,8 @@ class ReplyWakeGate:
         record = dict(found.record)
         record.update(status='submitted', updated_at=format_utc(now),
                       transport_receipt=dict(message_id=job['message_id'], attempt_id=attempt_id,
-                                             receipt_id=receipt_id, transport='owning_client_v1'))
-        record = append_event(record, 'submitted', 'Correlated reply notification submitted to exact owning client', now)
+                                             receipt_id=receipt_id, transport=transport))
+        record = append_event(record, 'submitted', 'Correlated reply notification submitted to bound client', now)
         replace_record(self.root, found, record)
 
 

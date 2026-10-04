@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: feat/p63-live-delivery
+Branch: feat/p63-tmux-delivery
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -24,7 +24,7 @@ evidence. A message admitted to SQLite is not a delivered notification.
 
 ## Current state
 
-Current main: f104c2f86b37ac548ba1f798aa0d65abd8d37322. Discovery, explicit
+Baseline at plan creation: f104c2f86b37ac548ba1f798aa0d65abd8d37322. Discovery, explicit
 membership/capabilities, durable mailboxes, replies, acknowledgements, foreground
 waits, scheduler/outbox foundations, receipt projection, retention and bounded
 backup/recovery implementation already exist. Reuse them.
@@ -47,6 +47,31 @@ Evidence: [live demo receipt](../verification/0111-2026-10-04-wakeA-wakeB-live-r
 The global installed 0.6.0 command still lacks A2A verbs. The demo used an isolated
 wheel built from current main. Automatic A2A transport and generic receipt dispatch
 remain unqualified. The demo bus is paused; the two user-owned sessions are idle.
+
+## Current execution decision | 2026-10-04
+
+The operator rejected the custom Codex runtime dependency as unnecessary. Do not
+activate the staged patch, replace the shared runtime, disable Codex updates or
+restart the shared daemon for this plan. Note0007 is superseded. Its earlier
+approval is not authority to continue the rejected activation path. The installed
+official Codex0.160.0 package and updater settings remain unchanged.
+
+Use the existing codex-wake Byobu/tmux wake mechanism for the next bounded probe.
+It already supports waking idle sessions. The outstanding feature is connecting
+message notifications and durable reply arms to that mechanism so that the
+request/reply exchange requires no controller intervention after send. MCP reload
+is not evidence of this behavior. Preserve exact identity/process binding, busy
+and composer checks, cancellation, expiry, uncertainty and the M1-M4 acceptance
+criteria. Do not bypass the existing A2A receipt dispatch fence merely to produce
+a demo. Qualify the existing path and change only the Wake integration seam
+required by an observed failure. A future runtime patch requires a separately
+explained need and explicit operator direction.
+
+Current integrated source:835990a4ba31a1a774b5fa72332fe05db17b7b28 via PR206.
+The retained patch and compiled package are inactive historical artifacts, not
+a product prerequisite. Existing owning-client commands depend on that inactive
+patch and do not constitute the selected stock-runtime transport. M1-M4 remain
+UNPROVEN and actual automatic round-trip attempts remain0/3.
 
 ## Scope and architecture
 
@@ -279,3 +304,60 @@ pending. Current policy0021 also requires deployment from an exact integrated
 origin/main commit; source integration and hosted checks must precede activation.
 No authority is inferred from compilation, local fixture results or a PR. M1-M4
 remain UNPROVEN, live round-trip attempts0/3, actual runtime unchanged.
+
+### Integrated source checkpoint | 2026-10-04
+
+PR206 integrated candidate source08e82c3 as
+origin/main835990a4ba31a1a774b5fa72332fe05db17b7b28. Hosted run37235883303 passed
+both Python3.11 and3.12 release gates,895 tests each, including installed wheel
+and existing compatibility/resource/recovery checks. Runtime source compilation
+and fixture guards remain supporting evidence; M1-M4 are stillUNPROVEN.
+Execution worktree remainscodex-wake-p63-feature-successor, now on
+feat/p63-activation-gate from that exact integrated main. Source branch and refs
+are retained. Verification0114 is the restart-safe activation checkpoint.
+
+Fresh readback confirms wakeA andwakeB idle, correctIDs/root,directinputallowed;
+installed shared daemon remains0.160.0 on its original standalone package.
+Explicit activation approval is pending; no shared restart, client reconnect or
+global install has occurred. Next action requires that approval, then the exact
+bounded activation and one actual M1 request/reply attempt. Do not build more
+supporting matrices while this concrete runtime gate remains unresolved.
+
+### Activation approved; shared idle gate pending | 2026-10-04
+
+The user's `approved` authorizes note0007's prepared shared activation and exact
+client reconnect. Candidate package staged with verified SHA256 and rollback
+snapshot; shared selection, settings and daemon remain unchanged. Fresh complete
+shared inventory and repeated checks show unrelated active turns. WakeA/B remain
+idle with original identities and empty composers. Do not restart across those
+active turns or request this approval again. Execute the approved gate after
+fresh complete all-idle readback, then perform the bounded M1 attempt. No live
+round-trip was attempted; M1-M4 remain UNPROVEN.
+
+### Operator correction: use existing wake transport | 2026-10-04
+
+The custom-runtime activation path is superseded by the execution decision above.
+The distinction is existing idle-session wake capability versus still-unproven
+automatic mailbox/receipt integration. Source trace confirms existing tmux wake
+prompt submission and process-bound routing; it also confirms an explicit A2A
+receipt dispatch fence. No message, notification, restart or reconnect occurred
+in this correction turn. Next packet targets the existing Wake integration and
+one bounded automatic round-trip probe, retaining all acceptance obligations.
+
+### Stock-runtime transport implementation | 2026-10-04
+
+Native `a2a bind-tmux` captures the existing client PID/start ticks/boot ID and
+exact home/provider namespace/thread/root. The existing notification dispatcher
+uses that explicit binding without an automatic transport fallback. It checks
+shared metadata for idle/direct-input eligibility and recognizes only the observed
+empty Codex composer. Draft, modal, unknown UI, unloaded and changed-generation
+clients are held. Paste uses the existing transport and records visible canonical
+message-pointer evidence, not a fabricated server turn receipt. The same existing
+reply-arm gate releases the correlated reply notification and reconciles completed
+transport bookkeeping without resend. Generic A2A receipt injection stays fenced.
+
+These are observed pre-paste checks, not an atomic server/composer transaction.
+M2 requires live safety tests; source checks alone do not prove a human cannot
+change input between the final check and paste. No stock runtime was modified.
+Next gate: integrate this source after required checks, then one actual automatic
+request/reply on the designated same threads.

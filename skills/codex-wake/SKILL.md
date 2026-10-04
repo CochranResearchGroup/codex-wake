@@ -11,8 +11,9 @@ Use `codex-wake` when work should resume after a defined trigger instead of rely
 
 ### Candidate enrolled mailbox workflow
 
-Plan 0119's owning-client delivery is a candidate awaiting live and installed
-acceptance. Use it only when the operator has explicitly enrolled this exact
+Plan 0119's notification delivery is a candidate awaiting live and installed
+acceptance. The selected stock-Codex transport is an explicit Byobu/tmux binding;
+it does not require a patched Codex executable. Use it only when the operator has explicitly enrolled this exact
 thread, opted its actual client into the binding, issued an actor capability and
 started the bounded notification worker. Environment defaults select setup;
 current runtime identity and capability validation still authorize each command.
