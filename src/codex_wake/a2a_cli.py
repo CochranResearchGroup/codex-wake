@@ -190,8 +190,29 @@ def a2a_command(args):
                     raise BusError('invalid_argument', 'worker requires bounded duration, interval and dispatch count')
                 deadline, submitted, ticks = time.monotonic() + args.duration, 0, 0
                 while time.monotonic() < deadline and submitted < args.max_dispatches:
-                    outcome = dispatcher.tick(limit=min(args.limit, args.max_dispatches - submitted))
-                    submitted += outcome['submitted']; ticks += 1
+                    try:
+                        outcome = dispatcher.tick(limit=min(args.limit, args.max_dispatches - submitted))
+                    except BusError as error:
+                        if error.code != 'clock_anomaly':
+                            raise
+                        # Clock guards remain unchanged. Retry only when the journal
+                        # proves this worker has no unfinished/ambiguous effect.
+                        with store.connection(read_only=True) as database:
+                            store.operator(database, args.operator_capability)
+                            pending = database.execute(
+                                "SELECT attempt_id FROM mail_attempts WHERE owner=? AND state IN ('dispatching','uncertain') LIMIT 1",
+                                (scheduler.owner,)).fetchone()
+                        if pending:
+                            raise BusError('effect_uncertain', 'clock interruption left an attempt requiring exact reconciliation') from None
+                        outcome = dict(status='held', reason='clock_anomaly', submitted=0, results=[])
+                    # A committed transport receipt counts even if a later lease
+                    # release hit the clock guard, so the effect budget cannot grow.
+                    with store.connection(read_only=True) as database:
+                        store.operator(database, args.operator_capability)
+                        submitted = database.execute(
+                            "SELECT count(*) FROM mail_attempts WHERE owner=? AND state='submitted'",
+                            (scheduler.owner,)).fetchone()[0]
+                    ticks += 1
                     result(dict(dispatch=outcome, tick=ticks))
                     if any(row['status'] == 'uncertain' for row in outcome['results']):
                         raise BusError('effect_uncertain', 'worker stopped for exact transport reconciliation')
