@@ -372,3 +372,19 @@ is preserved as a setup transport failure. The product runner now uses tmux's
 bracketed paste mode, a settle delay and one explicit Enter so burst detection
 does not absorb submit keys. Source and hosted checks must pass before using
 this correction for the actual automatic exchange.
+
+### Observed host-clock hold | 2026-10-04
+
+The old demo bus refused its stale clock checkpoint. A fresh demo-only bus for
+the same threads/root also stopped after three empty worker ticks. Sampling
+observed a backward wall-clock step of about2.7 seconds with monotonic time
+advancing normally. Both buses and raw receipts are preserved; there were zero
+messages and zero transport attempts. The old bus is paused. No host settings
+or mailbox clock checkpoint were changed.
+
+Keep the mailbox clock guard intact. The bounded worker may wait through a clock
+hold only after an independently authorized journal read proves it owns no
+dispatching or uncertain attempt. A pending effect instead stops for exact
+reconciliation. Count committed submissions from the same journal so an error
+after submission cannot expand the worker effect budget. This is a direct remedy
+for the observed zero-effect worker exit, not relaxed expiry or replay policy.

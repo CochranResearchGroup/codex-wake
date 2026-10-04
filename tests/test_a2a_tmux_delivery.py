@@ -87,3 +87,57 @@ class TmuxDeliveryTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class WorkerClockHoldTests(unittest.TestCase):
+    def test_worker_holds_zero_effect_clock_error_without_changing_guard(self):
+        from argparse import Namespace
+        import contextlib
+        import io
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.a2a_cli import a2a_command
+        from codex_wake.a2a_identity import BusError
+        from codex_wake.a2a_mailbox import Mailbox
+        with tempfile.TemporaryDirectory() as directory:
+            bus, operator = BusStore.configure(Path(directory) / 'bus')
+            Mailbox.migrate(bus, operator)
+            args = Namespace(a2a_command='worker', bus_root=bus.root, operator_capability=operator,
+                bindings_file=Path(directory) / 'bindings', wake_root=None, sender_receipt_authority=None,
+                duration=1, interval=.1, max_dispatches=1, limit=1)
+            with patch('codex_wake.a2a_delivery.NotificationDispatcher') as dispatcher, \
+                 patch('time.monotonic', side_effect=[0, 0, 2, 2, 2]), \
+                 patch('time.sleep'), contextlib.redirect_stdout(io.StringIO()) as output:
+                dispatcher.return_value.tick.side_effect = BusError('clock_anomaly', 'clock guard')
+                self.assertEqual(a2a_command(args), 0)
+            self.assertIn('"reason": "clock_anomaly"', output.getvalue())
+            with bus.connection(read_only=True) as database:
+                self.assertEqual(database.execute('SELECT count(*) FROM mail_attempts').fetchone()[0], 0)
+
+    def test_worker_never_retries_clock_error_after_ambiguous_effect(self):
+        from argparse import Namespace
+        import contextlib
+        import io
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.a2a_cli import a2a_command
+        from codex_wake.a2a_identity import BusError
+        from codex_wake.a2a_mailbox import Mailbox
+        with tempfile.TemporaryDirectory() as directory:
+            bus, operator = BusStore.configure(Path(directory) / 'bus')
+            Mailbox.migrate(bus, operator)
+            args = Namespace(a2a_command='worker', bus_root=bus.root, operator_capability=operator,
+                bindings_file=Path(directory) / 'bindings', wake_root=None, sender_receipt_authority=None,
+                duration=1, interval=.1, max_dispatches=1, limit=1)
+            with patch('codex_wake.a2a_delivery.NotificationDispatcher') as dispatcher, \
+                 patch('time.monotonic', side_effect=[0, 0]), \
+                 contextlib.redirect_stdout(io.StringIO()) as output:
+                def fail(**kwargs):
+                    scheduler = dispatcher.call_args.args[0]
+                    with bus.connection() as database:
+                        database.execute('INSERT INTO mail_attempts VALUES (?,?,?,?,?,?,?,?)',
+                            ('attempt_fixture', 'recipient', '[]', scheduler.owner, 1, time.time(), 'dispatching', '{}'))
+                        database.commit()
+                    raise BusError('clock_anomaly', 'after effect')
+                dispatcher.return_value.tick.side_effect = fail
+                self.assertNotEqual(a2a_command(args), 0)
+            self.assertIn('"code": "effect_uncertain"', output.getvalue())
+            self.assertEqual(dispatcher.return_value.tick.call_count, 1)
