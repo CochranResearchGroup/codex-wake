@@ -297,3 +297,14 @@ Explicit activation approval is pending; no shared restart, client reconnect or
 global install has occurred. Next action requires that approval, then the exact
 bounded activation and one actual M1 request/reply attempt. Do not build more
 supporting matrices while this concrete runtime gate remains unresolved.
+
+### Activation approved; shared idle gate pending | 2026-10-04
+
+The user's `approved` authorizes note0007's prepared shared activation and exact
+client reconnect. Candidate package staged with verified SHA256 and rollback
+snapshot; shared selection, settings and daemon remain unchanged. Fresh complete
+shared inventory and repeated checks show unrelated active turns. WakeA/B remain
+idle with original identities and empty composers. Do not restart across those
+active turns or request this approval again. Execute the approved gate after
+fresh complete all-idle readback, then perform the bounded M1 attempt. No live
+round-trip was attempted; M1-M4 remain UNPROVEN.

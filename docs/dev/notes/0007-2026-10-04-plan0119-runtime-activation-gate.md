@@ -1,6 +1,7 @@
 # Plan 0119 runtime activation gate
 
-Status: prepared, not authorized or executed. Candidate source is integrated by
+Status: user approved activation and reconnect on 2026-10-04. Package staged;
+runtime selection and restart await the shared idle gate. Candidate source is integrated by
 PR206 at `835990a4ba31a1a774b5fa72332fe05db17b7b28` onorigin/main.
 Verification0114 records hosted checks and the current runtime gate;
 verification0112 retains the initial build and unloaded-thread rejection.
@@ -58,3 +59,27 @@ Approval covers only the preceding reversible local activation and reconnect,
 not release publication, unrelated client termination, additional roots, or an
 unsupported transport fallback. If shared-runtime activation is declined, retain
 this observed blocker and continue source work without claiming live acceptance.
+
+### Approved gate preflight | 2026-10-04 21:43 UTC
+
+The user replied `approved` to this prepared gate. This approval persists; no
+repeat approval is needed for the listed scope. Fresh inventory reports complete
+shared-session coverage, with unrelated active turns and an unknown attachment.
+The designated clients remain idle with empty composers and original thread IDs.
+No active turn was interrupted.
+
+The candidate binary was copied into private package
+`/home/ecochran76/.codex/packages/standalone/releases/plan0119-835990a-8c131546/bin/codex`
+and its full SHA256 matches the candidate above. Rollback snapshot and staging
+receipt are retained in
+`/home/ecochran76/.local/state/codex-wake/live-demos/20261004-wakeA-wakeB/activation/`.
+Original current link and absent settings were reverified before staging. The
+current link was not changed, settings were not created, and daemon restart,
+client reconnect and live notification were not attempted.
+
+Preflight inventory: `/tmp/codex-wake-plan119-runtime/approval-sessions.json`.
+Repeated idle-gate observations:
+`/tmp/codex-wake-plan119-runtime/approval-idle-gate.jsonl`.
+Next effect remains steps 2-6 after fresh complete all-idle readback. Approval
+does not waive step 1 or authorize interrupting unrelated active sessions.
+M1-M4 remain UNPROVEN; actual live round-trip attempts remain 0/3.
