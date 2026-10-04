@@ -1,9 +1,9 @@
 # Build usable live agent-to-agent messaging
 
-State: PLANNED
+State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: docs/p63-feature-successor
+Branch: feat/p63-live-delivery
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -182,3 +182,48 @@ successor owns execution sequencing, with no reduction of the original goal.
 Memory discovery: skip; current canonical files and this turn's fresh live receipt
 supply the decisions needed for this plan. Closeout disposition is recorded
 separately; the plan is the restart-safe execution source.
+
+## Execution checkpoint | 2026-10-04
+
+User explicitly continued Plan0119 with working-product acceptance and a stop
+before one million tokens. Execution worktree is
+`/home/ecochran76/workspace.local/codex-wake-p63-feature-successor`, branch
+`feat/p63-live-delivery`, based on34f6671. Origin/main remainsf104c2f.
+Issue181 isOPEN; no open PR exists. Root checkout unrelated untracked note0003
+is preserved. No delegated agents, live attempts, messages or notifications.
+
+Read current policies and Plan0119. Re-resolved both exact demo threads through
+the existing shared daemon: bothloaded,idle,expectedroot,canAcceptDirectInput=true.
+Installed CLI/daemon remain0.160.0. Generated experimental protocol at
+`/tmp/codex-wake-plan119-schema`: queue/add accepts threadId,input and
+clientUserMessageId; queue/start accepts threadId and optional queuedSubmissionId.
+Neither parameter schema supplies a composer/client ownership guard. Schema
+absence alone does not qualify or disqualify every possible runtime seam.
+
+Retrieved official release-mapped source revision
+a956835d020762cb2b570053af06f643a11c0ecc beneath
+`/tmp/codex-wake-plan119-runtime/codex-a956835d020762cb2b570053af06f643a11c0ecc`.
+CodeGraph indexed the Wake worktree (188files,5851nodes,21907edges; fresh);
+runtime source indexing/exploration surfaced the owning TUI event loop,
+App::handle_event,submit_thread_op and composer_draft_snapshot.
+Local rustc/cargo1.94.1 are present; compilation was not attempted.
+File-searcher lookup waspartial/backend-degraded and did not locate a checkout;
+this is not an exhaustive absence claim. Downloaded source is temporary.
+
+M1-M4 remainUNPROVEN. No failing live notification probe or product code change
+has yet been produced. Progress classification:blocker_reduction for current
+identity and owning-seam discovery only; no live behavior advancement.
+Next: implement the opted-in binding at the actual owning TUI seam and connect
+existing MailScheduler dispatch/receipt path, then run the actual M1 probe.
+Do not substitute bare queue/add,terminal screenshots or fixtures for binding.
+No shared daemon restart,global install,client replacement or provider mutation
+was performed. Source patches must be retained in Wake before using temp source
+as a build input; qualify exact ownership,busy,draft,offline and uncertainty.
+
+Budget: inherited867188 plus observed continuation121672 =988860 before
+checkpoint writing. This is a conservative carried total,not an exact final
+meter. Stop now with reserve under1000000; do not treat a fresh meter as zero.
+User must explicitly resume or raise the ceiling before further execution.
+Memory discovery:skip,current canonical evidence sufficient.
+Memory disposition:not_durable;this startup investigation is transient and
+adds no accepted product behavior or durable design decision.
