@@ -96,3 +96,19 @@ not overwritten. Do not resume custom runtime activation.
 
 Memory disposition: unavailable; no reviewed Codex Wake Graphiti target group.
 No Graphiti write attempted.
+
+## M2 attempt1 checkpoint
+
+Request `msg_fc72c5646e8b4502bcc382fd38399b3e` was admitted while B's
+Byobu window was renamed/moved with its original thread, PID6145 and pane%72.
+The protected composer remained untouched by the worker; the request expired
+and was suppressed with zero transport attempts. This is a safety observation,
+not M2 acceptance. The observer started too late to capture the busy transition,
+and the owned draft fixture was only partially inserted. It refused to clear
+text that did not exactly match its full fixture. No reply occurred.
+
+Private `tmux-plan119/M2-1/guard-observations.jsonl` retains observations;
+`cleanup-proof.json` records exact original/visible owned fixture reconciliation,
+clearing only that fixture, restoration of window@72 to index18/namewakeB, and
+terminal workerPID89282. Retry requires observing before admission and verifying
+the actual fixture before using it. M2 attempt1/3 consumed; M2-M4 remain open.
