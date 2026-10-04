@@ -4988,3 +4988,16 @@ Verification 0107 preserves red probes, corrected fixture pause assumption and
 103 focused source / 15 Python 3.11 / 15 isolated installed API passes. Real legacy
 populated migration, fresh CLI proof and final acceptance remain pending. No live
 effects; campaign OPEN. This is implementation progress, not lifecycle acceptance.
+
+## Turn 229 | 2026-10-03
+
+Plan 0115 accepted populated installed old/new migration, production receipt
+projection, ninety-day retirement and physical recovery. Local comprehensive
+853 tests passed before one bounded expiry finding; first hosted baseline passed.
+WSL/DrvFS stalled local execution. GitHub connector preserved source continuity:
+red expiry commit/run63c7f90/37176054507 failed exactly one of854; correction95f68c7
+passed854 on Python3.11/3.12 and installed workloads4.403/2.947s, FD6->6, no children,
+zero dispatch, 28,672 bytes recovered per case. PR197 integrated8414adc0. Closed
+Plan0115; full campaignOPEN. No local cleanup/audit or host recovery claim. Next:
+versioned backup/restore preparation; actual live acceptance scope remains pending.
+Memory unavailable: no authorized group and local receipt runtime inaccessible.

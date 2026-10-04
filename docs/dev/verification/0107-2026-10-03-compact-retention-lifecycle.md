@@ -1,6 +1,6 @@
 # Compact retention lifecycle evidence
 
-Verdict: REWORK_HOSTED_PENDING
+Verdict: ACCEPTED_BOUNDED_RETENTION
 Plan: 0115
 Campaign: 0101 OPEN
 
@@ -137,3 +137,23 @@ the installed workload must acknowledge three actual committed receipts per
 message (admitted, declined, expired) instead of two. No live or service effects,
 no new discovery pass, and no inherited allowance reset. Final hosted verdict is
 pending; no local post-correction validation is claimed.
+
+## Final hosted and integration receipt
+
+Final source head 95f68c749f688a4e3a596464b780c9823bc97c20 passed both release
+gates in run 37176278799. Python 3.12: 854 tests, 31.485s; installed qualification
+2.947s. Python 3.11: 854 tests, 39.523s; installed qualification 4.403s. Both
+installed runs: FD6->6, no children, zero dispatch attempts, 28,672 bytes recovered
+per aged fixture. Pinned legacy installation and complete installed smoke steps
+passed on both Python versions. Old-reader refusal, populated migration, expiry
+projection pins, fresh read/retry identity, retirement and physical recovery are
+accepted on this bounded synthetic retention axis. No whole-campaign acceptance.
+
+PR 197 SHA-fenced squash integrated at 8414adc0bdb07c1290300405dd87cf009b744158.
+Plan 0115 is CLOSED. Local filesystem remains unavailable: no post-correction
+local wheel hash, local ref equality, clean-worktree, custody audit or cleanup
+claim. Reconcile local feat/p63-retention-lifecycle with remote source 95f68c7
+only after checking porcelain; preserve original untracked note 0003. Retain
+source and closeout refs. Full live, service, restore, soak and release gates
+remain OPEN. Memory disposition: unavailable; no authorized codex-wake group,
+and local runtime receipt execution is unavailable during the filesystem stall.

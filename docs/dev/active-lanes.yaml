@@ -6,16 +6,16 @@ lanes:
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/181]
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
-    plan_ref: docs/p63-rollback-closeout
-    branch: feat/p63-rollback-qualification
+    plan_ref: docs/p63-retention-closeout
+    branch: feat/p63-retention-lifecycle
     target: origin/main
     plan_state: OPEN
     custody_state: INTEGRATED
-    checkpoint: 4d5393607f8d16bb26b69c99f5db5dd77497cebe
-    remote_ref: refs/remotes/origin/feat/p63-rollback-qualification
+    checkpoint: 95f68c749f688a4e3a596464b780c9823bc97c20
+    remote_ref: refs/remotes/origin/feat/p63-retention-lifecycle
     integration: squash_pr
-    integration_receipt: de35fe900bd989b0557787f7c949823b8dffec1e
+    integration_receipt: 8414adc0bdb07c1290300405dd87cf009b744158
     dependencies: []
     overlaps: []
     updated_at: 2026-10-03
-    disposition: PR 194 integrated; full campaign OPEN; live scope pending; verification 0106 records remaining gates
+    disposition: PR197 integrated; campaign OPEN; local refs and custody audit pending filesystem recovery

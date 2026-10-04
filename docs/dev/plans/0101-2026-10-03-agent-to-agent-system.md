@@ -4,7 +4,7 @@ State: OPEN
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
-Branch: feat/p63-rollback-qualification
+Branch: feat/p63-retention-lifecycle
 Target: origin/main
 Integration: squash_pr
 
@@ -528,3 +528,13 @@ qualifies local schema migration, logical compaction, ninety-day retirement,
 physical recovery and installed old/new refusal. Hosted gates and integration
 remain pending. No actual agent/provider/service effects were introduced; full
 campaign acceptance in verification 0106 remains OPEN on those missing axes.
+
+## Retention acceptance after PR 197
+
+Plan 0115 CLOSED and verification 0107 accepts explicit schema-2 migration,
+compact identity through ninety days, retired-key refusal and paused physical
+recovery. Compaction first projects expiry and holds unreconciled receipts.
+Final hosted Python 3.11/3.12 gates passed on 95f68c7; squash 8414adc0. Full
+campaign remains OPEN. Local filesystem/ref/custody reconciliation is pending;
+no actual host/service recovery, restore activation, agent delivery or soak was
+performed. The new additional 500k meter and inherited review limits persist.

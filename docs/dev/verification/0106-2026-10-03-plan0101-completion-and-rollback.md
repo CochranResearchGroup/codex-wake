@@ -54,7 +54,7 @@ downgrade, backup activation, supervisor restart or live delivery was performed.
 | Lineage max8, no self-send/reply authority cycles, no automatic spawn/reply loops, bounded rejection metadata | mailbox validators and bus tests, body-free diagnostics | Provider-free evidence; no excluded product effect introduced |
 | Receipt source durable replay, exact arming, checkpoint/grant revocation, no recursive notification | 0100/0101/0102/0105 and installed nine-case projection gate | Local seams accepted; actual long suspension remains gated on delivery |
 | Foreground bounded receipt wait/watch, cancellation/timeout, correlated reply | 0099 and installed foreground smoke; messages_cli.py bounded polling | Synthetic accepted; actual agent waiting/suspension unqualified |
-| Body retention30d, pending/uncertain/active pins, preview/apply, finite dedup90d, compact tombstones | 0097/0105/0106 guarded pruning/horizon proof | Production projection acknowledgement accepted; compact metadata/tombstone cleanup and physical compaction missing |
+| Body retention30d, pending/uncertain/active pins, preview/apply, finite dedup90d, compact tombstones | 0097/0105/0106/0107; PR197; hosted run37176278799 | Bounded logical compaction, ninety-day retirement, expiry projection pins, explicit migration and physical recovery accepted; actual service/soak remains separate |
 | Backup/restore same identity without concurrent activation, no conversation cascade deletion | copied-root refusal in 0104/0106; retained canonical store/receipts | Actual versioned backup activation/recovery not qualified |
 | Diagnostics source/backlog/lease/schema/capacity/uncertainty/retention, body-free output | operations.py and 0097 installed doctor; source/signal diagnostics | Available metadata proof; live supervisor/source maintenance acceptance missing |
 | Resource process/FD cleanup, shallow shared clients, thresholds before soak | 0104/0105/0106 deterministic bounded workloads and census | Bounded fixture acceptance; long-running/live soak missing |
@@ -86,3 +86,10 @@ A named disposable response is required before dependent live work; elapsed time
 is not approval. Checkpoint by 450k, stop before current goal meter reaches500k.
 Memory discovery skipped because current canonical sources suffice; durable graph
 write unavailable without an authorized repository group.
+
+Retention successor update: Plan 0115 CLOSED / verification 0107 accepts the
+bounded retention/migration axis after PR 197 integration at 8414adc0. This
+supersedes the earlier missing-compaction statement only. Full restore, actual
+old-binary downgrade, live delivery, service/soak and release remain unproven.
+Next packet: versioned backup/restore preparation under original identity and
+concurrent-activation requirements, using owned provider-free fixtures first.
