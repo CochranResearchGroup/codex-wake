@@ -30,6 +30,16 @@ class TmuxDeliveryTests(unittest.TestCase):
                      'Approve this command?', '', 'shell $', EMPTY.replace('›', '>')):
             self.assertFalse(empty_composer(text))
 
+    def test_existing_transport_uses_bracketed_paste_and_one_submit(self):
+        from codex_wake.injector import SubprocessTmuxRunner
+        with patch('codex_wake.injector.subprocess.run') as run, patch('codex_wake.injector.time.sleep'):
+            SubprocessTmuxRunner().paste_prompt('/tmp/socket', '%1', 'fixture', 'first\nsecond\n')
+        commands = [call.args[0] for call in run.call_args_list]
+        paste = [cmd for cmd in commands if 'paste-buffer' in cmd]
+        self.assertEqual(len(paste), 1)
+        self.assertIn('-p', paste[0])
+        self.assertEqual(len([cmd for cmd in commands if 'send-keys' in cmd]), 1)
+
     def test_busy_recipient_cannot_paste(self):
         with patch.object(TmuxBinding, 'locate', return_value=({'status': {'type': 'active'}}, self.pane)), \
              patch('codex_wake.a2a_tmux_delivery.SubprocessTmuxRunner') as runner:

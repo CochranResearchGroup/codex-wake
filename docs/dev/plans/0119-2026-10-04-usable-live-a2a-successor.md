@@ -361,3 +361,14 @@ M2 requires live safety tests; source checks alone do not prove a human cannot
 change input between the final check and paste. No stock runtime was modified.
 Next gate: integrate this source after required checks, then one actual automatic
 request/reply on the designated same threads.
+
+### Live setup transport failure and correction | 2026-10-04
+
+Before the first mailbox send, the existing paste runner left B's long setup
+prompt folded in its composer; metadata remained idle and adapter deferred it as
+composer_protected. A later setup-only Enter submitted that retained prompt. No
+mailbox attempt occurred and no controller input followed a request send. This
+is preserved as a setup transport failure. The product runner now uses tmux's
+bracketed paste mode, a settle delay and one explicit Enter so burst detection
+does not absorb submit keys. Source and hosted checks must pass before using
+this correction for the actual automatic exchange.

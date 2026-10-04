@@ -76,21 +76,14 @@ class SubprocessTmuxRunner:
                 capture_output=True,
             )
             subprocess.run(
-                ["tmux", "-S", socket, "paste-buffer", "-d", "-b", buffer_name, "-t", pane],
+                ["tmux", "-S", socket, "paste-buffer", "-p", "-d", "-b", buffer_name, "-t", pane],
                 check=True,
                 text=True,
                 capture_output=True,
             )
-            # Codex's tmux-hosted multiline composer needs the paste to settle,
-            # then a blank-line submit for the two-line canonical prompt.
-            time.sleep(0.2)
-            subprocess.run(
-                ["tmux", "-S", socket, "send-keys", "-t", pane, "C-m"],
-                check=True,
-                text=True,
-                capture_output=True,
-            )
-            time.sleep(0.2)
+            # Bracketed paste is one input event, rather than a stream that the
+            # paste-burst detector can absorb together with the submit key.
+            time.sleep(1.0)
             subprocess.run(
                 ["tmux", "-S", socket, "send-keys", "-t", pane, "C-m"],
                 check=True,
