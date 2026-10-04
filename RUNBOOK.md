@@ -4918,3 +4918,9 @@ corrections. No live effects; actual suspension/delivery and full Plan 0101
 remain OPEN. Progress: outcome_progress, arming absent -> locally accepted.
 Campaign allowances carried forward without reset. Memory unavailable because
 no authorized repository Graphiti group exists.
+
+Turn 221 integration readback: PR #190 merged at
+9c3bbe8d89c421bddd6e6a5f2d8573d14acee6a1 after both hosted Python gates
+passed run 37167679971. Source matched tested head on fresh main fetch.
+Published integration receipt on docs/p63-arming-closeout. Full campaign OPEN;
+qualified exact-thread delivery and actual suspension remain pending.

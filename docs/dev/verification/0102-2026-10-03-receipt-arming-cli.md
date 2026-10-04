@@ -41,3 +41,14 @@ a live actor identity. CLI arming is accepted; actual agent suspension/delivery
 is not. Full Plan 0101 remains OPEN. Hosted gate/publication tracked separately.
 Graphiti discovery skipped: current canonical sources and prior verified
 checkpoint suffice. Memory write unavailable: no authorized repository group.
+
+## Hosted integration receipt
+
+PR #190 head 2361b1215b55716a6aca15a26617633b48521cd9 passed both hosted
+Python gates in run 37167679971. SHA-fenced squash merge succeeded at
+9c3bbe8d89c421bddd6e6a5f2d8573d14acee6a1; fresh origin/main readback
+confirmed the commit and identical src/tests/README to the tested head.
+Memory non-write receipt: 20261004T011935Z-remember.json, zero writes.
+This integration receipt is published on docs/p63-arming-closeout; it does not
+claim full campaign completion. Next gate is qualified exact-thread delivery
+before actual agent suspension acceptance. No service or provider effects.
