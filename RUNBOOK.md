@@ -5124,3 +5124,16 @@ and built. Verification0113 retains failures and current hashes. Presubmitpendin
 source integration and explicit shared-runtime approval required before M1.
 Carried budget1344086 before writing; ceiling1800000; goalactive. No liveattempt.
 Memorynot_durable remains the single receipted disposition for this in-progress turn.
+
+### Turn 239 source integration and activation gate
+
+PR206 source08e82c3 passed hosted3.11/3.12 release gates,895 tests each, and
+integrated835990a onorigin/main. Continued checkpoint custody on
+feat/p63-activation-gate in the existing worktree; earlier source refs retained.
+Verification0114 records exact candidate hashes, installed candidate CLI, fresh
+idle wakeA/wakeB readback and unchanged shared runtime. M1-M4unproven; issue181OPEN;
+liveattempts0/3. Explicit shared-runtime approval pending. Goalactive; carried
+1520577 before writing, ceiling1800000. No more supporting matrices before this
+concrete activation gate resolves. Final memory dispositionunavailable: healthy
+runtime, bounded atlas found no appropriate reviewed Codex Wake target group;
+supersedes provisionalnot_durable, with no graph write.

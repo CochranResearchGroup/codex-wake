@@ -1,16 +1,17 @@
 # Plan 0119 runtime activation gate
 
-Status: prepared, not authorized or executed. Candidate source checkpoint:
-`10fce9d` on `feat/p63-live-delivery`. Verification 0112 records focused tests,
-actual executable build, reproduction, and isolated unloaded-thread rejection.
+Status: prepared, not authorized or executed. Candidate source is integrated by
+PR206 at `835990a4ba31a1a774b5fa72332fe05db17b7b28` onorigin/main.
+Verification0114 records hosted checks and the current runtime gate;
+verification0112 retains the initial build and unloaded-thread rejection.
 This gate is necessary for M1; it does not close any milestone.
 
 Candidate executable:
 `/tmp/codex-wake-plan119-runtime/codex-a956835d020762cb2b570053af06f643a11c0ecc/codex-rs/target/debug/codex`
 Current SHA256 `8c1315463e35083aa33e47e4f05137ed6d607f5c55d2bc1b4a536c046aa6390b`.
 Current patch SHA256 `bbcf349398054e371003ce04aa894e8a6ee1c9445359ba88bb5efcdfd8b37212`.
-Namespace and durable sender-arm follow-up is retained in the same execution
-branch; verification0113 supersedes the initial build locator for activation.
+Namespace and durable sender-arm follow-up is integrated with that source;
+verification0113 supersedes the initial build locator for activation.
 The installed 0.160.0 server rejects the added method; normal turn/start cannot
 substitute because it may steer a concurrent turn.
 

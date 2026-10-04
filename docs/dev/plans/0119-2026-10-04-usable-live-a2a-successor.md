@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: feat/p63-live-delivery
+Branch: feat/p63-activation-gate
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -279,3 +279,21 @@ pending. Current policy0021 also requires deployment from an exact integrated
 origin/main commit; source integration and hosted checks must precede activation.
 No authority is inferred from compilation, local fixture results or a PR. M1-M4
 remain UNPROVEN, live round-trip attempts0/3, actual runtime unchanged.
+
+### Integrated source checkpoint | 2026-10-04
+
+PR206 integrated candidate source08e82c3 as
+origin/main835990a4ba31a1a774b5fa72332fe05db17b7b28. Hosted run37235883303 passed
+both Python3.11 and3.12 release gates,895 tests each, including installed wheel
+and existing compatibility/resource/recovery checks. Runtime source compilation
+and fixture guards remain supporting evidence; M1-M4 are stillUNPROVEN.
+Execution worktree remainscodex-wake-p63-feature-successor, now on
+feat/p63-activation-gate from that exact integrated main. Source branch and refs
+are retained. Verification0114 is the restart-safe activation checkpoint.
+
+Fresh readback confirms wakeA andwakeB idle, correctIDs/root,directinputallowed;
+installed shared daemon remains0.160.0 on its original standalone package.
+Explicit activation approval is pending; no shared restart, client reconnect or
+global install has occurred. Next action requires that approval, then the exact
+bounded activation and one actual M1 request/reply attempt. Do not build more
+supporting matrices while this concrete runtime gate remains unresolved.
