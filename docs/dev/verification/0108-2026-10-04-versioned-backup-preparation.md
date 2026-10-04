@@ -1,6 +1,6 @@
 # Versioned backup preparation evidence
 
-Verdict: LOCAL_PASS_HOSTED_PENDING
+Verdict: ACCEPTED_BOUNDED_BACKUP_PREPARATION
 Plan: 0116
 Campaign: 0101 OPEN
 Source base: fe425078a64c11ee690233081ec0bf7ab720cab9
@@ -51,3 +51,16 @@ the same184320byte snapshot and FD5->6/no-child/no-I/O observations.
 Wheel SHA256:a2dd0308a44b0c52c9f1600e90de5667647cee529cdb3b2ab92ec65bb7be1bcd.
 Compilation and diff whitespace checks passed. No extra drift-discovery review
 was opened; verification remains confined to the frozen snapshot acceptance.
+
+## Final exact-head hosted and integration receipt
+
+Source0e7c94655c55b51b96468972a31ecfd02bc8d4d6: hosted run37223760540
+SUCCESS. Python3.12:864 tests,36.853s; installed snapshot1.054s. Python3.11:
+864 tests,38.249s; installed snapshot0.924s. Both installed workloads:184320byte
+snapshot, two messages/one unknown intent, FD6->7 within+2 bound, no children,
+zero transport and fixture cleanup. Complete installed smoke and other release
+gates passed. No retry or exclusion. PR200 SHA-fenced squash integrated at
+a7d46967728e270577ca80fb9fbf1d94327a4090. Plan0116 CLOSED. Read-only snapshot
+verification and backup preparation are accepted; restore activation is not.
+Parent Plan0101 remainsOPEN. Memory disposition unavailable: no authorized
+codex-wake Graphiti group; preserve a non-write closeout receipt.

@@ -93,3 +93,13 @@ supersedes the earlier missing-compaction statement only. Full restore, actual
 old-binary downgrade, live delivery, service/soak and release remain unproven.
 Next packet: versioned backup/restore preparation under original identity and
 concurrent-activation requirements, using owned provider-free fixtures first.
+
+## Versioned backup preparation after PR200
+
+Verification0108 / Plan0116 accepts paused SQLite online snapshots and read-only
+version/schema/identity/integrity/authority verification, including preserved
+uncertain intent and committed WAL. Both hosted lanes passed864 tests and
+installed workloads. This reduces the backup-format gap only. Verification
+requires the original readable bus and always refuses to qualify activation;
+corrupt-source recovery, preventing revived old actor authority and preserving
+later receipts during activation remain unqualified. No full acceptance claim.
