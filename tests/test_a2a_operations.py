@@ -99,3 +99,16 @@ class OperationsTests(unittest.TestCase):
         self.assertNotIn('private operation fixture',str(value))
         self.assertEqual(value['states']['recipient'],{'unread':1})
         self.assertIsNone(self.mailbox.show(self.actors[0],self.identifier)['received_receipt_id'])
+
+    def test_dedup_outside_advertised_ninety_day_horizon_is_visibly_refused(self):
+        self.now += 90 * 86400
+        retry = self.mailbox.send(self.actors[0], self.identities[1], body='private operation fixture',
+            idempotency_key='request', delivery='inbox')
+        self.assertEqual(retry['message']['message_id'], self.identifier)
+        self.now += 1
+        with self.assertRaises(BusError) as error:
+            self.mailbox.send(self.actors[0], self.identities[1], body='private operation fixture',
+                idempotency_key='request', delivery='inbox')
+        self.assertEqual(error.exception.code, 'idempotency_horizon')
+        with self.bus.connection() as database:
+            self.assertEqual(database.execute('SELECT count(*) FROM mail_envelopes').fetchone()[0], 1)

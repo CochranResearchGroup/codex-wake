@@ -4949,3 +4949,15 @@ and final evidence: 55 focused on Python 3.11/3.12, 843 comprehensive, nine inst
 FD five to five, children zero. Source-contract types prevent boolean sequence
 impersonation. No live/provider/service effects; full campaign OPEN, live scope pending.
 Outcome_progress on retention acknowledgement; inherited allowances retained.
+
+## Turn 225 | 2026-10-03
+
+Plan 0114 qualifies installed synthetic pause rollback: accepted data/idempotency
+and recipient receipts persist, unknown attempt remains uncertain with no replay,
+new claims refuse while paused and copied backups cannot activate elsewhere.
+Existing dedup horizon guard already enforced ninety days; regression expected
+wrong code, corrected without runtime change. Seven focused tests on each Python
+version pass, installed workload FD5->5 and no children/I/O. Full requirement
+ledger 0106 establishes NOT COMPLETE and exact remaining gates. Named sender
+selector resolves; named recipient code6. Live disposable scope still pending.
+Outcome_progress on rollback acceptance; full campaign OPEN.
