@@ -142,3 +142,54 @@ behavior has live evidence; M2 remains partial pending unloaded/cancel checks.
 Two of three M2 live attempts are consumed. Before attempt3, designated idle
 B exited normally via its empty composer's C-d; PID6145 is terminal. The existing
 B thread/history is preserved and must be explicitly reconnected, not replaced.
+
+## M2 attempt3 and safe continuation checkpoint
+
+With B's TUI disconnected, A's actual native send using its issued capability
+failed `selection_error: session not found` for the original enrolled B thread.
+`M2-3/A-send-request.json` preserves the rejection. Exact authorized read-only
+journal reconciliation proves zero envelopes for `plan119-M2-3-A-request` and
+zero transport effects. A stopped without the planned cancellation because no
+message ID was issued. The observer also encountered `store_unavailable`; it
+terminated its launcher/owned worker. A subsequent authorized read-only read
+succeeded without repair. These failures are retained, not counted as cancellation
+or unloaded-recipient acceptance.
+
+Source diagnosis: `messages_command` sends through `resolve_identity`, which uses
+`sessions.observe`; that snapshot uses only `SharedAppServerReader.loaded_threads`.
+An exact enrolled recipient that is absent from the loaded inventory therefore
+cannot receive a new pending request. Admission needs exact authoritative stored
+thread identity, while notification eligibility must continue to require the
+current owning client and empty composer. No resolver repair has been made yet.
+The earlier direct `thread/read` idle metadata after disconnect was not proof of
+membership in the loaded inventory. Do not use stored status as unload proof.
+
+M2 has reached its three-attempt bound and remains PARTIAL. Reframe the next
+packet around this observed admission failure before any additional M2 live
+attempt: qualify a narrow exact-thread offline resolution repair, preserve
+namespace/root/enrollment and cross-root denial, integrate required checks, then
+perform one fresh bounded offline/cancel/reconnect qualification. Do not widen
+fuzzy selectors or auto-resume recipients. Fix the observer's post-clear phase
+handling and keep worker custody independent of assertion failures. M3 reconnect/
+worker restart and M4 release/install/multiroot/rollback/30-minute owned soak remain
+UNPROVEN. No custom Codex runtime activation is needed or authorized.
+
+Safe final state: B explicitly resumed its ORIGINAL thread using stock native
+`codex resume`, then native `a2a bind-tmux` refreshed only B's binding. B is now
+PID49283/start3437037, generation39167004ff17496d80feb04976177568, pane%72.
+A remains PID5322/start2076335/pane%71. Both actual threads are idle and both
+composers pass readiness. Original B window@72/index18/namewakeB is restored.
+`stock-live-final-state.json` proves all four M2 native workers terminal, no new
+third-request envelope, exact current identities and stock0.160.0 package path.
+The admitted M2-2 reply remains unread/deferred behind its expired arm; preserve
+it, do not extend/replay it or claim A read it. Original M1 evidence remains intact.
+
+Budget: last frozen goal meter is548526, carried total before unmetered work
+1544740. The goal remains reported blocked, so an exact current aggregate is
+unavailable. This is a conservative continuation checkpoint before the user's
+1800000 ceiling, not a claim that the budget or goal is complete. Runtime restored;
+no live attempt left running. Next work begins with the bounded resolver repair,
+not another unchanged live trial.
+
+Memory disposition: unavailable. No reviewed Codex Wake Graphiti target group was
+established; canonical repo evidence is retained and no memory write is attempted.

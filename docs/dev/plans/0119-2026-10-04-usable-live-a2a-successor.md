@@ -67,11 +67,17 @@ a demo. Qualify the existing path and change only the Wake integration seam
 required by an observed failure. A future runtime patch requires a separately
 explained need and explicit operator direction.
 
-Current integrated source:835990a4ba31a1a774b5fa72332fe05db17b7b28 via PR206.
+Current integrated source:dcc893404252c68fcd2a6304919892b0c5e86361 via PR209.
 The retained patch and compiled package are inactive historical artifacts, not
 a product prerequisite. Existing owning-client commands depend on that inactive
 patch and do not constitute the selected stock-runtime transport. M1 now passes
-on attempt2/3; M2-M4 remain UNPROVEN. Verification0115 records actual evidence.
+on attempt2/3. M2 has live busy/draft/rename/move and expiry evidence but remains
+PARTIAL: after three attempts, disconnected enrolled-recipient admission rejects
+the exact thread as session not found, preventing the cancellation test. M3-M4
+remain UNPROVEN. Verification0115 records actual failures and restored runtime.
+Next packet: narrow exact-thread offline admission repair with enrollment/root
+checks preserved, then explicitly bounded requalification. No unchanged fourth
+M2 trial, custom runtime activation, automatic resume or shared-daemon restart.
 
 ## Scope and architecture
 
