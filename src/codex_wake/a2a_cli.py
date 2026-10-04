@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'dispatch', 'worker', 'delegate-receipts']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -35,6 +35,23 @@ def add_a2a_parser(subparsers):
             command.add_argument('--apply', action='store_true', required=True)
         if verb == 'tick':
             command.add_argument('--projection-root', type=Path, required=True)
+        if verb in ('bind-client', 'dispatch', 'worker'):
+            command.add_argument('--bindings-file', type=Path, required=True)
+        if verb == 'bind-client':
+            command.add_argument('--thread', required=True)
+            command.add_argument('--client-socket', type=Path, required=True)
+        if verb == 'delegate-receipts':
+            command.add_argument('--thread', required=True)
+            command.add_argument('--wake-root', type=Path, required=True)
+            command.add_argument('--sender-receipt-authority', type=Path, required=True)
+        if verb in ('dispatch', 'worker'):
+            command.add_argument('--limit', type=int, default=10, choices=range(1, 11))
+            command.add_argument('--wake-root', type=Path)
+            command.add_argument('--sender-receipt-authority', type=Path)
+        if verb == 'worker':
+            command.add_argument('--duration', type=float, default=120)
+            command.add_argument('--interval', type=float, default=2)
+            command.add_argument('--max-dispatches', type=int, default=2)
         if verb == 'configure':
             command.add_argument('--allow-cross-root', action='store_true')
         if verb == 'enroll':
@@ -121,7 +138,60 @@ def a2a_command(args):
         # Validate explicit operator authority before observing or changing peers.
         with store.connection() as database:
             store.operator(database, args.operator_capability)
-        if args.a2a_command == 'enroll':
+        if args.a2a_command == 'delegate-receipts':
+            from .a2a_sender_receipts import SenderReceiptAuthority
+            from .a2a_identity import Actor
+            identity = resolve_identity('thread:' + args.thread)
+            with store.connection() as database:
+                row = database.execute('SELECT * FROM actors WHERE namespace=? AND thread_id=?',
+                                       (identity.namespace, identity.thread_id)).fetchone()
+                if row is None or not Path(identity.cwd).is_relative_to(Path(row['root'])):
+                    raise BusError('authorization_denied', 'sender delegation requires an issued actor in its enrolled root')
+                actor = Actor(store.bus_id, row['namespace'], row['thread_id'], row['root'], row['generation'], row['actor_id'])
+            authority = SenderReceiptAuthority(args.sender_receipt_authority, args.wake_root)
+            result(dict(delegation=authority.delegate(store, args.operator_capability, actor)))
+        elif args.a2a_command == 'bind-client':
+            from .a2a_delivery import bind_client
+            identity = resolve_identity('thread:' + args.thread)
+            with store.connection() as database:
+                actor = database.execute('SELECT a.*,e.can_notify FROM actors a JOIN enrollments e ON a.root=e.root WHERE a.namespace=? AND a.thread_id=?',
+                    (identity.namespace, identity.thread_id)).fetchone()
+                if not actor or actor['revoked'] or not actor['can_notify'] or not Path(identity.cwd).is_relative_to(Path(actor['root'])):
+                    raise BusError('authorization_denied', 'client binding requires an issued notification-enabled actor')
+            result(dict(binding=bind_client(args.bindings_file, args.client_socket, identity)))
+        elif args.a2a_command in ('dispatch', 'worker'):
+            from .a2a_delivery import NotificationDispatcher
+            from .a2a_mailbox import Mailbox
+            from .a2a_scheduler import MailScheduler
+            import math
+            import time
+            scheduler = MailScheduler(Mailbox(store), args.operator_capability, lease_seconds=60)
+            gate = None
+            if bool(args.wake_root) != bool(args.sender_receipt_authority):
+                raise BusError('invalid_argument', 'reply delivery requires both wake root and independent sender authority')
+            if args.wake_root:
+                from .a2a_reply_wake import ReplyWakeGate
+                gate = ReplyWakeGate(scheduler, args.wake_root, args.sender_receipt_authority)
+                gate.authority.senders()  # validate independent configuration before starting the reader
+            dispatcher = NotificationDispatcher(scheduler, args.bindings_file, receipt_gate=gate)
+            if args.a2a_command == 'dispatch':
+                result(dict(dispatch=dispatcher.tick(limit=args.limit)))
+            else:
+                if (not math.isfinite(args.duration) or not 1 <= args.duration <= 3600
+                        or not math.isfinite(args.interval) or not .1 <= args.interval <= 60
+                        or not 1 <= args.max_dispatches <= 20):
+                    raise BusError('invalid_argument', 'worker requires bounded duration, interval and dispatch count')
+                deadline, submitted, ticks = time.monotonic() + args.duration, 0, 0
+                while time.monotonic() < deadline and submitted < args.max_dispatches:
+                    outcome = dispatcher.tick(limit=min(args.limit, args.max_dispatches - submitted))
+                    submitted += outcome['submitted']; ticks += 1
+                    result(dict(dispatch=outcome, tick=ticks))
+                    if any(row['status'] == 'uncertain' for row in outcome['results']):
+                        raise BusError('effect_uncertain', 'worker stopped for exact transport reconciliation')
+                    if submitted < args.max_dispatches:
+                        time.sleep(min(args.interval, max(0, deadline-time.monotonic())))
+                result(dict(worker=dict(status='finished', submitted=submitted, ticks=ticks)))
+        elif args.a2a_command == 'enroll':
             identity = resolve_identity(args.thread, endpoint=args.app_server, socket_path=args.tmux_socket,
                                         session=args.tmux_session) if args.thread else None
             if identity is not None and not Path(identity.cwd).is_relative_to(args.root.resolve()):

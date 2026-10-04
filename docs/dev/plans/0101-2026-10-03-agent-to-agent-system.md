@@ -10,6 +10,12 @@ Integration: squash_pr
 
 ## Current state
 
+Execution sequencing successor: [Plan0119](0119-2026-10-04-usable-live-a2a-successor.md).
+The original campaign stays OPEN; the successor prioritizes unassisted live
+messaging and preserves this plan's outstanding acceptance obligations.
+The live wakeA/wakeB manual-inbox round trip passed; see verification0111.
+The following initial state and older checkpoints are historical.
+
 Execution authorized by the operator under the active Plan 0101 goal.
 The current operator ceiling is 500,000 goal tokens, with a working checkpoint
 at 450,000. Earlier ceilings below are historical. Effect-specific live gates

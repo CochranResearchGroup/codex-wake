@@ -5075,3 +5075,52 @@ Note0006 checkpoints before1,000,000 (live850,776 before writing). Full campaign
 OPEN; next packet gap disposition/legacy-notification fence, no implicit replay
 or live/service authority. Source refs clean/remote-equal and retained; root
 untracked note0003 preserved. Memory unavailable/no authorized group.
+
+## Turn 237 | 2026-10-04
+
+User rejected infrastructure-only progress and designated real Byobu wakeA/wakeB
+sessions for a live demo. Actual agents exchanged exactly one request and one
+correlated reply through an isolated installed CLI; B read/accepted/completed and
+A read its reply in55.509seconds. Verification0111 records exact identities and
+receipts; notifications were suppressed and controller prompts started inbox work.
+Both sessions are idle; owned bus paused; durable evidence preserved locally.
+Progress: outcome_progress on live manual messaging, not automatic delivery.
+
+Wrote Plan0119 as execution-sequencing successor: unassisted round trip first,
+normal-session guards, durable restart/suspension, then usable installation.
+Plan0101/issue181/P63 remain OPEN; previous acceptance obligations retained.
+Plan0119 PLANNED; existing autonomous goal remains paused at867188/1000000.
+No implementation, transport activation or global install by this planning turn.
+
+## Turn 238 | 2026-10-04
+
+Continued Plan0119 onfeat/p63-live-delivery in the existing clean successor
+worktree. Re-resolved wakeA/wakeB asloaded,idle,expectedroot onCodex0.160.0;
+inspected generated protocol and release-mapped owning TUI source. No product
+code,live attempt or notification; M1-M4 unproven. Plan0119 records exact
+locators and next owning-binding implementation seam. Conservative carried
+tokens988860 before checkpoint; stopping under the user one-million ceiling.
+Memory not_durable: transient startup investigation,no accepted product outcome.
+
+## Turn 239 | 2026-10-04 | implementation checkpoint
+
+Plan0119 candidate now contains an owning TUI binding, atomic idle-only server
+operation and native Wake notification worker. Rust check and executable build
+passed; 139 focused Wake tests and six transport guards passed. Reproduction
+applies the retained pinned patch. Verification0112 records evidence and pending
+Rust guard test. Installed daemon rejects the new operation without submission;
+live attempts remain0/3 and M1-M4 remainunproven. No shared restart, reconnect,
+global install or notification. Sender receipt-arm delivery is still unwired.
+Progress:blocker_reduction. Carried budget1167279 before checkpoint writing,
+ceiling1800000; goalactive. Memorynot_durable, receipted inverification0112.
+
+### Turn 239 continuation checkpoint | 21:19 UTC
+
+Native sender delegation and exact-message reply arming now connect the existing
+receipt source journal to notification delivery. Focused checks cover cancellation,
+expiry, independent authority, worker reconstruction and post-send bookkeeping
+crash reconciliation. Updated runtime verifies namespace; pinned patch reproduced
+and built. Verification0113 retains failures and current hashes. Presubmitpending;
+source integration and explicit shared-runtime approval required before M1.
+Carried budget1344086 before writing; ceiling1800000; goalactive. No liveattempt.
+Memorynot_durable remains the single receipted disposition for this in-progress turn.
