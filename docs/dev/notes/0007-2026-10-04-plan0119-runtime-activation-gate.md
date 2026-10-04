@@ -7,12 +7,17 @@ This gate is necessary for M1; it does not close any milestone.
 
 Candidate executable:
 `/tmp/codex-wake-plan119-runtime/codex-a956835d020762cb2b570053af06f643a11c0ecc/codex-rs/target/debug/codex`
-SHA256 `ecc8bc279390e63e3d2d7d16fa04d167a88c0f0327971ba269e765ff244073d5`.
-Patch SHA256 `99d6cedd681bc3f98c51cdaf3b7c1ae99fff0b112635abd7e31e2e36447709f3`.
+Current SHA256 `8c1315463e35083aa33e47e4f05137ed6d607f5c55d2bc1b4a536c046aa6390b`.
+Current patch SHA256 `bbcf349398054e371003ce04aa894e8a6ee1c9445359ba88bb5efcdfd8b37212`.
+Namespace and durable sender-arm follow-up is retained in the same execution
+branch; verification0113 supersedes the initial build locator for activation.
 The installed 0.160.0 server rejects the added method; normal turn/start cannot
 substitute because it may steer a concurrent turn.
 
 Activation scope requiring explicit approval under Plan0119 execution controls:
+
+Policy0021 also requires an exact integrated origin/main commit for deployment.
+Hosted source checks and integration must pass before this gate can execute.
 
 1. Fresh-read all loaded shared-daemon threads and the exact demo clients. Wait
    until the restart can occur without interrupting active turns. Reconfirm demo

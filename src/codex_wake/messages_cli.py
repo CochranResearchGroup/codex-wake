@@ -20,7 +20,7 @@ from .shared_app_server import SharedSourceError
 def add_messages_parser(subparsers):
     parser = subparsers.add_parser('messages', help='send and consume explicitly authorized local mailbox messages')
     commands = parser.add_subparsers(dest='messages_command', required=True)
-    for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile']:
+    for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile','arm-reply']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path, default=os.environ.get('CODEX_WAKE_A2A_BUS_ROOT'))
         command.add_argument('--bus-id', default='local')
@@ -30,8 +30,14 @@ def add_messages_parser(subparsers):
         if verb in ('show','read','reconcile'):
             command.add_argument('--as-operator', action='store_true')
             command.add_argument('--operator-capability', type=Path)
-        if verb in ('show','read','ack','reply','cancel','wait','reconcile'):
+        if verb in ('show','read','ack','reply','cancel','wait','reconcile','arm-reply'):
             command.add_argument('message_id')
+        if verb == 'arm-reply':
+            command.add_argument('--wake-root', type=Path, default=os.environ.get('CODEX_WAKE_WAKE_ROOT'))
+            command.add_argument('--sender-receipt-authority', type=Path,
+                                 default=os.environ.get('CODEX_WAKE_SENDER_RECEIPT_AUTHORITY'))
+            command.add_argument('--idempotency-key', required=True)
+            command.add_argument('--expires-at', required=True)
         if verb in ('send','reply'):
             command.add_argument('--body-file', required=True)
             command.add_argument('--idempotency-key')
@@ -141,7 +147,11 @@ def messages_command(args):
         if capability is None:
             raise BusError('authorization_denied', 'explicit issued actor capability is required')
         actor = invoking_actor(bus, capability, endpoint=args.app_server)
-        if verb == 'send':
+        if verb == 'arm-reply':
+            from .a2a_reply_wake import arm_reply
+            value = arm_reply(actor, args.message_id, args.wake_root,
+                              args.sender_receipt_authority, args.idempotency_key, args.expires_at)
+        elif verb == 'send':
             recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket, session=args.tmux_session)
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,

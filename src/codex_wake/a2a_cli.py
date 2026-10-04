@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'dispatch', 'worker']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'dispatch', 'worker', 'delegate-receipts']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -40,8 +40,14 @@ def add_a2a_parser(subparsers):
         if verb == 'bind-client':
             command.add_argument('--thread', required=True)
             command.add_argument('--client-socket', type=Path, required=True)
+        if verb == 'delegate-receipts':
+            command.add_argument('--thread', required=True)
+            command.add_argument('--wake-root', type=Path, required=True)
+            command.add_argument('--sender-receipt-authority', type=Path, required=True)
         if verb in ('dispatch', 'worker'):
             command.add_argument('--limit', type=int, default=10, choices=range(1, 11))
+            command.add_argument('--wake-root', type=Path)
+            command.add_argument('--sender-receipt-authority', type=Path)
         if verb == 'worker':
             command.add_argument('--duration', type=float, default=120)
             command.add_argument('--interval', type=float, default=2)
@@ -132,7 +138,19 @@ def a2a_command(args):
         # Validate explicit operator authority before observing or changing peers.
         with store.connection() as database:
             store.operator(database, args.operator_capability)
-        if args.a2a_command == 'bind-client':
+        if args.a2a_command == 'delegate-receipts':
+            from .a2a_sender_receipts import SenderReceiptAuthority
+            from .a2a_identity import Actor
+            identity = resolve_identity('thread:' + args.thread)
+            with store.connection() as database:
+                row = database.execute('SELECT * FROM actors WHERE namespace=? AND thread_id=?',
+                                       (identity.namespace, identity.thread_id)).fetchone()
+                if row is None or not Path(identity.cwd).is_relative_to(Path(row['root'])):
+                    raise BusError('authorization_denied', 'sender delegation requires an issued actor in its enrolled root')
+                actor = Actor(store.bus_id, row['namespace'], row['thread_id'], row['root'], row['generation'], row['actor_id'])
+            authority = SenderReceiptAuthority(args.sender_receipt_authority, args.wake_root)
+            result(dict(delegation=authority.delegate(store, args.operator_capability, actor)))
+        elif args.a2a_command == 'bind-client':
             from .a2a_delivery import bind_client
             identity = resolve_identity('thread:' + args.thread)
             with store.connection() as database:
@@ -147,8 +165,15 @@ def a2a_command(args):
             from .a2a_scheduler import MailScheduler
             import math
             import time
-            dispatcher = NotificationDispatcher(MailScheduler(Mailbox(store), args.operator_capability,
-                lease_seconds=60), args.bindings_file)
+            scheduler = MailScheduler(Mailbox(store), args.operator_capability, lease_seconds=60)
+            gate = None
+            if bool(args.wake_root) != bool(args.sender_receipt_authority):
+                raise BusError('invalid_argument', 'reply delivery requires both wake root and independent sender authority')
+            if args.wake_root:
+                from .a2a_reply_wake import ReplyWakeGate
+                gate = ReplyWakeGate(scheduler, args.wake_root, args.sender_receipt_authority)
+                gate.authority.senders()  # validate independent configuration before starting the reader
+            dispatcher = NotificationDispatcher(scheduler, args.bindings_file, receipt_gate=gate)
             if args.a2a_command == 'dispatch':
                 result(dict(dispatch=dispatcher.tick(limit=args.limit)))
             else:

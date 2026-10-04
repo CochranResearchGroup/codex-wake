@@ -4,6 +4,7 @@ from pathlib import Path
 import socket
 import tempfile
 import threading
+import time
 import unittest
 
 from codex_wake.a2a_bus import BusStore
@@ -28,7 +29,10 @@ class OwningClientDeliveryTests(unittest.TestCase):
             capability, _ = self.bus.issue_actor(identity, self.repo, self.operator)
             self.actors.append(self.bus.authenticate(capability, identity, invoking_cwd=self.repo))
         Mailbox.migrate(self.bus, self.operator)
-        self.mailbox = Mailbox(self.bus)
+        # Transport tests pin clocks; clock continuity has separate mailbox tests.
+        self.wall_clock, self.monotonic_clock = time.time(), time.monotonic()
+        self.mailbox = Mailbox(self.bus, clock=lambda: self.wall_clock,
+                              monotonic=lambda: self.monotonic_clock)
         self.scheduler = MailScheduler(self.mailbox, self.operator, lease_seconds=60)
         self.bus.set_paused(False, self.operator)
         self.bindings = self.private / 'bindings.json'
@@ -61,7 +65,7 @@ class OwningClientDeliveryTests(unittest.TestCase):
             with connection:
                 with connection.makefile('rb') as stream:
                     request = json.loads(stream.readline())
-                identity = dict(thread_id=self.thread_id, root=str(self.repo))
+                identity = dict(thread_id=self.thread_id, root=str(self.repo), namespace='fixture')
                 reply = dict(protocol=1, pid=os.getpid(), generation=self.generation, identity=identity)
                 if request['action'] == 'probe':
                     reply.update(status=self.status, reason='busy' if self.status != 'ready' else None,

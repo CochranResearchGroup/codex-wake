@@ -5,7 +5,7 @@
   "upstream_version": "0.160.0",
   "archive_url": "https://codeload.github.com/openai/codex/tar.gz/a956835d020762cb2b570053af06f643a11c0ecc",
   "archive_sha256": "351a23896ba75c2c32c2d9d2050a0987079d683ea4e92d3429b3e1833945e927",
-  "patch_sha256": "99d6cedd681bc3f98c51cdaf3b7c1ae99fff0b112635abd7e31e2e36447709f3",
+  "patch_sha256": "bbcf349398054e371003ce04aa894e8a6ee1c9445359ba88bb5efcdfd8b37212",
   "toolchain": "1.95.0",
   "build_command": [
     "cargo",
@@ -27,9 +27,9 @@
     "codex-rs/app-server/src/message_processor.rs": "80604ef5801001b7a62b649d0b510fb33a14d0b0eb21e520bbfb990b29bfd681",
     "codex-rs/app-server/src/request_processors/turn_processor.rs": "4b63da230d5112c37d0e7cde8f235483ecfaeefa41d90b5ece9988cb1ab200e5",
     "codex-rs/tui/src/app.rs": "9455b8088ffaeba40ee804fec93f895874b8fc8d10527818540b3b1671ebb685",
-    "codex-rs/tui/src/app/event_dispatch.rs": "6190775153a83c562613e82cc19ca080d0d39fe96896e6f8db19ca44ce94110b",
+    "codex-rs/tui/src/app/event_dispatch.rs": "c3ce054c0cc449667b9298ebf216061b5b7e3d5f9f3f2b0da23ad0599ad8cd88",
     "codex-rs/tui/src/app/startup.rs": "1e179ad001c2ca5f4d1878604c5a0a66f39f1c987578e8a4ee0a5d467a0297d1",
-    "codex-rs/tui/src/app/wake_client.rs": "befd16454a37ebb670e333d338a1f0a05a2eb1d6e582c65ec37417e58816e8e2",
+    "codex-rs/tui/src/app/wake_client.rs": "0eab7c2b90d7aa1fa142e3a39a04d8f5eb1406b9102763dfc37b59ecfe4ac805",
     "codex-rs/tui/src/app_event.rs": "82aac10351f82b3dad680c0ee02bf07b6b7c43865dda20865043da24b4b6c1ed",
     "codex-rs/tui/src/chatwidget.rs": "99910a95c122202853bdaa5aa7c26d87cc5ec14ec31d37d9e1b199efddb5082a",
     "codex-rs/tui/src/chatwidget/tests/composer_submission.rs": "9b5a51e2633bb65020279c40714c22e1ceec3c135f7e2ee5b9f89d0affcdcba6"

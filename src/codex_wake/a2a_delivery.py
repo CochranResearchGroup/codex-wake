@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import json
+from contextlib import nullcontext
 import os
 from pathlib import Path
 import socket
@@ -91,7 +92,7 @@ class ClientBinding:
 
     def probe(self):
         result = self.request(dict(action='probe'))
-        if result.get('identity') != dict(thread_id=self.thread_id, root=self.root):
+        if result.get('identity') != dict(thread_id=self.thread_id, root=self.root, namespace=self.namespace):
             return dict(status='deferred', reason='identity_changed')
         if result.get('idle_only_method') != 'turn/startIfIdle':
             return dict(status='deferred', reason='capability_unavailable')
@@ -101,10 +102,10 @@ class ClientBinding:
 
     def deliver(self, claim, job, bus_root):
         result = self.request(dict(action='deliver', request_id=claim['attempt_id'],
-            generation=self.generation, thread_id=self.thread_id, root=self.root,
+            generation=self.generation, thread_id=self.thread_id, root=self.root, namespace=self.namespace,
             bus_root=str(bus_root), message_id=job['message_id'], expires_at=job['expires_at']), effect=True)
         if result.get('status') in ('submitted', 'unsent') and result.get('reason') != 'pre_io_failure':
-            if result.get('identity') != dict(thread_id=self.thread_id, root=self.root):
+            if result.get('identity') != dict(thread_id=self.thread_id, root=self.root, namespace=self.namespace):
                 return dict(status='uncertain', reason='client_identity_mismatch')
         if result.get('status') == 'submitted' and (
                 result.get('request_id') != claim['attempt_id']
@@ -173,7 +174,7 @@ def bind_client(path, socket_path, identity: RuntimeIdentity):
         reply = json.loads(raw, object_pairs_hook=_unique)
         if (len(raw) > MAX_FRAME or not raw.endswith(b'\n') or reply.get('pid') != pid
                 or reply.get('protocol') != 1 or reply.get('idle_only_method') != 'turn/startIfIdle'
-                or reply.get('identity') != dict(thread_id=identity.thread_id, root=identity.cwd)
+                or reply.get('identity') != dict(thread_id=identity.thread_id, root=identity.cwd, namespace=identity.namespace)
                 or reply.get('status') not in ('ready', 'deferred')):
             raise ValueError('client identity mismatch')
         binding = ClientBinding(identity.namespace, identity.thread_id, identity.cwd,
@@ -205,10 +206,13 @@ def bind_client(path, socket_path, identity: RuntimeIdentity):
 
 
 class NotificationDispatcher:
-    def __init__(self, scheduler: MailScheduler, bindings_file):
+    def __init__(self, scheduler: MailScheduler, bindings_file, *, receipt_gate=None):
         self.scheduler, self.bindings_file = scheduler, Path(bindings_file)
+        self.receipt_gate = receipt_gate
 
     def tick(self, *, limit=10):
+        if self.receipt_gate is not None:
+            self.receipt_gate.tick()
         bindings = load_bindings(self.bindings_file)  # revocation/rebinding is observed every tick
         scheduler = self.scheduler
         dispatcher = scheduler.acquire()
@@ -224,51 +228,58 @@ class NotificationDispatcher:
             if paused:
                 return dict(status='paused', submitted=0, results=[], recovered=recovered)
             for job in scheduler.jobs(dispatcher, limit=limit):
-                dispatcher = scheduler.acquire()
-                if dispatcher is None:
-                    raise BusError('stale_lease', 'dispatcher ownership changed')
-                binding = bindings.get(job['recipient_key'])
-                try:
-                    probe = binding.probe() if binding else dict(status='deferred', reason='capability_unavailable')
-                except (BusError, OSError):
-                    probe = dict(status='deferred', reason='offline')
-                if probe.get('status') != 'ready':
-                    reason = probe.get('reason', 'capability_unavailable')
-                    scheduler.defer(dispatcher, job['job_id'], reason if reason in
-                        ('busy', 'offline', 'capability_unavailable') else 'capability_unavailable')
-                    results.append(dict(message_id=job['message_id'], status='deferred', reason=reason))
-                    continue
-                dispatcher = scheduler.acquire()
-                if dispatcher is None:
-                    raise BusError('stale_lease', 'dispatcher ownership changed')
-                recipient = scheduler.acquire('recipient:' + job['recipient_key'])
-                if recipient is None:
-                    results.append(dict(message_id=job['message_id'], status='deferred', reason='busy'))
-                    continue
-                try:
-                    try:
-                        claim = scheduler.claim(dispatcher, recipient, [job['job_id']])
-                    except BusError as error:
-                        results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
+                with (self.receipt_gate.guard(job) if self.receipt_gate is not None else nullcontext(None)) as receipt:
+                    if receipt is False:
+                        scheduler.defer(dispatcher, job['job_id'], 'capability_unavailable')
+                        results.append(dict(message_id=job['message_id'], status='deferred', reason='reply_arm_unavailable'))
                         continue
-                    result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
-                    outcome = result.get('status')
-                    evidence = dict(transport='owning_client_v1', exact_thread_id=binding.thread_id,
-                                    daemon_generation=binding.generation)
-                    if outcome == 'submitted':
-                        evidence['receipt_id'] = result['receipt_id']
-                    elif outcome == 'unsent':
-                        evidence['reason'] = 'pre_io_failure' if result.get('reason') == 'pre_io_failure' else 'explicit_not_sent'
-                    else:
-                        outcome = 'uncertain'
-                        evidence['reason'] = 'client_response_unqualified'
-                    scheduler.finish(dispatcher, recipient, claim['attempt_id'], outcome=outcome, evidence=evidence)
-                    results.append(dict(message_id=job['message_id'], attempt_id=claim['attempt_id'],
-                        status=outcome, reason=result.get('reason'), receipt_id=result.get('receipt_id')))
-                    if outcome == 'uncertain':
-                        break
-                finally:
-                    scheduler.release(recipient)
+                    dispatcher = scheduler.acquire()
+                    if dispatcher is None:
+                        raise BusError('stale_lease', 'dispatcher ownership changed')
+                    binding = bindings.get(job['recipient_key'])
+                    try:
+                        probe = binding.probe() if binding else dict(status='deferred', reason='capability_unavailable')
+                    except (BusError, OSError):
+                        probe = dict(status='deferred', reason='offline')
+                    if probe.get('status') != 'ready':
+                        reason = probe.get('reason', 'capability_unavailable')
+                        scheduler.defer(dispatcher, job['job_id'], reason if reason in
+                            ('busy', 'offline', 'capability_unavailable') else 'capability_unavailable')
+                        results.append(dict(message_id=job['message_id'], status='deferred', reason=reason))
+                        continue
+                    dispatcher = scheduler.acquire()
+                    if dispatcher is None:
+                        raise BusError('stale_lease', 'dispatcher ownership changed')
+                    recipient = scheduler.acquire('recipient:' + job['recipient_key'])
+                    if recipient is None:
+                        results.append(dict(message_id=job['message_id'], status='deferred', reason='busy'))
+                        continue
+                    try:
+                        try:
+                            claim = scheduler.claim(dispatcher, recipient, [job['job_id']])
+                        except BusError as error:
+                            results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
+                            continue
+                        result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
+                        outcome = result.get('status')
+                        evidence = dict(transport='owning_client_v1', exact_thread_id=binding.thread_id,
+                                        daemon_generation=binding.generation)
+                        if outcome == 'submitted':
+                            evidence['receipt_id'] = result['receipt_id']
+                        elif outcome == 'unsent':
+                            evidence['reason'] = 'pre_io_failure' if result.get('reason') == 'pre_io_failure' else 'explicit_not_sent'
+                        else:
+                            outcome = 'uncertain'
+                            evidence['reason'] = 'client_response_unqualified'
+                        scheduler.finish(dispatcher, recipient, claim['attempt_id'], outcome=outcome, evidence=evidence)
+                        results.append(dict(message_id=job['message_id'], attempt_id=claim['attempt_id'],
+                            status=outcome, reason=result.get('reason'), receipt_id=result.get('receipt_id')))
+                        if outcome == 'submitted' and self.receipt_gate is not None:
+                            self.receipt_gate.submitted(receipt, job, claim['attempt_id'], result['receipt_id'])
+                        if outcome == 'uncertain':
+                            break
+                    finally:
+                        scheduler.release(recipient)
             return dict(status='processed', submitted=sum(row['status'] == 'submitted' for row in results),
                         results=results, recovered=recovered)
         finally:

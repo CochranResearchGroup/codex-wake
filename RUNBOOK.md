@@ -5113,3 +5113,14 @@ live attempts remain0/3 and M1-M4 remainunproven. No shared restart, reconnect,
 global install or notification. Sender receipt-arm delivery is still unwired.
 Progress:blocker_reduction. Carried budget1167279 before checkpoint writing,
 ceiling1800000; goalactive. Memorynot_durable, receipted inverification0112.
+
+### Turn 239 continuation checkpoint | 21:19 UTC
+
+Native sender delegation and exact-message reply arming now connect the existing
+receipt source journal to notification delivery. Focused checks cover cancellation,
+expiry, independent authority, worker reconstruction and post-send bookkeeping
+crash reconciliation. Updated runtime verifies namespace; pinned patch reproduced
+and built. Verification0113 retains failures and current hashes. Presubmitpending;
+source integration and explicit shared-runtime approval required before M1.
+Carried budget1344086 before writing; ceiling1800000; goalactive. No liveattempt.
+Memorynot_durable remains the single receipted disposition for this in-progress turn.

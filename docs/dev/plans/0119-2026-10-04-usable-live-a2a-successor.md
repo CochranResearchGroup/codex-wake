@@ -250,3 +250,32 @@ daemon/client restart or global installation is authorized by this artifact.
 Once the candidate is built and its concrete rollout is reviewable, resolve
 any exact shared-runtime activation gate. No unqualified transport fallback.
 Live attempts remain0/3; no notification or message was sent this continuation.
+
+### Candidate receipt wiring and runtime boundary | 2026-10-04
+
+The exact-message operator receipt allowlist cannot preauthorize an unknown
+future message ID. Candidate `a2a delegate-receipts` instead independently grants
+bounded observation for explicitly listed, notification-enabled sender actors.
+Candidate `messages arm-reply` authenticates the current actor and registers its
+own exact outgoing request in the existing Wake signal journal. No operator step
+is required after send. This does not grant messaging or actor impersonation.
+New configuration holds at most100 senders, pins wake root, bus and actor
+generation, and is re-read on observation and dispatch. Generic receipt/tmux
+delivery remains fenced. No mailbox schema or message store change.
+
+The bounded native worker publishes its actual reader health, reconstructs reply
+arms through the existing receipt source family, and releases the existing reply
+notification only for a current exact firing arm. Cancellation, expiry and removed
+delegations hold delivery. Actual submission evidence is recorded in the existing
+mailbox attempt journal; interrupted arm bookkeeping is reconciled without resend.
+Source fixtures prove these boundaries; they do not prove M1 or M3 live behavior.
+
+Client binding also checks the actual server's home/provider namespace before
+submission. Expired client event responders are dropped before any later effect.
+The retained runtime patch and build hashes were updated and reproduced.
+
+Plan0119 runtime activation gate is prepared in note0007 and explicit approval is
+pending. Current policy0021 also requires deployment from an exact integrated
+origin/main commit; source integration and hosted checks must precede activation.
+No authority is inferred from compilation, local fixture results or a PR. M1-M4
+remain UNPROVEN, live round-trip attempts0/3, actual runtime unchanged.

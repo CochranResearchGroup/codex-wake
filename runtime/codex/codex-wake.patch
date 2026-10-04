@@ -171,12 +171,15 @@ diff --git a/codex-rs/tui/src/app.rs b/codex-rs/tui/src/app.rs
 diff --git a/codex-rs/tui/src/app/event_dispatch.rs b/codex-rs/tui/src/app/event_dispatch.rs
 --- a/codex-rs/tui/src/app/event_dispatch.rs
 +++ b/codex-rs/tui/src/app/event_dispatch.rs
-@@ -31,6 +31,12 @@
+@@ -31,6 +31,15 @@
          app_server: &mut AppServerSession,
          event: AppEvent,
      ) -> Result<AppRunControl> {
 +        #[cfg(unix)]
 +        if let AppEvent::WakeNotification { request, response } = event {
++            if response.is_closed() {
++                return Ok(AppRunControl::Continue);
++            }
 +            let result = self.handle_wake_notification(app_server, request).await;
 +            let _ = response.send(result);
 +            return Ok(AppRunControl::Continue);
@@ -184,7 +187,7 @@ diff --git a/codex-rs/tui/src/app/event_dispatch.rs b/codex-rs/tui/src/app/event
          // Release the shortcut's input guard even when a fork is rejected below.
          if matches!(event, AppEvent::ForkCurrentSession { .. }) {
              self.chat_widget.fork_in_progress = false;
-@@ -121,6 +127,8 @@
+@@ -121,6 +130,8 @@
              event => (event, None),
          };
          match event {
@@ -209,7 +212,7 @@ diff --git a/codex-rs/tui/src/app/wake_client.rs b/codex-rs/tui/src/app/wake_cli
 new file mode 100644
 --- /dev/null
 +++ b/codex-rs/tui/src/app/wake_client.rs
-@@ -0,0 +1,240 @@
+@@ -0,0 +1,258 @@
 +//! Explicit opt-in local notification binding. The owning TUI checks its real
 +//! composer and submits through Core's atomic idle-only operation.
 +use crate::app::App;
@@ -222,6 +225,7 @@ new file mode 100644
 +};
 +use serde::Deserialize;
 +use serde_json::{Value, json};
++use sha2::{Digest, Sha256};
 +use std::collections::HashMap;
 +use std::os::unix::fs::{MetadataExt, PermissionsExt};
 +use std::path::PathBuf;
@@ -241,6 +245,8 @@ new file mode 100644
 +    pub generation: String,
 +    #[serde(default)]
 +    pub thread_id: String,
++    #[serde(default)]
++    pub namespace: String,
 +    #[serde(default)]
 +    pub root: String,
 +    #[serde(default)]
@@ -356,8 +362,19 @@ new file mode 100644
 +    ) -> Value {
 +        let thread = self.active_thread_id;
 +        let root = self.config.cwd.as_path().to_string_lossy().into_owned();
-+        let identity = json!({"thread_id":thread.map(|id| id.to_string()),"root":root});
-+        let reason = if self.reconnect.offline {
++        let namespace = server.server_codex_home().and_then(|home| {
++            std::fs::canonicalize(home).ok().map(|home| {
++                let material = serde_json::to_string(&json!([
++                    home.to_string_lossy(),
++                    self.config.model_provider_id
++                ]))
++                .unwrap_or_default();
++                format!("codex:{:x}", Sha256::digest(material.as_bytes()))
++            })
++        });
++        let identity =
++            json!({"thread_id":thread.map(|id| id.to_string()),"root":root,"namespace":namespace});
++        let reason = if self.reconnect.offline || namespace.is_none() {
 +            Some("offline")
 +        } else if thread.is_none()
 +            || thread != self.chat_widget.thread_id()
@@ -384,7 +401,10 @@ new file mode 100644
 +            .duration_since(UNIX_EPOCH)
 +            .unwrap_or_default()
 +            .as_secs_f64();
-+        if thread.to_string() != request.thread_id || root != request.root {
++        if thread.to_string() != request.thread_id
++            || root != request.root
++            || namespace.as_deref() != Some(request.namespace.as_str())
++        {
 +            return json!({"status":"unsent","reason":"identity_changed","identity":identity});
 +        }
 +        if !request.expires_at.is_finite() || request.expires_at <= now {
@@ -432,7 +452,8 @@ new file mode 100644
 +                json!({"status":"unsent","reason":source.message,"identity":identity})
 +            }
 +            Ok(Err(TypedRequestError::Server { source, .. }))
-+                if matches!(source.code, -32600 | -32601) =>
++                if source.code == -32601
++                    || (source.code == -32600 && source.message.contains("unknown variant")) =>
 +            {
 +                json!({"status":"unsent","reason":"capability_unavailable","identity":identity})
 +            }

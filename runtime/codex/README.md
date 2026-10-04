@@ -33,6 +33,8 @@ at launch using an unused socket path in a canonical mode-0700 directory:
 CODEX_WAKE_CLIENT_SOCKET=/OWNED/CLIENT/client.sock \
 CODEX_WAKE_A2A_BUS_ROOT=/ENROLLED/BUS \
 CODEX_WAKE_A2A_CAPABILITY=/ISSUED/ACTOR.json \
+CODEX_WAKE_WAKE_ROOT=/OWNED/WAKE \
+CODEX_WAKE_SENDER_RECEIPT_AUTHORITY=/OWNED/SENDERS.json \
   /EXACT/CANDIDATE/codex resume EXISTING_THREAD_ID
 ```
 
@@ -52,6 +54,30 @@ codex-wake a2a worker --bus-root /ENROLLED/BUS \
   --operator-capability /ISSUED/OPERATOR.json --bindings-file /OWNED/BINDINGS.json \
   --duration 120 --max-dispatches 2 --json
 ```
+
+For durable sender reply wakes, the operator explicitly delegates each sender
+before agent work starts:
+
+```sh
+codex-wake a2a delegate-receipts --bus-root /ENROLLED/BUS \
+  --operator-capability /ISSUED/OPERATOR.json --thread EXISTING_THREAD_ID \
+  --wake-root /OWNED/WAKE --sender-receipt-authority /OWNED/SENDERS.json --json
+codex-wake a2a worker --bus-root /ENROLLED/BUS \
+  --operator-capability /ISSUED/OPERATOR.json --bindings-file /OWNED/BINDINGS.json \
+  --wake-root /OWNED/WAKE --sender-receipt-authority /OWNED/SENDERS.json \
+  --duration 120 --max-dispatches 2 --json
+```
+
+The worker advertises actual process-bound reader health for that wake root.
+Set `CODEX_WAKE_WAKE_ROOT` and `CODEX_WAKE_SENDER_RECEIPT_AUTHORITY` in the opted-in
+sender's environment. After sending, the sender runs native `messages arm-reply`
+for the returned exact message ID with an explicit idempotency key and fixed
+timezone-aware expiry, then ends its turn. No operator intervention is required
+after send. The independent delegation authorizes only listed senders' own
+outgoing messages; it is revalidated on receipt observation and delivery.
+In this worker mode, a reply notification waits for a matching live reply arm.
+Cancelled/expired arms and removed delegations cannot release it. The arm and
+existing notification journal retain send evidence across worker restart.
 
 Binding does not enroll actors or grant notification rights. Those are independent
 operator actions. The worker uses the existing fenced mailbox scheduler. It
