@@ -4961,3 +4961,12 @@ version pass, installed workload FD5->5 and no children/I/O. Full requirement
 ledger 0106 establishes NOT COMPLETE and exact remaining gates. Named sender
 selector resolves; named recipient code6. Live disposable scope still pending.
 Outcome_progress on rollback acceptance; full campaign OPEN.
+
+## Turn 226 | 2026-10-03
+
+PRs 194/195 integrated and hosted gates passed. Canonical lane catalog now audits
+cleanly and preserves campaign OPEN. Current retention inspection confirms body-only
+pruning and no compact tombstone representation; coordinated migration/read-path
+qualification is the next packet. Note 0004 checkpoints before the operator's 500k
+ceiling rather than starting a packet whose proof may cross it. Goal paused only
+under the explicit stop/checkpoint instruction; full completion remains unproven.
