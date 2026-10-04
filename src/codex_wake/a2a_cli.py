@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'dispatch', 'worker', 'delegate-receipts']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'dispatch', 'worker', 'delegate-receipts']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -35,11 +35,14 @@ def add_a2a_parser(subparsers):
             command.add_argument('--apply', action='store_true', required=True)
         if verb == 'tick':
             command.add_argument('--projection-root', type=Path, required=True)
-        if verb in ('bind-client', 'dispatch', 'worker'):
+        if verb in ('bind-client', 'bind-tmux', 'dispatch', 'worker'):
             command.add_argument('--bindings-file', type=Path, required=True)
         if verb == 'bind-client':
             command.add_argument('--thread', required=True)
             command.add_argument('--client-socket', type=Path, required=True)
+        if verb == 'bind-tmux':
+            command.add_argument('--thread', required=True)
+            command.add_argument('--tmux-socket', required=True)
         if verb == 'delegate-receipts':
             command.add_argument('--thread', required=True)
             command.add_argument('--wake-root', type=Path, required=True)
@@ -150,7 +153,7 @@ def a2a_command(args):
                 actor = Actor(store.bus_id, row['namespace'], row['thread_id'], row['root'], row['generation'], row['actor_id'])
             authority = SenderReceiptAuthority(args.sender_receipt_authority, args.wake_root)
             result(dict(delegation=authority.delegate(store, args.operator_capability, actor)))
-        elif args.a2a_command == 'bind-client':
+        elif args.a2a_command in ('bind-client', 'bind-tmux'):
             from .a2a_delivery import bind_client
             identity = resolve_identity('thread:' + args.thread)
             with store.connection() as database:
@@ -158,7 +161,11 @@ def a2a_command(args):
                     (identity.namespace, identity.thread_id)).fetchone()
                 if not actor or actor['revoked'] or not actor['can_notify'] or not Path(identity.cwd).is_relative_to(Path(actor['root'])):
                     raise BusError('authorization_denied', 'client binding requires an issued notification-enabled actor')
-            result(dict(binding=bind_client(args.bindings_file, args.client_socket, identity)))
+            if args.a2a_command == 'bind-tmux':
+                from .a2a_tmux_delivery import bind_tmux
+                result(dict(binding=bind_tmux(args.bindings_file, args.tmux_socket, identity)))
+            else:
+                result(dict(binding=bind_client(args.bindings_file, args.client_socket, identity)))
         elif args.a2a_command in ('dispatch', 'worker'):
             from .a2a_delivery import NotificationDispatcher
             from .a2a_mailbox import Mailbox

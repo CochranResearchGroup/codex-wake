@@ -1,7 +1,7 @@
 """Exact opt-in owning-client delivery for journal-fenced mailbox notifications.
 
-The local client must guard its actual composer and use atomic idle-only Core
-submission. There is no fallback to queue/add, turn/start, paste or resume.
+Bindings explicitly select either the opt-in owning client or the existing tmux
+wake transport. Neither transport falls back to queue/add, turn/start or resume.
 """
 from __future__ import annotations
 
@@ -34,6 +34,8 @@ class ClientBinding:
     process_start_ticks: int
     boot_id: str
     generation: str
+
+    transport = "owning_client_v1"
 
     @property
     def key(self):
@@ -144,9 +146,19 @@ def load_bindings(path):
                 or type(value['schema_version']) is not int or value['schema_version'] != 1 or type(value['bindings']) is not list
                 or not 1 <= len(value['bindings']) <= 100):
             raise ValueError('invalid configuration')
-        bindings = [ClientBinding(**row) for row in value['bindings']]
+        bindings = []
+        for row in value['bindings']:
+            row = dict(row)
+            transport = row.pop('transport', 'owning_client_v1')
+            if transport == 'tmux_notification_v1':
+                from .a2a_tmux_delivery import TmuxBinding
+                bindings.append(TmuxBinding(**row))
+            elif transport == 'owning_client_v1':
+                bindings.append(ClientBinding(**row))
+            else:
+                raise ValueError('unsupported binding transport')
         keys = [row.key for row in bindings]
-        sockets = [row.socket_path for row in bindings]
+        sockets = [getattr(row, "socket_path", None) or (row.tmux_socket, row.pid, row.process_start_ticks) for row in bindings]
         if len(set(keys)) != len(keys) or len(set(sockets)) != len(sockets):
             raise ValueError('ambiguous binding')
         return {row.key: row for row in bindings}
@@ -183,7 +195,7 @@ def bind_client(path, socket_path, identity: RuntimeIdentity):
     except (ValueError, TypeError, KeyError):
         raise BusError('binding_invalid', 'client did not attest exact runtime identity') from None
     bindings = load_bindings(path) if path.exists() or path.is_symlink() else {}
-    if any(row.socket_path == str(socket_path) and row.key != binding.key for row in bindings.values()):
+    if any(getattr(row, "socket_path", None) == str(socket_path) and row.key != binding.key for row in bindings.values()):
         raise BusError('binding_invalid', 'client socket already belongs to another thread')
     if binding.key not in bindings and len(bindings) >= 100:
         raise BusError('binding_invalid', 'client binding population bound reached')
@@ -192,7 +204,7 @@ def bind_client(path, socket_path, identity: RuntimeIdentity):
     fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     try:
         with os.fdopen(fd, 'w') as stream:
-            stream.write(encoded(dict(schema_version=1, bindings=[asdict(row) for row in bindings.values()])) + '\n')
+            stream.write(encoded(dict(schema_version=1, bindings=[binding_dict(row) for row in bindings.values()])) + '\n')
             stream.flush(); os.fsync(stream.fileno())
         os.replace(temporary, path)
         directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
@@ -262,7 +274,7 @@ class NotificationDispatcher:
                             continue
                         result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
                         outcome = result.get('status')
-                        evidence = dict(transport='owning_client_v1', exact_thread_id=binding.thread_id,
+                        evidence = dict(transport=binding.transport, exact_thread_id=binding.thread_id,
                                         daemon_generation=binding.generation)
                         if outcome == 'submitted':
                             evidence['receipt_id'] = result['receipt_id']
@@ -275,7 +287,7 @@ class NotificationDispatcher:
                         results.append(dict(message_id=job['message_id'], attempt_id=claim['attempt_id'],
                             status=outcome, reason=result.get('reason'), receipt_id=result.get('receipt_id')))
                         if outcome == 'submitted' and self.receipt_gate is not None:
-                            self.receipt_gate.submitted(receipt, job, claim['attempt_id'], result['receipt_id'])
+                            self.receipt_gate.submitted(receipt, job, claim['attempt_id'], result['receipt_id'], transport=binding.transport)
                         if outcome == 'uncertain':
                             break
                     finally:
@@ -284,3 +296,10 @@ class NotificationDispatcher:
                         results=results, recovered=recovered)
         finally:
             scheduler.release(dispatcher)
+
+
+def binding_dict(binding):
+    value = asdict(binding)
+    if binding.transport != 'owning_client_v1':
+        value['transport'] = binding.transport
+    return value

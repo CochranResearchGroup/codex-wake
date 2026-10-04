@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: feat/p63-activation-gate
+Branch: feat/p63-tmux-delivery
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -343,3 +343,21 @@ prompt submission and process-bound routing; it also confirms an explicit A2A
 receipt dispatch fence. No message, notification, restart or reconnect occurred
 in this correction turn. Next packet targets the existing Wake integration and
 one bounded automatic round-trip probe, retaining all acceptance obligations.
+
+### Stock-runtime transport implementation | 2026-10-04
+
+Native `a2a bind-tmux` captures the existing client PID/start ticks/boot ID and
+exact home/provider namespace/thread/root. The existing notification dispatcher
+uses that explicit binding without an automatic transport fallback. It checks
+shared metadata for idle/direct-input eligibility and recognizes only the observed
+empty Codex composer. Draft, modal, unknown UI, unloaded and changed-generation
+clients are held. Paste uses the existing transport and records visible canonical
+message-pointer evidence, not a fabricated server turn receipt. The same existing
+reply-arm gate releases the correlated reply notification and reconciles completed
+transport bookkeeping without resend. Generic A2A receipt injection stays fenced.
+
+These are observed pre-paste checks, not an atomic server/composer transaction.
+M2 requires live safety tests; source checks alone do not prove a human cannot
+change input between the final check and paste. No stock runtime was modified.
+Next gate: integrate this source after required checks, then one actual automatic
+request/reply on the designated same threads.
