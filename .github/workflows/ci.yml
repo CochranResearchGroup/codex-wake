@@ -56,6 +56,7 @@ jobs:
           /tmp/codex-wake-ci/bin/python scripts/session_discovery_smoke.py --cli /tmp/codex-wake-ci/bin/codex-wake
           /tmp/codex-wake-ci/bin/python scripts/a2a_mailbox_smoke.py --scheduler --operations --cli /tmp/codex-wake-ci/bin/codex-wake
           timeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_resource_qualification.py
+          PYTHONPATH=tests CODEX_WAKE_RECEIPT_CLI=/tmp/codex-wake-ci/bin/codex-wake /tmp/codex-wake-ci/bin/python -m unittest test_a2a_projection_ack -q
 
           python scripts/product_smoke.py \
             --codex-wake-bin /tmp/codex-wake-ci/bin/codex-wake \

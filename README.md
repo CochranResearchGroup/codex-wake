@@ -804,3 +804,26 @@ Generic receipt dispatch remains held; a pending arm or no-dispatch firing does
 not establish actual agent suspension or delivery. An expired timestamp creates
 an arm that the reader can retire as expired. Use `codex-waked --once
 --no-dispatch --wake-root ... --a2a-receipt-authority ...` for bounded observation.
+
+After exact receipt occurrences have been durably mirrored, an operator may
+reconcile their mailbox projection rows:
+
+```bash
+codex-wake a2a ack-projections --bus-root /absolute/bus \
+  --operator-capability /absolute/bus/operator.json \
+  --wake-root /absolute/wake \
+  --receipt-authority /absolute/receipt-authority.json \
+  --source-instance mailbox-EXACT_INSTANCE_FROM_GRANT --limit 100
+```
+
+The operator capability grants mailbox write authority independently of the
+read-only observer grant. The command checks the exact bus, actor generation,
+conversation and every immutable committed occurrence against the mailbox.
+Missing or compacted occurrences keep their retention pins; a source checkpoint
+or a fired wake alone is insufficient. It reports acknowledged/scanned counts
+and an attributable operator receipt. Repeating acknowledgement does not change
+previously published rows. An uncertain commit returns `reconciliation_required`
+and a receipt pointer; inspect that receipt before retrying. This clears only
+projection pins: body pruning still requires the existing retention preview/apply
+guard, and active claims/conversations retain their other pins. Observers cannot
+write or prune. No automatic body removal or physical secure erasure is implied.

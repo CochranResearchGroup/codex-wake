@@ -4938,3 +4938,14 @@ FD five to five, children zero, dispatch attempts zero, store below 10 MiB and
 time below 30 seconds. First harness assertion used wrong copied-root error code;
 corrected without runtime change. Installed CI gate added; verification 0104.
 Outcome_progress on these axes; full campaign and pending live scope unchanged.
+
+## Turn 224 | 2026-10-03
+
+Plan 0113 accepted operator acknowledgement of exact durable receipt projections.
+Read-only observer plus independent operator writer authority replaces simulated
+outbox clearing and unlocks existing guarded retention. Verification 0105 preserves
+missing-API red feedback, malformed JSON/type probes, fail-closed wrong-table repair
+and final evidence: 55 focused on Python 3.11/3.12, 843 comprehensive, nine installed.
+FD five to five, children zero. Source-contract types prevent boolean sequence
+impersonation. No live/provider/service effects; full campaign OPEN, live scope pending.
+Outcome_progress on retention acknowledgement; inherited allowances retained.

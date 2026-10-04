@@ -87,6 +87,28 @@ class ReceiptSignalAdapter:
         return SourceAnchor(0, 'a2a:' + self.source_instance,
                             MappingProxyType(dict(sequence=0, descriptor=descriptor)), 'source_replay')
 
+    def observation(self, row, original):
+        """Normalize exact immutable mailbox evidence for replay and reconciliation."""
+        try:
+            intent = json.loads(row['payload'])
+        except (TypeError, ValueError):
+            raise BusError('receipt_corrupt', 'signal outbox contains invalid receipt metadata') from None
+        if type(intent) is not dict:
+            raise BusError('receipt_corrupt', 'signal outbox contains invalid receipt metadata')
+        if intent.get('receipt_id') != row['receipt_id'] or intent.get('message_id') != row['message_id'] or intent.get('bus_id') != self.mailbox.bus.bus_id:
+            raise BusError('receipt_corrupt', 'signal outbox does not match journal receipt')
+        if row['in_reply_to'] == self.message_id:
+            if row['sender_key'] != original['recipient_key'] or row['recipient_key'] != original['sender_key']:
+                raise BusError('receipt_corrupt', 'reply does not match pinned conversation participants')
+            kind = 'reply' if row['kind'] == 'admitted' else 'reply_' + row['kind']
+        else:
+            kind = row['kind']
+        occurred = datetime.fromtimestamp(row['created'], timezone.utc)
+        return NormalizedObservation('a2a.receipt', self.source_instance, 'receipt', self.subject,
+            'mailbox_receipt', row['receipt_id'], occurred, occurred,
+            dict(receipt_kind=kind,receipt_id=row['receipt_id'],message_id=row['message_id'],sequence=row['receipt_seq']),
+            Verification('verified','committed_mailbox_receipt'), 'a2a:' + row['receipt_id'])
+
     def mirror(self, module, *, limit=100):
         if type(limit) is not int or not 1 <= limit <= 100:
             raise BusError('invalid_argument', 'receipt replay is limited to one hundred rows')
@@ -105,20 +127,7 @@ class ReceiptSignalAdapter:
                     ORDER BY r.receipt_seq LIMIT ?''', (after, self.message_id, self.message_id, limit)).fetchall()
                 observations = []
                 for row in rows:
-                    intent = json.loads(row['payload'])
-                    if intent.get('receipt_id') != row['receipt_id'] or intent.get('message_id') != row['message_id'] or intent.get('bus_id') != self.mailbox.bus.bus_id:
-                        raise BusError('receipt_corrupt', 'signal outbox does not match journal receipt')
-                    if row['in_reply_to'] == self.message_id:
-                        if row['sender_key'] != original['recipient_key'] or row['recipient_key'] != original['sender_key']:
-                            raise BusError('receipt_corrupt', 'reply does not match pinned conversation participants')
-                        kind = 'reply' if row['kind'] == 'admitted' else 'reply_' + row['kind']
-                    else:
-                        kind = row['kind']
-                    occurred = datetime.fromtimestamp(row['created'], timezone.utc)
-                    observations.append(NormalizedObservation('a2a.receipt', self.source_instance, 'receipt', self.subject,
-                        'mailbox_receipt', row['receipt_id'], occurred, occurred,
-                        dict(receipt_kind=kind,receipt_id=row['receipt_id'],message_id=row['message_id'],sequence=row['receipt_seq']),
-                        Verification('verified','committed_mailbox_receipt'), 'a2a:' + row['receipt_id']))
+                    observations.append(self.observation(row, original))
                 database.execute('ROLLBACK')
             if not rows:
                 return dict(status='caught_up', checkpoint=after, mirrored=0)

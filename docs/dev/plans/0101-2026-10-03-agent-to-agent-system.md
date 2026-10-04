@@ -493,3 +493,12 @@ limits, cross-root deny/allow, FIFO/idempotency, correlated replies, ten fresh
 process reopens, copied-root refusal and installed resource census. No runtime
 code changes or live actors. This advances operations/resource acceptance; full
 live, service, retention, soak and release requirements remain OPEN.
+
+## Production receipt projection acknowledgement
+
+Plan 0113 / verification 0105 accepts explicit operator acknowledgement of exact
+committed occurrence projections, replacing the simulated retention-pin clearing
+seam. Observer authority remains read-only; writer authority is independent.
+Missing/compacted/corrupt/mismatched proof holds pins, uncertain writes return an
+operator receipt pointer. Existing retention preview/apply still governs pruning.
+Full campaign and live/service/soak/compaction/release acceptance remain OPEN.

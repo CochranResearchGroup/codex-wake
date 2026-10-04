@@ -1533,6 +1533,58 @@ class SQLiteSignalModule(SignalEngine):
             ),
         }
 
+    @classmethod
+    def read_committed_occurrences(cls, database, source, source_instance, namespace, occurrence_ids):
+        """Bounded immutable occurrence proof, without initialization or migration."""
+        import os
+        import stat
+        connection = None
+        try:
+            if (type(occurrence_ids) not in (list, tuple) or len(occurrence_ids) > 100
+                    or any(type(value) is not str or not value or len(value.encode()) > 256
+                           for value in occurrence_ids)):
+                raise ValueError()
+            path = Path(database).absolute()
+            info = path.lstat()
+            if (path != path.resolve() or not stat.S_ISREG(info.st_mode)
+                    or info.st_uid != os.geteuid() or info.st_mode & 0o022):
+                raise ValueError()
+            connection = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=5)
+            connection.row_factory = sqlite3.Row
+            connection.execute("BEGIN")
+            if (connection.execute("PRAGMA application_id").fetchone()[0] != JOURNAL_APPLICATION_ID
+                    or connection.execute("PRAGMA user_version").fetchone()[0] != JOURNAL_SCHEMA_VERSION):
+                raise ValueError()
+            meta = connection.execute("SELECT journal_uuid FROM journal_meta WHERE singleton=1").fetchone()
+            if meta is None or not isinstance(meta[0], str) or not meta[0]:
+                raise ValueError()
+            source_row = connection.execute(
+                'SELECT contract_json FROM source_instances WHERE source=? AND source_instance=?',
+                (source, source_instance)).fetchone()
+            if source_row is None:
+                raise ValueError()
+            contract = _contract_from_json(source_row[0])
+            values = {}
+            if occurrence_ids:
+                placeholders = ','.join('?' for _ in occurrence_ids)
+                rows = connection.execute(
+                    'SELECT * FROM receipts WHERE source=? AND source_instance=? AND occurrence_namespace=? '
+                    'AND occurrence_value IN (' + placeholders + ')',
+                    (source, source_instance, namespace, *occurrence_ids)).fetchall()
+                for row in rows:
+                    observation = _observation_from_json(row['observation_json'])
+                    if (_validate_observation(observation, contract) is not None
+                            or _fingerprint(row['observation_json']) != row['content_fingerprint']
+                            or _canonical_json(_observation_payload(observation)) != row['observation_json']
+                            or _identity(observation) != (source, source_instance, namespace, row['occurrence_value'])):
+                        raise ValueError()
+                    values[row['occurrence_value']] = observation
+            return meta[0], values
+        except Exception:
+            return Degraded(None, "COMMITTED_PROOF_UNAVAILABLE", None)
+        finally:
+            _close_quietly(connection)
+
     def source_checkpoint(self, source: str, source_instance: str) -> SourceCommit | Degraded | None:
         """Read the atomic source cursor without creating or changing a journal."""
         connection: sqlite3.Connection | None = None
