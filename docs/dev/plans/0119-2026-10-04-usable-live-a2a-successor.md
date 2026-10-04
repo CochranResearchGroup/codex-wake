@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: feat/p63-tmux-delivery
+Branch: feat/p63-live-stock-checkpoint
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -70,8 +70,8 @@ explained need and explicit operator direction.
 Current integrated source:835990a4ba31a1a774b5fa72332fe05db17b7b28 via PR206.
 The retained patch and compiled package are inactive historical artifacts, not
 a product prerequisite. Existing owning-client commands depend on that inactive
-patch and do not constitute the selected stock-runtime transport. M1-M4 remain
-UNPROVEN and actual automatic round-trip attempts remain0/3.
+patch and do not constitute the selected stock-runtime transport. M1 now passes
+on attempt2/3; M2-M4 remain UNPROVEN. Verification0115 records actual evidence.
 
 ## Scope and architecture
 
@@ -399,3 +399,16 @@ original intent. This is M1 failure1/3, not a passed exchange. Preserve the agen
 turn, native output and reconciliation. The zero-effect owned worker was stopped;
 attempt2 retries the same intent key with120s and a fresh bounded worker. No
 controller prompt followed an admitted request.
+
+### M1 stock-runtime behavioral acceptance | 2026-10-04
+
+M1 PASS on attempt2/3: actual requestmsg_c33d4cdf87544e138fedb286896fb9bb,
+B read/accepted/replymsg_fe28d90d70c144ae8cec2a07f6c6ba77, automatic A read
+receipt_c0308cf295f14ff089e7dade82c44488. Durable reply arm submitted; exactly
+two transport submissions, same original threads/PIDs; worker exited normally.
+No controller prompt/body relay/inbox polling after admission. Deadline proven
+by90.576-second monotonic upper bound from BEFORE admission to actual A read;
+wall receipt delta56.006 seconds is labeled separately. Verification0115 retains
+exact receipts/turns, first failure and all setup/clock observations. Extra A
+terminal ack failed claim_required; read criterion passed, terminal ack not claimed.
+M2-M4 and wider campaign remain OPEN. Next packet is live session safety.

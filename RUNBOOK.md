@@ -5158,3 +5158,15 @@ shared restart, client reconnect, update pin, message or notification. Source
 trace confirms existing wake submission and the outstanding A2A receipt fence.
 Automatic round-trip remains unproven, attempts0/3. Memory dispositionunavailable:
 no reviewed Codex Wake Graphiti target group; no graph write attempted.
+
+### Plan0119 M1 automatic round trip on stock Codex | 2026-10-04
+
+PR207/208/209 integrated explicit tmux delivery, bracketed paste and zero-effect
+clock holds after hosted gates. Installed private CLI atdcc8934 ran M1 attempt2/3:
+one request/reply, automatic B and A turns, exact mailbox read/claim receipts,
+durable sender arm submitted, two transport submissions, owned worker terminal.
+Verification0115 contains proof and90.576-second monotonic deadline upper bound.
+First TTL120 parse failure was reconciled aszero effect, preserved and corrected
+to120s. Additional result-completed ack failedclaim_required; terminal ack not
+claimed. Stock Codex0.160.0 and updater configuration unchanged. M2-M4 OPEN.
+Memory dispositionunavailable: no reviewed Codex Wake Graphiti target group.
