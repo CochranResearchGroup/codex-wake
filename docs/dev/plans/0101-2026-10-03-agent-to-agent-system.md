@@ -538,3 +538,11 @@ Final hosted Python 3.11/3.12 gates passed on 95f68c7; squash 8414adc0. Full
 campaign remains OPEN. Local filesystem/ref/custody reconciliation is pending;
 no actual host/service recovery, restore activation, agent delivery or soak was
 performed. The new additional 500k meter and inherited review limits persist.
+
+## Post-reboot additional-500k checkpoint
+
+User reported reboot; local source checkout now matches retained remote95f68c7
+and is clean. PR197/198 integrated8414adc0/dc248e7; retention acceptance remains
+bounded. Note0005 records restart custody, current meter423,203 before writing,
+and the next backup/restore preparation packet. Stop/checkpoint before the
+additional500k ceiling; full campaignOPEN and live authority unanswered.

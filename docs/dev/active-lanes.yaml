@@ -6,7 +6,7 @@ lanes:
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/181]
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
-    plan_ref: docs/p63-retention-closeout
+    plan_ref: docs/p63-reboot-checkpoint
     branch: feat/p63-retention-lifecycle
     target: origin/main
     plan_state: OPEN
@@ -17,5 +17,5 @@ lanes:
     integration_receipt: 8414adc0bdb07c1290300405dd87cf009b744158
     dependencies: []
     overlaps: []
-    updated_at: 2026-10-03
-    disposition: PR197 integrated; campaign OPEN; local refs and custody audit pending filesystem recovery
+    updated_at: 2026-10-04
+    disposition: PR197 and PR198 integrated; recovered source checkout clean; additional-500k checkpoint; campaign OPEN
