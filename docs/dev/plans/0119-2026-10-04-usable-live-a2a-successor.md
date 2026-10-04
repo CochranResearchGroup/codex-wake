@@ -1,0 +1,184 @@
+# Build usable live agent-to-agent messaging
+
+State: PLANNED
+Lane: P63
+Owner: primary integration lane
+Branch: docs/p63-feature-successor
+Target: origin/main
+Integration: squash_pr
+Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
+Supersedes: Plan0101 execution sequencing; not its original acceptance obligations
+Depends-On: existing P63 mailbox, identity, scheduler, receipt and discovery implementation
+
+## Objective
+
+An agent in Byobu `wakeA` sends a request to `wakeB`. B is notified in its exact
+existing thread, reads the request, acknowledges it and replies. A can suspend
+its turn and is notified when the reply arrives. Both agents can inspect what
+happened using the normal installed CLI. After one-time enrollment and workflow
+setup, the controller does not paste prompts, poll inboxes or relay message bodies.
+
+Build and demonstrate this feature before expanding supporting infrastructure.
+A passing live behavior gate is progress; another green fixture suite is supporting
+evidence. A message admitted to SQLite is not a delivered notification.
+
+## Current state
+
+Current main: f104c2f86b37ac548ba1f798aa0d65abd8d37322. Discovery, explicit
+membership/capabilities, durable mailboxes, replies, acknowledgements, foreground
+waits, scheduler/outbox foundations, receipt projection, retention and bounded
+backup/recovery implementation already exist. Reuse them.
+
+On 2026-10-04 the operator designated two real sessions in the root repository:
+
+| Session | Actual thread | Demo result |
+| --- | --- | --- |
+| wakeA | 01a10876-c7cf-7ae1-ad99-e9d829994e45 | Sent request; waited for and read B's reply |
+| wakeB | 01a10876-e53a-7322-bf68-ff43e9b2f2dc | Read request; acknowledged accepted; composed and sent reply |
+
+One request `msg_02071e4c53c34984bd7561774edea49e` and one correlated reply
+`msg_84da70ea168047249bb155004aa4c786` passed in 55.509 seconds from admission
+to sender readback. Both identities were validated against the running shared
+daemon; commands ran in the actual agents' tool contexts. Controller prompts
+started their inbox work. Delivery was `inbox`, with notifications suppressed.
+This is live manual-pull acceptance, not automatic delivery or durable suspension.
+
+Evidence: [live demo receipt](../verification/0111-2026-10-04-wakeA-wakeB-live-round-trip.md).
+The global installed 0.6.0 command still lacks A2A verbs. The demo used an isolated
+wheel built from current main. Automatic A2A transport and generic receipt dispatch
+remain unqualified. The demo bus is paused; the two user-owned sessions are idle.
+
+## Scope and architecture
+
+Deliver the existing product through four consecutive user-visible milestones:
+automatic round trip, ordinary session safety, restart/suspension, and installation.
+Use the existing mailbox as message authority and Wake as notification authority.
+Do not create another broker, message database or receipt store. Notifications
+carry an exact inbox retrieval pointer; peer bodies remain untrusted.
+
+The next implementation seam is a qualified delivery adapter plus scheduler and
+receipt-wake wiring. Resolve the installed runtime's actual capabilities first.
+Use a supported exact-thread shared-daemon operation where its semantics protect
+ordinary client work. Current idle/status metadata alone does not establish
+composer ownership. If the existing runtime lacks the required binding, implement
+an explicitly opted-in client/hook binding at the narrowest owning seam; do not
+spend a succession of packets merely documenting its absence. Existing tmux
+transport is eligible only after exact thread/client/process-generation binding
+and composer safety are demonstrated. A queue operation that might run later is
+not a substitute for these guarantees.
+
+Keep notification delivery, recipient read, acknowledgement and reply as separate
+states. Preserve current `held`/`uncertain` semantics across transport failures;
+unknown effects are reconciled, never blindly replayed. A reply receipt is the
+trigger for A's exact-thread resumption, not an instruction to start another agent.
+
+## Milestones and acceptance
+
+| Milestone | Feature work | Required live result |
+| --- | --- | --- |
+| M1: Unassisted exchange | Qualified adapter; dispatch existing notification jobs; recipient inbox workflow; reply receipt wake for sender | After setup, A sends one request and ends its turn. Idle B wakes, reads/acks and replies; idle A wakes and reads it. No controller prompt, body relay or foreground inbox-poll helper after send. |
+| M2: Work safely in normal sessions | Gate delivery on exact identity and current client ownership; expose deferred/held reasons; honor cancel and expiry | Busy B is not interrupted; a human draft is unchanged; unloaded B stays pending without automatic resume. When B becomes eligible, the original exact recipient gets the message once. Rename/move cannot retarget it. Cancellation/expiry before dispatch prevents notification. |
+| M3: Survive normal lifecycle | Persist sender receipt arm and recipient notification; reload authority on reconnect; recover leases and classify uncertain transport | Restart only the demo-owned worker, reconnect the same threads, and deliver a pending request/reply without new IDs, duplicate effects or lost arms. A stays suspended through the worker restart and resumes on B's actual reply. |
+| M4: Usable installation | Ship CLI/workflow and service wiring through normal release path; expose setup/doctor/status; document the actual commands | Exact released installation performs M1 without temporary scripts or PYTHONPATH. A second explicitly enrolled root works; unenrolled root is denied. Installed rollback preserves readable messages/receipts and refuses unsupported state. |
+
+M1 is the immediate critical path. Its first live probe must be able to fail on
+missing delivery or wake-up, and its receipt must identify the actual sender,
+recipient, request, acknowledgement, reply and both resumed turns. A handcrafted
+firing record or a controller-generated reply cannot satisfy it.
+
+For M2, repeat the smallest live scenario for each distinct guard rather than
+building a broad synthetic matrix first. For M3, do not restart the shared daemon
+or interrupt unrelated agent sessions. For M4, perform a bounded 30-minute owned
+workload after the feature works: at most ten request/reply pairs, process/FD and
+memory census before/after, no residual demo workers. Preserve the existing
+verification0104 resource limits; freeze the installed baseline and thresholds
+before running. This bounded soak does not imply production-scale qualification.
+
+## First implementation packet
+
+Owner: primary. Outcome: M1 passes on the operator-designated wakeA/wakeB threads.
+Expected write surface: existing shared-runtime/transport adapter, injector,
+scheduler/receipt dispatcher integration, agent workflow skill, and affected tests.
+No mailbox schema or recovery change is planned unless a reproduced live failure
+requires one. Inspect these seams with CodeGraph before choosing exact files.
+
+1. Re-resolve wakeA/wakeB, installed identity, bus state and client bindings.
+   Freeze one owned notification bus and exact opt-in permissions; resume only
+   that healthy demo bus. Reuse the current identities if they still match.
+2. Record a failing end-to-end notification/wake probe against the actual entrypoint.
+   Identify the one blocking seam from observed behavior. Qualify or implement
+   the transport's ownership contract before allowing its effect.
+3. Connect existing outbox jobs to the qualified adapter. Install the bounded
+   inbox/ack/reply workflow in B; arm A's durable exact-message reply wake before
+   A suspends. Keep normal timers and other wake sources compatible.
+4. Run one actual request/reply, observe both thread resumptions, and preserve
+   runtime and mailbox receipts. Fix only demonstrated failures, then rerun that
+   same behavioral probe within the bounds below.
+
+Entry criteria: actual identity/binding, independent issued capabilities, owned
+healthy bus, explicit notification opt-in, finite attempt bounds. Exit: M1 live
+receipt passes, or a precise observed blocker and its smallest implementable
+remedy are recorded. Controller prompting after send means M1 failed.
+
+## Execution controls and authority
+
+This request authorizes writing the successor plan, not starting a new autonomous
+goal. The existing goal is paused at 867,188 tokens with its one-million ceiling.
+This plan does not reset usage, review/rework counters, uncertain-effect history
+or accepted findings. Carry them forward on an explicit goal continuation.
+
+The operator explicitly authorized the preceding demo in wakeA/wakeB. These are
+user-owned sessions in `/home/ecochran76/workspace.local/codex-wake`; do not delete,
+archive or replace them. A subsequent implementation/live packet must name its
+exact commands, notification permissions and effects. Routine in-scope source
+work needs no extra ceremony; shared-daemon restart, global install/release and
+additional roots have their own concrete execution boundaries. No business-system
+operations or private real-world message bodies belong in demos.
+
+One primary owner serializes M1-M4. No parallel lane is needed for M1's coupled
+adapter and dispatch changes; later independent verification may be split with
+explicit ownership. The same shared files have one writer.
+
+Use at most three live attempts per milestone, one request and one reply per
+attempt, with a 120-second delivery/reply deadline. No retry after uncertain I/O
+until exact reconciliation establishes what happened. Stop an attempt at timeout
+and preserve the first failure. At a local bound, reframe the verified blocker;
+do not start an unrelated maintenance packet or reset the campaign's allowances.
+Checkpoint after each live attempt and at least every 30 minutes of implementation.
+
+At every checkpoint report: which live behavior passed, which failed, the current
+installed/source identity, and the single next blocker. If two consecutive
+implementation checkpoints produce no advance in the next behavior gate, stop
+expanding code and revise the approach around that failing probe. Focused checks
+cover changed seams; required hosted checks govern integration, not live claims.
+
+## Deferred work and retained obligations
+
+The earlier sequence put recovery-gap disposition and hold release ahead of
+basic delivery. This successor reverses that priority. Existing damaged-source
+recovery remains held; no production recovery or automatic replay is enabled.
+Hold release, cross-generation processing-claim recovery, broader ancestry/fault
+matrices and longer operational qualification remain explicit Plan0101/P63
+obligations in verification0106. They do not block M1 on a new healthy bus.
+
+No optional MCP facade, remote federation, broadcast, autonomous spawning,
+new retention framework or additional backup design in this plan. Add hardening
+only for a reproduced failure or a concrete acceptance requirement, with its
+milestone effect stated. Preserve all previous failed receipts and accepted work.
+
+## Definition of done
+
+Close Plan0119 only when M1-M4 have attributable live/installed receipts, relevant
+source changes are integrated, the normal agent workflow needs no controller
+relay, and the documented install/rollback commands have been exercised. Demo
+workers and temporary grants are cleaned up or explicitly retained; user sessions
+and unresolved history are preserved.
+
+Plan0101 remains the original campaign requirement record; issue181/P63 remain
+OPEN until its outstanding obligations are separately reconciled and satisfied.
+Do not close the full-system issue from this narrower feature delivery. This
+successor owns execution sequencing, with no reduction of the original goal.
+
+Memory discovery: skip; current canonical files and this turn's fresh live receipt
+supply the decisions needed for this plan. Closeout disposition is recorded
+separately; the plan is the restart-safe execution source.

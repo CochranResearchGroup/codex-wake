@@ -123,3 +123,13 @@ Recovered canonical history is readable under fresh operator authority but
 paused/held: newer missing state stays unknown. This advances recovery without
 claiming gap disposition, hold release, actual service/live/suspension/soak or
 final release. Full Plan0101 remains NOT COMPLETE.
+
+## Live baseline and feature successor | 2026-10-04
+
+Verification0111 accepts an actual wakeA/wakeB manual-inbox round trip with
+recipient acknowledgement and sender reply readback. Earlier rows stating that
+no actual two-agent round trip exists are historical; the automatic delivery and
+suspension gates remain unmet. Plan0119 supersedes execution sequencing and
+prioritizes an unassisted version of this demonstrated flow. Plan0101's remaining
+obligations and NOT COMPLETE verdict are preserved; gap release is deferred
+behind feature delivery on a healthy bus, not reclassified as accepted.

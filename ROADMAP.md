@@ -1059,17 +1059,21 @@ Deliverables:
 
 State: OPEN
 
-Current State: Full system plan defines exact-thread addressing, enrolled
-cross-repository mailboxes, durable receipts, bounded notifications, reply/wait,
-crash reconciliation, operational limits, retention, and rollout. Implementation
-starts with P62 discovery; no mailbox, notification, or live-send acceptance is
-claimed by the planning slice.
+Current State: Real wakeA/wakeB request/read/ack/reply/sender-read passed through
+an isolated installed CLI; notifications were suppressed. Automatic exact-thread
+notification, sender receipt resumption, normal-session safety, restart and release
+remain unaccepted. Existing mailbox and recovery foundations are integrated.
 
-Plan: [Agent-to-Agent System](docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md)
+Execution Plan: [Build usable live A2A](docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md)
+Original requirements: [Agent-to-Agent System](docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md)
+Live baseline: [wakeA/wakeB round trip](docs/dev/verification/0111-2026-10-04-wakeA-wakeB-live-round-trip.md)
 
-Deliverables:
+Deliverables, in order:
 
-- Discovery and identity/enrollment before mailbox and delivery.
-- Durable CLI primitives with attributable recipient acknowledgements/replies.
-- Scheduler outbox and transport reconciliation with explicit uncertain effects.
-- Installed two-agent, restart, multi-root, resource, and release qualification.
+- Unassisted live request, recipient notification/reply and sender resumption.
+- Busy/draft/offline/exact-thread/cancel guards demonstrated in real sessions.
+- Same-thread worker restart and durable reply suspension.
+- Normal installed CLI/service, enrolled cross-root flow and release/rollback.
+
+Recovery-gap release and remaining full-system obligations remain tracked; they
+are not the next prerequisite for messaging on a healthy demo bus.

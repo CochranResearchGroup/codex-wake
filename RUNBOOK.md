@@ -5075,3 +5075,19 @@ Note0006 checkpoints before1,000,000 (live850,776 before writing). Full campaign
 OPEN; next packet gap disposition/legacy-notification fence, no implicit replay
 or live/service authority. Source refs clean/remote-equal and retained; root
 untracked note0003 preserved. Memory unavailable/no authorized group.
+
+## Turn 237 | 2026-10-04
+
+User rejected infrastructure-only progress and designated real Byobu wakeA/wakeB
+sessions for a live demo. Actual agents exchanged exactly one request and one
+correlated reply through an isolated installed CLI; B read/accepted/completed and
+A read its reply in55.509seconds. Verification0111 records exact identities and
+receipts; notifications were suppressed and controller prompts started inbox work.
+Both sessions are idle; owned bus paused; durable evidence preserved locally.
+Progress: outcome_progress on live manual messaging, not automatic delivery.
+
+Wrote Plan0119 as execution-sequencing successor: unassisted round trip first,
+normal-session guards, durable restart/suspension, then usable installation.
+Plan0101/issue181/P63 remain OPEN; previous acceptance obligations retained.
+Plan0119 PLANNED; existing autonomous goal remains paused at867188/1000000.
+No implementation, transport activation or global install by this planning turn.
