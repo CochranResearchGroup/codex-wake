@@ -4928,3 +4928,13 @@ unavailability was a missing dependency. Verification 0103 records evidence
 and a concrete disposable live boundary without effects. Automatic delivery
 and full campaign OPEN. Current goal checkpoint before 500k, working 450k;
 prior meters preserved as history. Progress classification: blocker_reduction.
+
+## Turn 223 | 2026-10-03
+
+Plan 0112 accepts bounded synthetic multiroot/resource qualification: 100 requests,
+20 replies, ten process reopens; explicit deny/allow, FIFO, retry identity and
+reply correlation held. Source Python 3.11/3.12 and isolated installed runs passed;
+FD five to five, children zero, dispatch attempts zero, store below 10 MiB and
+time below 30 seconds. First harness assertion used wrong copied-root error code;
+corrected without runtime change. Installed CI gate added; verification 0104.
+Outcome_progress on these axes; full campaign and pending live scope unchanged.
