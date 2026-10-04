@@ -4979,3 +4979,12 @@ terminal-compaction fixture fails in 0.070s at missing production maintenance AP
 Verification 0107 preserves the exact red loop and fixture-only projection boundary.
 No compaction acceptance or live effects claimed. Next: coordinated schema/read-path
 implementation and lifecycle qualification; campaign OPEN.
+
+## Turn 228 | 2026-10-03
+
+Plan 0115 implements ninety-day tombstone retirement with bounded hashed refusal
+markers, old safe orphan-attempt cleanup and explicit paused physical recovery.
+Verification 0107 preserves red probes, corrected fixture pause assumption and
+103 focused source / 15 Python 3.11 / 15 isolated installed API passes. Real legacy
+populated migration, fresh CLI proof and final acceptance remain pending. No live
+effects; campaign OPEN. This is implementation progress, not lifecycle acceptance.

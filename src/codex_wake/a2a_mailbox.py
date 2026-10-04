@@ -21,6 +21,10 @@ def encoded(value) -> str:
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 
 
+def retired_key_digest(sender_key: str, key: str) -> str:
+    return hashlib.sha256(encoded([sender_key, key]).encode()).hexdigest()
+
+
 def thread_key(identity: RuntimeIdentity) -> str:
     return encoded([identity.namespace, identity.thread_id])
 
@@ -126,6 +130,9 @@ class Mailbox:
             BEGIN SELECT RAISE(ABORT,'immutable tombstone'); END""")
         for name, column in (('recipient', 'recipient_key'), ('sender', 'sender_key'), ('replies', 'in_reply_to')):
             database.execute('CREATE INDEX mail_tombstone_' + name + ' ON mail_tombstones(' + column + ',global_seq)')
+        database.execute('CREATE INDEX mail_attempt_lifecycle ON mail_attempts(state,created)')
+        database.execute('CREATE TABLE mail_retired_keys (key_digest TEXT PRIMARY KEY, retired_at REAL NOT NULL)')
+        database.execute("CREATE TRIGGER mail_retired_key_immutable BEFORE UPDATE ON mail_retired_keys BEGIN SELECT RAISE(ABORT,'immutable retired key'); END")
         database.execute('CREATE VIEW mail_metadata AS SELECT * FROM mail_envelopes UNION ALL SELECT * FROM mail_tombstones')
         if database.execute('PRAGMA foreign_key_check').fetchone():
             raise BusError('store_unavailable', 'mailbox migration failed its foreign-key proof')
@@ -277,6 +284,9 @@ class Mailbox:
             projection = self._projection(database, row)
             receipt = next(item['receipt_id'] for item in projection['receipts'] if item['kind'] == 'admitted')
             return dict(message=projection, deduplicated=True, receipt_id=receipt)
+        if database.execute('SELECT 1 FROM mail_retired_keys WHERE key_digest=?',
+                (retired_key_digest(actor.key, key),)).fetchone():
+            raise BusError('idempotency_horizon', 'retired intent requires an explicitly new idempotency key')
         if original is not None and json.loads(original['envelope']).get('compacted'):
             raise BusError('message_compacted', 'new replies require a retained full envelope')
         target = self.bus.authorize_pair(database, actor, recipient)
@@ -284,7 +294,7 @@ class Mailbox:
         hop = parent['hop_count'] + 1 if parent else 0
         if hop > 8:
             raise BusError('lineage_limit', 'conversation hop bound exceeded')
-        if database.execute('SELECT count(*) FROM mail_metadata').fetchone()[0] >= self.max_messages:
+        if database.execute('SELECT (SELECT count(*) FROM mail_metadata)+(SELECT count(*) FROM mail_retired_keys)').fetchone()[0] >= self.max_messages:
             raise BusError('capacity', 'retained message capacity reached')
         if database.execute("SELECT count(*) FROM mail_envelopes e JOIN mail_state s USING(message_id) WHERE e.recipient_key=? AND e.expires>? AND s.admission='accepted' AND s.recipient NOT IN ('declined','completed','failed')", (recipient_key, now)).fetchone()[0] >= self.max_open:
             raise BusError('capacity', 'recipient open-message capacity reached')

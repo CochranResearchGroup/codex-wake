@@ -15,13 +15,15 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'ack-projections']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
         command.add_argument('--json', action='store_true', dest='as_json')
         if verb != 'configure':
             command.add_argument('--operator-capability', type=Path, required=True)
+        if verb == 'reclaim-space':
+            command.add_argument('--apply', action='store_true', required=True)
         if verb == 'tick':
             command.add_argument('--projection-root', type=Path, required=True)
         if verb == 'configure':
@@ -150,6 +152,10 @@ def a2a_command(args):
             operation = operations.compaction if args.a2a_command == 'compact' else operations.retention
             result({args.a2a_command: operation(cursor=args.cursor, limit=args.limit,
                 apply_fingerprint=args.apply_fingerprint)})
+        elif args.a2a_command == 'reclaim-space':
+            from .a2a_mailbox import Mailbox
+            from .a2a_operations import MailOperations
+            result(dict(maintenance=MailOperations(Mailbox(store), args.operator_capability).reclaim_space()))
         elif args.a2a_command == 'ack-projections':
             from .a2a_mailbox import Mailbox
             from .a2a_operations import MailOperations
@@ -175,7 +181,7 @@ def a2a_command(args):
         return exc.code
     except BusError as exc:
         result(dict(error=dict(code=exc.code, message=str(exc)), partial_receipt_ids=partial_receipts,
-                    reconciliation_required=bool(partial_receipts) or exc.code == 'effect_uncertain',
+                    reconciliation_required=bool(partial_receipts) or exc.code in ('effect_uncertain', 'maintenance_incomplete'),
                     reconciliation_pointer={key: value for key, value in getattr(exc, 'details', {}).items()
                         if key in ('message_id', 'receipt_id')}), success=False)
         return 7 if exc.code in ('authorization_denied', 'cross_root_denied') else 8

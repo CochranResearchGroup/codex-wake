@@ -52,3 +52,33 @@ Final changed-surface source check at this checkpoint: 99 A2A tests, Python 3.12
 12.061 seconds, PASS. Python 3.11 eleven operations tests, 1.189 seconds, PASS.
 No retry or exclusion; these are focused source checks, not the comprehensive or
 installed acceptance lane.
+
+## Ninety-day retirement and physical recovery, still incomplete
+
+Red retirement probe: one test, 0.078s, expected aged tombstone eligibility but
+observed no candidates. Implemented bounded retirement removes body/outbox/receipt/
+state/tombstone/identity rows after the ninety-day creation horizon and keeps only
+a SHA-256 sender/key refusal marker. Exact identity is no longer retained beyond
+the horizon; old keys still visibly refuse as idempotency_horizon. Markers count
+against the existing message capacity, so refusal metadata cannot grow without
+bounds. Immutable attributable bus events remain. Bounded old submitted/unsent
+orphan-attempt cleanup excludes dispatching/uncertain attempts and retained IDs.
+
+Red physical-reclaim probe: missing reclaim_space API, one error, 0.081s. After
+implementation the initial unpaused-refusal assertion failed because configure
+starts paused. Corrected the fixture to explicitly resume first; no runtime pause
+bug was found. The production operation requires pause, commits a request receipt,
+checkpoints WAL, VACUUMs with a ten-second progress deadline and records before/after
+file bytes. Reader contention or interruption gives maintenance_incomplete and
+a preserved request receipt; the CLI marks reconciliation required. Logical rows
+are not deleted by space recovery. A large disposable body fixture proves physical
+file reduction and retained logical identity; reader contention preserves data.
+
+Changed-surface source Python 3.12: 103 A2A tests, 12.740s, PASS. Python 3.11:
+15 operations tests, 2.644s, PASS. Isolated installed wheel API tests outside
+repository with PYTHONPATH unset: 15 operations tests, 2.072s, PASS. Installed
+reclaim-space help requires explicit --apply and independent operator capability.
+Wheel SHA256: 3d7d871d132b2dde3fb2fb3457bdf878bca7c2367070e93420282d5614e7775d.
+No retry, exclusion or live effects. These installed API tests are not yet a
+fresh-process populated old/new CLI migration proof. Full suite, hosted gates,
+production projection acknowledgement and installed compatibility remain pending.

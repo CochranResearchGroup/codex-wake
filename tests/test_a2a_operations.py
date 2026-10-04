@@ -203,3 +203,90 @@ class OperationsTests(unittest.TestCase):
             with self.assertRaises(BusError) as error:
                 Mailbox(legacy)
         self.assertEqual(error.exception.code, 'unsupported_mailbox_schema')
+
+    def test_tombstone_retirement_preserves_horizon_refusal_and_audit(self):
+        self.terminal_with_fixture_published_signals()
+        self.now += 31 * 86400
+        preview = self.ops.compaction()
+        self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.now = 1000. + 90 * 86400
+        self.assertEqual(self.ops.compaction()['eligible'], [])
+        retry = self.mailbox.send(self.actors[0], self.identities[1],
+            body='private operation fixture', idempotency_key='request', delivery='inbox')
+        self.assertEqual(retry['message']['message_id'], self.identifier)
+        self.now += 1
+        preview = self.ops.compaction()
+        self.assertEqual(preview['eligible'], [self.identifier])
+        self.assertEqual(preview['candidates'][0]['action'], 'retire')
+        result = self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.assertEqual(result['retired'], 1)
+        with self.assertRaises(BusError) as error:
+            self.mailbox.send(self.actors[0], self.identities[1],
+                body='private operation fixture', idempotency_key='request', delivery='inbox')
+        self.assertEqual(error.exception.code, 'idempotency_horizon')
+        with self.bus.connection() as database:
+            for table in ('mail_tombstones','mail_state','mail_receipts','mail_outbox','mail_identities'):
+                self.assertEqual(database.execute('SELECT count(*) FROM ' + table + ' WHERE message_id=?', (self.identifier,)).fetchone()[0], 0)
+            self.assertEqual(database.execute('SELECT count(*) FROM mail_retired_keys').fetchone()[0], 1)
+            self.assertIsNotNone(database.execute('SELECT 1 FROM events WHERE receipt_id=?', (result['receipt_id'],)).fetchone())
+            self.assertEqual(database.execute('PRAGMA foreign_key_check').fetchall(), [])
+        self.assertEqual(self.ops.compaction()['eligible'], [])
+
+    def test_physical_reclaim_requires_pause_and_preserves_logical_identity(self):
+        large = self.mailbox.send(self.actors[0], self.identities[1],
+            body='x' * 32768, idempotency_key='large', delivery='inbox')['message']['message_id']
+        self.mailbox.ack(self.actors[1], large, outcome='declined')
+        self.now += 31 * 86400
+        with self.bus.connection() as database:
+            database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+        preview = self.ops.compaction()
+        self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.bus.set_paused(False, self.operator)
+        with self.assertRaises(BusError) as error:
+            self.ops.reclaim_space()
+        self.assertEqual(error.exception.code, 'maintenance_requires_pause')
+        self.bus.set_paused(True, self.operator)
+        result = self.ops.reclaim_space()
+        self.assertLess(result['after_bytes'], result['before_bytes'])
+        self.assertTrue(self.mailbox.show(self.actors[0], large)['compacted'])
+        with self.bus.connection() as database:
+            self.assertEqual(database.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+            self.assertEqual(database.execute('PRAGMA foreign_key_check').fetchall(), [])
+
+    def test_busy_physical_maintenance_preserves_reconciliation_receipt(self):
+        self.bus.set_paused(True, self.operator)
+        with self.bus.connection(read_only=True) as reader:
+            reader.execute('BEGIN')
+            reader.execute('SELECT count(*) FROM events').fetchone()
+            with self.assertRaises(BusError) as error:
+                self.ops.reclaim_space()
+            self.assertEqual(error.exception.code, 'maintenance_incomplete')
+            requested = error.exception.details['receipt_id']
+        with self.bus.connection() as database:
+            row = database.execute('SELECT action FROM events WHERE receipt_id=?', (requested,)).fetchone()
+            self.assertEqual(row['action'], 'space_reclaim_requested')
+        self.assertTrue(self.mailbox.show(self.actors[0], self.identifier)['body_retained'])
+
+    def test_retirement_interruption_rolls_back_key_and_message_deletion(self):
+        self.terminal_with_fixture_published_signals()
+        self.now += 31 * 86400
+        preview = self.ops.compaction()
+        self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.now += 60 * 86400
+        preview = self.ops.compaction()
+        def fault(stage):
+            if stage == 'before_commit':
+                raise RuntimeError('fixture interrupted retirement')
+        self.mailbox.fault = fault
+        with self.assertRaises(RuntimeError):
+            self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.mailbox.fault = None
+        with self.bus.connection() as database:
+            self.assertEqual(database.execute('SELECT count(*) FROM mail_retired_keys').fetchone()[0], 0)
+            self.assertEqual(database.execute('SELECT count(*) FROM mail_tombstones').fetchone()[0], 1)
+        self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.mailbox.max_messages = 1
+        with self.assertRaises(BusError) as error:
+            self.mailbox.send(self.actors[0], self.identities[1], body='new explicit intent',
+                idempotency_key='new-key', delivery='inbox')
+        self.assertEqual(error.exception.code, 'capacity')

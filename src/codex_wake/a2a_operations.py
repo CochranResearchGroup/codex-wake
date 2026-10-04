@@ -4,10 +4,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sqlite3
+import time
 from pathlib import Path
 
 from .a2a_identity import BusError
-from .a2a_mailbox import Mailbox, TERMINAL, encoded
+from .a2a_mailbox import Mailbox, TERMINAL, encoded, retired_key_digest
 
 
 class MailOperations:
@@ -81,21 +83,30 @@ class MailOperations:
                         pruned=len(preview['eligible']) if apply_fingerprint is not None else 0)
 
     def _compaction_preview(self, database, now, cursor, limit):
-        rows = database.execute("""SELECT e.message_id,e.global_seq FROM mail_envelopes e
+        rows = database.execute("""SELECT e.message_id,e.global_seq FROM mail_metadata e
             JOIN mail_state s USING(message_id) WHERE e.global_seq>? AND s.terminal_at IS NOT NULL
-            AND s.terminal_at<=? ORDER BY e.global_seq LIMIT ?""", (cursor, now - 30 * 86400, limit + 1)).fetchall()
+            AND s.terminal_at<=? AND (json_extract(e.envelope,'$.compacted') IS NULL OR e.created<?)
+            ORDER BY e.global_seq LIMIT ?""", (cursor, now - 30 * 86400, now - 90 * 86400, limit + 1)).fetchall()
         candidates = []
         for item in rows[:limit]:
             row = self.mailbox._row(database, item['message_id'])
             pins = self._pins(database, row, now)
             if database.execute('SELECT 1 FROM mail_metadata WHERE in_reply_to=? LIMIT 1', (row['message_id'],)).fetchone():
                 pins.append('retained_reply')
+            count = database.execute('SELECT count(*) FROM mail_receipts WHERE message_id=?', (row['message_id'],)).fetchone()[0]
             candidates.append(dict(message_id=row['message_id'], pins=sorted(set(pins)),
-                fingerprint=row['fingerprint'], terminal_at=row['terminal_at']))
+                action='retire' if json.loads(row['envelope']).get('compacted') else 'compact',
+                row_digest=hashlib.sha256(encoded(dict(row)).encode()).hexdigest(), receipts_count=count))
+        orphan_attempts = [row['attempt_id'] for row in database.execute("""SELECT a.attempt_id FROM mail_attempts a
+            WHERE a.state IN ('submitted','unsent') AND a.created<? AND NOT EXISTS (
+                SELECT 1 FROM json_each(a.message_ids) m JOIN mail_identities i ON i.message_id=m.value)
+            ORDER BY a.created,a.attempt_id LIMIT ?""", (now - 90 * 86400, limit))]
         value = dict(schema_version=1, bus_id=self.mailbox.bus.bus_id, cursor=cursor, limit=limit,
             candidates=candidates, eligible=[item['message_id'] for item in candidates if not item['pins']],
+            orphan_attempts=orphan_attempts,
             next_cursor=rows[limit - 1]['global_seq'] if len(rows) > limit else None,
-            body_retention_days=30, dedup_horizon_days=90)
+            body_retention_days=30, dedup_horizon_days=90,
+            retired_key_markers='hashed_refusal_only; count_against_message_capacity')
         value['fingerprint'] = hashlib.sha256(encoded(value).encode()).hexdigest()
         return value
 
@@ -109,10 +120,18 @@ class MailOperations:
             applied = apply_fingerprint is not None
             if applied and apply_fingerprint != preview['fingerprint']:
                 raise BusError('retention_preview_stale', 'compaction eligibility changed; generate a fresh preview')
+            compacted, retired = [], []
             if applied:
                 for identifier in preview['eligible']:
                     row = self.mailbox._row(database, identifier)
                     envelope = json.loads(row['envelope'])
+                    if envelope.get('compacted'):
+                        database.execute('INSERT INTO mail_retired_keys VALUES (?,?)',
+                            (retired_key_digest(row['sender_key'], row['idempotency_key']), now))
+                        for table in ('mail_bodies', 'mail_outbox', 'mail_receipts', 'mail_state', 'mail_tombstones', 'mail_identities'):
+                            database.execute('DELETE FROM ' + table + ' WHERE message_id=?', (identifier,))
+                        retired.append(identifier)
+                        continue
                     # Drop discovery snapshots and optional subject text, while
                     # retaining immutable identity, lineage and correlation.
                     envelope.pop('selector_observation', None)
@@ -124,10 +143,54 @@ class MailOperations:
                          encoded(envelope), row['in_reply_to']))
                     database.execute('DELETE FROM mail_bodies WHERE message_id=?', (identifier,))
                     database.execute('DELETE FROM mail_envelopes WHERE message_id=?', (identifier,))
+                    compacted.append(identifier)
+                for attempt in preview['orphan_attempts']:
+                    database.execute('DELETE FROM mail_attempts WHERE attempt_id=?', (attempt,))
             receipt = self.mailbox.bus.event(database, 'operator', 'apply_compaction' if applied else 'preview_compaction',
-                dict(fingerprint=preview['fingerprint'], compacted=preview['eligible'] if applied else []))
+                dict(fingerprint=preview['fingerprint'], compacted=compacted, retired=retired,
+                    removed_attempts=preview['orphan_attempts'] if applied else []))
             self.mailbox._finish(database, receipt_id=receipt)
-            return dict(preview, applied=applied, compacted=len(preview['eligible']) if applied else 0, receipt_id=receipt)
+            return dict(preview, applied=applied, compacted=len(compacted), retired=len(retired), removed_attempts=len(preview['orphan_attempts']) if applied else 0, receipt_id=receipt)
+
+    def reclaim_space(self):
+        """Explicit paused-bus physical maintenance; never changes mail semantics."""
+        started = time.monotonic()
+        with self.mailbox.bus.connection() as database:
+            self.mailbox._schema(database)
+            database.execute('BEGIN IMMEDIATE')
+            self.mailbox.bus.operator(database, self.operator_capability)
+            if self.mailbox.bus.meta(database, 'paused') is not True:
+                raise BusError('maintenance_requires_pause', 'pause the bus before explicit physical maintenance')
+            requested = self.mailbox.bus.event(database, 'operator', 'space_reclaim_requested', {})
+            self.mailbox._finish(database, receipt_id=requested)
+            try:
+                checkpoint = database.execute('PRAGMA wal_checkpoint(TRUNCATE)').fetchone()
+                if checkpoint[0]:
+                    raise BusError('maintenance_busy', 'active readers prevent physical maintenance')
+                before = sum(p.stat().st_size for p in self.mailbox.bus.root.glob('mailbox.sqlite*') if p.is_file())
+                # SQLite aborts VACUUM transactionally if this bounded operation
+                # exceeds ten seconds. No logical row deletion is retried.
+                database.set_progress_handler(lambda: int(time.monotonic() - started > 10), 1000)
+                try:
+                    database.execute('VACUUM')
+                finally:
+                    database.set_progress_handler(None, 0)
+                checkpoint = database.execute('PRAGMA wal_checkpoint(TRUNCATE)').fetchone()
+                if checkpoint[0]:
+                    raise BusError('maintenance_busy', 'physical maintenance checkpoint is still busy')
+                after = sum(p.stat().st_size for p in self.mailbox.bus.root.glob('mailbox.sqlite*') if p.is_file())
+            except (BusError, sqlite3.Error, OSError) as cause:
+                error = BusError('maintenance_incomplete', 'physical maintenance requires operator reconciliation')
+                error.details = dict(receipt_id=requested)
+                raise error from cause
+            database.execute('BEGIN IMMEDIATE')
+            self.mailbox.bus.operator(database, self.operator_capability)
+            receipt = self.mailbox.bus.event(database, 'operator', 'space_reclaimed',
+                dict(request_receipt_id=requested, before_bytes=before, after_bytes=after))
+            self.mailbox._finish(database, receipt_id=receipt)
+            return dict(request_receipt_id=requested, receipt_id=receipt, before_bytes=before,
+                after_bytes=after, reclaimed_bytes=max(0, before - after), logical_data_unchanged=True,
+                elapsed_seconds=round(time.monotonic() - started, 6))
 
     def acknowledge_projections(self, wake_root, receipt_authority, source_instance, *, limit=100):
         from .a2a_receipt_authority import ConfiguredReceiptAuthority
