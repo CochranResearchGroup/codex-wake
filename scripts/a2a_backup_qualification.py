@@ -1,4 +1,4 @@
-"""Installed CLI snapshot qualification in one disposable synthetic bus; no activation."""
+"""Installed snapshot and optional state-equivalent restore in one disposable synthetic bus."""
 from __future__ import annotations
 
 import argparse
@@ -27,7 +27,7 @@ def census():
         children=Path('/proc/self/task/%s/children' % os.getpid()).read_text().split())
 
 
-def qualify(cli):
+def qualify(cli, *, restore=False):
     os.urandom(1)
     started = time.monotonic(); before = census()
     with tempfile.TemporaryDirectory(prefix='codex-wake-p63-backup-') as temporary:
@@ -52,8 +52,11 @@ def qualify(cli):
         def invoke(verb, snapshot, success=True):
             remaining = 20 - (time.monotonic() - started)
             require(remaining > 0, 'qualification deadline exceeded')
-            completed = subprocess.run([cli, 'a2a', verb, '--bus-root', str(bus.root),
-                '--operator-capability', str(operator), '--snapshot', str(snapshot), '--json'],
+            command = [cli, 'a2a', verb, '--bus-root', str(bus.root),
+                '--operator-capability', str(operator), '--snapshot', str(snapshot), '--json']
+            if verb == 'restore-backup':
+                command.append('--apply')
+            completed = subprocess.run(command,
                 capture_output=True, text=True, timeout=min(10, remaining))
             require((completed.returncode == 0) == success, 'unexpected installed ' + verb + ' status')
             require(body not in completed.stdout, 'operator output leaked body')
@@ -65,6 +68,9 @@ def qualify(cli):
             created = invoke('backup', root / 'snapshot')['backup']
             checked = invoke('verify-backup', root / 'snapshot')['backup']
             require(created['verified'] and checked['verified'] and not checked['activation_qualified'], 'wrong bounded verdict')
+            if restore:
+                blocked = invoke('restore-backup', root / 'snapshot', success=False)
+                require(blocked['error']['code'] == 'bus_busy', 'participating reader did not fence restore')
             require(created['database_sha256'] == checked['database_sha256'], 'fresh verification lost snapshot commitment')
             with sqlite3.connect(root / 'snapshot/mailbox.sqlite') as copied:
                 for table, expected in before_rows.items():
@@ -73,6 +79,19 @@ def qualify(cli):
                 require(copied.execute('PRAGMA integrity_check').fetchall() == [('ok',)], 'backup integrity')
             for table, expected in before_rows.items():
                 require([tuple(row) for row in live.execute('SELECT * FROM ' + table)] == expected, 'source mutated: ' + table)
+        if restore:
+            inode = bus.path.stat().st_ino
+            restored = invoke('restore-backup', root / 'snapshot')['backup']
+            require(restored['restored'] and restored['paused'] and restored['state_equivalent'], 'same-root restore failed')
+            require(bus.path.stat().st_ino == inode, 'canonical inode was replaced')
+            with bus.connection() as live:
+                for table, expected in before_rows.items():
+                    require([tuple(row) for row in live.execute('SELECT * FROM ' + table)] == expected, 'restored state differs: ' + table)
+                require(live.execute('SELECT action FROM events WHERE receipt_id=?', (restored['receipt_id'],)).fetchone()[0] == 'restore_completed', 'completion audit missing')
+            # Actual newer authority must prevent restoring the older snapshot.
+            bus.revoke_actor(actors[0].actor_id, operator)
+            refused = invoke('restore-backup', root / 'snapshot', success=False)
+            require(refused['error']['code'] == 'restore_refused', 'new authority was rewound')
         snapshot = root / 'snapshot'
         require(not (snapshot / 'operator.json').exists() and not (snapshot / 'capabilities').exists(), 'credential files exported')
         for path in snapshot.iterdir():
@@ -98,6 +117,7 @@ def qualify(cli):
     require(elapsed <= 20 and after['fd_count'] <= before['fd_count'] + 2 and before['children'] == after['children'] == [], 'resource budget failed')
     return dict(accepted=True, synthetic=True, activation_qualified=False, transport_io=0,
         messages=2, unknown_attempts=1, copied_root_denied=True, fresh_process_verified=True,
+        state_equivalent_restore_qualified=restore, corrupt_source_recovery_qualified=False,
         database_bytes=checked['database_bytes'], elapsed_seconds=round(elapsed, 3), before=before, after=after,
         thresholds=dict(elapsed_seconds=20, cli_timeout_seconds=10, fd_growth=2, residual_children=0), fixture_removed=True)
 
@@ -105,4 +125,6 @@ def qualify(cli):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cli', required=True)
-    print(json.dumps(qualify(parser.parse_args().cli), sort_keys=True))
+    parser.add_argument('--restore', action='store_true')
+    args = parser.parse_args()
+    print(json.dumps(qualify(args.cli, restore=args.restore), sort_keys=True))

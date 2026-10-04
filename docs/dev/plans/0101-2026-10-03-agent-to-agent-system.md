@@ -4,7 +4,7 @@ State: OPEN
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
-Branch: feat/p63-backup-recovery
+Branch: feat/p63-quiesced-restore
 Target: origin/main
 Integration: squash_pr
 
@@ -562,3 +562,13 @@ versioned paused snapshots and read-only independent-authority verification.
 Full activation needs lifecycle/write fencing and explicit preservation of
 post-snapshot authority/outcomes. Remaining live/service/soak/release gates
 remainOPEN. Continued ceiling1,000,000 and all inherited limits persist.
+
+## State-equivalent restore packet
+
+Plan0117 adds cooperative BusStore connection fencing and explicitly applied
+same-root SQLite restore only when all non-audit state still matches snapshot.
+Later audit history is retained; newer authority/outcomes refuse restore.
+Verification0109 preserves fixture and mocked-clock failures and their bounded
+corrections. Actual upgraded-client fixture qualification is pending; no old
+binary fleet, corrupt-source recovery, live/service/soak/release acceptance.
+Full campaignOPEN with ceiling1,000,000 and inherited allowances unchanged.

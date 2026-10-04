@@ -7,6 +7,9 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from datetime import datetime, timezone
+import fcntl
+import time
+from time import monotonic as lifecycle_monotonic
 import hashlib
 import json
 import os
@@ -156,7 +159,47 @@ class BusStore:
         return json.loads(row[0])
 
     @contextmanager
+    def lifecycle(self, *, exclusive=False):
+        """Cooperative connection fencing; old/raw SQLite clients are not covered."""
+        private_path(self.root, directory=True)
+        path = self.root / '.lifecycle.lock'
+        if path.exists() or path.is_symlink():
+            private_path(path)
+        try:
+            descriptor = os.open(path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        except OSError:
+            raise BusError('store_unavailable', 'lifecycle lock unavailable') from None
+        try:
+            info = os.fstat(descriptor)
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or stat.S_IMODE(info.st_mode) != 0o600:
+                raise BusError('ownership_mismatch', 'lifecycle lock must be owner-only')
+            deadline = lifecycle_monotonic() + 1
+            while True:
+                try:
+                    fcntl.flock(descriptor, (fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH) | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    if lifecycle_monotonic() >= deadline:
+                        raise BusError('bus_busy', 'participating bus connections prevent lifecycle maintenance') from None
+                    time.sleep(0.01)
+            yield
+        finally:
+            os.close(descriptor)
+
+    @contextmanager
     def connection(self, *, read_only: bool = False):
+        with self.lifecycle():
+            with self._connection(read_only=read_only) as database:
+                yield database
+
+    @contextmanager
+    def maintenance_connection(self):
+        with self.lifecycle(exclusive=True):
+            with self._connection() as database:
+                yield database
+
+    @contextmanager
+    def _connection(self, *, read_only: bool = False):
         private_path(self.root, directory=True)
         private_path(self.path)
         for suffix in ('-wal', '-shm'):

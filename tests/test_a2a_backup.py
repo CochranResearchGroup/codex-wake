@@ -179,3 +179,118 @@ class BackupTests(unittest.TestCase):
         self.assertEqual(exc.exception.code, 'authorization_denied')
         with sqlite3.connect(self.root / 'snapshot/mailbox.sqlite') as copied:
             self.assertEqual(copied.execute('SELECT revoked FROM actors WHERE actor_id=?', (actor.actor_id,)).fetchone()[0], 0)
+
+    def test_quiesced_restore_preserves_same_identity_and_later_audit(self):
+        backup = MailBackup(self.bus, self.operator)
+        directory = self.root / 'snapshot'; backup.create(directory)
+        with self.bus.connection() as live:
+            later = self.bus.event(live, 'operator', 'fixture_later_audit', {})
+        restored = backup.restore(directory)
+        self.assertTrue(restored['restored'])
+        self.assertTrue(self.bus.status()['paused'])
+        self.assertEqual(self.bus.bus_id, restored['bus_id'])
+        with self.bus.connection() as live:
+            self.assertIsNotNone(live.execute('SELECT receipt_id FROM events WHERE receipt_id=?', (later,)).fetchone())
+            self.assertEqual(live.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+
+    def test_restore_refuses_new_actor_authority_without_reviving_snapshot(self):
+        repo = self.root / 'repo'; repo.mkdir()
+        self.bus.enroll(repo, self.operator)
+        identity = RuntimeIdentity('backup-fixture', 'sender', str(repo))
+        capability, _ = self.bus.issue_actor(identity, repo, self.operator)
+        actor = self.bus.authenticate(capability, identity, invoking_cwd=repo)
+        backup = MailBackup(self.bus, self.operator)
+        backup.create(self.root / 'snapshot')
+        self.bus.revoke_actor(actor.actor_id, self.operator)
+        with self.assertRaises(BusError) as exc:
+            backup.restore(self.root / 'snapshot')
+        self.assertEqual(exc.exception.code, 'restore_refused')
+        with self.assertRaises(BusError):
+            self.bus.authenticate(capability, identity, invoking_cwd=repo)
+        with self.bus.connection() as live:
+            self.assertEqual(live.execute("SELECT count(*) FROM events WHERE action='restore_requested'").fetchone()[0], 0)
+
+    def test_restore_refuses_concurrent_participating_connection(self):
+        backup = MailBackup(self.bus, self.operator)
+        backup.create(self.root / 'snapshot')
+        with self.bus.connection(read_only=True):
+            with self.assertRaises(BusError) as exc:
+                backup.restore(self.root / 'snapshot')
+        self.assertEqual(exc.exception.code, 'bus_busy')
+        self.assertTrue(backup.restore(self.root / 'snapshot')['restored'])
+
+    def test_new_connections_refuse_during_exclusive_lifecycle_window(self):
+        with self.bus.maintenance_connection():
+            with self.assertRaises(BusError) as exc:
+                with self.bus.connection():
+                    self.fail('writer entered exclusive window')
+        self.assertEqual(exc.exception.code, 'bus_busy')
+        self.assertTrue(self.bus.status()['paused'])
+
+    def test_restore_completion_failure_preserves_request_stage_and_pause(self):
+        backup = MailBackup(self.bus, self.operator); directory = self.root / 'snapshot'
+        backup.create(directory)
+        original = self.bus.event
+        def fail(database, actor, action, subject):
+            if action == 'restore_completed':
+                raise sqlite3.OperationalError('fixture completion audit full')
+            return original(database, actor, action, subject)
+        with patch.object(self.bus, 'event', side_effect=fail):
+            with self.assertRaises(BusError) as exc:
+                backup.restore(directory)
+        self.assertEqual(exc.exception.code, 'restore_incomplete')
+        self.assertTrue(list(self.bus.root.glob('restore_*.sqlite')))
+        self.assertTrue(self.bus.status()['paused'])
+        self.assertTrue(backup.verify(directory)['verified'])
+        with self.bus.connection() as live:
+            self.assertEqual(live.execute('SELECT action FROM events WHERE receipt_id=?', (exc.exception.details['receipt_id'],)).fetchone()[0], 'restore_requested')
+            self.assertEqual(live.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+
+    def test_restore_copy_interruption_preserves_canonical_and_snapshot(self):
+        backup = MailBackup(self.bus, self.operator); directory = self.root / 'snapshot'
+        backup.create(directory)
+        original = sqlite3.connect
+        calls = []
+        class Stage(sqlite3.Connection):
+            def backup(self, destination, **kwargs):
+                def interrupted(status, remaining, total):
+                    self.asserted_pages = total - remaining
+                    if remaining > 0:
+                        raise sqlite3.OperationalError('fixture interrupted after first copied page')
+                return super().backup(destination, pages=1, progress=interrupted)
+        def connect(path, *args, **kwargs):
+            if Path(str(path)).name.startswith('restore_'):
+                calls.append(path)
+                kwargs['factory'] = Stage
+            return original(path, *args, **kwargs)
+        with self.bus.connection() as live:
+            before = [tuple(row) for row in live.execute('SELECT * FROM meta ORDER BY key')]
+        with patch('codex_wake.a2a_backup.sqlite3.connect', side_effect=connect):
+            with self.assertRaises(BusError) as exc:
+                backup.restore(directory)
+        self.assertEqual(exc.exception.code, 'restore_incomplete')
+        self.assertEqual(len(calls), 1)
+        with self.bus.connection() as live:
+            self.assertEqual(before, [tuple(row) for row in live.execute('SELECT * FROM meta ORDER BY key')])
+            self.assertEqual(live.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+        self.assertTrue(backup.verify(directory)['verified'])
+
+    def test_restore_refuses_new_recipient_receipt_and_preserves_outcome(self):
+        repo = self.root / 'repo'; repo.mkdir()
+        self.bus.enroll(repo, self.operator)
+        identities = [RuntimeIdentity('restore-fixture', name, str(repo)) for name in ('sender', 'recipient')]
+        actors = []
+        for identity in identities:
+            capability, _ = self.bus.issue_actor(identity, repo, self.operator)
+            actors.append(self.bus.authenticate(capability, identity, invoking_cwd=repo))
+        mailbox = Mailbox(self.bus)
+        identifier = mailbox.send(actors[0], identities[1], body='Restore receipt fixture.', idempotency_key='receipt', delivery='inbox')['message']['message_id']
+        backup = MailBackup(self.bus, self.operator)
+        backup.create(self.root / 'snapshot')
+        receipt = mailbox.ack(actors[1], identifier, outcome='declined')['receipt_id']
+        with self.assertRaises(BusError) as exc:
+            backup.restore(self.root / 'snapshot')
+        self.assertEqual(exc.exception.code, 'restore_refused')
+        with self.bus.connection() as live:
+            self.assertIsNotNone(live.execute('SELECT receipt_id FROM mail_receipts WHERE receipt_id=?', (receipt,)).fetchone())
+            self.assertEqual(live.execute('SELECT recipient FROM mail_state WHERE message_id=?', (identifier,)).fetchone()[0], 'declined')

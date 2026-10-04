@@ -869,3 +869,20 @@ A failed copy or completion audit returns `backup_incomplete` and the committed
 request receipt pointer. Keep the directory and receipt for reconciliation;
 partial artifacts are refused and repeated creation never overwrites an existing
 snapshot. A verified snapshot can exist even if completion audit failed.
+
+`a2a restore-backup --apply` uses the same bus/operator/snapshot arguments.
+It accepts only a paused, readable original bus whose complete non-audit
+canonical state still equals the verified snapshot. Actor revocation/rotation,
+new receipts/messages, clock/state changes or other canonical changes refuse
+restoration. Later audit events are preserved. A cooperative exclusive lifecycle
+lock fences upgraded BusStore connections (one-second wait); SQLite online backup
+commits into the existing canonical inode. The bus stays paused and notification
+intent is preserved. Copy/verification are bounded to ten seconds and each
+source/stage to one GiB. Private stage files are retained as operator evidence.
+
+Stop old binaries and raw SQLite writers independently before this maintenance;
+they do not participate in the connection lock. This command qualifies only
+state-equivalent same-root activation, not corrupt-source recovery or arbitrary
+rollback to older authority/outcomes. `restore_incomplete` preserves its request
+receipt and stage for explicit inspection before retry; it never resumes or
+replays notifications automatically.
