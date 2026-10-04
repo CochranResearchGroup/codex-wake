@@ -79,7 +79,7 @@ actual send/cancel outputs, observations, expiry proof and worker custody.
 Loaded inventory still included B in the sampled disconnected state; this live
 test proves disconnected-client admission and safe deferral, not server unload.
 Cancellation remains UNPROVEN because of the real host clock-continuity failure.
-The second changed-source live qualification is pending reconnect/delivery.
+The second changed-source live qualification is recorded below.
 
 ## Reconnect qualification outcome
 
@@ -89,9 +89,9 @@ A's actual reply arm wake_71e297b329f84cd1be06b712654bf46f was registered and
 A was idle before reconnect. Controller explicitly resumed the ORIGINAL B
 thread and refreshed binding to PID57334/start3653045/
 generationecce6178191746768b17ab28e4a098cd. Product worker reloaded the binding
-and submitted the original request exactly once, attempt8817c90b0e4f45cfb61c14bf50cc62a8.
-B read receipt324a1682d9a24931a1fa12acceedbad2, claimed
-receipt65cede0c0f9041c49d1fb756b699cdb0 and sent one correlated notify reply
+and submitted the original request exactly once, attempt_8817c90b0e4f45cfb61c14bf50cc62a8.
+B read receipt_324a1682d9a24931a1fa12acceedbad2, claimed
+receipt_65cede0c0f9041c49d1fb756b699cdb0 and sent one correlated notify reply
 msg_3246ab5d81ec422fbc4512ea75221677, completing its request claim.
 
 Return notification failed FIFO eligibility: old unread result
@@ -116,3 +116,28 @@ Both changed-source qualification slots are consumed. Do not run a third unchang
 trial. Next work must address host clock stability and prepare an explicitly
 reconciled mailbox before another bounded acceptance packet. Keep FIFO, clock,
 enrollment and exact-client checks intact. Plan0119 M2 remains PARTIAL; M3/M4 open.
+
+## Final readback and custody
+
+Manual A reads completed after the test: old-result read receipt
+receipt_fa43b26cc842439e99ddbcb790cc7bcf and reconnect-result read receipt
+receipt_217a51ac950a438ba126f06912f4806d. Both retained results now have recipient
+received; notification remains deferred. These reads neither prove automatic
+return notification nor erase its failed verdict. The expired cancellation
+fixture remains expired/suppressed/unread with no delivery attempt.
+
+Private offline-repair-final-state.json is a fresh OS/runtime readback:
+zero matching native demo workers, actual A PID5322/start2076335/pane%71 and
+B PID57334/start3653045/pane%72, both original thread IDs idle with ready empty
+composers. Stock0.160.0 package remains selected. Original root's unrelated
+untracked handoff note is preserved. Source repair is integrated; live evidence
+checkpoint branch is docs/p63-offline-live-checkpoint. Issue181 remains OPEN.
+
+Budget meter remains frozen at548526 with carried prior subtotal1544740;
+additional continuation work is unmetered. This bounded packet stops with a
+published checkpoint before further live work, preserving reserve below the
+user's1800000 ceiling without claiming an exact cumulative total.
+
+Memory disposition: unavailable, because no reviewed Codex Wake Graphiti target
+group is established. Canonical source and live receipts are retained; no memory
+write is attempted.

@@ -72,12 +72,15 @@ The retained patch and compiled package are inactive historical artifacts, not
 a product prerequisite. Existing owning-client commands depend on that inactive
 patch and do not constitute the selected stock-runtime transport. M1 now passes
 on attempt2/3. M2 has live busy/draft/rename/move and expiry evidence but remains
-PARTIAL: after three attempts, disconnected enrolled-recipient admission rejects
-the exact thread as session not found, preventing the cancellation test. M3-M4
-remain UNPROVEN. Verification0115 records actual failures and restored runtime.
-Next packet: narrow exact-thread offline admission repair with enrollment/root
-checks preserved, then explicitly bounded requalification. No unchanged fourth
-M2 trial, custom runtime activation, automatic resume or shared-daemon restart.
+PARTIAL. After the original three-attempt loop exposed offline admission failure,
+PR211 repaired exact-thread resolution. Installed live admission and delivery to
+the original recipient after explicit reconnect now pass. Cancellation was refused
+by clock continuity; return delivery hit retained unread FIFO backlog. M3-M4
+remain UNPROVEN. Verification0115 preserves original failures; verification0116
+records repair and changed-source qualification. Both repair qualification slots
+are consumed. Next packet must establish clock stability and reconcile the demo
+mailbox before further acceptance. No unchanged extra trial, custom runtime
+activation, automatic resume or shared-daemon restart.
 
 ## Scope and architecture
 
