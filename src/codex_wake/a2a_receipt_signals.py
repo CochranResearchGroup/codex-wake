@@ -121,7 +121,7 @@ class ReceiptSignalAdapter:
                 original = self.mailbox._row(database, self.message_id)
                 self.mailbox._participant(original, self.actor)
                 rows = database.execute('''SELECT r.*,e.in_reply_to,e.sender_key,e.recipient_key,o.payload
-                    FROM mail_receipts r JOIN mail_envelopes e USING(message_id)
+                    FROM mail_receipts r JOIN mail_metadata e USING(message_id)
                     JOIN mail_outbox o ON o.receipt_id=r.receipt_id AND o.kind='receipt_signal'
                     WHERE r.receipt_seq>? AND (e.message_id=? OR e.in_reply_to=?)
                     ORDER BY r.receipt_seq LIMIT ?''', (after, self.message_id, self.message_id, limit)).fetchall()

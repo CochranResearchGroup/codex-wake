@@ -13,7 +13,7 @@ import uuid
 from .a2a_bus import BusStore
 from .a2a_identity import Actor, BusError, RuntimeIdentity
 
-MAILBOX_SCHEMA = 1
+MAILBOX_SCHEMA = 2
 TERMINAL = frozenset({'declined', 'completed', 'failed'})
 
 
@@ -48,6 +48,13 @@ class Mailbox:
             bus.operator(database, operator_capability)
             previous = database.execute("SELECT value FROM meta WHERE key='mailbox_schema'").fetchone()
             if previous:
+                version = json.loads(previous[0])
+                if type(version) is int and version == 1:
+                    cls._migrate_identity(database)
+                    database.execute("UPDATE meta SET value=? WHERE key='mailbox_schema'", (encoded(MAILBOX_SCHEMA),))
+                    receipt = bus.event(database, 'operator', 'migrate_mailbox', dict(from_version=1, to_version=MAILBOX_SCHEMA))
+                    database.execute('COMMIT')
+                    return receipt
                 cls._schema(database)
                 database.execute('ROLLBACK')
                 return 'already_current'
@@ -86,10 +93,42 @@ class Mailbox:
             ]
             for statement in statements:
                 database.execute(statement)
+            cls._migrate_identity(database)
             database.execute('INSERT INTO meta VALUES (?,?)', ('mailbox_schema', encoded(MAILBOX_SCHEMA)))
             receipt = bus.event(database, 'operator', 'migrate_mailbox', dict(from_version=0, to_version=MAILBOX_SCHEMA))
             database.execute('COMMIT')
             return receipt
+
+    @staticmethod
+    def _migrate_identity(database):
+        # Keep the envelope sequence generator intact. Only dependent foreign
+        # keys move; an identity remains valid after its envelope is compacted.
+        database.execute('CREATE TABLE mail_identities (message_id TEXT PRIMARY KEY)')
+        database.execute('INSERT INTO mail_identities SELECT message_id FROM mail_envelopes')
+        for table in ('mail_bodies', 'mail_state', 'mail_receipts', 'mail_outbox'):
+            ddl = database.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()[0]
+            triggers = database.execute("SELECT sql FROM sqlite_master WHERE type='trigger' AND tbl_name=?", (table,)).fetchall()
+            indexes = database.execute("SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name=? AND sql IS NOT NULL", (table,)).fetchall()
+            replacement = table + '_identity_migration'
+            database.execute(ddl.replace('CREATE TABLE ' + table, 'CREATE TABLE ' + replacement, 1)
+                .replace('REFERENCES mail_envelopes(message_id)', 'REFERENCES mail_identities(message_id)'))
+            database.execute('INSERT INTO ' + replacement + ' SELECT * FROM ' + table)
+            database.execute('DROP TABLE ' + table)
+            database.execute('ALTER TABLE ' + replacement + ' RENAME TO ' + table)
+            for row in list(triggers) + list(indexes):
+                database.execute(row[0])
+        database.execute("""CREATE TABLE mail_tombstones (
+            global_seq INTEGER PRIMARY KEY, message_id TEXT UNIQUE NOT NULL REFERENCES mail_identities(message_id),
+            sender_key TEXT NOT NULL, recipient_key TEXT NOT NULL, idempotency_key TEXT NOT NULL,
+            fingerprint TEXT NOT NULL, created REAL NOT NULL, expires REAL NOT NULL,
+            envelope TEXT NOT NULL, in_reply_to TEXT, UNIQUE(sender_key,idempotency_key))""")
+        database.execute("""CREATE TRIGGER mail_tombstone_immutable BEFORE UPDATE ON mail_tombstones
+            BEGIN SELECT RAISE(ABORT,'immutable tombstone'); END""")
+        for name, column in (('recipient', 'recipient_key'), ('sender', 'sender_key'), ('replies', 'in_reply_to')):
+            database.execute('CREATE INDEX mail_tombstone_' + name + ' ON mail_tombstones(' + column + ',global_seq)')
+        database.execute('CREATE VIEW mail_metadata AS SELECT * FROM mail_envelopes UNION ALL SELECT * FROM mail_tombstones')
+        if database.execute('PRAGMA foreign_key_check').fetchone():
+            raise BusError('store_unavailable', 'mailbox migration failed its foreign-key proof')
 
     @contextmanager
     def transaction(self, actor: Actor | None = None, *, permission='inspect'):
@@ -160,7 +199,7 @@ class Mailbox:
         return receipt
 
     def _row(self, database, identifier):
-        row = database.execute('SELECT e.*,s.recipient_seq,s.admission,s.notification,s.recipient,s.read_receipt,s.claim_receipt,s.claim_generation,s.terminal_receipt,s.terminal_at FROM mail_envelopes e JOIN mail_state s USING(message_id) WHERE message_id=?', (identifier,)).fetchone()
+        row = database.execute('SELECT e.*,s.recipient_seq,s.admission,s.notification,s.recipient,s.read_receipt,s.claim_receipt,s.claim_generation,s.terminal_receipt,s.terminal_at FROM mail_metadata e JOIN mail_state s USING(message_id) WHERE message_id=?', (identifier,)).fetchone()
         if row is None:
             raise BusError('not_found', 'message not found')
         return row
@@ -170,6 +209,8 @@ class Mailbox:
             raise BusError('authorization_denied', 'message belongs to another mailbox')
 
     def _expire(self, database, row, now):
+        if json.loads(row['envelope']).get('compacted'):
+            return row
         if row['admission'] == 'accepted' and now >= row['expires']:
             notification = 'suppressed' if row['notification'] in ('pending', 'deferred') else row['notification']
             terminal_at = None if row['recipient'] == 'accepted' else row['terminal_at'] or now
@@ -226,7 +267,7 @@ class Mailbox:
         fingerprint = hashlib.sha256(encoded(dict(recipient=recipient_key, body_digest=body_digest,
             kind=kind, ttl=ttl, delivery=delivery, subject=subject, in_reply_to=parent_id,
             correlation=correlation, acknowledgement=acknowledgement)).encode()).hexdigest()
-        existing = database.execute('SELECT message_id,fingerprint,created FROM mail_envelopes WHERE sender_key=? AND idempotency_key=?', (actor.key, key)).fetchone()
+        existing = database.execute('SELECT message_id,fingerprint,created FROM mail_metadata WHERE sender_key=? AND idempotency_key=?', (actor.key, key)).fetchone()
         if existing:
             if now - existing['created'] > 90 * 86400:
                 raise BusError('idempotency_horizon', 'old intent requires an explicitly new idempotency key')
@@ -236,12 +277,14 @@ class Mailbox:
             projection = self._projection(database, row)
             receipt = next(item['receipt_id'] for item in projection['receipts'] if item['kind'] == 'admitted')
             return dict(message=projection, deduplicated=True, receipt_id=receipt)
+        if original is not None and json.loads(original['envelope']).get('compacted'):
+            raise BusError('message_compacted', 'new replies require a retained full envelope')
         target = self.bus.authorize_pair(database, actor, recipient)
         parent = json.loads(original['envelope']) if original else None
         hop = parent['hop_count'] + 1 if parent else 0
         if hop > 8:
             raise BusError('lineage_limit', 'conversation hop bound exceeded')
-        if database.execute('SELECT count(*) FROM mail_envelopes').fetchone()[0] >= self.max_messages:
+        if database.execute('SELECT count(*) FROM mail_metadata').fetchone()[0] >= self.max_messages:
             raise BusError('capacity', 'retained message capacity reached')
         if database.execute("SELECT count(*) FROM mail_envelopes e JOIN mail_state s USING(message_id) WHERE e.recipient_key=? AND e.expires>? AND s.admission='accepted' AND s.recipient NOT IN ('declined','completed','failed')", (recipient_key, now)).fetchone()[0] >= self.max_open:
             raise BusError('capacity', 'recipient open-message capacity reached')
@@ -262,6 +305,7 @@ class Mailbox:
             idempotency_key=key, in_reply_to=parent_id, correlation=parent['correlation'] if parent else correlation,
             lineage=(parent['lineage'] + [parent_id]) if parent else [], hop_count=hop,
             selector_observation=selector, delivery=delivery)
+        database.execute('INSERT INTO mail_identities VALUES (?)', (identifier,))
         database.execute('INSERT INTO mail_envelopes(message_id,sender_key,recipient_key,idempotency_key,fingerprint,created,expires,envelope,in_reply_to) VALUES (?,?,?,?,?,?,?,?,?)',
                          (identifier, actor.key, recipient_key, key, fingerprint, now, now + ttl, encoded(envelope), parent_id))
         database.execute('INSERT INTO mail_bodies VALUES (?,?)', (identifier, body))
@@ -334,6 +378,8 @@ class Mailbox:
             if prior and json.loads(prior['details']).get('evidence') != evidence:
                 raise BusError('receipt_conflict', 'outcome already has different evidence')
             return dict(receipt_id=receipt, claimed=False, deduplicated=True)
+        if json.loads(row['envelope']).get('compacted'):
+            raise BusError('message_compacted', 'compacted recipient state cannot acquire new outcomes')
         if row['recipient'] in TERMINAL:
             raise BusError('terminal_conflict', 'recipient outcome is already terminal')
         if outcome == 'accepted' and (row['admission'] != 'accepted' or now >= row['expires']):
@@ -413,7 +459,7 @@ class Mailbox:
         with self.transaction(actor) as database:
             now = self._now(database)
             column = 'sender_key' if outbox else 'recipient_key'
-            rows = database.execute('SELECT message_id,global_seq FROM mail_envelopes WHERE ' + column + '=? AND global_seq>? ORDER BY global_seq LIMIT ?', (actor.key, cursor, limit + 1)).fetchall()
+            rows = database.execute('SELECT message_id,global_seq FROM mail_metadata WHERE ' + column + '=? AND global_seq>? ORDER BY global_seq LIMIT ?', (actor.key, cursor, limit + 1)).fetchall()
             values = []
             for row in rows[:limit]:
                 current = self._expire(database, self._row(database, row['message_id']), now)
@@ -442,7 +488,7 @@ class Mailbox:
             original = self._row(database, identifier)
             self._participant(original, actor)
             now = self._now(database)
-            candidates = database.execute('SELECT message_id,envelope FROM mail_envelopes WHERE recipient_key=? AND sender_key=? AND in_reply_to=? ORDER BY global_seq LIMIT 100', (original['sender_key'], original['recipient_key'], identifier)).fetchall()
+            candidates = database.execute('SELECT message_id,envelope FROM mail_metadata WHERE recipient_key=? AND sender_key=? AND in_reply_to=? ORDER BY global_seq LIMIT 100', (original['sender_key'], original['recipient_key'], identifier)).fetchall()
             values = [self._projection(database, self._expire(database, self._row(database, row['message_id']), now))
                       for row in candidates if json.loads(row['envelope'])['in_reply_to'] == identifier]
             database.execute('COMMIT')

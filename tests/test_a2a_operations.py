@@ -139,3 +139,67 @@ class OperationsTests(unittest.TestCase):
             body='private operation fixture', idempotency_key='request', delivery='inbox')
         self.assertTrue(retry['deduplicated'])
         self.assertEqual(retry['message']['message_id'], self.identifier)
+
+    def test_compaction_pins_reply_and_stale_preview_preserves_full_envelope(self):
+        self.terminal_with_fixture_published_signals()
+        self.now += 31 * 86400
+        preview = self.ops.compaction()
+        self.mailbox.reply(self.actors[1], self.identifier, body='reply keeps ancestor',
+            idempotency_key='late-reply', delivery='inbox')
+        with self.assertRaises(BusError) as error:
+            self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.assertEqual(error.exception.code, 'retention_preview_stale')
+        current = self.ops.compaction()
+        self.assertIn('retained_reply', current['candidates'][0]['pins'])
+        self.assertTrue(self.mailbox.show(self.actors[0], self.identifier)['body_retained'])
+
+    def test_compaction_rollback_and_repeat_preserve_identity(self):
+        self.terminal_with_fixture_published_signals()
+        self.now += 31 * 86400
+        preview = self.ops.compaction()
+        def fault(stage):
+            if stage == 'before_commit':
+                raise RuntimeError('fixture interrupted compaction')
+        self.mailbox.fault = fault
+        with self.assertRaises(RuntimeError):
+            self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.mailbox.fault = None
+        with self.bus.connection() as database:
+            self.assertEqual(database.execute('SELECT count(*) FROM mail_tombstones').fetchone()[0], 0)
+        self.assertTrue(self.mailbox.show(self.actors[0], self.identifier)['body_retained'])
+        with self.bus.connection() as database:
+            database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+        preview = self.ops.compaction()
+        self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.assertEqual(self.ops.compaction()['eligible'], [])
+        self.assertEqual(self.mailbox.list(self.actors[0], outbox=True)['messages'][0]['message_id'], self.identifier)
+        with self.assertRaises(BusError) as error:
+            self.mailbox.reply(self.actors[1], self.identifier, body='new intent',
+                idempotency_key='after-compaction', delivery='inbox')
+        self.assertEqual(error.exception.code, 'message_compacted')
+
+    def test_legacy_schema_requires_explicit_atomic_migration(self):
+        legacy, operator = BusStore.configure(self.root / 'legacy-bus')
+        with legacy.connection() as database:
+            database.executescript((Path(__file__).parent / 'fixtures' / 'a2a_mailbox_v1.sql').read_text())
+        with self.assertRaises(BusError) as error:
+            Mailbox(legacy)
+        self.assertEqual(error.exception.code, 'unsupported_mailbox_schema')
+        actual = Mailbox._migrate_identity
+        def interrupted(database):
+            actual(database)
+            raise RuntimeError('fixture interrupted migration')
+        with patch.object(Mailbox, '_migrate_identity', side_effect=interrupted):
+            with self.assertRaises(RuntimeError):
+                Mailbox.migrate(legacy, operator)
+        with legacy.connection() as database:
+            self.assertEqual(database.execute("SELECT value FROM meta WHERE key='mailbox_schema'").fetchone()[0], '1')
+            self.assertIsNone(database.execute("SELECT name FROM sqlite_master WHERE name='mail_identities'").fetchone())
+        self.assertTrue(Mailbox.migrate(legacy, operator).startswith('receipt_'))
+        Mailbox(legacy)
+        self.assertEqual(Mailbox.migrate(legacy, operator), 'already_current')
+        # This enforces the old schema guard; installed old-binary proof is separate.
+        with patch('codex_wake.a2a_mailbox.MAILBOX_SCHEMA', 1):
+            with self.assertRaises(BusError) as error:
+                Mailbox(legacy)
+        self.assertEqual(error.exception.code, 'unsupported_mailbox_schema')

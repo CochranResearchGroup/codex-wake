@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'ack-projections']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'ack-projections']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -40,7 +40,7 @@ def add_a2a_parser(subparsers):
             command.add_argument('--receipt-authority', type=Path, required=True)
             command.add_argument('--source-instance', required=True)
             command.add_argument('--limit', type=int, default=100)
-        if verb == 'retention':
+        if verb in ('retention', 'compact'):
             command.add_argument('--cursor',type=int,default=0)
             command.add_argument('--limit',type=int,default=100)
             command.add_argument('--apply-fingerprint')
@@ -143,11 +143,13 @@ def a2a_command(args):
         elif args.a2a_command == 'rotate':
             capability, receipt = store.rotate_actor(args.actor_id, args.operator_capability)
             result(dict(bus_id=store.bus_id,actor_capability_file=str(capability),receipt_id=receipt))
-        elif args.a2a_command == 'retention':
+        elif args.a2a_command in ('retention', 'compact'):
             from .a2a_mailbox import Mailbox
             from .a2a_operations import MailOperations
-            result(dict(retention=MailOperations(Mailbox(store),args.operator_capability).retention(
-                cursor=args.cursor,limit=args.limit,apply_fingerprint=args.apply_fingerprint)))
+            operations = MailOperations(Mailbox(store), args.operator_capability)
+            operation = operations.compaction if args.a2a_command == 'compact' else operations.retention
+            result({args.a2a_command: operation(cursor=args.cursor, limit=args.limit,
+                apply_fingerprint=args.apply_fingerprint)})
         elif args.a2a_command == 'ack-projections':
             from .a2a_mailbox import Mailbox
             from .a2a_operations import MailOperations
