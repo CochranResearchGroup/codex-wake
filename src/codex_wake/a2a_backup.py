@@ -1,6 +1,7 @@
 """Private versioned snapshots. Verification is never restore activation."""
 from __future__ import annotations
 
+from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -130,7 +131,7 @@ class MailBackup:
         """Read-only validation against current independently supplied authority."""
         return self._verify(directory, time.monotonic() + DEADLINE_SECONDS)
 
-    def _verify(self, directory: Path, deadline):
+    def _verify(self, directory: Path, deadline, live=None):
         directory = Path(directory).absolute()
         if directory != directory.resolve():
             raise BusError('ownership_mismatch', 'snapshot path cannot traverse symlinks')
@@ -153,9 +154,9 @@ class MailBackup:
                 raise ValueError('unsupported versions')
             if manifest['bus_id'] != self.bus.bus_id or manifest['canonical_root'] != str(self.bus.root):
                 raise BusError('bus_identity_mismatch', 'backup belongs to a different canonical bus')
-            with self.bus.connection(read_only=True) as live:
-                self.bus.operator(live, self.operator_capability)
-                current_operator = self.bus.meta(live, 'operator_digest')
+            with (self.bus.connection(read_only=True) if live is None else nullcontext(live)) as authority:
+                self.bus.operator(authority, self.operator_capability)
+                current_operator = self.bus.meta(authority, 'operator_digest')
             if path.stat().st_size != manifest['database_bytes'] or _hash(path, deadline) != manifest['database_sha256']:
                 raise ValueError('snapshot digest or length')
             database = sqlite3.connect(path.as_uri() + '?mode=ro&immutable=1', uri=True, isolation_level=None)
@@ -188,3 +189,83 @@ class MailBackup:
             raise
         except (OSError, sqlite3.Error, ValueError, TypeError, KeyError):
             raise BusError('backup_invalid', 'backup format, integrity or commitment is invalid; no activation attempted') from None
+
+    @staticmethod
+    def _state_digest(database, deadline):
+        """Conservative exact state comparison; only append-only audit is excluded."""
+        value = hashlib.sha256()
+        database.set_progress_handler(lambda: int(time.monotonic() > deadline), 1000)
+        structure = database.execute("SELECT type,name,sql FROM sqlite_master ORDER BY type,name").fetchall()
+        value.update(json.dumps([tuple(row) for row in structure], separators=(',', ':')).encode())
+        schema = [name for kind, name, sql in structure if kind == 'table' and name != 'events']
+        for name in schema:
+            value.update(name.encode())
+            quoted = '"' + name.replace('"', '""') + '"'
+            for row in database.execute('SELECT * FROM ' + quoted + ' ORDER BY rowid'):
+                if time.monotonic() > deadline:
+                    raise BusError('restore_refused', 'state comparison deadline exceeded')
+                value.update(json.dumps(tuple(row), separators=(',', ':'), ensure_ascii=True).encode())
+                value.update(b'\n')
+        return value.hexdigest()
+
+    def restore(self, directory: Path):
+        """State-equivalent same-inode activation; never rewinds canonical changes."""
+        request = None
+        deadline = time.monotonic() + DEADLINE_SECONDS
+        with self.bus.maintenance_connection() as live:
+            self.bus.operator(live, self.operator_capability)
+            Mailbox._schema(live)
+            if self.bus.meta(live, 'paused') is not True:
+                raise BusError('pause_required', 'pause the bus before restore')
+            if live.execute('PRAGMA page_count').fetchone()[0] * live.execute('PRAGMA page_size').fetchone()[0] > MAX_BYTES:
+                raise BusError('restore_refused', 'canonical source exceeds restore size limit')
+            checked = self._verify(directory, deadline, live)
+            path = Path(directory).absolute() / 'mailbox.sqlite'
+            snapshot = sqlite3.connect(path.as_uri() + '?mode=ro&immutable=1', uri=True, isolation_level=None)
+            try:
+                if self._state_digest(live, deadline) != self._state_digest(snapshot, deadline):
+                    raise BusError('restore_refused', 'canonical state changed since snapshot; no rewind authorized')
+                request = self.bus.event(live, 'operator', 'restore_requested',
+                    dict(snapshot_id=checked['snapshot_id'], database_sha256=checked['database_sha256']))
+                stage_path = self.bus.root / ('restore_' + uuid.uuid4().hex + '.sqlite')
+                descriptor = os.open(stage_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+                os.close(descriptor)
+                stage = sqlite3.connect(stage_path, isolation_level=None)
+                try:
+                    def progress(status, remaining, total):
+                        if time.monotonic() > deadline:
+                            raise BusError('restore_refused', 'restore copy deadline exceeded')
+                    snapshot.backup(stage, pages=256, progress=progress, sleep=0.01)
+                    stage.set_progress_handler(lambda: int(time.monotonic() > deadline), 1000)
+                    stage.execute('BEGIN IMMEDIATE')
+                    for row in live.execute('SELECT * FROM events ORDER BY receipt_id'):
+                        previous = stage.execute('SELECT * FROM events WHERE receipt_id=?', (row[0],)).fetchone()
+                        if previous is not None and previous != tuple(row):
+                            raise BusError('restore_refused', 'snapshot audit history differs from canonical history')
+                        if previous is None:
+                            stage.execute('INSERT INTO events VALUES (?,?,?,?,?)', tuple(row))
+                    stage.execute('COMMIT')
+                    if stage.execute('PRAGMA page_count').fetchone()[0] * stage.execute('PRAGMA page_size').fetchone()[0] > MAX_BYTES:
+                        raise BusError('restore_refused', 'audit-preserving stage exceeds restore size limit')
+                    # SQLite online backup commits atomically into the existing inode.
+                    # The cooperating connection lock remains exclusive throughout.
+                    stage.backup(live, pages=256, progress=progress, sleep=0.01)
+                    if self._state_digest(live, deadline) != self._state_digest(stage, deadline):
+                        raise BusError('restore_refused', 'restored state verification failed')
+                    if live.execute('PRAGMA integrity_check').fetchone()[0] != 'ok' or live.execute('PRAGMA foreign_key_check').fetchone():
+                        raise BusError('restore_refused', 'restored database integrity failed')
+                    receipt = self.bus.event(live, 'operator', 'restore_completed',
+                        dict(snapshot_id=checked['snapshot_id'], request_receipt_id=request, stage_file=stage_path.name))
+                    return dict(restored=True, bus_id=self.bus.bus_id, paused=True, receipt_id=receipt,
+                        request_receipt_id=request, state_equivalent=True, source_recovery_qualified=False,
+                        writer_fence='cooperative_upgraded_clients', stage_file=str(stage_path))
+                finally:
+                    stage.close()
+            except (sqlite3.Error, OSError, BusError):
+                if request is None:
+                    raise
+                error = BusError('restore_incomplete', 'restore request committed; inspect canonical store and preserved stage before retry')
+                error.details = dict(receipt_id=request)
+                raise error from None
+            finally:
+                snapshot.close()

@@ -5030,3 +5030,14 @@ feature probe. Updated requirement ledger without claiming activation. Source
 worktree clean/remote-equal; branch retained. Progress:blocker_reduction. Next:
 restore authority and lifecycle fencing contract, then a disposable actual
 activation proof. Full campaignOPEN; memory unavailable/no authorized group.
+
+## Turn 233 | 2026-10-04
+
+Plan0117 implements state-equivalent same-root restore under upgraded-client
+connection fencing. Preserve later audit and paused state; refuse newer canonical
+authority/outcomes. Verification0109 records red missing API, correction of
+SQLite mock seam, passed121 A2A checks, installed restore and final17 focused
+checks. Comprehensive871 initiallyfailed four finite mocked-clock wait cases;
+ranked prediction confirmed by isolating lifecycle clock, unchanged seven message
+CLI casespassed1.741s. Final source/installed/hosted acceptance pending. No
+actual agents/services/raw-writer quiescence or corrupt-source recovery claim.
