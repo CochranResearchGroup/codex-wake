@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: feat/p63-live-stock-checkpoint
+Branch: fix/p63-offline-admission
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -418,3 +418,26 @@ wall receipt delta56.006 seconds is labeled separately. Verification0115 retains
 exact receipts/turns, first failure and all setup/clock observations. Extra A
 terminal ack failed claim_required; read criterion passed, terminal ack not claimed.
 M2-M4 and wider campaign remain OPEN. Next packet is live session safety.
+
+### Offline-admission repair packet
+
+Owner primary, human accountability ecochran76, issue181. Branch
+`fix/p63-offline-admission`, based on merged checkpoint PR210/main3bd0078.
+No delegation: the CLI authorization and live qualification are sequential.
+Public test seam: native `messages send`, real temporary mailbox, read-only
+runtime boundary supplying an unloaded exact recipient. Red command:
+`PYTHONPATH=src python3 -m unittest discover -s tests -p test_offline_message_admission.py -v`.
+Before repair it returns the live `selection_error: session not found` symptom.
+The selected repair allows only send's exact `thread:` selector to read stored
+runtime metadata directly. Returned ID must match; namespace/root/enrollment and
+cross-root policy remain enforced by existing mailbox admission. Enrollment,
+tabs and other fuzzy selectors retain loaded discovery. No lifecycle request,
+transport change, schema change or notification eligibility relaxation.
+
+The old three-attempt M2 loop is closed, failures preserved. After exact merged
+source installation, this changed-source packet permits at most two distinct
+live qualifications: one offline cancellation and one pending exact-recipient
+reconnect/delivery, each one request/at most one reply and120-second deadline.
+No retry of uncertain effects without exact reconciliation. Owned worker custody
+must survive observer failures, and only designated clients may reconnect.
+M2 remains partial until these live results exist; M3/M4 remain separate gates.

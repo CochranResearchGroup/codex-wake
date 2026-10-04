@@ -152,7 +152,8 @@ def messages_command(args):
             value = arm_reply(actor, args.message_id, args.wake_root,
                               args.sender_receipt_authority, args.idempotency_key, args.expires_at)
         elif verb == 'send':
-            recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket, session=args.tmux_session)
+            recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket,
+                                         session=args.tmux_session, allow_offline=True)
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                  subject=args.subject, selector=dict(selector=args.to, identity=recipient.thread_id),
