@@ -46,6 +46,14 @@ jobs:
           /tmp/codex-wake-build/bin/python -m pip install --upgrade pip build
           /tmp/codex-wake-build/bin/python -m build
 
+      - name: Install pinned schema-one compatibility package
+        run: |
+          git fetch --depth=1 origin 94e17a68e655d9e54ead6001704dc0ef453eb933
+          mkdir /tmp/codex-wake-legacy-source
+          git archive 94e17a68e655d9e54ead6001704dc0ef453eb933 | tar -x -C /tmp/codex-wake-legacy-source
+          python -m venv /tmp/codex-wake-legacy-ci
+          /tmp/codex-wake-legacy-ci/bin/python -m pip install /tmp/codex-wake-legacy-source
+
       - name: Smoke installed wheel
         run: |
           python -m venv /tmp/codex-wake-ci
@@ -57,6 +65,7 @@ jobs:
           /tmp/codex-wake-ci/bin/python scripts/a2a_mailbox_smoke.py --scheduler --operations --cli /tmp/codex-wake-ci/bin/codex-wake
           timeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_resource_qualification.py
           timeout 30s /tmp/codex-wake-ci/bin/python scripts/a2a_rollback_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake
+          timeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_retention_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake --legacy-python /tmp/codex-wake-legacy-ci/bin/python
           PYTHONPATH=tests CODEX_WAKE_RECEIPT_CLI=/tmp/codex-wake-ci/bin/codex-wake /tmp/codex-wake-ci/bin/python -m unittest test_a2a_projection_ack -q
 
           python scripts/product_smoke.py \

@@ -518,3 +518,13 @@ unknown records, inspection and retry identity; no downgrade/backup activation
 claimed. Existing ninety-day dedup boundary already visibly rejects stale keys.
 Current 17:wake resolves by metadata; 7:mail-receipts does not uniquely resolve.
 Pending disposable scope remains the live gate; do not silently use other sessions.
+
+## Resumed additional allowance and retention packet
+
+Operator resumed after the 412,020-token checkpoint with a new additional 500k
+allowance starting at zero; working checkpoint 450k. Earlier meters remain history
+and review/attempt allowances are unchanged. Plan 0115 / verification 0107 now
+qualifies local schema migration, logical compaction, ninety-day retirement,
+physical recovery and installed old/new refusal. Hosted gates and integration
+remain pending. No actual agent/provider/service effects were introduced; full
+campaign acceptance in verification 0106 remains OPEN on those missing axes.

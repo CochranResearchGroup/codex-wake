@@ -15,13 +15,15 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'ack-projections']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
         command.add_argument('--json', action='store_true', dest='as_json')
         if verb != 'configure':
             command.add_argument('--operator-capability', type=Path, required=True)
+        if verb == 'reclaim-space':
+            command.add_argument('--apply', action='store_true', required=True)
         if verb == 'tick':
             command.add_argument('--projection-root', type=Path, required=True)
         if verb == 'configure':
@@ -40,7 +42,7 @@ def add_a2a_parser(subparsers):
             command.add_argument('--receipt-authority', type=Path, required=True)
             command.add_argument('--source-instance', required=True)
             command.add_argument('--limit', type=int, default=100)
-        if verb == 'retention':
+        if verb in ('retention', 'compact'):
             command.add_argument('--cursor',type=int,default=0)
             command.add_argument('--limit',type=int,default=100)
             command.add_argument('--apply-fingerprint')
@@ -143,11 +145,17 @@ def a2a_command(args):
         elif args.a2a_command == 'rotate':
             capability, receipt = store.rotate_actor(args.actor_id, args.operator_capability)
             result(dict(bus_id=store.bus_id,actor_capability_file=str(capability),receipt_id=receipt))
-        elif args.a2a_command == 'retention':
+        elif args.a2a_command in ('retention', 'compact'):
             from .a2a_mailbox import Mailbox
             from .a2a_operations import MailOperations
-            result(dict(retention=MailOperations(Mailbox(store),args.operator_capability).retention(
-                cursor=args.cursor,limit=args.limit,apply_fingerprint=args.apply_fingerprint)))
+            operations = MailOperations(Mailbox(store), args.operator_capability)
+            operation = operations.compaction if args.a2a_command == 'compact' else operations.retention
+            result({args.a2a_command: operation(cursor=args.cursor, limit=args.limit,
+                apply_fingerprint=args.apply_fingerprint)})
+        elif args.a2a_command == 'reclaim-space':
+            from .a2a_mailbox import Mailbox
+            from .a2a_operations import MailOperations
+            result(dict(maintenance=MailOperations(Mailbox(store), args.operator_capability).reclaim_space()))
         elif args.a2a_command == 'ack-projections':
             from .a2a_mailbox import Mailbox
             from .a2a_operations import MailOperations
@@ -173,7 +181,7 @@ def a2a_command(args):
         return exc.code
     except BusError as exc:
         result(dict(error=dict(code=exc.code, message=str(exc)), partial_receipt_ids=partial_receipts,
-                    reconciliation_required=bool(partial_receipts) or exc.code == 'effect_uncertain',
+                    reconciliation_required=bool(partial_receipts) or exc.code in ('effect_uncertain', 'maintenance_incomplete'),
                     reconciliation_pointer={key: value for key, value in getattr(exc, 'details', {}).items()
                         if key in ('message_id', 'receipt_id')}), success=False)
         return 7 if exc.code in ('authorization_denied', 'cross_root_denied') else 8
