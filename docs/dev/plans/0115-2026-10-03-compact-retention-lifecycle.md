@@ -1,6 +1,6 @@
 # Compact mailbox retention lifecycle
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Owner: primary
 Branch: feat/p63-retention-lifecycle
@@ -16,7 +16,7 @@ independent projection acknowledgement and explicit ninety-day dedup refusal.
 Envelope/state/receipt/outbox/attempt metadata remains indefinitely. The focused terminal-compaction fixture now passes against schema 2 and the
 logical compaction implementation. Logical compaction, retirement, physical recovery and populated old/new installed
 migration/readback have local evidence, including production projection proof.
-Comprehensive source checks pass. Hosted gates and integration remain pending. The original campaign remains OPEN; its acceptance
+Hosted gates passed on source head 95f68c749f688a4e3a596464b780c9823bc97c20;\nPR 197 integrated at 8414adc0bdb07c1290300405dd87cf009b744158.\nVerification 0107 records final acceptance and preserved expiry rework.\nLocal refs/worktree reconciliation remains pending after the filesystem stall. The original campaign remains OPEN; its acceptance
 ledger is verification 0106. This plan carries no new live authority or allowance.
 
 ## Scope and critical path
