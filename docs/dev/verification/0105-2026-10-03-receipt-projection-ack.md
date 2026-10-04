@@ -74,3 +74,21 @@ including pending named disposable live scope, delivery/suspension, service/soak
 physical compaction/tombstones and release/rollback qualification. Read-only observer
 and generic dispatch hold unchanged. Discovery skipped because current canonical
 sources suffice; Graphiti writes unavailable without an authorized repository group.
+
+## Hosted integration checkpoint
+
+PR #193 head 63644643170a9483be6b168102197b260bd52762 passed both hosted
+Python release gates in run 37170070127, including installed nine-case projection
+checks. SHA-fenced squash merge succeeded at
+ed973ba299a60124d0f5b56c5d0798d37f4944f9; fresh origin/main fetch confirmed
+the commit and identical src/tests/README/CI to the tested head.
+Memory unavailable: receipt 20261004T020625Z-remember.json, zero writes.
+Integration receipt published on docs/p63-ack-closeout.
+
+Goal remains active and full campaign OPEN. Named disposable live scope is pending;
+no approval is inferred from elapsed time. Next ready work is current-state
+completion reconciliation and release/rollback preparation, alongside remaining
+physical lifecycle/compaction qualification. Do not claim a two-agent round trip
+from provider-free proof. Current meter observed 296,805 before hosted integration;
+working checkpoint 450k, mandatory stop before 500k. Preserve this packet's failed
+probes, targeted repair episode and cumulative review ledger at continuation.
