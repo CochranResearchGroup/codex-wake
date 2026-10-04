@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: fix/p63-offline-admission
+Branch: docs/p63-offline-live-checkpoint
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -67,7 +67,7 @@ a demo. Qualify the existing path and change only the Wake integration seam
 required by an observed failure. A future runtime patch requires a separately
 explained need and explicit operator direction.
 
-Current integrated source:dcc893404252c68fcd2a6304919892b0c5e86361 via PR209.
+Current integrated source:eb79e927fb227af3657d5b121aa17026294976d7 via PR211.
 The retained patch and compiled package are inactive historical artifacts, not
 a product prerequisite. Existing owning-client commands depend on that inactive
 patch and do not constitute the selected stock-runtime transport. M1 now passes
