@@ -15,13 +15,15 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
         command.add_argument('--json', action='store_true', dest='as_json')
         if verb != 'configure':
             command.add_argument('--operator-capability', type=Path, required=True)
+        if verb in ('backup', 'verify-backup'):
+            command.add_argument('--snapshot', type=Path, required=True)
         if verb == 'reclaim-space':
             command.add_argument('--apply', action='store_true', required=True)
         if verb == 'tick':
@@ -161,6 +163,11 @@ def a2a_command(args):
             from .a2a_operations import MailOperations
             result(dict(projection=MailOperations(Mailbox(store), args.operator_capability).acknowledge_projections(
                 args.wake_root, args.receipt_authority, args.source_instance, limit=args.limit)))
+        elif args.a2a_command in ('backup', 'verify-backup'):
+            from .a2a_backup import MailBackup
+            backup = MailBackup(store, args.operator_capability)
+            operation = backup.create if args.a2a_command == 'backup' else backup.verify
+            result(dict(backup=operation(args.snapshot)))
         elif args.a2a_command == 'doctor':
             from .a2a_mailbox import Mailbox
             from .a2a_operations import MailOperations
@@ -181,7 +188,7 @@ def a2a_command(args):
         return exc.code
     except BusError as exc:
         result(dict(error=dict(code=exc.code, message=str(exc)), partial_receipt_ids=partial_receipts,
-                    reconciliation_required=bool(partial_receipts) or exc.code in ('effect_uncertain', 'maintenance_incomplete'),
+                    reconciliation_required=bool(partial_receipts) or exc.code in ('effect_uncertain', 'maintenance_incomplete', 'backup_incomplete'),
                     reconciliation_pointer={key: value for key, value in getattr(exc, 'details', {}).items()
                         if key in ('message_id', 'receipt_id')}), success=False)
         return 7 if exc.code in ('authorization_denied', 'cross_root_denied') else 8
