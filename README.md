@@ -736,6 +736,23 @@ history remains intact. Current receipt source integration conservatively holds
 unprojected pins; pruning removes logical rows without erasing backups or pages.
 All operator commands require `--bus-root PATH --operator-capability FILE`.
 
+Mailbox schema 2 requires explicit `a2a migrate`; older readers refuse it rather
+than attempting a downgrade. `a2a compact` previews eligible terminal envelopes
+and, after ninety days from creation, expired tombstones. Apply the returned
+fingerprint with `--apply-fingerprint VALUE`. The same thirty-day terminal and
+uncertainty/projection pins apply; retained replies also pin their ancestors.
+Compaction preserves exact identity, digest, correlation and receipts through the
+ninety-day horizon. New replies require a retained full envelope. After retirement,
+a hashed key marker refuses reuse with `idempotency_horizon`; use an explicitly new
+key for a new intent. Refusal markers count toward the message capacity and are
+reported by `a2a doctor`. Immutable operator events remain attributable.
+
+Logical pruning does not recover disk pages. For explicit physical recovery,
+pause the bus and run `a2a reclaim-space --apply`; it records request/completion
+receipts and file-byte measurements. Busy readers or an interrupted operation
+require reconciliation of the returned receipt. This operation preserves logical
+mail data and does not activate backups or qualify binary downgrade.
+
 For an already-armed receipt wake, the daemon can restore an explicitly
 delegated observer with `--a2a-receipt-authority FILE`. The operator prepares
 this private mode-0600 JSON file from independently verified bus/actor/message

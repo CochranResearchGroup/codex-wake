@@ -290,3 +290,22 @@ class OperationsTests(unittest.TestCase):
             self.mailbox.send(self.actors[0], self.identities[1], body='new explicit intent',
                 idempotency_key='new-key', delivery='inbox')
         self.assertEqual(error.exception.code, 'capacity')
+
+    def test_reclaim_completion_fault_preserves_requested_receipt(self):
+        count = 0
+        def fault(stage):
+            nonlocal count
+            if stage == 'before_commit':
+                count += 1
+                if count == 2:
+                    raise RuntimeError('fixture interrupted maintenance completion')
+        self.mailbox.fault = fault
+        with self.assertRaises(BusError) as error:
+            self.ops.reclaim_space()
+        self.mailbox.fault = None
+        self.assertEqual(error.exception.code, 'maintenance_incomplete')
+        with self.bus.connection() as database:
+            row = database.execute('SELECT action FROM events WHERE receipt_id=?',
+                (error.exception.details['receipt_id'],)).fetchone()
+            self.assertEqual(row['action'], 'space_reclaim_requested')
+        self.assertTrue(self.mailbox.show(self.actors[0], self.identifier)['body_retained'])

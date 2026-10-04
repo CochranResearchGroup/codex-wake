@@ -183,11 +183,18 @@ class MailOperations:
                 error = BusError('maintenance_incomplete', 'physical maintenance requires operator reconciliation')
                 error.details = dict(receipt_id=requested)
                 raise error from cause
-            database.execute('BEGIN IMMEDIATE')
-            self.mailbox.bus.operator(database, self.operator_capability)
-            receipt = self.mailbox.bus.event(database, 'operator', 'space_reclaimed',
-                dict(request_receipt_id=requested, before_bytes=before, after_bytes=after))
-            self.mailbox._finish(database, receipt_id=receipt)
+            try:
+                database.execute('BEGIN IMMEDIATE')
+                self.mailbox.bus.operator(database, self.operator_capability)
+                receipt = self.mailbox.bus.event(database, 'operator', 'space_reclaimed',
+                    dict(request_receipt_id=requested, before_bytes=before, after_bytes=after))
+                self.mailbox._finish(database, receipt_id=receipt)
+            except Exception as cause:
+                if isinstance(cause, BusError) and cause.code == 'effect_uncertain':
+                    raise
+                error = BusError('maintenance_incomplete', 'physical maintenance completion requires reconciliation')
+                error.details = dict(receipt_id=requested)
+                raise error from cause
             return dict(request_receipt_id=requested, receipt_id=receipt, before_bytes=before,
                 after_bytes=after, reclaimed_bytes=max(0, before - after), logical_data_unchanged=True,
                 elapsed_seconds=round(time.monotonic() - started, 6))
@@ -248,10 +255,15 @@ class MailOperations:
             leases = [dict(name=row['name'],generation=row['generation'],expired=row['lease_until']<=now)
                       for row in database.execute('SELECT * FROM mail_leases ORDER BY name LIMIT 100')]
             receipt = self.mailbox.bus.event(database,'operator','inspect_mailbox',dict(bus_id=self.mailbox.bus.bus_id))
+            lifecycle_counts = dict(retained_tombstones=database.execute('SELECT count(*) FROM mail_tombstones').fetchone()[0],
+                retired_key_markers=database.execute('SELECT count(*) FROM mail_retired_keys').fetchone()[0],
+                capacity_records=database.execute('SELECT (SELECT count(*) FROM mail_metadata)+(SELECT count(*) FROM mail_retired_keys)').fetchone()[0])
             database.execute('COMMIT')
         return dict(schema_version=1,bus_id=self.mailbox.bus.bus_id,states=axes,outbox=outbox,
                     backlog_oldest_age_seconds=max(0,now-oldest) if oldest is not None else None,
                     leases=leases,notification_capability='unqualified',receipt_id=receipt,
+                    **lifecycle_counts,
+                    capacity_limit=self.mailbox.max_messages,
                     store_bytes=sum(p.stat().st_size for p in self.mailbox.bus.root.glob('mailbox.sqlite*') if p.is_file()),
                     observer_descriptors=len(list(Path('/proc/self/fd').iterdir())),
                     observer_pid=os.getpid(),metadata_only=True)

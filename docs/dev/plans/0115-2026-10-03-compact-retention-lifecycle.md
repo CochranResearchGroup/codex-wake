@@ -14,9 +14,9 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
 Main 94e17a68e655d9e54ead6001704dc0ef453eb933 contains guarded body pruning,
 independent projection acknowledgement and explicit ninety-day dedup refusal.
 Envelope/state/receipt/outbox/attempt metadata remains indefinitely. The focused terminal-compaction fixture now passes against schema 2 and the
-logical compaction implementation. Expired-tombstone cleanup and paused physical recovery have focused source and
-installed API evidence; populated installed migration/readback, production
-projection qualification, comprehensive checks and hosted gates remain pending. The original campaign remains OPEN; its acceptance
+logical compaction implementation. Logical compaction, retirement, physical recovery and populated old/new installed
+migration/readback have local evidence, including production projection proof.
+Comprehensive source checks pass. Hosted gates and integration remain pending. The original campaign remains OPEN; its acceptance
 ledger is verification 0106. This plan carries no new live authority or allowance.
 
 ## Scope and critical path

@@ -1,6 +1,6 @@
 # Compact retention lifecycle evidence
 
-Verdict: INCOMPLETE
+Verdict: LOCAL_ACCEPTED_HOSTED_PENDING
 Plan: 0115
 Campaign: 0101 OPEN
 
@@ -82,3 +82,30 @@ Wheel SHA256: 3d7d871d132b2dde3fb2fb3457bdf878bca7c2367070e93420282d5614e7775d.
 No retry, exclusion or live effects. These installed API tests are not yet a
 fresh-process populated old/new CLI migration proof. Full suite, hosted gates,
 production projection acknowledgement and installed compatibility remain pending.
+
+## Populated installed old/new qualification and final local source checks
+
+New script a2a_retention_qualification.py constructs two populated schema-one
+fixtures using the actual prior installed wheel, then invokes unmodified installed
+old/new CLIs. Thirty-one/ninety-one-day age is a controlled fixture offset of both
+wall and monotonic coordinates, not elapsed soak or a real reboot. New readers
+refuse before migration; explicit migration preserves data; old installed readers
+refuse afterward. Independently configured production receipt mirror/acknowledgement
+clears pins; actual installed compact/reclaim-space commands preserve identity,
+reduce files and retire old tombstones. Separate new processes prove listing and
+exact retry identity. The managed signal reader is an explicit synthetic fixture
+capability, not an installed service acceptance claim. Both cases have zero
+dispatch attempts and no runtime/provider operations. Temporary roots are removed.
+
+First installed workload: 3.511s, FD5->5, no children, each case recovered 36,864
+bytes. A completion-audit fault probe then showed RuntimeError escaping after
+VACUUM. Added a typed maintenance_incomplete boundary preserving the committed
+request receipt; after-commit uncertainty still preserves its exact completion
+receipt. Final installed workload: 3.833s, same recovery/census/effect result.
+Final wheel SHA256 cd4e179544884ccf1e9df452f31b5e5a956b6cecac2a947a2a108e395822338f.
+Final local comprehensive source Python 3.12: 853 tests, 50.167s, PASS. Python 3.11
+focused operations: 16 tests, 2.714s, PASS. No retry or exclusion. Hosted workflow
+installs schema-one package from pinned main 94e17a68e655d9e54ead6001704dc0ef453eb933
+and runs old/new installed qualification with a 40s outer / 35s internal budget.
+Hosted checks and integration remain required before closing Plan 0115. Full
+campaign live, service, restore, soak and release gates remain OPEN.
