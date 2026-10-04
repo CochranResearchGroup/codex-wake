@@ -89,7 +89,7 @@ class MailOperations:
             ORDER BY e.global_seq LIMIT ?""", (cursor, now - 30 * 86400, now - 90 * 86400, limit + 1)).fetchall()
         candidates = []
         for item in rows[:limit]:
-            row = self.mailbox._row(database, item['message_id'])
+            row = self.mailbox._expire(database, self.mailbox._row(database, item['message_id']), now)
             pins = self._pins(database, row, now)
             if database.execute('SELECT 1 FROM mail_metadata WHERE in_reply_to=? LIMIT 1', (row['message_id'],)).fetchone():
                 pins.append('retained_reply')

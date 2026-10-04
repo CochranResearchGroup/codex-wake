@@ -113,6 +113,13 @@ class OperationsTests(unittest.TestCase):
         with self.bus.connection() as database:
             self.assertEqual(database.execute('SELECT count(*) FROM mail_envelopes').fetchone()[0], 1)
 
+    def expire_and_publish_fixture_signals(self):
+        # Unit fixture only: installed qualification uses independent exact
+        # committed projection acknowledgement, including expiry receipts.
+        self.mailbox.list(self.actors[0], outbox=True)
+        with self.bus.connection() as database:
+            database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+
     def test_compaction_retains_terminal_identity_without_full_envelope(self):
         # This fixture qualifies the maintenance boundary only. Installed proof
         # must acknowledge projections through the production authority seam.
@@ -121,6 +128,7 @@ class OperationsTests(unittest.TestCase):
         before = self.mailbox.show(self.actors[0], self.identifier)
         with self.bus.connection() as database:
             database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         self.assertEqual(preview['eligible'], [self.identifier])
         result = self.ops.compaction(apply_fingerprint=preview['fingerprint'])
@@ -143,6 +151,7 @@ class OperationsTests(unittest.TestCase):
     def test_compaction_pins_reply_and_stale_preview_preserves_full_envelope(self):
         self.terminal_with_fixture_published_signals()
         self.now += 31 * 86400
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         self.mailbox.reply(self.actors[1], self.identifier, body='reply keeps ancestor',
             idempotency_key='late-reply', delivery='inbox')
@@ -156,6 +165,7 @@ class OperationsTests(unittest.TestCase):
     def test_compaction_rollback_and_repeat_preserve_identity(self):
         self.terminal_with_fixture_published_signals()
         self.now += 31 * 86400
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         def fault(stage):
             if stage == 'before_commit':
@@ -169,6 +179,7 @@ class OperationsTests(unittest.TestCase):
         self.assertTrue(self.mailbox.show(self.actors[0], self.identifier)['body_retained'])
         with self.bus.connection() as database:
             database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         self.ops.compaction(apply_fingerprint=preview['fingerprint'])
         self.assertEqual(self.ops.compaction()['eligible'], [])
@@ -207,6 +218,7 @@ class OperationsTests(unittest.TestCase):
     def test_tombstone_retirement_preserves_horizon_refusal_and_audit(self):
         self.terminal_with_fixture_published_signals()
         self.now += 31 * 86400
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         self.ops.compaction(apply_fingerprint=preview['fingerprint'])
         self.now = 1000. + 90 * 86400
@@ -215,6 +227,7 @@ class OperationsTests(unittest.TestCase):
             body='private operation fixture', idempotency_key='request', delivery='inbox')
         self.assertEqual(retry['message']['message_id'], self.identifier)
         self.now += 1
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         self.assertEqual(preview['eligible'], [self.identifier])
         self.assertEqual(preview['candidates'][0]['action'], 'retire')
@@ -239,6 +252,7 @@ class OperationsTests(unittest.TestCase):
         self.now += 31 * 86400
         with self.bus.connection() as database:
             database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         self.ops.compaction(apply_fingerprint=preview['fingerprint'])
         self.bus.set_paused(False, self.operator)
@@ -270,9 +284,11 @@ class OperationsTests(unittest.TestCase):
     def test_retirement_interruption_rolls_back_key_and_message_deletion(self):
         self.terminal_with_fixture_published_signals()
         self.now += 31 * 86400
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         self.ops.compaction(apply_fingerprint=preview['fingerprint'])
         self.now += 60 * 86400
+        self.expire_and_publish_fixture_signals()
         preview = self.ops.compaction()
         def fault(stage):
             if stage == 'before_commit':

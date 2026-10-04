@@ -1,6 +1,6 @@
 # Compact retention lifecycle evidence
 
-Verdict: LOCAL_ACCEPTED_HOSTED_PENDING
+Verdict: REWORK_HOSTED_PENDING
 Plan: 0115
 Campaign: 0101 OPEN
 
@@ -109,3 +109,31 @@ installs schema-one package from pinned main 94e17a68e655d9e54ead6001704dc0ef453
 and runs old/new installed qualification with a 40s outer / 35s internal budget.
 Hosted checks and integration remain required before closing Plan 0115. Full
 campaign live, service, restore, soak and release gates remain OPEN.
+
+## Hosted expiry correction during local WSL/DrvFS stall
+
+Initial PR 197 head 236272f689fa1354eaf29df561111a9ed77812a8 passed both hosted
+release gates in run 37175573115. One bounded self-review found that compaction
+could freeze an expired envelope while its admission/notification stayed pending.
+Local regression command did not execute: its shell stalled in p9_client_rpc;
+only that owned command was terminated (exit 143). No restart or host recovery
+was performed. GitHub connector remained available; all further edits are based
+on exact remote commit reads, with fast-forward-only branch updates. Local refs
+must be reconciled after filesystem recovery; preserve unrelated dirty work.
+
+Red test commit 63c7f900c9173b59e8b76aedcd0cd7271a94a605: both hosted Python jobs
+failed unit checks in run 37176054507. Python 3.12: 854 tests, 36.998s, exactly one
+failure, test_compaction_projects_expiry_before_clearing_pending_notification.
+The expired notification message was wrongly present in preview eligible IDs.
+This is a preserved first failure, not an infrastructure retry or erased history.
+
+Ranked predictions: (1) candidate expiry is never normalized before pins, so
+calling the existing _expire before _pins should record expiry and hold its signal;
+(2) pin SQL ignores an expiry projection, which would still fail after normalization;
+(3) tombstone reads alone freeze expiry, ruled out by failure before any apply.
+The correction changes only candidate normalization; pin SQL is unchanged.
+Unit publication helpers now expire their fixture records before simulated ACK;
+the installed workload must acknowledge three actual committed receipts per
+message (admitted, declined, expired) instead of two. No live or service effects,
+no new discovery pass, and no inherited allowance reset. Final hosted verdict is
+pending; no local post-correction validation is claimed.

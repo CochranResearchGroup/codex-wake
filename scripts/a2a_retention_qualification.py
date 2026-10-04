@@ -133,7 +133,7 @@ def qualify(cli, legacy_python):
                 require(isinstance(registered,Registration),'fixture source arm failed')
                 require(isinstance(adapter.mirror(module),Ingested),'production receipt mirror failed')
                 ack=invoke(cli,'ack-projections',('--wake-root',str(root/'wake'),'--receipt-authority',str(root/'authority.json'),'--source-instance',source))
-                require(ack['projection']['acknowledged']==2,'production projection acknowledgement lost receipts')
+                require(ack['projection']['acknowledged']==3,'production projection acknowledgement lost receipts')
             preview=invoke(cli,'compact')['compact']
             require(preview['eligible']==value['identifiers'],'installed compact eligibility changed')
             compact=invoke(cli,'compact',('--apply-fingerprint',preview['fingerprint']))['compact']
