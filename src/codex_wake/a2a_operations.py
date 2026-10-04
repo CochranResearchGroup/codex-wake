@@ -77,6 +77,50 @@ class MailOperations:
             return dict(preview,receipt_id=receipt,applied=apply_fingerprint is not None,
                         pruned=len(preview['eligible']) if apply_fingerprint is not None else 0)
 
+    def acknowledge_projections(self, wake_root, receipt_authority, source_instance, *, limit=100):
+        from .a2a_receipt_authority import ConfiguredReceiptAuthority
+        from .signal_records import signal_journal_path
+        from .signal_store import SQLiteSignalModule
+        from .signals import Degraded
+        if type(limit) is not int or not 1 <= limit <= 100:
+            raise BusError('invalid_argument', 'projection acknowledgement is limited to one hundred rows')
+        with self.mailbox.transaction() as database:
+            # Writer authority is independent of the observer's read-only delegation.
+            self.mailbox.bus.operator(database, self.operator_capability)
+            adapter = ConfiguredReceiptAuthority(receipt_authority, wake_root).adapter(source_instance)
+            if (adapter.mailbox.bus.root != self.mailbox.bus.root
+                    or adapter.mailbox.bus.bus_id != self.mailbox.bus.bus_id):
+                raise BusError('authorization_denied', 'receipt grant belongs to a different bus')
+            original = self.mailbox._row(database, adapter.message_id)
+            self.mailbox._participant(original, adapter.actor)
+            rows = database.execute("""SELECT r.*,e.in_reply_to,e.sender_key,e.recipient_key,o.payload,o.outbox_id
+                FROM mail_receipts r JOIN mail_envelopes e USING(message_id)
+                JOIN mail_outbox o ON o.receipt_id=r.receipt_id AND o.kind='receipt_signal'
+                WHERE o.status!='published' AND (e.message_id=? OR e.in_reply_to=?)
+                ORDER BY r.receipt_seq LIMIT ?""", (adapter.message_id, adapter.message_id, limit)).fetchall()
+            expected = {row['receipt_id']: adapter.observation(row, original) for row in rows}
+            proof = SQLiteSignalModule.read_committed_occurrences(signal_journal_path(wake_root),
+                'a2a.receipt', source_instance, 'mailbox_receipt', list(expected))
+            if isinstance(proof, Degraded):
+                raise BusError('projection_proof_unavailable', 'committed receipt proof is unavailable')
+            journal_uuid, observations = proof
+            acknowledged = []
+            for row in rows:
+                identifier = row['receipt_id']
+                if identifier not in observations:
+                    continue
+                if observations[identifier] != expected[identifier]:
+                    raise BusError('projection_proof_mismatch', 'committed occurrence does not match mailbox receipt')
+                database.execute("UPDATE mail_outbox SET status='published' WHERE outbox_id=?", (row['outbox_id'],))
+                acknowledged.append(identifier)
+            if not adapter.authorized():
+                raise BusError('authorization_denied', 'receipt grant is no longer available')
+            receipt = self.mailbox.bus.event(database, 'operator', 'acknowledge_receipt_projections',
+                dict(source_instance=source_instance, journal_uuid=journal_uuid, receipt_ids=acknowledged))
+            self.mailbox._finish(database, receipt_id=receipt)
+            return dict(acknowledged=len(acknowledged), scanned=len(rows), receipt_id=receipt,
+                        source_instance=source_instance, journal_uuid=journal_uuid)
+
     def diagnostics(self):
         with self.mailbox.transaction() as database:
             self.mailbox.bus.operator(database, self.operator_capability)
