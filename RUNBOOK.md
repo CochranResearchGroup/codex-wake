@@ -4970,3 +4970,12 @@ pruning and no compact tombstone representation; coordinated migration/read-path
 qualification is the next packet. Note 0004 checkpoints before the operator's 500k
 ceiling rather than starting a packet whose proof may cross it. Goal paused only
 under the explicit stop/checkpoint instruction; full completion remains unproven.
+
+## Turn 227 | 2026-10-03
+
+Operator resumed the goal with an additional 500k allowance; old paused usage
+412,020 remains history. Plan 0115 is OPEN on isolated retention worktree. Focused
+terminal-compaction fixture fails in 0.070s at missing production maintenance API.
+Verification 0107 preserves the exact red loop and fixture-only projection boundary.
+No compaction acceptance or live effects claimed. Next: coordinated schema/read-path
+implementation and lifecycle qualification; campaign OPEN.

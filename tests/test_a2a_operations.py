@@ -112,3 +112,30 @@ class OperationsTests(unittest.TestCase):
         self.assertEqual(error.exception.code, 'idempotency_horizon')
         with self.bus.connection() as database:
             self.assertEqual(database.execute('SELECT count(*) FROM mail_envelopes').fetchone()[0], 1)
+
+    def test_compaction_retains_terminal_identity_without_full_envelope(self):
+        # This fixture qualifies the maintenance boundary only. Installed proof
+        # must acknowledge projections through the production authority seam.
+        self.terminal_with_fixture_published_signals()
+        self.now += 31 * 86400
+        before = self.mailbox.show(self.actors[0], self.identifier)
+        with self.bus.connection() as database:
+            database.execute("UPDATE mail_outbox SET status='published' WHERE kind='receipt_signal'")
+        preview = self.ops.compaction()
+        self.assertEqual(preview['eligible'], [self.identifier])
+        result = self.ops.compaction(apply_fingerprint=preview['fingerprint'])
+        self.assertEqual(result['compacted'], 1)
+        after = self.mailbox.show(self.actors[0], self.identifier)
+        self.assertEqual(after['message_id'], before['message_id'])
+        self.assertEqual(after['body_digest'], before['body_digest'])
+        self.assertEqual(after['terminal_receipt_id'], before['terminal_receipt_id'])
+        self.assertFalse(after['body_retained'])
+        self.assertTrue(after['compacted'])
+        with self.bus.connection() as database:
+            self.assertEqual(database.execute(
+                'SELECT count(*) FROM mail_envelopes WHERE message_id=?',
+                (self.identifier,)).fetchone()[0], 0)
+        retry = self.mailbox.send(self.actors[0], self.identities[1],
+            body='private operation fixture', idempotency_key='request', delivery='inbox')
+        self.assertTrue(retry['deduplicated'])
+        self.assertEqual(retry['message']['message_id'], self.identifier)

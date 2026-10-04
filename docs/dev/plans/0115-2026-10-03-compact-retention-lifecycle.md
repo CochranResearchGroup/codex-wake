@@ -1,6 +1,6 @@
 # Compact mailbox retention lifecycle
 
-State: PLANNED
+State: OPEN
 Lane: P63
 Owner: primary
 Branch: feat/p63-retention-lifecycle
@@ -13,8 +13,8 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
 
 Main 94e17a68e655d9e54ead6001704dc0ef453eb933 contains guarded body pruning,
 independent projection acknowledgement and explicit ninety-day dedup refusal.
-Envelope/state/receipt/outbox/attempt metadata remains indefinitely. This packet
-has no implementation yet. The original campaign remains OPEN; its acceptance
+Envelope/state/receipt/outbox/attempt metadata remains indefinitely. A focused terminal-compaction fixture is being established; production
+implementation has not started. The original campaign remains OPEN; its acceptance
 ledger is verification 0106. This plan carries no new live authority or allowance.
 
 ## Scope and critical path
@@ -66,5 +66,8 @@ and hosted Python 3.11/3.12 gates are required on the reviewed SHA.
 The lifecycle behavior satisfies the original retention contract, installed migration
 and space-recovery evidence pass, code review and required gates pass, integration is
 verified, and the completion ledger is updated without claiming unrelated live gates.
-If accounting cannot be resumed or the current 500k ceiling approaches, checkpoint
+The operator resumed accounting with a new additional 500k allowance. The earlier
+412,020-token checkpoint remains historical and does not consume or reset this
+new meter. Checkpoint at a working 450k before the additional 500k ceiling. If
+accounting cannot be resumed or this ceiling approaches, checkpoint
 this packet without claiming accepted lifecycle behavior or resetting the ceiling.
