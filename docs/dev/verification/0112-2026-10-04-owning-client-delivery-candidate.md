@@ -32,8 +32,12 @@ Validation at this checkpoint:
   empty owned CODEX_HOME. Both empty and nonempty input against an unloaded exact
   thread return `WAKE_NOT_SENT:offline`. No thread is loaded and no provider
   submission occurs. Evidence: `candidate-capability.json` in the owned log root.
-- Focused Rust composer eligibility test is still running under owned session
-  53556, log `/tmp/codex-wake-plan119-runtime/test-tui-guard.log`.
+- Focused Rust composer eligibility test passed: private draft unchanged,
+  pending user turn and external editor deferred; 1 passed, 5586 filtered out.
+  Log: `/tmp/codex-wake-plan119-runtime/test-tui-guard.log`.
+- The retained helper completed its locked build in 2m02s. Executable SHA256:
+  `ecc8bc279390e63e3d2d7d16fa04d167a88c0f0327971ba269e765ff244073d5`.
+  Exact build receipt: `/tmp/codex-wake-plan119-runtime/build-receipt.json`.
 
 Owned candidate executable:
 `/tmp/codex-wake-plan119-runtime/codex-a956835d020762cb2b570053af06f643a11c0ecc/codex-rs/target/debug/codex`.
