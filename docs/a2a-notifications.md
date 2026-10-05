@@ -14,7 +14,7 @@ transport effects stop for reconciliation; do not restart or resend blindly.
 ## Operator setup
 
 Install the public tag with `uv tool install --force --reinstall
-git+https://github.com/CochranResearchGroup/codex-wake.git@v0.7.0`.
+git+https://github.com/CochranResearchGroup/codex-wake.git@v0.7.1`.
 Choose absolute private locations and the real thread IDs, repository roots and
 tmux socket. The following layout matches the shipped user-service example:
 
@@ -83,6 +83,12 @@ For user-systemd ownership, copy
 `~/.config/systemd/user/codex-wake-a2a.service`. Adjust every absolute path if
 using a different layout. Keep `Restart=no` and explicit start; the example is
 not enabled at login and does not claim indefinite unattended service.
+
+The service explicitly adds `~/.local/bin` to PATH so the native worker can
+find the stable stock `codex` command for read-only daemon discovery. Confirm
+that your stable Codex command and tmux executable are in the configured
+directories; adjust the unit PATH for an explicitly selected alternate install.
+An interactive shell's successful lookup does not prove user-service lookup.
 
 ```sh
 systemctl --user daemon-reload
