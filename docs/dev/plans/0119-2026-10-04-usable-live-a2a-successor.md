@@ -444,3 +444,24 @@ reconnect/delivery, each one request/at most one reply and120-second deadline.
 No retry of uncertain effects without exact reconciliation. Owned worker custody
 must survive observer failures, and only designated clients may reconnect.
 M2 remains partial until these live results exist; M3/M4 remain separate gates.
+
+### New goal continuation: remaining real acceptance
+
+The user renewed execution of the four remaining gates with a fresh1100000-token
+checkpoint ceiling; their Plan191 reference matches this Plan119's named gaps
+and no Plan191 exists. Prior goal's counts and bounds remain historical, not reset
+claims about failed tests. Current goal is active; track its own current meter.
+Clock probe captured a2.29-second wall step; old store checkpoint drift is near
+300 seconds. Preserve old journals and failed qualification. A fresh native,
+explicitly enrolled store continuation-v2 separates this run from retained FIFO
+history without resetting an existing clock checkpoint or weakening guards.
+
+Primary executes serially. New bounded cases: live cancellation before dispatch,
+clean reconnect automatic return, and full owned-worker restart/reconnect recovery;
+at most two attempts per distinct case, one request/at most one reply per attempt,
+120-second outcome deadline. A cancellation clock_anomaly may be retried once
+only after native rejection and read-only exact-state proof establish zero effect;
+no other error/effect retry. Stop or reframe failed bounded cases. Then complete
+normal released installation, explicitly enrolled second root/unenrolled denial,
+installed rollback, and30-minute owned soak with frozen existing resource limits.
+The full objective remains open until every live/installed gate is proved.
