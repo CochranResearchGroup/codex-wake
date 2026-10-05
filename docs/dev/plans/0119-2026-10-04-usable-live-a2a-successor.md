@@ -596,3 +596,25 @@ rejection ends that exchange; native unit lifecycle follows actual authoritative
 effect/process evidence, never an observer deadline alone. This is a changed
 actor recovery packet; first failed soak remains FAIL. No further soak attempt
 without another evidence-based reframe.
+
+### Requested remaining-gate packet acceptance | 2026-10-05
+
+Verification0122 audits every explicit current-goal gate: live cancellation,
+clean reconnect automatic return, full normal owned-worker restart/reconnect,
+ordinary released installation, actual multiroot/unenrolled denial and installed
+rollback PASS. Successor native v0.7.1 soak ran1800.32296seconds on one PID/
+invocation with four automatic pairs (88.38/92.01/96.74/92.09seconds), exactly
+eight submissions, zero unfinished attempts, stable FD growth0, peak RSS growth
+4259840bytes, peak store783105bytes, no residual owned children. Exact actor
+notification turns completed; stock Codex0.160.0 and original A/B preserved.
+
+Original failed soak and both successor observation/setup errors remain retained.
+The partial-file observer error did not stop native work; same worker observation
+resumed and actual pair3/4 receipts were reconciled. Manager cleared terminal
+timestamps; independent matching native journal/start identity proves full
+duration without replacing the original unknown-duration resource summary.
+No clock guard/checkpoint modification, blind effect replay, daemon restart or
+OpenClaw operation. Requested remaining-gate packet COMPLETE after final hosted
+docs integration; broader Plan0101/issue181 and retained Plan0119 server-unloaded
+qualification/deferred recovery obligations remain OPEN. Do not infer wider
+acceptance or new recovery authority from this bounded packet.
