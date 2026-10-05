@@ -9,10 +9,9 @@ Use `codex-wake` when work should resume after a defined trigger instead of rely
 
 ## Preconditions
 
-### Candidate enrolled mailbox workflow
+### Enrolled mailbox workflow
 
-Plan 0119's notification delivery is a candidate awaiting live and installed
-acceptance. The selected stock-Codex transport is an explicit Byobu/tmux binding;
+The stock-Codex notification transport is an explicit Byobu/tmux binding;
 it does not require a patched Codex executable. Use it only when the operator has explicitly enrolled this exact
 thread, opted its actual client into the binding, issued an actor capability and
 started the bounded notification worker. Environment defaults select setup;
@@ -28,6 +27,9 @@ codex-wake messages arm-reply EXACT_MESSAGE_ID \
 ```
 
 The operator must already have configured the sender delegation and wake root.
+The native A2A worker must be running for that exact wake root before registering
+the arm; a stopped worker cannot authorize publication. Supply `--wake-root` and
+`--sender-receipt-authority` explicitly if their environment defaults are absent.
 Inspect the arm registration result, then end the turn. A foreground inbox loop
 does not prove suspension. On an `A2A_NOTIFICATION` pointer, read that exact
 message with `messages read`, acknowledge a request with `messages ack --outcome

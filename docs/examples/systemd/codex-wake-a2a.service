@@ -1,0 +1,18 @@
+[Unit]
+Description=Codex Wake explicitly enrolled A2A notification worker
+Documentation=https://github.com/CochranResearchGroup/codex-wake/blob/main/docs/a2a-notifications.md
+After=default.target
+ConditionPathExists=%h/.config/codex-wake/a2a/operator.json
+ConditionPathExists=%h/.config/codex-wake/a2a/bindings.json
+ConditionPathExists=%h/.config/codex-wake/a2a/senders.json
+
+[Service]
+Type=simple
+UMask=0077
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.local/bin/codex-wake a2a worker --bus-root %h/.local/state/codex-wake/a2a/bus --operator-capability %h/.config/codex-wake/a2a/operator.json --bindings-file %h/.config/codex-wake/a2a/bindings.json --wake-root %h/.local/state/codex-wake/a2a/wake --sender-receipt-authority %h/.config/codex-wake/a2a/senders.json --duration 3600 --interval 1 --max-dispatches 20 --json
+Restart=no
+StandardOutput=journal
+StandardError=journal
+
+# Explicit start only: no Install section or automatic restart after uncertainty.

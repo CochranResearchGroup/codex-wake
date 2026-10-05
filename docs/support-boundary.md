@@ -21,6 +21,9 @@ Supported productized paths:
 - export a deterministic bounded support artifact with `support export`.
 - register process-exit wakes for one exact same-user process identity;
 - register systemd-unit transitions for one exact configured current-user unit.
+- run explicitly enrolled A2A notifications through a bounded native worker
+  and exact stock-Codex Byobu/tmux client bindings; see
+  [A2A setup and service](a2a-notifications.md).
 
 Unsupported as product evidence:
 
@@ -38,6 +41,10 @@ Unsupported as product evidence:
 - a systemd transition inferred from a unit name alone, an already-matching
   baseline, a missing unit, a reconnect/generation change, or an observation
   gap.
+- an A2A transport submission treated as recipient read, acknowledgement or
+  reply; a disconnected client treated as automatically resumed; an expired
+  managed-reader health file treated as a live worker; replay after an uncertain
+  effect without reconciliation.
 
 ## Required Evidence
 

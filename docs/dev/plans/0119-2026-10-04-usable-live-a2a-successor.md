@@ -479,3 +479,48 @@ M1 and these live lifecycle cases pass; M4 release/install, multiroot/denial,
 installed rollback and30-minute owned soak remain open. No custom Codex or shared
 daemon restart. Next slice: ordinary released installation and native service
 wiring with frozen installed baseline, then the remaining installed/live gates.
+
+### M4 release and installed acceptance packet | 2026-10-05
+
+Owner primary, serialized branch chore/p63-v070-release, issue181. PR213's
+evidence integrated at9ea38d7 after Python3.11/3.12 required gates passed.
+Prepare Python CLI v0.7.0, actual native workflow documentation and bounded
+user-systemd example. OpenClaw remains parked; neither installed plugin nor
+gateway is upgraded or restarted. No Codex binary/custom daemon changes.
+
+1. Validate release candidate locally and in required hosted CI. Integrate only
+   through a merged PR; publish v0.7.0 at that exact origin/main commit. Two
+   correction cycles maximum for this source/docs packet; unresolved failures
+   end or reframe it without publishing an unqualified build.
+2. Install the public tag using the ordinary user-scoped uv tool path. Preserve
+   pre/post version, source identity and active supervisor/root readbacks. Only
+   the already-active Codex Wake supervisor may restart to load the new package;
+   no shared Codex daemon, OpenClaw gateway or unrelated service restart. Install
+   an explicitly named demo-owned A2A unit from the shipped example and prove
+   M1 with actual enrolled A/B actors, no PYTHONPATH or transport helper.
+3. Prove an explicitly enrolled second real repository root and its actual
+   owned Codex thread can exchange with root1; prove an unenrolled root is denied.
+   New additional fixture thread/root is explicitly for this goal, never a
+   replacement for original A/B. One request/one reply per case,120-second
+   outcome bound, no ambiguous-effect retries.
+4. Roll back a disposable normal installed copy to public v0.6.0. Preserve the
+   A2A store and demonstrate old CLI refusal, then compatible reinstall reads
+   the same messages/receipts. Include existing schema1-reader/schema2 refusal
+   qualification, distinguished from v0.6.0's absent command surface. Do not
+   downgrade the active live worker or store during the soak.
+5. Freeze exact released CLI, store, owned unit/process baseline and thresholds
+   before the30-minute run: duration1800, notification budget20, at most ten
+   pairs, store<=10485760bytes, FD growth<=2, residual owned children0. Sample
+   stable-worker FD/RSS after initialization and before exit; record start/peak/
+   end RSS and freeze a64MiB RSS-growth ceiling before admission. Keep existing
+   verification0104 resource limits; its synthetic30-second bound is separate
+   from this requested real30-minute duration. Use four spaced live pairs at
+   most unless evidence requires fewer; retain full elapsed worker duration.
+   Operator setup may precede each request; no controller prompt/body relay
+   after that request's admission. Stop on uncertain effects or resource limit.
+
+Exactly one ordinary installation/public-tag proof and one30-minute soak are
+planned, with one diagnosed zero-effect setup correction maximum. Retain all
+failed receipts. Completion requires every installed/live result, not a release
+tag, green CI or documentation alone. Track the current goal's1100000-token
+checkpoint ceiling; preserve remaining gates if that boundary arrives first.

@@ -33,7 +33,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.6.0
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.7.0
 ```
 
 Verify the installed commands:
@@ -709,8 +709,11 @@ bodies as untrusted content. Retry the same intent with the same key; altered
 intent conflicts. `wait MESSAGE_ID --for received|reply` and `watch` observe
 receipts for at most five minutes and perform no work on their own.
 
-Notification intents are durable but automatic delivery remains unqualified.
-Use `--delivery inbox` for the qualified workflow; configuration starts paused.
+Automatic notification delivery uses an explicitly enrolled stock-Codex TUI in
+Byobu/tmux. See [A2A notification setup and service](docs/a2a-notifications.md)
+for binding, sender reply delegation, worker ownership and reconnect commands.
+Use `--delivery inbox` when notification delivery is not configured. New buses
+start paused; only the operator may resume them after explicit setup.
 Operator inspection requires explicit operator authority and does not count as
 recipient receipt. No production enrollment or service is installed implicitly.
 
@@ -718,7 +721,7 @@ recipient receipt. No production enrollment or service is installed implicitly.
 `a2a tick --projection-root PRIVATE_ABSOLUTE_PATH --bus-root PATH
 --operator-capability FILE` performs one bounded scheduler reconciliation and
 publishes body-free job metadata. It holds expired dispatch claims as uncertain
-and performs zero live dispatches while notification capability is unqualified.
+and performs zero live dispatches; live notifications require the native worker.
 Repeated publication reconciles identical bytes; cancelled jobs confer no
 journal authority even when an old projection remains on disk.
 
