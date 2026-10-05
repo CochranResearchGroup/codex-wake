@@ -546,3 +546,24 @@ PR/required CI and ordinary tag install. Preserve v0.7.0 and failed receipts;
 one diagnosed zero-effect setup correction, no ambiguous replay. Then released
 service M1, enrolled root2/unenrolled denial and30-minute native soak. Full
 objective remains OPEN; source/docs correction cycles have one remaining slot.
+
+### Released native/multiroot acceptance and failed soak | 2026-10-05
+
+Verification0121 records ordinary v0.7.1 at exact mainbec1005, released native
+service M1 PASS77.85seconds, actual unenrolled denial and enrolled root2 automatic
+exchange PASS71.08seconds. Original clients and stock runtime retained. The
+30-minute soak failed after786.195835seconds: pair1 PASS82.02seconds; pair2
+native B read rejected clock_anomaly before effect after one submitted
+notification. No reply/read receipt or retry. Observer incorrectly stopped on
+a file deadline and emitted invalid negative duration after manager timestamps
+cleared; both raw errors and authoritative reconciliation preserved.
+
+Close the original soak loop as failed. Next bounded packet has two steps: one
+qualification observer correction (no restart on observation timeout; include
+all native phase errors; preserve manager/process identity and valid duration),
+then read-only clock diagnosis and one concrete bounded recovery decision. Do
+not admit another soak until the failed intent/arm and FIFO state are reconciled
+and actor clock-error handling has an inspectable120-second policy. No guard
+weakening, host clock modification, checkpoint reset, or transport replay.
+The full-duration soak remains mandatory; current goal remains active with its
+1100000-token checkpoint ceiling. No implementation delegation.
