@@ -22,8 +22,11 @@ lanes:
     successor_state: OPEN
     release_branch: chore/p63-v070-release
     release_dependency: https://github.com/CochranResearchGroup/codex-wake/pull/213
-    successor_branch: docs/p63-final-live-acceptance
+    release_tag: v0.7.0
+    release_integration_receipt: 9144fb3ea0e0c6bd79907594b9040ac7a77ddce8
+    installed_acceptance: docs/dev/verification/0120-2026-10-05-public-v070-installation-and-rollback.md
+    successor_branch: docs/p63-v070-installed
     successor_source_checkpoint: db24f6ed098b09a4f515adc2d72913e6c6e46e59
     successor_integration_receipt: eb79e927fb227af3657d5b121aa17026294976d7
     successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/211
-    disposition: Original custody retained; Plan0119 M1 PASS; live cancellation and clean reconnect return PASS; normal owned-worker restart with original-client reconnect PASS; prior failures preserved; M4 release/install, multiroot, rollback and soak remain open
+    disposition: Original custody retained; live cancellation, reconnect and worker restart PASS; v0.7.0 released/installed and rollback PASS; native service M1 failed before transport because manager PATH lacks codex; patch required; multiroot/denial and soak remain open
