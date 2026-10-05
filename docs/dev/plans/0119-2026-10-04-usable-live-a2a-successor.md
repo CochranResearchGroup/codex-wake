@@ -465,3 +465,17 @@ no other error/effect retry. Stop or reframe failed bounded cases. Then complete
 normal released installation, explicitly enrolled second root/unenrolled denial,
 installed rollback, and30-minute owned soak with frozen existing resource limits.
 The full objective remains open until every live/installed gate is proved.
+
+### Current live checkpoint | 2026-10-05
+
+Verification0117 records actual cancellation with zero transport attempts and a
+clean reconnect automatic request/reply/read PASS. Verification0118 records a
+failed restart setup with no managed reader, then a fresh corrected case: same
+pending request/arm across native worker exit/new process, same original A/B
+thread reconnects, one submitted request and reply, actual A automatic read in
+109.313seconds. No further attempts in the bounded restart packet. Preserve the
+first failure; second case corrected setup rather than replaying its keys.
+M1 and these live lifecycle cases pass; M4 release/install, multiroot/denial,
+installed rollback and30-minute owned soak remain open. No custom Codex or shared
+daemon restart. Next slice: ordinary released installation and native service
+wiring with frozen installed baseline, then the remaining installed/live gates.
