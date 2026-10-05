@@ -4,17 +4,25 @@ State: OPEN
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
-Branch: feat/p63-held-recovery
+Branch: docs/p63-soak-closeout
 Target: origin/main
 Integration: squash_pr
 
 ## Current state
 
 Execution sequencing successor: [Plan0119](0119-2026-10-04-usable-live-a2a-successor.md).
-The original campaign stays OPEN; the successor prioritizes unassisted live
-messaging and preserves this plan's outstanding acceptance obligations.
-The live wakeA/wakeB manual-inbox round trip passed; see verification0111.
-The following initial state and older checkpoints are historical.
+The requested live cancellation, clean reconnect automatic return, normal worker
+restart, released installation, multiroot/rollback and full thirty-minute soak
+packet is COMPLETE; current acceptance is verification0122, merged PR218.
+The broader campaign and issue181 remain OPEN for server-unloaded-recipient and
+held-recovery obligations. No active implementation/live qualification or goal
+remains from that completed packet. Current custody is the retained accepted
+source docs/p63-soak-closeout; checkout cleanup/routing is verification0123.
+
+## Historical baseline and prior goal authority
+
+The following older execution authority, token limits and initial implementation
+state are historical. They do not resume a goal or override current acceptance.
 
 Execution authorized by the operator under the active Plan 0101 goal.
 The current operator ceiling is 500,000 goal tokens, with a working checkpoint
