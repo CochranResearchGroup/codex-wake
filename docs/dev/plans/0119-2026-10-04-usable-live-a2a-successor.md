@@ -524,3 +524,25 @@ planned, with one diagnosed zero-effect setup correction maximum. Retain all
 failed receipts. Completion requires every installed/live result, not a release
 tag, green CI or documentation alone. Track the current goal's1100000-token
 checkpoint ceiling; preserve remaining gates if that boundary arrives first.
+
+### Public installation and service failure checkpoint | 2026-10-05
+
+PR214 required Python3.11/3.12 run37250697991 passed; integrated exact main
+9144fb3ea0e0c6bd79907594b9040ac7a77ddce8 published as annotated v0.7.0.
+Ordinary global uv installation records exact tag/commit and CLI0.7.0; public-tag
+smoke passes. Existing Wake supervisor restarted to load it; four roots preserved,
+stock Codex0.160.0/shared daemon/OpenClaw untouched. Disposable installed downgrade
+v0.7 -> v0.6 -> v0.7 preserves mailbox bytes; old CLI refuses A2A; actual A reads
+the existing reply with the same receipt after restore. Verification0120 records
+these results and the following actual service failure separately.
+
+Native owned service M1 PID91069 exited5/runtime_unavailable. Actual A's request
+msg_f1500c1f16e244d7955f00422948f51d and arm were admitted, but journal proves zero
+transport attempts, pending/unread state. The shipped unit lacked ~/.local/bin
+in PATH; the manager PATH cannot find codex. Owned read-only systemd preflight
+with explicit stable PATH succeeds without changing the existing daemon.
+Next bounded correction: ship that environment fix as v0.7.1 through a merged
+PR/required CI and ordinary tag install. Preserve v0.7.0 and failed receipts;
+one diagnosed zero-effect setup correction, no ambiguous replay. Then released
+service M1, enrolled root2/unenrolled denial and30-minute native soak. Full
+objective remains OPEN; source/docs correction cycles have one remaining slot.
