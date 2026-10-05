@@ -28,6 +28,16 @@ fast-forwarded by31 commits; note0003 byte hash was identical before/after.
 Private before/after custody receipts:
 /home/ecochran76/.local/state/codex-wake/reconciliation/20261005T032012Z
 
+## Retained older branch custody
+
+All78 local branch refs were inspected:58 match their remote refs exactly,
+20 have no corresponding current remote ref, and none differ from an existing
+remote ref. Those older source/checkpoint refs are preserved without deletion
+or automatic publication. Exact ancestry and matching PR metadata are recorded
+in retained-local-only-refs.json. A verified repository-refs.bundle preserves
+all refs under the private custody receipt directory; it is local backup custody,
+not proof those20 refs were published. No older lane is reactivated.
+
 ## Canonical routing corrections
 
 P63 catalog now points to accepted source branch docs/p63-soak-closeout, checkpoint
