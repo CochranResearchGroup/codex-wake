@@ -21,6 +21,7 @@ lanes:
     execution_successor: docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md
     successor_state: OPEN
     release_branch: chore/p63-v070-release
+    service_fix_branch: fix/p63-v071-service-path
     release_dependency: https://github.com/CochranResearchGroup/codex-wake/pull/213
     successor_branch: docs/p63-final-live-acceptance
     successor_source_checkpoint: db24f6ed098b09a4f515adc2d72913e6c6e46e59
