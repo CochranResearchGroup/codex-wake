@@ -30,7 +30,7 @@ Private before/after custody receipts:
 
 ## Retained older branch custody
 
-All78 local branch refs were inspected:58 match their remote refs exactly,
+At inventory time, all78 local branch refs were inspected:58 match their remote refs exactly,
 20 have no corresponding current remote ref, and none differ from an existing
 remote ref. Those older source/checkpoint refs are preserved without deletion
 or automatic publication. Exact ancestry and matching PR metadata are recorded
@@ -43,6 +43,9 @@ not proof those20 refs were published. No older lane is reactivated.
 P63 catalog now points to accepted source branch docs/p63-soak-closeout, checkpoint
 5c394af and integration516661f/PR218. Installed acceptance points to0122, and
 previous offline-admission source/PR211 remain explicitly recorded separately.
+Parent Plan0101 also reflects this accepted custody and labels its expired goal
+authority/initial state historical. The catalog plan_ref points to the retained
+reconciliation follow-up source containing that corrected parent header.
 Branch retention is intentional; no implementation checkout is required.
 Plan0119's current summary reflects completed requested gates and the remaining
 wider scope, while its original baseline/execution decisions are labeled historical.
@@ -53,7 +56,11 @@ No bundle upgrade, policy-body retirement or new policy authority was introduced
 
 ## Validation and scope
 
-Every retained policy pointer resolves locally. Catalog-only lane audit verifies
+Every retained policy pointer resolves locally. The first pre-merge lane audit
+read the old default-ref catalog; a post-merge audit caught the parent plan header
+still naming held recovery. Preserve that failure privately; the follow-up aligns
+parent plan and plan_ref, then audits the actual candidate ref before publishing.
+The final published catalog-only lane audit verifies
 matching local/remote custody and integration; an integrated_cleanup_pending
 advisory denotes deliberately retained source refs, not an open checkout.
 Git diff whitespace check passes. Hosted Python3.11/3.12 gates govern integration
