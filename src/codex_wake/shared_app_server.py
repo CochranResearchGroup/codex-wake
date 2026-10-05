@@ -14,6 +14,7 @@ import subprocess
 import time
 from typing import Any, Callable
 
+from . import __version__
 from .records import WakeError
 
 
@@ -54,7 +55,7 @@ class SharedAppServerReader:
                                         close_timeout=min(1.0, self.timeout),
                                         compression=None, max_size=4 * 1024 * 1024)
             initialization = self.request("initialize", {
-                "clientInfo": {"name": "codex_wake_discovery", "version": "0.6.0"},
+                "clientInfo": {"name": "codex_wake_discovery", "version": __version__},
                 "capabilities": {"experimentalApi": True},
             })
             self.server_metadata = {key: initialization.get(key) for key in ("codexHome", "userAgent", "platformFamily", "platformOs")}

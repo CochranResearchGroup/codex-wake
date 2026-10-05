@@ -10,6 +10,12 @@ Both keep wake polling out of the model turn. The supervisor is preferred for
 multi-repo and OpenClaw plugin-created wakes because it avoids one disabled
 per-repo service silently stranding records.
 
+A2A mailbox notifications use a separate, explicitly bounded native
+`codex-wake a2a worker`. Neither generic monitor mode substitutes for its client
+bindings and sender delegation. See [A2A setup and service](a2a-notifications.md)
+and the shipped `codex-wake-a2a.service` example for exact ownership and start
+commands.
+
 ## Choose A Monitor Mode
 
 Use the user supervisor by default when an operator expects more than one repo,
