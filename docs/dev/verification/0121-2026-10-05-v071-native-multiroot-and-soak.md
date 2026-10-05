@@ -83,3 +83,20 @@ another full-duration run. Retain same guard, original identities, all failed
 evidence and the fixed120-second exchange bound. No replay of the already
 submitted pair2 notification. Full Plan0119/issue181 remain OPEN. Prior live
 cancellation/reconnect/normal worker-restart and installed rollback passes stand.
+
+### Recovery qualification checkpoint
+
+Successor private observers prepared and syntax-checked; original scripts kept.
+Native B read/ack and A read error outputs are now included; controller observation
+errors record failure without stopping/restarting the unit. Resource file races
+recheck original process generation; missing/cleared exit timestamps cannot pass
+duration. These scripts have not run a successor soak.
+
+Read-only30-second sampling reproduced minimum wall step-2.278388500213623seconds
+and maximum wall/monotonic step drift2.479177490211441seconds. Current NTP reports
+synchronized; that status does not contradict observed discontinuity. Installed
+v0.7.1 hermetic recovery check PASS: rejected recipient read leaves zero receipt;
+same-ID read after continuity creates exactly one received receipt, preserves
+original expiry, and expired first claim is refused. No guard/source/runtime
+changes. See observer-correction/{clock-sample,installed-read-recovery-proof,
+pre-next-run-state,correction-receipt}.json in the private evidence root.

@@ -567,3 +567,32 @@ and actor clock-error handling has an inspectable120-second policy. No guard
 weakening, host clock modification, checkpoint reset, or transport replay.
 The full-duration soak remains mandatory; current goal remains active with its
 1100000-token checkpoint ceiling. No implementation delegation.
+
+### Bounded soak recovery decision | 2026-10-05
+
+Read-only30-second host sample reproduced a2.278-second backward wall step;
+no clock service/configuration change is authorized or performed. Current bus
+checkpoint drift is about-100.95seconds, within the existing300-second guard.
+The original failed request remains unread/submitted and is past its expiry;
+retain it and let native expiration reconcile it before subsequent admission.
+No manual backlog cleanup or notification replay may qualify this failure.
+
+Installed v0.7.1 hermetic Mailbox qualification proves clock-rejected read has
+zero receipt effect; after continuity returns, reading the same ID gives one
+receipt, preserves expiry, and expired work cannot acquire a claim. Private
+observer-correction/installed-read-recovery-proof.json and clock-sample.json
+retain evidence; these are qualification, not live acceptance.
+
+One successor full1800-second soak is permitted after observer corrections and
+native expired-state reconciliation. Same installed v0.7.1, original A/B, four
+spaced pairs,20 notifications maximum and all original frozen resource limits.
+Each exact notified read permits at most one delayed same-ID retry after three
+seconds ONLY on native clock_anomaly with reconciliation_required=false. Save
+both results separately. No new send/notification/key or foreground inbox poll;
+no retry on missing output, timeout, effect_uncertain, ack/reply rejection or
+other error. Before work claim, native returned admission must remain accepted;
+original expiry and120-second send-to-read bound are unchanged. A second read
+rejection ends that exchange; native unit lifecycle follows actual authoritative
+effect/process evidence, never an observer deadline alone. This is a changed
+actor recovery packet; first failed soak remains FAIL. No further soak attempt
+without another evidence-based reframe.
