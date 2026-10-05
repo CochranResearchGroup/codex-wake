@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: fix/p63-offline-admission
+Branch: docs/p63-offline-live-checkpoint
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -67,17 +67,20 @@ a demo. Qualify the existing path and change only the Wake integration seam
 required by an observed failure. A future runtime patch requires a separately
 explained need and explicit operator direction.
 
-Current integrated source:dcc893404252c68fcd2a6304919892b0c5e86361 via PR209.
+Current integrated source:eb79e927fb227af3657d5b121aa17026294976d7 via PR211.
 The retained patch and compiled package are inactive historical artifacts, not
 a product prerequisite. Existing owning-client commands depend on that inactive
 patch and do not constitute the selected stock-runtime transport. M1 now passes
 on attempt2/3. M2 has live busy/draft/rename/move and expiry evidence but remains
-PARTIAL: after three attempts, disconnected enrolled-recipient admission rejects
-the exact thread as session not found, preventing the cancellation test. M3-M4
-remain UNPROVEN. Verification0115 records actual failures and restored runtime.
-Next packet: narrow exact-thread offline admission repair with enrollment/root
-checks preserved, then explicitly bounded requalification. No unchanged fourth
-M2 trial, custom runtime activation, automatic resume or shared-daemon restart.
+PARTIAL. After the original three-attempt loop exposed offline admission failure,
+PR211 repaired exact-thread resolution. Installed live admission and delivery to
+the original recipient after explicit reconnect now pass. Cancellation was refused
+by clock continuity; return delivery hit retained unread FIFO backlog. M3-M4
+remain UNPROVEN. Verification0115 preserves original failures; verification0116
+records repair and changed-source qualification. Both repair qualification slots
+are consumed. Next packet must establish clock stability and reconcile the demo
+mailbox before further acceptance. No unchanged extra trial, custom runtime
+activation, automatic resume or shared-daemon restart.
 
 ## Scope and architecture
 
@@ -441,3 +444,24 @@ reconnect/delivery, each one request/at most one reply and120-second deadline.
 No retry of uncertain effects without exact reconciliation. Owned worker custody
 must survive observer failures, and only designated clients may reconnect.
 M2 remains partial until these live results exist; M3/M4 remain separate gates.
+
+### New goal continuation: remaining real acceptance
+
+The user renewed execution of the four remaining gates with a fresh1100000-token
+checkpoint ceiling; their Plan191 reference matches this Plan119's named gaps
+and no Plan191 exists. Prior goal's counts and bounds remain historical, not reset
+claims about failed tests. Current goal is active; track its own current meter.
+Clock probe captured a2.29-second wall step; old store checkpoint drift is near
+300 seconds. Preserve old journals and failed qualification. A fresh native,
+explicitly enrolled store continuation-v2 separates this run from retained FIFO
+history without resetting an existing clock checkpoint or weakening guards.
+
+Primary executes serially. New bounded cases: live cancellation before dispatch,
+clean reconnect automatic return, and full owned-worker restart/reconnect recovery;
+at most two attempts per distinct case, one request/at most one reply per attempt,
+120-second outcome deadline. A cancellation clock_anomaly may be retried once
+only after native rejection and read-only exact-state proof establish zero effect;
+no other error/effect retry. Stop or reframe failed bounded cases. Then complete
+normal released installation, explicitly enrolled second root/unenrolled denial,
+installed rollback, and30-minute owned soak with frozen existing resource limits.
+The full objective remains open until every live/installed gate is proved.

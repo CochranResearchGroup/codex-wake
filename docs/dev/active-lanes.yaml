@@ -20,8 +20,8 @@ lanes:
     updated_at: 2026-10-04
     execution_successor: docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md
     successor_state: OPEN
-    successor_branch: fix/p63-offline-admission
-    successor_source_checkpoint: 0c0293e5ee3cfd553781e7edd01979ddf2294f34
-    successor_integration_receipt: dcc893404252c68fcd2a6304919892b0c5e86361
-    successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/209
-    disposition: Original custody retained; Plan0119 M1 PASS; M2 partial with offline admission repair in progress after closed three-attempt loop; M3-M4 unproven; campaign OPEN
+    successor_branch: docs/p63-offline-live-checkpoint
+    successor_source_checkpoint: db24f6ed098b09a4f515adc2d72913e6c6e46e59
+    successor_integration_receipt: eb79e927fb227af3657d5b121aa17026294976d7
+    successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/211
+    disposition: Original custody retained; Plan0119 M1 PASS; offline admission repair integrated and installed; reconnect request delivered once; cancellation clock failure and return FIFO conflict preserved; M2-M4 incomplete
