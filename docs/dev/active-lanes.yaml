@@ -6,18 +6,18 @@ lanes:
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/181]
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
-    plan_ref: docs/p63-million-checkpoint
-    branch: feat/p63-held-recovery
+    plan_ref: docs/p63-soak-closeout
+    branch: docs/p63-soak-closeout
     target: origin/main
     plan_state: OPEN
     custody_state: INTEGRATED
-    checkpoint: 928effef29648d1c082e94ef6c482b073cab5ffd
-    remote_ref: refs/remotes/origin/feat/p63-held-recovery
+    checkpoint: 5c394af42f304c466ecaea13ab7f156f44dd1d5f
+    remote_ref: refs/remotes/origin/docs/p63-soak-closeout
     integration: squash_pr
-    integration_receipt: ef59ca2b34397c24a192dc36ef57f6e165a47cfa
+    integration_receipt: 516661f9291f1feefcf2d6e010ff5ed153b8cf63
     dependencies: []
     overlaps: []
-    updated_at: 2026-10-04
+    updated_at: 2026-10-05
     execution_successor: docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md
     successor_state: OPEN
     release_branch: chore/p63-v070-release
@@ -25,11 +25,16 @@ lanes:
     release_dependency: https://github.com/CochranResearchGroup/codex-wake/pull/213
     release_tag: v0.7.1
     release_integration_receipt: bec10055a171a6e3c4de51718a16b15387fe80b9
-    installed_acceptance: docs/dev/verification/0121-2026-10-05-v071-native-multiroot-and-soak.md
+    installed_acceptance: docs/dev/verification/0122-2026-10-05-remaining-gates-and-native-soak-acceptance.md
     successor_branch: docs/p63-soak-closeout
-    successor_source_checkpoint: db24f6ed098b09a4f515adc2d72913e6c6e46e59
-    successor_integration_receipt: eb79e927fb227af3657d5b121aa17026294976d7
-    successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/211
+    successor_source_checkpoint: 5c394af42f304c466ecaea13ab7f156f44dd1d5f
+    successor_integration_receipt: 516661f9291f1feefcf2d6e010ff5ed153b8cf63
+    successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/218
+    offline_admission_source_checkpoint: db24f6ed098b09a4f515adc2d72913e6c6e46e59
+    offline_admission_integration_receipt: eb79e927fb227af3657d5b121aa17026294976d7
+    offline_admission_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/211
+    checkout_required: false
+    branch_retention: Integrated source branches intentionally retained as provenance; no active implementation checkout
     remaining_gate_acceptance: docs/dev/verification/0122-2026-10-05-remaining-gates-and-native-soak-acceptance.md
     remaining_gate_packet_state: COMPLETE
     disposition: Requested cancellation/reconnect/normal worker restart/released installation/multiroot/rollback/30-minute soak gates PASS; wider Plan0101 and retained server-unloaded/deferred recovery obligations remain OPEN

@@ -3,7 +3,7 @@
 State: OPEN
 Lane: P63
 Owner: primary integration lane
-Branch: docs/p63-offline-live-checkpoint
+Branch: docs/p63-soak-closeout
 Target: origin/main
 Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
@@ -22,7 +22,25 @@ Build and demonstrate this feature before expanding supporting infrastructure.
 A passing live behavior gate is progress; another green fixture suite is supporting
 evidence. A message admitted to SQLite is not a delivered notification.
 
-## Current state
+## Current reconciled state | 2026-10-05
+
+The requested remaining-gate packet is COMPLETE. Verification0122 is the current
+acceptance authority, published through PR218/main516661f: live cancellation,
+clean reconnect automatic return, normal owned-worker restart/reconnect, released
+v0.7.1 installation, multiroot/unenrolled denial, installed rollback and full
+1800.32296-second native soak all PASS. Earlier failures below remain historical
+receipts; they do not describe the current acceptance state.
+
+Stock Codex0.160.0 remains selected. No custom runtime activation is required.
+The bounded goal completed at757635 tokens; no active implementation or live
+qualification is running. Integrated branches are retained; their auxiliary
+checkouts have been closed. The original untracked note0003 remains preserved.
+
+This plan and issue181 remain OPEN for retained server-unloaded-recipient and
+broader held-recovery obligations. No new execution/recovery authority follows
+from repository reconciliation. See verification0123 for Git/custody cleanup.
+
+## Historical baseline at plan creation
 
 Baseline at plan creation: f104c2f86b37ac548ba1f798aa0d65abd8d37322. Discovery, explicit
 membership/capabilities, durable mailboxes, replies, acknowledgements, foreground
@@ -48,7 +66,7 @@ The global installed 0.6.0 command still lacks A2A verbs. The demo used an isola
 wheel built from current main. Automatic A2A transport and generic receipt dispatch
 remain unqualified. The demo bus is paused; the two user-owned sessions are idle.
 
-## Current execution decision | 2026-10-04
+## Historical execution decision | 2026-10-04
 
 The operator rejected the custom Codex runtime dependency as unnecessary. Do not
 activate the staged patch, replace the shared runtime, disable Codex updates or
@@ -67,7 +85,7 @@ a demo. Qualify the existing path and change only the Wake integration seam
 required by an observed failure. A future runtime patch requires a separately
 explained need and explicit operator direction.
 
-Current integrated source:eb79e927fb227af3657d5b121aa17026294976d7 via PR211.
+Integrated source at that checkpoint:eb79e927fb227af3657d5b121aa17026294976d7 via PR211.
 The retained patch and compiled package are inactive historical artifacts, not
 a product prerequisite. Existing owning-client commands depend on that inactive
 patch and do not constitute the selected stock-runtime transport. M1 now passes
