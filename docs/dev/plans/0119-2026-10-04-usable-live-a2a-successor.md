@@ -546,3 +546,53 @@ PR/required CI and ordinary tag install. Preserve v0.7.0 and failed receipts;
 one diagnosed zero-effect setup correction, no ambiguous replay. Then released
 service M1, enrolled root2/unenrolled denial and30-minute native soak. Full
 objective remains OPEN; source/docs correction cycles have one remaining slot.
+
+### Released native/multiroot acceptance and failed soak | 2026-10-05
+
+Verification0121 records ordinary v0.7.1 at exact mainbec1005, released native
+service M1 PASS77.85seconds, actual unenrolled denial and enrolled root2 automatic
+exchange PASS71.08seconds. Original clients and stock runtime retained. The
+30-minute soak failed after786.195835seconds: pair1 PASS82.02seconds; pair2
+native B read rejected clock_anomaly before effect after one submitted
+notification. No reply/read receipt or retry. Observer incorrectly stopped on
+a file deadline and emitted invalid negative duration after manager timestamps
+cleared; both raw errors and authoritative reconciliation preserved.
+
+Close the original soak loop as failed. Next bounded packet has two steps: one
+qualification observer correction (no restart on observation timeout; include
+all native phase errors; preserve manager/process identity and valid duration),
+then read-only clock diagnosis and one concrete bounded recovery decision. Do
+not admit another soak until the failed intent/arm and FIFO state are reconciled
+and actor clock-error handling has an inspectable120-second policy. No guard
+weakening, host clock modification, checkpoint reset, or transport replay.
+The full-duration soak remains mandatory; current goal remains active with its
+1100000-token checkpoint ceiling. No implementation delegation.
+
+### Bounded soak recovery decision | 2026-10-05
+
+Read-only30-second host sample reproduced a2.278-second backward wall step;
+no clock service/configuration change is authorized or performed. Current bus
+checkpoint drift is about-100.95seconds, within the existing300-second guard.
+The original failed request remains unread/submitted and is past its expiry;
+retain it and let native expiration reconcile it before subsequent admission.
+No manual backlog cleanup or notification replay may qualify this failure.
+
+Installed v0.7.1 hermetic Mailbox qualification proves clock-rejected read has
+zero receipt effect; after continuity returns, reading the same ID gives one
+receipt, preserves expiry, and expired work cannot acquire a claim. Private
+observer-correction/installed-read-recovery-proof.json and clock-sample.json
+retain evidence; these are qualification, not live acceptance.
+
+One successor full1800-second soak is permitted after observer corrections and
+native expired-state reconciliation. Same installed v0.7.1, original A/B, four
+spaced pairs,20 notifications maximum and all original frozen resource limits.
+Each exact notified read permits at most one delayed same-ID retry after three
+seconds ONLY on native clock_anomaly with reconciliation_required=false. Save
+both results separately. No new send/notification/key or foreground inbox poll;
+no retry on missing output, timeout, effect_uncertain, ack/reply rejection or
+other error. Before work claim, native returned admission must remain accepted;
+original expiry and120-second send-to-read bound are unchanged. A second read
+rejection ends that exchange; native unit lifecycle follows actual authoritative
+effect/process evidence, never an observer deadline alone. This is a changed
+actor recovery packet; first failed soak remains FAIL. No further soak attempt
+without another evidence-based reframe.

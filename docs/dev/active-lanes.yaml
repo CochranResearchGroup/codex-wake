@@ -23,11 +23,11 @@ lanes:
     release_branch: chore/p63-v070-release
     service_fix_branch: fix/p63-v071-service-path
     release_dependency: https://github.com/CochranResearchGroup/codex-wake/pull/213
-    release_tag: v0.7.0
-    release_integration_receipt: 9144fb3ea0e0c6bd79907594b9040ac7a77ddce8
-    installed_acceptance: docs/dev/verification/0120-2026-10-05-public-v070-installation-and-rollback.md
-    successor_branch: docs/p63-v070-installed
+    release_tag: v0.7.1
+    release_integration_receipt: bec10055a171a6e3c4de51718a16b15387fe80b9
+    installed_acceptance: docs/dev/verification/0121-2026-10-05-v071-native-multiroot-and-soak.md
+    successor_branch: docs/p63-v071-live-acceptance
     successor_source_checkpoint: db24f6ed098b09a4f515adc2d72913e6c6e46e59
     successor_integration_receipt: eb79e927fb227af3657d5b121aa17026294976d7
     successor_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/211
-    disposition: Original custody retained; live cancellation, reconnect and worker restart PASS; v0.7.0 released/installed and rollback PASS; native service M1 failed before transport because manager PATH lacks codex; patch required; multiroot/denial and soak remain open
+    disposition: Live cancellation, reconnect, normal worker restart and installed rollback PASS; released v0.7.1 native service and multiroot/unenrolled denial PASS; 30-minute soak FAIL after clock rejection and observer error; bounded diagnosis remains open
