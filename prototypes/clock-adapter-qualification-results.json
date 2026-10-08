@@ -1,0 +1,111 @@
+{
+  "comparison": {
+    "conditional_on_raw_elapsed_scale": true,
+    "rounds": [
+      {
+        "round": "round1.json",
+        "source_successes": 3,
+        "raw_reference": 75441.506539288,
+        "aligned_network_intervals": [
+          [
+            1791463930.9748225,
+            1791463931.0149744
+          ],
+          [
+            1791463930.9744625,
+            1791463931.0245373
+          ]
+        ],
+        "network_union_width": 0.05007481575012207,
+        "windows_transport_interval": [
+          1791463932.7397897,
+          1791463933.3950298
+        ],
+        "windows_ahead_of_network_seconds": [
+          1.71525239944458,
+          2.420567274093628
+        ]
+      },
+      {
+        "round": "round2.json",
+        "source_successes": 3,
+        "raw_reference": 75464.280911827,
+        "aligned_network_intervals": [
+          [
+            1791463953.7483783,
+            1791463953.7925575
+          ],
+          [
+            1791463953.747992,
+            1791463953.7931025
+          ]
+        ],
+        "network_union_width": 0.045110464096069336,
+        "windows_transport_interval": [
+          1791463955.50053,
+          1791463955.8257148
+        ],
+        "windows_ahead_of_network_seconds": [
+          1.7074275016784668,
+          2.0777227878570557
+        ]
+      },
+      {
+        "round": "round3.json",
+        "source_successes": 3,
+        "raw_reference": 75470.350435268,
+        "aligned_network_intervals": [
+          [
+            1791463959.8178384,
+            1791463959.863731
+          ],
+          [
+            1791463959.8176076,
+            1791463959.864401
+          ]
+        ],
+        "network_union_width": 0.046793460845947266,
+        "windows_transport_interval": [
+          1791463961.5893614,
+          1791463961.8480606
+        ],
+        "windows_ahead_of_network_seconds": [
+          1.7249603271484375,
+          2.0304529666900635
+        ]
+      }
+    ]
+  },
+  "failure_controls": [
+    {
+      "source": "short",
+      "ok": false,
+      "error": "ValueError",
+      "detail": "only plain 48-byte NTP supported in this experiment"
+    },
+    {
+      "source": "unsynchronized",
+      "ok": false,
+      "error": "ValueError",
+      "detail": "unsynchronized, invalid reply, or kiss-of-death"
+    },
+    {
+      "source": "wrong_origin",
+      "ok": false,
+      "error": "ValueError",
+      "detail": "origin mismatch"
+    },
+    {
+      "source": "timeout",
+      "ok": false,
+      "error": "TimeoutError",
+      "detail": "timed out"
+    }
+  ],
+  "windows_time_status": "The following error occurred: The service has not been started. (0x80070426)",
+  "windows_service": {
+    "Name": "W32Time",
+    "Status": 1,
+    "StartType": 3
+  }
+}
