@@ -1,0 +1,11 @@
+{"name":"Agreement","final":{"source":"Windows","lo":-0.1,"hi":0.1,"deadline":"Pending"}}
+{"name":"Windows outlier","final":{"source":"Network consensus","lo":-0.2,"hi":0.2,"deadline":"Pending"}}
+{"name":"One-server outage","final":{"source":"Windows","lo":-0.1,"hi":0.1,"deadline":"Pending"}}
+{"name":"No quorum","final":{"source":"Paused: no independent consensus","deadline":"Waiting for reliable time"}}
+{"name":"Recovery","final":{"source":"Windows","lo":-0.1,"hi":0.1,"deadline":"Pending"}}
+{"name":"Disagreement","final":{"source":"Paused: sources disagree","deadline":"Waiting for reliable time"}}
+{"name":"Sleep","final":{"source":"Windows","lo":3599.9,"hi":3600.1,"deadline":"Already handled"}}
+{"name":"Restart","final":{"source":"Windows","lo":-0.1,"hi":0.1,"deadline":"Pending"}}
+{"name":"Staleness","final":{"source":"Paused: no independent consensus","deadline":"Waiting for reliable time"}}
+{"name":"Boundary","final":{"source":"Windows","lo":300.9,"hi":301.1,"deadline":"Already handled"}}
+{"name":"Independence","final":{"source":"Paused: no independent consensus","deadline":"Waiting for reliable time"}}
