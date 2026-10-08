@@ -1,0 +1,66 @@
+<!doctype html><meta charset="utf-8"><title>Codex Wake — time prototype</title>
+<style>body{font:17px system-ui;max-width:1000px;margin:40px auto;padding:20px;background:#f6f8fb;color:#172333}section{background:white;padding:24px;margin:18px 0;border:1px solid #dce2ec;border-radius:12px}button,input{font:inherit;padding:9px;margin:5px;border:1px solid #bdcadd;border-radius:6px}button{cursor:pointer;background:#edf3ff}button:disabled{opacity:.45}dt{font-weight:600}dd{margin:3px 0 14px}table{width:100%;text-align:left}td,th{padding:8px;border-bottom:1px solid #ddd}.active{background:#bad2ff}small{display:block;color:#536174}</style>
+<h1>Which time should Codex Wake trust?</h1><p>Throwaway simulation: explore Windows-first selection, two independent network servers, and deadlines that include sleep. No real clocks, network requests or mailbox changes.</p>
+<section><h2>Current state</h2><div id="state" aria-live="polite"></div></section>
+<section><h2>Try any action</h2><div id="actions"></div><label>Agreement width (seconds) <input id="tolerance" type="number" min="0" value="1"></label><label>Freshness (seconds) <input id="freshness" type="number" min="0" value="30"></label><small>Illustrative values only. Freshness is measured on a simulated reference timeline, never Linux wall time.</small></section>
+<section><h2>Guided walkthroughs</h2><div id="tabs"></div><p id="description"></p><div id="steps"></div></section>
+<script id="model">
+const initial=()=>({reference:0,deadline:300,observations:[],tolerance:1,freshness:30,completed:false,log:'Reset: deadline at 300 seconds.'});
+function select(s){
+ const samples=s.observations.filter(o=>Number.isFinite(o.utc)&&Number.isFinite(o.error)&&o.error>=0&&o.at<=s.reference&&s.reference-o.at<=s.freshness);
+ const w=samples.find(o=>o.id==='windows'),n=samples.filter(o=>o.id!=='windows');
+ const interval=o=>[o.utc-o.error,o.utc+o.error+(s.reference-o.at)];
+ if(n.length===2&&n[0].provider!==n[1].provider){
+  const a=interval(n[0]),b=interval(n[1]),lo=Math.min(a[0],b[0]),hi=Math.max(a[1],b[1]);
+  if(hi-lo<=s.tolerance)return {source:w&&Math.max(Math.abs(w.utc-lo),Math.abs(w.utc-hi))+w.error<=s.tolerance?'Windows':'Network consensus',lo:w&&Math.max(Math.abs(w.utc-lo),Math.abs(w.utc-hi))+w.error<=s.tolerance?w.utc-w.error:lo,hi:w&&Math.max(Math.abs(w.utc-lo),Math.abs(w.utc-hi))+w.error<=s.tolerance?w.utc+w.error+(s.reference-w.at):hi};
+ }
+ if(w){const a=interval(w);if(n.some(o=>{const b=interval(o);return Math.max(a[1],b[1])-Math.min(a[0],b[0])>s.tolerance}))return {source:'Paused: sources disagree'};return {source:'Windows',lo:a[0],hi:a[1]};}
+ return {source:'Paused: no independent consensus'};
+}
+function outcome(s){const t=select(s);return {...t,deadline:s.completed?'Already handled':t.lo===undefined?'Waiting for reliable time':t.lo>=s.deadline?'Due':t.hi>=s.deadline?'Waiting at uncertain deadline boundary':'Pending'};}
+function reduce(old,a){
+ let s=JSON.parse(JSON.stringify(old));
+ if(a==='reset')return initial();
+ if(a==='sleep'){s.reference+=3600;s.observations=[];}
+ if(a==='age'){s.reference+=31;}
+ if(a==='restart'){s.observations=[];}
+ const sample=(id,offset=0,provider=id)=>({id,provider,utc:s.reference+offset,error:.1,at:s.reference});
+ if(a==='agree')s.observations=[sample('windows'),sample('server A',.1,'operator A'),sample('server B',-.1,'operator B')];
+ if(a==='outlier')s.observations=[sample('windows',120),sample('server A',.1,'operator A'),sample('server B',-.1,'operator B')];
+ if(a==='one')s.observations=s.observations.filter(o=>o.id!=='server B');
+ if(a==='windowsOff')s.observations=s.observations.filter(o=>o.id!=='windows');
+ if(a==='offline')s.observations=[];
+ if(a==='conflict')s.observations=[sample('windows'),sample('server A',30,'operator A'),sample('server B',-30,'operator B')];
+ if(a==='duplicate')s.observations=[sample('server A',0,'same operator'),sample('server B',0,'same operator')];
+ if(a==='boundary'){s.reference=300;s.observations=[sample('windows'),sample('server A',0,'operator A'),sample('server B',0,'operator B')];}
+ if(a==='past'){s.reference+=1;s.observations=[sample('windows'),sample('server A',0,'operator A'),sample('server B',0,'operator B')];}
+ if(a==='handle'&&outcome(s).deadline==='Due')s.completed=true;
+ s.log=a;return s;
+}
+const labels={reset:'Reset',agree:'Sources agree',outlier:'Windows is 2 minutes ahead',one:'Lose server B',windowsOff:'Lose Windows',offline:'Lose every source',conflict:'Sources conflict',sleep:'Sleep one hour',restart:'Restart worker',age:'Age observations',duplicate:'Both servers share an operator',boundary:'Reach deadline boundary',past:'Fresh sample after deadline',handle:'Handle due deadline'};
+const scenarios=[
+ ['Agreement',['agree'],'Windows is preferred when all fresh observations agree.'],
+ ['Windows outlier',['outlier'],'Two independent network servers override Windows.'],
+ ['One-server outage',['agree','one'],'Windows remains usable alongside one agreeing server.'],
+ ['No quorum',['agree','one','windowsOff'],'A lone server cannot establish consensus.'],
+ ['Recovery',['offline','agree'],'Fresh observations automatically restore usable time.'],
+ ['Disagreement',['conflict'],'No accepted agreement means time-dependent effects wait.'],
+ ['Sleep',['agree','sleep','agree','handle'],'Original deadline is due after resume and resampling.'],
+ ['Restart',['agree','restart','agree'],'Restart retains the deadline but discards observations.'],
+ ['Staleness',['agree','age'],'Old samples cannot authorize a decision.'],
+ ['Boundary',['boundary','handle','past','handle','restart','agree','handle'],'Do not act early, and do not handle an already completed deadline twice.'],
+ ['Independence',['duplicate'],'Two names backed by one operator cannot form quorum.']
+];
+</script>
+<script>
+let state=initial(),active=0,step=0;
+const button=(text,fn)=>{const b=document.createElement('button');b.textContent=text;b.onclick=fn;return b;};
+function render(){
+ const o=outcome(state);document.querySelector('#state').innerHTML=`<dl><dt>Selected source</dt><dd>${o.source}</dd><dt>Trusted time range</dt><dd>${o.lo===undefined?'Unknown':o.lo.toFixed(2)+' to '+o.hi.toFixed(2)+' seconds'}</dd><dt>Original deadline</dt><dd>${state.deadline} seconds</dd><dt>Deadline decision</dt><dd>${o.deadline}</dd><dt>Simulated timeline</dt><dd>${state.reference} seconds</dd><dt>Last action</dt><dd>${state.log}</dd></dl><table><tr><th>Source</th><th>Operator</th><th>Time ± error</th><th>Sample age</th></tr>${state.observations.map(x=>`<tr><td>${x.id}</td><td>${x.provider}</td><td>${x.utc} ± ${x.error}</td><td>${state.reference-x.at}s</td></tr>`).join('')}</table>`;
+ document.querySelector('#description').textContent=scenarios[active][2];const steps=document.querySelector('#steps');steps.replaceChildren();scenarios[active][1].forEach((a,i)=>{const b=button(`${i+1}. ${labels[a]}`,()=>{state=reduce(state,a);step++;render();});b.disabled=i!==step;steps.append(b);});
+ document.querySelectorAll('#tabs button').forEach((b,i)=>b.className=i===active?'active':'');
+}
+for(const [a,label] of Object.entries(labels))document.querySelector('#actions').append(button(label,()=>{state=reduce(state,a);render();}));
+scenarios.forEach(([name],i)=>document.querySelector('#tabs').append(button(name,()=>{active=i;step=0;state=initial();render();})));
+for(const key of ['tolerance','freshness'])document.querySelector('#'+key).onchange=e=>{const v=Number(e.target.value);if(Number.isFinite(v)&&v>=0)state[key]=v;render();};render();
+</script>
