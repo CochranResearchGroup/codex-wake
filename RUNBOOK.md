@@ -5170,3 +5170,21 @@ First TTL120 parse failure was reconciled aszero effect, preserved and corrected
 to120s. Additional result-completed ack failedclaim_required; terminal ack not
 claimed. Stock Codex0.160.0 and updater configuration unchanged. M2-M4 OPEN.
 Memory dispositionunavailable: no reviewed Codex Wake Graphiti target group.
+
+## Turn 240 | 2026-10-08
+
+Published the user-approved Plan0122 breakdown as repo-native Plans0123–0126 on feature/network-time-consensus. Plan0123 is READY; 0124/0125 depend on 0123; 0126 depends on both. Added P64 sequencing and one-child WIP limit. Preserved the parent design and historical prototype branches. This packet publishes actionable work and adds no runtime behavior. Next execution frontier: Plan0123 network-time inspection. Dependency/link validation and staged whitespace checks govern this documentation slice; no runtime tests were rerun. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
+
+
+## Turn 241 | 2026-10-08
+
+Implemented and accepted Plans0123–0126 under the existing goal on feature/network-time-consensus in `/home/ecochran76/workspace.local/codex-wake-time-prototype`. Original main checkout/untracked notes preserved. Inspection/fallback committed at a1a7aaa; the following coherent integration commit contains mailbox migration, network deadline wakes and acceptance. Shared 0125/0126 integration was exercised together and accepted together after 0123/0124, with no second concurrent ownership lane.
+
+Acceptance state: all four child plans DONE; P64/Plan0122 remain OPEN for production activation and unqualified additional-source/authentication work. Progress classification: implemented and verified isolated candidate, not live rollout. Evidence: `docs/dev/evidence/plan0126/acceptance-review.md`, exact source/wheel hashes, installed workflow, three owned host cache fault controls, 950 comprehensive tests in 53.722 s (one shard, no retries). Review fixed backup versioning, cancellation race, direct-dispatch gating, fractional deadlines, initial regression fence, archive retention, outage reply inspection and host cache failures. Controlled sleep/boot inputs are distinct from actual host actions.
+
+Material limits: only two admitted unauthenticated operators, stopped Windows synchronization service, Netnod/PTB scale and NTS qualification open; no production package/store/service/clock changes or real session transport. Release/migration/rollback instructions prepared for candidate 0.8.0. Stop reason: bounded implementation objective achieved before the user ceiling of 2 million tokens or 3 h. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
+
+
+## Turn 242 | 2026-10-08
+
+Bounded research reconciled historical A2A acceptance, current installed identity and the network-time candidate. Stable CLI is0.7.1 with A2A verbs; time/network-time verbs are absent. Plan0119/verification0122 already accepted released automatic exchanges, restart/reconnect and full soak. Corrected stale P63 roadmap projection; Plan0122 now prioritizes target bus/guard/worker reconciliation and bounded activation over optional additional-source research. Candidate remains53ffcfc before this documentation commit, clean; original main/untracked notes preserved. No live mailbox, capabilities, messages, services or installation changed. Note0010 holds sources, observations, limits and next packet. No runtime tests rerun for documentation-only research. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group established.

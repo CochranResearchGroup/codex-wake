@@ -96,6 +96,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="wake runtime root; defaults to .codex/wake under the current directory",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from .time_inspection import add_time_parser
+    add_time_parser(subparsers)
     from .sessions_cli import add_sessions_parser
     add_sessions_parser(subparsers)
     from .a2a_cli import add_a2a_parser
@@ -106,12 +108,14 @@ def build_parser() -> argparse.ArgumentParser:
     after = subparsers.add_parser("after", help="create a wake after a duration such as 45m or 1h30m")
     after.add_argument("duration")
     after.add_argument("prompt", nargs=argparse.REMAINDER)
+    after.add_argument("--network-time", action="store_true", help="use bounded network-first time (plain NTP, explicitly unauthenticated)")
     add_target_options(after)
     add_monitor_gate_options(after)
 
     at = subparsers.add_parser("at", help="create a wake at an ISO-8601 timestamp with timezone")
     at.add_argument("timestamp")
     at.add_argument("prompt", nargs=argparse.REMAINDER)
+    at.add_argument("--network-time", action="store_true", help="use bounded network-first time (plain NTP, explicitly unauthenticated)")
     add_target_options(at)
     add_monitor_gate_options(at)
 
@@ -806,16 +810,31 @@ def resolve_root(args: argparse.Namespace) -> Path:
 
 
 def create_after(args: argparse.Namespace, root: Path) -> int:
-    now = utc_now()
+    observation = None
+    if args.network_time:
+        from .network_wakes import read_time, creation_time
+        observation = read_time()
+        now = creation_time(observation)
+    else:
+        now = utc_now()
     due = now + parse_duration(args.duration)
     predicate = {"type": "not_before", "due_at": format_utc(due)}
-    return create_record(args.prompt, predicate, root, now, args)
+    return create_record(args.prompt, predicate, root, now, args, time_observation=observation)
 
 
 def create_at(args: argparse.Namespace, root: Path) -> int:
     due = parse_timestamp(args.timestamp)
-    predicate = {"type": "not_before", "due_at": format_utc(due)}
-    return create_record(args.prompt, predicate, root, utc_now(), args)
+    observation = None
+    if args.network_time:
+        from .network_wakes import read_time, creation_time, precise_deadline
+        observation = read_time()
+        now = creation_time(observation)
+        due = precise_deadline(args.timestamp)
+        stamp = due.isoformat().replace('+00:00','Z')
+    else:
+        now, stamp = utc_now(), format_utc(due)
+    predicate = {"type": "not_before", "due_at": stamp}
+    return create_record(args.prompt, predicate, root, now, args, time_observation=observation)
 
 
 def create_app(args: argparse.Namespace, root: Path) -> int:
@@ -1943,6 +1962,7 @@ def create_record(
     args: argparse.Namespace,
     *,
     target: dict | None = None,
+    time_observation=None,
 ) -> int:
     prompt = normalize_prompt(prompt_parts)
     if getattr(args, "require_monitor", False):
@@ -1955,6 +1975,9 @@ def create_record(
         target=target or target_for_args(args),
         now=now,
     )
+    if time_observation is not None:
+        from .network_wakes import mark_network_record
+        mark_network_record(record,time_observation)
     path = write_record(root, record)
     print(f"{record['id']} {path}")
     return 0
@@ -2689,6 +2712,9 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.command == "time":
+        from .time_inspection import time_command
+        return time_command(args)
     root = resolve_root(args)
     if args.command == "messages":
         from .messages_cli import messages_command

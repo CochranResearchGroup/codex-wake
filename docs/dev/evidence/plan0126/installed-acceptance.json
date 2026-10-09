@@ -1,0 +1,212 @@
+{
+  "candidate": {
+    "package": "/tmp/codex-wake-time-candidate/lib/python3.12/site-packages/codex_wake/__init__.py",
+    "version": "0.8.0"
+  },
+  "checks": [
+    "installed network inspection: two admitted operators; all four candidates visible",
+    "installed create/persist/poll/show: real network deadline reached with no transport dispatch",
+    "installed cancellation resolves isolated firing wake",
+    "installed operator migration and fresh-process mailbox inspection preserve the deadline",
+    "controlled outage: relative admission held, inspection/cancellation remain usable, no UTC fabricated"
+  ],
+  "dispatch": false,
+  "live_observation": {
+    "decision": {
+      "lower": 1791509988.7434382,
+      "reason": "",
+      "sources": [
+        "time.cloudflare.com",
+        "time.nist.gov"
+      ],
+      "status": "network",
+      "upper": 1791509988.7854574
+    },
+    "instant": {
+      "frequency": 10000000,
+      "generation": "cf3c0a3a-2a90-4b7e-9f5c-fc2790224919",
+      "guest_boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "host_boot": "639269852545000000",
+      "qpc": 1215374572597
+    },
+    "note": "Bounds refer to collector completion, not the later print instant. No deadline effects are authorized.",
+    "policy": {
+      "drift_ppm": 100,
+      "max_age": 120.0,
+      "max_rtt": 0.5,
+      "tolerance": 1.0
+    },
+    "production_ready": false,
+    "purpose": "inspection-only",
+    "schema": 1,
+    "sources": [
+      {
+        "authentication": "plain-ntp-inspection-only",
+        "host": "time.cloudflare.com",
+        "observation": {
+          "age": 0.2258425,
+          "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+          "healthy": true,
+          "kind": "network",
+          "lower": 1791509988.7434382,
+          "operator": "cloudflare",
+          "round_id": "cf3c0a3a-2a90-4b7e-9f5c-fc2790224919",
+          "scale": "utc-step",
+          "source": "time.cloudflare.com",
+          "upper": 1791509988.7850592
+        },
+        "operator": "cloudflare",
+        "peer": "162.159.200.1",
+        "reason": "accepted",
+        "scale": "utc-step"
+      },
+      {
+        "authentication": "plain-ntp-inspection-only",
+        "host": "time.nist.gov",
+        "observation": {
+          "age": 0.1411961,
+          "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+          "healthy": true,
+          "kind": "network",
+          "lower": 1791509988.7443788,
+          "operator": "nist",
+          "round_id": "cf3c0a3a-2a90-4b7e-9f5c-fc2790224919",
+          "scale": "utc-step",
+          "source": "time.nist.gov",
+          "upper": 1791509988.7854574
+        },
+        "operator": "nist",
+        "peer": "129.6.15.25",
+        "reason": "accepted",
+        "scale": "utc-step"
+      },
+      {
+        "authentication": "not-qualified",
+        "host": "ntp.se",
+        "operator": "netnod",
+        "reason": "time_scale_unqualified",
+        "scale": null
+      },
+      {
+        "authentication": "not-qualified",
+        "host": "ptbtime1.ptb.de",
+        "operator": "ptb",
+        "reason": "time_scale_unqualified",
+        "scale": null
+      }
+    ],
+    "windows": {
+      "reason": "windows_unsynchronized"
+    }
+  },
+  "mailbox": {
+    "cancellation_time": null,
+    "cancelled": true,
+    "deadline": 1791510054.352235,
+    "migration_receipt": "receipt_c9e6ad9119aa4621a7c099be8ca4048a"
+  },
+  "production_store_changes": 0,
+  "status": "passed",
+  "system_clock_adjustments": 0,
+  "wake": {
+    "final": {
+      "ack_timeout_seconds": 30,
+      "attempts": 0,
+      "created_at": "2026-10-09T01:39:50Z",
+      "cwd": "/home/ecochran76/workspace.local/codex-wake-time-prototype",
+      "events": [
+        {
+          "at": "2026-10-09T01:39:50Z",
+          "message": "Wake record created",
+          "type": "created"
+        },
+        {
+          "at": "2026-10-09T01:39:52Z",
+          "message": "Network lower bound reached original deadline",
+          "type": "predicate_matched"
+        }
+      ],
+      "id": "wake_20261009_013950_5b8b",
+      "max_attempts": 3,
+      "next_attempt_at": "2026-10-09T01:39:52Z",
+      "predicate": {
+        "due_at": "2026-10-09T01:39:52Z",
+        "type": "not_before"
+      },
+      "prompt": "Resume qualification fixture",
+      "schema_version": 3,
+      "status": "firing",
+      "target": {
+        "endpoint": "stdio://",
+        "thread_id": "qualification-fixture",
+        "transport": "app-server"
+      },
+      "time_observation": {
+        "lower": 1791509989.5713038,
+        "reason": "",
+        "sources": [
+          "time.cloudflare.com",
+          "time.nist.gov"
+        ],
+        "status": "network",
+        "upper": 1791509989.613489
+      },
+      "time_policy": {
+        "authentication": "plain-ntp-explicit-opt-in",
+        "mode": "network-first",
+        "version": 1
+      },
+      "updated_at": "2026-10-09T01:39:52Z"
+    },
+    "initial": {
+      "ack_timeout_seconds": 30,
+      "attempts": 0,
+      "created_at": "2026-10-09T01:39:50Z",
+      "cwd": "/home/ecochran76/workspace.local/codex-wake-time-prototype",
+      "events": [
+        {
+          "at": "2026-10-09T01:39:50Z",
+          "message": "Wake record created",
+          "type": "created"
+        }
+      ],
+      "id": "wake_20261009_013950_5b8b",
+      "max_attempts": 3,
+      "next_attempt_at": "2026-10-09T01:39:52Z",
+      "predicate": {
+        "due_at": "2026-10-09T01:39:52Z",
+        "type": "not_before"
+      },
+      "prompt": "Resume qualification fixture",
+      "schema_version": 3,
+      "status": "pending",
+      "target": {
+        "endpoint": "stdio://",
+        "thread_id": "qualification-fixture",
+        "transport": "app-server"
+      },
+      "time_observation": {
+        "lower": 1791509989.5713038,
+        "reason": "",
+        "sources": [
+          "time.cloudflare.com",
+          "time.nist.gov"
+        ],
+        "status": "network",
+        "upper": 1791509989.613489
+      },
+      "time_policy": {
+        "authentication": "plain-ntp-explicit-opt-in",
+        "mode": "network-first",
+        "version": 1
+      },
+      "updated_at": "2026-10-09T01:39:50Z"
+    },
+    "polls": [
+      "checked=1 fired=0 failed=0 pending=1 dispatched=0 submitted=0 requeued=0",
+      "checked=1 fired=0 failed=0 pending=1 dispatched=0 submitted=0 requeued=0",
+      "checked=1 fired=0 failed=0 pending=1 dispatched=0 submitted=0 requeued=0",
+      "checked=1 fired=1 failed=0 pending=0 dispatched=0 submitted=0 requeued=0"
+    ]
+  }
+}

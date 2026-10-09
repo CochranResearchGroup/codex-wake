@@ -38,6 +38,22 @@ lanes:
     remaining_gate_acceptance: docs/dev/verification/0122-2026-10-05-remaining-gates-and-native-soak-acceptance.md
     remaining_gate_packet_state: COMPLETE
     disposition: Requested cancellation/reconnect/normal worker restart/released installation/multiroot/rollback/30-minute soak gates PASS; wider Plan0101 and retained server-unloaded/deferred recovery obligations remain OPEN
+
+  - id: P64
+    owner: primary
+    objective: Complete Plan0122 network-first time activation and live A2A acceptance
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/224]
+    plan: docs/dev/plans/0122-2026-10-08-network-first-time-provider.md
+    plan_ref: feat/network-time-provider
+    branch: feat/network-time-provider
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    checkpoint: 7a4666a
+    integration: squash_pr
+    dependencies: []
+    overlaps: [P63]
+    updated_at: 2026-10-08
   - id: APP-PERSIST
     owner: remote-view-provider-remediation
     objective: Preserve accepted app-server turns beyond owned client teardown
