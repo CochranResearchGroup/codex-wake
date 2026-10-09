@@ -1,0 +1,12 @@
+{
+  "prototype": true,
+  "thread_id": "01a1227e-a041-7b72-9c36-18349e7dd22c",
+  "pid": 13458,
+  "started_at": 1791580206.917427,
+  "finished_at": 1791580209.4209597,
+  "transport": "codex queue",
+  "exit_code": 0,
+  "stdout": "Queued message 01a12280-80ef-7772-a00a-c68bd32ecbba for thread 01a1227e-a041-7b72-9c36-18349e7dd22c.\n",
+  "stderr": "",
+  "calling_tui_environment_removed": true
+}
