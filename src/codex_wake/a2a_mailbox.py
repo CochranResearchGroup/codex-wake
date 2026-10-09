@@ -230,20 +230,24 @@ class Mailbox:
                     pass  # Preserve the original failure; no admission or effect retry.
             raise
 
+    @staticmethod
+    def _check_network_checkpoint(database, decision):
+        previous = database.execute("SELECT value FROM meta WHERE key='mail_network_clock'").fetchone()
+        if previous:
+            from .time_provider import TimeDecision, require_time_decision
+            try:
+                last = json.loads(previous[0])
+                require_time_decision(TimeDecision(last['status'],tuple(last['sources']),last['lower'],last['upper']))
+                regressed = decision.lower < last['lower']-1
+            except (KeyError,TypeError,ValueError):
+                raise BusError('clock_anomaly','persisted network checkpoint is invalid') from None
+            if regressed:
+                raise BusError('clock_anomaly','network time regressed; no checkpoint reset authorized')
+
     def _now(self, database) -> float:
         if self._network_mode(database):
             decision = self._accepted_time()
-            previous = database.execute("SELECT value FROM meta WHERE key='mail_network_clock'").fetchone()
-            if previous:
-                from .time_provider import TimeDecision, require_time_decision
-                try:
-                    last = json.loads(previous[0])
-                    require_time_decision(TimeDecision(last['status'],tuple(last['sources']),last['lower'],last['upper']))
-                    regressed = decision.lower < last['lower']-1
-                except (KeyError,TypeError,ValueError):
-                    raise BusError('clock_anomaly','persisted network checkpoint is invalid') from None
-                if regressed:
-                    raise BusError('clock_anomaly','network time regressed; no checkpoint reset authorized')
+            self._check_network_checkpoint(database, decision)
             database.execute('INSERT INTO meta VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
                              ('mail_network_clock',encoded(dict(lower=decision.lower,upper=decision.upper,sources=decision.sources,status=decision.status))))
             return decision.lower

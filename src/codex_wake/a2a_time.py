@@ -11,4 +11,7 @@ def mailbox_time(mailbox, *, upper=False):
         from .records import utc_now
         return utc_now()
     decision = mailbox._accepted_time()
+    with mailbox.bus.connection(read_only=True) as database:
+        mailbox._schema(database)
+        mailbox._check_network_checkpoint(database, decision)
     return datetime.fromtimestamp(decision.upper if upper else decision.lower, UTC)

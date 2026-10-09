@@ -1,13 +1,13 @@
 # Plan 0122 — Network-first time provider
 
 State: OPEN
-Branch: feature/network-time-consensus
+Branch: feat/network-time-provider (integration); feature/network-time-consensus (preserved source)
 Owner: primary agent
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/224
 
 ## Current State
 
-Revision2 is IN_PROGRESS under issue224. Plans0123–0126 produced the isolated0.8.0 candidate; subsequent native-path regressions exposed and repaired worker outage termination, guest-clock reply expiry and final tmux expiry checks. Three independently operated plain-NTP sources now form real bounded consensus (Cloudflare/NIST/Alastyr); each single-provider loss retains two. Netnod/PTB remain visibly excluded. Main transport updates are reconciled at ec33887 and source regression is passing; owned native request delivery is observed, while automatic return and stable installed activation remain incomplete. See `docs/dev/evidence/plan0122/activation/progress.md`. No existing mailbox checkpoint has been reset.
+Revision2 is IN_PROGRESS under issue224. Plans0123–0126 produced the isolated0.8.0 candidate; subsequent native-path regressions exposed and repaired worker outage termination, guest-clock reply expiry and final tmux expiry checks. Three independently operated plain-NTP sources now form real bounded consensus (Cloudflare/NIST/Alastyr); each single-provider loss retains two. Netnod/PTB remain visibly excluded. Main transport updates are reconciled at ec33887 and source regression is passing; owned native automatic request/return and digest verification are accepted; stable installed activation remains incomplete. See `docs/dev/evidence/plan0122/activation/progress.md`. No existing mailbox checkpoint has been reset.
 
 ## Problem Statement
 

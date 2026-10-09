@@ -55,6 +55,18 @@ class NetworkMailboxTests(unittest.TestCase):
         self.assertEqual(reply['message']['in_reply_to'],identifier)
         self.assertEqual(self.mailbox.show(self.actors[0],identifier)['state']['recipient'],'completed')
 
+    def test_reply_transport_time_cannot_bypass_persisted_regression_guard(self):
+        from codex_wake.a2a_time import mailbox_time
+        self.activate()
+        with self.bus.connection(read_only=True) as database:
+            checkpoint=database.execute("SELECT value FROM meta WHERE key='mail_network_clock'").fetchone()[0]
+        self.reading=TimeDecision('network',('a','b'),900,900.1)
+        with self.assertRaises(BusError) as error:
+            mailbox_time(self.mailbox,upper=True)
+        self.assertEqual(error.exception.code,'clock_anomaly')
+        with self.bus.connection(read_only=True) as database:
+            self.assertEqual(database.execute("SELECT value FROM meta WHERE key='mail_network_clock'").fetchone()[0],checkpoint)
+
     def test_uncertain_creation_is_retryable_and_creates_no_message(self):
         self.activate()
         self.reading=TimeDecision('uncertain',reason='outage')

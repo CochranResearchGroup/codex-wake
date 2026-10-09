@@ -44,8 +44,8 @@ lanes:
     objective: Complete Plan0122 network-first time activation and live A2A acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/224]
     plan: docs/dev/plans/0122-2026-10-08-network-first-time-provider.md
-    plan_ref: feature/network-time-consensus
-    branch: feature/network-time-consensus
+    plan_ref: feat/network-time-provider
+    branch: feat/network-time-provider
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE

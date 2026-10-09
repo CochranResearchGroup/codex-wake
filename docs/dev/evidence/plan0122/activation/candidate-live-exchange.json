@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "boundary": "private candidate 0.8.0, not stable install",
+  "codex_version": "0.162.0",
+  "source_revision": "e4f742b",
+  "request_id": "msg_0dc2212aecbf47f0a517e00a0673bf59",
+  "reply_id": "msg_de1c56451204449f8e212aef106d6c16",
+  "digest_verified": true,
+  "mailbox_schema": 3,
+  "messages": [
+    {
+      "message_id": "msg_0dc2212aecbf47f0a517e00a0673bf59",
+      "in_reply_to": null,
+      "created": 1791513279.8388815,
+      "expires": 1791513879.8388815,
+      "admission": "accepted",
+      "notification": "submitted",
+      "recipient": "completed"
+    },
+    {
+      "message_id": "msg_de1c56451204449f8e212aef106d6c16",
+      "in_reply_to": "msg_0dc2212aecbf47f0a517e00a0673bf59",
+      "created": 1791513320.306929,
+      "expires": 1791599720.306929,
+      "admission": "accepted",
+      "notification": "submitted",
+      "recipient": "accepted"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "attempt_324eb457d28e47e4bad289ab8fb3e50a",
+      "message_ids": "[\"msg_0dc2212aecbf47f0a517e00a0673bf59\"]",
+      "state": "submitted",
+      "evidence": "{\"daemon_generation\":\"f5e958c3ebb84f8982ebb5ef004d26e0\",\"exact_thread_id\":\"01a11e72-49fd-7402-9e44-c2f5f8fcebb6\",\"receipt_id\":\"attempt_324eb457d28e47e4bad289ab8fb3e50a\",\"transport\":\"tmux_notification_v1\"}"
+    },
+    {
+      "attempt_id": "attempt_e9a88d47392d4f22a66d80b5bec0b8a5",
+      "message_ids": "[\"msg_de1c56451204449f8e212aef106d6c16\"]",
+      "state": "submitted",
+      "evidence": "{\"daemon_generation\":\"13f564d9a76748cd9a5d823fc3b669e5\",\"exact_thread_id\":\"01a11e72-49fc-7650-9226-923f3e7e0017\",\"receipt_id\":\"attempt_e9a88d47392d4f22a66d80b5bec0b8a5\",\"transport\":\"tmux_notification_v1\"}"
+    }
+  ],
+  "wake": {
+    "id": "wake_6070d2b97feb4a98aa9ff066e8f06142",
+    "status": "submitted",
+    "transport_receipt": {
+      "attempt_id": "attempt_e9a88d47392d4f22a66d80b5bec0b8a5",
+      "message_id": "msg_de1c56451204449f8e212aef106d6c16",
+      "receipt_id": "attempt_e9a88d47392d4f22a66d80b5bec0b8a5",
+      "transport": "tmux_notification_v1"
+    }
+  },
+  "worker": "MainPID=0\nExecMainStatus=0\nActiveState=inactive\nInvocationID=\n",
+  "controller_intervention_after_admission": false,
+  "limitations": [
+    "B corrected an overlong evidence argument before successful same-key admission",
+    "A corrected result acknowledgement usage autonomously; digest was verified",
+    "Earlier separate exchange1 failed and is preserved"
+  ]
+}
