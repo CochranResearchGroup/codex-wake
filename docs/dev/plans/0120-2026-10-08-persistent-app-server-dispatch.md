@@ -4,25 +4,24 @@ Date: 2026-10-08
 State: OPEN
 Owner: delegated provider remediation lane; primary integration owner adjudicates
 Lane: APP-PERSIST
-Branch: fix/app-server-owned-socket-alias
+Branch: fix/app-server-unix-websocket
 Work item: docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md
 Target: origin/main
 Integration: squash_pr
 
 ## Current State
 
-Initial repair PR221 integrated as a691d356 and was installed normally with a
-fresh Wake supervisor, unchanged four roots and unchanged Codex daemon. A fresh
-distinct native acceptance event proved scheduling/parity/privacy but failed
-before `turn/start`: actual Codex0.162.0 reports an owned leaf alias, which the
-initial blanket nonsymlink check rejected. That failed event remains archived;
-neither it nor the original interrupted event was retried.
+PR221 and alias correction PR222 integrated and were installed normally, with
+unchanged four roots and the same Codex daemon. Fresh distinct native events
+remain immutable and archived. The alias-qualified scenario admitted one wake,
+but initialize timed out before any turn started: Codex's raw stdio proxy copies
+bytes while its Unix control socket requires WebSocket upgrade and framing.
 
-The bounded followup qualifies that exact private alias layout and preserves
-precise WakeError diagnostics.31 focused tests and912 full Python tests pass
-(full46.245seconds); compileall and diff checks pass.
-No further provider adoption or live event belongs to this source followup before
-primary review. Actual intended-thread completion remains unproven.
+Actual installed0.162.0 read-only initialize succeeded over the supported Unix
+WebSocket transport using already-declared websockets17.2. This successor
+replaces the mismatched proxy bridge with that maintained client. Source
+qualification and required CI precede primary review and any integration/adoption.
+Actual intended-thread completion remains unproven.
 
 ## Problem and scope
 
@@ -36,25 +35,22 @@ watch evaluation, new ingress, provider installation or shared-daemon restart.
 
 ## Decision
 
-Dispatch connects stdio through the installed Codex CLI's existing
-`app-server proxy --sock SOCKET` to a running actor-owned daemon. Read-only
-`app-server daemon version` discovers its exact socket; `proxy --help` qualifies
-capability rather than guessing support from a version string. Each discovery
-command has a five-second deadline. Require an absolute canonical Unix socket,
-current-actor ownership and a private actor-owned containing directory. A reported
-current-actor-owned leaf alias is allowed only under a private owned directory,
-with an absolute canonical target socket under its own private owned directory.
-Reject ancestor aliases, chains, unsafe directories and foreign/dangling targets;
-pass the canonical resolved target to the proxy. Preserve specific WakeError
-messages rather than masking them through its ValueError base class. Never
-start, replace, stop or take ownership of that daemon. Missing/unsupported daemon
-fails before `turn/start`; no fallback to the known-interrupting standalone owner.
+Dispatch connects to the existing daemon's Unix WebSocket control transport with
+the already-declared maintained `websockets.sync.client.unix_connect` library.
+Read-only `app-server daemon version` discovers its exact socket with a five-second
+deadline. Require a canonical actor-owned Unix socket under a private actor-owned
+directory; a private owned leaf alias may resolve once to that canonical target.
+Reject ancestor aliases, chains, unsafe directories and foreign/dangling targets.
+Never start, replace, stop or take ownership of the daemon. There is no standalone
+fallback for dispatch. Readiness includes a bounded actual WebSocket handshake.
 
-Only the owned proxy is terminated/reaped after request completion. The existing
-30-second RPC bound is enforced against silent peers and notification streams;
-it is not a turn deadline. Typical long-running turns remain owned by the daemon
-and do not block the supervisor. `submitted` and `ack_observed` remain admission
-receipts; completion is unknown until independently observed in the exact thread.
+Initialize sends the initialized notification. Every RPC filters notifications
+and matches the exact request ID under one absolute30-second deadline, including
+blocked writes; deadline expiry shuts down only the owned connection. The library
+caps incoming messages at32MiB and close at one second. Only the owned connection
+closes after turn/start acceptance; long agent work remains daemon-owned.
+Submitted/acknowledged receipts do not prove completion; independently read the
+exact intended turn transcript.
 Read-only thread inspection retains its existing standalone client behavior.
 Custom per-record process commands cannot establish persistent dispatch ownership
 and are refused in real dispatch; injected provider-free clients remain supported.
@@ -62,14 +58,14 @@ and are refused in real dispatch; injected provider-free clients remain supporte
 ## Acceptance and bounded validation
 
 - [x] Reproduce the lifecycle regression before repair using a real local
-  provider-free Unix-socket daemon and owned proxy subprocess.
-- [x] Accepted turn remains able to complete after proxy teardown; no completion
+  provider-free framed Unix WebSocket daemon.
+- [x] Accepted turn remains able to complete after connection teardown; no completion
   claim is manufactured from `turn/start` acceptance.
 - [x] Missing/stopped/unsupported, nonprivate, wrong-actor and unsafe/ambiguous alias
-  paths refuse before proxy creation/turn-start; discovery never starts a daemon.
-- [x] Silent RPC/discovery timeout is bounded and owned proxy cleanup reaps it.
+  paths refuse before connection/turn-start; discovery never starts a daemon.
+- [x] Silent RPC/discovery timeout is bounded and owned connection cleanup closes it.
 - [x] Exact supported owned leaf alias reaches a real provider-free daemon;
-  canonical target is used and daemon-owned turn survives proxy teardown.
+  canonical target is used and daemon-owned turn survives connection teardown.
 - [ ] Followup canonical integration and installed intended-thread acceptance after primary
   review. No deployment, new wake or new turn belongs to this source packet.
 
