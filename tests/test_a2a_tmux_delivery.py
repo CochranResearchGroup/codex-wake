@@ -89,8 +89,12 @@ class TmuxDeliveryTests(unittest.TestCase):
         self.assertEqual(binding.deliver(self.claim, self.job, self.root)['status'], 'unsent')
 
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_stock_0162_idle_footer_is_recognized_without_legacy_shortcut_row(self):
+        current = '› Ask Codex to do anything\n\nGPT-6.1-Sol low · /owned/repo · Owned session   ⚠ 1 warning · f2 to view\n'
+        self.assertTrue(empty_composer(current))
+        self.assertFalse(empty_composer(current.replace('Ask Codex to do anything', 'unfinished draft')))
+        self.assertFalse(empty_composer(current.replace('GPT-6.1-Sol low', 'unknown UI')))
+        self.assertFalse(empty_composer(current+'wrapped draft continuation\n'))
 
 
 class WorkerClockHoldTests(unittest.TestCase):
@@ -145,3 +149,7 @@ class WorkerClockHoldTests(unittest.TestCase):
                 self.assertNotEqual(a2a_command(args), 0)
             self.assertIn('"code": "effect_uncertain"', output.getvalue())
             self.assertEqual(dispatcher.return_value.tick.call_count, 1)
+
+
+if __name__ == '__main__':
+    unittest.main()

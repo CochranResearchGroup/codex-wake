@@ -28,6 +28,33 @@ class NetworkMailboxTests(unittest.TestCase):
         Mailbox.activate_network_time(self.bus,self.operator,provider=lambda:self.reading)
         self.mailbox=Mailbox(self.bus,time_provider=lambda:self.reading)
 
+    def test_reply_waits_for_another_bounded_network_acquisition(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Event, Timer
+        self.activate()
+        sent=self.mailbox.send(self.actors[0],self.identities[1],body='request',idempotency_key='request')
+        identifier=sent['message']['message_id']
+        self.mailbox.read(self.actors[1],identifier)
+        self.mailbox.ack(self.actors[1],identifier,outcome='accepted')
+        entered,release=Event(),Event()
+        def slow_provider():
+            entered.set()
+            if not release.wait(5): raise RuntimeError('acquisition control timed out')
+            return self.reading
+        competing=Mailbox(self.bus,time_provider=slow_provider)
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            future=pool.submit(competing.read,self.actors[0],identifier)
+            self.assertTrue(entered.wait(2))
+            # Controlled acquisition latency exceeds the old one-second lock wait.
+            timer=Timer(1.3,release.set);timer.start()
+            try:
+                reply=self.mailbox.reply(self.actors[1],identifier,body='result',idempotency_key='reply',outcome='completed')
+            finally:
+                release.set();timer.cancel()
+            future.result(timeout=2)
+        self.assertEqual(reply['message']['in_reply_to'],identifier)
+        self.assertEqual(self.mailbox.show(self.actors[0],identifier)['state']['recipient'],'completed')
+
     def test_uncertain_creation_is_retryable_and_creates_no_message(self):
         self.activate()
         self.reading=TimeDecision('uncertain',reason='outage')

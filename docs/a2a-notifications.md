@@ -108,6 +108,11 @@ the actual terminal process state afterward.
 
 These commands run in the actual enrolled Codex thread and root. Never invent
 or override `CODEX_THREAD_ID`. Set `actor` to that thread's issued capability.
+Shared app-server tool processes may not inherit the TUI shell environment.
+Provide the executable and bus/capability/wake/delegation paths explicitly to each
+actor; use the explicit flags below or set variables in each command subprocess.
+Verify the executable version in the actual actor tool process before sending.
+
 A sends one request and arms its return before ending its turn:
 
 ```sh

@@ -25,8 +25,12 @@ def empty_composer(text):
     if not prompts or unsafe_pane_reason(text):
         return False
     tail = lines[prompts[-1]:]
-    return (len(tail) == 3 and tail[0] == '› Ask Codex to do anything'
-            and ' · ' in tail[1] and '? for shortcuts' in tail[2])
+    if tail[0] != '› Ask Codex to do anything':
+        return False
+    legacy = len(tail) == 3 and ' · ' in tail[1] and '? for shortcuts' in tail[2]
+    current = len(tail) == 2 and re.fullmatch(
+        r'GPT-[\w.-]+ (?:low|medium|high|xhigh|max|ultra) · .+ · .+', tail[1]) is not None
+    return legacy or current
 
 
 @dataclass(frozen=True)
