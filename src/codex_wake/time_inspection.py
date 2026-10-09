@@ -80,6 +80,7 @@ SOURCES = (
     dict(operator='nist', host='time.nist.gov', scale='utc-step', authentication='plain-ntp-inspection-only'),
     dict(operator='netnod', host='ntp.se', scale=None, authentication='not-qualified'),
     dict(operator='ptb', host='ptbtime1.ptb.de', scale=None, authentication='not-qualified'),
+    dict(operator='alastyr', host='ntp.alastyr.com', scale='utc-step', authentication='plain-ntp-inspection-only'),
 )
 
 

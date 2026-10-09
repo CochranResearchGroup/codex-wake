@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 import re
 import stat
-import time
 import uuid
 
 from .a2a_identity import BusError, RuntimeIdentity
@@ -89,7 +88,7 @@ class TmuxBinding:
         try:
             if (not re.fullmatch(r'attempt_[0-9a-f]{32}', claim['attempt_id'])
                     or not re.fullmatch(r'msg_[0-9a-f]{32}', job['message_id'])
-                    or time.time() >= job['expires_at']):
+                    or notification_expired(bus_root, job['expires_at'])):
                 raise BusError('binding_invalid', 'invalid or expired notification pointer')
             root = Path(bus_root)
             if not root.is_absolute() or root != root.resolve() or any(ord(c) < 32 for c in str(root)):
@@ -104,7 +103,7 @@ class TmuxBinding:
                     return dict(status='unsent', reason='explicit_not_sent')
                 if not empty_composer(runner.capture_pane(self.tmux_socket, pane['pane_id'])):
                     return dict(status='unsent', reason='explicit_not_sent')
-                if time.time() >= job['expires_at']:
+                if notification_expired(bus_root, job['expires_at']):
                     return dict(status='unsent', reason='explicit_not_sent')
                 marker = 'A2A_NOTIFICATION=' + job['message_id']
                 prompt = (marker + '\nA2A_BUS_ROOT=' + str(root) + '\n'
@@ -122,6 +121,13 @@ class TmuxBinding:
         except Exception:
             return dict(status='uncertain' if entered else 'unsent',
                         reason='transport_interrupted' if entered else 'pre_io_failure')
+
+
+def notification_expired(bus_root, expires_at):
+    from .a2a_bus import BusStore
+    from .a2a_mailbox import Mailbox
+    from .a2a_time import mailbox_time
+    return mailbox_time(Mailbox(BusStore(Path(bus_root))), upper=True).timestamp() >= expires_at
 
 
 def bind_tmux(path, socket_path, identity):

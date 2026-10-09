@@ -168,3 +168,42 @@ class NetworkMailboxTests(unittest.TestCase):
         with self.bus.connection() as database:
             self.assertEqual(database.execute("SELECT value FROM meta WHERE key='mail_clock_before_network'").fetchone()[0], checkpoint)
             self.assertEqual(database.execute('PRAGMA foreign_key_check').fetchall(), [])
+
+    def test_native_worker_holds_outage_then_recovers_without_restart(self):
+        import contextlib
+        import io
+        from unittest.mock import patch
+        from codex_wake.cli import main
+        self.activate()
+        bindings = self.root/'bindings.json'
+        bindings.write_text(json.dumps(dict(schema_version=1, bindings=[dict(transport='tmux_notification_v1', namespace='fixture', thread_id='recipient', root=str(self.repo), tmux_socket='/fixture/socket', pid=1, process_start_ticks=1, boot_id='fixture', generation='fixture')])))
+        bindings.chmod(0o600)
+        calls = []
+        def acquisition():
+            calls.append(1)
+            return TimeDecision('uncertain', reason='outage') if len(calls) == 1 else self.reading
+        output = io.StringIO()
+        with patch('codex_wake.time_inspection.network_time_decision', side_effect=acquisition), contextlib.redirect_stdout(output):
+            code = main(['a2a','worker','--bus-root',str(self.bus.root),'--operator-capability',str(self.operator),
+                         '--bindings-file',str(bindings),'--duration','1','--interval','0.1','--max-dispatches','1'])
+        rows = [json.loads(line) for line in output.getvalue().splitlines()]
+        self.assertEqual(code, 0, rows)
+        self.assertEqual(rows[0]['dispatch']['reason'], 'time_uncertain')
+        self.assertGreater(len(calls), 1)
+        self.assertEqual(rows[-1]['worker']['status'], 'finished')
+
+    def test_tmux_transport_checks_network_expiry_instead_of_guest_wall(self):
+        from unittest.mock import patch
+        from codex_wake.a2a_tmux_delivery import TmuxBinding
+        self.activate()
+        binding = TmuxBinding('fixture','recipient',str(self.repo),'/fixture/socket',1,1,'fixture','fixture')
+        claim = dict(attempt_id='attempt_'+'a'*32)
+        job = dict(message_id='msg_'+'b'*32, expires_at=1060)
+        empty = '› Ask Codex to do anything\n GPT-6 · /repo · session\n ← for agents · ? for shortcuts\n'
+        with patch('codex_wake.time_inspection.network_time_decision', return_value=self.reading), \
+             patch.object(TmuxBinding, 'locate', return_value=({}, dict(pane_id='%fixture'))), \
+             patch.object(TmuxBinding, 'probe', return_value=dict(status='ready')), \
+             patch('codex_wake.a2a_tmux_delivery.SubprocessTmuxRunner') as runner:
+            runner.return_value.capture_pane.side_effect = [empty,'A2A_NOTIFICATION='+job['message_id']]
+            result = binding.deliver(claim,job,self.bus.root)
+        self.assertEqual(result['status'],'submitted',result)

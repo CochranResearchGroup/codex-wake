@@ -14,7 +14,7 @@ class InspectionTests(unittest.TestCase):
         report = json.loads(output.getvalue())
         self.assertEqual(code, 0)
         self.assertEqual(report['decision']['status'], 'uncertain')
-        self.assertEqual([s['operator'] for s in report['sources']], ['cloudflare','nist','netnod','ptb'])
+        self.assertEqual([s['operator'] for s in report['sources']], ['cloudflare','nist','netnod','ptb','alastyr'])
         self.assertEqual(report['sources'][2]['reason'], 'time_scale_unqualified')
         self.assertEqual(report['sources'][3]['reason'], 'time_scale_unqualified')
         self.assertFalse(report['production_ready'])
@@ -72,7 +72,7 @@ class InspectionTests(unittest.TestCase):
             raise OSError('interop_unavailable')
         report=inspect_time(collector=unavailable)
         self.assertEqual(report['decision']['status'],'uncertain')
-        self.assertEqual(len(report['sources']),4)
+        self.assertEqual(len(report['sources']),5)
         self.assertEqual(report['sources'][0]['reason'],'interop_unavailable')
 
     def test_healthy_windows_fallback_and_health_exclusion(self):
@@ -103,6 +103,21 @@ class InspectionTests(unittest.TestCase):
         def survivor(sources,request):
             data=collect(sources,request); data['replies']=data['replies'][:1];return data
         self.assertEqual(inspect_time(collector=survivor)['decision']['reason'],'windows_conflicts_with_network')
+
+
+    def test_third_reviewed_operator_preserves_consensus_after_any_single_loss(self):
+        from codex_wake.time_inspection import inspect_time
+        hosts = ('time.cloudflare.com', 'time.nist.gov', 'ntp.alastyr.com')
+        for lost in hosts:
+            def collect(sources, request):
+                data = envelope(request)
+                data['replies'].append(dict(data['replies'][0], host='ntp.alastyr.com'))
+                data['replies'] = [r for r in data['replies'] if r['host'] != lost]
+                return data
+            with self.subTest(lost=lost):
+                report = inspect_time(collector=collect)
+                self.assertEqual(report['decision']['status'], 'network')
+                self.assertEqual(set(report['decision']['sources']), set(hosts)-{lost})
 
 
 def envelope(request):

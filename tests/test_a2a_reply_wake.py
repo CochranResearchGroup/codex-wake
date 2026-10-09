@@ -120,3 +120,17 @@ class ReplyWakeTests(unittest.TestCase):
         self.assertEqual(dispatcher.tick()['submitted'], 0)
         self.assertEqual(find_record(self.wake_root, arm['wake_id']).record['status'], 'submitted')
         self.assertEqual(len(self.deliveries), 1)
+
+    def test_network_bus_reply_arm_uses_network_time_despite_guest_wall_disagreement(self):
+        from codex_wake.a2a_mailbox import Mailbox
+        from codex_wake.time_provider import TimeDecision
+        reading = TimeDecision('network', ('a','b'), 1000, 1000.1)
+        with patch('codex_wake.time_inspection.network_time_decision', return_value=reading):
+            Mailbox.activate_network_time(self.bus, self.operator)
+            self.prepare()
+            expiry = datetime.fromtimestamp(1060, timezone.utc).isoformat()
+            armed = arm_reply(self.actors[0], self.identifier, self.wake_root, self.authority_file, 'network-arm', expiry)
+            reply_id = self.reply()
+            self.assertEqual(self.dispatcher.tick()['submitted'], 1)
+            self.assertEqual(self.deliveries[0]['message_id'], reply_id)
+            self.assertEqual(find_record(self.wake_root, armed['wake_id']).record['status'], 'submitted')
