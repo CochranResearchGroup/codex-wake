@@ -922,3 +922,15 @@ same reviewed `--expected-database-sha256` to finish that exact transition.
 Changed artifacts, malformed intent, conflicts or partial receipts stay held for
 inspection. Reconciliation never discards evidence, clears the gap hold, starts
 a different recovery, or silently overwrites another canonical image.
+
+### Inspect external time on WSL
+
+Run `codex-wake time inspect` to collect a bounded network-time report without
+changing the clock or mailbox. `codex-wake time inspect --offline` shows source
+admission policy without network access. Reports identify the accepted interval,
+its host-counter instant, and each source's exclusion reason. Windows PowerShell
+interop is required; unavailable acquisition returns uncertainty. Network rounds
+are limited to one per 64 seconds across processes, with a two-minute bounded
+cache. Cloudflare/NIST observations are explicitly unauthenticated; Netnod/PTB
+remain disabled pending time-scale qualification. This inspection command does
+not activate deadline effects. See Plan0123 qualification for policy and limits.
