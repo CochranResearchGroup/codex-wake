@@ -1,0 +1,15 @@
+Oct 09 16:09:02 cooper systemd[696]: Started codex-native-unattended-prototype-20261009.service - /usr/bin/python3 /home/ecochran76/workspace.local/codex-wake-native-session-prototype/scripts/prototype_native_sessions/unattended.py 01a1227e-a041-7b72-9c36-18349e7dd22c /home/ecochran76/.local/state/codex-wake/native-session-prototype-20261008/unattended-queue.json.
+Oct 09 16:09:02 cooper python3[6416]: Traceback (most recent call last):
+Oct 09 16:09:02 cooper python3[6416]:   File "/home/ecochran76/workspace.local/codex-wake-native-session-prototype/scripts/prototype_native_sessions/unattended.py", line 14, in <module>
+Oct 09 16:09:02 cooper python3[6416]:     result = subprocess.run(
+Oct 09 16:09:02 cooper python3[6416]:              ^^^^^^^^^^^^^^^
+Oct 09 16:09:02 cooper python3[6416]:   File "/usr/lib/python3.12/subprocess.py", line 548, in run
+Oct 09 16:09:02 cooper python3[6416]:     with Popen(*popenargs, **kwargs) as process:
+Oct 09 16:09:02 cooper python3[6416]:          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 09 16:09:02 cooper python3[6416]:   File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+Oct 09 16:09:02 cooper python3[6416]:     self._execute_child(args, executable, preexec_fn, close_fds,
+Oct 09 16:09:02 cooper python3[6416]:   File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+Oct 09 16:09:02 cooper python3[6416]:     raise child_exception_type(errno_num, err_msg, err_filename)
+Oct 09 16:09:02 cooper python3[6416]: FileNotFoundError: [Errno 2] No such file or directory: 'codex'
+Oct 09 16:09:02 cooper systemd[696]: codex-native-unattended-prototype-20261009.service: Main process exited, code=exited, status=1/FAILURE
+Oct 09 16:09:02 cooper systemd[696]: codex-native-unattended-prototype-20261009.service: Failed with result 'exit-code'.
