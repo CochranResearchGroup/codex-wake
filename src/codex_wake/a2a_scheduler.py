@@ -45,9 +45,9 @@ class MailScheduler:
                 if row['owner'] != self.owner:
                     database.execute('ROLLBACK')
                     return None
-                lease = Lease(name, self.owner, row['generation'], now + self.lease_seconds)
+                lease = Lease(name, self.owner, row['generation'], self.mailbox._time_upper(database,now) + self.lease_seconds)
             else:
-                lease = Lease(name, self.owner, row['generation'] + 1 if row else 1, now + self.lease_seconds)
+                lease = Lease(name, self.owner, row['generation'] + 1 if row else 1, self.mailbox._time_upper(database,now) + self.lease_seconds)
             database.execute('INSERT INTO mail_leases VALUES (?,?,?,?) ON CONFLICT(name) DO UPDATE SET owner=excluded.owner,generation=excluded.generation,lease_until=excluded.lease_until',
                              (lease.name, lease.owner, lease.generation, lease.until))
             database.execute('COMMIT')
@@ -55,7 +55,7 @@ class MailScheduler:
 
     def _fence(self, database, lease, now):
         row = database.execute('SELECT * FROM mail_leases WHERE name=?', (lease.name,)).fetchone()
-        if lease.owner != self.owner or not row or row['owner'] != lease.owner or row['generation'] != lease.generation or row['lease_until'] <= now:
+        if lease.owner != self.owner or not row or row['owner'] != lease.owner or row['generation'] != lease.generation or row['lease_until'] <= self.mailbox._time_upper(database,now):
             raise BusError('stale_lease', 'scheduler ownership expired or changed')
 
     def release(self, lease):
@@ -79,6 +79,12 @@ class MailScheduler:
                 row = self.mailbox._expire(database, self.mailbox._row(database, intent['message_id']), now)
                 if row['admission'] != 'accepted':
                     continue
+                try:
+                    self.mailbox._deadline_clear(database,row,now)
+                except BusError as error:
+                    if error.code != 'time_uncertain':
+                        raise
+                    continue
                 jobs.append(dict(schema_version=1, job_id=intent['outbox_id'], bus_id=self.mailbox.bus.bus_id,
                                  message_id=row['message_id'], recipient_key=row['recipient_key'],
                                  expires_at=row['expires'], kind='a2a.notification'))
@@ -98,6 +104,7 @@ class MailScheduler:
                 self._fence(database, lease, now)
                 intent = database.execute('SELECT * FROM mail_outbox WHERE outbox_id=?', (job['job_id'],)).fetchone()
                 row = self.mailbox._expire(database, self.mailbox._row(database, job['message_id']), now)
+                self.mailbox._deadline_clear(database,row,now)
                 if row['admission'] == 'accepted' and intent['status'] in ('pending','published','deferred'):
                     if intent['status'] == 'pending':
                         database.execute("UPDATE mail_outbox SET status='published' WHERE outbox_id=?", (job['job_id'],))
@@ -154,6 +161,7 @@ class MailScheduler:
                 if not intent or intent['status'] not in ('pending','published','deferred') or intent['next_attempt'] > now:
                     raise BusError('not_processable', 'notification intent cannot be dispatched')
                 row = self.mailbox._expire(database, self.mailbox._row(database, intent['message_id']), now)
+                self.mailbox._deadline_clear(database,row,now)
                 if row['admission'] != 'accepted' or row['notification'] not in ('pending','deferred'):
                     raise BusError('not_processable', 'message no longer authorizes notification')
                 if recipient_lease.name != 'recipient:' + row['recipient_key'] or not self._authorized(database, row):

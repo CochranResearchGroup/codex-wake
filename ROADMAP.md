@@ -1082,13 +1082,13 @@ are not the next prerequisite for messaging on a healthy demo bus.
 
 State: OPEN
 
-Current State: Isolated feature branch has a pure decision core and 16 passing tests. Four transport candidates responded; production source admission and live integration remain incomplete. Inspection and Windows fallback are implemented with isolated installed-candidate evidence; mailbox integration and wake acceptance remain incomplete. Critical-path owner: primary agent lane; substantive child WIP limit: one.
+Current State: Plans0123–0126 are complete on the isolated feature branch. Inspection, healthy Windows fallback, explicit mailbox migration and network deadline wakes passed 950 regression tests and installed-candidate acceptance. Two plain-NTP operators are admitted; Netnod/PTB scale qualification, NTS and production activation remain open. Critical-path owner: primary agent lane; substantive child WIP limit: one.
 
 Parent design: [Plan0122](docs/dev/plans/0122-2026-10-08-network-first-time-provider.md).
 
 1. [Plan0123: Network inspection](docs/dev/plans/0123-2026-10-08-network-time-inspection.md) — DONE; isolated inspection evidence recorded.
 2. [Plan0124: Healthy Windows fallback](docs/dev/plans/0124-2026-10-08-healthy-windows-time-fallback.md) — DONE; health-qualified inspection fallback.
-3. [Plan0125: Mailbox uncertainty recovery](docs/dev/plans/0125-2026-10-08-mailbox-time-uncertainty-recovery.md) — READY; inspection prerequisite complete.
-4. [Plan0126: Wake acceptance](docs/dev/plans/0126-2026-10-08-time-provider-wake-acceptance.md) — BLOCKED by 0124 and 0125.
+3. [Plan0125: Mailbox uncertainty recovery](docs/dev/plans/0125-2026-10-08-mailbox-time-uncertainty-recovery.md) — DONE; versioned migration and disposable outage/fault acceptance.
+4. [Plan0126: Wake acceptance](docs/dev/plans/0126-2026-10-08-time-provider-wake-acceptance.md) — DONE; isolated installed workflow, review and release/rollback evidence.
 
 After 0123, fallback and mailbox tracks are technically independent; the single-owner lane executes them serially. Acceptance is serialized after both. No source ticket implies live activation or historical clock root-cause proof.

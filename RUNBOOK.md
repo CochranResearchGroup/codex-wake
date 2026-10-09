@@ -5174,3 +5174,12 @@ Memory dispositionunavailable: no reviewed Codex Wake Graphiti target group.
 ## Turn 240 | 2026-10-08
 
 Published the user-approved Plan0122 breakdown as repo-native Plans0123–0126 on feature/network-time-consensus. Plan0123 is READY; 0124/0125 depend on 0123; 0126 depends on both. Added P64 sequencing and one-child WIP limit. Preserved the parent design and historical prototype branches. This packet publishes actionable work and adds no runtime behavior. Next execution frontier: Plan0123 network-time inspection. Dependency/link validation and staged whitespace checks govern this documentation slice; no runtime tests were rerun. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
+
+
+## Turn 241 | 2026-10-08
+
+Implemented and accepted Plans0123–0126 under the existing goal on feature/network-time-consensus in `/home/ecochran76/workspace.local/codex-wake-time-prototype`. Original main checkout/untracked notes preserved. Inspection/fallback committed at a1a7aaa; the following coherent integration commit contains mailbox migration, network deadline wakes and acceptance. Shared 0125/0126 integration was exercised together and accepted together after 0123/0124, with no second concurrent ownership lane.
+
+Acceptance state: all four child plans DONE; P64/Plan0122 remain OPEN for production activation and unqualified additional-source/authentication work. Progress classification: implemented and verified isolated candidate, not live rollout. Evidence: `docs/dev/evidence/plan0126/acceptance-review.md`, exact source/wheel hashes, installed workflow, three owned host cache fault controls, 950 comprehensive tests in 53.722 s (one shard, no retries). Review fixed backup versioning, cancellation race, direct-dispatch gating, fractional deadlines, initial regression fence, archive retention, outage reply inspection and host cache failures. Controlled sleep/boot inputs are distinct from actual host actions.
+
+Material limits: only two admitted unauthenticated operators, stopped Windows synchronization service, Netnod/PTB scale and NTS qualification open; no production package/store/service/clock changes or real session transport. Release/migration/rollback instructions prepared for candidate 0.8.0. Stop reason: bounded implementation objective achieved before the user ceiling of 2 million tokens or 3 h. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
