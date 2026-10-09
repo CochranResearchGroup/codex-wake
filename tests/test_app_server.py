@@ -129,7 +129,7 @@ class AppServerTests(unittest.TestCase):
 
             self.assertEqual(result.status, "failed")
             data = json.loads((root / "failed" / "wake_app.json").read_text())
-            self.assertIn("app-server command not found: codex", data["last_error"])
+            self.assertIn("Codex CLI command not found: codex", data["last_error"])
             self.assertEqual(data["events"][-1]["type"], "failed")
 
     def test_dispatch_rejects_non_executable_supervisor_default(self) -> None:

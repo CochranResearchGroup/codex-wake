@@ -54,3 +54,23 @@ lanes:
     dependencies: []
     overlaps: [P63]
     updated_at: 2026-10-08
+  - id: APP-PERSIST
+    owner: remote-view-provider-remediation
+    objective: Preserve accepted app-server turns beyond owned client teardown
+    work_items: [docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md]
+    plan: docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md
+    plan_ref: fix/app-server-unix-websocket
+    branch: fix/app-server-unix-websocket
+    target: origin/main
+    plan_state: OPEN
+    custody_state: PUBLISHED
+    checkpoint: 39efb5f8dc4760c687edd6db4b48b9e26e945ca5
+    remote_ref: refs/remotes/origin/fix/app-server-unix-websocket
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-08
+    checkout_required: true
+    disposition: Unix WebSocket dispatch successor source qualified; required CI and primary review pending. Three prior native failures immutable; installed completion remains pending.
+    prior_integration_receipt: 9e17dd79fe775154e9460ea255a5c1ad187e1ec5
+    prior_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/222
