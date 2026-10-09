@@ -394,6 +394,22 @@ codex-wake service stop
 codex-wake service uninstall
 ```
 
+App-server wake dispatch requires a running persistent Codex daemon with the
+existing `app-server proxy --sock` capability. Check it explicitly with
+`codex app-server daemon version`; executable resolution alone does not prove
+this readiness. The discovered socket must be absolute, free of symlinks, owned
+by the current user and contained in a private directory owned by that user.
+Codex Wake only discovers and connects to this existing daemon. It never starts,
+replaces or stops it. Missing or unsupported daemon readiness fails before a new
+turn starts; unattended app-server delivery has no standalone-server fallback.
+
+The dispatcher closes only its owned stdio proxy after `turn/start` returns.
+The persistent daemon owns the turn beyond that connection, including long
+turns. RPC deadlines bound discovery and protocol response waits, not agent work.
+`submitted` and `ack_observed` prove turn acceptance; verify the exact thread and
+turn transcript separately for completion. Do not automatically retry an original
+wake whose external outcome is uncertain.
+
 Run a readiness report:
 
 ```bash

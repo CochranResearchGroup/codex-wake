@@ -198,7 +198,12 @@ for line in sys.stdin:
             record["id"] = "wake_supervisor"
             write_record(wake_root, record)
 
-            with patch.dict("os.environ", {"PATH": "/definitely/missing"}, clear=True):
+            # This fixture qualifies enrolled executable routing only. The Unix
+            # daemon/proxy lifetime is exercised by test_app_server_lifecycle.
+            with patch.dict("os.environ", {"PATH": "/definitely/missing"}, clear=True), patch(
+                "codex_wake.app_server.persistent_app_server_command",
+                side_effect=lambda codex_cmd: [codex_cmd, "app-server", "--listen", "stdio://"],
+            ):
                 results = supervisor_poll_once(config, mode="once")
 
             self.assertTrue(results[0]["ok"])
