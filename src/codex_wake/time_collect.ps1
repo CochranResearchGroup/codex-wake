@@ -54,7 +54,7 @@ try {
         foreach ($name in $request.hosts) {
             $udp = $null
             try {
-                if (@('time.cloudflare.com','time.nist.gov') -notcontains $name) { throw 'endpoint_not_admitted' }
+                if (@('time.cloudflare.com','time.nist.gov','ntp.alastyr.com') -notcontains $name) { throw 'endpoint_not_admitted' }
                 if (((Qpc)-$start)/$frequency -gt 12) { throw 'round_deadline' }
                 $dns = [Net.Dns]::BeginGetHostAddresses($name, $null, $null)
                 try {

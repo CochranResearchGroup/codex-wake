@@ -209,7 +209,7 @@ def a2a_command(args):
                     try:
                         outcome = dispatcher.tick(limit=min(args.limit, args.max_dispatches - submitted))
                     except BusError as error:
-                        if error.code != 'clock_anomaly':
+                        if error.code not in ('clock_anomaly', 'time_uncertain'):
                             raise
                         # Clock guards remain unchanged. Retry only when the journal
                         # proves this worker has no unfinished/ambiguous effect.
@@ -220,7 +220,7 @@ def a2a_command(args):
                                 (scheduler.owner,)).fetchone()
                         if pending:
                             raise BusError('effect_uncertain', 'clock interruption left an attempt requiring exact reconciliation') from None
-                        outcome = dict(status='held', reason='clock_anomaly', submitted=0, results=[])
+                        outcome = dict(status='held', reason=error.code, submitted=0, results=[])
                     # A committed transport receipt counts even if a later lease
                     # release hit the clock guard, so the effect budget cannot grow.
                     with store.connection(read_only=True) as database:

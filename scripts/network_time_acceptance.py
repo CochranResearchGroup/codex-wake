@@ -35,7 +35,7 @@ def main():
             observation=json.loads(command('codex_wake.cli','time','inspect'))
             assert observation['decision']['status']=='network',observation
             report['live_observation']=observation
-            report['checks'].append('installed network inspection: two admitted operators; all four candidates visible')
+            report['checks'].append('installed network inspection: two admitted operators; all five candidates visible')
             wake_root=root/'wake'
             created=command('codex_wake.cli','--wake-root',wake_root,'after','--network-time','--app-server-thread-id','qualification-fixture','2s','--','Resume qualification fixture')
             wake_id=created.split()[0]

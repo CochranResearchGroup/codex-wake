@@ -3,6 +3,7 @@
 State: OPEN
 Branch: feature/network-time-consensus
 Owner: primary agent
+Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/224
 
 ## Current State
 
@@ -68,3 +69,11 @@ See `docs/dev/evidence/plan0122/production-requirements.md` for bounded primary-
 ## Successor Integration Result (2026-10-08)
 
 The historical packet results and draft breakdown above describe their original state. Their current successor is the accepted Plans0123–0126 implementation, with candidate identity, acceptance matrix, failure dispositions and limits under `docs/dev/evidence/plan0126/`. Original deadlines and legacy guard evidence are preserved. Only Cloudflare/NIST are admitted; Netnod/PTB and NTS remain unqualified. Production activation remains a separate scope. Next: reconcile the exact live bus, guard, bindings and worker; then prepare bounded integration/activation and a real-session exchange for this candidate. Additional independent sources and authenticated acquisition remain useful follow-ups, not implicit blockers to the explicitly opted-in two-provider plain-NTP mode. See `docs/dev/notes/0010-2026-10-08-a2a-readiness-reconciliation.md`.
+
+## Goal execution revision 2 — 2026-10-08
+
+User objective: complete Plan0122; diagnose and fix bugs; checkpoint before two million tokens or three hours. Goal began about02:05UTC October9; checkpoint by05:00UTC. Earlier isolated-packet exclusions remain historical for those packets. The user now authorizes the ordinary integration, installed activation and bounded live acceptance needed to complete this plan. Clock adjustment, reboot/suspend, legacy checkpoint reset, unrelated private messages and OpenClaw changes remain excluded.
+
+Primary lane remains feature/network-time-consensus. Serial critical path: reproduce and repair end-to-end worker/reply time-domain gaps; qualify adequate independent-source redundancy; review/regress/build; reconcile existing live store/guard before any migration; integrate/install using recoverable custody; run one owned bounded exact-thread request/reply exchange and audit every original user story. Use a fresh explicitly enrolled bus if the historical store's guard cannot safely migrate; preserve and report the historical hold without resetting it. Do not substitute a synthetic transport or fixture acknowledgement for actual agent delivery. The first new evidence is a CLI worker outage regression, not another planning packet. Current goal counters are authoritative via get_goal; all subsequent turns inherit the same ceiling.
+
+Completion requires verified source/installed identities, bounded acquisition and provider-loss behavior, versioned migration without guard bypass, retained deadlines through restart/outage, usable inspection/cancellation, and actual automatic A2A delivery on the network-time path. Extra-source and authentication work must have a truthful qualification disposition; no endpoint is enabled from ordinary agreement alone. If authentication cannot be qualified, retain the explicit unauthenticated trust policy and record that boundary rather than claim canonical authenticated UTC. Review once against the frozen baseline7a4666a and repair accepted findings, avoiding repeated unrelated hardening.

@@ -17,6 +17,10 @@ class TmuxDeliveryTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.a2a_mailbox import Mailbox
+        bus, operator = BusStore.configure(self.root)
+        Mailbox.migrate(bus, operator)
         self.binding = TmuxBinding('fixture', 'recipient', str(self.root), '/tmp/tmux/socket',
             os.getpid(), process_start_time_ticks(os.getpid()), boot_id_value(), 'fixture-generation')
         self.claim = {'attempt_id': 'attempt_' + 'a' * 32}
