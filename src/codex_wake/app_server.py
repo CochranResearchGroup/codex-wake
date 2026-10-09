@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+import select
 import shutil
+import stat
 import subprocess
+import time
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -104,6 +107,40 @@ def app_server_command(
     return [resolved or "codex", "app-server", "--listen", "stdio://"]
 
 
+def persistent_app_server_command(codex_cmd: str | None = None) -> list[str]:
+    """Discover an existing private daemon; never start or take ownership of it."""
+    codex = resolve_codex_cmd(codex_cmd, required=True)
+    try:
+        result = subprocess.run(
+            [codex, "app-server", "daemon", "version"], capture_output=True,
+            text=True, timeout=5, check=False,
+        )
+        if result.returncode:
+            raise WakeError("app-server persistent daemon discovery unsupported")
+        data = json.loads(result.stdout)
+        socket_path = data.get("socketPath")
+        if data.get("status") != "running" or not isinstance(socket_path, str):
+            raise WakeError("app-server persistent daemon is not running")
+        path = Path(socket_path)
+        if not path.is_absolute() or path.resolve(strict=True) != path:
+            raise WakeError("app-server daemon socket must be absolute without symlinks")
+        parent = os.lstat(path.parent)
+        endpoint = os.lstat(path)
+        if (not stat.S_ISDIR(parent.st_mode) or parent.st_uid != os.geteuid()
+                or parent.st_mode & 0o077 or not stat.S_ISSOCK(endpoint.st_mode)
+                or endpoint.st_uid != os.geteuid()):
+            raise WakeError("app-server daemon socket is not private to the current actor")
+        capability = subprocess.run(
+            [codex, "app-server", "proxy", "--help"], capture_output=True,
+            text=True, timeout=5, check=False,
+        )
+        if capability.returncode or "--sock" not in capability.stdout:
+            raise WakeError("app-server persistent daemon proxy unsupported")
+    except (OSError, ValueError, AttributeError, subprocess.TimeoutExpired) as exc:
+        raise WakeError("app-server persistent daemon discovery failed") from exc
+    return [codex, "app-server", "proxy", "--sock", str(path)]
+
+
 class StdioAppServerClient:
     def __init__(
         self,
@@ -111,17 +148,21 @@ class StdioAppServerClient:
         *,
         codex_cmd: str | None = None,
         timeout_seconds: float = 30.0,
+        persistent_dispatch: bool = False,
     ) -> None:
-        self.command = app_server_command(command, codex_cmd=codex_cmd)
+        if persistent_dispatch and command:
+            raise WakeError("app-server custom command cannot prove persistent turn ownership")
+        self.command = (persistent_app_server_command(codex_cmd) if persistent_dispatch
+                        else app_server_command(command, codex_cmd=codex_cmd))
         self.timeout_seconds = timeout_seconds
         self._next_id = 1
+        self._read_buffer = b""
         try:
             self.process = subprocess.Popen(
                 self.command,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
+                stderr=subprocess.DEVNULL,
             )
         except FileNotFoundError as exc:
             raise WakeError(
@@ -137,6 +178,7 @@ class StdioAppServerClient:
                     self.process.wait(timeout=2)
                 except subprocess.TimeoutExpired:
                     self.process.kill()
+                    self.process.wait(timeout=2)
         finally:
             for stream in (self.process.stdin, self.process.stdout, self.process.stderr):
                 if stream is not None:
@@ -153,13 +195,29 @@ class StdioAppServerClient:
             "method": method,
             "params": params,
         }
-        self.process.stdin.write(json.dumps(payload) + "\n")
+        self.process.stdin.write((json.dumps(payload) + "\n").encode())
         self.process.stdin.flush()
+        deadline = time.monotonic() + self.timeout_seconds
         while True:
-            line = self.process.stdout.readline()
-            if not line:
-                raise WakeError(f"app-server closed stdout while waiting for {method}")
-            message = json.loads(line)
+            while b"\n" not in self._read_buffer:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0 or not select.select([self.process.stdout], [], [], remaining)[0]:
+                    raise WakeError(f"app-server timed out while waiting for {method}")
+                chunk = os.read(self.process.stdout.fileno(), 65536)
+                if not chunk:
+                    raise WakeError(f"app-server closed stdout while waiting for {method}")
+                self._read_buffer += chunk
+                if len(self._read_buffer) > 32 * 1024 * 1024:
+                    raise WakeError("app-server response exceeds capacity")
+            line, self._read_buffer = self._read_buffer.split(b"\n", 1)
+            if time.monotonic() >= deadline:
+                raise WakeError(f"app-server timed out while waiting for {method}")
+            try:
+                message = json.loads(line)
+            except ValueError as exc:
+                raise WakeError("app-server returned invalid JSON") from exc
+            if not isinstance(message, dict):
+                raise WakeError("app-server returned invalid response")
             if message.get("id") != request_id:
                 continue
             if "error" in message:
@@ -434,6 +492,7 @@ def dispatch_app_server_record(
         app_client = client or StdioAppServerClient(
             command=command,
             codex_cmd=codex_cmd or default_codex_cmd,
+            persistent_dispatch=True,
         )
         try:
             app_client.initialize()
