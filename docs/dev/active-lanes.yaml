@@ -38,3 +38,21 @@ lanes:
     remaining_gate_acceptance: docs/dev/verification/0122-2026-10-05-remaining-gates-and-native-soak-acceptance.md
     remaining_gate_packet_state: COMPLETE
     disposition: Requested cancellation/reconnect/normal worker restart/released installation/multiroot/rollback/30-minute soak gates PASS; wider Plan0101 and retained server-unloaded/deferred recovery obligations remain OPEN
+  - id: APP-PERSIST
+    owner: remote-view-provider-remediation
+    objective: Preserve accepted app-server turns beyond owned client teardown
+    work_items: [docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md]
+    plan: docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md
+    plan_ref: fix/app-server-persistent-dispatch
+    branch: fix/app-server-persistent-dispatch
+    target: origin/main
+    plan_state: OPEN
+    custody_state: PUBLISHED
+    checkpoint: d4cb72a844bbd1daee46ca966163c164c6624b6d
+    remote_ref: refs/remotes/origin/fix/app-server-persistent-dispatch
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-08
+    checkout_required: true
+    disposition: Source qualified; primary review, integration and installed intended-thread acceptance pending. No daemon restart or original wake retry.
