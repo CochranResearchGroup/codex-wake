@@ -6,7 +6,7 @@ Owner: primary agent
 
 ## Current State
 
-Supersedes Windows-first preference in Plan0120 for this successor only; historical prototype and qualification remain unchanged. Four operator endpoints have responded to a bounded read-only probe. Implement the selection/deadline core first, without live mailbox wiring. Production adapters, authenticated time and persisted-state migration remain follow-up packets.
+Supersedes Windows-first preference in Plan0120 for this successor only; historical prototype and qualification remain unchanged. Four operator endpoints have responded to a bounded read-only probe. The selection/deadline core is committed at 9729a7c with 16 passing tests and has no live mailbox wiring. Production adapters, authenticated time and persisted-state migration remain follow-up packets.
 
 ## Problem Statement
 
@@ -60,3 +60,7 @@ Validation: `PYTHONPATH=src python3 -m unittest discover -s tests -p test_time_p
 Review baseline: commit `50c2eb9`. Standards/spec review found and fixed duplicate source voting, duplicate-operator conflicting evidence being lost before Windows fallback, unenforced per-kind observation limits, and malformed decision intervals permitting deadline release. Each correction was demonstrated failing before its fix. Search is bounded to at most four network observations plus one Windows observation. Core outputs overall uncertainty reasons; per-source rejection diagnostics in user story 5 remain an adapter/integration requirement.
 
 Current packet is complete. Overall state remains OPEN. Next packet: qualify and implement production acquisition/normalization and diagnostics before integrating deadline decisions into mailbox state. Stories about persistence, sleep, cancellation and live wake behavior remain acceptance requirements; pure tests do not prove those runtime properties. No existing persisted schema, mailbox guard, clock or service was changed.
+
+## Production Qualification Follow-up
+
+See `docs/dev/evidence/plan0122/production-requirements.md` for bounded primary-source research and a proposed four-ticket breakdown. NTS availability and a candidate Windows QPC age source are documented; current Netnod/PTB leap profiles, acquisition packaging, numeric bounds and NIST authentication admission remain unresolved. The breakdown is draft pending the to-tickets review; no tickets have been published or marked ready. Repo-native plans remain the tracker authority under policy 0002; there is no configured `docs/agents/issue-tracker.md`, so no remote tracker or competing scratch tracker was created.
