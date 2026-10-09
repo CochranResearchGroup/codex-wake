@@ -107,6 +107,36 @@ def app_server_command(
     return [resolved or "codex", "app-server", "--listen", "stdio://"]
 
 
+def private_daemon_socket(socket_path: str) -> Path:
+    """Accept Codex's owned leaf alias, never an untrusted traversal or chain."""
+    path = Path(socket_path)
+    if not path.is_absolute() or path.parent.resolve(strict=True) != path.parent:
+        raise WakeError("app-server daemon socket parent must be canonical and absolute")
+
+    def private_parent(endpoint: Path) -> None:
+        parent = os.lstat(endpoint.parent)
+        if (not stat.S_ISDIR(parent.st_mode) or parent.st_uid != os.geteuid()
+                or parent.st_mode & 0o077):
+            raise WakeError("app-server daemon socket parent is not private to the current actor")
+
+    private_parent(path)
+    leaf = os.lstat(path)
+    if leaf.st_uid != os.geteuid():
+        raise WakeError("app-server daemon socket or alias is not owned by the current actor")
+    if stat.S_ISLNK(leaf.st_mode):
+        target = Path(os.readlink(path))
+        if not target.is_absolute() or target.resolve(strict=True) != target:
+            raise WakeError("app-server daemon alias target must be canonical and absolute")
+        private_parent(target)
+        path = target
+        leaf = os.lstat(path)
+    elif path.resolve(strict=True) != path:
+        raise WakeError("app-server daemon socket path must be canonical")
+    if not stat.S_ISSOCK(leaf.st_mode) or leaf.st_uid != os.geteuid():
+        raise WakeError("app-server daemon target is not a socket owned by the current actor")
+    return path
+
+
 def persistent_app_server_command(codex_cmd: str | None = None) -> list[str]:
     """Discover an existing private daemon; never start or take ownership of it."""
     codex = resolve_codex_cmd(codex_cmd, required=True)
@@ -121,21 +151,15 @@ def persistent_app_server_command(codex_cmd: str | None = None) -> list[str]:
         socket_path = data.get("socketPath")
         if data.get("status") != "running" or not isinstance(socket_path, str):
             raise WakeError("app-server persistent daemon is not running")
-        path = Path(socket_path)
-        if not path.is_absolute() or path.resolve(strict=True) != path:
-            raise WakeError("app-server daemon socket must be absolute without symlinks")
-        parent = os.lstat(path.parent)
-        endpoint = os.lstat(path)
-        if (not stat.S_ISDIR(parent.st_mode) or parent.st_uid != os.geteuid()
-                or parent.st_mode & 0o077 or not stat.S_ISSOCK(endpoint.st_mode)
-                or endpoint.st_uid != os.geteuid()):
-            raise WakeError("app-server daemon socket is not private to the current actor")
+        path = private_daemon_socket(socket_path)
         capability = subprocess.run(
             [codex, "app-server", "proxy", "--help"], capture_output=True,
             text=True, timeout=5, check=False,
         )
         if capability.returncode or "--sock" not in capability.stdout:
             raise WakeError("app-server persistent daemon proxy unsupported")
+    except WakeError:
+        raise
     except (OSError, ValueError, AttributeError, subprocess.TimeoutExpired) as exc:
         raise WakeError("app-server persistent daemon discovery failed") from exc
     return [codex, "app-server", "proxy", "--sock", str(path)]

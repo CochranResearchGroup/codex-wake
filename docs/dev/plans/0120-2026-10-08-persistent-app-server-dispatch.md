@@ -4,19 +4,25 @@ Date: 2026-10-08
 State: OPEN
 Owner: delegated provider remediation lane; primary integration owner adjudicates
 Lane: APP-PERSIST
-Branch: fix/app-server-persistent-dispatch
+Branch: fix/app-server-owned-socket-alias
 Work item: docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md
 Target: origin/main
 Integration: squash_pr
 
 ## Current State
 
-Source remediation and31 focused app-server/supervisor tests pass. Full Python
-regression passes912tests in46.820seconds. The prior full run retained one outdated
-supervisor routing fixture failure, then its scope was corrected explicitly.
-Compileall and diff checks pass. Active planning audit retains the pre-existing
-Plan0119 missing Current State finding; this plan adds no finding. Canonical integration,
-provider installation and actual intended-thread completion remain unexecuted.
+Initial repair PR221 integrated as a691d356 and was installed normally with a
+fresh Wake supervisor, unchanged four roots and unchanged Codex daemon. A fresh
+distinct native acceptance event proved scheduling/parity/privacy but failed
+before `turn/start`: actual Codex0.162.0 reports an owned leaf alias, which the
+initial blanket nonsymlink check rejected. That failed event remains archived;
+neither it nor the original interrupted event was retried.
+
+The bounded followup qualifies that exact private alias layout and preserves
+precise WakeError diagnostics.31 focused tests and912 full Python tests pass
+(full46.245seconds); compileall and diff checks pass.
+No further provider adoption or live event belongs to this source followup before
+primary review. Actual intended-thread completion remains unproven.
 
 ## Problem and scope
 
@@ -34,8 +40,13 @@ Dispatch connects stdio through the installed Codex CLI's existing
 `app-server proxy --sock SOCKET` to a running actor-owned daemon. Read-only
 `app-server daemon version` discovers its exact socket; `proxy --help` qualifies
 capability rather than guessing support from a version string. Each discovery
-command has a five-second deadline. Require an absolute nonsymlink Unix socket,
-current-actor ownership and a private actor-owned containing directory. Never
+command has a five-second deadline. Require an absolute canonical Unix socket,
+current-actor ownership and a private actor-owned containing directory. A reported
+current-actor-owned leaf alias is allowed only under a private owned directory,
+with an absolute canonical target socket under its own private owned directory.
+Reject ancestor aliases, chains, unsafe directories and foreign/dangling targets;
+pass the canonical resolved target to the proxy. Preserve specific WakeError
+messages rather than masking them through its ValueError base class. Never
 start, replace, stop or take ownership of that daemon. Missing/unsupported daemon
 fails before `turn/start`; no fallback to the known-interrupting standalone owner.
 
@@ -54,10 +65,12 @@ and are refused in real dispatch; injected provider-free clients remain supporte
   provider-free Unix-socket daemon and owned proxy subprocess.
 - [x] Accepted turn remains able to complete after proxy teardown; no completion
   claim is manufactured from `turn/start` acceptance.
-- [x] Missing/stopped/unsupported, nonprivate, wrong-actor and symlink socket
+- [x] Missing/stopped/unsupported, nonprivate, wrong-actor and unsafe/ambiguous alias
   paths refuse before proxy creation/turn-start; discovery never starts a daemon.
 - [x] Silent RPC/discovery timeout is bounded and owned proxy cleanup reaps it.
-- [ ] Canonical integration and installed intended-thread acceptance after primary
+- [x] Exact supported owned leaf alias reaches a real provider-free daemon;
+  canonical target is used and daemon-owned turn survives proxy teardown.
+- [ ] Followup canonical integration and installed intended-thread acceptance after primary
   review. No deployment, new wake or new turn belongs to this source packet.
 
 One remediation packet and one primary closed-world adjudication; no broad

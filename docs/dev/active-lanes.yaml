@@ -43,16 +43,18 @@ lanes:
     objective: Preserve accepted app-server turns beyond owned client teardown
     work_items: [docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md]
     plan: docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md
-    plan_ref: fix/app-server-persistent-dispatch
-    branch: fix/app-server-persistent-dispatch
+    plan_ref: fix/app-server-owned-socket-alias
+    branch: fix/app-server-owned-socket-alias
     target: origin/main
     plan_state: OPEN
     custody_state: PUBLISHED
-    checkpoint: d4cb72a844bbd1daee46ca966163c164c6624b6d
-    remote_ref: refs/remotes/origin/fix/app-server-persistent-dispatch
+    checkpoint: 6a8755af9afa423db595a1f71a11e04afe58cdc6
+    remote_ref: refs/remotes/origin/fix/app-server-owned-socket-alias
     integration: squash_pr
     dependencies: []
     overlaps: []
     updated_at: 2026-10-08
     checkout_required: true
-    disposition: Source qualified; primary review, integration and installed intended-thread acceptance pending. No daemon restart or original wake retry.
+    disposition: Owned-leaf-alias followup source qualified; primary review, integration and installed completion pending. Prior native attempt failed before turn-start; no retry.
+    prior_integration_receipt: a691d3566c28d4e707491629b712aa7a53248b70
+    prior_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/221
