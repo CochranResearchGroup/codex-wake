@@ -204,6 +204,11 @@ class Mailbox:
         try:
             with self.bus.connection() as database:
                 self._schema(database)
+                if self._network_mode(database):
+                    # A competing transaction may be acquiring host time (25s
+                    # collector bound). Wait once for its commit, without retrying
+                    # an admission/effect; legacy stores retain their 1s bound.
+                    database.execute('PRAGMA busy_timeout=30000')
                 database.execute('BEGIN IMMEDIATE')
                 if actor is not None:
                     self.bus.validate_actor(database, actor, permission=permission)

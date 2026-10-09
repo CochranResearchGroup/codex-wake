@@ -964,7 +964,7 @@ Opt-in `after --network-time` / `at --network-time` wakes use bounded
 network-first time; put options before the duration or timestamp. Existing
 writers retain their default time policy. `codex-wake time inspect` shows
 qualified sources and exclusions; `--offline` shows configuration only.
-Cloudflare and NIST are admitted as explicitly unauthenticated plain NTP.
+Cloudflare, NIST and Alastyr are admitted as explicitly unauthenticated plain NTP.
 Netnod and PTB remain disabled pending scale qualification.
 
 Mailbox activation is an explicit operator schema migration, never a reset of

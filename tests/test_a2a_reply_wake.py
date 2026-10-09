@@ -134,3 +134,22 @@ class ReplyWakeTests(unittest.TestCase):
             self.assertEqual(self.dispatcher.tick()['submitted'], 1)
             self.assertEqual(self.deliveries[0]['message_id'], reply_id)
             self.assertEqual(find_record(self.wake_root, armed['wake_id']).record['status'], 'submitted')
+
+    def test_network_reply_expiry_boundary_holds_without_early_expiration(self):
+        from codex_wake.a2a_mailbox import Mailbox
+        from codex_wake.time_provider import TimeDecision
+        reading = [TimeDecision('network', ('a','b'), 1000, 1000.1)]
+        with patch('codex_wake.time_inspection.network_time_decision', side_effect=lambda:reading[0]):
+            Mailbox.activate_network_time(self.bus, self.operator)
+            self.prepare()
+            expiry = datetime.fromtimestamp(1060, timezone.utc).isoformat()
+            armed = arm_reply(self.actors[0], self.identifier, self.wake_root, self.authority_file, 'network-arm', expiry)
+            self.reply()
+            reading[0] = TimeDecision('network', ('a','b'), 1059.9, 1060.2)
+            self.assertEqual(self.dispatcher.tick()['submitted'], 0)
+            self.assertEqual(self.deliveries, [])
+            self.assertEqual(find_record(self.wake_root, armed['wake_id']).record['status'], 'firing')
+            reading[0] = TimeDecision('network', ('a','b'), 1061, 1061.1)
+            self.assertEqual(self.dispatcher.tick()['submitted'], 0)
+            self.assertEqual(find_record(self.wake_root, armed['wake_id']).record['status'], 'firing')
+            self.assertEqual(self.deliveries, [])
