@@ -96,6 +96,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="wake runtime root; defaults to .codex/wake under the current directory",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from .time_inspection import add_time_parser
+    add_time_parser(subparsers)
     from .sessions_cli import add_sessions_parser
     add_sessions_parser(subparsers)
     from .a2a_cli import add_a2a_parser
@@ -2689,6 +2691,9 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.command == "time":
+        from .time_inspection import time_command
+        return time_command(args)
     root = resolve_root(args)
     if args.command == "messages":
         from .messages_cli import messages_command

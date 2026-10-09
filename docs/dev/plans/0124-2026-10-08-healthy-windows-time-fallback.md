@@ -1,7 +1,7 @@
 # Plan 0124 — Use healthy Windows fallback during network outages
 
-State: PLANNED
-Workflow: BLOCKED
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
 Branch: feature/network-time-consensus
 Parent: docs/dev/plans/0122-2026-10-08-network-first-time-provider.md
@@ -9,7 +9,7 @@ Blocked by: docs/dev/plans/0123-2026-10-08-network-time-inspection.md
 
 ## Current State
 
-Approved breakdown published as a repo-native ticket. Implementation has not started. Wait for the named blockers to complete acceptance before implementation.
+Implemented synchronization-health-qualified Windows fallback through the inspection interface. Controlled evidence proves healthy fallback and conflict exclusion; the actual installed candidate excludes this host's stopped synchronization service while accepting network consensus.
 
 ## What to Build
 
@@ -21,11 +21,11 @@ Plan0122, its committed decision core and tests, and the primary-source producti
 
 ## Acceptance Criteria
 
-- [ ] Demonstrate healthy fallback and exclusion of unsynchronized, stale, unbounded or unavailable Windows observations through the inspection entrypoint.
-- [ ] Define and validate synchronization-health and UTC-uncertainty evidence; service-running status alone does not establish health.
-- [ ] Keep host elapsed-time authority separate from UTC health, including boot identity and restart invalidation.
-- [ ] Network consensus overrides an outlying Windows reading. Competing network groups cannot be resolved by Windows.
-- [ ] Cover network outage, surviving conflicting observations, stopped synchronization service, interop timeout and recovery with deterministic tests and a read-only candidate demonstration.
+- [x] Demonstrate healthy fallback and exclusion of unsynchronized, stale, unbounded or unavailable Windows observations through the inspection entrypoint.
+- [x] Define and validate synchronization-health and UTC-uncertainty evidence; service-running status alone does not establish health.
+- [x] Keep host elapsed-time authority separate from UTC health, including boot identity and restart invalidation.
+- [x] Network consensus overrides an outlying Windows reading. Competing network groups cannot be resolved by Windows.
+- [x] Cover network outage, surviving conflicting observations, stopped synchronization service, interop timeout and recovery with deterministic tests and a read-only candidate demonstration.
 
 ## Expected Write Surface
 
@@ -38,3 +38,7 @@ Record meaningful failing controls before behavior fixes, focused passing tests,
 ## Non-goals
 
 No synchronization-service startup, clock adjustment, mailbox activation or global host configuration changes.
+
+## Acceptance Evidence
+
+See `docs/dev/evidence/plan0124/qualification.md`. Focused time tests: 23 pass; existing CLI tests: 66 pass. Wheel built with `uv build`, installed only in `/tmp/codex-wake-time-candidate`, and its real `codex-wake time inspect` command returned network consensus. Initial plain pip wheel attempt failed for missing build backend; isolated uv build succeeded, with no production package changes. Whitespace and staged review are required before commit.

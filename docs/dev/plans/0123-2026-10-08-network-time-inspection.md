@@ -1,7 +1,7 @@
 # Plan 0123 — Inspect network time without changing the system clock
 
-State: PLANNED
-Workflow: READY
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
 Branch: feature/network-time-consensus
 Parent: docs/dev/plans/0122-2026-10-08-network-first-time-provider.md
@@ -9,7 +9,7 @@ Blocked by: None: can start immediately
 
 ## Current State
 
-Approved breakdown published as a repo-native ticket. Implementation has not started. This is the first execution frontier.
+Implemented the bounded WSL inspection CLI, packaged Windows QPC collector, explicit source policy, fault controls and rate-limited cache. Actual installed-candidate output demonstrates two admitted independent plain-NTP inspection sources; Netnod/PTB remain visible and excluded. No production candidacy or deadline effect is asserted.
 
 ## What to Build
 
@@ -21,13 +21,13 @@ Plan0122, its committed decision core and tests, and the primary-source producti
 
 ## Acceptance Criteria
 
-- [ ] Demonstrate the actual inspection entrypoint from source configuration through acquisition and normalization to bounded consensus and per-source diagnostics.
-- [ ] Keep all four candidate operators visible. Admit endpoints only with reviewed identity, explicit time-scale compatibility and a declared authentication policy; unknown profiles remain disabled.
-- [ ] Choose acquisition packaging through a bounded runnable NTS-client spike; record the decision and preserve failed evidence. Do not implement cryptography or silently downgrade authentication.
-- [ ] Validate age and common-instant alignment without assuming the WSL guest clock is correct. Evaluate host QPC bracketing, host/guest boot identity, collector generation and conservative interop bounds.
-- [ ] Select numeric tolerance, freshness, request deadlines, provider polling limits and retry/backoff with a recorded rationale; test values are not production defaults.
-- [ ] Cover malformed/replayed replies, excessive delay, DNS/transport failure, stale observations, duplicate operators, provider loss and 2–2 splits with deterministic controls.
-- [ ] Demonstrate at least two independent admitted sources before declaring production candidacy. If qualification remains unresolved, report uncertainty and leave this ticket incomplete rather than manufacture admission.
+- [x] Demonstrate the actual inspection entrypoint from source configuration through acquisition and normalization to bounded consensus and per-source diagnostics.
+- [x] Keep all four candidate operators visible. Admit endpoints only with reviewed identity, explicit time-scale compatibility and a declared authentication policy; unknown profiles remain disabled.
+- [x] Choose acquisition packaging through a bounded runnable NTS-client spike; record the decision and preserve failed evidence. Do not implement cryptography or silently downgrade authentication.
+- [x] Validate age and common-instant alignment without assuming the WSL guest clock is correct. Evaluate host QPC bracketing, host/guest boot identity, collector generation and conservative interop bounds.
+- [x] Select numeric tolerance, freshness, request deadlines, provider polling limits and retry/backoff with a recorded rationale; test values are not production defaults.
+- [x] Cover malformed/replayed replies, excessive delay, DNS/transport failure, stale observations, duplicate operators, provider loss and 2–2 splits with deterministic controls.
+- [x] Demonstrate at least two independent admitted sources before declaring production candidacy. If qualification remains unresolved, report uncertainty and leave this ticket incomplete rather than manufacture admission.
 
 ## Expected Write Surface
 
@@ -40,3 +40,7 @@ Record meaningful failing controls before behavior fixes, focused passing tests,
 ## Non-goals
 
 No mailbox integration, live clock or service changes, provider contact, installed production upgrade or effectful TLS bootstrap workaround.
+
+## Acceptance Evidence
+
+See `docs/dev/evidence/plan0123/qualification.md`. Focused time tests: 23 pass; existing CLI tests: 66 pass. Wheel built with `uv build`, installed only in `/tmp/codex-wake-time-candidate`, and its real `codex-wake time inspect` command returned network consensus. Initial plain pip wheel attempt failed for missing build backend; isolated uv build succeeded, with no production package changes. Whitespace and staged review are required before commit.

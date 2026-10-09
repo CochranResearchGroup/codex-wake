@@ -1,0 +1,6 @@
+2026-10-09T01:08:38Z chronyd version 4.5 starting (+CMDMON +NTP +REFCLOCK +RTC +PRIVDROP +SCFILTER +SIGND +ASYNCDNS +NTS +SECHASH +IPV6 -DEBUG)
+2026-10-09T01:08:38Z Wrong permissions on /tmp/codex-wake-nts-spike
+2026-10-09T01:08:38Z Disabled command socket /tmp/codex-wake-nts-spike/client.sock
+2026-10-09T01:08:38Z Disabled control of system clock
+2026-10-09T01:08:48Z Timeout reached
+2026-10-09T01:08:48Z chronyd exiting

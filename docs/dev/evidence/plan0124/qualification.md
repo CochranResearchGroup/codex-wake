@@ -1,0 +1,11 @@
+# Plan0124 Windows fallback
+
+The actual inspection entrypoint now reports Windows UTC health separately from host QPC. A stopped W32Time service excludes UTC but does not disable elapsed timing. With a running service, the collector reads bounded `w32tm /query /status /verbose` output and UTC in a QPC bracket. Unknown/localized status formats fail closed. No service is started or reconfigured.
+
+Admission requires: running service, zero leap indicator, stratum 1–15, a reviewed conventional-UTC synchronization source (Cloudflare/NIST), last successful synchronization no more than 300 seconds old, root dispersion at most 0.1 seconds, absolute phase offset at most 0.1 seconds and overall uncertainty at most 0.25 seconds. Bounds include reported dispersion/phase offset, 16 ms UTC read resolution, counter quantization and elapsed drift. Negative/future ages and nonfinite values fail closed. A running service alone is never sufficient. This is operational synchronization-health evidence, not cryptographic server authentication.
+
+TDD: healthy fallback and conflicting-survivor tests failed before the Windows adapter, then passed. An additional unknown/smeared synchronization-source control failed before source qualification was enforced, then passed. Controls cover stopped service, stale synchronization, excessive dispersion, leap alarm, nonfinite offset, network override and surviving network conflict. Pure selector tests retain network tie coverage.
+
+The isolated installed command receipt in Plan0123's `installed-inspection.json` proves current host UTC is excluded as `windows_unsynchronized` while agreeing network sources are accepted. Healthy fallback is demonstrated through the same public inspection interface with controlled host-acquisition evidence; the actual workstation's service remains stopped. Interop failure returns uncertainty and preserves all candidate diagnostics. A later good observation recovers without checkpoint reset.
+
+Standards: host script and Python normalizer retain separate responsibilities; no mailbox or system mutation. Spec: status is inspected independently of QPC authority, network consensus overrides the host and network conflicts cannot be resolved by it. Remaining trust limitation: plain NTP and Windows health evidence provide operational bounds, not malicious-host protection.
