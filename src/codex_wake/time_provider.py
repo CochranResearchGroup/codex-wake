@@ -80,3 +80,17 @@ def deadline_status(decision: TimeDecision, deadline: float) -> str:
     if decision.upper < deadline:
         return 'pending'
     return 'uncertain'
+
+
+NETWORK_TIME_POLICY = dict(version=1, mode='network-first', authentication='plain-ntp-explicit-opt-in')
+
+
+def require_time_decision(decision: TimeDecision) -> TimeDecision:
+    """Validate a trusted adapter's bounded result; never admit uncertain time."""
+    if not isinstance(decision, TimeDecision) or decision.status not in ('network', 'windows'):
+        raise ValueError('time_uncertain')
+    if not all(type(v) in (int, float) and math.isfinite(v) for v in (decision.lower, decision.upper)) or not 0 < decision.lower <= decision.upper or decision.upper-decision.lower > 1:
+        raise ValueError('time_uncertain')
+    if not isinstance(decision.sources,tuple) or not all(isinstance(s,str) and s for s in decision.sources) or len(set(decision.sources)) != len(decision.sources) or len(decision.sources) < (2 if decision.status == 'network' else 1):
+        raise ValueError('time_uncertain')
+    return decision

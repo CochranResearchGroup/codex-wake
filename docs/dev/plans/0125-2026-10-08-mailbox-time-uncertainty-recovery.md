@@ -1,7 +1,7 @@
 # Plan 0125 — Keep mailbox deadlines usable through time uncertainty
 
-State: PLANNED
-Workflow: BLOCKED
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
 Branch: feature/network-time-consensus
 Parent: docs/dev/plans/0122-2026-10-08-network-first-time-provider.md
@@ -9,7 +9,7 @@ Blocked by: docs/dev/plans/0123-2026-10-08-network-time-inspection.md
 
 ## Current State
 
-Approved breakdown published as a repo-native ticket. Implementation has not started. Wait for the named blockers to complete acceptance before implementation.
+Completed explicit schema-3 mailbox migration, retryable uncertain admission, time-independent inspection/cancellation and bounded expiry/delivery recovery. Disposable tests prove interrupted commits, concurrent admission, fresh-process persistence, preserved deadlines and intact legacy guards. Acceptance mapping, two-axis review, installed identity and final validation: `docs/dev/evidence/plan0126/acceptance-review.md`.
 
 ## What to Build
 
@@ -21,12 +21,12 @@ Plan0122, its committed decision core and tests, and the primary-source producti
 
 ## Acceptance Criteria
 
-- [ ] Define creation semantics when no trusted time exists: preserve explicit deadlines; retain relative intent as visibly pending or return a specific retryable error, never fabricate UTC.
-- [ ] Demonstrate inspection and cancellation during uncertainty without mutating guarded time anchors.
-- [ ] Hold expiration and time-dependent delivery until accepted bounds settle the original deadline; recover automatically when trusted evidence returns.
-- [ ] Document state versioning, compatibility, migration and rollback before changing persisted data. Preserve original deadlines and attributable anomaly evidence.
-- [ ] Use disposable stores to prove cross-process persistence, interrupted writes, concurrent evaluation, foreign boot/round rejection and recovery.
-- [ ] Prove no early release at interval boundaries and no accidental clearing/bypass of the existing live mailbox guard.
+- [x] Define creation semantics when no trusted time exists: preserve explicit deadlines; retain relative intent as visibly pending or return a specific retryable error, never fabricate UTC.
+- [x] Demonstrate inspection and cancellation during uncertainty without mutating guarded time anchors.
+- [x] Hold expiration and time-dependent delivery until accepted bounds settle the original deadline; recover automatically when trusted evidence returns.
+- [x] Document state versioning, compatibility, migration and rollback before changing persisted data. Preserve original deadlines and attributable anomaly evidence.
+- [x] Use disposable stores to prove cross-process persistence, interrupted writes, concurrent evaluation, foreign boot/round rejection and recovery.
+- [x] Prove no early release at interval boundaries and no accidental clearing/bypass of the existing live mailbox guard.
 
 ## Expected Write Surface
 

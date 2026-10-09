@@ -6,7 +6,7 @@ Owner: primary agent
 
 ## Current State
 
-Supersedes Windows-first preference in Plan0120 for this successor only; historical prototype and qualification remain unchanged. Four operator endpoints have responded to a bounded read-only probe. The selection/deadline core is committed at 9729a7c with 16 passing tests and has no live mailbox wiring. Production adapters, authenticated time and persisted-state migration remain follow-up packets.
+Plans0123–0126 are implemented and accepted on feature/network-time-consensus. The isolated 0.8.0 candidate includes real WSL host-QPC acquisition, two admitted plain-NTP operators, healthy Windows fallback, opt-in versioned mailbox migration and network deadline wakes. Final regression: 950 tests; installed workflow and owned host cache controls passed. See `docs/dev/evidence/plan0126/acceptance-review.md`. Overall plan remains OPEN for production activation and additional-source/authentication qualification; no production upgrade, live migration or real session dispatch occurred.
 
 ## Problem Statement
 
@@ -64,3 +64,7 @@ Current packet is complete. Overall state remains OPEN. Next packet: qualify and
 ## Production Qualification Follow-up
 
 See `docs/dev/evidence/plan0122/production-requirements.md` for bounded primary-source research and a proposed four-ticket breakdown. NTS availability and a candidate Windows QPC age source are documented; current Netnod/PTB leap profiles, acquisition packaging, numeric bounds and NIST authentication admission remain unresolved. The breakdown is draft pending the to-tickets review; no tickets have been published or marked ready. Repo-native plans remain the tracker authority under policy 0002; there is no configured `docs/agents/issue-tracker.md`, so no remote tracker or competing scratch tracker was created.
+
+## Successor Integration Result (2026-10-08)
+
+The historical packet results and draft breakdown above describe their original state. Their current successor is the accepted Plans0123–0126 implementation, with candidate identity, acceptance matrix, failure dispositions and limits under `docs/dev/evidence/plan0126/`. Original deadlines and legacy guard evidence are preserved. Only Cloudflare/NIST are admitted; Netnod/PTB and NTS remain unqualified. Production activation remains a separate scope; the next useful work is qualifying additional independent sources and authenticated acquisition before a rollout decision.

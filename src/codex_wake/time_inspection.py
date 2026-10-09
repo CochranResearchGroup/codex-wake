@@ -174,3 +174,10 @@ def time_command(args):
     import json
     print(json.dumps(inspect_time(offline=args.offline), sort_keys=True))
     return 0
+
+
+def network_time_decision():
+    """Trusted adapter seam for explicitly opted-in network-time domains."""
+    report = inspect_time()
+    decision = report['decision']
+    return TimeDecision(decision['status'],tuple(decision['sources']),decision['lower'],decision['upper'],decision['reason'])

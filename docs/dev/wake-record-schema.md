@@ -2,7 +2,7 @@
 
 Default write schema version: `1`
 
-Supported read schema versions: `1`, `2`
+Supported read schema versions: `1`, `2`, `3`
 
 Wake records are durable runtime records stored as JSON. They are operational state, not source artifacts. Schema version `1` remains the default for the existing timer, file, process, CLI, and plugin writers. Schema version `2` is reserved for capability-gated signal records backed by the root-local signal journal. A schema-v1 record whose predicate claims `type: signal`, an unknown version, or a malformed schema-v2 record is held rather than evaluated through the legacy predicate path.
 
@@ -328,3 +328,22 @@ unavailable. Existing writers, including the OpenClaw plugin, remain on v1.
 Managed downgrade must refuse active or recoverable v2 state; this contract
 does not claim that an arbitrary unmanaged legacy process can be prevented
 from reading files outside the managed-runtime boundary.
+
+## Network Deadline Record Version 3
+
+Explicit `after --network-time` and `at --network-time` writers add schema 3,
+`time_policy` (version 1, network-first, plain-ntp-explicit-opt-in), and the
+creation `time_observation`. Only `not_before` predicates are supported. Default
+writers remain schema 1. New readers validate the policy and hold unknown
+versions. Existing schema-2 signal authority is unchanged.
+
+Relative creation rounds the accepted upper UTC bound upward to whole seconds.
+Absolute `due_at` preserves fractional precision. Evaluation and direct dispatch
+require a fresh accepted lower bound to reach the original deadline and retry
+anchor. Uncertainty holds effects without rewriting the predicate. Cancellation
+uses the shared lifecycle lock and records `updated_at: null` plus a cancellation
+event with `at: null` and `time_status: not_observed`. Archive timestamps require
+accepted time and retention deletion uses its lower bound.
+
+Old unmanaged readers are not qualified for this version and must be quiesced
+before using their roots. See [candidate release and rollback](release-notes/0.8.0-network-time.md).

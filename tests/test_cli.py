@@ -335,7 +335,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0, err)
             data = json.loads(json_out)
             self.assertEqual(data["schema_version"], 1)
-            self.assertEqual(data["read_versions"], [1, 2])
+            self.assertEqual(data["read_versions"], [1, 2, 3])
             self.assertEqual(data["default_write_version"], 1)
             self.assertEqual(data["signal_record_contract_version"], 2)
             self.assertEqual(data["signal_journal_schema_version"], 2)
