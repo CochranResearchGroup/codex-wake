@@ -14,11 +14,23 @@ import test_app_server
 
 class PersistentDispatchTests(unittest.TestCase):
     def test_turn_survives_proxy_close_without_claiming_completion(self):
+        for owned_alias in (False, True):
+            with self.subTest(owned_alias=owned_alias):
+                self._qualify_turn_lifetime(owned_alias)
+
+    def _qualify_turn_lifetime(self, owned_alias):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
             private = base / 'control'
             private.mkdir(mode=0o700)
-            sockpath = private / 'daemon.sock'
+            target_private = base / 'daemon-private'
+            target_private.mkdir(mode=0o700)
+            sockpath = target_private / 'daemon.sock'
+            reported_path = private / 'app-server-control.sock'
+            if owned_alias:
+                reported_path.symlink_to(sockpath)
+            else:
+                reported_path = sockpath
             listener = socket.socket(socket.AF_UNIX)
             listener.bind(str(sockpath)); listener.listen(); listener.settimeout(5)
             started, disconnected, release, completed = [threading.Event() for _ in range(4)]
@@ -58,7 +70,7 @@ if args[:3]==['app-server','proxy','--sock']:
 for line in sys.stdin:
  q=json.loads(line);m=q['method'];r={} if m=='initialize' else {'thread':{'id':'thread_abc','status':{'type':'idle'}}} if m=='thread/resume' else {'turn':{'id':'turn_owned'}}
  print(json.dumps({'id':q['id'],'result':r}),flush=True)
-'''.replace('SOCKET,',repr(str(sockpath))+','))
+'''.replace('SOCKET,',repr(str(reported_path))+','))
             executable.chmod(0o700)
             try:
                 found = test_app_server.AppServerTests().make_record(base/'wake', base)
@@ -83,7 +95,7 @@ for line in sys.stdin:
             executable=base/'codex';executable.write_text('#!/bin/sh\nexit 0\n');executable.chmod(0o700)
             from subprocess import CompletedProcess
             try:
-                for case in ('missing','unsupported','nonprivate','wrong_actor','symlink'):
+                for case in ('missing','unsupported','nonprivate','wrong_actor','symlink_chain','foreign_alias','dangling_alias','unsafe_target','ancestor_alias','foreign_target'):
                     with self.subTest(case=case):
                         private.chmod(0o755 if case=='nonprivate' else 0o700)
                         data={'status':'stopped' if case=='missing' else 'running','socketPath':str(sockpath),'appServerVersion':'0.162.0'}
@@ -96,15 +108,36 @@ for line in sys.stdin:
                         original=os.lstat
                         def lstat(path,*args,**kwargs):
                             value=original(path,*args,**kwargs)
-                            if case=='wrong_actor' and Path(path)==sockpath:
+                            if ((case=='wrong_actor' and Path(path)==sockpath)
+                                    or (case=='foreign_alias' and Path(path)==alias)
+                                    or (case=='foreign_target' and Path(path)==sockpath)):
                                 from types import SimpleNamespace
                                 return SimpleNamespace(st_mode=value.st_mode,st_uid=os.geteuid()+1)
                             return value
                         alias=private/'alias.sock'
-                        if case=='symlink':alias.symlink_to(sockpath);data['socketPath']=str(alias)
+                        if alias.is_symlink(): alias.unlink()
+                        if case in ('symlink_chain','foreign_alias','dangling_alias','unsafe_target','ancestor_alias','foreign_target'):
+                            if case=='symlink_chain':
+                                intermediate=private/'intermediate.sock'
+                                intermediate.symlink_to(sockpath)
+                                alias.symlink_to(intermediate)
+                            elif case=='ancestor_alias':
+                                parent_alias=base/'control-alias';parent_alias.symlink_to(private)
+                                alias.symlink_to(sockpath);data['socketPath']=str(parent_alias/'alias.sock')
+                            elif case=='dangling_alias': alias.symlink_to(private/'missing.sock')
+                            elif case=='unsafe_target':
+                                unsafe=base/'unsafe';unsafe.mkdir(mode=0o755);unsafe.chmod(0o755)
+                                unsafe_socket=socket.socket(socket.AF_UNIX)
+                                unsafe_socket.bind(str(unsafe/'daemon.sock'));unsafe_socket.close()
+                                alias.symlink_to(unsafe/'daemon.sock')
+                            else: alias.symlink_to(sockpath)
+                            if case!='ancestor_alias':data['socketPath']=str(alias)
                         with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
                             result=dispatch_app_server_record(base/('wake-'+case),found,default_codex_cmd=str(executable))
                         self.assertEqual(result.status,'failed');popen.assert_not_called()
+                        failed=json.loads((base/('wake-'+case)/'failed/wake_app.json').read_text())
+                        if case=='missing':self.assertIn('is not running',failed['last_error'])
+                        if case=='unsupported':self.assertIn('proxy unsupported',failed['last_error'])
                         self.assertTrue(all('start' not in c and 'restart' not in c for c in calls))
             finally:server.close()
 
