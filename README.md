@@ -395,21 +395,24 @@ codex-wake service uninstall
 ```
 
 App-server wake dispatch requires a running persistent Codex daemon with the
-existing `app-server proxy --sock` capability. Check it explicitly with
+supported Unix WebSocket control transport. Check daemon presence with
 `codex app-server daemon version`; executable resolution alone does not prove
 this readiness. The discovered socket must be absolute and owned by the current user in a
 private directory owned by that user. A current-user-owned leaf alias under a
 private owned directory is supported only when its absolute target is a canonical
 socket in a separate private owned directory. Ancestor aliases, alias chains,
 foreign ownership, dangling targets and nonprivate containing directories fail
-closed. The proxy receives the verified canonical socket path.
+closed. The WebSocket client connects to the verified canonical socket path.
 Codex Wake only discovers and connects to this existing daemon. It never starts,
 replaces or stops it. Missing or unsupported daemon readiness fails before a new
 turn starts; unattended app-server delivery has no standalone-server fallback.
 
-The dispatcher closes only its owned stdio proxy after `turn/start` returns.
+The dispatcher closes only its owned WebSocket connection after `turn/start` returns.
 The persistent daemon owns the turn beyond that connection, including long
-turns. RPC deadlines bound discovery and protocol response waits, not agent work.
+turns. Absolute RPC deadlines bound writes and protocol response waits, not agent work.
+The maintained WebSocket client caps incoming messages at32MiB and closes within
+one second. The raw `codex app-server proxy` copies bytes and does not translate
+newline JSON into the WebSocket protocol; it is not used by dispatch.
 `submitted` and `ack_observed` prove turn acceptance; verify the exact thread and
 turn transcript separately for completion. Do not automatically retry an original
 wake whose external outcome is uncertain.
