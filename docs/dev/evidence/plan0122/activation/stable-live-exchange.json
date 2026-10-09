@@ -1,0 +1,75 @@
+{
+  "status": "accepted",
+  "boundary": "stable installed0.8.0",
+  "revision": "edf2aea4c5480202639bb3e94be7f16300b8efcb",
+  "codex_version": "0.162.0",
+  "request_id": "msg_1a456cdd3c7d4279802a88bbea520d61",
+  "reply_id": "msg_6598e510664f4919912c73a725163491",
+  "digest_verified": true,
+  "messages": [
+    {
+      "message_id": "msg_1a456cdd3c7d4279802a88bbea520d61",
+      "in_reply_to": null,
+      "created": 1791513805.16315,
+      "expires": 1791514405.16315,
+      "admission": "accepted",
+      "notification": "submitted",
+      "recipient": "completed"
+    },
+    {
+      "message_id": "msg_6598e510664f4919912c73a725163491",
+      "in_reply_to": "msg_1a456cdd3c7d4279802a88bbea520d61",
+      "created": 1791513833.764108,
+      "expires": 1791600233.764108,
+      "admission": "accepted",
+      "notification": "submitted",
+      "recipient": "accepted"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "attempt_ad230068887e43e6a8c78f6c6edd87d3",
+      "message_ids": "[\"msg_1a456cdd3c7d4279802a88bbea520d61\"]",
+      "state": "submitted",
+      "evidence": "{\"daemon_generation\":\"f5e958c3ebb84f8982ebb5ef004d26e0\",\"exact_thread_id\":\"01a11e72-49fd-7402-9e44-c2f5f8fcebb6\",\"receipt_id\":\"attempt_ad230068887e43e6a8c78f6c6edd87d3\",\"transport\":\"tmux_notification_v1\"}"
+    },
+    {
+      "attempt_id": "attempt_27ae784da6ca4c55ada7a9c9b088e8b5",
+      "message_ids": "[\"msg_6598e510664f4919912c73a725163491\"]",
+      "state": "submitted",
+      "evidence": "{\"daemon_generation\":\"13f564d9a76748cd9a5d823fc3b669e5\",\"exact_thread_id\":\"01a11e72-49fc-7650-9226-923f3e7e0017\",\"receipt_id\":\"attempt_27ae784da6ca4c55ada7a9c9b088e8b5\",\"transport\":\"tmux_notification_v1\"}"
+    }
+  ],
+  "wake": {
+    "id": "wake_eb6079edaff041b99249c28c4e864f32",
+    "status": "submitted",
+    "transport_receipt": {
+      "attempt_id": "attempt_27ae784da6ca4c55ada7a9c9b088e8b5",
+      "message_id": "msg_6598e510664f4919912c73a725163491",
+      "receipt_id": "attempt_27ae784da6ca4c55ada7a9c9b088e8b5",
+      "transport": "tmux_notification_v1"
+    }
+  },
+  "actor_versions": {
+    "A": "codex-wake 0.8.0",
+    "B": "codex-wake 0.8.0"
+  },
+  "worker": {
+    "unit": "codex-wake-plan122-stable.service",
+    "pid": "85630",
+    "invocation": "f2bc6bf2ae424b9d82ec15d4447fa6b6",
+    "terminal_message": {
+      "schema_version": 1,
+      "success": true,
+      "worker": {
+        "status": "finished",
+        "submitted": 2,
+        "ticks": 9
+      }
+    },
+    "post_state": "inactive/not-found: successful transient unit garbage collected; terminal journal retained",
+    "exit_code_readback": null
+  },
+  "controller_intervention_after_admission": false,
+  "peer_bodies_published": false
+}

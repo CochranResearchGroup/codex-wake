@@ -14,7 +14,7 @@ transport effects stop for reconciliation; do not restart or resend blindly.
 ## Operator setup
 
 Install the public tag with `uv tool install --force --reinstall
-git+https://github.com/CochranResearchGroup/codex-wake.git@v0.7.1`.
+git+https://github.com/CochranResearchGroup/codex-wake.git@v0.8.0`.
 Choose absolute private locations and the real thread IDs, repository roots and
 tmux socket. The following layout matches the shipped user-service example:
 
@@ -166,3 +166,11 @@ operate an A2A store. Downgrading the CLI does not make that store disposable:
 preserve it and reinstall a compatible release to read its messages/receipts.
 Qualification evidence lives under Plan0119; release/install, multiroot, rollback
 and soak acceptance are recorded separately from a successful transport test.
+
+
+For explicit network-time mailbox activation and schema3 compatibility, follow
+[0.8.0 network-time instructions](dev/release-notes/0.8.0-network-time.md).
+The current installed stock-Codex0.162 automatic exchange is recorded under
+[Plan0122 activation](dev/evidence/plan0122/activation/requirement-audit.md).
+This qualifies a bounded operator-started worker; it does not enable an indefinite
+service or silently migrate another bus.

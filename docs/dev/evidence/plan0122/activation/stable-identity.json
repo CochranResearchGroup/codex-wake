@@ -1,0 +1,29 @@
+{
+  "version": "0.8.0",
+  "revision": "edf2aea4c5480202639bb3e94be7f16300b8efcb",
+  "package": "/home/ecochran76/.local/share/uv/tools/codex-wake/lib/python3.12/site-packages/codex_wake",
+  "direct_url": {
+    "url": "https://github.com/CochranResearchGroup/codex-wake.git",
+    "vcs_info": {
+      "vcs": "git",
+      "commit_id": "edf2aea4c5480202639bb3e94be7f16300b8efcb",
+      "requested_revision": "edf2aea4c5480202639bb3e94be7f16300b8efcb"
+    }
+  },
+  "files_match_main": true,
+  "sha256": {
+    "a2a_mailbox.py": "f2f4bbe934dc079eea4c17b5357e02f57a69bc12349dcacff167d3b6eaed1c7a",
+    "a2a_time.py": "88e7fb8c7c1a35bc7c69bfecab0a25cff1af6a3777008d47a35f162c30d14c86",
+    "a2a_reply_wake.py": "474d571e1b1a8a2be43d7845a64ca341f0f0ce522290b722eb0c537a6003a7de",
+    "a2a_tmux_delivery.py": "97e5bd0b2935e52fdb25cbd006d5647768ef18314cf6de4b6c70fd9191af6d2e",
+    "time_provider.py": "5ff3a83454897277811264e442bf37d2ca005110d0afc01dcc561d92f621d639",
+    "time_inspection.py": "8f2243bb8dba8c38258e0d1d12361d1ae3a0300e3fa9f354f3e944481fd81acf",
+    "time_collect.ps1": "372eea0ebc8aec8d2c817f7912ddd73c9ce36aa641633173e689df43474661bc",
+    "network_wakes.py": "6aff0f3bbf0b79fa914ef70c7ed34597371c790659178456ea15603b2a238632"
+  },
+  "previous_version": "0.7.1",
+  "previous_revision": "b13e45734a2b074734801803c4fd9f5bb4de6f6f",
+  "existing_units_restarted": 0,
+  "system_clock_changes": 0,
+  "historical_bus_checkpoint_resets": 0
+}

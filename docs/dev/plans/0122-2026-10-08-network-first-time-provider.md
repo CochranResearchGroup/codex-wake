@@ -1,13 +1,15 @@
 # Plan 0122 — Network-first time provider
 
-State: OPEN
+State: CLOSED
 Branch: feat/network-time-provider (integration); feature/network-time-consensus (preserved source)
 Owner: primary agent
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/224
 
 ## Current State
 
-Revision2 is IN_PROGRESS under issue224. Plans0123–0126 produced the isolated0.8.0 candidate; subsequent native-path regressions exposed and repaired worker outage termination, guest-clock reply expiry and final tmux expiry checks. Three independently operated plain-NTP sources now form real bounded consensus (Cloudflare/NIST/Alastyr); each single-provider loss retains two. Netnod/PTB remain visibly excluded. Main transport updates are reconciled at ec33887 and source regression is passing; owned native automatic request/return and digest verification are accepted; stable installed activation remains incomplete. See `docs/dev/evidence/plan0122/activation/progress.md`. No existing mailbox checkpoint has been reset.
+Revision2 is COMPLETE under issue224. Implementation PR225 merged as edf2aea4c5480202639bb3e94be7f16300b8efcb after hosted Python3.11/3.12 gates; published v0.8.0 and stable installed files match that exact main commit. Three independently operated plain-NTP sources form bounded consensus and each controlled single-source omission retains quorum. The stable native A→B→A exchange completed automatically, with suspended sender, actual peer reads/reply, verified digest/correlation, exactly two submitted notifications and submitted arm.963 comprehensive tests pass; installed workflow and provider controls pass. See `docs/dev/evidence/plan0122/activation/requirement-audit.md` and its receipts.
+
+The owned bus is paused and backed up at schema3; owned worker finished and both owned client process trees are stopped. Existing service roots/checkpoints were not reset or migrated. NTS, unknown Netnod/PTB profiles, actual host reboot/suspend and healthy Windows observation remain explicit limits under the approved unauthenticated opt-in scope. The original packet/proposal sections below are historical; this current state and revision2 govern completion.
 
 ## Problem Statement
 
@@ -77,3 +79,10 @@ User objective: complete Plan0122; diagnose and fix bugs; checkpoint before two 
 Primary lane remains feature/network-time-consensus. Serial critical path: reproduce and repair end-to-end worker/reply time-domain gaps; qualify adequate independent-source redundancy; review/regress/build; reconcile existing live store/guard before any migration; integrate/install using recoverable custody; run one owned bounded exact-thread request/reply exchange and audit every original user story. Use a fresh explicitly enrolled bus if the historical store's guard cannot safely migrate; preserve and report the historical hold without resetting it. Do not substitute a synthetic transport or fixture acknowledgement for actual agent delivery. The first new evidence is a CLI worker outage regression, not another planning packet. Current goal counters are authoritative via get_goal; all subsequent turns inherit the same ceiling.
 
 Completion requires verified source/installed identities, bounded acquisition and provider-loss behavior, versioned migration without guard bypass, retained deadlines through restart/outage, usable inspection/cancellation, and actual automatic A2A delivery on the network-time path. Extra-source and authentication work must have a truthful qualification disposition; no endpoint is enabled from ordinary agreement alone. If authentication cannot be qualified, retain the explicit unauthenticated trust policy and record that boundary rather than claim canonical authenticated UTC. Review once against the frozen baseline7a4666a and repair accepted findings, avoiding repeated unrelated hardening.
+
+
+## Revision2 Acceptance Result
+
+All eight original stories are audited in activation/requirement-audit.md. Candidate exchange1 failed and is preserved; its contention pattern was reproduced and repaired. Candidate exchange2 and stable installed exchange3 both passed without controller intervention after admission. Additional native-path review fixes cover outage recovery, reply/transport clock domain, current idle composer and read-only persisted continuity. Source review and exact receipts remain in activation/review.md and activation/progress.md.
+
+Release: https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.8.0 . No authentication guarantee, arbitrary old-reader compatibility, indefinite service rollout or historical clock root-cause conclusion is implied. Existing issue181/wider Plan0101 retained obligations remain separate.
