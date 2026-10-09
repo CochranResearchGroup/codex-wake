@@ -1059,24 +1059,27 @@ Deliverables:
 
 State: OPEN
 
-Current State: Real wakeA/wakeB request/read/ack/reply/sender-read passed through
-an isolated installed CLI; notifications were suppressed. Automatic exact-thread
-notification, sender receipt resumption, normal-session safety, restart and release
-remain unaccepted. Existing mailbox and recovery foundations are integrated.
+Current State: Plan0119's requested remaining-gate packet is accepted in
+verification0122: released v0.7.1 automatic exchanges, cancellation,
+restart/reconnect, cross-root flow, rollback and a full thirty-minute soak passed.
+Server-unloaded recipient and broader held-recovery obligations remain open.
+The network-time successor is an isolated 0.8.0 candidate under P64; current
+installed runtime remains 0.7.1. See readiness reconciliation note0010.
 
 Execution Plan: [Build usable live A2A](docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md)
 Original requirements: [Agent-to-Agent System](docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md)
 Live baseline: [wakeA/wakeB round trip](docs/dev/verification/0111-2026-10-04-wakeA-wakeB-live-round-trip.md)
 
-Deliverables, in order:
+Accepted packet deliverables (verification0122):
 
 - Unassisted live request, recipient notification/reply and sender resumption.
 - Busy/draft/offline/exact-thread/cancel guards demonstrated in real sessions.
 - Same-thread worker restart and durable reply suspension.
 - Normal installed CLI/service, enrolled cross-root flow and release/rollback.
 
-Recovery-gap release and remaining full-system obligations remain tracked; they
-are not the next prerequisite for messaging on a healthy demo bus.
+Remaining scope: server-unloaded-recipient and broader held-recovery obligations.
+Current target bus/guard/bindings/worker must be read back before claiming present
+readiness; network-time activation is tracked under P64.
 
 ## P64 | Network-first Time for Wake and Mailbox Deadlines
 
