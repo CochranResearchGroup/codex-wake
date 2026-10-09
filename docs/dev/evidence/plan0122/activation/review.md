@@ -17,3 +17,9 @@ Plan0122 revision2 and issue224 govern activation. Stories1–8 map to child acc
 Still-open acceptance gates: canonical PR/CI integration, stable installed identity and actual exchange on that installed release, final original-story matrix and rollback custody readback. These are blocking for parent completion, not missing candidate source changes. Authentication is explicitly plain NTP opt-in; NTS, unknown Netnod/PTB profiles, actual workstation reboot/suspend and historical guard repair are not claimed. Current Windows service is unhealthy and excluded. Existing legacy default behavior is retained.
 
 Adjudication: Standards blocking source defects fixed; nonblocking serialization backlog retained. Spec has no observed unresolved source defect, but stable integration/installed acceptance remains blocking. Highest unresolved severity: Standards nonblocking, Spec blocking activation evidence.
+
+## Final activation adjudication
+
+All previously open Spec activation gates are now accepted: PR225 exact main edf2aea and both hosted gates, stable0.8.0 module identity, installed entrypoint workflow, each provider omission and actual stable native round trip, verified backups and real prior-reader refusal. All8 original stories are mapped in requirement-audit.md with fixture/live boundaries. No blocking Standards or Spec finding remains. Serialization and unauthenticated acquisition remain explicit nonblocking limits under approved scope. Successful transient worker units were garbage collected; final journal messages prove native bounded finish. Do not infer an exit code from default systemctl fields on a missing unit.
+
+Memory disposition: unavailable. Current-goal machine-readable non-write receipt: `/home/ecochran76/.local/state/codex-wake/live-demos/plan0122-20261009/memory-disposition.json`; no reviewed Codex Wake target group exists and no write was attempted.

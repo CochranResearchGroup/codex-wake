@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "source_revision": "edf2aea4c5480202639bb3e94be7f16300b8efcb",
+  "comprehensive": {
+    "command": "PYTHONPATH=src /tmp/codex-wake-time-candidate/bin/python -m unittest discover -s tests",
+    "log": "/tmp/plan0122-integration-final-tests.txt",
+    "tests": 963,
+    "seconds": 58.411,
+    "exit": 0,
+    "retries": 0
+  },
+  "pr": {
+    "number": 225,
+    "head": "e7ac7e6aad9e326c3d45daf25643dbded9c0dab7",
+    "run": 37875627352,
+    "python_311": "success",
+    "python_312": "success"
+  },
+  "main_run": {
+    "id": 37875792398,
+    "conclusion": "success"
+  },
+  "release": {
+    "assets": [
+      {
+        "apiUrl": "https://api.github.com/repos/CochranResearchGroup/codex-wake/releases/assets/623694460",
+        "contentType": "application/octet-stream",
+        "createdAt": "2026-10-09T02:46:45Z",
+        "digest": "sha256:b36916205747aff7c2b40750eb1ee0dcb39bdcc2e2c2bc16005b9f5f8c3fc36c",
+        "downloadCount": 0,
+        "id": "RA_kwDOShLp5M4lLNJ8",
+        "label": "",
+        "name": "codex_wake-0.8.0-py3-none-any.whl",
+        "size": 346557,
+        "state": "uploaded",
+        "updatedAt": "2026-10-09T02:46:46Z",
+        "url": "https://github.com/CochranResearchGroup/codex-wake/releases/download/v0.8.0/codex_wake-0.8.0-py3-none-any.whl"
+      }
+    ],
+    "isDraft": false,
+    "tagName": "v0.8.0",
+    "targetCommitish": "edf2aea4c5480202639bb3e94be7f16300b8efcb",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.8.0"
+  },
+  "installed_workflow": "stable-installed-workflow.json",
+  "installed_exchange": "stable-live-exchange.json",
+  "provider_loss_controls": "stable-provider-loss-controls.json",
+  "rollback_and_cleanup": "final-custody.json",
+  "memory_disposition": {
+    "disposition": "unavailable",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/live-demos/plan0122-20261009/memory-disposition.json",
+    "reason": "No reviewed Codex Wake Graphiti target group; no write attempted"
+  }
+}

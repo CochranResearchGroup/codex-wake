@@ -1,0 +1,81 @@
+{
+  "paused": true,
+  "mailbox_schema": 3,
+  "messages": 5,
+  "attempts": [
+    {
+      "state": "submitted",
+      "count": 5
+    }
+  ],
+  "outbox": [
+    {
+      "kind": "notification",
+      "status": "submitted",
+      "count": 5
+    },
+    {
+      "kind": "receipt_signal",
+      "status": "pending",
+      "count": 28
+    }
+  ],
+  "owned_process_generations_remaining": [],
+  "pre_migration_snapshot": {
+    "backup": {
+      "activation_qualified": false,
+      "bus_id": "plan0122-live",
+      "counts": {
+        "actors": 0,
+        "events": 3,
+        "mail_attempts": 0,
+        "mail_identities": 0,
+        "mail_receipts": 0
+      },
+      "database_bytes": 184320,
+      "database_sha256": "4c14cbc850897d466fc4adbfe99d7ba1dd1792b94d6c26a6283158c0e803451d",
+      "mailbox_schema": 2,
+      "receipt_id": "receipt_e9bf64cd52784e1ba28999c702587f69",
+      "request_receipt_id": "receipt_3162be8025054a8ea95c324b5255d0ba",
+      "snapshot_id": "snapshot_c73792dfe88f4f6899d7a8722d0b5859",
+      "verified": true
+    },
+    "schema_version": 1,
+    "success": true
+  },
+  "final_snapshot": {
+    "backup": {
+      "activation_qualified": false,
+      "bus_id": "plan0122-live",
+      "counts": {
+        "actors": 2,
+        "events": 40,
+        "mail_attempts": 5,
+        "mail_identities": 5,
+        "mail_receipts": 28
+      },
+      "database_bytes": 237568,
+      "database_sha256": "bdb011847dab540bd6b1655a33fc4516e8a1bd033ff906f959b7e4b23933a0ef",
+      "mailbox_schema": 3,
+      "snapshot_id": "snapshot_932940dcd0c94503b83707e79a0bbd0a",
+      "verified": true
+    },
+    "schema_version": 1,
+    "success": true
+  },
+  "old_reader_refusal": {
+    "error": {
+      "code": "unsupported_mailbox_schema",
+      "details": {},
+      "message": "mailbox domain requires an explicit supported migration"
+    },
+    "idempotency_key": null,
+    "reconciliation_required": false,
+    "schema_version": 1,
+    "success": false
+  },
+  "rollback_wheel_sha256": "7851bc325b1584bba3b06d3a86d149a50ff692ac4694510382507f7487716dff",
+  "backup_attempt_before_pause": "refused pause_required; preserved; final paused snapshot later created and verified",
+  "state_retained": true,
+  "historical_guard_reset": false
+}

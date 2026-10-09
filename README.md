@@ -33,7 +33,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.7.1
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.8.0
 ```
 
 Verify the installed commands:
@@ -954,11 +954,11 @@ admission policy without network access. Reports identify the accepted interval,
 its host-counter instant, and each source's exclusion reason. Windows PowerShell
 interop is required; unavailable acquisition returns uncertainty. Network rounds
 are limited to one per 64 seconds across processes, with a two-minute bounded
-cache. Cloudflare/NIST observations are explicitly unauthenticated; Netnod/PTB
+cache. Cloudflare/NIST/Alastyr observations are explicitly unauthenticated; Netnod/PTB
 remain disabled pending time-scale qualification. This inspection command does
 not activate deadline effects. See Plan0123 qualification for policy and limits.
 
-### Network time candidate (0.8.0)
+### Opt-in network time (0.8.0)
 
 Opt-in `after --network-time` / `at --network-time` wakes use bounded
 network-first time; put options before the duration or timestamp. Existing
@@ -968,5 +968,5 @@ Cloudflare, NIST and Alastyr are admitted as explicitly unauthenticated plain NT
 Netnod and PTB remain disabled pending scale qualification.
 
 Mailbox activation is an explicit operator schema migration, never a reset of
-an anomalous legacy checkpoint. See the [0.8.0 candidate instructions](docs/dev/release-notes/0.8.0-network-time.md)
+an anomalous legacy checkpoint. See the [0.8.0 instructions](docs/dev/release-notes/0.8.0-network-time.md)
 for commands, compatibility, migration, rollback and acceptance limits.

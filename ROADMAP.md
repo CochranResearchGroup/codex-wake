@@ -1083,9 +1083,9 @@ readiness; network-time activation is tracked under P64.
 
 ## P64 | Network-first Time for Wake and Mailbox Deadlines
 
-State: OPEN
+State: DONE
 
-Current State: Plans0123–0126 are complete on the isolated feature branch. Inspection, healthy Windows fallback, explicit mailbox migration and network deadline wakes passed 950 regression tests and installed-candidate acceptance. Two plain-NTP operators are admitted; Netnod/PTB scale qualification, NTS and production activation remain open. Critical-path owner: primary agent lane; substantive child WIP limit: one.
+Current State: Plan0122 revision2 COMPLETE. PR225 integrated edf2aea, published/installed v0.8.0,963 comprehensive tests and both hosted release gates pass. Three admitted plain-NTP operators retain quorum under each controlled single loss; installed native A→B→A proof verifies exact correlation/digest, submitted arm and bounded worker finish. Owned demo is paused/backed up and clients stopped; no old checkpoint reset. Authentication/additional-profile limits remain explicit follow-up, not hidden activation claims. Evidence: docs/dev/evidence/plan0122/activation/requirement-audit.md.
 
 Parent design: [Plan0122](docs/dev/plans/0122-2026-10-08-network-first-time-provider.md).
 

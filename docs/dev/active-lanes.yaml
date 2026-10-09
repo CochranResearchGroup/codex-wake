@@ -47,13 +47,18 @@ lanes:
     plan_ref: feat/network-time-provider
     branch: feat/network-time-provider
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
-    checkpoint: 7a4666a
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: edf2aea4c5480202639bb3e94be7f16300b8efcb
     integration: squash_pr
     dependencies: []
     overlaps: [P63]
-    updated_at: 2026-10-08
+    updated_at: 2026-10-09
+    release_tag: v0.8.0
+    integration_receipt: edf2aea4c5480202639bb3e94be7f16300b8efcb
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/225
+    acceptance: docs/dev/evidence/plan0122/activation/requirement-audit.md
+    disposition: Revision2 installed activation and automatic native exchange PASS; owned state paused/backed up; NTS/additional profiles remain qualified follow-up limits
   - id: APP-PERSIST
     owner: remote-view-provider-remediation
     objective: Preserve accepted app-server turns beyond owned client teardown
