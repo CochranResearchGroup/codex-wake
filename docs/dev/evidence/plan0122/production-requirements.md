@@ -33,7 +33,7 @@ The reliable first deliverable is an inspection-only acquisition path that repor
 
 ## Proposed execution breakdown
 
-Draft only, pending the to-tickets breakdown review. Each draft is a complete verifiable user behavior; there is no separate schema-only or adapter-only ticket.
+The user approved this breakdown; canonical tickets are Plans0123–0126 under `docs/dev/plans/`. The numbered proposal below is retained as research history, not a competing status authority. Each draft is a complete verifiable user behavior; there is no separate schema-only or adapter-only ticket.
 
 1. **Inspect network time without changing the system clock.** No ticket blockers. Operator can run a bounded inspection command and see qualified network consensus or per-source exclusion reasons. Includes acquisition, normalization, configuration, NTS packaging spike, explicit authentication/time-scale admission, numeric policies and deterministic fault tests. At least two independent admitted sources must be demonstrated before production candidacy; all four candidates remain visible, and unknown profiles stay disabled.
 2. **Use healthy Windows fallback during network outages.** Blocked by 1's acquisition/inspection contract. The same inspection path demonstrates fallback, health exclusion, stale evidence and conflict behavior. Windows synchronization health and UTC uncertainty must be independently justified; running service status alone is insufficient. No network tie can be broken by Windows.
