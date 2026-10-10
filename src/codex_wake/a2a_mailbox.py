@@ -383,13 +383,19 @@ class Mailbox:
         return hashlib.sha256(raw).hexdigest()
 
     def _admit(self, database, actor, recipient, *, body, kind, ttl, key, delivery,
-               subject, selector, now, original=None, correlation=None, acknowledgement=None):
+               subject, selector, now, original=None, correlation=None, acknowledgement=None,
+               resume_missing=False):
+        if type(resume_missing) is not bool or (resume_missing and delivery != 'notify'):
+            raise BusError('invalid_argument', 'explicit reopening requires notification delivery')
         body_digest = self._parameters(body, kind, ttl, key, delivery, subject, selector, correlation)
         recipient_key = thread_key(recipient)
         parent_id = original['message_id'] if original else None
-        fingerprint = hashlib.sha256(encoded(dict(recipient=recipient_key, body_digest=body_digest,
+        parameters = dict(recipient=recipient_key, body_digest=body_digest,
             kind=kind, ttl=ttl, delivery=delivery, subject=subject, in_reply_to=parent_id,
-            correlation=correlation, acknowledgement=acknowledgement)).encode()).hexdigest()
+            correlation=correlation, acknowledgement=acknowledgement)
+        if resume_missing:
+            parameters['resume_policy'] = 'same_thread'
+        fingerprint = hashlib.sha256(encoded(parameters).encode()).hexdigest()
         existing = database.execute('SELECT message_id,fingerprint,created FROM mail_metadata WHERE sender_key=? AND idempotency_key=?', (actor.key, key)).fetchone()
         if existing:
             if now - existing['created'] > 90 * 86400:
@@ -432,6 +438,11 @@ class Mailbox:
             idempotency_key=key, in_reply_to=parent_id, correlation=parent['correlation'] if parent else correlation,
             lineage=(parent['lineage'] + [parent_id]) if parent else [], hop_count=hop,
             selector_observation=selector, delivery=delivery)
+        if resume_missing:
+            envelope['resume_policy'] = 'same_thread'
+            envelope['notification_authority'] = dict(
+                sender=dict(actor_id=actor.actor_id, generation=actor.generation, root=actor.root),
+                recipient=dict(actor_id=target.actor_id, generation=target.generation, root=target.root))
         database.execute('INSERT INTO mail_identities VALUES (?)', (identifier,))
         database.execute('INSERT INTO mail_envelopes(message_id,sender_key,recipient_key,idempotency_key,fingerprint,created,expires,envelope,in_reply_to) VALUES (?,?,?,?,?,?,?,?,?)',
                          (identifier, actor.key, recipient_key, key, fingerprint, created, created + ttl, encoded(envelope), parent_id))
@@ -446,12 +457,13 @@ class Mailbox:
         return dict(message=self._projection(database, self._row(database, identifier)), deduplicated=False, receipt_id=receipt)
 
     def send(self, actor, recipient, *, body, idempotency_key, kind='request', ttl=86400,
-             delivery='notify', subject=None, selector=None, correlation=None):
+             delivery='notify', subject=None, selector=None, correlation=None, resume_missing=False):
         with self.transaction(actor, permission='send') as database:
             now = self._now(database)
             value = self._admit(database, actor, recipient, body=body, kind=kind, ttl=float(ttl),
                                 key=idempotency_key, delivery=delivery, subject=subject,
-                                selector=selector or {}, correlation=correlation, now=now)
+                                selector=selector or {}, correlation=correlation, now=now,
+                                resume_missing=resume_missing)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
                          receipt_id=value.get('receipt_id'))
             return value
@@ -539,7 +551,7 @@ class Mailbox:
             return value
 
     def reply(self, actor, identifier, *, body, idempotency_key, kind='result', ttl=86400,
-              delivery='notify', subject=None, outcome=None, evidence=None):
+              delivery='notify', subject=None, outcome=None, evidence=None, resume_missing=False):
         with self.transaction(actor, permission='send') as database:
             original = self._row(database, identifier)
             if actor.key != original['recipient_key']:
@@ -552,7 +564,8 @@ class Mailbox:
             value = self._admit(database, actor, recipient, body=body, kind=kind, ttl=float(ttl), key=idempotency_key,
                                 delivery=delivery, subject=subject, selector=dict(reply_to=identifier),
                                 now=now, original=original,
-                                acknowledgement=dict(outcome=outcome, evidence=evidence) if outcome else None)
+                                acknowledgement=dict(outcome=outcome, evidence=evidence) if outcome else None,
+                                resume_missing=resume_missing)
             if outcome:
                 value['acknowledgement'] = self._ack(database, actor, original, outcome, evidence, now)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,

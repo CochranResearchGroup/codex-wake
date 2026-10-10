@@ -39,6 +39,8 @@ def add_messages_parser(subparsers):
             command.add_argument('--idempotency-key', required=True)
             command.add_argument('--expires-at', required=True)
         if verb in ('send','reply'):
+            command.add_argument('--resume-missing', action='store_true',
+                                 help='explicitly authorize reopening only the same saved recipient')
             command.add_argument('--body-file', required=True)
             command.add_argument('--idempotency-key')
             command.add_argument('--human', action='store_true', help='generate and announce an intent key before attempting a human send')
@@ -157,11 +159,12 @@ def messages_command(args):
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                  subject=args.subject, selector=dict(selector=args.to, identity=recipient.thread_id),
-                                 correlation=args.correlation)
+                                 correlation=args.correlation, resume_missing=args.resume_missing)
         elif verb == 'reply':
             value = mailbox.reply(actor, args.message_id, body=body_input(args.body_file), idempotency_key=intent_key,
                                   kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
-                                  subject=args.subject, outcome=args.outcome, evidence=args.evidence)
+                                  subject=args.subject, outcome=args.outcome, evidence=args.evidence,
+                                  resume_missing=args.resume_missing)
         elif verb in ('inbox','outbox'):
             value = mailbox.list(actor, outbox=verb == 'outbox', cursor=args.cursor, limit=args.limit, state=args.state)
         elif verb == 'show':
