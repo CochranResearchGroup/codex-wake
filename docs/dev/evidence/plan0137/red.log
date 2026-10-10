@@ -1,0 +1,14 @@
+E
+======================================================================
+ERROR: test_rejected_queue_retains_safe_diagnostics_without_resend (tests.test_native_delivery.NativeDeliveryTests.test_rejected_queue_retains_safe_diagnostics_without_resend)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-queue-diagnostics/tests/test_native_delivery.py", line 91, in test_rejected_queue_retains_safe_diagnostics_without_resend
+    diagnostic = initial['native_delivery']['submission_failure']
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'submission_failure'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.063s
+
+FAILED (errors=1)

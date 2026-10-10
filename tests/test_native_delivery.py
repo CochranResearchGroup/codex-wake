@@ -71,6 +71,73 @@ class NativeDeliveryTests(unittest.TestCase):
             self.assertEqual(all_records(root)[0].record['native_delivery']['reconciliation']['state'], 'unresolved')
             self.assertEqual(all_records(root)[0].record['attempts'], 1)
 
+    def test_rejected_queue_retains_safe_diagnostics_without_resend(self):
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            executable = root / 'codex'
+            counter = root / 'calls'
+            executable.write_text('#!/usr/bin/env python3\nimport sys\nfrom pathlib import Path\n'
+                'if sys.argv[1] != "queue": sys.exit(2)\n'
+                f'with Path({str(counter)!r}).open("a") as f: f.write("call\\n")\n'
+                'print("PRIVATE_STDOUT")\n'
+                'print("Error: thread not found; Bearer PRIVATE_TOKEN", file=sys.stderr)\n'
+                'sys.exit(7)\n')
+            executable.chmod(0o700)
+            self.native_record(root, executable)
+            with patch('codex_wake.native_delivery.read_native_thread',
+                return_value={'id': '01a1227e-a041-7b72-9c36-18349e7dd22c', 'status': {'type': 'idle'}}):
+                poll_once(root, datetime(2026, 10, 9, tzinfo=UTC))
+                initial = all_records(root)[0].record
+                diagnostic = initial['native_delivery']['submission_failure']
+                self.assertEqual(diagnostic['reason'], 'queue_exit_nonzero')
+                self.assertEqual(diagnostic['returncode'], 7)
+                self.assertEqual(diagnostic['stderr']['hints'], ['thread_not_found'])
+                self.assertNotIn('PRIVATE_TOKEN', json.dumps(initial))
+                self.assertNotIn('PRIVATE_STDOUT', json.dumps(initial))
+                self.assertLess(len(json.dumps(diagnostic)), 1024)
+                poll_once(root, datetime(2026, 10, 9, 0, 1, tzinfo=UTC))
+            final = all_records(root)[0].record
+            self.assertEqual(counter.read_text(), 'call\n')
+            self.assertEqual(final['attempts'], 1)
+            self.assertEqual(final['native_delivery']['state'], 'uncertain')
+            self.assertEqual(final['native_delivery']['submission_failure'], diagnostic)
+
+    def test_queue_timeout_and_unconfirmed_output_keep_bounded_failure_evidence(self):
+        import json
+        import subprocess
+        outcomes = [
+            (subprocess.TimeoutExpired(['queue', 'PRIVATE_ARG'], 30,
+                output=b'PRIVATE_OUTPUT', stderr=b'PRIVATE_SECRET' * 1000), 'queue_timeout'),
+            (subprocess.CompletedProcess(['PRIVATE_ARG'], 0, 'PRIVATE_STDOUT',
+                'PRIVATE_UNKNOWN_ERROR'), 'queue_acceptance_unconfirmed'),
+            (PermissionError('PRIVATE_PATH'), 'queue_os_error'),
+        ]
+        for outcome, reason in outcomes:
+            with self.subTest(reason=reason), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                self.native_record(root, root / 'must-not-run')
+                options = {'side_effect': outcome} if isinstance(outcome, Exception) else {'return_value': outcome}
+                with patch('codex_wake.native_delivery.read_native_thread',
+                    return_value={'id': '01a1227e-a041-7b72-9c36-18349e7dd22c', 'status': {'type': 'idle'}}), patch(
+                    'codex_wake.native_delivery.subprocess.run', **options) as submit, patch(
+                    'codex_wake.native_delivery.native_request', side_effect=RuntimeError('unavailable')):
+                    poll_once(root, datetime(2026, 10, 9, tzinfo=UTC))
+                    initial = all_records(root)[0].record
+                    diagnostic = initial['native_delivery']['submission_failure']
+                    self.assertEqual(diagnostic['reason'], reason)
+                    self.assertLess(len(json.dumps(diagnostic)), 1024)
+                    self.assertNotIn('PRIVATE_', json.dumps(initial))
+                    if reason == 'queue_timeout':
+                        self.assertTrue(diagnostic['stderr']['truncated'])
+                        self.assertEqual(diagnostic['stderr']['hints'], [])
+                    poll_once(root, datetime(2026, 10, 9, 0, 1, tzinfo=UTC))
+                self.assertEqual(submit.call_count, 1)
+                final = all_records(root)[0].record
+                self.assertEqual(final['attempts'], 1)
+                self.assertEqual(final['native_delivery']['state'], 'uncertain')
+                self.assertEqual(final['native_delivery']['submission_failure'], diagnostic)
+
     def test_persisted_due_wake_uses_native_queue_and_records_acceptance(self):
         thread = '01a1227e-a041-7b72-9c36-18349e7dd22c'
         queue = '01a12280-80ef-7772-a00a-c68bd32ecbba'

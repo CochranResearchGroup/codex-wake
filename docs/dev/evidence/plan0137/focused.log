@@ -1,0 +1,9 @@
+.........................
+----------------------------------------------------------------------
+Ran 25 tests in 1.042s
+
+OK
+{"native_delivery": {"next_reconciliation_at": "2026-10-10T15:12:57Z", "reconciliation": {"checked_at": "2026-10-10T15:12:52Z", "reason": "multiple_native_submissions", "state": "unresolved"}, "state": "uncertain"}, "result": "skipped", "status": "firing", "wake_id": "wake_20261010_151252_5b58"}
+wake_20261009_000001_e74a /tmp/tmpqcm91kpg/wakes/pending/wake_20261009_000001_e74a.json
+wake_20261009_000001_58a6 /tmp/tmpakcphqx5/wake/pending/wake_20261009_000001_58a6.json
+{"native_delivery": {"acknowledgment": "not_observed", "evidence": {"client_message_id": "client-exact", "execution": "turn_completed", "source": "native_turn", "turn_id": "turn-exact", "user_message_id": "message-exact"}, "execution": "turn_completed", "reconciled": true, "reconciliation": {"checked_at": "2026-10-10T15:12:52Z", "state": "resolved"}, "state": "accepted"}, "result": "submitted", "status": "submitted", "wake_id": "wake_20261010_151252_ae54"}
