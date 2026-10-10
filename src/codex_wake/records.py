@@ -17,6 +17,7 @@ from .time_provider import NETWORK_TIME_POLICY
 
 
 SCHEMA_VERSION = 1
+NATIVE_SCHEMA_VERSION = 4
 SCHEMA_COMPATIBILITY = "additive_optional_fields"
 SCHEMA_DOC = "docs/dev/wake-record-schema.md"
 ACTIVE_STATUS_DIRS = ("pending", "firing", "submitted", "failed", "cancelled", "expired")
@@ -70,15 +71,41 @@ def classify_record(record: object) -> str:
 
     if decode_signal_record(record) is not None:
         return "signal_v2"
-    if not isinstance(record, dict) or record.get("schema_version") not in (SCHEMA_VERSION,3):
+    if not isinstance(record, dict) or record.get("schema_version") not in (SCHEMA_VERSION,3,NATIVE_SCHEMA_VERSION):
         return "hold"
     predicate = record.get("predicate")
     if isinstance(predicate, dict) and predicate.get("type") == "signal":
         return "hold"
     if not isinstance(record.get("id"), str) or not record.get("id"):
         return "hold"
-    if record.get("status") not in VALID_STATUSES:
+    if not isinstance(record.get("status"), str) or record["status"] not in VALID_STATUSES:
         return "hold"
+    if record.get("schema_version") == NATIVE_SCHEMA_VERSION:
+        target = record.get("target")
+        if (not isinstance(target, dict) or target.get("transport") != "native"
+                or not isinstance(predicate, dict)
+                or not isinstance(predicate.get("type"), str)
+                or predicate["type"] not in {"not_before", "file_exists"}
+                or not all(isinstance(target.get(key), str) and target[key]
+                           for key in ("thread_id", "endpoint", "codex_cmd", "expires_at"))):
+            return "hold"
+        from uuid import UUID
+        try:
+            if str(UUID(target['thread_id'])) != target['thread_id']:
+                return "hold"
+            parse_timestamp(target['expires_at'])
+            if not target['endpoint'].startswith('unix://') or not Path(target['codex_cmd']).is_absolute():
+                return "hold"
+            if predicate['type'] == 'not_before':
+                if not isinstance(predicate.get('due_at'), str):
+                    return "hold"
+                parse_timestamp(predicate['due_at'])
+            elif not isinstance(predicate.get('path'), str) or not Path(predicate['path']).is_absolute():
+                return "hold"
+        except (ValueError, KeyError, TypeError):
+            return "hold"
+        # Same basic predicate evaluation family; transport owns native effects.
+        return "v1"
     if record.get("schema_version") == 3:
         if record.get("time_policy") != NETWORK_TIME_POLICY or not isinstance(predicate,dict) or predicate.get("type") != "not_before":
             return "hold"
@@ -298,7 +325,7 @@ def build_record(
     wake_id = make_wake_id(current)
     timestamp = format_utc(current)
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": NATIVE_SCHEMA_VERSION if target.get("transport") == "native" else SCHEMA_VERSION,
         "id": wake_id,
         "created_at": timestamp,
         "updated_at": timestamp,
@@ -318,7 +345,8 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "read_versions": [1, 2, 3],
+        "read_versions": [1, 2, 3, 4],
+        "native_write_version": NATIVE_SCHEMA_VERSION,
         "default_write_version": SCHEMA_VERSION,
         "signal_record_contract_version": 2,
         "signal_journal_schema_version": 2,

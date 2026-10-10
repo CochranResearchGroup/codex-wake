@@ -1,0 +1,19 @@
+{
+  "source_base": "5175f5f",
+  "branch": "feat/native-workflows",
+  "version": "0.9.0",
+  "source_sha256": {
+    "src/codex_wake/__init__.py": "54c3c414d0b887192908fd1d521b8aecb6c957a768d7c5ee67160528896bcfb0",
+    "src/codex_wake/cli.py": "544bcdee32090d2c50222fffb23ac77fde671430db1df24d03965ecdb55012be",
+    "src/codex_wake/records.py": "dc09703eed89d3f6454e9514d49a5c32887825fdbf20450e67faea6a44fc352f",
+    "src/codex_wake/native_delivery.py": "09e1ab1c55f3cc664b408857c557238e96a9fc2ac2b1f808df3ae81fc2cfbb95",
+    "src/codex_wake/native_protocol.py": "1c6adda2d3064bdc770836627d2bab9c43a999f76debad99ba9f778fdfffc86e",
+    "src/codex_wake/session_lifecycle.py": "43d46cd3116f0b9964a7cce9276cf3a8b052ea64778253d146dcf7a71ba1e36c",
+    "src/codex_wake/daemon.py": "f4b92920a825e9c49309ca5eb3db9988a74ef1462d6ef001cee83b687550238c",
+    "src/codex_wake/injector.py": "89eea162a9148ae1a661f409f3e4ffda3ce3b04130df1983164dfd44d554136e"
+  },
+  "wheel_sha256": "d50bf892903efdd4c232e942fb7d1deae5d5b61714d75e4d4fadf2b1a004dff4",
+  "wheel_path": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-0.9.0/codex_wake-0.9.0-py3-none-any.whl",
+  "wheel_source_match": true,
+  "global_version_unchanged": "codex-wake 0.8.0"
+}

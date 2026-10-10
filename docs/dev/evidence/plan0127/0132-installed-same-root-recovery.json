@@ -1,0 +1,46 @@
+{
+  "steps": [
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-intent",
+        "native",
+        "migrate",
+        "wake_20261010_030151_186c",
+        "--apply"
+      ],
+      "exit": 0,
+      "stdout": "{\"id\": \"wake_20261010_030151_186c\", \"state\": \"migrated\", \"schema_version\": 4, \"backup\": \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-intent/migration/wake_20261010_030151_186c.schema1.json\", \"submitted\": false}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-intent",
+        "native",
+        "reconcile",
+        "wake_20261010_030151_186c"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_delivery\": {\"acknowledgment\": \"not_observed\", \"execution\": \"not_observed\", \"next_reconciliation_at\": \"2026-10-10T03:45:11Z\", \"prompt_sha256\": \"c7b29e8d5f068a05e99aa90533a430bb33cdc6ca4d8dafccd3ebee70054b25ba\", \"reconciliation\": {\"checked_at\": \"2026-10-10T03:45:06Z\", \"reason\": \"no_exact_native_evidence\", \"state\": \"unresolved\"}, \"state\": \"uncertain\", \"submission_id\": \"dc6ee865-e9ec-48dc-b409-ccd1e62a02a0\"}, \"result\": \"skipped\", \"status\": \"firing\", \"wake_id\": \"wake_20261010_030151_186c\"}\n",
+      "stderr": ""
+    }
+  ],
+  "native_delivery": {
+    "acknowledgment": "not_observed",
+    "execution": "not_observed",
+    "next_reconciliation_at": "2026-10-10T03:45:11Z",
+    "prompt_sha256": "c7b29e8d5f068a05e99aa90533a430bb33cdc6ca4d8dafccd3ebee70054b25ba",
+    "reconciliation": {
+      "checked_at": "2026-10-10T03:45:06Z",
+      "reason": "no_exact_native_evidence",
+      "state": "unresolved"
+    },
+    "state": "uncertain",
+    "submission_id": "dc6ee865-e9ec-48dc-b409-ccd1e62a02a0"
+  },
+  "no_resubmission": true,
+  "same_root": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-intent"
+}

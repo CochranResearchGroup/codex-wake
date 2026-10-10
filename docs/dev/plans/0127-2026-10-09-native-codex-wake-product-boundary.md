@@ -7,7 +7,12 @@ Branch: feat/native-workflows
 
 ## Current State
 
-Nine product decisions accepted in the design interview. Native A→B→A passed on Codex 0.162.0; unattended queue submission to an idle attached recipient passed on 0.162.1. These are bounded runtime proofs, not a production integration. The user approved the breakdown and validation boundary on 2026-10-09 and requested a simple governing execution plan. No ticket is implemented yet. Repository-native plans are used as requested; no remote tracker issues are created.
+Tickets 0128–0131 are CLOSED with installed candidate acceptance receipts in
+`docs/dev/evidence/plan0127/`. Ticket 0132 migration source gates pass; remote documentation publication remains.
+The candidate lives on `feat/native-workflows`; acceptance does not establish
+integration, release or global installation. Migration, qualified retirement,
+rollback and release remain required before this parent can close. Repository
+plans are the tickets; no remote tracker issues are created.
 
 ## Problem Statement
 
@@ -72,7 +77,7 @@ All child criteria pass with source/installed-version evidence; one complete lif
 
 This plan governs tickets 0128–0132. One owner executes the ready dependency frontier; do not start a blocked ticket or mark a dependency complete without its acceptance evidence. Default order is **0128 → 0129 → 0130 → 0131 → 0132**; 0129 is independent of 0128 and may run first if useful. No parallel agents are required.
 
-1. Begin each ticket with exact source, worktree, installed version and relevant current policy readback. Preserve unrelated dirty work. Establish an implementation branch from the current integrated baseline; this prototype branch currently holds planning and evidence custody only.
+1. Begin each ticket with exact source, worktree, installed version and relevant current policy readback. Preserve unrelated dirty work. Keep implementation custody on `feat/native-workflows`; refresh the integrated baseline before integration. Prototype evidence alone cannot establish release readiness.
 2. Build the smallest complete user-visible behavior through the existing CLI/scheduler seams. No substitute broker, simulated product, documentation-only completion or helper-only acceptance.
 3. Reproduce failures and fix them. Use focused regression checks plus actual installed-command/live-client evidence appropriate to the ticket. A mocked pass is supporting evidence, not proof of native delivery or tab lifecycle.
 4. Record source commit, installed version, exact recipient/tab identities, command outcomes and durable state transitions. Keep submission acceptance distinct from execution, acknowledgment and completed workflow.
@@ -85,11 +90,18 @@ Completion demonstration: **open/resume a tab → assign ordinary work natively 
 
 ## Tickets and Blocking Edges
 
-- [0128: Deliver an existing durable wake natively](0128-2026-10-09-native-durable-delivery.md) — blocked by none.
-- [0129: Open and close exact Byobu tabs](0129-2026-10-09-byobu-tab-lifecycle.md) — blocked by none.
-- [0130: Recover interrupted native delivery](0130-2026-10-09-native-delivery-recovery.md) — blocked by 0128.
-- [0131: Prove the complete native agent lifecycle](0131-2026-10-09-native-agent-lifecycle-acceptance.md) — blocked by 0128, 0129, 0130.
-- [0132: Migrate and retire redundant delivery paths](0132-2026-10-09-legacy-transport-retirement.md) — blocked by 0131.
+| Ticket | Outcome | Depends on | Current status |
+| --- | --- | --- | --- |
+| [0128](0128-2026-10-09-native-durable-delivery.md) | Installed scheduler delivers a durable wake to the exact native thread | None | Accepted candidate |
+| [0129](0129-2026-10-09-byobu-tab-lifecycle.md) | Explicit new/resume, attachment reuse and guarded tab close | None | Accepted candidate |
+| [0130](0130-2026-10-09-native-delivery-recovery.md) | Interrupted submission reconciles or remains safely unresolved | 0128 | Accepted candidate |
+| [0131](0131-2026-10-09-native-agent-lifecycle-acceptance.md) | Real agents complete the condition-triggered lifecycle unassisted | 0128–0130 | Accepted candidate |
+| [0132](0132-2026-10-09-legacy-transport-retirement.md) | Qualify migration/rollback, retire proven redundant paths and document release | 0131 | Migration source accepted; publication pending |
+
+Each ticket owns its acceptance checklist. The table is a navigation aid, not
+permission to bypass evidence. All five must pass, and integration and installed
+release must be verified, before the parent closes. No extra polish tickets are
+required for this bounded objective.
 
 ## Further Notes
 

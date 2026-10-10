@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codex-wake"
-version = "0.8.0"
-description = "Local wake spooler for TUI-bound Codex agents"
+version = "0.9.0"
+description = "Durable native Codex follow-ups and visible session lifecycle"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"

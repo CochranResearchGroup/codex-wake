@@ -21,6 +21,9 @@ def add_native_parser(subparsers):
     commands = native.add_subparsers(dest='native_command', required=True)
     reconcile = commands.add_parser('reconcile', help='inspect native evidence without resubmitting')
     reconcile.add_argument('wake_id')
+    migrate = commands.add_parser('migrate', help='inspect/promote earlier candidate native records without delivery')
+    migrate.add_argument('wake_id')
+    migrate.add_argument('--apply', action='store_true', help='save original and promote schema1 native record to schema4')
     for verb in ('after', 'at', 'file'):
         command = commands.add_parser(verb)
         command.add_argument('--codex-path', default='codex')
@@ -248,3 +251,43 @@ def reconcile_command(args, root):
     print(json.dumps(dict(wake_id=args.wake_id, result=result.status,
                          status=current['status'], native_delivery=current.get('native_delivery')), sort_keys=True))
     return 0
+
+
+def migrate_command(args, root):
+    """Metadata-only promotion. Never translate transport or replay an effect."""
+    from .records import WakeLifecycleLock, find_record, classify_record, NATIVE_SCHEMA_VERSION
+    with WakeLifecycleLock(root, args.wake_id):
+        found = find_record(root, args.wake_id)
+        record = found.record
+        if record.get('schema_version') == NATIVE_SCHEMA_VERSION:
+            if classify_record(record) == 'hold':
+                raise WakeError('current native record is malformed; inspect before continuing')
+            print(json.dumps({'id': args.wake_id, 'state': 'already_current', 'submitted': False}))
+            return 0
+        promoted = dict(record, schema_version=NATIVE_SCHEMA_VERSION)
+        if record.get('schema_version') != 1 or classify_record(promoted) == 'hold':
+            raise WakeError('migration requires an earlier schema1 native time/file record')
+        backup = root / 'migration' / (args.wake_id + '.schema1.json')
+        if args.apply:
+            backup.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            original = found.path.read_bytes()
+            try:
+                descriptor = os.open(backup, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(descriptor, 'wb') as stream:
+                    stream.write(original)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+            except FileExistsError:
+                if backup.read_bytes() != original:
+                    raise WakeError('migration backup differs; inspect before continuing') from None
+            for directory_path in (backup.parent, root):
+                directory = os.open(directory_path, os.O_RDONLY | os.O_DIRECTORY)
+                try:
+                    os.fsync(directory)
+                finally:
+                    os.close(directory)
+            replace_record(root, found, promoted)
+        print(json.dumps({'id': args.wake_id, 'state': 'migrated' if args.apply else 'would_migrate',
+                          'schema_version': NATIVE_SCHEMA_VERSION, 'backup': str(backup),
+                          'submitted': False}))
+        return 0

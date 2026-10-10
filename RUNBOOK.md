@@ -5218,3 +5218,32 @@ Ticket0130 accepted: nonce/hash precede native effect; exact queue/turn evidence
 ## Turn 247 | 2026-10-10 UTC
 
 Ticket0131 installed lifecycle PASS atc579ebe. New worker tab; native A→B assignment; A public-CLI file arm; initiating A turn completed; B slept20s, wrote42 and created condition; independent installed scheduler resumed exact A17s after prior completion; native reply and pane match. Separate missing-file guard refuses close, cancel preserves pane, ordinary close preserves conversation. Native IDs, queue nonce, durable records and result agree. Private scheduler stopped; freshMainPID0/inactive/not-found readback. No implementation change or shared runtime restart.0132 migration/retirement/release next; parentOPEN. Memory disposition unavailable: no reviewed Codex Wake target group, non-write receipt0131-memory-disposition.json.
+
+
+## Turn 248 | 2026-10-10 UTC
+
+Planning-only reconciliation requested by the operator: Plan0127 now presents
+five tickets in one dependency table and removes stale claims that no
+implementation exists. Child receipts record0128–0131 candidate acceptance;
+0132 migration, rollback, retirement and release remain open obligations.
+Execution requires actual installed behavior and criterion-level evidence;
+planning and mocked checks cannot close runtime tickets. No implementation,
+runtime action or release performed in this turn. Memory disposition
+not_durable: this correction updates the existing execution authority and adds
+no separate durable finding.
+
+
+## Turn 249 | 2026-10-10 UTC
+
+Ticket0132 migration source qualified on feat/native-workflows. Native schema4
+prevents oldreader tmux misinterpretation; metadata-only migration previews,
+backs up and preserves exact uncertain intent. Installed0.8 holds byte-identical
+state; frozen0.9 wheel submits one native wake with completed exact turn visible
+in original pane. Implicit basic tmux capture retired; explicit compatibility,
+old state, advanced signals and tracked receipt contracts retained.983 full
+installed tests pass91.152s; installed wheel-upgrade/product smoke passes.
+Malformed-state regressions and incorrect probe/deadline samples retained.
+No global install or unrelated service/shared Codex restart. Child remainsOPEN
+pending doc publication; parent release/integration/install gates remainOPEN.
+Memory disposition unavailable: no reviewed Codex Wake Graphiti group; qualified
+source outcome recorded by a non-write receipt.

@@ -1,25 +1,32 @@
 # Codex Wake
 
-Codex Wake is a local wake spooler for TUI-bound Codex agents. It lets an agent register a durable wake request, lets a deterministic daemon wait for the trigger, and resumes a Codex TUI pane by submitting a short wake prompt.
+Codex Wake adds durable time/condition triggers, recovery visibility and visible
+Byobu tab lifecycle to native Codex. Native Codex owns conversations, ordinary
+messages, turns and task status. Use native messaging directly for an immediate
+agent exchange; use Wake when a follow-up must survive the initiating turn or
+when you explicitly need a tracked exchange.
 
-The current package supports:
+The package provides:
 
-- `codex-wake after`, `codex-wake at`, and `codex-wake file`
-- durable JSON wake records under `.codex/wake/`
-- `codex-waked` polling and dispatch
-- monitor readiness checks and `--require-monitor` scheduling gates
-- a user-scoped supervisor for explicitly registered wake roots
-- tmux pane injection with `UserPromptSubmit` hook ack
-- terminal-state archival with `codex-wake archive`
-- experimental stdio app-server targeted wake records
-- experimental OpenClaw Gateway targeted wake records
-- OpenClaw plugin registration through `codex_wake_schedule`
+- `native after|at|file` for an exact thread, with expiry and explicit same-thread resume.
+- `native reconcile` for uncertain submission and `native migrate` for earlier candidate records.
+- `sessions list|show|resolve|current|watch|open|close` for discovery and visible tab lifecycle.
+- Durable records, installed polling, registered-root supervision, cancellation and archival.
+- Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
+
+Native queue acceptance is separate from execution and acknowledgment. Busy or
+unavailable threads hold until expiry; ambiguous submissions are reconciled and
+never blindly replayed or silently sent through another transport.
+
+See [migration and capabilities](docs/dev/native-workflow-migration.md) for the
+qualified support boundary and rollback procedure.
 
 ## Requirements
 
 - Python 3.11+
-- `tmux` for TUI-bound wake dispatch
-- Codex CLI with hook support
+- Official Codex 0.162.1 is the native client version qualified by Plan0127.
+- `tmux`/Byobu for visible tab lifecycle and legacy pane delivery.
+- Hook support for legacy tmux acknowledgment; native queue delivery needs no hook.
 - `uv` for the recommended user-scoped install path
 
 ## Install
@@ -138,16 +145,37 @@ This writes or checks this `.codex/hooks.json` shape:
 
 Codex may require a one-time `/hooks` review before a new repo-local hook runs. Codex Wake reports that prerequisite, but it does not bypass Codex hook trust. If `/hooks` does not list this repo hook source, the active TUI has not loaded the repo hook file; restart or resume Codex in this repo, then review hooks before testing wake ack behavior.
 
-## Basic Usage
+## Native Usage
 
-Run these commands inside a tmux pane that is hosting the Codex TUI you want
-to wake. `codex-wake` captures `CODEX_THREAD_ID` (or the compatible
-`CODEX_SESSION_ID`), `TMUX_PANE`, and the tmux socket from the environment.
-When the wake fires, the captured pane is only a location hint: Codex Wake
-validates exact thread metadata and the original Codex client-process identity,
-searches the captured tmux session for one unique relocated match, then falls
-back to app-server delivery for that same thread. Ambiguous matches fail closed
-without pasting.
+Choose the exact thread UUID returned by `sessions resolve` or `sessions open`.
+Tab names and numbers are discovery conveniences; durable work targets a thread.
+
+```bash
+codex-wake sessions resolve '19:wake' --json
+codex-wake sessions open --new --cwd /absolute/project --name worker --tmux-session SESSION
+codex-wake sessions open --resume THREAD_UUID --name worker --tmux-session SESSION
+codex-wake native after THREAD_UUID 45m -- "Inspect the migration log and continue."
+codex-wake native file --ttl 2h THREAD_UUID /absolute/project/.codex/events/tests.done -- "Read the test result."
+codex-wake native at --resume-missing THREAD_UUID "2026-10-12T17:30:00-05:00" -- "Inspect release readiness."
+codex-wake native reconcile WAKE_ID
+codex-wake sessions close THREAD_UUID
+```
+
+New versus resume is explicit. An existing exact attachment is reused unless
+`--extra-attachment` is requested. Ordinary close refuses active, unknown or
+pending work. `--force` preserves conversations and durable work and reports
+what is affected; cancellation and archival are separate commands. Supply
+`--bus-root` for custom mailbox stores when checking close safety.
+
+A running scheduler must own the chosen root for unattended execution. Native
+registration does not start a scheduler. End the initiating turn after arming
+its follow-up; a foreground wait is not a suspension proof.
+
+## Legacy Compatibility Usage
+
+The following basic commands require an explicit `--legacy-tmux` choice.
+Existing persisted records keep their transport. Advanced signal interfaces
+remain supported while their native replacements are unqualified.
 
 Agents can use the bundled `$codex-wake` skill for workflow guidance and wake
 cycle examples. The skill lives at `skills/codex-wake/` in this repo and can be
@@ -157,13 +185,13 @@ cycles.
 Wake after a duration:
 
 ```bash
-codex-wake after --require-monitor 45m -- "Continue the migration. First inspect .codex/events/migration.log."
+codex-wake after --legacy-tmux --require-monitor 45m -- "Continue the migration. First inspect .codex/events/migration.log."
 ```
 
 Wake at an absolute timestamp:
 
 ```bash
-codex-wake at --require-monitor "2026-05-18T17:30:00-05:00" -- "Check whether the release branch is ready."
+codex-wake at --legacy-tmux --require-monitor "2026-05-18T17:30:00-05:00" -- "Check whether the release branch is ready."
 ```
 
 Wake when a marker file exists:
@@ -174,7 +202,7 @@ mkdir -p .codex/events
   pytest -q > .codex/events/pytest.log 2>&1
   touch .codex/events/pytest.done
 ) &
-codex-wake file --require-monitor .codex/events/pytest.done -- \
+codex-wake file --legacy-tmux --require-monitor .codex/events/pytest.done -- \
   "Pytest finished. Read .codex/events/pytest.log and continue from the failing tests."
 ```
 

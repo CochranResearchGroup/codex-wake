@@ -1,0 +1,116 @@
+{
+  "steps": [
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked",
+        "--once",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/final-wheel-native-v4"
+      ],
+      "exit": 0,
+      "stdout": "checked=1 fired=0 failed=1 pending=0 dispatched=0 submitted=0 requeued=0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/final-wheel-native-v4",
+        "native",
+        "at",
+        "--ttl",
+        "10m",
+        "01a123a8-5782-7d43-a214-55b293bbd65f",
+        "2026-10-10T03:56:15.996322+00:00",
+        "--",
+        "Reply exactly PLAN132_FINAL_WHEEL_EXECUTED. This owned check qualifies the frozen 0.9.0 wheel."
+      ],
+      "exit": 0,
+      "stdout": "wake_20261010_035616_a434 /home/ecochran76/.local/state/codex-wake/plan127-runtime/final-wheel-native-v4/pending/wake_20261010_035616_a434.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-waked",
+        "--once",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/final-wheel-native-v4"
+      ],
+      "exit": 0,
+      "stdout": "checked=1 fired=0 failed=0 pending=1 dispatched=0 submitted=0 requeued=0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked",
+        "--once",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/final-wheel-native-v4"
+      ],
+      "exit": 0,
+      "stdout": "checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0\n",
+      "stderr": ""
+    }
+  ],
+  "expired_control": {
+    "wake_id": "wake_20261010_035550_3545",
+    "native_submission_absent": true,
+    "disposition": "First absolute deadline selected incorrectly; retained and qualified as expiry, not execution."
+  },
+  "accepted_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:56:16Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:56:16Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:56:16Z",
+        "message": "not_before due_at 2026-10-10T03:56:15Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:56:16Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:56:16Z",
+        "message": "native queue accepted; execution not yet observed",
+        "type": "native_accepted"
+      }
+    ],
+    "id": "wake_20261010_035616_a434",
+    "max_attempts": 3,
+    "native_delivery": {
+      "accepted_at": "2026-10-10T03:56:16Z",
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "8f1ba9e33462b8d2deeda5e7c9f8b9c5284e08bdb43f2010ef9300ca8cdd732a",
+      "queue_id": "01a123f4-51cc-7642-aacf-aad21de29ed3",
+      "state": "accepted",
+      "submission_id": "a7b09443-7234-425e-8607-efb8d92e9249"
+    },
+    "next_attempt_at": "2026-10-10T03:56:15Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:56:15Z",
+      "type": "not_before"
+    },
+    "prompt": "Reply exactly PLAN132_FINAL_WHEEL_EXECUTED. This owned check qualifies the frozen 0.9.0 wheel.",
+    "schema_version": 4,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T04:06:15Z",
+      "resume_policy": "hold",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:56:16Z"
+  }
+}

@@ -695,6 +695,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def add_target_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('--legacy-tmux', action='store_true',
+                        help='explicitly select compatibility tmux delivery; prefer native for time/file wakes')
     parser.add_argument(
         "--app-server-thread-id",
         help="create an app-server-targeted wake for the given Codex thread id instead of capturing tmux",
@@ -1970,6 +1972,10 @@ def create_record(
     if getattr(args, "require_monitor", False):
         readiness = monitor_readiness(wake_root=root, repo_root=Path.cwd())
         require_monitor_ready(readiness)
+    if (target is None and predicate.get('type') in {'not_before', 'file_exists'}
+            and not getattr(args, 'app_server_thread_id', None)
+            and not getattr(args, 'legacy_tmux', False)):
+        raise WakeError('use native after|at|file THREAD TRIGGER, or explicitly select --legacy-tmux')
     record = build_record(
         predicate=predicate,
         prompt=prompt,
@@ -1986,6 +1992,8 @@ def create_record(
 
 
 def target_for_args(args: argparse.Namespace) -> dict[str, object]:
+    if getattr(args, 'legacy_tmux', False) and getattr(args, 'app_server_thread_id', None):
+        raise WakeError('--legacy-tmux and --app-server-thread-id are mutually exclusive')
     if getattr(args, "app_server_thread_id", None):
         endpoint = getattr(args, "app_server_endpoint", "stdio://")
         if endpoint != "stdio://":
@@ -2731,6 +2739,9 @@ def run(argv: list[str] | None = None) -> int:
         from .sessions_cli import sessions_command
         return sessions_command(args)
     if args.command == "native":
+        if args.native_command == 'migrate':
+            from .native_delivery import migrate_command
+            return migrate_command(args, root)
         if args.native_command == 'reconcile':
             from .native_delivery import reconcile_command
             return reconcile_command(args, root)

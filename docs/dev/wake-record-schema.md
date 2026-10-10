@@ -2,7 +2,7 @@
 
 Default write schema version: `1`
 
-Supported read schema versions: `1`, `2`, `3`
+Supported read schema versions: `1`, `2`, `3`, `4`
 
 Wake records are durable runtime records stored as JSON. They are operational state, not source artifacts. Schema version `1` remains the default for the existing timer, file, process, CLI, and plugin writers. Schema version `2` is reserved for capability-gated signal records backed by the root-local signal journal. A schema-v1 record whose predicate claims `type: signal`, an unknown version, or a malformed schema-v2 record is held rather than evaluated through the legacy predicate path.
 
@@ -347,3 +347,24 @@ accepted time and retention deletion uses its lower bound.
 
 Old unmanaged readers are not qualified for this version and must be quiesced
 before using their roots. See [candidate release and rollback](release-notes/0.8.0-network-time.md).
+
+## Native Record Version 4
+
+Native time/file writers use schema4 so earlier releases hold these records
+instead of treating an unfamiliar target as tmux. The required target fields
+are `transport: native`, exact `thread_id`, local Unix `endpoint`, resolved
+`codex_cmd`, `expires_at` and workflow `resume_policy`. Basic `not_before` and
+`file_exists` predicates use the existing evaluator. Native submission intent,
+queue acceptance and observed execution are separate fields; acceptance is
+neither acknowledgment nor business completion.
+
+Current readers retain support for earlier candidate schema1 native records.
+`codex-wake native migrate WAKE_ID` previews promotion; `--apply` saves the
+original under `migration/WAKE_ID.schema1.json` and changes only schema_version.
+The command cannot submit, cancel, replace a thread or translate transport.
+Uncertain effects retain their nonce and reconciliation state.
+
+Rollback to an older release holds schema4 records unchanged. Preserve them
+until restoring a capable reader; do not downgrade them to tmux or restore an
+old candidate-native schema1 backup into an older live scheduler. Migration
+backups are private operational state, not repository fixtures.
