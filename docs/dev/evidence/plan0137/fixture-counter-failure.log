@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_rejected_queue_retains_safe_diagnostics_without_resend (tests.test_native_delivery.NativeDeliveryTests.test_rejected_queue_retains_safe_diagnostics_without_resend)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-queue-diagnostics/tests/test_native_delivery.py", line 100, in test_rejected_queue_retains_safe_diagnostics_without_resend
+    self.assertEqual(counter.read_text(), 'call\n')
+AssertionError: 'call\ncall\n' != 'call\n'
+  call
+- call
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.111s
+
+FAILED (failures=1)

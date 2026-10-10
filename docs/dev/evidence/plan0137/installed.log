@@ -1,0 +1,59 @@
+Installed: /home/ecochran76/.local/share/codex-wake/releases/0.10.1-6a580ec/lib/python3.12/site-packages/codex_wake/__init__.py 0.10.1
+test_busy_recipient_holds_until_expiry_without_submission (tests.test_native_delivery.NativeDeliveryTests.test_busy_recipient_holds_until_expiry_without_submission) ... ok
+test_duplicate_native_turns_remain_uncertain_even_with_same_client_identity (tests.test_native_delivery.NativeDeliveryTests.test_duplicate_native_turns_remain_uncertain_even_with_same_client_identity) ... ok
+test_explicit_missing_resume_uses_same_thread_without_opening_a_tab (tests.test_native_delivery.NativeDeliveryTests.test_explicit_missing_resume_uses_same_thread_without_opening_a_tab) ... ok
+test_file_wake_expires_even_if_file_never_appears (tests.test_native_delivery.NativeDeliveryTests.test_file_wake_expires_even_if_file_never_appears) ... ok
+test_persisted_due_wake_uses_native_queue_and_records_acceptance (tests.test_native_delivery.NativeDeliveryTests.test_persisted_due_wake_uses_native_queue_and_records_acceptance) ... ok
+test_queue_timeout_and_unconfirmed_output_keep_bounded_failure_evidence (tests.test_native_delivery.NativeDeliveryTests.test_queue_timeout_and_unconfirmed_output_keep_bounded_failure_evidence) ... ok
+test_reconcile_recovers_exact_native_turn_without_resending (tests.test_native_delivery.NativeDeliveryTests.test_reconcile_recovers_exact_native_turn_without_resending) ... ok
+test_rejected_queue_retains_safe_diagnostics_without_resend (tests.test_native_delivery.NativeDeliveryTests.test_rejected_queue_retains_safe_diagnostics_without_resend) ... ok
+test_uncertain_acceptance_is_not_resubmitted_on_another_poll (tests.test_native_delivery.NativeDeliveryTests.test_uncertain_acceptance_is_not_resubmitted_on_another_poll) ... ok
+test_absolute_fraction_and_file_ttl_are_preserved (tests.test_native_network_time.NativeNetworkTimeTests.test_absolute_fraction_and_file_ttl_are_preserved) ... ok
+test_fractional_expiry_does_not_fail_early_at_native_transport (tests.test_native_network_time.NativeNetworkTimeTests.test_fractional_expiry_does_not_fail_early_at_native_transport) ... ok
+test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake (tests.test_native_network_time.NativeNetworkTimeTests.test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake) ... ok
+test_interrupted_firing_cannot_bypass_time_gate (tests.test_native_network_time.NativeNetworkTimeTests.test_interrupted_firing_cannot_bypass_time_gate) ... ok
+test_malformed_policy_and_observation_are_held_without_effect (tests.test_native_network_time.NativeNetworkTimeTests.test_malformed_policy_and_observation_are_held_without_effect) ... ok
+test_outage_expiry_boundary_restart_and_cancellation_keep_original_deadlines (tests.test_native_network_time.NativeNetworkTimeTests.test_outage_expiry_boundary_restart_and_cancellation_keep_original_deadlines) ... ok
+test_provider_fallback_and_invalid_observations_at_cli (tests.test_native_network_time.NativeNetworkTimeTests.test_provider_fallback_and_invalid_observations_at_cli) ... ok
+test_relative_arm_uses_external_upper_bound_not_guest_time (tests.test_native_network_time.NativeNetworkTimeTests.test_relative_arm_uses_external_upper_bound_not_guest_time) ... ok
+test_uncertain_arm_rejects_without_record (tests.test_native_network_time.NativeNetworkTimeTests.test_uncertain_arm_rejects_without_record) ... ok
+test_uncertain_submission_reconciles_read_only_during_time_outage (tests.test_native_network_time.NativeNetworkTimeTests.test_uncertain_submission_reconciles_read_only_during_time_outage) ... ok
+test_classic_registration_requires_explicit_tmux_compatibility (tests.test_native_migration.NativeMigrationTests.test_classic_registration_requires_explicit_tmux_compatibility) ... ok
+test_malformed_native_state_is_held_without_crashing_scheduler (tests.test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) ... ok
+test_migration_preserves_uncertainty_and_original_without_submission (tests.test_native_migration.NativeMigrationTests.test_migration_preserves_uncertainty_and_original_without_submission) ... ok
+test_migration_refuses_legacy_transport_without_mutating_it (tests.test_native_migration.NativeMigrationTests.test_migration_refuses_legacy_transport_without_mutating_it) ... ok
+test_native_registration_uses_a_fail_closed_version_for_old_readers (tests.test_native_migration.NativeMigrationTests.test_native_registration_uses_a_fail_closed_version_for_old_readers) ... ok
+test_reconciliation_reads_user_message_beyond_default_websocket_cap (tests.test_native_protocol_large_response.NativeLargeResponseTests.test_reconciliation_reads_user_message_beyond_default_websocket_cap) ... ok
+test_app_server_fallback_requeues_active_writer_contention (tests.test_injector.InjectorTests.test_app_server_fallback_requeues_active_writer_contention) ... ok
+test_canonical_prompt_routes_to_owning_wake_root (tests.test_injector.InjectorTests.test_canonical_prompt_routes_to_owning_wake_root) ... ok
+test_dispatch_marks_submitted_when_ack_exists (tests.test_injector.InjectorTests.test_dispatch_marks_submitted_when_ack_exists) ... ok
+test_dispatch_pastes_only_canonical_prompt_and_requeues_without_ack (tests.test_injector.InjectorTests.test_dispatch_pastes_only_canonical_prompt_and_requeues_without_ack) ... ok
+test_dispatch_records_visibility_check_failure_without_failing_ack (tests.test_injector.InjectorTests.test_dispatch_records_visibility_check_failure_without_failing_ack) ... ok
+test_dispatch_records_visible_prompt_when_marker_appears_after_ack (tests.test_injector.InjectorTests.test_dispatch_records_visible_prompt_when_marker_appears_after_ack) ... ok
+test_foreign_reused_pane_falls_back_to_exact_app_server_thread (tests.test_injector.InjectorTests.test_foreign_reused_pane_falls_back_to_exact_app_server_thread) ... ok
+test_legacy_tmux_record_without_thread_identity_fails_closed (tests.test_injector.InjectorTests.test_legacy_tmux_record_without_thread_identity_fails_closed) ... ok
+test_no_matching_pane_or_valid_fallback_records_no_target (tests.test_injector.InjectorTests.test_no_matching_pane_or_valid_fallback_records_no_target) ... ok
+test_pane_lock_rejects_concurrent_lock (tests.test_injector.InjectorTests.test_pane_lock_rejects_concurrent_lock) ... ok
+test_pane_lock_removes_malformed_lock (tests.test_injector.InjectorTests.test_pane_lock_removes_malformed_lock) ... ok
+test_pane_lock_removes_stale_dead_pid_lock (tests.test_injector.InjectorTests.test_pane_lock_removes_stale_dead_pid_lock) ... ok
+test_persistent_unsafe_preflight_exhausts_separate_safety_bound (tests.test_injector.InjectorTests.test_persistent_unsafe_preflight_exhausts_separate_safety_bound) ... ok
+test_session_aware_dispatch_fails_closed_on_ambiguous_matches (tests.test_injector.InjectorTests.test_session_aware_dispatch_fails_closed_on_ambiguous_matches) ... ok
+test_session_aware_dispatch_routes_to_unique_relocated_pane (tests.test_injector.InjectorTests.test_session_aware_dispatch_routes_to_unique_relocated_pane) ... ok
+test_session_aware_dispatch_uses_unchanged_original_pane (tests.test_injector.InjectorTests.test_session_aware_dispatch_uses_unchanged_original_pane) ... ok
+test_signal_cancellation_holds_lifecycle_lock_until_dispatch_reloads_authority (tests.test_injector.InjectorTests.test_signal_cancellation_holds_lifecycle_lock_until_dispatch_reloads_authority) ... ok
+test_signal_firing_with_tampered_payload_makes_no_transport_attempt (tests.test_injector.InjectorTests.test_signal_firing_with_tampered_payload_makes_no_transport_attempt) ... ok
+test_signal_firing_without_live_authority_makes_no_transport_attempt (tests.test_injector.InjectorTests.test_signal_firing_without_live_authority_makes_no_transport_attempt) ... ok
+test_unsafe_pane_reason_ignores_approval_words_in_inert_history (tests.test_injector.InjectorTests.test_unsafe_pane_reason_ignores_approval_words_in_inert_history) ... ok
+test_unsafe_pane_reason_ignores_prompt_structure_outside_active_region (tests.test_injector.InjectorTests.test_unsafe_pane_reason_ignores_prompt_structure_outside_active_region) ... ok
+test_unsafe_pane_reason_rejects_shell_prompt_and_approval (tests.test_injector.InjectorTests.test_unsafe_pane_reason_rejects_shell_prompt_and_approval) ... ok
+test_unsafe_pane_requeues_and_does_not_paste (tests.test_injector.InjectorTests.test_unsafe_pane_requeues_and_does_not_paste) ... ok
+test_unsafe_preflight_does_not_consume_sole_delivery_attempt (tests.test_injector.InjectorTests.test_unsafe_preflight_does_not_consume_sole_delivery_attempt) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 2.149s
+
+OK
+{"native_delivery": {"next_reconciliation_at": "2026-10-10T15:14:18Z", "reconciliation": {"checked_at": "2026-10-10T15:14:13Z", "reason": "multiple_native_submissions", "state": "unresolved"}, "state": "uncertain"}, "result": "skipped", "status": "firing", "wake_id": "wake_20261010_151413_1c84"}
+wake_20261009_000001_cb3e /tmp/tmpz7zm1cvt/wakes/pending/wake_20261009_000001_cb3e.json
+wake_20261009_000001_45ea /tmp/tmppoah2jtt/wake/pending/wake_20261009_000001_45ea.json
+{"native_delivery": {"acknowledgment": "not_observed", "evidence": {"client_message_id": "client-exact", "execution": "turn_completed", "source": "native_turn", "turn_id": "turn-exact", "user_message_id": "message-exact"}, "execution": "turn_completed", "reconciled": true, "reconciliation": {"checked_at": "2026-10-10T15:14:13Z", "state": "resolved"}, "state": "accepted"}, "result": "submitted", "status": "submitted", "wake_id": "wake_20261010_151413_2412"}

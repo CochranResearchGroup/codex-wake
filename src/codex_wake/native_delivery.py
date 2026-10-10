@@ -89,6 +89,35 @@ def expire_native(root, found, now):
     return True
 
 
+def submission_failure(reason, result, error):
+    """Project subprocess evidence without retaining arbitrary output or argv."""
+    def output_summary(value, *, inspect=False):
+        value = value if isinstance(value, (str, bytes)) else ''
+        sample = value[:4096]
+        if isinstance(sample, bytes):
+            sample = sample.decode('utf-8', errors='replace')
+        hints = []
+        if inspect:
+            lowered = sample.lower()
+            for phrase, hint in (
+                ('thread not found', 'thread_not_found'),
+                ('connection refused', 'connection_refused'),
+                ('permission denied', 'permission_denied'),
+                ('unauthorized', 'unauthorized'),
+                ('unexpected argument', 'cli_usage_error'),
+                ('timed out', 'timed_out'),
+            ):
+                if phrase in lowered:
+                    hints.append(hint)
+        return dict(length=len(value), length_unit='bytes' if isinstance(value, bytes) else 'characters',
+                    truncated=len(value) > 4096, hints=hints, raw_output='withheld')
+    source = result if result is not None else error
+    return dict(version=1, reason=reason, exception_type=type(error).__name__,
+                returncode=result.returncode if result is not None else None,
+                stdout=output_summary(getattr(source, 'stdout', None)),
+                stderr=output_summary(getattr(source, 'stderr', None), inspect=True))
+
+
 def dispatch_native(root, found, now):
     from .injector import DispatchResult
     record = dict(found.record)
@@ -140,15 +169,24 @@ def dispatch_native(root, found, now):
     env = dict(os.environ)
     for key in ('CODEX_THREAD_ID', 'TMUX', 'TMUX_PANE'):
         env.pop(key, None)
+    result = None
+    failure_reason = 'queue_command_exception'
     try:
         remote = ['--remote', target['endpoint']] if target['endpoint'] != 'unix://' else []
         result = subprocess.run([target['codex_cmd'], 'queue', *remote, '--thread', target['thread_id'],
                                  '--message', prompt], env=env, capture_output=True, text=True, timeout=30)
         match = re.fullmatch(r'Queued message ([0-9a-f-]{36}) for thread '+re.escape(target['thread_id'])+r'\.\s*', result.stdout)
         if result.returncode or match is None:
+            failure_reason = 'queue_exit_nonzero' if result.returncode else 'queue_acceptance_unconfirmed'
             raise WakeError('native queue did not confirm exact acceptance')
+        failure_reason = 'queue_acceptance_unconfirmed'
         UUID(match[1])
     except Exception as exc:
+        if isinstance(exc, subprocess.TimeoutExpired):
+            failure_reason = 'queue_timeout'
+        elif isinstance(exc, OSError):
+            failure_reason = 'queue_os_error'
+        record['native_delivery']['submission_failure'] = submission_failure(failure_reason, result, exc)
         record['last_error'] = 'uncertain native submission: ' + type(exc).__name__
         record = append_event(record, 'native_uncertain', record['last_error'], now)
         replace_record(root, found, record)
