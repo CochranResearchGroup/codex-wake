@@ -28,3 +28,11 @@ Successful or failed processing requires this claim before terminal acknowledgme
 **Receipt publication**:
 Making an existing receipt available to observers. Publication is durable journal
 work and does not itself require the recipient's tab to remain open.
+
+**Recovery disposition**:
+The operator's attributable decision to retain snapshot-era work as unknown and
+prohibit its processing or replay. It does not infer missing outcomes.
+
+**Recovery hold release**:
+A separate operator action after committed disposition. It leaves the bus paused
+and requires fresh grants before new work; original history stays fenced.

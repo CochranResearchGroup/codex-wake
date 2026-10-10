@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'dispatch', 'worker', 'delegate-receipts', 'network-time']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'dispatch', 'worker', 'delegate-receipts', 'network-time', 'recovery-status', 'dispose-recovery', 'release-recovery']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -25,6 +25,15 @@ def add_a2a_parser(subparsers):
         if verb in ('recover-backup', 'reconcile-recovery'):
             command.add_argument('--expected-database-sha256', required=True)
             command.add_argument('--apply', action='store_true', required=True)
+        if verb in ('dispose-recovery', 'release-recovery'):
+            command.add_argument('--recovery-epoch', required=True)
+            command.add_argument('--expected-database-sha256', required=True)
+        if verb == 'dispose-recovery':
+            command.add_argument('--accept-missing-state-unknown', action='store_true', required=True)
+            command.add_argument('--idempotency-key', required=True)
+            command.add_argument('--reason', required=True, help='bounded nonsecret disposition explanation')
+        if verb == 'release-recovery':
+            command.add_argument('--disposition-receipt', required=True)
         if verb == 'recover-backup':
             command.add_argument('--accept-unbacked-state-hold', action='store_true', required=True)
         if verb in ('backup', 'verify-backup', 'restore-backup', 'recover-backup'):
@@ -154,7 +163,23 @@ def a2a_command(args):
         # Validate explicit operator authority before observing or changing peers.
         with store.connection() as database:
             store.operator(database, args.operator_capability)
-        if args.a2a_command == 'network-time':
+        if args.a2a_command in ('recovery-status', 'dispose-recovery', 'release-recovery'):
+            from .a2a_recovery_disposition import RecoveryDisposition
+            disposition = RecoveryDisposition(store, args.operator_capability)
+            if args.a2a_command == 'recovery-status':
+                result(dict(recovery=disposition.status()))
+            elif args.a2a_command == 'dispose-recovery':
+                value = disposition.dispose(epoch=args.recovery_epoch, sha256=args.expected_database_sha256,
+                    key=args.idempotency_key, reason=args.reason, accept_unknown=args.accept_missing_state_unknown)
+                partial_receipts.append(value['receipt_id'])
+                result(value)
+            else:
+                value = disposition.release(epoch=args.recovery_epoch, sha256=args.expected_database_sha256,
+                    receipt_id=args.disposition_receipt)
+                if value.get('receipt_id'):
+                    partial_receipts.append(value['receipt_id'])
+                result(value)
+        elif args.a2a_command == 'network-time':
             from .a2a_mailbox import Mailbox
             result(dict(receipt_id=Mailbox.activate_network_time(store,args.operator_capability),time_policy='network-first-v1'))
         elif args.a2a_command == 'delegate-receipts':

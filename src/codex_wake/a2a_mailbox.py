@@ -325,6 +325,14 @@ class Mailbox:
         if actor.key not in (row['sender_key'], row['recipient_key']):
             raise BusError('authorization_denied', 'message belongs to another mailbox')
 
+    def _legacy_recovery(self, database, row):
+        boundary = self.bus.recovery_legacy_boundary(database)
+        return boundary is not None and row['global_seq'] <= boundary
+
+    def _require_current_work(self, database, row):
+        if self._legacy_recovery(database, row):
+            raise BusError('recovery_legacy_held', 'snapshot-era work stays unknown; inspect as operator, never process or replay')
+
     def _time_upper(self, database, now):
         return self._time_context.decision.upper if self._network_mode(database) else now
 
@@ -333,6 +341,8 @@ class Mailbox:
             raise BusError('time_uncertain','deadline lies inside the accepted interval; no delivery authorized')
 
     def _expire(self, database, row, now):
+        if self._legacy_recovery(database, row):
+            return row
         if json.loads(row['envelope']).get('compacted'):
             return row
         if row['admission'] == 'accepted' and now >= row['expires']:
@@ -347,6 +357,9 @@ class Mailbox:
 
     def _projection(self, database, row):
         value = json.loads(row['envelope'])
+        if self._legacy_recovery(database, row):
+            value['recovery'] = dict(epoch=self.bus.meta(database, 'recovery_epoch'),
+                                     legacy=True, disposition='retain-unknown', gap_unknown=True)
         value['recipient_sequence'] = row['recipient_seq']
         value['state'] = dict(admission=row['admission'], notification=row['notification'], recipient=row['recipient'])
         value['received_receipt_id'] = row['read_receipt']
@@ -483,6 +496,7 @@ class Mailbox:
         with self.transaction(actor) as database:
             row = self._row(database, identifier)
             self._participant(row, actor)
+            self._require_current_work(database, row)
             recipient = actor.key == row['recipient_key']
             if recipient:
                 self.bus.validate_actor(database, actor, permission='receive')
@@ -543,6 +557,7 @@ class Mailbox:
         with self.transaction(actor, permission='receive') as database:
             row = self._row(database, identifier)
             self._participant(row, actor)
+            self._require_current_work(database, row)
             now = self._now(database)
             row = self._expire(database, row, now)
             self._deadline_clear(database,row,now)
@@ -555,6 +570,7 @@ class Mailbox:
               delivery='notify', subject=None, outcome=None, evidence=None, resume_missing=False):
         with self.transaction(actor, permission='send') as database:
             original = self._row(database, identifier)
+            self._require_current_work(database, original)
             if actor.key != original['recipient_key']:
                 raise BusError('authorization_denied', 'only the original recipient may reply')
             now = self._now(database)
@@ -576,6 +592,7 @@ class Mailbox:
     def cancel(self, actor, identifier):
         with self.transaction(actor) as database:
             row = self._row(database, identifier)
+            self._require_current_work(database, row)
             if actor.key != row['sender_key']:
                 raise BusError('authorization_denied', 'only the sender may cancel')
             try:

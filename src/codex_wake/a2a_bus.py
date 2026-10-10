@@ -23,7 +23,7 @@ import uuid
 from .a2a_identity import Actor, BusError, RuntimeIdentity
 
 SCHEMA_VERSION = 1
-SUPPORTED_BUS_SCHEMAS = (1, 2)
+SUPPORTED_BUS_SCHEMAS = (1, 2, 3)
 LOCAL_FILESYSTEMS = frozenset({'ext2', 'ext3', 'ext4', 'btrfs', 'xfs', 'zfs', 'tmpfs', 'ramfs', 'overlay', 'f2fs'})
 
 
@@ -231,14 +231,14 @@ class BusStore:
             version = self.meta(database, 'schema_version')
             if type(version) is not int or version not in SUPPORTED_BUS_SCHEMAS:
                 raise BusError('unsupported_schema', 'unsupported bus schema; no downgrade attempted')
-            if version == 2:
+            if version >= 2:
                 epoch = self.meta(database, 'recovery_epoch')
                 if not isinstance(epoch, str) or not re.fullmatch(r'recovery_[0-9a-f]{32}', epoch):
                     raise BusError('store_unavailable', 'recovered epoch metadata is invalid')
                 self.recovery_held(database)
             if self.meta(database, 'canonical_root') != str(self.root):
                 raise BusError('bus_identity_mismatch', 'copied bus root cannot become another active writer')
-            if version == 2:
+            if version >= 2:
                 anchor_path = self.root / '.recovery-authority.json'
                 private_path(anchor_path)
                 if anchor_path.stat().st_size > 4096:
@@ -248,6 +248,8 @@ class BusStore:
                     anchor.get('bus_id') != self.meta(database, 'bus_id') or anchor.get('operator_digest') != self.meta(database, 'operator_digest') or
                     anchor.get('recovery_epoch') != self.meta(database, 'recovery_epoch')):
                     raise BusError('store_unavailable', 'recovery authority anchor differs from canonical image')
+            if version == 3:
+                self.recovery_legacy_boundary(database)
             yield database
         except BusError:
             raise
@@ -266,6 +268,21 @@ class BusStore:
         if type(value) is not bool:
             raise BusError('store_unavailable', 'recovery hold metadata is invalid')
         return value
+
+    @staticmethod
+    def recovery_legacy_boundary(database):
+        version = BusStore.meta(database, 'schema_version')
+        if version != 3:
+            return None
+        value = BusStore.meta(database, 'recovery_disposition')
+        if (not isinstance(value, dict) or type(value.get('legacy_through_sequence')) is not int
+                or value['legacy_through_sequence'] < 0
+                or not isinstance(value.get('intent'), dict)
+                or value['intent'].get('epoch') != BusStore.meta(database, 'recovery_epoch')
+                or value['intent'].get('disposition') != 'retain-unknown'
+                or not isinstance(value.get('receipt_id'), str)):
+            raise BusError('store_unavailable', 'recovery legacy fence metadata is invalid')
+        return value['legacy_through_sequence']
 
     def operator(self, database, capability: Path) -> None:
         value = read_capability(capability)
