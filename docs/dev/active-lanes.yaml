@@ -238,12 +238,12 @@ lanes:
     objective: Dispose recovered uncertainty without replaying legacy work
     work_items: [docs/dev/plans/0146-2026-10-10-held-recovery-disposition.md]
     plan: docs/dev/plans/0146-2026-10-10-held-recovery-disposition.md
-    plan_ref: origin/main
+    plan_ref: origin/fix/recovery-disposition
     branch: fix/recovery-disposition
     target: origin/main
     plan_state: OPEN
-    custody_state: ACTIVE_CHECKOUT
-    checkpoint: 65582915685d64123410983481161d303b604958
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 9164e9cbc70b838f7aa7f09cff7098000c55f715
     remote_ref: refs/remotes/origin/fix/recovery-disposition
     integration: squash_pr
     checkout_required: true
@@ -251,4 +251,4 @@ lanes:
     overlaps: [P71]
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
-    disposition: Ticket0146 frozen retained-unknown contract; disposable recovery and public CLI red-green next. No production recovery, legacy replay or unrelated effects.
+    disposition: Ticket0146 source9164e9c reviewed, three accepted findings fixed; affected source and installed reviewed gates active. No production recovery, legacy replay or unrelated effects.
