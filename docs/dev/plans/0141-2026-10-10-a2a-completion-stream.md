@@ -11,7 +11,7 @@ Work-Item: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
 Supersedes: Plan0119 execution sequencing only; preserves Plan0101/0119 acceptance
 Depends-On: Plan0138, Plan0139, Plan0140 completed evidence
 
-## Current State
+## Historical execution state before final acceptance
 
 Planning baseline main78ff33c; active released CLI0.11.1, source2e87f66.
 Plan0138 ships explicit same-saved-recipient reopening. Plan0139 ships claim

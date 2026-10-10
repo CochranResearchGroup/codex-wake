@@ -37,7 +37,7 @@ lanes:
     branch_retention: Integrated source branches intentionally retained as provenance; no active implementation checkout
     remaining_gate_acceptance: docs/dev/verification/0122-2026-10-05-remaining-gates-and-native-soak-acceptance.md
     remaining_gate_packet_state: COMPLETE
-    disposition: Requested cancellation/reconnect/normal worker restart/released installation/multiroot/rollback/30-minute soak gates PASS; wider Plan0101 and retained server-unloaded/deferred recovery obligations remain OPEN
+    disposition: All original Plan0101/0119 obligations accepted by Plan0141/0149; released active0.12.0 and issue181 CLOSED. Historical packet receipts and uncertainties preserved.
 
     final_acceptance: docs/dev/evidence/plan0149/closeout.md
     final_release_tag: v0.12.0

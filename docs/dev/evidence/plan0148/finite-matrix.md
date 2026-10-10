@@ -35,10 +35,10 @@ live authority. Original old failures/uncertainties remain unchanged.
 | R26 | P63.7 operations restart/reconnect/unloading/multiroot/service ownership | 0122 restart/reconnect/multiroot;0143 changed transport restart;0145 genuinely notLoaded saved path |
 | R27 | Compatibility schemas1/2, older readers explicit reject, mailbox domain migration, staged rollout | PASS C1 actual old/new message-linked readers and restored claim |
 | R28 | Rollback pause/no reset/no replay/no deletion, retained inspection | 0120/0122 exact recorded0.7/0.6 rollback;0146 actual0.11.2 schema2→3 refusal; PASS C1 current binary roundtrip |
-| R29 | P63.8 docs/packaging/hosted CI/release/install readback | 0144 actual publication/global install;0149 final release/identity; hosted CI wait waived |
+| R29 | P63.8 docs/packaging/hosted CI/release/install readback | 0144 actual publication/global install;0149 v0.12.0/10c8a58 final release/identity PASS; hosted CI wait waived |
 | R30 | Optional MCP facade | Optional; no obligation |
 | R31 | Excluded cross-user/remote federation, broadcast, task allocation, arbitrary commands, external sends, autonomous delegation | Exclusions preserved; no task allocation/external sends |
-| R32 | Full definition of done: actual two-agent, fault matrix, multi-root, resource, migration/rollback, hosted and release evidence together | OPEN parent0148 finite cuts +0149 original definition-of-done audit |
+| R32 | Full definition of done: actual two-agent, fault matrix, multi-root, resource, migration/rollback, hosted and release evidence together | PASS0148 finite cuts +0149 original definition-of-done audit; final closeout.md |
 
 ## Three bounded execution packets
 
@@ -74,3 +74,7 @@ receipt reader. Identity/message/claim/terminal remain invariant throughout.
 
 All three packets PASS; closeout.md supplies exact attribution. Final release
 and original overall definition-of-done rows remain owned by0149, not waived.
+
+Final0149 release/install/cleanup PASS; original overall definition-of-done row
+closed by docs/dev/evidence/plan0149/closeout.md. Issue181 CLOSED by provider
+readback. Historical evidence version/resource/uncertainty limits still apply.
