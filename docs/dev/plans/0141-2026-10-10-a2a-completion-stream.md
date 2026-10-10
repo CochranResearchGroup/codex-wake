@@ -73,7 +73,7 @@ within its ticket. Existing GLOSSARY.md is terminology authority.
 | [0145](0145-2026-10-10-server-unloaded-recipient.md) Qualify explicitly reopened server-unloaded recipient | 0144 | DONE |
 | [0146](0146-2026-10-10-held-recovery-disposition.md) Make held recovery disposition explicit and safe | none | DONE |
 | [0147](0147-2026-10-10-processing-claim-generation-recovery.md) Recover processing ownership across generations | 0146 | DONE |
-| [0148](0148-2026-10-10-remaining-fault-and-ancestry-proof.md) Finish remaining fault and session-isolation proof | 0142, 0146, 0147 | READY |
+| [0148](0148-2026-10-10-remaining-fault-and-ancestry-proof.md) Finish remaining fault and session-isolation proof | 0142, 0146, 0147 | IN_PROGRESS |
 | [0149](0149-2026-10-10-final-campaign-acceptance.md) Close the work stream from complete evidence | 0143, 0144, 0145, 0146, 0147, 0148 | BLOCKED |
 
 Execution priority0142→0143→0144→0145→0146→0147→0148→0149. Ticket0146 is
@@ -147,5 +147,6 @@ receipt visibility. Optional features and indefinite scale are excluded.
 A fresh session reads this plan, its next unblocked ticket, applicable policies,
 active-lane catalog and exact Git/installed identities. It reconciles source/receipts
 before using old evidence, starts only one owned ticket, and updates status/proof as
-it progresses. Next concrete action: ticket0147 freezes original accepted-claim generation
-reconciliation and proves known-terminal versus held-unknown cases at public seams.
+it progresses. Next concrete action: finish ticket0148 actual subagent ancestry after its explicit
+test request; F1 faults, C1 binary compatibility and owned OS reparent/restart
+controls pass. Then0149 final installed release and complete original audit.

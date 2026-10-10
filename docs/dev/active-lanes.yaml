@@ -194,7 +194,7 @@ lanes:
     objective: Govern A2A work stream through final acceptance and cleanup
     work_items: [docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md]
     plan: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
-    plan_ref: origin/docs/a2a-completion-stream
+    plan_ref: origin/main
     branch: docs/a2a-completion-stream
     target: origin/main
     plan_state: OPEN
@@ -207,7 +207,7 @@ lanes:
     overlaps: [P63]
     reconciled_overlaps: [P63]
     updated_at: 2026-10-10
-    disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. Goal executing: tickets0142-0147 DONE, active0.11.2; prepared0.12 source; ticket0148 finite acceptance matrix next. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
+    disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. Goal executing: tickets0142-0147 DONE, active0.11.2; prepared0.12 source; ticket0148 finite faults/compatibility/OS controls PASS; actual subagent ancestry awaits explicit test request. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
 
   - id: P72
     owner: primary

@@ -36,3 +36,23 @@ restart and inherited-pane controls also require attributable proof.
 Private plan0148 retains fork metadata, F1 logs/results, compatibility original
 failed and corrected scripts/results. Hosted CI wait waived; not claimed PASS.
 No old wake replayed, unrelated session/service touched or production store fault.
+
+A1 owned OS-process control PASS0.450s: real child54911/start28480840 changed
+parent54908→controller54828 after its launcher exited, then replacement54944/
+start28480853 reopened the same original claim. Sender/parent capability is
+refused under recipient identity before/after reparent/restart; inherited pane
+string supplies no mailbox authority. Exact original claim receipt retained,
+no new start; FD5→5/all three fixture processes reaped/children0/root removed.
+This is real OS ancestry with synthetic mailbox roles; actual Codex subagent
+ancestry remains the separate unproved cut. No subagent turn was started.
+
+Prepared pending subagent packet: one disposable owned child, no model override,
+no delegated investigation or implementation, no real notification/business work.
+Capture actual child thread/parent/path and inherited pane/process identity;
+read-only parent observation plus private disposable bus proves parent capability
+cannot access child's inbox and child cannot access parent using inherited root/
+pane. Bind one original claimed fixture message and receipt arm; changed identity
+must be refused without retargeting. Child returns compact native identity only,
+then stop/archive/close after terminal ownership and OS readback. Bound120s,
+one attempt, zero external sends/production enrollment. Requires the pending
+explicit request under current session no-spawn rule; elapsed time is not consent.
