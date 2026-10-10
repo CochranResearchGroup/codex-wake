@@ -1,0 +1,141 @@
+{
+  "wake_id": "wake_20261010_030000_c100",
+  "create": {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "--wake-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-acceptance",
+      "native",
+      "at",
+      "--codex-path",
+      "/home/ecochran76/.local/bin/codex",
+      "--ttl",
+      "10m",
+      "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "2026-10-10T02:59:59.669429+00:00",
+      "--",
+      "Authorized Plan0130 after-acceptance control. Reply exactly PLAN130_AFTER_ACCEPTANCE. Do not edit files or message anyone."
+    ],
+    "exit_code": 0,
+    "stdout": "wake_20261010_030000_c100 /home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-acceptance/pending/wake_20261010_030000_c100.json\n",
+    "stderr": ""
+  },
+  "fault_phase": "after native queue accepted, before accepted-record write",
+  "fault_scheduler": {
+    "exit_code": 91,
+    "stdout": "",
+    "stderr": ""
+  },
+  "interrupted_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:00:00Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "not_before due_at 2026-10-10T02:59:59Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      }
+    ],
+    "id": "wake_20261010_030000_c100",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "f1be769c78b4b03b9a26781fd9a5be24a48ca70ee8b046c2d85a90fd0f572534",
+      "state": "uncertain",
+      "submission_id": "ab3c6886-0108-4c70-8145-7e70d8ad422d"
+    },
+    "next_attempt_at": "2026-10-10T02:59:59Z",
+    "predicate": {
+      "due_at": "2026-10-10T02:59:59Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 after-acceptance control. Reply exactly PLAN130_AFTER_ACCEPTANCE. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "firing",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:09:59Z",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:00:00Z"
+  },
+  "restarted_scheduler": {
+    "exit_code": 0,
+    "stdout": "checked=0 fired=0 failed=0 pending=0 dispatched=0 submitted=0 requeued=0\n",
+    "stderr": ""
+  },
+  "recovered_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:00:00Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "not_before due_at 2026-10-10T02:59:59Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:00:01Z",
+        "message": "no_exact_native_evidence",
+        "type": "native_unresolved"
+      }
+    ],
+    "id": "wake_20261010_030000_c100",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "next_reconciliation_at": "2026-10-10T03:00:06Z",
+      "prompt_sha256": "f1be769c78b4b03b9a26781fd9a5be24a48ca70ee8b046c2d85a90fd0f572534",
+      "reconciliation": {
+        "checked_at": "2026-10-10T03:00:01Z",
+        "reason": "no_exact_native_evidence",
+        "state": "unresolved"
+      },
+      "state": "uncertain",
+      "submission_id": "ab3c6886-0108-4c70-8145-7e70d8ad422d"
+    },
+    "next_attempt_at": "2026-10-10T02:59:59Z",
+    "predicate": {
+      "due_at": "2026-10-10T02:59:59Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 after-acceptance control. Reply exactly PLAN130_AFTER_ACCEPTANCE. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "firing",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:09:59Z",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:00:00Z"
+  }
+}

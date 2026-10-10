@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+    "sessions",
+    "close",
+    "window:@2",
+    "--tmux-socket",
+    "/tmp/tmux-1000/plan127-native",
+    "--force",
+    "--json"
+  ],
+  "exit_code": 4,
+  "stdout": "{\"candidates\": [\"1:plan127-resumed.0\", \"1:plan127-resumed.1\"], \"code\": 4, \"message\": \"selector matches multiple panes or windows\", \"selector\": \"window:@2\"}\n",
+  "stderr": "",
+  "panes_after_refusal": [
+    "%2",
+    "%4"
+  ]
+}

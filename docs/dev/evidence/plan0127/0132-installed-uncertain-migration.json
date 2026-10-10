@@ -1,0 +1,60 @@
+{
+  "source_control": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-intent/firing/wake_20261010_030151_186c.json",
+  "source_sha256": "0d9a2fab76bf14d679a958192e246be3f27c03fdc6a734ab8f8351c41f502451",
+  "disposable_copy": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/migration-uncertain-copy",
+  "steps": [
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/migration-uncertain-copy",
+        "native",
+        "migrate",
+        "wake_20261010_030151_186c"
+      ],
+      "exit": 0,
+      "stdout": "{\"id\": \"wake_20261010_030151_186c\", \"state\": \"would_migrate\", \"schema_version\": 4, \"backup\": \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/migration-uncertain-copy/migration/wake_20261010_030151_186c.schema1.json\", \"submitted\": false}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/migration-uncertain-copy",
+        "native",
+        "migrate",
+        "wake_20261010_030151_186c",
+        "--apply"
+      ],
+      "exit": 0,
+      "stdout": "{\"id\": \"wake_20261010_030151_186c\", \"state\": \"migrated\", \"schema_version\": 4, \"backup\": \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/migration-uncertain-copy/migration/wake_20261010_030151_186c.schema1.json\", \"submitted\": false}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-waked",
+        "--once",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/migration-uncertain-copy"
+      ],
+      "exit": 0,
+      "stdout": "checked=0 fired=0 failed=0 pending=0 dispatched=0 submitted=0 requeued=0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked",
+        "--once",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/migration-uncertain-copy"
+      ],
+      "exit": 0,
+      "stdout": "checked=0 fired=0 failed=0 pending=0 dispatched=0 submitted=0 requeued=0\n",
+      "stderr": ""
+    }
+  ],
+  "state": "uncertain_unresolved",
+  "submission_id_preserved": "dc6ee865-e9ec-48dc-b409-ccd1e62a02a0",
+  "no_new_submission_intent": true,
+  "backup_exact": true
+}

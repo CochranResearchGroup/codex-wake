@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+    "sessions",
+    "close",
+    "pane:%2",
+    "--tmux-socket",
+    "/tmp/tmux-1000/plan127-native",
+    "--force",
+    "--json"
+  ],
+  "exit_code": 6,
+  "stdout": "{\"candidates\": [], \"code\": 6, \"message\": \"selection has no unique Codex identity\", \"selector\": \"pane:%2\"}\n",
+  "stderr": "",
+  "panes_after_refusal": [
+    "%2"
+  ]
+}

@@ -1,0 +1,2 @@
+Oct 09 21:33:51 cooper systemd[696]: Started plan127-native-scheduler-first.service - /home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked --once --wake-root /home/ecochran76/.local/state/codex-wake/plan127-runtime/wakes.
+Oct 09 21:33:51 cooper codex-waked[5483]: checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0

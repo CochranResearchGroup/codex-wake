@@ -1,0 +1,65 @@
+[
+  {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T02:34:17Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake",
+    "events": [
+      {
+        "at": "2026-10-10T02:34:17Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T02:34:17Z",
+        "message": "not_before due_at 2026-10-10T02:33:50Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T02:34:17Z",
+        "message": "exact recipient is not available and idle",
+        "type": "native_held"
+      },
+      {
+        "at": "2026-10-10T02:34:51Z",
+        "message": "not_before due_at 2026-10-10T02:33:50Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T02:34:51Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T02:34:51Z",
+        "message": "native queue accepted; execution not yet observed",
+        "type": "native_accepted"
+      }
+    ],
+    "id": "wake_20261010_023417_c920",
+    "max_attempts": 3,
+    "native_delivery": {
+      "accepted_at": "2026-10-10T02:34:51Z",
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "queue_id": "01a123a9-c743-7730-b690-b7136d7ed33f",
+      "state": "accepted"
+    },
+    "next_attempt_at": "2026-10-10T02:34:22Z",
+    "predicate": {
+      "due_at": "2026-10-10T02:33:50Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized held wake. Reply exactly PLAN128_AFTER_BUSY.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T02:38:50Z",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T02:34:51Z"
+  }
+]

@@ -1,0 +1,43 @@
+[
+  {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T02:35:21Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T02:35:21Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T02:35:21Z",
+        "message": "not_before due_at 2026-10-10T02:35:20Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T02:35:21Z",
+        "message": "exact recipient is not available and idle",
+        "type": "native_held"
+      }
+    ],
+    "id": "wake_20261010_023521_8ef6",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T02:35:26Z",
+    "predicate": {
+      "due_at": "2026-10-10T02:35:20Z",
+      "type": "not_before"
+    },
+    "prompt": "This nonexistent recipient must not run.",
+    "schema_version": 1,
+    "status": "pending",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T02:35:28Z",
+      "thread_id": "deadbeef-0000-4000-8000-000000000001",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T02:35:21Z"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "source": "mcp__codex_tui__read_thread; exact readback 2026-10-10T03:56 UTC",
+  "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+  "turn_id": "01a123f4-51cf-7802-8f17-47f799ffdc1c",
+  "status": "completed",
+  "wake_id": "wake_20261010_035616_a434",
+  "submission_id": "a7b09443-7234-425e-8607-efb8d92e9249",
+  "final": "PLAN132_FINAL_WHEEL_EXECUTED",
+  "started_at": 1791604576,
+  "completed_at": 1791604579
+}

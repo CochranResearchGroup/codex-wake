@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"schemaVersion\":1,\"thread\":{\"id\":\"01a123a8-5782-7d43-a214-55b293bbd65f\",\"kind\":\"codex\",\"title\":\"Authorize Plan0127 recipient\",\"preview\":\"Authorized disposable Plan0127 recipient. Run printenv CODEX_THREAD_ID and save only that value to /home/ecochran76/.local/state/codex-wake/plan127-runtime/recipient.id. Reply exactly PLAN127_READY and finish. Do not edit repo files or message anyone.\",\"status\":{\"type\":\"idle\"},\"cwd\":\"/home/ecochran76/workspace.local/codex-wake-plan127\",\"createdAt\":1791599597,\"updatedAt\":1791599633},\"page\":{\"order\":\"newest_first\",\"limit\":1,\"hasMore\":true,\"nextCursor\":\"{\\\"requestedThreadId\\\":\\\"01a123a8-5782-7d43-a214-55b293bbd65f\\\",\\\"rolloutOrdinal\\\":22,\\\"includeAnchor\\\":false,\\\"scope\\\":{\\\"kind\\\":\\\"turns\\\"}}\"},\"turns\":[{\"id\":\"01a123a8-dcc0-7972-b497-1bfc44b3fc53\",\"status\":\"completed\",\"error\":null,\"startedAt\":1791599631,\"completedAt\":1791599633,\"durationMs\":2019,\"items\":[{\"type\":\"userMessage\",\"id\":\"01a123a8-dd21-7d11-96dc-afb0e7b46a55\",\"content\":[{\"type\":\"text\",\"text\":\"WAKE_TRIGGER_ID=wake_20261010_023345_1f75\\nWAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/wakes\\nAuthorized Plan0128 live wake. Reply exactly PLAN128_NATIVE_EXECUTED. Do not edit files or message anyone.\"}]},{\"type\":\"agentMessage\",\"id\":\"msg_0bb942efd65bb80f016ac9a4106a2087d28bcb5bfbb048de80\",\"text\":\"PLAN128_NATIVE_EXECUTED\",\"phase\":\"final_answer\"}]}]}"
+    }
+  ],
+  "isError": false
+}

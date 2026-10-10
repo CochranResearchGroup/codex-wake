@@ -383,6 +383,10 @@ def poll_once(
         if classification == "hold":
             pending += 1
             continue
+        from .native_delivery import expire_native
+        if expire_native(root, item, current):
+            failed += 1
+            continue
         if classification == 'network_v3':
             from .network_wakes import evaluate_pending
             try:

@@ -1,0 +1,45 @@
+[
+  {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "sessions",
+      "open",
+      "--resume",
+      "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "--name",
+      "plan127-explicit-extra",
+      "--extra-attachment",
+      "--tmux-socket",
+      "/tmp/tmux-1000/plan127-native",
+      "--tmux-session",
+      "recipient",
+      "--codex-path",
+      "/home/ecochran76/.local/bin/codex",
+      "--timeout",
+      "30",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"action\": \"opened\", \"attachments\": [{\"client_pid\": 86843, \"client_start_time_ticks\": 22333048, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%6\", \"pane_index\": \"0\", \"pane_title\": \"plan127-worker\", \"pane_tty\": \"/dev/pts/40\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@4\", \"window_index\": \"2\", \"window_name\": \"plan127-explicit-extra\"}], \"ready\": true, \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "--wake-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/unpublished-signal-control",
+      "sessions",
+      "close",
+      "pane:%6",
+      "--tmux-socket",
+      "/tmp/tmux-1000/plan127-native",
+      "--bus-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/mailbox-close-inbox-control",
+      "--force",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"action\": \"closed\", \"affected_messages\": [{\"bus_root\": \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/mailbox-close-inbox-control\", \"kind\": \"message\", \"message_id\": \"msg_e8405eb397774879b515bba11aed4f9c\"}], \"affected_wakes\": [{\"attribution\": \"exact\", \"publication_state\": \"prepared\", \"root\": \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/unpublished-signal-control\", \"wake_id\": \"wake_plan129_unpublished\"}], \"attachment\": {\"client_pid\": 86843, \"client_start_time_ticks\": 22333048, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%6\", \"pane_index\": \"0\", \"pane_title\": \"plan127-worker\", \"pane_tty\": \"/dev/pts/40\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@4\", \"window_index\": \"2\", \"window_name\": \"plan127-explicit-extra\"}, \"conversation\": \"preserved\", \"forced\": true, \"inspected_bus_roots\": [\"/home/ecochran76/.local/state/codex-wake/plan127-runtime/mailbox-close-inbox-control\"], \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\"}\n",
+    "stderr": ""
+  }
+]

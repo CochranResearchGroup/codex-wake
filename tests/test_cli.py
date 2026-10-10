@@ -29,6 +29,9 @@ class CliTests(unittest.TestCase):
         )
 
     def run_cli(self, argv: list[str], root: Path) -> tuple[int, str, str]:
+        # These fixtures exercise the retained tmux compatibility interface.
+        if argv and argv[0] in {'after', 'at', 'file'} and '--app-server-thread-id' not in argv:
+            argv = [argv[0], '--legacy-tmux', *argv[1:]]
         env = {
             **os.environ,
             "TMUX_PANE": "%11",
@@ -335,7 +338,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0, err)
             data = json.loads(json_out)
             self.assertEqual(data["schema_version"], 1)
-            self.assertEqual(data["read_versions"], [1, 2, 3])
+            self.assertEqual(data["read_versions"], [1, 2, 3, 4])
             self.assertEqual(data["default_write_version"], 1)
             self.assertEqual(data["signal_record_contract_version"], 2)
             self.assertEqual(data["signal_journal_schema_version"], 2)
@@ -1085,7 +1088,7 @@ class CliTests(unittest.TestCase):
             stderr = io.StringIO()
             with patch.dict(os.environ, {"TMUX_PANE": "", "TMUX": ""}, clear=False):
                 with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                    code = cli.main(["--wake-root", str(root), "after", "1m", "--", "Wake"])
+                    code = cli.main(["--wake-root", str(root), "after", "--legacy-tmux", "1m", "--", "Wake"])
             self.assertEqual(code, 2)
             self.assertIn("TMUX_PANE is required", stderr.getvalue())
 

@@ -1,0 +1,34 @@
+[
+  {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:22:54Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:22:54Z",
+        "message": "Wake record created",
+        "type": "created"
+      }
+    ],
+    "id": "wake_20261010_032254_a1a4",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T03:22:54Z",
+    "predicate": {
+      "path": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle131/condition.ready",
+      "type": "file_exists"
+    },
+    "prompt": "Authorized Plan0131 conditional follow-up. Read /home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle131/result.txt, verify it is exactly 42, and reply exactly PLAN131_RESUMED_RESULT_42. Do not edit files or send messages.",
+    "schema_version": 1,
+    "status": "pending",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:24:54Z",
+      "resume_policy": "hold",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:22:54Z"
+  }
+]

@@ -1,11 +1,41 @@
 ---
 name: codex-wake
-description: Schedule durable wake cycles for TUI-bound Codex agents with codex-wake. Use when an agent needs to resume later, wait for CI/tests/builds, monitor a file/process, continue a long job, dogfood wake behavior, or inspect/cancel/archive wake records.
+description: Schedule durable native wake cycles and manage visible Codex tabs with codex-wake. Use when an agent needs to resume later, wait for CI/tests/builds, monitor a file/process, continue a long job, dogfood wake behavior, or inspect/cancel/archive wake records.
 ---
 
 # Codex Wake
 
 Use `codex-wake` when work should resume after a defined trigger instead of relying on model memory or a foreground sleep.
+
+## Native workflow first
+
+Use native Codex tools for ordinary immediate messages. Wake is for durable
+triggers, explicit tracked exchanges and visible tab lifecycle. Resolve a human
+tab selector with `codex-wake sessions resolve SELECTOR --json` and retain the
+exact thread UUID. Do not persist a tab number as the recipient.
+
+```bash
+codex-wake native after THREAD_UUID 10m -- "Inspect the saved result and continue."
+codex-wake native file --ttl 2h THREAD_UUID /absolute/condition -- "Read the result."
+codex-wake native reconcile WAKE_ID
+```
+
+Verify an installed scheduler owns the selected wake root, then end the
+originating turn. Native queue acceptance does not prove execution or ack.
+Unavailable/busy targets hold until expiry; `--resume-missing` explicitly allows
+headless resume of the same saved thread. Uncertainty requires reconciliation,
+never a blind resend or legacy fallback. Native delivery does not require a
+UserPromptSubmit hook.
+
+`sessions open` requires explicit new or exact resume and reuses an existing
+attachment; extra attachment is explicit. Close guards pending work and active
+or unknown recipients. Force preserves conversations and wakes; cancel/archive
+are separate. Provide custom bus roots explicitly for close checks.
+
+For existing basic tmux workflows, select `--legacy-tmux`; advanced signals and
+tracked-mailbox workflows retain their compatibility contracts below. Read
+`docs/dev/native-workflow-migration.md` before migrating earlier native records
+or rolling back a scheduler. Retain schema4 state for a capable reader.
 
 ## Preconditions
 
@@ -169,7 +199,7 @@ OpenClaw Slack/API sessions are not tmux panes. Before using tmux wake patterns:
 printf 'TMUX_PANE=%s\n' "${TMUX_PANE-}"
 ```
 
-If `TMUX_PANE` is empty, the default `codex-wake after ...` path cannot capture a tmux target. For OpenClaw Slack/API sessions, prefer an OpenClaw Gateway wake with a real durable session key:
+If `TMUX_PANE` is empty, the explicit compatibility `codex-wake after --legacy-tmux ...` path cannot capture a tmux target. For OpenClaw Slack/API sessions, prefer an OpenClaw Gateway wake with a real durable session key:
 
 ```bash
 codex-wake --wake-root .codex/wake openclaw after \

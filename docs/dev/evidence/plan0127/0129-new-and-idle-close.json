@@ -1,0 +1,44 @@
+[
+  {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "--wake-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+      "sessions",
+      "open",
+      "--new",
+      "--cwd",
+      "/home/ecochran76/workspace.local/codex-wake-plan127",
+      "--name",
+      "plan129-new-control",
+      "--tmux-socket",
+      "/tmp/tmux-1000/plan127-native",
+      "--tmux-session",
+      "recipient",
+      "--codex-path",
+      "/home/ecochran76/.local/bin/codex",
+      "--timeout",
+      "30",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"action\": \"opened\", \"attachments\": [{\"client_pid\": 12097, \"client_start_time_ticks\": 22351838, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%7\", \"pane_index\": \"0\", \"pane_title\": \"plan129-new-control\", \"pane_tty\": \"/dev/pts/40\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@5\", \"window_index\": \"2\", \"window_name\": \"plan129-new-control\"}], \"ready\": true, \"thread_id\": \"01a123ba-05f8-7040-9c58-f2f28da1b35d\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "--wake-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+      "sessions",
+      "close",
+      "pane:%7",
+      "--tmux-socket",
+      "/tmp/tmux-1000/plan127-native",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"action\": \"closed\", \"affected_messages\": [], \"affected_wakes\": [], \"attachment\": {\"client_pid\": 12097, \"client_start_time_ticks\": 22351838, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%7\", \"pane_index\": \"0\", \"pane_title\": \"plan129-new-control\", \"pane_tty\": \"/dev/pts/40\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@5\", \"window_index\": \"2\", \"window_name\": \"plan129-new-control\"}, \"conversation\": \"preserved\", \"forced\": false, \"inspected_bus_roots\": [], \"thread_id\": \"01a123ba-05f8-7040-9c58-f2f28da1b35d\"}\n",
+    "stderr": ""
+  }
+]

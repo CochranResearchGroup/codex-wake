@@ -1,0 +1,120 @@
+{
+  "argv": [
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-acceptance",
+    "native",
+    "reconcile",
+    "wake_20261010_030000_c100"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"native_delivery\": {\"acknowledgment\": \"not_observed\", \"evidence\": {\"client_message_id\": \"01a123c0-d0df-7ce3-9c17-403831e33a5a\", \"execution\": \"turn_completed\", \"source\": \"native_turn\", \"turn_id\": \"01a123c0-d0e8-7b20-ac3d-f7feba83b867\", \"user_message_id\": \"01a123c0-d26e-7320-a885-7ff13264237c\"}, \"execution\": \"turn_completed\", \"next_reconciliation_at\": \"2026-10-10T03:00:06Z\", \"prompt_sha256\": \"f1be769c78b4b03b9a26781fd9a5be24a48ca70ee8b046c2d85a90fd0f572534\", \"reconciled\": true, \"reconciliation\": {\"checked_at\": \"2026-10-10T03:00:29Z\", \"state\": \"resolved\"}, \"state\": \"accepted\", \"submission_id\": \"ab3c6886-0108-4c70-8145-7e70d8ad422d\"}, \"result\": \"submitted\", \"status\": \"submitted\", \"wake_id\": \"wake_20261010_030000_c100\"}\n",
+  "stderr": "",
+  "recovered_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:00:00Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "not_before due_at 2026-10-10T02:59:59Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:00:00Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:00:01Z",
+        "message": "no_exact_native_evidence",
+        "type": "native_unresolved"
+      },
+      {
+        "at": "2026-10-10T03:00:29Z",
+        "message": "exact native evidence confirms acceptance; no resend",
+        "type": "native_reconciled"
+      }
+    ],
+    "id": "wake_20261010_030000_c100",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "evidence": {
+        "client_message_id": "01a123c0-d0df-7ce3-9c17-403831e33a5a",
+        "execution": "turn_completed",
+        "source": "native_turn",
+        "turn_id": "01a123c0-d0e8-7b20-ac3d-f7feba83b867",
+        "user_message_id": "01a123c0-d26e-7320-a885-7ff13264237c"
+      },
+      "execution": "turn_completed",
+      "next_reconciliation_at": "2026-10-10T03:00:06Z",
+      "prompt_sha256": "f1be769c78b4b03b9a26781fd9a5be24a48ca70ee8b046c2d85a90fd0f572534",
+      "reconciled": true,
+      "reconciliation": {
+        "checked_at": "2026-10-10T03:00:29Z",
+        "state": "resolved"
+      },
+      "state": "accepted",
+      "submission_id": "ab3c6886-0108-4c70-8145-7e70d8ad422d"
+    },
+    "next_attempt_at": "2026-10-10T02:59:59Z",
+    "predicate": {
+      "due_at": "2026-10-10T02:59:59Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 after-acceptance control. Reply exactly PLAN130_AFTER_ACCEPTANCE. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:09:59Z",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:00:00Z"
+  },
+  "matched_turn_count": 1,
+  "matched_turns": [
+    {
+      "id": "01a123c0-d0e8-7b20-ac3d-f7feba83b867",
+      "rootTurnId": "01a123c0-d0e8-7b20-ac3d-f7feba83b867",
+      "items": [
+        {
+          "type": "userMessage",
+          "id": "01a123c0-d26e-7320-a885-7ff13264237c",
+          "clientId": "01a123c0-d0df-7ce3-9c17-403831e33a5a",
+          "content": [
+            {
+              "type": "text",
+              "text": "WAKE_TRIGGER_ID=wake_20261010_030000_c100\nWAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-acceptance\nWAKE_NATIVE_SUBMISSION_ID=ab3c6886-0108-4c70-8145-7e70d8ad422d\nAuthorized Plan0130 after-acceptance control. Reply exactly PLAN130_AFTER_ACCEPTANCE. Do not edit files or message anyone.",
+              "text_elements": []
+            }
+          ]
+        },
+        {
+          "type": "agentMessage",
+          "id": "msg_05eb92d872912272016ac9aa33a90881928ae6c985d6017147",
+          "text": "PLAN130_AFTER_ACCEPTANCE",
+          "phase": "final_answer",
+          "memoryCitation": null,
+          "delivery": null,
+          "questions": null
+        }
+      ],
+      "itemsView": "full",
+      "status": "completed",
+      "error": null,
+      "startedAt": 1791601201,
+      "completedAt": 1791601204,
+      "durationMs": 2708
+    }
+  ]
+}

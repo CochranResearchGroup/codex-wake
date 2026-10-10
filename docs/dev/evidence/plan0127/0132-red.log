@@ -1,0 +1,28 @@
+test_classic_registration_requires_explicit_tmux_compatibility (test_native_migration.NativeMigrationTests.test_classic_registration_requires_explicit_tmux_compatibility) ... FAIL
+test_native_registration_uses_a_fail_closed_version_for_old_readers (test_native_migration.NativeMigrationTests.test_native_registration_uses_a_fail_closed_version_for_old_readers) ... FAIL
+
+======================================================================
+FAIL: test_classic_registration_requires_explicit_tmux_compatibility (test_native_migration.NativeMigrationTests.test_classic_registration_requires_explicit_tmux_compatibility)
+----------------------------------------------------------------------
+codex_wake.records.WakeError: TMUX_PANE is required to create a tmux-targeted wake
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-plan127/tests/test_native_migration.py", line 28, in test_classic_registration_requires_explicit_tmux_compatibility
+    with self.assertRaisesRegex(WakeError, 'legacy-tmux'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "legacy-tmux" does not match "TMUX_PANE is required to create a tmux-targeted wake"
+
+======================================================================
+FAIL: test_native_registration_uses_a_fail_closed_version_for_old_readers (test_native_migration.NativeMigrationTests.test_native_registration_uses_a_fail_closed_version_for_old_readers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-plan127/tests/test_native_migration.py", line 23, in test_native_registration_uses_a_fail_closed_version_for_old_readers
+    self.assertEqual(record['schema_version'], 4)
+AssertionError: 1 != 4
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.041s
+
+FAILED (failures=2)

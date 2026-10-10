@@ -358,7 +358,8 @@ def dispatch_firing_record(
         except WakeError:
             return DispatchResult('skipped','network time uncertain; no dispatch authorized')
     wake_id = record.get("id")
-    if record.get("schema_version") not in (2,3) or not isinstance(wake_id, str) or not wake_id:
+    native = isinstance(record.get('target'), dict) and record['target'].get('transport') == 'native'
+    if (record.get("schema_version") not in (2,3) and not native) or not isinstance(wake_id, str) or not wake_id:
         return _dispatch_firing_record_unlocked(
             root,
             found,
@@ -434,6 +435,9 @@ def _dispatch_firing_record_unlocked(
         if isinstance(predicate, dict) and predicate.get("source") == "a2a.receipt":
             return DispatchResult("skipped", "A2A receipt delivery is unqualified")
     target = record.get("target")
+    if isinstance(target, dict) and target.get('transport') == 'native':
+        from .native_delivery import dispatch_native
+        return dispatch_native(root, found, current)
     if isinstance(target, dict) and target.get("transport") == "app-server":
         from .app_server import dispatch_app_server_record
 

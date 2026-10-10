@@ -5199,3 +5199,59 @@ PR225 integrated exact main edf2aea4c5480202639bb3e94be7f16300b8efcb. Public v0.
 New owned schema3 bus was explicitly migrated from a verified schema2 snapshot and finally paused/backed up/verified. Five messages/attempts and28pending receipt-signal projections remain retained, with no dispatching/uncertain attempts. Old0.7.1 reader actually refuses schema3; prior wheel/source retained for rollback, which cannot erase later writes by blind old-snapshot restore. Dedicated owned clients were stopped and their process generations freshly verified absent; no unrelated service, shared Codex daemon, historical checkpoint or system clock changed. Original main/untracked notes and unrelated policy-rollout86f18ba/source branch preserved.
 
 Canonical proof: docs/dev/evidence/plan0122/activation/requirement-audit.md, validation.json and stable-live-exchange.json. All8 original stories mapped with deterministic/live boundaries. Remaining limits are explicit unauthenticated-NTP trust, unknown additional profiles, bounded writer serialization, fixture-only actual host suspend/reboot and unavailable healthy Windows fallback on this host. Wider Plan0101/issue181 remains separate. Memory disposition: unavailable; no reviewed Codex Wake Graphiti group. Exactly one current-goal non-write receipt: `/home/ecochran76/.local/state/codex-wake/live-demos/plan0122-20261009/memory-disposition.json`.
+
+## Turn 244 | 2026-10-09
+
+Published the user-approved Plan0127 execution contract and tickets0128–0132 locally on the prototype branch. Native evidence remains scoped to commits3619e60 and0445918; no product implementation is claimed. Required acceptance uses installed commands, exact native/tab identities, durable outcomes and real client execution. Documentation, mocks and prototypes cannot close tickets. Dependency links and plan metadata checked; original checkout's unrelated notes preserved. No runtime mutation in this planning slice. Memory disposition unavailable: no verified Codex Wake Graphiti group; the committed plan is durable provenance.
+
+
+## Turn 245 | 2026-10-10 UTC
+
+Plan0127 execution on feat/native-workflows:0128 committed1bb976b with installed systemd/native execution evidence;0129 now accepted through installed candidate new/resume/reuse/extra attachment, idle/busy/pending close controls, identity mismatch and force preservation. Full975-test suite passed102.172s,63 focused tests passed and23 affected checks passed after command-error conversion. Failed split-tab traceback and corrected refusal retained. JSON damage, unpublished signal registrations and pending mailbox work are guarded without consumption. Explicit custom buses use --bus-root. No shared daemon restart or unrelated tab change. Recovery0130 next; parent remainsOPEN and release unclaimed. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group; non-write receipt requested through graphiti-runtime.
+
+
+## Turn 246 | 2026-10-10 UTC
+
+Ticket0130 accepted: nonce/hash precede native effect; exact queue/turn evidence reconciles uncertainty without resend.978 comprehensive and56 focused tests pass. Real installed daemon interrupted before submission, after intent and after acceptance before recording. Private systemd restart safely submits pre-effect work or recovers one matching native turn. Intent-only uncertainty remains inspectable; duplicate native turns hold. Busy and notLoaded targets expire without submission; explicit same-thread resume executes headlessly without tabs. Visible-client restart preserves and displays the one native response. Two incorrect test assumptions (instant evidence visibility; tab closed implies native unavailable) retained and adjudicated against native observations. No shared daemon/host restart.0131 next; parentOPEN, candidate unreleased. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group; non-write receipt0130-memory-disposition.json.
+
+
+## Turn 247 | 2026-10-10 UTC
+
+Ticket0131 installed lifecycle PASS atc579ebe. New worker tab; native A→B assignment; A public-CLI file arm; initiating A turn completed; B slept20s, wrote42 and created condition; independent installed scheduler resumed exact A17s after prior completion; native reply and pane match. Separate missing-file guard refuses close, cancel preserves pane, ordinary close preserves conversation. Native IDs, queue nonce, durable records and result agree. Private scheduler stopped; freshMainPID0/inactive/not-found readback. No implementation change or shared runtime restart.0132 migration/retirement/release next; parentOPEN. Memory disposition unavailable: no reviewed Codex Wake target group, non-write receipt0131-memory-disposition.json.
+
+
+## Turn 248 | 2026-10-10 UTC
+
+Planning-only reconciliation requested by the operator: Plan0127 now presents
+five tickets in one dependency table and removes stale claims that no
+implementation exists. Child receipts record0128–0131 candidate acceptance;
+0132 migration, rollback, retirement and release remain open obligations.
+Execution requires actual installed behavior and criterion-level evidence;
+planning and mocked checks cannot close runtime tickets. No implementation,
+runtime action or release performed in this turn. Memory disposition
+not_durable: this correction updates the existing execution authority and adds
+no separate durable finding.
+
+
+## Turn 249 | 2026-10-10 UTC
+
+Ticket0132 migration source qualified on feat/native-workflows. Native schema4
+prevents oldreader tmux misinterpretation; metadata-only migration previews,
+backs up and preserves exact uncertain intent. Installed0.8 holds byte-identical
+state; frozen0.9 wheel submits one native wake with completed exact turn visible
+in original pane. Implicit basic tmux capture retired; explicit compatibility,
+old state, advanced signals and tracked receipt contracts retained.983 full
+installed tests pass91.152s; installed wheel-upgrade/product smoke passes.
+Malformed-state regressions and incorrect probe/deadline samples retained.
+No global install or unrelated service/shared Codex restart. Child remainsOPEN
+pending doc publication; parent release/integration/install gates remainOPEN.
+Memory disposition unavailable: no reviewed Codex Wake Graphiti group; qualified
+source outcome recorded by a non-write receipt.
+
+
+### Turn249 publication readback
+
+Source27bd7af pushed and read back as origin/feat/native-workflows. GitHub contents
+API confirms migration documentation blob4b8e602dc918ed5b8765f97876b7e41a97fbb186.
+Ticket0132 closes after all child criteria pass. Parent andP65 remainOPEN:
+normal installed rollout, hosted integration and release publication unproven.
