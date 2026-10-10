@@ -1,6 +1,6 @@
 # Runtime source contract and tracer
 
-State: OPEN
+State: CLOSED
 Lane: P51-C1
 Issue: #59
 Branch: `feat/issue-59-runtime-source-contract`
@@ -9,13 +9,11 @@ Integration: `squash`
 
 ## Current state
 
-Issue #59 is the sole ready P51 critical-path slice. The branch starts from
-canonical P51 goal-start commit
-`0a86c1ffa79e5d1b3c5ef3338f7695881a74ce99`. Existing signal adapters own
-source validation and anchors, runners own reconciliation, and the journal and
-record publisher own durable occurrence and wake publication state. This slice
-freezes the shared local-runtime contract before either process or systemd
-implementation begins.
+Reconciled 2026-10-10: issue59 is CLOSED; PR67 merged as
+2760402a2dc9818f43d9567c67c64ad51fb745d6, an ancestor of canonical main.
+P51's later P51-G1-C11 acceptance covers the completed contract and tracer.
+The former ready-slice narrative and next action below are historical; this
+plan has no remaining implementation action.
 
 ## Objective
 

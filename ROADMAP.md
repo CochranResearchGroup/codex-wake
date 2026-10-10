@@ -794,9 +794,12 @@ root remains.
 
 ## P54 | Managed GitHub Webhook Wakes
 
-State: CLOSED
+State: OPEN
 
-Current State: Issue #135 and Plan 0083 own the managed-production successor to
+Current State: Reconciled 2026-10-10: parent issue135 and C5 issue142 remain OPEN;
+C4 issue141 is CLOSED. The previous CLOSED roadmap label was premature.
+This remains a separate campaign; historical packet narratives below do not
+assert current installed/provider state. Issue #135 and Plan 0083 own the managed-production successor to
 P53. The accepted P53 route, listener, journal join, authoritative GitHub
 verification, and polling convergence are reusable foundations, but the live
 hook, secret, service, and isolated root were intentionally removed. P54 must
