@@ -41,6 +41,8 @@ class SavedRecipientBinding:
         panes = tmux_inventory(self.binding.tmux_socket, 5)
         if any(p['pane_title'] == thread.get('name') and p['pane_current_path'] == self.root for p in panes):
             raise BusError('composer_protected', 'recipient has a current or ambiguous tab')
+        if not isinstance(thread.get('status'), dict):
+            raise BusError('runtime_unavailable', 'recipient status is unqualified')
         return thread
 
     def context(self, attempt_id=None):
@@ -116,6 +118,6 @@ class SavedRecipientBinding:
                 raise BusError('queue_acceptance_unconfirmed', 'native queue did not confirm exact recipient')
             UUID(match[1])
             return dict(status='submitted', receipt_id=match[1], reason='native_queue_accepted')
-        except Exception as error:
+        except Exception:
             return dict(status='uncertain' if entered else 'unsent',
                         reason='saved_delivery_unqualified' if entered else 'pre_io_failure')

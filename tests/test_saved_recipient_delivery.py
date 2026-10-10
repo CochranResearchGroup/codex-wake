@@ -102,6 +102,13 @@ class SavedRecipientDeliveryTests(unittest.TestCase):
         self.assertFalse(self.queue_log.exists())
         self.assertEqual(self.mailbox.show(self.actors[0], identifier)['state']['notification'], 'deferred')
 
+    def test_malformed_runtime_status_holds_without_stopping_worker(self):
+        self.send(resume_missing=True)
+        self.thread['status'] = 'idle'
+        self.assertEqual(self.dispatcher.tick()['results'][0]['reason'], 'runtime_unavailable')
+        self.assertEqual(self.calls, [])
+        self.assertFalse(self.queue_log.exists())
+
     def test_default_closed_recipient_holds_without_lifecycle_or_queue(self):
         identifier = self.send()
         result = self.dispatcher.tick()['results'][0]

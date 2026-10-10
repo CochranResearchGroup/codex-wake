@@ -179,6 +179,10 @@ class MailScheduler:
                         or intent['generation'] != attempt['generation']
                         or intent['lease_until'] <= self.mailbox._time_upper(database, now)):
                     raise BusError('stale_attempt', 'original notification attempt is no longer authorized')
+                self._fence(database, Lease('dispatcher', self.owner,
+                    json.loads(attempt['evidence'])['dispatcher_generation'], 0), now)
+                self._fence(database, Lease('recipient:' + row['recipient_key'], self.owner,
+                    attempt['generation'], 0), now)
             envelope = json.loads(row['envelope'])
             database.execute('COMMIT')
             return envelope

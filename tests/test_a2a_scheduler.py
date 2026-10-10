@@ -84,6 +84,17 @@ class SchedulerTests(unittest.TestCase):
         self.assertEqual(error.exception.code, 'authorization_denied')
         self.assertEqual(self.mailbox.show(self.actors[0], identifier)['state']['notification'], 'pending')
 
+    def test_effect_context_rejects_replaced_recipient_lease_before_original_expiry(self):
+        identifier = self.send(resume_missing=True)
+        dispatcher, recipient = self.leases()
+        job = self.scheduler.jobs(dispatcher)[0]
+        claim = self.scheduler.claim(dispatcher, recipient, [job['job_id']])
+        self.scheduler.release(recipient)
+        self.assertIsNotNone(self.other.acquire('recipient:' + self.actors[1].key))
+        with self.assertRaises(BusError) as error:
+            self.scheduler.notification_context(job, attempt_id=claim['attempt_id'])
+        self.assertEqual(error.exception.code, 'stale_lease')
+
     def test_provably_unsent_backoff_and_attempt_bound(self):
         identifier = self.send()
         for count in range(3):
