@@ -42,6 +42,16 @@ This plan and issue181 remain OPEN for retained server-unloaded-recipient and
 broader held-recovery obligations. No new execution/recovery authority follows
 from repository reconciliation. See verification0123 for Git/custody cleanup.
 
+## Approved closed-conversation follow-up | 2026-10-10
+
+Operator approved reopening the exact saved conversation only when the sender
+explicitly requests it. Default hold remains. Plan0138 is the bounded successor
+for that behavior and its installed qualification; the older unconditional
+no-resume passages below are historical for the opt-in case. Native scheduled
+wake --resume-missing already exists, but agent-message integration and actual
+closed-recipient completion must be proved separately. No stale mailbox authority
+or uncertain effect may be replayed under this decision.
+
 ## Historical baseline at plan creation
 
 Baseline at plan creation: f104c2f86b37ac548ba1f798aa0d65abd8d37322. Discovery, explicit

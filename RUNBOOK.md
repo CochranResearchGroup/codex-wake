@@ -5374,3 +5374,10 @@ metadata and no-resend.49installed tests pass; failed fixture/import samples
 retained. Source/installed module parity and downloaded release hashes verified.
 Fourquiescent supervisor roots upgraded; unrelated units unchanged. FinalCI
 waiting waived by operator; original LitScout submission cause remains unknown.
+
+## 2026-10-10 — Explicit saved-conversation reopening decision
+
+Operator approved reopening the original saved conversation when explicitly
+requested by the sender; default messages continue to hold. Plan0138 sequences
+existing native closed-conversation acceptance before agent-message integration
+and one unattended request/reply. No implementation or live acceptance claimed.
