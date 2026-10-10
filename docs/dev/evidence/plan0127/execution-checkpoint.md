@@ -17,3 +17,49 @@ Source lane feat/native-workflows in codex-wake-plan127, based on integrated6b82
 ## 2026-10-10 03:27 UTC continuation
 
 0130 committedc579ebe.0131 accepted real two-agent workflow: A ended initial turn, B wrote42/condition, separate installed scheduler resumed A17sec later; exact replyvisible. Guard/cancel/close completed, Bnewthread01a123d4-e51b-70d1-bb05-6fd863df1515 conversationpreserved afterclosing@7/%9. Dedicated plan131 service stopped and confirmedMainPID0/inactive/not-found. Remaining owned panesoriginalA@0/%0 and priorworker@6/%8.0132 migration/retirement/release remaining; no global Wake installation changed. Deadline05:31:04UTC unchanged.
+
+
+## 2026-10-10 04:01 UTC continuation
+
+Migration source27bd7af and acceptance/publication4cd9279 are pushed on
+feat/native-workflows. All five child tickets accepted as candidate source;
+parent0127 andP65 remainOPEN. PR227:
+https://github.com/CochranResearchGroup/codex-wake/pull/227. Hosted CI run
+38022525575 has live3.11/3.12 jobs; inspect the current PR head/checks before
+integration and never infer terminal outcome from a wait timeout. Source remains
+based on origin/main6b822fa, last fetched this turn.
+
+Frozen wheel0.9.0 installed in private acceptance venv, now non-editable.
+983 comprehensive tests pass91.152s; installed wheel/product smoke passes;
+exact native completed turn and original pane showPLAN132_FINAL_WHEEL_EXECUTED.
+Source/wheel hashes and retained failures are under0132 evidence. Global Wake
+still0.8.0. Other project Wake services and shared Codex are unchanged.
+
+Remaining: hosted integration, release/publication, normal installed rollout,
+full objective audit and owned-fixture cleanup. Do not stop at candidate success.
+Preflight observed multiple active unrelated Wake services. Preserve their
+installations/processes during rollout; do not replace files they may lazily
+import or restart those units. The shared Wake supervisor currently uses
+/home/ecochran76/.local/bin/codex-wake; its observed MainPID21521 is live.
+Its status snapshot is in private runtime0132-existing-supervisor.json.
+No deployment choice has been executed.
+
+Owned runtime remains dedicatedsocketplan127-native, A@0/%0 exactthread
+01a123a8-5782-7d43-a214-55b293bbd65f and oldworker@6/%8 exactthread
+01a123ac-7b07-78a0-ad78-047ef1714f25. Other owned tabs were closed and
+conversations retained. No owned looping scheduler is running. The original
+no-effect after-intent control was explicitly promoted in place to schema4;
+original bytes saved under its migration/ directory. Same-root reconciliation
+remainsuncertain/unresolved no_exact_native_evidence; do not blindly resend.
+Copy controls are unregistered. Preserve records/evidence and unrelated tabs.
+
+Last goal readback:628878tokens,5578elapsedsec,active. User bound2MMtokens/3h.
+Check both get_goal elapsed and UTC; their meters differ by about2min. Stop and
+checkpoint conservatively by10500elapsedsec,1900000tokens or05:25UTC, whichever
+comes first, while leaving the goalactive if incomplete. No goal completion or
+operator pause is claimed.
+
+The active planning audit initially found only Plan0119's nonstandard Current
+State heading. Rename that heading without changing its P63 scope, milestones,
+acceptance or open obligations, then rerun. Historical baseline findings remain
+explicitly accepted/excluded by the repo audit.

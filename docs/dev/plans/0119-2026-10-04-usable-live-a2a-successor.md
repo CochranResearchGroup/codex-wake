@@ -22,7 +22,9 @@ Build and demonstrate this feature before expanding supporting infrastructure.
 A passing live behavior gate is progress; another green fixture suite is supporting
 evidence. A message admitted to SQLite is not a delivered notification.
 
-## Current reconciled state | 2026-10-05
+## Current State
+
+Reconciled acceptance snapshot: 2026-10-05.
 
 The requested remaining-gate packet is COMPLETE. Verification0122 is the current
 acceptance authority, published through PR218/main516661f: live cancellation,
