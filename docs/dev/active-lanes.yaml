@@ -147,3 +147,21 @@ lanes:
     overlaps: []
     updated_at: 2026-10-10
     disposition: Plan0138 complete; original native and closed-recipient request/reply turns completed; installed95 controls and all80package-file parity qualify active0.11.0; owned tabs/processes closed, histories and failures preserved; wider Plan0101/0119 remain OPEN.
+
+  - id: P69
+    owner: primary
+    objective: Repair message acknowledgment instructions and ordinary tab-close inspection
+    work_items: [docs/dev/plans/0139-2026-10-10-a2a-acknowledgment-and-tab-close-repair.md]
+    plan: docs/dev/plans/0139-2026-10-10-a2a-acknowledgment-and-tab-close-repair.md
+    plan_ref: fix/a2a-consumption-cleanup
+    branch: fix/a2a-consumption-cleanup
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 0700966ef529b00383183087614047e2ab4ae886
+    remote_ref: refs/remotes/origin/fix/a2a-consumption-cleanup
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-10
+    disposition: Authorized sequential repair of the two preserved Plan0138 baseline limitations; red loops and installed acceptance pending.
