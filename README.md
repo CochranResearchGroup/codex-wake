@@ -1,7 +1,7 @@
 # Codex Wake
 
-Codex Wake adds durable time/condition triggers, recovery visibility and visible
-Byobu tab lifecycle to native Codex. Native Codex owns conversations, ordinary
+Codex Wake adds durable time/condition triggers, tracked agent-to-agent exchanges,
+recovery visibility and visible Byobu tab lifecycle to native Codex. Native Codex owns conversations, ordinary
 messages, turns and task status. Use native messaging directly for an immediate
 agent exchange; use Wake when a follow-up must survive the initiating turn or
 when you explicitly need a tracked exchange.
@@ -12,6 +12,8 @@ The package provides:
 - `native reconcile` for uncertain submission and `native migrate` for earlier candidate records.
 - `sessions list|show|resolve|current|watch|open|close` for discovery and visible tab lifecycle.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
+- Tracked requests and correlated replies, work claims, completion receipts and generation-safe recovery.
+- Optional `codex-wake-mcp`: 14 tools for session discovery and authorized agent exchanges.
 - Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
 
 Native queue acceptance is separate from execution and acknowledgment. Busy or
@@ -20,6 +22,19 @@ never blindly replayed or silently sent through another transport.
 
 See [migration and capabilities](docs/dev/native-workflow-migration.md) for the
 qualified support boundary and rollback procedure.
+
+## Agent-to-agent communication
+
+Use Wake when a request needs a durable ID, an exclusive work claim, a correlated
+reply, or a follow-up after the sender's turn ends. The accepted A2A workflow
+includes unattended native request/reply, worker restart, explicit same-saved-thread
+reopening, and recovery that preserves uncertain work without replay.
+
+Start with the [agent-to-agent guide](docs/agent-to-agent.md): operator setup,
+human tab addressing, CLI and MCP request/reply, receipt meanings and limitations.
+Agents can discover the workflow through the bundled `$codex-wake` skill.
+The [MCP setup and tool reference](docs/a2a-mcp.md) exposes the same authorized
+mailbox operations; installing the server does not enroll threads or start workers.
 
 ## Requirements
 
@@ -40,7 +55,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.9.0
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.13.0
 ```
 
 Verify the installed commands:
