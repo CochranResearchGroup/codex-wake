@@ -136,10 +136,10 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 44237c19a0be8534d4fa83b80670178eb5855c46
+    checkpoint: a17b6d8dee9f55908550d75372c4076b49945b19
     remote_ref: refs/remotes/origin/feat/saved-recipient-reopening
     integration: squash_pr
     dependencies: []
     overlaps: []
     updated_at: 2026-10-10
-    disposition: Full Plan0138 goal active; native closed-recipient proof precedes agent-message integration and installed round-trip.
+    disposition: Plan0138 active; native same-saved-thread completion proved; message choice and original actor generations persisted and tested; delivery integration and installed round-trip remain open.
