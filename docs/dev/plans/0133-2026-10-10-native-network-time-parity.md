@@ -3,6 +3,9 @@
 State: OPEN
 Workflow: IN_PROGRESS
 Owner: primary agent
+Lane: P66
+Target: origin/main
+Integration: squash_pr
 Branch: feat/native-network-time
 Work-Item: docs/dev/plans/0133-2026-10-10-native-network-time-parity.md
 
