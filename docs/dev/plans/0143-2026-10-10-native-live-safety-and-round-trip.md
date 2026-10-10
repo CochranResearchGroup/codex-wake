@@ -1,7 +1,7 @@
 # Ticket0143 — Qualify normal request and reply after transport change
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -13,10 +13,12 @@ Depends-On: Plan0142
 
 ## Current State
 
-Ticket0142 integrated0076ae4 and actual single-result gate passed. Using immutable
-reviewed0.11.2-313e5aa candidate with81file parity and117installed tests.
-One owned A/B pair and private worker/bus/arm are next; root main, docs-only
-acceptance work, no new source changes or unrelated service restart.
+Installed two-agent request/reply PASS on immutable0.11.2-313e5aa. Both actual
+notification turns completed with exact message/attempt markers and terminal work
+claims. Original arm submitted; paused public reconciliation finished bookkeeping
+from the committed reply receipt with zero additional sends. Both tabs closed
+forced=false, all four owned PIDs and both panes absent. No source changes.
+Evidence: docs/dev/evidence/plan0143/installed-acceptance.md.
 
 ## What it delivers
 
@@ -28,11 +30,11 @@ Two owned agents exchange a request and correlated result without a controller r
 
 ## Acceptance criteria
 
-- [ ] Released-candidate commands, source PYTHONPATH unset: one request and one correlated reply use exact original threads, claims and terminal acknowledgments; both native turns complete.
-- [ ] Original sender receipt arm causes automatic return after its initiating turn ends; no controller reply, post-send prompt or foreground inbox poll.
-- [ ] Focused installed guards cover busy/draft/approval/identity/cancel/expiry/uncertain behavior; pending work remains held, terminal work permits ordinary close.
-- [ ] Use accepted restart/reconnect evidence when source/config/freshness still qualify it; otherwise run only the invalidated owned-worker control.
-- [ ] Freeze source/version, IDs and bounds before the sample; preserve failed receipts and close owned tabs/processes after fresh OS readback.
+- [x] Released-candidate commands, source PYTHONPATH unset: one request and one correlated reply use exact original threads, claims and terminal acknowledgments; both native turns complete.
+- [x] Original sender receipt arm causes automatic return after its initiating turn ends; no controller reply, post-send prompt or foreground inbox poll.
+- [x] Focused installed guards cover busy/draft/approval/identity/cancel/expiry/uncertain behavior; pending work remains held, terminal work permits ordinary close.
+- [x] Use accepted restart/reconnect evidence when source/config/freshness still qualify it; otherwise run only the invalidated owned-worker control.
+- [x] Freeze source/version, IDs and bounds before the sample; preserve failed receipts and close owned tabs/processes after fresh OS readback.
 
 ## Test seam and bound
 

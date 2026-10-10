@@ -1,7 +1,7 @@
 # Ticket0144 — Ship and activate qualified native live submission
 
-State: PLANNED
-Workflow: BLOCKED
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
