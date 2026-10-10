@@ -81,3 +81,22 @@ lanes:
     disposition: Paused at published4bc4718; checkout closed during 2026-10-10 reconciliation. Unmerged transport code retains review/CI and installed acceptance gates; no acceptance inferred from archival.
     prior_integration_receipt: 9e17dd79fe775154e9460ea255a5c1ad187e1ec5
     prior_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/222
+
+  - id: P66
+    owner: primary
+    objective: Qualify native network-time arming, recovery and installed acceptance
+    work_items: [docs/dev/plans/0133-2026-10-10-native-network-time-parity.md]
+    plan: docs/dev/plans/0133-2026-10-10-native-network-time-parity.md
+    plan_ref: feat/native-network-time
+    branch: feat/native-network-time
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 58902ef6fab39f7c8e794509dc422a624c56418d
+    remote_ref: refs/remotes/origin/feat/native-network-time
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-10
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/230
+    disposition: Source arming/recovery qualifies993 isolated tests; exact hosted gates pending; installed ticket0136 remains blocked. Branch-local plan owns execution detail.
