@@ -355,11 +355,38 @@ class Mailbox:
             return self._row(database, row['message_id'])
         return row
 
+    def _processing_claim(self, database, row):
+        namespace, thread_id = json.loads(row['recipient_key'])
+        current = database.execute('SELECT generation,revoked FROM actors WHERE namespace=? AND thread_id=?',
+                                   (namespace, thread_id)).fetchone()
+        generation = current['generation'] if current else None
+        if row['claim_receipt']:
+            state = 'already_claimed' if current and not current['revoked'] and generation == row['claim_generation'] else 'held_for_original_claim'
+        else:
+            state = 'unclaimed'
+        terminal_outcome = None
+        if row['terminal_receipt']:
+            terminal = database.execute('SELECT * FROM mail_receipts WHERE receipt_id=?',
+                                        (row['terminal_receipt'],)).fetchone()
+            if (terminal and terminal['message_id'] == row['message_id']
+                    and terminal['actor_key'] == row['recipient_key']
+                    and terminal['kind'] == row['recipient'] and terminal['kind'] in TERMINAL
+                    and (not row['claim_receipt'] or
+                         json.loads(terminal['details']).get('generation') == row['claim_generation'])):
+                state = 'known_terminal'
+                terminal_outcome = terminal['kind']
+            else:
+                state = 'held_for_exact_evidence'
+        return dict(state=state, claim_receipt_id=row['claim_receipt'], owner_generation=row['claim_generation'],
+                    current_generation=generation, terminal_receipt_id=row['terminal_receipt'],
+                    terminal_outcome=terminal_outcome)
+
     def _projection(self, database, row):
         value = json.loads(row['envelope'])
         if self._legacy_recovery(database, row):
             value['recovery'] = dict(epoch=self.bus.meta(database, 'recovery_epoch'),
                                      legacy=True, disposition='retain-unknown', gap_unknown=True)
+        value['processing_claim'] = self._processing_claim(database, row)
         value['recipient_sequence'] = row['recipient_seq']
         value['state'] = dict(admission=row['admission'], notification=row['notification'], recipient=row['recipient'])
         value['received_receipt_id'] = row['read_receipt']
@@ -528,7 +555,7 @@ class Mailbox:
             raise BusError('invalid_argument', 'evidence must be a bounded pointer')
         if row['recipient'] == outcome or (outcome == 'accepted' and row['claim_receipt']):
             if row['claim_receipt'] and row['claim_generation'] != actor.generation:
-                raise BusError('claim_fenced', 'claim generation requires explicit recovery')
+                raise BusError('claim_fenced', 'original generation owns this claim; messages reconcile observes it without takeover or replay')
             receipt = row['claim_receipt'] if outcome == 'accepted' else row['terminal_receipt']
             prior = database.execute('SELECT details FROM mail_receipts WHERE receipt_id=?', (receipt,)).fetchone()
             if prior and json.loads(prior['details']).get('evidence') != evidence:
@@ -543,7 +570,7 @@ class Mailbox:
         if outcome in ('completed', 'failed') and not row['claim_receipt']:
             raise BusError('claim_required', 'terminal processing outcome requires an accepted work claim')
         if row['claim_receipt'] and row['claim_generation'] != actor.generation:
-            raise BusError('claim_fenced', 'claim generation requires explicit recovery')
+            raise BusError('claim_fenced', 'original generation owns this claim; messages reconcile observes it without takeover or replay')
         receipt = self._record(database, row['message_id'], outcome, actor.key, now, dict(evidence=evidence, generation=actor.generation))
         if outcome == 'accepted':
             database.execute('UPDATE mail_state SET recipient=?,claim_receipt=?,claim_generation=? WHERE message_id=?',
@@ -664,6 +691,34 @@ class Mailbox:
                       for row in candidates if json.loads(row['envelope'])['in_reply_to'] == identifier]
             database.execute('COMMIT')
             return values
+
+    def _reconciliation(self, database, row):
+        message = self._projection(database, row)
+        return dict(message=message,
+                    reconciliation='held_for_exact_evidence' if row['notification'] == 'uncertain' else 'no_uncertain_effect',
+                    processing_reconciliation=message['processing_claim'], grants_new_processing=False,
+                    time_status='not_observed')
+
+    def reconcile(self, actor, identifier):
+        """Inspect exact committed evidence without granting or restarting work."""
+        with self.transaction(actor) as database:
+            row = self._row(database, identifier)
+            self._participant(row, actor)
+            value = self._reconciliation(database, row)
+            database.execute('ROLLBACK')
+            return value
+
+    def operator_reconcile(self, capability, identifier):
+        with self.transaction() as database:
+            self.bus.operator(database, capability)
+            row = self._row(database, identifier)
+            receipt = self.bus.event(database, 'operator', 'message_reconciled',
+                                     dict(message_id=identifier, body_requested=False,
+                                          time_status='not_observed', reconciliation=True))
+            value = self._reconciliation(database, row)
+            value['receipt_id'] = receipt
+            database.execute('COMMIT')
+            return value
 
     def operator_inspect(self, capability, identifier, *, body=False):
         with self.transaction() as database:

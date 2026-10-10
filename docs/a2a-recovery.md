@@ -38,3 +38,17 @@ schema3 or delete history. Keep the qualified0.12 reader available for inspectio
 Source/installed proof is in docs/dev/evidence/plan0146/. Production recovery or
 release requires exact store-specific authorization; qualification used disposable
 stores, fixed role-fixture time and zero transports, not UTC validation.
+
+## Processing claims across actor generations
+
+`codex-wake messages reconcile MESSAGE_ID --capability CAP --json` observes
+committed metadata without acquiring mailbox time, changing expiry, reading the
+body or granting another start. Processing reconciliation is separate from
+notification uncertainty: `unclaimed`, `already_claimed`,
+`held_for_original_claim`, or `known_terminal` backed by the exact recipient
+receipt. A mismatched terminal pointer stays `held_for_exact_evidence`.
+Original claim receipt/generation and current recipient generation are returned.
+Rotation never transfers an accepted claim; a new generation cannot acknowledge
+or complete the original work. Reconnecting alone does not create a new claim.
+Operator reconciliation uses `--as-operator --operator-capability CAP` and commits
+a bus audit receipt, with mailbox time explicitly `not_observed`.

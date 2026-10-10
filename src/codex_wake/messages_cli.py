@@ -140,9 +140,7 @@ def messages_command(args):
         if getattr(args, 'as_operator', False):
             if args.operator_capability is None:
                 raise BusError('authorization_denied', 'explicit operator capability is required')
-            value = mailbox.operator_inspect(args.operator_capability, args.message_id, body=verb == 'read')
-            if verb == 'reconcile':
-                value['reconciliation'] = 'held_for_exact_evidence' if value['message']['state']['notification'] == 'uncertain' else 'no_uncertain_effect'
+            value = mailbox.operator_reconcile(args.operator_capability, args.message_id) if verb == 'reconcile' else mailbox.operator_inspect(args.operator_capability, args.message_id, body=verb == 'read')
             result(value)
             return 0
         capability = args.capability or (Path(os.environ['CODEX_WAKE_A2A_CAPABILITY']) if os.environ.get('CODEX_WAKE_A2A_CAPABILITY') else None)
@@ -178,8 +176,7 @@ def messages_command(args):
         elif verb in ('wait','watch'):
             return observe_receipts(mailbox, actor, args)
         else:
-            value = dict(message=mailbox.show(actor, args.message_id))
-            value['reconciliation'] = 'held_for_exact_evidence' if value['message']['state']['notification'] == 'uncertain' else 'no_uncertain_effect'
+            value = mailbox.reconcile(actor, args.message_id)
         result(value)
         return 0
     except SelectionError as exc:
