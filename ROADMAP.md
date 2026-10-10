@@ -1095,3 +1095,11 @@ Parent design: [Plan0122](docs/dev/plans/0122-2026-10-08-network-first-time-prov
 4. [Plan0126: Wake acceptance](docs/dev/plans/0126-2026-10-08-time-provider-wake-acceptance.md) — DONE; isolated installed workflow, review and release/rollback evidence.
 
 After 0123, fallback and mailbox tracks are technically independent; the single-owner lane executes them serially. Acceptance is serialized after both. No source ticket implies live activation or historical clock root-cause proof.
+
+## P65 | Native Codex Delivery and Wake Lifecycle
+
+State: PLANNED
+
+Current State: User approved the native/Wake product boundary, five-ticket breakdown and installed-behavior validation seams. No implementation ticket has passed yet. Interactive and unattended prototype evidence qualifies only the named idle-recipient cases.
+
+Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 define native durable delivery, Byobu lifecycle, interruption recovery, complete lifecycle acceptance and qualified legacy retirement. The plan's dependency frontier and no-implementation-theater contract govern execution. This branch-local projection is not yet integrated into the default branch.
