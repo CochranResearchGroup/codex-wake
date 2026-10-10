@@ -29,7 +29,7 @@ def empty_composer(text):
         return False
     legacy = len(tail) == 3 and ' · ' in tail[1] and '? for shortcuts' in tail[2]
     current = len(tail) == 2 and re.fullmatch(
-        r'GPT-[\w.-]+ (?:low|medium|high|xhigh|max|ultra) · .+ · .+', tail[1]) is not None
+        r'GPT-[\w.-]+ (?:default|low|medium|high|xhigh|max|ultra) · .+ · .+', tail[1]) is not None
     return legacy or current
 
 

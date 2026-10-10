@@ -96,6 +96,14 @@ class TmuxDeliveryTests(unittest.TestCase):
         self.assertFalse(empty_composer(current.replace('GPT-6.1-Sol low', 'unknown UI')))
         self.assertFalse(empty_composer(current+'wrapped draft continuation\n'))
 
+    def test_stock_0162_default_effort_footer_preserves_empty_vs_draft(self):
+        current = ('› Ask Codex to do anything\n\n'
+            'GPT-6.1-Sol default · ~/workspace.local/codex-wake · p68-message-sender '
+            '· ← for agents   ⚠ 1 warning · f2 to view\n')
+        self.assertTrue(empty_composer(current))
+        self.assertFalse(empty_composer(current.replace('Ask Codex to do anything', 'human draft')))
+        self.assertFalse(empty_composer(current+'wrapped draft continuation\n'))
+
 
 class WorkerClockHoldTests(unittest.TestCase):
     def test_worker_holds_zero_effect_clock_error_without_changing_guard(self):
