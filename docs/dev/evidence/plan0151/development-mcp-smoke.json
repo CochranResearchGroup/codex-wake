@@ -1,0 +1,77 @@
+{
+  "status": "PASS",
+  "tools": [
+    "wake_sessions_list",
+    "wake_sessions_resolve",
+    "wake_sessions_show",
+    "wake_sessions_current",
+    "wake_messages_send",
+    "wake_messages_inbox",
+    "wake_messages_outbox",
+    "wake_messages_show",
+    "wake_messages_read",
+    "wake_messages_ack",
+    "wake_messages_reply",
+    "wake_messages_reconcile",
+    "wake_messages_cancel",
+    "wake_messages_arm_reply"
+  ],
+  "calls": [
+    {
+      "tool": "wake_sessions_current",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_send",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_send",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_read",
+      "is_error": true,
+      "shared_connection_child_claim": true
+    },
+    {
+      "tool": "wake_messages_read",
+      "is_error": true
+    },
+    {
+      "tool": "wake_messages_read",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_ack",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_ack",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_reply",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_read",
+      "is_error": false
+    },
+    {
+      "tool": "wake_messages_reconcile",
+      "is_error": false
+    }
+  ],
+  "elapsed_seconds": 5.59790517098736,
+  "runtime_methods": [
+    "initialize",
+    "initialized",
+    "thread/loaded/list",
+    "thread/read"
+  ],
+  "owned_fixture_removed": true,
+  "children_after": 0,
+  "native_turns": 0,
+  "notifications": 0
+}

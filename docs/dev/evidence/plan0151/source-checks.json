@@ -1,0 +1,30 @@
+{
+  "focused": {
+    "selection": [
+      "test_a2a_mcp",
+      "test_a2a_mailbox",
+      "test_claim_reconciliation"
+    ],
+    "tests": 27,
+    "seconds": 5.636,
+    "status": "PASS"
+  },
+  "proof_boundaries": {
+    "fixture_runtime": true,
+    "native_turns": 0,
+    "notifications": 0,
+    "SDK": "2.2.0"
+  },
+  "first_failures": [
+    "MCP entrypoint absent: red discovery test",
+    "SDK client uses snake_case annotation/schema attributes: harness corrected",
+    "Legacy show/inbox/outbox expire metadata: annotations corrected with red/green check",
+    "Smoke terminal projection field assumptions corrected to processing_reconciliation.state"
+  ],
+  "host_context": {
+    "current_native_shell_thread_claim": true,
+    "governance_MCP_startup_thread_env": false,
+    "source": "https://github.com/openai/codex/issues/19937",
+    "claim_is_attestation": false
+  }
+}

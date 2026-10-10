@@ -5426,3 +5426,14 @@ Root main read back; guard/regression pass and all21 existing policy bodies
 byte-identical to pre-change source. Terminal documentation closes Plan0150
 and issue237 from its integration. No hosted CI pass or host-token saving
 claimed. Memory disposition unavailable; non-write receipt preserved.
+
+## Turn 261 | 2026-10-10 UTC
+
+Plan0151/issue240 adds an optional official-SDK A2A MCP facade and public
+workflow/tool guides; skill trigger now advertises tracked exchanges. One private
+fixture exchange validates stdio discovery, original receipts, dedup and wrong
+capability/shared-connection child-claim refusal with no turns/notifications.
+Native MCP startup lacks CODEX_THREAD_ID; each message/current tool requires the
+actual native-shell caller claim and preserves fixed capability/root checks.
+Claim is not attestation. Existing A2A domain/schema unchanged. Package/install
+and release remain next; gov_policy evaluation deferred by operator.

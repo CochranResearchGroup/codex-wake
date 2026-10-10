@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codex-wake"
-version = "0.12.0"
-description = "Durable native Codex follow-ups and visible session lifecycle"
+version = "0.13.0"
+description = "Durable Codex follow-ups, tracked agent exchanges and MCP tools"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -22,6 +22,10 @@ codex-wake = "codex_wake.cli:main"
 codex-waked = "codex_wake.daemon:main"
 codex-wake-hook = "codex_wake.hook:main"
 codex-wake-github-webhook = "codex_wake.webhook_listener:main"
+codex-wake-mcp = "codex_wake.mcp_server:main"
+
+[project.optional-dependencies]
+mcp = ["mcp>=2.2,<2.3", "jsonschema>=4.26,<5"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
