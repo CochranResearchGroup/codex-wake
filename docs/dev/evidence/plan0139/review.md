@@ -43,7 +43,8 @@ These are focused checks, not a comprehensive suite or hosted-CI claim.
 Installed live consumption and separate terminal-inbox ordinary closure PASS;
 original uncertain notification remains held, and its ordinary close correctly
 refused. See installed-acceptance.md for exact IDs and distinct cleanup.
-Release/source/installed identities and integration remain open.
+Release/source/installed parity verified across81files; PR233 merged and
+v0.11.1 activated with unchanged13service snapshots. See closeout.md.
 No old Plan0138 records were completed, resent or edited. Wider Plan0101/0119 stay
 OPEN. No remaining accepted blocking source finding after P69-S1 remediation.
 

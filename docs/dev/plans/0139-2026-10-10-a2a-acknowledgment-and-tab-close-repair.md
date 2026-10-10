@@ -1,7 +1,7 @@
 # Plan0139 — Repair message acknowledgment and ordinary test-tab closure
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: COMPLETE
 Owner: primary
 Lane: P69
 Branch: fix/a2a-consumption-cleanup
@@ -48,3 +48,13 @@ on the same bus, without notification delivery, to prove the repaired receipt
 inventory and no-force close. This control does not qualify the original uncertain
 delivery. Cleanup of the original owned tab may explicitly use force after native
 completion and preserving the hold receipt. No transport repair is added here.
+
+## Closeout
+
+U1/U2/U3 COMPLETE; exact evidence docs/dev/evidence/plan0139/closeout.md.
+PR233 merged source2e87f664dea6ef3bdc7b37d004f60f8748638af0;
+v0.11.1 released and activated after81-file parity and107installed tests.
+Original notification uncertainty remains held, with separate U2 no-force control
+qualified. This is a retained transport limitation, not an unresolved repair gate.
+Both owned tabs closed, private worker stopped, clean published checkout closed.
+Broader Plan0101/0119 remain OPEN; root main; no unrelated restart.

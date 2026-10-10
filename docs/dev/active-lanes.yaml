@@ -153,15 +153,19 @@ lanes:
     objective: Repair message acknowledgment instructions and ordinary tab-close inspection
     work_items: [docs/dev/plans/0139-2026-10-10-a2a-acknowledgment-and-tab-close-repair.md]
     plan: docs/dev/plans/0139-2026-10-10-a2a-acknowledgment-and-tab-close-repair.md
-    plan_ref: fix/a2a-consumption-cleanup
+    plan_ref: origin/main
     branch: fix/a2a-consumption-cleanup
     target: origin/main
-    plan_state: OPEN
-    custody_state: INTEGRATION_READY
-    checkpoint: 2679baa
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 2679baa7373e841703a2140932ddc13e5dbc5e1a
     remote_ref: refs/remotes/origin/fix/a2a-consumption-cleanup
     integration: squash_pr
+    integration_receipt: 2e87f664dea6ef3bdc7b37d004f60f8748638af0
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/233
+    release_tag: v0.11.1
+    checkout_required: false
     dependencies: []
     overlaps: []
     updated_at: 2026-10-10
-    disposition: Two repairs qualified by installed107 tests, actual result claim/completion and separate no-force inbox-tab closure; original notification uncertainty preserved and held. Serial review resolved1finding; published source2679baa ready for squash integration.
+    disposition: Plan0139 complete; installed107 controls, actual claim/completion and separate no-force terminal-inbox closure PASS; original transport uncertainty remains held. PR233 merged, v0.11.1 active with81file parity; owned tabs/processes and clean worktree closed; wider Plan0101/0119 OPEN.
