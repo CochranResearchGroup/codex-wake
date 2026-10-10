@@ -207,7 +207,7 @@ lanes:
     overlaps: [P63]
     reconciled_overlaps: [P63]
     updated_at: 2026-10-10
-    disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. Goal executing: tickets0142-0146 DONE, active0.11.2; prepared0.12 source; ticket0147 claim reconciliation active. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
+    disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. Goal executing: tickets0142-0147 DONE, active0.11.2; prepared0.12 source; ticket0148 finite acceptance matrix next. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
 
   - id: P72
     owner: primary
@@ -265,14 +265,14 @@ lanes:
     plan_ref: origin/main
     branch: fix/claim-reconciliation
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 2acab101fc433ca1d4d5908a26ef4fa1e22a596b
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 8c5ea4cd26470520ad00a0ebc50f00556d298c53
     remote_ref: refs/remotes/origin/fix/claim-reconciliation
     integration: squash_pr
-    checkout_required: true
+    checkout_required: false
     dependencies: [P71, P73]
     overlaps: [P71]
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
-    disposition: Ticket0147 frozen observation-only claim recovery; public unknown/terminal generation regression next, no takeover or business replay.
+    disposition: Ticket0147 DONE; PR236 integrated85d9f73bfe184361c45361e64ac3b825f48c4fea; installed native-context proof and57 controls PASS; owned clean checkout closed, published source ref retained.

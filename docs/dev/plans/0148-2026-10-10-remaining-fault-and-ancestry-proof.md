@@ -1,7 +1,7 @@
 # Ticket0148 — Finish remaining fault and session-isolation proof
 
 State: PLANNED
-Workflow: BLOCKED
+Workflow: READY
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream

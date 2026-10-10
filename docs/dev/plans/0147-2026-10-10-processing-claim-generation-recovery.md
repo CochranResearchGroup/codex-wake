@@ -1,7 +1,7 @@
 # Ticket0147 — Recover processing ownership across generations
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P74
 Branch: fix/claim-reconciliation
@@ -21,10 +21,10 @@ After a worker generation ends, the same recipient can determine whether work is
 
 ## Acceptance criteria
 
-- [ ] Public mailbox/worker regression freezes accepted claim, generation change and terminal/unknown cases; stale actors cannot release, steal or complete a claim.
-- [ ] New generation observes prior acceptance and completion receipts; explicit recovery/reconciliation handles orphaned ownership without granting extra task rights.
-- [ ] An already-owned claim never grants permission to start again merely because read or notification is repeated; uncertain prior processing remains held.
-- [ ] Installed fresh-process control proves same-thread attribution, fencing and cleanup; no old live message is manually completed or replayed.
+- [x] Public mailbox/worker regression freezes accepted claim, generation change and terminal/unknown cases; stale actors cannot release, steal or complete a claim.
+- [x] New generation observes prior acceptance and completion receipts; explicit recovery/reconciliation handles orphaned ownership without granting extra task rights.
+- [x] An already-owned claim never grants permission to start again merely because read or notification is repeated; uncertain prior processing remains held.
+- [x] Installed fresh-process control proves same-thread attribution, fencing and cleanup; no old live message is manually completed or replayed.
 
 ## Test seam and bound
 
@@ -68,3 +68,10 @@ READY means refined and unblocked, not implemented. DONE requires all acceptance
 checks, attributable source/evidence, integration or explicit non-code completion,
 and owned cleanup. BLOCKED records a missing dependency/evidence, not approval
 inferred from elapsed time. Planning alone does not satisfy a behavior criterion.
+
+## Closeout
+
+PR236 integrated85d9f73; installed candidate/source82-file parity, actual native
+context and57 installed controls PASS. Source-checkpoint/review record exact proof.
+Owned clean checkout closed without force; published8c5ea4c ref retained. No test
+tab created or old wake replayed. Wider0148/0149 remain mandatory.
