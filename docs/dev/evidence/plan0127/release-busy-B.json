@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"schemaVersion\":1,\"thread\":{\"id\":\"01a12403-13f4-7e83-9a6e-9a9cf05c8b3d\",\"kind\":\"codex\",\"title\":\"plan127-release-worker\",\"preview\":\"Sleep20 seconds using exec; compute6*7; write42 to /tmp/codex-wake-plan127-release-2g_hgep2/result.txt; then touch /tmp/codex-wake-plan127-release-2g_hgep2/ready; finish PLAN127_RELEASE_WORKER_DONE. Private fixture only.\",\"status\":{\"type\":\"active\",\"activeFlags\":[]},\"cwd\":\"/home/ecochran76/workspace.local/codex-wake-plan127\",\"createdAt\":1791605543,\"updatedAt\":1791605913},\"page\":{\"order\":\"newest_first\",\"limit\":1,\"hasMore\":true,\"nextCursor\":\"{\\\"requestedThreadId\\\":\\\"01a12403-13f4-7e83-9a6e-9a9cf05c8b3d\\\",\\\"rolloutOrdinal\\\":45,\\\"includeAnchor\\\":false,\\\"scope\\\":{\\\"kind\\\":\\\"turns\\\"}}\"},\"turns\":[{\"id\":\"01a12408-a919-78b0-835e-0e4582506865\",\"status\":\"inProgress\",\"error\":null,\"startedAt\":1791605909,\"completedAt\":null,\"durationMs\":null,\"items\":[{\"type\":\"functionCallOutput\",\"id\":\"fco_01a12408-a91d-7623-af84-925e2f2fb187\",\"name\":\"send_message_to_thread\",\"namespace\":\"codex_tui\",\"codexDelegation\":{\"sourceThreadId\":\"01a1088e-8652-74d3-a3d4-784fc561feea\",\"input\":\"Authorized close-guard fixture only: run sleep 15, then finish PLAN127_RELEASE_BUSY_DONE. Do not write files or send messages.\"}}]}]}"
+    }
+  ],
+  "isError": false
+}

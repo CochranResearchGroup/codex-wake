@@ -12,7 +12,9 @@ Tickets 0128–0132 are CLOSED with installed candidate acceptance receipts in
 Source is integrated as canonical `0a05c66` via PR227 with both hosted release
 gates passing. Normal global0.9 lifecycle acceptance passes with retained failed
 samples. Release audit found native intent accounting and reader advertisement
-defects; bounded repairs are in progress. Release publication remains unproven. Continuation
+defects; source dc235a9 and normal immutable installation resolve both with
+983 installed tests and exact native execution proof. PR228 hosted integration,
+release publication and final audit remain required. Continuation
 custody is `release/native-workflows-closeout`. Migration, qualified retirement,
 rollback and release remain required before this parent can close. Repository
 plans are the tickets; no remote tracker issues are created.

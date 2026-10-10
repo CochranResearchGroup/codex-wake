@@ -40,7 +40,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.8.0
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.9.0
 ```
 
 Verify the installed commands:
@@ -149,6 +149,9 @@ Codex may require a one-time `/hooks` review before a new repo-local hook runs. 
 
 Choose the exact thread UUID returned by `sessions resolve` or `sessions open`.
 Tab names and numbers are discovery conveniences; durable work targets a thread.
+For session selectors use `thread:UUID`, `19:wake`, `tab:wake`, `pane:%N` or
+`window:@N` (decimal IDs from discovery). Qualify the tmux session when names/numbers are ambiguous. Native
+scheduling and `open --resume` take the UUID without the `thread:` prefix.
 
 ```bash
 codex-wake sessions resolve '19:wake' --json
@@ -158,7 +161,7 @@ codex-wake native after THREAD_UUID 45m -- "Inspect the migration log and contin
 codex-wake native file --ttl 2h THREAD_UUID /absolute/project/.codex/events/tests.done -- "Read the test result."
 codex-wake native at --resume-missing THREAD_UUID "2026-10-12T17:30:00-05:00" -- "Inspect release readiness."
 codex-wake native reconcile WAKE_ID
-codex-wake sessions close THREAD_UUID
+codex-wake sessions close thread:THREAD_UUID
 ```
 
 New versus resume is explicit. An existing exact attachment is reused unless
@@ -167,7 +170,7 @@ pending work. `--force` preserves conversations and durable work and reports
 what is affected; cancellation and archival are separate commands. Supply
 `--bus-root` for custom mailbox stores when checking close safety.
 
-A running scheduler must own the chosen root for unattended execution. Native
+A running Wake0.9 scheduler must own the chosen root for native execution. Native
 registration does not start a scheduler. End the initiating turn after arming
 its follow-up; a foreground wait is not a suspension proof.
 

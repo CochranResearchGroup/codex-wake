@@ -95,3 +95,31 @@ Last goal readback656277tokens/6014elapsedsec,active; refresh on continuation.
 Stop before10500elapsedsec or1900000tokens, and always before user2MM/3h bound.
 UTC alone is insufficient because the elapsed meter now differs by several
 minutes. No pause, block or completion is claimed.
+
+## 2026-10-10 04:47 UTC release repair checkpoint
+
+Global0.9 activation and normal two-agent lifecycle are qualified; owned visible
+clients/server are closed with fresh process readback and retained history.
+release-installed-acceptance.md records successful and failed samples separately.
+Audit repairs dc235a9 count native submission intents once and advertise reader
+schemas1–4.983 frozen installed tests pass126.407s; product smoke passes.
+PR228 is open on release/native-workflows-closeout; re-read exact head/checks.
+
+Active immutable prefix: /home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified.
+Four normal user links point there; only Wake-supervisor restarted, MainPID56947.
+Eleven other units and153 older module files are unchanged. Registry bytes remain
+unchanged. release-final-deployment.json preserves prior link targets. Older
+project workers remain on retained packages; no shared Codex/host restart occurred.
+
+Normal registered-root wake wake_20261010_044527_43a6 accepted with attempts1,
+queue01a12421-6234-71f0-a34f-68849237b845. Exact original A thread completed
+turn01a12421-623a-7293-b0f2-64685fc903c6 and repliedPLAN127_NATIVE_COUNTER_CONFIRMED.
+Archive is the directory named archive, not archived; show excludes archived
+records. Retained failed probes had no native replay. Normal pending/firing0.
+Private recovery-after-intent uncertainty is preserved/unregistered; never
+blindly resend it. No owned looping fixture scheduler/client remains.
+
+Next: commit/push installed evidence, verify exact-head PR228 hosted gates,
+integrate, publish v0.9.0 with qualified wheel/sdist, and audit every parent/child
+requirement before closing Plan0127/P65. Goal remains active. Refresh usage/time;
+stop/checkpoint before10500elapsedsec,1900000tokens or05:25UTC, whichever first.

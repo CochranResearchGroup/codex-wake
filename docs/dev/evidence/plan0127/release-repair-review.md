@@ -14,8 +14,10 @@ Repo-local tickets remain the work-item authority; no remote issue is required.
   Advertise the package's shared read-version contract, without implying every
   trigger/transport has native replacement parity.
 
-Both fixes are source-qualified below. Installed supervisor readback and new
-normal-root dispatch remain required before the findings close.
+Both findings are resolved: release-final-deployment.json reports schemas1–4
+from new supervisorPID56947; release-counter-record/native.json prove one intent,
+exact payload and completed normal-root native execution. Historical counters
+remain unchanged. Source integration and publication remain parent gates.
 
 ## Standards
 

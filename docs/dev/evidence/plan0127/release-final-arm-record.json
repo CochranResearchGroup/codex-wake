@@ -1,0 +1,56 @@
+{
+  "ack_timeout_seconds": 30,
+  "attempts": 0,
+  "created_at": "2026-10-10T04:15:57Z",
+  "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+  "events": [
+    {
+      "at": "2026-10-10T04:15:57Z",
+      "message": "Wake record created",
+      "type": "created"
+    },
+    {
+      "at": "2026-10-10T04:16:15Z",
+      "message": "file_exists path /tmp/codex-wake-plan127-release-final-07la71_a/ready matched",
+      "type": "predicate_matched"
+    },
+    {
+      "at": "2026-10-10T04:16:15Z",
+      "message": "native queue submission started",
+      "type": "native_submission_started"
+    },
+    {
+      "at": "2026-10-10T04:16:15Z",
+      "message": "native queue accepted; execution not yet observed",
+      "type": "native_accepted"
+    }
+  ],
+  "id": "wake_20261010_041557_70f4",
+  "max_attempts": 3,
+  "native_delivery": {
+    "accepted_at": "2026-10-10T04:16:15Z",
+    "acknowledgment": "not_observed",
+    "execution": "not_observed",
+    "prompt_sha256": "50d18c6bf78e95a9f5ec0758dcdb3f6987db72217d397777027035d83f41be51",
+    "queue_id": "01a12406-9c06-79d0-8a57-e886aad3b5e1",
+    "state": "accepted",
+    "submission_id": "670ae0f2-d78f-4682-b2f4-5a1568096bef"
+  },
+  "next_attempt_at": "2026-10-10T04:15:57Z",
+  "predicate": {
+    "path": "/tmp/codex-wake-plan127-release-final-07la71_a/ready",
+    "type": "file_exists"
+  },
+  "prompt": "Read /tmp/codex-wake-plan127-release-final-07la71_a/result.txt; reply exactly PLAN127_RELEASE_RESUMED_42.",
+  "schema_version": 4,
+  "status": "submitted",
+  "target": {
+    "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+    "endpoint": "unix://",
+    "expires_at": "2026-10-10T04:20:57Z",
+    "resume_policy": "hold",
+    "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+    "transport": "native"
+  },
+  "updated_at": "2026-10-10T04:16:15Z"
+}

@@ -1,0 +1,125 @@
+{
+  "source_code_commit": "dc235a9f6310621427f743056eaefddeffc9358a",
+  "comprehensive": {
+    "tests": 983,
+    "seconds": 126.407,
+    "exit_code": 0,
+    "tier": "comprehensive",
+    "selection": "all tests under tests",
+    "retries": 0,
+    "exclusions": [],
+    "environment": "Python3.12.13; installed non-editable0.9.0 wheel; no PYTHONPATH",
+    "log_sha256": "9a78f01e96bd725917b30939f3088e8d80aad55e978213a555c2f38937dca33e",
+    "log": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-qualified-installed-tests.log"
+  },
+  "installed_product_smoke": {
+    "artifact_dir": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-qualified-product-smoke",
+    "checks": {
+      "live_codex_app_server": {
+        "reason": "--live-codex-thread-id was not provided",
+        "status": "skipped"
+      },
+      "live_monitor": {
+        "reason": "--expect-monitor-ready was not provided",
+        "status": "skipped"
+      },
+      "live_openclaw_gateway": {
+        "reason": "--live-openclaw-agent and --live-openclaw-session-key were not provided",
+        "status": "skipped"
+      },
+      "surface": {
+        "cli_version": "0.9.0",
+        "github_fixture_lifecycle": {
+          "readiness": {
+            "checkpoint": {
+              "present": true,
+              "status": "ready"
+            },
+            "configuration": {
+              "enabled": true,
+              "status": "ready"
+            },
+            "credential_capability": {
+              "status": "ready"
+            },
+            "disabled": false,
+            "health": {
+              "degraded": false,
+              "status": "ready"
+            },
+            "health_code": "",
+            "observed_at": "2026-09-14T18:00:00+00:00",
+            "replay_lag": {
+              "seconds": 0,
+              "status": "ready"
+            },
+            "retry_at": null,
+            "status": "ready",
+            "terminal_failure": {
+              "code": "",
+              "status": "not_present"
+            },
+            "unsupported": false
+          },
+          "receipts": 1,
+          "source": "github",
+          "status": "matched"
+        },
+        "isolated_state": true,
+        "monitor_ready": false,
+        "product_readiness_overall": "blocked",
+        "runtime_fixture_lifecycle": {
+          "cleanup_deleted": 2,
+          "dispatch_attempted": false,
+          "sources": [
+            "process.exit",
+            "systemd.unit"
+          ],
+          "status": "matched",
+          "wake_ids": [
+            "wake-process-fixture",
+            "wake-systemd-fixture"
+          ]
+        },
+        "schema_version": 1,
+        "signal_lifecycle": {
+          "cleanup_deleted": true,
+          "dispatch_attempted": false,
+          "observed_status": "firing",
+          "retired_status": "archived",
+          "support_size_bytes": 4286,
+          "upgrade_reinstall": true,
+          "upgrade_restart": true,
+          "wake_id": "wake_8d3736e671a94443b707d0a403cd9a54"
+        },
+        "supervisor_once_roots": 1,
+        "surface_wake_root": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-qualified-product-smoke/surface-wake"
+      },
+      "tmux": {
+        "reason": "tmux smoke can paste into the active pane and requires operator-visible pane evidence",
+        "status": "manual_only",
+        "tmux_env_present": true,
+        "tmux_pane_present": true
+      }
+    },
+    "codex_wake_bin": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "codex_waked_bin": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked",
+    "generated_at": "2026-10-10T04:43:03.664262Z",
+    "live_wake_root": "/home/ecochran76/workspace.local/codex-wake-plan127/.codex/wake",
+    "public_tag": "",
+    "public_tag_work_dir": "",
+    "repo_root": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "schema_version": 1
+  },
+  "live_native": {
+    "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+    "turn_id": "01a12421-623a-7293-b0f2-64685fc903c6",
+    "turn_status": "completed",
+    "queue_id": "01a12421-6234-71f0-a34f-68849237b845",
+    "wake_id": "wake_20261010_044527_43a6",
+    "attempts": 1,
+    "exact_nonce_and_prompt_hash": true,
+    "reply": "PLAN127_NATIVE_COUNTER_CONFIRMED"
+  },
+  "limits": "Manual tmux/live branches of smoke are not runtime proof; separate real lifecycle receipts establish those. Hosted gates and publication remain required."
+}

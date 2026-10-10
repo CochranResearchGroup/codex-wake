@@ -1,0 +1,11 @@
+{
+  "work_dir": "/tmp/codex-wake-plan127-release-2g_hgep2",
+  "result": "/tmp/codex-wake-plan127-release-2g_hgep2/result.txt",
+  "condition": "/tmp/codex-wake-plan127-release-2g_hgep2/ready",
+  "arm_receipt": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-demo/arm.txt",
+  "verdict": {
+    "native_delivery": "PASS",
+    "originating_turn_ended_before_resumption": "PASS",
+    "numeric_result": "FAIL: literal escaped newline"
+  }
+}

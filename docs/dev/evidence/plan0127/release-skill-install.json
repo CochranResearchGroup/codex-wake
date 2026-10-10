@@ -1,0 +1,16 @@
+[
+  {
+    "path": "/home/ecochran76/.codex/shared/skills/codex-wake/SKILL.md",
+    "backup": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-skill-shared-original.md",
+    "original_sha256": "1562a9814bbb07906e0ac87b932a01cd3d866b8d479eeecb845b19b43bd08891",
+    "installed_sha256": "e2006e6efb9052a05b9a6847b9ed9171ea3df5ad9fe37ec52836d03ca8f97120",
+    "previous_matches_bundled0_8": true
+  },
+  {
+    "path": "/home/ecochran76/.agents/skills/codex-wake/SKILL.md",
+    "backup": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-skill-agents-original.md",
+    "original_sha256": "1562a9814bbb07906e0ac87b932a01cd3d866b8d479eeecb845b19b43bd08891",
+    "installed_sha256": "e2006e6efb9052a05b9a6847b9ed9171ea3df5ad9fe37ec52836d03ca8f97120",
+    "previous_matches_bundled0_8": true
+  }
+]

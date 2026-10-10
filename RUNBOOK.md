@@ -5271,3 +5271,20 @@ its scope, acceptance and open obligations unchanged. Current checkpoint
 records usage656277/6014sec and conservative user-bound stop thresholds.
 Memory disposition unavailable: no reviewed Codex Wake target group; source
 non-write receipt0132-memory-disposition.json records this turn's outcome.
+
+## Turn 252 | 2026-10-10 UTC
+
+Normal installed0.9 lifecycle passed: native A assigned visible B, armed a file
+follow-up, ended its turn and resumed15 seconds later with exact42. Busy/pending
+close, separate cancellation and conversation-preserving close passed. Failed
+formatting/selector/cleanup probes are retained. Owned clients/server exited;
+uncertain/signal/mailbox controls and native histories remain preserved.
+
+Release audit repaired intent accounting and reader-version advertisement at
+dc235a9. New immutable0.9-qualified prefix is active through four user links;
+supervisorPID56947 advertises schemas1–4. Eleven other unit readbacks and153 older
+module files are unchanged; registry bytes preserved.983 frozen installed tests
+pass126.407s; installed product smoke passes. Normal-root final wake has attempts1,
+exact payload/native completed turn and retained archived state. PR228/source
+integration, release publication and final requirement audit remain parent gates.
+Restart-safe checkpoint records exact custody and user budget stop thresholds.

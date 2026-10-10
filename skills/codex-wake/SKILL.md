@@ -20,12 +20,15 @@ codex-wake native file --ttl 2h THREAD_UUID /absolute/condition -- "Read the res
 codex-wake native reconcile WAKE_ID
 ```
 
-Verify an installed scheduler owns the selected wake root, then end the
+Verify an installed Wake0.9 scheduler owns the selected wake root, then end the
 originating turn. Native queue acceptance does not prove execution or ack.
 Unavailable/busy targets hold until expiry; `--resume-missing` explicitly allows
 headless resume of the same saved thread. Uncertainty requires reconciliation,
 never a blind resend or legacy fallback. Native delivery does not require a
 UserPromptSubmit hook.
+
+Use `sessions close thread:THREAD_UUID` for an exact thread selector.
+`native` scheduling and `open --resume` take the bare UUID.
 
 `sessions open` requires explicit new or exact resume and reuses an existing
 attachment; extra attachment is explicit. Close guards pending work and active

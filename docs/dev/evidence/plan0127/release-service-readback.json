@@ -1,0 +1,55 @@
+{
+  "units": {
+    "codex-wake-agent-browser-lease-authority.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-agent-browser.service": {
+      "MainPID": "80733",
+      "ActiveState": "active"
+    },
+    "codex-wake-auracall.service": {
+      "MainPID": "80734",
+      "ActiveState": "active"
+    },
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": {
+      "MainPID": "80737",
+      "ActiveState": "active"
+    },
+    "codex-wake-graphiti.service": {
+      "MainPID": "80738",
+      "ActiveState": "active"
+    },
+    "codex-wake-mail-receipts.service": {
+      "MainPID": "80739",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo-main-production-install.service": {
+      "MainPID": "80742",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo.service": {
+      "MainPID": "80748",
+      "ActiveState": "active"
+    },
+    "codex-wake-p54-c4-retained-v6s-poll.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website.service": {
+      "MainPID": "49232",
+      "ActiveState": "active"
+    },
+    "codex-wake-supervisor.service": {
+      "MainPID": "79221",
+      "ActiveState": "active"
+    }
+  },
+  "all_post_deployment_pids_stable": true,
+  "source_modules_match_frozen_acceptance": true,
+  "installed_version": "0.9.0"
+}

@@ -1,0 +1,42 @@
+{
+  "steps": [
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+        "archive",
+        "wake_20261010_041335_0fa8"
+      ],
+      "exit": 0,
+      "stdout": "archived wake_20261010_041335_0fa8 /home/ecochran76/workspace.local/codex-wake/.codex/wake/archive/wake_20261010_041335_0fa8.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+        "archive",
+        "wake_20261010_041557_70f4"
+      ],
+      "exit": 0,
+      "stdout": "archived wake_20261010_041557_70f4 /home/ecochran76/workspace.local/codex-wake/.codex/wake/archive/wake_20261010_041557_70f4.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+        "archive",
+        "wake_20261010_041927_c282"
+      ],
+      "exit": 0,
+      "stdout": "archived wake_20261010_041927_c282 /home/ecochran76/workspace.local/codex-wake/.codex/wake/archive/wake_20261010_041927_c282.json\n",
+      "stderr": ""
+    }
+  ],
+  "owned_records_retained": true,
+  "root_pending_firing": 0
+}

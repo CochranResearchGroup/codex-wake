@@ -1,0 +1,144 @@
+{
+  "state": "activated",
+  "version": "codex-wake 0.9.0",
+  "source_commit": "0a05c661d3dd854831614ab77ee732aa7f96b351",
+  "installed_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af",
+  "symlinks": {
+    "codex-wake": {
+      "path": "/home/ecochran76/.local/bin/codex-wake",
+      "original_target": "/home/ecochran76/.local/share/uv/tools/codex-wake/bin/codex-wake",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-wake"
+    },
+    "codex-waked": {
+      "path": "/home/ecochran76/.local/bin/codex-waked",
+      "original_target": "/home/ecochran76/.local/share/uv/tools/codex-wake/bin/codex-waked",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-waked"
+    },
+    "codex-wake-hook": {
+      "path": "/home/ecochran76/.local/bin/codex-wake-hook",
+      "original_target": "/home/ecochran76/.local/share/uv/tools/codex-wake/bin/codex-wake-hook",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-wake-hook"
+    },
+    "codex-wake-github-webhook": {
+      "path": "/home/ecochran76/.local/bin/codex-wake-github-webhook",
+      "original_target": "/home/ecochran76/.local/share/uv/tools/codex-wake/bin/codex-wake-github-webhook",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-wake-github-webhook"
+    }
+  },
+  "pre_units": {
+    "codex-wake-agent-browser-lease-authority.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-agent-browser-lease-authority.service"
+    },
+    "codex-wake-agent-browser.service": {
+      "MainPID": "80733",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-agent-browser.service"
+    },
+    "codex-wake-auracall.service": {
+      "MainPID": "80734",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-auracall.service"
+    },
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": {
+      "MainPID": "80737",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-github-webhook-p54-c4-retained-v6s.service"
+    },
+    "codex-wake-graphiti.service": {
+      "MainPID": "80738",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-graphiti.service"
+    },
+    "codex-wake-mail-receipts.service": {
+      "MainPID": "80739",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-mail-receipts.service"
+    },
+    "codex-wake-odollo-main-production-install.service": {
+      "MainPID": "80742",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-odollo-main-production-install.service"
+    },
+    "codex-wake-odollo.service": {
+      "MainPID": "80748",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-odollo.service"
+    },
+    "codex-wake-p54-c4-retained-v6s-poll.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-p54-c4-retained-v6s-poll.service"
+    },
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service"
+    },
+    "codex-wake-soylei-website.service": {
+      "MainPID": "49232",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-soylei-website.service"
+    },
+    "codex-wake-supervisor.service": {
+      "MainPID": "21521",
+      "ActiveState": "active",
+      "FragmentPath": "/home/ecochran76/.config/systemd/user/codex-wake-supervisor.service"
+    }
+  },
+  "post_units": {
+    "codex-wake-agent-browser-lease-authority.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-agent-browser.service": {
+      "MainPID": "80733",
+      "ActiveState": "active"
+    },
+    "codex-wake-auracall.service": {
+      "MainPID": "80734",
+      "ActiveState": "active"
+    },
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": {
+      "MainPID": "80737",
+      "ActiveState": "active"
+    },
+    "codex-wake-graphiti.service": {
+      "MainPID": "80738",
+      "ActiveState": "active"
+    },
+    "codex-wake-mail-receipts.service": {
+      "MainPID": "80739",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo-main-production-install.service": {
+      "MainPID": "80742",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo.service": {
+      "MainPID": "80748",
+      "ActiveState": "active"
+    },
+    "codex-wake-p54-c4-retained-v6s-poll.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website.service": {
+      "MainPID": "49232",
+      "ActiveState": "active"
+    },
+    "codex-wake-supervisor.service": {
+      "MainPID": "79221",
+      "ActiveState": "active"
+    }
+  },
+  "old_package_preserved": true,
+  "registry_bytes_preserved": true,
+  "pending_firing_preflight": "zero for all four registered roots",
+  "rollback": "Atomically restore recorded symlink targets and restart only the Wake supervisor after ensuring no firing work; keep schema4 records for a capable reader."
+}
