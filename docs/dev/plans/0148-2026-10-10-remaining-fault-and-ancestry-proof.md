@@ -1,7 +1,7 @@
 # Ticket0148 — Finish remaining fault and session-isolation proof
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -44,3 +44,9 @@ READY means refined and unblocked, not implemented. DONE requires all acceptance
 checks, attributable source/evidence, integration or explicit non-code completion,
 and owned cleanup. BLOCKED records a missing dependency/evidence, not approval
 inferred from elapsed time. Planning alone does not satisfy a behavior criterion.
+
+## Frozen execution
+
+See evidence/plan0148/finite-matrix.md: all32 original families, three bounded
+serial packets A1/F1/C1 and exact runtime/time/resource stops. No new delegation
+turns; metadata-only owned fork/process fixtures. Parent remains OPEN.
