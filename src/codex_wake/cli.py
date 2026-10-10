@@ -100,6 +100,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_time_parser(subparsers)
     from .sessions_cli import add_sessions_parser
     add_sessions_parser(subparsers)
+    from .native_delivery import add_native_parser
+    add_native_parser(subparsers)
     from .a2a_cli import add_a2a_parser
     add_a2a_parser(subparsers)
     from .messages_cli import add_messages_parser
@@ -2725,6 +2727,9 @@ def run(argv: list[str] | None = None) -> int:
     if args.command == "sessions":
         from .sessions_cli import sessions_command
         return sessions_command(args)
+    if args.command == "native":
+        from .native_delivery import create_native
+        return create_native(args, root)
     if args.command == "after":
         return create_after(args, root)
     if args.command == "at":

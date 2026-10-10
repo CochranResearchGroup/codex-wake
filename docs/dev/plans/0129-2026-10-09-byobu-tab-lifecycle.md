@@ -3,7 +3,7 @@
 State: PLANNED
 Workflow: READY_FOR_AGENT
 Owner: primary agent lane
-Branch: prototype/native-session-lookup
+Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
 Blocked by: None
 

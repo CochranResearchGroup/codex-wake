@@ -3,7 +3,7 @@
 State: PLANNED
 Workflow: READY_FOR_AGENT
 Owner: primary agent lane
-Branch: prototype/native-session-lookup
+Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
 Blocked by: docs/dev/plans/0131-2026-10-09-native-agent-lifecycle-acceptance.md — Prove the complete native agent lifecycle
 

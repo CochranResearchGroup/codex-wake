@@ -1,15 +1,15 @@
 # Plan 0128 — Deliver an existing durable wake natively
 
-State: PLANNED
-Workflow: READY_FOR_AGENT
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
-Branch: prototype/native-session-lookup
+Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
 Blocked by: None
 
 ## Current State
 
-Approved ticket; implementation not started. Execute only after every listed blocker is CLOSED with passing evidence. The parent execution contract governs this ticket; planning, mocks and prototype results alone cannot close it.
+Installed isolated candidate delivered a real due wake, held a busy recipient then delivered after idle, and held an unavailable exact thread until expiry. Evidence: docs/dev/evidence/plan0127/0128-acceptance.md. Native acceptance is explicitly distinct from execution/ack; no full-plan completion claim.
 
 ## What to Build
 
@@ -17,10 +17,10 @@ Deliver an existing durable wake natively, as one complete user-visible slice un
 
 ## Acceptance Criteria
 
-- [ ] A real installed scheduler submits one due wake to an exact idle thread without TUI injection or an originating agent turn.
-- [ ] Record native acceptance identity separately from recipient execution and acknowledgment.
-- [ ] Busy/unavailable recipients remain pending until expiry; ordinary direct-send failure creates no implicit mailbox record.
-- [ ] Transport selection is explicit; uncertain native submission never automatically falls back.
+- [x] A real installed scheduler submits one due wake to an exact idle thread without TUI injection or an originating agent turn.
+- [x] Record native acceptance identity separately from recipient execution and acknowledgment.
+- [x] Busy/unavailable recipients remain pending until expiry; ordinary direct-send failure creates no implicit mailbox record.
+- [x] Transport selection is explicit; uncertain native submission never automatically falls back.
 
 ## Scope and Non-goals
 

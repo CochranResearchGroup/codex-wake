@@ -1,9 +1,9 @@
 # Plan 0127 — Native Codex and Wake product boundary
 
-State: PLANNED
-Workflow: APPROVED
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary agent lane
-Branch: prototype/native-session-lookup
+Branch: feat/native-workflows
 
 ## Current State
 

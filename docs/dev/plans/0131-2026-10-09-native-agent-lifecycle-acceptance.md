@@ -3,7 +3,7 @@
 State: PLANNED
 Workflow: READY_FOR_AGENT
 Owner: primary agent lane
-Branch: prototype/native-session-lookup
+Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
 Blocked by: docs/dev/plans/0128-2026-10-09-native-durable-delivery.md — Deliver an existing durable wake natively; docs/dev/plans/0129-2026-10-09-byobu-tab-lifecycle.md — Open and close exact Byobu tabs; docs/dev/plans/0130-2026-10-09-native-delivery-recovery.md — Recover interrupted native delivery
 
