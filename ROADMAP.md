@@ -1100,6 +1100,6 @@ After 0123, fallback and mailbox tracks are technically independent; the single-
 
 State: OPEN
 
-Current State: Execution active on feat/native-workflows. Tickets0128–0131 passed installed-candidate native delivery, exact visible-tab lifecycle, interruption recovery and a real two-agent condition/resumption/close workflow. Ticket0132 migration/retirement and published capability docs now pass with frozen installed0.9.0 wheel evidence. Hosted integration, release and normal installation remain. The candidate is not released; prototype evidence alone does not satisfy the remaining gates.
+Current State: All five child tickets have installed candidate acceptance. PR227 integrates source as canonical0a05c66 after hosted3.11/3.12 release gates pass. Continuation custody is release/native-workflows-closeout. Release publication and normal installed qualification remain; parent staysOPEN.
 
-Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 define native durable delivery, Byobu lifecycle, interruption recovery, complete lifecycle acceptance and qualified legacy retirement. The plan's dependency frontier and no-implementation-theater contract govern execution. This branch-local projection is not yet integrated into the default branch.
+Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 define native durable delivery, Byobu lifecycle, interruption recovery, complete lifecycle acceptance and qualified legacy retirement. The plan's dependency frontier and no-implementation-theater contract govern execution. Source projection is integrated; release closeout remains on its declared continuation branch.
