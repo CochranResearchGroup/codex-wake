@@ -26,5 +26,14 @@
     "governance_MCP_startup_thread_env": false,
     "source": "https://github.com/openai/codex/issues/19937",
     "claim_is_attestation": false
+  },
+  "cli_regression": {
+    "selection": [
+      "test_messages_cli",
+      "test_a2a_cli"
+    ],
+    "tests": 13,
+    "seconds": 3.206,
+    "status": "PASS"
   }
 }

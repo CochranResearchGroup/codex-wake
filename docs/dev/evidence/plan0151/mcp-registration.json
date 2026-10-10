@@ -1,0 +1,22 @@
+{
+  "name": "codex-wake",
+  "enabled": true,
+  "disabled_reason": null,
+  "transport": {
+    "type": "stdio",
+    "command": "/home/ecochran76/.local/bin/codex-wake-mcp",
+    "args": [],
+    "env": null,
+    "env_vars": [
+      "CODEX_WAKE_A2A_BUS_ROOT",
+      "CODEX_WAKE_A2A_CAPABILITY",
+      "CODEX_WAKE_WAKE_ROOT",
+      "CODEX_WAKE_SENDER_RECEIPT_AUTHORITY"
+    ],
+    "cwd": null
+  },
+  "enabled_tools": null,
+  "disabled_tools": null,
+  "startup_timeout_sec": null,
+  "tool_timeout_sec": null
+}

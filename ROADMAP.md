@@ -1136,7 +1136,12 @@ CLOSED Plan0150 / issue237: reconcile policy pointers and admit one read-only sc
 policy-maintenance profile with canonical fallback and deterministic CI guard.
 Tool qualification complete; total host-token efficiency remains unmeasured.
 
-## P73 — Discoverable agent-to-agent MCP
+## P75 — Discoverable agent-to-agent MCP
 
-Plan0151 / issue240 exposes the accepted tracked exchange through MCP and
-updates human/agent discovery. Existing A2A acceptance remains CLOSED.
+State: CLOSED
+
+Plan0151 / issue240: v0.13.0 published, verified and installed; 14 MCP tools
+registered and qualified, human guides and installed agent skills advertise
+tracked exchanges. Existing A2A acceptance remains CLOSED. New sessions must
+discover the tools; messaging still requires operator-issued actor context.
+Evidence: docs/dev/evidence/plan0151/closeout.md. Gov_policy evaluation deferred.

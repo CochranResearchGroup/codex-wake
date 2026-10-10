@@ -1,9 +1,9 @@
 # Plan0151 — Discoverable agent-to-agent MCP
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary / ecochran76
-Lane: P73
+Lane: P75
 Branch: feat/a2a-mcp
 Target: origin/main
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/240
@@ -44,8 +44,15 @@ Existing A2A acceptance remains complete independently of this additive facade.
 
 ## Current State
 
-Issue240 owned-target preflight PASS. Existing0.12.0 has no MCP entrypoint;
-README/skill headline understate A2A. Optional SDK implementation and docs next.
+PR241 integrated source95f621d. Public v0.13.0 assets downloaded and verified;
+83-file source/wheel/installed parity PASS. Installed private MCP exchange and
+registered-command discovery PASS, 14 tools. Five links activated, two installed
+skill copies match source, 13 service PID/state snapshots unchanged. Current
+identity refuses an inherited-pane conflict; exact thread resolution succeeds.
+No production messages/notifications/turns or operator setup performed.
+Terminal receipt: docs/dev/evidence/plan0151/closeout.md. Hosted CI waiting waived.
+P75 corrects the initial P73 label, which was already allocated to Plan0146;
+that historical lane is preserved. Gov_policy evaluation remains deferred.
 
 ## Test seams and bounds
 

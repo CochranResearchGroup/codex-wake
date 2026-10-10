@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "source_commit": "95f621d883e71021b009dfe56e939330aa6d561f",
+  "tag": "v0.13.0",
+  "release_url": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.13.0",
+  "downloaded_assets": {
+    "codex_wake-0.13.0.tar.gz": "05d73f8d2eb3bf8d00cd4841b69ca7fd2d07545a935aaea3bf1c60a7c1be2830",
+    "codex_wake-0.13.0-py3-none-any.whl": "a3d1f103c59315b3706fb95c977c13d9efb969c883a2fd66f66651f4f57b2388"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "registered_command": "/home/ecochran76/.local/bin/codex-wake-mcp",
+  "resolved_executable": "/home/ecochran76/.local/share/codex-wake/releases/0.13.0-95f621d/bin/codex-wake-mcp",
+  "tool_count": 14,
+  "exact_self_resolution": true,
+  "existing_Codex_catalog_refreshed": false,
+  "client": "fresh actual stdio SDK client from Codex registration",
+  "native_turns": 0,
+  "notifications": 0
+}

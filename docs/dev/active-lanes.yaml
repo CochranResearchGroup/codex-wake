@@ -298,3 +298,24 @@ lanes:
     updated_at: 2026-10-10
     checkout_required: false
     disposition: Pilot tooling admitted; total host-token efficiency unmeasured; no broader rollout
+
+  - id: P75
+    owner: primary / ecochran76
+    objective: Advertise and expose accepted agent exchanges through MCP
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/240]
+    plan: docs/dev/plans/0151-2026-10-10-a2a-mcp-discoverability.md
+    plan_ref: origin/main
+    branch: feat/a2a-mcp
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 8940ebfedae68163288d195e2e093c28a02d378a
+    remote_ref: refs/remotes/origin/feat/a2a-mcp
+    integration: squash_pr
+    integration_receipt: 95f621d883e71021b009dfe56e939330aa6d561f
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/241
+    checkout_required: false
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-10
+    disposition: Plan0151 DONE; v0.13.0 released/installed; 14 MCP tools registered and qualified, docs and two installed skills match; no service restart or production messages; gov_policy evaluation deferred. Corrects initial P73 label without changing Plan0146 lane.
