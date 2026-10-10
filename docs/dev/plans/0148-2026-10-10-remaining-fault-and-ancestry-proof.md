@@ -1,7 +1,7 @@
 # Ticket0148 — Finish remaining fault and session-isolation proof
 
-State: OPEN
-Workflow: BLOCKED
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -21,12 +21,12 @@ Remaining original fault, compatibility and parent/child isolation requirements 
 
 ## Acceptance criteria
 
-- [ ] Produce a row for every original verification0106 requirement family, map later receipts and identify only still-unproved cuts; freeze the finite matrix before executing it.
-- [ ] Each remaining ancestry/reparent/restart case uses disposable process/session identities; foreign or changed owner cannot retarget a message, receipt arm or claim.
-- [ ] Remaining interruption, writer-fencing and version/schema cases prove preservation or explicit hold, never silent replay or state loss; installed commands cover required process boundaries.
-- [ ] Reuse valid multiroot, retention, backup, rollback and resource receipts; document source/freshness relevance rather than pretending old installed versions are current.
-- [ ] If matrix scope exceeds one context-sized packet, split this ticket into named bounded children with blockers and identical inherited obligations before execution; parent stays open until every required child has proof.
-- [ ] Clean owned processes/tabs and record fresh OS/resource readback. No autonomous unrelated agents, production-store faults or broad service restarts.
+- [x] Produce a row for every original verification0106 requirement family, map later receipts and identify only still-unproved cuts; freeze the finite matrix before executing it.
+- [x] Each remaining ancestry/reparent/restart case uses disposable process/session identities; foreign or changed owner cannot retarget a message, receipt arm or claim.
+- [x] Remaining interruption, writer-fencing and version/schema cases prove preservation or explicit hold, never silent replay or state loss; installed commands cover required process boundaries.
+- [x] Reuse valid multiroot, retention, backup, rollback and resource receipts; document source/freshness relevance rather than pretending old installed versions are current.
+- [x] If matrix scope exceeds one context-sized packet, split this ticket into named bounded children with blockers and identical inherited obligations before execution; parent stays open until every required child has proof.
+- [x] Clean owned processes/tabs and record fresh OS/resource readback. No autonomous unrelated agents, production-store faults or broad service restarts.
 
 ## Test seam and bound
 
@@ -56,3 +56,10 @@ turns; metadata-only owned fork/process fixtures. Parent remains OPEN.
 Independent F1/C1/OS controls PASS; actual native subagent test awaits explicit
 request under session no-spawn rule. Checkpoint04 records bound and custody.
 No missing test is accepted by documenting it; parent and campaign remain OPEN.
+
+## Closeout
+
+All finite cuts PASS; see docs/dev/evidence/plan0148/closeout.md. User requested
+one disposable subagent; actual native parent metadata and installed isolation
+proved, child archived/process absent. No test tab or notification created.
+Historical pending gate above is superseded by this proof, not erased.0149 next.

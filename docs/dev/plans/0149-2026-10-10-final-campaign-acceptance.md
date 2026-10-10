@@ -1,7 +1,7 @@
 # Ticket0149 — Close the work stream from complete evidence
 
-State: PLANNED
-Workflow: BLOCKED
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream

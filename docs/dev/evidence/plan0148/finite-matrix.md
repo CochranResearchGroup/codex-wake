@@ -17,24 +17,24 @@ live authority. Original old failures/uncertainties remain unchanged.
 | R08 | Body-file/stdin, machine keys, human announced key, kinds/TTL/delivery, body-hidden inspection, operator audit | 0095/0099;0147 body-hidden reconciliation/operator audit |
 | R09 | Immutable envelope fields, UTF-8/digest/body limit, conversation/lineage, exact recipient FIFO/idempotency | 0095/0104;0143 exact original/result lineage |
 | R10 | Reply permission/lineage, optional atomic ack and distinct reply keys; no implicit completed claim | 0095/0099;0143 request/result claims and completion |
-| R11 | SQLite WAL/busy/schema/migration, corruption/disk-full, clock and ownership failure, commit-before-accepted | OPEN F1 fault/interruption/writer controls and C1 compatibility |
+| R11 | SQLite WAL/busy/schema/migration, corruption/disk-full, clock and ownership failure, commit-before-accepted | PASS F1 fault/interruption/writer controls and C1 compatibility |
 | R12 | Separate admission/notification/recipient projections and honest semantics | 0143 exact separated state/native completed turns |
 | R13 | Expiry/processing claim semantics, cancel before claim versus uncertain/too-late, append-only events | 0095/0096;0122 actual cancellation;0147 generation observation |
 | R14 | Active/offline/unloaded recipients held, human draft/approval/foreign shell safe, no replacement thread | 0142 live admission safety;0145 notLoaded hold/opt-in same-thread |
 | R15 | Canonical metadata-only notification, untrusted peer content, actual hook event boundary | 0142 canonical metadata-only native notification;0143 actual hook/prompt consumption |
-| R16 | Dispatcher/recipient generation leases, FIFO/batch <=20, scan <=100, crash cuts, unknown never replayed | 0096/0104;0143 normal worker restart; OPEN F1 interrupted/unknown controls |
+| R16 | Dispatcher/recipient generation leases, FIFO/batch <=20, scan <=100, crash cuts, unknown never replayed | 0096/0104;0143 normal worker restart; PASS F1 interrupted/unknown controls |
 | R17 | 32 KiB, 24h TTL, 1000 open/recipient, 100000 retained, 1 GiB, 10/min sender, 10/hour recipient, 3 actual attempts/backoff | 0104 bounded resource/load;0122 full owned soak;0143 current pair resource proof |
 | R18 | Lineage max8, no self-send/reply authority cycles, no automatic spawn/reply loops, bounded rejection metadata | 0095 validators;0143 finite exchange; no autonomous spawning |
 | R19 | Receipt source durable replay, exact arming, checkpoint/grant revocation, no recursive notification | 0100–0105 receipt grants/replay;0143 actual reply wake restored across owned restart |
 | R20 | Foreground bounded receipt wait/watch, cancellation/timeout, correlated reply | 0099 bounded foreground;0143 actual unassisted automatic return |
 | R21 | Body retention30d, pending/uncertain/active pins, preview/apply, finite dedup90d, compact tombstones | 0107 retention;0146 snapshot legacy bound preserving pins/history |
-| R22 | Backup/restore same identity without concurrent activation, no conversation cascade deletion | 0108/0109/0110;0146 actual damaged recovery/disposition/release; OPEN C1 version-linked recovery |
+| R22 | Backup/restore same identity without concurrent activation, no conversation cascade deletion | 0108/0109/0110;0146 actual damaged recovery/disposition/release; PASS C1 version-linked recovery |
 | R23 | Diagnostics source/backlog/lease/schema/capacity/uncertainty/retention, body-free output | 0097 diagnostics;0122 service;0143 installed owned worker |
 | R24 | Resource process/FD cleanup, shallow shared clients, thresholds before soak | 0104–0106 bounded resources;0122 1800s owned soak;0143/0147 cleanup |
-| R25 | Parent/subagent exact isolation and inherited pane refusal | OPEN A1 actual disposable ancestry/process reparent/restart |
+| R25 | Parent/subagent exact isolation and inherited pane refusal | PASS A1 actual disposable ancestry/process reparent/restart |
 | R26 | P63.7 operations restart/reconnect/unloading/multiroot/service ownership | 0122 restart/reconnect/multiroot;0143 changed transport restart;0145 genuinely notLoaded saved path |
-| R27 | Compatibility schemas1/2, older readers explicit reject, mailbox domain migration, staged rollout | OPEN C1 actual old/new message-linked readers and restored claim |
-| R28 | Rollback pause/no reset/no replay/no deletion, retained inspection | 0120/0122 exact recorded0.7/0.6 rollback;0146 actual0.11.2 schema2→3 refusal; OPEN C1 current binary roundtrip |
+| R27 | Compatibility schemas1/2, older readers explicit reject, mailbox domain migration, staged rollout | PASS C1 actual old/new message-linked readers and restored claim |
+| R28 | Rollback pause/no reset/no replay/no deletion, retained inspection | 0120/0122 exact recorded0.7/0.6 rollback;0146 actual0.11.2 schema2→3 refusal; PASS C1 current binary roundtrip |
 | R29 | P63.8 docs/packaging/hosted CI/release/install readback | 0144 actual publication/global install;0149 final release/identity; hosted CI wait waived |
 | R30 | Optional MCP facade | Optional; no obligation |
 | R31 | Excluded cross-user/remote federation, broadcast, task allocation, arbitrary commands, external sends, autonomous delegation | Exclusions preserved; no task allocation/external sends |
@@ -71,3 +71,6 @@ C1 first harness assumed CLI status is read-only; actual public status appends a
 operator inspect_status audit. Preserve first failed hash assertion. Correction
 pins bytes after each explicit audited status, before the non-mutating old/new
 receipt reader. Identity/message/claim/terminal remain invariant throughout.
+
+All three packets PASS; closeout.md supplies exact attribution. Final release
+and original overall definition-of-done rows remain owned by0149, not waived.
