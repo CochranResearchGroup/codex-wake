@@ -1,7 +1,7 @@
 # Plan0138 — Wake an explicitly authorized saved conversation
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: COMPLETE
 Lane: P68
 Branch: feat/saved-recipient-reopening
 Target: origin/main
@@ -18,6 +18,13 @@ This decision supersedes Plan0119's unconditional no-resume rule only for this
 explicitly requested behavior. The ordinary default remains hold.
 
 ## Current state
+
+Complete2026-10-10: PR232 integrated source79c8c29185c48e3d01eb125a91284f4373cdf999;
+v0.11.0 released and global CLI activated from its immutable installed prefix.
+closeout.md records criterion-by-criterion evidence and retained limitations.
+Owned acceptance tabs/processes are closed; histories and failed samples remain.
+The feature checkout is removed with its source branch durably retained. Wider
+Plan0101/0119 remain OPEN. The following baseline describes the starting state.
 
 Baseline main94dc58c, installedv0.10.1. Native scheduled wakes already accept
 --resume-missing and persist same_thread policy. Existing fixtures exercise the
@@ -115,3 +122,11 @@ only owned idle-tab closure, preserved conversations and stopped test processes.
 State INSTALLED_BEHAVIOR_ACCEPTED→RELEASE_PREPARATION; progress outcome_progress.
 Source6b1b673, immutable installed95PASS49.942s/all80files match. Remaining gates:
 published PR integration, release assets and final source/release/installed parity.
+
+Final transition RELEASE_PREPARATION→COMPLETE: PR232 merged at79c8c29, released
+tagv0.11.0 resolves to that commit; downloaded wheel/sdist SHA256 match originals.
+All80package files match merged source, both release assets, final immutable
+installation and acceptance candidate. Global CLI reports0.11.0 and send/reply
+help exposes --resume-missing. All13running/inactive service PID/state snapshots
+remain unchanged; no unrelated rollout. Clean published source0842532 retained,
+feature checkout removed normally. closeout.md is the canonical completion audit.

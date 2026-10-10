@@ -131,15 +131,19 @@ lanes:
     objective: Qualify explicitly authorized reopening of the same saved recipient
     work_items: [docs/dev/plans/0138-2026-10-10-explicit-saved-recipient-reopening.md]
     plan: docs/dev/plans/0138-2026-10-10-explicit-saved-recipient-reopening.md
-    plan_ref: feat/saved-recipient-reopening
+    plan_ref: origin/main
     branch: feat/saved-recipient-reopening
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 98827de9718cbf1f771c7ec4bbe82d28da477a2c
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 0842532e3bbfa14f6cabf304844fd27f39c991a0
     remote_ref: refs/remotes/origin/feat/saved-recipient-reopening
     integration: squash_pr
+    integration_receipt: 79c8c29185c48e3d01eb125a91284f4373cdf999
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/232
+    release_tag: v0.11.0
+    checkout_required: false
     dependencies: []
     overlaps: []
     updated_at: 2026-10-10
-    disposition: Plan0138 active; installed controls qualified and saved recipient completed; first inbox reply failed return; corrected v2 exchange active; release and integration remain open.
+    disposition: Plan0138 complete; original native and closed-recipient request/reply turns completed; installed95 controls and all80package-file parity qualify active0.11.0; owned tabs/processes closed, histories and failures preserved; wider Plan0101/0119 remain OPEN.
