@@ -63,3 +63,35 @@ The active planning audit initially found only Plan0119's nonstandard Current
 State heading. Rename that heading without changing its P63 scope, milestones,
 acceptance or open obligations, then rerun. Historical baseline findings remain
 explicitly accepted/excluded by the repo audit.
+
+
+## 2026-10-10 04:06 UTC integration checkpoint
+
+PR227 merged as canonical0a05c661d3dd854831614ab77ee732aa7f96b351 after
+both exact-head hosted release gates passed on cbced951e29c05178b4c7c7d01ada6e194a6c131.
+Fetch/readback confirms origin/main0a05c66; its tree matches the accepted source.
+Continuation custody is now release/native-workflows-closeout in the same
+codex-wake-plan127 worktree, branched from canonical origin/main. The original
+feat/native-workflows branch is retained; no refs/worktrees were removed.
+
+Prepared immutable installed prefix:
+/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af.
+Its CLI reports0.9.0. This preparation has not switched user entrypoints or
+changed any service. Current normal commands still resolve into the existing
+/home/ecochran76/.local/share/uv/tools/codex-wake0.8.0 installation. Preserve
+that environment for running unrelated project workers during deployment.
+Record original user symlink targets and rollback before any switch.
+
+Remaining parent gates: normal installed deployment/actual lifecycle,
+release publication and completion audit. The shared Wake supervisor is a
+relevant product rollout boundary; preflight its registered roots for active
+firing work before any bounded upgrade. Do not restart unrelated project Wake
+units or shared Codex, or infer installed0.9 capability from an old live worker's
+entrypoint path. Other old readers retain compatibility and hold native4 until
+explicitly upgraded. Installed qualification must use a capable scheduler for
+its exact root. Source artifacts already prove safe rollback/uncertainty.
+
+Last goal readback656277tokens/6014elapsedsec,active; refresh on continuation.
+Stop before10500elapsedsec or1900000tokens, and always before user2MM/3h bound.
+UTC alone is insufficient because the elapsed meter now differs by several
+minutes. No pause, block or completion is claimed.

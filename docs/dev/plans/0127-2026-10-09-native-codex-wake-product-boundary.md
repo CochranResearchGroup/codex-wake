@@ -3,14 +3,15 @@
 State: OPEN
 Workflow: IN_PROGRESS
 Owner: primary agent lane
-Branch: feat/native-workflows
+Branch: release/native-workflows-closeout
 
 ## Current State
 
 Tickets 0128–0132 are CLOSED with installed candidate acceptance receipts in
 `docs/dev/evidence/plan0127/`. Ticket 0132 migration, qualified retirement and documentation publication pass.
-The candidate lives on `feat/native-workflows`; acceptance does not establish
-integration, release or global installation. Migration, qualified retirement,
+Source is integrated as canonical `0a05c66` via PR227 with both hosted release
+gates passing. Release and global installation remain unproven. Continuation
+custody is `release/native-workflows-closeout`. Migration, qualified retirement,
 rollback and release remain required before this parent can close. Repository
 plans are the tickets; no remote tracker issues are created.
 
