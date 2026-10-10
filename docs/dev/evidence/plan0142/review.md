@@ -34,8 +34,8 @@ No binding schema migration or manual rewrite of old receipts.
 
 Affected source116PASS58.751s before last malformed receipt case; installed
 initial candidate selection result retained privately. Reviewed candidate must
-repeat affected installed checks because transport metadata changed. Live actual
-submission/completion and ordinary-close evidence remain required before ticket
-closure. No remaining accepted blocking source finding after P72-S1 remediation.
+repeat affected installed checks because transport metadata changed. Reviewed313e5aa installed117PASS43.592s; all81files match. Actual live
+submission/completion and ordinary-close PASS; installed-acceptance.md binds IDs.
+Exact source integration remains required before ticket closure. No remaining accepted blocking source finding after P72-S1 remediation.
 
 Accepted findings: Standards0blocking; Spec1blocking resolved,0remaining.
