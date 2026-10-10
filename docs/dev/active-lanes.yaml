@@ -214,18 +214,21 @@ lanes:
     objective: Qualify native queue receipts for live-tab notifications
     work_items: [docs/dev/plans/0142-2026-10-10-native-live-submission.md]
     plan: docs/dev/plans/0142-2026-10-10-native-live-submission.md
-    plan_ref: origin/fix/native-live-submission
+    plan_ref: origin/main
     branch: fix/native-live-submission
     target: origin/main
-    plan_state: OPEN
-    custody_state: INTEGRATION_READY
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     checkpoint: 87ec00705a16c99734243f9b68dd27244498e065
     remote_ref: refs/remotes/origin/fix/native-live-submission
     integration: squash_pr
+    integration_receipt: 0076ae4
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/234
+    checkout_required: false
     validation_status: passed
     validation_ref: 87ec00705a16c99734243f9b68dd27244498e065
     dependencies: [P71]
     overlaps: [P71]
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
-    disposition: Public native receipt red-green and installed117/81file parity qualified; actual result newly claimed/completed after one native submission, owned tab closed forced=false and PIDs absent. Serial review resolved1finding; source ready for integration, remaining Plan0141 tickets OPEN.
+    disposition: Ticket0142 DONE; PR234 integrated, installed117/81file parity and actual native claim/completion/no-force cleanup PASS; owned checkout closed, published branch retained. Release and rest of Plan0141 remain OPEN.

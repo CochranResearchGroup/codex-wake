@@ -1,7 +1,7 @@
 # Ticket0142 — Native submission for existing live tabs
 
-State: OPEN
-Workflow: AWAITING_INTEGRATION
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P72
 Branch: fix/native-live-submission
@@ -17,7 +17,9 @@ Source313e5aa qualified: public red-green loops, serial Standards/Spec review,
 reviewed installed117PASS43.592s and81file parity. Actual owned result has one
 native queue receipt and recipient claimed/completed turn; tab closed without
 force and owned PIDs absent. See evidence/plan0142/installed-acceptance.md.
-All behavior criteria pass; exact source integration remains before DONE.
+All criteria pass; PR234 merged0076ae4. Source and reviewed candidate package
+parity remain valid; release activation is ticket0144. Clean published feature
+checkout closed, branch87ec007 retained remotely.
 
 ## What it delivers
 

@@ -1,7 +1,7 @@
 # Ticket0143 — Qualify normal request and reply after transport change
 
 State: PLANNED
-Workflow: BLOCKED
+Workflow: READY
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream

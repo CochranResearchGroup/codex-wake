@@ -1,7 +1,7 @@
 # Plan0141 — Finish usable agent-to-agent messaging
 
 State: OPEN
-Workflow: READY
+Workflow: IN_PROGRESS
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -22,8 +22,10 @@ capture is missing. Original message/attempt remain held and are never replayed.
 Verification0122 accepts earlier live cancellation, reconnect, owned-worker restart,
 multiroot, rollback and thirty-minute soak on their recorded source/version.
 Plan0101/0119 remain OPEN; their stale sequencing is replaced by this plan.
-No implementation ticket has started. Next is ticket0142. Plan creation is planning
-work, not product outcome progress. No active goal or old token allowance is inferred.
+Ticket0142 DONE after PR234/0076ae4, installed117 tests and actual native
+submission/claim/completion/no-force cleanup. Active user goal now authorizes
+Plan0141 execution with stop/checkpoint before2milliontokens or4hours. Next0143;
+globalCLI remains0.11.1 until0144. Original old allowances remain historical.
 
 ## Problem statement and solution
 
@@ -66,8 +68,8 @@ within its ticket. Existing GLOSSARY.md is terminology authority.
 
 ## Sequence and blocking edges
 
-| [0142](0142-2026-10-10-native-live-submission.md) Native submission for existing live tabs | none | READY |
-| [0143](0143-2026-10-10-native-live-safety-and-round-trip.md) Qualify normal request and reply after transport change | 0142 | BLOCKED |
+| [0142](0142-2026-10-10-native-live-submission.md) Native submission for existing live tabs | none | DONE |
+| [0143](0143-2026-10-10-native-live-safety-and-round-trip.md) Qualify normal request and reply after transport change | 0142 | READY |
 | [0144](0144-2026-10-10-release-native-live-submission.md) Ship and activate qualified native live submission | 0143 | BLOCKED |
 | [0145](0145-2026-10-10-server-unloaded-recipient.md) Qualify explicitly reopened server-unloaded recipient | 0144 | BLOCKED |
 | [0146](0146-2026-10-10-held-recovery-disposition.md) Make held recovery disposition explicit and safe | none | READY |
