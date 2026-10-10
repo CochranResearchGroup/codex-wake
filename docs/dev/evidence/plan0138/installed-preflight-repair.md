@@ -1,7 +1,7 @@
 # Plan0138 installed preflight — failed sample and correction
 
-Candidate d5f0524 / isolated0.11.0-d5f0524,94-test selection before added control:
-actually93tests ran28.210s and failed5errors. Original log is private
+Candidate d5f0524 / isolated0.11.0-d5f0524:93tests ran28.210s and failed5errors.
+Original log is private
 ~/.local/state/codex-wake/plan0138/installed-focused.log. No acceptance exchange
 or original request had been admitted when this failure occurred.
 
