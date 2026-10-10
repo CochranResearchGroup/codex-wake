@@ -1,0 +1,140 @@
+{
+  "units": {
+    "codex-wake-agent-browser-lease-authority.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-agent-browser.service": {
+      "MainPID": "80733",
+      "ActiveState": "active"
+    },
+    "codex-wake-auracall.service": {
+      "MainPID": "80734",
+      "ActiveState": "active"
+    },
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": {
+      "MainPID": "80737",
+      "ActiveState": "active"
+    },
+    "codex-wake-graphiti.service": {
+      "MainPID": "80738",
+      "ActiveState": "active"
+    },
+    "codex-wake-mail-receipts.service": {
+      "MainPID": "80739",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo-main-production-install.service": {
+      "MainPID": "80742",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo.service": {
+      "MainPID": "80748",
+      "ActiveState": "active"
+    },
+    "codex-wake-p54-c4-retained-v6s-poll.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website.service": {
+      "MainPID": "49232",
+      "ActiveState": "active"
+    },
+    "codex-wake-supervisor.service": {
+      "MainPID": "56947",
+      "ActiveState": "active"
+    }
+  },
+  "owned_clients": [
+    {
+      "pid": 99853,
+      "owned_generation": 22231130,
+      "current_generation": null,
+      "owned_process_present": false
+    },
+    {
+      "pid": 70287,
+      "owned_generation": 22446915,
+      "current_generation": null,
+      "owned_process_present": false
+    },
+    {
+      "pid": 88323,
+      "owned_generation": 22851808,
+      "current_generation": null,
+      "owned_process_present": false
+    }
+  ],
+  "owned_server_probe": {
+    "exit": 1,
+    "stderr": "no server running on /tmp/tmux-1000/plan127-native\n"
+  },
+  "root_reader_health": {
+    "agent-browser-p190-aacb8e5b": {
+      "pid": 56947,
+      "source": "supervisor",
+      "checked_at": "2026-10-10T04:53:54Z",
+      "reader_schema_versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 23059078
+    },
+    "codex-wake-98975473": {
+      "pid": 56947,
+      "source": "supervisor",
+      "checked_at": "2026-10-10T04:53:54Z",
+      "reader_schema_versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 23059078
+    },
+    "soylei-website-bb3c1b12": {
+      "pid": 49232,
+      "source": "codex-waked",
+      "checked_at": "2026-10-10T04:53:54Z",
+      "reader_schema_versions": [
+        1,
+        2
+      ],
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 21388923
+    },
+    "soylei-website-fulfillment-authority-reconciliation-20260808-92fcd511": {
+      "pid": 56947,
+      "source": "supervisor",
+      "checked_at": "2026-10-10T04:53:54Z",
+      "reader_schema_versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 23059078
+    }
+  },
+  "all_registered_roots_pending_firing_zero": true,
+  "protected_uncertain_signal_mailbox_state_unchanged": true,
+  "user_entrypoint_links": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-waked",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-wake-github-webhook"
+  },
+  "codex_version": "codex-cli 0.162.1",
+  "wake_version": "codex-wake 0.9.0",
+  "retained_failed_probe": "First final assertion assumed all root health files always report the supervisor. Existing SoyLei workerPID49232 also writes its own truthful schemas1/2 advertisement. No unrelated reader is upgraded/restarted; selected Codex Wake root has the qualified supervisor and actual native delivery proof.",
+  "scope": "Activation captured schemas1\u20134 from the supervisor for four roots. Later health files can reflect retained per-project legacy readers; monitor-ready alone is not native capability proof."
+}

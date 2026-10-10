@@ -9,7 +9,7 @@ Blocked by: docs/dev/plans/0128-2026-10-09-native-durable-delivery.md — Delive
 
 ## Current State
 
-Installed two-agent lifecycle passed at sourcec579ebe. A assigned B natively, armed a file condition and ended its turn; the independent installed scheduler resumed A17 seconds later, read result42 and displayed the exact response. Guard, separate cancellation and ordinary close preserved B conversation. Current-source0130 receipts cover expiry and explicit same-thread resume. See [acceptance](../evidence/plan0127/0131-acceptance.md). Candidate release/migration remain0132; parent staysopen.
+Installed two-agent lifecycle passed at sourcec579ebe. A assigned B natively, armed a file condition and ended its turn; the independent installed scheduler resumed A17 seconds later, read result42 and displayed the exact response. Guard, separate cancellation and ordinary close preserved B conversation. See [acceptance](../evidence/plan0127/0131-acceptance.md). Normal installed v0.9.0 repeated the complete lifecycle through the existing supervisor, with A resuming15 seconds later. Separate0130 receipts cover expiry/resume; final repair execution, migration, release and parent completion audit pass. Owned fixture clients/server are closed; native histories remain readable.
 
 ## What to Build
 

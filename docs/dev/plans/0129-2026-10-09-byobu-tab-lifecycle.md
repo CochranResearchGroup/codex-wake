@@ -9,7 +9,7 @@ Blocked by: None
 
 ## Current State
 
-Installed candidate acceptance passed new/exact resume/reuse/explicit extra attachment, active/pending close guards, ordinary idle close, force preservation, and identity mismatch refusal. Signal and mailbox authorities are inspected alongside JSON records.975 comprehensive tests and affected regression checks pass. See [acceptance](../evidence/plan0127/0129-acceptance.md) and exact source hashes. Candidate is not released; parent Plan0127 remains open.
+Installed candidate acceptance passed new/exact resume/reuse/explicit extra attachment, active/pending close guards, ordinary idle close, force preservation, and identity mismatch refusal. Signal and mailbox authorities are inspected alongside JSON records.975 candidate tests and affected regression checks passed. See [acceptance](../evidence/plan0127/0129-acceptance.md) and exact source hashes. Released v0.9.0 adds normal installed lifecycle/close evidence and983 frozen installed tests; parent completion-audit.md records final qualification and retained failed samples.
 
 ## What to Build
 

@@ -1,0 +1,12 @@
+{
+  "release_source_commit": "a686c7b73034b149967b4ef19d0d7a58b2b61cc4",
+  "qualified_wheel_asset": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-qualified-0.9.0/codex_wake-0.9.0-py3-none-any.whl",
+  "wheel_sha256": "30bf9d2736c78af6fb69d0051184e26af2a32924a01f87dbe5bdfbd0f8e9f40d",
+  "sdist_asset": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/release-public-0.9.0/codex_wake-0.9.0.tar.gz",
+  "sdist_sha256": "3d681fb30a4e44262535ba5153d45ec55d36d7102b9b817b143f3a3daf6fe33a",
+  "canonical_rebuild_wheel_sha256": "dc818cb627f0fe83874c2e9d74aa97f4541f609f359c20c67e743c0f75cc80cb",
+  "all_wheel_entries_content_identical": true,
+  "wheel_entry_count": 84,
+  "sdist_source_and_metadata_match": true,
+  "retained_failed_probe": "Initial binary wheel equality assertion fails because ZIP timestamps differ; every entry content, metadata and RECORD is identical. Publish the exact already-tested wheel bytes and canonical rebuilt sdist."
+}

@@ -15,8 +15,12 @@ executes; implicit basic tmux capture retires with explicit compatibility
 retained.983 comprehensive tests, installed wheel smoke and real native turn
 readback pass. See [acceptance](../evidence/plan0127/0132-acceptance.md).
 Migration/capability documentation is published at remote source27bd7af. All
-child criteria pass; parent integration, release and normal installation remain
-unproven.
+child criteria pass. Parent integration via PR228/canonicala686c7b, publicv0.9.0
+and normal installation are now verified in completion-audit.md. Candidate
+receipts above remain historical; final installed wheel matches all78 source
+modules and983 installed tests pass. Older project workers and original state
+are explicitly preserved; native parity is not claimed for retained advanced
+or network-time compatibility paths.
 
 ## What to Build
 

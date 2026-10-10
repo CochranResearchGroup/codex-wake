@@ -1,23 +1,24 @@
 # Plan 0127 — Native Codex and Wake product boundary
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
-Branch: release/native-workflows-closeout
+Branch: docs/plan127-completion
 
 ## Current State
 
-Tickets 0128–0132 are CLOSED with installed candidate acceptance receipts in
-`docs/dev/evidence/plan0127/`. Ticket 0132 migration, qualified retirement and documentation publication pass.
-Source is integrated as canonical `0a05c66` via PR227 with both hosted release
-gates passing. Normal global0.9 lifecycle acceptance passes with retained failed
-samples. Release audit found native intent accounting and reader advertisement
-defects; source dc235a9 and normal immutable installation resolve both with
-983 installed tests and exact native execution proof. PR228 hosted integration,
-release publication and final audit remain required. Continuation
-custody is `release/native-workflows-closeout`. Migration, qualified retirement,
-rollback and release remain required before this parent can close. Repository
-plans are the tickets; no remote tracker issues are created.
+All five tickets and the full installed lifecycle pass. PR227 integrates the
+native workflow source; PR228 integrates audit repairs/evidence as canonical
+a686c7b after both hosted Python3.11/3.12 gates pass, including merged-main CI.
+Public v0.9.0 points to that exact source; downloaded wheel/sdist hashes match.
+The active immutable0.9-qualified installation matches all78 source modules;
+983 installed tests and real normal-supervisor exact-thread execution pass.
+Intent accounting and reader advertisement audit defects are resolved. Owned
+fixture clients/server are closed; conversations, uncertainty and older package
+files are preserved. Other project workers remain explicitly retained legacy
+readers. See [completion audit](../evidence/plan0127/completion-audit.md) for all
+15 stories,20 child criteria, implementation/testing/execution rules and limits.
+Repository plans are the tickets; no remote tracker issues were created.
 
 ## Problem Statement
 
@@ -97,11 +98,11 @@ Completion demonstration: **open/resume a tab → assign ordinary work natively 
 
 | Ticket | Outcome | Depends on | Current status |
 | --- | --- | --- | --- |
-| [0128](0128-2026-10-09-native-durable-delivery.md) | Installed scheduler delivers a durable wake to the exact native thread | None | Accepted candidate |
-| [0129](0129-2026-10-09-byobu-tab-lifecycle.md) | Explicit new/resume, attachment reuse and guarded tab close | None | Accepted candidate |
-| [0130](0130-2026-10-09-native-delivery-recovery.md) | Interrupted submission reconciles or remains safely unresolved | 0128 | Accepted candidate |
-| [0131](0131-2026-10-09-native-agent-lifecycle-acceptance.md) | Real agents complete the condition-triggered lifecycle unassisted | 0128–0130 | Accepted candidate |
-| [0132](0132-2026-10-09-legacy-transport-retirement.md) | Qualify migration/rollback, retire proven redundant paths and document release | 0131 | Accepted candidate; docs published |
+| [0128](0128-2026-10-09-native-durable-delivery.md) | Installed scheduler delivers a durable wake to the exact native thread | None | DONE; released0.9.0 |
+| [0129](0129-2026-10-09-byobu-tab-lifecycle.md) | Explicit new/resume, attachment reuse and guarded tab close | None | DONE; released0.9.0 |
+| [0130](0130-2026-10-09-native-delivery-recovery.md) | Interrupted submission reconciles or remains safely unresolved | 0128 | DONE; released0.9.0 |
+| [0131](0131-2026-10-09-native-agent-lifecycle-acceptance.md) | Real agents complete the condition-triggered lifecycle unassisted | 0128–0130 | DONE; released0.9.0 |
+| [0132](0132-2026-10-09-legacy-transport-retirement.md) | Qualify migration/rollback, retire proven redundant paths and document release | 0131 | DONE; released0.9.0 |
 
 Each ticket owns its acceptance checklist. The table is a navigation aid, not
 permission to bypass evidence. All five must pass, and integration and installed
@@ -110,4 +111,4 @@ required for this bounded objective.
 
 ## Further Notes
 
-Evidence: prototype commits 3619e60 and 0445918, with scripts/prototype_native_sessions/README.md and UNATTENDED.md. Accepted interview provenance remains in the original checkout's docs/dev/notes/0011-2026-10-08-native-wake-product-boundary-interview.md. No default-branch active lane is claimed until the reviewed plan projection is integrated.
+Historical design evidence: prototype commits 3619e60 and 0445918, with scripts/prototype_native_sessions/README.md and UNATTENDED.md. Accepted interview provenance remains in the original checkout's docs/dev/notes/0011-2026-10-08-native-wake-product-boundary-interview.md. Released behavior is proven separately in the parent completion audit and installed/native receipts.
