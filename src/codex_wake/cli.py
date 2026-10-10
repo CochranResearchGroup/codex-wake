@@ -2725,6 +2725,9 @@ def run(argv: list[str] | None = None) -> int:
         from .a2a_cli import a2a_command
         return a2a_command(args)
     if args.command == "sessions":
+        if args.sessions_command in ('open', 'close'):
+            from .session_lifecycle import lifecycle_command
+            return lifecycle_command(args, root)
         from .sessions_cli import sessions_command
         return sessions_command(args)
     if args.command == "native":

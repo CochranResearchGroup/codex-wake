@@ -1,0 +1,76 @@
+[
+  {
+    "label": "reuse",
+    "argv": [
+      "sessions",
+      "open",
+      "--resume",
+      "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "--name",
+      "plan127-worker",
+      "--tmux-socket",
+      "/tmp/tmux-1000/plan127-native",
+      "--tmux-session",
+      "recipient",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"action\": \"reused\", \"attachments\": [{\"client_pid\": 40057, \"client_start_time_ticks\": 22259604, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%1\", \"pane_index\": \"0\", \"pane_title\": \"plan127-worker\", \"pane_tty\": \"/dev/pts/42\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@1\", \"window_index\": \"1\", \"window_name\": \"plan127-worker\"}], \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\"}\n",
+    "stderr": ""
+  },
+  {
+    "label": "pending-register",
+    "argv": [
+      "native",
+      "after",
+      "--codex-path",
+      "/home/ecochran76/.local/bin/codex",
+      "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "1h",
+      "--",
+      "This pending workflow must survive closing the tab."
+    ],
+    "exit_code": 0,
+    "stdout": "wake_20261010_023823_46b8 /home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes/pending/wake_20261010_023823_46b8.json\n",
+    "stderr": ""
+  },
+  {
+    "label": "guard-pending-close",
+    "argv": [
+      "sessions",
+      "close",
+      "window:@1",
+      "--tmux-socket",
+      "/tmp/tmux-1000/plan127-native",
+      "--json"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "codex-wake: tab has active/unknown work or pending wakes; explicit --force required\n"
+  },
+  {
+    "label": "force-close",
+    "argv": [
+      "sessions",
+      "close",
+      "window:@1",
+      "--tmux-socket",
+      "/tmp/tmux-1000/plan127-native",
+      "--force",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"action\": \"closed\", \"affected_wakes\": [{\"root\": \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes\", \"wake_id\": \"wake_20261010_023823_46b8\"}], \"attachment\": {\"client_pid\": 40057, \"client_start_time_ticks\": 22259604, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%1\", \"pane_index\": \"0\", \"pane_title\": \"plan127-worker\", \"pane_tty\": \"/dev/pts/42\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@1\", \"window_index\": \"1\", \"window_name\": \"plan127-worker\"}, \"conversation\": \"preserved\", \"forced\": true, \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\"}\n",
+    "stderr": ""
+  },
+  {
+    "label": "pending-preserved",
+    "argv": [
+      "list",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "[\n  {\n    \"ack_timeout_seconds\": 30,\n    \"attempts\": 0,\n    \"created_at\": \"2026-10-10T02:38:23Z\",\n    \"cwd\": \"/home/ecochran76/workspace.local/codex-wake-plan127\",\n    \"events\": [\n      {\n        \"at\": \"2026-10-10T02:38:23Z\",\n        \"message\": \"Wake record created\",\n        \"type\": \"created\"\n      }\n    ],\n    \"id\": \"wake_20261010_023823_46b8\",\n    \"max_attempts\": 3,\n    \"next_attempt_at\": \"2026-10-10T03:38:23Z\",\n    \"predicate\": {\n      \"due_at\": \"2026-10-10T03:38:23Z\",\n      \"type\": \"not_before\"\n    },\n    \"prompt\": \"This pending workflow must survive closing the tab.\",\n    \"schema_version\": 1,\n    \"status\": \"pending\",\n    \"target\": {\n      \"codex_cmd\": \"/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex\",\n      \"endpoint\": \"unix://\",\n      \"expires_at\": \"2026-10-11T03:38:23Z\",\n      \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\",\n      \"transport\": \"native\"\n    },\n    \"updated_at\": \"2026-10-10T02:38:23Z\"\n  }\n]\n",
+    "stderr": ""
+  }
+]

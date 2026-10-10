@@ -5203,3 +5203,8 @@ Canonical proof: docs/dev/evidence/plan0122/activation/requirement-audit.md, val
 ## Turn 244 | 2026-10-09
 
 Published the user-approved Plan0127 execution contract and tickets0128–0132 locally on the prototype branch. Native evidence remains scoped to commits3619e60 and0445918; no product implementation is claimed. Required acceptance uses installed commands, exact native/tab identities, durable outcomes and real client execution. Documentation, mocks and prototypes cannot close tickets. Dependency links and plan metadata checked; original checkout's unrelated notes preserved. No runtime mutation in this planning slice. Memory disposition unavailable: no verified Codex Wake Graphiti group; the committed plan is durable provenance.
+
+
+## Turn 245 | 2026-10-10 UTC
+
+Plan0127 execution on feat/native-workflows:0128 committed1bb976b with installed systemd/native execution evidence;0129 now accepted through installed candidate new/resume/reuse/extra attachment, idle/busy/pending close controls, identity mismatch and force preservation. Full975-test suite passed102.172s,63 focused tests passed and23 affected checks passed after command-error conversion. Failed split-tab traceback and corrected refusal retained. JSON damage, unpublished signal registrations and pending mailbox work are guarded without consumption. Explicit custom buses use --bus-root. No shared daemon restart or unrelated tab change. Recovery0130 next; parent remainsOPEN and release unclaimed. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group; non-write receipt requested through graphiti-runtime.

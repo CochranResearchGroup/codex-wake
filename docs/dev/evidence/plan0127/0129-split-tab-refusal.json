@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+    "sessions",
+    "close",
+    "window:@2",
+    "--tmux-socket",
+    "/tmp/tmux-1000/plan127-native",
+    "--force",
+    "--json"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake\", line 10, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/ecochran76/workspace.local/codex-wake-plan127/src/codex_wake/cli.py\", line 2797, in main\n    return run(argv)\n           ^^^^^^^^^\n  File \"/home/ecochran76/workspace.local/codex-wake-plan127/src/codex_wake/cli.py\", line 2730, in run\n    return lifecycle_command(args, root)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ecochran76/workspace.local/codex-wake-plan127/src/codex_wake/session_lifecycle.py\", line 150, in lifecycle_command\n    result = open_session(args) if args.sessions_command == 'open' else close_session(args, root)\n                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ecochran76/workspace.local/codex-wake-plan127/src/codex_wake/session_lifecycle.py\", line 114, in close_session\n    row = resolve(snapshot, args.selector, session=args.tmux_session)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ecochran76/workspace.local/codex-wake-plan127/src/codex_wake/sessions.py\", line 159, in resolve\n    raise SelectionError(4, 'selector matches multiple panes or windows', selector,\ncodex_wake.sessions.SelectionError: selector matches multiple panes or windows\n",
+  "panes_after_refusal": [
+    "%2",
+    "%3"
+  ]
+}

@@ -83,6 +83,32 @@ class CompactionResult:
     retained: int
 
 
+def pending_signal_targets(database: Path) -> list[dict[str, Any]]:
+    """Read pending registration targets, including unpublished records.
+
+    This inspection neither initializes nor migrates an existing journal and
+    excludes prompt bodies from its result.
+    """
+    if not database.exists():
+        return []
+    connection = None
+    try:
+        connection = sqlite3.connect(database.resolve().as_uri() + '?mode=ro',
+                                     uri=True, timeout=1)
+        rows = connection.execute(
+            "SELECT a.wake_id, a.resume_json, a.state FROM arms a "
+            "LEFT JOIN wake_lifecycle l ON a.wake_id=l.wake_id "
+            "WHERE a.state!='tombstoned' AND "
+            "(l.desired_status IS NULL OR l.desired_status IN ('pending','firing'))"
+        ).fetchall()
+        return [dict(wake_id=identifier, target=json.loads(resume)['target'],
+                     publication_state=state) for identifier, resume, state in rows]
+    except (sqlite3.Error, ValueError, KeyError, TypeError):
+        raise SignalStoreError('pending signal target inventory unavailable') from None
+    finally:
+        _close_quietly(connection)
+
+
 class SQLiteSignalModule(SignalEngine):
     """SQLite adapter at the accepted WakeSignalModule seam."""
 

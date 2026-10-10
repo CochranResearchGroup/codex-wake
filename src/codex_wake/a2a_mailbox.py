@@ -42,6 +42,28 @@ class Mailbox:
         with bus.connection() as database:
             self._schema(database)
 
+    def pending_thread_work(self, thread_id: str) -> list[dict]:
+        """Inspect lifecycle blockers without reading message bodies or expiring work."""
+        with self.bus.connection(read_only=True) as database:
+            rows = database.execute(
+                "SELECT e.message_id, e.recipient_key, 'message' AS kind "
+                "FROM mail_metadata e JOIN mail_state s USING(message_id) "
+                "WHERE s.admission='accepted' AND s.recipient NOT IN ('declined','completed','failed') "
+                "UNION SELECT message_id, recipient_key, kind FROM mail_outbox "
+                "WHERE status IN ('pending','published','deferred','dispatching','uncertain')"
+            ).fetchall()
+        result = []
+        for row in rows:
+            try:
+                identity = json.loads(row['recipient_key'])
+                if not isinstance(identity, list) or len(identity) != 2:
+                    raise ValueError()
+            except (ValueError, TypeError):
+                raise BusError('inventory_unavailable', 'pending mailbox attribution is unavailable') from None
+            if identity[1] == thread_id:
+                result.append(dict(message_id=row['message_id'], kind=row['kind']))
+        return result
+
     @staticmethod
     def _schema(database):
         row = database.execute("SELECT value FROM meta WHERE key='mailbox_schema'").fetchone()

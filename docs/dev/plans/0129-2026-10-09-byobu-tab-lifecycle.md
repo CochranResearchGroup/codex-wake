@@ -1,7 +1,7 @@
 # Plan 0129 — Open and close exact Byobu tabs
 
-State: PLANNED
-Workflow: READY_FOR_AGENT
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
 Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
@@ -9,7 +9,7 @@ Blocked by: None
 
 ## Current State
 
-Approved ticket; implementation not started. Execute only after every listed blocker is CLOSED with passing evidence. The parent execution contract governs this ticket; planning, mocks and prototype results alone cannot close it.
+Installed candidate acceptance passed new/exact resume/reuse/explicit extra attachment, active/pending close guards, ordinary idle close, force preservation, and identity mismatch refusal. Signal and mailbox authorities are inspected alongside JSON records.975 comprehensive tests and affected regression checks pass. See [acceptance](../evidence/plan0127/0129-acceptance.md) and exact source hashes. Candidate is not released; parent Plan0127 remains open.
 
 ## What to Build
 
@@ -17,10 +17,10 @@ Open and close exact Byobu tabs, as one complete user-visible slice under the pa
 
 ## Acceptance Criteria
 
-- [ ] Open explicitly creates a conversation with a chosen directory or resumes one exact thread; return thread and tab identities.
-- [ ] Reuse an existing attachment unless another is explicitly requested; do not create implicit worktrees.
-- [ ] Closing active or pending-work tabs refuses; force-close preserves conversations and records and reports affected work.
-- [ ] A disposable real session proves new, resume, reuse, close and identity mismatch handling.
+- [x] Open explicitly creates a conversation with a chosen directory or resumes one exact thread; return thread and tab identities.
+- [x] Reuse an existing attachment unless another is explicitly requested; do not create implicit worktrees.
+- [x] Closing active or pending-work tabs refuses; force-close preserves conversations and records and reports affected work.
+- [x] A disposable real session proves new, resume, reuse, close and identity mismatch handling.
 
 ## Scope and Non-goals
 

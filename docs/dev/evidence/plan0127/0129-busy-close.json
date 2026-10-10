@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+    "sessions",
+    "close",
+    "window:@2",
+    "--tmux-socket",
+    "/tmp/tmux-1000/plan127-native",
+    "--json"
+  ],
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "codex-wake: tab has active/unknown work or pending wakes; explicit --force required\n"
+}

@@ -13,6 +13,26 @@ from .sessions import SelectionError, observe, resolve
 def add_sessions_parser(subparsers):
     parser = subparsers.add_parser('sessions', help='discover live Codex sessions by exact thread or Byobu tab')
     commands = parser.add_subparsers(dest='sessions_command', required=True)
+    for verb in ('open', 'close'):
+        command = commands.add_parser(verb)
+        command.add_argument('--json', dest='as_json', action='store_true')
+        command.add_argument('--app-server', default='unix://')
+        command.add_argument('--tmux-socket')
+        command.add_argument('--tmux-session')
+        command.add_argument('--timeout', type=float, default=30)
+        if verb == 'open':
+            mode = command.add_mutually_exclusive_group(required=True)
+            mode.add_argument('--new', action='store_true')
+            mode.add_argument('--resume')
+            command.add_argument('--cwd')
+            command.add_argument('--name', required=True)
+            command.add_argument('--codex-path', default='codex')
+            command.add_argument('--extra-attachment', action='store_true')
+        else:
+            command.add_argument('selector')
+            command.add_argument('--force', action='store_true')
+            command.add_argument('--bus-root', action='append', default=[],
+                                 help='also inspect this explicitly located durable mailbox bus')
     for verb in ['list', 'show', 'resolve', 'current', 'watch']:
         command = commands.add_parser(verb)
         command.add_argument('--json', dest='as_json', action='store_true')
