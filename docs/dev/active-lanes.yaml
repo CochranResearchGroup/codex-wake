@@ -169,3 +169,22 @@ lanes:
     overlaps: []
     updated_at: 2026-10-10
     disposition: Plan0139 complete; installed107 controls, actual claim/completion and separate no-force terminal-inbox closure PASS; original transport uncertainty remains held. PR233 merged, v0.11.1 active with81file parity; owned tabs/processes and clean worktree closed; wider Plan0101/0119 OPEN.
+
+  - id: P70
+    owner: primary
+    objective: Diagnose completed notification with uncertain pane visibility
+    work_items: [docs/dev/plans/0140-2026-10-10-notification-visibility-diagnosis.md]
+    plan: docs/dev/plans/0140-2026-10-10-notification-visibility-diagnosis.md
+    plan_ref: origin/main
+    branch: main
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: b98f750134882945c7cec13eab00fc7d94202fa5
+    remote_ref: refs/remotes/origin/main
+    integration: direct_main_docs
+    checkout_required: false
+    dependencies: [P69]
+    overlaps: []
+    updated_at: 2026-10-10
+    disposition: Diagnosis complete; native exact message completed, screen observer loses markers under scroll and wrapping. Original UI capture missing, uncertainty preserved; native live submission repair proposed, not implemented.
