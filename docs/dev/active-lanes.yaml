@@ -90,13 +90,16 @@ lanes:
     plan_ref: feat/native-network-time
     branch: feat/native-network-time
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 72e7c13420fde3d70b8ea3bf679196be974e029e
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 28a7076b0c2ba895899132d838d21cfa247f4c1b
     remote_ref: refs/remotes/origin/feat/native-network-time
     integration: squash_pr
     dependencies: []
     overlaps: []
     updated_at: 2026-10-10
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/230
-    disposition: Source arming/recovery qualifies993 isolated tests; exact hosted gates pending; installed ticket0136 remains blocked. Branch-local plan owns execution detail.
+    disposition: Installed unattended acceptance complete; PR230 integrated and v0.10.0 activated. Final CI waiting waived by user; unrelated units preserved.
+    integration_receipt: 17b4d9833d33588bea1fd9987224561f7cca0953
+    release_tag: v0.10.0
+    checkout_required: false

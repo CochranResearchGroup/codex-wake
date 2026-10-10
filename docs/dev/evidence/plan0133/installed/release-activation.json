@@ -1,0 +1,63 @@
+{
+  "source": "17b4d9833d33588bea1fd9987224561f7cca0953",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98",
+  "assets": {
+    "codex_wake-0.10.0-py3-none-any.whl": "4c49d172f5b4137b04e3fa70219ad574542cea290859c4d6374cacef5cc7d1ea",
+    "codex_wake-0.10.0.tar.gz": "83d3411fa2a75fb2aa140dbcb41858b6333d6e5813e98a040d0238febef96b4b"
+  },
+  "links": {
+    "codex-wake": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-f4afd98/bin/codex-wake",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-wake"
+    },
+    "codex-waked": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-f4afd98/bin/codex-waked",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-waked"
+    },
+    "codex-wake-hook": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-f4afd98/bin/codex-wake-hook",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-wake-hook"
+    },
+    "codex-wake-github-webhook": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-f4afd98/bin/codex-wake-github-webhook",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-wake-github-webhook"
+    }
+  },
+  "pre_units": {
+    "codex-wake-agent-browser-lease-authority.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-agent-browser.service": "MainPID=80733\nActiveState=active",
+    "codex-wake-auracall.service": "MainPID=80734\nActiveState=active",
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": "MainPID=80737\nActiveState=active",
+    "codex-wake-graphiti.service": "MainPID=80738\nActiveState=active",
+    "codex-wake-litscout-0553-integration.service": "MainPID=24465\nActiveState=active",
+    "codex-wake-mail-receipts.service": "MainPID=80739\nActiveState=active",
+    "codex-wake-odollo-main-production-install.service": "MainPID=80742\nActiveState=active",
+    "codex-wake-odollo.service": "MainPID=80748\nActiveState=active",
+    "codex-wake-p54-c4-retained-v6s-poll.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website.service": "MainPID=75007\nActiveState=active",
+    "codex-wake-supervisor.service": "MainPID=56947\nActiveState=active"
+  },
+  "status": "activated",
+  "ci_waiver": "User: skip CI",
+  "post_units": {
+    "codex-wake-agent-browser-lease-authority.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-agent-browser.service": "MainPID=80733\nActiveState=active",
+    "codex-wake-auracall.service": "MainPID=80734\nActiveState=active",
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": "MainPID=80737\nActiveState=active",
+    "codex-wake-graphiti.service": "MainPID=80738\nActiveState=active",
+    "codex-wake-litscout-0553-integration.service": "MainPID=24465\nActiveState=active",
+    "codex-wake-mail-receipts.service": "MainPID=80739\nActiveState=active",
+    "codex-wake-odollo-main-production-install.service": "MainPID=80742\nActiveState=active",
+    "codex-wake-odollo.service": "MainPID=80748\nActiveState=active",
+    "codex-wake-p54-c4-retained-v6s-poll.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website.service": "MainPID=75007\nActiveState=active",
+    "codex-wake-supervisor.service": "MainPID=45166\nActiveState=active"
+  },
+  "supervisor_pid": 45166,
+  "supervisor_argv": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/python /home/ecochran76/.local/bin/codex-wake supervisor run --interval 1 --registry-dir /home/ecochran76/.config/codex-wake/roots.d --state-dir /home/ecochran76/.local/state/codex-wake/supervisor ",
+  "post_roots_ready": 4,
+  "version": "0.10.0",
+  "release_url": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.10.0"
+}

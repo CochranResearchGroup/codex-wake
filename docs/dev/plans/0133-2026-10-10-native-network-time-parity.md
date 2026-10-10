@@ -1,7 +1,7 @@
 # Plan 0133 — Native network-time parity
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: COMPLETE
 Owner: primary agent
 Lane: P66
 Target: origin/main
@@ -11,11 +11,14 @@ Work-Item: docs/dev/plans/0133-2026-10-10-native-network-time-parity.md
 
 ## Current State
 
-Planning approved on 2026-10-10. Plan0122 supplies the released network-first
-provider; Plan0127 supplies released native delivery. At canonical baseline
-38c74f3, native creation and expiry still use guest UTC. This plan and its three
-tickets define the successor; no successor implementation or runtime acceptance
-has run. Repo-native plans remain the ticket authority.
+Complete: integrated PR230 commit17b4d9833d33588bea1fd9987224561f7cca0953,
+published v0.10.0, active immutable0.10.0-17b4d98 installation. Real unattended
+native after/at and installed controls qualify; release assets/module parity,
+quiescent supervisor rollout and unrelated-unit preservation verified.
+Final hosted CI waiting explicitly waived by user: "skip CI". Prior source CI
+and local/installed evidence retained; final CI success is not inferred.
+See ../evidence/plan0133/installed-acceptance.md and installed/release-activation.json.
+Disposable tab closed preserving conversation; no migration or unrelated rollout.
 
 ## Problem Statement
 

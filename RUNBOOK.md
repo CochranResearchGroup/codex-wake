@@ -5356,3 +5356,12 @@ unchanged. Meaningful red-green regressions retained; isolated comprehensive993
 tests pass138.845s. Initial bare-interpreter errors retained and environment fixed.
 Hosted exact-head and installed0136 gates remain; source review is Standards/Spec
 by primary. No clock, global package, supervisor or unrelated root changes.
+
+## 2026-10-10 — Native network-time release closeout
+
+PR230 integrated17b4d98; published and activated v0.10.0 after installed unattended
+after/at,23controls, restart/prior-reader hold and bounded release smoke. User
+waived final hostedCI waiting. Root anchored main; LitScout repair retained in
+source and unrelated installed scheduler. Disposable tab closed, conversation
+preserved. All4supervisor roots quiescent before restart; unrelated units unchanged.
+Evidence: docs/dev/evidence/plan0133/installed-acceptance.md and installed/release-activation.json.

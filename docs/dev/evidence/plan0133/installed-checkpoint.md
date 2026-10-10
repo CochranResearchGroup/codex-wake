@@ -53,3 +53,12 @@ preflight had0 for all4roots, but refresh it. Restart only owning supervisor whe
 quiescent; unrelated daemon units including LitScout remain on preserved prefixes.
 Finish plan/catalog projections after released/installed readback. Root repair
 checkout is clean but owned by other session; reconcile custody before switching.
+
+## Final disposition
+
+COMPLETE. PR230 integrated17b4d98; v0.10.0 published/download hashes verified;
+active immutable0.10.0-17b4d98. Actual supervisor argv points to that prefix and
+all4roots report fresh ready health. Unrelated unit PIDs/states unchanged.
+FinalCI waiting waived explicitly by user. Pending CI wake8496 cancelled.
+Parent0133 and child0136 closed; release-activation.json owns final identity.
+Earlier checkpoint sections remain historical; do not execute their pending steps.
