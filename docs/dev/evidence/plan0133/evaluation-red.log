@@ -1,0 +1,14 @@
+test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake (tests.test_native_network_time.NativeNetworkTimeTests.test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake) ... FAIL
+
+======================================================================
+FAIL: test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake (tests.test_native_network_time.NativeNetworkTimeTests.test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_native_network_time.py", line 59, in test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake
+    self.assertEqual(poll_once(root,dispatch=False,time_provider=lambda:due).fired,1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 1 test in 0.028s
+
+FAILED (failures=1)

@@ -45,21 +45,24 @@ def create_native(args, root):
         raise WakeError('native target requires an exact thread UUID') from None
     if not args.endpoint.startswith('unix://'):
         raise WakeError('native target requires a local unix:// endpoint')
-    now = utc_now()
+    from .network_wakes import read_time, creation_time, precise_deadline
+    observation = read_time()
+    now = creation_time(observation)
     if args.native_command == 'file':
         predicate = {'type': 'file_exists', 'path': str(Path(args.trigger).resolve())}
         due = now
     else:
-        due = now + parse_duration(args.trigger) if args.native_command == 'after' else parse_timestamp(args.trigger)
-        predicate = {'type': 'not_before', 'due_at': format_utc(due)}
+        due = now + parse_duration(args.trigger) if args.native_command == 'after' else precise_deadline(args.trigger)
+        predicate = {'type': 'not_before', 'due_at': due.isoformat().replace('+00:00', 'Z')}
     ttl = parse_duration(args.ttl)
     if ttl.total_seconds() <= 0:
         raise WakeError('native expiry must be positive')
     target = {'transport': 'native', 'thread_id': args.thread_id,
               'codex_cmd': resolve_codex_cmd(args.codex_path, required=True),
-              'endpoint': args.endpoint, 'expires_at': format_utc(due + ttl),
+              'endpoint': args.endpoint, 'expires_at': (due + ttl).isoformat().replace('+00:00', 'Z'),
               'resume_policy': 'same_thread' if args.resume_missing else 'hold'}
-    return create_record(args.prompt, predicate, root, now, args, target=target)
+    return create_record(args.prompt, predicate, root, now, args, target=target,
+                         time_observation=observation)
 
 
 def read_native_thread(target):
@@ -93,7 +96,9 @@ def dispatch_native(root, found, now):
     existing = record.get('native_delivery', {})
     if existing.get('state') == 'uncertain':
         return reconcile_native(root, found, now)
-    if now >= parse_timestamp(target['expires_at']):
+    from .network_wakes import precise_deadline
+    expiry = precise_deadline(target['expires_at']) if record.get('schema_version') == 5 else parse_timestamp(target['expires_at'])
+    if now >= expiry:
         record['status'] = 'failed'
         record = append_event(record, 'expired', 'native recipient deadline elapsed', now)
         replace_record(root, found, record)
@@ -115,7 +120,8 @@ def dispatch_native(root, found, now):
         ready = False
     if not ready:
         record['status'] = 'pending'
-        record['next_attempt_at'] = format_utc(now + timedelta(seconds=5))
+        retry = now + timedelta(seconds=5)
+        record['next_attempt_at'] = retry.isoformat().replace('+00:00', 'Z') if record.get('schema_version') == 5 else format_utc(retry)
         record = append_event(record, 'native_held', 'exact recipient is not available and idle', now)
         replace_record(root, found, record)
         return DispatchResult('requeued', 'exact recipient is not available and idle')
@@ -214,7 +220,7 @@ def reconcile_native(root, found, now, *, force=False):
     delivery = dict(record.get('native_delivery', {}))
     if delivery.get('state') != 'uncertain':
         return DispatchResult('skipped', 'native submission is not uncertain')
-    if not force and delivery.get('next_reconciliation_at') and now < parse_timestamp(delivery['next_reconciliation_at']):
+    if now is not None and not force and delivery.get('next_reconciliation_at') and now < parse_timestamp(delivery['next_reconciliation_at']):
         return DispatchResult('skipped', 'native reconciliation observation deferred')
     prompt = native_prompt(root, record)
     try:
@@ -225,20 +231,24 @@ def reconcile_native(root, found, now, *, force=False):
         evidence, reason = None, 'native_evidence_unavailable:' + type(exc).__name__
     if evidence is None:
         previous_reason = delivery.get('reconciliation', {}).get('reason')
-        delivery.update(reconciliation=dict(state='unresolved', reason=reason, checked_at=format_utc(now)),
-                        next_reconciliation_at=format_utc(now + timedelta(seconds=5)))
+        delivery.update(reconciliation=dict(state='unresolved', reason=reason, checked_at=format_utc(now) if now else None),
+                        next_reconciliation_at=format_utc(now + timedelta(seconds=5)) if now else None)
         record['native_delivery'] = delivery
         if reason != previous_reason:
             record = append_event(record, 'native_unresolved', reason, now)
+            if now is None:
+                record['events'][-1].update(at=None, time_status='not_observed')
         replace_record(root, found, record)
         return DispatchResult('skipped', 'native submission unresolved; no resend')
     delivery.update(state='accepted', reconciled=True, evidence=evidence,
                     execution=evidence['execution'], acknowledgment='not_observed',
-                    reconciliation=dict(state='resolved', checked_at=format_utc(now)))
+                    reconciliation=dict(state='resolved', checked_at=format_utc(now) if now else None))
     if evidence.get('queue_id'):
         delivery['queue_id'] = evidence['queue_id']
     record.update(status='submitted', native_delivery=delivery)
     record = append_event(record, 'native_reconciled', 'exact native evidence confirms acceptance; no resend', now)
+    if now is None:
+        record['events'][-1].update(at=None, time_status='not_observed')
     replace_record(root, found, record)
     return DispatchResult('submitted', 'native acceptance reconciled')
 
@@ -249,7 +259,16 @@ def reconcile_command(args, root):
         found = find_record(root, args.wake_id)
         if found.record.get('target', {}).get('transport') != 'native':
             raise WakeError('reconciliation requires a native wake')
-        result = reconcile_native(root, found, utc_now(), force=True)
+        from .records import classify_record
+        if classify_record(found.record) == 'native_network_v5':
+            from .network_wakes import read_time, evaluation_time
+            try:
+                current = evaluation_time(read_time())
+            except WakeError:
+                current = None
+        else:
+            current = utc_now()
+        result = reconcile_native(root, found, current, force=True)
         current = find_record(root, args.wake_id).record
     print(json.dumps(dict(wake_id=args.wake_id, result=result.status,
                          status=current['status'], native_delivery=current.get('native_delivery')), sort_keys=True))
@@ -262,7 +281,7 @@ def migrate_command(args, root):
     with WakeLifecycleLock(root, args.wake_id):
         found = find_record(root, args.wake_id)
         record = found.record
-        if record.get('schema_version') == NATIVE_SCHEMA_VERSION:
+        if record.get('schema_version') in (NATIVE_SCHEMA_VERSION, 5):
             if classify_record(record) == 'hold':
                 raise WakeError('current native record is malformed; inspect before continuing')
             print(json.dumps({'id': args.wake_id, 'state': 'already_current', 'submitted': False}))

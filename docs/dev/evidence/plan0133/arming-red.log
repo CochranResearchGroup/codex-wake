@@ -1,0 +1,17 @@
+test_relative_arm_uses_external_upper_bound_not_guest_time (tests.test_native_network_time.NativeNetworkTimeTests.test_relative_arm_uses_external_upper_bound_not_guest_time) ... FAIL
+
+======================================================================
+FAIL: test_relative_arm_uses_external_upper_bound_not_guest_time (tests.test_native_network_time.NativeNetworkTimeTests.test_relative_arm_uses_external_upper_bound_not_guest_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_native_network_time.py", line 26, in test_relative_arm_uses_external_upper_bound_not_guest_time
+    self.assertEqual(record['predicate']['due_at'],'2027-01-15T08:01:01Z')
+AssertionError: '2026-10-10T14:30:49Z' != '2027-01-15T08:01:01Z'
+- 2026-10-10T14:30:49Z
++ 2027-01-15T08:01:01Z
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.044s
+
+FAILED (failures=1)

@@ -368,3 +368,13 @@ Rollback to an older release holds schema4 records unchanged. Preserve them
 until restoring a capable reader; do not downgrade them to tmux or restore an
 old candidate-native schema1 backup into an older live scheduler. Migration
 backups are private operational state, not repository fixtures.
+
+## Schema5: native network-time deadlines
+
+New native after/at/file registrations use schema5 with the existing native target,
+network-first time policy and bounded arming observation. Old readers1–4 hold this
+version. Existing schema4 remains guest-timed; no record is silently migrated.
+Relative creation/file TTL use the conservative upper bound; absolute deadlines
+preserve fractional precision. Fresh bounded evidence gates due, retry and expiry;
+uncertainty holds effects. Read-only native reconciliation and cancellation remain
+available without trustworthy time and report unknown timestamps.

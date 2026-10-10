@@ -1,14 +1,16 @@
 # Plan 0134 — Native network-time arming
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary agent
-Branch: docs/native-time-parity
+Branch: feat/native-network-time
 Work-Item: docs/dev/plans/0134-2026-10-10-native-network-time-arming.md
 
 ## Current State
 
-Approved ticket; implementation and acceptance have not run.
+Source behavior implemented and qualified in isolated Python3.12.13: comprehensive
+993 tests pass; exact hosted head remains the acceptance gate. See
+../evidence/plan0133/source-checkpoint.md. No installed/runtime activation claimed.
 
 ## Parent
 

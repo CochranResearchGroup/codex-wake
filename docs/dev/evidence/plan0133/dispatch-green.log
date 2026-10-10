@@ -1,0 +1,10 @@
+test_absolute_fraction_and_file_ttl_are_preserved (tests.test_native_network_time.NativeNetworkTimeTests.test_absolute_fraction_and_file_ttl_are_preserved) ... ok
+test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake (tests.test_native_network_time.NativeNetworkTimeTests.test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake) ... ok
+test_interrupted_firing_cannot_bypass_time_gate (tests.test_native_network_time.NativeNetworkTimeTests.test_interrupted_firing_cannot_bypass_time_gate) ... ok
+test_relative_arm_uses_external_upper_bound_not_guest_time (tests.test_native_network_time.NativeNetworkTimeTests.test_relative_arm_uses_external_upper_bound_not_guest_time) ... ok
+test_uncertain_arm_rejects_without_record (tests.test_native_network_time.NativeNetworkTimeTests.test_uncertain_arm_rejects_without_record) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.157s
+
+OK

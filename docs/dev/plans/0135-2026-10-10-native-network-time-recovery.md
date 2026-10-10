@@ -1,14 +1,16 @@
 # Plan 0135 — Safe native deadline evaluation and recovery
 
-State: PLANNED
-Workflow: BLOCKED
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary agent
-Branch: docs/native-time-parity
+Branch: feat/native-network-time
 Work-Item: docs/dev/plans/0135-2026-10-10-native-network-time-recovery.md
 
 ## Current State
 
-Approved ticket; implementation and acceptance have not run.
+Source behavior implemented and qualified in isolated Python3.12.13: comprehensive
+993 tests pass; exact hosted head remains the acceptance gate. See
+../evidence/plan0133/source-checkpoint.md. No installed/runtime activation claimed.
 
 ## Parent
 

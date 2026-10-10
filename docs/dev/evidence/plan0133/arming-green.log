@@ -1,0 +1,6 @@
+test_relative_arm_uses_external_upper_bound_not_guest_time (tests.test_native_network_time.NativeNetworkTimeTests.test_relative_arm_uses_external_upper_bound_not_guest_time) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.029s
+
+OK

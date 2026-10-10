@@ -18,6 +18,7 @@ from .time_provider import NETWORK_TIME_POLICY
 
 SCHEMA_VERSION = 1
 NATIVE_SCHEMA_VERSION = 4
+NATIVE_NETWORK_SCHEMA_VERSION = 5
 SCHEMA_COMPATIBILITY = "additive_optional_fields"
 SCHEMA_DOC = "docs/dev/wake-record-schema.md"
 ACTIVE_STATUS_DIRS = ("pending", "firing", "submitted", "failed", "cancelled", "expired")
@@ -69,6 +70,21 @@ class WakeLifecycleLock:
 def classify_record(record: object) -> str:
     """Pure multi-version classification; unrecognized records are held."""
 
+    if isinstance(record, dict) and record.get('schema_version') == NATIVE_NETWORK_SCHEMA_VERSION:
+        if classify_record(dict(record, schema_version=NATIVE_SCHEMA_VERSION)) != 'v1':
+            return 'hold'
+        if record.get('time_policy') != NETWORK_TIME_POLICY:
+            return 'hold'
+        from .time_provider import TimeDecision, require_time_decision
+        try:
+            observed = record['time_observation']
+            if not isinstance(observed['sources'], (list, tuple)):
+                return 'hold'
+            require_time_decision(TimeDecision(observed['status'], tuple(observed['sources']),
+                                              observed['lower'], observed['upper']))
+        except (KeyError, TypeError, ValueError):
+            return 'hold'
+        return 'native_network_v5'
     if decode_signal_record(record) is not None:
         return "signal_v2"
     if not isinstance(record, dict) or record.get("schema_version") not in (SCHEMA_VERSION,3,NATIVE_SCHEMA_VERSION):
@@ -349,8 +365,10 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "read_versions": [1, 2, 3, 4],
-        "native_write_version": NATIVE_SCHEMA_VERSION,
+        "read_versions": [1, 2, 3, 4, 5],
+        "native_network_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
+        "native_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
+        "legacy_native_write_version": NATIVE_SCHEMA_VERSION,
         "default_write_version": SCHEMA_VERSION,
         "signal_record_contract_version": 2,
         "signal_journal_schema_version": 2,
@@ -529,7 +547,7 @@ def cancel_record(
     checkpoint: Callable[[str], None] | None = None,
 ) -> Path:
     found = find_record(root, wake_id)
-    if decode_signal_record(found.record) is not None or classify_record(found.record) == "network_v3":
+    if decode_signal_record(found.record) is not None or classify_record(found.record) in {"network_v3", "native_network_v5"}:
         with WakeLifecycleLock(root, wake_id):
             if checkpoint is not None:
                 checkpoint("after_cancel_lock")
@@ -547,7 +565,7 @@ def _cancel_found(
     status = record.get("status")
     if status in {"submitted", "failed", "cancelled", "expired", "archived"}:
         raise WakeError(f"cannot cancel wake in status {status}")
-    network = classify_record(record) == 'network_v3'
+    network = classify_record(record) in {'network_v3', 'native_network_v5'}
     current = None if network else now or utc_now()
     record["status"] = "cancelled"
     record["updated_at"] = None if network else format_utc(current)

@@ -1,0 +1,329 @@
+.......................................................................................................................................................................EE....EEEEEEEEEEEE.EE........................................................F........................................................................................................................................................................................................................................................................................................................................................................................................................................................................usage: codex-wake sessions open [-h] [--json] [--app-server APP_SERVER]
+                                [--tmux-socket TMUX_SOCKET]
+                                [--tmux-session TMUX_SESSION]
+                                [--timeout TIMEOUT] (--new | --resume RESUME)
+                                [--cwd CWD] --name NAME
+                                [--codex-path CODEX_PATH] [--extra-attachment]
+codex-wake sessions open: error: one of the arguments --new --resume is required
+..........................................................................................................................................................................................................................................................codex-wake: webhook listener configuration is invalid
+....................................................
+======================================================================
+ERROR: test_dispatch_records_missing_app_server_command_as_operator_error (test_app_server.AppServerTests.test_dispatch_records_missing_app_server_command_as_operator_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server.py", line 124, in test_dispatch_records_missing_app_server_command_as_operator_error
+    result = dispatch_app_server_record(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/src/codex_wake/app_server.py", line 588, in dispatch_app_server_record
+    app_client = client or UnixWebSocketAppServerClient(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/src/codex_wake/app_server.py", line 440, in __init__
+    from websockets.sync.client import unix_connect
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_dispatch_rejects_non_executable_supervisor_default (test_app_server.AppServerTests.test_dispatch_rejects_non_executable_supervisor_default)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server.py", line 143, in test_dispatch_rejects_non_executable_supervisor_default
+    result = dispatch_app_server_record(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/src/codex_wake/app_server.py", line 588, in dispatch_app_server_record
+    app_client = client or UnixWebSocketAppServerClient(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/src/codex_wake/app_server.py", line 440, in __init__
+    from websockets.sync.client import unix_connect
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_discovery_timeout_does_not_start_a_proxy_or_daemon (test_app_server_lifecycle.PersistentDispatchTests.test_discovery_timeout_does_not_start_a_proxy_or_daemon)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 208, in test_discovery_timeout_does_not_start_a_proxy_or_daemon
+    result = dispatch_app_server_record(base/'wake', found, default_codex_cmd=str(executable))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/src/codex_wake/app_server.py", line 588, in dispatch_app_server_record
+    app_client = client or UnixWebSocketAppServerClient(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/src/codex_wake/app_server.py", line 440, in __init__
+    from websockets.sync.client import unix_connect
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_framed_rpc_invalid_messages_and_absolute_deadline (test_app_server_lifecycle.PersistentDispatchTests.test_framed_rpc_invalid_messages_and_absolute_deadline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 148, in test_framed_rpc_invalid_messages_and_absolute_deadline
+    from websockets.sync.server import serve
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='unsupported')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='nonprivate')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='wrong_actor')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='symlink_chain')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='foreign_alias')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='dangling_alias')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='unsafe_target')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='ancestor_alias')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start (test_app_server_lifecycle.PersistentDispatchTests.test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start) (case='foreign_target')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 138, in test_missing_unsupported_and_nonprivate_daemon_refuse_before_turn_start
+    with patch('codex_wake.app_server.subprocess.run',side_effect=run),patch('codex_wake.app_server.subprocess.Popen') as popen,patch('websockets.sync.client.unix_connect') as connect,patch('codex_wake.app_server.os.lstat',side_effect=lstat):
+                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/mock.py", line 1451, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pkgutil.py", line 513, in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_turn_survives_websocket_close_without_claiming_completion (test_app_server_lifecycle.PersistentDispatchTests.test_turn_survives_websocket_close_without_claiming_completion) (owned_alias=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 19, in test_turn_survives_websocket_close_without_claiming_completion
+    self._qualify_turn_lifetime(owned_alias)
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 34, in _qualify_turn_lifetime
+    from websockets.sync.server import serve
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+ERROR: test_turn_survives_websocket_close_without_claiming_completion (test_app_server_lifecycle.PersistentDispatchTests.test_turn_survives_websocket_close_without_claiming_completion) (owned_alias=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 19, in test_turn_survives_websocket_close_without_claiming_completion
+    self._qualify_turn_lifetime(owned_alias)
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_app_server_lifecycle.py", line 34, in _qualify_turn_lifetime
+    from websockets.sync.server import serve
+ModuleNotFoundError: No module named 'websockets'
+
+======================================================================
+FAIL: test_schema_command_reports_version_and_json (test_cli.CliTests.test_schema_command_reports_version_and_json)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_cli.py", line 341, in test_schema_command_reports_version_and_json
+    self.assertEqual(data["read_versions"], [1, 2, 3, 4])
+AssertionError: Lists differ: [1, 2, 3, 4, 5] != [1, 2, 3, 4]
+
+First list contains 1 additional elements.
+First extra element 4:
+5
+
+- [1, 2, 3, 4, 5]
+?            ---
+
++ [1, 2, 3, 4]
+
+----------------------------------------------------------------------
+Ran 993 tests in 116.037s
+
+FAILED (failures=1, errors=16)
+{"native_delivery": {"next_reconciliation_at": "2026-10-10T14:35:30Z", "reconciliation": {"checked_at": "2026-10-10T14:35:25Z", "reason": "multiple_native_submissions", "state": "unresolved"}, "state": "uncertain"}, "result": "skipped", "status": "firing", "wake_id": "wake_20261010_143525_20ae"}
+wake_20261009_000001_6140 /tmp/tmpo01an3lc/wakes/pending/wake_20261009_000001_6140.json
+wake_20261009_000001_68f2 /tmp/tmppnsrq8ij/wake/pending/wake_20261009_000001_68f2.json
+{"native_delivery": {"acknowledgment": "not_observed", "evidence": {"client_message_id": "client-exact", "execution": "turn_completed", "source": "native_turn", "turn_id": "turn-exact", "user_message_id": "message-exact"}, "execution": "turn_completed", "reconciled": true, "reconciliation": {"checked_at": "2026-10-10T14:35:25Z", "state": "resolved"}, "state": "accepted"}, "result": "submitted", "status": "submitted", "wake_id": "wake_20261010_143525_27fd"}
+{"cleanup": {"safe": true, "temporary_roots_removed": true}, "overall": "accepted", "phase": "cleaned"}
+{"cleanup": {"recovery_root": "/tmp/tmpyh5npdq8/p53-c5-ingress-fixture", "safe": false}, "overall": "failed", "phase": "cleanup_uncertain"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 1, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-10T14:35:48.508730+00:00", "deadline": "2026-10-10T14:50:48.508730+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "COMMITTED", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": "METHOD", "leak_free": true, "status": 405}, "wrong_path": {"code": "ROUTE", "leak_free": true, "status": 404}}, "request_sha256": "638c8588ca5311d877a1454d3f5fbe698d80b686e930048e048a9b4518a5c293", "security_header_fingerprint": "af2481a5db11a8f4b98870bc0d0923c49a371110e8ae7677883e276c3baec8ed", "signed_delivery_id": "3c57abe6-a865-46f3-adbc-e7d9bb1b779f", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://127.0.0.1:8820"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 2, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-10T14:35:48.508730+00:00", "deadline": "2026-10-10T14:50:48.508730+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "638c8588ca5311d877a1454d3f5fbe698d80b686e930048e048a9b4518a5c293", "security_header_fingerprint": "af2481a5db11a8f4b98870bc0d0923c49a371110e8ae7677883e276c3baec8ed", "signed_delivery_id": "3c57abe6-a865-46f3-adbc-e7d9bb1b779f", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://codex-wake.localhost"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 3, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-10T14:35:48.508730+00:00", "deadline": "2026-10-10T14:50:48.508730+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": "codex-wake.ecochran.dyndns.org", "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "638c8588ca5311d877a1454d3f5fbe698d80b686e930048e048a9b4518a5c293", "security_header_fingerprint": "af2481a5db11a8f4b98870bc0d0923c49a371110e8ae7677883e276c3baec8ed", "signed_delivery_id": "3c57abe6-a865-46f3-adbc-e7d9bb1b779f", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://192.168.50.108"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 4, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-10T14:35:48.508730+00:00", "deadline": "2026-10-10T14:50:48.508730+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "638c8588ca5311d877a1454d3f5fbe698d80b686e930048e048a9b4518a5c293", "security_header_fingerprint": "af2481a5db11a8f4b98870bc0d0923c49a371110e8ae7677883e276c3baec8ed", "signed_delivery_id": "3c57abe6-a865-46f3-adbc-e7d9bb1b779f", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "https://codex-wake.ecochran.dyndns.org"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 1, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-10T14:35:48.522081+00:00", "deadline": "2026-10-10T14:50:48.522081+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "COMMITTED", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": "METHOD", "leak_free": true, "status": 405}, "wrong_path": {"code": "ROUTE", "leak_free": true, "status": 404}}, "request_sha256": "c406355f85e034e3c395c58ff233115dc85b2f975d66bfbd6171f9c4dd147fc5", "security_header_fingerprint": "bca99a7a78444015498e929ed6b809f1b5337d34b47ca30bfd6c0a246db2ab57", "signed_delivery_id": "834c0191-7749-4a08-91c0-c707ee41916b", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://127.0.0.1:8820"}
+source=github-webhook
+enabled=true
+config=/tmp/tmp34hya5wr/wake/github/webhook-listeners.json
+{"address": "127.0.0.1", "allow_non_loopback": false, "current_generation": 1, "enabled": true, "max_body_bytes": 262144, "max_connections": 8, "operation_timeout_seconds": 8.0, "path": "/github/webhook", "port": 8820, "previous_generation": null, "previous_secret_ref": null, "request_timeout_seconds": 15.0, "secret_ref": "CODEX_WAKE_WEBHOOK_SECRET", "shutdown_timeout_seconds": 10.0, "source_instance": "github-webhook"}
+source=public-webhook
+enabled=true
+config=/tmp/tmp34hya5wr/wake/github/webhook-listeners.json
+{"counters": {"create": 0, "delete": 0, "dispatch": 0, "redelivery": 0, "trigger": 0}, "dispatch": "disabled", "identity": {"actor": "ecochran76", "callback_url": "https://codex-wake.ecochran.dyndns.org/github/webhook", "conclusion": "success", "github_host": "github.com", "listener": "127.0.0.1:8820", "ref": "refs/heads/main", "repository": "CochranResearchGroup/codex-wake", "repository_id": 1242753508, "secret_ref": "CODEX_WAKE_P53_C6_WEBHOOK_SECRET", "source_instance": "p53-c6-live-github", "token_ref": "CODEX_WAKE_P53_C6_GITHUB_TOKEN", "unit": "codex-wake-github-webhook-p53-c6-live-github.service", "workflow_id": 279450573, "workflow_path": ".github/workflows/ci.yml"}, "network": "absent", "phase": "read_only_preflight", "provider_transport": "absent", "runtime_counters": {"cleanup": 0, "establish": 0, "observation": 0, "secret_provision": 0, "secret_retirement": 0}}

@@ -14,13 +14,20 @@ from codex_wake.records import all_records, WakeError, write_record
 THREAD = '01a1227e-a041-7b72-9c36-18349e7dd22c'
 
 class NativeMigrationTests(unittest.TestCase):
+    def setUp(self):
+        from codex_wake.time_provider import TimeDecision
+        reading = TimeDecision('network', ('a','b'), 1791504000, 1791504000.2)
+        provider = patch('codex_wake.time_inspection.network_time_decision', return_value=reading)
+        provider.start()
+        self.addCleanup(provider.stop)
+
     def test_native_registration_uses_a_fail_closed_version_for_old_readers(self):
         with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
             root = Path(tmp)
             self.assertEqual(run(['--wake-root', tmp, 'native', 'after',
                                   '--codex-path', sys.executable, THREAD, '1h', '--', 'Continue']), 0)
             record = all_records(root)[0].record
-            self.assertEqual(record['schema_version'], 4)
+            self.assertEqual(record['schema_version'], 5)
             self.assertEqual(record['target']['thread_id'], THREAD)
 
     def test_classic_registration_requires_explicit_tmux_compatibility(self):
@@ -37,6 +44,8 @@ class NativeMigrationTests(unittest.TestCase):
             found = all_records(root)[0]
             record = dict(found.record, schema_version=1, status='firing',
                           native_delivery={'state': 'uncertain', 'submission_id': 'retained-nonce'})
+            record.pop('time_policy')
+            record.pop('time_observation')
             found.path.unlink()
             original_path = write_record(root, record)
             original = original_path.read_bytes()

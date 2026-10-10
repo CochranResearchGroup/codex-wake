@@ -1,0 +1,14 @@
+test_malformed_policy_and_observation_are_held_without_effect (tests.test_native_network_time.NativeNetworkTimeTests.test_malformed_policy_and_observation_are_held_without_effect) ... FAIL
+
+======================================================================
+FAIL: test_malformed_policy_and_observation_are_held_without_effect (tests.test_native_network_time.NativeNetworkTimeTests.test_malformed_policy_and_observation_are_held_without_effect)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_native_network_time.py", line 113, in test_malformed_policy_and_observation_are_held_without_effect
+    self.assertEqual(result.failed,0)
+AssertionError: 1 != 0
+
+----------------------------------------------------------------------
+Ran 1 test in 0.036s
+
+FAILED (failures=1)

@@ -25,7 +25,7 @@ def evaluation_time(decision):
 
 
 def mark_network_record(record, decision):
-    record['schema_version'] = 3
+    record['schema_version'] = 5 if record.get('target', {}).get('transport') == 'native' else 3
     record['time_policy'] = dict(NETWORK_TIME_POLICY)
     record['time_observation'] = asdict(decision)
     return record
@@ -56,3 +56,37 @@ def precise_deadline(value):
         return due.astimezone(UTC)
     except ValueError as error:
         raise WakeError('deadline must be an ISO timestamp with timezone') from error
+
+
+def evaluate_native_pending(root, identifier, provider=None):
+    """Evaluate native conditions and TTL with a fresh bounded observation."""
+    from .records import WakeLifecycleLock, classify_record, find_record, move_record
+    decision = read_time(provider)
+    current = evaluation_time(decision)
+    with WakeLifecycleLock(root, identifier):
+        found = find_record(root, identifier)
+        record = found.record
+        if classify_record(record) != 'native_network_v5' or record['status'] != 'pending':
+            return 'inactive'
+        expiry = precise_deadline(record['target']['expires_at'])
+        if current >= expiry:
+            move_record(root, found, 'failed', event_type='expired',
+                        message='Network lower bound reached native expiry', now=current)
+            return 'failed'
+        # A due trigger is insufficient when delivery eligibility is uncertain.
+        if decision.upper >= expiry.timestamp():
+            return 'pending'
+        retry = record.get('next_attempt_at')
+        if retry and current < precise_deadline(retry):
+            return 'pending'
+        predicate = record['predicate']
+        if predicate['type'] == 'not_before':
+            ready = current >= precise_deadline(predicate['due_at'])
+        else:
+            from pathlib import Path
+            ready = Path(predicate['path']).exists()
+        if not ready:
+            return 'pending'
+        move_record(root, found, 'firing', event_type='predicate_matched',
+                    message='Native condition and network deadline established', now=current)
+        return 'firing'
