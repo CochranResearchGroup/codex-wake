@@ -99,6 +99,11 @@ class RecoveryDisposition:
                 release = self.bus.meta(database, 'recovery_release')
                 if release.get('epoch') != epoch or release.get('disposition_receipt') != receipt_id:
                     raise BusError('recovery_refused', 'original release receipt is unavailable')
+                audit = database.execute('SELECT actor,action,subject FROM events WHERE receipt_id=?',
+                                         (release.get('receipt_id'),)).fetchone()
+                expected = dict(epoch=epoch, disposition_receipt=receipt_id, gap_unknown=True, paused=True)
+                if audit is None or audit['actor'] != 'operator' or audit['action'] != 'recovery_hold_released' or json.loads(audit['subject']) != expected:
+                    raise BusError('recovery_refused', 'release metadata differs from its committed audit receipt')
                 database.execute('ROLLBACK')
                 return dict(recovery=value, receipt_id=release['receipt_id'], deduplicated=True)
             receipt = self.bus.event(database, 'operator', 'recovery_hold_released',

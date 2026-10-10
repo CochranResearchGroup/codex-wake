@@ -104,7 +104,7 @@ class RecoveryDispositionTests(unittest.TestCase):
             self.assertEqual(code, 0)
             fresh.append(self.bus.authenticate(Path(rotated['actor_capability_file']), identity, invoking_cwd=self.repo))
         self.bus.enroll(self.repo, Path(self.operator), notify=True)
-        mailbox = Mailbox(self.bus)
+        mailbox = Mailbox(self.bus, max_open=2)
         with self.assertRaises(BusError) as denied:
             mailbox.ack(fresh[1], self.legacy_unread, outcome='accepted')
         self.assertEqual(denied.exception.code, 'recovery_legacy_held')
@@ -191,3 +191,49 @@ class RecoveryDispositionTests(unittest.TestCase):
         code, disposed = self.dispose()
         self.assertEqual(code, 0)
         self.assertFalse(disposed['deduplicated'])
+
+    def test_corrupted_legacy_boundary_cannot_enable_snapshot_processing(self):
+        self.assertEqual(self.dispose()[0], 0)
+        with self.bus.connection() as database:
+            # Corruption input, not an outcome oracle.
+            value = self.bus.meta(database, 'recovery_disposition')
+            value['legacy_through_sequence'] = 0
+            database.execute("UPDATE meta SET value=? WHERE key='recovery_disposition'", (json.dumps(value),))
+        code, refused = self.invoke('recovery-status')
+        self.assertEqual(code, 8)
+        self.assertEqual(refused['error']['code'], 'store_unavailable')
+
+    def test_later_recovery_epoch_has_its_own_disposition_and_release(self):
+        _, first = self.dispose()
+        self.assertEqual(self.invoke('release-recovery', *self.commitment,
+                                    '--disposition-receipt', first['receipt_id'])[0], 0)
+        snapshot = self.root / 'second-snapshot'
+        code, backup = self.invoke('backup', '--snapshot', str(snapshot))
+        self.assertEqual(code, 0)
+        sha256 = backup['backup']['database_sha256']
+        with self.bus.path.open('r+b') as stream:
+            stream.write(b'Damaged again!!')
+        code, recovered = self.invoke('recover-backup', '--snapshot', str(snapshot),
+                                      '--expected-database-sha256', sha256,
+                                      '--accept-unbacked-state-hold', '--apply')
+        self.assertEqual(code, 0)
+        self.operator = recovered['recovery']['operator_capability_file']
+        epoch = recovered['recovery']['recovery_epoch']
+        self.commitment = ['--recovery-epoch', epoch, '--expected-database-sha256', sha256]
+        self.assertIsNone(self.invoke('recovery-status')[1]['recovery']['disposition'])
+        code, second = self.dispose()
+        self.assertEqual(code, 0)
+        self.assertNotEqual(first['receipt_id'], second['receipt_id'])
+        code, released = self.invoke('release-recovery', *self.commitment,
+                                     '--disposition-receipt', second['receipt_id'])
+        self.assertEqual(code, 0)
+        self.assertEqual(released['recovery']['epoch'], epoch)
+        self.assertTrue(released['recovery']['gap_unknown'])
+
+    def test_unreceipted_hold_clear_is_not_a_release(self):
+        self.assertEqual(self.dispose()[0], 0)
+        with self.bus.connection() as database:
+            database.execute("UPDATE meta SET value='false' WHERE key='recovery_hold'")
+        code, refused = self.invoke('status')
+        self.assertEqual(code, 8)
+        self.assertEqual(refused['error']['code'], 'store_unavailable')

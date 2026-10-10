@@ -282,6 +282,25 @@ class BusStore:
                 or value['intent'].get('disposition') != 'retain-unknown'
                 or not isinstance(value.get('receipt_id'), str)):
             raise BusError('store_unavailable', 'recovery legacy fence metadata is invalid')
+        receipt = database.execute('SELECT actor,action,subject FROM events WHERE receipt_id=?',
+                                   (value['receipt_id'],)).fetchone()
+        expected = dict(value['intent'], legacy_through_sequence=value['legacy_through_sequence'], gap_unknown=True)
+        if (receipt is None or receipt['actor'] != 'operator' or receipt['action'] != 'recovery_disposition'
+                or json.loads(receipt['subject']) != expected
+                or BusStore.meta(database, 'recovery_gap_unknown') is not True):
+            raise BusError('store_unavailable', 'recovery legacy fence differs from its committed audit receipt')
+        if not BusStore.recovery_held(database):
+            release = BusStore.meta(database, 'recovery_release')
+            if (not isinstance(release, dict) or release.get('epoch') != value['intent']['epoch']
+                    or release.get('disposition_receipt') != value['receipt_id']):
+                raise BusError('store_unavailable', 'recovery hold has no qualified release commitment')
+            audit = database.execute('SELECT actor,action,subject FROM events WHERE receipt_id=?',
+                                     (release.get('receipt_id'),)).fetchone()
+            expected = dict(epoch=value['intent']['epoch'], disposition_receipt=value['receipt_id'],
+                            gap_unknown=True, paused=True)
+            if (audit is None or audit['actor'] != 'operator' or audit['action'] != 'recovery_hold_released'
+                    or json.loads(audit['subject']) != expected):
+                raise BusError('store_unavailable', 'recovery hold clear differs from its committed release receipt')
         return value['legacy_through_sequence']
 
     def operator(self, database, capability: Path) -> None:

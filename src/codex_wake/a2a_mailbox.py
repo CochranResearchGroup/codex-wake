@@ -432,7 +432,7 @@ class Mailbox:
             raise BusError('lineage_limit', 'conversation hop bound exceeded')
         if database.execute('SELECT (SELECT count(*) FROM mail_metadata)+(SELECT count(*) FROM mail_retired_keys)').fetchone()[0] >= self.max_messages:
             raise BusError('capacity', 'retained message capacity reached')
-        if database.execute("SELECT count(*) FROM mail_envelopes e JOIN mail_state s USING(message_id) WHERE e.recipient_key=? AND e.expires>? AND s.admission='accepted' AND s.recipient NOT IN ('declined','completed','failed')", (recipient_key, now)).fetchone()[0] >= self.max_open:
+        if database.execute("SELECT count(*) FROM mail_envelopes e JOIN mail_state s USING(message_id) WHERE e.recipient_key=? AND e.expires>? AND e.global_seq>? AND s.admission='accepted' AND s.recipient NOT IN ('declined','completed','failed')", (recipient_key, now, self.bus.recovery_legacy_boundary(database) or 0)).fetchone()[0] >= self.max_open:
             raise BusError('capacity', 'recipient open-message capacity reached')
         if database.execute('SELECT count(*) FROM mail_envelopes WHERE sender_key=? AND created>?', (actor.key, now - 60)).fetchone()[0] >= self.rate_limit:
             raise BusError('rate_limit', 'sender minute limit reached')

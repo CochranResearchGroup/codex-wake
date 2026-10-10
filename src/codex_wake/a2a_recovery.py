@@ -133,6 +133,9 @@ class MailRecovery:
                     recovery_gap_unknown=True, operator_digest=digest(secret))
                 for key, value in metadata.items():
                     prepared.execute('INSERT INTO meta VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value', (key, json.dumps(value)))
+                # Current disposition belongs to its epoch; prior audit receipts
+                # and the original snapshot/quarantine remain immutable history.
+                prepared.execute("DELETE FROM meta WHERE key IN ('recovery_disposition','recovery_release')")
                 for actor in prepared.execute('SELECT actor_id FROM actors').fetchall():
                     prepared.execute('UPDATE actors SET actor_id=?,revoked=1,generation=generation+1 WHERE actor_id=?',
                         ('actor_' + uuid.uuid4().hex, actor[0]))
