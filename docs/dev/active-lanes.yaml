@@ -176,12 +176,12 @@ lanes:
     work_items: [docs/dev/plans/0140-2026-10-10-notification-visibility-diagnosis.md]
     plan: docs/dev/plans/0140-2026-10-10-notification-visibility-diagnosis.md
     plan_ref: origin/main
-    branch: main
+    branch: docs/notification-visibility-diagnosis
     target: origin/main
     plan_state: CLOSED
     custody_state: INTEGRATED
     checkpoint: b98f750134882945c7cec13eab00fc7d94202fa5
-    remote_ref: refs/remotes/origin/main
+    remote_ref: refs/remotes/origin/docs/notification-visibility-diagnosis
     integration: direct_main_docs
     checkout_required: false
     dependencies: [P69]
@@ -205,5 +205,6 @@ lanes:
     checkout_required: false
     dependencies: [P63, P69, P70]
     overlaps: [P63]
+    reconciled_overlaps: [P63]
     updated_at: 2026-10-10
     disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. No implementation active; ticket0142 next. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
