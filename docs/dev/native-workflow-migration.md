@@ -3,7 +3,9 @@
 Native Codex owns ordinary messaging, conversation history, turn execution and
 status. Wake adds persistent conditions, bounded follow-up expiry, uncertain
 submission recovery and visible Byobu lifecycle. No custom Codex patch or
-shared-daemon restart is required. Plan0127 qualifies official Codex0.162.1.
+shared-daemon restart is required. Plan0127 qualifies official Codex0.162.1. Native execution requires a Wake0.9
+reader for the selected root; an older live monitor holds schema4 even when its
+legacy health status is ready.
 
 | Capability | Native support | Compatibility retained |
 | --- | --- | --- |
@@ -15,6 +17,13 @@ shared-daemon restart is required. Plan0127 qualifies official Codex0.162.1.
 | Ambiguous native submission | Exact evidence reconciliation or inspectable unresolved state | No automatic resend or transport fallback |
 
 ## Existing records and command callers
+
+Native `attempts` counts durable submission intents. It increments once before
+queue submission, including interruption before the external effect. Busy,
+unavailable and expired work consumes no attempt; reconciliation never increments
+it. This counter is not execution proof. Migration preserves historical counters
+exactly, including earlier accepted candidate records with zero attempts.
+Malformed native counters are held for inspection instead of reset or dispatched.
 
 Existing schema1 tmux/app-server records, schema2 signal journals and schema3
 network-time records retain their readers and recovery contracts. No bulk state
@@ -57,3 +66,14 @@ native turns, durable state and visible panes. Ticket0132 proves old-reader
 hold, restored native execution and same-root uncertainty preservation with
 owned disposable state. Candidate acceptance alone does not prove release,
 global installation, arbitrary Codex-version support or network-time parity.
+
+## Local versioned deployment
+
+The qualified workstation uses user entrypoints pointing to an immutable0.9
+installation under `.local/share/codex-wake/releases/`. The existing uv-managed
+0.8 environment is retained for already-running project workers. Its package
+manager listing describes that retained environment, not the current user
+entrypoints. The deployment receipt records exact link targets and rollback.
+A future uv tool install may reclaim user entrypoints; perform it against the
+intended release and account for workers using the old environment. No automatic
+upgrade of unrelated per-project units is claimed.

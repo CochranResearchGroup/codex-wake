@@ -38,9 +38,11 @@ class NativeDeliveryTests(unittest.TestCase):
                 result = poll_once(root, datetime(2026, 10, 9, tzinfo=UTC))
             self.assertEqual(result.requeued, 1)
             self.assertEqual(all_records(root)[0].record['status'], 'pending')
+            self.assertEqual(all_records(root)[0].record['attempts'], 0)
             result = poll_once(root, datetime(2026, 10, 9, 0, 11, tzinfo=UTC))
             self.assertEqual(result.failed, 1)
             self.assertNotIn('native_delivery', all_records(root)[0].record)
+            self.assertEqual(all_records(root)[0].record['attempts'], 0)
 
     def test_uncertain_acceptance_is_not_resubmitted_on_another_poll(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -60,6 +62,7 @@ class NativeDeliveryTests(unittest.TestCase):
             self.assertEqual(counter.read_text(), 'call\n')
             self.assertEqual(all_records(root)[0].record['native_delivery']['state'], 'uncertain')
             self.assertEqual(all_records(root)[0].record['native_delivery']['reconciliation']['state'], 'unresolved')
+            self.assertEqual(all_records(root)[0].record['attempts'], 1)
 
     def test_persisted_due_wake_uses_native_queue_and_records_acceptance(self):
         thread = '01a1227e-a041-7b72-9c36-18349e7dd22c'
@@ -81,6 +84,7 @@ class NativeDeliveryTests(unittest.TestCase):
             tmux.assert_not_called()
             self.assertEqual(result.submitted, 1)
             record = all_records(root)[0].record
+            self.assertEqual(record['attempts'], 1)
             self.assertEqual(record['native_delivery']['queue_id'], queue)
             self.assertEqual(record['native_delivery']['execution'], 'not_observed')
             self.assertEqual(record['native_delivery']['acknowledgment'], 'not_observed')

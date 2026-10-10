@@ -60,6 +60,7 @@ class MonitorTests(unittest.TestCase):
             self.assertIsNotNone(capability)
             self.assertEqual(capability.wake_root, root)
             self.assertIn(2, capability.schema_versions)
+            self.assertEqual(set(capability.schema_versions), {1, 2, 3, 4})
             self.assertGreater(capability.generation, 0)
             self.assertIsNone(
                 probe_managed_reader_capability(

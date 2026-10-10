@@ -126,6 +126,9 @@ def dispatch_native(root, found, now):
                                  'submission_id': str(uuid4())}
     prompt = native_prompt(root, record)
     record['native_delivery']['prompt_sha256'] = hashlib.sha256(prompt.encode()).hexdigest()
+    # Count the durable submission intent, including a crash before queueing.
+    # Reconciliation observes that intent and never consumes another attempt.
+    record['attempts'] += 1
     record = append_event(record, 'native_submission_started', 'native queue submission started', now)
     replace_record(root, found, record)
     env = dict(os.environ)

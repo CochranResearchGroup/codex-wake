@@ -10,7 +10,9 @@ Branch: release/native-workflows-closeout
 Tickets 0128–0132 are CLOSED with installed candidate acceptance receipts in
 `docs/dev/evidence/plan0127/`. Ticket 0132 migration, qualified retirement and documentation publication pass.
 Source is integrated as canonical `0a05c66` via PR227 with both hosted release
-gates passing. Release and global installation remain unproven. Continuation
+gates passing. Normal global0.9 lifecycle acceptance passes with retained failed
+samples. Release audit found native intent accounting and reader advertisement
+defects; bounded repairs are in progress. Release publication remains unproven. Continuation
 custody is `release/native-workflows-closeout`. Migration, qualified retirement,
 rollback and release remain required before this parent can close. Repository
 plans are the tickets; no remote tracker issues are created.

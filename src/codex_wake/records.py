@@ -80,6 +80,10 @@ def classify_record(record: object) -> str:
         return "hold"
     if not isinstance(record.get("status"), str) or record["status"] not in VALID_STATUSES:
         return "hold"
+    target = record.get("target")
+    if isinstance(target, dict) and target.get('transport') == 'native':
+        if type(record.get('attempts')) is not int or record['attempts'] < 0:
+            return "hold"
     if record.get("schema_version") == NATIVE_SCHEMA_VERSION:
         target = record.get("target")
         if (not isinstance(target, dict) or target.get("transport") != "native"
