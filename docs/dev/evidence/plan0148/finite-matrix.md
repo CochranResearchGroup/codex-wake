@@ -60,9 +60,14 @@ C1:0.11.2→prepared0.12→0.11.2→prepared0.12 on same owned normal mailbox; e
 message/claim/terminal receipts preserved, current reconciliation restored. Old
 reader explicitly refuses disposed schema3; held schema2 remains readable.
 Use actual retained immutable old/current candidates; no live service/binary
-activation.60s, child10s, bytes/identity/receipts unchanged, FD+2/children0.
+activation.60s, child10s, reader bytes/identity/receipts unchanged; explicit CLI status audit separately retained, FD+2/children0.
 
 WIP1, packets executed A1→F1→C1; two diagnosed attempts each maximum. Unknown
 effect stops that case without replay. Missing runtime ancestry may be safely
 reframed locally; no fixture promoted to actual ancestry. Parent0148 stays OPEN
 until every original row and all three packets qualify, then0149 final release.
+
+C1 first harness assumed CLI status is read-only; actual public status appends an
+operator inspect_status audit. Preserve first failed hash assertion. Correction
+pins bytes after each explicit audited status, before the non-mutating old/new
+receipt reader. Identity/message/claim/terminal remain invariant throughout.
