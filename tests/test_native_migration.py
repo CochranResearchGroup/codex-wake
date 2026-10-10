@@ -59,9 +59,13 @@ class NativeMigrationTests(unittest.TestCase):
                  THREAD, '1h', '--', 'Continue'])
             found = all_records(root)[0]
             base = json.loads(found.path.read_text())
+            base['predicate']['due_at'] = '2026-10-09T00:00:00Z'
+            base['next_attempt_at'] = '2026-10-09T00:00:00Z'
+            base['target']['expires_at'] = '2099-01-01T00:00:00Z'
             cases = [('target', 'expires_at', 'unreadable'),
                      ('predicate', 'due_at', 123), ('predicate', 'type', []),
-                     (None, 'status', [])]
+                     (None, 'status', []), (None, 'attempts', 'zero'),
+                     (None, 'attempts', -1), (None, 'attempts', True)]
             for section, key, value in cases:
                 with self.subTest(field=key):
                     record = json.loads(json.dumps(base))
@@ -69,7 +73,9 @@ class NativeMigrationTests(unittest.TestCase):
                     # Deliberately damaged JSON still belongs in pending custody.
                     found.path.write_text(json.dumps(record))
                     original = found.path.read_bytes()
-                    result = poll_once(root)
+                    with patch('codex_wake.native_delivery.read_native_thread',
+                               return_value={'id': THREAD, 'status': {'type': 'idle'}}):
+                        result = poll_once(root)
                     self.assertEqual(result.dispatched, 0)
                     self.assertEqual(result.failed, 0)
                     self.assertEqual(found.path.read_bytes(), original)

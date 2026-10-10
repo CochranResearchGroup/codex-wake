@@ -1,0 +1,455 @@
+{
+  "state": "activated",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified",
+  "links": {
+    "codex-wake": {
+      "path": "/home/ecochran76/.local/bin/codex-wake",
+      "original_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-wake",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-wake"
+    },
+    "codex-waked": {
+      "path": "/home/ecochran76/.local/bin/codex-waked",
+      "original_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-waked",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-waked"
+    },
+    "codex-wake-hook": {
+      "path": "/home/ecochran76/.local/bin/codex-wake-hook",
+      "original_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-wake-hook",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-wake-hook"
+    },
+    "codex-wake-github-webhook": {
+      "path": "/home/ecochran76/.local/bin/codex-wake-github-webhook",
+      "original_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af/bin/codex-wake-github-webhook",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified/bin/codex-wake-github-webhook"
+    }
+  },
+  "pre_units": {
+    "codex-wake-agent-browser-lease-authority.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-agent-browser.service": {
+      "MainPID": "80733",
+      "ActiveState": "active"
+    },
+    "codex-wake-auracall.service": {
+      "MainPID": "80734",
+      "ActiveState": "active"
+    },
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": {
+      "MainPID": "80737",
+      "ActiveState": "active"
+    },
+    "codex-wake-graphiti.service": {
+      "MainPID": "80738",
+      "ActiveState": "active"
+    },
+    "codex-wake-mail-receipts.service": {
+      "MainPID": "80739",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo-main-production-install.service": {
+      "MainPID": "80742",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo.service": {
+      "MainPID": "80748",
+      "ActiveState": "active"
+    },
+    "codex-wake-p54-c4-retained-v6s-poll.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website.service": {
+      "MainPID": "49232",
+      "ActiveState": "active"
+    },
+    "codex-wake-supervisor.service": {
+      "MainPID": "79221",
+      "ActiveState": "active"
+    }
+  },
+  "pre_status": {
+    "registry_dir": "/home/ecochran76/.config/codex-wake/roots.d",
+    "root_count": 4,
+    "roots": [
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:20Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/aacb8e5b1d28.json",
+        "health_recent": true,
+        "health_source": "supervisor",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/agent-browser-p190-aacb8e5b.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/agent-browser-p190",
+        "root_id": "agent-browser-p190-aacb8e5b",
+        "wake_root": "/home/ecochran76/workspace.local/agent-browser-p190/.codex/wake"
+      },
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:20Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/98975473f9fc.json",
+        "health_recent": true,
+        "health_source": "supervisor",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/codex-wake-98975473.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/codex-wake",
+        "root_id": "codex-wake-98975473",
+        "wake_root": "/home/ecochran76/workspace.local/codex-wake/.codex/wake"
+      },
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:21Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/bb3c1b12ea7a.json",
+        "health_recent": true,
+        "health_source": "codex-waked",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/soylei-website-bb3c1b12.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/soylei-website",
+        "root_id": "soylei-website-bb3c1b12",
+        "wake_root": "/home/ecochran76/workspace.local/soylei-website/.codex/wake"
+      },
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:20Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/92fcd5113ab0.json",
+        "health_recent": true,
+        "health_source": "supervisor",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/soylei-website-fulfillment-authority-reconciliation-20260808-92fcd511.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/soylei-website-fulfillment-authority-reconciliation-20260808",
+        "root_id": "soylei-website-fulfillment-authority-reconciliation-20260808-92fcd511",
+        "wake_root": "/home/ecochran76/workspace.local/soylei-website-fulfillment-authority-reconciliation-20260808/.codex/wake"
+      }
+    ],
+    "service": {
+      "active": "active",
+      "enabled": "enabled",
+      "log": "/home/ecochran76/.local/state/codex-wake/codex-wake-supervisor.log",
+      "name": "codex-wake-supervisor.service",
+      "unit": "/home/ecochran76/.config/systemd/user/codex-wake-supervisor.service"
+    },
+    "state_dir": "/home/ecochran76/.local/state/codex-wake/supervisor"
+  },
+  "post_units": {
+    "codex-wake-agent-browser-lease-authority.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-agent-browser.service": {
+      "MainPID": "80733",
+      "ActiveState": "active"
+    },
+    "codex-wake-auracall.service": {
+      "MainPID": "80734",
+      "ActiveState": "active"
+    },
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": {
+      "MainPID": "80737",
+      "ActiveState": "active"
+    },
+    "codex-wake-graphiti.service": {
+      "MainPID": "80738",
+      "ActiveState": "active"
+    },
+    "codex-wake-mail-receipts.service": {
+      "MainPID": "80739",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo-main-production-install.service": {
+      "MainPID": "80742",
+      "ActiveState": "active"
+    },
+    "codex-wake-odollo.service": {
+      "MainPID": "80748",
+      "ActiveState": "active"
+    },
+    "codex-wake-p54-c4-retained-v6s-poll.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": {
+      "MainPID": "0",
+      "ActiveState": "inactive"
+    },
+    "codex-wake-soylei-website.service": {
+      "MainPID": "49232",
+      "ActiveState": "active"
+    },
+    "codex-wake-supervisor.service": {
+      "MainPID": "56947",
+      "ActiveState": "active"
+    }
+  },
+  "post_status": {
+    "registry_dir": "/home/ecochran76/.config/codex-wake/roots.d",
+    "root_count": 4,
+    "roots": [
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:25Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/aacb8e5b1d28.json",
+        "health_recent": true,
+        "health_source": "supervisor",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/agent-browser-p190-aacb8e5b.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/agent-browser-p190",
+        "root_id": "agent-browser-p190-aacb8e5b",
+        "wake_root": "/home/ecochran76/workspace.local/agent-browser-p190/.codex/wake"
+      },
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:25Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/98975473f9fc.json",
+        "health_recent": true,
+        "health_source": "supervisor",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/codex-wake-98975473.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/codex-wake",
+        "root_id": "codex-wake-98975473",
+        "wake_root": "/home/ecochran76/workspace.local/codex-wake/.codex/wake"
+      },
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:26Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/bb3c1b12ea7a.json",
+        "health_recent": true,
+        "health_source": "codex-waked",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/soylei-website-bb3c1b12.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/soylei-website",
+        "root_id": "soylei-website-bb3c1b12",
+        "wake_root": "/home/ecochran76/workspace.local/soylei-website/.codex/wake"
+      },
+      {
+        "enabled": true,
+        "health_checked_at": "2026-10-10T04:45:25Z",
+        "health_mode": "loop",
+        "health_path": "/home/ecochran76/.local/state/codex-wake/monitors/92fcd5113ab0.json",
+        "health_recent": true,
+        "health_source": "supervisor",
+        "health_status": "ready",
+        "registry_path": "/home/ecochran76/.config/codex-wake/roots.d/soylei-website-fulfillment-authority-reconciliation-20260808-92fcd511.json",
+        "remediation": "",
+        "repo_root": "/home/ecochran76/workspace.local/soylei-website-fulfillment-authority-reconciliation-20260808",
+        "root_id": "soylei-website-fulfillment-authority-reconciliation-20260808-92fcd511",
+        "wake_root": "/home/ecochran76/workspace.local/soylei-website-fulfillment-authority-reconciliation-20260808/.codex/wake"
+      }
+    ],
+    "service": {
+      "active": "active",
+      "enabled": "enabled",
+      "log": "/home/ecochran76/.local/state/codex-wake/codex-wake-supervisor.log",
+      "name": "codex-wake-supervisor.service",
+      "unit": "/home/ecochran76/.config/systemd/user/codex-wake-supervisor.service"
+    },
+    "state_dir": "/home/ecochran76/.local/state/codex-wake/supervisor"
+  },
+  "reader_health": [
+    {
+      "checked_at": "2026-10-10T04:45:26Z",
+      "mode": "loop",
+      "pid": 56947,
+      "poll_result": {
+        "checked": 0,
+        "dispatched": 0,
+        "failed": 0,
+        "fired": 0,
+        "pending": 0,
+        "requeued": 0,
+        "signal_sources": [],
+        "submitted": 0
+      },
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 23059078,
+      "reader_capabilities": [
+        "signal_records_v2"
+      ],
+      "reader_generation": 23059078,
+      "reader_id": "supervisor:56947",
+      "reader_schema_versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "repo_root": "/home/ecochran76/workspace.local/agent-browser-p190",
+      "root_id": "agent-browser-p190-aacb8e5b",
+      "root_key": "aacb8e5b1d28",
+      "schema_version": 1,
+      "signal_sources": [],
+      "source": "supervisor",
+      "transports": {
+        "app_server": {
+          "codex_cmd": "",
+          "codex_cmd_ready": false,
+          "codex_cmd_source": "supervisor_registry_missing",
+          "interactive_codex_cmd": "",
+          "message": "supervisor root registration does not set dispatch.codex_cmd",
+          "unit_codex_cmd": "",
+          "user_manager_codex_cmd": ""
+        }
+      },
+      "wake_root": "/home/ecochran76/workspace.local/agent-browser-p190/.codex/wake"
+    },
+    {
+      "checked_at": "2026-10-10T04:45:26Z",
+      "mode": "loop",
+      "pid": 56947,
+      "poll_result": {
+        "checked": 0,
+        "dispatched": 0,
+        "failed": 0,
+        "fired": 0,
+        "pending": 0,
+        "requeued": 0,
+        "signal_sources": [],
+        "submitted": 0
+      },
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 23059078,
+      "reader_capabilities": [
+        "signal_records_v2"
+      ],
+      "reader_generation": 23059078,
+      "reader_id": "supervisor:56947",
+      "reader_schema_versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "repo_root": "/home/ecochran76/workspace.local/codex-wake",
+      "root_id": "codex-wake-98975473",
+      "root_key": "98975473f9fc",
+      "schema_version": 1,
+      "signal_sources": [],
+      "source": "supervisor",
+      "transports": {
+        "app_server": {
+          "codex_cmd": "/home/ecochran76/.local/bin/codex",
+          "codex_cmd_ready": true,
+          "codex_cmd_source": "supervisor_registry",
+          "interactive_codex_cmd": "",
+          "message": "supervisor root registration sets dispatch.codex_cmd",
+          "unit_codex_cmd": "",
+          "user_manager_codex_cmd": ""
+        }
+      },
+      "wake_root": "/home/ecochran76/workspace.local/codex-wake/.codex/wake"
+    },
+    {
+      "checked_at": "2026-10-10T04:45:26Z",
+      "mode": "loop",
+      "pid": 56947,
+      "poll_result": {
+        "checked": 0,
+        "dispatched": 0,
+        "failed": 0,
+        "fired": 0,
+        "pending": 0,
+        "requeued": 0,
+        "signal_sources": [],
+        "submitted": 0
+      },
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 23059078,
+      "reader_capabilities": [
+        "signal_records_v2"
+      ],
+      "reader_generation": 23059078,
+      "reader_id": "supervisor:56947",
+      "reader_schema_versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "repo_root": "/home/ecochran76/workspace.local/soylei-website",
+      "root_id": "soylei-website-bb3c1b12",
+      "root_key": "bb3c1b12ea7a",
+      "schema_version": 1,
+      "signal_sources": [],
+      "source": "supervisor",
+      "transports": {
+        "app_server": {
+          "codex_cmd": "/home/ecochran76/.local/bin/codex",
+          "codex_cmd_ready": true,
+          "codex_cmd_source": "supervisor_registry",
+          "interactive_codex_cmd": "",
+          "message": "supervisor root registration sets dispatch.codex_cmd",
+          "unit_codex_cmd": "",
+          "user_manager_codex_cmd": ""
+        }
+      },
+      "wake_root": "/home/ecochran76/workspace.local/soylei-website/.codex/wake"
+    },
+    {
+      "checked_at": "2026-10-10T04:45:26Z",
+      "mode": "loop",
+      "pid": 56947,
+      "poll_result": {
+        "checked": 0,
+        "dispatched": 0,
+        "failed": 0,
+        "fired": 0,
+        "pending": 0,
+        "requeued": 0,
+        "signal_sources": [],
+        "submitted": 0
+      },
+      "process_boot_id": "3cf33f0d-c332-452e-8b6d-396eccccd3db",
+      "process_start_time_ticks": 23059078,
+      "reader_capabilities": [
+        "signal_records_v2"
+      ],
+      "reader_generation": 23059078,
+      "reader_id": "supervisor:56947",
+      "reader_schema_versions": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "repo_root": "/home/ecochran76/workspace.local/soylei-website-fulfillment-authority-reconciliation-20260808",
+      "root_id": "soylei-website-fulfillment-authority-reconciliation-20260808-92fcd511",
+      "root_key": "92fcd5113ab0",
+      "schema_version": 1,
+      "signal_sources": [],
+      "source": "supervisor",
+      "transports": {
+        "app_server": {
+          "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.147.0-x86_64-unknown-linux-musl/bin/codex",
+          "codex_cmd_ready": false,
+          "codex_cmd_source": "supervisor_registry",
+          "interactive_codex_cmd": "",
+          "message": "Codex CLI path is tied to a version-managed Node installation: /home/ecochran76/.codex/packages/standalone/releases/0.147.0-x86_64-unknown-linux-musl/bin/codex; provide a stable wrapper or symlink path instead",
+          "unit_codex_cmd": "",
+          "user_manager_codex_cmd": ""
+        }
+      },
+      "wake_root": "/home/ecochran76/workspace.local/soylei-website-fulfillment-authority-reconciliation-20260808/.codex/wake"
+    }
+  ],
+  "registry_bytes_preserved": true,
+  "older_module_bytes_preserved": true,
+  "version": "codex-wake 0.9.0"
+}

@@ -1,0 +1,89 @@
+{
+  "steps": [
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+        "sessions",
+        "close",
+        "--tmux-socket",
+        "/tmp/tmux-1000/plan127-native",
+        "--tmux-session",
+        "recipient",
+        "--json",
+        "thread:01a12403-13f4-7e83-9a6e-9a9cf05c8b3d"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "codex-wake: tab has active/unknown work or pending wakes; explicit --force required\n"
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+        "cancel",
+        "wake_20261010_041927_c282"
+      ],
+      "exit": 0,
+      "stdout": "cancelled wake_20261010_041927_c282 /home/ecochran76/workspace.local/codex-wake/.codex/wake/cancelled/wake_20261010_041927_c282.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+        "sessions",
+        "close",
+        "--tmux-socket",
+        "/tmp/tmux-1000/plan127-native",
+        "--tmux-session",
+        "recipient",
+        "--json",
+        "thread:01a12403-13f4-7e83-9a6e-9a9cf05c8b3d"
+      ],
+      "exit": 0,
+      "stdout": "{\"action\": \"closed\", \"affected_messages\": [], \"affected_wakes\": [], \"attachment\": {\"client_pid\": 88323, \"client_start_time_ticks\": 22851808, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%10\", \"pane_index\": \"0\", \"pane_title\": \"plan127-release-worker\", \"pane_tty\": \"/dev/pts/40\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@8\", \"window_index\": \"2\", \"window_name\": \"plan127-release-worker\"}, \"conversation\": \"preserved\", \"forced\": false, \"inspected_bus_roots\": [], \"thread_id\": \"01a12403-13f4-7e83-9a6e-9a9cf05c8b3d\"}\n",
+      "stderr": ""
+    }
+  ],
+  "cancelled_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T04:19:27Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T04:19:27Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T04:19:27Z",
+        "message": "Wake cancelled by operator",
+        "type": "cancelled"
+      }
+    ],
+    "id": "wake_20261010_041927_c282",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T04:19:27Z",
+    "predicate": {
+      "path": "/tmp/codex-wake-plan127-release-final-07la71_a/close-blocker",
+      "type": "file_exists"
+    },
+    "prompt": "Owned close guard; never execute.",
+    "schema_version": 4,
+    "status": "cancelled",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T04:24:27Z",
+      "resume_policy": "hold",
+      "thread_id": "01a12403-13f4-7e83-9a6e-9a9cf05c8b3d",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T04:19:27Z"
+  }
+}

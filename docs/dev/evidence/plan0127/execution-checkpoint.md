@@ -63,3 +63,63 @@ The active planning audit initially found only Plan0119's nonstandard Current
 State heading. Rename that heading without changing its P63 scope, milestones,
 acceptance or open obligations, then rerun. Historical baseline findings remain
 explicitly accepted/excluded by the repo audit.
+
+
+## 2026-10-10 04:06 UTC integration checkpoint
+
+PR227 merged as canonical0a05c661d3dd854831614ab77ee732aa7f96b351 after
+both exact-head hosted release gates passed on cbced951e29c05178b4c7c7d01ada6e194a6c131.
+Fetch/readback confirms origin/main0a05c66; its tree matches the accepted source.
+Continuation custody is now release/native-workflows-closeout in the same
+codex-wake-plan127 worktree, branched from canonical origin/main. The original
+feat/native-workflows branch is retained; no refs/worktrees were removed.
+
+Prepared immutable installed prefix:
+/home/ecochran76/.local/share/codex-wake/releases/0.9.0-27bd7af.
+Its CLI reports0.9.0. This preparation has not switched user entrypoints or
+changed any service. Current normal commands still resolve into the existing
+/home/ecochran76/.local/share/uv/tools/codex-wake0.8.0 installation. Preserve
+that environment for running unrelated project workers during deployment.
+Record original user symlink targets and rollback before any switch.
+
+Remaining parent gates: normal installed deployment/actual lifecycle,
+release publication and completion audit. The shared Wake supervisor is a
+relevant product rollout boundary; preflight its registered roots for active
+firing work before any bounded upgrade. Do not restart unrelated project Wake
+units or shared Codex, or infer installed0.9 capability from an old live worker's
+entrypoint path. Other old readers retain compatibility and hold native4 until
+explicitly upgraded. Installed qualification must use a capable scheduler for
+its exact root. Source artifacts already prove safe rollback/uncertainty.
+
+Last goal readback656277tokens/6014elapsedsec,active; refresh on continuation.
+Stop before10500elapsedsec or1900000tokens, and always before user2MM/3h bound.
+UTC alone is insufficient because the elapsed meter now differs by several
+minutes. No pause, block or completion is claimed.
+
+## 2026-10-10 04:47 UTC release repair checkpoint
+
+Global0.9 activation and normal two-agent lifecycle are qualified; owned visible
+clients/server are closed with fresh process readback and retained history.
+release-installed-acceptance.md records successful and failed samples separately.
+Audit repairs dc235a9 count native submission intents once and advertise reader
+schemas1–4.983 frozen installed tests pass126.407s; product smoke passes.
+PR228 is open on release/native-workflows-closeout; re-read exact head/checks.
+
+Active immutable prefix: /home/ecochran76/.local/share/codex-wake/releases/0.9.0-qualified.
+Four normal user links point there; only Wake-supervisor restarted, MainPID56947.
+Eleven other units and153 older module files are unchanged. Registry bytes remain
+unchanged. release-final-deployment.json preserves prior link targets. Older
+project workers remain on retained packages; no shared Codex/host restart occurred.
+
+Normal registered-root wake wake_20261010_044527_43a6 accepted with attempts1,
+queue01a12421-6234-71f0-a34f-68849237b845. Exact original A thread completed
+turn01a12421-623a-7293-b0f2-64685fc903c6 and repliedPLAN127_NATIVE_COUNTER_CONFIRMED.
+Archive is the directory named archive, not archived; show excludes archived
+records. Retained failed probes had no native replay. Normal pending/firing0.
+Private recovery-after-intent uncertainty is preserved/unregistered; never
+blindly resend it. No owned looping fixture scheduler/client remains.
+
+Next: commit/push installed evidence, verify exact-head PR228 hosted gates,
+integrate, publish v0.9.0 with qualified wheel/sdist, and audit every parent/child
+requirement before closing Plan0127/P65. Goal remains active. Refresh usage/time;
+stop/checkpoint before10500elapsedsec,1900000tokens or05:25UTC, whichever first.

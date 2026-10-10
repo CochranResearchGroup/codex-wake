@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/home/ecochran76/.local/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+    "sessions",
+    "close",
+    "--tmux-socket",
+    "/tmp/tmux-1000/plan127-native",
+    "--tmux-session",
+    "recipient",
+    "--json",
+    "01a12403-13f4-7e83-9a6e-9a9cf05c8b3d"
+  ],
+  "exit": 3,
+  "stdout": "{\"candidates\": [], \"code\": 3, \"message\": \"session not found\", \"selector\": \"01a12403-13f4-7e83-9a6e-9a9cf05c8b3d\"}\n",
+  "stderr": ""
+}

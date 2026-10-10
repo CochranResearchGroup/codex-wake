@@ -3,14 +3,19 @@
 State: OPEN
 Workflow: IN_PROGRESS
 Owner: primary agent lane
-Branch: feat/native-workflows
+Branch: release/native-workflows-closeout
 
 ## Current State
 
 Tickets 0128–0132 are CLOSED with installed candidate acceptance receipts in
 `docs/dev/evidence/plan0127/`. Ticket 0132 migration, qualified retirement and documentation publication pass.
-The candidate lives on `feat/native-workflows`; acceptance does not establish
-integration, release or global installation. Migration, qualified retirement,
+Source is integrated as canonical `0a05c66` via PR227 with both hosted release
+gates passing. Normal global0.9 lifecycle acceptance passes with retained failed
+samples. Release audit found native intent accounting and reader advertisement
+defects; source dc235a9 and normal immutable installation resolve both with
+983 installed tests and exact native execution proof. PR228 hosted integration,
+release publication and final audit remain required. Continuation
+custody is `release/native-workflows-closeout`. Migration, qualified retirement,
 rollback and release remain required before this parent can close. Repository
 plans are the tickets; no remote tracker issues are created.
 
@@ -77,7 +82,7 @@ All child criteria pass with source/installed-version evidence; one complete lif
 
 This plan governs tickets 0128–0132. One owner executes the ready dependency frontier; do not start a blocked ticket or mark a dependency complete without its acceptance evidence. Default order is **0128 → 0129 → 0130 → 0131 → 0132**; 0129 is independent of 0128 and may run first if useful. No parallel agents are required.
 
-1. Begin each ticket with exact source, worktree, installed version and relevant current policy readback. Preserve unrelated dirty work. Keep implementation custody on `feat/native-workflows`; refresh the integrated baseline before integration. Prototype evidence alone cannot establish release readiness.
+1. Begin each ticket with exact source, worktree, installed version and relevant current policy readback. Preserve unrelated dirty work. Keep bounded custody on the declared branch; refresh the integrated baseline before integration. Prototype evidence alone cannot establish release readiness.
 2. Build the smallest complete user-visible behavior through the existing CLI/scheduler seams. No substitute broker, simulated product, documentation-only completion or helper-only acceptance.
 3. Reproduce failures and fix them. Use focused regression checks plus actual installed-command/live-client evidence appropriate to the ticket. A mocked pass is supporting evidence, not proof of native delivery or tab lifecycle.
 4. Record source commit, installed version, exact recipient/tab identities, command outcomes and durable state transitions. Keep submission acceptance distinct from execution, acknowledgment and completed workflow.
