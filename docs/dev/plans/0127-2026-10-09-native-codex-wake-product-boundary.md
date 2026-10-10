@@ -7,8 +7,8 @@ Branch: feat/native-workflows
 
 ## Current State
 
-Tickets 0128–0131 are CLOSED with installed candidate acceptance receipts in
-`docs/dev/evidence/plan0127/`. Ticket 0132 migration source gates pass; remote documentation publication remains.
+Tickets 0128–0132 are CLOSED with installed candidate acceptance receipts in
+`docs/dev/evidence/plan0127/`. Ticket 0132 migration, qualified retirement and documentation publication pass.
 The candidate lives on `feat/native-workflows`; acceptance does not establish
 integration, release or global installation. Migration, qualified retirement,
 rollback and release remain required before this parent can close. Repository
@@ -96,7 +96,7 @@ Completion demonstration: **open/resume a tab → assign ordinary work natively 
 | [0129](0129-2026-10-09-byobu-tab-lifecycle.md) | Explicit new/resume, attachment reuse and guarded tab close | None | Accepted candidate |
 | [0130](0130-2026-10-09-native-delivery-recovery.md) | Interrupted submission reconciles or remains safely unresolved | 0128 | Accepted candidate |
 | [0131](0131-2026-10-09-native-agent-lifecycle-acceptance.md) | Real agents complete the condition-triggered lifecycle unassisted | 0128–0130 | Accepted candidate |
-| [0132](0132-2026-10-09-legacy-transport-retirement.md) | Qualify migration/rollback, retire proven redundant paths and document release | 0131 | Migration source accepted; publication pending |
+| [0132](0132-2026-10-09-legacy-transport-retirement.md) | Qualify migration/rollback, retire proven redundant paths and document release | 0131 | Accepted candidate; docs published |
 
 Each ticket owns its acceptance checklist. The table is a navigation aid, not
 permission to bypass evidence. All five must pass, and integration and installed

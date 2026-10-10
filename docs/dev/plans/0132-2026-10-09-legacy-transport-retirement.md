@@ -1,7 +1,7 @@
 # Plan 0132 — Migrate and retire redundant delivery paths
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
 Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
@@ -14,8 +14,9 @@ promotion preserve uncertainty; installed oldreader holds and restored reader
 executes; implicit basic tmux capture retires with explicit compatibility
 retained.983 comprehensive tests, installed wheel smoke and real native turn
 readback pass. See [acceptance](../evidence/plan0127/0132-acceptance.md).
-Remote documentation publication remains before this child closes; parent
-integration, release and normal installation remain unproven.
+Migration/capability documentation is published at remote source27bd7af. All
+child criteria pass; parent integration, release and normal installation remain
+unproven.
 
 ## What to Build
 
@@ -23,10 +24,10 @@ Migrate and retire redundant delivery paths, as one complete user-visible slice 
 
 ## Acceptance Criteria
 
-- [ ] Inventory each legacy path and its callers, persisted formats and qualified replacement before proposing removal.
-- [ ] Prove existing state remains readable and recovery and rollback supported with disposable copies.
-- [ ] Retire only paths whose replacement contract passes; retain explicitly required compatibility without silent fallback.
-- [ ] Publish migration, capability and product-boundary documentation; no unapproved destructive state cleanup.
+- [x] Inventory each legacy path and its callers, persisted formats and qualified replacement before proposing removal.
+- [x] Prove existing state remains readable and recovery and rollback supported with disposable copies.
+- [x] Retire only paths whose replacement contract passes; retain explicitly required compatibility without silent fallback.
+- [x] Publish migration, capability and product-boundary documentation; no unapproved destructive state cleanup.
 
 ## Scope and Non-goals
 

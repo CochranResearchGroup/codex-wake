@@ -10,7 +10,7 @@ project services or shared Codex runtime changed.
 | Legacy path/caller/format/replacement inventory precedes retirement | PASS | 0132-path-inventory.md and pre-code migration contract in ticket0132 |
 | Existing-state readability, recovery and rollback with disposable state | PASS | Installed explicit legacy readback; old0.8 reader holds native4 unchanged; restored reader executes; copied uncertainty and same-root original retain nonce/hash and unresolved state |
 | Retire qualified redundant defaults; retain compatibility; no fallback | PASS | Classic implicit basic tmux capture refuses; explicit exact registration succeeds; legacy-to-native migration refuses; native dispatcher unchanged and uncertainty never resends |
-| Publish migration/capability/product boundary documentation | NOT RUN publication | README, bundled skill, state contract, migration doc and0.9 release preparation written and reviewed; remote publication/integration still pending |
+| Publish migration/capability/product boundary documentation | PASS | Remote commit27bd7af publishes README, bundled skill, state contract, migration/capability doc and0.9 release preparation; GitHub contents readback confirms migration blob4b8e602dc918ed5b8765f97876b7e41a97fbb186 |
 
 ## Concrete installed outcomes
 
@@ -49,8 +49,8 @@ in0132-review.md.
 
 ## Remaining gate
 
-Remote documentation publication is required before this child closes.
-Parent0127 additionally requires hosted integration, release publication and
+Remote documentation publication is verified at27bd7af; this child is accepted.
+Parent0127 still requires hosted integration, release publication and
 normal installed qualification. No production/global installation or release
 has occurred yet. Existing schema1/2/3 interfaces remain, including unqualified
 advanced and network-time compatibility paths. No historical-state deletion.

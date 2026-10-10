@@ -5247,3 +5247,11 @@ No global install or unrelated service/shared Codex restart. Child remainsOPEN
 pending doc publication; parent release/integration/install gates remainOPEN.
 Memory disposition unavailable: no reviewed Codex Wake Graphiti group; qualified
 source outcome recorded by a non-write receipt.
+
+
+### Turn249 publication readback
+
+Source27bd7af pushed and read back as origin/feat/native-workflows. GitHub contents
+API confirms migration documentation blob4b8e602dc918ed5b8765f97876b7e41a97fbb186.
+Ticket0132 closes after all child criteria pass. Parent andP65 remainOPEN:
+normal installed rollout, hosted integration and release publication unproven.
