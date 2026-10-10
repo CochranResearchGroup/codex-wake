@@ -86,3 +86,11 @@ Startup transition READY→ACTIVE; outcome_progress: disposable exact recipient
 created and seed turn queued. Private runtime receipts under user state plan0138.
 Next: after completed seed, close its tab, verify notLoaded and arm one original
 explicit resume wake through normal installed supervisor. No live user-thread replay.
+
+Unit1 PASS: native-acceptance.md proves completed follow-up in the original saved
+thread. Unit2 source checkpoint: explicit message choice and original actor
+generations persisted; dispatcher integrates same-saved-thread delivery only for
+an offline original Byobu binding. Live-client composer path remains authoritative.
+Original mailbox attempt fences all native effects; delegated reply arm remains
+required. Focused91tests PASS28.619s before version packaging. Installed unit3,
+serial review, release/identity parity and cleanup remain unproven.
