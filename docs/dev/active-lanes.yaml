@@ -157,11 +157,11 @@ lanes:
     branch: fix/a2a-consumption-cleanup
     target: origin/main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 0700966ef529b00383183087614047e2ab4ae886
+    custody_state: INTEGRATION_READY
+    checkpoint: 2679baa
     remote_ref: refs/remotes/origin/fix/a2a-consumption-cleanup
     integration: squash_pr
     dependencies: []
     overlaps: []
     updated_at: 2026-10-10
-    disposition: Authorized sequential repair of the two preserved Plan0138 baseline limitations; red loops and installed acceptance pending.
+    disposition: Two repairs qualified by installed107 tests, actual result claim/completion and separate no-force inbox-tab closure; original notification uncertainty preserved and held. Serial review resolved1finding; published source2679baa ready for squash integration.
