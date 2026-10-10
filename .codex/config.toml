@@ -1,0 +1,4 @@
+# Repo-local read-only registration; overrides the dynamic user wrapper here.
+[mcp_servers.governance]
+command = "/home/ecochran76/.local/share/governance-context/releases/4f0ef58/venv/bin/governance-context-mcp"
+args = ["--root", ".", "--include", "AGENTS.md", "--include", "docs/dev/policies/**/*.md", "--include", "docs/dev/plans/**/*.md", "--include", "docs/dev/notes/**/*.md", "--include", "ROADMAP.md", "--include", "RUNBOOK.md"]

@@ -1,0 +1,109 @@
+{
+  "args": [
+    "--root",
+    ".",
+    "--include",
+    "AGENTS.md",
+    "--include",
+    "docs/dev/policies/**/*.md",
+    "--include",
+    "docs/dev/plans/**/*.md",
+    "--include",
+    "docs/dev/notes/**/*.md",
+    "--include",
+    "ROADMAP.md",
+    "--include",
+    "RUNBOOK.md"
+  ],
+  "checked_at": "2026-10-10T19:33:40.897287+00:00",
+  "command": "/home/ecochran76/.local/share/governance-context/releases/4f0ef58/venv/bin/governance-context-mcp",
+  "config_path": "/home/ecochran76/workspace.local/codex-wake/.codex/config.toml",
+  "effective_includes": [
+    "AGENTS.md",
+    "docs/dev/policies/**/*.md",
+    "docs/dev/plans/**/*.md",
+    "docs/dev/notes/**/*.md",
+    "ROADMAP.md",
+    "RUNBOOK.md"
+  ],
+  "failures": [],
+  "fresh_session": {
+    "fallback_reads": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "15679fda4974ebad607cfae87b2516f04c3b8869bda3c3732d53bb958a8d67f0"
+      },
+      {
+        "path": "docs/dev/policies/0001-policy-selection.md",
+        "sha256": "b56fed682c9c16c233778e4e8ff787326db93e05f7c1104b872dc2d0c08c994b"
+      },
+      {
+        "path": "docs/dev/policies/0002-planning-and-documentation.md",
+        "sha256": "078bd3703010192d35099a1e4fd5d24f5fab056d5cd19b5d6fa4d611ba641a32"
+      },
+      {
+        "path": "docs/dev/policies/0005-engineering-git-and-release.md",
+        "sha256": "07dae82e04ed6c9807cb9d527be6f5a408774030a13d2d2f9eafecbc3d523284"
+      },
+      {
+        "path": "docs/dev/policies/0006-validation-and-closeout.md",
+        "sha256": "a9a7a226063c919d9bc390b315a1bd1d60a10cf9a9ce582a5d57fceb4d637845"
+      },
+      {
+        "path": "docs/dev/policies/0010-policy-management.md",
+        "sha256": "de649f128c1fc2f513c92569b6638cd7cb94cbf4fd28f07df475aab0c43c9505"
+      },
+      {
+        "path": "docs/dev/policies/0011-policy-adoption-feedback-loop.md",
+        "sha256": "c906c970b401948c50df78d1ad7ac803591c0a60dea0945c67f6713ec214dd39"
+      },
+      {
+        "path": "docs/dev/policies/0012-notes-and-memories.md",
+        "sha256": "41bba721dbd95a4187fa678c9b0aaba7cf5631f20795ff7122a33b9051601e23"
+      },
+      {
+        "path": "docs/dev/policies/0013-planning-discipline.md",
+        "sha256": "c07fc6d47bbc389a5a1757f6e9ebb40ff5fe688d58dbdf0682b6c0aa9ad128a2"
+      },
+      {
+        "path": "docs/dev/policies/0015-turn-closeout.md",
+        "sha256": "b2af31262a58a4785ebf13f78b30f880d553d30d0568d9a598b0819f26eefd44"
+      },
+      {
+        "path": "docs/dev/policies/0016-code-testing-discipline.md",
+        "sha256": "c5184686efc6650d733376667b20964ddf735f97c5ca7a5f23938eaab840e797"
+      },
+      {
+        "path": "docs/dev/policies/0021-collaborative-development-workflow.md",
+        "sha256": "0de96e2f30464fc7837f28331835dcc8b737e8a4346189289909d9fc383386de"
+      },
+      {
+        "path": "docs/dev/policies/0022-policy-context-pilot.md",
+        "sha256": "8ce8e1784ebfa923f030ba90fe7ec35be9da30f82373183fb68a0a746eb7d39e"
+      }
+    ],
+    "tools": [
+      "gov_list",
+      "gov_outline",
+      "gov_policy",
+      "gov_read",
+      "gov_search"
+    ]
+  },
+  "installed_version": "0.0.5.dev0",
+  "policy": {
+    "applicable": true,
+    "decision_digest": "75d7f1bb16d2c3a02bb79e40a45bc47243697adaa68589805f36fe909037e012",
+    "fallback_required": false,
+    "policy_digest": "433849a46bed21f56603da315cc5650459d07c1d35980cfeab019ec15a6d41fc",
+    "status": "current"
+  },
+  "profile": "codex-wake-policy-maintenance",
+  "receipt_digest": "6bf7828667d492528f09efdfc8d56f970110fc1cd8a4acda4d052c051f788f1f",
+  "repo_root": "/home/ecochran76/workspace.local/codex-wake",
+  "resolved_command": "/home/ecochran76/.local/share/governance-context/releases/4f0ef58/venv/bin/governance-context-mcp",
+  "schema_version": 1,
+  "server_name": "governance",
+  "status": "admitted",
+  "task_kind": "policy-maintenance"
+}

@@ -5408,3 +5408,13 @@ LitScout/unrelated sessions preserved. Exact evidence/limits/failure retention:
 docs/dev/evidence/plan0149/closeout.md. Hosted CI waiting waived, not claimed PASS.
 Plan0101/0119/0141/0149 CLOSED; issue181 separately read back after closure.
 Memory disposition unavailable, no reviewed Codex Wake Graphiti group.
+
+## Turn 259 | 2026-10-10 UTC
+
+Plan0150/issue237 repairs nonexistent policy pointers and admits one scoped
+gov_policy policy-maintenance pilot. Canonical bodies0001-0021 preserved;
+current/freshness/drift/inventory/out-of-scope controls and fresh MCP admission
+PASS. CI wiring guard added; hosted waiting waived. Serialized response shrink
+is measured, total host-token benefit remains unmeasured. Exact adoption and
+limits: docs/dev/notes/2026-10-10-policy-context-pilot-adoption.md. No runtime
+effect, service change, global configuration or unrelated checkout mutation.
