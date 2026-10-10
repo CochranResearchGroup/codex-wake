@@ -1,15 +1,23 @@
 # Ticket0142 — Native submission for existing live tabs
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: AWAITING_INTEGRATION
 Owner: primary
-Lane: P71
-Branch: docs/a2a-completion-stream
+Lane: P72
+Branch: fix/native-live-submission
 Target: origin/main
-Integration: governed_by_plan0141
+Integration: squash_pr
 Work-Item: docs/dev/plans/0142-2026-10-10-native-live-submission.md
 Parent: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
 Depends-On: none
+
+## Current State
+
+Source313e5aa qualified: public red-green loops, serial Standards/Spec review,
+reviewed installed117PASS43.592s and81file parity. Actual owned result has one
+native queue receipt and recipient claimed/completed turn; tab closed without
+force and owned PIDs absent. See evidence/plan0142/installed-acceptance.md.
+All behavior criteria pass; exact source integration remains before DONE.
 
 ## What it delivers
 
@@ -21,11 +29,11 @@ None; priority ordering still applies.
 
 ## Acceptance criteria
 
-- [ ] Public dispatcher regression reproduces viewport loss/wrapping and then succeeds with a validated exact-thread native queue receipt; paste success alone never proves submission.
-- [ ] Busy, human draft, approval, unknown UI, changed identity/process generation, expiry and unavailable authority prevent queue I/O; existing pane-lock and immediate pre-submit checks remain.
-- [ ] Malformed response, wrong returned thread, timeout or interrupted entered submission remain uncertain; no second queue, paste fallback or automatic retry.
-- [ ] The notification includes exact message/attempt pointers and existing claim instructions; saved-recipient reopening and reply-arm permissions remain separate.
-- [ ] One installed owned live notification has exact admission/attempt/queue IDs, actual recipient claimed/completed turn and no-force tab cleanup. Original Plan0139 uncertainty is unchanged.
+- [x] Public dispatcher regression reproduces viewport loss/wrapping and then succeeds with a validated exact-thread native queue receipt; paste success alone never proves submission.
+- [x] Busy, human draft, approval, unknown UI, changed identity/process generation, expiry and unavailable authority prevent queue I/O; existing pane-lock and immediate pre-submit checks remain.
+- [x] Malformed response, wrong returned thread, timeout or interrupted entered submission remain uncertain; no second queue, paste fallback or automatic retry.
+- [x] The notification includes exact message/attempt pointers and existing claim instructions; saved-recipient reopening and reply-arm permissions remain separate.
+- [x] One installed owned live notification has exact admission/attempt/queue IDs, actual recipient claimed/completed turn and no-force tab cleanup. Original Plan0139 uncertainty is unchanged.
 
 ## Test seam and bound
 

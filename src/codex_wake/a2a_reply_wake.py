@@ -137,7 +137,7 @@ class ReplyWakeGate:
                         evidence = json.loads(row['evidence'])
                         if (row['message_id'] in json.loads(attempt['message_ids'])
                                 and evidence.get('transport') in ('owning_client_v1', 'tmux_notification_v1',
-                                                                  'native_saved_recipient_v1')
+                                                                  'native_saved_recipient_v1', 'native_live_recipient_v1')
                                 and evidence.get('exact_thread_id') == target.get('thread_id')
                                 and isinstance(evidence.get('receipt_id'), str) and evidence['receipt_id']):
                             reconciled = (row['message_id'], row['attempt_id'], evidence['receipt_id'], evidence['transport'])
