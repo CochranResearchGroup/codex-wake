@@ -1132,6 +1132,6 @@ armed wakes retain deadlines during time holds.
 
 ## P72 — Policy routing and gov_policy pilot
 
-Plan0150 / issue237: reconcile policy pointers and admit one read-only scoped
+CLOSED Plan0150 / issue237: reconcile policy pointers and admit one read-only scoped
 policy-maintenance profile with canonical fallback and deterministic CI guard.
 Tool qualification complete; total host-token efficiency remains unmeasured.

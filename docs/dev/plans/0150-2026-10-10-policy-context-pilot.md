@@ -1,7 +1,7 @@
 # Plan0150 — Policy routing and governance-context pilot
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary / ecochran76
 Lane: P72
 Branch: chore/policy-context-pilot
@@ -39,9 +39,11 @@ host efficiency; no total-token saving claim without paired host measurements.
 
 ## Current State
 
-Issue237 created after owned-target preflight. Existing user-scope governance
-MCP already roots to this checkout; profile is unavailable until manifest lands.
-Plan0141 completed; only this policy-maintenance change is authorized here.
+Implementation and qualification merged by PR238 at
+fbc3d0275f0e46b41180706adf615e6ce3771bae. All local acceptance criteria pass;
+root main read back before this terminal documentation slice. Pilot host-token
+economics remain explicitly unmeasured; no broader profile or efficiency claim.
+Issue237 closes from final terminal metadata integration.
 
 ## Bounds
 

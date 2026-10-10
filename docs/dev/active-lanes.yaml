@@ -279,3 +279,22 @@ lanes:
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
     disposition: Ticket0147 DONE; PR236 integrated85d9f73bfe184361c45361e64ac3b825f48c4fea; installed native-context proof and57 controls PASS; owned clean checkout closed, published source ref retained.
+  - id: P72
+    owner: primary / ecochran76
+    objective: Repair policy routing and admit one scoped governance MCP pilot
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/237]
+    plan: docs/dev/plans/0150-2026-10-10-policy-context-pilot.md
+    plan_ref: origin/main
+    branch: chore/policy-context-pilot
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 12059fc0c88035527de71369ab7243d1ce684a0a
+    remote_ref: refs/remotes/origin/chore/policy-context-pilot
+    integration: squash_pr
+    integration_receipt: fbc3d0275f0e46b41180706adf615e6ce3771bae
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-10
+    checkout_required: false
+    disposition: Pilot tooling admitted; total host-token efficiency unmeasured; no broader rollout
