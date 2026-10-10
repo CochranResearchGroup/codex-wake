@@ -10,14 +10,23 @@ Integration: squash_pr
 
 ## Current state
 
-Execution sequencing successor: [Plan0119](0119-2026-10-04-usable-live-a2a-successor.md).
-The requested live cancellation, clean reconnect automatic return, normal worker
-restart, released installation, multiroot/rollback and full thirty-minute soak
-packet is COMPLETE; current acceptance is verification0122, merged PR218.
-The broader campaign and issue181 remain OPEN for server-unloaded-recipient and
-held-recovery obligations. No active implementation/live qualification or goal
-remains from that completed packet. Current custody is the retained accepted
-source docs/p63-soak-closeout; checkout cleanup/routing is verification0123.
+Reconciled2026-10-10: [Plan0141](0141-2026-10-10-a2a-completion-stream.md)
+owns execution sequencing through eight tickets and final requirement audit.
+Plan0119 retains usable-feature acceptance; this plan retains all original
+mandatory requirements. Both remain OPEN until their own definitions are met.
+
+Verification0122 accepts earlier live cancellation, reconnect, worker restart,
+released multiroot/rollback and thirty-minute soak at its recorded version.
+Plan0138/0139 are shipped; active0.11.1. Plan0140 diagnosis is complete, with
+original uncertain notification preserved. Native live submission repair,
+server-unloaded qualification, recovery hold/gap disposition, cross-generation
+claim recovery and remaining ancestry/fault evidence have explicit owners in
+Plan0141. No product completion is claimed from this planning packet.
+
+The historical next actions and budget meters below remain history, not current
+execution instructions or renewed goal authority. Ticket0142 is next. The parent
+issue181 is unchanged; no production recovery or uncertain-effect replay is
+inferred from reconciliation.
 
 ## Historical baseline and prior goal authority
 

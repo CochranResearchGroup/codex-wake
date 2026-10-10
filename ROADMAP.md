@@ -1069,8 +1069,13 @@ Server-unloaded recipient and broader held-recovery obligations remain open.
 P64 subsequently qualified/released v0.8.0 network time; P65 qualified/released
 v0.9.0 native lifecycle. Those releases do not close the remaining P63 obligations.
 The older readiness reconciliation note0010 is historical.
+2026-10-10: Plan0138/0139 shipped explicit saved reopening, claim instructions
+and ordinary tab cleanup; active0.11.1. Plan0140 diagnosis is complete, original
+notification uncertainty preserved. Plan0141 now owns eight ordered completion
+tickets, beginning with native live submission; recovery obligations remain OPEN.
 
-Execution Plan: [Build usable live A2A](docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md)
+Execution Plan: [Finish usable A2A — Plan0141](docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md)
+Usable-feature requirements: [Plan0119](docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md)
 Original requirements: [Agent-to-Agent System](docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md)
 Live baseline: [wakeA/wakeB round trip](docs/dev/verification/0111-2026-10-04-wakeA-wakeB-live-round-trip.md)
 

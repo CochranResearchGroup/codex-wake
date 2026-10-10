@@ -24,23 +24,25 @@ evidence. A message admitted to SQLite is not a delivered notification.
 
 ## Current State
 
-Reconciled acceptance snapshot: 2026-10-05.
+Reconciled planning snapshot:2026-10-10. Execution sequencing is now
+[Plan0141](0141-2026-10-10-a2a-completion-stream.md), with eight bounded
+repo-native tickets through final campaign acceptance. This plan remains OPEN
+as the usable-feature requirement record; Plan0101 retains original obligations.
 
-The requested remaining-gate packet is COMPLETE. Verification0122 is the current
-acceptance authority, published through PR218/main516661f: live cancellation,
-clean reconnect automatic return, normal owned-worker restart/reconnect, released
-v0.7.1 installation, multiroot/unenrolled denial, installed rollback and full
-1800.32296-second native soak all PASS. Earlier failures below remain historical
-receipts; they do not describe the current acceptance state.
+Verification0122 accepts the prior live cancellation, reconnect, owned-worker
+restart, released0.7.1 multiroot/rollback and thirty-minute soak on its exact
+recorded source/workload. Plan0138 ships explicit saved-recipient reopening;
+Plan0139 ships claim instructions and ordinary close fixes, active0.11.1.
+Plan0140 diagnosis is complete: actual notification consumption coexists with
+uncertain pane visibility. Original uncertainty is preserved; native live queue
+submission is the next implementation ticket0142, not yet implemented.
 
-Stock Codex0.160.0 remains selected. No custom runtime activation is required.
-The bounded goal completed at757635 tokens; no active implementation or live
-qualification is running. Integrated branches are retained; their auxiliary
-checkouts have been closed. The original untracked note0003 remains preserved.
-
-This plan and issue181 remain OPEN for retained server-unloaded-recipient and
-broader held-recovery obligations. No new execution/recovery authority follows
-from repository reconciliation. See verification0123 for Git/custody cleanup.
+Remaining campaign gates are owned explicitly: current-transport qualification
+and release, genuinely server-unloaded recipient evidence, held-recovery gap
+and legacy-notification disposition, cross-generation claims, remaining ancestry/
+fault cuts, and final requirement-to-proof audit. No old completed goal or token
+allowance is resumed by this planning reconciliation. No production recovery,
+shared service restart or uncertain effect replay is newly authorized.
 
 ## Approved closed-conversation follow-up | 2026-10-10
 
