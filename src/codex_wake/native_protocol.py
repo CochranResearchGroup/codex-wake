@@ -28,7 +28,10 @@ def native_request(endpoint, codex, method, params, timeout):
     remaining = deadline - time.monotonic()
     if remaining <= 0:
         raise WakeError('native lifecycle endpoint observation timed out')
-    with unix_connect(endpoint[7:], open_timeout=remaining, close_timeout=1) as ws:
+    # Long-lived threads can exceed the WebSocket library's 1 MiB default.
+    # Retain a finite response cap and the existing absolute request deadline.
+    with unix_connect(endpoint[7:], open_timeout=remaining, close_timeout=1,
+                      compression=None, max_size=32 * 1024 * 1024) as ws:
         def request(identifier, name, body):
             ws.send(json.dumps({'id': identifier, 'method': name, 'params': body}))
             while True:
