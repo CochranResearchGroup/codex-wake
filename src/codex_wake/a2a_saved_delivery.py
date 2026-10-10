@@ -63,7 +63,7 @@ class SavedRecipientBinding:
             return dict(status='ready')
         except BusError as error:
             return dict(status='deferred', reason=error.code)
-        except (WakeError, OSError):
+        except (WakeError, OSError, subprocess.SubprocessError):
             return dict(status='deferred', reason='runtime_unavailable')
 
     def deliver(self, claim, job, bus_root):

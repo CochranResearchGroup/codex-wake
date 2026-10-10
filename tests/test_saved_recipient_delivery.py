@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import tempfile
 import time
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -70,7 +71,7 @@ class SavedRecipientDeliveryTests(unittest.TestCase):
             ('codex_wake.shared_app_server.locate_shared_endpoint', lambda **kwargs: 'unix:///fixture'),
             ('codex_wake.native_protocol.native_request', native),
             ('codex_wake.app_server.resolve_codex_cmd', lambda *args, **kwargs: str(self.codex)),
-            ('codex_wake.a2a_tmux_delivery.tmux_inventory', lambda *args, **kwargs: [])]:
+            ('codex_wake.a2a_saved_delivery.tmux_inventory', lambda *args, **kwargs: [])]:
             mock = patch(target, replacement); mock.start(); self.addCleanup(mock.stop)
 
     def send(self, **kwargs):
@@ -106,6 +107,14 @@ class SavedRecipientDeliveryTests(unittest.TestCase):
         self.send(resume_missing=True)
         self.thread['status'] = 'idle'
         self.assertEqual(self.dispatcher.tick()['results'][0]['reason'], 'runtime_unavailable')
+        self.assertEqual(self.calls, [])
+        self.assertFalse(self.queue_log.exists())
+
+    def test_missing_tmux_source_is_not_proof_that_recipient_tab_is_closed(self):
+        self.send(resume_missing=True)
+        with patch('codex_wake.a2a_saved_delivery.tmux_inventory',
+                   side_effect=subprocess.CalledProcessError(1, ['tmux'])):
+            self.assertEqual(self.dispatcher.tick()['results'][0]['reason'], 'runtime_unavailable')
         self.assertEqual(self.calls, [])
         self.assertFalse(self.queue_log.exists())
 
