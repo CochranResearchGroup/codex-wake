@@ -136,7 +136,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: c5c273a5678d32f44ed17e8949050cc0f175582e
+    checkpoint: 44237c19a0be8534d4fa83b80670178eb5855c46
     remote_ref: refs/remotes/origin/feat/saved-recipient-reopening
     integration: squash_pr
     dependencies: []
