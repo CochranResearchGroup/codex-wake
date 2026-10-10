@@ -36,3 +36,15 @@ Codex patch, new enrollment or wider Plan0101/0119 completion claim. No new goal
 is inferred from this bounded repair authorization. Existing glossary is authority.
 One owner, sequential repairs; retain red/green commands and exact installed
 evidence. Unresolved verified blockers produce held state and a precise next step.
+
+## Installed acceptance clarification
+
+The single original notification was consumed and completed by its actual recipient,
+but the transport recorded visibility as uncertain and stopped its worker. Public
+reconcile reports held_for_exact_evidence; it supplies no clearing operation.
+Preserve that exact original record and never resend it. Ordinary closure must
+continue to hold that recipient. U2 uses one separate owned terminal-inbox control
+on the same bus, without notification delivery, to prove the repaired receipt
+inventory and no-force close. This control does not qualify the original uncertain
+delivery. Cleanup of the original owned tab may explicitly use force after native
+completion and preserving the hold receipt. No transport repair is added here.
