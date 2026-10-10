@@ -1,7 +1,7 @@
 # Plan0141 — Finish usable agent-to-agent messaging
 
 State: OPEN
-Workflow: IN_PROGRESS
+Workflow: BLOCKED
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -73,7 +73,7 @@ within its ticket. Existing GLOSSARY.md is terminology authority.
 | [0145](0145-2026-10-10-server-unloaded-recipient.md) Qualify explicitly reopened server-unloaded recipient | 0144 | DONE |
 | [0146](0146-2026-10-10-held-recovery-disposition.md) Make held recovery disposition explicit and safe | none | DONE |
 | [0147](0147-2026-10-10-processing-claim-generation-recovery.md) Recover processing ownership across generations | 0146 | DONE |
-| [0148](0148-2026-10-10-remaining-fault-and-ancestry-proof.md) Finish remaining fault and session-isolation proof | 0142, 0146, 0147 | IN_PROGRESS |
+| [0148](0148-2026-10-10-remaining-fault-and-ancestry-proof.md) Finish remaining fault and session-isolation proof | 0142, 0146, 0147 | BLOCKED |
 | [0149](0149-2026-10-10-final-campaign-acceptance.md) Close the work stream from complete evidence | 0143, 0144, 0145, 0146, 0147, 0148 | BLOCKED |
 
 Execution priority0142→0143→0144→0145→0146→0147→0148→0149. Ticket0146 is

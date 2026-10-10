@@ -1,7 +1,7 @@
 # Ticket0148 — Finish remaining fault and session-isolation proof
 
 State: OPEN
-Workflow: IN_PROGRESS
+Workflow: BLOCKED
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -50,3 +50,9 @@ inferred from elapsed time. Planning alone does not satisfy a behavior criterion
 See evidence/plan0148/finite-matrix.md: all32 original families, three bounded
 serial packets A1/F1/C1 and exact runtime/time/resource stops. No new delegation
 turns; metadata-only owned fork/process fixtures. Parent remains OPEN.
+
+## Current gate
+
+Independent F1/C1/OS controls PASS; actual native subagent test awaits explicit
+request under session no-spawn rule. Checkpoint04 records bound and custody.
+No missing test is accepted by documenting it; parent and campaign remain OPEN.
