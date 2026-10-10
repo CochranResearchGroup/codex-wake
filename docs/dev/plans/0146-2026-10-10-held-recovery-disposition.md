@@ -1,7 +1,7 @@
 # Ticket0146 — Make held recovery disposition explicit and safe
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
