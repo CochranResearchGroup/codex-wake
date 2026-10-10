@@ -5,6 +5,11 @@ in Byobu/tmux. Notification prompts carry only message IDs and a private bus
 location. The recipient uses its issued actor capability to read the body.
 No modified Codex binary or extra broker is needed.
 
+Live-tab delivery uses native queue acceptance for the exact thread; screen
+visibility is not submission evidence. Submission does not prove processing.
+Idle/composer checks are observed immediately before queueing, not an atomic
+native idle guarantee. Unknown queue effects never fall back to paste or replay.
+
 Delivery requires an idle exact thread, the bound client process generation,
 and an empty recognized composer. Busy clients, drafts and disconnected clients
 defer delivery. By default, a human reconnects a disconnected client and rebinds
@@ -23,7 +28,7 @@ transport effects stop for reconciliation; do not restart or resend blindly.
 ## Operator setup
 
 Install the public tag with `uv tool install --force --reinstall
-git+https://github.com/CochranResearchGroup/codex-wake.git@v0.11.1`.
+git+https://github.com/CochranResearchGroup/codex-wake.git@v0.11.2`.
 Choose absolute private locations and the real thread IDs, repository roots and
 tmux socket. The following layout matches the shipped user-service example:
 

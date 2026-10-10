@@ -233,16 +233,31 @@ class NetworkMailboxTests(unittest.TestCase):
 
     def test_tmux_transport_checks_network_expiry_instead_of_guest_wall(self):
         from unittest.mock import patch
+        import subprocess
+        from codex_wake.a2a_scheduler import MailScheduler
         from codex_wake.a2a_tmux_delivery import TmuxBinding
         self.activate()
+        self.bus.enroll(self.repo, self.operator, notify=True)
+        self.bus.set_paused(False, self.operator)
+        message = self.mailbox.send(self.actors[0], self.identities[1], body='fixture',
+                                    idempotency_key='native-expiry', ttl=60)['message']
+        scheduler = MailScheduler(self.mailbox, self.operator)
+        dispatcher = scheduler.acquire()
+        job = scheduler.jobs(dispatcher)[0]
+        recipient = scheduler.acquire('recipient:' + job['recipient_key'])
+        claim = scheduler.claim(dispatcher, recipient, [job['job_id']])
         binding = TmuxBinding('fixture','recipient',str(self.repo),'/fixture/socket',1,1,'fixture','fixture')
-        claim = dict(attempt_id='attempt_'+'a'*32)
-        job = dict(message_id='msg_'+'b'*32, expires_at=1060)
         empty = '› Ask Codex to do anything\n GPT-6 · /repo · session\n ← for agents · ? for shortcuts\n'
+        accepted = subprocess.CompletedProcess([], 0,
+            'Queued message 00000000-0000-4000-8000-000000000003 for thread recipient.\n', '')
         with patch('codex_wake.time_inspection.network_time_decision', return_value=self.reading), \
              patch.object(TmuxBinding, 'locate', return_value=({}, dict(pane_id='%fixture'))), \
              patch.object(TmuxBinding, 'probe', return_value=dict(status='ready')), \
-             patch('codex_wake.a2a_tmux_delivery.SubprocessTmuxRunner') as runner:
-            runner.return_value.capture_pane.side_effect = [empty,'A2A_NOTIFICATION='+job['message_id']]
-            result = binding.deliver(claim,job,self.bus.root)
+             patch('codex_wake.a2a_tmux_delivery.SubprocessTmuxRunner') as runner, \
+             patch('codex_wake.a2a_tmux_delivery.locate_shared_endpoint', return_value='unix:///fixture'), \
+             patch('codex_wake.app_server.resolve_codex_cmd', return_value='fixture-codex'), \
+             patch('codex_wake.a2a_tmux_delivery.subprocess.run', return_value=accepted):
+            runner.return_value.capture_pane.return_value = empty
+            result = binding.deliver(claim,job,self.bus.root,scheduler=scheduler)
+        self.assertEqual(message['expires_at'],1060.1)
         self.assertEqual(result['status'],'submitted',result)

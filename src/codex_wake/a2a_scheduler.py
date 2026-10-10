@@ -184,6 +184,10 @@ class MailScheduler:
                 self._fence(database, Lease('recipient:' + row['recipient_key'], self.owner,
                     attempt['generation'], 0), now)
             envelope = json.loads(row['envelope'])
+            namespace, thread_id = json.loads(row['recipient_key'])
+            actor = database.execute('SELECT actor_id,generation,root FROM actors WHERE namespace=? AND thread_id=?',
+                                     (namespace, thread_id)).fetchone()
+            envelope['current_recipient_authority'] = dict(actor)
             database.execute('COMMIT')
             return envelope
 

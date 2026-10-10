@@ -1,6 +1,6 @@
-"""Explicit stock-Codex delivery through the existing Byobu wake transport.
+"""Explicit native Codex submission guarded by the existing Byobu binding.
 
-Eligibility is observed immediately before paste, not an atomic server guarantee.
+Eligibility is observed immediately before queue submission, not an atomic server guarantee.
 Only an empty recognized composer is eligible; unknown UI states remain held.
 """
 from dataclasses import asdict, dataclass
@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 import stat
+import subprocess
 import uuid
 
 from .a2a_identity import BusError, RuntimeIdentity
@@ -88,7 +89,7 @@ class TmuxBinding:
         return dict(status='ready' if empty_composer(text) else 'deferred',
                     reason=None if empty_composer(text) else 'composer_protected')
 
-    def deliver(self, claim, job, bus_root):
+    def deliver(self, claim, job, bus_root, *, scheduler=None):
         entered = False
         try:
             if (not re.fullmatch(r'attempt_[0-9a-f]{32}', claim['attempt_id'])
@@ -110,16 +111,40 @@ class TmuxBinding:
                     return dict(status='unsent', reason='explicit_not_sent')
                 if notification_expired(bus_root, job['expires_at']):
                     return dict(status='unsent', reason='explicit_not_sent')
-                marker = 'A2A_NOTIFICATION=' + job['message_id']
-                prompt = notification_prompt(job['message_id'], root)
-                entered = True
-                runner.paste_prompt(self.tmux_socket, pane['pane_id'], claim['attempt_id'], prompt)
+                if scheduler is None or scheduler.mailbox.bus.root != root:
+                    raise BusError('authorization_denied', 'original scheduler authority is required')
+                context = scheduler.notification_context(job, attempt_id=claim['attempt_id'])
+                authority = context['current_recipient_authority']
+                suffix = '' if authority['generation'] == 1 else '_g' + str(authority['generation'])
+                capability = root / 'capabilities' / (authority['actor_id'] + suffix + '.json')
+                actor = scheduler.mailbox.bus.authenticate(capability,
+                    RuntimeIdentity(self.namespace, self.thread_id, self.root), invoking_cwd=Path(self.root))
+                if actor.generation != authority['generation']:
+                    raise BusError('authorization_denied', 'recipient capability changed')
+                from .app_server import resolve_codex_cmd
+                codex = resolve_codex_cmd('codex', required=True)
+                endpoint = locate_shared_endpoint(timeout=5)
+                prompt = notification_prompt(job['message_id'], root,
+                    attempt_id=claim['attempt_id'], capability=capability)
+                env = dict(os.environ)
+                for key in ('CODEX_THREAD_ID', 'TMUX', 'TMUX_PANE'):
+                    env.pop(key, None)
+                # Native command/capability preparation may outlast the first UI check.
+                if self.probe()['status'] != 'ready':
+                    return dict(status='unsent', reason='explicit_not_sent')
                 _, current = self.locate()
-                after = runner.capture_pane(self.tmux_socket, current['pane_id'])
-                if marker not in after:
-                    return dict(status='uncertain', reason='notification_visibility_unproven')
-                return dict(status='submitted', receipt_id=claim['attempt_id'],
-                            reason='visible_notification_prompt', evidence_boundary='tmux_prompt_visibility')
+                if current['pane_id'] != pane['pane_id'] or not empty_composer(
+                        runner.capture_pane(self.tmux_socket, current['pane_id'])):
+                    return dict(status='unsent', reason='explicit_not_sent')
+                entered = True
+                result = subprocess.run([codex, 'queue', '--remote', endpoint, '--thread', self.thread_id,
+                                         '--message', prompt], env=env, capture_output=True, text=True, timeout=10)
+                match = re.fullmatch(r'Queued message ([0-9a-f-]{36}) for thread '+re.escape(self.thread_id)+r'\.\s*', result.stdout)
+                if result.returncode or match is None:
+                    raise BusError('queue_acceptance_unconfirmed', 'native queue did not confirm exact recipient')
+                uuid.UUID(match[1])
+                return dict(status='submitted', receipt_id=match[1], reason='native_queue_accepted',
+                            transport='native_live_recipient_v1', evidence_boundary='native_queue_acceptance')
         except Exception:
             return dict(status='uncertain' if entered else 'unsent',
                         reason='transport_interrupted' if entered else 'pre_io_failure')

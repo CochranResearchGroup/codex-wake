@@ -281,9 +281,13 @@ class NotificationDispatcher:
                         except BusError as error:
                             results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
                             continue
-                        result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
+                        from .a2a_tmux_delivery import TmuxBinding
+                        if isinstance(binding, TmuxBinding):
+                            result = binding.deliver(claim, job, scheduler.mailbox.bus.root, scheduler=scheduler)
+                        else:
+                            result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
                         outcome = result.get('status')
-                        evidence = dict(transport=binding.transport, exact_thread_id=binding.thread_id,
+                        evidence = dict(transport=result.get('transport', binding.transport), exact_thread_id=binding.thread_id,
                                         daemon_generation=binding.generation)
                         if outcome == 'submitted':
                             evidence['receipt_id'] = result['receipt_id']
@@ -296,7 +300,7 @@ class NotificationDispatcher:
                         results.append(dict(message_id=job['message_id'], attempt_id=claim['attempt_id'],
                             status=outcome, reason=result.get('reason'), receipt_id=result.get('receipt_id')))
                         if outcome == 'submitted' and self.receipt_gate is not None:
-                            self.receipt_gate.submitted(receipt, job, claim['attempt_id'], result['receipt_id'], transport=binding.transport)
+                            self.receipt_gate.submitted(receipt, job, claim['attempt_id'], result['receipt_id'], transport=evidence['transport'])
                         if outcome == 'uncertain':
                             break
                     finally:
