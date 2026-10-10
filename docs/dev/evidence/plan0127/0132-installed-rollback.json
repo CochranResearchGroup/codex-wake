@@ -1,0 +1,26 @@
+{
+  "old_reader": {
+    "executable": "/home/ecochran76/.local/bin/codex-waked",
+    "returncode": 0,
+    "stdout": "checked=1 fired=0 failed=0 pending=1 dispatched=0 submitted=0 requeued=0\n",
+    "stderr": "",
+    "state_sha256_unchanged": "f6e0739dcb7232c992be25b2f9893fd207f4559225762635ddfe9e448084067a"
+  },
+  "restored_reader": {
+    "executable": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked",
+    "returncode": 0,
+    "stdout": "checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0\n",
+    "stderr": ""
+  },
+  "wake_id": "wake_20261010_034354_0c98",
+  "schema_version": 4,
+  "native_delivery": {
+    "accepted_at": "2026-10-10T03:44:04Z",
+    "acknowledgment": "not_observed",
+    "execution": "not_observed",
+    "prompt_sha256": "eddd5ec5d87e57d5b06675b8899b53f1efbf41f0415c78c9b0bb191f5a0996f0",
+    "queue_id": "01a123e9-2849-72e1-942a-eca836228845",
+    "state": "accepted",
+    "submission_id": "08af8c54-ffdd-4127-8d3c-f59dc4e98462"
+  }
+}

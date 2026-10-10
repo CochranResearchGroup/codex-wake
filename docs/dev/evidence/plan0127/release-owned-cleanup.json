@@ -1,0 +1,37 @@
+{
+  "state": "owned_fixture_server_terminal",
+  "socket_file_exists": true,
+  "socket_listener_present": false,
+  "socket_probe": {
+    "exit": 1,
+    "stderr": "no server running on /tmp/tmux-1000/plan127-native\n"
+  },
+  "owned_processes": [
+    {
+      "pid": 99853,
+      "original_start_time_ticks": 22231130,
+      "owned_process_present": false,
+      "pane": "%0"
+    },
+    {
+      "pid": 70287,
+      "original_start_time_ticks": 22446915,
+      "owned_process_present": false,
+      "pane": "%8"
+    },
+    {
+      "pid": 88323,
+      "original_start_time_ticks": 22851808,
+      "owned_process_present": false,
+      "pane": "%10"
+    }
+  ],
+  "protected_state_present_sha256": {
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-intent/firing/wake_20261010_030151_186c.json": "c877dd8a9c542b06582eb5fb731666c70950ba9c0ed811c491dc6057830b5c12",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/unpublished-signal-control/signals/journal.sqlite3": "e56dbf2a530532b84ea3a38a7c291afe8e8e3afcbecb5dac44f9dbdede0d63c9",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/mailbox-close-inbox-control/mailbox.sqlite": "58473aad2ab024f7927019b8d8f673863cdf733eb933c2c98bd74318537c1a1b"
+  },
+  "controller_observation": "Both force-close calls validated exit0 and unchanged protected-state checksums before final list-panes. That probe failed because the last owned pane closed and the server exited; a stale socket file remains. Captured per-close JSON was not persisted before this harness failure; do not synthesize it. Ticket0129 receipts qualify affected-work reporting.",
+  "conversations_archived": false,
+  "historical_state_deleted": false
+}

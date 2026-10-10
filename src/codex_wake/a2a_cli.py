@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'dispatch', 'worker', 'delegate-receipts']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'dispatch', 'worker', 'delegate-receipts', 'network-time']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -55,6 +55,8 @@ def add_a2a_parser(subparsers):
             command.add_argument('--duration', type=float, default=120)
             command.add_argument('--interval', type=float, default=2)
             command.add_argument('--max-dispatches', type=int, default=2)
+        if verb == 'network-time':
+            command.add_argument('--accept-unauthenticated-ntp', action='store_true', required=True, help='opt this bus into bounded plain-NTP time; authenticated UTC is not claimed')
         if verb == 'configure':
             command.add_argument('--allow-cross-root', action='store_true')
         if verb == 'enroll':
@@ -152,7 +154,10 @@ def a2a_command(args):
         # Validate explicit operator authority before observing or changing peers.
         with store.connection() as database:
             store.operator(database, args.operator_capability)
-        if args.a2a_command == 'delegate-receipts':
+        if args.a2a_command == 'network-time':
+            from .a2a_mailbox import Mailbox
+            result(dict(receipt_id=Mailbox.activate_network_time(store,args.operator_capability),time_policy='network-first-v1'))
+        elif args.a2a_command == 'delegate-receipts':
             from .a2a_sender_receipts import SenderReceiptAuthority
             from .a2a_identity import Actor
             identity = resolve_identity('thread:' + args.thread)
@@ -204,7 +209,7 @@ def a2a_command(args):
                     try:
                         outcome = dispatcher.tick(limit=min(args.limit, args.max_dispatches - submitted))
                     except BusError as error:
-                        if error.code != 'clock_anomaly':
+                        if error.code not in ('clock_anomaly', 'time_uncertain'):
                             raise
                         # Clock guards remain unchanged. Retry only when the journal
                         # proves this worker has no unfinished/ambiguous effect.
@@ -215,7 +220,7 @@ def a2a_command(args):
                                 (scheduler.owner,)).fetchone()
                         if pending:
                             raise BusError('effect_uncertain', 'clock interruption left an attempt requiring exact reconciliation') from None
-                        outcome = dict(status='held', reason='clock_anomaly', submitted=0, results=[])
+                        outcome = dict(status='held', reason=error.code, submitted=0, results=[])
                     # A committed transport receipt counts even if a later lease
                     # release hit the clock guard, so the effect budget cannot grow.
                     with store.connection(read_only=True) as database:

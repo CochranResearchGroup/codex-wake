@@ -1,0 +1,10 @@
+test_classic_registration_requires_explicit_tmux_compatibility (test_native_migration.NativeMigrationTests.test_classic_registration_requires_explicit_tmux_compatibility) ... ok
+test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) ... ok
+test_migration_preserves_uncertainty_and_original_without_submission (test_native_migration.NativeMigrationTests.test_migration_preserves_uncertainty_and_original_without_submission) ... ok
+test_migration_refuses_legacy_transport_without_mutating_it (test_native_migration.NativeMigrationTests.test_migration_refuses_legacy_transport_without_mutating_it) ... ok
+test_native_registration_uses_a_fail_closed_version_for_old_readers (test_native_migration.NativeMigrationTests.test_native_registration_uses_a_fail_closed_version_for_old_readers) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.223s
+
+OK

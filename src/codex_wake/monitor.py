@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .records import WakeError, format_utc, utc_now
+from .records import WakeError, format_utc, schema_summary, utc_now
 from .process import boot_id_value, process_identity
 from .service import (
     ServiceConfig,
@@ -71,7 +71,7 @@ def write_monitor_health(
         "process_boot_id": identity.get("boot_id") or boot_id_value(),
         "reader_id": f"{source}:{pid}",
         "reader_generation": generation,
-        "reader_schema_versions": [1, 2],
+        "reader_schema_versions": schema_summary()['read_versions'],
         "reader_capabilities": ["signal_records_v2"],
         "checked_at": format_utc(current),
         "poll_result": poll_result or {},

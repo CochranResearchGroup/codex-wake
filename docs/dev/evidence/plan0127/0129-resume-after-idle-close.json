@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+    "sessions",
+    "open",
+    "--resume",
+    "01a123ac-7b07-78a0-ad78-047ef1714f25",
+    "--name",
+    "plan127-recovery-worker",
+    "--tmux-socket",
+    "/tmp/tmux-1000/plan127-native",
+    "--tmux-session",
+    "recipient",
+    "--codex-path",
+    "/home/ecochran76/.local/bin/codex",
+    "--timeout",
+    "30",
+    "--json"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"action\": \"opened\", \"attachments\": [{\"client_pid\": 15476, \"client_start_time_ticks\": 22301182, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%5\", \"pane_index\": \"0\", \"pane_title\": \"plan127-worker\", \"pane_tty\": \"/dev/pts/5\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@3\", \"window_index\": \"1\", \"window_name\": \"plan127-recovery-worker\"}], \"ready\": true, \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\"}\n",
+  "stderr": ""
+}

@@ -1,0 +1,13 @@
+{
+  "base_commit": "b1d3d19",
+  "branch": "feat/native-workflows",
+  "wake_candidate": "0.8.0 editable private venv",
+  "codex_version": "0.162.1",
+  "files": {
+    "src/codex_wake/native_delivery.py": "21acc9161687a6330f3d6fccacf026599e8f534eac170afbd2fe0f70a299d518",
+    "src/codex_wake/native_protocol.py": "1c6adda2d3064bdc770836627d2bab9c43a999f76debad99ba9f778fdfffc86e",
+    "src/codex_wake/session_lifecycle.py": "43d46cd3116f0b9964a7cce9276cf3a8b052ea64778253d146dcf7a71ba1e36c",
+    "src/codex_wake/cli.py": "2ff9bf744ca49eec3c5111eb0e0b018a6398b9dddbf146002391e44bc5f9a511",
+    "tests/test_native_delivery.py": "32707e9f1984da1bc6ec598c73d47ed3e9b65b93293f57fe513495f16d3adc20"
+  }
+}

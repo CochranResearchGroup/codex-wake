@@ -1,0 +1,184 @@
+{
+  "wake_id": "wake_20261010_030151_186c",
+  "fault_scheduler": {
+    "exit_code": 92,
+    "stdout": "",
+    "stderr": ""
+  },
+  "interrupted_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:01:51Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "not_before due_at 2026-10-10T03:01:49Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      }
+    ],
+    "id": "wake_20261010_030151_186c",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "c7b29e8d5f068a05e99aa90533a430bb33cdc6ca4d8dafccd3ebee70054b25ba",
+      "state": "uncertain",
+      "submission_id": "dc6ee865-e9ec-48dc-b409-ccd1e62a02a0"
+    },
+    "next_attempt_at": "2026-10-10T03:01:49Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:01:49Z",
+      "type": "not_before"
+    },
+    "prompt": "This intent-only control must not be replayed automatically.",
+    "schema_version": 1,
+    "status": "firing",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:11:49Z",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:01:51Z"
+  },
+  "restart_scheduler": {
+    "exit_code": 0,
+    "stdout": "checked=0 fired=0 failed=0 pending=0 dispatched=0 submitted=0 requeued=0\n",
+    "stderr": ""
+  },
+  "held_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:01:51Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "not_before due_at 2026-10-10T03:01:49Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "no_exact_native_evidence",
+        "type": "native_unresolved"
+      }
+    ],
+    "id": "wake_20261010_030151_186c",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "next_reconciliation_at": "2026-10-10T03:01:56Z",
+      "prompt_sha256": "c7b29e8d5f068a05e99aa90533a430bb33cdc6ca4d8dafccd3ebee70054b25ba",
+      "reconciliation": {
+        "checked_at": "2026-10-10T03:01:51Z",
+        "reason": "no_exact_native_evidence",
+        "state": "unresolved"
+      },
+      "state": "uncertain",
+      "submission_id": "dc6ee865-e9ec-48dc-b409-ccd1e62a02a0"
+    },
+    "next_attempt_at": "2026-10-10T03:01:49Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:01:49Z",
+      "type": "not_before"
+    },
+    "prompt": "This intent-only control must not be replayed automatically.",
+    "schema_version": 1,
+    "status": "firing",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:11:49Z",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:01:51Z"
+  },
+  "explicit_inspect": {
+    "exit_code": 0,
+    "stdout": "{\"native_delivery\": {\"acknowledgment\": \"not_observed\", \"execution\": \"not_observed\", \"next_reconciliation_at\": \"2026-10-10T03:01:56Z\", \"prompt_sha256\": \"c7b29e8d5f068a05e99aa90533a430bb33cdc6ca4d8dafccd3ebee70054b25ba\", \"reconciliation\": {\"checked_at\": \"2026-10-10T03:01:51Z\", \"reason\": \"no_exact_native_evidence\", \"state\": \"unresolved\"}, \"state\": \"uncertain\", \"submission_id\": \"dc6ee865-e9ec-48dc-b409-ccd1e62a02a0\"}, \"result\": \"skipped\", \"status\": \"firing\", \"wake_id\": \"wake_20261010_030151_186c\"}\n",
+    "stderr": ""
+  },
+  "final_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:01:51Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "not_before due_at 2026-10-10T03:01:49Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:01:51Z",
+        "message": "no_exact_native_evidence",
+        "type": "native_unresolved"
+      }
+    ],
+    "id": "wake_20261010_030151_186c",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "next_reconciliation_at": "2026-10-10T03:01:56Z",
+      "prompt_sha256": "c7b29e8d5f068a05e99aa90533a430bb33cdc6ca4d8dafccd3ebee70054b25ba",
+      "reconciliation": {
+        "checked_at": "2026-10-10T03:01:51Z",
+        "reason": "no_exact_native_evidence",
+        "state": "unresolved"
+      },
+      "state": "uncertain",
+      "submission_id": "dc6ee865-e9ec-48dc-b409-ccd1e62a02a0"
+    },
+    "next_attempt_at": "2026-10-10T03:01:49Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:01:49Z",
+      "type": "not_before"
+    },
+    "prompt": "This intent-only control must not be replayed automatically.",
+    "schema_version": 1,
+    "status": "firing",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:11:49Z",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:01:51Z"
+  }
+}

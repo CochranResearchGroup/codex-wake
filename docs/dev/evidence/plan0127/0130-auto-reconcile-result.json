@@ -1,0 +1,104 @@
+{
+  "record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:08:14Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:08:14Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:08:14Z",
+        "message": "not_before due_at 2026-10-10T03:08:13Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:08:14Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:08:23Z",
+        "message": "exact native evidence confirms acceptance; no resend",
+        "type": "native_reconciled"
+      }
+    ],
+    "id": "wake_20261010_030814_b49d",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "evidence": {
+        "client_message_id": "01a123c8-6154-7e62-b73f-8e22ee52a385",
+        "execution": "turn_completed",
+        "source": "native_turn",
+        "turn_id": "01a123c8-6156-71d3-8f29-323d3eba0ec9",
+        "user_message_id": "01a123c8-6793-74c2-935c-db39113ceecf"
+      },
+      "execution": "turn_completed",
+      "prompt_sha256": "50220d55c342df2bb4967332eedde428ff01599aafd4600d52ed3969aada025f",
+      "reconciled": true,
+      "reconciliation": {
+        "checked_at": "2026-10-10T03:08:23Z",
+        "state": "resolved"
+      },
+      "state": "accepted",
+      "submission_id": "2a249816-ad4c-4d75-a2fd-f9437c01516d"
+    },
+    "next_attempt_at": "2026-10-10T03:08:13Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:08:13Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 automatic reconciliation control. Reply exactly PLAN130_AUTO_RECONCILED. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:18:13Z",
+      "resume_policy": "hold",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:08:14Z"
+  },
+  "matched_turns": [
+    {
+      "id": "01a123c8-6156-71d3-8f29-323d3eba0ec9",
+      "rootTurnId": "01a123c8-6156-71d3-8f29-323d3eba0ec9",
+      "items": [
+        {
+          "type": "userMessage",
+          "id": "01a123c8-6793-74c2-935c-db39113ceecf",
+          "clientId": "01a123c8-6154-7e62-b73f-8e22ee52a385",
+          "content": [
+            {
+              "type": "text",
+              "text": "WAKE_TRIGGER_ID=wake_20261010_030814_b49d\nWAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-auto-after-acceptance\nWAKE_NATIVE_SUBMISSION_ID=2a249816-ad4c-4d75-a2fd-f9437c01516d\nAuthorized Plan0130 automatic reconciliation control. Reply exactly PLAN130_AUTO_RECONCILED. Do not edit files or message anyone.",
+              "text_elements": []
+            }
+          ]
+        },
+        {
+          "type": "agentMessage",
+          "id": "msg_0bb942efd65bb80f016ac9ac24c03087d297ada99be0c5223b",
+          "text": "PLAN130_AUTO_RECONCILED",
+          "phase": "final_answer",
+          "memoryCitation": null,
+          "delivery": null,
+          "questions": null
+        }
+      ],
+      "itemsView": "full",
+      "status": "completed",
+      "error": null,
+      "startedAt": 1791601697,
+      "completedAt": 1791601701,
+      "durationMs": 4522
+    }
+  ],
+  "scheduler_journal": "Oct 09 22:08:23 cooper systemd[696]: Started plan130-auto-reconcile.service - /home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked --wake-root /home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-auto-after-acceptance --once.\nOct 09 22:08:23 cooper codex-waked[73721]: checked=0 fired=0 failed=0 pending=0 dispatched=1 submitted=1 requeued=0\n"
+}

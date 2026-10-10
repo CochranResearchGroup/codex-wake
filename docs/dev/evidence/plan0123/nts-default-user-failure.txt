@@ -1,0 +1,2 @@
+2026-10-09T01:08:31Z chronyd version 4.5 starting (+CMDMON +NTP +REFCLOCK +RTC +PRIVDROP +SCFILTER +SIGND +ASYNCDNS +NTS +SECHASH +IPV6 -DEBUG)
+2026-10-09T01:08:31Z Fatal error : Could not get user/group ID of _chrony

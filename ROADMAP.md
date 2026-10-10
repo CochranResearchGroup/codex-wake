@@ -1059,21 +1059,47 @@ Deliverables:
 
 State: OPEN
 
-Current State: Real wakeA/wakeB request/read/ack/reply/sender-read passed through
-an isolated installed CLI; notifications were suppressed. Automatic exact-thread
-notification, sender receipt resumption, normal-session safety, restart and release
-remain unaccepted. Existing mailbox and recovery foundations are integrated.
+Current State: Plan0119's requested remaining-gate packet is accepted in
+verification0122: released v0.7.1 automatic exchanges, cancellation,
+restart/reconnect, cross-root flow, rollback and a full thirty-minute soak passed.
+Server-unloaded recipient and broader held-recovery obligations remain open.
+The network-time successor is an isolated 0.8.0 candidate under P64; current
+installed runtime remains 0.7.1. See readiness reconciliation note0010.
 
 Execution Plan: [Build usable live A2A](docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md)
 Original requirements: [Agent-to-Agent System](docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md)
 Live baseline: [wakeA/wakeB round trip](docs/dev/verification/0111-2026-10-04-wakeA-wakeB-live-round-trip.md)
 
-Deliverables, in order:
+Accepted packet deliverables (verification0122):
 
 - Unassisted live request, recipient notification/reply and sender resumption.
 - Busy/draft/offline/exact-thread/cancel guards demonstrated in real sessions.
 - Same-thread worker restart and durable reply suspension.
 - Normal installed CLI/service, enrolled cross-root flow and release/rollback.
 
-Recovery-gap release and remaining full-system obligations remain tracked; they
-are not the next prerequisite for messaging on a healthy demo bus.
+Remaining scope: server-unloaded-recipient and broader held-recovery obligations.
+Current target bus/guard/bindings/worker must be read back before claiming present
+readiness; network-time activation is tracked under P64.
+
+## P64 | Network-first Time for Wake and Mailbox Deadlines
+
+State: DONE
+
+Current State: Plan0122 revision2 COMPLETE. PR225 integrated edf2aea, published/installed v0.8.0,963 comprehensive tests and both hosted release gates pass. Three admitted plain-NTP operators retain quorum under each controlled single loss; installed native A→B→A proof verifies exact correlation/digest, submitted arm and bounded worker finish. Owned demo is paused/backed up and clients stopped; no old checkpoint reset. Authentication/additional-profile limits remain explicit follow-up, not hidden activation claims. Evidence: docs/dev/evidence/plan0122/activation/requirement-audit.md.
+
+Parent design: [Plan0122](docs/dev/plans/0122-2026-10-08-network-first-time-provider.md).
+
+1. [Plan0123: Network inspection](docs/dev/plans/0123-2026-10-08-network-time-inspection.md) — DONE; isolated inspection evidence recorded.
+2. [Plan0124: Healthy Windows fallback](docs/dev/plans/0124-2026-10-08-healthy-windows-time-fallback.md) — DONE; health-qualified inspection fallback.
+3. [Plan0125: Mailbox uncertainty recovery](docs/dev/plans/0125-2026-10-08-mailbox-time-uncertainty-recovery.md) — DONE; versioned migration and disposable outage/fault acceptance.
+4. [Plan0126: Wake acceptance](docs/dev/plans/0126-2026-10-08-time-provider-wake-acceptance.md) — DONE; isolated installed workflow, review and release/rollback evidence.
+
+After 0123, fallback and mailbox tracks are technically independent; the single-owner lane executes them serially. Acceptance is serialized after both. No source ticket implies live activation or historical clock root-cause proof.
+
+## P65 | Native Codex Delivery and Wake Lifecycle
+
+State: CLOSED
+
+Current State: All five tickets and normal installed lifecycle pass. PR228 integrates final source/evidence as a686c7b; hosted PR/main Python3.11/3.12 gates pass. Publicv0.9.0 tag and downloaded artifacts are verified.983 frozen installed tests pass; audit repairs, migration/rollback, guarded close and owned-fixture cleanup pass. Final requirement audit is docs/dev/evidence/plan0127/completion-audit.md. Other project legacy readers and unrelated local work remain preserved.
+
+Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 are DONE. Source/release qualification is complete; docs/plan127-completion carries the final closure projection. P63's separate retained recovery obligations are unchanged.

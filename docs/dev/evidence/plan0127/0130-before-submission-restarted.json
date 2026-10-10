@@ -1,0 +1,94 @@
+{
+  "record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:01:21Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:01:21Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:01:21Z",
+        "message": "not_before due_at 2026-10-10T03:01:20Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:01:25Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:01:25Z",
+        "message": "native queue accepted; execution not yet observed",
+        "type": "native_accepted"
+      }
+    ],
+    "id": "wake_20261010_030121_5e38",
+    "max_attempts": 3,
+    "native_delivery": {
+      "accepted_at": "2026-10-10T03:01:25Z",
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "c04ebb89b69db2b1745f29903a45ca6dc18bbbb5e4c5849daf87baa786559492",
+      "queue_id": "01a123c2-1b74-7b81-9b02-3933ed636c14",
+      "state": "accepted",
+      "submission_id": "ac39011c-d5ea-4bc8-b69f-2903bd547945"
+    },
+    "next_attempt_at": "2026-10-10T03:01:20Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:01:20Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 before-submission restart control. Reply exactly PLAN130_BEFORE_SUBMISSION. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:11:20Z",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:01:21Z"
+  },
+  "matched_turn_count": 1,
+  "matched_turns": [
+    {
+      "id": "01a123c2-1b75-7453-8121-4d0f9b8c50fd",
+      "rootTurnId": "01a123c2-1b75-7453-8121-4d0f9b8c50fd",
+      "items": [
+        {
+          "type": "userMessage",
+          "id": "01a123c2-1bf3-7d73-bd3b-3e48aedb8f22",
+          "clientId": "01a123c2-1b74-7012-b61a-74e6c2b3bc4a",
+          "content": [
+            {
+              "type": "text",
+              "text": "WAKE_TRIGGER_ID=wake_20261010_030121_5e38\nWAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-before-submission\nWAKE_NATIVE_SUBMISSION_ID=ac39011c-d5ea-4bc8-b69f-2903bd547945\nAuthorized Plan0130 before-submission restart control. Reply exactly PLAN130_BEFORE_SUBMISSION. Do not edit files or message anyone.",
+              "text_elements": []
+            }
+          ]
+        },
+        {
+          "type": "agentMessage",
+          "id": "msg_05eb92d872912272016ac9aa87f7288192adb15575c651d29c",
+          "text": "PLAN130_BEFORE_SUBMISSION",
+          "phase": "final_answer",
+          "memoryCitation": null,
+          "delivery": null,
+          "questions": null
+        }
+      ],
+      "itemsView": "full",
+      "status": "completed",
+      "error": null,
+      "startedAt": 1791601286,
+      "completedAt": 1791601288,
+      "durationMs": 2464
+    }
+  ],
+  "scheduler_journal": "Oct 09 22:01:25 cooper systemd[696]: Started plan130-before-submission-restart.service - /home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked --wake-root /home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-before-submission --once.\nOct 09 22:01:26 cooper codex-waked[5606]: checked=0 fired=0 failed=0 pending=0 dispatched=1 submitted=1 requeued=0\n"
+}

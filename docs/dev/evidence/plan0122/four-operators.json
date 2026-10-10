@@ -1,0 +1,70 @@
+[
+  {
+    "ok": true,
+    "source": "time.cloudflare.com",
+    "peer": "162.159.200.123",
+    "received_raw": 75762.469370493,
+    "rtt_raw_seconds": 0.02594564099854324,
+    "dns_seconds": 0.008558183995774016,
+    "server_tx_utc": 1791464251.9430702,
+    "interval_at_receive": [
+      1791464251.930352,
+      1791464251.981734
+    ],
+    "stratum": 3,
+    "leap": 0,
+    "root_dispersion": 0.000579833984375,
+    "authenticated": false
+  },
+  {
+    "ok": true,
+    "source": "time.nist.gov",
+    "peer": "129.6.15.25",
+    "received_raw": 75762.481807814,
+    "rtt_raw_seconds": 0.04115578100027051,
+    "dns_seconds": 0.005434834994957782,
+    "server_tx_utc": 1791464251.9425285,
+    "interval_at_receive": [
+      1791464251.9424827,
+      1791464251.98373
+    ],
+    "stratum": 1,
+    "leap": 0,
+    "root_dispersion": 3.0517578125e-05,
+    "authenticated": false
+  },
+  {
+    "ok": true,
+    "source": "ntp.se",
+    "peer": "194.58.200.20",
+    "received_raw": 75762.693113029,
+    "rtt_raw_seconds": 0.13079532000119798,
+    "dns_seconds": 0.12683488600305282,
+    "server_tx_utc": 1791464252.1160624,
+    "interval_at_receive": [
+      1791464252.116032,
+      1791464252.2468882
+    ],
+    "stratum": 1,
+    "leap": 0,
+    "root_dispersion": 3.0517578125e-05,
+    "authenticated": false
+  },
+  {
+    "ok": true,
+    "source": "ptbtime1.ptb.de",
+    "peer": "192.53.103.108",
+    "received_raw": 75762.589300912,
+    "rtt_raw_seconds": 0.12977885000873357,
+    "dns_seconds": 0.023036753002088517,
+    "server_tx_utc": 1791464252.008237,
+    "interval_at_receive": [
+      1791464252.0081682,
+      1791464252.1380844
+    ],
+    "stratum": 1,
+    "leap": 0,
+    "root_dispersion": 1.52587890625e-05,
+    "authenticated": false
+  }
+]

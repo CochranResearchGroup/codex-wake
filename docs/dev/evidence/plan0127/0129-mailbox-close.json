@@ -1,0 +1,32 @@
+{
+  "message_id": "msg_e8405eb397774879b515bba11aed4f9c",
+  "message_state": {
+    "admission": "accepted",
+    "notification": "suppressed",
+    "recipient": "unread"
+  },
+  "inventory": [
+    {
+      "message_id": "msg_e8405eb397774879b515bba11aed4f9c",
+      "kind": "message"
+    }
+  ],
+  "argv": [
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+    "--wake-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle-wakes",
+    "sessions",
+    "close",
+    "pane:%5",
+    "--tmux-socket",
+    "/tmp/tmux-1000/plan127-native",
+    "--bus-root",
+    "/home/ecochran76/.local/state/codex-wake/plan127-runtime/mailbox-close-inbox-control",
+    "--json"
+  ],
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "codex-wake: tab has active/unknown work or pending wakes; explicit --force required\n",
+  "delivery": "inbox; no notification dispatched",
+  "prior_failed_control": "delivery=manual rejected as unsupported before admission; original private bus preserved"
+}

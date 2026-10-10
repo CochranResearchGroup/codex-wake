@@ -1,0 +1,70 @@
+{
+  "wake_id": "wake_20261010_030121_5e38",
+  "create": {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "--wake-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-before-submission",
+      "native",
+      "at",
+      "--codex-path",
+      "/home/ecochran76/.local/bin/codex",
+      "--ttl",
+      "10m",
+      "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "2026-10-10T03:01:20.368889+00:00",
+      "--",
+      "Authorized Plan0130 before-submission restart control. Reply exactly PLAN130_BEFORE_SUBMISSION. Do not edit files or message anyone."
+    ],
+    "exit_code": 0,
+    "stdout": "wake_20261010_030121_5e38 /home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-before-submission/pending/wake_20261010_030121_5e38.json\n",
+    "stderr": ""
+  },
+  "fault_phase": "before-submission",
+  "fault_scheduler": {
+    "exit_code": 90,
+    "stdout": "",
+    "stderr": ""
+  },
+  "interrupted_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:01:21Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:01:21Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:01:21Z",
+        "message": "not_before due_at 2026-10-10T03:01:20Z matched",
+        "type": "predicate_matched"
+      }
+    ],
+    "id": "wake_20261010_030121_5e38",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T03:01:20Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:01:20Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 before-submission restart control. Reply exactly PLAN130_BEFORE_SUBMISSION. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "firing",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:11:20Z",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:01:21Z"
+  },
+  "restart_unit": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "Running timer as unit: plan130-before-submission-restart.timer\nWill run service as unit: plan130-before-submission-restart.service\n"
+  }
+}

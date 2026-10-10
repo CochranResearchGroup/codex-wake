@@ -5170,3 +5170,145 @@ First TTL120 parse failure was reconciled aszero effect, preserved and corrected
 to120s. Additional result-completed ack failedclaim_required; terminal ack not
 claimed. Stock Codex0.160.0 and updater configuration unchanged. M2-M4 OPEN.
 Memory dispositionunavailable: no reviewed Codex Wake Graphiti target group.
+
+## Turn 240 | 2026-10-08
+
+Published the user-approved Plan0122 breakdown as repo-native Plans0123–0126 on feature/network-time-consensus. Plan0123 is READY; 0124/0125 depend on 0123; 0126 depends on both. Added P64 sequencing and one-child WIP limit. Preserved the parent design and historical prototype branches. This packet publishes actionable work and adds no runtime behavior. Next execution frontier: Plan0123 network-time inspection. Dependency/link validation and staged whitespace checks govern this documentation slice; no runtime tests were rerun. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
+
+
+## Turn 241 | 2026-10-08
+
+Implemented and accepted Plans0123–0126 under the existing goal on feature/network-time-consensus in `/home/ecochran76/workspace.local/codex-wake-time-prototype`. Original main checkout/untracked notes preserved. Inspection/fallback committed at a1a7aaa; the following coherent integration commit contains mailbox migration, network deadline wakes and acceptance. Shared 0125/0126 integration was exercised together and accepted together after 0123/0124, with no second concurrent ownership lane.
+
+Acceptance state: all four child plans DONE; P64/Plan0122 remain OPEN for production activation and unqualified additional-source/authentication work. Progress classification: implemented and verified isolated candidate, not live rollout. Evidence: `docs/dev/evidence/plan0126/acceptance-review.md`, exact source/wheel hashes, installed workflow, three owned host cache fault controls, 950 comprehensive tests in 53.722 s (one shard, no retries). Review fixed backup versioning, cancellation race, direct-dispatch gating, fractional deadlines, initial regression fence, archive retention, outage reply inspection and host cache failures. Controlled sleep/boot inputs are distinct from actual host actions.
+
+Material limits: only two admitted unauthenticated operators, stopped Windows synchronization service, Netnod/PTB scale and NTS qualification open; no production package/store/service/clock changes or real session transport. Release/migration/rollback instructions prepared for candidate 0.8.0. Stop reason: bounded implementation objective achieved before the user ceiling of 2 million tokens or 3 h. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group.
+
+
+## Turn 242 | 2026-10-08
+
+Bounded research reconciled historical A2A acceptance, current installed identity and the network-time candidate. Stable CLI is0.7.1 with A2A verbs; time/network-time verbs are absent. Plan0119/verification0122 already accepted released automatic exchanges, restart/reconnect and full soak. Corrected stale P63 roadmap projection; Plan0122 now prioritizes target bus/guard/worker reconciliation and bounded activation over optional additional-source research. Candidate remains53ffcfc before this documentation commit, clean; original main/untracked notes preserved. No live mailbox, capabilities, messages, services or installation changed. Note0010 holds sources, observations, limits and next packet. No runtime tests rerun for documentation-only research. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group established.
+
+
+## Turn 243 | 2026-10-08 local / 2026-10-09 UTC
+
+Completed Plan0122 revision2 / issue224 under the approved two-million-token/three-hour ceiling. Reproduced/fixed native worker outage exit, sender and tmux guest-clock expiry, current Codex0.162 idle UI, bounded acquisition/write-lock contention, and read-only network continuity bypass. Third reviewed operator Alastyr supports each single-provider-loss quorum; Netnod/PTB remain disabled and NTS is not claimed.963 comprehensive tests pass in58.411s, both hosted Python release gates and main CI pass.
+
+PR225 integrated exact main edf2aea4c5480202639bb3e94be7f16300b8efcb. Public v0.8.0 and wheel point to that commit; stable installed module hashes/direct URL match. Actual installed actors A/B completed automatic request→reply→suspended-sender return with digest/correlation verification, submitted arm and exactly two notifications. Candidate exchange1 failed and is preserved; its contention pattern was reproduced, repaired, and separate candidate2/stable3 accepted without controller intervention after admission.
+
+New owned schema3 bus was explicitly migrated from a verified schema2 snapshot and finally paused/backed up/verified. Five messages/attempts and28pending receipt-signal projections remain retained, with no dispatching/uncertain attempts. Old0.7.1 reader actually refuses schema3; prior wheel/source retained for rollback, which cannot erase later writes by blind old-snapshot restore. Dedicated owned clients were stopped and their process generations freshly verified absent; no unrelated service, shared Codex daemon, historical checkpoint or system clock changed. Original main/untracked notes and unrelated policy-rollout86f18ba/source branch preserved.
+
+Canonical proof: docs/dev/evidence/plan0122/activation/requirement-audit.md, validation.json and stable-live-exchange.json. All8 original stories mapped with deterministic/live boundaries. Remaining limits are explicit unauthenticated-NTP trust, unknown additional profiles, bounded writer serialization, fixture-only actual host suspend/reboot and unavailable healthy Windows fallback on this host. Wider Plan0101/issue181 remains separate. Memory disposition: unavailable; no reviewed Codex Wake Graphiti group. Exactly one current-goal non-write receipt: `/home/ecochran76/.local/state/codex-wake/live-demos/plan0122-20261009/memory-disposition.json`.
+
+## Turn 244 | 2026-10-09
+
+Published the user-approved Plan0127 execution contract and tickets0128–0132 locally on the prototype branch. Native evidence remains scoped to commits3619e60 and0445918; no product implementation is claimed. Required acceptance uses installed commands, exact native/tab identities, durable outcomes and real client execution. Documentation, mocks and prototypes cannot close tickets. Dependency links and plan metadata checked; original checkout's unrelated notes preserved. No runtime mutation in this planning slice. Memory disposition unavailable: no verified Codex Wake Graphiti group; the committed plan is durable provenance.
+
+
+## Turn 245 | 2026-10-10 UTC
+
+Plan0127 execution on feat/native-workflows:0128 committed1bb976b with installed systemd/native execution evidence;0129 now accepted through installed candidate new/resume/reuse/extra attachment, idle/busy/pending close controls, identity mismatch and force preservation. Full975-test suite passed102.172s,63 focused tests passed and23 affected checks passed after command-error conversion. Failed split-tab traceback and corrected refusal retained. JSON damage, unpublished signal registrations and pending mailbox work are guarded without consumption. Explicit custom buses use --bus-root. No shared daemon restart or unrelated tab change. Recovery0130 next; parent remainsOPEN and release unclaimed. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group; non-write receipt requested through graphiti-runtime.
+
+
+## Turn 246 | 2026-10-10 UTC
+
+Ticket0130 accepted: nonce/hash precede native effect; exact queue/turn evidence reconciles uncertainty without resend.978 comprehensive and56 focused tests pass. Real installed daemon interrupted before submission, after intent and after acceptance before recording. Private systemd restart safely submits pre-effect work or recovers one matching native turn. Intent-only uncertainty remains inspectable; duplicate native turns hold. Busy and notLoaded targets expire without submission; explicit same-thread resume executes headlessly without tabs. Visible-client restart preserves and displays the one native response. Two incorrect test assumptions (instant evidence visibility; tab closed implies native unavailable) retained and adjudicated against native observations. No shared daemon/host restart.0131 next; parentOPEN, candidate unreleased. Memory disposition unavailable: no reviewed Codex Wake Graphiti target group; non-write receipt0130-memory-disposition.json.
+
+
+## Turn 247 | 2026-10-10 UTC
+
+Ticket0131 installed lifecycle PASS atc579ebe. New worker tab; native A→B assignment; A public-CLI file arm; initiating A turn completed; B slept20s, wrote42 and created condition; independent installed scheduler resumed exact A17s after prior completion; native reply and pane match. Separate missing-file guard refuses close, cancel preserves pane, ordinary close preserves conversation. Native IDs, queue nonce, durable records and result agree. Private scheduler stopped; freshMainPID0/inactive/not-found readback. No implementation change or shared runtime restart.0132 migration/retirement/release next; parentOPEN. Memory disposition unavailable: no reviewed Codex Wake target group, non-write receipt0131-memory-disposition.json.
+
+
+## Turn 248 | 2026-10-10 UTC
+
+Planning-only reconciliation requested by the operator: Plan0127 now presents
+five tickets in one dependency table and removes stale claims that no
+implementation exists. Child receipts record0128–0131 candidate acceptance;
+0132 migration, rollback, retirement and release remain open obligations.
+Execution requires actual installed behavior and criterion-level evidence;
+planning and mocked checks cannot close runtime tickets. No implementation,
+runtime action or release performed in this turn. Memory disposition
+not_durable: this correction updates the existing execution authority and adds
+no separate durable finding.
+
+
+## Turn 249 | 2026-10-10 UTC
+
+Ticket0132 migration source qualified on feat/native-workflows. Native schema4
+prevents oldreader tmux misinterpretation; metadata-only migration previews,
+backs up and preserves exact uncertain intent. Installed0.8 holds byte-identical
+state; frozen0.9 wheel submits one native wake with completed exact turn visible
+in original pane. Implicit basic tmux capture retired; explicit compatibility,
+old state, advanced signals and tracked receipt contracts retained.983 full
+installed tests pass91.152s; installed wheel-upgrade/product smoke passes.
+Malformed-state regressions and incorrect probe/deadline samples retained.
+No global install or unrelated service/shared Codex restart. Child remainsOPEN
+pending doc publication; parent release/integration/install gates remainOPEN.
+Memory disposition unavailable: no reviewed Codex Wake Graphiti group; qualified
+source outcome recorded by a non-write receipt.
+
+
+### Turn249 publication readback
+
+Source27bd7af pushed and read back as origin/feat/native-workflows. GitHub contents
+API confirms migration documentation blob4b8e602dc918ed5b8765f97876b7e41a97fbb186.
+Ticket0132 closes after all child criteria pass. Parent andP65 remainOPEN:
+normal installed rollout, hosted integration and release publication unproven.
+
+
+## Turn 250 | 2026-10-10 UTC
+
+PR227 exact-head hosted3.11/3.12 release gates PASS; squash integration verified
+as origin/main0a05c661d3dd854831614ab77ee732aa7f96b351 with identical accepted tree.
+Continued on release/native-workflows-closeout; original source branch/worktree
+and user dirty notes retained. Immutable0.9.0 prefix prepared separately from
+existing uv0.8.0 modules used by active other-project workers. Global symlinks
+and service processes unchanged; no release published. Parent/P65 OPEN for
+normal installed lifecycle, rollout, release and final objective audit. Active
+planning audit passes after renaming Plan0119's existing dated state heading;
+its scope, acceptance and open obligations unchanged. Current checkpoint
+records usage656277/6014sec and conservative user-bound stop thresholds.
+Memory disposition unavailable: no reviewed Codex Wake target group; source
+non-write receipt0132-memory-disposition.json records this turn's outcome.
+
+## Turn 252 | 2026-10-10 UTC
+
+Normal installed0.9 lifecycle passed: native A assigned visible B, armed a file
+follow-up, ended its turn and resumed15 seconds later with exact42. Busy/pending
+close, separate cancellation and conversation-preserving close passed. Failed
+formatting/selector/cleanup probes are retained. Owned clients/server exited;
+uncertain/signal/mailbox controls and native histories remain preserved.
+
+Release audit repaired intent accounting and reader-version advertisement at
+dc235a9. New immutable0.9-qualified prefix is active through four user links;
+supervisorPID56947 advertises schemas1–4. Eleven other unit readbacks and153 older
+module files are unchanged; registry bytes preserved.983 frozen installed tests
+pass126.407s; installed product smoke passes. Normal-root final wake has attempts1,
+exact payload/native completed turn and retained archived state. PR228/source
+integration, release publication and final requirement audit remain parent gates.
+Restart-safe checkpoint records exact custody and user budget stop thresholds.
+
+## Turn 253 | 2026-10-10 UTC
+
+Plan0127's full behavior/migration/release audit passes. PR228 exact head1e6d5bc
+and merged-main a686c7b pass both hosted Python3.11/3.12 gates. Publicv0.9.0 tag
+resolves to a686c7b; downloaded wheel/sdist hashes match. The exact installed-tested
+wheel bytes are published. Canonical rebuild changes ZIP timestamps only;
+all84 entry contents and all78 source modules match.983 installed tests pass.
+
+All15 parent stories,20 child criteria and implementation/testing/execution
+rules are mapped to current proof in completion-audit.md. R1/R2 are resolved.
+Native direct-send failure separately proves unchanged Wake/default-mailbox bytes.
+Fresh OS readback confirms owned clients/server gone, registered pending/firing0,
+protected controls unchanged and11 other units preserved. Selected Wake root is
+owned by supervisor56947/schema1–4. An existing SoyLei worker49232 can publish its
+own legacy schema1/2 health; no unrelated reader is upgraded or native-capable by
+alias change. Official Codex0.162.1 remains unchanged.
+
+Plan0127/P65 and child release projections are CLOSED/DONE; final documentation
+integration is on docs/plan127-completion. P63's separate retained obligations and
+the original checkout's local policy commit/five dirty notes are preserved.
+Goal remains active until this projection integrates and canonical readback passes.
+Memory disposition unavailable: no reviewed Codex Wake target group; explicit
+non-write receipt final-memory-disposition.json records the durable closeout.

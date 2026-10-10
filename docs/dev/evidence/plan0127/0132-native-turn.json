@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"schemaVersion\":1,\"thread\":{\"id\":\"01a123a8-5782-7d43-a214-55b293bbd65f\",\"kind\":\"codex\",\"title\":\"Authorize Plan0127 recipient\",\"preview\":\"Authorized disposable Plan0127 recipient. Run printenv CODEX_THREAD_ID and save only that value to /home/ecochran76/.local/state/codex-wake/plan127-runtime/recipient.id. Reply exactly PLAN127_READY and finish. Do not edit repo files or message anyone.\",\"status\":{\"type\":\"idle\"},\"cwd\":\"/home/ecochran76/workspace.local/codex-wake-plan127\",\"createdAt\":1791599597,\"updatedAt\":1791603848},\"page\":{\"order\":\"newest_first\",\"limit\":1,\"hasMore\":true,\"nextCursor\":\"{\\\"requestedThreadId\\\":\\\"01a123a8-5782-7d43-a214-55b293bbd65f\\\",\\\"rolloutOrdinal\\\":132,\\\"includeAnchor\\\":false,\\\"scope\\\":{\\\"kind\\\":\\\"turns\\\"}}\"},\"turns\":[{\"id\":\"01a123e9-284b-7a30-accf-801fe14fe01c\",\"status\":\"completed\",\"error\":null,\"startedAt\":1791603845,\"completedAt\":1791603848,\"durationMs\":3027,\"items\":[{\"type\":\"userMessage\",\"id\":\"01a123e9-29bc-7b30-92ff-c09e0f15ace6\",\"content\":[{\"type\":\"text\",\"text\":\"WAKE_TRIGGER_ID=wake_20261010_034354_0c98\\nWAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/rollback-native-v4\\nWAKE_NATIVE_SUBMISSION_ID=08af8c54-ffdd-4127-8d3c-f59dc4e98462\\nReply with PLAN132_SCHEMA4_EXECUTED. This is an owned migration acceptance wake.\"}]},{\"type\":\"agentMessage\",\"id\":\"msg_0bb942efd65bb80f016ac9b487b87487d28ba824c8c4a0d7bc\",\"text\":\"PLAN132_SCHEMA4_EXECUTED\",\"phase\":\"final_answer\"}]}]}"
+    }
+  ],
+  "isError": false
+}

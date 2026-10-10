@@ -1,0 +1,302 @@
+{
+  "status": "passed",
+  "controls": [
+    {
+      "withheld_operator": "cloudflare",
+      "fault": "controlled reply omission after real acquisition",
+      "report": {
+        "schema": 1,
+        "production_ready": false,
+        "purpose": "inspection-only",
+        "decision": {
+          "status": "network",
+          "sources": [
+            "ntp.alastyr.com",
+            "time.nist.gov"
+          ],
+          "lower": 1791512213.3227074,
+          "upper": 1791512213.5409722,
+          "reason": ""
+        },
+        "sources": [
+          {
+            "operator": "cloudflare",
+            "host": "time.cloudflare.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "missing_or_duplicate_reply"
+          },
+          {
+            "operator": "nist",
+            "host": "time.nist.gov",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.nist.gov",
+              "operator": "nist",
+              "lower": 1791512213.4376507,
+              "upper": 1791512213.4766977,
+              "age": 0.3571002,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "ef89a4df-5999-4efb-a73f-506f97067113",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "132.163.96.2"
+          },
+          {
+            "operator": "netnod",
+            "host": "ntp.se",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "ptb",
+            "host": "ptbtime1.ptb.de",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "alastyr",
+            "host": "ntp.alastyr.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "ntp.alastyr.com",
+              "operator": "alastyr",
+              "lower": 1791512213.3227074,
+              "upper": 1791512213.5409722,
+              "age": 0.1344837,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "ef89a4df-5999-4efb-a73f-506f97067113",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "5.2.80.90"
+          }
+        ],
+        "windows": {
+          "reason": "windows_unsynchronized"
+        },
+        "instant": {
+          "host_boot": "639269852545000000",
+          "qpc": 1237621978793,
+          "frequency": 10000000,
+          "generation": "ef89a4df-5999-4efb-a73f-506f97067113",
+          "guest_boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db"
+        },
+        "policy": {
+          "tolerance": 1.0,
+          "max_age": 120.0,
+          "max_rtt": 0.5,
+          "drift_ppm": 100
+        },
+        "note": "Bounds refer to collector completion, not the later print instant. No deadline effects are authorized."
+      }
+    },
+    {
+      "withheld_operator": "nist",
+      "fault": "controlled reply omission after real acquisition",
+      "report": {
+        "schema": 1,
+        "production_ready": false,
+        "purpose": "inspection-only",
+        "decision": {
+          "status": "network",
+          "sources": [
+            "ntp.alastyr.com",
+            "time.cloudflare.com"
+          ],
+          "lower": 1791512213.987865,
+          "upper": 1791512214.2062628,
+          "reason": ""
+        },
+        "sources": [
+          {
+            "operator": "cloudflare",
+            "host": "time.cloudflare.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.cloudflare.com",
+              "operator": "cloudflare",
+              "lower": 1791512214.0704548,
+              "upper": 1791512214.1424007,
+              "age": 1.1066195,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "ef89a4df-5999-4efb-a73f-506f97067113",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "162.159.200.123"
+          },
+          {
+            "operator": "nist",
+            "host": "time.nist.gov",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "missing_or_duplicate_reply"
+          },
+          {
+            "operator": "netnod",
+            "host": "ntp.se",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "ptb",
+            "host": "ptbtime1.ptb.de",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "alastyr",
+            "host": "ntp.alastyr.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "ntp.alastyr.com",
+              "operator": "alastyr",
+              "lower": 1791512213.987865,
+              "upper": 1791512214.2062628,
+              "age": 0.7997079,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "ef89a4df-5999-4efb-a73f-506f97067113",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "5.2.80.90"
+          }
+        ],
+        "windows": {
+          "reason": "windows_unsynchronized"
+        },
+        "instant": {
+          "host_boot": "639269852545000000",
+          "qpc": 1237628631035,
+          "frequency": 10000000,
+          "generation": "ef89a4df-5999-4efb-a73f-506f97067113",
+          "guest_boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db"
+        },
+        "policy": {
+          "tolerance": 1.0,
+          "max_age": 120.0,
+          "max_rtt": 0.5,
+          "drift_ppm": 100
+        },
+        "note": "Bounds refer to collector completion, not the later print instant. No deadline effects are authorized."
+      }
+    },
+    {
+      "withheld_operator": "alastyr",
+      "fault": "controlled reply omission after real acquisition",
+      "report": {
+        "schema": 1,
+        "production_ready": false,
+        "purpose": "inspection-only",
+        "decision": {
+          "status": "network",
+          "sources": [
+            "time.cloudflare.com",
+            "time.nist.gov"
+          ],
+          "lower": 1791512214.8360677,
+          "upper": 1791512214.9081666,
+          "reason": ""
+        },
+        "sources": [
+          {
+            "operator": "cloudflare",
+            "host": "time.cloudflare.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.cloudflare.com",
+              "operator": "cloudflare",
+              "lower": 1791512214.8360677,
+              "upper": 1791512214.9081666,
+              "age": 1.872309,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "ef89a4df-5999-4efb-a73f-506f97067113",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "162.159.200.123"
+          },
+          {
+            "operator": "nist",
+            "host": "time.nist.gov",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.nist.gov",
+              "operator": "nist",
+              "lower": 1791512214.868421,
+              "upper": 1791512214.9077547,
+              "age": 1.7880139,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "ef89a4df-5999-4efb-a73f-506f97067113",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "132.163.96.2"
+          },
+          {
+            "operator": "netnod",
+            "host": "ntp.se",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "ptb",
+            "host": "ptbtime1.ptb.de",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "alastyr",
+            "host": "ntp.alastyr.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "missing_or_duplicate_reply"
+          }
+        ],
+        "windows": {
+          "reason": "windows_unsynchronized"
+        },
+        "instant": {
+          "host_boot": "639269852545000000",
+          "qpc": 1237636287930,
+          "frequency": 10000000,
+          "generation": "ef89a4df-5999-4efb-a73f-506f97067113",
+          "guest_boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db"
+        },
+        "policy": {
+          "tolerance": 1.0,
+          "max_age": 120.0,
+          "max_rtt": 0.5,
+          "drift_ppm": 100
+        },
+        "note": "Bounds refer to collector completion, not the later print instant. No deadline effects are authorized."
+      }
+    }
+  ]
+}

@@ -1,25 +1,32 @@
 # Codex Wake
 
-Codex Wake is a local wake spooler for TUI-bound Codex agents. It lets an agent register a durable wake request, lets a deterministic daemon wait for the trigger, and resumes a Codex TUI pane by submitting a short wake prompt.
+Codex Wake adds durable time/condition triggers, recovery visibility and visible
+Byobu tab lifecycle to native Codex. Native Codex owns conversations, ordinary
+messages, turns and task status. Use native messaging directly for an immediate
+agent exchange; use Wake when a follow-up must survive the initiating turn or
+when you explicitly need a tracked exchange.
 
-The current package supports:
+The package provides:
 
-- `codex-wake after`, `codex-wake at`, and `codex-wake file`
-- durable JSON wake records under `.codex/wake/`
-- `codex-waked` polling and dispatch
-- monitor readiness checks and `--require-monitor` scheduling gates
-- a user-scoped supervisor for explicitly registered wake roots
-- tmux pane injection with `UserPromptSubmit` hook ack
-- terminal-state archival with `codex-wake archive`
-- experimental stdio app-server targeted wake records
-- experimental OpenClaw Gateway targeted wake records
-- OpenClaw plugin registration through `codex_wake_schedule`
+- `native after|at|file` for an exact thread, with expiry and explicit same-thread resume.
+- `native reconcile` for uncertain submission and `native migrate` for earlier candidate records.
+- `sessions list|show|resolve|current|watch|open|close` for discovery and visible tab lifecycle.
+- Durable records, installed polling, registered-root supervision, cancellation and archival.
+- Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
+
+Native queue acceptance is separate from execution and acknowledgment. Busy or
+unavailable threads hold until expiry; ambiguous submissions are reconciled and
+never blindly replayed or silently sent through another transport.
+
+See [migration and capabilities](docs/dev/native-workflow-migration.md) for the
+qualified support boundary and rollback procedure.
 
 ## Requirements
 
 - Python 3.11+
-- `tmux` for TUI-bound wake dispatch
-- Codex CLI with hook support
+- Official Codex 0.162.1 is the native client version qualified by Plan0127.
+- `tmux`/Byobu for visible tab lifecycle and legacy pane delivery.
+- Hook support for legacy tmux acknowledgment; native queue delivery needs no hook.
 - `uv` for the recommended user-scoped install path
 
 ## Install
@@ -33,7 +40,7 @@ uv tool install --force .
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.7.1
+uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.9.0
 ```
 
 Verify the installed commands:
@@ -138,16 +145,40 @@ This writes or checks this `.codex/hooks.json` shape:
 
 Codex may require a one-time `/hooks` review before a new repo-local hook runs. Codex Wake reports that prerequisite, but it does not bypass Codex hook trust. If `/hooks` does not list this repo hook source, the active TUI has not loaded the repo hook file; restart or resume Codex in this repo, then review hooks before testing wake ack behavior.
 
-## Basic Usage
+## Native Usage
 
-Run these commands inside a tmux pane that is hosting the Codex TUI you want
-to wake. `codex-wake` captures `CODEX_THREAD_ID` (or the compatible
-`CODEX_SESSION_ID`), `TMUX_PANE`, and the tmux socket from the environment.
-When the wake fires, the captured pane is only a location hint: Codex Wake
-validates exact thread metadata and the original Codex client-process identity,
-searches the captured tmux session for one unique relocated match, then falls
-back to app-server delivery for that same thread. Ambiguous matches fail closed
-without pasting.
+Choose the exact thread UUID returned by `sessions resolve` or `sessions open`.
+Tab names and numbers are discovery conveniences; durable work targets a thread.
+For session selectors use `thread:UUID`, `19:wake`, `tab:wake`, `pane:%N` or
+`window:@N` (decimal IDs from discovery). Qualify the tmux session when names/numbers are ambiguous. Native
+scheduling and `open --resume` take the UUID without the `thread:` prefix.
+
+```bash
+codex-wake sessions resolve '19:wake' --json
+codex-wake sessions open --new --cwd /absolute/project --name worker --tmux-session SESSION
+codex-wake sessions open --resume THREAD_UUID --name worker --tmux-session SESSION
+codex-wake native after THREAD_UUID 45m -- "Inspect the migration log and continue."
+codex-wake native file --ttl 2h THREAD_UUID /absolute/project/.codex/events/tests.done -- "Read the test result."
+codex-wake native at --resume-missing THREAD_UUID "2026-10-12T17:30:00-05:00" -- "Inspect release readiness."
+codex-wake native reconcile WAKE_ID
+codex-wake sessions close thread:THREAD_UUID
+```
+
+New versus resume is explicit. An existing exact attachment is reused unless
+`--extra-attachment` is requested. Ordinary close refuses active, unknown or
+pending work. `--force` preserves conversations and durable work and reports
+what is affected; cancellation and archival are separate commands. Supply
+`--bus-root` for custom mailbox stores when checking close safety.
+
+A running Wake0.9 scheduler must own the chosen root for native execution. Native
+registration does not start a scheduler. End the initiating turn after arming
+its follow-up; a foreground wait is not a suspension proof.
+
+## Legacy Compatibility Usage
+
+The following basic commands require an explicit `--legacy-tmux` choice.
+Existing persisted records keep their transport. Advanced signal interfaces
+remain supported while their native replacements are unqualified.
 
 Agents can use the bundled `$codex-wake` skill for workflow guidance and wake
 cycle examples. The skill lives at `skills/codex-wake/` in this repo and can be
@@ -157,13 +188,13 @@ cycles.
 Wake after a duration:
 
 ```bash
-codex-wake after --require-monitor 45m -- "Continue the migration. First inspect .codex/events/migration.log."
+codex-wake after --legacy-tmux --require-monitor 45m -- "Continue the migration. First inspect .codex/events/migration.log."
 ```
 
 Wake at an absolute timestamp:
 
 ```bash
-codex-wake at --require-monitor "2026-05-18T17:30:00-05:00" -- "Check whether the release branch is ready."
+codex-wake at --legacy-tmux --require-monitor "2026-05-18T17:30:00-05:00" -- "Check whether the release branch is ready."
 ```
 
 Wake when a marker file exists:
@@ -174,7 +205,7 @@ mkdir -p .codex/events
   pytest -q > .codex/events/pytest.log 2>&1
   touch .codex/events/pytest.done
 ) &
-codex-wake file --require-monitor .codex/events/pytest.done -- \
+codex-wake file --legacy-tmux --require-monitor .codex/events/pytest.done -- \
   "Pytest finished. Read .codex/events/pytest.log and continue from the failing tests."
 ```
 
@@ -393,6 +424,29 @@ codex-wake service logs --lines 50
 codex-wake service stop
 codex-wake service uninstall
 ```
+
+App-server wake dispatch requires a running persistent Codex daemon with the
+supported Unix WebSocket control transport. Check daemon presence with
+`codex app-server daemon version`; executable resolution alone does not prove
+this readiness. The discovered socket must be absolute and owned by the current user in a
+private directory owned by that user. A current-user-owned leaf alias under a
+private owned directory is supported only when its absolute target is a canonical
+socket in a separate private owned directory. Ancestor aliases, alias chains,
+foreign ownership, dangling targets and nonprivate containing directories fail
+closed. The WebSocket client connects to the verified canonical socket path.
+Codex Wake only discovers and connects to this existing daemon. It never starts,
+replaces or stops it. Missing or unsupported daemon readiness fails before a new
+turn starts; unattended app-server delivery has no standalone-server fallback.
+
+The dispatcher closes only its owned WebSocket connection after `turn/start` returns.
+The persistent daemon owns the turn beyond that connection, including long
+turns. Absolute RPC deadlines bound writes and protocol response waits, not agent work.
+The maintained WebSocket client caps incoming messages at32MiB and closes within
+one second. The raw `codex app-server proxy` copies bytes and does not translate
+newline JSON into the WebSocket protocol; it is not used by dispatch.
+`submitted` and `ack_observed` prove turn acceptance; verify the exact thread and
+turn transcript separately for completion. Do not automatically retry an original
+wake whose external outcome is uncertain.
 
 Run a readiness report:
 
@@ -922,3 +976,28 @@ same reviewed `--expected-database-sha256` to finish that exact transition.
 Changed artifacts, malformed intent, conflicts or partial receipts stay held for
 inspection. Reconciliation never discards evidence, clears the gap hold, starts
 a different recovery, or silently overwrites another canonical image.
+
+### Inspect external time on WSL
+
+Run `codex-wake time inspect` to collect a bounded network-time report without
+changing the clock or mailbox. `codex-wake time inspect --offline` shows source
+admission policy without network access. Reports identify the accepted interval,
+its host-counter instant, and each source's exclusion reason. Windows PowerShell
+interop is required; unavailable acquisition returns uncertainty. Network rounds
+are limited to one per 64 seconds across processes, with a two-minute bounded
+cache. Cloudflare/NIST/Alastyr observations are explicitly unauthenticated; Netnod/PTB
+remain disabled pending time-scale qualification. This inspection command does
+not activate deadline effects. See Plan0123 qualification for policy and limits.
+
+### Opt-in network time (0.8.0)
+
+Opt-in `after --network-time` / `at --network-time` wakes use bounded
+network-first time; put options before the duration or timestamp. Existing
+writers retain their default time policy. `codex-wake time inspect` shows
+qualified sources and exclusions; `--offline` shows configuration only.
+Cloudflare, NIST and Alastyr are admitted as explicitly unauthenticated plain NTP.
+Netnod and PTB remain disabled pending scale qualification.
+
+Mailbox activation is an explicit operator schema migration, never a reset of
+an anomalous legacy checkpoint. See the [0.8.0 instructions](docs/dev/release-notes/0.8.0-network-time.md)
+for commands, compatibility, migration, rollback and acceptance limits.

@@ -1,0 +1,17 @@
+{
+  "base_commit": "1bb976b",
+  "branch": "feat/native-workflows",
+  "candidate_python": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/python",
+  "candidate_install": "editable; resolves source in codex-wake-plan127; global installation untouched",
+  "wake_version": "0.8.0 candidate",
+  "codex_version": "0.162.1",
+  "files": {
+    "src/codex_wake/session_lifecycle.py": "8fe932e62c0ab0ff3a48bf54f9c97644da6dd6392e93763546765800cc143a3e",
+    "src/codex_wake/sessions_cli.py": "b8058fc801339ab9b20c42a4ed30c4a6156f959122a542853ae4d5e34fd95151",
+    "src/codex_wake/cli.py": "b16db3af1247aeaca14f6cfa32f15ba9c188305bc8d7fc0e2e08569798d48233",
+    "src/codex_wake/signal_store.py": "ecc5643877a2fe08121b3bd8193da3740dd960e2b31aaa56ef09461137be926c",
+    "src/codex_wake/a2a_mailbox.py": "2b1ba134efdc22ea8b9bc938ec044a59b626a5f735f91907aa01f1a4edacbe20",
+    "tests/test_session_lifecycle.py": "ab049d3d17d6d3afa470589da740fd84cee69c3dad3b41f1c6f25f3e7e441c67",
+    "tests/test_a2a_mailbox.py": "bd44f6db498114357f15e072ae9af080acc80d8ea4b0c7ce57c872da29ce7b19"
+  }
+}

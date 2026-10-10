@@ -1,0 +1,18 @@
+{
+  "signals_after_force_close": [
+    {
+      "wake_id": "wake_plan129_unpublished",
+      "target": {
+        "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+        "transport": "native"
+      },
+      "publication_state": "prepared"
+    }
+  ],
+  "mailbox_after_force_close": [
+    {
+      "message_id": "msg_e8405eb397774879b515bba11aed4f9c",
+      "kind": "message"
+    }
+  ]
+}

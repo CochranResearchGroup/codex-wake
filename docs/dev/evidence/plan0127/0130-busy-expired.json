@@ -1,0 +1,51 @@
+{
+  "record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:10:55Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:10:55Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:10:55Z",
+        "message": "not_before due_at 2026-10-10T03:10:53Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:10:55Z",
+        "message": "exact recipient is not available and idle",
+        "type": "native_held"
+      },
+      {
+        "at": "2026-10-10T03:11:01Z",
+        "message": "native wake expired without submission",
+        "type": "expired"
+      }
+    ],
+    "id": "wake_20261010_031055_bb06",
+    "last_error": "native wake expired",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T03:11:00Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:10:53Z",
+      "type": "not_before"
+    },
+    "prompt": "This busy control must expire without native submission.",
+    "schema_version": 1,
+    "status": "failed",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:10:59Z",
+      "resume_policy": "same_thread",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:10:55Z"
+  },
+  "scheduler_journal": "Oct 09 22:11:01 cooper systemd[696]: Started plan130-busy-expiry.service - /home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked --wake-root /home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-busy-expiry --once.\nOct 09 22:11:01 cooper codex-waked[88447]: checked=1 fired=0 failed=1 pending=0 dispatched=0 submitted=0 requeued=0\n"
+}

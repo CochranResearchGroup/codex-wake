@@ -1,0 +1,11 @@
+{
+  "tier": "comprehensive",
+  "command": "private installed0.9.0 python -m unittest discover -s tests -q",
+  "tests": 983,
+  "seconds": 91.152,
+  "outcome": "PASS",
+  "retries": 0,
+  "log": "/home/ecochran76/.local/state/codex-wake/plan127-runtime/0132-final-frozen-full-tests.log",
+  "log_sha256": "5e2b03b4ce2be0957d47e8af4afd5af8a227ea95aa4dcc6ea2e2d5afcb37ea8f",
+  "prior_samples": "0132-full-tests-first.log failed eight outdated implicit-legacy fixtures; retained. Earlier successful builds/tests do not replace this frozen-source sample."
+}

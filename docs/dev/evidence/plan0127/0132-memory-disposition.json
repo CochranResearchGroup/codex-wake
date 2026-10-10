@@ -1,0 +1,18 @@
+{
+  "artifact_path": "docs/dev/evidence/plan0127/0132-memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": null,
+  "reason": "No reviewed Codex Wake Graphiti target group is available for a qualified write.",
+  "recorded_at": "2026-10-10T03:58:21.977309+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "docs/dev/evidence/plan0127/0132-acceptance.md",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}

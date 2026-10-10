@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "tier": "comprehensive",
+  "tests": 950,
+  "seconds": 53.722,
+  "command": "PYTHONPATH=src python -m unittest discover -s tests",
+  "log": "/tmp/codex-wake-network-reviewed-tests.txt",
+  "log_sha256": "6e43ff74cdce136b8e6952fb98cb4fcfeb82c0cc2c4e0c2dd2b3f988385ea030",
+  "retries": 0,
+  "shards": 1,
+  "exclusions": [],
+  "installed_acceptance": "installed-acceptance.json",
+  "installed_checks": 5,
+  "host_cache_controls": "cache-corruption-control.json",
+  "host_controls": 3,
+  "build_log": "/tmp/codex-wake-network-final-build.txt",
+  "prior_comprehensive_runs": [
+    {
+      "tests": 940,
+      "seconds": 49.268,
+      "log": "/tmp/codex-wake-network-full-tests.txt"
+    },
+    {
+      "tests": 948,
+      "seconds": 57.14,
+      "log": "/tmp/codex-wake-network-final-tests.txt"
+    }
+  ],
+  "production_effects": false,
+  "actual_host_suspend_or_reboot": false
+}

@@ -1,0 +1,46 @@
+{
+  "status": "passed",
+  "network_acquisitions": 0,
+  "controls": [
+    {
+      "fault": "corruption",
+      "status": "passed",
+      "observation": {
+        "generation": "a3a76950-78d3-468e-807c-b4535b5c54b9",
+        "host_boot_end": "639269852545000000",
+        "guest_boot": "fixture",
+        "replies": [
+          {
+            "host": "time.cloudflare.com",
+            "error": "cache_invalid_backoff"
+          },
+          {
+            "host": "time.nist.gov",
+            "error": "cache_invalid_backoff"
+          }
+        ],
+        "start": 1215765192359,
+        "host_boot": "639269852545000000",
+        "windows": {
+          "error": "windows_unsynchronized",
+          "service_running": false
+        },
+        "frequency": 10000000,
+        "request_id": "corruption",
+        "end": 1215768800757
+      }
+    },
+    {
+      "fault": "frequency_changed",
+      "status": "passed",
+      "exit_code": 1,
+      "error": "elapsed_authority_changed"
+    },
+    {
+      "fault": "counter_regressed",
+      "status": "passed",
+      "exit_code": 1,
+      "error": "elapsed_authority_changed"
+    }
+  ]
+}

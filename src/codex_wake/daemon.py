@@ -303,6 +303,7 @@ def poll_once(
     signal_runners: tuple[SignalSourceRunner, ...] = (),
     signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
     receipt_authority_path: Path | None = None,
+    time_provider=None,
 ) -> PollResult:
     current = now or utc_now()
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
@@ -382,6 +383,22 @@ def poll_once(
         if classification == "hold":
             pending += 1
             continue
+        from .native_delivery import expire_native
+        if expire_native(root, item, current):
+            failed += 1
+            continue
+        if classification == 'network_v3':
+            from .network_wakes import evaluate_pending
+            try:
+                state = evaluate_pending(root,item.record['id'],time_provider)
+            except WakeError:
+                pending += 1
+                continue
+            if state == 'firing':
+                fired += 1
+            elif state == 'pending':
+                pending += 1
+            continue
         if classification == "signal_v2":
             if signal_runtime is None:
                 pending += 1
@@ -445,12 +462,13 @@ def poll_once(
                 else:
                     pending += 1
             continue
-        due_for_attempt, _next_attempt = next_attempt_is_due(item.record, current)
+        item_current = current
+        due_for_attempt, _next_attempt = next_attempt_is_due(item.record, item_current)
         if not due_for_attempt:
             pending += 1
             continue
         try:
-            ready, message = predicate_is_ready(item.record, current)
+            ready, message = predicate_is_ready(item.record, item_current)
         except WakeError as exc:
             move_record(
                 root,
@@ -458,7 +476,7 @@ def poll_once(
                 "failed",
                 event_type="failed",
                 message=str(exc),
-                now=current,
+                now=item_current,
                 last_error=str(exc),
             )
             failed += 1
@@ -470,20 +488,30 @@ def poll_once(
                 "firing",
                 event_type="predicate_matched",
                 message=message,
-                now=current,
+                now=item_current,
             )
             fired += 1
         else:
             pending += 1
     if dispatch:
         for item in firing_records(root):
+            if classify_record(item.record) == 'hold':
+                continue
+            dispatch_current = current
+            if classify_record(item.record) == 'network_v3':
+                from .network_wakes import read_time, evaluation_time
+                try:
+                    dispatch_current = evaluation_time(read_time(time_provider))
+                except WakeError:
+                    continue
             result = dispatch_firing_record(
                 root,
                 item,
                 runner=runner,
-                now=current,
+                now=dispatch_current,
                 ack_timeout_override=ack_timeout_override,
                 app_server_codex_cmd=app_server_codex_cmd,
+                **(dict(time_provider=time_provider) if classify_record(item.record) == "network_v3" else {}),
                 signal_authorizer=(
                     signal_runtime.authorize_firing_record
                     if signal_runtime is not None

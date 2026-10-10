@@ -11,6 +11,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
+from codex_wake.app_server import StdioAppServerClient
 from codex_wake.monitor import write_monitor_health
 from codex_wake.event_wake import EventWake
 from codex_wake.filesystem_signals import FilesystemSignalAdapter
@@ -198,7 +199,12 @@ for line in sys.stdin:
             record["id"] = "wake_supervisor"
             write_record(wake_root, record)
 
-            with patch.dict("os.environ", {"PATH": "/definitely/missing"}, clear=True):
+            # This fixture qualifies enrolled executable routing only. The Unix
+            # daemon/connection lifetime is exercised by test_app_server_lifecycle.
+            with patch.dict("os.environ", {"PATH": "/definitely/missing"}, clear=True), patch(
+                "codex_wake.app_server.UnixWebSocketAppServerClient",
+                side_effect=lambda codex_cmd: StdioAppServerClient(codex_cmd=codex_cmd),
+            ):
                 results = supervisor_poll_once(config, mode="once")
 
             self.assertTrue(results[0]["ok"])

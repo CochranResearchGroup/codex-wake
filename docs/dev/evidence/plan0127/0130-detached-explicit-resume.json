@@ -1,0 +1,97 @@
+{
+  "create": {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "--wake-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/detached-explicit-resume",
+      "native",
+      "at",
+      "--codex-path",
+      "/home/ecochran76/.local/bin/codex",
+      "--resume-missing",
+      "--ttl",
+      "10m",
+      "01a123ba-05f8-7040-9c58-f2f28da1b35d",
+      "2026-10-10T03:04:28.078163+00:00",
+      "--",
+      "Authorized Plan0130 same-thread resume control. Reply exactly PLAN130_SAME_THREAD_RESUMED. Do not edit files or message anyone."
+    ],
+    "exit_code": 0,
+    "stdout": "wake_20261010_030429_b337 /home/ecochran76/.local/state/codex-wake/plan127-runtime/detached-explicit-resume/pending/wake_20261010_030429_b337.json\n",
+    "stderr": ""
+  },
+  "scheduler": {
+    "exit_code": 0,
+    "stdout": "checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0\n",
+    "stderr": ""
+  },
+  "record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:04:29Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "not_before due_at 2026-10-10T03:04:28Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "explicit workflow policy resumed its exact saved thread",
+        "type": "native_same_thread_resumed"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "native queue accepted; execution not yet observed",
+        "type": "native_accepted"
+      }
+    ],
+    "id": "wake_20261010_030429_b337",
+    "max_attempts": 3,
+    "native_delivery": {
+      "accepted_at": "2026-10-10T03:04:29Z",
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "02a2a7e040363db3e50cb7767e612cac188c3798e372026ad8df232f99a9463c",
+      "queue_id": "01a123c4-f9ec-7db2-aa68-1c7c093d9d16",
+      "state": "accepted",
+      "submission_id": "a7cf3e0d-9085-422e-b95c-a9858ebc74f3"
+    },
+    "next_attempt_at": "2026-10-10T03:04:28Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:04:28Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 same-thread resume control. Reply exactly PLAN130_SAME_THREAD_RESUMED. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:14:28Z",
+      "resume_policy": "same_thread",
+      "thread_id": "01a123ba-05f8-7040-9c58-f2f28da1b35d",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:04:29Z"
+  },
+  "tabs_before": [
+    "@0",
+    "@3"
+  ],
+  "tabs_after": [
+    "@0",
+    "@3"
+  ]
+}

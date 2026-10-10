@@ -1,0 +1,96 @@
+{
+  "record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:07:49Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:07:49Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:07:50Z",
+        "message": "not_before due_at 2026-10-10T03:07:48Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:07:50Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:07:50Z",
+        "message": "native queue accepted; execution not yet observed",
+        "type": "native_accepted"
+      }
+    ],
+    "id": "wake_20261010_030749_932e",
+    "max_attempts": 3,
+    "native_delivery": {
+      "accepted_at": "2026-10-10T03:07:50Z",
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "bd632f5930808b4f843448c567d9462374723975faa4bc41eb6a896ca103a328",
+      "queue_id": "01a123c7-f990-74b2-bdb5-0513b8694767",
+      "state": "accepted",
+      "submission_id": "12c8aee1-3e96-4e6f-9a72-b03a6062c851"
+    },
+    "next_attempt_at": "2026-10-10T03:07:48Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:07:48Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 client restart control. Reply exactly PLAN130_CLIENT_RESTARTED. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:12:48Z",
+      "resume_policy": "hold",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:07:50Z"
+  },
+  "matched_turns": [
+    {
+      "id": "01a123c7-f991-7681-8094-27c50fdc8d7a",
+      "rootTurnId": "01a123c7-f991-7681-8094-27c50fdc8d7a",
+      "items": [
+        {
+          "type": "userMessage",
+          "id": "01a123c7-fa18-7170-8f6f-8a5000bb89d1",
+          "clientId": "01a123c7-f98f-7f51-ad57-d7f72046e83c",
+          "content": [
+            {
+              "type": "text",
+              "text": "WAKE_TRIGGER_ID=wake_20261010_030749_932e\nWAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control\nWAKE_NATIVE_SUBMISSION_ID=12c8aee1-3e96-4e6f-9a72-b03a6062c851\nAuthorized Plan0130 client restart control. Reply exactly PLAN130_CLIENT_RESTARTED. Do not edit files or message anyone.",
+              "text_elements": []
+            }
+          ]
+        },
+        {
+          "type": "agentMessage",
+          "id": "msg_05eb92d872912272016ac9ac085c50819280bdc49edba4dc80",
+          "text": "PLAN130_CLIENT_RESTARTED",
+          "phase": "final_answer",
+          "memoryCitation": null,
+          "delivery": null,
+          "questions": null
+        }
+      ],
+      "itemsView": "full",
+      "status": "completed",
+      "error": null,
+      "startedAt": 1791601670,
+      "completedAt": 1791601673,
+      "durationMs": 2722
+    }
+  ],
+  "pane_after_restart": "\n  >_ OpenAI Codex (v0.162.1)\n     ~/workspace.local/codex-wake-plan127\n  Resuming session\u2026\n\n\u203a Ask Codex to do anything\n\n\n\n\n  >_ OpenAI Codex (v0.162.1)\n     ~/workspace.local/codex-wake-plan127\n  permissions: YOLO mode\n\n  Tip: When the composer is empty, press Esc to step back and edit your last message; Enter confirms.\n\n\u2022 Sent by Codex from task 01a1088e-8652-74d3-a3d4-784fc561feea\n  Plan0129 disposable busy-close acceptance: run sleep 15 with the terminal tool, then reply exactly PLAN129_BUSY_DONE. No other work.\n\n\u2022 I\u2019ll run the 15-second terminal sleep.\n\n\u2022 Ran sleep 15\n  \u2514 (no output)\n\n\u2022 PLAN129_BUSY_DONE\n\n  Worked for 20s \u2022 21:43\n\n\n\u203a WAKE_TRIGGER_ID=wake_20261010_030000_c100\n  WAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-after-acceptance\n  WAKE_NATIVE_SUBMISSION_ID=ab3c6886-0108-4c70-8145-7e70d8ad422d\n  Authorized Plan0130 after-acceptance control. Reply exactly PLAN130_AFTER_ACCEPTANCE. Do not edit files or message anyone.\n\n\n\u2022 PLAN130_AFTER_ACCEPTANCE\n\n  Worked for 2s \u2022 22:00\n\n\n\u203a WAKE_TRIGGER_ID=wake_20261010_030121_5e38\n  WAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-before-submission\n  WAKE_NATIVE_SUBMISSION_ID=ac39011c-d5ea-4bc8-b69f-2903bd547945\n  Authorized Plan0130 before-submission restart control. Reply exactly PLAN130_BEFORE_SUBMISSION. Do not edit files or message anyone.\n\n\n\u2022 PLAN130_BEFORE_SUBMISSION\n\n  Worked for 2s \u2022 22:01\n\n\n\u203a WAKE_TRIGGER_ID=wake_20261010_030749_932e\n  WAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control\n  WAKE_NATIVE_SUBMISSION_ID=12c8aee1-3e96-4e6f-9a72-b03a6062c851\n  Authorized Plan0130 client restart control. Reply exactly PLAN130_CLIENT_RESTARTED. Do not edit files or message anyone.\n\n\n\u2022 PLAN130_CLIENT_RESTARTED\n\n  Worked for 2s \u2022 22:07\n\n\n\u203a Ask Codex to do anything\n\n  GPT-6.1-Sol default \u00b7 ~/workspace.local/codex-wake-plan127 \u00b7 plan127-worker \u00b7 \u2190 for agents\n",
+  "second_scheduler_journal": "Oct 09 22:07:58 cooper systemd[696]: Started plan130-client-restart-delivery.service - /home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked --wake-root /home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control --once.\nOct 09 22:07:58 cooper codex-waked[71421]: checked=0 fired=0 failed=0 pending=0 dispatched=0 submitted=0 requeued=0\n",
+  "first_assertion_disposition": "Expected a missing native target after tab close; observed submission instead. Detached visibility does not establish native unavailability. No same-thread resume event or replacement thread was created. This sample qualifies available native execution across visible-client restart; the separate notLoaded control proves hold/expiry."
+}

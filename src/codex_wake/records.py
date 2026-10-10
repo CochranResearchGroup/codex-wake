@@ -13,16 +13,18 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .signal_records import decode_signal_record, signal_journal_path
+from .time_provider import NETWORK_TIME_POLICY
 
 
 SCHEMA_VERSION = 1
+NATIVE_SCHEMA_VERSION = 4
 SCHEMA_COMPATIBILITY = "additive_optional_fields"
 SCHEMA_DOC = "docs/dev/wake-record-schema.md"
 ACTIVE_STATUS_DIRS = ("pending", "firing", "submitted", "failed", "cancelled", "expired")
 TERMINAL_STATUSES = {"submitted", "failed", "cancelled", "expired"}
 VALID_STATUSES = set(ACTIVE_STATUS_DIRS) | {"archived"}
 PREDICATE_TYPES = ("not_before", "file_exists", "file_changed", "process_done")
-TARGET_TRANSPORTS = ("tmux", "app-server", "openclaw_gateway")
+TARGET_TRANSPORTS = ("tmux", "native", "app-server", "openclaw_gateway")
 
 
 class WakeError(ValueError):
@@ -69,15 +71,49 @@ def classify_record(record: object) -> str:
 
     if decode_signal_record(record) is not None:
         return "signal_v2"
-    if not isinstance(record, dict) or record.get("schema_version") != SCHEMA_VERSION:
+    if not isinstance(record, dict) or record.get("schema_version") not in (SCHEMA_VERSION,3,NATIVE_SCHEMA_VERSION):
         return "hold"
     predicate = record.get("predicate")
     if isinstance(predicate, dict) and predicate.get("type") == "signal":
         return "hold"
     if not isinstance(record.get("id"), str) or not record.get("id"):
         return "hold"
-    if record.get("status") not in VALID_STATUSES:
+    if not isinstance(record.get("status"), str) or record["status"] not in VALID_STATUSES:
         return "hold"
+    target = record.get("target")
+    if isinstance(target, dict) and target.get('transport') == 'native':
+        if type(record.get('attempts')) is not int or record['attempts'] < 0:
+            return "hold"
+    if record.get("schema_version") == NATIVE_SCHEMA_VERSION:
+        target = record.get("target")
+        if (not isinstance(target, dict) or target.get("transport") != "native"
+                or not isinstance(predicate, dict)
+                or not isinstance(predicate.get("type"), str)
+                or predicate["type"] not in {"not_before", "file_exists"}
+                or not all(isinstance(target.get(key), str) and target[key]
+                           for key in ("thread_id", "endpoint", "codex_cmd", "expires_at"))):
+            return "hold"
+        from uuid import UUID
+        try:
+            if str(UUID(target['thread_id'])) != target['thread_id']:
+                return "hold"
+            parse_timestamp(target['expires_at'])
+            if not target['endpoint'].startswith('unix://') or not Path(target['codex_cmd']).is_absolute():
+                return "hold"
+            if predicate['type'] == 'not_before':
+                if not isinstance(predicate.get('due_at'), str):
+                    return "hold"
+                parse_timestamp(predicate['due_at'])
+            elif not isinstance(predicate.get('path'), str) or not Path(predicate['path']).is_absolute():
+                return "hold"
+        except (ValueError, KeyError, TypeError):
+            return "hold"
+        # Same basic predicate evaluation family; transport owns native effects.
+        return "v1"
+    if record.get("schema_version") == 3:
+        if record.get("time_policy") != NETWORK_TIME_POLICY or not isinstance(predicate,dict) or predicate.get("type") != "not_before":
+            return "hold"
+        return "network_v3"
     return "v1"
 
 
@@ -293,7 +329,7 @@ def build_record(
     wake_id = make_wake_id(current)
     timestamp = format_utc(current)
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": NATIVE_SCHEMA_VERSION if target.get("transport") == "native" else SCHEMA_VERSION,
         "id": wake_id,
         "created_at": timestamp,
         "updated_at": timestamp,
@@ -313,7 +349,8 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "read_versions": [1, 2],
+        "read_versions": [1, 2, 3, 4],
+        "native_write_version": NATIVE_SCHEMA_VERSION,
         "default_write_version": SCHEMA_VERSION,
         "signal_record_contract_version": 2,
         "signal_journal_schema_version": 2,
@@ -492,7 +529,7 @@ def cancel_record(
     checkpoint: Callable[[str], None] | None = None,
 ) -> Path:
     found = find_record(root, wake_id)
-    if decode_signal_record(found.record) is not None:
+    if decode_signal_record(found.record) is not None or classify_record(found.record) == "network_v3":
         with WakeLifecycleLock(root, wake_id):
             if checkpoint is not None:
                 checkpoint("after_cancel_lock")
@@ -510,11 +547,12 @@ def _cancel_found(
     status = record.get("status")
     if status in {"submitted", "failed", "cancelled", "expired", "archived"}:
         raise WakeError(f"cannot cancel wake in status {status}")
-    current = now or utc_now()
+    network = classify_record(record) == 'network_v3'
+    current = None if network else now or utc_now()
     record["status"] = "cancelled"
-    record["updated_at"] = format_utc(current)
+    record["updated_at"] = None if network else format_utc(current)
     events = list(record.get("events") or [])
-    events.append(make_event("cancelled", "Wake cancelled by operator", current))
+    events.append(dict(type='cancelled',message='Wake cancelled by operator',at=None,time_status='not_observed') if network else make_event("cancelled", "Wake cancelled by operator", current))
     record["events"] = events
     destination = write_record(root, record)
     if checkpoint is not None:
@@ -571,7 +609,11 @@ def archive_record(
     status = record.get("status")
     if status not in TERMINAL_STATUSES:
         raise WakeError(f"cannot archive wake in status {status}")
-    current = now or utc_now()
+    if record.get("schema_version") == 3:
+        from .network_wakes import creation_time, read_time
+        current = creation_time(read_time())
+    else:
+        current = now or utc_now()
     record["previous_status"] = status
     record["status"] = "archived"
     record["archived_at"] = format_utc(current)
@@ -622,7 +664,14 @@ def cleanup_archived_records(
             retention_at = parse_utc_timestamp(retention_text)
         except WakeError:
             continue
-        if retention_at > cutoff:
+        item_cutoff = cutoff
+        if item.record.get("schema_version") == 3:
+            from .network_wakes import evaluation_time, read_time
+            try:
+                item_cutoff = evaluation_time(read_time()) - older_than
+            except WakeError:
+                continue
+        if retention_at > item_cutoff:
             continue
         if decode_signal_record(item.record) is not None and not _signal_cleanup_allowed(root, item.record):
             continue

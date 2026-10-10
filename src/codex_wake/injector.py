@@ -339,10 +339,27 @@ def dispatch_firing_record(
     signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
     thread_identity_resolver: Callable[[str], dict[str, str]] | None = None,
     app_server_client: Any | None = None,
+    time_provider=None,
 ) -> DispatchResult:
     record = found.record
+    from .records import classify_record
+    classification = classify_record(record)
+    if classification == 'hold':
+        return DispatchResult('skipped','unrecognized record; no dispatch authorized')
+    network_current = None
+    if classification == 'network_v3':
+        from .network_wakes import read_time, evaluation_time, creation_time, precise_deadline
+        try:
+            decision = read_time(time_provider)
+            lower = evaluation_time(decision)
+            if lower < precise_deadline(record['predicate']['due_at']) or lower < precise_deadline(record.get('next_attempt_at',record['predicate']['due_at'])):
+                return DispatchResult('skipped','network deadline not established')
+            network_current = creation_time(decision)
+        except WakeError:
+            return DispatchResult('skipped','network time uncertain; no dispatch authorized')
     wake_id = record.get("id")
-    if record.get("schema_version") != 2 or not isinstance(wake_id, str) or not wake_id:
+    native = isinstance(record.get('target'), dict) and record['target'].get('transport') == 'native'
+    if (record.get("schema_version") not in (2,3) and not native) or not isinstance(wake_id, str) or not wake_id:
         return _dispatch_firing_record_unlocked(
             root,
             found,
@@ -360,13 +377,15 @@ def dispatch_firing_record(
         except (FileNotFoundError, OSError, json.JSONDecodeError):
             return DispatchResult("skipped", "signal firing record is no longer active")
         active = WakePath(found.path, reloaded)
-        if reloaded.get("schema_version") != 2 or reloaded.get("status") != "firing":
+        if reloaded.get("schema_version") != record.get("schema_version") or reloaded.get("status") != "firing" or classify_record(reloaded) == "hold":
             return DispatchResult("skipped", "signal firing record is no longer active")
+        if classification == 'network_v3' and (reloaded.get('predicate') != record.get('predicate') or reloaded.get('next_attempt_at') != record.get('next_attempt_at')):
+            return DispatchResult('skipped','network wake changed during acquisition')
         return _dispatch_firing_record_unlocked(
             root,
             active,
             runner=runner,
-            now=now,
+            now=network_current or now,
             ack_timeout_override=ack_timeout_override,
             app_server_codex_cmd=app_server_codex_cmd,
             signal_authorizer=signal_authorizer,
@@ -416,6 +435,9 @@ def _dispatch_firing_record_unlocked(
         if isinstance(predicate, dict) and predicate.get("source") == "a2a.receipt":
             return DispatchResult("skipped", "A2A receipt delivery is unqualified")
     target = record.get("target")
+    if isinstance(target, dict) and target.get('transport') == 'native':
+        from .native_delivery import dispatch_native
+        return dispatch_native(root, found, current)
     if isinstance(target, dict) and target.get("transport") == "app-server":
         from .app_server import dispatch_app_server_record
 

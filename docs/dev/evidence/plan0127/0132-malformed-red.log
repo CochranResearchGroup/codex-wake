@@ -1,0 +1,44 @@
+======================================================================
+ERROR: test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) (field='due_at')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-plan127/tests/test_native_migration.py", line 72, in test_malformed_native_state_is_held_without_crashing_scheduler
+    result = poll_once(root)
+             ^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/lib/python3.12/site-packages/codex_wake/daemon.py", line 382, in poll_once
+    classification = classify_record(item.record)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/lib/python3.12/site-packages/codex_wake/records.py", line 99, in classify_record
+    parse_timestamp(predicate['due_at'])
+  File "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/lib/python3.12/site-packages/codex_wake/records.py", line 148, in parse_timestamp
+    text = value.strip()
+           ^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'strip'
+
+======================================================================
+ERROR: test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) (field='type')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-plan127/tests/test_native_migration.py", line 72, in test_malformed_native_state_is_held_without_crashing_scheduler
+    result = poll_once(root)
+             ^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/lib/python3.12/site-packages/codex_wake/daemon.py", line 382, in poll_once
+    classification = classify_record(item.record)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/lib/python3.12/site-packages/codex_wake/records.py", line 87, in classify_record
+    or predicate.get("type") not in {"not_before", "file_exists"}
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+FAIL: test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) (field='status')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-plan127/tests/test_native_migration.py", line 73, in test_malformed_native_state_is_held_without_crashing_scheduler
+    self.assertEqual(result.pending, 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.194s
+
+FAILED (failures=1, errors=2)

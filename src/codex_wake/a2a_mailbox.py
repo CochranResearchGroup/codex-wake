@@ -8,12 +8,14 @@ import json
 import math
 from pathlib import Path
 import time
+import threading
 import uuid
 
 from .a2a_bus import BusStore
 from .a2a_identity import Actor, BusError, RuntimeIdentity
 
 MAILBOX_SCHEMA = 2
+NETWORK_MAILBOX_SCHEMA = 3
 TERMINAL = frozenset({'declined', 'completed', 'failed'})
 
 
@@ -31,19 +33,47 @@ def thread_key(identity: RuntimeIdentity) -> str:
 
 class Mailbox:
     def __init__(self, bus: BusStore, *, clock=time.time, monotonic=time.monotonic,
-                 fault=None, max_open=1000, max_messages=100000, max_bytes=1024**3, rate_limit=10):
+                 fault=None, time_provider=None, max_open=1000, max_messages=100000, max_bytes=1024**3, rate_limit=10):
         self.bus, self.clock, self.monotonic, self.fault = bus, clock, monotonic, fault
+        self.time_provider = time_provider
+        self._time_context = threading.local()
         self.max_open, self.max_messages, self.max_bytes, self.rate_limit = max_open, max_messages, max_bytes, rate_limit
         self.boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
         with bus.connection() as database:
             self._schema(database)
 
+    def pending_thread_work(self, thread_id: str) -> list[dict]:
+        """Inspect lifecycle blockers without reading message bodies or expiring work."""
+        with self.bus.connection(read_only=True) as database:
+            rows = database.execute(
+                "SELECT e.message_id, e.recipient_key, 'message' AS kind "
+                "FROM mail_metadata e JOIN mail_state s USING(message_id) "
+                "WHERE s.admission='accepted' AND s.recipient NOT IN ('declined','completed','failed') "
+                "UNION SELECT message_id, recipient_key, kind FROM mail_outbox "
+                "WHERE status IN ('pending','published','deferred','dispatching','uncertain')"
+            ).fetchall()
+        result = []
+        for row in rows:
+            try:
+                identity = json.loads(row['recipient_key'])
+                if not isinstance(identity, list) or len(identity) != 2:
+                    raise ValueError()
+            except (ValueError, TypeError):
+                raise BusError('inventory_unavailable', 'pending mailbox attribution is unavailable') from None
+            if identity[1] == thread_id:
+                result.append(dict(message_id=row['message_id'], kind=row['kind']))
+        return result
+
     @staticmethod
     def _schema(database):
         row = database.execute("SELECT value FROM meta WHERE key='mailbox_schema'").fetchone()
         version = json.loads(row[0]) if row else None
-        if type(version) is not int or version != MAILBOX_SCHEMA:
+        if type(version) is not int or version not in (MAILBOX_SCHEMA, NETWORK_MAILBOX_SCHEMA):
             raise BusError('unsupported_mailbox_schema', 'mailbox domain requires an explicit supported migration')
+        if version == NETWORK_MAILBOX_SCHEMA:
+            policy = database.execute("SELECT value FROM meta WHERE key='mail_time_policy'").fetchone()
+            if not policy or json.loads(policy[0]) != dict(version=1,mode='network-first',authentication='plain-ntp-explicit-opt-in'):
+                raise BusError('unsupported_time_policy','network time policy is missing or unsupported')
 
     @classmethod
     def migrate(cls, bus: BusStore, operator_capability: Path) -> str:
@@ -103,6 +133,60 @@ class Mailbox:
             database.execute('COMMIT')
             return receipt
 
+    @classmethod
+    def activate_network_time(cls, bus, operator_capability, *, provider=None):
+        """Explicit schema migration; never resets an anomalous legacy checkpoint."""
+        mailbox = cls(bus, time_provider=provider)
+        with mailbox.transaction() as database:
+            bus.operator(database, operator_capability)
+            if bus.recovery_held(database):
+                raise BusError('recovery_hold','time-policy migration is held during recovery')
+            if mailbox._network_mode(database):
+                database.execute('ROLLBACK')
+                return 'already_current'
+            decision = mailbox._accepted_time()
+            if database.execute("SELECT 1 FROM mail_leases WHERE lease_until>?",(decision.lower,)).fetchone() or database.execute("SELECT 1 FROM mail_attempts WHERE state IN ('dispatching','uncertain')").fetchone():
+                raise BusError('migration_busy','quiescent mailbox required for time-policy migration')
+            if decision.status != 'network':
+                raise BusError('time_uncertain','network consensus required to establish the time policy')
+            previous = database.execute("SELECT value FROM meta WHERE key='mail_clock'").fetchone()
+            if previous:
+                legacy_now = mailbox._now(database)
+                if legacy_now < decision.lower-1 or legacy_now > decision.upper+1:
+                    raise BusError('clock_anomaly','legacy clock and network consensus disagree; checkpoint retained')
+                database.execute('INSERT INTO meta VALUES (?,?)',('mail_clock_before_network',previous[0]))
+            ddl = database.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='mail_receipts'").fetchone()[0]
+            triggers = database.execute("SELECT sql FROM sqlite_master WHERE type='trigger' AND tbl_name='mail_receipts'").fetchall()
+            database.execute(ddl.replace('CREATE TABLE "mail_receipts"','CREATE TABLE network_receipts',1).replace('CREATE TABLE mail_receipts','CREATE TABLE network_receipts',1).replace('created REAL NOT NULL','created REAL',1))
+            database.execute('INSERT INTO network_receipts SELECT * FROM mail_receipts')
+            database.execute('DROP TABLE mail_receipts')
+            database.execute('ALTER TABLE network_receipts RENAME TO mail_receipts')
+            for trigger in triggers:
+                database.execute(trigger[0])
+            database.execute("UPDATE meta SET value=? WHERE key='mailbox_schema'",(encoded(NETWORK_MAILBOX_SCHEMA),))
+            database.execute('INSERT INTO meta VALUES (?,?)',('mail_time_policy',encoded(dict(version=1,mode='network-first',authentication='plain-ntp-explicit-opt-in'))))
+            database.execute('INSERT INTO meta VALUES (?,?)',('mail_network_clock',encoded(dict(lower=decision.lower,upper=decision.upper,sources=decision.sources,status=decision.status))))
+            receipt = bus.event(database,'operator','activate_network_time',dict(from_version=MAILBOX_SCHEMA,to_version=NETWORK_MAILBOX_SCHEMA,previous_checkpoint_preserved=bool(previous)))
+            if database.execute('PRAGMA foreign_key_check').fetchone():
+                raise BusError('store_unavailable','time-policy migration failed foreign-key proof')
+            mailbox._finish(database,receipt_id=receipt)
+            return receipt
+
+    @staticmethod
+    def _network_mode(database):
+        row = database.execute("SELECT value FROM meta WHERE key='mailbox_schema'").fetchone()
+        return bool(row and json.loads(row[0]) == NETWORK_MAILBOX_SCHEMA)
+
+    def _accepted_time(self):
+        from .time_inspection import network_time_decision
+        from .time_provider import require_time_decision
+        try:
+            decision = require_time_decision((self.time_provider or network_time_decision)())
+        except (OSError,ValueError,TypeError) as error:
+            raise BusError('time_uncertain','bounded time unavailable; retry original intent') from error
+        self._time_context.decision = decision
+        return decision
+
     @staticmethod
     def _migrate_identity(database):
         # Keep the envelope sequence generator intact. Only dependent foreign
@@ -142,6 +226,11 @@ class Mailbox:
         try:
             with self.bus.connection() as database:
                 self._schema(database)
+                if self._network_mode(database):
+                    # A competing transaction may be acquiring host time (25s
+                    # collector bound). Wait once for its commit, without retrying
+                    # an admission/effect; legacy stores retain their 1s bound.
+                    database.execute('PRAGMA busy_timeout=30000')
                 database.execute('BEGIN IMMEDIATE')
                 if actor is not None:
                     self.bus.validate_actor(database, actor, permission=permission)
@@ -163,7 +252,27 @@ class Mailbox:
                     pass  # Preserve the original failure; no admission or effect retry.
             raise
 
+    @staticmethod
+    def _check_network_checkpoint(database, decision):
+        previous = database.execute("SELECT value FROM meta WHERE key='mail_network_clock'").fetchone()
+        if previous:
+            from .time_provider import TimeDecision, require_time_decision
+            try:
+                last = json.loads(previous[0])
+                require_time_decision(TimeDecision(last['status'],tuple(last['sources']),last['lower'],last['upper']))
+                regressed = decision.lower < last['lower']-1
+            except (KeyError,TypeError,ValueError):
+                raise BusError('clock_anomaly','persisted network checkpoint is invalid') from None
+            if regressed:
+                raise BusError('clock_anomaly','network time regressed; no checkpoint reset authorized')
+
     def _now(self, database) -> float:
+        if self._network_mode(database):
+            decision = self._accepted_time()
+            self._check_network_checkpoint(database, decision)
+            database.execute('INSERT INTO meta VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
+                             ('mail_network_clock',encoded(dict(lower=decision.lower,upper=decision.upper,sources=decision.sources,status=decision.status))))
+            return decision.lower
         now, monotonic = float(self.clock()), float(self.monotonic())
         if not math.isfinite(now) or not math.isfinite(monotonic) or now <= 0:
             raise BusError('clock_anomaly', 'invalid clock observation')
@@ -214,6 +323,13 @@ class Mailbox:
     def _participant(self, row, actor):
         if actor.key not in (row['sender_key'], row['recipient_key']):
             raise BusError('authorization_denied', 'message belongs to another mailbox')
+
+    def _time_upper(self, database, now):
+        return self._time_context.decision.upper if self._network_mode(database) else now
+
+    def _deadline_clear(self, database, row, now):
+        if self._network_mode(database) and row['admission'] == 'accepted' and now < row['expires'] <= self._time_upper(database,now):
+            raise BusError('time_uncertain','deadline lies inside the accepted interval; no delivery authorized')
 
     def _expire(self, database, row, now):
         if json.loads(row['envelope']).get('compacted'):
@@ -307,17 +423,18 @@ class Mailbox:
         sequence = sequence[0] if sequence else 1
         database.execute('INSERT INTO mail_sequences VALUES (?,?) ON CONFLICT(recipient_key) DO UPDATE SET next_sequence=excluded.next_sequence', (recipient_key, sequence + 1))
         identifier = 'msg_' + uuid.uuid4().hex
+        created = self._time_upper(database,now)
         envelope = dict(schema_version=1, bus_id=self.bus.bus_id, message_id=identifier,
             conversation_id=parent['conversation_id'] if parent else 'conversation_' + uuid.uuid4().hex,
             sender=dict(namespace=actor.namespace, thread_id=actor.thread_id, root=actor.root),
             recipient=dict(namespace=target.namespace, thread_id=target.thread_id, root=target.root),
-            kind=kind, subject=subject, body_digest=body_digest, created_at=now, expires_at=now + ttl,
+            kind=kind, subject=subject, body_digest=body_digest, created_at=created, expires_at=created + ttl,
             idempotency_key=key, in_reply_to=parent_id, correlation=parent['correlation'] if parent else correlation,
             lineage=(parent['lineage'] + [parent_id]) if parent else [], hop_count=hop,
             selector_observation=selector, delivery=delivery)
         database.execute('INSERT INTO mail_identities VALUES (?)', (identifier,))
         database.execute('INSERT INTO mail_envelopes(message_id,sender_key,recipient_key,idempotency_key,fingerprint,created,expires,envelope,in_reply_to) VALUES (?,?,?,?,?,?,?,?,?)',
-                         (identifier, actor.key, recipient_key, key, fingerprint, now, now + ttl, encoded(envelope), parent_id))
+                         (identifier, actor.key, recipient_key, key, fingerprint, created, created + ttl, encoded(envelope), parent_id))
         database.execute('INSERT INTO mail_bodies VALUES (?,?)', (identifier, body))
         database.execute('INSERT INTO mail_state(message_id,recipient_seq,admission,notification,recipient) VALUES (?,?,?,?,?)',
                          (identifier, sequence, 'accepted', 'pending' if delivery == 'notify' else 'suppressed', 'unread'))
@@ -343,7 +460,8 @@ class Mailbox:
         with self.transaction(actor) as database:
             row = self._row(database, identifier)
             self._participant(row, actor)
-            row = self._expire(database, row, self._now(database))
+            if not self._network_mode(database):
+                row = self._expire(database, row, self._now(database))
             value = self._projection(database, row)
             database.execute('COMMIT')
             return value
@@ -357,6 +475,7 @@ class Mailbox:
                 self.bus.validate_actor(database, actor, permission='receive')
             now = self._now(database)
             row = self._expire(database, row, now)
+            self._deadline_clear(database,row,now)
             stored = database.execute('SELECT body FROM mail_bodies WHERE message_id=?', (identifier,)).fetchone()
             if stored is None:
                 raise BusError('body_unavailable', 'body was retained as metadata only')
@@ -413,6 +532,7 @@ class Mailbox:
             self._participant(row, actor)
             now = self._now(database)
             row = self._expire(database, row, now)
+            self._deadline_clear(database,row,now)
             value = self._ack(database, actor, row, outcome, evidence, now)
             value['message'] = self._projection(database, self._row(database, identifier))
             self._finish(database, message_id=identifier, receipt_id=value['receipt_id'])
@@ -426,6 +546,7 @@ class Mailbox:
                 raise BusError('authorization_denied', 'only the original recipient may reply')
             now = self._now(database)
             original = self._expire(database, original, now)
+            self._deadline_clear(database,original,now)
             sender = json.loads(original['envelope'])['sender']
             recipient = RuntimeIdentity(sender['namespace'], sender['thread_id'], sender['root'])
             value = self._admit(database, actor, recipient, body=body, kind=kind, ttl=float(ttl), key=idempotency_key,
@@ -443,8 +564,14 @@ class Mailbox:
             row = self._row(database, identifier)
             if actor.key != row['sender_key']:
                 raise BusError('authorization_denied', 'only the sender may cancel')
-            now = self._now(database)
-            row = self._expire(database, row, now)
+            try:
+                now = self._now(database)
+            except BusError as error:
+                if not self._network_mode(database) or error.code != 'time_uncertain':
+                    raise
+                now = None
+            if now is not None:
+                row = self._expire(database, row, now)
             if row['admission'] == 'cancelled':
                 value = dict(message=self._projection(database, row), deduplicated=True)
             else:
@@ -456,7 +583,8 @@ class Mailbox:
                     raise BusError('not_processable', 'message admission is already terminal')
                 database.execute("UPDATE mail_state SET admission='cancelled',notification='suppressed',terminal_at=? WHERE message_id=?", (now, identifier))
                 database.execute("UPDATE mail_outbox SET status='suppressed' WHERE message_id=? AND kind='notification'", (identifier,))
-                receipt = self._record(database, identifier, 'cancelled', actor.key, now)
+                receipt = self._record(database, identifier, 'cancelled', actor.key, now,
+                                       dict(time_status='uncertain') if now is None else {}, signal=now is not None)
                 value = dict(message=self._projection(database, self._row(database, identifier)), receipt_id=receipt, deduplicated=False)
             self._finish(database, message_id=identifier, receipt_id=value.get('receipt_id'))
             return value
@@ -467,12 +595,14 @@ class Mailbox:
         if state is not None and state not in ('unread','received','accepted','declined','completed','failed','cancelled','expired'):
             raise BusError('invalid_argument', 'unsupported mailbox state filter')
         with self.transaction(actor) as database:
-            now = self._now(database)
+            now = None if self._network_mode(database) else self._now(database)
             column = 'sender_key' if outbox else 'recipient_key'
             rows = database.execute('SELECT message_id,global_seq FROM mail_metadata WHERE ' + column + '=? AND global_seq>? ORDER BY global_seq LIMIT ?', (actor.key, cursor, limit + 1)).fetchall()
             values = []
             for row in rows[:limit]:
-                current = self._expire(database, self._row(database, row['message_id']), now)
+                current = self._row(database, row['message_id'])
+                if now is not None:
+                    current = self._expire(database,current,now)
                 if state is None or state == current['admission' if state in ('cancelled','expired') else 'recipient']:
                     values.append(self._projection(database, current))
             next_cursor = rows[limit - 1]['global_seq'] if len(rows) > limit else None
@@ -497,9 +627,9 @@ class Mailbox:
         with self.transaction(actor) as database:
             original = self._row(database, identifier)
             self._participant(original, actor)
-            now = self._now(database)
+            now = None if self._network_mode(database) else self._now(database)
             candidates = database.execute('SELECT message_id,envelope FROM mail_metadata WHERE recipient_key=? AND sender_key=? AND in_reply_to=? ORDER BY global_seq LIMIT 100', (original['sender_key'], original['recipient_key'], identifier)).fetchall()
-            values = [self._projection(database, self._expire(database, self._row(database, row['message_id']), now))
+            values = [self._projection(database, self._row(database, row['message_id']) if now is None else self._expire(database, self._row(database, row['message_id']), now))
                       for row in candidates if json.loads(row['envelope'])['in_reply_to'] == identifier]
             database.execute('COMMIT')
             return values
@@ -507,8 +637,11 @@ class Mailbox:
     def operator_inspect(self, capability, identifier, *, body=False):
         with self.transaction() as database:
             self.bus.operator(database, capability)
-            row = self._expire(database, self._row(database, identifier), self._now(database))
-            receipt = self._record(database, identifier, 'operator_inspected', 'operator', float(self.clock()), dict(body_requested=bool(body)), signal=False)
+            network = self._network_mode(database)
+            row = self._row(database,identifier)
+            if not network:
+                row = self._expire(database,row,self._now(database))
+            receipt = self._record(database, identifier, 'operator_inspected', 'operator', None if network else float(self.clock()), dict(body_requested=bool(body),time_status='not_observed' if network else 'legacy'), signal=False)
             value = dict(message=self._projection(database, row), receipt_id=receipt)
             if body:
                 stored = database.execute('SELECT body FROM mail_bodies WHERE message_id=?', (identifier,)).fetchone()

@@ -1,0 +1,38 @@
+[
+  {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T02:38:23Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T02:38:23Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T02:42:51Z",
+        "message": "Wake cancelled by operator",
+        "type": "cancelled"
+      }
+    ],
+    "id": "wake_20261010_023823_46b8",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T03:38:23Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:38:23Z",
+      "type": "not_before"
+    },
+    "prompt": "This pending workflow must survive closing the tab.",
+    "schema_version": 1,
+    "status": "cancelled",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-11T03:38:23Z",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T02:42:51Z"
+  }
+]

@@ -229,3 +229,10 @@ class MailboxTests(unittest.TestCase):
             self.mailbox.reply(actor,current,body='Fixture reply',idempotency_key='hop-9',delivery='inbox')
         self.assertEqual(error.exception.code,'lineage_limit')
         self.assertEqual(self.mailbox.list(self.recipient,state='accepted')['messages'],[])
+
+    def test_pending_thread_work_exposes_identifiers_without_message_bodies(self):
+        identifier = self.send()['message']['message_id']
+        work = self.mailbox.pending_thread_work('recipient')
+        self.assertTrue(any(item['message_id'] == identifier for item in work))
+        self.assertNotIn('Fixture request', json.dumps(work))
+        self.assertEqual(self.mailbox.pending_thread_work('foreign'), [])
