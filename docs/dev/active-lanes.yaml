@@ -208,3 +208,22 @@ lanes:
     reconciled_overlaps: [P63]
     updated_at: 2026-10-10
     disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. No implementation active; ticket0142 next. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
+
+  - id: P72
+    owner: primary
+    objective: Qualify native queue receipts for live-tab notifications
+    work_items: [docs/dev/plans/0142-2026-10-10-native-live-submission.md]
+    plan: docs/dev/plans/0142-2026-10-10-native-live-submission.md
+    plan_ref: origin/fix/native-live-submission
+    branch: fix/native-live-submission
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: c8adce33a4a1b0fb26b8936f02017407f84d625e
+    remote_ref: refs/remotes/origin/fix/native-live-submission
+    integration: squash_pr
+    dependencies: [P71]
+    overlaps: [P71]
+    reconciled_overlaps: [P71]
+    updated_at: 2026-10-10
+    disposition: Primary owns Plan0141 and ticket0142 implementation serially; goal execution active, native receipt regression next, no live effects yet.
