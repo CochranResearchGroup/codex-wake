@@ -1,0 +1,17 @@
+test_interrupted_firing_cannot_bypass_time_gate (tests.test_native_network_time.NativeNetworkTimeTests.test_interrupted_firing_cannot_bypass_time_gate) ... FAIL
+
+======================================================================
+FAIL: test_interrupted_firing_cannot_bypass_time_gate (tests.test_native_network_time.NativeNetworkTimeTests.test_interrupted_firing_cannot_bypass_time_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_native_network_time.py", line 75, in test_interrupted_firing_cannot_bypass_time_gate
+    self.assertEqual(result.status,'skipped')
+AssertionError: 'requeued' != 'skipped'
+- requeued
++ skipped
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.028s
+
+FAILED (failures=1)

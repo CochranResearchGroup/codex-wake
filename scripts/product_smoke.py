@@ -449,7 +449,23 @@ def run_surface_smoke(
         env=signal_env,
         cwd=signal_work,
     )
-    time.sleep(1.1)
+    # Observe eligibility before deletion; a fixed sleep can cross the retention
+    # boundary before the command's clock observation reaches it.
+    eligibility_deadline = time.monotonic() + 6
+    for attempt in range(12):
+        eligibility = run_json(
+            [str(codex_wake), "--wake-root", str(surface_root), "cleanup",
+             "--older-than", "1s", "--json"],
+            artifact_dir=artifact_dir,
+            name=f"signal-retention-eligibility-{attempt}",
+            env=signal_env,
+            cwd=signal_work,
+        )
+        if eligibility.get("matched_count") == 1 and eligibility.get("protected_count") == 0:
+            break
+        if time.monotonic() >= eligibility_deadline:
+            raise SystemExit("installed signal retirement did not become eligible within the bounded wait")
+        time.sleep(0.5)
     cleanup = run_json(
         [
             str(codex_wake), "--wake-root", str(surface_root), "cleanup",

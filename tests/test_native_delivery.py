@@ -10,6 +10,13 @@ from codex_wake.records import all_records, build_record, write_record
 
 
 class NativeDeliveryTests(unittest.TestCase):
+    def setUp(self):
+        from codex_wake.time_provider import TimeDecision
+        reading = TimeDecision('network', ('a','b'), 1791504000, 1791504000.2)
+        provider = patch('codex_wake.time_inspection.network_time_decision', return_value=reading)
+        provider.start()
+        self.addCleanup(provider.stop)
+
     def test_file_wake_expires_even_if_file_never_appears(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

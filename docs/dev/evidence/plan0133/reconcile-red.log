@@ -1,0 +1,17 @@
+test_uncertain_submission_reconciles_read_only_during_time_outage (tests.test_native_network_time.NativeNetworkTimeTests.test_uncertain_submission_reconciles_read_only_during_time_outage) ... FAIL
+
+======================================================================
+FAIL: test_uncertain_submission_reconciles_read_only_during_time_outage (tests.test_native_network_time.NativeNetworkTimeTests.test_uncertain_submission_reconciles_read_only_during_time_outage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-native-time/tests/test_native_network_time.py", line 145, in test_uncertain_submission_reconciles_read_only_during_time_outage
+    self.assertEqual(recovered['status'],'submitted')
+AssertionError: 'firing' != 'submitted'
+- firing
++ submitted
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.026s
+
+FAILED (failures=1)

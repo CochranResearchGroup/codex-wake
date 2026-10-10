@@ -1,14 +1,16 @@
 # Plan 0136 — Installed native network-time acceptance
 
-State: PLANNED
-Workflow: BLOCKED
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary agent
-Branch: docs/native-time-parity
+Branch: feat/native-network-time
 Work-Item: docs/dev/plans/0136-2026-10-10-native-network-time-installed-acceptance.md
 
 ## Current State
 
-Approved ticket; implementation and acceptance have not run.
+Source dependency0135 accepted. Separate immutable candidate installed; unattended
+after/at checks armed. See ../evidence/plan0133/installed-checkpoint.md.
+Acceptance remains incomplete.
 
 ## Parent
 

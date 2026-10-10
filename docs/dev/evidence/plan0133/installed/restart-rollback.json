@@ -1,0 +1,106 @@
+{
+  "status": "passed",
+  "wake_id": "wake_20261010_150007_0174",
+  "before": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T15:00:07Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake",
+    "events": [
+      {
+        "at": "2026-10-10T15:00:07Z",
+        "message": "Wake record created",
+        "type": "created"
+      }
+    ],
+    "id": "wake_20261010_150007_0174",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T15:00:07Z",
+    "predicate": {
+      "path": "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/never-created",
+      "type": "file_exists"
+    },
+    "prompt": "Disposable restart control; marker must remain absent.",
+    "schema_version": 5,
+    "status": "pending",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T15:10:07Z",
+      "resume_policy": "hold",
+      "thread_id": "01a1264d-330a-7821-9270-20851ef2b9c6",
+      "transport": "native"
+    },
+    "time_observation": {
+      "lower": 1791644406.6168475,
+      "reason": "",
+      "sources": [
+        "ntp.alastyr.com",
+        "time.cloudflare.com",
+        "time.nist.gov"
+      ],
+      "status": "network",
+      "upper": 1791644406.7973514
+    },
+    "time_policy": {
+      "authentication": "plain-ntp-explicit-opt-in",
+      "mode": "network-first",
+      "version": 1
+    },
+    "updated_at": "2026-10-10T15:00:07Z"
+  },
+  "after": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T15:00:07Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake",
+    "events": [
+      {
+        "at": "2026-10-10T15:00:07Z",
+        "message": "Wake record created",
+        "type": "created"
+      }
+    ],
+    "id": "wake_20261010_150007_0174",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T15:00:07Z",
+    "predicate": {
+      "path": "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/never-created",
+      "type": "file_exists"
+    },
+    "prompt": "Disposable restart control; marker must remain absent.",
+    "schema_version": 5,
+    "status": "pending",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T15:10:07Z",
+      "resume_policy": "hold",
+      "thread_id": "01a1264d-330a-7821-9270-20851ef2b9c6",
+      "transport": "native"
+    },
+    "time_observation": {
+      "lower": 1791644406.6168475,
+      "reason": "",
+      "sources": [
+        "ntp.alastyr.com",
+        "time.cloudflare.com",
+        "time.nist.gov"
+      ],
+      "status": "network",
+      "upper": 1791644406.7973514
+    },
+    "time_policy": {
+      "authentication": "plain-ntp-explicit-opt-in",
+      "mode": "network-first",
+      "version": 1
+    },
+    "updated_at": "2026-10-10T15:00:07Z"
+  },
+  "old_pid": 94869,
+  "new_pid": 66503,
+  "prior_reader_stdout": "checked=1 fired=0 failed=0 pending=1 dispatched=0 submitted=0 requeued=0\n",
+  "prior_reader_stderr": "",
+  "prior_installation": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-f4afd98/bin/codex-waked",
+  "global_entrypoint": "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-f4afd98/bin/codex-wake"
+}

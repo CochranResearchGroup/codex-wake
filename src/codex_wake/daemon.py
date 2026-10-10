@@ -383,6 +383,16 @@ def poll_once(
         if classification == "hold":
             pending += 1
             continue
+        if classification == 'native_network_v5':
+            from .network_wakes import evaluate_native_pending
+            try:
+                state = evaluate_native_pending(root, item.record['id'], time_provider)
+            except WakeError:
+                state = 'pending'
+            fired += int(state == 'firing')
+            failed += int(state == 'failed')
+            pending += int(state == 'pending')
+            continue
         from .native_delivery import expire_native
         if expire_native(root, item, current):
             failed += 1
@@ -511,7 +521,7 @@ def poll_once(
                 now=dispatch_current,
                 ack_timeout_override=ack_timeout_override,
                 app_server_codex_cmd=app_server_codex_cmd,
-                **(dict(time_provider=time_provider) if classify_record(item.record) == "network_v3" else {}),
+                **(dict(time_provider=time_provider) if classify_record(item.record) in {"network_v3", "native_network_v5"} else {}),
                 signal_authorizer=(
                     signal_runtime.authorize_firing_record
                     if signal_runtime is not None

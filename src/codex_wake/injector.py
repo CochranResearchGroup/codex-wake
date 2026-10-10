@@ -347,6 +347,34 @@ def dispatch_firing_record(
     if classification == 'hold':
         return DispatchResult('skipped','unrecognized record; no dispatch authorized')
     network_current = None
+    if classification == 'native_network_v5':
+        from .network_wakes import read_time, evaluation_time, precise_deadline
+        try:
+            decision = read_time(time_provider)
+            lower = evaluation_time(decision)
+            predicate = record['predicate']
+            due = predicate.get('due_at') if predicate['type'] == 'not_before' else None
+            retry = record.get('next_attempt_at')
+            uncertain = record.get('native_delivery', {}).get('state') == 'uncertain'
+            if not uncertain and ((due and lower < precise_deadline(due))
+                                  or (retry and lower < precise_deadline(retry))):
+                return DispatchResult('skipped', 'native network deadline not established')
+            expiry = precise_deadline(record['target']['expires_at']).timestamp()
+            if not uncertain and decision.lower < expiry <= decision.upper:
+                return DispatchResult('skipped', 'native expiry is uncertain')
+            network_current = lower
+        except WakeError:
+            if record.get('native_delivery', {}).get('state') == 'uncertain':
+                from .native_delivery import reconcile_native
+                with WakeLifecycleLock(root, record['id']):
+                    try:
+                        active = find_record(root, record['id'])
+                    except WakeError:
+                        return DispatchResult('skipped', 'native record no longer active')
+                    if active.record != record or active.record['status'] != 'firing':
+                        return DispatchResult('skipped', 'native record changed during acquisition')
+                    return reconcile_native(root, active, None)
+            return DispatchResult('skipped', 'network time uncertain; no native submission authorized')
     if classification == 'network_v3':
         from .network_wakes import read_time, evaluation_time, creation_time, precise_deadline
         try:
@@ -381,6 +409,10 @@ def dispatch_firing_record(
             return DispatchResult("skipped", "signal firing record is no longer active")
         if classification == 'network_v3' and (reloaded.get('predicate') != record.get('predicate') or reloaded.get('next_attempt_at') != record.get('next_attempt_at')):
             return DispatchResult('skipped','network wake changed during acquisition')
+        if classification == 'native_network_v5' and any(
+                reloaded.get(key) != record.get(key) for key in
+                ('predicate', 'target', 'next_attempt_at', 'time_policy', 'time_observation', 'native_delivery')):
+            return DispatchResult('skipped', 'native wake changed during acquisition')
         return _dispatch_firing_record_unlocked(
             root,
             active,
