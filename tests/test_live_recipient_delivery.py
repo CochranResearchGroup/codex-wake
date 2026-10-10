@@ -187,3 +187,11 @@ class LiveRecipientDeliveryTests(unittest.TestCase):
     def test_success_without_a_parseable_native_receipt_is_uncertain(self):
         import subprocess
         self.assert_uncertain_native_response(response=subprocess.CompletedProcess([], 0, 'unqualified', ''))
+
+    def test_uncertain_receipt_identifies_actual_native_transport(self):
+        identifier = self.send()
+        self.codex.write_text('#!/usr/bin/env python3\nprint("unqualified")\n')
+        self.assertEqual(self.dispatcher.tick()['results'][0]['status'], 'uncertain')
+        message = self.mailbox.show(self.actors[0], identifier)
+        receipt = next(r for r in message['receipts'] if r['kind'] == 'notification_uncertain')
+        self.assertEqual(receipt['details']['evidence']['transport'], 'native_live_recipient_v1')

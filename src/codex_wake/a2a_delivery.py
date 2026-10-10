@@ -287,7 +287,7 @@ class NotificationDispatcher:
                         else:
                             result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
                         outcome = result.get('status')
-                        evidence = dict(transport=result.get('transport', binding.transport), exact_thread_id=binding.thread_id,
+                        evidence = dict(transport=getattr(binding, 'delivery_transport', binding.transport), exact_thread_id=binding.thread_id,
                                         daemon_generation=binding.generation)
                         if outcome == 'submitted':
                             evidence['receipt_id'] = result['receipt_id']

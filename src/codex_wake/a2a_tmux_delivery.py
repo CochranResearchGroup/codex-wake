@@ -46,7 +46,8 @@ class TmuxBinding:
     boot_id: str
     generation: str
 
-    transport = 'tmux_notification_v1'
+    transport = 'tmux_notification_v1'  # Durable binding discriminator, retained for compatibility.
+    delivery_transport = 'native_live_recipient_v1'
 
     @property
     def key(self):
@@ -144,7 +145,7 @@ class TmuxBinding:
                     raise BusError('queue_acceptance_unconfirmed', 'native queue did not confirm exact recipient')
                 uuid.UUID(match[1])
                 return dict(status='submitted', receipt_id=match[1], reason='native_queue_accepted',
-                            transport='native_live_recipient_v1', evidence_boundary='native_queue_acceptance')
+                            transport=self.delivery_transport, evidence_boundary='native_queue_acceptance')
         except Exception:
             return dict(status='uncertain' if entered else 'unsent',
                         reason='transport_interrupted' if entered else 'pre_io_failure')
