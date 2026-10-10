@@ -102,3 +102,16 @@ exact original records and closed failure. Correct only trusted pointer CLI/vers
 and notify-reply instructions, then run one fresh v2 intent. Never modify/replay
 the committed inbox reply. Acceptance remains full unattended request/reply;
 another failure ends this local attempt and requires evidence-backed reframe.
+
+Unit3 installed behavior PASS: installed-acceptance.md records both completed
+original turns and one dispatch per notification. The original v2 reply was held
+with zero claims by the reproduced default-footer defect; correcting recognition
+continued that same intent, with no new request/reply/arm. Request state completed;
+reply received and sender result turn completed. Terminal reply ack failed
+claim_required and is explicitly not claimed. final-review.md adjudicates that
+existing consumption limitation and close inventory warning as nonblocking for
+this bounded saved-recipient spec; wider plans remain open. cleanup.md records
+only owned idle-tab closure, preserved conversations and stopped test processes.
+State INSTALLED_BEHAVIOR_ACCEPTED→RELEASE_PREPARATION; progress outcome_progress.
+Source6b1b673, immutable installed95PASS49.942s/all80files match. Remaining gates:
+published PR integration, release assets and final source/release/installed parity.
