@@ -125,3 +125,21 @@ lanes:
     updated_at: 2026-10-10
     checkout_required: false
     disposition: 49installed controls and artifact/module parity qualify active0.10.1; original LitScout cause remains unknown; hosted wait waived.
+
+  - id: P68
+    owner: primary
+    objective: Qualify explicitly authorized reopening of the same saved recipient
+    work_items: [docs/dev/plans/0138-2026-10-10-explicit-saved-recipient-reopening.md]
+    plan: docs/dev/plans/0138-2026-10-10-explicit-saved-recipient-reopening.md
+    plan_ref: feat/saved-recipient-reopening
+    branch: feat/saved-recipient-reopening
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: c5c273a5678d32f44ed17e8949050cc0f175582e
+    remote_ref: refs/remotes/origin/feat/saved-recipient-reopening
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-10
+    disposition: Full Plan0138 goal active; native closed-recipient proof precedes agent-message integration and installed round-trip.
