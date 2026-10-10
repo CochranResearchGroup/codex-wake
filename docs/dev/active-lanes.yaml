@@ -242,13 +242,16 @@ lanes:
     branch: fix/recovery-disposition
     target: origin/main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 9164e9cbc70b838f7aa7f09cff7098000c55f715
+    custody_state: INTEGRATION_READY
+    checkpoint: 1f79e4d9718c14018baf39a428b845c0b3d1dd74
     remote_ref: refs/remotes/origin/fix/recovery-disposition
     integration: squash_pr
     checkout_required: true
+    validation_status: passed
+    validation_ref: 1f79e4d9718c14018baf39a428b845c0b3d1dd74
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/235
     dependencies: [P71]
     overlaps: [P71]
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
-    disposition: Ticket0146 source9164e9c reviewed, three accepted findings fixed; affected source and installed reviewed gates active. No production recovery, legacy replay or unrelated effects.
+    disposition: Ticket0146 source and installed recovery/fencing PASS; three accepted findings fixed; exact published1f79e4d ready for PR235 integration. No production recovery, legacy replay or unrelated effects.
