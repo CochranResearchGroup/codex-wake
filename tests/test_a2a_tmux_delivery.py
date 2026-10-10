@@ -71,6 +71,43 @@ class TmuxDeliveryTests(unittest.TestCase):
             self.assertIn(self.job['message_id'], prompt)
             self.assertNotIn('message body', prompt)
 
+    def test_result_notification_instructions_allow_claim_then_terminal_ack(self):
+        import re
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.a2a_identity import RuntimeIdentity
+        from codex_wake.a2a_mailbox import Mailbox
+        bus = BusStore(self.root)
+        operator = self.root / 'operator.json'
+        bus.enroll(self.root, operator)
+        actors = []
+        identities = [RuntimeIdentity('fixture', name, str(self.root))
+                      for name in ('sender', 'recipient')]
+        for identity in identities:
+            capability, _ = bus.issue_actor(identity, self.root, operator)
+            actors.append(bus.authenticate(capability, identity, invoking_cwd=self.root))
+        mailbox = Mailbox(bus)
+        message = mailbox.send(actors[0], identities[1], kind='result', body='Fixture result',
+                               idempotency_key='result-notification')['message']
+        job = dict(message_id=message['message_id'], expires_at=message['expires_at'])
+        with patch.object(TmuxBinding, 'locate', return_value=({}, self.pane)), \
+             patch.object(TmuxBinding, 'probe', return_value={'status': 'ready'}), \
+             patch('codex_wake.a2a_tmux_delivery.SubprocessTmuxRunner') as runner:
+            runner.return_value.capture_pane.side_effect = [EMPTY, 'A2A_NOTIFICATION=' + message['message_id']]
+            self.assertEqual(self.binding.deliver(self.claim, job, self.root)['status'], 'submitted')
+            prompt = runner.return_value.paste_prompt.call_args.args[-1]
+        mailbox.read(actors[1], message['message_id'])
+        # Execute the declared ack sequence; the old bare 'acknowledge' instruction
+        # led the actual acceptance actor directly to terminal acknowledgment.
+        outcomes = re.findall(r'--outcome (accepted|completed)', prompt) or ['completed']
+        for outcome in outcomes:
+            result = mailbox.ack(actors[1], message['message_id'], outcome=outcome)
+            if outcome == 'accepted':
+                self.assertTrue(result['claimed'])
+        self.assertEqual(mailbox.show(actors[0], message['message_id'])['state']['recipient'], 'completed')
+        self.assertIn('claimed=false', prompt)
+        self.assertIn('stop', prompt)
+        self.assertNotIn('Fixture result', prompt)
+
     def test_partial_paste_is_uncertain_and_expired_job_has_no_effect(self):
         with patch.object(TmuxBinding, 'locate', return_value=({}, self.pane)), \
              patch.object(TmuxBinding, 'probe', return_value={'status': 'ready'}), \
