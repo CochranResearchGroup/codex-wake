@@ -120,3 +120,42 @@ class SessionLifecycleTests(unittest.TestCase):
                     run(['--wake-root', str(fixture.repo), 'sessions', 'close', 'window:@3'])
         finally:
             fixture.doCleanups()
+
+    def test_terminal_mailbox_receipts_allow_ordinary_idle_tab_close(self):
+        import json
+        from contextlib import redirect_stdout
+        from io import StringIO
+        from tests.test_a2a_mailbox import MailboxTests
+        fixture = MailboxTests()
+        fixture.setUp()
+        try:
+            identifier = fixture.send(delivery='inbox')['message']['message_id']
+            fixture.mailbox.read(fixture.recipient, identifier)
+            fixture.mailbox.ack(fixture.recipient, identifier, outcome='accepted')
+            fixture.mailbox.ack(fixture.recipient, identifier, outcome='completed')
+            from codex_wake.a2a_scheduler import MailScheduler
+            deferred = fixture.send('held-control')['message']['message_id']
+            fixture.bus.set_paused(False, fixture.operator)
+            scheduler = MailScheduler(fixture.mailbox, fixture.operator)
+            lease = scheduler.acquire()
+            scheduler.defer(lease, scheduler.jobs(lease)[0]['job_id'], 'offline')
+            fixture.mailbox.cancel(fixture.sender, deferred)
+            self.assertEqual(fixture.mailbox.pending_thread_work('recipient'), [])
+            row = {'thread_id': 'recipient', 'cwd': str(fixture.repo), 'runtime_state': 'idle',
+                   'attachments': [{'pane_id': '%4', 'window_id': '@3'}]}
+            output = StringIO()
+            with redirect_stdout(output), patch(
+                    'codex_wake.session_lifecycle.observe', return_value={'complete': True}), patch(
+                    'codex_wake.session_lifecycle.resolve', return_value=row), patch(
+                    'codex_wake.session_lifecycle.revalidate_attachment', return_value=True), patch(
+                    'codex_wake.supervisor.default_registry_dir', return_value=fixture.repo/'registry'), patch(
+                    'codex_wake.a2a_bus.default_bus_root', return_value=fixture.bus.root), patch(
+                    'codex_wake.session_lifecycle.tmux_command', return_value='%4') as command:
+                self.assertEqual(run(['--wake-root', str(fixture.repo), 'sessions', 'close',
+                                      'window:@3', '--bus-root', str(fixture.bus.root), '--json']), 0)
+            closed = json.loads(output.getvalue())
+            self.assertFalse(closed['forced'])
+            self.assertEqual(closed['affected_messages'], [])
+            self.assertTrue(any('kill-pane' in call.args for call in command.call_args_list))
+        finally:
+            fixture.doCleanups()

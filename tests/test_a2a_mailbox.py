@@ -249,3 +249,31 @@ class MailboxTests(unittest.TestCase):
         self.assertTrue(any(item['message_id'] == identifier for item in work))
         self.assertNotIn('Fixture request', json.dumps(work))
         self.assertEqual(self.mailbox.pending_thread_work('foreign'), [])
+
+    def test_uncertain_notification_still_blocks_after_recipient_completion(self):
+        from codex_wake.a2a_scheduler import MailScheduler
+        self.bus.enroll(self.repo, self.operator, notify=True)
+        identifier = self.send()['message']['message_id']
+        self.bus.set_paused(False, self.operator)
+        scheduler = MailScheduler(self.mailbox, self.operator)
+        dispatcher = scheduler.acquire()
+        recipient = scheduler.acquire('recipient:' + self.recipient.key)
+        claim = scheduler.claim(dispatcher, recipient, [scheduler.jobs(dispatcher)[0]['job_id']])
+        scheduler.finish(dispatcher, recipient, claim['attempt_id'], outcome='uncertain', evidence={})
+        self.mailbox.ack(self.recipient, identifier, outcome='accepted')
+        self.mailbox.ack(self.recipient, identifier, outcome='completed')
+        with self.assertRaises(BusError) as error:
+            self.mailbox.cancel(self.sender, identifier)
+        self.assertEqual(error.exception.code, 'effect_uncertain')
+        self.assertEqual(self.mailbox.pending_thread_work('recipient'),
+                         [dict(message_id=identifier, kind='notification')])
+
+    def test_unattributable_notification_inventory_remains_held(self):
+        self.send()
+        # Corrupt external store fixture; the observation oracle stays public.
+        with self.bus.connection() as database:
+            database.execute("UPDATE mail_outbox SET recipient_key='scheduler' WHERE kind='notification'")
+            database.commit()
+        with self.assertRaises(BusError) as error:
+            self.mailbox.pending_thread_work('foreign')
+        self.assertEqual(error.exception.code, 'inventory_unavailable')
