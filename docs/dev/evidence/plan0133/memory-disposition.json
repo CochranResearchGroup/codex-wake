@@ -1,0 +1,18 @@
+{
+  "artifact_path": "/home/ecochran76/workspace.local/codex-wake-plan127/docs/dev/evidence/plan0133/memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": null,
+  "reason": "Atlas returned no reviewed Codex Wake target group; no unrelated group selected.",
+  "recorded_at": "2026-10-10T14:15:18.450505+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "/home/ecochran76/workspace.local/codex-wake-plan127/docs/dev/plans/0133-2026-10-10-native-network-time-parity.md",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}
