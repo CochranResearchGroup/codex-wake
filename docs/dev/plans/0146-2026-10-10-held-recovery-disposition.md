@@ -1,7 +1,7 @@
 # Ticket0146 — Make held recovery disposition explicit and safe
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P73
 Branch: fix/recovery-disposition
@@ -10,6 +10,15 @@ Integration: squash_pr
 Work-Item: docs/dev/plans/0146-2026-10-10-held-recovery-disposition.md
 Parent: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
 Depends-On: none
+
+## Current State
+
+PR235 integrated8548265879534762c2cf205d88688b263c6604f6. Reviewed228source,
+86installed and9changed fixture controls PASS; actual fresh-process disposition,
+release, old-reader refusal and cleanup PASS. All82package files match reviewed
+candidate and merged source. Owned clean published checkout closed normally;
+branch1f79e4d retained. Candidate0.12.0 is prepared; global0.11.2 stays active until
+final release. See docs/dev/evidence/plan0146/source-checkpoint.md and review.md.
 
 ## What it delivers
 
@@ -21,11 +30,11 @@ None; priority ordering still applies.
 
 ## Acceptance criteria
 
-- [ ] Derive the exact unresolved gap/hold obligations from verification0110 and original Plan0101; retain quarantine, snapshot hash, unavailable outcomes and immutable receipts.
-- [ ] Freeze a disposition contract before code: unknown prior effects never become absent/completed by inference, and releasing the hold never queues a legacy attempt.
-- [ ] Public CLI red-green and installed fresh-process controls prove old operator/actor/scheduler and legacy notifications fenced, fresh authority required, audited deliberate disposition and explicit release/refusal.
-- [ ] Interruption/repeated disposition is attributable and idempotent or visibly held; ambiguous writes reconcile before retry.
-- [ ] Only disposable recovery stores are mutated. Production recovery/hold release requires an exact separately authorized store and concrete reviewed operation; this plan does not grant it.
+- [x] Derive the exact unresolved gap/hold obligations from verification0110 and original Plan0101; retain quarantine, snapshot hash, unavailable outcomes and immutable receipts.
+- [x] Freeze a disposition contract before code: unknown prior effects never become absent/completed by inference, and releasing the hold never queues a legacy attempt.
+- [x] Public CLI red-green and installed fresh-process controls prove old operator/actor/scheduler and legacy notifications fenced, fresh authority required, audited deliberate disposition and explicit release/refusal.
+- [x] Interruption/repeated disposition is attributable and idempotent or visibly held; ambiguous writes reconcile before retry.
+- [x] Only disposable recovery stores are mutated. Production recovery/hold release requires an exact separately authorized store and concrete reviewed operation; this plan does not grant it.
 
 ## Test seam and bound
 

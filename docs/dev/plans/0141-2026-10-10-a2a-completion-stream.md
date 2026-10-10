@@ -24,7 +24,7 @@ multiroot, rollback and thirty-minute soak on their recorded source/version.
 Plan0101/0119 remain OPEN; their stale sequencing is replaced by this plan.
 Ticket0142 DONE after PR234/0076ae4, installed117 tests and actual native
 submission/claim/completion/no-force cleanup. Active user goal now authorizes
-Plan0141 execution with stop/checkpoint before2milliontokens or4hours. Ticket0143 DONE: actual installed pair and owned restart/cleanup. Ticket0144 DONE: released/active0.11.2/0076ae4. Ticket0145 DONE by exact qualified notLoaded proof reuse. Next0146. Original old allowances remain historical.
+Plan0141 execution with stop/checkpoint before2milliontokens or4hours. Ticket0143 DONE: actual installed pair and owned restart/cleanup. Ticket0144 DONE: released/active0.11.2/0076ae4. Ticket0145 DONE by exact qualified notLoaded proof reuse. Ticket0146 DONE: integrated8548265, retained-unknown recovery and installed fences. Next0147. Original old allowances remain historical.
 
 ## Problem statement and solution
 
@@ -71,8 +71,8 @@ within its ticket. Existing GLOSSARY.md is terminology authority.
 | [0143](0143-2026-10-10-native-live-safety-and-round-trip.md) Qualify normal request and reply after transport change | 0142 | DONE |
 | [0144](0144-2026-10-10-release-native-live-submission.md) Ship and activate qualified native live submission | 0143 | DONE |
 | [0145](0145-2026-10-10-server-unloaded-recipient.md) Qualify explicitly reopened server-unloaded recipient | 0144 | DONE |
-| [0146](0146-2026-10-10-held-recovery-disposition.md) Make held recovery disposition explicit and safe | none | IN_PROGRESS |
-| [0147](0147-2026-10-10-processing-claim-generation-recovery.md) Recover processing ownership across generations | 0146 | BLOCKED |
+| [0146](0146-2026-10-10-held-recovery-disposition.md) Make held recovery disposition explicit and safe | none | DONE |
+| [0147](0147-2026-10-10-processing-claim-generation-recovery.md) Recover processing ownership across generations | 0146 | READY |
 | [0148](0148-2026-10-10-remaining-fault-and-ancestry-proof.md) Finish remaining fault and session-isolation proof | 0142, 0146, 0147 | BLOCKED |
 | [0149](0149-2026-10-10-final-campaign-acceptance.md) Close the work stream from complete evidence | 0143, 0144, 0145, 0146, 0147, 0148 | BLOCKED |
 
@@ -147,5 +147,5 @@ receipt visibility. Optional features and indefinite scale are excluded.
 A fresh session reads this plan, its next unblocked ticket, applicable policies,
 active-lane catalog and exact Git/installed identities. It reconciles source/receipts
 before using old evidence, starts only one owned ticket, and updates status/proof as
-it progresses. Next concrete action: ticket0146 freezes the disposable recovered-bus gap
-disposition/hold release contract before public red-green implementation.
+it progresses. Next concrete action: ticket0147 freezes original accepted-claim generation
+reconciliation and proves known-terminal versus held-unknown cases at public seams.

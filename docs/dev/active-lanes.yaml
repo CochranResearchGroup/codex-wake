@@ -238,15 +238,16 @@ lanes:
     objective: Dispose recovered uncertainty without replaying legacy work
     work_items: [docs/dev/plans/0146-2026-10-10-held-recovery-disposition.md]
     plan: docs/dev/plans/0146-2026-10-10-held-recovery-disposition.md
-    plan_ref: origin/fix/recovery-disposition
+    plan_ref: origin/main
     branch: fix/recovery-disposition
     target: origin/main
-    plan_state: OPEN
-    custody_state: INTEGRATION_READY
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     checkpoint: 1f79e4d9718c14018baf39a428b845c0b3d1dd74
     remote_ref: refs/remotes/origin/fix/recovery-disposition
     integration: squash_pr
-    checkout_required: true
+    integration_receipt: 8548265879534762c2cf205d88688b263c6604f6
+    checkout_required: false
     validation_status: passed
     validation_ref: 1f79e4d9718c14018baf39a428b845c0b3d1dd74
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/235
@@ -254,4 +255,4 @@ lanes:
     overlaps: [P71]
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
-    disposition: Ticket0146 source and installed recovery/fencing PASS; three accepted findings fixed; exact published1f79e4d ready for PR235 integration. No production recovery, legacy replay or unrelated effects.
+    disposition: Ticket0146 DONE; PR235 integrated8548265, source/installed/fresh-process recovery fences PASS. Owned clean published checkout closed normally, branch retained. Final release remains0149. No production recovery, legacy replay or unrelated effects.

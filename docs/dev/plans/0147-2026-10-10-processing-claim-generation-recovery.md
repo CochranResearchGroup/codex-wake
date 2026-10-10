@@ -1,7 +1,7 @@
 # Ticket0147 — Recover processing ownership across generations
 
 State: PLANNED
-Workflow: BLOCKED
+Workflow: READY
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
