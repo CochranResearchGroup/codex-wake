@@ -88,6 +88,8 @@ class SavedRecipientDeliveryTests(unittest.TestCase):
         prompt = queued[queued.index('--message') + 1]
         self.assertIn(identifier, prompt)
         self.assertNotIn('Private request body', prompt)
+        self.assertIn('A2A_WORKER_CLI=', prompt)
+        self.assertIn('--delivery notify', prompt)
         self.assertEqual(self.mailbox.show(self.actors[0], identifier)['state']['notification'], 'submitted')
         self.assertEqual(self.dispatcher.tick()['results'], [])
         self.assertEqual(len(self.calls), 1)

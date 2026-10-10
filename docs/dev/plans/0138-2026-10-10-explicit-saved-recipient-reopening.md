@@ -94,3 +94,11 @@ an offline original Byobu binding. Live-client composer path remains authoritati
 Original mailbox attempt fences all native effects; delegated reply arm remains
 required. Focused91tests PASS28.619s before version packaging. Installed unit3,
 serial review, release/identity parity and cleanup remain unproven.
+
+Installed packet split after observed failure: preflight94controls qualified;
+live exchange1 reopened and completed the saved recipient but its inbox-only
+reply suppressed the return notification. first-exchange-failure.md retains the
+exact original records and closed failure. Correct only trusted pointer CLI/version
+and notify-reply instructions, then run one fresh v2 intent. Never modify/replay
+the committed inbox reply. Acceptance remains full unattended request/reply;
+another failure ends this local attempt and requires evidence-backed reframe.
