@@ -1100,6 +1100,6 @@ After 0123, fallback and mailbox tracks are technically independent; the single-
 
 State: OPEN
 
-Current State: Execution active on feat/native-workflows. Tickets0128 and0129 passed installed-candidate native delivery and exact visible-tab lifecycle acceptance. Recovery0130 is next, followed by complete lifecycle0131 and migration/retirement0132. The candidate is not released; prototype evidence alone does not satisfy the remaining gates.
+Current State: Execution active on feat/native-workflows. Tickets0128–0130 passed installed-candidate native delivery, exact visible-tab lifecycle and interruption recovery acceptance. Complete lifecycle0131 is next, followed by migration/retirement0132. The candidate is not released; prototype evidence alone does not satisfy the remaining gates.
 
 Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 define native durable delivery, Byobu lifecycle, interruption recovery, complete lifecycle acceptance and qualified legacy retirement. The plan's dependency frontier and no-implementation-theater contract govern execution. This branch-local projection is not yet integrated into the default branch.

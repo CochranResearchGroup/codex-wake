@@ -1,0 +1,147 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control",
+        "native",
+        "at",
+        "--codex-path",
+        "/home/ecochran76/.local/bin/codex",
+        "--ttl",
+        "5m",
+        "01a123ac-7b07-78a0-ad78-047ef1714f25",
+        "2026-10-10T03:07:48.630286+00:00",
+        "--",
+        "Authorized Plan0130 client restart control. Reply exactly PLAN130_CLIENT_RESTARTED. Do not edit files or message anyone."
+      ],
+      "exit_code": 0,
+      "stdout": "wake_20261010_030749_932e /home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control/pending/wake_20261010_030749_932e.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control",
+        "sessions",
+        "close",
+        "pane:%5",
+        "--tmux-socket",
+        "/tmp/tmux-1000/plan127-native",
+        "--force",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"action\": \"closed\", \"affected_messages\": [], \"affected_wakes\": [{\"root\": \"/home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control\", \"wake_id\": \"wake_20261010_030749_932e\"}], \"attachment\": {\"client_pid\": 15476, \"client_start_time_ticks\": 22301182, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%5\", \"pane_index\": \"0\", \"pane_title\": \"plan127-worker\", \"pane_tty\": \"/dev/pts/5\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@3\", \"window_index\": \"1\", \"window_name\": \"plan127-recovery-worker\"}, \"conversation\": \"preserved\", \"forced\": true, \"inspected_bus_roots\": [], \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control",
+        "--once"
+      ],
+      "exit_code": 0,
+      "stdout": "checked=1 fired=1 failed=0 pending=0 dispatched=1 submitted=1 requeued=0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+        "sessions",
+        "open",
+        "--resume",
+        "01a123ac-7b07-78a0-ad78-047ef1714f25",
+        "--name",
+        "plan130-client-restarted",
+        "--tmux-socket",
+        "/tmp/tmux-1000/plan127-native",
+        "--tmux-session",
+        "recipient",
+        "--codex-path",
+        "/home/ecochran76/.local/bin/codex",
+        "--timeout",
+        "30",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"action\": \"opened\", \"attachments\": [{\"client_pid\": 70287, \"client_start_time_ticks\": 22446915, \"evidence\": \"metadata_matched\", \"pane_current_path\": \"/home/ecochran76/workspace.local/codex-wake-plan127\", \"pane_id\": \"%8\", \"pane_index\": \"0\", \"pane_title\": \"plan127-worker\", \"pane_tty\": \"/dev/pts/5\", \"session_id\": \"$0\", \"session_name\": \"recipient\", \"socket\": \"/tmp/tmux-1000/plan127-native\", \"window_id\": \"@6\", \"window_index\": \"1\", \"window_name\": \"plan130-client-restarted\"}], \"ready\": true, \"thread_id\": \"01a123ac-7b07-78a0-ad78-047ef1714f25\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "systemd-run",
+        "--user",
+        "--unit=plan130-client-restart-delivery",
+        "--on-active=6s",
+        "--",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan127-runtime/client-restart-control",
+        "--once"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Running timer as unit: plan130-client-restart-delivery.timer\nWill run service as unit: plan130-client-restart-delivery.service\n"
+    }
+  ],
+  "held_record_after_close": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:07:49Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:07:49Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:07:50Z",
+        "message": "not_before due_at 2026-10-10T03:07:48Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:07:50Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:07:50Z",
+        "message": "native queue accepted; execution not yet observed",
+        "type": "native_accepted"
+      }
+    ],
+    "id": "wake_20261010_030749_932e",
+    "max_attempts": 3,
+    "native_delivery": {
+      "accepted_at": "2026-10-10T03:07:50Z",
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "bd632f5930808b4f843448c567d9462374723975faa4bc41eb6a896ca103a328",
+      "queue_id": "01a123c7-f990-74b2-bdb5-0513b8694767",
+      "state": "accepted",
+      "submission_id": "12c8aee1-3e96-4e6f-9a72-b03a6062c851"
+    },
+    "next_attempt_at": "2026-10-10T03:07:48Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:07:48Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 client restart control. Reply exactly PLAN130_CLIENT_RESTARTED. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:12:48Z",
+      "resume_policy": "hold",
+      "thread_id": "01a123ac-7b07-78a0-ad78-047ef1714f25",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:07:50Z"
+  }
+}

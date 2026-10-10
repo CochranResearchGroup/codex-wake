@@ -1,7 +1,7 @@
 # Plan 0130 — Recover interrupted native delivery
 
-State: PLANNED
-Workflow: READY_FOR_AGENT
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
 Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
@@ -9,7 +9,7 @@ Blocked by: docs/dev/plans/0128-2026-10-09-native-durable-delivery.md — Delive
 
 ## Current State
 
-Approved ticket; implementation not started. Execute only after every listed blocker is CLOSED with passing evidence. The parent execution contract governs this ticket; planning, mocks and prototype results alone cannot close it.
+Installed recovery acceptance passed exact native reconciliation, safe pre-submission restart, unresolved intent holds, busy/expiry, default detached hold, explicit same-thread headless resume and visible-client restart.978 comprehensive tests pass. See [acceptance](../evidence/plan0127/0130-acceptance.md), retained failed assumptions, source hashes and actual native/systemd receipts. Shared daemon and host were not restarted. Candidate remains unreleased.
 
 ## What to Build
 
@@ -17,10 +17,10 @@ Recover interrupted native delivery, as one complete user-visible slice under th
 
 ## Acceptance Criteria
 
-- [ ] Inject interruption before submission, after acceptance and before recording; retain attribution and reconcile exact native evidence.
-- [ ] Never blindly resend ambiguous work; unresolved submission remains inspectable.
-- [ ] Qualify busy, detached and restarted-client cases individually; unsupported cases remain explicit pending/expiry outcomes.
-- [ ] Demonstrate scheduler-process restart with disposable state; host or shared-daemon restart requires separately bounded authority.
+- [x] Inject interruption before submission, after acceptance and before recording; retain attribution and reconcile exact native evidence.
+- [x] Never blindly resend ambiguous work; unresolved submission remains inspectable.
+- [x] Qualify busy, detached and restarted-client cases individually; unsupported cases remain explicit pending/expiry outcomes.
+- [x] Demonstrate scheduler-process restart with disposable state; host or shared-daemon restart requires separately bounded authority.
 
 ## Scope and Non-goals
 

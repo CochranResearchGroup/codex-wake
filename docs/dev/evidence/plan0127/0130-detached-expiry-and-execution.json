@@ -1,0 +1,148 @@
+{
+  "default_record_after_expiry": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:04:13Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:04:13Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:04:13Z",
+        "message": "not_before due_at 2026-10-10T03:04:12Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:04:13Z",
+        "message": "exact recipient is not available and idle",
+        "type": "native_held"
+      },
+      {
+        "at": "2026-10-10T03:04:19Z",
+        "message": "native wake expired without submission",
+        "type": "expired"
+      }
+    ],
+    "id": "wake_20261010_030413_9675",
+    "last_error": "native wake expired",
+    "max_attempts": 3,
+    "next_attempt_at": "2026-10-10T03:04:18Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:04:12Z",
+      "type": "not_before"
+    },
+    "prompt": "This detached default control must expire without auto-resume.",
+    "schema_version": 1,
+    "status": "failed",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:04:17Z",
+      "resume_policy": "hold",
+      "thread_id": "01a123ba-05f8-7040-9c58-f2f28da1b35d",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:04:13Z"
+  },
+  "explicit_resume_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:04:29Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "not_before due_at 2026-10-10T03:04:28Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "explicit workflow policy resumed its exact saved thread",
+        "type": "native_same_thread_resumed"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      },
+      {
+        "at": "2026-10-10T03:04:29Z",
+        "message": "native queue accepted; execution not yet observed",
+        "type": "native_accepted"
+      }
+    ],
+    "id": "wake_20261010_030429_b337",
+    "max_attempts": 3,
+    "native_delivery": {
+      "accepted_at": "2026-10-10T03:04:29Z",
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "02a2a7e040363db3e50cb7767e612cac188c3798e372026ad8df232f99a9463c",
+      "queue_id": "01a123c4-f9ec-7db2-aa68-1c7c093d9d16",
+      "state": "accepted",
+      "submission_id": "a7cf3e0d-9085-422e-b95c-a9858ebc74f3"
+    },
+    "next_attempt_at": "2026-10-10T03:04:28Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:04:28Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 same-thread resume control. Reply exactly PLAN130_SAME_THREAD_RESUMED. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "submitted",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:14:28Z",
+      "resume_policy": "same_thread",
+      "thread_id": "01a123ba-05f8-7040-9c58-f2f28da1b35d",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:04:29Z"
+  },
+  "thread_id": "01a123ba-05f8-7040-9c58-f2f28da1b35d",
+  "turns": [
+    {
+      "id": "01a123c4-f9ef-7062-8a83-0fd6a8f03455",
+      "rootTurnId": "01a123c4-f9ef-7062-8a83-0fd6a8f03455",
+      "items": [
+        {
+          "type": "userMessage",
+          "id": "01a123c4-fc5d-7432-95e2-b893406e75e8",
+          "clientId": "01a123c4-f9eb-7823-bb99-47705e3d412d",
+          "content": [
+            {
+              "type": "text",
+              "text": "WAKE_TRIGGER_ID=wake_20261010_030429_b337\nWAKE_TRIGGER_ROOT=/home/ecochran76/.local/state/codex-wake/plan127-runtime/detached-explicit-resume\nWAKE_NATIVE_SUBMISSION_ID=a7cf3e0d-9085-422e-b95c-a9858ebc74f3\nAuthorized Plan0130 same-thread resume control. Reply exactly PLAN130_SAME_THREAD_RESUMED. Do not edit files or message anyone.",
+              "text_elements": []
+            }
+          ]
+        },
+        {
+          "type": "agentMessage",
+          "id": "msg_0270f54cdde51a1e016ac9ab43630c81a0a3e615be722ed7b0",
+          "text": "PLAN130_SAME_THREAD_RESUMED",
+          "phase": "final_answer",
+          "memoryCitation": null,
+          "delivery": null,
+          "questions": null
+        }
+      ],
+      "itemsView": "full",
+      "status": "completed",
+      "error": null,
+      "startedAt": 1791601474,
+      "completedAt": 1791601476,
+      "durationMs": 2386
+    }
+  ],
+  "expiry_scheduler_journal": "Oct 09 22:04:18 cooper systemd[696]: Started plan130-detached-expiry.service - /home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-waked --wake-root /home/ecochran76/.local/state/codex-wake/plan127-runtime/detached-default --once.\nOct 09 22:04:19 cooper codex-waked[33176]: checked=1 fired=0 failed=1 pending=0 dispatched=0 submitted=0 requeued=0\n"
+}

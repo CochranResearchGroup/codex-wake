@@ -1,0 +1,81 @@
+{
+  "create": {
+    "argv": [
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake",
+      "--wake-root",
+      "/home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-auto-after-acceptance",
+      "native",
+      "at",
+      "--codex-path",
+      "/home/ecochran76/.local/bin/codex",
+      "--ttl",
+      "10m",
+      "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "2026-10-10T03:08:13.212338+00:00",
+      "--",
+      "Authorized Plan0130 automatic reconciliation control. Reply exactly PLAN130_AUTO_RECONCILED. Do not edit files or message anyone."
+    ],
+    "exit_code": 0,
+    "stdout": "wake_20261010_030814_b49d /home/ecochran76/.local/state/codex-wake/plan127-runtime/recovery-auto-after-acceptance/pending/wake_20261010_030814_b49d.json\n",
+    "stderr": ""
+  },
+  "fault_scheduler": {
+    "exit_code": 91,
+    "stdout": "",
+    "stderr": ""
+  },
+  "interrupted_record": {
+    "ack_timeout_seconds": 30,
+    "attempts": 0,
+    "created_at": "2026-10-10T03:08:14Z",
+    "cwd": "/home/ecochran76/workspace.local/codex-wake-plan127",
+    "events": [
+      {
+        "at": "2026-10-10T03:08:14Z",
+        "message": "Wake record created",
+        "type": "created"
+      },
+      {
+        "at": "2026-10-10T03:08:14Z",
+        "message": "not_before due_at 2026-10-10T03:08:13Z matched",
+        "type": "predicate_matched"
+      },
+      {
+        "at": "2026-10-10T03:08:14Z",
+        "message": "native queue submission started",
+        "type": "native_submission_started"
+      }
+    ],
+    "id": "wake_20261010_030814_b49d",
+    "max_attempts": 3,
+    "native_delivery": {
+      "acknowledgment": "not_observed",
+      "execution": "not_observed",
+      "prompt_sha256": "50220d55c342df2bb4967332eedde428ff01599aafd4600d52ed3969aada025f",
+      "state": "uncertain",
+      "submission_id": "2a249816-ad4c-4d75-a2fd-f9437c01516d"
+    },
+    "next_attempt_at": "2026-10-10T03:08:13Z",
+    "predicate": {
+      "due_at": "2026-10-10T03:08:13Z",
+      "type": "not_before"
+    },
+    "prompt": "Authorized Plan0130 automatic reconciliation control. Reply exactly PLAN130_AUTO_RECONCILED. Do not edit files or message anyone.",
+    "schema_version": 1,
+    "status": "firing",
+    "target": {
+      "codex_cmd": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+      "endpoint": "unix://",
+      "expires_at": "2026-10-10T03:18:13Z",
+      "resume_policy": "hold",
+      "thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+      "transport": "native"
+    },
+    "updated_at": "2026-10-10T03:08:14Z"
+  },
+  "automatic_restart_timer": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "Running timer as unit: plan130-auto-reconcile.timer\nWill run service as unit: plan130-auto-reconcile.service\n"
+  }
+}

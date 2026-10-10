@@ -2731,6 +2731,9 @@ def run(argv: list[str] | None = None) -> int:
         from .sessions_cli import sessions_command
         return sessions_command(args)
     if args.command == "native":
+        if args.native_command == 'reconcile':
+            from .native_delivery import reconcile_command
+            return reconcile_command(args, root)
         from .native_delivery import create_native
         return create_native(args, root)
     if args.command == "after":

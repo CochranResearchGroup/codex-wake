@@ -2,50 +2,15 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 import shlex
-import stat
 import subprocess
 import time
 from uuid import UUID
 
-from . import __version__
+from .native_protocol import native_request
 from .records import WakeError, classify_record
 from .sessions import observe, resolve, revalidate_attachment
-
-
-def native_request(endpoint, codex, method, params, timeout):
-    from .shared_app_server import locate_shared_endpoint
-    from websockets.sync.client import unix_connect
-    if endpoint == 'unix://':
-        endpoint = locate_shared_endpoint(codex_cmd=codex, timeout=timeout)
-    if not endpoint.startswith('unix://') or not Path(endpoint[7:]).is_absolute():
-        raise WakeError('session lifecycle requires an existing local Unix endpoint')
-    try:
-        info = Path(endpoint[7:]).lstat()
-    except OSError:
-        raise WakeError('native lifecycle endpoint is unavailable') from None
-    if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.geteuid():
-        raise WakeError('native lifecycle endpoint must be an owned Unix socket')
-    deadline = time.monotonic() + timeout
-    with unix_connect(endpoint[7:], open_timeout=timeout, close_timeout=1) as ws:
-        def request(identifier, name, body):
-            ws.send(json.dumps({'id': identifier, 'method': name, 'params': body}))
-            while True:
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    raise WakeError('native lifecycle request timed out; inspect state before retry')
-                result = json.loads(ws.recv(timeout=remaining))
-                if result.get('id') != identifier:
-                    continue
-                if 'error' in result:
-                    raise WakeError('native lifecycle request rejected: ' + name)
-                return result['result']
-        request(1, 'initialize', {'clientInfo': {'name': 'codex_wake_lifecycle', 'version': __version__},
-                                  'capabilities': {'experimentalApi': True}})
-        ws.send(json.dumps({'method': 'initialized'}))
-        return request(2, method, params)
 
 
 def tmux_command(args, *command):

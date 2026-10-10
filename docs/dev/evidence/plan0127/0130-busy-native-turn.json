@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"schemaVersion\":1,\"thread\":{\"id\":\"01a123a8-5782-7d43-a214-55b293bbd65f\",\"kind\":\"codex\",\"title\":\"Authorize Plan0127 recipient\",\"preview\":\"Authorized disposable Plan0127 recipient. Run printenv CODEX_THREAD_ID and save only that value to /home/ecochran76/.local/state/codex-wake/plan127-runtime/recipient.id. Reply exactly PLAN127_READY and finish. Do not edit repo files or message anyone.\",\"status\":{\"type\":\"active\",\"activeFlags\":[]},\"cwd\":\"/home/ecochran76/workspace.local/codex-wake-plan127\",\"createdAt\":1791599597,\"updatedAt\":1791601858},\"page\":{\"order\":\"newest_first\",\"limit\":1,\"hasMore\":true,\"nextCursor\":\"{\\\"requestedThreadId\\\":\\\"01a123a8-5782-7d43-a214-55b293bbd65f\\\",\\\"rolloutOrdinal\\\":73,\\\"includeAnchor\\\":false,\\\"scope\\\":{\\\"kind\\\":\\\"turns\\\"}}\"},\"turns\":[{\"id\":\"01a123ca-c97e-7930-b0d3-0995299a6fc0\",\"status\":\"inProgress\",\"error\":null,\"startedAt\":1791601854,\"completedAt\":null,\"durationMs\":null,\"items\":[{\"type\":\"functionCallOutput\",\"id\":\"fco_01a123ca-c981-7030-81c4-0059177095c1\",\"name\":\"send_message_to_thread\",\"namespace\":\"codex_tui\",\"codexDelegation\":{\"sourceThreadId\":\"01a1088e-8652-74d3-a3d4-784fc561feea\",\"input\":\"Owned Plan0130 busy/expiry control: run sleep 15 with the terminal tool, then reply exactly PLAN130_BUSY_DONE. Do not edit files or send messages.\"},\"output\":{\"text\":\"<codex_delegation>\\n  <source_thread_id>01a1088e-8652-74d3-a3d4-784fc561feea</source_thread_id>\\n  <input>Owned Plan0130 busy/expiry control: run sleep 15 with the terminal tool, then reply exactly PLAN130_BUSY_DONE. Do not edit files or send messages.</input>\\n</codex_delegation>\",\"truncated\":false}}]}]}"
+    }
+  ],
+  "isError": false
+}
