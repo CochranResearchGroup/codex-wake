@@ -1098,8 +1098,8 @@ After 0123, fallback and mailbox tracks are technically independent; the single-
 
 ## P65 | Native Codex Delivery and Wake Lifecycle
 
-State: OPEN
+State: CLOSED
 
-Current State: All five child tickets and the normal installed lifecycle pass. PR227 integrates source as canonical0a05c66. Audit repairs dc235a9 qualify intent accounting and reader advertisement in a new immutable installation;983 installed tests pass. PR228 integration, release publication and final audit remain; parent staysOPEN on release/native-workflows-closeout.
+Current State: All five tickets and normal installed lifecycle pass. PR228 integrates final source/evidence as a686c7b; hosted PR/main Python3.11/3.12 gates pass. Publicv0.9.0 tag and downloaded artifacts are verified.983 frozen installed tests pass; audit repairs, migration/rollback, guarded close and owned-fixture cleanup pass. Final requirement audit is docs/dev/evidence/plan0127/completion-audit.md. Other project legacy readers and unrelated local work remain preserved.
 
-Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 define native durable delivery, Byobu lifecycle, interruption recovery, complete lifecycle acceptance and qualified legacy retirement. The plan's dependency frontier and no-implementation-theater contract govern execution. Source projection is integrated; release closeout remains on its declared continuation branch.
+Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 are DONE. Source/release qualification is complete; docs/plan127-completion carries the final closure projection. P63's separate retained recovery obligations are unchanged.

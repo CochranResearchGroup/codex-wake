@@ -11,6 +11,11 @@ Blocked by: None
 
 Installed isolated candidate delivered a real due wake, held a busy recipient then delivered after idle, and held an unavailable exact thread until expiry. Evidence: docs/dev/evidence/plan0127/0128-acceptance.md. Native acceptance is explicitly distinct from execution/ack; no full-plan completion claim.
 
+Released in v0.9.0 at canonicala686c7b. Normal installed supervisor execution and
+final accounting pass; native-direct-failure.json separately proves failed native
+send creates no Wake/default-mailbox change. Parent completion-audit.md records
+current release evidence; the isolated receipts above remain historical samples.
+
 ## What to Build
 
 Deliver an existing durable wake natively, as one complete user-visible slice under the parent product contract.

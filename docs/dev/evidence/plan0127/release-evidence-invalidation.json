@@ -1,0 +1,29 @@
+{
+  "unchanged_qualified_interfaces": [
+    "cli",
+    "native_protocol",
+    "session_lifecycle",
+    "daemon",
+    "injector"
+  ],
+  "changed_native_counter_surfaces": [
+    "src/codex_wake/records.py",
+    "src/codex_wake/native_delivery.py"
+  ],
+  "monitor_advertisement_fix": "src/codex_wake/monitor.py",
+  "final_source_manifest_current": true,
+  "installed_skill_hashes": {
+    "/home/ecochran76/.codex/shared/skills/codex-wake/SKILL.md": "e2006e6efb9052a05b9a6847b9ed9171ea3df5ad9fe37ec52836d03ca8f97120",
+    "/home/ecochran76/.agents/skills/codex-wake/SKILL.md": "e2006e6efb9052a05b9a6847b9ed9171ea3df5ad9fe37ec52836d03ca8f97120"
+  },
+  "protected_control_hashes_current": true,
+  "original_checkout_head": "86f18ba17cc37b746d24c845739ad10f26b8eda0",
+  "original_untracked_note_hashes": {
+    "docs/dev/notes/0008-2026-10-07-clock-measurement-research.md": "a7c89804431ed6f869104f8ec7507dd2db8edd0ac30f65fa1d9121d080436b2f",
+    "docs/dev/notes/0003-2026-10-03-plan0101-fresh-agent-handoff.md": "44c9f81e8e2d90ef22d1dada58e7ec6fde73a10a75a6b8db99283e90a4a0893c",
+    "docs/dev/notes/0010-2026-10-08-native-session-lookup-research.md": "26ff4e74187700adfb148bcd65ca8ed1c4a3680f827b6441fa39c3fde681b871",
+    "docs/dev/notes/0011-2026-10-08-native-wake-product-boundary-interview.md": "6d10e300fbf370374334cecaf96aa4f3656cdd4b246097d825480d41ec61805d",
+    "docs/dev/notes/0009-2026-10-07-clock-adjustment-source-research.md": "1ae74cd123455f5cb69b02da994b784105713433ce34c25f428d0a58ca2fcb31"
+  },
+  "invalidation": "Prior lifecycle/recovery/migration outcomes remain valid for unchanged interfaces. Counter semantics and live reader advertisement are separately requalified; full installed tests cover current readers."
+}

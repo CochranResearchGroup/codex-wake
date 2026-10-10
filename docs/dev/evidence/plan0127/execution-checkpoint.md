@@ -123,3 +123,28 @@ Next: commit/push installed evidence, verify exact-head PR228 hosted gates,
 integrate, publish v0.9.0 with qualified wheel/sdist, and audit every parent/child
 requirement before closing Plan0127/P65. Goal remains active. Refresh usage/time;
 stop/checkpoint before10500elapsedsec,1900000tokens or05:25UTC, whichever first.
+
+## 2026-10-10 04:59 UTC final projection checkpoint
+
+PR228 merged as a686c7b73034b149967b4ef19d0d7a58b2b61cc4. Exact-head and
+merged-main hosted gates pass. Publicv0.9.0 tag and both downloaded artifacts are
+verified in release-publication.json. Actual installed/native/lifecycle/migration
+proof passes every requirement in completion-audit.md; R1/R2 resolved.
+
+Current branch docs/plan127-completion, based on canonicala686c7b. Source/README/
+bundled skill behavior is unchanged by final documentation closure. ParentP65/0127
+and all children project CLOSED/DONE; final PR/integration readback remains before
+goal completion. Do not repeat runtime acceptance or reinstall unchanged code.
+
+Runtime: four user aliases→0.9.0-qualified prefix; supervisorMainPID56947;
+selected original Wake root reports schemas1–4 and pending/firing0. Other units
+remain unchanged. Legacy SoyLei reader49232 can also publish its own schemas1/2
+health snapshot; activation was not an all-project native rollout. No shared
+daemon/host restart or package overwrite. Owned fixture server/clients are gone;
+native histories and private uncertainty/signal/mailbox controls remain retained.
+
+Latest checked goal usage1000151tokens/9098elapsedsec. Refresh before finishing;
+stop and checkpoint before10500sec/1900000tokens/05:25UTC if still incomplete.
+Memory disposition unavailable receipt final-memory-disposition.json records the
+qualified release closeout without a write. Original policy commit86f18ba and
+five untracked original notes remain unchanged; do not reset/prune that checkout.

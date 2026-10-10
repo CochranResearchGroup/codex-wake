@@ -5288,3 +5288,27 @@ pass126.407s; installed product smoke passes. Normal-root final wake has attempt
 exact payload/native completed turn and retained archived state. PR228/source
 integration, release publication and final requirement audit remain parent gates.
 Restart-safe checkpoint records exact custody and user budget stop thresholds.
+
+## Turn 253 | 2026-10-10 UTC
+
+Plan0127's full behavior/migration/release audit passes. PR228 exact head1e6d5bc
+and merged-main a686c7b pass both hosted Python3.11/3.12 gates. Publicv0.9.0 tag
+resolves to a686c7b; downloaded wheel/sdist hashes match. The exact installed-tested
+wheel bytes are published. Canonical rebuild changes ZIP timestamps only;
+all84 entry contents and all78 source modules match.983 installed tests pass.
+
+All15 parent stories,20 child criteria and implementation/testing/execution
+rules are mapped to current proof in completion-audit.md. R1/R2 are resolved.
+Native direct-send failure separately proves unchanged Wake/default-mailbox bytes.
+Fresh OS readback confirms owned clients/server gone, registered pending/firing0,
+protected controls unchanged and11 other units preserved. Selected Wake root is
+owned by supervisor56947/schema1–4. An existing SoyLei worker49232 can publish its
+own legacy schema1/2 health; no unrelated reader is upgraded or native-capable by
+alias change. Official Codex0.162.1 remains unchanged.
+
+Plan0127/P65 and child release projections are CLOSED/DONE; final documentation
+integration is on docs/plan127-completion. P63's separate retained obligations and
+the original checkout's local policy commit/five dirty notes are preserved.
+Goal remains active until this projection integrates and canonical readback passes.
+Memory disposition unavailable: no reviewed Codex Wake target group; explicit
+non-write receipt final-memory-disposition.json records the durable closeout.

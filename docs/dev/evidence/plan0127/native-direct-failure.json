@@ -1,0 +1,78 @@
+{
+  "thread_id": "00000000-0000-4000-8000-000000000127",
+  "native_result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "thread/read failed: thread not loaded: 00000000-0000-4000-8000-000000000127 (code -32600)"
+      }
+    ],
+    "isError": true
+  },
+  "before": {
+    "/home/ecochran76/workspace.local/codex-wake/.codex/wake": {
+      "archive/wake_20260523_170830_845a.json": "457c4cf9589255f023b2647cde028a6ec28b457b2291b2fa21ba8806980407fa",
+      "archive/wake_20260526_034420_a0c4.json": "8de0f196fd2b795cd2432beb122efba05bacfb3eb2cf3d72112acb04ff739fb3",
+      "archive/wake_20260522_002354_a43f.json": "5f03e081210184b150e1a0be4de11707731fa0d178ae8f1b0313b8aa2555a3f6",
+      "archive/wake_20260525_203934_201f.json": "a3804175bc676ca52a87dc5c332969bb2e2069c35a3c66fdd48a9c29803cc9c0",
+      "archive/wake_20260526_130227_30c0.json": "ed182f8ddd2093ad6e0c69b04c00d8b1332e3b82a120b6eb10a43564f93fc488",
+      "archive/wake_20260526_034938_2c63.json": "c5683e5e7be71a0d6284c590fd736f342ed9b45948b0dc66ed0c8c6564646e09",
+      "archive/wake_20261010_044527_43a6.json": "554564ebfa95b076366d1a087bf83126924c1511b6df691fcee4f427c09b8c54",
+      "archive/wake_20260521_011040_bd20.json": "6f677042b8b1c66617f438adf435b86a5740351463a8ff7068dacb46dad0a363",
+      "archive/wake_20260520_174316_9be6.json": "477dd3a14de2800a75828efe520d76d1470bd7d17d7c72436506be73712c5aa9",
+      "archive/wake_20260526_022238_c03b.json": "02c39a65b3f47a380a928af01deb460d549eaa729bbedc80152c117c8bc86e25",
+      "archive/wake_20260520_214519_1ee0.json": "5d00fde1f236e59e1c95b9c953bf34c7ab8ddbd3dadfca4434a11d6271c00b3e",
+      "archive/wake_20260519_030204_9085.json": "1eacfe133a6c36a35de5bf3292faf3bd65cd2bfb9914df9ebc720d87298b155d",
+      "archive/wake_20260526_034707_8dab.json": "f6bedffb8ee5e33edfe11f49f2e8d30186e3a2c004be9580491579883511096f",
+      "archive/wake_20261010_041927_c282.json": "a8e387431e0445f0147a6adc1fa5dc4ddfcc212df72d90cc8dad95815f522a58",
+      "archive/wake_20260526_130335_d7b5.json": "02f7b4543d29b9f6ee810116bf3de2499d99a9dc9e93edae32af3430f267b98a",
+      "archive/wake_20260523_170925_1105.json": "c14b1763553e0e876b064b7a72a3b59709ac3160fc012534282448628bcaa3db",
+      "archive/wake_20260525_211551_b1f4.json": "76492e03a1cbd66d9b4b115282ed312454dfbb4c73577c2233d8b887a7f1c86c",
+      "archive/wake_20261010_041557_70f4.json": "46d03860a5fc48be5ee10ba1e19e674834582d6bfd173189a5ccb0806e595d23",
+      "archive/wake_20260521_125018_24fb.json": "d6d944f65c8eabbda38ea87923be23d48135c0a618de259f141e0330a526d649",
+      "archive/wake_20260519_031211_5457.json": "04b20a50ba7cee38518a89561f4c36c33133965df3699dd2b39ae22a6f674392",
+      "archive/wake_20260521_010911_f2d9.json": "ffbae3c0cd8bfbb62fe34edfbfbd17aecf296e4de079578441c618fe349a5e8e",
+      "archive/wake_20261010_041335_0fa8.json": "9f152374a0207642b7590f877142990d52f83292a3063acc69376e6d925c065f",
+      "archive/wake_20260519_033023_e611.json": "58e39e1dffe1138166beb199ed996f0e96723f155ed7b1385eb36825c6806172",
+      "archive/wake_20260526_002126_b0b9.json": "889b51795373eca7649e77d31ba3f18ec2aca317eecfd7b609973255e74574cf",
+      "archive/wake_20260523_170314_41b4.json": "25ca0d99bc4b18dcb2be85f1ab3e881a3da8cc70e1a539ae5c2193317735bf2a",
+      "archive/wake_20260525_210815_c4d9.json": "3eaad81dd390b185a6b09286e451c2ccd2ac9e9ec9eff413082efabcc2984922",
+      "archive/wake_20260519_104518_d191.json": "82cf4c086dba0125a7be921a7dc2120b94d9be78c74188a96205809377c7ea3d"
+    },
+    "/home/ecochran76/.local/state/codex-wake/a2a/local": {}
+  },
+  "after": {
+    "/home/ecochran76/workspace.local/codex-wake/.codex/wake": {
+      "archive/wake_20260523_170830_845a.json": "457c4cf9589255f023b2647cde028a6ec28b457b2291b2fa21ba8806980407fa",
+      "archive/wake_20260526_034420_a0c4.json": "8de0f196fd2b795cd2432beb122efba05bacfb3eb2cf3d72112acb04ff739fb3",
+      "archive/wake_20260522_002354_a43f.json": "5f03e081210184b150e1a0be4de11707731fa0d178ae8f1b0313b8aa2555a3f6",
+      "archive/wake_20260525_203934_201f.json": "a3804175bc676ca52a87dc5c332969bb2e2069c35a3c66fdd48a9c29803cc9c0",
+      "archive/wake_20260526_130227_30c0.json": "ed182f8ddd2093ad6e0c69b04c00d8b1332e3b82a120b6eb10a43564f93fc488",
+      "archive/wake_20260526_034938_2c63.json": "c5683e5e7be71a0d6284c590fd736f342ed9b45948b0dc66ed0c8c6564646e09",
+      "archive/wake_20261010_044527_43a6.json": "554564ebfa95b076366d1a087bf83126924c1511b6df691fcee4f427c09b8c54",
+      "archive/wake_20260521_011040_bd20.json": "6f677042b8b1c66617f438adf435b86a5740351463a8ff7068dacb46dad0a363",
+      "archive/wake_20260520_174316_9be6.json": "477dd3a14de2800a75828efe520d76d1470bd7d17d7c72436506be73712c5aa9",
+      "archive/wake_20260526_022238_c03b.json": "02c39a65b3f47a380a928af01deb460d549eaa729bbedc80152c117c8bc86e25",
+      "archive/wake_20260520_214519_1ee0.json": "5d00fde1f236e59e1c95b9c953bf34c7ab8ddbd3dadfca4434a11d6271c00b3e",
+      "archive/wake_20260519_030204_9085.json": "1eacfe133a6c36a35de5bf3292faf3bd65cd2bfb9914df9ebc720d87298b155d",
+      "archive/wake_20260526_034707_8dab.json": "f6bedffb8ee5e33edfe11f49f2e8d30186e3a2c004be9580491579883511096f",
+      "archive/wake_20261010_041927_c282.json": "a8e387431e0445f0147a6adc1fa5dc4ddfcc212df72d90cc8dad95815f522a58",
+      "archive/wake_20260526_130335_d7b5.json": "02f7b4543d29b9f6ee810116bf3de2499d99a9dc9e93edae32af3430f267b98a",
+      "archive/wake_20260523_170925_1105.json": "c14b1763553e0e876b064b7a72a3b59709ac3160fc012534282448628bcaa3db",
+      "archive/wake_20260525_211551_b1f4.json": "76492e03a1cbd66d9b4b115282ed312454dfbb4c73577c2233d8b887a7f1c86c",
+      "archive/wake_20261010_041557_70f4.json": "46d03860a5fc48be5ee10ba1e19e674834582d6bfd173189a5ccb0806e595d23",
+      "archive/wake_20260521_125018_24fb.json": "d6d944f65c8eabbda38ea87923be23d48135c0a618de259f141e0330a526d649",
+      "archive/wake_20260519_031211_5457.json": "04b20a50ba7cee38518a89561f4c36c33133965df3699dd2b39ae22a6f674392",
+      "archive/wake_20260521_010911_f2d9.json": "ffbae3c0cd8bfbb62fe34edfbfbd17aecf296e4de079578441c618fe349a5e8e",
+      "archive/wake_20261010_041335_0fa8.json": "9f152374a0207642b7590f877142990d52f83292a3063acc69376e6d925c065f",
+      "archive/wake_20260519_033023_e611.json": "58e39e1dffe1138166beb199ed996f0e96723f155ed7b1385eb36825c6806172",
+      "archive/wake_20260526_002126_b0b9.json": "889b51795373eca7649e77d31ba3f18ec2aca317eecfd7b609973255e74574cf",
+      "archive/wake_20260523_170314_41b4.json": "25ca0d99bc4b18dcb2be85f1ab3e881a3da8cc70e1a539ae5c2193317735bf2a",
+      "archive/wake_20260525_210815_c4d9.json": "3eaad81dd390b185a6b09286e451c2ccd2ac9e9ec9eff413082efabcc2984922",
+      "archive/wake_20260519_104518_d191.json": "82cf4c086dba0125a7be921a7dc2120b94d9be78c74188a96205809377c7ea3d"
+    },
+    "/home/ecochran76/.local/state/codex-wake/a2a/local": {}
+  },
+  "wake_and_default_mailbox_bytes_unchanged": true,
+  "scope": "Ordinary native message failure creates no implicit Wake workflow or default mailbox mutation. Custom Wake buses are not selected by this native interface."
+}

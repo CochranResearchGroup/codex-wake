@@ -9,7 +9,7 @@ Blocked by: docs/dev/plans/0128-2026-10-09-native-durable-delivery.md — Delive
 
 ## Current State
 
-Installed recovery acceptance passed exact native reconciliation, safe pre-submission restart, unresolved intent holds, busy/expiry, default detached hold, explicit same-thread headless resume and visible-client restart.978 comprehensive tests pass. See [acceptance](../evidence/plan0127/0130-acceptance.md), retained failed assumptions, source hashes and actual native/systemd receipts. Shared daemon and host were not restarted. Candidate remains unreleased.
+Installed recovery acceptance passed exact native reconciliation, safe pre-submission restart, unresolved intent holds, busy/expiry, default detached hold, explicit same-thread headless resume and visible-client restart.978 candidate tests passed. See [acceptance](../evidence/plan0127/0130-acceptance.md), retained failed assumptions, source hashes and actual native/systemd receipts. Shared daemon and host were not restarted. Released v0.9.0 preserves these contracts; current intent accounting is separately qualified, with983 installed tests and the final parent completion audit. The no-effect uncertainty control remains intentionally unresolved and preserved.
 
 ## What to Build
 
