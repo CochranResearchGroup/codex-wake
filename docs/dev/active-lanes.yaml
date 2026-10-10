@@ -49,10 +49,12 @@ lanes:
     target: origin/main
     plan_state: CLOSED
     custody_state: INTEGRATED
-    checkpoint: edf2aea4c5480202639bb3e94be7f16300b8efcb
+    checkpoint: e7ac7e6aad9e326c3d45daf25643dbded9c0dab7
+    remote_ref: refs/remotes/origin/feat/network-time-provider
     integration: squash_pr
     dependencies: []
-    overlaps: [P63]
+    overlaps: []
+    overlap_disposition: P63 network-time integration accepted under PR225; wider P63 obligations stay open
     updated_at: 2026-10-09
     release_tag: v0.8.0
     integration_receipt: edf2aea4c5480202639bb3e94be7f16300b8efcb
@@ -68,14 +70,14 @@ lanes:
     branch: fix/app-server-unix-websocket
     target: origin/main
     plan_state: OPEN
-    custody_state: PUBLISHED
-    checkpoint: 39efb5f8dc4760c687edd6db4b48b9e26e945ca5
+    custody_state: PAUSED_REF
+    checkpoint: 4bc47187aee17732e9b3aa9c1a9d6015a83c6c5a
     remote_ref: refs/remotes/origin/fix/app-server-unix-websocket
     integration: squash_pr
     dependencies: []
     overlaps: []
     updated_at: 2026-10-08
-    checkout_required: true
-    disposition: Unix WebSocket dispatch successor source qualified; required CI and primary review pending. Three prior native failures immutable; installed completion remains pending.
+    checkout_required: false
+    disposition: Paused at published4bc4718; checkout closed during 2026-10-10 reconciliation. Unmerged transport code retains review/CI and installed acceptance gates; no acceptance inferred from archival.
     prior_integration_receipt: 9e17dd79fe775154e9460ea255a5c1ad187e1ec5
     prior_pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/222

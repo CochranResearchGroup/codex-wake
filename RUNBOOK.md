@@ -5330,3 +5330,13 @@ all parent/ticket links resolve, dependency chain0134→0135→0136 checked, and
 diff whitespace check PASS. Memory disposition unavailable: atlas discovery
 returned no reviewed Codex Wake target group; non-write receipt is
 docs/dev/evidence/plan0133/memory-disposition.json.
+
+## Turn 255 | 2026-10-10 UTC
+
+Reconciled root main with released38c74f3 and approved native-time planningf845e39,
+preserving86f18ba policy commit and five exact historical note byte hashes.
+Published matching archive refs before normally removing four unused clean
+worktrees. APP-PERSIST paused unmerged with its outstanding gates preserved;
+Plan0127 checkout retained because live processes use it. Source/tests unchanged
+from released main; no installed runtime or service changes. Reconciliation
+dispositions and exact tips are in notes/0012-2026-10-10-repository-reconciliation.md.
