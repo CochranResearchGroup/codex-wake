@@ -5437,3 +5437,17 @@ Native MCP startup lacks CODEX_THREAD_ID; each message/current tool requires the
 actual native-shell caller claim and preserves fixed capability/root checks.
 Claim is not attestation. Existing A2A domain/schema unchanged. Package/install
 and release remain next; gov_policy evaluation deferred by operator.
+
+## Turn 262 | 2026-10-10 UTC
+
+Plan0151 source merged PR241/95f621d and v0.13.0 published, downloaded and
+installed with 83-file parity. Private installed exchange and fresh client using
+the registered MCP command PASS; 14 tools exposed. Five executable links point
+to the qualified prefix, two installed skill copies match source, all 13 service
+PID/state snapshots unchanged. Current identity fails closed on an inherited pane
+conflict; explicit thread resolution succeeds. No production messages, enrollment,
+worker/service restart, notifications, turns or test tabs. New Codex sessions
+must discover tools; this existing session's catalog was not refreshed.
+Plan0151 lane corrected to P75 because P73 already belongs to Plan0146.
+Terminal evidence: docs/dev/evidence/plan0151/closeout.md. Hosted CI waiting
+waived; gov_policy measurement deferred. Memory disposition unavailable.

@@ -1,0 +1,31 @@
+{
+  "status": "PASS_WITH_CURRENT_IDENTITY_REFUSAL",
+  "tool_count": 14,
+  "actual_thread_id": "01a1088e-8652-74d3-a3d4-784fc561feea",
+  "startup_thread_env_present": false,
+  "resolve_exact": true,
+  "current_identity": {
+    "candidates": [],
+    "code": 6,
+    "message": "inherited pane conflicts with invoking thread",
+    "selector": "current",
+    "sources": {
+      "app_server": {
+        "availability": "available",
+        "endpoint": "unix:///tmp/codex-daemon-1000/4963f4777989e594396b1095fe104d96c531418f7db4a8f572e4aee86502b9e6",
+        "error_code": null,
+        "observed_at": "2026-10-10T23:46:23.971913+00:00"
+      },
+      "tmux": {
+        "availability": "available",
+        "endpoint": "/tmp/tmux-1000/default",
+        "error_code": null,
+        "observed_at": "2026-10-10T23:46:24.930723+00:00"
+      }
+    }
+  },
+  "native_turns": 0,
+  "notifications": 0,
+  "callable_in_existing_Codex_catalog": false,
+  "discovery_boundary": "fresh actual stdio SDK client; explicit thread resolution succeeds, inherited-pane current identity fails closed; no identity override or production effect"
+}
