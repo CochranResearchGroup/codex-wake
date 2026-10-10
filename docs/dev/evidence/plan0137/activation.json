@@ -1,0 +1,62 @@
+{
+  "source": "4aabb57cf4be8b88885b2e8005b4ecce949479d1",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.10.1-4aabb57",
+  "assets": {
+    "codex_wake-0.10.1.tar.gz": "e62bb333089f9dda04524d46b6ff2e5f73bd45451e19c2ebce076653ac8f032f",
+    "codex_wake-0.10.1-py3-none-any.whl": "7b910a67566be45c3d1bd4d3ee0f16f2c4402a99a609ed3e8b4da23bf912fc52"
+  },
+  "links": {
+    "codex-wake": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-wake",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.1-4aabb57/bin/codex-wake"
+    },
+    "codex-waked": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-waked",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.1-4aabb57/bin/codex-waked"
+    },
+    "codex-wake-hook": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-wake-hook",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.1-4aabb57/bin/codex-wake-hook"
+    },
+    "codex-wake-github-webhook": {
+      "old": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-17b4d98/bin/codex-wake-github-webhook",
+      "new": "/home/ecochran76/.local/share/codex-wake/releases/0.10.1-4aabb57/bin/codex-wake-github-webhook"
+    }
+  },
+  "pre_units": {
+    "codex-wake-agent-browser-lease-authority.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-agent-browser.service": "MainPID=80733\nActiveState=active",
+    "codex-wake-auracall.service": "MainPID=80734\nActiveState=active",
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": "MainPID=80737\nActiveState=active",
+    "codex-wake-graphiti.service": "MainPID=80738\nActiveState=active",
+    "codex-wake-litscout-0553-integration.service": "MainPID=24465\nActiveState=active",
+    "codex-wake-mail-receipts.service": "MainPID=80739\nActiveState=active",
+    "codex-wake-odollo-main-production-install.service": "MainPID=80742\nActiveState=active",
+    "codex-wake-odollo.service": "MainPID=80748\nActiveState=active",
+    "codex-wake-p54-c4-retained-v6s-poll.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website.service": "MainPID=75007\nActiveState=active",
+    "codex-wake-supervisor.service": "MainPID=45166\nActiveState=active"
+  },
+  "status": "activated",
+  "ci_waiver": "User: skip CI",
+  "quiescent_roots": 4,
+  "post_units": {
+    "codex-wake-agent-browser-lease-authority.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-agent-browser.service": "MainPID=80733\nActiveState=active",
+    "codex-wake-auracall.service": "MainPID=80734\nActiveState=active",
+    "codex-wake-github-webhook-p54-c4-retained-v6s.service": "MainPID=80737\nActiveState=active",
+    "codex-wake-graphiti.service": "MainPID=80738\nActiveState=active",
+    "codex-wake-litscout-0553-integration.service": "MainPID=24465\nActiveState=active",
+    "codex-wake-mail-receipts.service": "MainPID=80739\nActiveState=active",
+    "codex-wake-odollo-main-production-install.service": "MainPID=80742\nActiveState=active",
+    "codex-wake-odollo.service": "MainPID=80748\nActiveState=active",
+    "codex-wake-p54-c4-retained-v6s-poll.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service": "MainPID=0\nActiveState=inactive",
+    "codex-wake-soylei-website.service": "MainPID=75007\nActiveState=active",
+    "codex-wake-supervisor.service": "MainPID=48816\nActiveState=active"
+  },
+  "supervisor_pid": 48816,
+  "supervisor_argv": "/home/ecochran76/.local/share/codex-wake/releases/0.10.1-4aabb57/bin/python /home/ecochran76/.local/bin/codex-wake supervisor run --interval 1 --registry-dir /home/ecochran76/.config/codex-wake/roots.d --state-dir /home/ecochran76/.local/state/codex-wake/supervisor ",
+  "roots_ready": 4
+}

@@ -103,3 +103,25 @@ lanes:
     integration_receipt: 17b4d9833d33588bea1fd9987224561f7cca0953
     release_tag: v0.10.0
     checkout_required: false
+
+  - id: P67
+    owner: primary
+    objective: Preserve safe native queue failure diagnostics without resend
+    work_items: [docs/dev/plans/0137-2026-10-10-native-queue-failure-diagnostics.md]
+    plan: docs/dev/plans/0137-2026-10-10-native-queue-failure-diagnostics.md
+    plan_ref: origin/main
+    branch: fix/native-queue-diagnostics
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 8b501e68cb6e4e40670574b677d8678eb295bc87
+    remote_ref: refs/remotes/origin/fix/native-queue-diagnostics
+    integration: squash_pr
+    integration_receipt: 4aabb57cf4be8b88885b2e8005b4ecce949479d1
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/231
+    release_tag: v0.10.1
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-10
+    checkout_required: false
+    disposition: 49installed controls and artifact/module parity qualify active0.10.1; original LitScout cause remains unknown; hosted wait waived.

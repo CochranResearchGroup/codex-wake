@@ -1,7 +1,7 @@
 # Plan0137 — Preserve safe native queue failure diagnostics
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: COMPLETE
 Owner: primary
 Lane: P67
 Branch: fix/native-queue-diagnostics
@@ -35,4 +35,11 @@ Final hosted CI wait is waived under the operator's existing instruction.
 ## Current state
 
 Started at main2a8a945; LitScout repair and v0.10.0 native deadlines retained.
-No effect has been retried. Acceptance pending.
+No effect has been retried. PR231 integrated4aabb57cf4be8b88885b2e8005b4ecce949479d1;
+published v0.10.1 and activated immutable0.10.1-4aabb57. 25native +24injector
+source controls pass;49installed controls PASS2.149s. Release asset hashes and
+installed module parity verified; fresh supervisor argv and4ready roots verified.
+Prior installation retained for rollback; unrelated units unchanged. Raw output
+is withheld, unknown error bodies remain unavailable, and LitScout's original
+cause remains unknown. Red/green and fixture/environment failures retained.
+See ../evidence/plan0137/review.md and activation.json. Hosted waiting waived.

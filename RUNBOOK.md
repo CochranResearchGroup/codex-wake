@@ -5365,3 +5365,12 @@ waived final hostedCI waiting. Root anchored main; LitScout repair retained in
 source and unrelated installed scheduler. Disposable tab closed, conversation
 preserved. All4supervisor roots quiescent before restart; unrelated units unchanged.
 Evidence: docs/dev/evidence/plan0133/installed-acceptance.md and installed/release-activation.json.
+
+## 2026-10-10 — Queue failure diagnostics closeout
+
+Plan0137 integratedPR231/4aabb57, published/activatedv0.10.1. Real rejected queue
+regression and timeout/OS-error/unconfirmed controls preserve safe bounded
+metadata and no-resend.49installed tests pass; failed fixture/import samples
+retained. Source/installed module parity and downloaded release hashes verified.
+Fourquiescent supervisor roots upgraded; unrelated units unchanged. FinalCI
+waiting waived by operator; original LitScout submission cause remains unknown.
