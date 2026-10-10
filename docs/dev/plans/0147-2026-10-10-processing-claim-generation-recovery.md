@@ -1,12 +1,12 @@
 # Ticket0147 — Recover processing ownership across generations
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
-Lane: P71
-Branch: docs/a2a-completion-stream
+Lane: P74
+Branch: fix/claim-reconciliation
 Target: origin/main
-Integration: governed_by_plan0141
+Integration: squash_pr
 Work-Item: docs/dev/plans/0147-2026-10-10-processing-claim-generation-recovery.md
 Parent: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
 Depends-On: Plan0146
@@ -29,6 +29,32 @@ After a worker generation ends, the same recipient can determine whether work is
 ## Test seam and bound
 
 Public accepted-work claim and reconciliation seams under disposable generation transitions. One smallest red loop per ownership gap; no provider effects.
+
+## Frozen claim reconciliation contract
+
+Actor capability generation fences the accepted-work claim; a tab/client reconnect
+alone does not create a new claim. Repeated acceptance returns claimed=false and
+does not grant another start. A rotated or revoked actor cannot steal or complete
+the original claim. No takeover/reset or invented processing outcome is added.
+
+Public messages reconcile reports processing separately from notification:
+unclaimed, already claimed by current generation, held for the original claim,
+or known terminal backed by its exact immutable receipt. It reports original
+claim receipt/generation and current recipient generation. A terminal receipt
+remains observable across rotation; absence of terminal evidence stays unknown.
+Reconciliation grants no new processing rights, reads no body and never requeues.
+Metadata reconciliation must work without acquiring a clock or changing expiry;
+operator inspection remains explicitly audited. Existing notification reconciliation
+and its old held uncertainty retain their meaning.
+
+Use current public Mailbox and messages CLI seams, external runtime metadata for
+actor CLI qualification, fixed role-fixture clocks for non-time setup, and fresh
+installed processes. No new schema or storage reset. Version0.12.0 remains the
+prepared campaign version. Bound the unit to accepted/unknown, terminal, same-
+generation repeat and stale authority controls; focused90s, installed60s/child10s,
+FD+2/children0, zero business-task/notification effects. At most one owned empty
+native tab may qualify exact actor context; preserve its fixture history and
+close it after idle/ownership readback, with any pending-work refusal retained.
 
 ## Owned write surface
 

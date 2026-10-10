@@ -199,7 +199,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: PAUSED_REF
-    checkpoint: 65582915685d64123410983481161d303b604958
+    checkpoint: 2acab101fc433ca1d4d5908a26ef4fa1e22a596b
     remote_ref: refs/remotes/origin/docs/a2a-completion-stream
     integration: sequential_ticket_prs
     checkout_required: false
@@ -207,7 +207,7 @@ lanes:
     overlaps: [P63]
     reconciled_overlaps: [P63]
     updated_at: 2026-10-10
-    disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. Goal executing: tickets0142-0145 DONE, active released0.11.2; ticket0146 recovery contract active. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
+    disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. Goal executing: tickets0142-0146 DONE, active0.11.2; prepared0.12 source; ticket0147 claim reconciliation active. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
 
   - id: P72
     owner: primary
@@ -256,3 +256,23 @@ lanes:
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
     disposition: Ticket0146 DONE; PR235 integrated8548265, source/installed/fresh-process recovery fences PASS. Owned clean published checkout closed normally, branch retained. Final release remains0149. No production recovery, legacy replay or unrelated effects.
+
+  - id: P74
+    owner: primary
+    objective: Reconcile original processing claims across actor generations
+    work_items: [docs/dev/plans/0147-2026-10-10-processing-claim-generation-recovery.md]
+    plan: docs/dev/plans/0147-2026-10-10-processing-claim-generation-recovery.md
+    plan_ref: origin/main
+    branch: fix/claim-reconciliation
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 2acab101fc433ca1d4d5908a26ef4fa1e22a596b
+    remote_ref: refs/remotes/origin/fix/claim-reconciliation
+    integration: squash_pr
+    checkout_required: true
+    dependencies: [P71, P73]
+    overlaps: [P71]
+    reconciled_overlaps: [P71]
+    updated_at: 2026-10-10
+    disposition: Ticket0147 frozen observation-only claim recovery; public unknown/terminal generation regression next, no takeover or business replay.
