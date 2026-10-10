@@ -1,0 +1,21 @@
+{
+  "pid": 66503,
+  "command": [
+    "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-p66-f3a72e8/bin/codex-wake",
+    "supervisor",
+    "run",
+    "--interval",
+    "2",
+    "--registry-dir",
+    "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/registry",
+    "--state-dir",
+    "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/supervisor",
+    "--log-path",
+    "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/supervisor.log",
+    "--codex-wake-path",
+    "/home/ecochran76/.local/share/codex-wake/releases/0.9.0-p66-f3a72e8/bin/codex-wake"
+  ],
+  "source": "f3a72e80c8383c98172230d6242fa3e5b6f7de08",
+  "wheel_sha256": "c96a405a892f06c1433e581e7322d42ab321d5a090428c337c1413dff6b94326",
+  "prior_pid": 94869
+}

@@ -36,3 +36,10 @@ Release/version/integration/global installed rollout remain separate pending gat
 Root remains LitScout repair branch; preserve its checkout. Main catalog P66
 checkpoint72e7c13 is stale after repair merge and needs reconciled projection
 at integration. Do not claim root is anchored main or parent0133 complete.
+
+## Resumed acceptance
+
+Unattended after/at completed; installed-acceptance.md records evidence and cleanup.
+Recipient tab closed preserving conversation; owned supervisor stopped/unenrolled.
+Next: exact0.10.0 release-preparation CI, integration, public release build, final
+installation parity and protected-root rollout readback. No duplicate test wakes.

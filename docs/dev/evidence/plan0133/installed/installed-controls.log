@@ -1,0 +1,33 @@
+Installed package: /home/ecochran76/.local/share/codex-wake/releases/0.9.0-p66-f3a72e8/lib/python3.12/site-packages/codex_wake/__init__.py
+test_absolute_fraction_and_file_ttl_are_preserved (test_native_network_time.NativeNetworkTimeTests.test_absolute_fraction_and_file_ttl_are_preserved) ... ok
+test_fractional_expiry_does_not_fail_early_at_native_transport (test_native_network_time.NativeNetworkTimeTests.test_fractional_expiry_does_not_fail_early_at_native_transport) ... ok
+test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake (test_native_network_time.NativeNetworkTimeTests.test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake) ... ok
+test_interrupted_firing_cannot_bypass_time_gate (test_native_network_time.NativeNetworkTimeTests.test_interrupted_firing_cannot_bypass_time_gate) ... ok
+test_malformed_policy_and_observation_are_held_without_effect (test_native_network_time.NativeNetworkTimeTests.test_malformed_policy_and_observation_are_held_without_effect) ... ok
+test_outage_expiry_boundary_restart_and_cancellation_keep_original_deadlines (test_native_network_time.NativeNetworkTimeTests.test_outage_expiry_boundary_restart_and_cancellation_keep_original_deadlines) ... ok
+test_provider_fallback_and_invalid_observations_at_cli (test_native_network_time.NativeNetworkTimeTests.test_provider_fallback_and_invalid_observations_at_cli) ... ok
+test_relative_arm_uses_external_upper_bound_not_guest_time (test_native_network_time.NativeNetworkTimeTests.test_relative_arm_uses_external_upper_bound_not_guest_time) ... ok
+test_uncertain_arm_rejects_without_record (test_native_network_time.NativeNetworkTimeTests.test_uncertain_arm_rejects_without_record) ... ok
+test_uncertain_submission_reconciles_read_only_during_time_outage (test_native_network_time.NativeNetworkTimeTests.test_uncertain_submission_reconciles_read_only_during_time_outage) ... ok
+test_busy_recipient_holds_until_expiry_without_submission (test_native_delivery.NativeDeliveryTests.test_busy_recipient_holds_until_expiry_without_submission) ... ok
+test_duplicate_native_turns_remain_uncertain_even_with_same_client_identity (test_native_delivery.NativeDeliveryTests.test_duplicate_native_turns_remain_uncertain_even_with_same_client_identity) ... ok
+test_explicit_missing_resume_uses_same_thread_without_opening_a_tab (test_native_delivery.NativeDeliveryTests.test_explicit_missing_resume_uses_same_thread_without_opening_a_tab) ... ok
+test_file_wake_expires_even_if_file_never_appears (test_native_delivery.NativeDeliveryTests.test_file_wake_expires_even_if_file_never_appears) ... ok
+test_persisted_due_wake_uses_native_queue_and_records_acceptance (test_native_delivery.NativeDeliveryTests.test_persisted_due_wake_uses_native_queue_and_records_acceptance) ... ok
+test_reconcile_recovers_exact_native_turn_without_resending (test_native_delivery.NativeDeliveryTests.test_reconcile_recovers_exact_native_turn_without_resending) ... ok
+test_uncertain_acceptance_is_not_resubmitted_on_another_poll (test_native_delivery.NativeDeliveryTests.test_uncertain_acceptance_is_not_resubmitted_on_another_poll) ... ok
+test_classic_registration_requires_explicit_tmux_compatibility (test_native_migration.NativeMigrationTests.test_classic_registration_requires_explicit_tmux_compatibility) ... ok
+test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) ... ok
+test_migration_preserves_uncertainty_and_original_without_submission (test_native_migration.NativeMigrationTests.test_migration_preserves_uncertainty_and_original_without_submission) ... ok
+test_migration_refuses_legacy_transport_without_mutating_it (test_native_migration.NativeMigrationTests.test_migration_refuses_legacy_transport_without_mutating_it) ... ok
+test_native_registration_uses_a_fail_closed_version_for_old_readers (test_native_migration.NativeMigrationTests.test_native_registration_uses_a_fail_closed_version_for_old_readers) ... ok
+test_reconciliation_reads_user_message_beyond_default_websocket_cap (test_native_protocol_large_response.NativeLargeResponseTests.test_reconciliation_reads_user_message_beyond_default_websocket_cap) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 1.146s
+
+OK
+{"native_delivery": {"next_reconciliation_at": "2026-10-10T14:59:49Z", "reconciliation": {"checked_at": "2026-10-10T14:59:44Z", "reason": "multiple_native_submissions", "state": "unresolved"}, "state": "uncertain"}, "result": "skipped", "status": "firing", "wake_id": "wake_20261010_145944_405b"}
+wake_20261009_000001_86df /tmp/tmpo8f44dnq/wakes/pending/wake_20261009_000001_86df.json
+wake_20261009_000001_ef02 /tmp/tmpe0l2xrmj/wake/pending/wake_20261009_000001_ef02.json
+{"native_delivery": {"acknowledgment": "not_observed", "evidence": {"client_message_id": "client-exact", "execution": "turn_completed", "source": "native_turn", "turn_id": "turn-exact", "user_message_id": "message-exact"}, "execution": "turn_completed", "reconciled": true, "reconciliation": {"checked_at": "2026-10-10T14:59:45Z", "state": "resolved"}, "state": "accepted"}, "result": "submitted", "status": "submitted", "wake_id": "wake_20261010_145945_1faa"}

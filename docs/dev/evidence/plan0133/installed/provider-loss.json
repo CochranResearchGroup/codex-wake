@@ -1,0 +1,302 @@
+{
+  "status": "passed",
+  "controls": [
+    {
+      "withheld_operator": "cloudflare",
+      "fault": "controlled reply omission after real acquisition",
+      "report": {
+        "schema": 1,
+        "production_ready": false,
+        "purpose": "inspection-only",
+        "decision": {
+          "status": "network",
+          "sources": [
+            "ntp.alastyr.com",
+            "time.nist.gov"
+          ],
+          "lower": 1791643978.118769,
+          "upper": 1791643978.2810147,
+          "reason": ""
+        },
+        "sources": [
+          {
+            "operator": "cloudflare",
+            "host": "time.cloudflare.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "missing_or_duplicate_reply"
+          },
+          {
+            "operator": "nist",
+            "host": "time.nist.gov",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.nist.gov",
+              "operator": "nist",
+              "lower": 1791643978.1348455,
+              "upper": 1791643978.2242496,
+              "age": 0.3918754,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "6b87269c-639c-418d-a78f-dc4eb064911e",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "132.163.96.2"
+          },
+          {
+            "operator": "netnod",
+            "host": "ntp.se",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "ptb",
+            "host": "ptbtime1.ptb.de",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "alastyr",
+            "host": "ntp.alastyr.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "ntp.alastyr.com",
+              "operator": "alastyr",
+              "lower": 1791643978.118769,
+              "upper": 1791643978.2810147,
+              "age": 0.2154593,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "6b87269c-639c-418d-a78f-dc4eb064911e",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "5.2.80.90"
+          }
+        ],
+        "windows": {
+          "reason": "Exception calling \"Parse\" with \"2\" argument(s): \"The string was not recognized as a valid DateTime. There is an unknown word starting at index 0.\""
+        },
+        "instant": {
+          "host_boot": "639269852545000000",
+          "qpc": 2555298565656,
+          "frequency": 10000000,
+          "generation": "6b87269c-639c-418d-a78f-dc4eb064911e",
+          "guest_boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db"
+        },
+        "policy": {
+          "tolerance": 1.0,
+          "max_age": 120.0,
+          "max_rtt": 0.5,
+          "drift_ppm": 100
+        },
+        "note": "Bounds refer to collector completion, not the later print instant. No deadline effects are authorized."
+      }
+    },
+    {
+      "withheld_operator": "nist",
+      "fault": "controlled reply omission after real acquisition",
+      "report": {
+        "schema": 1,
+        "production_ready": false,
+        "purpose": "inspection-only",
+        "decision": {
+          "status": "network",
+          "sources": [
+            "ntp.alastyr.com",
+            "time.cloudflare.com"
+          ],
+          "lower": 1791643978.9574013,
+          "upper": 1791643979.1198149,
+          "reason": ""
+        },
+        "sources": [
+          {
+            "operator": "cloudflare",
+            "host": "time.cloudflare.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.cloudflare.com",
+              "operator": "cloudflare",
+              "lower": 1791643979.019852,
+              "upper": 1791643979.063532,
+              "age": 1.3795094,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "6b87269c-639c-418d-a78f-dc4eb064911e",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "162.159.200.1"
+          },
+          {
+            "operator": "nist",
+            "host": "time.nist.gov",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "missing_or_duplicate_reply"
+          },
+          {
+            "operator": "netnod",
+            "host": "ntp.se",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "ptb",
+            "host": "ptbtime1.ptb.de",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "alastyr",
+            "host": "ntp.alastyr.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "ntp.alastyr.com",
+              "operator": "alastyr",
+              "lower": 1791643978.9574013,
+              "upper": 1791643979.1198149,
+              "age": 1.0541756,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "6b87269c-639c-418d-a78f-dc4eb064911e",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "5.2.80.90"
+          }
+        ],
+        "windows": {
+          "reason": "Exception calling \"Parse\" with \"2\" argument(s): \"The string was not recognized as a valid DateTime. There is an unknown word starting at index 0.\""
+        },
+        "instant": {
+          "host_boot": "639269852545000000",
+          "qpc": 2555306952819,
+          "frequency": 10000000,
+          "generation": "6b87269c-639c-418d-a78f-dc4eb064911e",
+          "guest_boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db"
+        },
+        "policy": {
+          "tolerance": 1.0,
+          "max_age": 120.0,
+          "max_rtt": 0.5,
+          "drift_ppm": 100
+        },
+        "note": "Bounds refer to collector completion, not the later print instant. No deadline effects are authorized."
+      }
+    },
+    {
+      "withheld_operator": "alastyr",
+      "fault": "controlled reply omission after real acquisition",
+      "report": {
+        "schema": 1,
+        "production_ready": false,
+        "purpose": "inspection-only",
+        "decision": {
+          "status": "network",
+          "sources": [
+            "time.cloudflare.com",
+            "time.nist.gov"
+          ],
+          "lower": 1791643979.779455,
+          "upper": 1791643979.8696704,
+          "reason": ""
+        },
+        "sources": [
+          {
+            "operator": "cloudflare",
+            "host": "time.cloudflare.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.cloudflare.com",
+              "operator": "cloudflare",
+              "lower": 1791643979.825829,
+              "upper": 1791643979.8696704,
+              "age": 2.1855672,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "6b87269c-639c-418d-a78f-dc4eb064911e",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "162.159.200.1"
+          },
+          {
+            "operator": "nist",
+            "host": "time.nist.gov",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "accepted",
+            "observation": {
+              "source": "time.nist.gov",
+              "operator": "nist",
+              "lower": 1791643979.779455,
+              "upper": 1791643979.869188,
+              "age": 2.0366495,
+              "boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db:639269852545000000",
+              "round_id": "6b87269c-639c-418d-a78f-dc4eb064911e",
+              "kind": "network",
+              "scale": "utc-step",
+              "healthy": true
+            },
+            "peer": "132.163.96.2"
+          },
+          {
+            "operator": "netnod",
+            "host": "ntp.se",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "ptb",
+            "host": "ptbtime1.ptb.de",
+            "scale": null,
+            "authentication": "not-qualified",
+            "reason": "time_scale_unqualified"
+          },
+          {
+            "operator": "alastyr",
+            "host": "ntp.alastyr.com",
+            "scale": "utc-step",
+            "authentication": "plain-ntp-inspection-only",
+            "reason": "missing_or_duplicate_reply"
+          }
+        ],
+        "windows": {
+          "reason": "Exception calling \"Parse\" with \"2\" argument(s): \"The string was not recognized as a valid DateTime. There is an unknown word starting at index 0.\""
+        },
+        "instant": {
+          "host_boot": "639269852545000000",
+          "qpc": 2555315013397,
+          "frequency": 10000000,
+          "generation": "6b87269c-639c-418d-a78f-dc4eb064911e",
+          "guest_boot": "3cf33f0d-c332-452e-8b6d-396eccccd3db"
+        },
+        "policy": {
+          "tolerance": 1.0,
+          "max_age": 120.0,
+          "max_rtt": 0.5,
+          "drift_ppm": 100
+        },
+        "note": "Bounds refer to collector completion, not the later print instant. No deadline effects are authorized."
+      }
+    }
+  ]
+}
