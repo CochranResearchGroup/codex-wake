@@ -159,7 +159,8 @@
     "0146-2026-10-10-held-recovery-disposition.md",
     "0147-2026-10-10-processing-claim-generation-recovery.md",
     "0148-2026-10-10-remaining-fault-and-ancestry-proof.md",
-    "0149-2026-10-10-final-campaign-acceptance.md"
+    "0149-2026-10-10-final-campaign-acceptance.md",
+    "0150-2026-10-10-policy-context-pilot.md"
   ],
   "excluded_unclassified_plans": [],
   "goal_execution_contract": {
@@ -441,18 +442,6 @@
       "lane_id": null,
       "lane_ok": false,
       "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0120-2026-10-08-persistent-app-server-dispatch.md",
-      "state": "OPEN",
-      "state_ok": true,
-      "wired_in_roadmap": false,
-      "wired_in_runbook": false
-    },
-    {
-      "current_state_ok": true,
-      "file": "0150-2026-10-10-policy-context-pilot.md",
-      "filename_ok": true,
-      "lane_id": "P72",
-      "lane_ok": true,
-      "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0150-2026-10-10-policy-context-pilot.md",
       "state": "OPEN",
       "state_ok": true,
       "wired_in_roadmap": false,
@@ -791,7 +780,8 @@
     "## Turn 256 | 2026-10-10 UTC",
     "## Turn 257 | 2026-10-10 UTC",
     "## Turn 258 | 2026-10-10 UTC",
-    "## Turn 259 | 2026-10-10 UTC"
+    "## Turn 259 | 2026-10-10 UTC",
+    "## Turn 260 | 2026-10-10 UTC"
   ],
   "unused_baseline_findings": []
 }

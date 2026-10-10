@@ -5418,3 +5418,11 @@ PASS. CI wiring guard added; hosted waiting waived. Serialized response shrink
 is measured, total host-token benefit remains unmeasured. Exact adoption and
 limits: docs/dev/notes/2026-10-10-policy-context-pilot-adoption.md. No runtime
 effect, service change, global configuration or unrelated checkout mutation.
+
+## Turn 260 | 2026-10-10 UTC
+
+Plan0150 implementation merged PR238/fbc3d0275f0e46b41180706adf615e6ce3771bae.
+Root main read back; guard/regression pass and all21 existing policy bodies
+byte-identical to pre-change source. Terminal documentation closes Plan0150
+and issue237 from its integration. No hosted CI pass or host-token saving
+claimed. Memory disposition unavailable; non-write receipt preserved.
