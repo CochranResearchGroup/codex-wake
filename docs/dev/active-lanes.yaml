@@ -199,7 +199,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: PAUSED_REF
-    checkpoint: 2acab101fc433ca1d4d5908a26ef4fa1e22a596b
+    checkpoint: 081a072a69a66c23b08368bf0a552ca2cdfb1ff3
     remote_ref: refs/remotes/origin/docs/a2a-completion-stream
     integration: sequential_ticket_prs
     checkout_required: false
