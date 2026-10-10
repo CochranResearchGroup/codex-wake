@@ -1,5 +1,6 @@
 """Public dispatcher tests with isolated native-server and queue process peers."""
 import json
+import re
 from dataclasses import replace
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -93,6 +94,22 @@ class SavedRecipientDeliveryTests(unittest.TestCase):
         self.assertEqual(self.mailbox.show(self.actors[0], identifier)['state']['notification'], 'submitted')
         self.assertEqual(self.dispatcher.tick()['results'], [])
         self.assertEqual(len(self.calls), 1)
+
+    def test_saved_result_pointer_claims_before_terminal_ack(self):
+        identifier = self.send(kind='result', resume_missing=True)
+        self.assertEqual(self.dispatcher.tick()['submitted'], 1)
+        queued = json.loads(self.queue_log.read_text())
+        prompt = queued[queued.index('--message') + 1]
+        self.mailbox.read(self.actors[1], identifier)
+        outcomes = re.findall(r'--outcome (accepted|completed)', prompt) or ['completed']
+        for outcome in outcomes:
+            receipt = self.mailbox.ack(self.actors[1], identifier, outcome=outcome)
+            if outcome == 'accepted':
+                self.assertTrue(receipt['claimed'])
+        self.assertEqual(self.mailbox.show(self.actors[0], identifier)['state']['recipient'], 'completed')
+        self.assertIn('claimed=false', prompt)
+        self.assertIn('stop', prompt)
+        self.assertNotIn('Private request body', prompt)
 
     def test_runtime_observation_failure_holds_original_without_attempt(self):
         from codex_wake.shared_app_server import SharedSourceError

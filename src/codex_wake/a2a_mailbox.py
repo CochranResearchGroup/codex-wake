@@ -50,13 +50,14 @@ class Mailbox:
                 "FROM mail_metadata e JOIN mail_state s USING(message_id) "
                 "WHERE s.admission='accepted' AND s.recipient NOT IN ('declined','completed','failed') "
                 "UNION SELECT message_id, recipient_key, kind FROM mail_outbox "
-                "WHERE status IN ('pending','published','deferred','dispatching','uncertain')"
+                "WHERE kind='notification' AND status IN ('pending','published','deferred','dispatching','uncertain')"
             ).fetchall()
         result = []
         for row in rows:
             try:
                 identity = json.loads(row['recipient_key'])
-                if not isinstance(identity, list) or len(identity) != 2:
+                if (not isinstance(identity, list) or len(identity) != 2
+                        or any(not isinstance(part, str) or not part for part in identity)):
                     raise ValueError()
             except (ValueError, TypeError):
                 raise BusError('inventory_unavailable', 'pending mailbox attribution is unavailable') from None
