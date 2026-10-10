@@ -1,7 +1,7 @@
 # Ticket0143 — Qualify normal request and reply after transport change
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -10,6 +10,13 @@ Integration: governed_by_plan0141
 Work-Item: docs/dev/plans/0143-2026-10-10-native-live-safety-and-round-trip.md
 Parent: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
 Depends-On: Plan0142
+
+## Current State
+
+Ticket0142 integrated0076ae4 and actual single-result gate passed. Using immutable
+reviewed0.11.2-313e5aa candidate with81file parity and117installed tests.
+One owned A/B pair and private worker/bus/arm are next; root main, docs-only
+acceptance work, no new source changes or unrelated service restart.
 
 ## What it delivers
 
