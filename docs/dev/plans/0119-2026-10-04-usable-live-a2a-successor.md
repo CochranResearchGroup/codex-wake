@@ -1,6 +1,6 @@
 # Build usable live agent-to-agent messaging
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Owner: primary integration lane
 Branch: docs/p63-soak-closeout
@@ -9,6 +9,17 @@ Integration: squash_pr
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/181
 Supersedes: Plan0101 execution sequencing; not its original acceptance obligations
 Depends-On: existing P63 mailbox, identity, scheduler, receipt and discovery implementation
+
+
+## Final acceptance | 2026-10-10
+
+CLOSED after all Plan0141 tickets and original mandatory obligations passed.
+Canonical final proof: docs/dev/evidence/plan0149/closeout.md; all32 original
+families remain mapped in0148 finite matrix. Released/active0.12.0, tag/source
+10c8a58; exact installed82-file parity and downloaded hashes, rollback retained,
+13service snapshots unchanged. Old uncertain effects remain held/history.
+Historical sections and old allowances below are retained, not current authority.
+
 
 ## Objective
 
@@ -22,7 +33,7 @@ Build and demonstrate this feature before expanding supporting infrastructure.
 A passing live behavior gate is progress; another green fixture suite is supporting
 evidence. A message admitted to SQLite is not a delivered notification.
 
-## Current State
+## Historical pre-completion state
 
 Reconciled planning snapshot:2026-10-10. Execution sequencing is now
 [Plan0141](0141-2026-10-10-a2a-completion-stream.md), with eight bounded

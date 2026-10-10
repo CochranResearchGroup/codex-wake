@@ -1,7 +1,7 @@
 # Ticket0149 — Close the work stream from complete evidence
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -21,12 +21,12 @@ One final audit ties every original mandatory obligation to qualifying evidence 
 
 ## Acceptance criteria
 
-- [ ] Every Plan0101/0119 mandatory requirement has exact qualifying evidence or remains explicitly OPEN; optional MCP/federation/spawning work cannot be added as a completion gate.
-- [ ] Review and ship any post-ticket0144 recovery changes through the same source/release/installed parity and rollback gates; final acceptance names one current installed identity.
-- [ ] Recheck only invalidated live/installed/lifecycle/resource evidence. Historical thirty-minute soak counts for its exact accepted source/workload, not as an automatic new-version claim.
-- [ ] Verify actual same-thread request/reply, explicit saved/unloaded handling, claims, holds and no-force cleanup; original uncertain effects remain auditable and unreplayed.
-- [ ] Root main clean/published, no unnecessary owned worktrees/tabs/workers, unrelated sessions/LitScout preserved; parent issue is closed only under the repository issue-operation policy and exact evidence.
-- [ ] Close Plan0119 and Plan0101 only when their own definitions of done are satisfied. A required unresolved recovery gate blocks campaign closure; documenting or deferring it does not count as done.
+- [x] Every Plan0101/0119 mandatory requirement has exact qualifying evidence or remains explicitly OPEN; optional MCP/federation/spawning work cannot be added as a completion gate.
+- [x] Review and ship any post-ticket0144 recovery changes through the same source/release/installed parity and rollback gates; final acceptance names one current installed identity.
+- [x] Recheck only invalidated live/installed/lifecycle/resource evidence. Historical thirty-minute soak counts for its exact accepted source/workload, not as an automatic new-version claim.
+- [x] Verify actual same-thread request/reply, explicit saved/unloaded handling, claims, holds and no-force cleanup; original uncertain effects remain auditable and unreplayed.
+- [x] Root main clean/published, no unnecessary owned worktrees/tabs/workers, unrelated sessions/LitScout preserved; parent issue is closed only under the repository issue-operation policy and exact evidence.
+- [x] Close Plan0119 and Plan0101 only when their own definitions of done are satisfied. A required unresolved recovery gate blocks campaign closure; documenting or deferring it does not count as done.
 
 ## Test seam and bound
 
@@ -44,3 +44,12 @@ READY means refined and unblocked, not implemented. DONE requires all acceptance
 checks, attributable source/evidence, integration or explicit non-code completion,
 and owned cleanup. BLOCKED records a missing dependency/evidence, not approval
 inferred from elapsed time. Planning alone does not satisfy a behavior criterion.
+
+## Final acceptance | 2026-10-10
+
+CLOSED after all Plan0141 tickets and original mandatory obligations passed.
+Canonical final proof: docs/dev/evidence/plan0149/closeout.md; all32 original
+families remain mapped in0148 finite matrix. Released/active0.12.0, tag/source
+10c8a58; exact installed82-file parity and downloaded hashes, rollback retained,
+13service snapshots unchanged. Old uncertain effects remain held/history.
+Historical sections and old allowances below are retained, not current authority.

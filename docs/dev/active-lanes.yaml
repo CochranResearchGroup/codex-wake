@@ -6,10 +6,10 @@ lanes:
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/181]
     plan: docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md
-    plan_ref: docs/p63-reconciliation-followup
+    plan_ref: origin/main
     branch: docs/p63-soak-closeout
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: INTEGRATED
     checkpoint: 5c394af42f304c466ecaea13ab7f156f44dd1d5f
     remote_ref: refs/remotes/origin/docs/p63-soak-closeout
@@ -19,7 +19,7 @@ lanes:
     overlaps: []
     updated_at: 2026-10-05
     execution_successor: docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md
-    successor_state: OPEN
+    successor_state: CLOSED
     release_branch: chore/p63-v070-release
     service_fix_branch: fix/p63-v071-service-path
     release_dependency: https://github.com/CochranResearchGroup/codex-wake/pull/213
@@ -39,6 +39,9 @@ lanes:
     remaining_gate_packet_state: COMPLETE
     disposition: Requested cancellation/reconnect/normal worker restart/released installation/multiroot/rollback/30-minute soak gates PASS; wider Plan0101 and retained server-unloaded/deferred recovery obligations remain OPEN
 
+    final_acceptance: docs/dev/evidence/plan0149/closeout.md
+    final_release_tag: v0.12.0
+    final_release_source: 10c8a58f4e515e11548bdcba13a0abaad0112f80
   - id: P64
     owner: primary
     objective: Complete Plan0122 network-first time activation and live A2A acceptance
@@ -197,7 +200,7 @@ lanes:
     plan_ref: origin/main
     branch: docs/a2a-completion-stream
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: PAUSED_REF
     checkpoint: 081a072a69a66c23b08368bf0a552ca2cdfb1ff3
     remote_ref: refs/remotes/origin/docs/a2a-completion-stream
@@ -207,7 +210,7 @@ lanes:
     overlaps: [P63]
     reconciled_overlaps: [P63]
     updated_at: 2026-10-10
-    disposition: Published completion spec and eight tickets0142-0149; primary owns sequencing and reconciliation with P63 requirements. Goal executing: tickets0142-0147 DONE, active0.11.2; prepared0.12 source; ticket0148 finite faults/compatibility/OS controls PASS; actual subagent ancestry awaits explicit test request. Every mandatory requirement needs proof before campaign closure; no old goal or effect authority renewed.
+    disposition: All tickets0142-0149 and original Plan0101/0119 requirements accepted; active0.12.0/10c8a58; final proof plan0149/closeout.md; original uncertainties retained and live plan127 checkout preserved.
 
   - id: P72
     owner: primary

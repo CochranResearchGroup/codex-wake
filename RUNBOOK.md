@@ -5395,3 +5395,16 @@ lossy pane visibility, original uncertain effect remains untouched. Product
 implementation has not started; next ticket0142. No new goal, live effects,
 production recovery, service change or external parent-issue update. Planning
 work is not product completion. Root remains main; publish docs branch custody.
+
+## 2026-10-10 | Plan0141 final A2A campaign acceptance
+
+Tickets0142–0149 DONE; native live submission and current installed exchange,
+server-unloaded saved reopening, retained-unknown recovery, original claim
+reconciliation, finite faults/binary compatibility and actual subagent isolation
+proved. v0.12.0/10c8a58 published/downloaded/installed with82-file parity; all
+13service snapshots unchanged, four links switched and0.11.2 rollback retained.
+No owned test tabs/workers/checkouts remain; separate live plan127 checkout and
+LitScout/unrelated sessions preserved. Exact evidence/limits/failure retention:
+docs/dev/evidence/plan0149/closeout.md. Hosted CI waiting waived, not claimed PASS.
+Plan0101/0119/0141/0149 CLOSED; issue181 separately read back after closure.
+Memory disposition unavailable, no reviewed Codex Wake Graphiti group.

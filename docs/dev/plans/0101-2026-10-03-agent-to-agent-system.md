@@ -1,6 +1,6 @@
 # Local agent-to-agent communication system
 
-State: OPEN
+State: CLOSED
 Lane: P63
 Depends-On: P62 / Plan 0100
 Owner: primary integration lane
@@ -8,7 +8,18 @@ Branch: docs/p63-soak-closeout
 Target: origin/main
 Integration: squash_pr
 
-## Current state
+
+## Final acceptance | 2026-10-10
+
+CLOSED after all Plan0141 tickets and original mandatory obligations passed.
+Canonical final proof: docs/dev/evidence/plan0149/closeout.md; all32 original
+families remain mapped in0148 finite matrix. Released/active0.12.0, tag/source
+10c8a58; exact installed82-file parity and downloaded hashes, rollback retained,
+13service snapshots unchanged. Old uncertain effects remain held/history.
+Historical sections and old allowances below are retained, not current authority.
+
+
+## Historical pre-completion state
 
 Reconciled2026-10-10: [Plan0141](0141-2026-10-10-a2a-completion-stream.md)
 owns execution sequencing through eight tickets and final requirement audit.

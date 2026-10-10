@@ -1060,7 +1060,7 @@ Deliverables:
 
 ## P63 | Local Agent-to-Agent Communication
 
-State: OPEN
+State: CLOSED
 
 Current State: Plan0119's requested remaining-gate packet is accepted in
 verification0122: released v0.7.1 automatic exchanges, cancellation,
@@ -1089,6 +1089,10 @@ Accepted packet deliverables (verification0122):
 Remaining scope: server-unloaded-recipient and broader held-recovery obligations.
 Current target bus/guard/bindings/worker must be read back before claiming present
 readiness; network-time activation is tracked under P64.
+
+Final2026-10-10: all Plan0141 tickets and original Plan0101/0119 requirements
+accepted. Released/active0.12.0/10c8a58; see plan0149/closeout.md for exact evidence,
+limits, rollback and cleanup. Older remaining-scope statements above are history.
 
 ## P64 | Network-first Time for Wake and Mailbox Deadlines
 

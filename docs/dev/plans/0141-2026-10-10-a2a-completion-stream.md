@@ -1,7 +1,7 @@
 # Plan0141 — Finish usable agent-to-agent messaging
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -74,7 +74,7 @@ within its ticket. Existing GLOSSARY.md is terminology authority.
 | [0146](0146-2026-10-10-held-recovery-disposition.md) Make held recovery disposition explicit and safe | none | DONE |
 | [0147](0147-2026-10-10-processing-claim-generation-recovery.md) Recover processing ownership across generations | 0146 | DONE |
 | [0148](0148-2026-10-10-remaining-fault-and-ancestry-proof.md) Finish remaining fault and session-isolation proof | 0142, 0146, 0147 | DONE |
-| [0149](0149-2026-10-10-final-campaign-acceptance.md) Close the work stream from complete evidence | 0143, 0144, 0145, 0146, 0147, 0148 | IN_PROGRESS |
+| [0149](0149-2026-10-10-final-campaign-acceptance.md) Close the work stream from complete evidence | 0143, 0144, 0145, 0146, 0147, 0148 | DONE |
 
 Execution priority0142→0143→0144→0145→0146→0147→0148→0149. Ticket0146 is
 independently unblocked but does not displace the live submission critical path.
@@ -154,3 +154,12 @@ controls pass. Then0149 final installed release and complete original audit.
 Ticket0148 DONE: finite faults/compatibility/OS and actual requested native child
 isolation PASS; owned child archived/PID absent. Current execution0149 final
 review/release/install and full original acceptance audit; checkpoint04 unblocked.
+
+## Final acceptance | 2026-10-10
+
+CLOSED after all Plan0141 tickets and original mandatory obligations passed.
+Canonical final proof: docs/dev/evidence/plan0149/closeout.md; all32 original
+families remain mapped in0148 finite matrix. Released/active0.12.0, tag/source
+10c8a58; exact installed82-file parity and downloaded hashes, rollback retained,
+13service snapshots unchanged. Old uncertain effects remain held/history.
+Historical sections and old allowances below are retained, not current authority.
