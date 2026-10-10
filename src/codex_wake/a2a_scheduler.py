@@ -116,6 +116,7 @@ class MailScheduler:
 
     def _authorized(self, database, row):
         # Recheck grants; an immutable envelope does not preserve revoked rights.
+        envelope = json.loads(row['envelope'])
         for key, permission in [(row['sender_key'], 'send'), (row['recipient_key'], 'receive')]:
             namespace, thread_id = json.loads(key)
             actor = database.execute('SELECT a.*,e.can_send,e.can_receive,e.can_notify FROM actors a JOIN enrollments e ON a.root=e.root WHERE a.namespace=? AND a.thread_id=?', (namespace, thread_id)).fetchone()
@@ -123,10 +124,17 @@ class MailScheduler:
                 return False
             if permission == 'receive' and not actor['can_notify']:
                 return False
+            if envelope.get('resume_policy') == 'same_thread':
+                role = 'sender' if permission == 'send' else 'recipient'
+                expected = envelope.get('notification_authority', {}).get(role)
+                if expected != dict(actor_id=actor['actor_id'], generation=actor['generation'], root=actor['root']):
+                    return False
         return True
 
     def defer(self, lease, job_id, reason, *, seconds=5):
-        if reason not in {'paused','busy','offline','capability_unavailable','rate_limit','authorization_denied'} or not 1 <= seconds <= 300:
+        if reason not in {'paused','busy','offline','capability_unavailable','rate_limit','authorization_denied',
+                          'identity_changed','composer_protected','runtime_unavailable','client_offline',
+                          'reply_arm_unavailable'} or not 1 <= seconds <= 300:
             raise BusError('invalid_argument', 'unsupported bounded deferral')
         with self.mailbox.transaction() as database:
             self._operator(database)
@@ -144,6 +152,40 @@ class MailScheduler:
                 if not previous or json.loads(previous['details']).get('reason') != reason:
                     self.mailbox._record(database, row['message_id'], 'deferred', 'scheduler', now, dict(reason=reason))
             database.execute('COMMIT')
+
+    def notification_context(self, job, *, attempt_id=None):
+        """Revalidate original notification authority immediately before effects."""
+        with self.mailbox.transaction() as database:
+            self._operator(database)
+            now = self.mailbox._now(database)
+            row = self.mailbox._expire(database, self.mailbox._row(database, job['message_id']), now)
+            self.mailbox._deadline_clear(database, row, now)
+            intent = database.execute('SELECT * FROM mail_outbox WHERE outbox_id=? AND kind=?',
+                                      (job['job_id'], 'notification')).fetchone()
+            if (self.mailbox.bus.meta(database, 'paused') or row['admission'] != 'accepted'
+                    or row['recipient_key'] != job['recipient_key'] or row['expires'] != job['expires_at']
+                    or not intent or intent['message_id'] != row['message_id']
+                    or not self._authorized(database, row)):
+                raise BusError('authorization_denied', 'original notification authority is unavailable')
+            if attempt_id is None:
+                if intent['status'] not in ('pending', 'published', 'deferred'):
+                    raise BusError('not_processable', 'notification is not pending')
+            else:
+                attempt = database.execute('SELECT * FROM mail_attempts WHERE attempt_id=?', (attempt_id,)).fetchone()
+                if (not attempt or attempt['owner'] != self.owner or attempt['state'] != 'dispatching'
+                        or attempt['recipient_key'] != row['recipient_key']
+                        or json.loads(attempt['message_ids']) != [row['message_id']]
+                        or intent['status'] != 'dispatching' or intent['owner'] != self.owner
+                        or intent['generation'] != attempt['generation']
+                        or intent['lease_until'] <= self.mailbox._time_upper(database, now)):
+                    raise BusError('stale_attempt', 'original notification attempt is no longer authorized')
+                self._fence(database, Lease('dispatcher', self.owner,
+                    json.loads(attempt['evidence'])['dispatcher_generation'], 0), now)
+                self._fence(database, Lease('recipient:' + row['recipient_key'], self.owner,
+                    attempt['generation'], 0), now)
+            envelope = json.loads(row['envelope'])
+            database.execute('COMMIT')
+            return envelope
 
     def claim(self, dispatcher, recipient_lease, job_ids):
         if not isinstance(job_ids, list) or not 1 <= len(job_ids) <= 20 or len(set(job_ids)) != len(job_ids):

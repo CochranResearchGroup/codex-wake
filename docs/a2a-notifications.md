@@ -7,14 +7,23 @@ No modified Codex binary or extra broker is needed.
 
 Delivery requires an idle exact thread, the bound client process generation,
 and an empty recognized composer. Busy clients, drafts and disconnected clients
-defer delivery. A human must reconnect a disconnected client and rebind its new
-generation. Shared app-server discovery never resumes a thread itself. Unknown
+defer delivery. By default, a human reconnects a disconnected client and rebinds
+its new generation. Explicit `messages send --resume-missing` or
+`messages reply --resume-missing` instead authorizes delivery to only that same
+saved conversation after its original Byobu client closes. Use an exact
+`--to thread:FULL_ID` selector for a closed recipient. The normal worker retains
+the original enrollment, actor IDs, roots and capability generations; changed
+permissions or an unavailable saved recipient hold visibly. A reply still needs
+the sender's delegated reply arm and its own explicit reopening choice. The
+worker queues a body-free message pointer; it does not recreate a tab. Existing
+live tabs retain busy and draft checks. Shared app-server discovery never resumes
+a thread itself. Unknown
 transport effects stop for reconciliation; do not restart or resend blindly.
 
 ## Operator setup
 
 Install the public tag with `uv tool install --force --reinstall
-git+https://github.com/CochranResearchGroup/codex-wake.git@v0.8.0`.
+git+https://github.com/CochranResearchGroup/codex-wake.git@v0.11.0`.
 Choose absolute private locations and the real thread IDs, repository roots and
 tmux socket. The following layout matches the shipped user-service example:
 

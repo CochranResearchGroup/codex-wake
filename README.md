@@ -766,6 +766,15 @@ receipts for at most five minutes and perform no work on their own.
 Automatic notification delivery uses an explicitly enrolled stock-Codex TUI in
 Byobu/tmux. See [A2A notification setup and service](docs/a2a-notifications.md)
 for binding, sender reply delegation, worker ownership and reconnect commands.
+Messages to a closed recipient wait by default. Add `--resume-missing` to
+`messages send` or `messages reply` to authorize only the same saved recipient.
+Use `--to thread:FULL_ID` when its tab is closed. The original Byobu binding,
+enrollment and capability remain required; changed or revoked permissions hold
+the message. The normal worker may reopen that saved conversation without a tab.
+Reply delivery still requires the sender's delegated reply arm. A reply needs
+its own explicit reopening choice; it does not inherit the request's choice.
+Inspect `messages show` for the persisted policy and deferral or submission
+receipt. Queue acceptance is separate from a completed recipient turn.
 Use `--delivery inbox` when notification delivery is not configured. New buses
 start paused; only the operator may resume them after explicit setup.
 Operator inspection requires explicit operator authority and does not count as

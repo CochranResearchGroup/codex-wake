@@ -1,7 +1,11 @@
 # Plan0138 — Wake an explicitly authorized saved conversation
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
+Lane: P68
+Branch: feat/saved-recipient-reopening
+Target: origin/main
+Integration: squash_pr
 Owner: primary
 Work-Item: docs/dev/plans/0138-2026-10-10-explicit-saved-recipient-reopening.md
 
@@ -58,3 +62,56 @@ No custom Codex patch, shared-daemon restart, implicit opt-in, arbitrary recipie
 lookup, new conversation in place of the original, live user-conversation replay,
 broad held-recovery campaign or unrelated worker rollout. No old goal restarted.
 Wider Plan0101/0119 obligations remain OPEN independently of this bounded slice.
+
+## Goal execution control — 2026-10-10
+
+Goal: complete every Plan0138 acceptance criterion. Start1791645933; checkpoint
+by18:15:33UTC (2h50), stop before18:25:33UTC (3h) or3000000goal tokens,
+whichever first. get_goal usage is authoritative; no token-budget tool override
+is inferred. Check usage/time at material boundaries and at least every20minutes.
+One owner, one worktree lane, no parallel implementation; disposable recipients
+are product acceptance actors. Source baseline d9354a8; installed0.10.1.
+
+Critical path: closed saved native recipient → explicit agent-message permission
+and integration → unattended installed request/reply → review/release/cleanup.
+First primary-evidence deadline15:40UTC. Current acceptance unproven; no helper
+or queue-accepted receipt substitutes for completed same-conversation turns.
+Per unit: one discovery/review and one consolidated repair pass. Preserve failed
+samples; stop/reframe that unit if an accepted blocker remains after verification.
+Checkpoint fields: state_transition, acceptance_state, progress_classification,
+evidence, material_blockers, next_action_or_stop_reason. Hosted wait waived;
+all behavioral, source/release/installed and authority gates remain required.
+
+Startup transition READY→ACTIVE; outcome_progress: disposable exact recipient
+created and seed turn queued. Private runtime receipts under user state plan0138.
+Next: after completed seed, close its tab, verify notLoaded and arm one original
+explicit resume wake through normal installed supervisor. No live user-thread replay.
+
+Unit1 PASS: native-acceptance.md proves completed follow-up in the original saved
+thread. Unit2 source checkpoint: explicit message choice and original actor
+generations persisted; dispatcher integrates same-saved-thread delivery only for
+an offline original Byobu binding. Live-client composer path remains authoritative.
+Original mailbox attempt fences all native effects; delegated reply arm remains
+required. Focused91tests PASS28.619s before version packaging. Installed unit3,
+serial review, release/identity parity and cleanup remain unproven.
+
+Installed packet split after observed failure: preflight94controls qualified;
+live exchange1 reopened and completed the saved recipient but its inbox-only
+reply suppressed the return notification. first-exchange-failure.md retains the
+exact original records and closed failure. Correct only trusted pointer CLI/version
+and notify-reply instructions, then run one fresh v2 intent. Never modify/replay
+the committed inbox reply. Acceptance remains full unattended request/reply;
+another failure ends this local attempt and requires evidence-backed reframe.
+
+Unit3 installed behavior PASS: installed-acceptance.md records both completed
+original turns and one dispatch per notification. The original v2 reply was held
+with zero claims by the reproduced default-footer defect; correcting recognition
+continued that same intent, with no new request/reply/arm. Request state completed;
+reply received and sender result turn completed. Terminal reply ack failed
+claim_required and is explicitly not claimed. final-review.md adjudicates that
+existing consumption limitation and close inventory warning as nonblocking for
+this bounded saved-recipient spec; wider plans remain open. cleanup.md records
+only owned idle-tab closure, preserved conversations and stopped test processes.
+State INSTALLED_BEHAVIOR_ACCEPTED→RELEASE_PREPARATION; progress outcome_progress.
+Source6b1b673, immutable installed95PASS49.942s/all80files match. Remaining gates:
+published PR integration, release assets and final source/release/installed parity.

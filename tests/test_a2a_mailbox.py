@@ -83,6 +83,19 @@ class MailboxTests(unittest.TestCase):
             self.send(ttl=61)
         self.assertEqual(error.exception.code, 'idempotency_conflict')
 
+    def test_explicit_reopening_survives_restart_and_retry_cannot_change_it(self):
+        original = self.send(resume_missing=True)['message']
+        restarted = Mailbox(BusStore(self.bus.root), clock=lambda: self.now, monotonic=lambda: self.now)
+        stored = restarted.show(self.sender, original['message_id'])
+        self.assertEqual(stored['resume_policy'], 'same_thread')
+        self.assertEqual(stored['notification_authority']['recipient']['generation'], 1)
+        self.assertTrue(self.send(resume_missing=True)['deduplicated'])
+        with self.assertRaises(BusError) as error:
+            self.send(resume_missing=False)
+        self.assertEqual(error.exception.code, 'idempotency_conflict')
+        default = self.send('default')['message']
+        self.assertEqual(default.get('resume_policy', 'hold'), 'hold')
+
     def test_interruption_before_commit_leaves_no_message(self):
         def interrupt(stage):
             if stage == 'before_commit': raise RuntimeError('fixture crash')

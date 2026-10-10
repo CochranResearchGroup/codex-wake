@@ -1,7 +1,8 @@
 """Exact opt-in owning-client delivery for journal-fenced mailbox notifications.
 
 Bindings explicitly select either the opt-in owning client or the existing tmux
-wake transport. Neither transport falls back to queue/add, turn/start or resume.
+wake transport. An explicitly authorized original notification may use native
+delivery for the same saved recipient after its bound Byobu client is closed.
 """
 from __future__ import annotations
 
@@ -253,10 +254,18 @@ class NotificationDispatcher:
                         probe = binding.probe() if binding else dict(status='deferred', reason='capability_unavailable')
                     except (BusError, OSError):
                         probe = dict(status='deferred', reason='offline')
+                    if binding is not None and probe.get('reason') == 'offline':
+                        from .a2a_saved_delivery import SavedRecipientBinding
+                        saved = SavedRecipientBinding(binding, scheduler, job, reply_authorized=receipt is not None)
+                        saved_probe = saved.probe()
+                        if saved_probe.get('reason') != 'reopening_not_authorized':
+                            binding, probe = saved, saved_probe
                     if probe.get('status') != 'ready':
                         reason = probe.get('reason', 'capability_unavailable')
                         scheduler.defer(dispatcher, job['job_id'], reason if reason in
-                            ('busy', 'offline', 'capability_unavailable') else 'capability_unavailable')
+                            ('busy', 'offline', 'capability_unavailable', 'authorization_denied',
+                             'identity_changed', 'composer_protected', 'runtime_unavailable',
+                             'client_offline', 'reply_arm_unavailable') else 'capability_unavailable')
                         results.append(dict(message_id=job['message_id'], status='deferred', reason=reason))
                         continue
                     dispatcher = scheduler.acquire()
