@@ -56,7 +56,8 @@ class Mailbox:
         for row in rows:
             try:
                 identity = json.loads(row['recipient_key'])
-                if not isinstance(identity, list) or len(identity) != 2:
+                if (not isinstance(identity, list) or len(identity) != 2
+                        or any(not isinstance(part, str) or not part for part in identity)):
                     raise ValueError()
             except (ValueError, TypeError):
                 raise BusError('inventory_unavailable', 'pending mailbox attribution is unavailable') from None

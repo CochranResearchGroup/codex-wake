@@ -270,10 +270,12 @@ class MailboxTests(unittest.TestCase):
 
     def test_unattributable_notification_inventory_remains_held(self):
         self.send()
-        # Corrupt external store fixture; the observation oracle stays public.
-        with self.bus.connection() as database:
-            database.execute("UPDATE mail_outbox SET recipient_key='scheduler' WHERE kind='notification'")
-            database.commit()
-        with self.assertRaises(BusError) as error:
-            self.mailbox.pending_thread_work('foreign')
-        self.assertEqual(error.exception.code, 'inventory_unavailable')
+        for identity in ('scheduler', '["runtime",null]', '["","recipient"]'):
+            with self.subTest(identity=identity):
+                # Corrupt external store fixture; the observation oracle stays public.
+                with self.bus.connection() as database:
+                    database.execute("UPDATE mail_outbox SET recipient_key=? WHERE kind='notification'", (identity,))
+                    database.commit()
+                with self.assertRaises(BusError) as error:
+                    self.mailbox.pending_thread_work('foreign')
+                self.assertEqual(error.exception.code, 'inventory_unavailable')
