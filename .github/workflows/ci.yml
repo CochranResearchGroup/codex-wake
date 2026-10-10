@@ -29,6 +29,9 @@ jobs:
       - name: Compile sources
         run: python -m compileall -q src tests .codex/hooks
 
+      - name: Check canonical policy wiring and pilot hashes
+        run: python scripts/check_policy_wiring.py
+
       - name: Install declared dependencies for protocol tests
         run: python -m pip install .
 

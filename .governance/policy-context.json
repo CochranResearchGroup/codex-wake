@@ -1,0 +1,407 @@
+{
+  "schema_version": 1,
+  "fallback_paths": [
+    "AGENTS.md",
+    "docs/dev/policies/0001-policy-selection.md",
+    "docs/dev/policies/0002-planning-and-documentation.md",
+    "docs/dev/policies/0003-runtime-state-and-wake-semantics.md",
+    "docs/dev/policies/0004-agent-runtime-governance.md",
+    "docs/dev/policies/0005-engineering-git-and-release.md",
+    "docs/dev/policies/0006-validation-and-closeout.md",
+    "docs/dev/policies/0007-graph-backed-memory-usage.md",
+    "docs/dev/policies/0008-codegraph-usage.md",
+    "docs/dev/policies/0009-goal-execution-governance.md",
+    "docs/dev/policies/0010-policy-management.md",
+    "docs/dev/policies/0011-policy-adoption-feedback-loop.md",
+    "docs/dev/policies/0012-notes-and-memories.md",
+    "docs/dev/policies/0013-planning-discipline.md",
+    "docs/dev/policies/0014-architecture-guardrails.md",
+    "docs/dev/policies/0015-turn-closeout.md",
+    "docs/dev/policies/0016-code-testing-discipline.md",
+    "docs/dev/policies/0017-work-item-traceability.md",
+    "docs/dev/policies/0018-model-selection-and-calibration.md",
+    "docs/dev/policies/0019-forge-issue-reporting.md",
+    "docs/dev/policies/0020-github-issue-operations.md",
+    "docs/dev/policies/0021-collaborative-development-workflow.md",
+    "docs/dev/policies/0022-policy-context-pilot.md"
+  ],
+  "governance_inventory": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "15679fda4974ebad607cfae87b2516f04c3b8869bda3c3732d53bb958a8d67f0"
+    },
+    {
+      "path": "docs/dev/policies/0001-policy-selection.md",
+      "sha256": "b56fed682c9c16c233778e4e8ff787326db93e05f7c1104b872dc2d0c08c994b"
+    },
+    {
+      "path": "docs/dev/policies/0002-planning-and-documentation.md",
+      "sha256": "078bd3703010192d35099a1e4fd5d24f5fab056d5cd19b5d6fa4d611ba641a32"
+    },
+    {
+      "path": "docs/dev/policies/0003-runtime-state-and-wake-semantics.md",
+      "sha256": "f5ea32a977d1e08a55a0ec68aacb9a430c762476ff058dd2ca5dabebfc22a3a5"
+    },
+    {
+      "path": "docs/dev/policies/0004-agent-runtime-governance.md",
+      "sha256": "6660ecf3893dcec9b7943964279f7eea1728058a291bf05891cd6d930792f67a"
+    },
+    {
+      "path": "docs/dev/policies/0005-engineering-git-and-release.md",
+      "sha256": "07dae82e04ed6c9807cb9d527be6f5a408774030a13d2d2f9eafecbc3d523284"
+    },
+    {
+      "path": "docs/dev/policies/0006-validation-and-closeout.md",
+      "sha256": "a9a7a226063c919d9bc390b315a1bd1d60a10cf9a9ce582a5d57fceb4d637845"
+    },
+    {
+      "path": "docs/dev/policies/0007-graph-backed-memory-usage.md",
+      "sha256": "869d168a54019c7576f6e125389d74d7f5bfca1b0217b9dac5d0bfd7d4bfbd92"
+    },
+    {
+      "path": "docs/dev/policies/0008-codegraph-usage.md",
+      "sha256": "4e3d2563e3274ad598604d4eca4efe42b32ae39aa4188aa823f9dbca3ed37bdb"
+    },
+    {
+      "path": "docs/dev/policies/0009-goal-execution-governance.md",
+      "sha256": "a9744fc169329b1331bc8b6e89722f731fa844967c31eadab1a1ab98d0067547"
+    },
+    {
+      "path": "docs/dev/policies/0010-policy-management.md",
+      "sha256": "de649f128c1fc2f513c92569b6638cd7cb94cbf4fd28f07df475aab0c43c9505"
+    },
+    {
+      "path": "docs/dev/policies/0011-policy-adoption-feedback-loop.md",
+      "sha256": "c906c970b401948c50df78d1ad7ac803591c0a60dea0945c67f6713ec214dd39"
+    },
+    {
+      "path": "docs/dev/policies/0012-notes-and-memories.md",
+      "sha256": "41bba721dbd95a4187fa678c9b0aaba7cf5631f20795ff7122a33b9051601e23"
+    },
+    {
+      "path": "docs/dev/policies/0013-planning-discipline.md",
+      "sha256": "c07fc6d47bbc389a5a1757f6e9ebb40ff5fe688d58dbdf0682b6c0aa9ad128a2"
+    },
+    {
+      "path": "docs/dev/policies/0014-architecture-guardrails.md",
+      "sha256": "d5c6726baecb392542bf96ca12992fc0ff72e43caa1859ef95340340325a3e45"
+    },
+    {
+      "path": "docs/dev/policies/0015-turn-closeout.md",
+      "sha256": "b2af31262a58a4785ebf13f78b30f880d553d30d0568d9a598b0819f26eefd44"
+    },
+    {
+      "path": "docs/dev/policies/0016-code-testing-discipline.md",
+      "sha256": "c5184686efc6650d733376667b20964ddf735f97c5ca7a5f23938eaab840e797"
+    },
+    {
+      "path": "docs/dev/policies/0017-work-item-traceability.md",
+      "sha256": "b2adb8ec67916fa3752cdbc63c836fc105d1767790aaae18ddc515f5bda5f5b5"
+    },
+    {
+      "path": "docs/dev/policies/0018-model-selection-and-calibration.md",
+      "sha256": "619e128624c1e5942278cefeda6da3ae5b3c374b00c6af1704426e1dfed642fe"
+    },
+    {
+      "path": "docs/dev/policies/0019-forge-issue-reporting.md",
+      "sha256": "31967406bd0674f6d82fef8df0c2dcb8818e9f568bb540c375229f8abd9ee759"
+    },
+    {
+      "path": "docs/dev/policies/0020-github-issue-operations.md",
+      "sha256": "c7e8dfe8e555a3541c4643cafc90410f189aa59fca310d574116940dfd4f835d"
+    },
+    {
+      "path": "docs/dev/policies/0021-collaborative-development-workflow.md",
+      "sha256": "0de96e2f30464fc7837f28331835dcc8b737e8a4346189289909d9fc383386de"
+    },
+    {
+      "path": "docs/dev/policies/0022-policy-context-pilot.md",
+      "sha256": "8ce8e1784ebfa923f030ba90fe7ec35be9da30f82373183fb68a0a746eb7d39e"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "codex-wake-policy-maintenance",
+      "scope": "Repository policy routing, canonical policy documentation, manifest maintenance and its deterministic validation only; excludes product changes, release, services and wake effects.",
+      "task_kinds": [
+        "policy-maintenance"
+      ],
+      "sources": [
+        {
+          "path": "AGENTS.md",
+          "sha256": "15679fda4974ebad607cfae87b2516f04c3b8869bda3c3732d53bb958a8d67f0",
+          "sections": [
+            {
+              "heading_path": [
+                "Codex Wake"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0001-policy-selection.md",
+          "sha256": "b56fed682c9c16c233778e4e8ff787326db93e05f7c1104b872dc2d0c08c994b",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy Selection"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0002-planning-and-documentation.md",
+          "sha256": "078bd3703010192d35099a1e4fd5d24f5fab056d5cd19b5d6fa4d611ba641a32",
+          "sections": [
+            {
+              "heading_path": [
+                "Planning And Documentation"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0005-engineering-git-and-release.md",
+          "sha256": "07dae82e04ed6c9807cb9d527be6f5a408774030a13d2d2f9eafecbc3d523284",
+          "sections": [
+            {
+              "heading_path": [
+                "Engineering, Git, And Release"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0006-validation-and-closeout.md",
+          "sha256": "a9a7a226063c919d9bc390b315a1bd1d60a10cf9a9ce582a5d57fceb4d637845",
+          "sections": [
+            {
+              "heading_path": [
+                "Validation And Closeout"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0010-policy-management.md",
+          "sha256": "de649f128c1fc2f513c92569b6638cd7cb94cbf4fd28f07df475aab0c43c9505",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Policy Management"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0011-policy-adoption-feedback-loop.md",
+          "sha256": "c906c970b401948c50df78d1ad7ac803591c0a60dea0945c67f6713ec214dd39",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Policy Adoption Feedback Loop"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0012-notes-and-memories.md",
+          "sha256": "41bba721dbd95a4187fa678c9b0aaba7cf5631f20795ff7122a33b9051601e23",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Notes And Memories"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0013-planning-discipline.md",
+          "sha256": "c07fc6d47bbc389a5a1757f6e9ebb40ff5fe688d58dbdf0682b6c0aa9ad128a2",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Planning Discipline"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0015-turn-closeout.md",
+          "sha256": "b2af31262a58a4785ebf13f78b30f880d553d30d0568d9a598b0819f26eefd44",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Turn Closeout"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0016-code-testing-discipline.md",
+          "sha256": "c5184686efc6650d733376667b20964ddf735f97c5ca7a5f23938eaab840e797",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Code Testing Discipline"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0021-collaborative-development-workflow.md",
+          "sha256": "0de96e2f30464fc7837f28331835dcc8b737e8a4346189289909d9fc383386de",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Collaborative Development Workflow"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0022-policy-context-pilot.md",
+          "sha256": "8ce8e1784ebfa923f030ba90fe7ec35be9da30f82373183fb68a0a746eb7d39e",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Policy Context Pilot"
+              ]
+            }
+          ]
+        }
+      ],
+      "fallback_paths": [
+        "AGENTS.md",
+        "docs/dev/policies/0001-policy-selection.md",
+        "docs/dev/policies/0002-planning-and-documentation.md",
+        "docs/dev/policies/0005-engineering-git-and-release.md",
+        "docs/dev/policies/0006-validation-and-closeout.md",
+        "docs/dev/policies/0010-policy-management.md",
+        "docs/dev/policies/0011-policy-adoption-feedback-loop.md",
+        "docs/dev/policies/0012-notes-and-memories.md",
+        "docs/dev/policies/0013-planning-discipline.md",
+        "docs/dev/policies/0015-turn-closeout.md",
+        "docs/dev/policies/0016-code-testing-discipline.md",
+        "docs/dev/policies/0021-collaborative-development-workflow.md",
+        "docs/dev/policies/0022-policy-context-pilot.md"
+      ],
+      "reread_triggers": [
+        "Canonical policy or AGENTS source changes",
+        "Task scope, action facts, target or validation changes",
+        "Context loss or unavailable/stale/invalid/conflicted response"
+      ],
+      "decision_packet": {
+        "schema_version": 1,
+        "obligations": [
+          {
+            "id": "gate.single-canonical-policy",
+            "kind": "required_gate",
+            "statement": "Keep one active path per policy module identity; reconcile conflicting copies and validate unique entrypoint wiring.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0010-policy-management.md",
+                "heading_path": [
+                  "Policy | Policy Management"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gate.bounded-plan",
+            "kind": "required_gate",
+            "statement": "Use proportionate bounded plans for substantive multi-file changes, preserving objective and current state.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0013-planning-discipline.md",
+                "heading_path": [
+                  "Policy | Planning Discipline"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "effect.no-derived-authority",
+            "kind": "prohibited_effect",
+            "statement": "Derived MCP policy packets cannot replace canonical Markdown or infer current action authorization.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0022-policy-context-pilot.md",
+                "heading_path": [
+                  "Policy | Policy Context Pilot"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "approval.action-specific",
+            "kind": "approval_requirement",
+            "statement": "Establish current scope and effect authority separately; an agent acquires no merge, release or provider authority merely by working.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0021-collaborative-development-workflow.md",
+                "heading_path": [
+                  "Policy | Collaborative Development Workflow"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gate.pull-request-integration",
+            "kind": "required_gate",
+            "statement": "Use origin/main as canonical integration ref and change it through a merged pull request; preserve unrelated dirty work.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0021-collaborative-development-workflow.md",
+                "heading_path": [
+                  "Policy | Collaborative Development Workflow"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "validation.actual-surface",
+            "kind": "validation_requirement",
+            "statement": "Validate the surface actually used; record concrete outcomes and known gaps rather than claiming success from documentation.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0006-validation-and-closeout.md",
+                "heading_path": [
+                  "Validation And Closeout"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "validation.fail-closed-pilot",
+            "kind": "validation_requirement",
+            "statement": "Require availability admission and current/changed-source/inventory/out-of-scope controls; retain canonical fallback and hydrate on context loss.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0022-policy-context-pilot.md",
+                "heading_path": [
+                  "Policy | Policy Context Pilot"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "receipt.adoption-feedback",
+            "kind": "receipt_requirement",
+            "statement": "Record dated policy provenance, selected modules, observed friction, repo-local decisions and behavior evidence.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0011-policy-adoption-feedback-loop.md",
+                "heading_path": [
+                  "Policy | Policy Adoption Feedback Loop"
+                ]
+              }
+            ]
+          }
+        ],
+        "precedence": [],
+        "conflicts": []
+      }
+    }
+  ]
+}

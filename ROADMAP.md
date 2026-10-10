@@ -1129,3 +1129,9 @@ Execution Plan: [Plan0133](docs/dev/plans/0133-2026-10-10-native-network-time-pa
 Order:0134 arming →0135 evaluation/recovery →0136 installed acceptance.
 The ready frontier contains0134 only. Rejected uncertain-time arms create no wake;
 armed wakes retain deadlines during time holds.
+
+## P72 — Policy routing and gov_policy pilot
+
+Plan0150 / issue237: reconcile policy pointers and admit one read-only scoped
+policy-maintenance profile with canonical fallback and deterministic CI guard.
+Tool qualification complete; total host-token efficiency remains unmeasured.

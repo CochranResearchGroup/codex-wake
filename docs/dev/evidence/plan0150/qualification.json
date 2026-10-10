@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "cases": [
+    {
+      "case": "current",
+      "status": "current"
+    },
+    {
+      "case": "retained-packet-freshness",
+      "unchanged": true
+    },
+    {
+      "case": "changed_source",
+      "status": "stale_or_unavailable",
+      "reason": "STALE_FILE",
+      "fallback_required": true
+    },
+    {
+      "case": "missing_file",
+      "status": "stale_or_unavailable",
+      "reason": "INVENTORY_CHANGED",
+      "fallback_required": true
+    },
+    {
+      "case": "added_file",
+      "status": "stale_or_unavailable",
+      "reason": "INVENTORY_CHANGED",
+      "fallback_required": true
+    },
+    {
+      "case": "out_of_scope",
+      "status": "out_of_scope",
+      "reason": null,
+      "fallback_required": true
+    }
+  ],
+  "profile": "codex-wake-policy-maintenance",
+  "installed_cli": "/home/ecochran76/.local/share/governance-context/releases/4f0ef58/venv/bin/governance-context",
+  "elapsed_seconds": 4.904255616012961,
+  "hydrated_response_bytes": 53675,
+  "reuse_response_bytes": 325,
+  "total_host_token_savings": "unmeasured; response bytes are not host tokens",
+  "owned_fixture_removed": true,
+  "production_effects": 0
+}
