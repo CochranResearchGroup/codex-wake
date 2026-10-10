@@ -43,3 +43,13 @@ Unattended after/at completed; installed-acceptance.md records evidence and clea
 Recipient tab closed preserving conversation; owned supervisor stopped/unenrolled.
 Next: exact0.10.0 release-preparation CI, integration, public release build, final
 installation parity and protected-root rollout readback. No duplicate test wakes.
+
+0.10.0 wheel installed separately at releases/0.10.0-9182d4d; runtime module parity
+except version proven. Product smoke bounded eligibility PASS; initial fixed-wait
+failure retained. Next exact head CI then squashPR230, publish0.10.0 from exact
+integrated commit and verify downloaded wheel/sdist and installed module parity.
+Before global entrypoint activation recheck all supervisor roots pending/firing;
+preflight had0 for all4roots, but refresh it. Restart only owning supervisor when
+quiescent; unrelated daemon units including LitScout remain on preserved prefixes.
+Finish plan/catalog projections after released/installed readback. Root repair
+checkout is clean but owned by other session; reconcile custody before switching.

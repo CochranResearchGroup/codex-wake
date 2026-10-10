@@ -1,0 +1,99 @@
+{
+  "artifact_dir": "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/release-smoke-bounded",
+  "checks": {
+    "live_codex_app_server": {
+      "reason": "--live-codex-thread-id was not provided",
+      "status": "skipped"
+    },
+    "live_monitor": {
+      "reason": "--expect-monitor-ready was not provided",
+      "status": "skipped"
+    },
+    "live_openclaw_gateway": {
+      "reason": "--live-openclaw-agent and --live-openclaw-session-key were not provided",
+      "status": "skipped"
+    },
+    "surface": {
+      "cli_version": "0.10.0",
+      "github_fixture_lifecycle": {
+        "readiness": {
+          "checkpoint": {
+            "present": true,
+            "status": "ready"
+          },
+          "configuration": {
+            "enabled": true,
+            "status": "ready"
+          },
+          "credential_capability": {
+            "status": "ready"
+          },
+          "disabled": false,
+          "health": {
+            "degraded": false,
+            "status": "ready"
+          },
+          "health_code": "",
+          "observed_at": "2026-09-14T18:00:00+00:00",
+          "replay_lag": {
+            "seconds": 0,
+            "status": "ready"
+          },
+          "retry_at": null,
+          "status": "ready",
+          "terminal_failure": {
+            "code": "",
+            "status": "not_present"
+          },
+          "unsupported": false
+        },
+        "receipts": 1,
+        "source": "github",
+        "status": "matched"
+      },
+      "isolated_state": true,
+      "monitor_ready": false,
+      "product_readiness_overall": "blocked",
+      "runtime_fixture_lifecycle": {
+        "cleanup_deleted": 2,
+        "dispatch_attempted": false,
+        "sources": [
+          "process.exit",
+          "systemd.unit"
+        ],
+        "status": "matched",
+        "wake_ids": [
+          "wake-process-fixture",
+          "wake-systemd-fixture"
+        ]
+      },
+      "schema_version": 1,
+      "signal_lifecycle": {
+        "cleanup_deleted": true,
+        "dispatch_attempted": false,
+        "observed_status": "firing",
+        "retired_status": "archived",
+        "support_size_bytes": 4277,
+        "upgrade_reinstall": false,
+        "upgrade_restart": false,
+        "wake_id": "wake_b2e2b969a03b46839d815a1880d65f38"
+      },
+      "supervisor_once_roots": 1,
+      "surface_wake_root": "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/release-smoke-bounded/surface-wake"
+    },
+    "tmux": {
+      "reason": "tmux smoke can paste into the active pane and requires operator-visible pane evidence",
+      "status": "manual_only",
+      "tmux_env_present": true,
+      "tmux_pane_present": true
+    }
+  },
+  "codex_wake_bin": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-9182d4d/bin/codex-wake",
+  "codex_waked_bin": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-9182d4d/bin/codex-waked",
+  "generated_at": "2026-10-10T15:03:08.120227Z",
+  "live_wake_root": "/home/ecochran76/workspace.local/codex-wake-native-time/.codex/wake",
+  "public_tag": "",
+  "public_tag_work_dir": "",
+  "repo_root": "/home/ecochran76/workspace.local/codex-wake-native-time",
+  "schema_version": 1
+}

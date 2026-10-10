@@ -1,0 +1,8 @@
+{
+  "source": "9182d4d2f7e9c7eea56a63771f2710a7bbecc49d",
+  "runtime_diff": [
+    "__init__.py"
+  ],
+  "candidate_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.10.0-9182d4d/lib/python3.12/site-packages/codex_wake",
+  "wheel_sha256": "3430dfc0731060df6ef5e71122f9a0c61ed379a2837f31cb68f388383b1c0382"
+}

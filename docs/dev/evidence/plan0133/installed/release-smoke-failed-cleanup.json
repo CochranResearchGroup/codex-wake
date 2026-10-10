@@ -1,0 +1,12 @@
+{
+  "archive_terminal": false,
+  "archived_terminal": [],
+  "archived_terminal_count": 0,
+  "matched": [],
+  "matched_count": 0,
+  "mode": "delete",
+  "older_than": "1s",
+  "protected": [],
+  "protected_count": 0,
+  "wake_root": "/home/ecochran76/.local/state/codex-wake/plan0136-f3a72e8/release-smoke/surface-wake"
+}

@@ -43,3 +43,14 @@ Spec: source/runtime criteria above qualify; final released/installed/integrated
 identity verification remains pending. Existing review R1-R3 are fixed; no new
 broad review pass or independent evaluator claimed. Parent staysOPEN until final
 gates pass. Publication and global installation are not inferred from samples.
+
+## Release packaging and smoke
+
+0.10.0-9182d4d installed from wheel; Python modules are byte-identical to tested
+0.9.0 candidate except __init__.py version. release-parity.json freezes wheel hash.
+First optional product smoke failed fixed1.1s retention wait (matched0/protected0);
+later read-only eligibility matched1. Failure does not invalidate native delivery,
+provider or restart evidence; no claim about the cause of clock differences.
+Harness now checks dry-run eligibility for bounded6s/12attempts before deletion.
+Bounded smoke PASS; original failed cleanup receipt retained. This changes only
+acceptance harness, not installed product. Exact new-head hosted gates required.
