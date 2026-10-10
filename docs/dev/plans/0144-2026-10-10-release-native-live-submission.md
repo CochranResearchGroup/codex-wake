@@ -1,7 +1,7 @@
 # Ticket0144 — Ship and activate qualified native live submission
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream
@@ -10,6 +10,12 @@ Integration: governed_by_plan0141
 Work-Item: docs/dev/plans/0144-2026-10-10-release-native-live-submission.md
 Parent: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
 Depends-On: Plan0143
+
+## Current State
+
+Released and activated0.11.2/0076ae4. All81files match candidate/source/assets/final,
+download hashes/tag verified, four links switched,13service snapshots unchanged.
+Evidence: docs/dev/evidence/plan0144/closeout.md.
 
 ## What it delivers
 
@@ -21,11 +27,11 @@ The normal installed CLI runs the qualified repair from a published release with
 
 ## Acceptance criteria
 
-- [ ] Serial Standards and Spec reviews pin source and adjudicate findings; one consolidated remediation pass followed by relevant invalidated checks.
-- [ ] Merge exact reviewed head through normal PR path; build wheel/sdist from merge SHA and compare every tracked package file with the tested candidate/final installation.
-- [ ] Publish/download release assets and verify hashes/tag target; activate CLI links retaining prior immutable prefix and rollback targets.
-- [ ] Verify installed command/version and service PID/state snapshots; no unrelated restart. Hosted CI waiting stays user-waived and is never reported PASS.
-- [ ] Root is clean published main; clean merged owned worktree closes after exact remote custody and CWD-owner readback; owned test tabs closed.
+- [x] Serial Standards and Spec reviews pin source and adjudicate findings; one consolidated remediation pass followed by relevant invalidated checks.
+- [x] Merge exact reviewed head through normal PR path; build wheel/sdist from merge SHA and compare every tracked package file with the tested candidate/final installation.
+- [x] Publish/download release assets and verify hashes/tag target; activate CLI links retaining prior immutable prefix and rollback targets.
+- [x] Verify installed command/version and service PID/state snapshots; no unrelated restart. Hosted CI waiting stays user-waived and is never reported PASS.
+- [x] Root is clean published main; clean merged owned worktree closes after exact remote custody and CWD-owner readback; owned test tabs closed.
 
 ## Test seam and bound
 

@@ -1,7 +1,7 @@
 # Ticket0145 — Qualify explicitly reopened server-unloaded recipient
 
-State: PLANNED
-Workflow: BLOCKED
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
 Lane: P71
 Branch: docs/a2a-completion-stream

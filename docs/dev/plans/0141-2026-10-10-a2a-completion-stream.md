@@ -24,8 +24,7 @@ multiroot, rollback and thirty-minute soak on their recorded source/version.
 Plan0101/0119 remain OPEN; their stale sequencing is replaced by this plan.
 Ticket0142 DONE after PR234/0076ae4, installed117 tests and actual native
 submission/claim/completion/no-force cleanup. Active user goal now authorizes
-Plan0141 execution with stop/checkpoint before2milliontokens or4hours. Ticket0143 DONE: actual installed pair and owned restart/cleanup. Next0144;
-globalCLI remains0.11.1 until0144. Original old allowances remain historical.
+Plan0141 execution with stop/checkpoint before2milliontokens or4hours. Ticket0143 DONE: actual installed pair and owned restart/cleanup. Ticket0144 DONE: released/active0.11.2/0076ae4. Next0145. Original old allowances remain historical.
 
 ## Problem statement and solution
 
@@ -70,8 +69,8 @@ within its ticket. Existing GLOSSARY.md is terminology authority.
 
 | [0142](0142-2026-10-10-native-live-submission.md) Native submission for existing live tabs | none | DONE |
 | [0143](0143-2026-10-10-native-live-safety-and-round-trip.md) Qualify normal request and reply after transport change | 0142 | DONE |
-| [0144](0144-2026-10-10-release-native-live-submission.md) Ship and activate qualified native live submission | 0143 | IN_PROGRESS |
-| [0145](0145-2026-10-10-server-unloaded-recipient.md) Qualify explicitly reopened server-unloaded recipient | 0144 | BLOCKED |
+| [0144](0144-2026-10-10-release-native-live-submission.md) Ship and activate qualified native live submission | 0143 | DONE |
+| [0145](0145-2026-10-10-server-unloaded-recipient.md) Qualify explicitly reopened server-unloaded recipient | 0144 | IN_PROGRESS |
 | [0146](0146-2026-10-10-held-recovery-disposition.md) Make held recovery disposition explicit and safe | none | READY |
 | [0147](0147-2026-10-10-processing-claim-generation-recovery.md) Recover processing ownership across generations | 0146 | BLOCKED |
 | [0148](0148-2026-10-10-remaining-fault-and-ancestry-proof.md) Finish remaining fault and session-isolation proof | 0142, 0146, 0147 | BLOCKED |
@@ -148,5 +147,5 @@ receipt visibility. Optional features and indefinite scale are excluded.
 A fresh session reads this plan, its next unblocked ticket, applicable policies,
 active-lane catalog and exact Git/installed identities. It reconciles source/receipts
 before using old evidence, starts only one owned ticket, and updates status/proof as
-it progresses. Next concrete action: ticket0144 builds from merged0076ae4, proves candidate/final
-package parity, publishes/downloads hashes and activates reversible CLI links.
+it progresses. Next concrete action: ticket0145 reconciles original Plan0138 notLoaded/history
+evidence against unchanged saved transport and current installed controls.
