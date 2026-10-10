@@ -1042,10 +1042,10 @@ Acceptance target:
 
 State: CLOSED
 
-Current State: Session verb design is complete. A read-only probe verified
-shared-daemon loaded-thread discovery and tmux tab enumeration. Product
-implementation, identity-binding acceptance, and installed qualification remain
-pending. Agent messaging depends on this discovery boundary.
+Current State: Historical discovery design was completed under Plan0100.
+Released v0.9.0 adds qualified native session addressing and visible tab lifecycle
+under P65; see Plan0127 completion audit. That acceptance supersedes the former
+product-implementation-pending statement without reopening the historical plan.
 
 Plan: [Session Discovery Verbs](docs/dev/plans/0100-2026-10-03-session-discovery-verbs.md)
 
@@ -1063,8 +1063,9 @@ Current State: Plan0119's requested remaining-gate packet is accepted in
 verification0122: released v0.7.1 automatic exchanges, cancellation,
 restart/reconnect, cross-root flow, rollback and a full thirty-minute soak passed.
 Server-unloaded recipient and broader held-recovery obligations remain open.
-The network-time successor is an isolated 0.8.0 candidate under P64; current
-installed runtime remains 0.7.1. See readiness reconciliation note0010.
+P64 subsequently qualified/released v0.8.0 network time; P65 qualified/released
+v0.9.0 native lifecycle. Those releases do not close the remaining P63 obligations.
+The older readiness reconciliation note0010 is historical.
 
 Execution Plan: [Build usable live A2A](docs/dev/plans/0119-2026-10-04-usable-live-a2a-successor.md)
 Original requirements: [Agent-to-Agent System](docs/dev/plans/0101-2026-10-03-agent-to-agent-system.md)
@@ -1103,3 +1104,16 @@ State: CLOSED
 Current State: All five tickets and normal installed lifecycle pass. PR228 integrates final source/evidence as a686c7b; hosted PR/main Python3.11/3.12 gates pass. Publicv0.9.0 tag and downloaded artifacts are verified.983 frozen installed tests pass; audit repairs, migration/rollback, guarded close and owned-fixture cleanup pass. Final requirement audit is docs/dev/evidence/plan0127/completion-audit.md. Other project legacy readers and unrelated local work remain preserved.
 
 Execution authority: [Plan0127](docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md). Tickets0128–0132 are DONE. Source/release qualification is complete; docs/plan127-completion carries the final closure projection. P63's separate retained recovery obligations are unchanged.
+
+## P66 | Native Network-time Parity
+
+State: PLANNED
+
+Current State: Approved governing Plan0133 and tickets0134–0136. No successor
+implementation or installed acceptance has run. Reuse P64 time policy throughout
+P65 native deadline handling; P63 retained obligations remain separate.
+
+Execution Plan: [Plan0133](docs/dev/plans/0133-2026-10-10-native-network-time-parity.md).
+Order:0134 arming →0135 evaluation/recovery →0136 installed acceptance.
+The ready frontier contains0134 only. Rejected uncertain-time arms create no wake;
+armed wakes retain deadlines during time holds.
