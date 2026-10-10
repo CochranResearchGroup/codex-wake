@@ -1,0 +1,18 @@
+{
+  "source_commit": "c579ebe",
+  "wake_candidate": "0.8.0 editable private venv",
+  "codex_version": "0.162.1",
+  "sender_thread_id": "01a123a8-5782-7d43-a214-55b293bbd65f",
+  "initiating_turn_id": "01a123d5-81d1-7c70-a920-4f3957144eb7",
+  "initiating_turn_completed_at": 1791602577,
+  "resumed_turn_id": "01a123d6-139a-73e2-b9e7-79830172fc97",
+  "resumed_turn_started_at": 1791602594,
+  "idle_gap_seconds_same_native_clock": 17,
+  "wake_id": "wake_20261010_032254_a1a4",
+  "queue_id": "01a123d6-1399-7ec1-935d-ec04bf55ca9a",
+  "native_submission_id": "2a0c7e8c-896d-4ac2-b8cd-acee6efa63ff",
+  "ordinary_native_assignment_count": 1,
+  "scheduler_unit": "plan131-native-lifecycle.service",
+  "fixture_scheduler_stopped": true,
+  "result": "42"
+}

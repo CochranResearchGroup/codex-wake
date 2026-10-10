@@ -1,0 +1,9 @@
+Authorized disposable Plan0131 end-to-end acceptance. Do not edit repository files or interact with any agent except the owned worker below.
+
+1. Use native send_message_to_thread to worker 01a123d4-e51b-70d1-bb05-6fd863df1515 with this exact task:
+"Owned Plan0131 worker: run sleep 20, then write exactly 42 to /home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle131/result.txt and create /home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle131/condition.ready. Reply exactly PLAN131_WORK_DONE. Do not edit repo files or message other agents."
+2. Run this installed command through your terminal tool:
+/home/ecochran76/.local/state/codex-wake/plan127-runtime/venv/bin/codex-wake --wake-root /home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle131 native file --codex-path /home/ecochran76/.local/bin/codex --ttl 2m 01a123a8-5782-7d43-a214-55b293bbd65f /home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle131/condition.ready -- 'Authorized Plan0131 conditional follow-up. Read /home/ecochran76/.local/state/codex-wake/plan127-runtime/lifecycle131/result.txt, verify it is exactly 42, and reply exactly PLAN131_RESUMED_RESULT_42. Do not edit files or send messages.'
+3. Finish your current turn immediately with exactly PLAN131_ARMED_IDLE. Do not wait for the worker or condition. The separate installed scheduler owns continuation.
+
+An external verifier will inspect the installed record, native turns and visible panes. If any command fails, report the exact failure rather than claiming completion. No Wake mailbox is used for the ordinary native assignment.

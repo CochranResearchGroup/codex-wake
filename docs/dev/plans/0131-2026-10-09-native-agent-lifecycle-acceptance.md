@@ -1,7 +1,7 @@
 # Plan 0131 — Prove the complete native agent lifecycle
 
-State: PLANNED
-Workflow: READY_FOR_AGENT
+State: CLOSED
+Workflow: DONE
 Owner: primary agent lane
 Branch: feat/native-workflows
 Parent: docs/dev/plans/0127-2026-10-09-native-codex-wake-product-boundary.md
@@ -9,7 +9,7 @@ Blocked by: docs/dev/plans/0128-2026-10-09-native-durable-delivery.md — Delive
 
 ## Current State
 
-Approved ticket; implementation not started. Execute only after every listed blocker is CLOSED with passing evidence. The parent execution contract governs this ticket; planning, mocks and prototype results alone cannot close it.
+Installed two-agent lifecycle passed at sourcec579ebe. A assigned B natively, armed a file condition and ended its turn; the independent installed scheduler resumed A17 seconds later, read result42 and displayed the exact response. Guard, separate cancellation and ordinary close preserved B conversation. Current-source0130 receipts cover expiry and explicit same-thread resume. See [acceptance](../evidence/plan0127/0131-acceptance.md). Candidate release/migration remain0132; parent staysopen.
 
 ## What to Build
 
@@ -17,10 +17,10 @@ Prove the complete native agent lifecycle, as one complete user-visible slice un
 
 ## Acceptance Criteria
 
-- [ ] Open recipient tab, assign ordinary work natively, arm a condition follow-up, end the sender turn, observe due execution and reply, then close the tab preserving the conversation.
-- [ ] Real tab, native transcript and durable record evidence agree on exact identities and outcome.
-- [ ] Exercise guarded close with pending work, cancellation separate from close, expiry and per-workflow same-thread resume.
-- [ ] Record installed/source versions and limitations; code review evaluates standards and spec independently.
+- [x] Open recipient tab, assign ordinary work natively, arm a condition follow-up, end the sender turn, observe due execution and reply, then close the tab preserving the conversation.
+- [x] Real tab, native transcript and durable record evidence agree on exact identities and outcome.
+- [x] Exercise guarded close with pending work, cancellation separate from close, expiry and per-workflow same-thread resume.
+- [x] Record installed/source versions and limitations; code review evaluates standards and spec independently.
 
 ## Scope and Non-goals
 

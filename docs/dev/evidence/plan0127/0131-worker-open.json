@@ -1,0 +1,23 @@
+{
+  "action": "opened",
+  "attachments": [
+    {
+      "client_pid": 47369,
+      "client_start_time_ticks": 22535297,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/workspace.local/codex-wake-plan127",
+      "pane_id": "%9",
+      "pane_index": "0",
+      "pane_title": "plan131-worker",
+      "pane_tty": "/dev/pts/42",
+      "session_id": "$0",
+      "session_name": "recipient",
+      "socket": "/tmp/tmux-1000/plan127-native",
+      "window_id": "@7",
+      "window_index": "2",
+      "window_name": "plan131-worker"
+    }
+  ],
+  "ready": true,
+  "thread_id": "01a123d4-e51b-70d1-bb05-6fd863df1515"
+}
