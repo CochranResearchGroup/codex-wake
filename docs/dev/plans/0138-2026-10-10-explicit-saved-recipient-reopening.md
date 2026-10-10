@@ -1,7 +1,11 @@
 # Plan0138 — Wake an explicitly authorized saved conversation
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
+Lane: P68
+Branch: feat/saved-recipient-reopening
+Target: origin/main
+Integration: squash_pr
 Owner: primary
 Work-Item: docs/dev/plans/0138-2026-10-10-explicit-saved-recipient-reopening.md
 
@@ -58,3 +62,27 @@ No custom Codex patch, shared-daemon restart, implicit opt-in, arbitrary recipie
 lookup, new conversation in place of the original, live user-conversation replay,
 broad held-recovery campaign or unrelated worker rollout. No old goal restarted.
 Wider Plan0101/0119 obligations remain OPEN independently of this bounded slice.
+
+## Goal execution control — 2026-10-10
+
+Goal: complete every Plan0138 acceptance criterion. Start1791645933; checkpoint
+by18:15:33UTC (2h50), stop before18:25:33UTC (3h) or3000000goal tokens,
+whichever first. get_goal usage is authoritative; no token-budget tool override
+is inferred. Check usage/time at material boundaries and at least every20minutes.
+One owner, one worktree lane, no parallel implementation; disposable recipients
+are product acceptance actors. Source baseline d9354a8; installed0.10.1.
+
+Critical path: closed saved native recipient → explicit agent-message permission
+and integration → unattended installed request/reply → review/release/cleanup.
+First primary-evidence deadline15:40UTC. Current acceptance unproven; no helper
+or queue-accepted receipt substitutes for completed same-conversation turns.
+Per unit: one discovery/review and one consolidated repair pass. Preserve failed
+samples; stop/reframe that unit if an accepted blocker remains after verification.
+Checkpoint fields: state_transition, acceptance_state, progress_classification,
+evidence, material_blockers, next_action_or_stop_reason. Hosted wait waived;
+all behavioral, source/release/installed and authority gates remain required.
+
+Startup transition READY→ACTIVE; outcome_progress: disposable exact recipient
+created and seed turn queued. Private runtime receipts under user state plan0138.
+Next: after completed seed, close its tab, verify notLoaded and arm one original
+explicit resume wake through normal installed supervisor. No live user-thread replay.
