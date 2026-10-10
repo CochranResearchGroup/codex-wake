@@ -92,7 +92,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 58902ef6fab39f7c8e794509dc422a624c56418d
+    checkpoint: 72e7c13420fde3d70b8ea3bf679196be974e029e
     remote_ref: refs/remotes/origin/feat/native-network-time
     integration: squash_pr
     dependencies: []
