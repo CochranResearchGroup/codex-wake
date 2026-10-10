@@ -14,6 +14,13 @@ Red: PYTHONPATH=src python3 -m unittest discover -s tests -p test_a2a_mailbox.py
 failed18tests with one TypeError for unsupported resume_missing.
 Green: same command18PASS. Public messages CLI suite7PASS.
 
+Second TDD seam: public MailScheduler.claim after explicit capability rotation.
+Red: PYTHONPATH=src python3 -m unittest discover -s tests -p test_a2a_scheduler.py
+failed8tests with one failure: replaced recipient capability was incorrectly
+claimable. Green: same command8PASS after comparing both original actor IDs,
+generations and roots for explicit reopening messages. Existing notification
+rights are still rechecked. No lifecycle or transport effect was attempted.
+
 This checkpoint does not implement notification reopening and is not acceptance
 or release evidence. It must not be integrated/released as the complete feature.
 Next: connect existing journal-fenced NotificationDispatcher to explicit saved

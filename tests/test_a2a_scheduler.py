@@ -75,6 +75,15 @@ class SchedulerTests(unittest.TestCase):
         with self.assertRaises(BusError): self.scheduler.finish(dispatcher, recipient, claim['attempt_id'], outcome='submitted', evidence={'receipt_id':'late'})
         with self.assertRaises(BusError): self.mailbox.cancel(self.actors[0], identifier)
 
+    def test_reopening_request_cannot_use_replaced_recipient_capability(self):
+        identifier = self.send(resume_missing=True)
+        self.bus.rotate_actor(self.actors[1].actor_id, self.operator)
+        dispatcher, recipient = self.leases()
+        with self.assertRaises(BusError) as error:
+            self.scheduler.claim(dispatcher, recipient, ['notify_' + identifier])
+        self.assertEqual(error.exception.code, 'authorization_denied')
+        self.assertEqual(self.mailbox.show(self.actors[0], identifier)['state']['notification'], 'pending')
+
     def test_provably_unsent_backoff_and_attempt_bound(self):
         identifier = self.send()
         for count in range(3):

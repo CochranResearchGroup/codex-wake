@@ -116,6 +116,7 @@ class MailScheduler:
 
     def _authorized(self, database, row):
         # Recheck grants; an immutable envelope does not preserve revoked rights.
+        envelope = json.loads(row['envelope'])
         for key, permission in [(row['sender_key'], 'send'), (row['recipient_key'], 'receive')]:
             namespace, thread_id = json.loads(key)
             actor = database.execute('SELECT a.*,e.can_send,e.can_receive,e.can_notify FROM actors a JOIN enrollments e ON a.root=e.root WHERE a.namespace=? AND a.thread_id=?', (namespace, thread_id)).fetchone()
@@ -123,6 +124,11 @@ class MailScheduler:
                 return False
             if permission == 'receive' and not actor['can_notify']:
                 return False
+            if envelope.get('resume_policy') == 'same_thread':
+                role = 'sender' if permission == 'send' else 'recipient'
+                expected = envelope.get('notification_authority', {}).get(role)
+                if expected != dict(actor_id=actor['actor_id'], generation=actor['generation'], root=actor['root']):
+                    return False
         return True
 
     def defer(self, lease, job_id, reason, *, seconds=5):
