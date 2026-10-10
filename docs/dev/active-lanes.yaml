@@ -218,12 +218,14 @@ lanes:
     branch: fix/native-live-submission
     target: origin/main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: c8adce33a4a1b0fb26b8936f02017407f84d625e
+    custody_state: INTEGRATION_READY
+    checkpoint: 87ec00705a16c99734243f9b68dd27244498e065
     remote_ref: refs/remotes/origin/fix/native-live-submission
     integration: squash_pr
+    validation_status: passed
+    validation_ref: 87ec00705a16c99734243f9b68dd27244498e065
     dependencies: [P71]
     overlaps: [P71]
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
-    disposition: Primary owns Plan0141 and ticket0142 implementation serially; goal execution active, native receipt regression next, no live effects yet.
+    disposition: Public native receipt red-green and installed117/81file parity qualified; actual result newly claimed/completed after one native submission, owned tab closed forced=false and PIDs absent. Serial review resolved1finding; source ready for integration, remaining Plan0141 tickets OPEN.
