@@ -1,15 +1,21 @@
 # Ticket0142 — Native submission for existing live tabs
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary
-Lane: P71
-Branch: docs/a2a-completion-stream
+Lane: P72
+Branch: fix/native-live-submission
 Target: origin/main
-Integration: governed_by_plan0141
+Integration: squash_pr
 Work-Item: docs/dev/plans/0142-2026-10-10-native-live-submission.md
 Parent: docs/dev/plans/0141-2026-10-10-a2a-completion-stream.md
 Depends-On: none
+
+## Current State
+
+Goal authorized execution2026-10-10; baseline843fabc. Public native receipt
+regression is next; source0.11.1 still uses pane visibility. No new live attempt
+yet; Plan0139 original uncertainty untouched.
 
 ## What it delivers
 
