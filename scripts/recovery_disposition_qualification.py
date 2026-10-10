@@ -30,7 +30,8 @@ def main():
     descriptor_count = lambda: len(list(Path('/proc/self/fd').iterdir()))
     before = descriptor_count()
     report = dict(version=codex_wake.__version__, prefix=sys.prefix, checks=[],
-                  transports=0, production_store_changes=0, fd_before=before)
+                  transports=0, production_store_changes=0, fd_before=before,
+                  clock_basis='fixed fixture1000; not a UTC/time-provider qualification')
     try:
         with tempfile.TemporaryDirectory(prefix='wake-recovery-disposition-') as directory:
             root = Path(directory)
@@ -44,9 +45,9 @@ def main():
             for identity in identities:
                 cap, _ = bus.issue_actor(identity, repo, old)
                 actors.append(bus.authenticate(cap, identity, invoking_cwd=repo))
-            original = Mailbox(bus).send(actors[0], identities[1], body='Unknown prior work.',
+            original = Mailbox(bus, clock=lambda: 1000.0, monotonic=lambda: 1000.0).send(actors[0], identities[1], body='Unknown prior work.',
                 idempotency_key='original-owned-intent', delivery='notify')['message']['message_id']
-            Mailbox(bus).ack(actors[1], original, outcome='accepted')
+            Mailbox(bus, clock=lambda: 1000.0, monotonic=lambda: 1000.0).ack(actors[1], original, outcome='accepted')
             snapshot = root / 'snapshot'
             backup = MailBackup(bus, old).create(snapshot)
             with bus.path.open('r+b') as stream:
@@ -90,7 +91,7 @@ def main():
                 actor = next(a for a in disposed['recovery']['revoked_actors'] if a['thread_id'] == identity.thread_id)
                 rotated = command(cli, 'rotate', actor['actor_id'], authority=fresh)
                 fresh_actors.append(bus.authenticate(Path(rotated['actor_capability_file']), identity, invoking_cwd=repo))
-            mailbox = Mailbox(bus)
+            mailbox = Mailbox(bus, clock=lambda: 1000.0, monotonic=lambda: 1000.0)
             try:
                 mailbox.ack(fresh_actors[1], original, outcome='accepted')
             except BusError as error:

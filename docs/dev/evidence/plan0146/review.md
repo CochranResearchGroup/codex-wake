@@ -45,3 +45,13 @@ All accepted findings resolved within one cycle; zero remaining accepted blockin
 findings. Focused9PASS6.536s. Reviewed source/installed gates must now repeat only
 the affected selection and installed fresh-process workload; no new discovery or
 independent-review claim. Exact reviewed source is the following commit checkpoint.
+
+Reviewed source9164e9c affected228PASS81.118s and installed86PASS36.363s.
+Initial fresh-process workload on that candidate stopped in role-fixture setup
+with the existing clock_continuity guard before recovery/disposition. The failed
+receipt is retained. No production guard was changed: non-time role fixtures now
+use the public Mailbox clock seam with fixed1000; operator history assertions use
+its public inspection API on the same controlled clock. Recovery CLI commands
+remain actual fresh processes, and no UTC qualification is claimed. Fixture-only
+9PASS5.873s. Repeat those invalidated fixtures/workload; package code remains byte
+identical to reviewed9164e9c, so unchanged86controls need no blanket repeat.

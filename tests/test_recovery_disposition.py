@@ -32,7 +32,7 @@ class RecoveryDispositionTests(unittest.TestCase):
         for identity in self.identities:
             capability, _ = self.bus.issue_actor(identity, self.repo, self.old_operator)
             self.old_actors.append(self.bus.authenticate(capability, identity, invoking_cwd=self.repo))
-        mailbox = Mailbox(self.bus)
+        mailbox = Mailbox(self.bus, clock=lambda: 1000.0, monotonic=lambda: 1000.0)
         self.legacy = mailbox.send(self.old_actors[0], self.identities[1], body='Unknown prior work.',
                                    idempotency_key='legacy-intent', delivery='notify')['message']['message_id']
         self.legacy_unread = mailbox.send(self.old_actors[0], self.identities[1], body='Unknown unread prior work.',
@@ -104,7 +104,7 @@ class RecoveryDispositionTests(unittest.TestCase):
             self.assertEqual(code, 0)
             fresh.append(self.bus.authenticate(Path(rotated['actor_capability_file']), identity, invoking_cwd=self.repo))
         self.bus.enroll(self.repo, Path(self.operator), notify=True)
-        mailbox = Mailbox(self.bus, max_open=2)
+        mailbox = Mailbox(self.bus, max_open=2, clock=lambda: 1000.0, monotonic=lambda: 1000.0)
         with self.assertRaises(BusError) as denied:
             mailbox.ack(fresh[1], self.legacy_unread, outcome='accepted')
         self.assertEqual(denied.exception.code, 'recovery_legacy_held')
@@ -123,10 +123,8 @@ class RecoveryDispositionTests(unittest.TestCase):
         self.assertTrue(mailbox.ack(fresh[1], admitted['message']['message_id'], outcome='accepted')['claimed'])
 
     def operator_show(self, identifier):
-        with patch('sys.stdout', new_callable=io.StringIO) as output:
-            code = main(['messages', 'show', identifier, '--as-operator', '--bus-root', str(self.bus.root),
-                         '--operator-capability', self.operator, '--json'])
-        return code, json.loads(output.getvalue())
+        mailbox = Mailbox(self.bus, clock=lambda: 1000.0, monotonic=lambda: 1000.0)
+        return 0, mailbox.operator_inspect(Path(self.operator), identifier)
 
     def test_lost_disposition_response_reconciles_original_key_without_second_effect(self):
         class LostResponse(io.StringIO):
