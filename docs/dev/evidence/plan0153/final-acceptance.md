@@ -51,3 +51,12 @@ Hosted CI waiting skipped at operator direction. No test tab was created.
 
 Memory disposition: unavailable; no reviewed Codex Wake group/safe write target.
 A machine-readable no-write closeout receipt is retained privately.
+
+## Subsequent actual three-hour delivery
+
+Original retained three-hour wake was submitted once and its exact prompt received
+in the intended turn. All original anchors/due/expiry/stop remained unchanged.
+See real-three-hour-delivery.md/json. This advances the earlier fixture-only
+delivery boundary; continuation completion, physical accuracy and manual recovery
+remain unproved. Root alternative archived with verified remote custody2a81a4a;
+root returned to canonical main without installing or reapplying the alternative.
