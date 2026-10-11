@@ -223,6 +223,11 @@ A running Wake0.9 scheduler must own the chosen root for native execution. Nativ
 registration does not start a scheduler. End the initiating turn after arming
 its follow-up; a foreground wait is not a suspension proof.
 
+Agents should follow the [A2A response standard](skills/codex-wake/references/a2a-responses.md):
+questions/work requests receive a delivered sender reply; notices/final results
+normally end locally. TUI output alone does not deliver a reply. Third-party
+handoffs require explicit authority and a separate correlated send.
+
 ## Legacy Compatibility Usage
 
 The following basic commands require an explicit `--legacy-tmux` choice.

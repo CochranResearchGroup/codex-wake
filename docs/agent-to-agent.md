@@ -5,6 +5,21 @@ stable message ID, exclusive work claim, correlated reply and completion evidenc
 Use native Codex messaging for ordinary immediate exchanges. Use Wake for durable
 tracked work and unattended follow-up. CLI and MCP use the same mailbox and rules.
 
+## Response routing
+
+Follow the bundled [A2A response standard](../skills/codex-wake/references/a2a-responses.md).
+A local TUI answer can be observed by a peer but does not send a message or cause
+its next turn. Questions and work requests require a response to the sender;
+notices and terminal results normally need only local processing, without a reply
+loop. Notified tracked requests return one correlated notify reply; agreed
+inbox-only exchanges return one inbox reply and the sender owns checking it.
+For no-reply observations use a notice. Include the expected response route,
+recipient, scope, fixed deadline and evidence in each request.
+
+A third-party handoff needs existing explicit authority, a separately resolved
+recipient and new send with correlation; `reply` always targets the original
+sender. Do not silently downgrade delivery or call TUI output a delivered result.
+
 ## Set up once as the operator
 
 1. Install the released package; add the `mcp` extra for [MCP tools](a2a-mcp.md).

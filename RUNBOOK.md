@@ -5496,3 +5496,17 @@ physical-accuracy or manual-recovery claim. Evidence in Plan0153. All30 root fil
 preserved in remote archive2a81a4a plus local stash; safely fast-forwarded from
 da21f33 to main172dbd9. Alternative never installed. Docs-only packet with no
 runtime/wake effects. Memory unavailable receipt; no reviewed safe group.
+
+## Turn 268 | 2026-10-11 UTC
+
+Operator requested A2A response standards. Implemented a self-contained response
+reference, prominent skill rules, A2A invocation metadata, examples and CLI/MCP
+human guides. Questions/work requests require sender replies; notices/results
+normally end locally. Notified tracked requests return notify; agreed inbox-only
+exchanges return inbox. Explicit third-party authority and separate correlated
+send required. TUI output and receipt acks are not outbound messages.
+Eight-scenario primary review, 15 relative-link checks, policy wiring, active
+planning audit and whitespace checks PASS. Both installed skill copies match;
+previous copies backed up privately. No executable/service/wake changes or
+production messages. Already-active agents must reread the skill; no model
+compliance proof claimed. Graphiti target unavailable; no writes attempted.

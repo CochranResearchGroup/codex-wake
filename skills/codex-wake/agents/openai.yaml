@@ -1,7 +1,7 @@
 interface:
   display_name: "Codex Wake"
-  short_description: "Schedule durable agent wake cycles"
-  default_prompt: "Use $codex-wake to schedule a durable follow-up wake for this agent task."
+  short_description: "Tracked A2A requests, replies and wake cycles"
+  default_prompt: "Use $codex-wake for tracked agent communication or a durable follow-up. Choose the reply route explicitly; a TUI answer alone does not deliver an A2A reply."
 
 policy:
   allow_implicit_invocation: true
