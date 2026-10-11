@@ -13,7 +13,7 @@ lanes:
     custody_state: ACTIVE_WORKTREE
     integration: squash_pr
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/244
-    source_checkpoint: 13c059084acf54d7e30d34373638ef555ceeee91
+    source_checkpoint: 9dd966c5eaa7afbc01fc0a9deec225721b1e785f
     remote_ref: refs/remotes/origin/fix/issue243-intent-recovery
     dependencies: []
     overlaps: [Plan0152-private-installed-StableTime-rollout]
