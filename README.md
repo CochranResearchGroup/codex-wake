@@ -179,6 +179,38 @@ codex-wake native reconcile WAKE_ID
 codex-wake sessions close thread:THREAD_UUID
 ```
 
+Native scheduling retains the original request when trusted time is unavailable.
+Use a stable key for each automated follow-up so retries return the same wake:
+
+```bash
+codex-wake native after --idempotency-key monitor-run-42-next --json THREAD_UUID 3h -- "Inspect the monitoring result."
+codex-wake status --json
+codex-wake show WAKE_ID --json
+```
+
+An active schema6-capable worker on that root retries qualification on its normal
+poll interval. Registration does not start or upgrade a worker. Receipts report
+`requires_worker_schema=6`; older workers hold the request. `status` exposes
+pending-time and missed-deadline alerts. A successful registration means the
+intent persisted; queue acceptance and completed execution have separate receipts.
+
+For relative delays, the configured authenticated StableTime service can supply
+host-counter evidence even while UTC is unavailable. Same-epoch elapsed bounds
+preserve not-before and expiry; this evidence is never described as UTC. Default
+interval tolerance is 2% of the delay, bounded to 1s–5m; use `--time-tolerance 1s`
+for a stricter request. Service UTC qualification remains below 100ms. Absolute
+`at` deadlines and optional `--stop-at ISO_TIMESTAMP` require qualified UTC.
+
+If no clock is admissible at registration, the retained relative delay starts
+conservatively at the first qualified observation; `origin_state` makes that
+lateness explicit. Lost counter continuity holds the original anchor; it is
+never reset silently. A previously captured UTC anchor can recover its original
+deadline. Reuse a key only for the identical request; changed content conflicts,
+and terminal or archived requests retain their identity. Without a key, only
+identical active retained requests coalesce. See
+[the schema contract](docs/dev/wake-record-schema.md#schema6-native-scheduling-intent-and-time-recovery)
+for compatibility, clock continuity and cleanup behavior.
+
 New versus resume is explicit. An existing exact attachment is reused unless
 `--extra-attachment` is requested. Ordinary close refuses active, unknown or
 pending work. `--force` preserves conversations and durable work and reports

@@ -5451,3 +5451,16 @@ must discover tools; this existing session's catalog was not refreshed.
 Plan0151 lane corrected to P75 because P73 already belongs to Plan0146.
 Terminal evidence: docs/dev/evidence/plan0151/closeout.md. Hosted CI waiting
 waived; gov_policy measurement deferred. Memory disposition unavailable.
+
+## Turn 264 | 2026-10-11 UTC
+
+Plan0153 / issue243: installed unavailable-time registration reproduced with
+zero records. Standalone schema6 repair retains scheduling intent, root/thread
+identity and stable retry keys; active workers recover qualified relative or UTC
+deadlines while preserving not-before/expiry/stop and uncertain-effect fences.
+1061 comprehensive tests passed after restoring declared dependencies; focused
+and installed fixture checks prove one successor, fresh-process retention and
+live compatible-worker capability. Initial failures and receipts are retained.
+Source integration/activation remain open; no production wake or native turn,
+global install, unrelated worker/session or private StableTime rollout change.
+Matt setup draft awaits label preference; CI waiting remains waived.

@@ -29,6 +29,11 @@ def add_native_parser(subparsers):
         command.add_argument('--codex-path', default='codex')
         command.add_argument('--endpoint', default='unix://')
         command.add_argument('--ttl', default='24h', help='expiry after time due, or after file registration')
+        command.add_argument('--idempotency-key', help='stable original scheduling intent; reuse only for that request')
+        command.add_argument('--time-tolerance', help='maximum admitted clock interval, at most 5m')
+        command.add_argument('--stop-at', help='absolute UTC stop; requires qualified UTC before any dispatch')
+        command.add_argument('--json', dest='as_json', action='store_true', help='structured native intent receipt')
+        command.add_argument('--require-monitor', action='store_true', help='require an active worker compatible with this record')
         command.add_argument('--resume-missing', action='store_true',
                              help='explicitly resume the same saved thread when it is not loaded')
         command.add_argument('thread_id')
@@ -46,7 +51,30 @@ def create_native(args, root):
     if not args.endpoint.startswith('unix://'):
         raise WakeError('native target requires a local unix:// endpoint')
     from .network_wakes import read_time, creation_time, precise_deadline
-    observation = read_time()
+    # Validate the request before accepting an intent, even during acquisition failure.
+    from .cli import normalize_prompt
+    normalize_prompt(args.prompt)
+    resolve_codex_cmd(args.codex_path, required=True)
+    parse_duration(args.ttl)
+    if args.native_command == 'after':
+        parse_duration(args.trigger)
+    elif args.native_command == 'at':
+        precise_deadline(args.trigger)
+    if getattr(args, 'require_monitor', False):
+        from .monitor import monitor_readiness, require_monitor_ready
+        require_monitor_ready(monitor_readiness(wake_root=root, repo_root=Path.cwd()))
+    from .native_intents import existing_receipt, retain
+    existing = existing_receipt(args, root)
+    if existing is not None:
+        return existing
+    from .native_clock import configuration
+    if configuration() or any(getattr(args, name, None) for name in ('idempotency_key', 'time_tolerance', 'stop_at', 'as_json')):
+        return retain(args, root)
+    try:
+        observation = read_time()
+    except WakeError:
+        from .native_intents import retain
+        return retain(args, root)
     now = creation_time(observation)
     if args.native_command == 'file':
         predicate = {'type': 'file_exists', 'path': str(Path(args.trigger).resolve())}
@@ -118,7 +146,7 @@ def submission_failure(reason, result, error):
                 stderr=output_summary(getattr(source, 'stderr', None), inspect=True))
 
 
-def dispatch_native(root, found, now):
+def dispatch_native(root, found, now, *, clock_provider=None):
     from .injector import DispatchResult
     record = dict(found.record)
     target = record['target']
@@ -126,8 +154,20 @@ def dispatch_native(root, found, now):
     if existing.get('state') == 'uncertain':
         return reconcile_native(root, found, now)
     from .network_wakes import precise_deadline
-    expiry = precise_deadline(target['expires_at']) if record.get('schema_version') == 5 else parse_timestamp(target['expires_at'])
-    if now >= expiry:
+    intent = record.get('schema_version') == 6
+    if intent:
+        from .native_intents import dispatch_gate
+        verdict = dispatch_gate(record, clock_provider())
+        if verdict['state'] != 'due':
+            record['status'] = 'failed' if verdict['state'] == 'missed_deadline' else 'pending'
+            record['time_recovery'] = verdict
+            record = append_event(record, 'native_time_held', verdict['reason'], None)
+            replace_record(root, found, record)
+            return DispatchResult('failed' if record['status'] == 'failed' else 'requeued', verdict['reason'])
+        expiry = None
+    else:
+        expiry = precise_deadline(target['expires_at']) if record.get('schema_version') == 5 else parse_timestamp(target['expires_at'])
+    if not intent and now >= expiry:
         record['status'] = 'failed'
         record = append_event(record, 'expired', 'native recipient deadline elapsed', now)
         replace_record(root, found, record)
@@ -149,11 +189,23 @@ def dispatch_native(root, found, now):
         ready = False
     if not ready:
         record['status'] = 'pending'
-        retry = now + timedelta(seconds=5)
-        record['next_attempt_at'] = retry.isoformat().replace('+00:00', 'Z') if record.get('schema_version') == 5 else format_utc(retry)
+        if intent:
+            record['next_attempt_at'] = None
+        else:
+            retry = now + timedelta(seconds=5)
+            record['next_attempt_at'] = retry.isoformat().replace('+00:00', 'Z') if record.get('schema_version') == 5 else format_utc(retry)
         record = append_event(record, 'native_held', 'exact recipient is not available and idle', now)
         replace_record(root, found, record)
         return DispatchResult('requeued', 'exact recipient is not available and idle')
+    if intent:
+        # Runtime reads/resume can take time: refresh immediately before queueing.
+        verdict = dispatch_gate(record, clock_provider())
+        if verdict['state'] != 'due':
+            record['status'] = 'failed' if verdict['state'] == 'missed_deadline' else 'pending'
+            record['time_recovery'] = verdict
+            record = append_event(record, 'native_time_held', verdict['reason'], None)
+            replace_record(root, found, record)
+            return DispatchResult('failed' if record['status'] == 'failed' else 'requeued', verdict['reason'])
     # Persist ambiguity BEFORE making the external effect. A crashed caller must
     # never assume the queue did not accept its submission.
     record['native_delivery'] = {'state': 'uncertain', 'execution': 'not_observed',
@@ -192,7 +244,7 @@ def dispatch_native(root, found, now):
         replace_record(root, found, record)
         return DispatchResult('skipped', record['last_error'])
     record['status'] = 'submitted'
-    record['native_delivery'].update(state='accepted', queue_id=match[1], accepted_at=format_utc(now))
+    record['native_delivery'].update(state='accepted', queue_id=match[1], accepted_at=None if intent else format_utc(now))
     record = append_event(record, 'native_accepted', 'native queue accepted; execution not yet observed', now)
     replace_record(root, found, record)
     return DispatchResult('submitted', 'native queue accepted')
@@ -298,7 +350,9 @@ def reconcile_command(args, root):
         if found.record.get('target', {}).get('transport') != 'native':
             raise WakeError('reconciliation requires a native wake')
         from .records import classify_record
-        if classify_record(found.record) == 'native_network_v5':
+        if classify_record(found.record) == 'native_intent_v6':
+            current = None
+        elif classify_record(found.record) == 'native_network_v5':
             from .network_wakes import read_time, evaluation_time
             try:
                 current = evaluation_time(read_time())

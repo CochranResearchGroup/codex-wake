@@ -28,13 +28,16 @@ class NativeNetworkTimeTests(unittest.TestCase):
             self.assertEqual(record['schema_version'],5)
             self.assertEqual(record['time_policy']['mode'],'network-first')
 
-    def test_uncertain_arm_rejects_without_record(self):
-        from codex_wake.records import WakeError
+    def test_uncertain_arm_retains_non_dispatchable_intent(self):
+        from codex_wake.daemon import poll_once
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)/'wake'
-            with self.assertRaisesRegex(WakeError,'time_uncertain'):
-                self.arm(root,decision=TimeDecision('uncertain',reason='outage'))
-            self.assertEqual(all_records(root),[])
+            with patch('codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None, 'reason': 'outage'}):
+                self.assertEqual(self.arm(root,decision=TimeDecision('uncertain',reason='outage')), 0)
+            record=all_records(root)[0].record
+            self.assertEqual(record['schema_version'],6)
+            self.assertEqual(record['time_recovery']['state'],'pending_time')
+            self.assertEqual(poll_once(root,dispatch=False,time_provider=lambda:TimeDecision('uncertain')).fired,0)
 
     def test_absolute_fraction_and_file_ttl_are_preserved(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -121,9 +124,11 @@ class NativeNetworkTimeTests(unittest.TestCase):
             self.arm(root,decision=TimeDecision('windows',('windows',),1800000000,1800000000.2))
             self.assertEqual(all_records(root)[0].record['time_observation']['status'],'windows')
             for reading in (TimeDecision('uncertain',reason='competing_network_consensuses'),TimeDecision('network',('a','b'),float('nan'),1)):
-                with self.assertRaisesRegex(WakeError,'time_uncertain'):
-                    self.arm(root,decision=reading)
-            self.assertEqual(len(all_records(root)),1)
+                with patch('codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None, 'reason': 'invalid_time'}):
+                    self.assertEqual(self.arm(root,decision=reading),0)
+            self.assertEqual(len(all_records(root)),2)
+            retained=next(item.record for item in all_records(root) if item.record['schema_version']==6)
+            self.assertEqual(retained['time_recovery']['state'],'pending_time')
 
     def test_uncertain_submission_reconciles_read_only_during_time_outage(self):
         from codex_wake.records import replace_record, find_record

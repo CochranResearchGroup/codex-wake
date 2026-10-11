@@ -70,6 +70,9 @@ class WakeLifecycleLock:
 def classify_record(record: object) -> str:
     """Pure multi-version classification; unrecognized records are held."""
 
+    if isinstance(record, dict) and record.get('schema_version') == 6:
+        from .native_intents import valid_record
+        return 'native_intent_v6' if valid_record(record) else 'hold'
     if isinstance(record, dict) and record.get('schema_version') == NATIVE_NETWORK_SCHEMA_VERSION:
         if classify_record(dict(record, schema_version=NATIVE_SCHEMA_VERSION)) != 'v1':
             return 'hold'
@@ -325,7 +328,7 @@ def append_event(
     **extra: Any,
 ) -> dict[str, Any]:
     updated = dict(record)
-    event = make_event(event_type, message, now)
+    event = dict(at=None, type=event_type, message=message) if record.get("schema_version") == 6 and now is None else make_event(event_type, message, now)
     event.update(extra)
     events = list(updated.get("events") or [])
     events.append(event)
@@ -365,7 +368,8 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "read_versions": [1, 2, 3, 4, 5],
+        "read_versions": [1, 2, 3, 4, 5, 6],
+        "native_intent_write_version": 6,
         "native_network_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
         "native_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
         "legacy_native_write_version": NATIVE_SCHEMA_VERSION,
@@ -429,12 +433,24 @@ def write_record(root: Path, record: dict[str, Any]) -> Path:
         raise WakeError(f"invalid wake status: {status}")
     if not isinstance(wake_id, str) or not wake_id:
         raise WakeError("wake record missing id")
-    target_dir = root / status
+    # Schema6 keeps one atomic authority file across all active/terminal states.
+    # Status is in the record, not inferred from its directory. This prevents a
+    # crash between status-directory writes from reviving a pre-submission copy.
+    target_dir = root / ("pending" if record.get('schema_version') == 6 else status)
     target_dir.mkdir(parents=True, exist_ok=True)
     final_path = target_dir / f"{wake_id}.json"
     temp_path = final_path.with_suffix(".json.tmp")
     temp_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     temp_path.replace(final_path)
+    if record.get('schema_version') == 6:
+        with final_path.open('rb') as stream:
+            os.fsync(stream.fileno())
+        for directory in (target_dir, root, root.parent):
+            descriptor = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
     return final_path
 
 
@@ -493,11 +509,21 @@ def status_summary(root: Path) -> dict[str, Any]:
     predicate_counts: dict[str, int] = {}
     target_counts: dict[str, int] = {}
     visibility_counts: dict[str, int] = {}
+    time_recovery_counts: dict[str, int] = {}
+    time_recovery_alerts: list[dict[str, Any]] = []
     pending_next_attempts: list[str] = []
 
     for item in [*active_records, *archived_records]:
         record = item.record
         status = record.get("status")
+        recovery = record.get('time_recovery')
+        if record.get('schema_version') == 6 and isinstance(recovery, dict):
+            state = recovery.get('state')
+            if isinstance(state, str):
+                time_recovery_counts[state] = time_recovery_counts.get(state, 0) + 1
+            if recovery.get('alert') and status in {'pending', 'firing', 'failed'}:
+                time_recovery_alerts.append({'id': record.get('id'), 'state': state,
+                                             'reason': recovery.get('reason'), 'alert': recovery['alert']})
         if status == "archived":
             status_counts["archived"] += 1
         elif isinstance(status, str):
@@ -535,6 +561,9 @@ def status_summary(root: Path) -> dict[str, Any]:
         "counts_by_predicate": dict(sorted(predicate_counts.items())),
         "counts_by_target_transport": dict(sorted(target_counts.items())),
         "counts_by_visibility_classification": dict(sorted(visibility_counts.items())),
+        "counts_by_time_recovery_state": dict(sorted(time_recovery_counts.items())),
+        "time_recovery_alerts": time_recovery_alerts[:100],
+        "time_recovery_alert_total": len(time_recovery_alerts),
         "earliest_next_attempt_at": min(pending_next_attempts) if pending_next_attempts else "",
     }
 
@@ -547,7 +576,7 @@ def cancel_record(
     checkpoint: Callable[[str], None] | None = None,
 ) -> Path:
     found = find_record(root, wake_id)
-    if decode_signal_record(found.record) is not None or classify_record(found.record) in {"network_v3", "native_network_v5"}:
+    if decode_signal_record(found.record) is not None or classify_record(found.record) in {"network_v3", "native_network_v5", "native_intent_v6"}:
         with WakeLifecycleLock(root, wake_id):
             if checkpoint is not None:
                 checkpoint("after_cancel_lock")
@@ -565,7 +594,7 @@ def _cancel_found(
     status = record.get("status")
     if status in {"submitted", "failed", "cancelled", "expired", "archived"}:
         raise WakeError(f"cannot cancel wake in status {status}")
-    network = classify_record(record) in {'network_v3', 'native_network_v5'}
+    network = classify_record(record) in {'network_v3', 'native_network_v5', 'native_intent_v6'}
     current = None if network else now or utc_now()
     record["status"] = "cancelled"
     record["updated_at"] = None if network else format_utc(current)
@@ -627,15 +656,18 @@ def archive_record(
     status = record.get("status")
     if status not in TERMINAL_STATUSES:
         raise WakeError(f"cannot archive wake in status {status}")
-    if record.get("schema_version") == 3:
+    if record.get('schema_version') == 6:
+        # Archival is an operator action, not evidence of UTC acquisition.
+        current = None
+    elif record.get("schema_version") == 3:
         from .network_wakes import creation_time, read_time
         current = creation_time(read_time())
     else:
         current = now or utc_now()
     record["previous_status"] = status
     record["status"] = "archived"
-    record["archived_at"] = format_utc(current)
-    record["updated_at"] = format_utc(current)
+    record["archived_at"] = None if current is None else format_utc(current)
+    record["updated_at"] = "" if current is None else format_utc(current)
     record = append_event(record, "archived", "Wake archived by operator", current)
     archive_dir = root / "archive"
     archive_dir.mkdir(parents=True, exist_ok=True)

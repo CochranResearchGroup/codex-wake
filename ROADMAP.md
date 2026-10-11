@@ -1145,3 +1145,13 @@ registered and qualified, human guides and installed agent skills advertise
 tracked exchanges. Existing A2A acceptance remains CLOSED. New sessions must
 discover the tools; messaging still requires operator-issued actor context.
 Evidence: docs/dev/evidence/plan0151/closeout.md. Gov_policy evaluation deferred.
+
+## P153 | Wake intent and time recovery
+
+State: OPEN
+
+Issue243 / [Plan0153](docs/dev/plans/0153-2026-10-11-wake-intent-time-recovery.md):
+retain and deduplicate native scheduling requests, recover qualified relative
+delays and preserve strict absolute boundaries. Standalone source and installed
+fixture acceptance are in progress; activation must reconcile the separate
+private StableTime rollout. Matt skills setup awaits default-label preference.

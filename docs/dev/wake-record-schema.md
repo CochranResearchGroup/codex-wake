@@ -2,7 +2,7 @@
 
 Default write schema version: `1`
 
-Supported read schema versions: `1`, `2`, `3`, `4`
+Supported read schema versions: `1`, `2`, `3`, `4`, `5`, `6`
 
 Wake records are durable runtime records stored as JSON. They are operational state, not source artifacts. Schema version `1` remains the default for the existing timer, file, process, CLI, and plugin writers. Schema version `2` is reserved for capability-gated signal records backed by the root-local signal journal. A schema-v1 record whose predicate claims `type: signal`, an unknown version, or a malformed schema-v2 record is held rather than evaluated through the legacy predicate path.
 
@@ -378,3 +378,58 @@ Relative creation/file TTL use the conservative upper bound; absolute deadlines
 preserve fractional precision. Fresh bounded evidence gates due, retry and expiry;
 uncertainty holds effects. Read-only native reconciliation and cancellation remain
 available without trustworthy time and report unknown timestamps.
+
+## Schema6: native scheduling intent and time recovery
+
+Schema6 is used when StableTime is configured, acquisition fails, or native
+creation requests `--idempotency-key`, `--time-tolerance`, `--stop-at` or `--json`.
+Other healthy native writers retain schema5; existing records are not migrated.
+Versions1–5 hold schema6. Rollback must preserve these records and restore a
+compatible worker before automatic recovery can continue.
+
+`scheduling_intent` stores canonical root, content fingerprint, optional stable
+key, exact normalized schedule, TTL, tolerance, optional UTC stop, original
+counter/UTC anchors and `origin_state`. Recipient endpoint, executable, thread,
+prompt and cwd remain in the record. A root-scoped key is bound to all those
+request fields: retries reuse the exact record; a different request conflicts.
+Implicit deduplication covers identical active retained requests only. Automated
+chains should supply a key per logical successor, including terminal retries.
+
+`time_recovery.state` distinguishes `pending`, `pending_time`, `due` and
+`missed_deadline`; reason, mode, conservative bounds and availability alerts
+remain inspectable through show/list/status. A missed deadline changes record
+status to failed. Qualification retries use the active worker's bounded poll
+interval and a shared clock acquisition per pass, not a new scheduler. Clock
+failures do not consume native delivery attempts. Uncertain submissions retain
+their original nonce and reconcile exact native evidence without resending.
+
+The authenticated service contract1.0 retains its strict UTC qualification
+(maximum error below100ms, NTS-verified independent operators, bounded freshness).
+An unavailable response with a valid host measurement, continuity epoch and
+rate policy permits elapsed-only relative scheduling. The native QPC handoff
+must match frequency, advance monotonically and stay within service maximum age.
+Relative elapsed lower/upper bounds include one tick of quantization and the
+maximum captured/current rate error. They never manufacture UTC. Per-wake
+tolerance bounds the interval width, not service qualification.
+
+Absolute deadlines/stops require qualified UTC. Lower bounds must establish
+not-before; upper bounds must remain before expiry and stop. Dispatch refreshes
+qualification before runtime checks and immediately before native queue admission,
+reserving35s for the bounded30s queue handoff. This proves consumer admission
+eligibility, not an atomic deadline contract inside the native queue or a
+completed turn before expiry; queue acceptance, execution and acknowledgment
+remain separate. Counter continuity changes after reboot/suspend hold the
+original request unless a captured UTC anchor establishes its original deadline.
+No initial clock means a visible `first_qualified_after_hold` relative origin,
+which can be late but never shorter than the requested delay. Absolute expiry
+and UTC stop are never bypassed to recover availability.
+
+Schema6 uses one atomic authority file under `pending/` for every unarchived
+status, including firing and terminal states. Record status is authoritative;
+directory membership is not. Publication is fsynced, and existing lifecycle
+locks serialize evaluation, cancellation and pre-effect publication. This avoids
+reviving an older pre-effect copy after a crash between status-directory moves.
+Archival is an explicit operator action; its UTC timestamp remains unknown.
+Automatic age-based cleanup skips the unknown-time archive, preserving stable
+retry identity. Creation/events/acceptance also record unknown UTC rather than
+using guest time. No guest wall-clock value authorizes timing or retention.

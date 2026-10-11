@@ -2062,6 +2062,8 @@ def status_command(args: argparse.Namespace, root: Path) -> int:
         + ",".join(f"{key}:{counts_by_visibility[key]}" for key in sorted(counts_by_visibility))
     )
     print(f"earliest_next_attempt_at={summary['earliest_next_attempt_at']}")
+    for alert in summary['time_recovery_alerts']:
+        print(f"time_alert={alert['id']} state={alert['state']} reason={alert['reason']} {alert['alert']}")
     print(f"signal_readiness={signals['status']}")
     signal_sources = signals.get("sources", [])
     if isinstance(signal_sources, list):
