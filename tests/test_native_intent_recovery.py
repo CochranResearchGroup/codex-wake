@@ -31,7 +31,7 @@ class NativeIntentRecoveryTests(unittest.TestCase):
                 run(['--wake-root', str(root), 'status', '--json'])
             status = json.loads(output.getvalue())
             self.assertEqual(status['counts_by_time_recovery_state'], {'pending_time': 1})
-            self.assertEqual(status['time_recovery_alerts'][0]['reason'], 'scheduling_time_unavailable')
+            self.assertEqual(status['time_recovery_alerts'][0]['reason'], 'relative_origin_unanchored')
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
                 run(['--wake-root', str(root), 'schema', '--json'])
@@ -101,6 +101,28 @@ class NativeIntentRecoveryTests(unittest.TestCase):
             for field, value in [('id', 'wake_intent_/../../escape'), ('events', None), ('scheduling_intent', [])]:
                 with self.subTest(field=field):
                     self.assertEqual(classify_record(dict(deepcopy(valid), **{field: value})), 'hold')
+
+    def test_wrong_root_or_thread_cannot_dispatch_the_retained_request(self):
+        import shutil
+        origin = {'utc': None, 'counter': {'epoch': 'host-a', 'counter': 1000000, 'frequency': 1000, 'rate_ppm': 0}}
+        due = {'utc': None, 'counter': dict(origin['counter'], counter=11800010)}
+        with tempfile.TemporaryDirectory() as directory:
+            root, other = Path(directory) / 'original', Path(directory) / 'other'
+            with patch('codex_wake.native_clock.snapshot', return_value=origin), contextlib.redirect_stdout(io.StringIO()):
+                run(['--wake-root', str(root), 'native', 'after', '--json', '--codex-path', sys.executable, THREAD, '3h', '--', 'Continue'])
+            with patch('codex_wake.native_clock.snapshot', return_value=due):
+                self.assertEqual(poll_once(root, dispatch=False).fired, 1)
+            item = all_records(root)[0]
+            (other / 'pending').mkdir(parents=True)
+            shutil.copyfile(item.path, other / 'pending' / item.path.name)
+            with patch('codex_wake.native_clock.snapshot', return_value=due), patch('codex_wake.native_delivery.read_native_thread', return_value={'id': 'c357309d-c209-4467-b757-e1488e6b1aaa', 'status': {'type': 'idle'}}), patch('codex_wake.native_delivery.subprocess.run') as submit:
+                self.assertEqual(poll_once(other).submitted, 0)
+                self.assertEqual(poll_once(root).submitted, 0)
+            submit.assert_not_called()
+            original = all_records(root)[0].record
+            self.assertEqual(original['target']['thread_id'], THREAD)
+            self.assertEqual(original['status'], 'pending')
+            self.assertEqual(original['attempts'], 0)
 
     def test_required_monitor_must_support_the_retained_record_schema(self):
         from types import SimpleNamespace
@@ -186,19 +208,29 @@ class NativeIntentRecoveryTests(unittest.TestCase):
             self.assertEqual(result.fired, 0)
             self.assertEqual(all_records(root)[0].record["time_recovery"]["reason"], "absolute_stop_time_unavailable")
 
-    def test_missing_initial_clock_recovers_without_losing_the_relative_request(self):
+    def test_recovery_cannot_extend_an_unanchored_original_expiry(self):
         outage = {"utc": None, "counter": None, "reason": "outage"}
         recovered = {"utc": {"status": "network", "sources": ["a", "b"], "lower": 1800000000, "upper": 1800000000.2}, "counter": None}
         due = {"utc": {"status": "network", "sources": ["a", "b"], "lower": 1800000061, "upper": 1800000061.2}, "counter": None}
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "wake"
-            with patch("codex_wake.native_clock.snapshot", return_value=outage), contextlib.redirect_stdout(io.StringIO()):
-                run(["--wake-root", str(root), "native", "after", "--idempotency-key", "recover-origin", "--codex-path", sys.executable, THREAD, "1m", "--", "Continue"])
+            output = io.StringIO()
+            with patch("codex_wake.native_clock.snapshot", return_value=outage), contextlib.redirect_stdout(output):
+                run(["--wake-root", str(root), "native", "after", "--json", "--idempotency-key", "recover-origin", "--ttl", "1m", "--codex-path", sys.executable, THREAD, "1m", "--", "Continue"])
+            receipt = json.loads(output.getvalue())
+            self.assertTrue(receipt['requires_original_clock_evidence'])
+            self.assertEqual(receipt['automatic_recovery'], 'requires_original_clock_evidence')
+            self.assertEqual(receipt['time_recovery']['reason'], 'relative_origin_unanchored')
             with patch("codex_wake.native_clock.snapshot", return_value=recovered):
                 self.assertEqual(poll_once(root, dispatch=False).fired, 0)
             with patch("codex_wake.native_clock.snapshot", return_value=due):
-                self.assertEqual(poll_once(root, dispatch=False).fired, 1)
-            self.assertEqual(all_records(root)[0].record["scheduling_intent"]["origin_state"], "first_qualified_after_hold")
+                self.assertEqual(poll_once(root, dispatch=False).fired, 0)
+            record = all_records(root)[0].record
+            self.assertEqual(record['scheduling_intent']['origin_state'], 'awaiting_qualified_clock')
+            self.assertIsNone(record['scheduling_intent']['counter_anchor'])
+            self.assertIsNone(record['scheduling_intent']['utc_anchor'])
+            self.assertEqual(record['time_recovery']['reason'], 'relative_origin_unanchored')
+            self.assertIn('original', record['time_recovery']['alert'].lower())
 
     def test_uncertain_submission_is_reconciled_during_outage_without_retry(self):
         import subprocess

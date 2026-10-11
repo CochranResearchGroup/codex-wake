@@ -23,12 +23,20 @@ class NativeClockTests(unittest.TestCase):
     def test_wake_tolerance_does_not_relax_service_utc_qualification(self):
         valid = response()
         self.assertIsNotNone(from_response(valid, counter=10000010, frequency=10000000)['utc'])
-        invalid = deepcopy(valid)
-        invalid['estimate'].update(earliest_utc='2027-01-15T12:00:00Z',
-                                   latest_utc='2027-01-15T12:00:00.200Z',
-                                   maximum_error_ns=100000000, maximum_error_ms=100.0)
-        with self.assertRaises(ValueError):
-            from_response(invalid, counter=10000010, frequency=10000000)
+        just_below = deepcopy(valid)
+        just_below['estimate'].update(earliest_utc='2027-01-15T12:00:00.000000001Z',
+                                     latest_utc='2027-01-15T12:00:00.199999999Z',
+                                     maximum_error_ns=99999999, maximum_error_ms=99.999999)
+        self.assertIsNotNone(from_response(just_below, counter=10000010, frequency=10000000)['utc'])
+        for radius, milliseconds, earliest, latest in [
+            (100000000, 100.0, '2027-01-15T12:00:00Z', '2027-01-15T12:00:00.200Z'),
+            (100000001, 100.000001, '2027-01-15T11:59:59.999999999Z', '2027-01-15T12:00:00.200000001Z'),
+        ]:
+            invalid = deepcopy(valid)
+            invalid['estimate'].update(earliest_utc=earliest, latest_utc=latest,
+                                       maximum_error_ns=radius, maximum_error_ms=milliseconds)
+            with self.subTest(radius=radius), self.assertRaises(ValueError):
+                from_response(invalid, counter=10000010, frequency=10000000)
 
     def test_authenticated_unavailable_response_can_only_supply_elapsed_evidence(self):
         value = response()

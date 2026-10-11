@@ -50,27 +50,34 @@ unrelated services/sessions, new tenant or second mailbox/dispatcher.
 
 ## Current State
 
-Installed 0.13.0-stable-time-01 reproduction confirmed: exit2, zero records,
-injected unavailable acquisition at actual CLI entrypoint in private root. Fifteen
-installed baseline tests PASS. Standalone repair retains schema6 intent, supports
-authenticated elapsed fallback, preserves stop/expiry, unknown-origin/continuity
-holds and uncertain effects, and advertises recovery alerts. 1063 comprehensive
-tests passed with declared dependencies; 117 focused checks preceded the final
-review regression. Installed private0.13.1 CLI/worker, concurrent creators, six
-fresh workers, live schema6 capability, one successor, separate acceptance/crash/
-no-replay and old-worker rollback passed. The85-file wheel has source parity.
-Draft PR244 / checkpoint13c0590 is published and read back. No model turn or
-production wake is claimed. An optional private composite preserving three exact
-adapter files passed55 focused tests,86-file parity and installed acceptance;
-it has not been published or activated. Its concrete patch/receipt is ready for
-the operator's decision. Setup and that publication decision remain pending.
-Current incident uncertainty magnitude remains unknown.
-Setup draft at ~/.local/state/codex-wake/triage-243/setup-draft.md, default labels
-await user preference. Integration and activation remain separate gates; global
-activation cannot silently remove the current uncommitted StableTime adapter.
+Installed 0.13.0-stable-time-01 reproduction confirmed exit2/zero records in an
+isolated root. Corrected schema6 source preserves original anchored deadlines;
+unanchored relative requests hold with actionable receipt/status alerts rather
+than manufacturing a later origin. Draft PR244 is published, target main.
+Both standalone and optional private-composite installed candidates pass eight
+fresh-worker qualification, concurrent dedup, one monitoring successor, uncertain
+crash no-replay and byte-for-byte old-worker rollback. Their wheels match85 and86
+package files respectively. No production wake or completed model turn is claimed.
+See completion-audit.md/acceptance.md for current test results and limits.
+The original root remains main with all unrelated changes preserved. Matt setup
+and default labels await confirmation. The exact private adapter publication
+proposal awaits a scoped decision; integration/activation remain separate gates.
+Incident uncertainty magnitude remains unknown. Historical acceptance of a later
+relative origin is revoked by F4; the final installed receipt verifies no expiry
+extension. Current restart state is recorded in checkpoint-04.md/handoff.md.
 
 ## Seams
 
 Actual native CLI and record inventory; poll_once/time acquisition; native queue
 submission and reconciliation; installed package and worker fixture. Tests use
 public receipts and independently fixed deadlines, not private storage assertions.
+
+## Completion audit correction
+
+Second bounded review/remediation cycle: unknown initial origins must not be
+rebased when time recovers, because doing so extends an original expiry that
+cannot be established. The retained request instead holds with an actionable
+relative_origin_unanchored alert. Existing anchored counter/UTC recovery remains
+automatic. Acceptance of the earlier first-qualified-origin behavior is revoked;
+its public CLI/poll regression failed before the correction. Refreshed installed and optional-composite receipts pass; full source results
+are recorded in acceptance.md before the corrected source checkpoint publication.

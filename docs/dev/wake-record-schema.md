@@ -420,9 +420,11 @@ eligibility, not an atomic deadline contract inside the native queue or a
 completed turn before expiry; queue acceptance, execution and acknowledgment
 remain separate. Counter continuity changes after reboot/suspend hold the
 original request unless a captured UTC anchor establishes its original deadline.
-No initial clock means a visible `first_qualified_after_hold` relative origin,
-which can be late but never shorter than the requested delay. Absolute expiry
-and UTC stop are never bypassed to recover availability.
+No initial clock means the original relative origin and expiry remain unknown.
+The record stays held with `relative_origin_unanchored` and an actionable alert;
+current clock recovery cannot restart the delay or extend the original expiry.
+Earlier private candidate records with a rebased origin are held as unsupported.
+Absolute expiry and UTC stop are never bypassed to recover availability.
 
 Schema6 uses one atomic authority file under `pending/` for every unarchived
 status, including firing and terminal states. Record status is authoritative;

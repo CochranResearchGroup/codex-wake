@@ -61,6 +61,15 @@ atomic transaction across suspension. This limit is explicit in the schema doc.
 Source acceptance does not prove production activation or completed model turns.
 No source claim resolves companion StableTime availability issue7.
 
-Accepted findings: Standards4 resolved; Spec3 resolved. No remaining accepted
+F4 blocking, resolved in bounded review cycle2: first qualification could rebase
+an initially unanchored relative request and extend its original expiry. The
+completion audit invalidated that part of the earlier acceptance. Its regression
+failed with fired1 and now proves retained/held original origin/expiry after
+current UTC recovers. The evaluator no longer manufactures a later anchor.
+Counter/UTC-anchored automatic recovery remains; absolute requests retain their
+known UTC deadlines. Verification is closed-world for this finding and affected
+recovery/expiry paths; no new broad reviewer pass or reset of cycle bounds.
+
+Accepted findings: Standards4 resolved; Spec4 resolved. No remaining accepted
 source blocker. Separate setup confirmation and installed-rollout reconciliation
 remain effect gates, not source-review findings.

@@ -201,9 +201,11 @@ interval tolerance is 2% of the delay, bounded to 1s–5m; use `--time-tolerance
 for a stricter request. Service UTC qualification remains below 100ms. Absolute
 `at` deadlines and optional `--stop-at ISO_TIMESTAMP` require qualified UTC.
 
-If no clock is admissible at registration, the retained relative delay starts
-conservatively at the first qualified observation; `origin_state` makes that
-lateness explicit. Lost counter continuity holds the original anchor; it is
+If no clock is admissible at registration, the original relative origin and
+expiry cannot be established. The request stays retained with an actionable
+alert; recovery does not restart its delay or extend its expiry. Reconcile that
+original request before choosing a replacement with a new intent key.
+Lost counter continuity holds the original anchor; it is
 never reset silently. A previously captured UTC anchor can recover its original
 deadline. Reuse a key only for the identical request; changed content conflicts,
 and terminal or archived requests retain their identity. Without a key, only

@@ -1,6 +1,6 @@
 # Plan0153 — Published source and pending effect gates
 
-Source checkpoint13c059084acf54d7e30d34373638ef555ceeee91, draft PR244:
+Latest corrected source: fix/issue243-intent-recovery, draft PR244:
 https://github.com/CochranResearchGroup/codex-wake/pull/244 . Target main.
 Source/installed fixture acceptance and serial review are accepted; issue243 and
 Plan0153 remain OPEN. Goal remains active, awaiting required operator decisions.
@@ -13,8 +13,8 @@ including its retained changes. The root's dirty work is untouched on main.
 
 Private restart locators under ~/.local/state/codex-wake/triage-243:
 setup-draft.md, baseline-publication.patch/json, composite-proposal.json,
-composite-installed.json, pr-receipt.json, preserved-baseline.json and the
-initial/final presubmit logs. Composite qualification is explicitly a reviewed
+composite-final-audit-installed.json, composite-final-audit-parity.json,
+pr-receipt.json, preserved-baseline.json and final-source-tests*.log. Composite qualification is explicitly a reviewed
 feature plus three exact retained source files, not a public release or main
 source-parity claim. No production wake or completed model turn was attempted.
 
@@ -26,10 +26,17 @@ uncertain effects. Do not replay either failed incident attempt. Close issue/goa
 only after remaining setup and integration/activation gates are accepted.
 
 Operator limits persist: stop before2M tokens /6h; checkpoint backstop1.9M /
-5h45m. Checkpoint03 observed390683 /4287s; later get_goal before continuing.
+5h45m. Checkpoint04 observed536040 /6668s; later get_goal before continuing.
 No CI waiting. One review discovery pass used; further verification is closed
 world against accepted findings, not renewed broad discovery.
 
 Memory disposition: unavailable. graphiti-runtime recorded a no-write receipt
 because no reviewed repo group/safe target is configured. No Graphiti write was
 attempted. The source-backed review/acceptance remains in the repository.
+
+Completion audit F4 supersedes the previous later-origin recovery acceptance.
+See completion-audit.md and checkpoint-04.md. Missing original relative origin
+now stays held; registration explicitly requires original clock evidence. Both
+final-audit-venv and composite-final-audit-venv pass installed fixture qualification
+with eight fresh workers. Old reviewed-venv is intentionally retained as red
+evidence and must not be activated. Root adapter hashes are unchanged.

@@ -152,11 +152,29 @@ def qualify(prefix, legacy_python=None):
         assert recovered.returncode == 0 and len(effects.read_text().splitlines()) == 2
         crashed_record = json.loads(Path(json.loads(created.stdout)['path']).read_text())
         assert crashed_record['attempts'] == 1 and crashed_record['native_delivery']['state'] == 'uncertain'
+        # First clock recovery cannot restart an unknown original expiry.
+        unknown_root = base / 'unanchored-wake'
+        unknown_create = list(create)
+        unknown_create[unknown_create.index(str(root))] = str(unknown_root)
+        unknown = subprocess.run(unknown_create, env=env, cwd=base, capture_output=True, text=True, timeout=20)
+        assert unknown.returncode == 0, unknown.stderr
+        for count in (1000000, 11855010):
+            clock.write_text(json.dumps({'utc': None, 'counter': dict(anchor, counter=count)}))
+            held = subprocess.run([str(python), str(wrapper), 'codex-waked', '--wake-root', str(unknown_root), '--once'],
+                                  env=env, cwd=base, capture_output=True, text=True, timeout=20)
+            assert held.returncode == 0 and len(effects.read_text().splitlines()) == 2
+        listing = subprocess.run([str(python), str(wrapper), 'codex-wake', '--wake-root', str(unknown_root), 'list', '--json'],
+                                 env=env, cwd=base, capture_output=True, text=True, timeout=20)
+        assert listing.returncode == 0
+        original = json.loads(listing.stdout)[0]
+        assert original['status'] == 'pending' and original['time_recovery']['reason'] == 'relative_origin_unanchored'
+        assert original['scheduling_intent']['counter_anchor'] is None and original['scheduling_intent']['utc_anchor'] is None
         return {'verdict': 'PASS', 'scope': 'installed_clock_and_native_queue_fixtures',
                 'prefix': str(prefix), 'concurrent_creators': 2, 'retained_records': 1,
-                'fresh_worker_processes': 6, 'fixture_queue_acceptances': 2,
+                'fresh_worker_processes': 8, 'fixture_queue_acceptances': 2,
                 'recovery_chain_successors': 1, 'separate_crashed_request_acceptances': 1,
                 'crash_replay_count': 0,
+                'unanchored_origin_preserved': True, 'unanchored_expiry_extended': False,
                 'live_worker_schema6': True, 'owned_loop_worker_stopped': True,
                 'legacy_worker_held_record_unchanged': rollback_held,
                 'production_wakes': 0, 'global_install_changes': 0,

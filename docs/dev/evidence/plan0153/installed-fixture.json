@@ -3,17 +3,20 @@
   "concurrent_creators": 2,
   "crash_replay_count": 0,
   "fixture_queue_acceptances": 2,
-  "fresh_worker_processes": 6,
+  "fresh_worker_processes": 8,
   "global_install_changes": 0,
   "legacy_worker_held_record_unchanged": true,
   "live_worker_schema6": true,
   "owned_loop_worker_stopped": true,
+  "prefix": "/home/ecochran76/.local/state/codex-wake/triage-243/final-audit-venv",
   "production_wakes": 0,
-  "qualification_script_sha256": "90f3bd6b77453a6c7b225affe33d2afcdd34852a4fe3239e1086f7666353a2e9",
+  "qualification_script_sha256": "f36b4f08b47fad6553403318e342f2badbe0670f615600104679101186d311c0",
   "recovery_chain_successors": 1,
   "retained_records": 1,
   "scope": "installed_clock_and_native_queue_fixtures",
   "separate_crashed_request_acceptances": 1,
+  "unanchored_expiry_extended": false,
+  "unanchored_origin_preserved": true,
   "verdict": "PASS",
-  "wake_id": "wake_intent_0abf35203557458b857f7d4a1d13670a"
+  "wake_id": "wake_intent_3d34fc923aa64aa88dab3eea3ac8abcc"
 }

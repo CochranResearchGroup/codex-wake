@@ -55,7 +55,7 @@
     "codex_wake/monitor.py": "7101973508943a02277ad546fb2a3279f528f99ce64e397a38061ede43fdd787",
     "codex_wake/native_clock.py": "ff2c9b7ae55bbae0476722e1970b137bb4ef4d92c283cc22569aa2d71b142ff7",
     "codex_wake/native_delivery.py": "abb9543ff6921e56fa3ddcc2f2762f055548c77d8da8428414a26c864532a737",
-    "codex_wake/native_intents.py": "70cb09d29d67d00d8525e1da0c822445b20b4f02a419b626c00cae7a92acb17e",
+    "codex_wake/native_intents.py": "91facb54f29b97d9c34b157b9458147ed1d59f9d24555aeb86478a342d46fb77",
     "codex_wake/native_protocol.py": "d64aeb77f90ce3a29ab7eaeda0bee52240258f558cb0c23e733c17b37b00c07a",
     "codex_wake/network_wakes.py": "da9c543ec6e803126839c06ba084da5cfc6f6bdd6505c211565aa83ef1ecc566",
     "codex_wake/openclaw_gateway.py": "1ab99a8f90d576ae306e2603403453e0d357ce90ff08936475a2c6d6b5978b92",
@@ -86,7 +86,8 @@
     "codex_wake/webhook_lifecycle.py": "6848fb33b689567980591da4c6714db88138db04ce8e1ed442f00585f287c3f7",
     "codex_wake/webhook_listener.py": "f7e013346512d00c85cf0dfa793edbc8cde1d6b566db9d6dc8601955c574b085"
   },
-  "private_rollout_overlay": false,
-  "source_parity": true,
-  "wheel_sha256": "3571d93eed09e1c38bade319669ad33f17bd890983345c8a44614bad412096a0"
+  "private_overlay": false,
+  "source_file_count": 85,
+  "verdict": "PASS",
+  "wheel_sha256": "5b71ed36b0a703e816db047204d8b5a8b9d9f3c0c019cec26548fc6b0fb262e9"
 }

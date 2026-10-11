@@ -8,13 +8,18 @@ an isolated root and an explicitly injected unavailable acquisition: exit2,
 zero records. The actual incident's error magnitude remains unknown. No failed
 production wake was replayed.
 
-Final standalone0.13.1 source passed1063 standard-library tests in104.487s with
-declared dependencies installed. First broad run preserved17 missing-WebSocket
-environment errors and two obsolete schema-version assertions; assertions were
-updated and the proper environment passed. A subsequent source regression and
-compatible-monitor option passed the final complete run. No flake/retry claim.
-Policy wiring, compile checks and active planning audit pass; the latter carries
-20 explicitly accepted historical baseline findings. Hosted CI waiting waived.
+Corrected standalone0.13.1 source:119 focused tests PASS in6.883s. The first
+full run executed1064 tests in93.735s with one failure in the unchanged
+agent-message idempotency-conflict test (exit8 instead of9) and two skips. That
+test passed alone and in ten isolated repetitions; its broad-run failure remains
+unexplained and is preserved, not relabeled as a clean result. One justified full
+repeat executed1064 tests in90.798s, OK with two skips. Source was unchanged
+between the failing and passing full runs. First-run historical dependency/schema
+errors remain preserved in earlier receipts. No deterministic flake explanation
+or CI result is claimed. The F4 missing-origin regression and installed old/new
+candidate red/green checks specifically prove no original-expiry extension.
+Policy wiring, compile and whitespace checks PASS. Active planning audit PASS
+with20 accepted historical baseline findings. Hosted CI waiting waived.
 
 Commands:
 
@@ -28,17 +33,19 @@ python scripts/native_intent_qualification.py --prefix ISOLATED_PREFIX --legacy-
 ```
 
 Installed fixture acceptance: two concurrent creators retained one original ID.
-Six fresh worker processes prove outage hold, counter recovery, no duplicate
+Eight fresh worker processes prove outage hold, counter recovery, no duplicate
 successor, live schema6 capability and owned loop shutdown. The monitoring chain
 produced exactlyone fixture successor. A separate request accepted once before
 its worker was killed ahead of acceptance publication; its fresh worker retained
 the durable uncertain nonce, attempts1, and did not resend during clock outage.
-The previous installed worker held schema6 byte-for-byte without dispatch.
+Two extra fresh processes prove an unanchored original intent stays held after
+clock recovery, without moving its origin or expiry. The previous installed
+worker held schema6 byte-for-byte without dispatch.
 No global install changes, production roots/turns, notifications or test tabs.
 Derived worker state uses isolated XDG directories and owned processes are stopped.
 
 Wheel-source parity:85 package files match source, no private StableTime overlay.
-Wheel SHA2563571d93eed09e1c38bade319669ad33f17bd890983345c8a44614bad412096a0.
+Wheel SHA2565b71ed36b0a703e816db047204d8b5a8b9d9f3c0c019cec26548fc6b0fb262e9.
 See wheel-source-parity.json and installed-fixture.json for bounded readbacks.
 Readiness/queue fixtures are injected boundaries, not completed native model turns.
 

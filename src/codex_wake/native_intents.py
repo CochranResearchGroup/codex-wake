@@ -79,13 +79,18 @@ def _receipt(args, record, path, deduplicated):
         reader = probe_managed_reader_capability(Path(record['scheduling_intent']['canonical_root']))
         if reader is None or 6 not in reader.schema_versions:
             raise WakeError(f"schema6 intent retained as {record['id']}; active compatible worker unavailable; upgrade the owning worker")
+    intent = record['scheduling_intent']
+    unanchored = (intent['schedule']['kind'] != 'at' and intent.get('counter_anchor') is None
+                  and intent.get('utc_anchor') is None)
+    recovery = 'requires_original_clock_evidence' if unanchored else 'on_monitor_poll'
     value = {"id": record["id"], "path": str(path), "status": record["status"],
              "time_recovery": record["time_recovery"], "deduplicated": deduplicated,
-             "automatic_recovery": "on_monitor_poll", "requires_worker_schema": 6}
+             "automatic_recovery": recovery, "requires_original_clock_evidence": unanchored,
+             "requires_worker_schema": 6}
     if getattr(args, "as_json", False):
         print(json.dumps(value, sort_keys=True))
     else:
-        print(f"{record['id']} {path} state={record['time_recovery']['state']} reason={record['time_recovery']['reason']} recovery=on_monitor_poll requires_worker_schema=6")
+        print(f"{record['id']} {path} state={record['time_recovery']['state']} reason={record['time_recovery']['reason']} recovery={recovery} requires_worker_schema=6")
     return 0
 
 
@@ -121,6 +126,8 @@ def retain(args, root):
                                         "origin_state": "at_request" if valid_counter(clock.get("counter")) or valid_utc(clock.get("utc")) else "awaiting_qualified_clock"},
                   "time_recovery": {"state": "pending_time", "reason": "scheduling_time_unavailable",
                                     "alert": "Retained intent needs an active monitor to recover; no dispatch authorized"}}
+        if content['schedule']['kind'] != 'at' and record['scheduling_intent']['origin_state'] == 'awaiting_qualified_clock':
+            record['time_recovery'] = eligibility(record, clock)
         path = _save(root, record)
         return _receipt(args, record, path, False)
 
@@ -153,7 +160,7 @@ def valid_record(record):
                 or not isinstance(record["id"], str) or not re.fullmatch(r'wake_intent_[0-9a-f]{32}', record['id'])
                 or not isinstance(record.get('events'), list) or any(not isinstance(event, dict) for event in record['events'])
                 or not isinstance(intent.get('fingerprint'), str) or not re.fullmatch(r'[0-9a-f]{64}', intent['fingerprint'])
-                or intent.get('origin_state') not in {'at_request', 'awaiting_qualified_clock', 'first_qualified_after_hold'}
+                or intent.get('origin_state') not in {'at_request', 'awaiting_qualified_clock'}
                 or type(record["attempts"]) is not int or record["attempts"] < 0
                 or not isinstance(record["prompt"], str) or not record["prompt"].strip()
                 or target["transport"] != "native" or str(UUID(target["thread_id"])) != target["thread_id"]
@@ -206,6 +213,9 @@ def eligibility(record, clock):
         if utc["upper"] >= stop:
             return dict(result, reason="stop_boundary_uncertain")
         stop_remaining = stop - utc["upper"]
+    if kind != 'at' and not valid_counter(origin) and not valid_utc(intent.get('utc_anchor')):
+        return dict(result, reason='relative_origin_unanchored',
+                    alert='Original relative origin unavailable; reconcile the original deadline before creating a replacement intent')
     continuous = (valid_counter(origin) and valid_counter(observed)
                   and observed['epoch'] == origin['epoch'] and observed['frequency'] == origin['frequency']
                   and observed['counter'] >= origin['counter'])
@@ -254,15 +264,6 @@ def evaluate(root, identifier, clock):
         record = dict(found.record)
         if not valid_record(record) or record["status"] != "pending" or record["scheduling_intent"]["canonical_root"] != str(Path(root).resolve()):
             return "pending"
-        intent = dict(record['scheduling_intent'])
-        if (intent['schedule']['kind'] != 'at' and intent.get('counter_anchor') is None and intent.get('utc_anchor') is None
-                and (valid_counter(clock.get('counter')) or valid_utc(clock.get('utc')))):
-            intent['counter_anchor'] = clock.get('counter') if valid_counter(clock.get('counter')) else None
-            intent['utc_anchor'] = clock.get('utc') if valid_utc(clock.get('utc')) else None
-            intent['origin_state'] = 'first_qualified_after_hold'
-            record['scheduling_intent'] = intent
-            record['events'] = list(record['events']) + [{'at': None, 'type': 'relative_origin_established',
-                'message': 'Initial clock was unavailable; conservative relative delay starts at first qualified observation'}]
         verdict = eligibility(record, clock)
         previous = record["time_recovery"]
         record["time_recovery"] = verdict
