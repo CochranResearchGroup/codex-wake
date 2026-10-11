@@ -1148,10 +1148,13 @@ Evidence: docs/dev/evidence/plan0151/closeout.md. Gov_policy evaluation deferred
 
 ## P153 | Wake intent and time recovery
 
-State: OPEN
+State: CLOSED
 
 Issue243 / [Plan0153](docs/dev/plans/0153-2026-10-11-wake-intent-time-recovery.md):
-retain and deduplicate native scheduling requests, recover qualified relative
-delays and preserve strict absolute boundaries. Standalone source and installed
-fixture acceptance are in progress; activation must reconcile the separate
-private StableTime rollout. Matt skills setup awaits default-label preference.
+DONE. PR244/241d7a4 integrated; v0.13.1 published/download parity/activated.
+Matt setup/default labels applied and current StableTime adapter preserved.
+Contract2.0 finite bounds supported, original expiry never rebased.1072 full
+source OK/two skips;45 affected checks, two optional MCP tests and installed MCP
+smoke PASS. Seven live daemon roots support schemas1–6; supervisor upgraded;
+all70 records accounted for; independent webhook and root alternative preserved.
+Acceptance: docs/dev/evidence/plan0153/final-acceptance.md. No incident replay.

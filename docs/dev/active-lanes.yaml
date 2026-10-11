@@ -9,16 +9,18 @@ lanes:
     plan_ref: fix/issue243-intent-recovery
     branch: fix/issue243-intent-recovery
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     integration: squash_pr
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/244
-    source_checkpoint: 9dd966c5eaa7afbc01fc0a9deec225721b1e785f
+    source_checkpoint: 9b781357cd424895146a17f1f3b54730d8be98ff
     remote_ref: refs/remotes/origin/fix/issue243-intent-recovery
     dependencies: []
     overlaps: [Plan0152-private-installed-StableTime-rollout]
     updated_at: 2026-10-11
-    disposition: Standalone source repair; installed activation must preserve the separate uncommitted consumer rollout
+    integration_receipt: 241d7a4fecb4f38c84883e75ad697ebee1027996
+    checkout_required: false
+    disposition: DONE; PR244 merged; v0.13.1 published/activated; Matt setup complete; root alternative preserved
   - id: P63
     owner: primary
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance
