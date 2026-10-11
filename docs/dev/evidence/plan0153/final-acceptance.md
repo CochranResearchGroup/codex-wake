@@ -41,7 +41,9 @@ not an atomic native-queue expiry or completed-turn guarantee. Service availabil
 can still hold requests; companion StableTime issue7 is not resolved by this work.
 
 Matt configuration applied with approved default vocabulary; all provider labels
-read back, issue243 bug/ready-for-agent. docs/agents/*.md is the repo setup.
+read back, issue243 bug/ready-for-agent. docs/agents/*.md is the repo setup. Approved configuration also mirrored into
+the root checkout without changing its concurrent runtime work; root policy
+wiring passes. Root main is intentionally not fast-forwarded over dirty files.
 Public main and installed release are authoritative. Root checkout remains on
 main with concurrent dirty work untouched; root pending_time candidate is not
 part of this release. Its raw patch/untracked snapshot is preserved privately.
