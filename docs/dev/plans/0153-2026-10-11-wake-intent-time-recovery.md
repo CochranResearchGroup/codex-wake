@@ -54,11 +54,16 @@ Installed 0.13.0-stable-time-01 reproduction confirmed: exit2, zero records,
 injected unavailable acquisition at actual CLI entrypoint in private root. Fifteen
 installed baseline tests PASS. Standalone repair retains schema6 intent, supports
 authenticated elapsed fallback, preserves stop/expiry, unknown-origin/continuity
-holds and uncertain effects, and advertises recovery alerts. 1061 comprehensive
-tests passed with declared dependencies; 117 subsequent focused checks passed.
-Installed private 0.13.1 CLI/worker, concurrent creators, four fresh workers,
-live schema6 capability and exactlyone fixture successor passed. No model turn
-or production wake is claimed. Final reviewed-source rebuild/rollback remains.
+holds and uncertain effects, and advertises recovery alerts. 1063 comprehensive
+tests passed with declared dependencies; 117 focused checks preceded the final
+review regression. Installed private0.13.1 CLI/worker, concurrent creators, six
+fresh workers, live schema6 capability, one successor, separate acceptance/crash/
+no-replay and old-worker rollback passed. The85-file wheel has source parity.
+Draft PR244 / checkpoint13c0590 is published and read back. No model turn or
+production wake is claimed. An optional private composite preserving three exact
+adapter files passed55 focused tests,86-file parity and installed acceptance;
+it has not been published or activated. Its concrete patch/receipt is ready for
+the operator's decision. Setup and that publication decision remain pending.
 Current incident uncertainty magnitude remains unknown.
 Setup draft at ~/.local/state/codex-wake/triage-243/setup-draft.md, default labels
 await user preference. Integration and activation remain separate gates; global
