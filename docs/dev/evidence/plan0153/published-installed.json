@@ -1,0 +1,22 @@
+{
+  "completed_model_turns": 0,
+  "concurrent_creators": 2,
+  "crash_replay_count": 0,
+  "fixture_queue_acceptances": 2,
+  "fresh_worker_processes": 8,
+  "global_install_changes": 0,
+  "legacy_worker_held_record_unchanged": true,
+  "live_worker_schema6": true,
+  "owned_loop_worker_stopped": true,
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4",
+  "production_wakes": 0,
+  "qualification_script_sha256": "f36b4f08b47fad6553403318e342f2badbe0670f615600104679101186d311c0",
+  "recovery_chain_successors": 1,
+  "retained_records": 1,
+  "scope": "installed_clock_and_native_queue_fixtures",
+  "separate_crashed_request_acceptances": 1,
+  "unanchored_expiry_extended": false,
+  "unanchored_origin_preserved": true,
+  "verdict": "PASS",
+  "wake_id": "wake_intent_a8b1665cc0b44a90b9d860048e22b4c1"
+}

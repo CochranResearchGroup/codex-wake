@@ -1,7 +1,7 @@
 # Plan0153 — Retain wake intent during time outages
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary / ecochran76
 Lane: P153
 Branch: fix/issue243-intent-recovery
@@ -50,21 +50,17 @@ unrelated services/sessions, new tenant or second mailbox/dispatcher.
 
 ## Current State
 
-Installed 0.13.0-stable-time-01 reproduction confirmed exit2/zero records in an
-isolated root. Corrected schema6 source preserves original anchored deadlines;
-unanchored relative requests hold with actionable receipt/status alerts rather
-than manufacturing a later origin. Draft PR244 is published, target main.
-Both standalone and optional private-composite installed candidates pass eight
-fresh-worker qualification, concurrent dedup, one monitoring successor, uncertain
-crash no-replay and byte-for-byte old-worker rollback. Their wheels match85 and86
-package files respectively. No production wake or completed model turn is claimed.
-See completion-audit.md/acceptance.md for current test results and limits.
-The original root remains main with all unrelated changes preserved. Matt setup
-and default labels await confirmation. The exact private adapter publication
-proposal awaits a scoped decision; integration/activation remain separate gates.
-Incident uncertainty magnitude remains unknown. Historical acceptance of a later
-relative origin is revoked by F4; the final installed receipt verifies no expiry
-extension. Current restart state is recorded in checkpoint-04.md/handoff.md.
+DONE. PR244 integrated241d7a4; v0.13.1 published/downloaded/activated at exact
+release prefix. Matt setup/default labels applied. Four current StableTime adapter
+files preserved in public source; contract2.0 finite bounds supported.1072 full
+source tests OK/two skips,45 affected checks PASS, two optional MCP tests and
+installed MCP smoke PASS. Published prefix eight-worker qualification proves one
+monitor successor, no crash replay, no unknown-origin expiry extension and old
+reader rollback. Seven daemon roots advertise schemas1–6; supervisor new-prefix
+active; independent webhook unchanged; all70 existing records accounted for.
+Root/main dirty alternative preserved separately, no production incident replay,
+new wake or completed model turn claimed. See final-acceptance.md and activation
+receipts for exact scope/limits. Companion StableTime availability not resolved.
 
 ## Seams
 
@@ -94,3 +90,10 @@ Only the four current adapter source/test files are admitted to PR244; root patc
 and untracked files retained privately in triage-243/root-reconciliation.
 Source/installed verification must refresh for this exact combined packet before
 main integration, published release and activation. Preserve all other sessions.
+
+## Terminal disposition
+
+All accepted work complete. Later historical pending-decision text records earlier
+checkpoints and is superseded by final-acceptance.md. Public source and installed
+identity verified; root dirty work preserved. Worktree closes after exact remote
+custody and documentation integration. No further implementation packet required.

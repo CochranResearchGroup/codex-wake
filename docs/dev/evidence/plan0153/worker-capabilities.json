@@ -1,0 +1,93 @@
+[
+  {
+    "service": "codex-wake-odollo.service",
+    "compatible": true,
+    "schema_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "pid": 87046
+  },
+  {
+    "service": "codex-wake-agent-browser.service",
+    "compatible": true,
+    "schema_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "pid": 87089
+  },
+  {
+    "service": "codex-wake-auracall.service",
+    "compatible": true,
+    "schema_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "pid": 87181
+  },
+  {
+    "service": "codex-wake-soylei-website.service",
+    "compatible": true,
+    "schema_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "pid": 87336
+  },
+  {
+    "service": "codex-wake-graphiti.service",
+    "compatible": true,
+    "schema_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "pid": 87285
+  },
+  {
+    "service": "codex-wake-litscout-0553-integration.service",
+    "compatible": true,
+    "schema_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "pid": 87310
+  },
+  {
+    "service": "codex-wake-odollo-main-production-install.service",
+    "compatible": true,
+    "schema_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "pid": 87362
+  }
+]

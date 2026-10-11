@@ -1,0 +1,82 @@
+{
+  "links": [
+    {
+      "name": "codex-wake",
+      "old_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/codex-wake",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake"
+    },
+    {
+      "name": "codex-waked",
+      "old_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/codex-waked",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-waked"
+    },
+    {
+      "name": "codex-wake-hook",
+      "old_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/codex-wake-hook",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake-hook"
+    },
+    {
+      "name": "codex-wake-github-webhook",
+      "old_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/codex-wake-github-webhook",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake-github-webhook"
+    },
+    {
+      "name": "codex-wake-mcp",
+      "old_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/codex-wake-mcp",
+      "new_target": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake-mcp"
+    }
+  ],
+  "services": [
+    {
+      "unit": "codex-wake-odollo.service",
+      "pid": 87046,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    },
+    {
+      "unit": "codex-wake-agent-browser.service",
+      "pid": 87089,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    },
+    {
+      "unit": "codex-wake-auracall.service",
+      "pid": 87181,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    },
+    {
+      "unit": "codex-wake-soylei-website.service",
+      "pid": 87263,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    },
+    {
+      "unit": "codex-wake-graphiti.service",
+      "pid": 87285,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    },
+    {
+      "unit": "codex-wake-litscout-0553-integration.service",
+      "pid": 87310,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    },
+    {
+      "unit": "codex-wake-supervisor.service",
+      "pid": 87336,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    },
+    {
+      "unit": "codex-wake-odollo-main-production-install.service",
+      "pid": 87362,
+      "active": true,
+      "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4"
+    }
+  ],
+  "previous_prefix_retained": true,
+  "unrelated_webhook_unchanged": true,
+  "verdict": "PASS"
+}

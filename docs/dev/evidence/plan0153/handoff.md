@@ -1,3 +1,15 @@
+# Plan0153 terminal handoff
+
+DONE. See final-acceptance.md. PR244 integrated241d7a4; release v0.13.1 active.
+Prior pending decisions resolved by operator "ok go". No further execution packet.
+Root concurrent dirty work is preserved; public main and exact installed prefix
+are the accepted authorities. Original standalone/composite receipts and earlier
+blocked audit are historical, not current pending gates. No replay or retry of
+incident events. Previous prefix retained for rollback; schema6 records hold on
+old reader. Companion StableTime availability issue remains separate.
+
+Historical handoff follows for provenance:
+
 # Plan0153 — Published source and pending effect gates
 
 Latest corrected source: fix/issue243-intent-recovery, draft PR244:

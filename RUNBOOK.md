@@ -5475,3 +5475,14 @@ installed candidates pass eight-worker qualification, no duplicate successor or
 crash replay, original expiry holds, old rollback and85/86-file parity. See
 checkpoint-04.md/completion-audit.md. Setup/publication decisions still pending;
 no global activation/production turn. Memory unavailable receipt, no write.
+
+## Turn 266 | 2026-10-11 UTC
+
+Operator approved Matt setup/default labels and adapter publication. Plan0153
+DONE: PR244 integrated241d7a4, v0.13.1 published/download parity/activated, previous
+prefix retained.1072 full-source OK/two skips;45 affected checks, two optional MCP
+tests and installed MCP smoke pass. Published eight-worker fixture qualifies
+one monitor successor/no replay/original-expiry hold. Seven daemon roots live
+schemas1–6; supervisor new prefix; independent webhook unchanged;70 records
+accounted for. Root alternative and other sessions preserved; no incident replay
+or new production wake/model turn. See final-acceptance.md. Memory unavailable.
