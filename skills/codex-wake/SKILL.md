@@ -42,6 +42,27 @@ and [MCP setup](https://github.com/CochranResearchGroup/codex-wake/blob/v0.13.0/
 for operator configuration, receipts and supported limits. CLI and MCP share
 one mailbox and dispatcher; do not start extra workers for MCP clients.
 
+## A2A response routing
+
+A TUI final answer is local output: it does not deliver a reply or cause another
+agent's turn. Questions and work requests need one response to the exact sender;
+notices and final results normally end locally without an outbound courtesy reply.
+For tracked requests use `wake_messages_reply` / `messages reply` on the original
+ID: notified requests reply with `delivery=notify`, agreed inbox-only exchanges
+reply with `delivery=inbox`. A suspended sender must verify its exact reply arm.
+Do not silently replace a required notified reply with TUI output or an inbox reply.
+
+Before sending, state purpose, expected response route, result recipient, scope,
+fixed deadline and evidence. Use `kind=notice` for explicit no-reply/TUI-only
+observations. Receipt acknowledgements do not require a message back. A third-party
+handoff needs existing explicit authorization and its own exact-target send and
+correlation; it never redirects the original correlated reply. Missing authority
+or uncertain delivery requires a truthful local blocker and reconciliation.
+
+Read [A2A response standards and examples](references/a2a-responses.md) before
+sending or processing an A2A exchange. Follow its request/result defaults, claim
+rules, native/Wake distinction, third-party limits and no-reply-loop rules.
+
 ## Native workflow first
 
 Use native Codex tools for ordinary immediate messages. Wake is for durable

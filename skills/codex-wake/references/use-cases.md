@@ -2,6 +2,14 @@
 
 Use these patterns when deciding how an agent should schedule its own wake cycle.
 
+## Agent-to-agent response routing
+
+Read [the response standard](a2a-responses.md) for questions, work results,
+notices, inbox-only exchanges and authorized third-party handoffs. Local TUI
+output does not deliver a sender reply. Choose the response expectation before
+sending, retain the exact message ID, and end final-result exchanges without a
+courtesy reply loop.
+
 ## Choose Transport First
 
 Pick the target runtime before choosing a trigger. The same `after 20m` timing

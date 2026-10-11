@@ -1158,3 +1158,14 @@ source OK/two skips;45 affected checks, two optional MCP tests and installed MCP
 smoke PASS. Seven live daemon roots support schemas1–6; supervisor upgraded;
 all70 records accounted for; independent webhook and root alternative preserved.
 Acceptance: docs/dev/evidence/plan0153/final-acceptance.md. No incident replay.
+
+## P154 | A2A response standards
+
+State: CLOSED
+
+[Plan0154](docs/dev/plans/0154-2026-10-11-a2a-response-standards.md): documented
+TUI/local output versus sender replies, inbox-only returns, no-reply notices and
+explicitly authorized third-party handoffs. Bundled and two installed skills
+include the [response standard](skills/codex-wake/references/a2a-responses.md).
+Existing MCP/CLI/worker contracts unchanged. Eight-scenario review and installed
+parity: docs/dev/evidence/plan0154/review.md. No live model-compliance claim.

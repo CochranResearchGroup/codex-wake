@@ -6,6 +6,22 @@ idempotency, work claims, receipt generations, expiry and recovery. It starts no
 daemon or watcher and creates no separate store. See the
 [agent-to-agent guide](agent-to-agent.md) for operator setup and receipt meanings.
 
+## Response expectations
+
+The [A2A response standard](../skills/codex-wake/references/a2a-responses.md)
+also applies to MCP. `wake_messages_reply` correlates the result to the exact
+original message and original sender. Select `delivery=notify` for a notified
+request's return, or `delivery=inbox` for an explicitly inbox-only exchange.
+A TUI answer alone does neither. Use `wake_messages_arm_reply` before a suspended
+sender yields; notify admission alone does not prove receipt or continuation.
+
+`wake_messages_ack` records receipts, not an outbound acknowledgement message.
+Do not automatically reply to final results/notices. An explicitly authorized
+third-party handoff uses `wake_messages_send` with its own exact recipient,
+intent key and correlation; it does not redirect `wake_messages_reply`.
+These conventions use existing tools and fields; they add no permission or
+runtime-enforced response policy.
+
 ## Install and register
 
 Install the optional extra from a released tag or reviewed checkout:
