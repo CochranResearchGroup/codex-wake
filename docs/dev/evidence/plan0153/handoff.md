@@ -1,3 +1,8 @@
+Current reconciliation: actual three-hour delivery accepted; see
+real-three-hour-delivery.md/json. Root alternative preserved on remote archive
+2a81a4a; root returned to current main. Earlier dirty-root/pending-delivery notes
+below are history. No replay, registration, record mutation or restart.
+
 # Plan0153 terminal handoff
 
 DONE. See final-acceptance.md. PR244 integrated241d7a4; release v0.13.1 active.

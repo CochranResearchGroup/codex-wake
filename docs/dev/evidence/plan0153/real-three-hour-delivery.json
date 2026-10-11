@@ -1,0 +1,40 @@
+{
+  "wake_id": "wake_intent_a31828e69e05434591ae75224acb7085",
+  "checks": {
+    "intent_exactly_unchanged": true,
+    "prompt_unchanged": true,
+    "target_unchanged": true,
+    "original_three_hours": true,
+    "due_original": true,
+    "expiry_original": true,
+    "stop_original": true,
+    "source_identity": true,
+    "bounded_not_before": true,
+    "bounded_expiry": true,
+    "one_submission_attempt": true,
+    "exact_submission": true,
+    "ack_same_root_thread": true,
+    "native_same_turn": true,
+    "native_actual_user_message": true,
+    "native_source": true
+  },
+  "due_utc": "2026-10-11T20:08:04.145467Z",
+  "fixed_expiry_utc": "2026-10-11T20:23:04.145467Z",
+  "bounded_dispatch_lower": "2026-10-11T20:08:05.247287Z",
+  "bounded_dispatch_upper": "2026-10-11T20:08:06.138265Z",
+  "limitations": [
+    "Continuation is in progress; no completion claim",
+    "Conditional authenticated bounds do not measure physical UTC error",
+    "Manual lifecycle and companion-ticket acceptance remain separate"
+  ],
+  "attempts": 1,
+  "same_original_intent": true,
+  "ack_submitted_at": "2026-10-11T20:08:08Z",
+  "native_execution_observed": "turn_inProgress",
+  "continuation_completion_proven": false,
+  "source_receipts": {
+    "/home/ecochran76/workspace.local/wsl-time/docs/dev/evidence/issue-7/live-3h-independent-verification.json": "56aa3253919dca63ddb1fd2828555bf6f76c67e30a79c1338a1f99a07b738349",
+    "/home/ecochran76/workspace.local/wsl-time/docs/dev/evidence/issue-7/live-3h-delivery.json": "4cc3fd5f824d8a68f0733e6bfaab836f741b6fc4afbe29624811917c10fe35b8",
+    "/home/ecochran76/workspace.local/wsl-time/docs/dev/evidence/issue-7/live-3h-anchored-intent.json": "e98c1ff2d2fab670fc5ad48d1a67e0cc30e4de6ff0e8f2ef0d845d437a27699a"
+  }
+}

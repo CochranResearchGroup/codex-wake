@@ -5486,3 +5486,13 @@ one monitor successor/no replay/original-expiry hold. Seven daemon roots live
 schemas1–6; supervisor new prefix; independent webhook unchanged;70 records
 accounted for. Root alternative and other sessions preserved; no incident replay
 or new production wake/model turn. See final-acceptance.md. Memory unavailable.
+
+## Turn 267 | 2026-10-11 UTC
+
+Operator approved actual three-hour delivery documentation and root reconciliation.
+Current record hash and all16 receipt checks verified; original anchors/boundaries
+and one submission preserved, receiving native turn observed. No completion,
+physical-accuracy or manual-recovery claim. Evidence in Plan0153. All30 root files
+preserved in remote archive2a81a4a plus local stash; safely fast-forwarded from
+da21f33 to main172dbd9. Alternative never installed. Docs-only packet with no
+runtime/wake effects. Memory unavailable receipt; no reviewed safe group.
