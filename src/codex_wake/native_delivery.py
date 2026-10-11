@@ -46,6 +46,18 @@ def create_native(args, root):
     if not args.endpoint.startswith('unix://'):
         raise WakeError('native target requires a local unix:// endpoint')
     from .network_wakes import read_time, creation_time, precise_deadline
+    from .time_inspection import stable_time_config
+    if stable_time_config() is not None:
+        from .pending_time import register_intent
+        target = {'transport': 'native', 'thread_id': args.thread_id,
+                  'codex_cmd': resolve_codex_cmd(args.codex_path, required=True),
+                  'endpoint': args.endpoint,
+                  'resume_policy': 'same_thread' if args.resume_missing else 'hold'}
+        try:
+            observation = read_time()
+        except WakeError:
+            observation = None
+        return register_intent(args, root, target, observation)
     observation = read_time()
     now = creation_time(observation)
     if args.native_command == 'file':
@@ -304,6 +316,8 @@ def reconcile_command(args, root):
                 current = evaluation_time(read_time())
             except WakeError:
                 current = None
+        elif classify_record(found.record) == 'native_pending_time_v6':
+            current = None
         else:
             current = utc_now()
         result = reconcile_native(root, found, current, force=True)
@@ -319,7 +333,7 @@ def migrate_command(args, root):
     with WakeLifecycleLock(root, args.wake_id):
         found = find_record(root, args.wake_id)
         record = found.record
-        if record.get('schema_version') in (NATIVE_SCHEMA_VERSION, 5):
+        if record.get('schema_version') in (NATIVE_SCHEMA_VERSION, 5, 6):
             if classify_record(record) == 'hold':
                 raise WakeError('current native record is malformed; inspect before continuing')
             print(json.dumps({'id': args.wake_id, 'state': 'already_current', 'submitted': False}))

@@ -1145,3 +1145,9 @@ registered and qualified, human guides and installed agent skills advertise
 tracked exchanges. Existing A2A acceptance remains CLOSED. New sessions must
 discover the tools; messaging still requires operator-issued actor context.
 Evidence: docs/dev/evidence/plan0151/closeout.md. Gov_policy evaluation deferred.
+
+## P152 | StableTime consumer
+
+State: CLOSED
+
+Current State: [Plan0152](docs/dev/plans/0152-2026-10-10-stable-time-consumer.md) installed authenticated StableTime for native/opt-in network-time Wake paths on this workstation. Legacy records and application clocks remain; recovery acceptance deferred.

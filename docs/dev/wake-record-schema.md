@@ -378,3 +378,52 @@ Relative creation/file TTL use the conservative upper bound; absolute deadlines
 preserve fractional precision. Fresh bounded evidence gates due, retry and expiry;
 uncertainty holds effects. Read-only native reconciliation and cancellation remain
 available without trustworthy time and report unknown timestamps.
+
+## Schema6: retained native time intent
+
+When StableTime is configured but cannot supply a finite supported interval,
+`native after|at|file` accepts and durably retains the scheduling intent as
+schema6. It does not reject solely because time is uncertain and does not
+substitute the WSL clock. Unconfigured legacy registration is unchanged.
+
+The record remains `pending` with predicate `{"type":"pending_time"}` and an
+explicit `time_intent` containing the trigger kind, positive TTL seconds and
+`origin_policy: first_finite_upper_bound` and `provider: stable-time`. Relative triggers carry positive
+`delay_seconds`; absolute triggers preserve fractional `due_at` and fixed
+`expires_at`; file triggers carry the resolved path. `created_at`, `updated_at`,
+`next_attempt_at` and unknown relative/file expiry are null. The inspectable
+`time_observation` explicitly records uncertain status, null bounds and a
+StableTime unavailable/unbounded reason. Events use null UTC timestamps rather
+than inventing guest-clock observations.
+
+A root-scoped intent hash serializes overlapping identical active registrations
+with the same trigger, TTL, target, prompt and cwd. They return the same wake ID
+instead of registering another delivery. A submitted or cancelled intent does
+not suppress a later deliberate new registration.
+
+The monitor retries time acquisition. Registration, promotion, later evaluation
+and direct dispatch of these intents require finite network observations whose
+source names all carry the `stable-time:` authenticated-adapter prefix. Disabling
+or removing the selector cannot replace that persisted authority with legacy NTP
+or Windows time. Existing generic schema5 records remain compatible.
+
+The first finite supported observation
+promotes schema6 to schema5 under the same lifecycle lock used by cancellation
+and native dispatch. The wake ID, original unknown-time event, prompt and intent
+are preserved. If a relative trigger had no supported UTC origin, its entire
+requested delay starts at the first admitted upper UTC bound, rounded upward to
+whole seconds; elapsed outage time is not fabricated. A file TTL starts at the
+same conservative admission anchor. An absolute deadline and its TTL never
+move during recovery. Once an anchor exists it never restarts on subsequent
+outages. Existing schema5 not-before, uncertain-expiry, cancellation and native
+submission/reconciliation rules then govern delivery. A finite lower bound
+past absolute expiry produces failure with no submission.
+
+Schema6 cannot dispatch directly. Cancellation and read-only reconciliation
+remain available with unknown timestamps; malformed or unknown records hold.
+Archiving a cancelled schema6 record also preserves null UTC timestamps. Without
+a supported retention anchor, automatic age-based cleanup leaves it intact.
+Readers supporting versions1–5 hold schema6 unchanged. Restore a schema6-aware
+reader to recover it; do not downgrade its predicate to a guest-timed schema.
+Mixed roots retain support for existing versions1–5. Existing records receive
+no automatic migration. See the [candidate compatibility note](release-notes/0.13.0-stable-time-intents.md).

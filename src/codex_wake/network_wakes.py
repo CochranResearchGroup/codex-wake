@@ -68,6 +68,9 @@ def evaluate_native_pending(root, identifier, provider=None):
         record = found.record
         if classify_record(record) != 'native_network_v5' or record['status'] != 'pending':
             return 'inactive'
+        from .pending_time import admissible_intent_observation
+        if not admissible_intent_observation(record, decision):
+            return 'pending'
         expiry = precise_deadline(record['target']['expires_at'])
         if current >= expiry:
             move_record(root, found, 'failed', event_type='expired',

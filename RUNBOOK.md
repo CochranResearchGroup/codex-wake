@@ -5451,3 +5451,7 @@ must discover tools; this existing session's catalog was not refreshed.
 Plan0151 lane corrected to P75 because P73 already belongs to Plan0146.
 Terminal evidence: docs/dev/evidence/plan0151/closeout.md. Hosted CI waiting
 waived; gov_policy measurement deferred. Memory disposition unavailable.
+
+## Turn 263 | 2026-10-10 UTC
+
+Operator requested live StableTime rollout and deferred recovery. Plan0152 closes the first consumer slice: authenticated service adapter on the existing network-time seam, 29 focused tests, installed 0.13.0-stable-time-01 and eight active Wake workers. Private selector opts this workstation in; failure holds without fallback. Existing records/schemas remain. Qualified installed response and worker/source readback retained at ../wsl-time/docs/dev/evidence/consumer-rollout-01. No business-service clock migration, commits or pushes claimed.

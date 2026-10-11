@@ -1025,3 +1025,16 @@ Netnod and PTB remain disabled pending scale qualification.
 Mailbox activation is an explicit operator schema migration, never a reset of
 an anomalous legacy checkpoint. See the [0.8.0 instructions](docs/dev/release-notes/0.8.0-network-time.md)
 for commands, compatibility, migration, rollback and acceptance limits.
+
+### Use the installed StableTime authority
+
+Set `CODEX_WAKE_STABLE_TIME_CONFIG` to an existing private StableTime client JSON,
+or provision `~/.config/codex-wake/stable-time-client.json` with that config.
+Native and opt-in network-time wakes then read authenticated loopback HTTPS from
+StableTime instead of making their own provider requests. Configured service
+failure returns uncertain time without guest-clock or plain-NTP fallback.
+The Windows QPC handoff widens the upper endpoint; bounds refer to that native
+measurement instant, not an arbitrarily later caller instant. Existing record
+schemas and legacy policy labels remain compatible; `stable-time:` source names
+identify this adapter. Current strict service gates may delay wakes until the
+next qualified window. Recovery acceptance remains deferred on this workstation.

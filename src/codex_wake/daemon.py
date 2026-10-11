@@ -383,6 +383,13 @@ def poll_once(
         if classification == "hold":
             pending += 1
             continue
+        if classification == 'native_pending_time_v6':
+            from .pending_time import evaluate_intent
+            state = evaluate_intent(root, item.record['id'], time_provider)
+            fired += int(state == 'firing')
+            failed += int(state == 'failed')
+            pending += int(state == 'pending')
+            continue
         if classification == 'native_network_v5':
             from .network_wakes import evaluate_native_pending
             try:

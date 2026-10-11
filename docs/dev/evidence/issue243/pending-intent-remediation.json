@@ -1,0 +1,36 @@
+{
+  "accepted_blockers": [
+    {
+      "fix": "Persist provider stable-time; require finite network evidence with >=2 distinct stable-time sources at configured registration,6 admission,5 evaluation and direct dispatch for time_intent records",
+      "id": "authenticated_provider_identity",
+      "red": "Legacy finite sources promoted schema6 and fired5; direct dispatch returned submitted from alternate sources",
+      "verification": "four new public-seam tests: alternate-provider6 recovery, wrong-provider configured registration, selector-disabled5 polling and direct dispatch"
+    },
+    {
+      "fix": "Schema6 requires a nonempty list of explicit unknown-time event objects; malformed history holds before promotion",
+      "id": "malformed_event_history",
+      "red": "events=1,None,{},[1],or malformed event dict classified native_pending_time_v6",
+      "verification": "new public classification/poll test asserts no change for all5 malformed histories"
+    }
+  ],
+  "effects": "Source and tests only. No installation, live provider requests, live wake registrations, commits or tracker closure.",
+  "prior_evidence": "pending-intent-validation.json",
+  "red_green_command": "CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src /home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/python -m unittest discover -s tests -p test_pending_time_intent.py -q",
+  "source_sha256": {
+    "docs/dev/release-notes/0.13.0-stable-time-intents.md": "92277ff2bd2ae905220249171d37e43929c7ced5cccde2252b83db1f3fe52dee",
+    "docs/dev/wake-record-schema.md": "b995594ce62dff6202f2b72b18329188f97d3af059e398386a3b571d527bc1e1",
+    "src/codex_wake/daemon.py": "81136536db38dee4947f2a2272374d30fcfc874519b085ddce47d91d6e63eac5",
+    "src/codex_wake/injector.py": "3456ac9b7bc81d51418c11977c7b884b51c525ba4091b258bc7c06f06957061a",
+    "src/codex_wake/native_delivery.py": "47265aae3b940efc6dc093202f8348ea3a8d2ae8f6410c807bb0626cd224f27a",
+    "src/codex_wake/network_wakes.py": "0fc3bb358ce8c4ca98c9a37ae8e9481102ac4690b2ee7c7654c139dc9bb96ad7",
+    "src/codex_wake/pending_time.py": "00f0737ef382a30147e2f673406b82d6f4ef488f4bc87d34ea22fba65b777457",
+    "src/codex_wake/records.py": "6344135594300c3018259634ef1e291be01396718501b3669e6a9f76a97ce72c",
+    "tests/test_pending_time_intent.py": "dfccb51a94d6bf2b7021b9c3a0104f1ec6a3973a20d1af02db572fef3baa9cd6"
+  },
+  "validation": {
+    "command": "CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src:tests /home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/python -m unittest test_pending_time_intent test_native_network_time test_native_delivery test_native_migration test_native_protocol_large_response test_records test_daemon test_network_wakes test_injector -q",
+    "exit": 0,
+    "pending_intent_tests": 17,
+    "tests": 120
+  }
+}

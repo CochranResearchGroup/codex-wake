@@ -19,6 +19,7 @@ from .time_provider import NETWORK_TIME_POLICY
 SCHEMA_VERSION = 1
 NATIVE_SCHEMA_VERSION = 4
 NATIVE_NETWORK_SCHEMA_VERSION = 5
+NATIVE_PENDING_TIME_SCHEMA_VERSION = 6
 SCHEMA_COMPATIBILITY = "additive_optional_fields"
 SCHEMA_DOC = "docs/dev/wake-record-schema.md"
 ACTIVE_STATUS_DIRS = ("pending", "firing", "submitted", "failed", "cancelled", "expired")
@@ -70,6 +71,9 @@ class WakeLifecycleLock:
 def classify_record(record: object) -> str:
     """Pure multi-version classification; unrecognized records are held."""
 
+    if isinstance(record, dict) and record.get('schema_version') == NATIVE_PENDING_TIME_SCHEMA_VERSION:
+        from .pending_time import valid_pending_record
+        return 'native_pending_time_v6' if valid_pending_record(record) else 'hold'
     if isinstance(record, dict) and record.get('schema_version') == NATIVE_NETWORK_SCHEMA_VERSION:
         if classify_record(dict(record, schema_version=NATIVE_SCHEMA_VERSION)) != 'v1':
             return 'hold'
@@ -365,8 +369,9 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "read_versions": [1, 2, 3, 4, 5],
+        "read_versions": [1, 2, 3, 4, 5, 6],
         "native_network_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
+        "native_pending_time_write_version": NATIVE_PENDING_TIME_SCHEMA_VERSION,
         "native_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
         "legacy_native_write_version": NATIVE_SCHEMA_VERSION,
         "default_write_version": SCHEMA_VERSION,
@@ -452,7 +457,7 @@ def iter_records(root: Path) -> list[WakePath]:
             if not isinstance(record, dict):
                 continue
             results.append(WakePath(path=path, record=record))
-    return sorted(results, key=lambda item: (item.record.get("created_at", ""), item.record.get("id", "")))
+    return sorted(results, key=lambda item: ((item.record.get("created_at") or ""), item.record.get("id", "")))
 
 
 def iter_archived_records(root: Path) -> list[WakePath]:
@@ -468,7 +473,7 @@ def iter_archived_records(root: Path) -> list[WakePath]:
         if not isinstance(record, dict):
             continue
         results.append(WakePath(path=path, record=record))
-    return sorted(results, key=lambda item: (item.record.get("archived_at", ""), item.record.get("id", "")))
+    return sorted(results, key=lambda item: ((item.record.get("archived_at") or ""), item.record.get("id", "")))
 
 
 def find_record(root: Path, wake_id: str) -> WakePath:
@@ -482,7 +487,7 @@ def all_records(root: Path, include_archive: bool = False) -> list[WakePath]:
     records = iter_records(root)
     if include_archive:
         records.extend(iter_archived_records(root))
-    return sorted(records, key=lambda item: (item.record.get("created_at", ""), item.record.get("id", "")))
+    return sorted(records, key=lambda item: ((item.record.get("created_at") or ""), item.record.get("id", "")))
 
 
 def status_summary(root: Path) -> dict[str, Any]:
@@ -547,7 +552,7 @@ def cancel_record(
     checkpoint: Callable[[str], None] | None = None,
 ) -> Path:
     found = find_record(root, wake_id)
-    if decode_signal_record(found.record) is not None or classify_record(found.record) in {"network_v3", "native_network_v5"}:
+    if decode_signal_record(found.record) is not None or classify_record(found.record) in {"network_v3", "native_network_v5", "native_pending_time_v6"}:
         with WakeLifecycleLock(root, wake_id):
             if checkpoint is not None:
                 checkpoint("after_cancel_lock")
@@ -565,7 +570,7 @@ def _cancel_found(
     status = record.get("status")
     if status in {"submitted", "failed", "cancelled", "expired", "archived"}:
         raise WakeError(f"cannot cancel wake in status {status}")
-    network = classify_record(record) in {'network_v3', 'native_network_v5'}
+    network = classify_record(record) in {'network_v3', 'native_network_v5', 'native_pending_time_v6'}
     current = None if network else now or utc_now()
     record["status"] = "cancelled"
     record["updated_at"] = None if network else format_utc(current)
@@ -627,16 +632,23 @@ def archive_record(
     status = record.get("status")
     if status not in TERMINAL_STATUSES:
         raise WakeError(f"cannot archive wake in status {status}")
-    if record.get("schema_version") == 3:
+    unknown_origin = classify_record(record) == "native_pending_time_v6"
+    if unknown_origin:
+        current = None
+    elif record.get("schema_version") == 3:
         from .network_wakes import creation_time, read_time
         current = creation_time(read_time())
     else:
         current = now or utc_now()
     record["previous_status"] = status
     record["status"] = "archived"
-    record["archived_at"] = format_utc(current)
-    record["updated_at"] = format_utc(current)
-    record = append_event(record, "archived", "Wake archived by operator", current)
+    record["archived_at"] = format_utc(current) if current else None
+    record["updated_at"] = format_utc(current) if current else None
+    if unknown_origin:
+        record["events"] = list(record.get("events") or []) + [dict(
+            type="archived", message="Wake archived by operator", at=None, time_status="not_observed")]
+    else:
+        record = append_event(record, "archived", "Wake archived by operator", current)
     archive_dir = root / "archive"
     archive_dir.mkdir(parents=True, exist_ok=True)
     final_path = archive_dir / f"{wake_id}.json"

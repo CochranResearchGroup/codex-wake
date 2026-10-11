@@ -1,0 +1,71 @@
+{
+  "additional_coverage": [
+    "process-boundary persistence",
+    "absolute fractional deadline and fixed expiry",
+    "cancellation during acquisition",
+    "concurrent identical creation",
+    "concurrent promotion exactly once",
+    "one intercepted native submission",
+    "malformed records hold",
+    "file recovery expiry",
+    "unconfigured native legacy compatibility"
+  ],
+  "issues": [
+    "CochranResearchGroup/stable-time#7",
+    "CochranResearchGroup/codex-wake#243"
+  ],
+  "red_commands": [
+    "CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src python -m unittest discover -s tests -p test_pending_time_intent.py -v",
+    "CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src /home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/python -m unittest discover -s tests -p test_pending_time_intent.py -q"
+  ],
+  "red_green_cycles": [
+    {
+      "green": "schema6 persisted with null UTC and bounds",
+      "name": "unknown creation",
+      "red": "WakeError time_uncertain rejected creation"
+    },
+    {
+      "green": "same ID promoted5 and full delay preserved",
+      "name": "recovery",
+      "red": "schema6 never promoted"
+    },
+    {
+      "green": "advertises6 and write version6",
+      "name": "schema discovery",
+      "red": "read_versions omitted6"
+    },
+    {
+      "green": "unknown timestamp reconciliation succeeds",
+      "name": "read-only reconciliation",
+      "red": "forbidden guest clock called"
+    },
+    {
+      "green": "explicit pending-time hold; no effect",
+      "name": "direct dispatch observability",
+      "red": "generic signal no-longer-active message"
+    },
+    {
+      "green": "null archive timestamp; retention skips unknown age",
+      "name": "unknown-origin archive",
+      "red": "forbidden guest clock called"
+    }
+  ],
+  "runtime": "No installation, live provider acquisition, live native submission or issue closure performed. Existing installed interpreter used only as test runner with PYTHONPATH selecting source.",
+  "scope": "source-only native pending-time intent seam",
+  "source_sha256": {
+    "docs/dev/release-notes/0.13.0-stable-time-intents.md": "686a0e4c84e6660ca549e4d3756ba1719e1f19306246868f76611ec313ec5a29",
+    "docs/dev/wake-record-schema.md": "eb2ca61f18028327a83051c02a4d2ee9c5184630e17503945e9cd1c02f357da9",
+    "src/codex_wake/daemon.py": "81136536db38dee4947f2a2272374d30fcfc874519b085ddce47d91d6e63eac5",
+    "src/codex_wake/injector.py": "8d32ea56cf694a9ac4f5de3f7bc4564d82dc55de584a5eac37417c14f94b2101",
+    "src/codex_wake/native_delivery.py": "47265aae3b940efc6dc093202f8348ea3a8d2ae8f6410c807bb0626cd224f27a",
+    "src/codex_wake/pending_time.py": "81be7b43a16c591849a9689d529c8a5d006c24e667e7922e07eb7d67c7a5bcde",
+    "src/codex_wake/records.py": "6344135594300c3018259634ef1e291be01396718501b3669e6a9f76a97ce72c",
+    "tests/test_pending_time_intent.py": "aab1eda97521c24a8f8f4cc988892a39b9cc1235aaa579ec03c9340956120359"
+  },
+  "validation": {
+    "command": "CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src:tests /home/ecochran76/.local/share/codex-wake/releases/0.13.0-stable-time-01/bin/python -m unittest test_pending_time_intent test_native_network_time test_native_delivery test_native_migration test_native_protocol_large_response test_records test_daemon test_network_wakes test_injector -q",
+    "exit": 0,
+    "new_pending_intent_tests": 12,
+    "tests": 115
+  }
+}

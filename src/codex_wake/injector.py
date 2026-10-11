@@ -346,11 +346,16 @@ def dispatch_firing_record(
     classification = classify_record(record)
     if classification == 'hold':
         return DispatchResult('skipped','unrecognized record; no dispatch authorized')
+    if classification == 'native_pending_time_v6':
+        return DispatchResult('skipped', 'pending time intent retained; finite time not yet admitted')
     network_current = None
     if classification == 'native_network_v5':
         from .network_wakes import read_time, evaluation_time, precise_deadline
         try:
             decision = read_time(time_provider)
+            from .pending_time import admissible_intent_observation
+            if not admissible_intent_observation(record, decision):
+                return DispatchResult('skipped', 'StableTime authority not established; intent retained')
             lower = evaluation_time(decision)
             predicate = record['predicate']
             due = predicate.get('due_at') if predicate['type'] == 'not_before' else None
