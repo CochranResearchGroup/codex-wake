@@ -81,3 +81,16 @@ relative_origin_unanchored alert. Existing anchored counter/UTC recovery remains
 automatic. Acceptance of the earlier first-qualified-origin behavior is revoked;
 its public CLI/poll regression failed before the correction. Refreshed installed and optional-composite receipts pass; full source results
 are recorded in acceptance.md before the corrected source checkpoint publication.
+
+## Approved integration packet
+
+Operator approved Matt/default-label setup and retained adapter publication.
+Six docs/agents files and default labels applied. AGENTS pilot inventory hash
+refreshed. Current adapter includes contract2.0 finite authenticated wide bounds;
+native clock consumer updated against ../wsl-time/src/client.rs contract.
+Root competing pending_time candidate remains preserved separately: its later
+relative-origin behavior conflicts with F4 and its schema6 representation differs.
+Only the four current adapter source/test files are admitted to PR244; root patch
+and untracked files retained privately in triage-243/root-reconciliation.
+Source/installed verification must refresh for this exact combined packet before
+main integration, published release and activation. Preserve all other sessions.

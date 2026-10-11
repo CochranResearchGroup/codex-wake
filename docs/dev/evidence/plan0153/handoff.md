@@ -48,3 +48,10 @@ readback. No root edits were made by this lane. Private composite acceptance
 remains acceptance of its exact older snapshot, not the newly edited root.
 Reconcile current root and active owner before applying the publication patch or
 activating any candidate; composite-proposal.json records current drift.
+
+Operator subsequently approved both pending decisions. Setup applied; four current
+StableTime adapter files incorporated. See integration-reconciliation.md. Older
+private composite proposals are historical snapshots; use combined-dist and
+combined-venv with exact combined-installed/parity receipts. Root pending_time
+candidate preserved separately and excluded because of incompatible schema6 and
+relative-origin behavior. No old permission question remains pending.

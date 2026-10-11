@@ -71,8 +71,9 @@ def snapshot():
 
 def from_response(response, *, counter, frequency):
     """Validate the authenticated service contract and native counter handoff."""
-    if not isinstance(response, dict) or response.get("contract_version") != "1.0":
+    if not isinstance(response, dict) or response.get("contract_version") not in ("1.0", "2.0"):
         raise ValueError("invalid_clock_contract")
+    version_two = response["contract_version"] == "2.0"
     epoch = response["epoch"]
     if str(UUID(epoch)) != epoch:
         raise ValueError("invalid_clock_epoch")
@@ -85,7 +86,7 @@ def from_response(response, *, counter, frequency):
         raise ValueError('invalid_counter_wire_format')
     measured, measured_frequency = int(measurement["counter"]), int(measurement["frequency_hz"])
     if (any(type(x) is not int for x in (rate, max_age, counter, frequency))
-            or not 0 <= rate <= 5000 or not 0 < max_age <= 10000000000
+            or not 0 <= rate <= 5000 or not 0 < max_age <= (300000000000 if version_two else 10000000000)
             or frequency <= 0 or frequency != measured_frequency or counter < measured or measured < 0
             or response.get("time_scale") != "UTC-step; announced-leaps-unavailable"):
         raise ValueError("invalid_counter_evidence")
@@ -94,11 +95,14 @@ def from_response(response, *, counter, frequency):
         raise ValueError("counter_handoff_expired")
     host = {"epoch": epoch, "counter": counter, "frequency": frequency, "rate_ppm": rate}
     if response.get("status") == "unavailable":
-        if response.get("authentication") != "NTS-required" or response.get('estimate') is not None:
+        if (response.get("authentication") != "NTS-required" or response.get('estimate') is not None
+                or (version_two and response.get('bound') != 'unbounded')):
             raise ValueError("invalid_unavailable_contract")
         return {"utc": None, "counter": host, "reason": "authenticated_counter_only"}
     if response.get("status") not in ("qualified_live", "qualified_holdover") or response.get("authentication") != "NTS-verified":
         raise ValueError("utc_authentication_unqualified")
+    if version_two and (response.get('bound') != 'finite' or response.get('best_effort') is not None):
+        raise ValueError('inconsistent_finite_result')
     operators = response["operators"]
     age = response["acquisition_age_ns"]
     generation = response["evidence_generation"]
@@ -115,7 +119,7 @@ def from_response(response, *, counter, frequency):
     estimate = response["estimate"]
     lower, middle, upper = (stamp(estimate[x]) for x in ("earliest_utc", "utc", "latest_utc"))
     radius = estimate["maximum_error_ns"]
-    if (type(radius) is not int or not 0 <= radius < 100000000 or not lower <= middle <= upper
+    if (type(radius) is not int or radius < 0 or (not version_two and radius >= 100000000) or not lower <= middle <= upper
             or type(estimate.get('maximum_error_ms')) not in (int, float)
             or estimate.get('maximum_error_ms') != radius / 1000000
             or response.get('reason') is not None

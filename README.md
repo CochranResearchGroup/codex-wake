@@ -198,7 +198,7 @@ For relative delays, the configured authenticated StableTime service can supply
 host-counter evidence even while UTC is unavailable. Same-epoch elapsed bounds
 preserve not-before and expiry; this evidence is never described as UTC. Default
 interval tolerance is 2% of the delay, bounded to 1s–5m; use `--time-tolerance 1s`
-for a stricter request. Service UTC qualification remains below 100ms. Absolute
+for a stricter request. Contract1.0 UTC qualification remains below100ms. Contract2.0 accepts authenticated finite bounds under request tolerance; best-effort UTC never authorizes dispatch. Absolute
 `at` deadlines and optional `--stop-at ISO_TIMESTAMP` require qualified UTC.
 
 If no clock is admissible at registration, the original relative origin and

@@ -54,3 +54,17 @@ outside its Plan0152 no-commit/push scope. A clean0.13.1 install would otherwise
 remove that private adapter for other consumers. Preserve it and obtain a scoped
 publication decision before a global release/worker upgrade. Matt setup draft
 also awaits the required default-label preference and draft confirmation.
+
+## Approved combined candidate
+
+Matt setup/default-label approval received and applied. Current four-file
+StableTime adapter admitted; contract2.0 finite bounds supported by native reader.
+45 affected checks PASS in1.249s. Initial combined full run1072 in104.901s had
+one new-test missing-import error/two skips; import corrected and focused check
+passed. Corrected full run: Ran 1072 tests in 104.366s; OK (skipped=2). No source runtime change
+between those two runs. Earlier unexplained message-test failure remains history.
+Combined86-file wheel source parity and eight-fresh-worker installed fixture
+qualification PASS. Read-only installed candidate acquired authenticated counter
+only during live UTC outage; no production wake or completed turn was attempted.
+See integration-reconciliation.md; the old clean standalone/private-composite
+receipts are superseded by the combined candidate for publication/activation.

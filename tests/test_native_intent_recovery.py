@@ -102,6 +102,27 @@ class NativeIntentRecoveryTests(unittest.TestCase):
                 with self.subTest(field=field):
                     self.assertEqual(classify_record(dict(deepcopy(valid), **{field: value})), 'hold')
 
+    def test_authenticated_v2_wide_utc_retains_original_three_hour_deadline(self):
+        from copy import deepcopy
+        from test_native_clock import response
+        from codex_wake.native_clock import from_response
+        value = response()
+        value.update(contract_version='2.0', bound='finite', best_effort=None,
+                     counter_policy={'rate_ppm': 5000, 'maximum_age_ns': 300000000000})
+        value['estimate'].update(earliest_utc='2027-01-15T12:00:00Z', utc='2027-01-15T12:00:03Z',
+                                 latest_utc='2027-01-15T12:00:06Z', maximum_error_ns=3000000000, maximum_error_ms=3000.0)
+        origin = from_response(value, counter=10000010, frequency=10000000)
+        later = deepcopy(origin)
+        later['utc'].update(lower=1800025207, upper=1800025213)
+        later['counter']['counter'] += 108070000000
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'wake'
+            with patch('codex_wake.native_clock.snapshot', return_value=origin), contextlib.redirect_stdout(io.StringIO()):
+                run(['--wake-root', str(root), 'native', 'after', '--json', '--idempotency-key', 'wide-v2', '--codex-path', sys.executable, THREAD, '3h', '--', 'Continue'])
+            with patch('codex_wake.native_clock.snapshot', return_value=later):
+                self.assertEqual(poll_once(root, dispatch=False).fired, 1)
+            self.assertEqual(all_records(root)[0].record['scheduling_intent']['utc_anchor'], origin['utc'])
+
     def test_wrong_root_or_thread_cannot_dispatch_the_retained_request(self):
         import shutil
         origin = {'utc': None, 'counter': {'epoch': 'host-a', 'counter': 1000000, 'frequency': 1000, 'rate_ppm': 0}}

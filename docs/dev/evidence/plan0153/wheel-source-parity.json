@@ -53,7 +53,7 @@
     "codex_wake/mcp_server.py": "c8c1fddbd65a6825077dd2cb7610bf837194601f323a1b61bcd985e39b779e14",
     "codex_wake/messages_cli.py": "62b0a9c0f53e8cecac2e742c70b0257bb139af9520851ee5b30a9da3aae6fdca",
     "codex_wake/monitor.py": "7101973508943a02277ad546fb2a3279f528f99ce64e397a38061ede43fdd787",
-    "codex_wake/native_clock.py": "ff2c9b7ae55bbae0476722e1970b137bb4ef4d92c283cc22569aa2d71b142ff7",
+    "codex_wake/native_clock.py": "4b7290f47ab4d346c69f14265d7f32a3a65316f021c7e556fad0f850cc8695e6",
     "codex_wake/native_delivery.py": "abb9543ff6921e56fa3ddcc2f2762f055548c77d8da8428414a26c864532a737",
     "codex_wake/native_intents.py": "91facb54f29b97d9c34b157b9458147ed1d59f9d24555aeb86478a342d46fb77",
     "codex_wake/native_protocol.py": "d64aeb77f90ce3a29ab7eaeda0bee52240258f558cb0c23e733c17b37b00c07a",
@@ -76,18 +76,18 @@
     "codex_wake/signal_support.py": "2edd3032116dd3a336eb66e38e7e332e27958f00a3f182f0c709cafb07334ba9",
     "codex_wake/signals.py": "1a5c3ce9e70c2a4ff60772eb77d86448cffa2591c360cecbd5622a9cd8b8cb6f",
     "codex_wake/source_registry.py": "74ffa2f69226c8dd89e2ed3f57f261370725ad1500d26fe14ddf71e78de343e5",
+    "codex_wake/stable_time.py": "b8f2c520c63c85abfd274f60f9b4f9d5fe68f9fdf5a3909ae04c37e3dd92ec0f",
     "codex_wake/supervisor.py": "fc8f37246a2d487cf3e5b90d82ef3fd77bab924557d4e73c9bbd2c70b19713c9",
     "codex_wake/systemd_signals.py": "4ccd233b1377fdc3cfdabb80a4e2e9aedb753ccf52e2aacbfe71dc4474b836b7",
     "codex_wake/systemd_source_config.py": "26ce977fb546bd6f9a72d43939e2dea3670764588e8edb418b8ff577a347b32f",
     "codex_wake/time_collect.ps1": "372eea0ebc8aec8d2c817f7912ddd73c9ce36aa641633173e689df43474661bc",
-    "codex_wake/time_inspection.py": "8f2243bb8dba8c38258e0d1d12361d1ae3a0300e3fa9f354f3e944481fd81acf",
-    "codex_wake/time_provider.py": "5ff3a83454897277811264e442bf37d2ca005110d0afc01dcc561d92f621d639",
+    "codex_wake/time_inspection.py": "99158fec218141024242a8704e190a3526c0270195a758a3f2b829adf2603b02",
+    "codex_wake/time_provider.py": "2a5ea7ccaecdd3e06f7f8d05b7a61fd4e274f74bfae3e04a7ddf56e724f6fcd0",
     "codex_wake/webhook_http.py": "91e9f63ece54e6b7991d1bad052f1e191c1d3d78f7a68bd88476e7305cd2e1ab",
     "codex_wake/webhook_lifecycle.py": "6848fb33b689567980591da4c6714db88138db04ce8e1ed442f00585f287c3f7",
     "codex_wake/webhook_listener.py": "f7e013346512d00c85cf0dfa793edbc8cde1d6b566db9d6dc8601955c574b085"
   },
-  "private_overlay": false,
-  "source_file_count": 85,
+  "source_file_count": 86,
   "verdict": "PASS",
-  "wheel_sha256": "5b71ed36b0a703e816db047204d8b5a8b9d9f3c0c019cec26548fc6b0fb262e9"
+  "wheel_sha256": "1b67d7ef9589e156a1fb30bdb9238fe04cc7182453e3a0dc92bd2d0476ced111"
 }

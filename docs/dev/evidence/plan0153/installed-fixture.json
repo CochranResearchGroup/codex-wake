@@ -8,7 +8,7 @@
   "legacy_worker_held_record_unchanged": true,
   "live_worker_schema6": true,
   "owned_loop_worker_stopped": true,
-  "prefix": "/home/ecochran76/.local/state/codex-wake/triage-243/final-audit-venv",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/triage-243/combined-venv",
   "production_wakes": 0,
   "qualification_script_sha256": "f36b4f08b47fad6553403318e342f2badbe0670f615600104679101186d311c0",
   "recovery_chain_successors": 1,
@@ -18,5 +18,5 @@
   "unanchored_expiry_extended": false,
   "unanchored_origin_preserved": true,
   "verdict": "PASS",
-  "wake_id": "wake_intent_3d34fc923aa64aa88dab3eea3ac8abcc"
+  "wake_id": "wake_intent_34d62393e5ae44468a2ae922d336051d"
 }

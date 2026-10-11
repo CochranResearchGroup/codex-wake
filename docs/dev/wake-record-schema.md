@@ -435,3 +435,8 @@ Archival is an explicit operator action; its UTC timestamp remains unknown.
 Automatic age-based cleanup skips the unknown-time archive, preserving stable
 retry identity. Creation/events/acceptance also record unknown UTC rather than
 using guest time. No guest wall-clock value authorizes timing or retention.
+
+Contract2.0 finite NTS-verified bounds are supported with service freshness up to
+300s and bounded QPC handoff. Per-request precision still governs dispatch.
+Unbounded/best-effort UTC never supplies dispatch authority. Contract1.0 retains
+its below100ms qualification. No relative origin is created after an outage.

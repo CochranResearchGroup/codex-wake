@@ -38,6 +38,21 @@ class NativeClockTests(unittest.TestCase):
             with self.subTest(radius=radius), self.assertRaises(ValueError):
                 from_response(invalid, counter=10000010, frequency=10000000)
 
+    def test_v2_finite_bounds_support_hours_away_tolerance_without_best_effort(self):
+        value = response()
+        value.update(contract_version='2.0', bound='finite', best_effort=None,
+                     status='qualified_holdover', acquisition_age_ns=80000000000,
+                     counter_policy={'rate_ppm': 5000, 'maximum_age_ns': 300000000000})
+        value['estimate'].update(earliest_utc='2027-01-15T12:00:00Z',
+                                 utc='2027-01-15T12:00:03Z', latest_utc='2027-01-15T12:00:06Z',
+                                 maximum_error_ns=3000000000, maximum_error_ms=3000.0)
+        observed = from_response(value, counter=10000010, frequency=10000000)
+        self.assertLessEqual(observed['utc']['lower'], 1800014400)
+        self.assertGreaterEqual(observed['utc']['upper'], 1800014406)
+        for replacement in [dict(value, bound='unbounded'), dict(value, best_effort={'utc': '2027-01-15T12:00:03Z'})]:
+            with self.assertRaises(ValueError):
+                from_response(replacement, counter=10000010, frequency=10000000)
+
     def test_authenticated_unavailable_response_can_only_supply_elapsed_evidence(self):
         value = response()
         value.update(status='unavailable', authentication='NTS-required', estimate=None,
