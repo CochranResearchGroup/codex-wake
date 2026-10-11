@@ -14,7 +14,8 @@
         "edit",
         "apply_labels",
         "assign",
-        "close"
+        "close",
+        "create_labels"
       ],
       "security_route": "none",
       "label_map": {
@@ -23,6 +24,27 @@
         },
         "intent/feature": {
           "provider_label": "enhancement"
+        },
+        "intent/bug": {
+          "provider_label": "bug"
+        },
+        "intent/enhancement": {
+          "provider_label": "enhancement"
+        },
+        "state/needs-triage": {
+          "provider_label": "needs-triage"
+        },
+        "state/needs-info": {
+          "provider_label": "needs-info"
+        },
+        "state/ready-for-agent": {
+          "provider_label": "ready-for-agent"
+        },
+        "state/ready-for-human": {
+          "provider_label": "ready-for-human"
+        },
+        "state/wontfix": {
+          "provider_label": "wontfix"
         }
       }
     }

@@ -64,3 +64,13 @@ Read and follow:
 - `AGENTS.md` includes repo-local guidance plus the policy entry section.
 - The durable policy body lives under `docs/dev/policies/`.
 - Keep repo-specific commands, environment details, and operational caveats in this file or adjacent local docs.
+
+## Agent skills
+
+GitHub Issues at CochranResearchGroup/codex-wake owns intake and discussion;
+repository plans, ROADMAP and RUNBOOK retain execution and evidence authority.
+See docs/agents/issue-tracker.md and docs/agents/triage-labels.md.
+Single-context terminology uses existing GLOSSARY.md; see docs/agents/domain.md.
+Codex discovery/runtime rules: docs/agents/codex-stack.md,
+docs/agents/codex-code-discovery.md and docs/agents/runtime-proof.md.
+Existing docs/dev/policies remain the policy authority.

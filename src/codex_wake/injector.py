@@ -346,6 +346,13 @@ def dispatch_firing_record(
     classification = classify_record(record)
     if classification == 'hold':
         return DispatchResult('skipped','unrecognized record; no dispatch authorized')
+    if classification == 'native_intent_v6':
+        from .native_intents import dispatch
+        provider = None
+        if time_provider is not None:
+            from dataclasses import asdict
+            provider = lambda: {'utc': asdict(time_provider()), 'counter': None}
+        return dispatch(root, found, provider)
     network_current = None
     if classification == 'native_network_v5':
         from .network_wakes import read_time, evaluation_time, precise_deadline

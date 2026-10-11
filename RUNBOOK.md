@@ -5451,3 +5451,27 @@ must discover tools; this existing session's catalog was not refreshed.
 Plan0151 lane corrected to P75 because P73 already belongs to Plan0146.
 Terminal evidence: docs/dev/evidence/plan0151/closeout.md. Hosted CI waiting
 waived; gov_policy measurement deferred. Memory disposition unavailable.
+
+## Turn 264 | 2026-10-11 UTC
+
+Plan0153 / issue243: installed unavailable-time registration reproduced with
+zero records. Standalone schema6 repair retains scheduling intent, root/thread
+identity and stable retry keys; active workers recover qualified relative or UTC
+deadlines while preserving not-before/expiry/stop and uncertain-effect fences.
+1061 comprehensive tests passed after restoring declared dependencies; focused
+and installed fixture checks prove one successor, fresh-process retention and
+live compatible-worker capability. Initial failures and receipts are retained.
+Source integration/activation remain open; no production wake or native turn,
+global install, unrelated worker/session or private StableTime rollout change.
+Matt setup draft awaits label preference; CI waiting remains waived.
+
+## Turn 265 | 2026-10-11 UTC
+
+Plan0153 issue243 completion audit corrected F4: no later origin may extend an
+unanchored relative expiry. PR244 remains draft; root/main and existing adapter
+preserved. 119 focused checks pass;1064 full-repeat OK/two skips after one
+unexplained existing message-test failure (retained evidence). Both final isolated
+installed candidates pass eight-worker qualification, no duplicate successor or
+crash replay, original expiry holds, old rollback and85/86-file parity. See
+checkpoint-04.md/completion-audit.md. Setup/publication decisions still pending;
+no global activation/production turn. Memory unavailable receipt, no write.

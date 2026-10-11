@@ -3,6 +3,7 @@ from dataclasses import asdict
 import base64
 import json
 import math
+import os
 from pathlib import Path
 import struct
 import subprocess
@@ -171,14 +172,33 @@ def add_time_parser(subparsers):
     inspect.add_argument('--offline', action='store_true', help='show admission policy without network access')
 
 
+def stable_time_config():
+    if 'CODEX_WAKE_STABLE_TIME_CONFIG' in os.environ:
+        return os.environ['CODEX_WAKE_STABLE_TIME_CONFIG'] or None
+    candidate = Path.home() / '.config' / 'codex-wake' / 'stable-time-client.json'
+    return str(candidate) if candidate.exists() else None
+
+
 def time_command(args):
-    import json
-    print(json.dumps(inspect_time(offline=args.offline), sort_keys=True))
+    config = stable_time_config()
+    if config:
+        from .stable_time import service_time_result
+        decision, observation = (TimeDecision('uncertain', reason='acquisition_not_requested'), None) if args.offline else service_time_result(config)
+        report = dict(schema=1, provider='stable-time', authentication='NTS-required',
+                      decision=asdict(decision), observation=observation, purpose='installed-service-consumer',
+                      note='Observation is diagnostic; only the validated decision supplies finite dispatch authority.')
+    else:
+        report = inspect_time(offline=args.offline)
+    print(json.dumps(report, sort_keys=True))
     return 0
 
 
 def network_time_decision():
     """Trusted adapter seam for explicitly opted-in network-time domains."""
+    config = stable_time_config()
+    if config:
+        from .stable_time import service_time_decision
+        return service_time_decision(config)
     report = inspect_time()
     decision = report['decision']
     return TimeDecision(decision['status'],tuple(decision['sources']),decision['lower'],decision['upper'],decision['reason'])

@@ -1,6 +1,24 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P153
+    owner: primary
+    objective: Retain native wake intent and recover conservative deadlines during time outages
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/243]
+    plan: docs/dev/plans/0153-2026-10-11-wake-intent-time-recovery.md
+    plan_ref: fix/issue243-intent-recovery
+    branch: fix/issue243-intent-recovery
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    integration: squash_pr
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/244
+    source_checkpoint: 9dd966c5eaa7afbc01fc0a9deec225721b1e785f
+    remote_ref: refs/remotes/origin/fix/issue243-intent-recovery
+    dependencies: []
+    overlaps: [Plan0152-private-installed-StableTime-rollout]
+    updated_at: 2026-10-11
+    disposition: Standalone source repair; installed activation must preserve the separate uncommitted consumer rollout
   - id: P63
     owner: primary
     objective: Complete Plan 0101 local agent-to-agent communication and acceptance

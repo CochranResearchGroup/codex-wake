@@ -16,6 +16,16 @@ A bounded estimate of current time accepted under the configured source-selectio
 **Time uncertainty**:
 The condition in which available evidence cannot establish whether a deadline has passed.
 
+**Scheduling intent**:
+The durable original request to schedule one follow-up, retained even when a
+clock cannot yet qualify its deadline. Reusing its key returns that request;
+it does not authorize another submission.
+
+**Relative clock continuity**:
+Evidence that elapsed observations belong to the same qualified host-counter
+epoch and rate policy. Losing continuity holds the original anchor rather than
+starting the delay again. Elapsed evidence does not establish absolute UTC.
+
 **Message receipt**:
 An attributable record of retrieval, acceptance or another message outcome.
 Reading records retrieval; it does not accept the work.
