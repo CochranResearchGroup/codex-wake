@@ -40,3 +40,11 @@ now stays held; registration explicitly requires original clock evidence. Both
 final-audit-venv and composite-final-audit-venv pass installed fixture qualification
 with eight fresh workers. Old reviewed-venv is intentionally retained as red
 evidence and must not be activated. Root adapter hashes are unchanged.
+
+Late readback after checkpoint04: concurrent root change adds a contract2.0
+wide-holdover test in tests/test_stable_time.py. Its reviewed hash a78fcbd3...
+is now1f73e7dc...; both adapter source hashes still matched the snapshot at that
+readback. No root edits were made by this lane. Private composite acceptance
+remains acceptance of its exact older snapshot, not the newly edited root.
+Reconcile current root and active owner before applying the publication patch or
+activating any candidate; composite-proposal.json records current drift.
