@@ -13,6 +13,14 @@ from .sessions import SelectionError, observe, resolve
 def add_sessions_parser(subparsers):
     parser = subparsers.add_parser('sessions', help='discover live Codex sessions by exact thread or Byobu tab')
     commands = parser.add_subparsers(dest='sessions_command', required=True)
+    spawn = commands.add_parser('spawn', help='launch an agent using a host-approved profile')
+    spawn.add_argument('--profiles', required=True)
+    spawn.add_argument('--profile', required=True)
+    spawn.add_argument('--intent', required=True)
+    spawn.add_argument('--name', required=True)
+    spawn.add_argument('--task', required=True)
+    spawn.add_argument('--expires-at', required=True)
+    spawn.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
         command = commands.add_parser(verb)
         command.add_argument('--json', dest='as_json', action='store_true')

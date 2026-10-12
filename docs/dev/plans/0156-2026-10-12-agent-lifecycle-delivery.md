@@ -1,12 +1,24 @@
 # Plan0156 — Spawn, refresh and fresh-agent handoff
 
-State: PLANNED
-Workflow: READY
+State: OPEN
+Workflow: IN_PROGRESS
 Owner: primary / ecochran76
 Target: origin/main
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
+
+Execution started on `feat/agent-lifecycle` from origin/main a741010 under the
+operator's execute-Plan0156 goal. Plan0157 is the serial critical path; 0158 then
+0159 follow. Primary owns shared controller/CLI/MCP integration. One read-only
+worker may inspect native contracts; it has no effect or implementation authority.
+Checkpoint each child and before installed effects, with a 45-minute backstop;
+stop and checkpoint before cumulative 2,000,000 tokens or six hours. Goal runtime
+start is epoch1791817417; six-hour ceiling1791839017. Native goal counters are the
+token authority. Two attempts per failing seam and one consolidated review plus
+one remediation pass remain the campaign bounds. No completed criterion yet.
+Public CLI/MCP are deterministic seams; native queued-message and owned TUI
+readback are installed seams. Red/green commands belong in the evidence ledger.
 
 Existing open/resume/close accepted; Plan0155 disposable probe complete. Same-thread
 TUI restart retains its thread's MCP connection on installed Codex0.162.1; fresh

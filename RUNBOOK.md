@@ -5530,3 +5530,17 @@ links verified. Canonical forge preflight duplicate enhancement alias removed
 without changing target/actions/provider labels; qualified preflight passed.
 Product implementation, real goal transfer and actual ask-Matt preflight remain
 future acceptance, not prototype claims. Memory target unavailable.
+
+## Turn 270 | 2026-10-12 UTC
+
+Started operator execute-Plan0156 goal at clean origin/main a741010 on
+feat/agent-lifecycle; issue249 assigned/read back. Spawn public-CLI TDD now
+rejects unapproved profiles, preserves uncertain native creation without retry,
+and proves exact task completion without duplication across pending observation.
+Four red/green cycles and corrected failed attempts recorded in
+docs/dev/evidence/plan0156/checkpoint-01.md. Fixture socket and real PTY process
+are deterministic proof only. Controller recovery, MCP and installed acceptance
+remain unfinished;0158/0159 and combined release remain OPEN obligations.
+Read-only native schema worker completed; primary retained no-idempotent-create
+and no-native-goal-transfer constraints. No installed/shared service effects.
+Memory disposition unavailable: no reviewed Codex Wake Graphiti cloud.

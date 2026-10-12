@@ -1,6 +1,22 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P156
+    owner: primary / ecochran76
+    objective: Implement verified spawn refresh and handoff lifecycle
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/248, https://github.com/CochranResearchGroup/codex-wake/issues/249]
+    plan: docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md
+    plan_ref: feat/agent-lifecycle
+    branch: feat/agent-lifecycle
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    integration: squash_pr
+    checkout_required: true
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-12
+    disposition: Spawn test-first implementation in progress; no installed acceptance or release claimed
   - id: P153
     owner: primary
     objective: Retain native wake intent and recover conservative deadlines during time outages

@@ -1,0 +1,44 @@
+test_spawn_executes_exact_assignment_once_across_pending_observation (tests.test_agent_spawn.AgentSpawnTests.test_spawn_executes_exact_assignment_once_across_pending_observation) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_unapproved_profile_is_rejected_before_runtime_effects (tests.test_agent_spawn.AgentSpawnTests.test_unapproved_profile_is_rejected_before_runtime_effects) ... ok
+test_unknown_thread_creation_is_retained_without_duplicate_retry (tests.test_agent_spawn.AgentSpawnTests.test_unknown_thread_creation_is_retained_without_duplicate_retry) ... ok
+test_ambiguous_close_returns_existing_selection_error_contract (tests.test_session_lifecycle.SessionLifecycleTests.test_ambiguous_close_returns_existing_selection_error_contract) ... ok
+test_close_refuses_split_tab_without_killing_any_pane (tests.test_session_lifecycle.SessionLifecycleTests.test_close_refuses_split_tab_without_killing_any_pane) ... ok
+test_open_requires_explicit_new_or_resume_before_creating_a_tab (tests.test_session_lifecycle.SessionLifecycleTests.test_open_requires_explicit_new_or_resume_before_creating_a_tab) ... usage: codex-wake sessions open [-h] [--json] [--app-server APP_SERVER]
+                                [--tmux-socket TMUX_SOCKET]
+                                [--tmux-session TMUX_SESSION]
+                                [--timeout TIMEOUT] (--new | --resume RESUME)
+                                [--cwd CWD] --name NAME
+                                [--codex-path CODEX_PATH] [--extra-attachment]
+codex-wake sessions open: error: one of the arguments --new --resume is required
+ok
+test_pending_mailbox_work_prevents_ordinary_close (tests.test_session_lifecycle.SessionLifecycleTests.test_pending_mailbox_work_prevents_ordinary_close) ... ok
+test_resume_reuses_exact_existing_attachment (tests.test_session_lifecycle.SessionLifecycleTests.test_resume_reuses_exact_existing_attachment) ... ok
+test_terminal_mailbox_receipts_allow_ordinary_idle_tab_close (tests.test_session_lifecycle.SessionLifecycleTests.test_terminal_mailbox_receipts_allow_ordinary_idle_tab_close) ... ok
+test_unpublished_signal_registration_prevents_ordinary_close (tests.test_session_lifecycle.SessionLifecycleTests.test_unpublished_signal_registration_prevents_ordinary_close) ... ok
+test_unreadable_pending_work_prevents_ordinary_close (tests.test_session_lifecycle.SessionLifecycleTests.test_unreadable_pending_work_prevents_ordinary_close) ... ok
+test_all_exact_selector_forms (tests.test_sessions.SessionTests.test_all_exact_selector_forms) ... ok
+test_cli_json_exit_and_limit_do_not_change_resolution (tests.test_sessions.SessionTests.test_cli_json_exit_and_limit_do_not_change_resolution) ... ok
+test_collision_does_not_prefer_active_thread (tests.test_sessions.SessionTests.test_collision_does_not_prefer_active_thread) ... ok
+test_current_conflicting_inherited_parent_pane (tests.test_sessions.SessionTests.test_current_conflicting_inherited_parent_pane) ... ok
+test_duplicate_name_including_shell_requires_qualification (tests.test_sessions.SessionTests.test_duplicate_name_including_shell_requires_qualification) ... ok
+test_headless_exact_thread_requires_only_daemon_source (tests.test_sessions.SessionTests.test_headless_exact_thread_requires_only_daemon_source) ... ok
+test_invalid_reserved_selectors_are_argument_errors (tests.test_sessions.SessionTests.test_invalid_reserved_selectors_are_argument_errors) ... ok
+test_invalid_timeout_emits_json_before_observation (tests.test_sessions.SessionTests.test_invalid_timeout_emits_json_before_observation) ... ok
+test_literal_names_and_index_guard (tests.test_sessions.SessionTests.test_literal_names_and_index_guard) ... ok
+test_reused_pane_fails_generation_revalidation (tests.test_sessions.SessionTests.test_reused_pane_fails_generation_revalidation) ... ok
+test_shell_show_and_resolve_have_distinct_outcomes (tests.test_sessions.SessionTests.test_shell_show_and_resolve_have_distinct_outcomes) ... ok
+test_source_loss_never_proves_not_found_or_unique (tests.test_sessions.SessionTests.test_source_loss_never_proves_not_found_or_unique) ... ok
+test_split_window_requires_explicit_pane (tests.test_sessions.SessionTests.test_split_window_requires_explicit_pane) ... ok
+test_subagent_path_and_unloaded_provider_status_are_preserved (tests.test_sessions.SessionTests.test_subagent_path_and_unloaded_provider_status_are_preserved) ... ok
+test_watch_pins_thread_across_tab_replacement (tests.test_sessions.SessionTests.test_watch_pins_thread_across_tab_replacement) ... ok
+test_watch_source_loss_is_not_thread_removal (tests.test_sessions.SessionTests.test_watch_source_loss_is_not_thread_removal) ... ok
+test_discovery_has_explicit_actor_tools_without_operator_escape (tests.test_a2a_mcp.AgentExchangeMCPTests.test_discovery_has_explicit_actor_tools_without_operator_escape) ... Executing <Task pending name='Task-2' coro=<AgentExchangeMCPTests.test_discovery_has_explicit_actor_tools_without_operator_escape() running at /home/ecochran76/workspace.local/codex-wake/tests/test_a2a_mcp.py:48> cb=[_run_until_complete_cb() at /home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:181] created at /home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:100> took 1.072 seconds
+ok
+test_timeout_preserves_intent_and_does_not_retry_or_run_invalid_input (tests.test_a2a_mcp.AgentExchangeMCPTests.test_timeout_preserves_intent_and_does_not_retry_or_run_invalid_input) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 3.872s
+
+OK

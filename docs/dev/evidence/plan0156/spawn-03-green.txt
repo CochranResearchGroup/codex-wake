@@ -1,0 +1,10 @@
+test_spawn_executes_exact_assignment_once_and_returns_native_receipt (tests.test_agent_spawn.AgentSpawnTests.test_spawn_executes_exact_assignment_once_and_returns_native_receipt) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_unapproved_profile_is_rejected_before_runtime_effects (tests.test_agent_spawn.AgentSpawnTests.test_unapproved_profile_is_rejected_before_runtime_effects) ... ok
+test_unknown_thread_creation_is_retained_without_duplicate_retry (tests.test_agent_spawn.AgentSpawnTests.test_unknown_thread_creation_is_retained_without_duplicate_retry) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.386s
+
+OK
