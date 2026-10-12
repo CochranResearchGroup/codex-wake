@@ -104,7 +104,10 @@ class AgentRefreshTests(unittest.TestCase):
     def test_rollback_reattaches_after_proven_owned_tab_absence(self):
         self.refresh_scenario(draft=False,loss='new-window',rollback_absence=True)
 
-    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False):
+    def test_handoff_preserves_unaccounted_pending_work_and_original_client(self):
+        self.refresh_scenario(draft=False,recipient_guard='pending',operation='handoff')
+
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh'):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -125,6 +128,7 @@ class AgentRefreshTests(unittest.TestCase):
             skill.write_text('---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n')
             goal = dict(objective='Finish fixture', status='paused', tokenBudget=1000,
                         tokensUsed=50, timeUsedSeconds=12, createdAt=100, updatedAt=100)
+            if operation=='handoff':goal['threadId']=thread_id
             def handler(ws):
                 for raw in ws:
                     request = json.loads(raw)
@@ -133,8 +137,12 @@ class AgentRefreshTests(unittest.TestCase):
                     if method == 'thread/loaded/list':
                         value = dict(data=[thread_id], nextCursor=None)
                     elif method == 'thread/read':
+                        turns=[]
+                        if operation=='handoff':turns=[dict(id='writer-turn',status='completed',items=[
+                            dict(id='writer-command',type='commandExecution',status='completed',exitCode=0,
+                                cwd=tmp,aggregatedOutput='checkpoint:'+thread_id+':'+hashlib.sha256(checkpoint.read_bytes()).hexdigest())])]
                         value = dict(thread=dict(id=thread_id, name='owned-worker', cwd=tmp,
-                            status={'type':recipient_guard if recipient_guard in ('active','unknown') else 'idle'}, canAcceptDirectInput=True, turns=[]))
+                            status={'type':recipient_guard if recipient_guard in ('active','unknown') else 'idle'}, canAcceptDirectInput=True, turns=turns))
                     elif method == 'thread/goal/get':
                         observed=dict(goal)
                         if advancing_usage and methods.count(method)>1:
@@ -188,11 +196,20 @@ class AgentRefreshTests(unittest.TestCase):
             if recipient_guard == 'pending':
                 (root/'pending').mkdir()
                 (root/'pending/unaccounted.json').write_text('{"target":null}')
+            if operation=='handoff':
+                registry=json.loads(profiles.read_text())
+                registry['continuations']={thread_id:dict(objective='Finish fixture',approval='operator fixture',
+                    token_cap=1000,time_cap_seconds=2000,tokens_before_source=0,seconds_before_source=0,
+                    started_at='1970-01-01T00:00:00Z')}
+                profiles.write_text(json.dumps(registry))
             argv = ['--wake-root',tmp,'sessions','refresh','--profiles',str(profiles),
                 '--profile','worker','--intent','refresh-1','--thread-id',thread_id,
                 '--checkpoint','checkpoint.json','--checkpoint-sha256',
                 hashlib.sha256(checkpoint.read_bytes()).hexdigest(),'--resource','updated-skill',
                 '--expires-at','2030-01-01T00:00:00Z','--json']
+            if operation=='handoff':
+                argv[argv.index('refresh')]='handoff';index=argv.index('--resource');del argv[index:index+2]
+                argv+=['--mode','new-tab']
             try:
                 with unix_serve(handler,str(endpoint)) as server:
                     worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
@@ -229,6 +246,7 @@ class AgentRefreshTests(unittest.TestCase):
                             receipt=json.loads(output.getvalue())
                             if recipient_guard:
                                 self.assertEqual(receipt['state'],'blocked')
+                                if operation=='handoff':self.assertEqual(receipt['reason'],'pending_thread_work')
                                 self.assertEqual(effects,[])
                                 self.assertIsNone(client.poll())
                                 self.assertEqual(client.pid,original_pid)

@@ -62,7 +62,11 @@ def handoff_command(args, root):
             and goal[k]>=0 for k in ('tokensUsed','timeUsedSeconds'))
         receipt.update(state='blocked',reason=('successor_preflight_not_verified' if known
                                               else 'source_usage_unknown'))
-        if known:
+        if known and (goal.get('threadId')!=args.thread_id or goal.get('objective')!=policy['objective']
+                or goal.get('status') not in ('active','paused')
+                or type(goal.get('tokenBudget')) is not int or not 0<goal['tokenBudget']<=policy['token_cap']):
+            receipt['reason']='source_goal_authority_changed'
+        if known and receipt['reason']=='successor_preflight_not_verified':
             used=policy['tokens_before_source']+goal['tokensUsed']
             receipt['cumulative_tokens_used']=used
             receipt['remaining_tokens']=max(0,policy['token_cap']-used)
@@ -91,8 +95,33 @@ def handoff_command(args, root):
                 and item.get('cwd')==str(workspace) and marker in (item.get('aggregatedOutput') or '')]
             if thread.get('id')!=args.thread_id or len(writers)!=1:
                 receipt['reason']='checkpoint_writer_unverified'
-            else:receipt['checkpoint_writer']=writers[0]
+            else:
+                receipt['checkpoint_writer']=writers[0]
+                source_guard(receipt,profile,root)
         save(path,receipt)
         from .sessions_cli import emit
         emit(receipt,args.as_json)
         return 5
+
+
+def source_guard(receipt,profile,root):
+    from .sessions import observe,revalidate_attachment
+    from .session_lifecycle import pending_thread_work
+    snapshot=observe(endpoint=profile['app_server'],socket_path=profile.get('tmux_socket'),
+        timeout=profile['timeout'])
+    rows=[r for r in snapshot['sessions'] if r['thread_id']==receipt['thread_id']]
+    if (not snapshot['complete'] or len(rows)!=1 or rows[0]['runtime_state']!='idle'
+            or rows[0]['cwd']!=str(Path(profile['cwd']).resolve()) or rows[0]['active_flags']
+            or rows[0]['can_accept_direct_input'] is not True or len(rows[0]['attachments'])!=1):
+        receipt['reason']='source_client_not_uniquely_ready'
+        return
+    attachment=rows[0]['attachments'][0]
+    if attachment['session_name']!=profile['tmux_session'] or not revalidate_attachment(attachment):
+        receipt['reason']='source_client_not_uniquely_ready'
+        return
+    work=pending_thread_work(rows[0],root)
+    receipt['pending_work']=work
+    if work['pending'] or work['messages']:
+        receipt['reason']='pending_thread_work'
+        return
+    receipt['source_attachment']=attachment

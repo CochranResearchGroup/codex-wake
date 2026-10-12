@@ -75,7 +75,9 @@ print('checkpoint:'+source+':'+hashlib.sha256(p.read_bytes()).hexdigest())
         while True:
             code,state=invoke(argv);receipt['spawn']=state;write(root/'state.json',receipt)
             if state['state']=='completed':break
-            if state['state'] in ('blocked','expired','uncertain') or time.monotonic()>=deadline:
+            if (state['state'] in ('blocked','expired') or time.monotonic()>=deadline
+                    or (state['state']=='uncertain' and
+                        not (state.get('thread_id') and state.get('submission_id')))):
                 raise RuntimeError('outgoing writer did not complete: '+state['state'])
             time.sleep(.5)
         thread=state['thread_id'];native=request('thread/read',{'threadId':thread,'includeTurns':True})['thread']
@@ -130,9 +132,73 @@ print('checkpoint:'+source+':'+hashlib.sha256(p.read_bytes()).hexdigest())
     return 0 if receipt['state']=='passed' else 1
 
 
+def reconcile(root,prefix):
+    """Read/reconcile the one saved assignment; never create or replay a task."""
+    original=json.loads((root/'state.json').read_text());saved=original['spawn']
+    if not saved.get('thread_id') or not saved.get('submission_id'):
+        raise RuntimeError('known source/submission required; unknown creation cannot be replayed')
+    profile=saved['intent']['launch'];home=Path(profile['codex_home']);codex=profile['codex_path']
+    locator=root/'native.sock';env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
+    for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','PYTHONPATH'):env.pop(k,None)
+    log=(root/'reconcile.log').open('w');server=subprocess.Popen(
+        [codex,'app-server','--listen','unix://'+str(locator)],env=env,stdout=log,stderr=log,start_new_session=True)
+    result=dict(state='failed',scope='existing checkpoint writer axis only; no goal mutation/task replay')
+    try:
+        deadline=time.monotonic()+15
+        while not locator.exists() and server.poll() is None and time.monotonic()<deadline:time.sleep(.1)
+        if 'unix://'+str(locator.resolve(strict=True))!=profile['app_server']:
+            raise RuntimeError('original approved endpoint changed; hold original intent')
+        intent=saved['intent']
+        args=[str(prefix/'bin/codex-wake'),'--wake-root',str(root/'wake'),'sessions','spawn',
+            '--profiles',str(root/'profiles.json'),'--profile',intent['profile'],'--intent',saved['intent_key'],
+            '--name',intent['name'],'--task',intent['task'],'--expires-at',intent['expires_at'],'--json']
+        proc=subprocess.run(args,env=env,capture_output=True,text=True,timeout=30)
+        observed=json.loads(proc.stdout);result['spawn']=observed
+        if proc.returncode or observed.get('execution',{}).get('execution')!='turn_completed':
+            raise RuntimeError('original exact native assignment not completed')
+        thread=native_request(profile['app_server'],codex,'thread/read',
+            {'threadId':saved['thread_id'],'includeTurns':True},10)['thread']
+        checkpoint=Path(profile['cwd'])/'checkpoint.json';body=json.loads(checkpoint.read_text())
+        digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+        if body['source_thread_id']!=saved['thread_id']:raise RuntimeError('checkpoint source changed')
+        marker='checkpoint:'+saved['thread_id']+':'+digest
+        writers=[dict(turn_id=t['id'],item_id=i['id'],cwd=i.get('cwd'),exit_code=i.get('exitCode'))
+            for t in thread['turns'] for i in t['items'] if t['status']=='completed'
+            and i['type']=='commandExecution' and i.get('status')=='completed'
+            and i.get('exitCode')==0 and i.get('cwd')==profile['cwd']
+            and marker in (i.get('aggregatedOutput') or '')]
+        if len(writers)!=1 or len(thread['turns'])!=1:raise RuntimeError('writer/assignment not uniquely observed')
+        usages=[]
+        for line in Path(thread['path']).read_text().splitlines():
+            event=json.loads(line);payload=event.get('payload',{});info=payload.get('info') or {}
+            if event.get('type')=='event_msg' and payload.get('type')=='token_count' and info.get('total_token_usage'):
+                usages.append(info['total_token_usage'])
+        if not usages:raise RuntimeError('source token usage unavailable')
+        result.update(state='passed_checkpoint_axis',checkpoint_sha256=digest,writer=writers[0],
+            native_token_usage=usages[-1],model_assignments=1,additional_model_assignments=0)
+    except Exception as exc:result['error']=str(exc)
+    finally:
+        if server.poll() is None:os.killpg(server.pid,signal.SIGTERM)
+        server.wait(timeout=20);log.close();result['server_exit']=server.returncode
+        matches=[];denied=[]
+        for p in Path('/proc').iterdir():
+            if not p.name.isdigit():continue
+            try:
+                if p.stat().st_uid==os.getuid() and ('CODEX_HOME='+str(home)).encode() in (p/'environ').read_bytes().split(b'\0'):matches.append(int(p.name))
+            except PermissionError:denied.append(int(p.name))
+            except (FileNotFoundError,ProcessLookupError):pass
+        result['cleanup']=dict(private_readable_environment_matches=matches,denied_environment_pids=denied)
+        if matches:result.update(state='failed',error='owned processes remain')
+        write(root/'writer-reconciliation.json',result)
+    print(json.dumps({k:result.get(k) for k in ('state','error','native_token_usage','additional_model_assignments','cleanup')}))
+    return 0 if result['state']=='passed_checkpoint_axis' else 1
+
+
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--execute',action='store_true',required=True)
     p.add_argument('--root',type=Path,required=True)
     p.add_argument('--prefix',type=Path,required=True)
-    a=p.parse_args();raise SystemExit(execute(a.root.resolve(),a.prefix.resolve()))
+    p.add_argument('--reconcile-existing',action='store_true')
+    a=p.parse_args();operation=reconcile if a.reconcile_existing else execute
+    raise SystemExit(operation(a.root.resolve(),a.prefix.resolve()))

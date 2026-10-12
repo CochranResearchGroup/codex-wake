@@ -30,7 +30,10 @@ class AgentHandoffTests(unittest.TestCase):
     def test_malformed_host_allowance_is_rejected_before_native_or_journal_effects(self):
         self.scenario(tokens=50,bad_cap='1000')
 
-    def scenario(self, tokens=None, carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None):
+    def test_native_goal_objective_change_holds_before_successor(self):
+        self.scenario(tokens=50,goal_objective='Different fixture',reason='source_goal_authority_changed')
+
+    def scenario(self, tokens=None, carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None,goal_objective='Finish fixture'):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             source='00000000-0000-7000-8000-000000000159'
@@ -47,7 +50,7 @@ class AgentHandoffTests(unittest.TestCase):
                     method=request['method'];methods.append(method)
                     if method=='initialize':value={'userAgent':'fixture'}
                     elif method=='thread/goal/get':
-                        value={'goal':dict(threadId=source,objective='Finish fixture',
+                        value={'goal':dict(threadId=source,objective=goal_objective,
                             status='paused',tokenBudget=1000,timeUsedSeconds=12,
                             createdAt=100,updatedAt=100)}
                         if tokens is not None:value['goal']['tokensUsed']=tokens

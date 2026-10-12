@@ -1,6 +1,6 @@
 {
   "state": "observed",
-  "scope": "two previously completed owned fixture assignments; native cumulative tokens include cached tokens",
+  "scope": "three completed owned assignments; count cumulative final usage once per thread",
   "threads": [
     {
       "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02",
@@ -95,8 +95,25 @@
           }
         }
       ]
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-writer-02",
+      "thread_id": "01a1312c-a5cb-76d1-a56d-c2c960d40450",
+      "events": [
+        {
+          "total_token_usage": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 35200,
+            "input_tokens": 46741,
+            "output_tokens": 177,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 46918
+          }
+        }
+      ],
+      "source_artifact": "installed-handoff-writer-02.json"
     }
   ],
-  "cumulative_external_tokens": 78423,
+  "cumulative_external_tokens": 125341,
   "accounting_rule": "Add final cumulative total once per native thread; do not sum successive cumulative events. Count cached tokens conservatively."
 }

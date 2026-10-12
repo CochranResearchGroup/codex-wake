@@ -84,23 +84,9 @@ def open_session(args):
                 pane_id=pane_id, message='tab created; startup not yet verified; inspect before retry')
 
 
-def close_session(args, wake_root):
-    snapshot = observe(endpoint=args.app_server, socket_path=args.tmux_socket, timeout=args.timeout)
-    if not snapshot['complete']:
-        raise WakeError('complete source inventory required to close a tab')
-    row = resolve(snapshot, args.selector, session=args.tmux_session)
-    attachments = row['attachments']
-    if args.selector.startswith('window:'):
-        attachments = [p for p in attachments if p['window_id'] == args.selector[7:]]
-    if args.selector.startswith('pane:'):
-        attachments = [p for p in attachments if p['pane_id'] == args.selector[5:]]
-    if len(attachments) != 1:
-        raise WakeError('close requires one exact attached pane')
-    attachment = attachments[0]
-    panes = tmux_command(args, 'list-panes', '-t', attachment['window_id'],
-                         '-F', '#{pane_id}').splitlines()
-    if panes != [attachment['pane_id']]:
-        raise WakeError('tab has multiple panes or changed identity; refusing tab close')
+def pending_thread_work(row, wake_root, bus_roots=()):
+    """Read the same attributable wake/mailbox inventory for close and handoff."""
+    bus_roots_requested = bus_roots
     roots = {Path(wake_root).resolve(), Path(row['cwd']) / '.codex/wake'}
     from .supervisor import default_registry_dir
     registry = default_registry_dir()
@@ -152,7 +138,7 @@ def close_session(args, wake_root):
     bus_roots = {path.parent for path in default_bus_root().parent.glob('*/mailbox.sqlite')}
     bus_roots.update(path.parent for path in
                      default_bus_root().parent.glob('*/.recovery-in-progress.json'))
-    bus_roots.update(Path(path).absolute() for path in args.bus_root)
+    bus_roots.update(Path(path).absolute() for path in bus_roots_requested)
     messages = []
     for bus_root in sorted(bus_roots):
         try:
@@ -160,6 +146,28 @@ def close_session(args, wake_root):
         except BusError as exc:
             work = [dict(message_id='unknown', kind='inventory_unavailable', reason=exc.code)]
         messages.extend(dict(item, bus_root=str(bus_root)) for item in work)
+    return dict(pending=pending, messages=messages, inspected_bus_roots=[str(path) for path in sorted(bus_roots)])
+
+
+def close_session(args, wake_root):
+    snapshot = observe(endpoint=args.app_server, socket_path=args.tmux_socket, timeout=args.timeout)
+    if not snapshot['complete']:
+        raise WakeError('complete source inventory required to close a tab')
+    row = resolve(snapshot, args.selector, session=args.tmux_session)
+    attachments = row['attachments']
+    if args.selector.startswith('window:'):
+        attachments = [p for p in attachments if p['window_id'] == args.selector[7:]]
+    if args.selector.startswith('pane:'):
+        attachments = [p for p in attachments if p['pane_id'] == args.selector[5:]]
+    if len(attachments) != 1:
+        raise WakeError('close requires one exact attached pane')
+    attachment = attachments[0]
+    panes = tmux_command(args, 'list-panes', '-t', attachment['window_id'],
+                         '-F', '#{pane_id}').splitlines()
+    if panes != [attachment['pane_id']]:
+        raise WakeError('tab has multiple panes or changed identity; refusing tab close')
+    work = pending_thread_work(row, wake_root, args.bus_root)
+    pending, messages = work["pending"], work["messages"]
     if not args.force and (row['runtime_state'] != 'idle' or pending or messages):
         raise WakeError('tab has active/unknown work or pending wakes; explicit --force required')
     if not revalidate_attachment(attachment):
@@ -168,7 +176,7 @@ def close_session(args, wake_root):
     tmux_command(args, 'kill-pane', '-t', attachment['pane_id'])
     return dict(action='closed', thread_id=row['thread_id'], attachment=attachment,
                 forced=bool(args.force), affected_wakes=pending, affected_messages=messages,
-                inspected_bus_roots=[str(path) for path in sorted(bus_roots)], conversation='preserved')
+                inspected_bus_roots=work["inspected_bus_roots"], conversation='preserved')
 
 
 def lifecycle_command(args, root):
