@@ -87,7 +87,8 @@ def handoff_command(args, root):
                                               else 'source_usage_unknown'))
         if known and (goal.get('threadId')!=args.thread_id or goal.get('objective')!=policy['objective']
                 or goal.get('status') not in ('active','paused')
-                or type(goal.get('tokenBudget')) is not int or not 0<goal['tokenBudget']<=policy['token_cap']):
+                or 'tokenBudget' not in goal or (goal['tokenBudget'] is not None
+                    and (type(goal['tokenBudget']) is not int or goal['tokenBudget']<=0))):
             receipt['reason']='source_goal_authority_changed'
         if known and previous:
             if any(goal.get(k)!=previous.get(k) for k in ('threadId','objective','tokenBudget','createdAt')):
@@ -98,10 +99,15 @@ def handoff_command(args, root):
         if known and receipt['reason']=='successor_preflight_not_verified':
             used=policy['tokens_before_source']+goal['tokensUsed']
             receipt['cumulative_tokens_used']=used
-            receipt['remaining_tokens']=max(0,min(policy['token_cap']-used,goal['tokenBudget']-goal['tokensUsed']))
+            native_remaining=policy['token_cap']-used if goal['tokenBudget'] is None else goal['tokenBudget']-goal['tokensUsed']
+            receipt['remaining_tokens']=max(0,min(policy['token_cap']-used,native_remaining))
             receipt['source_remaining_tokens']=receipt['remaining_tokens']
+            elapsed=policy['seconds_before_source']+goal['timeUsedSeconds']
+            receipt['cumulative_seconds_used']=elapsed
             if receipt['remaining_tokens']==0:
                 receipt['reason']='cumulative_token_budget_exhausted'
+            elif elapsed>=policy['time_cap_seconds']:
+                receipt['reason']='cumulative_time_budget_exhausted'
             else:
                 from .native_clock import snapshot
                 bounds=snapshot().get('utc')
@@ -109,7 +115,9 @@ def handoff_command(args, root):
                     receipt['reason']='admissible_time_unavailable'
                 else:
                     deadline=min(parse_timestamp(args.expires_at).timestamp(),
-                        parse_timestamp(policy['started_at']).timestamp()+policy['time_cap_seconds'])
+                        parse_timestamp(policy['started_at']).timestamp()+policy['time_cap_seconds'],
+                        bounds['upper']+policy['time_cap_seconds']-elapsed,
+                        receipt.get('continuation_deadline',float('inf')))
                     receipt['continuation_deadline']=deadline
                     receipt['remaining_seconds']=max(0,deadline-bounds['upper'])
                     if bounds['upper']>=deadline:
@@ -232,8 +240,13 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                     receipt.update(state='blocked',reason='source_pause_unverified');return
                 receipt['source_goal']=paused
                 used=policy['tokens_before_source']+paused['tokensUsed']
-                remaining=max(0,min(policy['token_cap']-used,paused['tokenBudget']-paused['tokensUsed']))
+                native_remaining=policy['token_cap']-used if paused['tokenBudget'] is None else paused['tokenBudget']-paused['tokensUsed']
+                remaining=max(0,min(policy['token_cap']-used,native_remaining))
                 receipt.update(cumulative_tokens_used=used,remaining_tokens=remaining,source_remaining_tokens=remaining)
+                elapsed=policy['seconds_before_source']+paused['timeUsedSeconds']
+                receipt['cumulative_seconds_used']=elapsed
+                if elapsed>=policy['time_cap_seconds']:
+                    receipt.update(state='blocked',reason='cumulative_time_budget_exhausted');return
                 if remaining<preflight['token_allowance']:
                     receipt.update(state='blocked',reason='preflight_allowance_insufficient');return
             if receipt.get('uncertain_effect')=='thread/goal/pause':receipt.pop('uncertain_effect',None)

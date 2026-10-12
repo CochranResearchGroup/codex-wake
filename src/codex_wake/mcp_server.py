@@ -24,6 +24,11 @@ SEND = {"body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery
         "resume_missing": {"type": "boolean"}}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_sessions_handoff": ("sessions", "handoff", "Prepare an explicitly approved fresh-context continuation from the source agent's verified checkpoint. Preserve cumulative allowance and original deadline; activation requires the owned continuous monitor. No inherited claims or automatic A2A enrollment.",
+        {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
+         "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+         "mode": {"enum": ["new-tab", "same-tab"]}, "expires_at": TEXT},
+        ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "mode", "expires_at"], False),
     "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources in the exact source thread. Requires its preserved checkpoint; unsafe stop or stale resource proof holds without fresh-thread or shared-daemon fallback.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
@@ -51,7 +56,7 @@ SPECS = {
 }
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 for _name, _spec in list(SPECS.items()):
-    if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh"):
+    if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
                        {**_spec[3], "caller_thread_id": CALLER}, [*_spec[4], "caller_thread_id"], _spec[5])
 
@@ -85,7 +90,7 @@ class CommandRunner:
             except UnicodeError:
                 return {"error": {"code": "invalid_argument", "message": "Body must be valid UTF-8."}}, True
         # Host launch context owns endpoint/capability/root/identity; tools cannot override them.
-        if verb in ('spawn', 'refresh'):
+        if verb in ('spawn', 'refresh', 'handoff'):
             if self.lifecycle_profiles is None or self.wake_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
             command = [*self.cli, '--wake-root', str(self.wake_root), group, verb,
@@ -96,13 +101,13 @@ class CommandRunner:
         if positional in arguments:
             command.append(arguments[positional])
         command += ["--json"]
-        if verb not in ('spawn', 'refresh'):
+        if verb not in ('spawn', 'refresh', 'handoff'):
             command += ["--app-server", self.app_server]
         if group == "messages":
             for flag, value in (("--bus-root", self.bus_root), ("--capability", self.capability)):
                 if value is not None:
                     command += [flag, str(value)]
-        if (group == "sessions" and verb not in ('spawn', 'refresh')) or verb == "send":
+        if (group == "sessions" and verb not in ('spawn', 'refresh', 'handoff')) or verb == "send":
             for flag, value in (("--tmux-socket", self.tmux_socket), ("--tmux-session", self.tmux_session)):
                 if value:
                     command += [flag, value]
@@ -111,7 +116,7 @@ class CommandRunner:
                 if value is not None:
                     command += [flag, str(value)]
         for key, value in arguments.items():
-            if key == positional or (key == 'caller_thread_id' and verb not in ('spawn', 'refresh')):
+            if key == positional or (key == 'caller_thread_id' and verb not in ('spawn', 'refresh', 'handoff')):
                 continue
             flag = "--" + key.replace("_", "-")
             if key == 'resources':

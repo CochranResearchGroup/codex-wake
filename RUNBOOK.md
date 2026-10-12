@@ -5675,3 +5675,13 @@ Checkpoint12 distinguishes fixture proof from unexecuted installed native goal
 continuation and all final acceptance/integration/release gates. Root1378287/
 15262s ACTIVE plus external125341, original caps unchanged. Memory unavailable;
 retained receipt. No new provider assignment or shared installed runtime change.
+
+## Turn 282 | 2026-10-12 UTC
+
+Plan0156 cycles56–58 expose guarded handoff MCP17-tool discovery, apply explicit
+host caps to unlimited/larger native budget, and charge carried elapsed usage.
+104 focused lifecycle/daemon/MCP tests PASS24.569s. Candidate skill/operator docs
+retain gaps; opt-in native continuation runner generated scripts compile but
+acceptance is unexecuted. Checkpoint13 precedes isolated installed09 effects.
+Root1444180/16092s ACTIVE plus external125341, original caps unchanged. All full
+integration/release gates remain. Memory unavailable; retained non-write receipt.

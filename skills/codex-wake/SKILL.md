@@ -114,8 +114,20 @@ matching source's lifecycle guide for checkpoint and host proof definitions.
 Explicit `rollback: true` reconciles the original conversation and retains a
 separate rollback result. Pending or ambiguous attachments hold; it never
 creates another conversation or renews expiry.
-Fresh-agent handoff remains pending; neither restart nor new context renews
-authority or resources.
+The source candidate exposes `wake_sessions_handoff` / `sessions handoff`.
+Write your own checkpoint with exact native source identity, objective, original
+authority, next packet and preserved pending obligations. Supply its exact hash,
+stable intent, approved profile, source thread, explicit tab mode and fixed expiry.
+The host approves cumulative counters and the selected preflight script; callers
+cannot supply budgets or probes. Pending work, unknown usage and changed goal
+authority hold. The successor must execute the selected github-handoff preflight
+and produce actual native command evidence. Preparation leaves its goal paused;
+only the existing continuous owned monitor with explicit host activation approval
+can activate the original remaining allowance. One-shot checks cannot activate.
+Keep the owned target untouched. Reconcile the same intent; do not reset a goal,
+renew time, copy claims/capabilities or create another actor to bypass a hold.
+Same-tab and handoff rollback acceptance remain pending in this source candidate.
+See the matching lifecycle guide for monitor setup and known acceptance gaps.
 
 For existing basic tmux workflows, select `--legacy-tmux`; advanced signals and
 tracked-mailbox workflows retain their compatibility contracts below. Read

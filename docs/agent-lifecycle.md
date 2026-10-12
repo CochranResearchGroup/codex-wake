@@ -116,5 +116,37 @@ preserves resource failures and does not create a fresh thread or submit work.
 The current rollback comparison requires the saved goal to match exactly;
 changing accounting counters can hold it. Live nonnull-goal proof is pending.
 
-Fresh-agent handoff remains Plan0159 work. TUI restart, fresh context and a file
-read alone prove neither MCP refresh nor renewed goal allowance.
+The source candidate exposes `sessions handoff` / `wake_sessions_handoff` with
+`thread_id`, checkpoint path/hash, stable intent, profile, explicit `mode` and
+fixed expiry. A host `continuations` entry keyed by source UUID supplies objective,
+approval locator, original `started_at`, `token_cap`, `time_cap_seconds`,
+`tokens_before_source`, `seconds_before_source` and a `preflight` descriptor:
+absolute `script`, pinned `sha256`, workspace-contained `receipt`,
+`workflow: "github-handoff"`, nonempty `required_checks` and bounded
+`token_allowance`. Native source usage and any smaller native budget constrain
+the host cumulative ceiling. An unlimited native budget grants no additional
+allowance; the explicit host cap still binds. Source checkpoint writer must be
+observed in native completed command evidence. Source drafts and pending work hold.
+
+The fresh successor executes the host-selected preflight and produces its exact
+native command/hash/identity receipt. Actual rollout usage is charged before a
+paused successor goal receives the remaining allowance. `awaiting_activation`
+does not establish autonomous continuation. Host policy must additionally supply
+`activation: {"approved": true, "max_poll_seconds": 1,
+"deadline_margin_seconds": 45}` for a continuous owned monitor. The interval is
+positive, at most five seconds and within the host bound; the safety margin must
+cover that interval plus four native request timeouts. Operator command:
+
+```bash
+codex-waked --wake-root /owned/wake --no-dispatch --interval 1
+```
+
+The existing monitor verifies exact goals, leaves source paused, activates only
+the original remaining successor allowance, and pauses/interrupts owned activity
+at its deadline safety boundary. One-shot polling cannot activate. Graceful
+monitor exit pauses its goal; a different live PID generation prevents takeover.
+Monitor availability is a runtime requirement, not a claim of enforcement during
+host outages. Unknown effects retain original receipts for reconciliation.
+Current source supports new-tab preparation; same-tab, handoff rollback and full
+installed native continuation acceptance remain open Plan0159 gates. TUI restart,
+fresh context and a file read do not prove MCP readiness or renewed allowance.

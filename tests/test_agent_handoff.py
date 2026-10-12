@@ -39,7 +39,15 @@ class AgentHandoffTests(unittest.TestCase):
     def test_smaller_native_goal_budget_cannot_be_replenished_from_host_ceiling(self):
         self.scenario(tokens=50,budget=60,reason='checkpoint_writer_unverified',remaining=10)
 
-    def scenario(self, tokens=None, carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None,goal_objective='Finish fixture',reset_on_repeat=False,budget=1000,remaining=None):
+    def test_explicit_host_cumulative_cap_bounds_an_unlimited_or_larger_native_budget(self):
+        for budget in (None,2000):
+            with self.subTest(budget=budget):
+                self.scenario(tokens=50,budget=budget,reason='checkpoint_writer_unverified',remaining=950)
+
+    def test_carried_native_elapsed_usage_cannot_be_ignored_by_wall_clock_window(self):
+        self.scenario(tokens=50,seconds_carry=95,reason='cumulative_time_budget_exhausted')
+
+    def scenario(self, tokens=None, carry=0,seconds_carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None,goal_objective='Finish fixture',reset_on_repeat=False,budget=1000,remaining=None):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             source='00000000-0000-7000-8000-000000000159'
@@ -71,7 +79,7 @@ class AgentHandoffTests(unittest.TestCase):
                     cwd=tmp,app_server='unix://'+str(endpoint),codex_path='/bin/true',
                     tmux_session='owned',timeout=1)},continuations={source:dict(
                     objective='Finish fixture',token_cap=1000,time_cap_seconds=100,
-                    tokens_before_source=carry,seconds_before_source=0,
+                    tokens_before_source=carry,seconds_before_source=seconds_carry,
                     approval='operator fixture',started_at='2030-01-01T00:00:00Z')})))
                 if bad_cap is not None:
                     registry=json.loads(profiles.read_text());registry['continuations'][source]['token_cap']=bad_cap
