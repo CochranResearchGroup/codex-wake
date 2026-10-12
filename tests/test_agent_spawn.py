@@ -115,8 +115,11 @@ class AgentSpawnTests(unittest.TestCase):
     def test_tui_auto_start_is_observed_without_starting_another_turn(self):
         self.spawn_scenario(auto_start=True)
 
+    def test_rendered_local_draft_prevents_native_assignment(self):
+        self.spawn_scenario(composer='draft')
+
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -203,6 +206,11 @@ class AgentSpawnTests(unittest.TestCase):
                     if loss == 'new-window':
                         raise subprocess.TimeoutExpired(argv, 1)
                     output = '@157\t%157'
+                elif 'capture-pane' in argv:
+                    text = 'UNSUBMITTED_DRAFT_157' if composer == 'draft' else '\x1b[2mAsk Codex to do anything\x1b[0m'
+                    output = '\n\n\x1b[1m›\x1b[0m ' + text + '\n\n  GPT-6.1-Sol low · fixture\n'
+                elif 'display-message' in argv:
+                    output = '23,2' if composer == 'draft' else '2,2'
                 elif 'list-panes' in argv:
                     output = ('%157' if '-a' not in argv else '\t'.join([
                         '$1', 'fixture', '@157', '1', 'worker', '%157', '0', state['name'], tmp, tty]))
@@ -226,6 +234,10 @@ class AgentSpawnTests(unittest.TestCase):
                             pending = StringIO()
                             with redirect_stdout(pending):
                                 self.assertEqual(run(argv), 5, pending.getvalue())
+                            if composer == 'draft':
+                                self.assertEqual(tasks, [], 'native idle must not overwrite a local draft')
+                                self.assertEqual(json.loads(pending.getvalue())['reason'], 'local_composer_not_proven_empty')
+                                return
                             if normalized_input:
                                 self.assertEqual(json.loads(pending.getvalue())['state'], 'awaiting_preflight')
                             if expire_at_task:

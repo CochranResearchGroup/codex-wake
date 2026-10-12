@@ -184,6 +184,24 @@ def advance_spawn(path, receipt, profile):
                 receipt['reason'] = 'split_or_changed_tab'
                 save(path, receipt)
                 return
+            # Native idle does not expose the local composer's draft. Require
+            # the observed Codex empty-composer rendering at the actual cursor.
+            # Unknown layouts fail closed; never clear or submit local input.
+            frame = tmux_command(runtime, 'capture-pane', '-e', '-p', '-t', receipt['pane_id'],
+                                 preserve_output=True)
+            cursor = tmux_command(runtime, 'display-message', '-p', '-t', receipt['pane_id'],
+                                  '#{cursor_x},#{cursor_y}')
+            lines = frame.splitlines()
+            try:
+                x, y = map(int, cursor.strip().split(','))
+                empty = (x == 2 and y >= 0 and y < len(lines) and lines[y] ==
+                         '\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m')
+            except ValueError:
+                empty = False
+            if not empty:
+                receipt['reason'] = 'local_composer_not_proven_empty'
+                save(path, receipt)
+                return
             receipt.update(state='ready', attachment=attachments[0], submission_id=str(uuid4()))
             save(path, receipt)
         if receipt['state'] == 'ready':

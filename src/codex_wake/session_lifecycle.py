@@ -13,11 +13,12 @@ from .records import WakeError, classify_record
 from .sessions import observe, resolve, revalidate_attachment
 
 
-def tmux_command(args, *command):
+def tmux_command(args, *command, preserve_output=False):
     socket = ['-S', args.tmux_socket] if args.tmux_socket else []
     try:
-        return subprocess.run(['tmux', *socket, *command], check=True, text=True,
-                              capture_output=True, timeout=args.timeout).stdout.strip()
+        output = subprocess.run(['tmux', *socket, *command], check=True, text=True,
+                                capture_output=True, timeout=args.timeout).stdout
+        return output if preserve_output else output.strip()
     except (OSError, subprocess.SubprocessError):
         raise WakeError('tmux lifecycle command failed; inspect the target before retry') from None
 
