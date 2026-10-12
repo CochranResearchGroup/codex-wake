@@ -28,6 +28,23 @@ class AgentSpawnTests(unittest.TestCase):
                      '--profile', 'unapproved', '--intent', 'first-worker', '--name', 'worker',
                      '--task', 'Report readiness.', '--expires-at', '2030-01-01T00:00:00Z', '--json'])
 
+    def test_malformed_host_profile_is_rejected_without_creating_journal(self):
+        invalid = [('cwd', None), ('timeout', '1'), ('timeout', True),
+                   ('app_server', []), ('codex_path', None), ('tmux_session', ''),
+                   ('codex_home', []), ('tmux_socket', 42)]
+        for field, value in invalid:
+            with self.subTest(field=field, value=value), tempfile.TemporaryDirectory() as tmp:
+                profiles = Path(tmp) / 'profiles.json'
+                profile = dict(cwd=tmp, app_server='unix:///missing.sock',
+                               codex_path='/bin/true', tmux_session='fixture', timeout=1)
+                profile[field] = value
+                profiles.write_text(json.dumps({'version': 1, 'profiles': {'worker': profile}}))
+                with redirect_stdout(StringIO()), self.assertRaisesRegex(WakeError, 'profile'):
+                    run(['--wake-root', tmp, 'sessions', 'spawn', '--profiles', str(profiles),
+                         '--profile', 'worker', '--intent', 'malformed', '--name', 'worker',
+                         '--task', 'Report readiness.', '--expires-at', '2030-01-01T00:00:00Z', '--json'])
+                self.assertFalse((Path(tmp) / 'lifecycle').exists())
+
     def test_unknown_thread_creation_is_retained_without_duplicate_retry(self):
         starts = []
         def handler(ws):
@@ -118,8 +135,11 @@ class AgentSpawnTests(unittest.TestCase):
     def test_rendered_local_draft_prevents_native_assignment(self):
         self.spawn_scenario(composer='draft')
 
+    def test_restart_rechecks_draft_before_prepared_task_admission(self):
+        self.spawn_scenario(interrupted_admission=True)
+
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -221,7 +241,12 @@ class AgentSpawnTests(unittest.TestCase):
                     '--profile', 'worker', '--intent', 'one-worker', '--name', 'worker',
                     '--task', 'Calculate 6 * 7 and report 42.',
                     '--expires-at', '2030-01-01T00:00:00Z', '--json']
+            interrupted = False
             def clock():
+                nonlocal interrupted
+                if interrupted_admission and state['loaded'] and not interrupted:
+                    interrupted = True
+                    raise SystemExit('fixture controller termination before admission')
                 upper = 1893456001 if expire_at_task and state['loaded'] else 1001
                 return {'utc': {'lower': upper - 1, 'upper': upper}, 'counter': None}
             try:
@@ -231,6 +256,10 @@ class AgentSpawnTests(unittest.TestCase):
                     try:
                         with patch('subprocess.run', side_effect=command), patch(
                                 'codex_wake.native_clock.snapshot', side_effect=clock):
+                            if interrupted_admission:
+                                with redirect_stdout(StringIO()), self.assertRaises(SystemExit):
+                                    run(argv)
+                                composer = 'draft'
                             pending = StringIO()
                             with redirect_stdout(pending):
                                 self.assertEqual(run(argv), 5, pending.getvalue())

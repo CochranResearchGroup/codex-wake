@@ -26,12 +26,15 @@ def spawn_command(args, root):
         if not isinstance(grants, list) or args.profile not in grants:
             raise WakeError('host caller grant does not authorize this launch profile')
     required = {'cwd', 'app_server', 'codex_path', 'tmux_session', 'timeout'}
+    strings = (required - {'timeout'}) | (set(profile) & {'tmux_socket', 'codex_home'})
     if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home'}
+            or any(not isinstance(profile.get(k), str) or not profile[k]
+                   or '\x00' in profile[k] for k in strings)
             or not Path(profile['cwd']).is_dir()):
         raise WakeError('approved launch profile is incomplete')
     if 'codex_home' in profile and not Path(profile['codex_home']).is_dir():
         raise WakeError('approved Codex home is unavailable')
-    if not 0 < profile['timeout'] <= 60:
+    if (type(profile['timeout']) not in (int, float) or not 0 < profile['timeout'] <= 60):
         raise WakeError('launch profile timeout must be between zero and 60 seconds')
     if not args.intent or len(args.intent) > 200 or not args.task or len(args.task) > 32768:
         raise WakeError('bounded intent and task are required')
@@ -166,7 +169,8 @@ def advance_spawn(path, receipt, profile):
             receipt.update(state='uncertain')
             save(path, receipt)
             return
-        if receipt['state'] == 'awaiting_preflight' and not receipt.get('submission_id'):
+        if ((receipt['state'] == 'awaiting_preflight' and not receipt.get('submission_id'))
+                or (receipt['state'] == 'ready' and not receipt.get('queue_id'))):
             snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket, timeout=runtime.timeout)
             rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']]
             attachments = [p for r in rows for p in r['attachments']]
@@ -202,7 +206,8 @@ def advance_spawn(path, receipt, profile):
                 receipt['reason'] = 'local_composer_not_proven_empty'
                 save(path, receipt)
                 return
-            receipt.update(state='ready', attachment=attachments[0], submission_id=str(uuid4()))
+            receipt.update(state='ready', attachment=attachments[0],
+                           submission_id=receipt.get('submission_id') or str(uuid4()))
             save(path, receipt)
         if receipt['state'] == 'ready':
             if not before_effect(path, receipt):
