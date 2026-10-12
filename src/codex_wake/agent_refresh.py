@@ -29,6 +29,12 @@ def refresh_command(args, root):
         raise WakeError('requested resources require host-approved proof checks')
     for name in args.resource:
         check = resources[name]
+        if not isinstance(check, dict) or check.get('kind') not in ('skill', 'mcp'):
+            raise WakeError('requested resource proof kind is unsupported')
+        required = ({'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
+                    {'kind', 'server', 'tool', 'arguments', 'read_only', 'expected_content'})
+        if set(check) != required:
+            raise WakeError('requested resource proof is incomplete or contains unsupported fields')
         if isinstance(check, dict) and check.get('kind') == 'mcp' and check.get('read_only') is not True:
             raise WakeError('MCP refresh proof requires a host-approved read-only check')
     if config.get('version') != 1:
@@ -213,7 +219,16 @@ def advance_refresh(path, receipt, profile):
                 return
             receipt['attachment'] = panes[0]
             receipt['goal_after'] = request('thread/goal/get', {'threadId': receipt['thread_id']})['goal']
-            if receipt['goal_before'] != receipt['goal_after']:
+            before, after = receipt['goal_before'], receipt['goal_after']
+            changed = before != after
+            if isinstance(before, dict) and isinstance(after, dict):
+                accounting = {'tokensUsed', 'timeUsedSeconds', 'updatedAt'}
+                changed = ({k: v for k, v in before.items() if k not in accounting} !=
+                           {k: v for k, v in after.items() if k not in accounting}
+                           or any(type(before.get(k)) not in (int, float)
+                                  or type(after.get(k)) not in (int, float)
+                                  or not after[k] >= before[k] for k in accounting))
+            if changed:
                 receipt.update(state='blocked', reason='goal_changed_during_refresh')
                 save(path, receipt)
                 return

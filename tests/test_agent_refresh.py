@@ -39,6 +39,30 @@ class AgentRefreshTests(unittest.TestCase):
                 run(argv)
             self.assertFalse((root / 'lifecycle').exists())
 
+    def test_unsupported_resource_proof_is_rejected_before_journal_or_runtime(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            checkpoint=root/'checkpoint.json'
+            checkpoint.write_text(json.dumps(dict(source_thread_id='00000000-0000-7000-8000-000000000158',
+                objective='Finish fixture',authority='operator fixture',next_packet='Check resource',pending_obligations=[])))
+            profiles=root/'profiles.json'
+            profiles.write_text(json.dumps({'version':1,'profiles':{'worker':dict(cwd=tmp,
+                app_server='unix:///missing.sock',codex_path='/bin/true',tmux_session='owned',timeout=1,
+                resources={'unsupported':{'kind':'arbitrary-command','command':'unsafe'}})}}))
+            argv=['--wake-root',tmp,'sessions','refresh','--profiles',str(profiles),'--profile','worker',
+                '--intent','invalid-proof','--thread-id','00000000-0000-7000-8000-000000000158',
+                '--checkpoint','checkpoint.json','--checkpoint-sha256',hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                '--resource','unsupported','--expires-at','2030-01-01T00:00:00Z','--json']
+            definitions=[{'kind':'arbitrary-command','command':'unsafe'}, {'kind':'skill'},
+                         {'kind':'mcp','read_only':True}]
+            for definition in definitions:
+                registry=json.loads(profiles.read_text())
+                registry['profiles']['worker']['resources']['unsupported']=definition
+                profiles.write_text(json.dumps(registry))
+                with self.subTest(definition=definition),redirect_stdout(StringIO()),self.assertRaisesRegex(WakeError,'proof'):
+                    run(argv)
+                self.assertFalse((root/'lifecycle').exists())
+
     def test_local_draft_preserves_old_generation_and_blocks_refresh(self):
         self.refresh_scenario(draft=True)
 
@@ -60,7 +84,21 @@ class AgentRefreshTests(unittest.TestCase):
     def test_unapproved_probe_is_rejected_before_stopping_original_client(self):
         self.refresh_scenario(draft=False, stale_mcp=True, unapproved_probe=True)
 
-    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False):
+    def test_refresh_preserves_native_goal_authority_with_monotonic_usage(self):
+        self.refresh_scenario(draft=False, advancing_usage=True)
+
+    def test_active_unknown_split_or_unaccounted_pending_work_preserves_client(self):
+        for guard in ('active','unknown','split','pending'):
+            with self.subTest(guard=guard):self.refresh_scenario(draft=False,recipient_guard=guard)
+
+    def test_goal_budget_change_or_counter_reset_holds_without_mutating_goal(self):
+        for change in ('budget','reset'):
+            with self.subTest(change=change):self.refresh_scenario(draft=False,goal_change=change)
+
+    def test_actual_updated_mcp_behavior_establishes_requested_readiness(self):
+        self.refresh_scenario(draft=False,mcp_ready=True)
+
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -90,10 +128,16 @@ class AgentRefreshTests(unittest.TestCase):
                         value = dict(data=[thread_id], nextCursor=None)
                     elif method == 'thread/read':
                         value = dict(thread=dict(id=thread_id, name='owned-worker', cwd=tmp,
-                            status={'type':'idle'}, canAcceptDirectInput=True, turns=[]))
-                    elif method == 'thread/goal/get': value = {'goal': goal}
+                            status={'type':recipient_guard if recipient_guard in ('active','unknown') else 'idle'}, canAcceptDirectInput=True, turns=[]))
+                    elif method == 'thread/goal/get':
+                        observed=dict(goal)
+                        if advancing_usage and methods.count(method)>1:
+                            observed.update(tokensUsed=51,timeUsedSeconds=13,updatedAt=101)
+                        if goal_change and methods.count(method)>1:
+                            observed.update(tokenBudget=2000) if goal_change == 'budget' else observed.update(tokensUsed=0)
+                        value={'goal':observed}
                     elif method == 'mcpServer/tool/call':
-                        value = {'content':[{'type':'text','text':'old-version'}],'isError':False}
+                        value = {'content':[{'type':'text','text':'new-version' if mcp_ready else 'old-version'}],'isError':False}
                     elif method == 'skills/list': value = {'data': [dict(cwd=tmp, errors=[], skills=[
                         dict(name='updated-skill',path=str(skill),description='Updated fixture',enabled=True)])]}
                     else: value = {}
@@ -101,7 +145,7 @@ class AgentRefreshTests(unittest.TestCase):
             def command(argv, **kwargs):
                 nonlocal client
                 if 'list-panes' in argv:
-                    value = ('%158' if '-a' not in argv else '\t'.join([
+                    value = (('%158\n%159' if recipient_guard == 'split' else '%158') if '-a' not in argv else '\t'.join([
                         '$1','owned','@158','1',tab['name'],'%158','0','owned-worker',tmp,tty]))
                 elif 'capture-pane' in argv:
                     text = 'UNSUBMITTED_DRAFT_158' if draft else '\x1b[2mAsk Codex to do anything\x1b[0m'
@@ -127,12 +171,15 @@ class AgentRefreshTests(unittest.TestCase):
                 app_server='unix://'+str(endpoint),codex_path=str(client_script),tmux_session='owned',
                 timeout=1,resources={'updated-skill':dict(kind='skill',path=str(skill),
                     description='Updated fixture',sha256=hashlib.sha256(skill.read_bytes()).hexdigest())})}}))
-            if stale_mcp:
+            if stale_mcp or mcp_ready:
                 registry=json.loads(profiles.read_text())
                 registry['profiles']['worker']['resources']['updated-skill']=dict(kind='mcp',
                     server='fixture',tool='version',arguments={},read_only=not unapproved_probe,
                     expected_content=[{'type':'text','text':'new-version'}])
                 profiles.write_text(json.dumps(registry))
+            if recipient_guard == 'pending':
+                (root/'pending').mkdir()
+                (root/'pending/unaccounted.json').write_text('{"target":null}')
             argv = ['--wake-root',tmp,'sessions','refresh','--profiles',str(profiles),
                 '--profile','worker','--intent','refresh-1','--thread-id',thread_id,
                 '--checkpoint','checkpoint.json','--checkpoint-sha256',
@@ -159,9 +206,14 @@ class AgentRefreshTests(unittest.TestCase):
                                 self.assertEqual(held['state'],'uncertain')
                                 self.assertEqual(held['uncertain_effect'],'tmux/'+loss)
                             output=StringIO()
-                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop else 0,output.getvalue())
+                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change else 0,output.getvalue())
                             receipt=json.loads(output.getvalue())
-                            if expire_after_stop:
+                            if recipient_guard:
+                                self.assertEqual(receipt['state'],'blocked')
+                                self.assertEqual(effects,[])
+                                self.assertIsNone(client.poll())
+                                self.assertEqual(client.pid,original_pid)
+                            elif expire_after_stop:
                                 self.assertEqual(receipt['state'],'expired')
                                 self.assertEqual(sum('kill-pane' in x for x in effects),1)
                                 self.assertFalse(any('new-window' in x for x in effects))
@@ -173,6 +225,10 @@ class AgentRefreshTests(unittest.TestCase):
                                 self.assertEqual(receipt['reason'],'local_composer_not_proven_empty')
                                 self.assertEqual(effects,[])
                                 self.assertIsNone(client.poll())
+                            elif goal_change:
+                                self.assertEqual(receipt['state'],'blocked')
+                                self.assertEqual(receipt['reason'],'goal_changed_during_refresh')
+                                self.assertEqual(receipt['goal_before'],goal)
                             elif stale_mcp:
                                 self.assertEqual(receipt['state'],'blocked')
                                 self.assertNotEqual(client.pid,original_pid)
@@ -187,8 +243,9 @@ class AgentRefreshTests(unittest.TestCase):
                                 self.assertEqual(receipt['thread_id'],thread_id)
                                 self.assertNotEqual(client.pid,original_pid)
                                 self.assertEqual(receipt['goal_before'],goal)
-                                self.assertEqual(receipt['goal_after'],goal)
+                                self.assertEqual(receipt['goal_after'],dict(goal,tokensUsed=51,timeUsedSeconds=13,updatedAt=101) if advancing_usage else goal)
                                 self.assertEqual(receipt['resources']['updated-skill']['state'],'ready')
+                                if mcp_ready:self.assertEqual(methods.count('mcpServer/tool/call'),1)
                                 count=len(effects)
                                 with redirect_stdout(StringIO()):self.assertEqual(run(argv),0)
                                 self.assertEqual(len(effects),count)
