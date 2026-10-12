@@ -17,16 +17,26 @@ from codex_wake.native_protocol import native_request
 from agent_handoff_writer_acceptance import write
 
 
-def execute(root,prefix,repo,parent_deadline):
-    root.mkdir(mode=0o700,parents=True,exist_ok=False)
-    workspace=root/'workspace';workspace.mkdir();home=root/'codex-home';home.mkdir(mode=0o700)
+def execute(root,prefix,repo,parent_deadline,resume_setup=False):
+    original=None
+    if resume_setup:
+        original=json.loads((root/'state.json').read_text())
+        if (original.get('state')!='failed' or original.get('source') or original.get('handoff')
+                or 'launch profile requires an existing owned Unix socket' not in original.get('error','')
+                or list((root/'wake/lifecycle').glob('*.json')) or list((root/'codex-home/sessions').rglob('*.jsonl'))
+                or original.get('cleanup',{}).get('private_readable_environment_matches')!=[]):
+            raise RuntimeError('setup resume requires proved pre-creation rejection and clean owned runtime')
+        write(root/'setup-failure-01.json',original)
+    root.mkdir(mode=0o700,parents=True,exist_ok=resume_setup)
+    workspace=root/'workspace';workspace.mkdir(exist_ok=resume_setup);home=root/'codex-home';home.mkdir(mode=0o700,exist_ok=resume_setup)
     codex=Path(subprocess.check_output(['which','codex'],text=True).strip()).resolve()
     config=tomllib.loads((Path.home()/'.codex/config.toml').read_text())
     selected={k:config[k] for k in ('model','model_reasoning_effort','model_provider') if k in config}
     lines=[f'{k} = {json.dumps(v)}' for k,v in selected.items()]
     lines+=['approval_policy = "never"','sandbox_mode = "workspace-write"',f'[projects.{json.dumps(str(workspace))}]','trust_level = "trusted"']
-    (home/'config.toml').write_text('\n'.join(lines)+'\n');(home/'auth.json').symlink_to(Path.home()/'.codex/auth.json')
-    skill=home/'skills/codex-wake';shutil.copytree(repo/'skills/codex-wake',skill)
+    (home/'config.toml').write_text('\n'.join(lines)+'\n')
+    if not (home/'auth.json').is_symlink():(home/'auth.json').symlink_to(Path.home()/'.codex/auth.json')
+    skill=home/'skills/codex-wake';shutil.copytree(repo/'skills/codex-wake',skill,dirs_exist_ok=resume_setup)
     workflow=Path.home()/'.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md'
     guide=skill/'SKILL.md';helper=workspace/'preflight.py';profiles=root/'profiles.json'
     head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
@@ -36,13 +46,20 @@ def execute(root,prefix,repo,parent_deadline):
     env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
     for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):env.pop(k,None)
     socket=root/'tmux.sock';session='owned-handoff';locator=root/'native.sock';server=None;monitor=None;created=False
-    log=(root/'server.log').open('w');mlog=(root/'monitor.log').open('w')
+    log=(root/'server.log').open('a' if resume_setup else 'w');mlog=(root/'monitor.log').open('a' if resume_setup else 'w')
     def launch_server():
         proc=subprocess.Popen([str(codex),'app-server','--listen','unix://'+str(locator)],env=env,stdout=log,stderr=log,start_new_session=True)
-        deadline=time.monotonic()+15
-        while not locator.exists() and proc.poll() is None and time.monotonic()<deadline:time.sleep(.1)
-        if not locator.exists():raise RuntimeError('owned native socket unavailable')
-        return proc
+        deadline=time.monotonic()+20
+        while proc.poll() is None and time.monotonic()<deadline:
+            try:
+                endpoint=locator.resolve(strict=True)
+                ready=native_request('unix://'+str(endpoint),str(codex),'thread/loaded/list',{},2)
+                if ready.get('data')==[] and ready.get('nextCursor') is None:return proc
+                raise RuntimeError('unexpected existing native threads in setup')
+            except (OSError,ValueError,RuntimeError):time.sleep(.1)
+        if proc.poll() is None:
+            os.killpg(proc.pid,signal.SIGTERM);proc.wait(timeout=10)
+        raise RuntimeError('owned native socket did not answer readiness')
     def invoke(args):
         p=subprocess.run([str(prefix/'bin/codex-wake'),'--wake-root',str(root/'wake'),*args],env=env,text=True,capture_output=True,timeout=40)
         if not p.stdout:raise RuntimeError('installed CLI empty response '+p.stderr[-300:])
@@ -59,8 +76,9 @@ def execute(root,prefix,repo,parent_deadline):
     try:
         bounds=snapshot().get('utc')
         if not bounds:raise RuntimeError('admissible UTC unavailable')
-        started=bounds['upper'];end=min(started+600,parent_deadline-60)
-        if end-started<480:raise RuntimeError('parent deadline leaves insufficient fixed fixture window')
+        started=original['started_at'] if original else bounds['upper']
+        end=min(original['deadline'] if original else started+600,parent_deadline-60)
+        if end-bounds['upper']<(240 if original else 480):raise RuntimeError('original/parent deadline leaves insufficient fixed fixture window')
         expiry=datetime.fromtimestamp(end,UTC).isoformat();receipt.update(started_at=started,deadline=end)
         # Resolve the owned listener before configuring MCP, without creating a thread.
         server=launch_server();endpoint=locator.resolve(strict=True)
@@ -72,6 +90,9 @@ def execute(root,prefix,repo,parent_deadline):
         (home/'config.toml').write_text('\n'.join(lines)+'\n');server=launch_server()
         if locator.resolve()!=endpoint:raise RuntimeError('owned endpoint changed')
         def request(method,params):return native_request('unix://'+str(endpoint),str(codex),method,params,10)
+        empty=request('thread/list',{'limit':100})
+        if empty.get('data')!=[] or empty.get('nextCursor') is not None:raise RuntimeError('existing conversations hold setup resume')
+        receipt['setup_readiness']=dict(loaded_threads=[],persisted_threads=[],original_window_retained=bool(original))
         subprocess.run(['tmux','-S',str(socket),'new-session','-d','-s',session,'-x','160','-y','40','sleep 700'],env=env,check=True,capture_output=True,timeout=10);created=True
         profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
         write(profiles,dict(version=1,profiles={'worker':profile}))
@@ -217,8 +238,8 @@ print('preflight:'+cid+':'+nonce+':'+digest)
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--execute',action='store_true');p.add_argument('--root',type=Path,required=True);p.add_argument('--prefix',type=Path,required=True);p.add_argument('--repo',type=Path,required=True);p.add_argument('--parent-deadline',type=float,required=True)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--execute',action='store_true');p.add_argument('--resume-setup',action='store_true');p.add_argument('--root',type=Path,required=True);p.add_argument('--prefix',type=Path,required=True);p.add_argument('--repo',type=Path,required=True);p.add_argument('--parent-deadline',type=float,required=True)
     args=p.parse_args()
     if not args.execute:p.error('--execute required for two owned assignments and bounded native goal effects')
-    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline)
+    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline,args.resume_setup)
 if __name__=='__main__':raise SystemExit(main())
