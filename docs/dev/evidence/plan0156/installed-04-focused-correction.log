@@ -1,0 +1,13 @@
+installed_module=/home/ecochran76/.local/state/codex-wake/plan0156/installed-04/lib/python3.12/site-packages/codex_wake/__init__.py
+....................usage: codex-wake sessions open [-h] [--json] [--app-server APP_SERVER]
+                                [--tmux-socket TMUX_SOCKET]
+                                [--tmux-session TMUX_SESSION]
+                                [--timeout TIMEOUT] (--new | --resume RESUME)
+                                [--cwd CWD] --name NAME
+                                [--codex-path CODEX_PATH] [--extra-attachment]
+codex-wake sessions open: error: one of the arguments --new --resume is required
+......
+----------------------------------------------------------------------
+Ran 26 tests in 7.091s
+
+OK

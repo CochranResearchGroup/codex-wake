@@ -1,0 +1,8 @@
+{
+  "model_turns": 0,
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-04",
+  "codex_home": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-04-skill-proof/codex-home",
+  "state": "failed",
+  "error": "exact installed skill missing",
+  "server_exit": 0
+}

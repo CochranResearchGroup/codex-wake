@@ -5560,3 +5560,18 @@ Source docs/skill now describe guarded spawn; global install/release/integration
 0158 refresh and0159 handoff remain pending. Goal ACTIVE,344390 tokens/2789s at
 readback;45-minute checkpoint backstop exceeded89s, user2m/six-hour ceilings intact.
 Memory unavailable, existing no-write receipt retained; no shared runtime effects.
+
+## Turn 272 | 2026-10-12 UTC
+
+Plan0156 checkpoint03: actual no-model draft rendering established; public CLI
+red/green guards reject drafts, malformed host profiles and restart-time draft
+changes before unqueued admission. Existing active/unknown/split and lost-turn
+response guards qualified. Frozen1090 comprehensive tests pass; isolated wheel
+matches source and26 focused checks pass after retained test-import correction.
+Installed15-tool stdio MCP passes controlled synthetic-clock run; first host-clock
+anomaly retained, not declared diagnosed. Copied skill visible in actual native
+catalog alongside global same-name entry; selection remains unproven. Both owned
+no-model skill servers exit0; readable private-home census empty with denied
+entries explicit.0158/0159 and final integration/release remain pending; full goal
+ACTIVE. See checkpoint03 for exact evidence/gates. Memory unavailable; receipt
+retained. No new model assignment or global service/package/skill mutation.
