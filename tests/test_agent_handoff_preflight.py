@@ -58,7 +58,16 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_another_live_monitor_generation_cannot_be_taken_over_or_stopped(self):
         self.scenario(activate=True,foreign_monitor=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False):
+    def test_explicit_rollback_reuses_source_and_deducts_successor_spending_once(self):
+        self.scenario(rollback=True)
+
+    def test_lost_rollback_budget_response_reconciles_without_second_debit(self):
+        self.scenario(rollback=True,lost_rollback=True)
+
+    def test_rollback_cannot_debit_source_after_another_transition_takes_ownership(self):
+        self.scenario(rollback=True,owner_conflict=True)
+
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -121,7 +130,10 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     elif method=='thread/goal/set':
                         goal_sets.append(params)
                         if tid==source:
-                            goals[tid].update(status='paused',tokensUsed=pause_used,updatedAt=1002)
+                            goals[tid].update(status='paused',updatedAt=1002)
+                            if pause_used is not None:goals[tid]['tokensUsed']=pause_used
+                            if 'tokenBudget' in params:goals[tid]['tokenBudget']=params['tokenBudget']
+                            if lost_rollback and 'tokenBudget' in params:ws.close();return
                             ws.send(json.dumps(dict(id=req['id'],result={'goal':goals[tid]})))
                             continue
                         if 'objective' not in params:
@@ -202,6 +214,26 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         self.assertEqual(receipt['successor_thread_id'],target)
                         self.assertEqual(receipt['remaining_tokens'],920 if pause_used is None else 970-pause_used)
                         self.assertEqual(receipt['preflight']['state'],'passed')
+                    if rollback:
+                        if owner_conflict:
+                            owner=root/'lifecycle'/ ('owner-'+hashlib.sha256(source.encode()).hexdigest()+'.json')
+                            lease=json.loads(owner.read_text());lease['intent_fingerprint']='another-transition';owner.write_text(json.dumps(lease))
+                            out=StringIO()
+                            with redirect_stdout(out):self.assertEqual(run(argv+['--rollback']),5)
+                            self.assertEqual(json.loads(out.getvalue())['rollback']['reason'],'source_owned_by_another_transition')
+                            self.assertEqual(goals[source]['tokenBudget'],1000)
+                            self.assertEqual(len(goal_sets),1)
+                            return
+                        for index in range(2):
+                            out=StringIO()
+                            with redirect_stdout(out):self.assertEqual(run(argv+['--rollback']),5 if lost_rollback and index==0 else 0)
+                            restored=json.loads(out.getvalue())['rollback']
+                            self.assertEqual(restored['state'],'uncertain' if lost_rollback and index==0 else 'completed')
+                            self.assertEqual(restored['thread_id'],source)
+                            self.assertEqual(restored['remaining_tokens'],920)
+                            self.assertEqual(goals[source]['tokenBudget'],970)
+                            self.assertEqual(goals[source]['tokensUsed'],50)
+                        self.assertEqual(clients[0].poll(),None)
                     if activate:
                         from codex_wake.daemon import run as daemon_run
                         sleeps=[]
@@ -260,7 +292,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 self.assertEqual(methods.count('thread/start'),1)
                 self.assertEqual(methods.count('thread/queue/add'),1)
                 self.assertEqual(methods.count('thread/queue/start'),1)
-                self.assertEqual(len(goal_sets),(2 if foreign_monitor else 3) if activate else (1 if pause_used is None else 2))
+                self.assertEqual(len(goal_sets),(2 if foreign_monitor else 3) if activate else (2 if rollback or pause_used is not None else 1))
                 self.assertEqual(goals[source]['tokensUsed'],50 if pause_used is None else pause_used)
                 self.assertEqual(goals[source]['status'],'paused')
                 self.assertEqual(goals[target]['status'],'active' if foreign_monitor else 'paused')

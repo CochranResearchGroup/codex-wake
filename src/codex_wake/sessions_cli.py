@@ -36,6 +36,7 @@ def add_sessions_parser(subparsers):
         handoff.add_argument('--' + option, required=True)
     handoff.add_argument('--mode', required=True, choices=('new-tab', 'same-tab'))
     handoff.add_argument('--caller-thread-id')
+    handoff.add_argument('--rollback', action='store_true', help='restore the original paused conversation without renewing allowance')
     handoff.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
         command = commands.add_parser(verb)

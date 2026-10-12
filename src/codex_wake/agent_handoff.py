@@ -60,6 +60,12 @@ def handoff_command(args, root):
         else:
             receipt=dict(version=1,intent_key=args.intent,fingerprint=fingerprint,
                 intent=intent,thread_id=args.thread_id,state='prepared')
+        if getattr(args,'rollback',False):
+            rollback_handoff(path,receipt,profile,policy,root)
+            save(path,receipt)
+            from .sessions_cli import emit
+            emit(receipt,args.as_json)
+            return 0 if receipt.get('rollback',{}).get('state')=='completed' else 5
         if receipt.get('deadline_fence'):
             from .process import process_identity,process_exists
             fence=receipt['deadline_fence']
@@ -142,6 +148,76 @@ def handoff_command(args, root):
         from .sessions_cli import emit
         emit(receipt,args.as_json)
         return 5
+
+
+def rollback_handoff(path,receipt,profile,policy,root):
+    """Reuse a ready original client with conserved budget; active successors hold."""
+    result=receipt.setdefault('rollback',dict(state='prepared',thread_id=receipt['thread_id']))
+    def request(method,params):
+        return native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),method,params,profile['timeout'])
+    try:
+        target=receipt.get('successor_thread_id')
+        if not target or receipt.get('successor',{}).get('state')!='completed':
+            result.update(state='blocked',reason='successor_assignment_not_settled');return
+        key=hashlib.sha256(receipt['thread_id'].encode()).hexdigest();owner_path=path.parent/('owner-'+key+'.json')
+        owner=json.loads(owner_path.read_text())
+        if owner.get('intent_fingerprint')!=receipt['fingerprint'] or owner.get('source_thread_id')!=receipt['thread_id']:
+            result.update(state='blocked',reason='source_owned_by_another_transition');return
+        target_goal=request('thread/goal/get',{'threadId':target})['goal']
+        if target_goal and target_goal['status'] not in ('paused','complete','budgetLimited','usageLimited','blocked'):
+            result.update(state='blocked',reason='successor_not_paused');return
+        source=receipt['thread_id'];goal=request('thread/goal/get',{'threadId':source})['goal']
+        before=result.get('source_goal_before',receipt['source_goal'])
+        if (not goal or goal['status']!='paused'
+                or any(goal.get(k)!=before.get(k) for k in ('threadId','objective','createdAt'))
+                or any(type(goal.get(k)) is not int or goal[k]<before[k] for k in ('tokensUsed','timeUsedSeconds'))):
+            result.update(state='blocked',reason='source_goal_authority_changed');return
+        guard=dict(thread_id=source,reason='successor_preflight_not_verified')
+        source_guard(guard,profile,root)
+        if not guard.get('source_attachment'):
+            result.update(state='blocked',reason=guard['reason']);return
+        if 'requested_budget' not in result:
+            if goal.get('tokenBudget')!=before.get('tokenBudget'):
+                result.update(state='blocked',reason='source_goal_authority_changed');return
+            native=request('thread/read',{'threadId':target,'includeTurns':True})['thread']
+            if native['id']!=target or native['status']['type']!='idle' or any(t['status']=='inProgress' for t in native['turns']):
+                result.update(state='blocked',reason='successor_assignment_not_settled');return
+            rollout=Path(native['path']).resolve(strict=True)
+            rollout.relative_to(Path(profile.get('codex_home',Path.home()/'.codex'))/'sessions')
+            used=None
+            for line in rollout.read_text().splitlines():
+                e=json.loads(line);p=e.get('payload',{});i=p.get('info') or {}
+                if e.get('type')=='event_msg' and p.get('type')=='token_count' and i.get('total_token_usage'):
+                    used=i['total_token_usage'].get('total_tokens')
+            if type(used) is not int or used<0:
+                result.update(state='blocked',reason='successor_usage_unknown');return
+            remaining=policy['token_cap']-policy['tokens_before_source']-goal['tokensUsed']-used
+            if goal['tokenBudget'] is not None:remaining=min(remaining,goal['tokenBudget']-goal['tokensUsed']-used)
+            remaining=max(0,remaining)
+            result.update(source_goal_before=goal,successor_tokens_used=used,remaining_tokens=remaining,
+                requested_budget=goal['tokensUsed']+remaining,attachment=guard['source_attachment'])
+            save(path,receipt)
+        expected=result['requested_budget']
+        if goal['tokenBudget']!=expected:
+            if result.get('uncertain_effect'):
+                result.update(state='uncertain',reason='source_budget_change_unobserved');return
+            if not before_handoff_effect(path,receipt):
+                result.update(state='blocked',reason=receipt['reason']);return
+            result.update(state='budgeting_source',uncertain_effect='thread/goal/rollback_source_budget');save(path,receipt)
+            request('thread/goal/set',dict(threadId=source,status='paused',tokenBudget=expected,origin='automatic'))
+            goal=request('thread/goal/get',{'threadId':source})['goal']
+        if (not goal or goal['status']!='paused' or goal['tokenBudget']!=expected
+                or any(goal.get(k)!=before.get(k) for k in ('threadId','objective','createdAt'))
+                or any(type(goal.get(k)) is not int or goal[k]<before[k] for k in ('tokensUsed','timeUsedSeconds'))):
+            result.update(state='uncertain',reason='source_budget_change_unobserved');return
+        result.pop('uncertain_effect',None)
+        result.update(state='completed',reason='original_paused_conversation_reused',source_goal_after=goal)
+        receipt.update(state='blocked',reason='handoff_rolled_back')
+        owner=json.loads(owner_path.read_text())
+        if owner['intent_fingerprint']!=receipt['fingerprint']:raise ValueError('owner changed')
+        owner['state']='rolled_back';save(owner_path,owner)
+    except Exception as exc:
+        result.update(state='uncertain' if result.get('uncertain_effect') else 'blocked',reason=type(exc).__name__)
 
 
 def source_guard(receipt,profile,root):

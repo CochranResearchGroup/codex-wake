@@ -147,6 +147,11 @@ at its deadline safety boundary. One-shot polling cannot activate. Graceful
 monitor exit pauses its goal; a different live PID generation prevents takeover.
 Monitor availability is a runtime requirement, not a claim of enforcement during
 host outages. Unknown effects retain original receipts for reconciliation.
-Current source supports new-tab preparation; same-tab, handoff rollback and full
-installed native continuation acceptance remain open Plan0159 gates. TUI restart,
+Current source supports new-tab preparation and explicit handoff `--rollback`
+(MCP `rollback: true`) when the successor is paused and settled and the original
+source attachment remains ready. Rollback keeps the original goal paused and
+subtracts observed receiver spending once; uncertain effects reconcile before
+retry. An active successor or missing source attachment holds. Same-tab, broader
+rollback and full installed native continuation acceptance remain open Plan0159
+gates. TUI restart,
 fresh context and a file read do not prove MCP readiness or renewed allowance.
