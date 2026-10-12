@@ -40,7 +40,11 @@ the positive installed spawn axis proven; no parent completion claim.
   empty. Final correction03 passed. This installed spawn loop used its initial
   run plus two correction attempts and is now closed; no further blind spawn.
 - cleanup-checkpoint-02.json: fresh same-UID OS census across all three private
-  homes is empty, with diagnostics explicitly recorded. No production sessions,
+  homes finds no readable matching environment. Eight unrelated/protected entries
+  denied environment access; their command lines match no owned root and two
+  Codex entries are checked for terminal process state. Do not describe this as
+  successful reading of every protected process environment. Owned runner/client
+  handles closed; diagnostics are explicit. No production sessions,
   shared services, A2A enrollment or goals changed.
 
 ## Remaining acceptance and next action

@@ -7,35 +7,75 @@
   "diagnostics": [
     {
       "pid": "696",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "systemd",
+      "argv_matches_owned_root": false,
+      "metadata_error": "PermissionError",
+      "process_state": "S",
+      "process_start_ticks": 1802
     },
     {
       "pid": "720",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "(sd-pam)",
+      "argv_matches_owned_root": false,
+      "metadata_error": "PermissionError",
+      "process_state": "S",
+      "process_start_ticks": 1804
     },
     {
       "pid": "6960",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "sshd",
+      "argv_matches_owned_root": false,
+      "metadata_error": "PermissionError",
+      "process_state": "S",
+      "process_start_ticks": 40772049
     },
     {
       "pid": "22375",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "sshd",
+      "argv_matches_owned_root": false,
+      "metadata_error": "PermissionError",
+      "process_state": "S",
+      "process_start_ticks": 680107
     },
     {
       "pid": "25206",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "codex",
+      "argv_matches_owned_root": false,
+      "metadata_error": "FileNotFoundError",
+      "process_state": "Z",
+      "process_start_ticks": 112453
     },
     {
       "pid": "38165",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "smbd[127.0.0.1]",
+      "argv_matches_owned_root": false,
+      "metadata_error": "PermissionError",
+      "process_state": "S",
+      "process_start_ticks": 33422178
     },
     {
       "pid": "50470",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "codex",
+      "argv_matches_owned_root": false,
+      "metadata_error": "FileNotFoundError",
+      "process_state": "Z",
+      "process_start_ticks": 10959165
     },
     {
       "pid": "91523",
-      "error": "PermissionError"
+      "error": "PermissionError",
+      "comm": "gpg-agent",
+      "argv_matches_owned_root": false,
+      "metadata_error": "PermissionError",
+      "process_state": "S",
+      "process_start_ticks": 39518
     }
   ],
   "admissible_time": {
@@ -56,5 +96,6 @@
       "rate_ppm": 5000
     },
     "reason": "authenticated_utc"
-  }
+  },
+  "census_scope": "Readable same-UID environments, metadata for denied entries, and known owned runtime handles; not a claim that every protected environment was readable."
 }
