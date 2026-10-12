@@ -24,7 +24,7 @@ goal mutation; actual updated MCP behavior producesready. Combined focused:
 CODEX_WAKE_STABLE_TIME_CONFIG='' .venv/bin/python -m unittest tests.test_agent_refresh tests.test_agent_spawn tests.test_lifecycle_mcp tests.test_a2a_mcp tests.test_session_lifecycle -q
 42 tests PASS12.810s. No live model/provider/shared-service effects.
 
-Checkpoint before installed refresh effects: current source partial0138 acceptance
+Checkpoint before installed refresh effects: current source partial0158 acceptance
 requires owned installed native/TUI evidence, rollback and final schema/scope audit.
 Full0156/handoff/release/clean-main obligations remain. Next proof uses new private
 home, workspace, app-server, tmux socket and only toy read-only MCP/skill resources;

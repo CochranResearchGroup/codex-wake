@@ -16,14 +16,17 @@ Checkpoint each child and before installed effects, with a 45-minute backstop;
 stop and checkpoint before cumulative 2,000,000 tokens or six hours. Goal runtime
 start is epoch1791817417; six-hour ceiling1791839017. Native goal counters are the
 token authority. Two attempts per failing seam and one consolidated review plus
-one remediation pass remain the campaign bounds. No completed criterion yet.
+one remediation pass remain the campaign bounds. Positive installed spawn and
+installed refresh's stale-resource axis are proven; all child closeouts and
+combined product/release acceptance remain incomplete.
 Public CLI/MCP are deterministic seams; native queued-message and owned TUI
 readback are installed seams. Red/green commands belong in the evidence ledger.
 
 Existing open/resume/close accepted; Plan0155 disposable probe complete. Same-thread
 TUI restart retains its thread's MCP connection on installed Codex0.162.1; fresh
 conversation loads the revised MCP. This plan specifies a future lifecycle product,
-not a claim that the controller or goal migration is implemented.
+the controller now implements guarded spawn and partial refresh. Goal migration
+and actual successor preflight remain pending Plan0159 work.
 
 ## Problem Statement
 

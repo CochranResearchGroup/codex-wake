@@ -1,0 +1,113 @@
+{
+  "qualification": "installed stale-resource axis",
+  "state": "passed",
+  "operation_state": "blocked",
+  "operation_reason": "requested_resources_not_ready",
+  "interface": "native mcpServer/tool/call -> installed stdio wake_sessions_refresh -> installed CLI",
+  "thread_id": "01a130ee-98eb-7323-8752-45561a229b8b",
+  "old_attachment": {
+    "client_pid": 12029,
+    "client_start_time_ticks": 46167395,
+    "evidence": "metadata_matched",
+    "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-01/workspace",
+    "pane_id": "%1",
+    "pane_index": "0",
+    "pane_title": "owned-refresh-worker",
+    "pane_tty": "/dev/pts/23",
+    "session_id": "$0",
+    "session_name": "owned-refresh",
+    "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-01/tmux.sock",
+    "window_id": "@1",
+    "window_index": "1",
+    "window_name": "worker"
+  },
+  "new_attachment": {
+    "client_pid": 13697,
+    "client_start_time_ticks": 46167708,
+    "evidence": "metadata_matched",
+    "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-01/workspace",
+    "pane_id": "%2",
+    "pane_index": "0",
+    "pane_title": "owned-refresh-worker",
+    "pane_tty": "/dev/pts/23",
+    "session_id": "$0",
+    "session_name": "owned-refresh",
+    "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-01/tmux.sock",
+    "window_id": "@2",
+    "window_index": "1",
+    "window_name": "worker-refresh-21d30c6558c6"
+  },
+  "old_generation_exit_observed": true,
+  "resources": {
+    "mcp": {
+      "is_error": false,
+      "observed_content": [
+        {
+          "text": "v1",
+          "type": "text"
+        }
+      ],
+      "server": "toy",
+      "state": "blocked",
+      "tool": "version"
+    },
+    "skill": {
+      "catalog": [
+        {
+          "description": "Refresh marker v2",
+          "enabled": true,
+          "name": "refresh-marker",
+          "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-01/workspace/.agents/skills/refresh-marker/SKILL.md",
+          "pluginId": null,
+          "scope": "repo"
+        }
+      ],
+      "observed_sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd",
+      "state": "ready"
+    }
+  },
+  "goal_before": null,
+  "goal_after": null,
+  "model_turns": 0,
+  "server_exit": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      696,
+      720,
+      6960,
+      22375,
+      25206,
+      38165,
+      50470,
+      91523
+    ],
+    "private_readable_environment_matches": []
+  },
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-05",
+  "codex": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+  "checkpoint_sha256": "7caee1c60542806c5c59a0afa5d3938da0bb81270d9b0d2fb5fa211ee5a1f01f",
+  "source_commit": "6c02c47",
+  "modules": {
+    "agent_refresh.py": {
+      "source": "4e3d7306b84459c04f8ded6c23689238419514d4a093900146ff57d1ad33a138",
+      "installed": "4e3d7306b84459c04f8ded6c23689238419514d4a093900146ff57d1ad33a138"
+    },
+    "agent_lifecycle.py": {
+      "source": "428a883f41c8383fcb03b3fcf19c4fbeee5d727dda73ff5ae628005cd01377ca",
+      "installed": "428a883f41c8383fcb03b3fcf19c4fbeee5d727dda73ff5ae628005cd01377ca"
+    },
+    "mcp_server.py": {
+      "source": "b4b5d338e8cf59f3511b70b424d8c90a50ca420e4c59d31413a38d89f9563ee7",
+      "installed": "b4b5d338e8cf59f3511b70b424d8c90a50ca420e4c59d31413a38d89f9563ee7"
+    },
+    "sessions_cli.py": {
+      "source": "50b74863c59535d6b41cb1ea2697d85e16d80342f827bf017b7897d7e6c63101",
+      "installed": "50b74863c59535d6b41cb1ea2697d85e16d80342f827bf017b7897d7e6c63101"
+    },
+    "cli.py": {
+      "source": "aaa56010f07ed5d6bf28d24ab76de44065a64921cc6d6dc4f022313ce6463775",
+      "installed": "aaa56010f07ed5d6bf28d24ab76de44065a64921cc6d6dc4f022313ce6463775"
+    }
+  },
+  "remaining": "nonnull goal installed proof, selected skill instructions, rollback, final scope/schema review, handoff and combined release"
+}

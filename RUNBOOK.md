@@ -5575,3 +5575,16 @@ no-model skill servers exit0; readable private-home census empty with denied
 entries explicit.0158/0159 and final integration/release remain pending; full goal
 ACTIVE. See checkpoint03 for exact evidence/gates. Memory unavailable; receipt
 retained. No new model assignment or global service/package/skill mutation.
+
+## Turn 273 | 2026-10-12 UTC
+
+Plan0156 source refresh cycles19–29 add checkpoint/draft guards, safe same-thread
+reattachment, unique lost-stop/tab reconciliation, fixed expiry, scoped16-tool
+MCP and actual resource behavior checks. Monotonic native counters preserved;
+budget changes/resets held.42 focused checks pass. Installed-05 no-model native
+MCP/TUI run proves changed skill catalogready and retainedv1MCPblocked despite
+newclient; source thread and nullgoal preserved. Owned server exits0; no readable
+private-home process matches, deniedentries explicit. See checkpoint04 and
+installed-refresh-01.json. Nonnullgoal/selectedskill/rollback,0159, consolidated
+review and final integration/release remain pending. Full goal ACTIVE,784954tokens/
+5528s readback, originalcaps retained. Memory unavailable; existing receipt retained.
