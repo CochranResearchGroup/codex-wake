@@ -1,6 +1,6 @@
 {
   "state": "observed",
-  "scope": "three completed owned assignments; count cumulative final usage once per thread",
+  "scope": "five completed owned assignments, including failed successor preflight; final cumulative usage once per thread",
   "threads": [
     {
       "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02",
@@ -112,8 +112,40 @@
         }
       ],
       "source_artifact": "installed-handoff-writer-02.json"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01",
+      "thread_id": "01a1318d-7d31-7260-9650-052d65f66f22",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/codex-home/sessions/2026/10/12/rollout-2026-10-12T14-18-38-01a1318d-7d31-7260-9650-052d65f66f22.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 40117,
+        "cached_input_tokens": 31872,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 326,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 40443
+      },
+      "total_tokens": 40443
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01",
+      "thread_id": "01a1318d-bed9-7142-b969-dfe81043a6e6",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/codex-home/sessions/2026/10/12/rollout-2026-10-12T14-18-55-01a1318d-bed9-7142-b969-dfe81043a6e6.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 160575,
+        "cached_input_tokens": 137088,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 536,
+        "reasoning_output_tokens": 20,
+        "total_tokens": 161111
+      },
+      "total_tokens": 161111
     }
   ],
-  "cumulative_external_tokens": 125341,
+  "cumulative_external_tokens": 326895,
   "accounting_rule": "Add final cumulative total once per native thread; do not sum successive cumulative events. Count cached tokens conservatively."
 }

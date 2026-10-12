@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "state": "failed_preflight_no_continuation",
+  "source_commit": "35e1ce373017e34520fb89646b8c867b93496b36",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-09",
+  "raw_root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01",
+  "original_deadline": 1791833065.8310812,
+  "setup_failure_preserved": "setup-failure-01.json",
+  "setup_resume_original_window": {
+    "loaded_threads": [],
+    "original_window_retained": true,
+    "persisted_threads": []
+  },
+  "source_thread_id": "01a1318d-7d31-7260-9650-052d65f66f22",
+  "successor_thread_id": "01a1318d-bed9-7142-b969-dfe81043a6e6",
+  "source_native_commands": [
+    {
+      "turn_id": "01a1318d-7d3d-76c2-860e-6bd78a9cfbf4",
+      "item_id": "exec-d0d94b51-ffa9-46d8-9696-f55c939db25f",
+      "status": "completed",
+      "exit_code": 0,
+      "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/workspace"
+    }
+  ],
+  "successor_native_commands": [
+    {
+      "turn_id": "01a1318d-cb13-7701-bc08-22d976eab416",
+      "item_id": "exec-327638b0-23bf-4adb-99dc-f68093050170",
+      "status": "completed",
+      "exit_code": 0,
+      "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/workspace"
+    },
+    {
+      "turn_id": "01a1318d-cb13-7701-bc08-22d976eab416",
+      "item_id": "exec-16afee7e-3d50-499a-95fc-1e48a3bb4d66",
+      "status": "completed",
+      "exit_code": 0,
+      "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/workspace"
+    },
+    {
+      "turn_id": "01a1318d-cb13-7701-bc08-22d976eab416",
+      "item_id": "exec-bce81fa7-08f2-45a9-a680-be10bb6b5212",
+      "status": "failed",
+      "exit_code": 1,
+      "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/workspace"
+    },
+    {
+      "turn_id": "01a1318d-cb13-7701-bc08-22d976eab416",
+      "item_id": "exec-fec3f4cd-bc53-4a85-8b99-a5fb59b0a949",
+      "status": "failed",
+      "exit_code": 2,
+      "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/workspace"
+    }
+  ],
+  "source_goal": {
+    "threadId": "01a1318d-7d31-7260-9650-052d65f66f22",
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /home/ecochran76/.local/state/codex-wake/plan0156/installed-09/bin/python /home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/workspace/preflight.py --continue exactly once, record actual result, then mark this goal complete. No other work, actors, resource renewal or goal budget change.",
+    "status": "paused",
+    "tokenBudget": 209557,
+    "tokensUsed": 0,
+    "timeUsedSeconds": 0,
+    "createdAt": 1791832734,
+    "updatedAt": 1791832734
+  },
+  "successor_goal": null,
+  "usage": [
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01",
+      "thread_id": "01a1318d-7d31-7260-9650-052d65f66f22",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/codex-home/sessions/2026/10/12/rollout-2026-10-12T14-18-38-01a1318d-7d31-7260-9650-052d65f66f22.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 40117,
+        "cached_input_tokens": 31872,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 326,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 40443
+      },
+      "total_tokens": 40443
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01",
+      "thread_id": "01a1318d-bed9-7142-b969-dfe81043a6e6",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/codex-home/sessions/2026/10/12/rollout-2026-10-12T14-18-55-01a1318d-bed9-7142-b969-dfe81043a6e6.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 160575,
+        "cached_input_tokens": 137088,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 536,
+        "reasoning_output_tokens": 20,
+        "total_tokens": 161111
+      },
+      "total_tokens": 161111
+    }
+  ],
+  "preflight_allowance": 150000,
+  "successor_spending": 161111,
+  "source_goal_preserved_paused": true,
+  "goal_activation": false,
+  "selected_instructions_read": true,
+  "checkpoint_read": true,
+  "selected_preflight_passed": false,
+  "reason": "harness stopped on transient admissible-time hold; subsequent native resource check failed during teardown; successor also exceeded preflight allowance",
+  "additional_model_assignments_after_reconciliation": 0,
+  "readonly_server_exit": 0,
+  "cleanup": {
+    "private_readable_environment_matches": [],
+    "denied_environment_pids": [
+      696,
+      720,
+      6960,
+      22375,
+      25206,
+      38165,
+      50470,
+      91523
+    ]
+  },
+  "remaining_gates": [
+    "successful native preflight",
+    "bounded native goal continuation",
+    "same-tab",
+    "handoff rollback",
+    "combined fresh review/remediation",
+    "required local gates",
+    "PR main integration release rollback",
+    "clean main and issue closures"
+  ],
+  "checkpoint_sha256": "0e674bf71a7d563e0e9e77f65618b13f26fff56acc853edaab7040772b96c444",
+  "checkpoint_writer_marker_verified": true,
+  "selected_instruction_proof": [
+    {
+      "item_id": "exec-327638b0-23bf-4adb-99dc-f68093050170",
+      "marker_hashes_present": true
+    }
+  ],
+  "installed_source_parity": {
+    "agent_lifecycle.py": true,
+    "agent_refresh.py": true,
+    "agent_handoff.py": true,
+    "mcp_server.py": true,
+    "daemon.py": true,
+    "sessions_cli.py": true,
+    "session_lifecycle.py": true,
+    "native_protocol.py": true
+  }
+}
