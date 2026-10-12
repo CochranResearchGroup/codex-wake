@@ -5598,3 +5598,14 @@ successor preflight remains unexecuted. Issues250/251 owner assigned/read back,
 both OPEN. Installed nonnull-goal/rollback,0159, review/integration/release remain
 pending. See checkpoint05. Root ACTIVE881825tokens8105s, original caps unchanged.
 Memory unavailable; existing non-write receipt retained.
+
+## Turn 275 | 2026-10-12 UTC
+
+Isolated installed06/native no-model refresh preserves actual paused goal;
+automatic-origin fixture goal creation accepted, same-thread rollback completed,
+oldMCPv1 still blocks requestedv2. Ownedserverexit0/private readable censusempty;
+installed-refresh-02.json binds exactsource6ebd4a4 hashes. Public handoff TDD
+cycles33–35 hold unknown usage, cumulative exhaustion and fixed deadline without
+successor/goal effects. Actual preflight/ownership/activation and full integration
+remain pending; Plan0159 now IN_PROGRESS. Root950583tokens8766s ACTIVE readback.
+Memory unavailable; retained non-write receipt. No global update/model turn.

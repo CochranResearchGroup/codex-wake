@@ -20,7 +20,7 @@ def write(path, value):
     path.chmod(0o600)
 
 
-def execute(root, prefix):
+def execute(root, prefix, paused_goal=False, rollback=False):
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     workspace, home = root / 'workspace', root / 'codex-home'
     workspace.mkdir(); home.mkdir(mode=0o700)
@@ -99,7 +99,15 @@ for line in sys.stdin:
         initial=request('mcpServer/tool/call',{'threadId':thread,'server':'toy','tool':'version','arguments':{}})
         if initial['content'] != [{'type':'text','text':'v1'}]:raise RuntimeError('initial MCP behavior mismatch')
         receipt['initial_mcp']=initial
+        if paused_goal:
+            # Automatic provenance is deliberate: this probe must not forge a
+            # new user-origin authorization for an agent-created fixture goal.
+            receipt['goal_creation']=request('thread/goal/set',dict(threadId=thread,
+                objective='Plan0156 disposable paused-goal continuity probe',
+                status='paused',tokenBudget=1000,origin='automatic'))
         goal=request('thread/goal/get',{'threadId':thread})['goal'];receipt['goal_before']=goal
+        if paused_goal and (not goal or goal['status']!='paused'):
+            raise RuntimeError('paused native fixture goal not observed')
         skill_version('v2');version.write_text('v2')
         profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),
             app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10,
@@ -138,6 +146,14 @@ for line in sys.stdin:
         write(root/'state.json',receipt)
         goal_after=request('thread/goal/get',{'threadId':thread})['goal'];receipt['goal_after']=goal_after
         if goal_after!=goal:raise RuntimeError('native goal changed')
+        if rollback:
+            result=request('mcpServer/tool/call',{'threadId':thread,'server':'wake_lifecycle',
+                'tool':'wake_sessions_refresh','arguments':dict(body,rollback=True)})
+            restored=json.loads(result['content'][0]['text']);receipt['mcp_rollback']=restored
+            if restored.get('rollback',{}).get('state')!='completed':
+                raise RuntimeError('native original conversation rollback not completed')
+            if restored['rollback']['goal']!=goal:
+                raise RuntimeError('rollback changed native goal')
         history=request('thread/read',{'threadId':thread,'includeTurns':True})['thread']['turns']
         if history:raise RuntimeError('no-model proof unexpectedly created native turns')
         receipt.update(state='passed',model_turns=0)
@@ -169,5 +185,7 @@ if __name__=='__main__':
     parser.add_argument('--execute',action='store_true',required=True)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--prefix',type=Path,required=True)
+    parser.add_argument('--paused-goal',action='store_true')
+    parser.add_argument('--rollback',action='store_true')
     args=parser.parse_args()
-    raise SystemExit(execute(args.root.resolve(),args.prefix.resolve()))
+    raise SystemExit(execute(args.root.resolve(),args.prefix.resolve(),args.paused_goal,args.rollback))

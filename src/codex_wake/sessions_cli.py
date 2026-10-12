@@ -30,6 +30,13 @@ def add_sessions_parser(subparsers):
     refresh.add_argument('--caller-thread-id')
     refresh.add_argument('--rollback', action='store_true', help='reattach the original conversation within the same fixed intent')
     refresh.add_argument('--json', dest='as_json', action='store_true')
+    handoff = commands.add_parser('handoff', help='prepare a bounded fresh-context continuation')
+    for option in ('profiles', 'profile', 'intent', 'thread-id', 'checkpoint',
+                   'checkpoint-sha256', 'expires-at'):
+        handoff.add_argument('--' + option, required=True)
+    handoff.add_argument('--mode', required=True, choices=('new-tab', 'same-tab'))
+    handoff.add_argument('--caller-thread-id')
+    handoff.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
         command = commands.add_parser(verb)
         command.add_argument('--json', dest='as_json', action='store_true')

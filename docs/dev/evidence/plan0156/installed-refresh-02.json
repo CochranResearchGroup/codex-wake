@@ -1,0 +1,155 @@
+{
+  "cleanup": {
+    "denied_environment_pids": [
+      696,
+      720,
+      6960,
+      22375,
+      25206,
+      38165,
+      50470,
+      91523
+    ],
+    "private_readable_environment_matches": []
+  },
+  "current_cli_changed_after_install": true,
+  "goal_after": {
+    "createdAt": 1791825238,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "status": "paused",
+    "threadId": "01a1311b-4f69-7a32-9e89-fbaf9aa83eb2",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 1000,
+    "tokensUsed": 0,
+    "updatedAt": 1791825238
+  },
+  "goal_before": {
+    "createdAt": 1791825238,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "status": "paused",
+    "threadId": "01a1311b-4f69-7a32-9e89-fbaf9aa83eb2",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 1000,
+    "tokensUsed": 0,
+    "updatedAt": 1791825238
+  },
+  "goal_creation_origin": "automatic",
+  "limits": [
+    "paused goal only; active goal continuation unproven",
+    "stale MCP axis; full requested readiness blocked",
+    "original existing attachment rollback; absence rollback fixture only"
+  ],
+  "model_turns": 0,
+  "module_hash_parity_current_worktree": {
+    "agent_lifecycle": true,
+    "agent_refresh": true,
+    "cli": false,
+    "mcp_server": true,
+    "sessions_cli": false
+  },
+  "module_hash_parity_source_commit": {
+    "agent_lifecycle": true,
+    "agent_refresh": true,
+    "cli": true,
+    "mcp_server": true,
+    "sessions_cli": true
+  },
+  "new_attachment": {
+    "client_pid": 89287,
+    "client_start_time_ticks": 46489911,
+    "evidence": "metadata_matched",
+    "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02/workspace",
+    "pane_id": "%2",
+    "pane_index": "0",
+    "pane_title": "owned-refresh-worker",
+    "pane_tty": "/dev/pts/23",
+    "session_id": "$0",
+    "session_name": "owned-refresh",
+    "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02/tmux.sock",
+    "window_id": "@2",
+    "window_index": "1",
+    "window_name": "worker-refresh-7b2c08a86a85"
+  },
+  "old_attachment": {
+    "client_pid": 88958,
+    "client_start_time_ticks": 46489623,
+    "evidence": "metadata_matched",
+    "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02/workspace",
+    "pane_id": "%1",
+    "pane_index": "0",
+    "pane_title": "owned-refresh-worker",
+    "pane_tty": "/dev/pts/23",
+    "session_id": "$0",
+    "session_name": "owned-refresh",
+    "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02/tmux.sock",
+    "window_id": "@1",
+    "window_index": "1",
+    "window_name": "worker"
+  },
+  "operation_state": "blocked",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-06",
+  "raw_root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02",
+  "resources": {
+    "mcp": {
+      "is_error": false,
+      "observed_content": [
+        {
+          "text": "v1",
+          "type": "text"
+        }
+      ],
+      "server": "toy",
+      "state": "blocked",
+      "tool": "version"
+    },
+    "skill": {
+      "catalog": [
+        {
+          "description": "Refresh marker v2",
+          "enabled": true,
+          "name": "refresh-marker",
+          "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02/workspace/.agents/skills/refresh-marker/SKILL.md",
+          "pluginId": null,
+          "scope": "repo"
+        }
+      ],
+      "observed_sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd",
+      "state": "ready"
+    }
+  },
+  "rollback": {
+    "action": "reused_original_conversation",
+    "attachment": {
+      "client_pid": 89287,
+      "client_start_time_ticks": 46489911,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02/workspace",
+      "pane_id": "%2",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/23",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-02/tmux.sock",
+      "window_id": "@2",
+      "window_index": "1",
+      "window_name": "worker-refresh-7b2c08a86a85"
+    },
+    "goal": {
+      "createdAt": 1791825238,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a1311b-4f69-7a32-9e89-fbaf9aa83eb2",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791825238
+    },
+    "state": "completed",
+    "thread_id": "01a1311b-4f69-7a32-9e89-fbaf9aa83eb2"
+  },
+  "server_exit": 0,
+  "source_commit": "6ebd4a4",
+  "state": "passed",
+  "thread_id": "01a1311b-4f69-7a32-9e89-fbaf9aa83eb2"
+}
