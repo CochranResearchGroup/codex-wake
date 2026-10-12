@@ -6,6 +6,7 @@ import fcntl
 import hashlib
 import os
 import shlex
+import stat
 from uuid import uuid4
 from pathlib import Path
 from types import SimpleNamespace
@@ -46,9 +47,18 @@ def spawn_command(args, root):
                   task=args.task, expires_at=args.expires_at, source_thread_id=args.caller_thread_id)
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     journal = Path(root) / 'lifecycle'
-    journal.mkdir(mode=0o700, parents=True, exist_ok=True)
     key = hashlib.sha256(args.intent.encode()).hexdigest()
     path = journal / (key + '.json')
+    if not path.exists():
+        endpoint=profile['app_server']
+        try:
+            socket=Path(endpoint[7:])
+            info=socket.lstat()
+            if (not endpoint.startswith('unix://') or not socket.is_absolute()
+                    or not stat.S_ISSOCK(info.st_mode) or info.st_uid!=os.geteuid()):raise ValueError
+        except (OSError,ValueError):
+            raise WakeError('launch profile requires an existing owned Unix socket') from None
+    journal.mkdir(mode=0o700, parents=True, exist_ok=True)
     # One external owner, including observation and uncertain-effect reconciliation.
     with (journal / (key + '.lock')).open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)

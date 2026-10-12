@@ -19,6 +19,26 @@ from codex_wake.records import WakeError
 
 
 class AgentSpawnTests(unittest.TestCase):
+    def test_symlink_endpoint_is_rejected_before_creation_journal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);endpoint=root/'native.sock';link=root/'locator.sock'
+            with unix_serve(lambda ws: None,str(endpoint)) as server:
+                worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+                link.symlink_to(endpoint)
+                profiles=root/'profiles.json'
+                profiles.write_text(json.dumps({'version':1,'profiles':{'worker':dict(
+                    cwd=tmp,app_server='unix://'+str(link),codex_path='/bin/true',
+                    tmux_session='fixture',timeout=1)}}))
+                try:
+                    with redirect_stdout(StringIO()),patch('subprocess.run'),patch(
+                            'codex_wake.native_clock.snapshot',return_value={'utc':{'lower':1000,'upper':1001}}), \
+                            self.assertRaisesRegex(WakeError,'owned Unix socket'):
+                        run(['--wake-root',tmp,'sessions','spawn','--profiles',str(profiles),
+                            '--profile','worker','--intent','invalid-endpoint','--name','worker',
+                            '--task','Report readiness.','--expires-at','2030-01-01T00:00:00Z','--json'])
+                    self.assertFalse((root/'lifecycle').exists())
+                finally:server.shutdown();worker.join(2)
+
     def test_unapproved_profile_is_rejected_before_runtime_effects(self):
         with tempfile.TemporaryDirectory() as tmp:
             profiles = Path(tmp) / 'profiles.json'

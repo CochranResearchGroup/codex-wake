@@ -28,7 +28,12 @@ be trusted in the selected Codex home. Example registry:
 ```
 
 `codex_home` and `tmux_socket` are optional; the other profile fields are required.
-Keep the registry and journal private and operator-controlled. The host grants
+Keep the registry and journal private and operator-controlled.
+New launches require the existing owned Unix socket itself; a listener locator
+symlink must be resolved by the operator before storing the approved endpoint.
+Invalid endpoint types are rejected before a new creation journal.
+
+The host grants
 each MCP caller only the profiles it may select. `caller_thread_id` is a claim,
 not an attestation or permission grant. Obtain it from your native shell; never
 substitute a peer's ID. Spawn does not enroll the worker in A2A or copy the

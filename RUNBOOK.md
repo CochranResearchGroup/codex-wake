@@ -5620,3 +5620,14 @@ Owned earlier two model assignments reconciled from cumulative native usage:
 checkpoint07. Actual fresh successor/preflight/activation and final integrated
 release remain pending. No new model/private/globalruntime effect this packet.
 Memory unavailable; retained non-write receipt.
+
+## Turn 277 | 2026-10-12 UTC
+
+Writer acceptance first held uncertain before thread ID/task admission. Private
+read-only probe reproduces native listener symlink rejected before transport;
+resolved socket pages empty, serverexit0. Original receipt untouched. Public
+cycle38 rejects invalid owned endpoint before new journal;24 spawn/handoff tests
+pass4.549s. Harness now resolves exact owned native listener. See checkpoint08;
+corrected writer/successor/goal continuation and final release remain pending.
+Root1064704tokens9728s ACTIVE + external78423, original caps unchanged. Memory
+unavailable; retained non-write receipt. No shared runtime/model assignment.
