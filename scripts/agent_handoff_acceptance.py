@@ -92,6 +92,11 @@ if sys.argv[1:]==['--continue']:
     assert not pathlib.Path('continued.json').exists(),'continuation already executed'
     p=subprocess.run([C['prefix']+'/bin/codex-wake','--version'],capture_output=True,text=True,check=True)
     pathlib.Path('continued.json').write_text(json.dumps(dict(state='passed',thread_id=cid,checkpoint_sha256=proof['checkpoint_sha256'],version=p.stdout.strip())))
+    goal=native_request(C['endpoint'],C['codex'],'thread/goal/get',{'threadId':cid},10)['goal']
+    checkpoint=json.loads(pathlib.Path('checkpoint.json').read_text())
+    assert goal['threadId']==cid and goal['objective']==checkpoint['objective'] and goal['status']=='active'
+    done=native_request(C['endpoint'],C['codex'],'thread/goal/set',dict(threadId=cid,status='complete',origin='automatic'),10)['goal']
+    assert done['status']=='complete' and done['tokenBudget']==goal['tokenBudget']
     print('CONTINUATION_CHECK:'+cid+':'+proof['checkpoint_sha256'])
     raise SystemExit(0)
 source,nonce,digest=sys.argv[1:]
