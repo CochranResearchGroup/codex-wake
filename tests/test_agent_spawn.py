@@ -107,6 +107,9 @@ class AgentSpawnTests(unittest.TestCase):
     def test_lost_task_admission_response_reconciles_exact_queue_without_resend(self):
         self.spawn_scenario(loss='queue/add')
 
+    def test_lost_turn_start_response_reconciles_completion_without_restart(self):
+        self.spawn_scenario(loss='queue/start')
+
     def test_lost_tab_creation_response_reconciles_owned_generation_without_replacement(self):
         self.spawn_scenario(loss='new-window')
 
@@ -138,8 +141,13 @@ class AgentSpawnTests(unittest.TestCase):
     def test_restart_rechecks_draft_before_prepared_task_admission(self):
         self.spawn_scenario(interrupted_admission=True)
 
+    def test_active_unknown_or_split_recipient_is_held_without_task_admission(self):
+        for guard in ('active', 'unknown', 'split'):
+            with self.subTest(guard=guard):
+                self.spawn_scenario(recipient_guard=guard)
+
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -150,7 +158,7 @@ class AgentSpawnTests(unittest.TestCase):
                 if 'id' not in request:
                     continue
                 method, params = request['method'], request.get('params', {})
-                thread = dict(id=thread_id, name=state['name'], cwd=tmp, status={'type': 'idle'},
+                thread = dict(id=thread_id, name=state['name'], cwd=tmp, status={'type': recipient_guard if recipient_guard in ('active', 'unknown') else 'idle'},
                               canAcceptDirectInput=True, turns=state['turns'])
                 if method == 'thread/start':
                     starts.append(params)
@@ -183,6 +191,9 @@ class AgentSpawnTests(unittest.TestCase):
                         dict(id='user157', type='userMessage', clientId=task['clientUserMessageId'],
                              content=task['input'])])]
                     result = {'turn': state['turns'][0]}
+                    if loss == 'queue/start':
+                        ws.close()
+                        return
                 elif method == 'thread/queue/list':
                     result = {'data': [dict(id='queue157', **tasks[-1])]
                               if tasks and not state['turns'] else [], 'nextCursor': None}
@@ -232,7 +243,7 @@ class AgentSpawnTests(unittest.TestCase):
                 elif 'display-message' in argv:
                     output = '23,2' if composer == 'draft' else '2,2'
                 elif 'list-panes' in argv:
-                    output = ('%157' if '-a' not in argv else '\t'.join([
+                    output = (('%157\n%158' if recipient_guard == 'split' else '%157') if '-a' not in argv else '\t'.join([
                         '$1', 'fixture', '@157', '1', 'worker', '%157', '0', state['name'], tmp, tty]))
                 else:
                     output = ''
@@ -263,6 +274,13 @@ class AgentSpawnTests(unittest.TestCase):
                             pending = StringIO()
                             with redirect_stdout(pending):
                                 self.assertEqual(run(argv), 5, pending.getvalue())
+                            if recipient_guard:
+                                self.assertEqual(tasks, [])
+                                self.assertEqual(len(starts), 1)
+                                self.assertEqual(len(windows), 1)
+                                self.assertEqual(json.loads(pending.getvalue())['reason'],
+                                    'split_or_changed_tab' if recipient_guard == 'split' else 'exact_idle_owned_client_not_ready')
+                                return
                             if composer == 'draft':
                                 self.assertEqual(tasks, [], 'native idle must not overwrite a local draft')
                                 self.assertEqual(json.loads(pending.getvalue())['reason'], 'local_composer_not_proven_empty')
@@ -294,8 +312,7 @@ class AgentSpawnTests(unittest.TestCase):
                             self.assertEqual(len(starts), 1)
                             self.assertEqual(len(tasks), 1)
                             self.assertEqual(len(windows), 1)
-                            if auto_start:
-                                self.assertEqual(turn_starts, [])
+                            self.assertEqual(len(turn_starts), 0 if auto_start else 1)
                             self.assertEqual(tasks[0]['input'], [
                                 {'type': 'text', 'text': 'Calculate 6 * 7 and report 42.'}])
                             if check_environment:

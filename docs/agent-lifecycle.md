@@ -50,6 +50,14 @@ under the same key is rejected. Exit0 means the exact assignment's native turn
 completed. Exit5 means held, uncertain, expired or still awaiting evidence.
 Native failure/interruption is retained as blocked; history is preserved.
 
+Admission requires native idle, one exact client generation and an observed
+empty local composer. Drafts, unknown composer layouts and split tabs hold the
+assignment. The composer adapter recognizes the observed Codex0.162.1 ANSI
+placeholder at its cursor; a changed layout holds rather than clearing input.
+Controller restart rechecks readiness before admitting an unqueued assignment.
+These observations do not atomically exclude concurrent human input; keep the
+owned target untouched during the transition. Refresh remains unqualified.
+
 When an external response is unknown, retain its receipt. Known tab or native
 queue/turn evidence can reconcile the original effect. An unknown thread/start
 response has no native idempotency key: it stays uncertain. Do not use another
