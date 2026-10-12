@@ -21,9 +21,16 @@ def spawn_command(args, root):
             raise ValueError
     except (OSError, ValueError, KeyError, TypeError):
         raise WakeError('an approved launch profile is required') from None
+    if args.caller_thread_id:
+        grants = config.get('callers', {}).get(args.caller_thread_id, [])
+        if not isinstance(grants, list) or args.profile not in grants:
+            raise WakeError('host caller grant does not authorize this launch profile')
     required = {'cwd', 'app_server', 'codex_path', 'tmux_session', 'timeout'}
-    if set(profile) != required or not Path(profile['cwd']).is_dir():
+    if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home'}
+            or not Path(profile['cwd']).is_dir()):
         raise WakeError('approved launch profile is incomplete')
+    if 'codex_home' in profile and not Path(profile['codex_home']).is_dir():
+        raise WakeError('approved Codex home is unavailable')
     if not 0 < profile['timeout'] <= 60:
         raise WakeError('launch profile timeout must be between zero and 60 seconds')
     if not args.intent or len(args.intent) > 200 or not args.task or len(args.task) > 32768:
@@ -32,7 +39,7 @@ def spawn_command(args, root):
         raise WakeError('tab name must be bounded and single-line')
     expiry = parse_timestamp(args.expires_at).timestamp()
     intent = dict(operation='spawn', profile=args.profile, launch=profile, name=args.name,
-                  task=args.task, expires_at=args.expires_at)
+                  task=args.task, expires_at=args.expires_at, source_thread_id=args.caller_thread_id)
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     journal = Path(root) / 'lifecycle'
     journal.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -64,7 +71,7 @@ def spawn_command(args, root):
                 from .app_server import resolve_codex_cmd
                 from .session_lifecycle import tmux_command
                 from .native_protocol import native_request
-                runtime = SimpleNamespace(**profile, tmux_socket=None,
+                runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile),
                                           codex=resolve_codex_cmd(profile['codex_path'], required=True))
                 tmux_command(runtime, 'has-session', '-t', runtime.tmux_session)
                 receipt.update(state='starting', uncertain_effect='thread/start')
@@ -91,20 +98,60 @@ def advance_spawn(path, receipt, profile):
     from .session_lifecycle import tmux_command
     from .sessions import observe, revalidate_attachment
     from .native_delivery import native_evidence
-    runtime = SimpleNamespace(**profile, tmux_socket=None,
+    runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile),
                               codex=resolve_codex_cmd(profile['codex_path'], required=True))
     target = dict(endpoint=runtime.app_server, codex_cmd=runtime.codex,
                   thread_id=receipt['thread_id'])
     def request(method, params):
         return native_request(runtime.app_server, runtime.codex, method, params, runtime.timeout)
     try:
+        if receipt.get('uncertain_effect') == 'tmux/new-window':
+            snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket, timeout=runtime.timeout)
+            rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']
+                    and r['name'] == receipt['thread_name']]
+            panes = [p for r in rows for p in r['attachments']
+                     if p['session_name'] == runtime.tmux_session]
+            if not snapshot['complete'] or len(rows) != 1 or len(panes) != 1:
+                receipt.update(state='uncertain', reason='no_unique_existing_owned_tab')
+                save(path, receipt)
+                return
+            pane = panes[0]
+            if not revalidate_attachment(pane):
+                receipt.update(state='uncertain', reason='tab_generation_unavailable')
+                save(path, receipt)
+                return
+            receipt.update(state='awaiting_preflight', pane_id=pane['pane_id'],
+                           window_id=pane['window_id'])
+            receipt.pop('uncertain_effect', None)
+            save(path, receipt)
+        if receipt.get('uncertain_effect') in ('thread/queue/add', 'thread/queue/start'):
+            evidence, reason = native_evidence(target, receipt['intent']['task'])
+            if not evidence or evidence.get('client_message_id') != receipt['submission_id']:
+                receipt.update(state='uncertain', reason=reason or 'submission_identity_mismatch')
+                save(path, receipt)
+                return
+            if evidence['source'] == 'native_queue':
+                if receipt['uncertain_effect'] == 'thread/queue/start':
+                    receipt.update(state='uncertain', reason='queue_start_not_yet_observed')
+                    save(path, receipt)
+                    return
+                receipt.update(state='ready', queue_id=evidence['queue_id'])
+            else:
+                receipt['state'] = 'awaiting_preflight'
+            receipt.pop('uncertain_effect', None)
+            save(path, receipt)
         if receipt['state'] == 'awaiting_preflight' and not receipt.get('pane_id'):
+            if not before_effect(path, receipt):
+                return
             # Set an exact correlation name before the non-idempotent tab effect.
             name = receipt['intent']['name'] + '-' + receipt['fingerprint'][:12]
             request('thread/name/set', {'threadId': receipt['thread_id'], 'name': name})
             receipt.update(state='starting', uncertain_effect='tmux/new-window', thread_name=name)
             save(path, receipt)
-            command = shlex.join(['env', '-u', 'CODEX_THREAD_ID', '-u', 'TMUX_PANE',
+            removed = ['CODEX_THREAD_ID', 'TMUX_PANE', 'CODEX_WAKE_A2A_CAPABILITY',
+                       'CODEX_WAKE_A2A_BUS_ROOT', 'CODEX_WAKE_SENDER_RECEIPT_AUTHORITY']
+            home = ['CODEX_HOME=' + profile['codex_home']] if 'codex_home' in profile else []
+            command = shlex.join(['env', *[part for name in removed for part in ('-u', name)], *home,
                                   runtime.codex, 'resume', '--no-alt-screen', '-C',
                                   str(Path(runtime.cwd).resolve()), receipt['thread_id'],
                                   '--remote', runtime.app_server])
@@ -120,7 +167,7 @@ def advance_spawn(path, receipt, profile):
             save(path, receipt)
             return
         if receipt['state'] == 'awaiting_preflight' and not receipt.get('submission_id'):
-            snapshot = observe(endpoint=runtime.app_server, timeout=runtime.timeout)
+            snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket, timeout=runtime.timeout)
             rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']]
             attachments = [p for r in rows for p in r['attachments']]
             if (not snapshot['complete'] or len(rows) != 1 or len(attachments) != 1
@@ -140,28 +187,46 @@ def advance_spawn(path, receipt, profile):
             receipt.update(state='ready', attachment=attachments[0], submission_id=str(uuid4()))
             save(path, receipt)
         if receipt['state'] == 'ready':
-            receipt.update(state='starting', uncertain_effect='thread/queue/add')
+            if not before_effect(path, receipt):
+                return
+            if not receipt.get('queue_id'):
+                receipt.update(state='starting', uncertain_effect='thread/queue/add')
+                save(path, receipt)
+                response = request('thread/queue/add', dict(threadId=receipt['thread_id'],
+                    clientUserMessageId=receipt['submission_id'],
+                    input=[dict(type='text', text=receipt['intent']['task'])]))
+                queued = response['queuedSubmission']
+                items = queued['input']
+                if (queued['clientUserMessageId'] != receipt['submission_id']
+                        or len(items) != 1 or items[0].get('type') != 'text'
+                        or items[0].get('text') != receipt['intent']['task']
+                        or items[0].get('text_elements', []) != []):
+                    raise WakeError('native task receipt identity mismatch')
+                receipt['queue_id'] = queued['id']
             save(path, receipt)
-            response = request('thread/queue/add', dict(threadId=receipt['thread_id'],
-                clientUserMessageId=receipt['submission_id'],
-                input=[dict(type='text', text=receipt['intent']['task'])]))
-            queued = response['queuedSubmission']
-            if (queued['clientUserMessageId'] != receipt['submission_id']
-                    or queued['input'] != [dict(type='text', text=receipt['intent']['task'])]):
-                raise WakeError('native task receipt identity mismatch')
-            receipt.update(state='starting', queue_id=queued['id'], uncertain_effect='thread/queue/start')
-            save(path, receipt)
-            request('thread/queue/start', dict(threadId=receipt['thread_id'],
-                                            queuedSubmissionId=receipt['queue_id']))
+            evidence, reason = native_evidence(target, receipt['intent']['task'])
+            if not evidence or evidence.get('client_message_id') != receipt['submission_id']:
+                receipt.update(state='uncertain', uncertain_effect='thread/queue/add',
+                               reason=reason or 'submission_identity_mismatch')
+                save(path, receipt)
+                return
+            if evidence['source'] == 'native_queue':
+                if not before_effect(path, receipt):
+                    return
+                receipt.update(state='starting', uncertain_effect='thread/queue/start')
+                save(path, receipt)
+                request('thread/queue/start', dict(threadId=receipt['thread_id'],
+                                                queuedSubmissionId=receipt['queue_id']))
             receipt.update(state='awaiting_preflight')
             receipt.pop('uncertain_effect', None)
             save(path, receipt)
-        if receipt.get('submission_id') and receipt.get('queue_id'):
+        if receipt.get('submission_id'):
             evidence, reason = native_evidence(target, receipt['intent']['task'])
             if evidence and evidence.get('client_message_id') == receipt['submission_id']:
                 receipt['execution'] = evidence
                 if evidence.get('execution') == 'turn_completed':
                     receipt['state'] = 'completed'
+                    receipt.pop('reason', None)
                 elif evidence.get('execution') in ('turn_failed', 'turn_interrupted'):
                     receipt.update(state='blocked', reason='initial_task_' + evidence['execution'])
                 else:
@@ -173,7 +238,24 @@ def advance_spawn(path, receipt, profile):
         save(path, receipt)
 
 
+def before_effect(path, receipt):
+    from .native_clock import snapshot
+    observation = snapshot()
+    bounds = observation.get('utc')
+    if not bounds or bounds['upper'] >= parse_timestamp(receipt['intent']['expires_at']).timestamp():
+        receipt.update(state='expired' if bounds else 'blocked',
+                       reason='expiry_reached' if bounds else 'admissible_time_unavailable')
+        save(path, receipt)
+        return False
+    return True
+
+
 def save(path, receipt):
+    event = dict(state=receipt['state'], effect=receipt.get('uncertain_effect'),
+                 reason=receipt.get('reason'))
+    history = receipt.setdefault('history', [])
+    if not history or history[-1] != event:
+        history.append(event)
     temporary = path.with_suffix('.tmp')
     with temporary.open('w') as stream:
         os.chmod(temporary, 0o600)

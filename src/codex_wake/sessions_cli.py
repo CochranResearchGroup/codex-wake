@@ -20,6 +20,7 @@ def add_sessions_parser(subparsers):
     spawn.add_argument('--name', required=True)
     spawn.add_argument('--task', required=True)
     spawn.add_argument('--expires-at', required=True)
+    spawn.add_argument('--caller-thread-id')
     spawn.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
         command = commands.add_parser(verb)

@@ -5544,3 +5544,19 @@ remain unfinished;0158/0159 and combined release remain OPEN obligations.
 Read-only native schema worker completed; primary retained no-idempotent-create
 and no-native-goal-transfer constraints. No installed/shared service effects.
 Memory disposition unavailable: no reviewed Codex Wake Graphiti cloud.
+
+## Turn 271 | 2026-10-12 UTC
+
+Plan0156 checkpoint02: spawn public-seam TDD recovery/MCP/caller/env/expiry and
+native-normalization/auto-start corrections pass. Positive installed-03 stdio
+MCP created exact owned TUI/native worker and completed42; duplicate intent kept
+one submission. Two initial installed failures retained; original uncertain02
+submission reconciled read-only without replay. All private process censuses
+empty. Source comprehensive03 passes1085; final receipt delta has focused13,
+frozen final comprehensive still required. Full evidence and guard gaps are in
+docs/dev/evidence/plan0156/checkpoint-02.md. Native direct-input capability is not
+draft proof; no-model TUI probe needs explicit rendered-marker observation next.
+Source docs/skill now describe guarded spawn; global install/release/integration,
+0158 refresh and0159 handoff remain pending. Goal ACTIVE,344390 tokens/2789s at
+readback;45-minute checkpoint backstop exceeded89s, user2m/six-hour ceilings intact.
+Memory unavailable, existing no-write receipt retained; no shared runtime effects.

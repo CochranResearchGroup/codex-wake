@@ -1,0 +1,19 @@
+test_peer_cannot_select_profile_without_host_caller_grant (tests.test_agent_spawn.AgentSpawnTests.test_peer_cannot_select_profile_without_host_caller_grant) ... FAIL
+
+======================================================================
+FAIL: test_peer_cannot_select_profile_without_host_caller_grant (tests.test_agent_spawn.AgentSpawnTests.test_peer_cannot_select_profile_without_host_caller_grant)
+----------------------------------------------------------------------
+codex_wake.records.WakeError: tmux lifecycle command failed; inspect the target before retry
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 81, in test_peer_cannot_select_profile_without_host_caller_grant
+    with redirect_stdout(StringIO()), self.assertRaisesRegex(WakeError, 'caller grant'):
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "caller grant" does not match "tmux lifecycle command failed; inspect the target before retry"
+
+----------------------------------------------------------------------
+Ran 1 test in 0.313s
+
+FAILED (failures=1)

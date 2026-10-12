@@ -1,0 +1,30 @@
+test_fixed_expiry_survives_startup_and_prevents_late_task_admission (tests.test_agent_spawn.AgentSpawnTests.test_fixed_expiry_survives_startup_and_prevents_late_task_admission) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_host_profile_uses_exact_isolated_socket_and_codex_home (tests.test_agent_spawn.AgentSpawnTests.test_host_profile_uses_exact_isolated_socket_and_codex_home) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_lost_tab_creation_response_reconciles_owned_generation_without_replacement (tests.test_agent_spawn.AgentSpawnTests.test_lost_tab_creation_response_reconciles_owned_generation_without_replacement) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_lost_task_admission_response_reconciles_exact_queue_without_resend (tests.test_agent_spawn.AgentSpawnTests.test_lost_task_admission_response_reconciles_exact_queue_without_resend) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_peer_cannot_select_profile_without_host_caller_grant (tests.test_agent_spawn.AgentSpawnTests.test_peer_cannot_select_profile_without_host_caller_grant) ... ok
+test_reconciled_completion_keeps_original_uncertain_effect_history (tests.test_agent_spawn.AgentSpawnTests.test_reconciled_completion_keeps_original_uncertain_effect_history) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_spawn_does_not_inherit_parent_actor_or_mailbox_capability (tests.test_agent_spawn.AgentSpawnTests.test_spawn_does_not_inherit_parent_actor_or_mailbox_capability) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_spawn_executes_exact_assignment_once_across_pending_observation (tests.test_agent_spawn.AgentSpawnTests.test_spawn_executes_exact_assignment_once_across_pending_observation) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_unapproved_profile_is_rejected_before_runtime_effects (tests.test_agent_spawn.AgentSpawnTests.test_unapproved_profile_is_rejected_before_runtime_effects) ... ok
+test_unknown_thread_creation_is_retained_without_duplicate_retry (tests.test_agent_spawn.AgentSpawnTests.test_unknown_thread_creation_is_retained_without_duplicate_retry) ... ok
+test_spawn_discovery_and_caller_cannot_override_host_launch_scope (tests.test_lifecycle_mcp.LifecycleMCPTests.test_spawn_discovery_and_caller_cannot_override_host_launch_scope) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 3.516s
+
+OK

@@ -91,6 +91,18 @@ attachment; extra attachment is explicit. Close guards pending work and active
 or unknown recipients. Force preserves conversations and wakes; cancel/archive
 are separate. Provide custom bus roots explicitly for close checks.
 
+For a bounded worker assignment, use `wake_sessions_spawn` when the host has
+configured lifecycle launch profiles and your caller/profile grant. Supply your
+actual native caller ID, one stable `intent`, approved `profile`, tab `name`,
+bounded `task` and fixed `expires_at`. The CLI equivalent is `sessions spawn`
+with operator-selected `--profiles` and `--wake-root`; peer bodies cannot select
+those paths. Creation/readiness, admission and execution are separate evidence.
+Retain the receipt and reconcile the same intent; uncertainty does not authorize
+another worker, intent, root or transport. Spawn supplies no A2A enrollment or
+parent capability. See `docs/agent-lifecycle.md` in the installed source version
+for profile setup, receipt states and limits. Refresh/handoff remain separate
+pending operations; neither restart nor new context renews authority/resources.
+
 For existing basic tmux workflows, select `--legacy-tmux`; advanced signals and
 tracked-mailbox workflows retain their compatibility contracts below. Read
 `docs/dev/native-workflow-migration.md` before migrating earlier native records

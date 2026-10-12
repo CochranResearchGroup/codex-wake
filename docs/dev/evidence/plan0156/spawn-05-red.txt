@@ -1,0 +1,19 @@
+test_lost_task_admission_response_reconciles_exact_queue_without_resend (tests.test_agent_spawn.AgentSpawnTests.test_lost_task_admission_response_reconciles_exact_queue_without_resend) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+FAIL
+
+======================================================================
+FAIL: test_lost_task_admission_response_reconciles_exact_queue_without_resend (tests.test_agent_spawn.AgentSpawnTests.test_lost_task_admission_response_reconciles_exact_queue_without_resend)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 78, in test_lost_task_admission_response_reconciles_exact_queue_without_resend
+    self.spawn_scenario(loss='queue/add')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 166, in spawn_scenario
+    self.assertEqual(run(argv), 0, output.getvalue())
+AssertionError: 5 != 0 : {"attachment": {"client_pid": 37313, "client_start_time_ticks": 45691476, "evidence": "metadata_matched", "pane_current_path": "/tmp/tmp1bef60sj", "pane_id": "%157", "pane_index": "0", "pane_title": "worker-8ddb3487891d", "pane_tty": "/dev/pts/1", "session_id": "$1", "session_name": "fixture", "socket": "/tmp/tmux-1000/default", "window_id": "@157", "window_index": "1", "window_name": "worker"}, "fingerprint": "8ddb3487891d10f4b454458bebda007cc7a8fec4a3469d7e3461a8d46a0a91ff", "intent": {"expires_at": "2030-01-01T00:00:00Z", "launch": {"app_server": "unix:///tmp/tmp1bef60sj/native.sock", "codex_path": "/bin/true", "cwd": "/tmp/tmp1bef60sj", "timeout": 1, "tmux_session": "fixture"}, "name": "worker", "operation": "spawn", "profile": "worker", "task": "Calculate 6 * 7 and report 42."}, "intent_key": "one-worker", "pane_id": "%157", "reason": "ConnectionClosedOK", "state": "uncertain", "submission_id": "b7ed6635-3530-4cb1-82f7-e5a49af031a8", "thread_id": "00000000-0000-7000-8000-000000000157", "thread_name": "worker-8ddb3487891d", "uncertain_effect": "thread/queue/add", "version": 1, "window_id": "@157"}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.231s
+
+FAILED (failures=1)

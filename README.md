@@ -13,7 +13,7 @@ The package provides:
 - `sessions list|show|resolve|current|watch|open|close` for discovery and visible tab lifecycle.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
 - Tracked requests and correlated replies, work claims, completion receipts and generation-safe recovery.
-- Optional `codex-wake-mcp`: 14 tools for session discovery and authorized agent exchanges.
+- Optional `codex-wake-mcp`: 15 tools for session discovery, host-approved worker spawn and authorized agent exchanges.
 - Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
 
 Native queue acceptance is separate from execution and acknowledgment. Busy or
@@ -178,6 +178,11 @@ codex-wake native at --resume-missing THREAD_UUID "2026-10-12T17:30:00-05:00" --
 codex-wake native reconcile WAKE_ID
 codex-wake sessions close thread:THREAD_UUID
 ```
+
+For task delivery after exact worker readiness, use guarded `sessions spawn` or
+`wake_sessions_spawn` with an operator-configured launch profile, stable intent
+and fixed expiry. See [agent lifecycle](docs/agent-lifecycle.md) for host scope,
+durable receipts and uncertainty recovery.
 
 Native scheduling retains the original request when trusted time is unavailable.
 Use a stable key for each automated follow-up so retries return the same wake:

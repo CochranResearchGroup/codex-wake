@@ -1,0 +1,212 @@
+Building wheel...
+running egg_info
+writing src/codex_wake.egg-info/PKG-INFO
+writing dependency_links to src/codex_wake.egg-info/dependency_links.txt
+writing entry points to src/codex_wake.egg-info/entry_points.txt
+writing requirements to src/codex_wake.egg-info/requires.txt
+writing top-level names to src/codex_wake.egg-info/top_level.txt
+reading manifest file 'src/codex_wake.egg-info/SOURCES.txt'
+writing manifest file 'src/codex_wake.egg-info/SOURCES.txt'
+running bdist_wheel
+running build
+running build_py
+copying src/codex_wake/agent_lifecycle.py -> build/lib/codex_wake
+running egg_info
+writing src/codex_wake.egg-info/PKG-INFO
+writing dependency_links to src/codex_wake.egg-info/dependency_links.txt
+writing entry points to src/codex_wake.egg-info/entry_points.txt
+writing requirements to src/codex_wake.egg-info/requires.txt
+writing top-level names to src/codex_wake.egg-info/top_level.txt
+reading manifest file 'src/codex_wake.egg-info/SOURCES.txt'
+writing manifest file 'src/codex_wake.egg-info/SOURCES.txt'
+installing to build/bdist.linux-x86_64/wheel
+running install
+running install_lib
+creating build/bdist.linux-x86_64/wheel
+creating build/bdist.linux-x86_64/wheel/codex_wake
+copying build/lib/codex_wake/github_webhook_admin.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/http_json_source_config.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/github_source_config.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/builtin_signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/__main__.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/product_readiness.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/__init__.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/cli.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/managed_webhook_rotation_preview.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/service.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/github_polling.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/managed_webhook_runtime.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_backup.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_sender_receipts.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_delivery.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/runtime_signal_tracer.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/stable_time.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/local_source_families.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/process.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/managed_webhook_cleanup.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/openclaw_gateway.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/source_registry.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_operations.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/signal_store.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/time_provider.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_mailbox.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/signal_support.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/monitor.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/managed_webhooks.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/native_delivery.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_time.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/agent_lifecycle.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/managed_webhook_rotation.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/http_json_signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/webhook_http.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/webhook_listener.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/sessions.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_receipt_signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/webhook_lifecycle.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/messages_cli.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_reply_wake.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_tmux_delivery.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_saved_delivery.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/network_wakes.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/openclaw_plugin.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/managed_webhook_health.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_bus.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/github_client.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_recovery.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/hook.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/systemd_signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_receipt_authority.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/executables.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/sessions_cli.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/app_server.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/mcp_server.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/github_webhook_runtime.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/time_inspection.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/managed_webhook_health_evidence.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_recovery_disposition.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/shared_app_server.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/systemd_source_config.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/process_signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/signal_records.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/http_json_source_family.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/runtime_signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/filesystem_signals.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/github_credentials.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_notification_prompt.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/github_webhooks.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/event_wake.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/hook_config.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/daemon.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_scheduler.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_cli.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/supervisor.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/session_lifecycle.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/native_clock.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/injector.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_receipt_family.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/github_source_family.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/native_intents.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/a2a_identity.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/time_collect.ps1 -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/records.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+copying build/lib/codex_wake/native_protocol.py -> build/bdist.linux-x86_64/wheel/./codex_wake
+running install_egg_info
+Copying src/codex_wake.egg-info to build/bdist.linux-x86_64/wheel/./codex_wake-0.13.1-py3.12.egg-info
+running install_scripts
+creating build/bdist.linux-x86_64/wheel/codex_wake-0.13.1.dist-info/WHEEL
+creating '/home/ecochran76/.local/state/codex-wake/plan0156/build-03/.tmp-nstb8no1/codex_wake-0.13.1-py3-none-any.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+adding 'codex_wake/__init__.py'
+adding 'codex_wake/__main__.py'
+adding 'codex_wake/a2a_backup.py'
+adding 'codex_wake/a2a_bus.py'
+adding 'codex_wake/a2a_cli.py'
+adding 'codex_wake/a2a_delivery.py'
+adding 'codex_wake/a2a_identity.py'
+adding 'codex_wake/a2a_mailbox.py'
+adding 'codex_wake/a2a_notification_prompt.py'
+adding 'codex_wake/a2a_operations.py'
+adding 'codex_wake/a2a_receipt_authority.py'
+adding 'codex_wake/a2a_receipt_family.py'
+adding 'codex_wake/a2a_receipt_signals.py'
+adding 'codex_wake/a2a_recovery.py'
+adding 'codex_wake/a2a_recovery_disposition.py'
+adding 'codex_wake/a2a_reply_wake.py'
+adding 'codex_wake/a2a_saved_delivery.py'
+adding 'codex_wake/a2a_scheduler.py'
+adding 'codex_wake/a2a_sender_receipts.py'
+adding 'codex_wake/a2a_time.py'
+adding 'codex_wake/a2a_tmux_delivery.py'
+adding 'codex_wake/agent_lifecycle.py'
+adding 'codex_wake/app_server.py'
+adding 'codex_wake/builtin_signals.py'
+adding 'codex_wake/cli.py'
+adding 'codex_wake/daemon.py'
+adding 'codex_wake/event_wake.py'
+adding 'codex_wake/executables.py'
+adding 'codex_wake/filesystem_signals.py'
+adding 'codex_wake/github_client.py'
+adding 'codex_wake/github_credentials.py'
+adding 'codex_wake/github_polling.py'
+adding 'codex_wake/github_source_config.py'
+adding 'codex_wake/github_source_family.py'
+adding 'codex_wake/github_webhook_admin.py'
+adding 'codex_wake/github_webhook_runtime.py'
+adding 'codex_wake/github_webhooks.py'
+adding 'codex_wake/hook.py'
+adding 'codex_wake/hook_config.py'
+adding 'codex_wake/http_json_signals.py'
+adding 'codex_wake/http_json_source_config.py'
+adding 'codex_wake/http_json_source_family.py'
+adding 'codex_wake/injector.py'
+adding 'codex_wake/local_source_families.py'
+adding 'codex_wake/managed_webhook_cleanup.py'
+adding 'codex_wake/managed_webhook_health.py'
+adding 'codex_wake/managed_webhook_health_evidence.py'
+adding 'codex_wake/managed_webhook_rotation.py'
+adding 'codex_wake/managed_webhook_rotation_preview.py'
+adding 'codex_wake/managed_webhook_runtime.py'
+adding 'codex_wake/managed_webhooks.py'
+adding 'codex_wake/mcp_server.py'
+adding 'codex_wake/messages_cli.py'
+adding 'codex_wake/monitor.py'
+adding 'codex_wake/native_clock.py'
+adding 'codex_wake/native_delivery.py'
+adding 'codex_wake/native_intents.py'
+adding 'codex_wake/native_protocol.py'
+adding 'codex_wake/network_wakes.py'
+adding 'codex_wake/openclaw_gateway.py'
+adding 'codex_wake/openclaw_plugin.py'
+adding 'codex_wake/process.py'
+adding 'codex_wake/process_signals.py'
+adding 'codex_wake/product_readiness.py'
+adding 'codex_wake/records.py'
+adding 'codex_wake/runtime_signal_tracer.py'
+adding 'codex_wake/runtime_signals.py'
+adding 'codex_wake/service.py'
+adding 'codex_wake/session_lifecycle.py'
+adding 'codex_wake/sessions.py'
+adding 'codex_wake/sessions_cli.py'
+adding 'codex_wake/shared_app_server.py'
+adding 'codex_wake/signal_records.py'
+adding 'codex_wake/signal_store.py'
+adding 'codex_wake/signal_support.py'
+adding 'codex_wake/signals.py'
+adding 'codex_wake/source_registry.py'
+adding 'codex_wake/stable_time.py'
+adding 'codex_wake/supervisor.py'
+adding 'codex_wake/systemd_signals.py'
+adding 'codex_wake/systemd_source_config.py'
+adding 'codex_wake/time_collect.ps1'
+adding 'codex_wake/time_inspection.py'
+adding 'codex_wake/time_provider.py'
+adding 'codex_wake/webhook_http.py'
+adding 'codex_wake/webhook_lifecycle.py'
+adding 'codex_wake/webhook_listener.py'
+adding 'codex_wake-0.13.1.dist-info/METADATA'
+adding 'codex_wake-0.13.1.dist-info/WHEEL'
+adding 'codex_wake-0.13.1.dist-info/entry_points.txt'
+adding 'codex_wake-0.13.1.dist-info/top_level.txt'
+adding 'codex_wake-0.13.1.dist-info/RECORD'
+removing build/bdist.linux-x86_64/wheel
+Successfully built /home/ecochran76/.local/state/codex-wake/plan0156/build-03/codex_wake-0.13.1-py3-none-any.whl

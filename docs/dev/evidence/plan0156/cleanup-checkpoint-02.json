@@ -1,0 +1,60 @@
+{
+  "private_processes": {
+    "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-01": [],
+    "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02": [],
+    "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-03": []
+  },
+  "diagnostics": [
+    {
+      "pid": "696",
+      "error": "PermissionError"
+    },
+    {
+      "pid": "720",
+      "error": "PermissionError"
+    },
+    {
+      "pid": "6960",
+      "error": "PermissionError"
+    },
+    {
+      "pid": "22375",
+      "error": "PermissionError"
+    },
+    {
+      "pid": "25206",
+      "error": "PermissionError"
+    },
+    {
+      "pid": "38165",
+      "error": "PermissionError"
+    },
+    {
+      "pid": "50470",
+      "error": "PermissionError"
+    },
+    {
+      "pid": "91523",
+      "error": "PermissionError"
+    }
+  ],
+  "admissible_time": {
+    "utc": {
+      "status": "network",
+      "sources": [
+        "stable-time:cloudflare",
+        "stable-time:netnod"
+      ],
+      "lower": 1791820118.8585389,
+      "upper": 1791820119.6387818,
+      "reason": ""
+    },
+    "counter": {
+      "epoch": "c4a308fb-a327-4a41-b281-cdc0576b880f",
+      "counter": 4316744457256,
+      "frequency": 10000000,
+      "rate_ppm": 5000
+    },
+    "reason": "authenticated_utc"
+  }
+}

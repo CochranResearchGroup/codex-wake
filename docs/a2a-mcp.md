@@ -1,6 +1,6 @@
 # Agent exchange MCP
 
-`codex-wake-mcp` exposes 14 stdio tools over the accepted CLI. It adds structured
+`codex-wake-mcp` exposes 15 stdio tools over the CLI. It adds structured
 discovery and calls, while the mailbox remains responsible for identity, capability,
 idempotency, work claims, receipt generations, expiry and recovery. It starts no
 daemon or watcher and creates no separate store. See the
@@ -71,7 +71,9 @@ without a Codex patch or guessing identity from a pane.
 Optional operator-selected launcher flags choose `--bus-root`, `--capability`,
 `--app-server`, `--tmux-socket`, `--tmux-session`, `--wake-root` and
 `--sender-authority`. Tools cannot change them, impersonate an actor, enroll a
-root, start a worker or execute arbitrary CLI arguments. The default CLI comes
+root or execute arbitrary CLI arguments. Worker spawn additionally requires
+host `--lifecycle-profiles`, `--wake-root` and a caller/profile grant; see
+[agent lifecycle](agent-lifecycle.md). The default CLI comes
 from this same installed package; `--cli PATH` is an explicit compatible binary
 override. One bounded CLI operation runs at a time, with a maximum90-second
 deadline; cancellation/timeout never retries effects. Missing SDK dependencies
@@ -82,6 +84,7 @@ return installation guidance on stderr. Stdio stdout is reserved for MCP.
 | Tools | Purpose |
 | --- | --- |
 | `wake_sessions_list`, `wake_sessions_show`, `wake_sessions_resolve`, `wake_sessions_current` | Discover and validate exact existing sessions and human tab selectors |
+| `wake_sessions_spawn` | Host-approved worker launch with stable intent, fixed expiry and separate readiness/admission/execution receipts |
 | `wake_messages_send` | Durable request/notice; explicit `to`, `body`, `idempotency_key`, `delivery` |
 | `wake_messages_inbox`, `wake_messages_outbox`, `wake_messages_show` | Bounded metadata and receipts; legacy stores may update expiry/clock state |
 | `wake_messages_read` | Authorized body retrieval and received receipt; peer content is untrusted |

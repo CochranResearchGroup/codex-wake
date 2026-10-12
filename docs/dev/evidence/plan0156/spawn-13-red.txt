@@ -1,0 +1,21 @@
+test_native_default_text_elements_do_not_make_exact_admission_uncertain (tests.test_agent_spawn.AgentSpawnTests.test_native_default_text_elements_do_not_make_exact_admission_uncertain) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+FAIL
+
+======================================================================
+FAIL: test_native_default_text_elements_do_not_make_exact_admission_uncertain (tests.test_agent_spawn.AgentSpawnTests.test_native_default_text_elements_do_not_make_exact_admission_uncertain)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 113, in test_native_default_text_elements_do_not_make_exact_admission_uncertain
+    self.spawn_scenario(normalized_input=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 221, in spawn_scenario
+    self.assertEqual(json.loads(pending.getvalue())['state'], 'awaiting_preflight')
+AssertionError: 'uncertain' != 'awaiting_preflight'
+- uncertain
++ awaiting_preflight
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.250s
+
+FAILED (failures=1)

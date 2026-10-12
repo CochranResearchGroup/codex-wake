@@ -24,6 +24,9 @@ SEND = {"body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery
         "resume_missing": {"type": "boolean"}}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_sessions_spawn": ("sessions", "spawn", "Spawn one worker through a host-approved launch profile. Stable intent and exact readiness precede task admission; uncertain effects require reconciliation without replacement.",
+        {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "name": {**TEXT, "maxLength": 200},
+         "task": BODY, "expires_at": TEXT}, ["profile", "intent", "name", "task", "expires_at"], False),
     "wake_sessions_list": ("sessions", "list", "Discover existing Codex threads and Byobu tabs. Partial inventory does not prove absence or uniqueness.", {"limit": PAGE["limit"]}, [], True),
     "wake_sessions_resolve": ("sessions", "resolve", "Resolve a tab/name/thread selector to an exact thread. Pin the returned UUID before sending; discovery grants no delivery authority.", {"selector": TEXT}, ["selector"], True),
     "wake_sessions_show": ("sessions", "show", "Inspect an exact session or tab and its binding evidence without starting a turn.", {"selector": TEXT}, ["selector"], True),
@@ -41,7 +44,7 @@ SPECS = {
 }
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 for _name, _spec in list(SPECS.items()):
-    if _spec[0] == "messages" or _spec[1] == "current":
+    if _spec[0] == "messages" or _spec[1] in ("current", "spawn"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
                        {**_spec[3], "caller_thread_id": CALLER}, [*_spec[4], "caller_thread_id"], _spec[5])
 
@@ -49,13 +52,14 @@ for _name, _spec in list(SPECS.items()):
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
-                 call_timeout=90):
+                 call_timeout=90, lifecycle_profiles=None):
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
         self.app_server = app_server
         self.tmux_socket, self.tmux_session = tmux_socket, tmux_session
         self.wake_root, self.sender_authority = wake_root, sender_authority
         self.call_timeout = call_timeout
+        self.lifecycle_profiles = lifecycle_profiles
 
     def call(self, name, arguments):
         from jsonschema import Draft202012Validator
@@ -74,16 +78,24 @@ class CommandRunner:
             except UnicodeError:
                 return {"error": {"code": "invalid_argument", "message": "Body must be valid UTF-8."}}, True
         # Host launch context owns endpoint/capability/root/identity; tools cannot override them.
-        command = [*self.cli, group, verb]
+        if verb == 'spawn':
+            if self.lifecycle_profiles is None or self.wake_root is None:
+                return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
+            command = [*self.cli, '--wake-root', str(self.wake_root), group, verb,
+                       '--profiles', str(self.lifecycle_profiles)]
+        else:
+            command = [*self.cli, group, verb]
         positional = "selector" if group == "sessions" else "message_id"
         if positional in arguments:
             command.append(arguments[positional])
-        command += ["--json", "--app-server", self.app_server]
+        command += ["--json"]
+        if verb != 'spawn':
+            command += ["--app-server", self.app_server]
         if group == "messages":
             for flag, value in (("--bus-root", self.bus_root), ("--capability", self.capability)):
                 if value is not None:
                     command += [flag, str(value)]
-        if group == "sessions" or verb == "send":
+        if (group == "sessions" and verb != 'spawn') or verb == "send":
             for flag, value in (("--tmux-socket", self.tmux_socket), ("--tmux-session", self.tmux_session)):
                 if value:
                     command += [flag, value]
@@ -92,7 +104,7 @@ class CommandRunner:
                 if value is not None:
                     command += [flag, str(value)]
         for key, value in arguments.items():
-            if key in (positional, "caller_thread_id"):
+            if key == positional or (key == 'caller_thread_id' and verb != 'spawn'):
                 continue
             flag = "--" + key.replace("_", "-")
             if key == "body":
@@ -173,6 +185,7 @@ def main(argv=None):
     parser.add_argument("--tmux-session")
     parser.add_argument("--wake-root", type=Path, default=os.environ.get("CODEX_WAKE_WAKE_ROOT"))
     parser.add_argument("--sender-authority", type=Path, default=os.environ.get("CODEX_WAKE_SENDER_RECEIPT_AUTHORITY"))
+    parser.add_argument('--lifecycle-profiles', type=Path, help='host-approved lifecycle launch registry')
     args = parser.parse_args(argv)
     if not 0 < args.call_timeout <= 90:
         parser.error("--call-timeout must be positive and at most 90 seconds")

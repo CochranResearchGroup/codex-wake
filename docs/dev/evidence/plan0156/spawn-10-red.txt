@@ -1,0 +1,21 @@
+test_fixed_expiry_survives_startup_and_prevents_late_task_admission (tests.test_agent_spawn.AgentSpawnTests.test_fixed_expiry_survives_startup_and_prevents_late_task_admission) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+FAIL
+
+======================================================================
+FAIL: test_fixed_expiry_survives_startup_and_prevents_late_task_admission (tests.test_agent_spawn.AgentSpawnTests.test_fixed_expiry_survives_startup_and_prevents_late_task_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 104, in test_fixed_expiry_survives_startup_and_prevents_late_task_admission
+    self.spawn_scenario(expire_at_task=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 202, in spawn_scenario
+    self.assertEqual(json.loads(pending.getvalue())['state'], 'expired')
+AssertionError: 'awaiting_preflight' != 'expired'
+- awaiting_preflight
++ expired
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.227s
+
+FAILED (failures=1)

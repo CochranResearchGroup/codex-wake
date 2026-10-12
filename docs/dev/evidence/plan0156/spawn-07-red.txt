@@ -1,0 +1,70 @@
+test_spawn_discovery_and_caller_cannot_override_host_launch_scope (tests.test_lifecycle_mcp.LifecycleMCPTests.test_spawn_discovery_and_caller_cannot_override_host_launch_scope) ... usage: mcp_server.py [-h] [--version] [--cli CLI]
+                     [--call-timeout CALL_TIMEOUT] [--bus-root BUS_ROOT]
+                     [--capability CAPABILITY] [--app-server APP_SERVER]
+                     [--tmux-socket TMUX_SOCKET] [--tmux-session TMUX_SESSION]
+                     [--wake-root WAKE_ROOT]
+                     [--sender-authority SENDER_AUTHORITY]
+mcp_server.py: error: unrecognized arguments: --lifecycle-profiles /tmp/tmpm9anlyyh/host-profiles.json
+ERROR
+
+======================================================================
+ERROR: test_spawn_discovery_and_caller_cannot_override_host_launch_scope (tests.test_lifecycle_mcp.LifecycleMCPTests.test_spawn_discovery_and_caller_cannot_override_host_launch_scope)
+----------------------------------------------------------------------
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+  |     return future.result()
+  |            ^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/workspace.local/codex-wake/tests/test_lifecycle_mcp.py", line 26, in test_spawn_discovery_and_caller_cannot_override_host_launch_scope
+  |     async with Client(parameters, mode='legacy') as client:
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/client/client.py", line 453, in __aenter__
+  |     async with AsyncExitStack() as exit_stack:
+  |                ^^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 754, in __aexit__
+  |     raise exc_details[1]
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 737, in __aexit__
+  |     cb_suppress = await cb(*exc_details)
+  |                   ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 231, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 200, in stdio_client
+  |     async with anyio.create_task_group() as tg:
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 204, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 737, in __aexit__
+    |     cb_suppress = await cb(*exc_details)
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/client/session.py", line 514, in __aexit__
+    |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+    |     raise BaseExceptionGroup(
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/client/client.py", line 458, in __aenter__
+      |     await session.initialize()
+      |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/client/session.py", line 654, in initialize
+      |     result = await self.send_request(
+      |              ^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/client/session.py", line 586, in send_request
+      |     raw = await self._dispatcher.send_raw_request(method, data.get("params"), opts)
+      |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/home/ecochran76/workspace.local/codex-wake/.venv/lib/python3.12/site-packages/mcp/shared/jsonrpc_dispatcher.py", line 444, in send_raw_request
+      |     raise MCPError(code=outcome.code, message=outcome.message, data=outcome.data)
+      | mcp.shared.exceptions.MCPError: Connection closed
+      +------------------------------------
+
+----------------------------------------------------------------------
+Ran 1 test in 0.072s
+
+FAILED (errors=1)
