@@ -207,10 +207,18 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 receipt.update(state='pausing_source',uncertain_effect='thread/goal/pause');save(path,receipt)
                 request('thread/goal/set',dict(threadId=receipt['thread_id'],status='paused',origin='automatic'))
                 paused=request('thread/goal/get',{'threadId':receipt['thread_id']})['goal']
-                if (paused is None or paused['status']!='paused' or paused['objective']!=source_goal['objective']
-                        or paused['tokenBudget']!=source_goal['tokenBudget']):
+                if (paused is None or paused['status']!='paused'
+                        or any(paused.get(k)!=source_goal.get(k) for k in
+                               ('threadId','objective','tokenBudget','createdAt'))
+                        or any(type(paused.get(k)) is not int or paused[k]<source_goal[k]
+                               for k in ('tokensUsed','timeUsedSeconds'))):
                     receipt.update(state='blocked',reason='source_pause_unverified');return
                 receipt['source_goal']=paused
+                used=policy['tokens_before_source']+paused['tokensUsed']
+                remaining=max(0,min(policy['token_cap']-used,paused['tokenBudget']-paused['tokensUsed']))
+                receipt.update(cumulative_tokens_used=used,remaining_tokens=remaining,source_remaining_tokens=remaining)
+                if remaining<preflight['token_allowance']:
+                    receipt.update(state='blocked',reason='preflight_allowance_insufficient');return
             if receipt.get('uncertain_effect')=='thread/goal/pause':receipt.pop('uncertain_effect',None)
             receipt.update(state='starting_successor');save(path,receipt)
             contract=dict(source_thread_id=receipt['thread_id'],checkpoint=str(Path(profile['cwd'])/args.checkpoint),

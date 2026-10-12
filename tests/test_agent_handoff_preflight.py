@@ -28,7 +28,13 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_lost_goal_creation_response_never_repeats_unobserved_creation(self):
         self.scenario(lost_goal=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False):
+    def test_usage_spent_while_pausing_is_deducted_before_successor_preparation(self):
+        self.scenario(pause_used=53)
+
+    def test_preflight_crossing_original_deadline_cannot_prepare_a_goal(self):
+        self.scenario(expire_preflight=True)
+
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -37,11 +43,12 @@ class HandoffPreflightTests(unittest.TestCase):
                 "ctypes.CDLL(None).prctl(15,b'codex',0,0,0)\nprint('ready',flush=True)\ntime.sleep(60)\n")
             codex.chmod(0o700)
             clients=[];fds=[];panes={};methods=[];threads={source:{'name':'original-worker','turns':[]}}
-            goals={source:dict(threadId=source,objective='Finish fixture',status='paused',
+            goals={source:dict(threadId=source,objective='Finish fixture',status='active' if pause_used is not None else 'paused',
                 tokenBudget=source_budget,tokensUsed=50,timeUsedSeconds=12,createdAt=100,updatedAt=100)}
             queue={};goal_sets=[]
             external_run=subprocess.run
             visibility={'show_goal':not lost_goal}
+            clock={'utc':{'lower':1000,'upper':1001}}
             def launch(command,pane,name,thread):
                 master,slave=pty.openpty();fds.extend([master,slave])
                 client=subprocess.Popen(command,stdin=slave,stdout=subprocess.PIPE)
@@ -88,6 +95,10 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     elif method=='thread/goal/get':value={'goal':None if tid==target and not visibility['show_goal'] else goals.get(tid)}
                     elif method=='thread/goal/set':
                         goal_sets.append(params)
+                        if tid==source:
+                            goals[tid].update(status='paused',tokensUsed=pause_used,updatedAt=1002)
+                            ws.send(json.dumps(dict(id=req['id'],result={'goal':goals[tid]})))
+                            continue
                         goals[tid]=dict(threadId=tid,objective=params['objective'],status=params['status'],
                             tokenBudget=params['tokenBudget'],tokensUsed=0,timeUsedSeconds=0,createdAt=1001,updatedAt=1001)
                         if lost_goal:ws.close();return
@@ -107,6 +118,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                                 cwd=tmp,command=shlex.join(cmd),aggregatedOutput=p.stdout)])]
                         (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(
                             type='token_count',info={'total_token_usage':{'total_tokens':30}})))+'\n')
+                        if expire_preflight:clock['utc'].update(lower=2001,upper=2002)
                         value={}
                     else:raise AssertionError('unexpected native method '+method)
                     ws.send(json.dumps(dict(id=req['id'],result=value)))
@@ -128,11 +140,18 @@ print('preflight:'+target+':'+nonce+':'+digest)
             server=unix_serve(handler,str(endpoint));worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
             try:
                 with patch('subprocess.run',side_effect=command),patch('codex_wake.native_clock.snapshot',
-                        return_value={'utc':{'lower':1000,'upper':1001}}):
+                        return_value=clock):
                     for _ in range(2):
                         output=StringIO()
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         receipt=json.loads(output.getvalue())
+                        if expire_preflight:
+                            self.assertEqual(receipt['state'],'expired')
+                            self.assertEqual(receipt['reason'],'continuation_time_exhausted')
+                            self.assertNotIn(target,goals)
+                            self.assertEqual(goal_sets,[])
+                            self.assertEqual(methods.count('thread/start'),1)
+                            return
                         if source_budget==60:
                             self.assertEqual(receipt['reason'],'preflight_allowance_insufficient')
                             self.assertEqual(methods.count('thread/start'),0)
@@ -144,7 +163,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             continue
                         self.assertEqual(receipt['state'],'awaiting_activation')
                         self.assertEqual(receipt['successor_thread_id'],target)
-                        self.assertEqual(receipt['remaining_tokens'],920)
+                        self.assertEqual(receipt['remaining_tokens'],920 if pause_used is None else 970-pause_used)
                         self.assertEqual(receipt['preflight']['state'],'passed')
                     if lost_goal:
                         self.assertEqual(len(goal_sets),1)
@@ -155,11 +174,11 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 self.assertEqual(methods.count('thread/start'),1)
                 self.assertEqual(methods.count('thread/queue/add'),1)
                 self.assertEqual(methods.count('thread/queue/start'),1)
-                self.assertEqual(len(goal_sets),1)
-                self.assertEqual(goals[source]['tokensUsed'],50)
+                self.assertEqual(len(goal_sets),1 if pause_used is None else 2)
+                self.assertEqual(goals[source]['tokensUsed'],50 if pause_used is None else pause_used)
                 self.assertEqual(goals[source]['status'],'paused')
                 self.assertEqual(goals[target]['status'],'paused')
-                self.assertEqual(goals[target]['tokenBudget'],920)
+                self.assertEqual(goals[target]['tokenBudget'],920 if pause_used is None else 970-pause_used)
                 self.assertTrue(all(c.poll() is None for c in clients))
             finally:
                 server.shutdown();worker.join(2)
