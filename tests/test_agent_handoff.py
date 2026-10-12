@@ -11,6 +11,7 @@ from unittest.mock import patch
 from websockets.sync.server import unix_serve
 
 from codex_wake.cli import run
+from codex_wake.records import WakeError
 
 
 class AgentHandoffTests(unittest.TestCase):
@@ -23,7 +24,13 @@ class AgentHandoffTests(unittest.TestCase):
     def test_original_deadline_holds_even_when_native_elapsed_counter_is_small(self):
         self.scenario(tokens=50,clock_upper=1893456120,reason='continuation_time_exhausted')
 
-    def scenario(self, tokens=None, carry=0, reason='source_usage_unknown',clock_upper=1893456020):
+    def test_checkpoint_claim_without_outgoing_native_writer_evidence_holds(self):
+        self.scenario(tokens=50,reason='checkpoint_writer_unverified')
+
+    def test_malformed_host_allowance_is_rejected_before_native_or_journal_effects(self):
+        self.scenario(tokens=50,bad_cap='1000')
+
+    def scenario(self, tokens=None, carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             source='00000000-0000-7000-8000-000000000159'
@@ -44,6 +51,7 @@ class AgentHandoffTests(unittest.TestCase):
                             status='paused',tokenBudget=1000,timeUsedSeconds=12,
                             createdAt=100,updatedAt=100)}
                         if tokens is not None:value['goal']['tokensUsed']=tokens
+                    elif method=='thread/read':value={'thread':{'id':source,'turns':[]}}
                     else:raise AssertionError('Unexpected effect '+method)
                     ws.send(json.dumps(dict(id=request['id'],result=value)))
             server=unix_serve(handler,str(endpoint))
@@ -56,19 +64,31 @@ class AgentHandoffTests(unittest.TestCase):
                     objective='Finish fixture',token_cap=1000,time_cap_seconds=100,
                     tokens_before_source=carry,seconds_before_source=0,
                     approval='operator fixture',started_at='2030-01-01T00:00:00Z')})))
+                if bad_cap is not None:
+                    registry=json.loads(profiles.read_text());registry['continuations'][source]['token_cap']=bad_cap
+                    profiles.write_text(json.dumps(registry))
                 output=StringIO()
+                argv=['--wake-root',str(root/'wake'),'sessions','handoff',
+                    '--profiles',str(profiles),'--profile','worker','--intent','handoff-1',
+                    '--thread-id',source,'--checkpoint','checkpoint.json',
+                    '--checkpoint-sha256',hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                    '--expires-at','2030-01-01T00:01:00Z','--mode','new-tab','--json']
+                if bad_cap is not None:
+                    with redirect_stdout(output),self.assertRaisesRegex(WakeError,'continuation allowance'):
+                        run(argv)
+                    self.assertEqual(methods,[])
+                    self.assertFalse((root/'wake/lifecycle').exists())
+                    return
                 with redirect_stdout(output),patch('codex_wake.native_clock.snapshot',
                         return_value={'utc':{'lower':clock_upper-1,'upper':clock_upper}}):
-                    code=run(['--wake-root',str(root/'wake'),'sessions','handoff',
-                        '--profiles',str(profiles),'--profile','worker','--intent','handoff-1',
-                        '--thread-id',source,'--checkpoint','checkpoint.json',
-                        '--checkpoint-sha256',hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
-                        '--expires-at','2030-01-01T00:01:00Z','--mode','new-tab','--json'])
+                    code=run(argv)
                 receipt=json.loads(output.getvalue())
                 self.assertEqual(code,5)
                 self.assertEqual(receipt['state'],'blocked')
                 self.assertEqual(receipt['reason'],reason)
                 self.assertNotIn('successor_thread_id',receipt)
-                self.assertEqual([m for m in methods if m!='initialize'],['thread/goal/get'])
+                expected=['thread/goal/get']
+                if reason=='checkpoint_writer_unverified':expected.append('thread/read')
+                self.assertEqual([m for m in methods if m!='initialize'],expected)
             finally:
                 server.shutdown();worker.join(2)

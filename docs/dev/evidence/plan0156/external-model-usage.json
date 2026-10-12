@@ -1,0 +1,102 @@
+{
+  "state": "observed",
+  "scope": "two previously completed owned fixture assignments; native cumulative tokens include cached tokens",
+  "threads": [
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02",
+      "thread_id": "01a130b8-2411-7a52-9ac7-83823d4d77ef",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02/codex-home/sessions/2026/10/12/rollout-2026-10-12T10-25-36-01a130b8-2411-7a52-9ac7-83823d4d77ef.jsonl"
+      ],
+      "events": [
+        {
+          "timestamp": "2026-10-12T15:25:46.459Z",
+          "total_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 156,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19586
+          },
+          "last_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 156,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19586
+          }
+        },
+        {
+          "timestamp": "2026-10-12T15:25:50.474Z",
+          "total_token_usage": {
+            "input_tokens": 39079,
+            "cached_input_tokens": 31360,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 39264
+          },
+          "last_token_usage": {
+            "input_tokens": 19649,
+            "cached_input_tokens": 19200,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 29,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19678
+          }
+        }
+      ]
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-03",
+      "thread_id": "01a130c1-4418-71c1-8507-4330768614f1",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-03/codex-home/sessions/2026/10/12/rollout-2026-10-12T10-35-34-01a130c1-4418-71c1-8507-4330768614f1.jsonl"
+      ],
+      "events": [
+        {
+          "timestamp": "2026-10-12T15:35:47.468Z",
+          "total_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 107,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19537
+          },
+          "last_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 107,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19537
+          }
+        },
+        {
+          "timestamp": "2026-10-12T15:35:52.259Z",
+          "total_token_usage": {
+            "input_tokens": 39023,
+            "cached_input_tokens": 31360,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 136,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 39159
+          },
+          "last_token_usage": {
+            "input_tokens": 19593,
+            "cached_input_tokens": 19200,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 29,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19622
+          }
+        }
+      ]
+    }
+  ],
+  "cumulative_external_tokens": 78423,
+  "accounting_rule": "Add final cumulative total once per native thread; do not sum successive cumulative events. Count cached tokens conservatively."
+}

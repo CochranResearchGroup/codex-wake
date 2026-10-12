@@ -30,6 +30,12 @@ def handoff_command(args, root):
         raise WakeError('handoff requires an approved continuation and source checkpoint') from None
     if hashlib.sha256(content).hexdigest()!=args.checkpoint_sha256:
         raise WakeError('checkpoint hash changed; original checkpoint must be preserved')
+    fields=('token_cap','time_cap_seconds','tokens_before_source','seconds_before_source')
+    if (any(not isinstance(policy.get(k),int) or isinstance(policy[k],bool)
+            or policy[k]<0 for k in fields)
+            or policy['token_cap']==0 or policy['time_cap_seconds']==0):
+        raise WakeError('host continuation allowance must contain explicit bounded counters')
+    parse_timestamp(policy.get('started_at',''))
     if args.caller_thread_id and (args.caller_thread_id!=args.thread_id or args.profile not in
             config.get('callers',{}).get(args.caller_thread_id,[])):
         raise WakeError('handoff requires the host-granted source caller')
@@ -74,6 +80,18 @@ def handoff_command(args, root):
                     receipt['remaining_seconds']=max(0,deadline-bounds['upper'])
                     if bounds['upper']>=deadline:
                         receipt['reason']='continuation_time_exhausted'
+        if receipt['reason']=='successor_preflight_not_verified':
+            thread=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                'thread/read',{'threadId':args.thread_id,'includeTurns':True},profile['timeout'])['thread']
+            marker='checkpoint:'+args.thread_id+':'+args.checkpoint_sha256
+            writers=[{'turn_id':turn['id'],'item_id':item['id']}
+                for turn in thread.get('turns',[]) for item in turn.get('items',[])
+                if turn.get('status')=='completed' and item.get('type')=='commandExecution'
+                and item.get('status')=='completed' and item.get('exitCode')==0
+                and item.get('cwd')==str(workspace) and marker in (item.get('aggregatedOutput') or '')]
+            if thread.get('id')!=args.thread_id or len(writers)!=1:
+                receipt['reason']='checkpoint_writer_unverified'
+            else:receipt['checkpoint_writer']=writers[0]
         save(path,receipt)
         from .sessions_cli import emit
         emit(receipt,args.as_json)
