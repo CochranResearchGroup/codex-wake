@@ -22,6 +22,13 @@ def add_sessions_parser(subparsers):
     spawn.add_argument('--expires-at', required=True)
     spawn.add_argument('--caller-thread-id')
     spawn.add_argument('--json', dest='as_json', action='store_true')
+    refresh = commands.add_parser('refresh', help='refresh selected resources in the exact owned thread')
+    for option in ('profiles', 'profile', 'intent', 'thread-id', 'checkpoint',
+                   'checkpoint-sha256', 'expires-at'):
+        refresh.add_argument('--' + option, required=True)
+    refresh.add_argument('--resource', action='append', required=True)
+    refresh.add_argument('--caller-thread-id')
+    refresh.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
         command = commands.add_parser(verb)
         command.add_argument('--json', dest='as_json', action='store_true')
