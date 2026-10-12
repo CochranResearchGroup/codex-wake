@@ -5510,3 +5510,23 @@ planning audit and whitespace checks PASS. Both installed skill copies match;
 previous copies backed up privately. No executable/service/wake changes or
 production messages. Already-active agents must reread the skill; no model
 compliance proof claimed. Graphiti target unavailable; no writes attempted.
+
+## Turn 269 | 2026-10-12 UTC
+
+Operator approved lifecycle design, disposable runtime prototype and execution
+tickets. Three native model turns in private CODEX_HOME/workspace: outgoing agent
+wrote handoff; exact-thread TUI restart read v2 skill but retained v1 MCP; /new
+successor loaded/called v2 MCP and read original handoff, confirming own identity
+and no goal/budget authority. Initial toy tool lacked read-only annotations and
+was rejected; retained failure, corrected fixture annotation for fresh v2.
+Observed real client exit before resume; initial reopen reused the not-yet-exited
+client. Listener symlink rejected before creation; resolved owned socket used.
+Ordinary exact-pane close passed without force; owned test tmux session/server
+and both MCP/TUI processes gone; private CODEX_HOME census empty. No shared
+service/agent/pending-work change. Prototype5e1b0ac preserved and published.
+Plan0155 CLOSED; Plan0156 specification and child Plans0157–0159 PLANNED.
+Issues248–251 published with exact labels/readbacks; native250/251 blocked-by249
+links verified. Canonical forge preflight duplicate enhancement alias removed
+without changing target/actions/provider labels; qualified preflight passed.
+Product implementation, real goal transfer and actual ask-Matt preflight remain
+future acceptance, not prototype claims. Memory target unavailable.

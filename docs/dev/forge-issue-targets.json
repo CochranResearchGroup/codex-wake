@@ -28,9 +28,6 @@
         "intent/bug": {
           "provider_label": "bug"
         },
-        "intent/enhancement": {
-          "provider_label": "enhancement"
-        },
         "state/needs-triage": {
           "provider_label": "needs-triage"
         },
