@@ -33,7 +33,13 @@ class AgentHandoffTests(unittest.TestCase):
     def test_native_goal_objective_change_holds_before_successor(self):
         self.scenario(tokens=50,goal_objective='Different fixture',reason='source_goal_authority_changed')
 
-    def scenario(self, tokens=None, carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None,goal_objective='Finish fixture'):
+    def test_source_counter_reset_after_checkpoint_hold_never_restores_allowance(self):
+        self.scenario(tokens=50,reason='checkpoint_writer_unverified',reset_on_repeat=True)
+
+    def test_smaller_native_goal_budget_cannot_be_replenished_from_host_ceiling(self):
+        self.scenario(tokens=50,budget=60,reason='checkpoint_writer_unverified',remaining=10)
+
+    def scenario(self, tokens=None, carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None,goal_objective='Finish fixture',reset_on_repeat=False,budget=1000,remaining=None):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             source='00000000-0000-7000-8000-000000000159'
@@ -51,9 +57,9 @@ class AgentHandoffTests(unittest.TestCase):
                     if method=='initialize':value={'userAgent':'fixture'}
                     elif method=='thread/goal/get':
                         value={'goal':dict(threadId=source,objective=goal_objective,
-                            status='paused',tokenBudget=1000,timeUsedSeconds=12,
+                            status='paused',tokenBudget=budget,timeUsedSeconds=12,
                             createdAt=100,updatedAt=100)}
-                        if tokens is not None:value['goal']['tokensUsed']=tokens
+                        if tokens is not None:value['goal']['tokensUsed']=0 if reset_on_repeat and methods.count(method)>1 else tokens
                     elif method=='thread/read':value={'thread':{'id':source,'turns':[]}}
                     else:raise AssertionError('Unexpected effect '+method)
                     ws.send(json.dumps(dict(id=request['id'],result=value)))
@@ -89,9 +95,16 @@ class AgentHandoffTests(unittest.TestCase):
                 self.assertEqual(code,5)
                 self.assertEqual(receipt['state'],'blocked')
                 self.assertEqual(receipt['reason'],reason)
+                if remaining is not None:self.assertEqual(receipt['remaining_tokens'],remaining)
                 self.assertNotIn('successor_thread_id',receipt)
                 expected=['thread/goal/get']
                 if reason=='checkpoint_writer_unverified':expected.append('thread/read')
                 self.assertEqual([m for m in methods if m!='initialize'],expected)
+                if reset_on_repeat:
+                    repeated=StringIO()
+                    with redirect_stdout(repeated):self.assertEqual(run(argv),5)
+                    held=json.loads(repeated.getvalue())
+                    self.assertEqual(held['reason'],'source_goal_accounting_changed')
+                    self.assertEqual(held['source_goal']['tokensUsed'],50)
             finally:
                 server.shutdown();worker.join(2)
