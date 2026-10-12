@@ -27,6 +27,10 @@ def refresh_command(args, root):
     resources = profile.get('resources', {})
     if not resources or any(name not in resources for name in args.resource):
         raise WakeError('requested resources require host-approved proof checks')
+    for name in args.resource:
+        check = resources[name]
+        if isinstance(check, dict) and check.get('kind') == 'mcp' and check.get('read_only') is not True:
+            raise WakeError('MCP refresh proof requires a host-approved read-only check')
     if config.get('version') != 1:
         raise WakeError('approved profile registry version is required')
     if args.caller_thread_id:
@@ -58,13 +62,17 @@ def refresh_command(args, root):
             receipt = json.loads(path.read_text())
             if receipt['fingerprint'] != fingerprint:
                 raise WakeError('intent key already binds a different lifecycle assignment')
+            if (receipt['state'] == 'uncertain'
+                    and receipt.get('uncertain_effect') == 'tmux/kill-pane'):
+                receipt['state'] = 'stopping'
+                save(path, receipt)
         else:
             receipt = dict(version=1, intent_key=args.intent, fingerprint=fingerprint,
                            intent=intent, thread_id=args.thread_id, state='prepared')
             save(path, receipt)
         if receipt['state'] == 'prepared' and before_effect(path, receipt):
             preflight(path, receipt, profile)
-        if receipt['state'] in ('stopping', 'starting', 'awaiting_preflight'):
+        if receipt['state'] in ('stopping', 'starting', 'awaiting_preflight', 'uncertain'):
             advance_refresh(path, receipt, profile)
         from .sessions_cli import emit
         emit(receipt, args.as_json)
@@ -141,6 +149,23 @@ def advance_refresh(path, receipt, profile):
     def request(method, params):
         return native_request(runtime.app_server, runtime.codex, method, params, runtime.timeout)
     try:
+        if receipt.get('uncertain_effect') == 'tmux/new-window':
+            snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket,
+                               timeout=runtime.timeout)
+            rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']]
+            candidates = [p for r in rows for p in r['attachments']
+                          if p['session_name'] == runtime.tmux_session
+                          and p['window_name'] == receipt.get('tab_name')]
+            if (not snapshot['complete'] or len(rows) != 1 or len(candidates) != 1
+                    or not revalidate_attachment(candidates[0])):
+                receipt.update(state='uncertain', reason='no_unique_existing_refresh_tab')
+                save(path, receipt)
+                return
+            pane = candidates[0]
+            receipt.update(state='awaiting_preflight', pane_id=pane['pane_id'],
+                           window_id=pane['window_id'])
+            receipt.pop('uncertain_effect', None)
+            save(path, receipt)
         if receipt['state'] == 'stopping':
             old = receipt['old_attachment']
             try:
@@ -164,11 +189,12 @@ def advance_refresh(path, receipt, profile):
             command = shlex.join(['env', *[v for k in removed for v in ('-u', k)], *home,
                                   runtime.codex, 'resume', '--no-alt-screen', '-C', runtime.cwd,
                                   receipt['thread_id'], '--remote', runtime.app_server])
-            receipt.update(state='starting', uncertain_effect='tmux/new-window')
+            receipt.update(state='starting', uncertain_effect='tmux/new-window',
+                           tab_name=old['window_name'] + '-refresh-' + receipt['fingerprint'][:12])
             save(path, receipt)
             created = tmux_command(runtime, 'new-window', '-d', '-P', '-F',
                                    '#{window_id}\t#{pane_id}', '-t', runtime.tmux_session + ':',
-                                   '-n', old['window_name'], '-c', runtime.cwd, command)
+                                   '-n', receipt['tab_name'], '-c', runtime.cwd, command)
             window, pane = created.split('\t')
             receipt.update(state='awaiting_preflight', window_id=window, pane_id=pane)
             receipt.pop('uncertain_effect', None)

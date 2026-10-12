@@ -77,6 +77,28 @@ the actual `caller_thread_id`. Tools cannot override profiles files, journal
 roots, launch commands, endpoints or credential locations. Missing host scope
 or caller grant holds the operation.
 
-Same-thread refresh and fresh-agent handoff are separate Plan0158/0159 operations
-whose implementation and acceptance remain pending. TUI restart, fresh context
-and a file read alone prove neither MCP refresh nor renewed goal allowance.
+The source candidate also exposes `sessions refresh` / `wake_sessions_refresh`.
+Installed refresh qualification remains pending. Supply the exact `thread_id`,
+stable `intent`, workspace-contained `checkpoint`, its `checkpoint_sha256`,
+fixed `expires_at` and named `resources` (CLI repeats `--resource`). The checkpoint
+JSON must identify `source_thread_id`, `objective`, `authority`, `next_packet` and
+an empty `pending_obligations` list. Actual pending-work inventory independently
+guards the stop. MCP callers must name their own source thread and have its host
+profile grant; host paths and probe definitions cannot be supplied by the caller.
+
+Refresh profiles add a `resources` map. A skill check contains `kind: "skill"`,
+the exact installed `path`, expected exported `description` and `sha256`. An MCP
+check contains `kind: "mcp"`, host-approved `server`, `tool`, `arguments`,
+`read_only: true` and `expected_content` from its actual tool response. Only
+read-only behavior probes are eligible. A new TUI process alone does not prove
+MCP readiness; an old result blocks the requested refresh.
+
+Refresh preserves the checkpoint and original conversation, observes the old
+process generation's exit and reattaches the same thread. Its replacement tab
+has a unique refresh suffix for lost-response reconciliation. Repeat the exact
+intent to observe/reconcile; do not replace an uncertain stop or launch. Source
+expiry guards prevent a late replacement and never renew the deadline. Draft,
+active/unknown work and pending obligations hold without a force option.
+
+Fresh-agent handoff remains Plan0159 work. TUI restart, fresh context and a file
+read alone prove neither MCP refresh nor renewed goal allowance.

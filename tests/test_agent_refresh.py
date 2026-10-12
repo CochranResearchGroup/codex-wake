@@ -48,7 +48,19 @@ class AgentRefreshTests(unittest.TestCase):
     def test_new_client_with_old_mcp_behavior_blocks_full_refresh(self):
         self.refresh_scenario(draft=False, stale_mcp=True)
 
-    def refresh_scenario(self, *, draft, stale_mcp=False):
+    def test_lost_new_tab_response_reconciles_existing_refresh_without_replacement(self):
+        self.refresh_scenario(draft=False, loss='new-window')
+
+    def test_lost_stop_response_observes_old_exit_without_stopping_twice(self):
+        self.refresh_scenario(draft=False, loss='kill-pane')
+
+    def test_fixed_expiry_after_stop_prevents_replacement_without_reset(self):
+        self.refresh_scenario(draft=False, expire_after_stop=True)
+
+    def test_unapproved_probe_is_rejected_before_stopping_original_client(self):
+        self.refresh_scenario(draft=False, stale_mcp=True, unapproved_probe=True)
+
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -64,6 +76,7 @@ class AgentRefreshTests(unittest.TestCase):
             endpoint = root / 'native.sock'
             methods, effects = [], []
             original_pid = client.pid
+            tab = {'name':'worker'}
             skill = root / 'skill.md'
             skill.write_text('---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n')
             goal = dict(objective='Finish fixture', status='paused', tokenBudget=1000,
@@ -89,17 +102,20 @@ class AgentRefreshTests(unittest.TestCase):
                 nonlocal client
                 if 'list-panes' in argv:
                     value = ('%158' if '-a' not in argv else '\t'.join([
-                        '$1','owned','@158','1','worker','%158','0','owned-worker',tmp,tty]))
+                        '$1','owned','@158','1',tab['name'],'%158','0','owned-worker',tmp,tty]))
                 elif 'capture-pane' in argv:
                     text = 'UNSUBMITTED_DRAFT_158' if draft else '\x1b[2mAsk Codex to do anything\x1b[0m'
                     value = '\n\n\x1b[1m›\x1b[0m ' + text + '\n'
                 elif 'display-message' in argv: value = '23,2' if draft else '2,2'
                 elif 'kill-pane' in argv:
                     effects.append(argv); client.terminate();client.wait(timeout=2);client.stdout.close();value=''
+                    if loss == 'kill-pane':raise subprocess.TimeoutExpired(argv,1)
                 elif 'new-window' in argv:
                     effects.append(argv)
+                    tab['name']=argv[argv.index('-n')+1]
                     client=subprocess.Popen(['sh','-c','exec '+argv[-1]],stdin=slave,stdout=subprocess.PIPE)
                     self.assertEqual(client.stdout.readline(),b'ready\n');value='@158\t%158'
+                    if loss == 'new-window':raise subprocess.TimeoutExpired(argv,1)
                 else:
                     effects.append(argv); value = ''
                 return subprocess.CompletedProcess(argv,0,value,'')
@@ -114,7 +130,7 @@ class AgentRefreshTests(unittest.TestCase):
             if stale_mcp:
                 registry=json.loads(profiles.read_text())
                 registry['profiles']['worker']['resources']['updated-skill']=dict(kind='mcp',
-                    server='fixture',tool='version',arguments={},read_only=True,
+                    server='fixture',tool='version',arguments={},read_only=not unapproved_probe,
                     expected_content=[{'type':'text','text':'new-version'}])
                 profiles.write_text(json.dumps(registry))
             argv = ['--wake-root',tmp,'sessions','refresh','--profiles',str(profiles),
@@ -127,11 +143,32 @@ class AgentRefreshTests(unittest.TestCase):
                     worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
                     try:
                         with patch('subprocess.run',side_effect=command), patch(
-                                'codex_wake.native_clock.snapshot',return_value={'utc':{'upper':1001}}):
+                                'codex_wake.native_clock.snapshot',side_effect=lambda: {'utc':{'upper':
+                                    1893456001 if expire_after_stop and client.poll() is not None else 1001}}):
+                            if unapproved_probe:
+                                with redirect_stdout(StringIO()),self.assertRaisesRegex(WakeError,'read-only'):
+                                    run(argv)
+                                self.assertEqual(effects,[])
+                                self.assertIsNone(client.poll())
+                                self.assertFalse((root/'lifecycle').exists())
+                                return
+                            if loss:
+                                first=StringIO()
+                                with redirect_stdout(first):self.assertEqual(run(argv),5)
+                                held=json.loads(first.getvalue())
+                                self.assertEqual(held['state'],'uncertain')
+                                self.assertEqual(held['uncertain_effect'],'tmux/'+loss)
                             output=StringIO()
-                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp else 0,output.getvalue())
+                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop else 0,output.getvalue())
                             receipt=json.loads(output.getvalue())
-                            if draft:
+                            if expire_after_stop:
+                                self.assertEqual(receipt['state'],'expired')
+                                self.assertEqual(sum('kill-pane' in x for x in effects),1)
+                                self.assertFalse(any('new-window' in x for x in effects))
+                                count=len(effects)
+                                with redirect_stdout(StringIO()):self.assertEqual(run(argv),5)
+                                self.assertEqual(len(effects),count)
+                            elif draft:
                                 self.assertEqual(receipt['state'],'blocked')
                                 self.assertEqual(receipt['reason'],'local_composer_not_proven_empty')
                                 self.assertEqual(effects,[])
@@ -145,6 +182,8 @@ class AgentRefreshTests(unittest.TestCase):
                                 self.assertEqual(receipt['goal_after'],goal)
                             else:
                                 self.assertEqual(receipt['state'],'completed')
+                                self.assertEqual(sum('new-window' in x for x in effects),1)
+                                self.assertEqual(sum('kill-pane' in x for x in effects),1)
                                 self.assertEqual(receipt['thread_id'],thread_id)
                                 self.assertNotEqual(client.pid,original_pid)
                                 self.assertEqual(receipt['goal_before'],goal)

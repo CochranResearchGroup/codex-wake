@@ -24,6 +24,12 @@ SEND = {"body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery
         "resume_missing": {"type": "boolean"}}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources in the exact source thread. Requires its preserved checkpoint; unsafe stop or stale resource proof holds without fresh-thread or shared-daemon fallback.",
+        {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
+         "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+         "resources": {"type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": True,
+                       "items": MESSAGE}, "expires_at": TEXT},
+        ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "resources", "expires_at"], False),
     "wake_sessions_spawn": ("sessions", "spawn", "Spawn one worker through a host-approved launch profile. Stable intent and exact readiness precede task admission; uncertain effects require reconciliation without replacement.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "name": {**TEXT, "maxLength": 200},
          "task": BODY, "expires_at": TEXT}, ["profile", "intent", "name", "task", "expires_at"], False),
@@ -44,7 +50,7 @@ SPECS = {
 }
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 for _name, _spec in list(SPECS.items()):
-    if _spec[0] == "messages" or _spec[1] in ("current", "spawn"):
+    if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
                        {**_spec[3], "caller_thread_id": CALLER}, [*_spec[4], "caller_thread_id"], _spec[5])
 
@@ -78,7 +84,7 @@ class CommandRunner:
             except UnicodeError:
                 return {"error": {"code": "invalid_argument", "message": "Body must be valid UTF-8."}}, True
         # Host launch context owns endpoint/capability/root/identity; tools cannot override them.
-        if verb == 'spawn':
+        if verb in ('spawn', 'refresh'):
             if self.lifecycle_profiles is None or self.wake_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
             command = [*self.cli, '--wake-root', str(self.wake_root), group, verb,
@@ -89,13 +95,13 @@ class CommandRunner:
         if positional in arguments:
             command.append(arguments[positional])
         command += ["--json"]
-        if verb != 'spawn':
+        if verb not in ('spawn', 'refresh'):
             command += ["--app-server", self.app_server]
         if group == "messages":
             for flag, value in (("--bus-root", self.bus_root), ("--capability", self.capability)):
                 if value is not None:
                     command += [flag, str(value)]
-        if (group == "sessions" and verb != 'spawn') or verb == "send":
+        if (group == "sessions" and verb not in ('spawn', 'refresh')) or verb == "send":
             for flag, value in (("--tmux-socket", self.tmux_socket), ("--tmux-session", self.tmux_session)):
                 if value:
                     command += [flag, value]
@@ -104,10 +110,13 @@ class CommandRunner:
                 if value is not None:
                     command += [flag, str(value)]
         for key, value in arguments.items():
-            if key == positional or (key == 'caller_thread_id' and verb != 'spawn'):
+            if key == positional or (key == 'caller_thread_id' and verb not in ('spawn', 'refresh')):
                 continue
             flag = "--" + key.replace("_", "-")
-            if key == "body":
+            if key == 'resources':
+                for resource in value:
+                    command += ['--resource', resource]
+            elif key == "body":
                 command += ["--body-file", "-"]
             elif isinstance(value, bool):
                 if value:

@@ -100,8 +100,18 @@ those paths. Creation/readiness, admission and execution are separate evidence.
 Retain the receipt and reconcile the same intent; uncertainty does not authorize
 another worker, intent, root or transport. Spawn supplies no A2A enrollment or
 parent capability. See `docs/agent-lifecycle.md` in the installed source version
-for profile setup, receipt states and limits. Refresh/handoff remain separate
-pending operations; neither restart nor new context renews authority/resources.
+for profile setup, receipt states and limits.
+
+The development source exposes `wake_sessions_refresh` with the same host scope;
+installed qualification remains pending. Write and preserve your source checkpoint,
+then supply its workspace-relative path and exact hash, your exact source thread,
+stable intent, selected named resources and fixed expiry. Draft/active/unknown or
+pending work holds the stop. A new client does not establish resource readiness:
+an old MCP behavior result blocks refresh. Reconcile the original stop/launch
+receipt instead of replacing it; no force or shared-daemon restart. See the
+matching source's lifecycle guide for checkpoint and host proof definitions.
+Fresh-agent handoff remains pending; neither restart nor new context renews
+authority or resources.
 
 For existing basic tmux workflows, select `--legacy-tmux`; advanced signals and
 tracked-mailbox workflows retain their compatibility contracts below. Read

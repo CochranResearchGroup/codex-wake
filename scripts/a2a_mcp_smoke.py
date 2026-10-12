@@ -93,8 +93,9 @@ async def smoke(cli, mcp_command):
 
                 async with Client(parameters(0), mode="legacy") as sender, Client(parameters(1), mode="legacy") as recipient:
                     discovered = [tool.name for tool in (await sender.list_tools()).tools]
-                    assert len(discovered) == 15
+                    assert len(discovered) == 16
                     assert 'wake_sessions_spawn' in discovered
+                    assert 'wake_sessions_refresh' in discovered
                     current = await call(sender, "wake_sessions_current", {})
                     assert current["session"]["thread_id"] == ids[0]
                     admission = await call(sender, "wake_messages_send", {

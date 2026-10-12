@@ -1,6 +1,6 @@
 # Agent exchange MCP
 
-`codex-wake-mcp` exposes 15 stdio tools over the CLI. It adds structured
+`codex-wake-mcp` exposes 16 stdio tools over the CLI in this source candidate. It adds structured
 discovery and calls, while the mailbox remains responsible for identity, capability,
 idempotency, work claims, receipt generations, expiry and recovery. It starts no
 daemon or watcher and creates no separate store. See the
