@@ -34,7 +34,31 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_preflight_crossing_original_deadline_cannot_prepare_a_goal(self):
         self.scenario(expire_preflight=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False):
+    def test_daemon_expires_prepared_continuation_at_original_deadline(self):
+        self.scenario(monitor_expiry=True)
+
+    def test_continuous_monitor_activates_one_owner_with_remaining_allowance(self):
+        self.scenario(activate=True)
+
+    def test_monitor_pauses_and_interrupts_owned_turn_before_original_deadline(self):
+        self.scenario(activate=True,enforce_deadline=True)
+
+    def test_lost_deadline_pause_response_reconciles_without_repeating_pause(self):
+        self.scenario(activate=True,enforce_deadline=True,lost_pause=True)
+
+    def test_lost_activation_response_reconciles_original_goal_without_reactivation(self):
+        self.scenario(activate=True,lost_activate=True)
+
+    def test_monitor_shutdown_pauses_owned_goal_and_preserves_allowance(self):
+        self.scenario(activate=True,shutdown=True)
+
+    def test_same_intent_cli_readback_preserves_active_monitor_ownership(self):
+        self.scenario(activate=True,readback=True)
+
+    def test_another_live_monitor_generation_cannot_be_taken_over_or_stopped(self):
+        self.scenario(activate=True,foreign_monitor=True)
+
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -45,7 +69,7 @@ class HandoffPreflightTests(unittest.TestCase):
             clients=[];fds=[];panes={};methods=[];threads={source:{'name':'original-worker','turns':[]}}
             goals={source:dict(threadId=source,objective='Finish fixture',status='active' if pause_used is not None else 'paused',
                 tokenBudget=source_budget,tokensUsed=50,timeUsedSeconds=12,createdAt=100,updatedAt=100)}
-            queue={};goal_sets=[]
+            queue={};goal_sets=[];interrupts=[]
             external_run=subprocess.run
             visibility={'show_goal':not lost_goal}
             clock={'utc':{'lower':1000,'upper':1001}}
@@ -78,6 +102,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 started_at='1970-01-01T00:00:00Z',preflight=dict(script=str(helper),
                     sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',
                     workflow='github-handoff',required_checks=['fixture'],token_allowance=100))
+            if activate:policy['activation']=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=10)
             profiles.write_text(json.dumps(dict(version=1,profiles={'worker':profile},continuations={source:policy})))
             def handler(ws):
                 for raw in ws:
@@ -99,10 +124,22 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             goals[tid].update(status='paused',tokensUsed=pause_used,updatedAt=1002)
                             ws.send(json.dumps(dict(id=req['id'],result={'goal':goals[tid]})))
                             continue
+                        if 'objective' not in params:
+                            goals[tid].update(status=params['status'],updatedAt=1003)
+                            if params['status']=='active' and enforce_deadline:
+                                threads[tid]['turns'].append(dict(id='autonomous-turn',status='inProgress',items=[]))
+                            if (lost_pause and params['status']=='paused') or (lost_activate and params['status']=='active'):ws.close();return
+                            ws.send(json.dumps(dict(id=req['id'],result={'goal':goals[tid]})))
+                            continue
                         goals[tid]=dict(threadId=tid,objective=params['objective'],status=params['status'],
                             tokenBudget=params['tokenBudget'],tokensUsed=0,timeUsedSeconds=0,createdAt=1001,updatedAt=1001)
                         if lost_goal:ws.close();return
                         value={'goal':goals[tid]}
+                    elif method=='turn/interrupt':
+                        interrupts.append(params)
+                        for turn in threads[tid]['turns']:
+                            if turn['id']==params['turnId']:turn['status']='interrupted'
+                        value={}
                     elif method=='thread/queue/add':
                         queue[tid]=dict(id='preflight-queue',clientUserMessageId=params['clientUserMessageId'],input=params['input'])
                         value={'queuedSubmission':queue[tid]}
@@ -165,6 +202,55 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         self.assertEqual(receipt['successor_thread_id'],target)
                         self.assertEqual(receipt['remaining_tokens'],920 if pause_used is None else 970-pause_used)
                         self.assertEqual(receipt['preflight']['state'],'passed')
+                    if activate:
+                        from codex_wake.daemon import run as daemon_run
+                        sleeps=[]
+                        def sleep(_):
+                            sleeps.append(1)
+                            if foreign_monitor and len(sleeps)==1:
+                                from codex_wake.process import process_identity
+                                saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
+                                lease=json.loads(saved.read_text())
+                                lease['deadline_fence'].update(pid=clients[0].pid,identity=process_identity(clients[0].pid))
+                                saved.write_text(json.dumps(lease))
+                                clock['utc'].update(lower=1990,upper=1991)
+                                return
+                            if enforce_deadline and len(sleeps)==1:
+                                self.assertEqual(goals[target]['status'],'active')
+                                clock['utc'].update(lower=1990,upper=1991)
+                                return
+                            if lost_pause and len(sleeps)==2:return
+                            if lost_activate and len(sleeps)==1:return
+                            if not enforce_deadline:
+                                self.assertEqual(goals[target]['status'],'active')
+                                if readback:
+                                    out=StringIO()
+                                    with redirect_stdout(out):self.assertEqual(run(argv),0)
+                                    self.assertEqual(json.loads(out.getvalue())['state'],'active')
+                                saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
+                                self.assertEqual(json.loads(saved.read_text())['state'],'active')
+                            raise KeyboardInterrupt
+                        with patch('codex_wake.daemon.time.sleep',side_effect=sleep),redirect_stdout(StringIO()):
+                            with self.assertRaises(KeyboardInterrupt):
+                                daemon_run(['--wake-root',tmp,'--no-dispatch','--interval','1'])
+                        self.assertEqual(goals[target]['status'],'active' if foreign_monitor else 'paused')
+                        if enforce_deadline:
+                            self.assertEqual(interrupts,[dict(threadId=target,turnId='autonomous-turn')])
+                            saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
+                            self.assertEqual(json.loads(saved.read_text())['state'],'expired')
+                        self.assertEqual(goals[source]['status'],'paused')
+                        if lost_activate:
+                            saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
+                            self.assertEqual(json.loads(saved.read_text())['reason'],'monitor_stopped')
+                    if monitor_expiry:
+                        from codex_wake.daemon import run as daemon_run
+                        clock['utc'].update(lower=2001,upper=2002)
+                        with redirect_stdout(StringIO()):
+                            self.assertEqual(daemon_run(['--wake-root',tmp,'--once','--no-dispatch']),0)
+                        saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
+                        monitored=json.loads(saved.read_text())
+                        self.assertEqual(monitored['state'],'expired')
+                        self.assertEqual(monitored['reason'],'continuation_time_exhausted')
                     if lost_goal:
                         self.assertEqual(len(goal_sets),1)
                         visibility['show_goal']=True
@@ -174,10 +260,10 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 self.assertEqual(methods.count('thread/start'),1)
                 self.assertEqual(methods.count('thread/queue/add'),1)
                 self.assertEqual(methods.count('thread/queue/start'),1)
-                self.assertEqual(len(goal_sets),1 if pause_used is None else 2)
+                self.assertEqual(len(goal_sets),(2 if foreign_monitor else 3) if activate else (1 if pause_used is None else 2))
                 self.assertEqual(goals[source]['tokensUsed'],50 if pause_used is None else pause_used)
                 self.assertEqual(goals[source]['status'],'paused')
-                self.assertEqual(goals[target]['status'],'paused')
+                self.assertEqual(goals[target]['status'],'active' if foreign_monitor else 'paused')
                 self.assertEqual(goals[target]['tokenBudget'],920 if pause_used is None else 970-pause_used)
                 self.assertTrue(all(c.poll() is None for c in clients))
             finally:

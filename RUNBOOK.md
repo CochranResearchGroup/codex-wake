@@ -5664,3 +5664,14 @@ original deadline.57 focused tests PASS11.519s. Checkpoint11 retains full open
 program gates and proposes existing daemon deadline enforcement before activation.
 Root1303297/14421s ACTIVE plus external125341; original caps unchanged. No provider
 assignment or global runtime update. Memory unavailable; existing receipt retained.
+
+## Turn 281 | 2026-10-12 UTC
+
+Plan0156 cycles48–55 integrate original-deadline supervision into existing daemon.
+Fixture CLI/nativeWS/PTY checks prove explicit continuous activation, owned pause
+and exact turn interrupt, lost-effect reconciliation, graceful shutdown and live
+monitor generation protection.97 focused lifecycle/daemon tests PASS17.494s.
+Checkpoint12 distinguishes fixture proof from unexecuted installed native goal
+continuation and all final acceptance/integration/release gates. Root1378287/
+15262s ACTIVE plus external125341, original caps unchanged. Memory unavailable;
+retained receipt. No new provider assignment or shared installed runtime change.

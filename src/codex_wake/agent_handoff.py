@@ -60,6 +60,23 @@ def handoff_command(args, root):
         else:
             receipt=dict(version=1,intent_key=args.intent,fingerprint=fingerprint,
                 intent=intent,thread_id=args.thread_id,state='prepared')
+        if receipt.get('deadline_fence'):
+            from .process import process_identity,process_exists
+            fence=receipt['deadline_fence']
+            goals={}
+            for thread in (args.thread_id,receipt['successor_thread_id']):
+                goals[thread]=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                    'thread/goal/get',{'threadId':thread},profile['timeout'])['goal']
+            alive=process_exists(fence['pid']) and process_identity(fence['pid'])==fence['identity']
+            receipt['readback']=dict(monitor_alive=alive,goals=goals)
+            save(path,receipt)
+            from .sessions_cli import emit
+            emit(receipt,args.as_json)
+            source=goals[args.thread_id];target=goals[receipt['successor_thread_id']]
+            ready=bool(source and target and source.get('status')=='paused' and
+                all(target.get(k)==receipt['successor_goal'].get(k) for k in ('threadId','objective','tokenBudget','createdAt')))
+            return 0 if ready and (receipt['state']=='completed' or
+                receipt['state']=='active' and alive and target.get('status')=='active') else 5
         goal=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
             'thread/goal/get',{'threadId':args.thread_id},profile['timeout'])['goal']
         previous=receipt.get('source_goal')
@@ -300,3 +317,128 @@ def before_handoff_effect(path,receipt):
         save(path,receipt)
         return False
     return True
+
+
+def poll_handoffs(root,supervision=None,stop_reason=None):
+    """Reconcile expiry of owned paused preparations; never infer activation."""
+    directory=Path(root)/'lifecycle'
+    for path in directory.glob('*.json'):
+        if path.name.startswith('owner-'):continue
+        with path.with_suffix('.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            receipt=None
+            try:
+                receipt=json.loads(path.read_text())
+                if receipt.get('intent',{}).get('operation')!='handoff' or receipt.get('state') not in ('awaiting_activation','activating','active','pausing_continuation'):continue
+                source=receipt['thread_id'];target=receipt['successor_thread_id']
+                key=hashlib.sha256(source.encode()).hexdigest()
+                owner=json.loads((directory/('owner-'+key+'.json')).read_text())
+                if (owner.get('intent_fingerprint')!=receipt['fingerprint']
+                        or owner.get('source_thread_id')!=source or owner.get('successor_thread_id')!=target
+                        or owner.get('state') not in (('successor_prepared','active') if receipt['state']=='activating'
+                            else ('successor_prepared',) if receipt['state']=='awaiting_activation' else ('active',))):continue
+                if receipt.get('deadline_fence'):
+                    from .process import process_identity,process_exists
+                    import os
+                    fence=receipt['deadline_fence']
+                    if fence['pid']!=os.getpid() and process_exists(fence['pid']) and process_identity(fence['pid'])==fence['identity']:
+                        continue
+                    identity=process_identity(os.getpid())
+                    if not identity:continue
+                    if stop_reason and fence['pid']!=os.getpid():continue
+                    fence.update(pid=os.getpid(),identity=identity)
+                    save(path,receipt)
+                profile=receipt['intent']['launch']
+                observed={}
+                for thread,saved in ((source,receipt['source_goal']),(target,receipt['successor_goal'])):
+                    goal=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                        'thread/goal/get',{'threadId':thread},profile['timeout'])['goal']
+                    allowed=('active','paused','complete','budgetLimited','usageLimited') if thread==target and receipt['state']!='awaiting_activation' else ('paused',)
+                    if (not goal or goal.get('status') not in allowed
+                            or any(goal.get(k)!=saved.get(k) for k in ('threadId','objective','tokenBudget','createdAt'))):
+                        raise ValueError('owned paused goal changed')
+                    observed[thread]=goal
+                receipt['monitor_observed_goals']=observed
+                if receipt['state']=='activating':
+                    if observed[target]['status']!='active':
+                        receipt['monitor_error']='successor_activation_unobserved';save(path,receipt);continue
+                    receipt.update(state='active',reason='continuation_active',successor_goal=observed[target])
+                    receipt.pop('uncertain_effect',None);receipt.pop('monitor_error',None)
+                    owner['state']='active';save(directory/('owner-'+key+'.json'),owner);save(path,receipt)
+                activation=receipt['intent']['continuation'].get('activation',{})
+                if receipt['state'] in ('active','pausing_continuation'):
+                    from .native_clock import snapshot
+                    bounds=snapshot().get('utc')
+                    target_goal=observed[target]
+                    if target_goal['status']=='complete':
+                        receipt.update(state='completed',reason='successor_goal_complete',successor_goal=target_goal)
+                        owner['state']='completed';save(directory/('owner-'+key+'.json'),owner);save(path,receipt)
+                        continue
+                    if (stop_reason or not bounds or bounds['upper']+activation['deadline_margin_seconds']>=receipt['continuation_deadline']
+                            or target_goal['tokensUsed']>=target_goal['tokenBudget']
+                            or target_goal['status']!='active'):
+                        reason=receipt.get('continuation_stop_reason') or stop_reason or ('admissible_time_unavailable' if not bounds else
+                            'deadline_safety_stop' if bounds['upper']+activation['deadline_margin_seconds']>=receipt['continuation_deadline']
+                            else 'continuation_budget_or_status_stop')
+                        receipt.update(state='pausing_continuation',reason=reason,continuation_stop_reason=reason)
+                        def request(method,params):
+                            return native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                                method,params,profile['timeout'])
+                        if target_goal['status']=='paused':
+                            paused=target_goal
+                        else:
+                            if receipt.get('uncertain_effect')=='thread/goal/pause_successor':
+                                receipt['monitor_error']='successor_pause_unobserved';save(path,receipt);continue
+                            receipt['uncertain_effect']='thread/goal/pause_successor';save(path,receipt)
+                            paused=request('thread/goal/set',dict(threadId=target,status='paused',origin='automatic'))['goal']
+                        if (paused.get('status')!='paused' or any(paused.get(k)!=target_goal.get(k)
+                                for k in ('threadId','objective','tokenBudget','createdAt'))):
+                            raise ValueError('successor pause unverified')
+                        receipt['successor_goal']=paused
+                        if receipt.get('uncertain_effect')=='thread/goal/pause_successor':receipt.pop('uncertain_effect',None)
+                        save(path,receipt)
+                        thread=request('thread/read',dict(threadId=target,includeTurns=True))['thread']
+                        turns=[t for t in thread['turns'] if t['status']=='inProgress']
+                        if thread['id']!=target or len(turns)>1:raise ValueError('active turn ambiguous')
+                        if turns:
+                            if receipt.get('uncertain_effect')=='turn/interrupt':
+                                receipt['monitor_error']='turn_interrupt_unobserved';save(path,receipt);continue
+                            receipt.update(uncertain_effect='turn/interrupt',stop_turn_id=turns[0]['id']);save(path,receipt)
+                            request('turn/interrupt',dict(threadId=target,turnId=turns[0]['id']))
+                            final=request('thread/read',dict(threadId=target,includeTurns=True))['thread']
+                            if any(t['status']=='inProgress' for t in final['turns']):raise ValueError('turn stop unverified')
+                        receipt.pop('uncertain_effect',None)
+                        receipt.pop('monitor_error',None)
+                        receipt['state']='expired' if reason=='deadline_safety_stop' else 'blocked'
+                        owner['state']='stopped';save(directory/('owner-'+key+'.json'),owner)
+                    save(path,receipt)
+                    continue
+                if not before_handoff_effect(path,receipt):continue
+                if (supervision and activation.get('approved') is True
+                        and type(activation.get('max_poll_seconds')) in (int,float)
+                        and 0<supervision['interval']<=activation['max_poll_seconds']<=5
+                        and type(activation.get('deadline_margin_seconds')) in (int,float)
+                        and activation['deadline_margin_seconds']>=activation['max_poll_seconds']+4*profile['timeout']):
+                    from .native_clock import snapshot
+                    from .process import process_identity
+                    import os
+                    bounds=snapshot().get('utc')
+                    if not bounds or bounds['upper']+activation['deadline_margin_seconds']>=receipt['continuation_deadline']:continue
+                    identity=process_identity(os.getpid())
+                    if not identity:continue
+                    receipt.update(state='activating',uncertain_effect='thread/goal/activate_successor',
+                        deadline_fence=dict(pid=os.getpid(),identity=identity,utc=bounds,
+                            interval=supervision['interval'],deadline=receipt['continuation_deadline']))
+                    save(path,receipt)
+                    active=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                        'thread/goal/set',dict(threadId=target,status='active',origin='automatic'),profile['timeout'])['goal']
+                    if active.get('status')!='active':raise ValueError('goal activation unverified')
+                    receipt.update(state='active',reason='continuation_active',successor_goal=active)
+                    receipt.pop('uncertain_effect',None)
+                    owner['state']='active';save(directory/('owner-'+key+'.json'),owner)
+                save(path,receipt)
+            except Exception as exc:
+                # Failed observation cannot certify enforcement or authorize activation.
+                if isinstance(receipt,dict) and receipt.get('intent',{}).get('operation')=='handoff':
+                    receipt['monitor_error']=type(exc).__name__;save(path,receipt)
+                continue

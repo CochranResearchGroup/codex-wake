@@ -304,8 +304,11 @@ def poll_once(
     signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
     receipt_authority_path: Path | None = None,
     time_provider=None,
+    lifecycle_supervision=None,
 ) -> PollResult:
     current = now or utc_now()
+    from .agent_handoff import poll_handoffs
+    poll_handoffs(root,supervision=lifecycle_supervision)
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
     if signal_runtime is None:
         journal = signal_journal_path(root)
@@ -605,25 +608,30 @@ def run(argv: list[str] | None = None) -> int:
     if args.interval <= 0:
         raise WakeError("--interval must be greater than zero")
     signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
-    while True:
-        result = poll_once(
-            root,
-            dispatch=not args.no_dispatch,
-            ack_timeout_override=args.ack_timeout,
-            signal_reconcile_reason=signal_reconcile_reason,
-            receipt_authority_path=args.a2a_receipt_authority,
-        )
-        signal_reconcile_reason = "periodic"
-        write_monitor_health(
-            wake_root=root,
-            repo_root=Path.cwd(),
-            source="codex-waked",
-            mode="loop",
-            poll_result=poll_result_dict(result),
-        )
-        if poll_result_has_activity(result):
-            print(format_poll_result(result), flush=True)
-        time.sleep(args.interval)
+    try:
+        while True:
+            result = poll_once(
+                root,
+                dispatch=not args.no_dispatch,
+                ack_timeout_override=args.ack_timeout,
+                signal_reconcile_reason=signal_reconcile_reason,
+                receipt_authority_path=args.a2a_receipt_authority,
+                lifecycle_supervision={'interval':args.interval} if args.no_dispatch else None,
+            )
+            signal_reconcile_reason = "periodic"
+            write_monitor_health(
+                wake_root=root,
+                repo_root=Path.cwd(),
+                source="codex-waked",
+                mode="loop",
+                poll_result=poll_result_dict(result),
+            )
+            if poll_result_has_activity(result):
+                print(format_poll_result(result), flush=True)
+            time.sleep(args.interval)
+    finally:
+        from .agent_handoff import poll_handoffs
+        poll_handoffs(root,stop_reason="monitor_stopped")
 
 
 def main(argv: list[str] | None = None) -> int:
