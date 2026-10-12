@@ -146,8 +146,11 @@ class AgentSpawnTests(unittest.TestCase):
             with self.subTest(guard=guard):
                 self.spawn_scenario(recipient_guard=guard)
 
+    def test_shared_profile_resource_checks_do_not_override_spawn_launch(self):
+        self.spawn_scenario(resource_profile=True)
+
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -217,6 +220,9 @@ class AgentSpawnTests(unittest.TestCase):
                 'cwd': tmp, 'app_server': 'unix://' + str(endpoint), 'codex_path': str(client_script),
                 'tmux_session': 'fixture', 'timeout': 1,
             }
+            if resource_profile:
+                profile['resources']={'version':{'kind':'mcp','server':'unused','tool':'version',
+                    'arguments':{},'read_only':True,'expected_content':[{'type':'text','text':'v2'}]}}
             if isolated_profile:
                 (root / 'codex-home').mkdir()
                 profile.update(tmux_socket=str(root / 'tmux.sock'), codex_home=str(root / 'codex-home'))

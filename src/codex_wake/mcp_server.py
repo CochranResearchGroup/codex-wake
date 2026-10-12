@@ -27,6 +27,7 @@ SPECS = {
     "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources in the exact source thread. Requires its preserved checkpoint; unsafe stop or stale resource proof holds without fresh-thread or shared-daemon fallback.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+         "rollback": {"type": "boolean"},
          "resources": {"type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": True,
                        "items": MESSAGE}, "expires_at": TEXT},
         ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "resources", "expires_at"], False),

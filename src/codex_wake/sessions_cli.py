@@ -28,6 +28,7 @@ def add_sessions_parser(subparsers):
         refresh.add_argument('--' + option, required=True)
     refresh.add_argument('--resource', action='append', required=True)
     refresh.add_argument('--caller-thread-id')
+    refresh.add_argument('--rollback', action='store_true', help='reattach the original conversation within the same fixed intent')
     refresh.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
         command = commands.add_parser(verb)

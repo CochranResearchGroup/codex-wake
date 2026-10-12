@@ -27,7 +27,8 @@ def spawn_command(args, root):
             raise WakeError('host caller grant does not authorize this launch profile')
     required = {'cwd', 'app_server', 'codex_path', 'tmux_session', 'timeout'}
     strings = (required - {'timeout'}) | (set(profile) & {'tmux_socket', 'codex_home'})
-    if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home'}
+    if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home', 'resources'}
+            or ('resources' in profile and not isinstance(profile['resources'], dict))
             or any(not isinstance(profile.get(k), str) or not profile[k]
                    or '\x00' in profile[k] for k in strings)
             or not Path(profile['cwd']).is_dir()):
@@ -276,6 +277,8 @@ def before_effect(path, receipt):
 def save(path, receipt):
     event = dict(state=receipt['state'], effect=receipt.get('uncertain_effect'),
                  reason=receipt.get('reason'))
+    if receipt.get('rollback'):
+        event['rollback_state'] = receipt['rollback']['state']
     history = receipt.setdefault('history', [])
     if not history or history[-1] != event:
         history.append(event)

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "state": "selected_not_executed",
+  "router": "github-ask-matt",
+  "router_path": "/home/ecochran76/.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-ask-matt/SKILL.md",
+  "repository": {
+    "id": "1242753508",
+    "name": "CochranResearchGroup/codex-wake",
+    "default_branch": "main"
+  },
+  "source": {
+    "url": "https://github.com/CochranResearchGroup/codex-wake/blob/f0ea6ce/docs/dev/plans/0159-2026-10-12-agent-handoff.md",
+    "blob_sha": "6e3bcc9405501777f2a280afd2c83665de710cf8",
+    "ref": "f0ea6ce"
+  },
+  "desired_outcome": "restart-safe continuation packet and exact successor preflight",
+  "selected_workflow": "github-handoff",
+  "selected_path": "/home/ecochran76/.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md",
+  "validation_contract": "successor reconciles canonical files, exact repo/ref/runtime and executes checkpoint validation commands in the write-capable environment; actual results required",
+  "health_claim": false,
+  "authority_renewal": false
+}

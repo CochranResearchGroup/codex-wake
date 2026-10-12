@@ -5588,3 +5588,13 @@ private-home process matches, deniedentries explicit. See checkpoint04 and
 installed-refresh-01.json. Nonnullgoal/selectedskill/rollback,0159, consolidated
 review and final integration/release remain pending. Full goal ACTIVE,784954tokens/
 5528s readback, originalcaps retained. Memory unavailable; existing receipt retained.
+
+## Turn 274 | 2026-10-12 UTC
+
+Plan0156 cycles30–32 qualify shared spawn/refresh profile compatibility and
+explicit same-conversation rollback reuse/proven-absence reattachment at public
+CLI seams.35 focused tests pass11.352s. Actual GitHub ask-Matt selects handoff;
+successor preflight remains unexecuted. Issues250/251 owner assigned/read back,
+both OPEN. Installed nonnull-goal/rollback,0159, review/integration/release remain
+pending. See checkpoint05. Root ACTIVE881825tokens8105s, original caps unchanged.
+Memory unavailable; existing non-write receipt retained.

@@ -56,7 +56,7 @@ assignment. The composer adapter recognizes the observed Codex0.162.1 ANSI
 placeholder at its cursor; a changed layout holds rather than clearing input.
 Controller restart rechecks readiness before admitting an unqueued assignment.
 These observations do not atomically exclude concurrent human input; keep the
-owned target untouched during the transition. Refresh remains unqualified.
+owned target untouched during the transition.
 
 When an external response is unknown, retain its receipt. Known tab or native
 queue/turn evidence can reconcile the original effect. An unknown thread/start
@@ -78,7 +78,9 @@ roots, launch commands, endpoints or credential locations. Missing host scope
 or caller grant holds the operation.
 
 The source candidate also exposes `sessions refresh` / `wake_sessions_refresh`.
-Installed refresh qualification remains pending. Supply the exact `thread_id`,
+Installed candidate evidence proves the same-thread transition and stale-MCP
+hold with no goal; nonnull-goal and full readiness acceptance remain pending.
+Supply the exact `thread_id`,
 stable `intent`, workspace-contained `checkpoint`, its `checkpoint_sha256`,
 fixed `expires_at` and named `resources` (CLI repeats `--resource`). The checkpoint
 JSON must identify `source_thread_id`, `objective`, `authority`, `next_packet` and
@@ -99,6 +101,15 @@ has a unique refresh suffix for lost-response reconciliation. Repeat the exact
 intent to observe/reconcile; do not replace an uncertain stop or launch. Source
 expiry guards prevent a late replacement and never renew the deadline. Draft,
 active/unknown work and pending obligations hold without a force option.
+
+Explicit `--rollback` (MCP `rollback: true`) observes the original conversation.
+It reuses a uniquely observed attachment with matching goal evidence. It may
+reattach only after complete absence of the owned replacement tab and observed
+exit of the original OS generation. Pending or ambiguous tabs hold rollback;
+expiry still prevents a new attachment. Rollback adds a separate receipt result,
+preserves resource failures and does not create a fresh thread or submit work.
+The current rollback comparison requires the saved goal to match exactly;
+changing accounting counters can hold it. Live nonnull-goal proof is pending.
 
 Fresh-agent handoff remains Plan0159 work. TUI restart, fresh context and a file
 read alone prove neither MCP refresh nor renewed goal allowance.

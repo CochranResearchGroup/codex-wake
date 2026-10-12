@@ -76,13 +76,60 @@ def refresh_command(args, root):
             receipt = dict(version=1, intent_key=args.intent, fingerprint=fingerprint,
                            intent=intent, thread_id=args.thread_id, state='prepared')
             save(path, receipt)
-        if receipt['state'] == 'prepared' and before_effect(path, receipt):
+        if args.rollback:
+            rollback(path, receipt, profile)
+        elif receipt['state'] == 'prepared' and before_effect(path, receipt):
             preflight(path, receipt, profile)
-        if receipt['state'] in ('stopping', 'starting', 'awaiting_preflight', 'uncertain'):
+        if not args.rollback and receipt['state'] in ('stopping', 'starting', 'awaiting_preflight', 'uncertain'):
             advance_refresh(path, receipt, profile)
         from .sessions_cli import emit
         emit(receipt, args.as_json)
-        return 0 if receipt['state'] == 'completed' else 5
+        outcome = receipt.get('rollback', {}).get('state') if args.rollback else receipt['state']
+        return 0 if outcome == 'completed' else 5
+
+
+def rollback(path, receipt, profile):
+    from .sessions import observe, revalidate_attachment
+    from .app_server import resolve_codex_cmd
+    from .native_protocol import native_request
+    receipt['rollback'] = dict(state='awaiting_preflight', thread_id=receipt['thread_id'])
+    snapshot = observe(endpoint=profile['app_server'], socket_path=profile.get('tmux_socket'),
+                       timeout=profile['timeout'])
+    rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']]
+    panes = [p for r in rows for p in r['attachments']]
+    pending_tabs = [p for r in snapshot['sessions'] for p in r['attachments']
+                    if p['session_name'] == profile['tmux_session']
+                    and p['window_name'] == receipt.get('tab_name')]
+    if (snapshot['complete'] and len(rows) == 1 and not panes and not pending_tabs
+            and receipt.get('old_generation_exit_observed')):
+        # Explicit rollback after complete absence proof restores only the
+        # original conversation. An unobserved/pending tab never permits this.
+        if not before_effect(path, receipt):
+            receipt['rollback']['state'] = receipt['state']
+            save(path, receipt)
+            return
+        receipt.pop('uncertain_effect', None)
+        receipt['state'] = 'stopping'
+        receipt['rollback']['state'] = 'starting'
+        save(path, receipt)
+        advance_refresh(path, receipt, profile)
+        snapshot = observe(endpoint=profile['app_server'], socket_path=profile.get('tmux_socket'),
+                           timeout=profile['timeout'])
+        rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']]
+        panes = [p for r in rows for p in r['attachments']]
+    if not snapshot['complete'] or len(rows) != 1 or len(panes) != 1 or not revalidate_attachment(panes[0]):
+        receipt['rollback'].update(state='blocked', reason='original_attachment_not_uniquely_observed')
+        save(path, receipt)
+        return
+    goal = native_request(profile['app_server'], resolve_codex_cmd(profile['codex_path'], required=True),
+                          'thread/goal/get', {'threadId': receipt['thread_id']}, profile['timeout'])['goal']
+    baseline = receipt.get('goal_after', receipt.get('goal_before'))
+    if goal != baseline or 'goal_before' not in receipt:
+        receipt['rollback'].update(state='blocked', reason='original_goal_continuity_unproven', goal=goal)
+    else:
+        receipt['rollback'].update(state='completed', action='reused_original_conversation',
+                                   attachment=panes[0], goal=goal)
+    save(path, receipt)
 
 
 def preflight(path, receipt, profile):

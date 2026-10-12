@@ -98,7 +98,13 @@ class AgentRefreshTests(unittest.TestCase):
     def test_actual_updated_mcp_behavior_establishes_requested_readiness(self):
         self.refresh_scenario(draft=False,mcp_ready=True)
 
-    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False):
+    def test_rollback_reuses_original_conversation_without_goal_or_client_duplication(self):
+        self.refresh_scenario(draft=False,stale_mcp=True,rollback_requested=True)
+
+    def test_rollback_reattaches_after_proven_owned_tab_absence(self):
+        self.refresh_scenario(draft=False,loss='new-window',rollback_absence=True)
+
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -144,6 +150,8 @@ class AgentRefreshTests(unittest.TestCase):
                     ws.send(json.dumps(dict(id=request['id'],result=value)))
             def command(argv, **kwargs):
                 nonlocal client
+                if 'list-panes' in argv and tab.get('absent'):
+                    return subprocess.CompletedProcess(argv,0,'','')
                 if 'list-panes' in argv:
                     value = (('%158\n%159' if recipient_guard == 'split' else '%158') if '-a' not in argv else '\t'.join([
                         '$1','owned','@158','1',tab['name'],'%158','0','owned-worker',tmp,tty]))
@@ -156,10 +164,10 @@ class AgentRefreshTests(unittest.TestCase):
                     if loss == 'kill-pane':raise subprocess.TimeoutExpired(argv,1)
                 elif 'new-window' in argv:
                     effects.append(argv)
-                    tab['name']=argv[argv.index('-n')+1]
+                    tab['name']=argv[argv.index('-n')+1];tab['absent']=False
                     client=subprocess.Popen(['sh','-c','exec '+argv[-1]],stdin=slave,stdout=subprocess.PIPE)
                     self.assertEqual(client.stdout.readline(),b'ready\n');value='@158\t%158'
-                    if loss == 'new-window':raise subprocess.TimeoutExpired(argv,1)
+                    if loss == 'new-window' and sum('new-window' in x for x in effects)==1:raise subprocess.TimeoutExpired(argv,1)
                 else:
                     effects.append(argv); value = ''
                 return subprocess.CompletedProcess(argv,0,value,'')
@@ -205,6 +213,17 @@ class AgentRefreshTests(unittest.TestCase):
                                 held=json.loads(first.getvalue())
                                 self.assertEqual(held['state'],'uncertain')
                                 self.assertEqual(held['uncertain_effect'],'tmux/'+loss)
+                                if rollback_absence:
+                                    client.terminate();client.wait(timeout=2);client.stdout.close();tab['absent']=True
+                                    restored=StringIO()
+                                    with redirect_stdout(restored):self.assertEqual(run([*argv,'--rollback']),0,restored.getvalue())
+                                    receipt=json.loads(restored.getvalue())
+                                    self.assertEqual(receipt['rollback']['state'],'completed')
+                                    self.assertEqual(receipt['rollback']['thread_id'],thread_id)
+                                    self.assertEqual(sum('new-window' in x for x in effects),2)
+                                    self.assertEqual(sum('kill-pane' in x for x in effects),1)
+                                    self.assertIsNone(client.poll())
+                                    return
                             output=StringIO()
                             with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change else 0,output.getvalue())
                             receipt=json.loads(output.getvalue())
@@ -236,6 +255,14 @@ class AgentRefreshTests(unittest.TestCase):
                                     [{'type':'text','text':'old-version'}])
                                 self.assertEqual(methods.count('mcpServer/tool/call'),1)
                                 self.assertEqual(receipt['goal_after'],goal)
+                                if rollback_requested:
+                                    count=len(effects);rolled=StringIO()
+                                    with redirect_stdout(rolled):self.assertEqual(run([*argv,'--rollback']),0)
+                                    restored=json.loads(rolled.getvalue())
+                                    self.assertEqual(restored['rollback']['state'],'completed')
+                                    self.assertEqual(restored['rollback']['thread_id'],thread_id)
+                                    self.assertEqual(len(effects),count)
+                                    self.assertEqual(restored['rollback']['goal'],goal)
                             else:
                                 self.assertEqual(receipt['state'],'completed')
                                 self.assertEqual(sum('new-window' in x for x in effects),1)
