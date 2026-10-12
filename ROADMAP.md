@@ -1169,3 +1169,21 @@ explicitly authorized third-party handoffs. Bundled and two installed skills
 include the [response standard](skills/codex-wake/references/a2a-responses.md).
 Existing MCP/CLI/worker contracts unchanged. Eight-scenario review and installed
 parity: docs/dev/evidence/plan0154/review.md. No live model-compliance claim.
+
+## P156 | Agent lifecycle delivery
+
+State: PLANNED
+
+[Plan0156](docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md) /
+[issue248](https://github.com/CochranResearchGroup/codex-wake/issues/248)
+governs spawn, same-thread refresh and fresh-agent handoff. Plan0155 probe is
+CLOSED; findings show resumed TUI retains old MCP, while fresh conversation loaded
+new MCP and read the outgoing handoff. Product controller remains unimplemented.
+
+Ready frontier: [spawn249](https://github.com/CochranResearchGroup/codex-wake/issues/249)
+(Plan0157). Then [refresh250](https://github.com/CochranResearchGroup/codex-wake/issues/250)
+(Plan0158), then [handoff251](https://github.com/CochranResearchGroup/codex-wake/issues/251)
+(Plan0159). Both latter tickets are genuinely blocked by249, not by each other;
+primary serializes shared integration. No automatic goal/resource allowance reset.
+Prototype preserved on prototype/agent-lifecycle at5e1b0ac; no production source
+or runtime rollout in this design packet.

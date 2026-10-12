@@ -1,0 +1,37 @@
+{
+  "codex_version": "0.162.1",
+  "wake_version": "0.13.1",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "low",
+  "model_turns": 3,
+  "original_thread": "01a13088-6678-7760-a753-962be554f61a",
+  "successor_thread": "01a1308c-065b-7ae2-9e93-98666efdb1f0",
+  "initial_client_pid": 23375,
+  "resumed_client_pid": 35694,
+  "initial_skill_marker": "v1",
+  "resumed_skill_file_marker": "v2",
+  "resumed_mcp_tool": "probe_v1",
+  "fresh_mcp_tool": "probe_v2",
+  "fresh_mcp_marker": "MCP_MARKER_v2",
+  "native_goal_changes": 0,
+  "ordinary_close_forced": false,
+  "cleanup": {
+    "owned_tmux_session_absent": true,
+    "owned_server_absent": true,
+    "old_client_absent": true,
+    "new_client_absent": true,
+    "mcp_v1_absent": true,
+    "mcp_v2_absent": true
+  },
+  "remaining_private_processes": [],
+  "sources": {
+    "setup.json": "f6ab8badd8576b5925995f2e4867f01f94f04168c08ed681d6121c315536c27c",
+    "refreshed-readback.json": "53385be8426cfdddf8feb14d97f95af33d5f20e2f0344b005fe0394112b25c44",
+    "successor-terminal.json": "cf9201840364e4c70d575e2c89f264c4e731303ab7e57d228bb8ab2b497cb7e1",
+    "mcp-events.jsonl": "8e0cfccadf60e3cf04dd050441184d276cd24db4e83b2339a87c0d1c6a376a03",
+    "ordinary-close.json": "6e830e840e81ca22bb733fbfa27c0eb809b6fecc34218fc7f6d9b3e127966ece",
+    "cleanup-readback.json": "48ff6e7426d11cb79ac068c3b2c064394265151063ee38a432aeb78d28df6aee",
+    "private-process-census.json": "248afd97220ee28ab828cf639eef0e36889f6bbccb13dfab15fa5489fb249d4c",
+    "workspace/handoff.md": "3f62bee63e8c27171c7ed22bc6998ee81791bbf7da71ed597e75f4c54f15a6bc"
+  }
+}

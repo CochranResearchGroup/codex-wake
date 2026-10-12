@@ -46,3 +46,25 @@ prohibit its processing or replay. It does not infer missing outcomes.
 **Recovery hold release**:
 A separate operator action after committed disposition. It leaves the bus paused
 and requires fresh grants before new work; original history stays fenced.
+
+**Agent spawn**:
+Starting a separate agent conversation with an explicit assignment and scope.
+
+**Agent refresh**:
+Reopening the same conversation to refresh selected runtime resources while
+preserving its identity and unfinished work.
+
+**Agent handoff**:
+Passing an unfinished objective and its checkpoint to a different conversation,
+without implicitly transferring identity, permissions or resource allowance.
+
+**Handoff checkpoint**:
+The outgoing agent's durable account of completed work, remaining work, evidence,
+authority, pending obligations and resource allowance for its successor to verify.
+
+**Lifecycle controller**:
+The external owner that observes and coordinates an agent's lifecycle transition.
+
+**Continuation allowance**:
+The explicitly authorized resources remaining for work on the same objective.
+Fresh context does not replenish that allowance.
