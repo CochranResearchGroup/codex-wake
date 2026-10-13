@@ -45,6 +45,11 @@ def spawn_command(args, root):
     expiry = parse_timestamp(args.expires_at).timestamp()
     intent = dict(operation='spawn', profile=args.profile, launch=profile, name=args.name,
                   task=args.task, expires_at=args.expires_at, source_thread_id=args.caller_thread_id)
+    replacement=getattr(args,'replacement',None)
+    if replacement is not None:
+        if not isinstance(replacement,dict) or not replacement.get('source_thread_id') or not isinstance(replacement.get('attachment'),dict):
+            raise WakeError('same-tab spawn requires an exact source attachment')
+        intent['replacement']=replacement
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     journal = Path(root) / 'lifecycle'
     key = hashlib.sha256(args.intent.encode()).hexdigest()
@@ -119,7 +124,7 @@ def advance_spawn(path, receipt, profile):
     def request(method, params):
         return native_request(runtime.app_server, runtime.codex, method, params, runtime.timeout)
     try:
-        if receipt.get('uncertain_effect') == 'tmux/new-window':
+        if receipt.get('uncertain_effect') in ('tmux/new-window','tmux/respawn-pane'):
             snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket, timeout=runtime.timeout)
             rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']
                     and r['name'] == receipt['thread_name']]
@@ -130,6 +135,11 @@ def advance_spawn(path, receipt, profile):
                 save(path, receipt)
                 return
             pane = panes[0]
+            replacement=receipt['intent'].get('replacement')
+            if replacement and (pane['pane_id']!=replacement['attachment']['pane_id']
+                    or pane['window_id']!=replacement['attachment']['window_id']
+                    or pane['client_pid']==replacement['attachment']['client_pid']):
+                receipt.update(state='uncertain',reason='same_tab_generation_not_observed');save(path,receipt);return
             if not revalidate_attachment(pane):
                 receipt.update(state='uncertain', reason='tab_generation_unavailable')
                 save(path, receipt)
@@ -160,7 +170,16 @@ def advance_spawn(path, receipt, profile):
             # Set an exact correlation name before the non-idempotent tab effect.
             name = receipt['intent']['name'] + '-' + receipt['fingerprint'][:12]
             request('thread/name/set', {'threadId': receipt['thread_id'], 'name': name})
-            receipt.update(state='starting', uncertain_effect='tmux/new-window', thread_name=name)
+            replacement=receipt['intent'].get('replacement')
+            if replacement:
+                from .agent_handoff import source_guard
+                guard=dict(thread_id=replacement['source_thread_id'],reason='successor_preflight_not_verified')
+                source_guard(guard,profile,path.parent.parent)
+                source_goal=request('thread/goal/get',{'threadId':replacement['source_thread_id']})['goal']
+                if (guard.get('source_attachment')!=replacement['attachment'] or not source_goal
+                        or source_goal['status']!='paused'):
+                    receipt.update(state='blocked',reason='same_tab_source_changed');save(path,receipt);return
+            receipt.update(state='starting', uncertain_effect='tmux/respawn-pane' if replacement else 'tmux/new-window', thread_name=name)
             save(path, receipt)
             removed = ['CODEX_THREAD_ID', 'TMUX_PANE', 'CODEX_WAKE_A2A_CAPABILITY',
                        'CODEX_WAKE_A2A_BUS_ROOT', 'CODEX_WAKE_SENDER_RECEIPT_AUTHORITY']
@@ -169,10 +188,15 @@ def advance_spawn(path, receipt, profile):
                                   runtime.codex, 'resume', '--no-alt-screen', '-C',
                                   str(Path(runtime.cwd).resolve()), receipt['thread_id'],
                                   '--remote', runtime.app_server])
-            created = tmux_command(runtime, 'new-window', '-d', '-P', '-F',
-                                   '#{window_id}\t#{pane_id}', '-t', runtime.tmux_session + ':',
-                                   '-n', receipt['intent']['name'], '-c', runtime.cwd, command)
-            window, pane = created.split('\t')
+            if replacement:
+                old=replacement['attachment']
+                tmux_command(runtime,'respawn-pane','-k','-t',old['pane_id'],'-c',runtime.cwd,command)
+                window,pane=old['window_id'],old['pane_id']
+            else:
+                created = tmux_command(runtime, 'new-window', '-d', '-P', '-F',
+                                       '#{window_id}\t#{pane_id}', '-t', runtime.tmux_session + ':',
+                                       '-n', receipt['intent']['name'], '-c', runtime.cwd, command)
+                window, pane = created.split('\t')
             receipt.update(window_id=window, pane_id=pane, state='awaiting_preflight')
             receipt.pop('uncertain_effect', None)
             save(path, receipt)

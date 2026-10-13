@@ -229,10 +229,34 @@ def source_guard(receipt,profile,root):
     rows=[r for r in snapshot['sessions'] if r['thread_id']==receipt['thread_id']]
     if (not snapshot['complete'] or len(rows)!=1 or rows[0]['runtime_state']!='idle'
             or rows[0]['cwd']!=str(Path(profile['cwd']).resolve()) or rows[0]['active_flags']
-            or rows[0]['can_accept_direct_input'] is not True or len(rows[0]['attachments'])!=1):
+            or rows[0]['can_accept_direct_input'] is not True):
         receipt['reason']='source_client_not_uniquely_ready'
         return
+    if not rows[0]['attachments'] and receipt.get('intent',{}).get('mode')=='same-tab' and receipt.get('successor_thread_id'):
+        old=receipt['source_attachment']
+        targets=[r for r in snapshot['sessions'] if r['thread_id']==receipt['successor_thread_id']]
+        panes=[p for r in targets for p in r['attachments']]
+        if (len(targets)!=1 or len(panes)!=1 or panes[0]['pane_id']!=old['pane_id']
+                or panes[0]['window_id']!=old['window_id'] or panes[0]['session_name']!=profile['tmux_session']
+                or panes[0]['client_pid']==old['client_pid'] or not revalidate_attachment(panes[0])):
+            receipt['reason']='same_tab_successor_not_uniquely_ready';return
+        try:
+            fields=Path('/proc',str(old['client_pid']),'stat').read_text().rsplit(')',1)[1].split()
+            gone=fields[0]=='Z' or int(fields[19])!=old['client_start_time_ticks']
+        except FileNotFoundError:gone=True
+        except (PermissionError,ValueError,IndexError):gone=False
+        work=pending_thread_work(rows[0],root);receipt['pending_work']=work
+        if not gone:receipt['reason']='same_tab_source_exit_not_observed'
+        elif work['pending'] or work['messages']:receipt['reason']='pending_thread_work'
+        else:receipt['source_detached']=True
+        return
+    if len(rows[0]['attachments'])!=1:
+        receipt['reason']='source_client_not_uniquely_ready';return
     attachment=rows[0]['attachments'][0]
+    old=receipt.get('source_attachment')
+    if old and any(attachment.get(k)!=old.get(k) for k in
+                   ('client_pid','client_start_time_ticks','pane_id','window_id','session_name')):
+        receipt['reason']='source_attachment_generation_changed';return
     if attachment['session_name']!=profile['tmux_session'] or not revalidate_attachment(attachment):
         receipt['reason']='source_client_not_uniquely_ready'
         return
@@ -276,7 +300,7 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             or preflight['token_allowance']>receipt['source_remaining_tokens']):
         receipt.update(state='blocked',reason='preflight_allowance_insufficient')
         return
-    if args.mode!='new-tab':
+    if args.mode not in ('new-tab','same-tab'):
         receipt.update(state='blocked',reason='same_tab_transition_not_implemented')
         return
     key=hashlib.sha256(receipt['thread_id'].encode()).hexdigest()
@@ -353,6 +377,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 intent='handoff-preflight:'+receipt['fingerprint'],name='handoff-'+receipt['fingerprint'][:12],
                 task=receipt['preflight_task'],expires_at=datetime.fromtimestamp(receipt['continuation_deadline'],UTC).isoformat(),
                 caller_thread_id=args.caller_thread_id,as_json=True)
+            if args.mode=='same-tab':
+                child.replacement=dict(source_thread_id=receipt['thread_id'],attachment=receipt['source_attachment'])
             emitted=StringIO()
             with redirect_stdout(emitted):spawn_command(child,root)
             worker=json.loads(emitted.getvalue());receipt['successor']=worker

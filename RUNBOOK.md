@@ -5767,3 +5767,15 @@ null, census empty. Host route now qualified before successor admission. Known
 resumed external263464 plus provisional250000 reserve for unknown receiver.
 Checkpoint20 retains failure and moves to provider-free same-tab source unit.
 Full acceptance remains OPEN; no new native retry. Memory unavailable.
+
+## Turn 290 | 2026-10-13 UTC
+
+Plan0156 same-tab public CLI RED/GREEN replaces only original verified pane with
+fresh native conversation. New generation/task admission, old source exit and
+paused goal conserved. Lost respawn reply reconciles without duplicate thread,
+pane replacement or assignment; positive recovery qualification only (initial
+bad test assertion corrected, not counted as product RED). Additional actual
+stale-title RED/GREEN keeps original source generation pinned while metadata
+catches up.117 focused tests PASS 23.840s. Checkpoint21 source seam advances; installed same-tab and full program
+acceptance remain open. No provider assignments; next active/missing-source
+rollback. Memory unavailable; retained non-write receipt.
