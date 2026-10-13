@@ -5799,3 +5799,15 @@ verified command before checking complete turn and whole reported resource cap.
 Checkpoint23 freezes one bounded same-tab native packet with full remaining
 program allowance reconciliation. No provider calls or acceptance claim yet.
 Memory unavailable; prior discovery target remains unavailable.
+
+## Turn 293 | 2026-10-13 UTC
+
+Plan0156 native same-tab packet failed preflight spending188386>150000 despite
+successful helper command. Actual trace proves outer tool-output truncation and
+two additional instruction reads. Runner now supplies both output limits and
+prints raw output directly; no native retry or acceptance claim. Fresh read-only
+native source paused/receiver goalnull, completed turns, private serverexit0 and
+empty owned process census. Checkpoint24/installed-handoff04 preserve failure;
+ledger known reset-window499975 plus one unreported receiver. Review SP-01/SP-02
+await public reproduction and adjudication; full integration/release remains open.
+Memory unavailable; prior non-write receipt retained.
