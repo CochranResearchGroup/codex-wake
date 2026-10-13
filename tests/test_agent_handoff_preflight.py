@@ -82,7 +82,25 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_same_tab_stale_title_cannot_replace_pinned_source_generation(self):
         self.scenario(same_tab=True,stale_title=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False):
+    def test_rollback_pauses_owned_active_successor_before_restoring_source(self):
+        self.scenario(rollback=True,active_rollback=True)
+
+    def test_lost_active_rollback_pause_response_reconciles_without_repause(self):
+        self.scenario(rollback=True,active_rollback=True,lost_rollback_pause=True)
+
+    def test_rollback_restores_missing_source_in_the_owned_successor_pane(self):
+        self.scenario(rollback=True,missing_source=True)
+
+    def test_same_tab_rollback_restores_original_paused_conversation(self):
+        self.scenario(same_tab=True,rollback=True)
+
+    def test_lost_source_restore_response_observes_existing_generation_without_respawn(self):
+        self.scenario(rollback=True,missing_source=True,lost_restore=True)
+
+    def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
+        self.scenario(rollback=True,lost_rollback=True,late_usage=True)
+
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -155,7 +173,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             goals[tid].update(status=params['status'],updatedAt=1003)
                             if params['status']=='active' and enforce_deadline:
                                 threads[tid]['turns'].append(dict(id='autonomous-turn',status='inProgress',items=[]))
-                            if (lost_pause and params['status']=='paused') or (lost_activate and params['status']=='active'):ws.close();return
+                            if ((lost_pause or lost_rollback_pause) and params['status']=='paused') or (lost_activate and params['status']=='active'):ws.close();return
                             ws.send(json.dumps(dict(id=req['id'],result={'goal':goals[tid]})))
                             continue
                         goals[tid]=dict(threadId=tid,objective=params['objective'],status=params['status'],
@@ -199,11 +217,14 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 elif 'capture-pane' in argv:out='\n\n\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m\n'
                 elif 'display-message' in argv:out='2,2'
                 elif 'respawn-pane' in argv:
-                    self.assertTrue(same_tab);respawns.append(argv)
-                    self.assertEqual(argv[argv.index('-t')+1],'%159')
-                    clients[0].terminate();clients[0].wait(timeout=2)
-                    launch(['sh','-c','exec '+argv[-1]],'%159','original-worker',target);out=''
-                    if lost_respawn:raise subprocess.TimeoutExpired(argv,1)
+                    self.assertTrue(same_tab or missing_source);respawns.append(argv)
+                    pane=argv[argv.index('-t')+1]
+                    self.assertEqual(pane,'%160' if missing_source else '%159')
+                    old=next(c for c in clients if c.pid==panes[pane]['pid'])
+                    old.terminate();old.wait(timeout=2)
+                    restored=source if source in argv[-1] else target
+                    launch(['sh','-c','exec '+argv[-1]],pane,'original-worker',restored);out=''
+                    if lost_respawn or lost_restore and restored==source:raise subprocess.TimeoutExpired(argv,1)
                 elif 'new-window' in argv:
                     self.assertFalse(same_tab)
                     launch(['sh','-c','exec '+argv[-1]],'%160',argv[argv.index('-n')+1],target);out='@160\t%160'
@@ -261,6 +282,13 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         self.assertEqual(receipt['remaining_tokens'],920 if pause_used is None else 970-pause_used)
                         self.assertEqual(receipt['preflight']['state'],'passed')
                     if rollback:
+                        if missing_source:
+                            clients[0].terminate();clients[0].wait(timeout=2);del panes['%159']
+                        if active_rollback:
+                            goals[target]['status']='active'
+                            threads[target]['turns'].append(dict(id='autonomous-turn',status='inProgress',items=[]))
+                            owner=root/'lifecycle'/ ('owner-'+hashlib.sha256(source.encode()).hexdigest()+'.json')
+                            lease=json.loads(owner.read_text());lease['state']='active';owner.write_text(json.dumps(lease))
                         if owner_conflict:
                             owner=root/'lifecycle'/ ('owner-'+hashlib.sha256(source.encode()).hexdigest()+'.json')
                             lease=json.loads(owner.read_text());lease['intent_fingerprint']='another-transition';owner.write_text(json.dumps(lease))
@@ -270,16 +298,35 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(goals[source]['tokenBudget'],1000)
                             self.assertEqual(len(goal_sets),1)
                             return
-                        for index in range(2):
+                        for index in range(3 if late_usage else 2):
                             out=StringIO()
-                            with redirect_stdout(out):self.assertEqual(run(argv+['--rollback']),5 if lost_rollback and index==0 else 0)
+                            with redirect_stdout(out):self.assertEqual(run(argv+['--rollback']),5 if late_usage and index<2 or (lost_rollback or lost_rollback_pause or lost_restore) and index==0 else 0)
                             restored=json.loads(out.getvalue())['rollback']
-                            self.assertEqual(restored['state'],'uncertain' if lost_rollback and index==0 else 'completed')
+                            if lost_restore and index==0:
+                                self.assertEqual(restored['state'],'uncertain')
+                                self.assertEqual(restored['uncertain_effect'],'tmux/rollback_respawn')
+                                self.assertEqual(goals[source]['tokenBudget'],1000)
+                                continue
+                            if lost_rollback_pause and index==0:
+                                self.assertEqual(restored['state'],'uncertain')
+                                self.assertEqual(restored['uncertain_effect'],'thread/goal/rollback_pause_successor')
+                                self.assertEqual(goals[source]['tokenBudget'],1000)
+                                continue
+                            self.assertEqual(restored['state'],'uncertain' if late_usage and index<2 or lost_rollback and index==0 else 'completed')
                             self.assertEqual(restored['thread_id'],source)
-                            self.assertEqual(restored['remaining_tokens'],920)
-                            self.assertEqual(goals[source]['tokenBudget'],970)
+                            self.assertEqual(restored['remaining_tokens'],910 if late_usage and index>0 else 920)
+                            self.assertEqual(goals[source]['tokenBudget'],960 if late_usage and index>0 else 970)
+                            if late_usage and index==0:
+                                (home/'sessions'/ (target+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':40}})))+'\n')
                             self.assertEqual(goals[source]['tokensUsed'],50)
-                        self.assertEqual(clients[0].poll(),None)
+                        if missing_source or same_tab:
+                            self.assertIsNotNone(clients[0].poll())
+                            self.assertEqual(restored['attachment']['pane_id'],'%159' if same_tab else '%160')
+                            self.assertEqual(len(respawns),2 if same_tab else 1)
+                        else:self.assertEqual(clients[0].poll(),None)
+                        if active_rollback:
+                            self.assertEqual(goals[target]['status'],'paused')
+                            self.assertEqual(interrupts,[dict(threadId=target,turnId='autonomous-turn')])
                     if activate:
                         from codex_wake.daemon import run as daemon_run
                         sleeps=[]
@@ -338,7 +385,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 self.assertEqual(methods.count('thread/start'),1)
                 self.assertEqual(methods.count('thread/queue/add'),1)
                 self.assertEqual(methods.count('thread/queue/start'),1)
-                self.assertEqual(len(goal_sets),(2 if foreign_monitor else 3) if activate else (2 if rollback or pause_used is not None else 1))
+                self.assertEqual(len(goal_sets),(2 if foreign_monitor else 3) if activate else (3 if active_rollback or late_usage else 2 if rollback or pause_used is not None else 1))
                 self.assertEqual(goals[source]['tokensUsed'],50 if pause_used is None else pause_used)
                 self.assertEqual(goals[source]['status'],'paused')
                 self.assertEqual(goals[target]['status'],'active' if foreign_monitor else 'paused')
@@ -346,9 +393,10 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 if same_tab:
                     self.assertIsNotNone(clients[0].poll())
                     self.assertEqual(list(panes),['%159'])
-                    self.assertEqual(len(respawns),1)
+                    self.assertEqual(len(respawns),2 if rollback else 1)
                     self.assertEqual(receipt['successor']['pane_id'],'%159')
                     self.assertIsNone(clients[-1].poll())
+                elif missing_source:self.assertIsNone(clients[-1].poll())
                 else:self.assertTrue(all(c.poll() is None for c in clients))
             finally:
                 server.shutdown();worker.join(2)

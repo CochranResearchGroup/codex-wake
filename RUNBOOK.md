@@ -5779,3 +5779,14 @@ stale-title RED/GREEN keeps original source generation pinned while metadata
 catches up.117 focused tests PASS 23.840s. Checkpoint21 source seam advances; installed same-tab and full program
 acceptance remain open. No provider assignments; next active/missing-source
 rollback. Memory unavailable; retained non-write receipt.
+
+## Turn 291 | 2026-10-13 UTC
+
+Plan0156 public rollback RED/GREEN qualifies active owner pause/interrupt,
+missing-source reattachment in owned settled successor pane and fresh late-usage
+budget debit. Source ownership lock held through effects; continuation fenced,
+identities/counters preserved; unknown responses reconcile once. Positive lost
+pause/respawn and same-tab return qualifications retain original actor/goal.
+123 focused checks PASS28.580s; final lease-pointer guard handoff suite PASS27/
+14.748s. Checkpoint22 before combined native proof; no provider calls or installed
+rollback claim. Full program remains OPEN. Memory unavailable.
