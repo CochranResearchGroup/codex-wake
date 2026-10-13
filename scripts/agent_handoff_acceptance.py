@@ -44,7 +44,7 @@ def observe_native_preflight(request, source, target, guide, cwd):
     if not any(s['path']==str(guide) and s.get('enabled') is True
                for d in skills['data'] for s in d['skills']):
         raise RuntimeError('actual native skill catalog did not load selected guide')
-    resource=request('thread/mcp/tool/call',dict(threadId=target,server='codex-wake',
+    resource=request('mcpServer/tool/call',dict(threadId=target,server='codex-wake',
         tool='wake_sessions_show',arguments={'selector':'thread:'+source}))
     if resource.get('isError',False):raise RuntimeError('native resource tool failed')
     observed=json.loads(resource['content'][0]['text'])
@@ -222,6 +222,9 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         source=state['thread_id'];native,spent=usage(source);receipt['source_usage']=spent;write(root/'native-source.json',native)
         if spent['total_tokens']>=100000:raise RuntimeError('source exceeded fixture suballowance')
         receipt['source_goal']=request('thread/goal/set',dict(threadId=source,objective=objective,tokenBudget=250000-spent['total_tokens'],status='paused',origin='automatic'))['goal']
+        # Qualify the host route on the settled source before buying a successor turn.
+        receipt['host_source_preflight']=observe_native_preflight(request,source,source,guide,workspace)
+        write(root/'state.json',receipt)
         policy=dict(objective=objective,approval=receipt['authority'],token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=spent['total_tokens'],seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat(),preflight=dict(script=str(helper),sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',workflow='github-handoff',required_checks=['canonical_sources','selected_skill','selected_workflow','native_resource','installed_cli','focused_validation'],token_allowance=150000),activation=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=45))
         write(profiles,dict(version=1,profiles={'worker':profile},continuations={source:policy},callers={source:['worker']}))
         checkpoint=workspace/'checkpoint.json';digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
@@ -239,7 +242,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('guide','workflow')):raise RuntimeError('actual selected instruction read unverified')
         receipt['instruction_read_item']=instructions[0]['id']
         mcp_args=dict(profile='worker',intent='handoff-1',thread_id=source,checkpoint='checkpoint.json',checkpoint_sha256=digest,expires_at=expiry,mode='new-tab',caller_thread_id=source)
-        receipt['native_handoff_mcp_prepared']=native_request('unix://'+str(endpoint),str(codex),'thread/mcp/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
+        receipt['native_handoff_mcp_prepared']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
         monitor=subprocess.Popen([str(prefix/'bin/codex-waked'),'--wake-root',str(root/'wake'),'--no-dispatch','--interval','1'],env=env,stdout=mlog,stderr=mlog,start_new_session=True)
         deadline=time.monotonic()+min(180,max(0,end-snapshot()['utc']['upper']-50))
         while time.monotonic()<deadline and monitor.poll() is None:
@@ -266,7 +269,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         if done['status']!='complete' or done['tokenBudget']!=goal['tokenBudget']:
             raise RuntimeError('native continuation completion did not conserve budget')
         receipt.update(state='passed_continuation_axis',successor_usage=spent,continuation_turn_id=matching[0]['id'],final_source_goal=request('thread/goal/get',dict(threadId=source))['goal'],final_successor_goal=done)
-        receipt['native_handoff_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'thread/mcp/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
+        receipt['native_handoff_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
         write(root/'native-continuation.json',native)
     except Exception as exc:receipt.update(state='failed',error=str(exc))
     finally:

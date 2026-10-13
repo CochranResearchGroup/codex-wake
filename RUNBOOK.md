@@ -5755,3 +5755,15 @@ completion stays external after actual native command/active-owner proof.
 Checkpoint19 reframes exhausted socket-dependent method; no sandbox weakening or
 new model calls. Relevant checks PASS33/9.655s; native acceptance remains open.
 Memory unavailable; no reviewed target group.
+
+## Turn 289 | 2026-10-13 UTC
+
+Installed11/a211a62 handoff03 fails before selected preflight on invalid native
+method thread/mcp/tool/call. Source48069 known; receiver usage unreported, never
+zero. Fixed method from installed generated schema, regression RED/GREEN; actual
+mcpServer/tool/call reaches exact source via MCP without model assignment and
+honestly returns incomplete post-cleanup inventory. Goal unchanged/paused, target
+null, census empty. Host route now qualified before successor admission. Known
+resumed external263464 plus provisional250000 reserve for unknown receiver.
+Checkpoint20 retains failure and moves to provider-free same-tab source unit.
+Full acceptance remains OPEN; no new native retry. Memory unavailable.

@@ -58,6 +58,7 @@ class HostNativeObservationTests(unittest.TestCase):
         self.assertEqual(result['source_thread_id'], 'source')
         self.assertEqual(result['successor_thread_id'], 'successor')
         self.assertEqual(result['native_resource']['state'], 'passed')
+        self.assertEqual(calls[-1][0], 'mcpServer/tool/call')
         self.assertEqual(calls[-1][1]['threadId'], 'successor')
         self.assertEqual(calls[-1][1]['arguments'], {'selector': 'thread:source'})
 

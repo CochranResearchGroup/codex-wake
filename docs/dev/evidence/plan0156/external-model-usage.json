@@ -1,6 +1,6 @@
 {
   "state": "observed",
-  "scope": "seven owned native assignments including failed/interrupted preflight; final cumulative usage once per thread",
+  "scope": "nine owned native assignments; final cumulative usage once per thread where reported; one successor unreported",
   "threads": [
     {
       "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02",
@@ -178,13 +178,48 @@
       },
       "total_tokens": 167448,
       "budget_window": "resume-2026-10-13"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+      "thread_id": "01a134e5-14a6-73b3-94c7-b9c14faea04b",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-53-10-01a134e5-14a6-73b3-94c7-b9c14faea04b.jsonl"
+      ],
+      "final_native_usage": null,
+      "total_tokens": null,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "unreported"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+      "thread_id": "01a134e4-d3b0-7500-9db9-b729de509da1",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-52-54-01a134e4-d3b0-7500-9db9-b729de509da1.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 47738,
+        "cached_input_tokens": 24320,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 331,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 48069
+      },
+      "total_tokens": 48069,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "observed"
     }
   ],
-  "cumulative_external_tokens": 542290,
+  "cumulative_external_tokens": 590359,
   "accounting_rule": "Add final cumulative total once per native thread; do not sum successive cumulative events. Count cached tokens conservatively.",
   "resource_windows": {
     "original_external_tokens": 326895,
-    "resume_2026_10_13_external_tokens": 215395,
-    "operator_reset_authority": "explicit counter reset and active Plan0156 goal at1791887366; historical spending retained"
-  }
+    "resume_2026_10_13_external_tokens": 263464,
+    "operator_reset_authority": "explicit counter reset and active Plan0156 goal at1791887366; historical spending retained",
+    "resume_unreported_thread_ids": [
+      "01a134e5-14a6-73b3-94c7-b9c14faea04b"
+    ],
+    "resume_unreported_usage_reserve": 250000,
+    "reserve_status": "provisional conservative planning reserve, not measured usage or verified hard upper bound"
+  },
+  "cumulative_external_tokens_status": "known subtotal; excludes one unreported successor, never a complete total"
 }

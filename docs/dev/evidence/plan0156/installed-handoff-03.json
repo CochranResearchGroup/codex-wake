@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "state": "failed_before_selected_preflight",
+  "source_commit": "a211a62f82c6a5d37ea71bc7fadf5596deb99bc9",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-11",
+  "raw_root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+  "failure": "native lifecycle request rejected: thread/mcp/tool/call",
+  "usage": [
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+      "thread_id": "01a134e5-14a6-73b3-94c7-b9c14faea04b",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-53-10-01a134e5-14a6-73b3-94c7-b9c14faea04b.jsonl"
+      ],
+      "final_native_usage": null,
+      "total_tokens": null,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "unreported"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+      "thread_id": "01a134e4-d3b0-7500-9db9-b729de509da1",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-52-54-01a134e4-d3b0-7500-9db9-b729de509da1.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 47738,
+        "cached_input_tokens": 24320,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 331,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 48069
+      },
+      "total_tokens": 48069,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "observed"
+    }
+  ],
+  "native_readback": {
+    "read_only": true,
+    "model_assignments": 0,
+    "source": {
+      "thread_id": "01a134e4-d3b0-7500-9db9-b729de509da1",
+      "goal": {
+        "threadId": "01a134e4-d3b0-7500-9db9-b729de509da1",
+        "objective": "Operator-approved Plan0156 disposable continuation: execute /home/ecochran76/.local/state/codex-wake/plan0156/installed-11/bin/python /home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/workspace/preflight.py --continue exactly once, record actual result, then mark this goal complete. No other work, actors, resource renewal or goal budget change.",
+        "status": "paused",
+        "tokenBudget": 201931,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1791888789,
+        "updatedAt": 1791888789
+      },
+      "turns": [
+        {
+          "id": "01a134e4-d524-7d63-9951-db7cc49d0222",
+          "status": "completed",
+          "commands": [
+            {
+              "id": "exec-5f3ef714-324c-480d-b5cd-ec6662ff9364",
+              "status": "completed",
+              "exit_code": 0
+            }
+          ]
+        }
+      ]
+    },
+    "successor": {
+      "thread_id": "01a134e5-14a6-73b3-94c7-b9c14faea04b",
+      "goal": null,
+      "turns": []
+    },
+    "server_exit": 0
+  },
+  "provider_free_protocol": {
+    "method": "mcpServer/tool/call",
+    "accepted": true,
+    "is_error": false,
+    "observed_source_id": "01a134e4-d3b0-7500-9db9-b729de509da1",
+    "complete": false,
+    "expected_incomplete_reason": "owned tmux fixture already torn down",
+    "source_goal_unchanged": true,
+    "model_assignments": 0,
+    "server_exit": 0
+  },
+  "cleanup": {
+    "private_readable_environment_matches": [],
+    "denied_environment_pids": [
+      552,
+      585,
+      5221,
+      52706,
+      69885
+    ]
+  },
+  "goal_activation": false,
+  "selected_preflight_passed": false,
+  "usage_uncertainty": "successor has no cumulative report; do not assume zero"
+}
