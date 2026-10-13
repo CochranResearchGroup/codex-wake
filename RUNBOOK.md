@@ -5881,3 +5881,13 @@ actor/ADMIN, basea741010 and draft head8d7763f. No merge/release/auto-close. Che
 records active resource snapshot851732+723655 and pending window clarification;
 no further provider assignments or silently renewed caps. Full objective OPEN.
 Memory unavailable; prior non-write receipt retained.
+
+## Turn 300 | 2026-10-13 UTC
+
+Installed CLI/MCP scope audit confirms documented field surfaces and rejects
+host path/budget/helper/replacement overrides at schema validation before journal
+creation. Actual installed stdio process,18 rejected calls,zero provider assignments;
+first harness over-specific error assertion corrected without product fix claim.
+Checkpoint31/curated schemas. Remaining full native handoff/integration/release
+scope unchanged; counter-window clarification pending, no resource reset inferred.
+Memory unavailable; prior non-write receipt retained.
