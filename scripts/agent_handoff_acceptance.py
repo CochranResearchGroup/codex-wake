@@ -56,7 +56,7 @@ def observe_native_preflight(request, source, target, guide, cwd):
             content_sha256=hashlib.sha256(json.dumps(resource,sort_keys=True).encode()).hexdigest()))
 
 
-def execute(root,prefix,repo,parent_deadline,resume_setup=False):
+def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',rollback=False):
     original=None
     if resume_setup:
         original=json.loads((root/'state.json').read_text())
@@ -77,11 +77,11 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False):
     if not (home/'auth.json').is_symlink():(home/'auth.json').symlink_to(Path.home()/'.codex/auth.json')
     skill=home/'skills/codex-wake';shutil.copytree(repo/'skills/codex-wake',skill,dirs_exist_ok=resume_setup)
     workflow=Path.home()/'.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md'
-    guide=skill/'SKILL.md';helper=workspace/'preflight.py';profiles=root/'profiles.json'
+    guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
     head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
     receipt=dict(state='preparing',root=str(root),prefix=str(prefix),source_commit=head,
         selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
-        token_cap=250000,time_cap_seconds=600,manual_assignment_limit=2)
+        token_cap=250000,time_cap_seconds=600,manual_assignment_limit=2,mode=mode,rollback_requested=rollback)
     env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
     for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):env.pop(k,None)
     socket=root/'tmux.sock';session='owned-handoff';locator=root/'native.sock';server=None;monitor=None;created=False
@@ -135,7 +135,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False):
         subprocess.run(['tmux','-S',str(socket),'new-session','-d','-s',session,'-x','160','-y','40','sleep 700'],env=env,check=True,capture_output=True,timeout=10);created=True
         profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
         write(profiles,dict(version=1,profiles={'worker':profile}))
-        objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once, record actual result, then mark this goal complete. No other work, actors, resource renewal or goal budget change.'
+        objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.'
         constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),prefix=str(prefix),
             native_observations=str(root/'native-observations.json'),continuation_authority=str(root/'continuation-authority.json'))
         helper.write_text('C='+repr(constants)+'\n'+'''import os,sys,json,pathlib,hashlib,subprocess,time
@@ -165,6 +165,7 @@ if sys.argv[1:]==['--continue']:
     checkpoint=json.loads(pathlib.Path('checkpoint.json').read_text())
     assert goal['threadId']==cid and goal['objective']==checkpoint['objective'] and goal['status']=='active'
     pathlib.Path('continued.json').write_text(json.dumps(dict(state='passed',thread_id=cid,checkpoint_sha256=proof['checkpoint_sha256'],version=p.stdout.strip())))
+    print(pathlib.Path('continued.json').read_text())
     print('CONTINUATION_CHECK:'+cid+':'+proof['checkpoint_sha256'])
     raise SystemExit(0)
 source,nonce,digest=sys.argv[1:]
@@ -199,6 +200,8 @@ packet=('Objective: '+body['objective']+'\\nNon-goals: other actors, sends, clai
 pathlib.Path('successor-handoff.md').write_text(packet)
 checks['selected_workflow'].update(packet='successor-handoff.md',packet_sha256=sha('successor-handoff.md'),verified_ref=ref)
 pathlib.Path('preflight.json').write_text(json.dumps(dict(version=1,state='passed',source_thread_id=source,successor_thread_id=cid,checkpoint_sha256=digest,intent_fingerprint=nonce,selected_workflow='github-handoff',checks=checks)))
+print(pathlib.Path('preflight.json').read_text())
+print(packet)
 print('preflight:'+cid+':'+nonce+':'+digest)
 ''')
         ref=subprocess.check_output(['git','-C',str(repo),'ls-remote','--exit-code','origin','refs/heads/feat/agent-lifecycle'],text=True,timeout=15).split()[0]
@@ -228,7 +231,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         policy=dict(objective=objective,approval=receipt['authority'],token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=spent['total_tokens'],seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat(),preflight=dict(script=str(helper),sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',workflow='github-handoff',required_checks=['canonical_sources','selected_skill','selected_workflow','native_resource','installed_cli','focused_validation'],token_allowance=150000),activation=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=45))
         write(profiles,dict(version=1,profiles={'worker':profile},continuations={source:policy},callers={source:['worker']}))
         checkpoint=workspace/'checkpoint.json';digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-        handoff=['sessions','handoff','--profiles',str(profiles),'--profile','worker','--intent','handoff-1','--thread-id',source,'--checkpoint','checkpoint.json','--checkpoint-sha256',digest,'--expires-at',expiry,'--mode','new-tab','--json']
+        handoff=['sessions','handoff','--profiles',str(profiles),'--profile','worker','--intent','handoff-1','--thread-id',source,'--checkpoint','checkpoint.json','--checkpoint-sha256',digest,'--expires-at',expiry,'--mode',mode,'--json']
         deadline=time.monotonic()+240
         def observe_handoff(state):
             receipt['handoff']=state;write(root/'state.json',receipt)
@@ -241,7 +244,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and '--instructions' in i.get('command','') and i.get('exitCode')==0]
         if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('guide','workflow')):raise RuntimeError('actual selected instruction read unverified')
         receipt['instruction_read_item']=instructions[0]['id']
-        mcp_args=dict(profile='worker',intent='handoff-1',thread_id=source,checkpoint='checkpoint.json',checkpoint_sha256=digest,expires_at=expiry,mode='new-tab',caller_thread_id=source)
+        mcp_args=dict(profile='worker',intent='handoff-1',thread_id=source,checkpoint='checkpoint.json',checkpoint_sha256=digest,expires_at=expiry,mode=mode,caller_thread_id=source)
         receipt['native_handoff_mcp_prepared']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
         monitor=subprocess.Popen([str(prefix/'bin/codex-waked'),'--wake-root',str(root/'wake'),'--no-dispatch','--interval','1'],env=env,stdout=mlog,stderr=mlog,start_new_session=True)
         deadline=time.monotonic()+min(180,max(0,end-snapshot()['utc']['upper']-50))
@@ -254,23 +257,57 @@ print('preflight:'+cid+':'+nonce+':'+digest)
             if state['state'] in ('expired','blocked'):raise RuntimeError('continuation held: '+state['reason'])
             time.sleep(1)
         if not (workspace/'continued.json').exists():raise RuntimeError('actual goal continuation command not observed')
-        # Read the exact native turn; a filesystem result alone is insufficient.
+        # Verify real command completion before ending goal dispatch.
         deadline=time.monotonic()+20
         while True:
             native,spent=usage(target)
             matching=[t for t in native['turns'] if any(i.get('type')=='commandExecution' and 'CONTINUATION_CHECK:'+target+':'+digest in (i.get('aggregatedOutput') or '') and i.get('exitCode')==0 for i in t['items'])]
-            if len(matching)==1 and matching[0]['status']=='completed':break
+            executed=[i for t in matching for i in t['items'] if i.get('type')=='commandExecution' and i.get('status')=='completed' and i.get('exitCode')==0 and str(helper) in i.get('command','') and '--continue' in i.get('command','') and 'CONTINUATION_CHECK:'+target+':'+digest in (i.get('aggregatedOutput') or '')]
+            if len(matching)==1 and len(executed)==1:break
             if time.monotonic()>deadline:raise RuntimeError('native continuation completion unverified')
             time.sleep(.5)
         goal=request('thread/goal/get',dict(threadId=target))['goal']
-        if not goal or goal['threadId']!=target or goal['status']!='active' or goal['objective']!=objective:
+        if not goal or goal['status'] not in ('active','complete') or any(goal.get(k)!=state['successor_goal'].get(k) for k in ('threadId','objective','tokenBudget','createdAt')):
             raise RuntimeError('exact active continuation owner not observed before completion')
-        done=request('thread/goal/set',dict(threadId=target,status='complete',origin='automatic'))['goal']
+        done=goal if goal['status']=='complete' else request('thread/goal/set',dict(threadId=target,status='complete',origin='automatic'))['goal']
         if done['status']!='complete' or done['tokenBudget']!=goal['tokenBudget']:
             raise RuntimeError('native continuation completion did not conserve budget')
+        deadline=time.monotonic()+20
+        while True:
+            native,spent=usage(target)
+            final_turn=[t for t in native['turns'] if t['id']==matching[0]['id']]
+            if len(final_turn)==1 and final_turn[0]['status']=='completed':break
+            if time.monotonic()>deadline:raise RuntimeError('native continuation turn completion unverified')
+            time.sleep(.5)
+        if receipt['source_usage']['total_tokens']+spent['total_tokens']>receipt['token_cap']:
+            raise RuntimeError('reported native fixture usage exceeded total cap')
+        final_goal=request('thread/goal/get',dict(threadId=target))['goal']
+        if (not final_goal or final_goal['status']!='complete'
+                or any(final_goal.get(k)!=done.get(k) for k in ('threadId','objective','tokenBudget','createdAt'))
+                or final_goal['tokensUsed']>final_goal['tokenBudget']):
+            raise RuntimeError('final native goal completion/accounting unverified')
+        done=final_goal
         receipt.update(state='passed_continuation_axis',successor_usage=spent,continuation_turn_id=matching[0]['id'],final_source_goal=request('thread/goal/get',dict(threadId=source))['goal'],final_successor_goal=done)
         receipt['native_handoff_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
         write(root/'native-continuation.json',native)
+        if mode=='same-tab':
+            old=receipt['handoff']['source_attachment'];fresh=receipt['handoff']['successor']['attachment']
+            if old['pane_id']!=fresh['pane_id'] or old['window_id']!=fresh['window_id'] or old['client_pid']==fresh['client_pid']:
+                raise RuntimeError('same-tab identity/generation proof failed')
+            receipt['same_tab_identity']=dict(original=old,successor=fresh)
+        if rollback:
+            deadline=time.monotonic()+30
+            while True:
+                code,restored=invoke(handoff+['--rollback']);receipt['rollback']=restored;write(root/'state.json',receipt)
+                if restored.get('rollback',{}).get('state')=='completed':break
+                if time.monotonic()>deadline:raise RuntimeError('installed rollback did not settle')
+                time.sleep(.5)
+            returned=restored['rollback'];before=receipt['source_goal'];after=returned['source_goal_after']
+            if (after['status']!='paused' or any(after.get(k)!=before.get(k) for k in ('threadId','objective','createdAt'))
+                    or any(after[k]<before[k] for k in ('tokensUsed','timeUsedSeconds'))):
+                raise RuntimeError('rollback source identity/counters not conserved')
+            receipt['native_rollback_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=dict(mcp_args,rollback=True)),70)
+            receipt['rollback_source_goal']=request('thread/goal/get',dict(threadId=source))['goal']
     except Exception as exc:receipt.update(state='failed',error=str(exc))
     finally:
         if monitor is not None and monitor.poll() is None:
@@ -306,7 +343,8 @@ print('preflight:'+cid+':'+nonce+':'+digest)
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--execute',action='store_true');p.add_argument('--resume-setup',action='store_true');p.add_argument('--root',type=Path,required=True);p.add_argument('--prefix',type=Path,required=True);p.add_argument('--repo',type=Path,required=True);p.add_argument('--parent-deadline',type=float,required=True)
+    p.add_argument('--mode',choices=['new-tab','same-tab'],default='new-tab');p.add_argument('--rollback',action='store_true')
     args=p.parse_args()
     if not args.execute:p.error('--execute required for two owned assignments and bounded native goal effects')
-    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline,args.resume_setup)
+    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline,args.resume_setup,args.mode,args.rollback)
 if __name__=='__main__':raise SystemExit(main())

@@ -5790,3 +5790,12 @@ pause/respawn and same-tab return qualifications retain original actor/goal.
 123 focused checks PASS28.580s; final lease-pointer guard handoff suite PASS27/
 14.748s. Checkpoint22 before combined native proof; no provider calls or installed
 rollback claim. Full program remains OPEN. Memory unavailable.
+
+## Turn 292 | 2026-10-13 UTC
+
+Plan0156 combined proof runner selects same-tab/rollback, protects approved helper
+outside workspace, prints actual checks/results and stops goal dispatch after
+verified command before checking complete turn and whole reported resource cap.
+Checkpoint23 freezes one bounded same-tab native packet with full remaining
+program allowance reconciliation. No provider calls or acceptance claim yet.
+Memory unavailable; prior discovery target remains unavailable.
