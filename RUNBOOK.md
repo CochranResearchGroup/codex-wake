@@ -5709,3 +5709,16 @@ program incomplete. Root1616438/19657s plus external326895 gives conservative
 1943333 tokens at checkpoint preparation; final tool counters reported separately.
 No new provider assignment, shared install, release, issue closure or final review.
 Memory unavailable; existing checkpoint-01-memory.json non-write receipt retained.
+
+## Turn 285 | 2026-10-13 UTC
+
+Operator reset resource window and resumed full Plan0156 with Matt's process.
+New native goal start1791887366/deadline1791908966; old accounting and expired
+fixtures retained. Diagnosing-bugs actual polling-loop replay reproduces premature
+teardown on admissible_time_unavailable before observing existing task completion.
+Acceptance supervisor now re-polls identical intent for that hold within original
+observation deadline; other blocked reasons remain terminal. Public regression
+and handoff checks PASS29/8.533s; this is blocker reduction, not installed acceptance.
+Checkpoint16 records exact RED/GREEN limits and next live-budget observation seam.
+No external assignments, shared runtime effects, release or issue closure.
+Memory unavailable: healthy runtime but no reviewed Codex Wake atlas candidate.

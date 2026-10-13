@@ -17,6 +17,24 @@ from codex_wake.native_protocol import native_request
 from agent_handoff_writer_acceptance import write
 
 
+def wait_for_preflight(invoke, intent, deadline, observe):
+    """Observe one existing intent; clock uncertainty never authorizes replacement."""
+    while True:
+        code, state = invoke(intent)
+        observe(state)
+        if state['state'] == 'awaiting_activation':
+            return state
+        clock_hold = (state['state'] == 'blocked'
+                      and state.get('reason') == 'admissible_time_unavailable')
+        if ((state['state'] in ('blocked', 'expired') and not clock_hold)
+                or time.monotonic() > deadline
+                or (state['state'] == 'uncertain' and not (
+                    state.get('successor_thread_id')
+                    and state.get('successor', {}).get('submission_id')))):
+            raise RuntimeError('handoff held: ' + state.get('reason', state['state']))
+        time.sleep(.5)
+
+
 def execute(root,prefix,repo,parent_deadline,resume_setup=False):
     original=None
     if resume_setup:
@@ -175,11 +193,9 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         checkpoint=workspace/'checkpoint.json';digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
         handoff=['sessions','handoff','--profiles',str(profiles),'--profile','worker','--intent','handoff-1','--thread-id',source,'--checkpoint','checkpoint.json','--checkpoint-sha256',digest,'--expires-at',expiry,'--mode','new-tab','--json']
         deadline=time.monotonic()+240
-        while True:
-            code,state=invoke(handoff);receipt['handoff']=state;write(root/'state.json',receipt)
-            if state['state']=='awaiting_activation':break
-            if state['state'] in ('blocked','expired') or time.monotonic()>deadline or (state['state']=='uncertain' and not(state.get('successor_thread_id') and state.get('successor',{}).get('submission_id'))):raise RuntimeError('handoff held: '+state.get('reason',state['state']))
-            time.sleep(.5)
+        def observe_handoff(state):
+            receipt['handoff']=state;write(root/'state.json',receipt)
+        state=wait_for_preflight(invoke,handoff,deadline,observe_handoff)
         target=state['successor_thread_id'];native,spent=usage(target);receipt['preflight_usage']=spent;write(root/'native-preflight.json',native)
         instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and '--instructions' in i.get('command','') and i.get('exitCode')==0]
         if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('guide','workflow')):raise RuntimeError('actual selected instruction read unverified')

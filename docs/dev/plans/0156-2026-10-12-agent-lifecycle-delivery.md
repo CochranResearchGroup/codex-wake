@@ -8,6 +8,13 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
 
+2026-10-13 operator-authorized resource reset/resume: new native goal window
+start1791887366, deadline1791908966; stop/checkpoint before 2,000,000 tokens
+or six hours in this window. Previous counters and expired fixture deadlines
+remain historical evidence. Full scope and review/retry bounds unchanged.
+Checkpoint16 reproduces and repairs acceptance-runner transient-hold teardown;
+installed preflight/continuation remain unaccepted. Earlier execution snapshot:
+
 Execution started on `feat/agent-lifecycle` from origin/main a741010 under the
 operator's execute-Plan0156 goal. Plan0157 is the serial critical path; 0158 then
 0159 follow. Primary owns shared controller/CLI/MCP integration. One read-only
