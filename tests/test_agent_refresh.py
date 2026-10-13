@@ -205,6 +205,13 @@ class AgentRefreshTests(unittest.TestCase):
                     token_cap=1000,time_cap_seconds=2000,tokens_before_source=0,seconds_before_source=0,
                     started_at='1970-01-01T00:00:00Z')}
                 profiles.write_text(json.dumps(registry))
+                body=json.loads(checkpoint.read_text());policy=registry['continuations'][thread_id]
+                body.update(repo=tmp,worktree=tmp,commit='a'*40,dirty_work='isolated fixture',
+                    acceptance_remaining=['bounded handoff'],evidence=['source writer fixture'],
+                    pending_wakes=[],pending_messages=[],claim_holders=[],reply_route='original thread',
+                    hard_stops=['fixed caps and expiry'],expires_at='2030-01-01T00:00:00Z',
+                    resources={k:policy[k] for k in ('token_cap','time_cap_seconds','tokens_before_source','seconds_before_source','started_at')})
+                checkpoint.write_text(json.dumps(body))
             argv = ['--wake-root',tmp,'sessions','refresh','--profiles',str(profiles),
                 '--profile','worker','--intent','refresh-1','--thread-id',thread_id,
                 '--checkpoint','checkpoint.json','--checkpoint-sha256',

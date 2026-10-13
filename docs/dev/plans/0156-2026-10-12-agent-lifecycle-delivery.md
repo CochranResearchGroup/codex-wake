@@ -8,6 +8,15 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
 
+2026-10-13 latest: checkpoints25–26 remediate consolidated review SP-01
+(late source accounting fences activation/continuation) and SP-02 (restart-safe
+checkpoint qualification). Native installed13 at0e111f9, live-handoff05, still
+fails preflight allowance174533>150000 after extra source reads; instruction
+output no longer truncates. Source paused, target goalnull, exact turn interrupted,
+no continuation/rollback acceptance. Checkpoint27 preserves this failure and
+local full-suite diagnosis. Both native modes, refresh goal/instruction proof,
+local release gates, integration/release/cleanup and issue closure remain open.
+
 2026-10-13 operator-authorized resource reset/resume: new native goal window
 start1791887366, deadline1791908966; stop/checkpoint before 2,000,000 tokens
 or six hours in this window. Previous counters and expired fixture deadlines
