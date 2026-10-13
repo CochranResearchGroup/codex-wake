@@ -1,0 +1,439 @@
+{
+  "state": "passed",
+  "error": null,
+  "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13",
+  "thread_id": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+  "authority": "execute Plan0156; disposable no-model resource refresh proof",
+  "model_turn_limit": 0,
+  "model_turns": 0,
+  "old_attachment": {
+    "client_pid": 30053,
+    "client_start_time_ticks": 4503424,
+    "evidence": "metadata_matched",
+    "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+    "pane_id": "%1",
+    "pane_index": "0",
+    "pane_title": "owned-refresh-worker",
+    "pane_tty": "/dev/pts/43",
+    "session_id": "$0",
+    "session_name": "owned-refresh",
+    "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock",
+    "window_id": "@1",
+    "window_index": "1",
+    "window_name": "worker"
+  },
+  "goal_before": {
+    "createdAt": 1791898707,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "status": "paused",
+    "threadId": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 1000,
+    "tokensUsed": 0,
+    "updatedAt": 1791898707
+  },
+  "goal_after": {
+    "createdAt": 1791898707,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "status": "paused",
+    "threadId": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 1000,
+    "tokensUsed": 0,
+    "updatedAt": 1791898707
+  },
+  "initial_mcp": {
+    "content": [
+      {
+        "text": "v1",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  },
+  "mcp_refresh": {
+    "attachment": {
+      "client_pid": 30387,
+      "client_start_time_ticks": 4503697,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+      "pane_id": "%2",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/43",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock",
+      "window_id": "@2",
+      "window_index": "1",
+      "window_name": "worker-refresh-17489446a3b8"
+    },
+    "fingerprint": "17489446a3b8266753dfdb86e0ac64ac481247c098e2d5f4e01a33d591e83514",
+    "goal_after": {
+      "createdAt": 1791898707,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791898707
+    },
+    "goal_before": {
+      "createdAt": 1791898707,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791898707
+    },
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "prepared"
+      },
+      {
+        "effect": "tmux/kill-pane",
+        "reason": null,
+        "state": "stopping"
+      },
+      {
+        "effect": "tmux/new-window",
+        "reason": null,
+        "state": "starting"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": "exact_replacement_client_not_ready",
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "completed"
+      }
+    ],
+    "intent": {
+      "checkpoint": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace/checkpoint.json",
+      "checkpoint_sha256": "fe555a73064b2c4a1a915ce3b7685633030cdb4544263e5617ae63d7d9dc08c1",
+      "expires_at": "2026-10-13T13:41:26.917763+00:00",
+      "launch": {
+        "app_server": "unix:///tmp/codex-daemon-1000/bc60e49eb812e6630e43cbba190b7a21a70c0df93253f9b12a74075959291d53",
+        "codex_home": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/codex-home",
+        "codex_path": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+        "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+        "resources": {
+          "mcp": {
+            "arguments": {},
+            "expected_content": [
+              {
+                "text": "v2",
+                "type": "text"
+              }
+            ],
+            "kind": "mcp",
+            "read_only": true,
+            "server": "toy",
+            "tool": "version"
+          },
+          "skill": {
+            "description": "Refresh marker v2",
+            "kind": "skill",
+            "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace/.agents/skills/refresh-marker/SKILL.md",
+            "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+          }
+        },
+        "timeout": 10,
+        "tmux_session": "owned-refresh",
+        "tmux_socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock"
+      },
+      "operation": "refresh",
+      "resources": [
+        "skill",
+        "mcp"
+      ],
+      "source_thread_id": "01a1357c-5b32-7e33-9878-6ddd8b2a675c"
+    },
+    "intent_key": "refresh-resources",
+    "old_attachment": {
+      "client_pid": 30053,
+      "client_start_time_ticks": 4503424,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/43",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "worker"
+    },
+    "old_generation_exit_observed": true,
+    "pane_id": "%2",
+    "resources": {
+      "mcp": {
+        "is_error": false,
+        "observed_content": [
+          {
+            "text": "v2",
+            "type": "text"
+          }
+        ],
+        "server": "toy",
+        "state": "ready",
+        "tool": "version"
+      },
+      "skill": {
+        "catalog": [
+          {
+            "description": "Refresh marker v2",
+            "enabled": true,
+            "name": "refresh-marker",
+            "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace/.agents/skills/refresh-marker/SKILL.md",
+            "pluginId": null,
+            "scope": "repo"
+          }
+        ],
+        "observed_sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd",
+        "state": "ready"
+      }
+    },
+    "state": "completed",
+    "tab_name": "worker-refresh-17489446a3b8",
+    "thread_id": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+    "thread_name": "owned-refresh-worker",
+    "version": 1,
+    "window_id": "@2"
+  },
+  "mcp_rollback": {
+    "attachment": {
+      "client_pid": 30387,
+      "client_start_time_ticks": 4503697,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+      "pane_id": "%2",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/43",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock",
+      "window_id": "@2",
+      "window_index": "1",
+      "window_name": "worker-refresh-17489446a3b8"
+    },
+    "fingerprint": "17489446a3b8266753dfdb86e0ac64ac481247c098e2d5f4e01a33d591e83514",
+    "goal_after": {
+      "createdAt": 1791898707,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791898707
+    },
+    "goal_before": {
+      "createdAt": 1791898707,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791898707
+    },
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "prepared"
+      },
+      {
+        "effect": "tmux/kill-pane",
+        "reason": null,
+        "state": "stopping"
+      },
+      {
+        "effect": "tmux/new-window",
+        "reason": null,
+        "state": "starting"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": "exact_replacement_client_not_ready",
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "completed"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "rollback_state": "completed",
+        "state": "completed"
+      }
+    ],
+    "intent": {
+      "checkpoint": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace/checkpoint.json",
+      "checkpoint_sha256": "fe555a73064b2c4a1a915ce3b7685633030cdb4544263e5617ae63d7d9dc08c1",
+      "expires_at": "2026-10-13T13:41:26.917763+00:00",
+      "launch": {
+        "app_server": "unix:///tmp/codex-daemon-1000/bc60e49eb812e6630e43cbba190b7a21a70c0df93253f9b12a74075959291d53",
+        "codex_home": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/codex-home",
+        "codex_path": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+        "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+        "resources": {
+          "mcp": {
+            "arguments": {},
+            "expected_content": [
+              {
+                "text": "v2",
+                "type": "text"
+              }
+            ],
+            "kind": "mcp",
+            "read_only": true,
+            "server": "toy",
+            "tool": "version"
+          },
+          "skill": {
+            "description": "Refresh marker v2",
+            "kind": "skill",
+            "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace/.agents/skills/refresh-marker/SKILL.md",
+            "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+          }
+        },
+        "timeout": 10,
+        "tmux_session": "owned-refresh",
+        "tmux_socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock"
+      },
+      "operation": "refresh",
+      "resources": [
+        "skill",
+        "mcp"
+      ],
+      "source_thread_id": "01a1357c-5b32-7e33-9878-6ddd8b2a675c"
+    },
+    "intent_key": "refresh-resources",
+    "old_attachment": {
+      "client_pid": 30053,
+      "client_start_time_ticks": 4503424,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/43",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "worker"
+    },
+    "old_generation_exit_observed": true,
+    "pane_id": "%2",
+    "resources": {
+      "mcp": {
+        "is_error": false,
+        "observed_content": [
+          {
+            "text": "v2",
+            "type": "text"
+          }
+        ],
+        "server": "toy",
+        "state": "ready",
+        "tool": "version"
+      },
+      "skill": {
+        "catalog": [
+          {
+            "description": "Refresh marker v2",
+            "enabled": true,
+            "name": "refresh-marker",
+            "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace/.agents/skills/refresh-marker/SKILL.md",
+            "pluginId": null,
+            "scope": "repo"
+          }
+        ],
+        "observed_sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd",
+        "state": "ready"
+      }
+    },
+    "rollback": {
+      "action": "reused_original_conversation",
+      "attachment": {
+        "client_pid": 30387,
+        "client_start_time_ticks": 4503697,
+        "evidence": "metadata_matched",
+        "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace",
+        "pane_id": "%2",
+        "pane_index": "0",
+        "pane_title": "owned-refresh-worker",
+        "pane_tty": "/dev/pts/43",
+        "session_id": "$0",
+        "session_name": "owned-refresh",
+        "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/tmux.sock",
+        "window_id": "@2",
+        "window_index": "1",
+        "window_name": "worker-refresh-17489446a3b8"
+      },
+      "goal": {
+        "createdAt": 1791898707,
+        "objective": "Plan0156 disposable paused-goal continuity probe",
+        "status": "paused",
+        "threadId": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1791898707
+      },
+      "state": "completed",
+      "thread_id": "01a1357c-5b32-7e33-9878-6ddd8b2a675c"
+    },
+    "state": "completed",
+    "tab_name": "worker-refresh-17489446a3b8",
+    "thread_id": "01a1357c-5b32-7e33-9878-6ddd8b2a675c",
+    "thread_name": "owned-refresh-worker",
+    "version": 1,
+    "window_id": "@2"
+  },
+  "server_exit": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      552,
+      585,
+      5221,
+      52706
+    ],
+    "private_readable_environment_matches": []
+  },
+  "instruction_read": {
+    "performed_by": "primary host reader",
+    "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-refresh-07/workspace/.agents/skills/refresh-marker/SKILL.md",
+    "content": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+    "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd",
+    "proof_limit": "host read plus actual native catalog/resource probe; no claim of refreshed actor model instruction consumption"
+  }
+}

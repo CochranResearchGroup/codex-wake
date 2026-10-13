@@ -5859,3 +5859,16 @@ Preflight includes approved helper source in complete first read and explicit
 two-command protocol; no provider attempt. Checkpoint28 before no-model installed
 nonnull-goal refresh/rollback. Full lifecycle acceptance/integration/release OPEN.
 Memory unavailable; prior non-write receipt retained.
+
+## Turn 298 | 2026-10-13 UTC
+
+Native installed refresh06 preserves a real nonnull paused goal through exact
+same-thread client replacement and guarded rollback; actual cached MCP v1 blocks
+success despite updated native skill v2. Fresh refresh07 positively qualifies hot
+MCP v2 and native catalog v2, completed public refresh/rollback with goal unchanged.
+Both zero model turns/serverexit0/owned census empty. Host instruction read clearly
+labeled, no refreshed actor model-consumption claim. Checkpoint29/curated receipts;
+Plan0158 current state reconciled, full lifecycle integration/release OPEN.
+Resource refresh ACTIVE823636 plus external723655=headroom452709; current window
+retained while clarification pending, no full500000 provider packet purchased.
+Memory unavailable; prior non-write receipt retained.

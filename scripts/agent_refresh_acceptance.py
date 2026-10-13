@@ -20,7 +20,7 @@ def write(path, value):
     path.chmod(0o600)
 
 
-def execute(root, prefix, paused_goal=False, rollback=False):
+def execute(root, prefix, paused_goal=False, rollback=False, dynamic_mcp=False):
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     workspace, home = root / 'workspace', root / 'codex-home'
     workspace.mkdir(); home.mkdir(mode=0o700)
@@ -31,6 +31,7 @@ def execute(root, prefix, paused_goal=False, rollback=False):
     toy = root / 'toy-mcp.py'
     toy.write_text('''import json,sys,os,pathlib
 version=pathlib.Path(sys.argv[1]).read_text().strip()
+dynamic=len(sys.argv)>3 and sys.argv[3]=='--dynamic'
 with pathlib.Path(sys.argv[2]).open('a') as f:f.write(json.dumps(dict(pid=os.getpid(),version=version))+'\\n')
 for line in sys.stdin:
  r=json.loads(line)
@@ -38,7 +39,7 @@ for line in sys.stdin:
  method=r['method']
  if method=='initialize':v=dict(protocolVersion=r['params']['protocolVersion'],capabilities={'tools':{}},serverInfo=dict(name='toy',version=version))
  elif method=='tools/list':v={'tools':[dict(name='version',description='Read toy version '+version,inputSchema={'type':'object','properties':{},'additionalProperties':False},annotations={'readOnlyHint':True})]}
- elif method=='tools/call':v={'content':[{'type':'text','text':version}],'isError':False}
+ elif method=='tools/call':v={'content':[{'type':'text','text':pathlib.Path(sys.argv[1]).read_text().strip() if dynamic else version}],'isError':False}
  elif method=='ping':v={}
  else:v={}
  print(json.dumps(dict(jsonrpc='2.0',id=r['id'],result=v)),flush=True)
@@ -48,7 +49,7 @@ for line in sys.stdin:
     lines += ['approval_policy = "never"', 'sandbox_mode = "workspace-write"',
         f'[projects.{json.dumps(str(workspace))}]', 'trust_level = "trusted"',
         '[mcp_servers.toy]', f'command = {json.dumps(str(prefix / "bin/python"))}',
-        'args = ' + json.dumps([str(toy), str(version), str(root/'mcp-processes.jsonl')]),
+        'args = ' + json.dumps([str(toy), str(version), str(root/'mcp-processes.jsonl'), *(['--dynamic'] if dynamic_mcp else [])]),
         '[mcp_servers.wake_lifecycle]', f'command = {json.dumps(str(prefix / "bin/codex-wake-mcp"))}',
         'args = ' + json.dumps(['--cli', str(prefix/'bin/codex-wake'), '--wake-root', str(root/'wake'),
                                '--lifecycle-profiles', str(profiles), '--call-timeout', '45'])]
@@ -137,12 +138,17 @@ for line in sys.stdin:
                 'tool':'wake_sessions_refresh','arguments':body})
             lifecycle=json.loads(result['content'][0]['text']);time.sleep(.2)
         receipt['mcp_refresh']=lifecycle
-        if (lifecycle['state']!='blocked' or lifecycle.get('reason')!='requested_resources_not_ready'
+        if dynamic_mcp:
+            if (lifecycle['state']!='completed' or lifecycle['resources']['skill']['state']!='ready'
+                    or lifecycle['resources']['mcp']['state']!='ready'
+                    or lifecycle['resources']['mcp']['observed_content']!=[{'type':'text','text':'v2'}]):
+                raise RuntimeError('actual updated MCP behavior and selected skill must qualify refresh')
+        elif (lifecycle['state']!='blocked' or lifecycle.get('reason')!='requested_resources_not_ready'
                 or lifecycle['resources']['skill']['state']!='ready'
                 or lifecycle['resources']['mcp']['observed_content']!=[{'type':'text','text':'v1'}]):
             raise RuntimeError('stale MCP must block despite updated skill/new client')
         if lifecycle['attachment']['client_pid']==old['client_pid']:raise RuntimeError('old generation retained')
-        receipt['state']='passed_stale_resource_axis'
+        receipt['state']='passed_updated_resource_axis' if dynamic_mcp else 'passed_stale_resource_axis'
         write(root/'state.json',receipt)
         goal_after=request('thread/goal/get',{'threadId':thread})['goal'];receipt['goal_after']=goal_after
         if goal_after!=goal:raise RuntimeError('native goal changed')
@@ -187,5 +193,6 @@ if __name__=='__main__':
     parser.add_argument('--prefix',type=Path,required=True)
     parser.add_argument('--paused-goal',action='store_true')
     parser.add_argument('--rollback',action='store_true')
+    parser.add_argument('--dynamic-mcp',action='store_true')
     args=parser.parse_args()
-    raise SystemExit(execute(args.root.resolve(),args.prefix.resolve(),args.paused_goal,args.rollback))
+    raise SystemExit(execute(args.root.resolve(),args.prefix.resolve(),args.paused_goal,args.rollback,args.dynamic_mcp))
