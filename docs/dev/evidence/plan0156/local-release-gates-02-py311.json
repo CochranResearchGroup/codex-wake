@@ -1,0 +1,214 @@
+{
+  "state": "passed",
+  "candidate": "9809bebd975fb21f179e597b6cc5ea19fa2b997b",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311",
+  "legacy_commit": "94e17a68e655d9e54ead6001704dc0ef453eb933",
+  "model_assignments": 0,
+  "checks": [
+    {
+      "name": "source_registry",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/source_registry_smoke.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 0.165,
+      "state": "passed"
+    },
+    {
+      "name": "session_discovery",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/session_discovery_smoke.py",
+        "--cli",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake"
+      ],
+      "exit_code": 0,
+      "seconds": 2.279,
+      "state": "passed"
+    },
+    {
+      "name": "mailbox",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/a2a_mailbox_smoke.py",
+        "--scheduler",
+        "--operations",
+        "--cli",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake"
+      ],
+      "exit_code": 0,
+      "seconds": 4.587,
+      "state": "passed"
+    },
+    {
+      "name": "mcp",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/a2a_mcp_smoke.py",
+        "--cli",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake",
+        "--mcp",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake-mcp"
+      ],
+      "exit_code": 0,
+      "seconds": 4.946,
+      "state": "passed"
+    },
+    {
+      "name": "resource",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/a2a_resource_qualification.py"
+      ],
+      "exit_code": 0,
+      "seconds": 3.643,
+      "state": "passed"
+    },
+    {
+      "name": "recovery",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/a2a_recovery_qualification.py",
+        "--cli",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake",
+        "--legacy-python",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/legacy-13-py311/bin/python"
+      ],
+      "exit_code": 0,
+      "seconds": 2.633,
+      "state": "passed"
+    },
+    {
+      "name": "backup",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/a2a_backup_qualification.py",
+        "--cli",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake",
+        "--restore"
+      ],
+      "exit_code": 0,
+      "seconds": 2.535,
+      "state": "passed"
+    },
+    {
+      "name": "rollback",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/a2a_rollback_qualification.py",
+        "--cli",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake"
+      ],
+      "exit_code": 0,
+      "seconds": 0.618,
+      "state": "passed"
+    },
+    {
+      "name": "retention",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/a2a_retention_qualification.py",
+        "--cli",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake",
+        "--legacy-python",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/legacy-13-py311/bin/python"
+      ],
+      "exit_code": 0,
+      "seconds": 4.097,
+      "state": "passed"
+    },
+    {
+      "name": "projection",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "-m",
+        "unittest",
+        "test_a2a_projection_ack",
+        "-q"
+      ],
+      "exit_code": 0,
+      "seconds": 3.23,
+      "state": "passed"
+    },
+    {
+      "name": "product",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/python",
+        "scripts/product_smoke.py",
+        "--codex-wake-bin",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake",
+        "--codex-waked-bin",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-waked",
+        "--artifact-dir",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/release-gates-02-py311/product",
+        "--upgrade-wheel",
+        "/tmp/plan156-resume-diagnosis/wheel-13-py311/codex_wake-0.13.1-py3-none-any.whl",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 12.587,
+      "state": "passed"
+    },
+    {
+      "name": "daemon",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-waked",
+        "--once",
+        "--no-dispatch",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/release-gates-02-py311/empty"
+      ],
+      "exit_code": 0,
+      "seconds": 0.115,
+      "state": "passed"
+    },
+    {
+      "name": "hook",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake-hook"
+      ],
+      "exit_code": 0,
+      "seconds": 0.033,
+      "state": "passed"
+    },
+    {
+      "name": "registration",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/release-gates-02-py311/runtime",
+        "after",
+        "--app-server-thread-id",
+        "thread_ci_smoke",
+        "1m",
+        "--",
+        "CI smoke wake"
+      ],
+      "exit_code": 0,
+      "seconds": 0.168,
+      "state": "passed"
+    },
+    {
+      "name": "list",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13-py311/bin/codex-wake",
+        "--wake-root",
+        "/home/ecochran76/.local/state/codex-wake/plan0156/release-gates-02-py311/runtime",
+        "list"
+      ],
+      "exit_code": 0,
+      "seconds": 0.116,
+      "state": "passed"
+    }
+  ],
+  "python_version": "3.11.15",
+  "full_unit": {
+    "exit_code": 0,
+    "tests": 1158,
+    "seconds": 143.256,
+    "log": "/tmp/plan156-resume-diagnosis/full-unit-py311.log"
+  },
+  "first_python312_recovery_failure_preserved": "local-release-gates-01.json"
+}

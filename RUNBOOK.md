@@ -5846,3 +5846,16 @@ flake retained. Compilation/policy/build/plugin/static gates pass; full release
 lanes remain. Root goal unexpectedly BLOCKED/frozen715261, primary did not set it;
 resource headroom unverified, no further provider purchase. Full program OPEN.
 Memory unavailable; prior non-write receipt retained.
+
+## Turn 297 | 2026-10-13 UTC
+
+Resource refresh confirms ACTIVE goal without resetting original window. Receiver03
+reconciled as metadata-only/no native turns/no queue/no task journal effects;
+qualified zero model assignment retires250000 provisional reserve. External known
+723655. Installed release checks and Python3.11 full suite/complete surface pass;
+Python3.12 recovery first failure retained as non-reproduced intermittent after
+bounded diagnostics. Improved failure observability, no semantic/threshold change.
+Preflight includes approved helper source in complete first read and explicit
+two-command protocol; no provider attempt. Checkpoint28 before no-model installed
+nonnull-goal refresh/rollback. Full lifecycle acceptance/integration/release OPEN.
+Memory unavailable; prior non-write receipt retained.

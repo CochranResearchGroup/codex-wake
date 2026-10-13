@@ -1,6 +1,6 @@
 {
   "state": "observed",
-  "scope": "thirteen owned native assignments; final cumulative usage once per thread where reported; one successor unreported",
+  "scope": "thirteen owned native threads; twelve model assignments, one qualified pre-submission receiver with no model assignment",
   "threads": [
     {
       "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02",
@@ -186,9 +186,10 @@
         "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-53-10-01a134e5-14a6-73b3-94c7-b9c14faea04b.jsonl"
       ],
       "final_native_usage": null,
-      "total_tokens": null,
+      "total_tokens": 0,
       "budget_window": "resume-2026-10-13",
-      "usage_status": "unreported"
+      "usage_status": "qualified_no_model_assignment",
+      "usage_qualification": "unassigned-receiver-03.json"
     },
     {
       "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
@@ -287,11 +288,9 @@
     "original_external_tokens": 326895,
     "resume_2026_10_13_external_tokens": 723655,
     "operator_reset_authority": "explicit counter reset and active Plan0156 goal at1791887366; historical spending retained",
-    "resume_unreported_thread_ids": [
-      "01a134e5-14a6-73b3-94c7-b9c14faea04b"
-    ],
-    "resume_unreported_usage_reserve": 250000,
-    "reserve_status": "provisional conservative planning reserve, not measured usage or verified hard upper bound"
+    "resume_unreported_thread_ids": [],
+    "resume_unreported_usage_reserve": 0,
+    "reserve_status": "prior250000 provisional reserve retired by unassigned-receiver-03.json; absence of native assignment qualified, not missing usage assumed zero"
   },
-  "cumulative_external_tokens_status": "known subtotal; excludes one unreported successor, never a complete total"
+  "cumulative_external_tokens_status": "known complete assignment subtotal; metadata-only unassigned receiver contributes zero by reconciliation"
 }
