@@ -5811,3 +5811,13 @@ empty owned process census. Checkpoint24/installed-handoff04 preserve failure;
 ledger known reset-window499975 plus one unreported receiver. Review SP-01/SP-02
 await public reproduction and adjudication; full integration/release remains open.
 Memory unavailable; prior non-write receipt retained.
+
+## Turn 294 | 2026-10-13 UTC
+
+Accepted SP-01 after actual public seam RED: late paused-source token usage left
+successor active. Monitor now fences counter advances/unknown or regressed values
+before activation and during supervision, pauses owned goal and interrupts exact
+turn; original objective/caps/deadline preserved. Token regression GREEN plus time
+and preactivation positive qualification. Focused72 PASS19.007s; checkpoint25.
+No provider calls or installed acceptance. SP-02 and full delivery gates remain.
+Memory unavailable; existing non-write receipt retained.

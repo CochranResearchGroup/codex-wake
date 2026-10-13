@@ -611,6 +611,19 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                         raise ValueError('owned paused goal changed')
                     observed[thread]=goal
                 receipt['monitor_observed_goals']=observed
+                saved_source=receipt['source_goal'];current_source=observed[source]
+                accounting_stop=None
+                for counter in ('tokensUsed','timeUsedSeconds'):
+                    value=current_source.get(counter);previous=saved_source.get(counter)
+                    if type(value) is not int or type(previous) is not int or value<previous:
+                        accounting_stop='source_accounting_unverified';break
+                    if value>previous:accounting_stop='source_accounting_advanced'
+                if accounting_stop:
+                    receipt['continuation_stop_reason']=accounting_stop
+                    if receipt['state']=='awaiting_activation' or observed[target]['status']=='complete':
+                        receipt.update(state='blocked',reason=accounting_stop)
+                        owner['state']='stopped';save(directory/('owner-'+key+'.json'),owner)
+                        save(path,receipt);continue
                 if receipt['state']=='activating':
                     if observed[target]['status']!='active':
                         receipt['monitor_error']='successor_activation_unobserved';save(path,receipt);continue
@@ -626,7 +639,7 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                         receipt.update(state='completed',reason='successor_goal_complete',successor_goal=target_goal)
                         owner['state']='completed';save(directory/('owner-'+key+'.json'),owner);save(path,receipt)
                         continue
-                    if (stop_reason or not bounds or bounds['upper']+activation['deadline_margin_seconds']>=receipt['continuation_deadline']
+                    if (accounting_stop or stop_reason or not bounds or bounds['upper']+activation['deadline_margin_seconds']>=receipt['continuation_deadline']
                             or target_goal['tokensUsed']>=target_goal['tokenBudget']
                             or target_goal['status']!='active'):
                         reason=receipt.get('continuation_stop_reason') or stop_reason or ('admissible_time_unavailable' if not bounds else

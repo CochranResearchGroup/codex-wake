@@ -49,6 +49,15 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_lost_activation_response_reconciles_original_goal_without_reactivation(self):
         self.scenario(activate=True,lost_activate=True)
 
+    def test_late_source_accounting_fences_active_successor(self):
+        self.scenario(activate=True,late_source=True)
+
+    def test_late_source_time_fences_active_successor(self):
+        self.scenario(activate=True,late_source='time')
+
+    def test_late_source_accounting_cannot_activate_prepared_successor(self):
+        self.scenario(activate=True,before_source=True)
+
     def test_monitor_shutdown_pauses_owned_goal_and_preserves_allowance(self):
         self.scenario(activate=True,shutdown=True)
 
@@ -100,7 +109,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -171,7 +180,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             continue
                         if 'objective' not in params:
                             goals[tid].update(status=params['status'],updatedAt=1003)
-                            if params['status']=='active' and enforce_deadline:
+                            if params['status']=='active' and (enforce_deadline or late_source):
                                 threads[tid]['turns'].append(dict(id='autonomous-turn',status='inProgress',items=[]))
                             if ((lost_pause or lost_rollback_pause) and params['status']=='paused') or (lost_activate and params['status']=='active'):ws.close();return
                             ws.send(json.dumps(dict(id=req['id'],result={'goal':goals[tid]})))
@@ -281,6 +290,16 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         self.assertEqual(receipt['successor_thread_id'],target)
                         self.assertEqual(receipt['remaining_tokens'],920 if pause_used is None else 970-pause_used)
                         self.assertEqual(receipt['preflight']['state'],'passed')
+                    if before_source:
+                        from codex_wake.daemon import run as daemon_run
+                        goals[source]['tokensUsed']=150
+                        with redirect_stdout(StringIO()):
+                            self.assertEqual(daemon_run(['--wake-root',tmp,'--once','--no-dispatch']),0)
+                        saved=root/'lifecycle'/(hashlib.sha256(b'handoff-1').hexdigest()+'.json')
+                        self.assertEqual(json.loads(saved.read_text())['reason'],'source_accounting_advanced')
+                        self.assertEqual(goals[target]['status'],'paused')
+                        self.assertEqual(len(goal_sets),1)
+                        return
                     if rollback:
                         if missing_source:
                             clients[0].terminate();clients[0].wait(timeout=2);del panes['%159']
@@ -332,6 +351,17 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         sleeps=[]
                         def sleep(_):
                             sleeps.append(1)
+                            if late_source:
+                                if len(sleeps)==1:
+                                    self.assertEqual(goals[target]["status"],"active")
+                                    if late_source=="time":goals[source]["timeUsedSeconds"]=13
+                                    else:goals[source]["tokensUsed"]=150
+                                    return
+                                self.assertEqual(goals[target]["status"],"paused")
+                                self.assertEqual(interrupts,[dict(threadId=target,turnId="autonomous-turn")])
+                                saved=root/"lifecycle"/(hashlib.sha256(b"handoff-1").hexdigest()+".json")
+                                self.assertEqual(json.loads(saved.read_text())["reason"],"source_accounting_advanced")
+                                raise KeyboardInterrupt
                             if foreign_monitor and len(sleeps)==1:
                                 from codex_wake.process import process_identity
                                 saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
@@ -386,7 +416,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 self.assertEqual(methods.count('thread/queue/add'),1)
                 self.assertEqual(methods.count('thread/queue/start'),1)
                 self.assertEqual(len(goal_sets),(2 if foreign_monitor else 3) if activate else (3 if active_rollback or late_usage else 2 if rollback or pause_used is not None else 1))
-                self.assertEqual(goals[source]['tokensUsed'],50 if pause_used is None else pause_used)
+                self.assertEqual(goals[source]['tokensUsed'],150 if late_source and late_source!="time" else 50 if pause_used is None else pause_used)
                 self.assertEqual(goals[source]['status'],'paused')
                 self.assertEqual(goals[target]['status'],'active' if foreign_monitor else 'paused')
                 self.assertEqual(goals[target]['tokenBudget'],920 if pause_used is None else 970-pause_used)
