@@ -153,6 +153,14 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 started_at='1970-01-01T00:00:00Z',preflight=dict(script=str(helper),
                     sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',
                     workflow='github-handoff',required_checks=['fixture'],token_allowance=100))
+            body=json.loads(checkpoint.read_text())
+            body.update(repo=tmp,worktree=tmp,commit='a'*40,dirty_work='fixture; no Git changes',
+                acceptance_remaining=['bounded continuation'],evidence=['native fixture writer'],
+                pending_wakes=[],pending_messages=[],claim_holders=[],reply_route='original thread',
+                hard_stops=['original expiry and caps'],expires_at='2030-01-01T00:00:00Z',
+                resources={k:policy[k] for k in ('token_cap','time_cap_seconds','tokens_before_source','seconds_before_source','started_at')})
+            checkpoint.write_text(json.dumps(body));digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            threads[source]['turns'][0]['items'][0]['aggregatedOutput']='checkpoint:'+source+':'+digest
             if activate:policy['activation']=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=10)
             profiles.write_text(json.dumps(dict(version=1,profiles={'worker':profile},continuations={source:policy})))
             def handler(ws):

@@ -47,7 +47,14 @@ class AgentHandoffTests(unittest.TestCase):
     def test_carried_native_elapsed_usage_cannot_be_ignored_by_wall_clock_window(self):
         self.scenario(tokens=50,seconds_carry=95,reason='cumulative_time_budget_exhausted')
 
-    def scenario(self, tokens=None, carry=0,seconds_carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None,goal_objective='Finish fixture',reset_on_repeat=False,budget=1000,remaining=None):
+    def test_incomplete_checkpoint_is_rejected_before_native_effects(self):
+        self.scenario(tokens=50,incomplete=True)
+
+    def test_checkpoint_cannot_change_caps_expiry_or_custody(self):
+        for field in ('resources','expires_at','worktree','claim_holders'):
+            with self.subTest(field=field):self.scenario(tokens=50,bad_checkpoint=field)
+
+    def scenario(self, tokens=None, carry=0,seconds_carry=0, reason='source_usage_unknown',clock_upper=1893456020,bad_cap=None,goal_objective='Finish fixture',reset_on_repeat=False,budget=1000,remaining=None,incomplete=False,bad_checkpoint=None):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             source='00000000-0000-7000-8000-000000000159'
@@ -81,6 +88,19 @@ class AgentHandoffTests(unittest.TestCase):
                     objective='Finish fixture',token_cap=1000,time_cap_seconds=100,
                     tokens_before_source=carry,seconds_before_source=seconds_carry,
                     approval='operator fixture',started_at='2030-01-01T00:00:00Z')})))
+                if not incomplete:
+                    body=json.loads(checkpoint.read_text())
+                    policy=json.loads(profiles.read_text())['continuations'][source]
+                    body.update(repo=tmp,worktree=tmp,commit='a'*40,dirty_work='fixture; no Git changes',
+                        acceptance_remaining=['fixture continuation'],evidence=['native writer fixture'],
+                        pending_wakes=[],pending_messages=[],claim_holders=[],reply_route='original thread',
+                        hard_stops=['original expiry and caps'],expires_at='2030-01-01T00:01:00Z',
+                        resources={k:policy[k] for k in ('token_cap','time_cap_seconds','tokens_before_source','seconds_before_source','started_at')})
+                    if bad_checkpoint=="resources":body["resources"]["token_cap"]=2000
+                    elif bad_checkpoint=="expires_at":body["expires_at"]="2030-01-02T00:01:00Z"
+                    elif bad_checkpoint=="worktree":body["worktree"]="/tmp"
+                    elif bad_checkpoint=="claim_holders":body["claim_holders"]=["another actor"]
+                    checkpoint.write_text(json.dumps(body))
                 if bad_cap is not None:
                     registry=json.loads(profiles.read_text());registry['continuations'][source]['token_cap']=bad_cap
                     profiles.write_text(json.dumps(registry))
@@ -90,6 +110,12 @@ class AgentHandoffTests(unittest.TestCase):
                     '--thread-id',source,'--checkpoint','checkpoint.json',
                     '--checkpoint-sha256',hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
                     '--expires-at','2030-01-01T00:01:00Z','--mode','new-tab','--json']
+                if incomplete or bad_checkpoint:
+                    with redirect_stdout(output),self.assertRaisesRegex(WakeError,'restart-safe checkpoint'):
+                        run(argv)
+                    self.assertEqual(methods,[])
+                    self.assertFalse((root/'wake/lifecycle').exists())
+                    return
                 if bad_cap is not None:
                     with redirect_stdout(output),self.assertRaisesRegex(WakeError,'continuation allowance'):
                         run(argv)

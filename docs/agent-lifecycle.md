@@ -125,7 +125,22 @@ absolute `script`, pinned `sha256`, workspace-contained `receipt`,
 `workflow: "github-handoff"`, nonempty `required_checks` and bounded
 `token_allowance`. Native source usage and any smaller native budget constrain
 the host cumulative ceiling. An unlimited native budget grants no additional
-allowance; the explicit host cap still binds. Source checkpoint writer must be
+allowance; the explicit host cap still binds.
+Handoff checkpoints additionally require `repo` (absolute existing repository
+path), `worktree` (exact launch workspace), `commit` (40 lowercase hexadecimal
+characters), explicit `dirty_work` disposition, nonempty string lists
+`acceptance_remaining`, `evidence`, `hard_stops`, and a nonempty `reply_route`.
+`pending_wakes`, `pending_messages`, `claim_holders` must each be empty; runtime
+inventory independently verifies that no custody is outstanding. `resources`
+contains the host `token_cap`, `time_cap_seconds`, `started_at`,
+`tokens_before_source`, and `seconds_before_source`; caps/start must match the
+immutable host intent. Checkpoint carried counters are nonnegative lower bounds:
+the host may incorporate later observed spending but may never reduce those
+bounds. `expires_at` must exactly match the fixed intent expiry. Native source
+counters remain authoritative and are accounted separately. These shape and
+intent checks run before native effects; revision/evidence claims are snapshots
+for successor reconciliation, not independently certified acceptance.
+ Source checkpoint writer must be
 observed in native completed command evidence. Source drafts and pending work hold.
 
 The fresh successor executes the host-selected preflight and produces its exact

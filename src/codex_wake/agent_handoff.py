@@ -41,6 +41,24 @@ def handoff_command(args, root):
             or policy['token_cap']==0 or policy['time_cap_seconds']==0):
         raise WakeError('host continuation allowance must contain explicit bounded counters')
     parse_timestamp(policy.get('started_at',''))
+    try:
+        text_fields=('repo','worktree','commit','dirty_work','reply_route','authority','next_packet')
+        if any(not isinstance(body.get(k),str) or not body[k].strip() for k in text_fields):raise ValueError
+        if (not Path(body['repo']).is_absolute() or not Path(body['repo']).is_dir()
+                or Path(body['worktree']).resolve(strict=True)!=workspace
+                or len(body['commit'])!=40 or any(c not in '0123456789abcdef' for c in body['commit'])):raise ValueError
+        for field in ('acceptance_remaining','evidence','hard_stops'):
+            if (not isinstance(body.get(field),list) or not body[field]
+                    or any(not isinstance(v,str) or not v.strip() for v in body[field])):raise ValueError
+        if any(body.get(k)!=[] for k in ('pending_wakes','pending_messages','claim_holders')):raise ValueError
+        resources=body['resources']
+        if (not isinstance(resources,dict)
+                or any(type(resources.get(k)) is not int or resources[k]!=policy[k] for k in fields[:2])
+                or any(type(resources.get(k)) is not int or not 0<=resources[k]<=policy[k] for k in fields[2:])
+                or resources.get('started_at')!=policy['started_at']
+                or body.get('expires_at')!=args.expires_at):raise ValueError
+    except (KeyError,TypeError,ValueError,OSError):
+        raise WakeError('handoff requires a complete restart-safe checkpoint matching the host intent') from None
     if args.caller_thread_id and (args.caller_thread_id!=args.thread_id or args.profile not in
             config.get('callers',{}).get(args.caller_thread_id,[])):
         raise WakeError('handoff requires the host-granted source caller')

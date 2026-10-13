@@ -59,10 +59,19 @@ def execute(root,prefix):
         profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),
             app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
         write(profiles,dict(version=1,profiles={'worker':profile}))
-        script="""import os,json,hashlib,pathlib
+        repo=Path(__file__).resolve().parents[1]
+        checkpoint_contract=dict(repo=str(repo),worktree=str(workspace),
+            commit=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip(),
+            dirty_work='isolated writer fixture; source status must be reconciled before continuation',
+            acceptance_remaining=['preflight qualification'],evidence=[str(root/'state.json')],
+            pending_wakes=[],pending_messages=[],claim_holders=[],reply_route='root via '+str(root/'state.json'),
+            hard_stops=['original token/time caps; no renewal'],expires_at=expiry,
+            resources=dict(token_cap=150000,time_cap_seconds=180,tokens_before_source=0,
+                seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat()))
+        script=f"""import os,json,hashlib,pathlib
 source=os.environ['CODEX_THREAD_ID']
 p=pathlib.Path('checkpoint.json')
-p.write_text(json.dumps(dict(source_thread_id=source,objective='Qualify owned handoff preflight',authority='operator execute Plan0156; disposable fixture',next_packet='Read canonical sources and execute selected preflight; no active goal yet',pending_obligations=[]),sort_keys=True)+'\\n')
+p.write_text(json.dumps(dict(**{checkpoint_contract!r},source_thread_id=source,objective='Qualify owned handoff preflight',authority='operator execute Plan0156; disposable fixture',next_packet='Read canonical sources and execute selected preflight; no active goal yet',pending_obligations=[]),sort_keys=True)+'\\n')
 print('checkpoint:'+source+':'+hashlib.sha256(p.read_bytes()).hexdigest())
 """
         task=('Operator-approved Plan0156 disposable fixture. Execute only the following Python script '

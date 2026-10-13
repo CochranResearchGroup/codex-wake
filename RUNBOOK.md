@@ -5821,3 +5821,13 @@ turn; original objective/caps/deadline preserved. Token regression GREEN plus ti
 and preactivation positive qualification. Focused72 PASS19.007s; checkpoint25.
 No provider calls or installed acceptance. SP-02 and full delivery gates remain.
 Memory unavailable; existing non-write receipt retained.
+
+## Turn 295 | 2026-10-13 UTC
+
+SP-02 public RED proves incomplete checkpoint reached native reads. Guard now
+requires restart-safe contract and host cap/start/expiry correspondence before
+native/journal effects. Updated acceptance writers, generated scripts compile,
+public docs and fixtures. Focused47 PASS17.093s; checkpoint26 records proof limits,
+review adjudication and conservative resource headroom545479 at root704546.
+Full installed acceptance/integration/release remains OPEN. No provider calls.
+Memory unavailable; prior non-write receipt retained.
