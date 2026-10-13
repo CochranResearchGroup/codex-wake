@@ -8,6 +8,10 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
 
+Draft integration PR: https://github.com/CochranResearchGroup/codex-wake/pull/253
+(base main, verified8d7763f at creation). Draft remains not merge-ready; full native
+handoff acceptance and release gates remain open. No issue auto-close directives.
+
 2026-10-13 latest: checkpoints25–26 remediate consolidated review SP-01
 (late source accounting fences activation/continuation) and SP-02 (restart-safe
 checkpoint qualification). Native installed13 at0e111f9, live-handoff05, still
