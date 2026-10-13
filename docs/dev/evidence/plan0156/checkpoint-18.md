@@ -15,7 +15,7 @@ independently reconciled beyond configuration.
 Actual command: installed10/bin/python scripts/agent_handoff_acceptance.py
  --execute --root /home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02
  --prefix /home/ecochran76/.local/state/codex-wake/plan0156/installed-10
- --repo /home/ecochran76/workspace.local/codex-wake --parent-deadline1791908966.
+ --repo /home/ecochran76/workspace.local/codex-wake --parent-deadline 1791908966.
 Two native assignments only; fixed fixture deadline1791888412.853127, total cap
 250000, preflight150000. No fixture renewal/replay/activation.
 

@@ -5743,3 +5743,15 @@ fresh private census empty/server exits0. No activation or accepted handoff.
 External215395 in reset window (lifetime542290) retained in ledger. Checkpoint18
 reframes next work to provider-free transport reproduction; no unchanged provider
 retry. Full scope open; native budget-stop axis advances only. Memory unavailable.
+
+## Turn 288 | 2026-10-13 UTC
+
+Plan0156 provider-free recorded-sandbox replay reproduces socket lstat denial
+under protected daemon directory while host socket stays live. Boundary proof
+PASS: host observation readable outside workspace, sandbox overwrite denied.
+Acceptance fixture now uses real identity-bound external native observations;
+host performs remote/socket validation, successor verifies them. Continuation
+completion stays external after actual native command/active-owner proof.
+Checkpoint19 reframes exhausted socket-dependent method; no sandbox weakening or
+new model calls. Relevant checks PASS33/9.655s; native acceptance remains open.
+Memory unavailable; no reviewed target group.

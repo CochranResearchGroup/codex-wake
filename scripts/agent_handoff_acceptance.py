@@ -35,6 +35,27 @@ def wait_for_preflight(invoke, intent, deadline, observe):
         time.sleep(.5)
 
 
+def observe_native_preflight(request, source, target, guide, cwd):
+    """Host-side reads; the sandbox never gains access to the daemon socket."""
+    source_goal=request('thread/goal/get',dict(threadId=source))['goal']
+    if not source_goal or source_goal['threadId']!=source or source_goal['status']!='paused':
+        raise RuntimeError('source goal is not the paused preflight owner')
+    skills=request('skills/list',dict(cwds=[str(cwd)],forceReload=True))
+    if not any(s['path']==str(guide) and s.get('enabled') is True
+               for d in skills['data'] for s in d['skills']):
+        raise RuntimeError('actual native skill catalog did not load selected guide')
+    resource=request('thread/mcp/tool/call',dict(threadId=target,server='codex-wake',
+        tool='wake_sessions_show',arguments={'selector':'thread:'+source}))
+    if resource.get('isError',False):raise RuntimeError('native resource tool failed')
+    observed=json.loads(resource['content'][0]['text'])
+    if observed['session']['thread_id']!=source or observed['complete'] is not True:
+        raise RuntimeError('native resource source identity/readiness mismatch')
+    return dict(state='passed',source_thread_id=source,successor_thread_id=target,
+        guide=str(guide),source_goal=source_goal,
+        native_resource=dict(state='passed',tool='wake_sessions_show',source_thread_id=source,
+            content_sha256=hashlib.sha256(json.dumps(resource,sort_keys=True).encode()).hexdigest()))
+
+
 def execute(root,prefix,repo,parent_deadline,resume_setup=False):
     original=None
     if resume_setup:
@@ -115,27 +136,35 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False):
         profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
         write(profiles,dict(version=1,profiles={'worker':profile}))
         objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once, record actual result, then mark this goal complete. No other work, actors, resource renewal or goal budget change.'
-        constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),prefix=str(prefix),codex=str(codex),endpoint='unix://'+str(endpoint))
-        helper.write_text('C='+repr(constants)+'\n'+'''import os,sys,json,pathlib,hashlib,subprocess
-from codex_wake.native_protocol import native_request
+        constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),prefix=str(prefix),
+            native_observations=str(root/'native-observations.json'),continuation_authority=str(root/'continuation-authority.json'))
+        helper.write_text('C='+repr(constants)+'\n'+'''import os,sys,json,pathlib,hashlib,subprocess,time
 cid=os.environ['CODEX_THREAD_ID']
 def sha(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
+def host_read(key):
+    deadline=time.monotonic()+10
+    while not pathlib.Path(C[key]).is_file():
+        assert time.monotonic()<deadline,'host native observation unavailable'
+        time.sleep(.1)
+    return json.loads(pathlib.Path(C[key]).read_text())
 if sys.argv[1:]==['--instructions']:
     for kind in ('guide','workflow'):
         print('SELECTED_INSTRUCTIONS:'+kind+':'+sha(C[kind]))
         print(pathlib.Path(C[kind]).read_text())
+    for p in (C['repo']+'/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md',
+              C['repo']+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md','checkpoint.json'):
+        print('PREFLIGHT_SOURCE:'+p+':'+sha(p))
+        print(pathlib.Path(p).read_text())
     raise SystemExit(0)
 if sys.argv[1:]==['--continue']:
     proof=json.loads(pathlib.Path('preflight.json').read_text())
     assert proof['successor_thread_id']==cid and proof['state']=='passed'
     assert not pathlib.Path('continued.json').exists(),'continuation already executed'
     p=subprocess.run([C['prefix']+'/bin/codex-wake','--version'],capture_output=True,text=True,check=True)
-    pathlib.Path('continued.json').write_text(json.dumps(dict(state='passed',thread_id=cid,checkpoint_sha256=proof['checkpoint_sha256'],version=p.stdout.strip())))
-    goal=native_request(C['endpoint'],C['codex'],'thread/goal/get',{'threadId':cid},10)['goal']
+    goal=host_read('continuation_authority')['goal']
     checkpoint=json.loads(pathlib.Path('checkpoint.json').read_text())
     assert goal['threadId']==cid and goal['objective']==checkpoint['objective'] and goal['status']=='active'
-    done=native_request(C['endpoint'],C['codex'],'thread/goal/set',dict(threadId=cid,status='complete',origin='automatic'),10)['goal']
-    assert done['status']=='complete' and done['tokenBudget']==goal['tokenBudget']
+    pathlib.Path('continued.json').write_text(json.dumps(dict(state='passed',thread_id=cid,checkpoint_sha256=proof['checkpoint_sha256'],version=p.stdout.strip())))
     print('CONTINUATION_CHECK:'+cid+':'+proof['checkpoint_sha256'])
     raise SystemExit(0)
 source,nonce,digest=sys.argv[1:]
@@ -147,24 +176,21 @@ checks={}
 for name in ('canonical_sources','selected_skill','selected_workflow'):
     paths=([C['repo']+'/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md',C['repo']+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md'] if name=='canonical_sources' else [C['guide']] if name=='selected_skill' else [C['workflow']])
     checks[name]=dict(state='passed',sources=[dict(path=p,sha256=sha(p)) for p in paths])
-skills=native_request(C['endpoint'],C['codex'],'skills/list',dict(cwds=[str(pathlib.Path.cwd())],forceReload=True),10)
-assert any(s['path']==C['guide'] and s.get('enabled') is True for d in skills['data'] for s in d['skills'])
-resource=native_request(C['endpoint'],C['codex'],'thread/mcp/tool/call',dict(threadId=cid,server='codex-wake',tool='wake_sessions_show',arguments={'selector':'thread:'+source}),20)
-assert not resource.get('isError',False)
-observed=json.loads(resource['content'][0]['text']);assert observed['session']['thread_id']==source and observed['complete'] is True
-checks['native_resource']=dict(state='passed',tool='wake_sessions_show',source_thread_id=source,content_sha256=hashlib.sha256(json.dumps(resource,sort_keys=True).encode()).hexdigest())
+observed=host_read('native_observations')
+assert observed['state']=='passed' and observed['source_thread_id']==source and observed['successor_thread_id']==cid
+assert observed['checkpoint_sha256']==digest and observed['intent_fingerprint']==nonce and observed['guide']==C['guide']
+checks['native_resource']=observed['native_resource']
 version=subprocess.check_output([C['prefix']+'/bin/codex-wake','--version'],text=True).strip()
 checks['installed_cli']=dict(state='passed',version=version)
-ref=subprocess.check_output(['git','-C',C['repo'],'ls-remote','--exit-code','origin','refs/heads/feat/agent-lifecycle'],text=True,timeout=15).split()[0]
+ref=observed['host_validation']['verified_ref']
 assert ref==C['head']
-validation=[C['prefix']+'/bin/python','-m','unittest','discover','-s',C['repo']+'/tests','-p','test_agent_handoff.py','-q']
-p=subprocess.run(validation,cwd=C['repo'],env=dict(os.environ,CODEX_WAKE_STABLE_TIME_CONFIG='',PYTHONWARNINGS='ignore'),capture_output=True,text=True,timeout=30)
-assert p.returncode==0,p.stderr
-checks['focused_validation']=dict(state='passed',command=validation,exit_code=p.returncode,result=p.stderr[-500:])
+checks['focused_validation']=observed['host_validation']['focused_validation']
+assert checks['focused_validation']['state']=='passed' and checks['focused_validation']['exit_code']==0
+validation=checks['focused_validation']['command']
 packet=('Objective: '+body['objective']+'\\nNon-goals: other actors, sends, claims, resource renewal, shared service changes.\\n'
     +'Repository: CochranResearchGroup/codex-wake at '+ref+'\\n'
     +'Canonical plan: https://github.com/CochranResearchGroup/codex-wake/blob/'+ref+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md\\n'
-    +'GitHub ref verified by git ls-remote. Local/native evidence is separately sourced from this executed preflight; no connector health claim.\\n'
+    +'GitHub ref verified by host git ls-remote. Native and validation evidence was executed by the external controller and verified by this sandboxed preflight; no connector health claim.\\n'
     +'Completed fixture work: exact source checkpoint read and hash verified; installed selected instructions read, native read-only MCP resource and focused public installed validation passed.\\n'
     +'Next authorized packet: execute only the bounded continuation check named by the preserved objective after external goal activation.\\n'
     +'Remaining full Plan0156 acceptance: same-tab, rollback, final review, integration/release and clean main. Fixture success does not close the program.\\n'
@@ -175,7 +201,15 @@ checks['selected_workflow'].update(packet='successor-handoff.md',packet_sha256=s
 pathlib.Path('preflight.json').write_text(json.dumps(dict(version=1,state='passed',source_thread_id=source,successor_thread_id=cid,checkpoint_sha256=digest,intent_fingerprint=nonce,selected_workflow='github-handoff',checks=checks)))
 print('preflight:'+cid+':'+nonce+':'+digest)
 ''')
-        (workspace/'AGENTS.md').write_text(f'For handoff preflight, first run {prefix}/bin/python {helper} --instructions with max_output_tokens=20000 and read both selected skill instructions completely. Then apply their checkpoint/live-state validation through the exact host preflight command. This private fixture has no GitHub connector; use the root-selected github-handoff workflow and canonical frozen repository evidence. Do not claim GitHub connector health. For the outgoing writer, execute only its supplied Python checkpoint script. No A2A enrollment, sends, claims or resource renewal.\n')
+        ref=subprocess.check_output(['git','-C',str(repo),'ls-remote','--exit-code','origin','refs/heads/feat/agent-lifecycle'],text=True,timeout=15).split()[0]
+        if ref!=head:raise RuntimeError('published candidate differs before native assignments')
+        validation=[str(prefix/'bin/python'),'-m','unittest','discover','-s',str(repo/'tests'),'-p','test_agent_handoff.py','-q']
+        checked=subprocess.run(validation,cwd=repo,env=dict(env,CODEX_WAKE_STABLE_TIME_CONFIG='',PYTHONWARNINGS='ignore'),capture_output=True,text=True,timeout=30)
+        if checked.returncode!=0:raise RuntimeError('host installed public validation failed')
+        host_validation=dict(verified_ref=ref,focused_validation=dict(state='passed',command=validation,
+            exit_code=checked.returncode,result=checked.stderr[-500:],performed_by='host_controller'))
+        write(root/'host-validation.json',host_validation)
+        (workspace/'AGENTS.md').write_text(f'For handoff preflight, first run {prefix}/bin/python {helper} --instructions with max_output_tokens=20000 and read both selected skill instructions, canonical plans and checkpoint completely from that output. Then apply their checkpoint/live-state validation through the exact host preflight command with the three contract arguments. The external controller performs native catalog/resource reads and publishes identity-bound observations outside your writable workspace; the script verifies those real observations. Do not access the protected native socket from sandbox shell. This private fixture has no GitHub connector; use the root-selected github-handoff workflow and canonical frozen repository evidence. Do not claim GitHub connector health. For the outgoing writer, execute only its supplied Python checkpoint script. No A2A enrollment, sends, claims or resource renewal.\n')
         script="import os,json,hashlib,pathlib\np=pathlib.Path('checkpoint.json')\np.write_text(json.dumps(dict(source_thread_id=os.environ['CODEX_THREAD_ID'],objective="+repr(objective)+",authority='operator execute Plan0156; fixed bounded disposable continuation',repo="+repr(str(repo))+",commit="+repr(head)+",next_packet='Read selected skill instructions and run host preflight before authorized bounded continuation',pending_obligations=[]),sort_keys=True)+'\\n')\nprint('checkpoint:'+os.environ['CODEX_THREAD_ID']+':'+hashlib.sha256(p.read_bytes()).hexdigest())\n"
         task='Execute only this Python script to write your own outgoing checkpoint, then report checkpoint ready. Do not change any goal.\n```python\n'+script+'```'
         spawn=['sessions','spawn','--profiles',str(profiles),'--profile','worker','--intent','source-1','--name','checkpoint-source','--task',task,'--expires-at',expiry,'--json']
@@ -195,6 +229,10 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         deadline=time.monotonic()+240
         def observe_handoff(state):
             receipt['handoff']=state;write(root/'state.json',receipt)
+            if state.get('successor_thread_id') and not (root/'native-observations.json').exists():
+                observed=observe_native_preflight(request,source,state['successor_thread_id'],guide,workspace)
+                observed.update(checkpoint_sha256=digest,intent_fingerprint=state['fingerprint'],host_validation=host_validation)
+                write(root/'native-observations.json',observed)
         state=wait_for_preflight(invoke,handoff,deadline,observe_handoff)
         target=state['successor_thread_id'];native,spent=usage(target);receipt['preflight_usage']=spent;write(root/'native-preflight.json',native)
         instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and '--instructions' in i.get('command','') and i.get('exitCode')==0]
@@ -206,6 +244,9 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         deadline=time.monotonic()+min(180,max(0,end-snapshot()['utc']['upper']-50))
         while time.monotonic()<deadline and monitor.poll() is None:
             code,state=invoke(handoff);receipt['continuation']=state;write(root/'state.json',receipt)
+            if not (root/'continuation-authority.json').exists():
+                goal=request('thread/goal/get',dict(threadId=target))['goal']
+                if goal and goal['status']=='active':write(root/'continuation-authority.json',dict(goal=goal))
             if (workspace/'continued.json').exists():break
             if state['state'] in ('expired','blocked'):raise RuntimeError('continuation held: '+state['reason'])
             time.sleep(1)
@@ -218,7 +259,13 @@ print('preflight:'+cid+':'+nonce+':'+digest)
             if len(matching)==1 and matching[0]['status']=='completed':break
             if time.monotonic()>deadline:raise RuntimeError('native continuation completion unverified')
             time.sleep(.5)
-        receipt.update(state='passed_continuation_axis',successor_usage=spent,continuation_turn_id=matching[0]['id'],final_source_goal=request('thread/goal/get',dict(threadId=source))['goal'],final_successor_goal=request('thread/goal/get',dict(threadId=target))['goal'])
+        goal=request('thread/goal/get',dict(threadId=target))['goal']
+        if not goal or goal['threadId']!=target or goal['status']!='active' or goal['objective']!=objective:
+            raise RuntimeError('exact active continuation owner not observed before completion')
+        done=request('thread/goal/set',dict(threadId=target,status='complete',origin='automatic'))['goal']
+        if done['status']!='complete' or done['tokenBudget']!=goal['tokenBudget']:
+            raise RuntimeError('native continuation completion did not conserve budget')
+        receipt.update(state='passed_continuation_axis',successor_usage=spent,continuation_turn_id=matching[0]['id'],final_source_goal=request('thread/goal/get',dict(threadId=source))['goal'],final_successor_goal=done)
         receipt['native_handoff_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'thread/mcp/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
         write(root/'native-continuation.json',native)
     except Exception as exc:receipt.update(state='failed',error=str(exc))
@@ -228,10 +275,11 @@ print('preflight:'+cid+':'+nonce+':'+digest)
             try:monitor.wait(timeout=30)
             except subprocess.TimeoutExpired:receipt['monitor_shutdown']='timed_out'
         receipt['monitor_exit']=monitor.poll() if monitor else None
-        if 'target' in locals():
+        cleanup_target=receipt.get('handoff',{}).get('successor_thread_id')
+        if cleanup_target:
             try:
-                _,receipt['successor_usage']=usage(target)
-                receipt['cleanup_successor_goal']=request('thread/goal/get',dict(threadId=target))['goal']
+                _,receipt['successor_usage']=usage(cleanup_target)
+                receipt['cleanup_successor_goal']=request('thread/goal/get',dict(threadId=cleanup_target))['goal']
             except Exception as exc:receipt['final_readback_error']=type(exc).__name__
         if created:subprocess.run(['tmux','-S',str(socket),'kill-session','-t',session],env=env,capture_output=True,timeout=10)
         if server is not None and server.poll() is None:
