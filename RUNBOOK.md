@@ -5891,3 +5891,15 @@ first harness over-specific error assertion corrected without product fix claim.
 Checkpoint31/curated schemas. Remaining full native handoff/integration/release
 scope unchanged; counter-window clarification pending, no resource reset inferred.
 Memory unavailable; prior non-write receipt retained.
+
+## Turn 301 | 2026-10-13 UTC
+
+Native no-model catalog reframe17tools/15152bytes→one session lookup/418bytes,
+private enabled_tools verified on0.162.1. Probe limitations retained; no model-token
+savings claim. Runner restricts unnecessary tools without dropping required proof.
+Checkpoint32 before resource stop: root971091+external723655 leaves305254; full
+remaining both-mode allocation500000 plus primary cannot be funded. Same window
+condition persisted3goal turns; safe ready lanes exhausted, requestBLOCKED pending
+explicit counter-window interpretation. Full goal OPEN, no native retry/merge/
+release/closure. Fresh restart handoff replaces expired original locator.
+Memory unavailable; prior non-write receipt retained.

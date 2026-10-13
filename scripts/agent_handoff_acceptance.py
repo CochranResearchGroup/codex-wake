@@ -125,6 +125,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         lines+=['[mcp_servers.codex-wake]',f'command = {json.dumps(str(prefix/"bin/codex-wake-mcp"))}',
             'args = '+json.dumps(['--wake-root',str(root/'wake'),'--lifecycle-profiles',str(profiles),
                 '--app-server','unix://'+str(endpoint),'--tmux-socket',str(socket),'--tmux-session',session]),
+            'enabled_tools = ["wake_sessions_show"]',
             'startup_timeout_sec = 20','tool_timeout_sec = 20']
         (home/'config.toml').write_text('\n'.join(lines)+'\n');server=launch_server()
         if locator.resolve()!=endpoint:raise RuntimeError('owned endpoint changed')
