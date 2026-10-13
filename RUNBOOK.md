@@ -5732,3 +5732,14 @@ response is persisted uncertain and read back without retry. Two actual RED/GREE
 cycles and85 focused checks PASS16.458s; checkpoint17 before isolated native proof.
 Polling cannot guarantee zero provider overshoot. Full installed/product acceptance
 remains incomplete; no provider effects yet in resumed window. Memory unavailable.
+
+## Turn 287 | 2026-10-13 UTC
+
+Installed10 at76a379e matches eight modules; fresh native handoff02 fails selected
+preflight. Child socket lstat unavailable while parent still polls; cause unproven.
+Actual overspend167448/150000 now interrupts exact successor turn. Read-only native
+reconciliation confirms interrupted turn, source goal paused, successor goal null;
+fresh private census empty/server exits0. No activation or accepted handoff.
+External215395 in reset window (lifetime542290) retained in ledger. Checkpoint18
+reframes next work to provider-free transport reproduction; no unchanged provider
+retry. Full scope open; native budget-stop axis advances only. Memory unavailable.

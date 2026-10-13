@@ -1,6 +1,6 @@
 {
   "state": "observed",
-  "scope": "five completed owned assignments, including failed successor preflight; final cumulative usage once per thread",
+  "scope": "seven owned native assignments including failed/interrupted preflight; final cumulative usage once per thread",
   "threads": [
     {
       "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02",
@@ -144,8 +144,47 @@
         "total_tokens": 161111
       },
       "total_tokens": 161111
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02",
+      "thread_id": "01a134d6-2ed6-7b80-81a9-1a86c1a097ef",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-36-54-01a134d6-2ed6-7b80-81a9-1a86c1a097ef.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 47623,
+        "cached_input_tokens": 35584,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 324,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 47947
+      },
+      "total_tokens": 47947,
+      "budget_window": "resume-2026-10-13"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02",
+      "thread_id": "01a134d6-767f-7061-bd4a-0ffa03547d98",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-37-12-01a134d6-767f-7061-bd4a-0ffa03547d98.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 166889,
+        "cached_input_tokens": 140288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 559,
+        "reasoning_output_tokens": 19,
+        "total_tokens": 167448
+      },
+      "total_tokens": 167448,
+      "budget_window": "resume-2026-10-13"
     }
   ],
-  "cumulative_external_tokens": 326895,
-  "accounting_rule": "Add final cumulative total once per native thread; do not sum successive cumulative events. Count cached tokens conservatively."
+  "cumulative_external_tokens": 542290,
+  "accounting_rule": "Add final cumulative total once per native thread; do not sum successive cumulative events. Count cached tokens conservatively.",
+  "resource_windows": {
+    "original_external_tokens": 326895,
+    "resume_2026_10_13_external_tokens": 215395,
+    "operator_reset_authority": "explicit counter reset and active Plan0156 goal at1791887366; historical spending retained"
+  }
 }
