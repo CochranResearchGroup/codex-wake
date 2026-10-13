@@ -5722,3 +5722,13 @@ and handoff checks PASS29/8.533s; this is blocker reduction, not installed accep
 Checkpoint16 records exact RED/GREEN limits and next live-budget observation seam.
 No external assignments, shared runtime effects, release or issue closure.
 Memory unavailable: healthy runtime but no reviewed Codex Wake atlas candidate.
+
+## Turn 286 | 2026-10-13 UTC
+
+Plan0156 public CLI/socket/PTY reproduction proves active successor usage101 above
+allowance100 was ignored until completion. Controller now observes running usage,
+fences continuation and interrupts only original assignment turn; lost interrupt
+response is persisted uncertain and read back without retry. Two actual RED/GREEN
+cycles and85 focused checks PASS16.458s; checkpoint17 before isolated native proof.
+Polling cannot guarantee zero provider overshoot. Full installed/product acceptance
+remains incomplete; no provider effects yet in resumed window. Memory unavailable.

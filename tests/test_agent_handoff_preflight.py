@@ -67,7 +67,13 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_rollback_cannot_debit_source_after_another_transition_takes_ownership(self):
         self.scenario(rollback=True,owner_conflict=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False):
+    def test_running_preflight_over_allowance_interrupts_exact_assignment_once(self):
+        self.scenario(running_overspend=True)
+
+    def test_lost_preflight_interrupt_response_reconciles_without_reinterrupt(self):
+        self.scenario(running_overspend=True,lost_preflight_interrupt=True)
+
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -151,6 +157,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         interrupts.append(params)
                         for turn in threads[tid]['turns']:
                             if turn['id']==params['turnId']:turn['status']='interrupted'
+                        if lost_preflight_interrupt:ws.close();return
                         value={}
                     elif method=='thread/queue/add':
                         queue[tid]=dict(id='preflight-queue',clientUserMessageId=params['clientUserMessageId'],input=params['input'])
@@ -167,6 +174,9 @@ print('preflight:'+target+':'+nonce+':'+digest)
                                 cwd=tmp,command=shlex.join(cmd),aggregatedOutput=p.stdout)])]
                         (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(
                             type='token_count',info={'total_token_usage':{'total_tokens':30}})))+'\n')
+                        if running_overspend:
+                            threads[tid]['turns'][0]['status']='inProgress'
+                            (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':101}})))+'\n')
                         if expire_preflight:clock['utc'].update(lower=2001,upper=2002)
                         value={}
                     else:raise AssertionError('unexpected native method '+method)
@@ -194,6 +204,16 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         output=StringIO()
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         receipt=json.loads(output.getvalue())
+                        if running_overspend:
+                            self.assertEqual(receipt['state'],'uncertain' if lost_preflight_interrupt and _==0 else 'blocked')
+                            if not (lost_preflight_interrupt and _==0):
+                                self.assertEqual(receipt['reason'],'preflight_allowance_exhausted')
+                            self.assertEqual(receipt['preflight_tokens_used'],101)
+                            self.assertEqual(interrupts,[dict(threadId=target,turnId='preflight-turn')])
+                            self.assertNotIn(target,goals)
+                            self.assertEqual(methods.count('thread/start'),1)
+                            if _==1:return
+                            continue
                         if expire_preflight:
                             self.assertEqual(receipt['state'],'expired')
                             self.assertEqual(receipt['reason'],'continuation_time_exhausted')

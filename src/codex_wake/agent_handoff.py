@@ -297,6 +297,15 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 method,params,profile['timeout'])
         try:
             source_goal=receipt['source_goal']
+            if receipt.get('preflight_stop'):
+                stop=receipt['preflight_stop']
+                observed=request('thread/read',{'threadId':stop['thread_id'],'includeTurns':True})['thread']
+                if observed.get('id')!=stop['thread_id']:raise WakeError('preflight stop identity mismatch')
+                stop['settled']=not any(turn.get('status')=='inProgress' and turn.get('id') in stop['turn_ids']
+                                        for turn in observed.get('turns',[]))
+                if stop['settled']:receipt.pop('uncertain_effect',None)
+                receipt.update(state='blocked' if stop['settled'] else 'uncertain',reason='preflight_allowance_exhausted')
+                return
             if receipt.get('successor_thread_id') and source_goal['status']!='paused':
                 receipt.update(state='blocked',reason='source_resumed_after_transfer')
                 return
@@ -348,6 +357,32 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             with redirect_stdout(emitted):spawn_command(child,root)
             worker=json.loads(emitted.getvalue());receipt['successor']=worker
             receipt['successor_thread_id']=worker.get('thread_id')
+            if worker.get('thread_id') and worker.get('submission_id'):
+                running=request('thread/read',{'threadId':worker['thread_id'],'includeTurns':True})['thread']
+                if running.get('id')!=worker['thread_id']:raise WakeError('preflight usage identity mismatch')
+                spent=None
+                lines=[]
+                if running.get('path'):
+                    rollout=Path(running['path']).resolve()
+                    rollout.relative_to(Path(profile.get('codex_home',Path.home()/'.codex'))/'sessions')
+                    if rollout.is_file():lines=rollout.read_text().splitlines()
+                for line in lines:
+                    event=json.loads(line);payload=event.get('payload',{});info=payload.get('info') or {}
+                    if event.get('type')=='event_msg' and payload.get('type')=='token_count' and info.get('total_token_usage'):
+                        spent=info['total_token_usage'].get('total_tokens')
+                if type(spent) is int and spent>preflight['token_allowance']:
+                    owned=[turn for turn in running.get('turns',[]) if turn.get('status')=='inProgress'
+                           and any(item.get('type')=='userMessage' and item.get('clientId')==worker['submission_id']
+                                   for item in turn.get('items',[]))]
+                    receipt.update(state='blocked',reason='preflight_allowance_exhausted',preflight_tokens_used=spent,
+                                   preflight_stop=dict(thread_id=worker['thread_id'],turn_ids=[turn['id'] for turn in owned]))
+                    save(path,receipt)
+                    for turn in owned:
+                        receipt['uncertain_effect']='turn/interrupt_preflight';save(path,receipt)
+                        request('turn/interrupt',dict(threadId=worker['thread_id'],turnId=turn['id']))
+                    receipt.pop('uncertain_effect',None)
+                    receipt['preflight_stop']['interrupt_response_received']=True
+                    return
             if worker['state']!='completed':
                 receipt.update(state=worker['state'],reason='successor_assignment_'+worker['state']);return
             target=worker['thread_id']
