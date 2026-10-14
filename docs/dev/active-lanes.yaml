@@ -6,8 +6,8 @@ lanes:
     objective: Resolve informal MCP tab targets and explicit dormant-session policies
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/262]
     plan: docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md
-    plan_ref: feat/mcp-tab-targets
-    branch: feat/mcp-tab-targets
+    plan_ref: fix/p162-startup-readiness
+    branch: fix/p162-startup-readiness
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
