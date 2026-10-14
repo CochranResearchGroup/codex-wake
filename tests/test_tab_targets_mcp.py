@@ -13,11 +13,11 @@ class TabTargetMCPTests(unittest.TestCase):
     def test_mcp_accepts_human_descriptor_and_returns_canonical_target(self):
         with tempfile.TemporaryDirectory() as tmp:
             entry=Path(tmp)/'cli'
-            entry.write_text(f'#!{sys.executable}\n'+'''
+            from tests.test_sessions import pane, snapshot
+            state=snapshot(panes=[pane('18','policies')])
+            entry.write_text(f'#!{sys.executable}\ns={state!r}\n'+'''
 from unittest.mock import patch
 from codex_wake.cli import main
-from tests.test_sessions import pane,snapshot
-s=snapshot(panes=[pane('18','policies')])
 with patch('codex_wake.tab_targets.observe',return_value=s):
     raise SystemExit(main())
 ''')
