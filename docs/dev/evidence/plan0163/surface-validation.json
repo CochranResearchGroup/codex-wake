@@ -12,7 +12,7 @@
     "wake_sessions_handoff"
   ],
   "json_examples": 6,
-  "local_links": 11,
+  "local_links": 13,
   "tool_count": 19,
   "effects": "none; parsers and schema validators only"
 }

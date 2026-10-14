@@ -7,6 +7,7 @@ lanes:
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/267]
     plan: docs/dev/plans/0163-2026-10-14-lifecycle-onboarding.md
     plan_ref: docs/lifecycle-onboarding
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/268
     branch: docs/lifecycle-onboarding
     target: origin/main
     plan_state: CLOSED
