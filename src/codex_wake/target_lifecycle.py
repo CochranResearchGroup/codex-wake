@@ -220,7 +220,7 @@ def advance(path, receipt, profile):
                     value.update(session=dict(row, selected_attachment=pane), thread_id=row['thread_id'])
                     mark(path,receipt,'resolved',next_actions=['send']);return
                 mark(path,receipt,'target_busy');return
-            if row['thread_id'] or pane.get('client_pid'):
+            if row['thread_id']:
                 mark(path,receipt,'target_changed');return
             # A shell may still be launching. Never launch a replacement.
             mark(path,receipt,'starting',next_actions=['retry_same_intent']);return

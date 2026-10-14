@@ -1,0 +1,13 @@
+{
+  "state": "restored",
+  "links": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-waked",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-github-webhook",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-mcp"
+  },
+  "reason": "owned startup exposed pending native identity race",
+  "failed_release": "v0.15.0",
+  "owned_process_residue": []
+}

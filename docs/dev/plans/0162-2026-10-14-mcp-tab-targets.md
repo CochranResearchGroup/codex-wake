@@ -11,6 +11,14 @@ Dependency: Plan0156 / PR253, pinned source 5b14c05
 
 ## Current State
 
+0.15.0 merged via PR263/88f008d and was briefly activated. Its owned post-install
+startup proof exposed an unbound-process readiness race; no model turns or residue.
+Restored all five prior0.14.0 links and both skill roots before repair. New bounded
+patch lane fix/p162-startup-readiness distinguishes pending identity from a known
+wrong thread; red/green public CLI regression. Prepare0.15.1, exact-main deployment
+and fresh proof before closure. Earlier deployment notes below are historical.
+
+
 Deployment continuation authorized by operator: `install and deploy and reconcile
 the repo`. Parent PR253 merged as3bde6d5 and0.14.0 is installed. Rebased only the
 three feature commits from original base5b14c05 onto current main3bde6d5; original

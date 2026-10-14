@@ -213,6 +213,19 @@ class TargetLifecycleTests(unittest.TestCase):
         self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'resolved')
         self.assertEqual(self.calls,[])
 
+    def test_process_appearing_before_native_binding_remains_starting(self):
+        self.call('--on-inactive','fresh')
+        p=pane('18','policies',identifier='%19',title='Loading')
+        p['pane_current_path']=str(self.root)
+        self.state=snapshot(threads=[],panes=[self.shell,p])
+        self.calls=[]
+        self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'starting')
+        p['pane_title']='Session | repo'
+        self.state=snapshot(threads=[dict(id='new-thread',cwd=str(self.root),name='Session',
+                                        status={'type':'idle'})],panes=[self.shell,p])
+        self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'resolved')
+        self.assertEqual(self.calls,[])
+
     def test_startup_becomes_exact_ready_identity_and_reuse_is_detected(self):
         self.call('--on-inactive','fresh')
         p=pane('18','policies',identifier='%19');p['pane_current_path']=str(self.root)

@@ -1,0 +1,15 @@
+======================================================================
+FAIL: test_process_appearing_before_native_binding_remains_starting (tests.test_tab_targets.TargetLifecycleTests.test_process_appearing_before_native_binding_remains_starting)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-tab-targets/tests/test_tab_targets.py", line 222, in test_process_appearing_before_native_binding_remains_starting
+    self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'starting')
+AssertionError: 'target_changed' != 'starting'
+- target_changed
++ starting
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.056s
+
+FAILED (failures=1)
