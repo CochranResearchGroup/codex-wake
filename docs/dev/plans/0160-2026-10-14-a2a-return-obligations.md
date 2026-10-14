@@ -5,7 +5,7 @@ Workflow: DONE
 Owner: primary / ecochran76
 Branch: docs/a2a-return-obligations
 Target: origin/main
-Work-Item: docs/dev/plans/0160-2026-10-14-a2a-return-obligations.md
+Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/258
 
 ## Current State
 
@@ -24,7 +24,8 @@ Primary owns changes; no parallel agent work needed for this coupled contract.
 
 No runtime/schema changes, live messages, incident replay, service changes,
 release or automatic enforcement. No changes to lifecycle implementation.
-No external issue/PR publication or merge in this local standards packet.
+Initial local packet excluded publication. Operator subsequently authorized
+PR, merge and deployment; issue258 owns this delivery continuation.
 
 ## Acceptance criteria
 
