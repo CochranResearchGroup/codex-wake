@@ -90,6 +90,20 @@ def handoff_command(args, root):
             from .sessions_cli import emit
             emit(receipt,args.as_json)
             return 0 if receipt.get('rollback',{}).get('state')=='completed' else 5
+        if receipt.get('terminal_review'):
+            try:
+                from .lifecycle_budget import record_successor, native_usage
+                observed=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                    'thread/read',dict(threadId=receipt['successor_thread_id'],includeTurns=True),profile['timeout'])['thread']
+                if observed.get('id')!=receipt['successor_thread_id']:raise ValueError('terminal actor changed')
+                record_successor(root,receipt,native_usage(observed,profile),
+                    settled=not any(turn.get('status')=='inProgress' for turn in observed.get('turns',[])))
+            except Exception as exc:
+                receipt['terminal_accounting_error']=type(exc).__name__
+            save(path,receipt)
+            from .sessions_cli import emit
+            emit(receipt,args.as_json)
+            return 5
         if receipt.get('deadline_fence'):
             from .process import process_identity,process_exists
             fence=receipt['deadline_fence']
@@ -526,9 +540,14 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 caller_thread_id=args.caller_thread_id,as_json=True)
             if args.mode=='same-tab':
                 child.replacement=dict(source_thread_id=receipt['thread_id'],attachment=receipt['source_attachment'])
-            emitted=StringIO()
-            with redirect_stdout(emitted):spawn_command(child,root)
-            worker=json.loads(emitted.getvalue());receipt['successor']=worker
+            if receipt.get('correction_assignment'):
+                from .lifecycle_correction import advance_correction
+                worker=advance_correction(path,receipt,profile,request)
+            else:
+                emitted=StringIO()
+                with redirect_stdout(emitted):spawn_command(child,root)
+                worker=json.loads(emitted.getvalue())
+            receipt['successor']=worker
             receipt['successor_thread_id']=worker.get('thread_id')
             if worker.get('thread_id'):
                 if owner.get('successor_thread_id') not in (None,worker['thread_id']):
@@ -575,6 +594,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             executions=[i for turn in native['turns'] for i in turn['items']
                 if turn['status']=='completed' and i.get('type')=='commandExecution' and i.get('status')=='completed'
                 and i.get('exitCode')==0 and i.get('cwd')==str(Path(profile['cwd']).resolve())
+                and any(item.get('type')=='userMessage' and item.get('clientId')==worker['submission_id']
+                        for item in turn['items'])
                 and str(script) in i.get('command','') and marker in (i.get('aggregatedOutput') or '')]
             if (any(proof.get(k)!=v for k,v in required.items()) or len(executions)!=1
                     or any(proof.get('checks',{}).get(k,{}).get('state')!='passed' for k in preflight['required_checks'])):
@@ -598,16 +619,26 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             review = proof.get('work_review', {})
             receipt['work_review'] = review
             if review.get('verdict') in ('correct', 'blocked'):
+                if review['verdict']=='correct':
+                    from .lifecycle_correction import prepare_correction
+                    if prepare_correction(path,receipt,policy,profile,review):
+                        if receipt['state']=='blocked':
+                            receipt['terminal_review']=True
+                            record_successor(root,receipt,usage,settled=True)
+                        return
                 record_successor(root, receipt, usage, settled=True)
+                receipt['terminal_review']=True
                 receipt.update(state='blocked', reason='work_review_' + review['verdict'])
                 return
             if review.get('verdict') != 'accept':
                 record_successor(root, receipt, usage, settled=True)
+                receipt['terminal_review']=True
                 receipt.update(state='blocked', reason='substantive_work_review_unverified')
                 return
             if not validate_work_review(review, policy, Path(profile['cwd']),
                                         json.loads(Path(contract['checkpoint']).read_text())):
                 record_successor(root, receipt, usage, settled=True)
+                receipt['terminal_review']=True
                 receipt.update(state='blocked', reason='substantive_work_review_unverified')
                 return
             if receipt['remaining_tokens']==0:
@@ -624,6 +655,9 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                     or goal['tokenBudget']!=receipt['remaining_tokens']):
                 receipt.update(state='blocked',reason='successor_goal_authority_changed');return
             receipt.pop('uncertain_effect',None);receipt['successor_goal']=goal
+            from .lifecycle_budget import ledger_for, trusted_upper
+            receipt['objective_budget']=ledger_for(root,receipt).bind_goal(
+                'goal:'+target+':'+str(goal['createdAt']),receipt['budget_actor'],usage,now=trusted_upper())
             receipt.update(state='awaiting_activation',reason='deadline_fence_unverified')
             owner.update(state='successor_prepared',successor_thread_id=target);save(owner_path,owner)
         except Exception as exc:
@@ -691,7 +725,7 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                         now=trusted_upper()
                         ledger=ledger_for(root,receipt)
                         source_goal=observed[source]
-                        ledger.record('goal:'+source+':'+str(source_goal['createdAt']),
+                        ledger.record_goal('goal:'+source+':'+str(source_goal['createdAt']),
                             source_goal.get('tokensUsed'),settled=True,now=now)
                         counter=observed[target].get('tokensUsed')
                         total=receipt['preflight_tokens_used']+counter if type(counter) is int and counter>=0 else None

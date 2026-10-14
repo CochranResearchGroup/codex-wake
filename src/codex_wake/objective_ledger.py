@@ -142,7 +142,7 @@ class ObjectiveLedger:
             else:
                 state.update(configuration=config, original_deadline=config['objective_deadline'],
                              prior_tokens=prior_tokens, actors={}, correction_cycles=0,
-                             authorization_history=[dict(configuration=config, approval=approval, at=_epoch(now))])
+                             authorization_history=[dict(action='initial', configuration=config, approval=approval, at=_epoch(now))])
             self._observe(state, now)
             return self._view(state, now)
 
@@ -186,6 +186,26 @@ class ObjectiveLedger:
             return self._view(state, now, admitted=admitted)
 
     def record(self, actor_id, cumulative_tokens, settled=False, *, now):
+        return self._record(actor_id, cumulative_tokens, settled=settled, now=now)
+
+    def record_goal(self, goal_id, cumulative_tokens, settled=False, *, now):
+        return self._record(goal_id, cumulative_tokens, settled=settled, goal=True, now=now)
+
+    def bind_goal(self, goal_id, actor_id, preflight_tokens, *, now):
+        _count(preflight_tokens)
+        with self._transaction() as state:
+            self._observe(state, now)
+            actor = state['actors'][actor_id]
+            if actor['used'] < preflight_tokens:
+                raise ValueError('preflight accounting must precede goal binding')
+            binding = dict(actor_id=actor_id, preflight_tokens=preflight_tokens)
+            aliases = state.setdefault('goal_aliases', {})
+            if goal_id in aliases and aliases[goal_id] != binding:
+                raise ValueError('native goal accounting binding changed')
+            aliases[goal_id] = binding
+            return self._view(state, now)
+
+    def _record(self, actor_id, cumulative_tokens, settled=False, *, goal=False, now):
         if not actor_id:
             raise ValueError('actor identity required')
         if cumulative_tokens is not None:
@@ -193,6 +213,12 @@ class ObjectiveLedger:
         with self._transaction() as state:
             self._observe(state, now)
             self._view(state, now)
+            if goal:
+                binding = state.get('goal_aliases', {}).get(actor_id)
+                if binding:
+                    actor_id = binding['actor_id']
+                    if cumulative_tokens is not None:
+                        cumulative_tokens += binding['preflight_tokens']
             actor = state['actors'].setdefault(actor_id, dict(terms=None, reservation=0, used=0, settled=False, known=True))
             if cumulative_tokens is None or cumulative_tokens < actor['used']:
                 actor['known'] = False
@@ -203,16 +229,35 @@ class ObjectiveLedger:
                 actor['settled'] = actor['settled'] or bool(settled)
             return self._view(state, now)
 
-    def correction(self, *, now):
+    def correction(self, *, now, key=None, actor_id=None):
         with self._transaction() as state:
             self._observe(state, now)
             view = self._view(state, now)
-            admitted = view['ready'] and state['correction_cycles'] < state['configuration']['max_correction_cycles']
+            decisions = state.setdefault('correction_decisions', {})
+            eligible = view['ready']
+            if actor_id is not None:
+                actor = state['actors'].get(actor_id, {})
+                eligible = (view['accounting_known'] and actor.get('known') is True
+                    and actor.get('settled') is False and actor.get('reservation', 0) > actor.get('used', 0)
+                    and state['observed_at'] < min(actor.get('session_deadline', 0), _epoch(state['configuration']['objective_deadline']))
+                    and view['tokens_used'] + view['tokens_reserved'] <= state['configuration']['objective_token_limit'])
+            if key is not None and key in decisions:
+                return self._view(state, now, admitted=decisions[key] and eligible)
+            admitted = eligible and state['correction_cycles'] < state['configuration']['max_correction_cycles']
             if admitted:
                 state['correction_cycles'] += 1
+            if key is not None:
+                decisions[key] = admitted
             return self._view(state, now, admitted=admitted)
 
     def extend(self, configuration, approval, *, now):
+        return self._authorize(configuration, approval, 'extend', now=now)
+
+    def reset(self, configuration, approval, *, now):
+        """Replace caps explicitly; retain all usage, original time and cycle history."""
+        return self._authorize(configuration, approval, 'reset', now=now)
+
+    def _authorize(self, configuration, approval, action, *, now):
         config = self._configuration(configuration)
         if not approval:
             raise ValueError('explicit extension approval required')
@@ -220,10 +265,17 @@ class ObjectiveLedger:
             self._observe(state, now)
             self._view(state, now)
             previous = state['configuration']
+            last = state['authorization_history'][-1]
+            if (config == previous and last.get('action') == action
+                    and last['approval'] == approval):
+                return self._view(state, now)
             if (config['revision'] == previous['revision'] or config['started_at'] != previous['started_at']
-                    or config['objective_token_limit'] < previous['objective_token_limit']
-                    or _epoch(config['objective_deadline']) < _epoch(previous['objective_deadline'])):
-                raise ValueError('extension must preserve origin and increase authorization revision')
+                    or (action == 'extend' and (config['objective_token_limit'] < previous['objective_token_limit']
+                    or _epoch(config['objective_deadline']) < _epoch(previous['objective_deadline'])))):
+                raise ValueError('authorization must preserve origin and use a new revision')
+            if action == 'reset' and any(not actor['settled'] or not actor['known']
+                                        for actor in state['actors'].values()):
+                raise ValueError('reset requires settled known actor accounting')
             state['configuration'] = config
-            state['authorization_history'].append(dict(configuration=config, approval=approval, at=_epoch(now)))
+            state['authorization_history'].append(dict(action=action, configuration=config, approval=approval, at=_epoch(now)))
             return self._view(state, now)

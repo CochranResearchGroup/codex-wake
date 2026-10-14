@@ -5981,3 +5981,22 @@ refresh/spawn accounting, correction admission and both-mode native acceptance
 remain open. No release/install/merge or external issue closure. Memory disposition
 unavailable: no qualified repository cloud manifest from bounded atlas discovery;
 machine-readable non-write receipt retained, zero Graphiti writes attempted.
+
+## Turn 307 | 2026-10-14 UTC
+
+Outcome_progress: explicit budget reset/replay, durable goal accounting aliases,
+owned corrective assignments and two-cycle terminal stop implemented. Public
+worked examples: prior40 resetcap100 leaves60; preflight10+successor20 remains30
+after source/restart replay; actual repair accepted after60 preflight tokens;
+repeated rejection stops after two corrections/90tokens with no successor goal
+or fourth queue item. Outside-scope correction holds before admission.
+Focused selection72 tests passed22.251s, including harness supervision. Compile,
+policy wiring and whitespace pass. Executable MCP smoke passes18tools/11calls;
+CI's previous failure is an exact stale17-tool smoke assertion, now repaired.
+Evidence docs/dev/evidence/plan0156/correction-reset-source.md. Worker
+/root/native_harness_revision returned only script changes; primary inspected and
+accepted adaptation, validated under repo venv after worker's environment-import
+failure. Native effects withheld from worker. Counter/model unknown; conservative
+100,000token reservation retained alongside the prior ledger lane reservation.
+Full goal OPEN; general spawn/refresh accounting, context-replacement correction,
+installed both-mode acceptance, integration/release and cleanup remain open.

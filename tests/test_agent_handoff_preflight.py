@@ -36,6 +36,15 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_missing_writer_instruction_read_blocks_before_successor_admission(self):
         self.scenario(unread_writer=True)
 
+    def test_bounded_correction_runs_owned_packet_then_accepts_actual_repair(self):
+        self.scenario(correction='accept')
+
+    def test_correction_cannot_widen_host_approved_scope(self):
+        self.scenario(correction='drift')
+
+    def test_repeated_rejection_stops_after_two_owned_correction_cycles(self):
+        self.scenario(correction='reject')
+
     def test_ready_runtime_with_unsupported_completion_cannot_prepare_a_goal(self):
         self.scenario(work_verdict='correct')
 
@@ -132,7 +141,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -194,6 +203,9 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     type='commandExecution',status='completed',exitCode=read.returncode,cwd=tmp,
                     command=shlex.join(['cat',str(writer)]),aggregatedOutput=read.stdout))
             policy['acceptance_criteria']=['bounded continuation']
+            if correction:
+                policy['correction_scope']=['repair.txt']
+                (root/'repair.txt').write_text('broken')
             defaults=dict(handoff_writer=dict(name='local-writer',path=str(writer)),
                 preflight_reviewer=dict(name=workflow,path=str(reviewer)),session_token_limit=session_cap,
                 session_time_limit_seconds=1000,objective_token_limit=1000,
@@ -247,6 +259,10 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     elif method=='thread/queue/start':
                         q=queue.pop(tid);task=q['input'][0]['text']
                         contract=json.loads(task.split('PREFLIGHT_CONTRACT=',1)[1].split('\n',1)[0])
+                        corrected='CORRECTION_PACKET=' in task
+                        if corrected:
+                            repair_cmd=[sys.executable,'-c',"from pathlib import Path; Path('repair.txt').write_text('corrected')"]
+                            repair=external_run(repair_cmd,cwd=tmp,capture_output=True,text=True,check=True)
                         cmd=[sys.executable,str(helper),source,contract['intent_fingerprint'],digest]
                         p=external_run(cmd,cwd=tmp,env=dict(os.environ,CODEX_THREAD_ID=tid),capture_output=True,text=True,check=True)
                         proof=json.loads((root/'preflight.json').read_text())
@@ -263,21 +279,34 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         if bad_review=='changed_evidence':proof['work_review']['acceptance_progress'][0]['evidence'][0]['sha256']='0'*64
                         if bad_review=='unknown_criterion':proof['work_review']['acceptance_progress'][0]['criterion']='invented acceptance'
                         (root/'preflight.json').write_text(json.dumps(proof))
+                        if correction:
+                            proof=json.loads((root/'preflight.json').read_text())
+                            if not corrected or correction=='reject':
+                                proof['work_review'].update(verdict='correct',unsupported_claims=['Repair still unaccepted'],
+                                    correction_packet=dict(criterion='bounded continuation',paths=['repair.txt'],
+                                        evidence=[dict(path='repair.txt',sha256=hashlib.sha256((root/'repair.txt').read_bytes()).hexdigest())],
+                                        instructions='Repair the broken fixture and review the actual result.'))
+                            else:
+                                proof['work_review']['acceptance_progress'][0]['evidence']=[dict(path='repair.txt',
+                                    sha256=hashlib.sha256((root/'repair.txt').read_bytes()).hexdigest())]
+                            if correction=='drift':proof['work_review']['correction_packet']['paths']=['outside.txt']
+                            (root/'preflight.json').write_text(json.dumps(proof))
                         if work_verdict:
                             proof=json.loads((root/'preflight.json').read_text())
                             proof['work_review']=dict(verdict=work_verdict,
                                 unsupported_claims=['Completion based only on test count'])
                             (root/'preflight.json').write_text(json.dumps(proof))
-                        threads[tid]['turns']=[dict(id='preflight-turn',status='completed',items=[
+                        prior_turns=threads[tid]['turns'] if correction else []
+                        threads[tid]['turns']=prior_turns+[dict(id='preflight-turn-'+str(len(prior_turns)) if correction else 'preflight-turn',status='completed',items=[
                             dict(id='user',type='userMessage',clientId=q['clientUserMessageId'],content=q['input']),
                             dict(id='preflight-command',type='commandExecution',status='completed',exitCode=p.returncode,
                                 cwd=tmp,command=shlex.join(cmd),aggregatedOutput=p.stdout)])]
                         read=external_run(['cat',str(reviewer)],capture_output=True,text=True,check=True)
-                        threads[tid]['turns'][0]['items'].append(dict(id='review-instructions',
+                        threads[tid]['turns'][-1]['items'].append(dict(id='review-instructions',
                             type='commandExecution',status='completed',exitCode=read.returncode,cwd=tmp,
                             command=shlex.join(['cat',str(reviewer)]),aggregatedOutput=read.stdout))
                         (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(
-                            type='token_count',info={'total_token_usage':{'total_tokens':30}})))+'\n')
+                            type='token_count',info={'total_token_usage':{'total_tokens':30*len(threads[tid]['turns']) if correction else 30}})))+'\n')
                         if running_overspend:
                             threads[tid]['turns'][0]['status']='inProgress'
                             (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':101}})))+'\n')
@@ -314,7 +343,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
             try:
                 with patch('subprocess.run',side_effect=command),patch('codex_wake.native_clock.snapshot',
                         return_value=clock):
-                    for _ in range(3 if stale_title else 2):
+                    for _ in range(3 if correction or stale_title else 2):
                         output=StringIO()
                         if changed_defaults and _==1:
                             from codex_wake.records import WakeError
@@ -331,6 +360,32 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         if unread_writer:
                             self.assertEqual(receipt['reason'], 'handoff_writer_instructions_unverified')
                             self.assertEqual(methods.count('thread/start'), 0)
+                            return
+                        if correction:
+                            if correction=='drift':
+                                self.assertEqual(receipt['reason'],'work_review_correct')
+                                self.assertEqual(receipt['objective_budget']['correction_cycles'],0)
+                                self.assertEqual(methods.count('thread/queue/add'),1)
+                                return
+                            if receipt['state']=='correcting':
+                                self.assertNotIn(target,goals)
+                                self.assertEqual(receipt['objective_budget']['correction_cycles'],_+1)
+                                continue
+                            if correction=='reject':
+                                self.assertEqual(receipt['reason'],'correction_cycles_exhausted')
+                                self.assertEqual(receipt['objective_budget']['correction_cycles'],2)
+                                self.assertEqual(methods.count('thread/queue/add'),3)
+                                self.assertNotIn(target,goals)
+                                repeated=StringIO()
+                                with redirect_stdout(repeated):self.assertEqual(run(argv),5)
+                                self.assertEqual(json.loads(repeated.getvalue())['reason'],'correction_cycles_exhausted')
+                                self.assertEqual(methods.count('thread/queue/add'),3)
+                                return
+                            self.assertEqual(receipt['state'],'awaiting_activation')
+                            self.assertEqual((root/'repair.txt').read_text(),'corrected')
+                            self.assertEqual(receipt['preflight_tokens_used'],60)
+                            self.assertEqual(receipt['remaining_tokens'],890)
+                            self.assertEqual(methods.count('thread/start'),1)
                             return
                         if stale_title and _<2:
                             if _==0:self.assertEqual(receipt['state'],'awaiting_preflight')

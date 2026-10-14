@@ -11,6 +11,33 @@ def config(revision=1, limit=100, deadline=200):
 
 
 class ObjectiveLedgerTests(unittest.TestCase):
+    def test_successor_goal_and_preflight_are_charged_once_when_successor_becomes_source(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger = ObjectiveLedger(root, 'objective')
+            ledger.configure(config(), 'operator', now=100)
+            ledger.reserve('successor', 60, 40, now=100)
+            ledger.record('successor', 10, now=110)
+            ledger.bind_goal('thread:goal-created', 'successor', 10, now=110)
+            ledger.record_goal('thread:goal-created', 20, now=120)
+            ledger = ObjectiveLedger(root, 'objective')
+            view = ledger.record_goal('thread:goal-created', 20, settled=True, now=120)
+            self.assertEqual(view['tokens_used'], 30)
+            self.assertEqual(view['remaining_tokens'], 70)
+    def test_explicit_reset_replaces_caps_without_erasing_spend_or_cycles(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger = ObjectiveLedger(root, 'objective')
+            ledger.configure(config(), 'initial operator grant', now=100)
+            ledger.reserve('a', 50, 10, now=100)
+            ledger.record('a', 40, settled=True, now=110)
+            ledger.correction(now=110)
+            view = ledger.reset(config(2, 60, 300), 'explicit reset', now=200)
+            self.assertEqual(view['tokens_used'], 40)
+            self.assertEqual(view['remaining_tokens'], 20)
+            self.assertEqual(view['original_deadline'], 200)
+            self.assertEqual(view['correction_cycles'], 1)
+            self.assertEqual(view['authorization_history'][-1]['action'], 'reset')
+            replay = ledger.reset(config(2, 60, 300), 'explicit reset', now=201)
+            self.assertEqual(len(replay['authorization_history']), 2)
     def test_shared_cap_survives_restart_and_snapshots_are_idempotent(self):
         with tempfile.TemporaryDirectory() as root:
             ledger = ObjectiveLedger(root, 'objective')

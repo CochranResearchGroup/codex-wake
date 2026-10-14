@@ -12,6 +12,8 @@ import subprocess
 import time
 import tomllib
 
+from codex_wake.lifecycle_configuration import effective_configuration
+from codex_wake.lifecycle_review import instruction_read
 from codex_wake.native_clock import snapshot
 from codex_wake.native_protocol import native_request
 from agent_handoff_writer_acceptance import write
@@ -77,11 +79,18 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
     if not (home/'auth.json').is_symlink():(home/'auth.json').symlink_to(Path.home()/'.codex/auth.json')
     skill=home/'skills/codex-wake';shutil.copytree(repo/'skills/codex-wake',skill,dirs_exist_ok=resume_setup)
     workflow=Path.home()/'.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md'
+    reviewer=workflow.parent.parent/'github-ask-matt/SKILL.md'
+    # Exact catalog selections: unreadable paths hold before any runtime effects.
+    for selected_path in (workflow, reviewer):
+        if not selected_path.is_file() or not selected_path.read_text().strip():
+            raise RuntimeError('selected instructions unavailable; no substitution permitted')
     guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
     head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
     receipt=dict(state='preparing',root=str(root),prefix=str(prefix),source_commit=head,
         selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
-        token_cap=250000,time_cap_seconds=600,manual_assignment_limit=2,mode=mode,rollback_requested=rollback)
+        token_cap=250000,time_cap_seconds=600,manual_assignment_limit=2,mode=mode,rollback_requested=rollback,
+        root_window=dict(start='2026-10-14T10:38:06Z',deadline='2026-10-14T16:38:06Z',token_cap=2000000),
+        adaptation_lane=dict(token_cap=100000,time_cap_seconds=900,goal_counter='unknown'))
     env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
     for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):env.pop(k,None)
     socket=root/'tmux.sock';session='owned-handoff';locator=root/'native.sock';server=None;monitor=None;created=False
@@ -116,12 +125,15 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         bounds=snapshot().get('utc')
         if not bounds:raise RuntimeError('admissible UTC unavailable')
         started=original['started_at'] if original else bounds['upper']
-        end=min(original['deadline'] if original else started+600,parent_deadline-60)
+        end=min(original['deadline'] if original else started+600,parent_deadline-60,
+            datetime(2026,10,14,16,38,6,tzinfo=UTC).timestamp()-60)
         if end-bounds['upper']<(240 if original else 480):raise RuntimeError('original/parent deadline leaves insufficient fixed fixture window')
         expiry=datetime.fromtimestamp(end,UTC).isoformat();receipt.update(started_at=started,deadline=end)
         # Resolve the owned listener before configuring MCP, without creating a thread.
         server=launch_server();endpoint=locator.resolve(strict=True)
         os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=15)
+        for selected_path in (workflow,reviewer):
+            lines+=['[[skills.config]]',f'path = {json.dumps(str(selected_path))}','enabled = true']
         lines+=['[mcp_servers.codex-wake]',f'command = {json.dumps(str(prefix/"bin/codex-wake-mcp"))}',
             'args = '+json.dumps(['--wake-root',str(root/'wake'),'--lifecycle-profiles',str(profiles),
                 '--app-server','unix://'+str(endpoint),'--tmux-socket',str(socket),'--tmux-session',session]),
@@ -130,16 +142,28 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         (home/'config.toml').write_text('\n'.join(lines)+'\n');server=launch_server()
         if locator.resolve()!=endpoint:raise RuntimeError('owned endpoint changed')
         def request(method,params):return native_request('unix://'+str(endpoint),str(codex),method,params,10)
+        catalog=request('skills/list',dict(cwds=[str(workspace)],forceReload=True))
+        for selection in (workflow,reviewer):
+            if not any(entry.get('path')==str(selection) and entry.get('enabled') is True
+                       for group in catalog['data'] for entry in group['skills']):
+                raise RuntimeError('actual native skill catalog did not load exact selected instructions')
+        receipt['selected_instruction_catalog']=dict(writer=str(workflow),reviewer=str(reviewer))
         empty=request('thread/list',{'limit':100})
         if empty.get('data')!=[] or empty.get('nextCursor') is not None:raise RuntimeError('existing conversations hold setup resume')
         receipt['setup_readiness']=dict(loaded_threads=[],persisted_threads=[],original_window_retained=bool(original))
         subprocess.run(['tmux','-S',str(socket),'new-session','-d','-s',session,'-x','160','-y','40','sleep 700'],env=env,check=True,capture_output=True,timeout=10);created=True
         profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
-        write(profiles,dict(version=1,profiles={'worker':profile}))
+        defaults=dict(handoff_writer=dict(name='github-handoff',path=str(workflow)),
+            preflight_reviewer=dict(name='github-ask-matt',path=str(reviewer)),
+            session_token_limit=150000,session_time_limit_seconds=int(end-started),
+            objective_token_limit=250000,objective_time_limit_seconds=int(end-started),max_correction_cycles=0)
+        write(profiles,dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults))
         objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.'
-        constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),prefix=str(prefix),
+        constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),reviewer=str(reviewer),prefix=str(prefix),
+            review_authority=str(root/'review-authority.json'),
             native_observations=str(root/'native-observations.json'),continuation_authority=str(root/'continuation-authority.json'))
         helper.write_text('C='+repr(constants)+'\n'+'''import os,sys,json,pathlib,hashlib,subprocess,time
+from codex_wake.lifecycle_review import validate_work_review
 cid=os.environ['CODEX_THREAD_ID']
 def sha(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
 def host_read(key):
@@ -148,12 +172,12 @@ def host_read(key):
         assert time.monotonic()<deadline,'host native observation unavailable'
         time.sleep(.1)
     return json.loads(pathlib.Path(C[key]).read_text())
-if sys.argv[1:]==['--instructions']:
-    for kind in ('guide','workflow'):
+if sys.argv[1:1+1]==['--instructions']:
+    for kind in ('guide','reviewer','workflow'):
         print('SELECTED_INSTRUCTIONS:'+kind+':'+sha(C[kind]))
         print(pathlib.Path(C[kind]).read_text())
     for p in (C['repo']+'/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md',
-              C['repo']+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md','checkpoint.json'):
+              C['repo']+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md','checkpoint.json','host-validation.json'):
         print('PREFLIGHT_SOURCE:'+p+':'+sha(p))
         print(pathlib.Path(p).read_text())
     own=pathlib.Path(__file__).resolve()
@@ -192,18 +216,21 @@ assert ref==C['head']
 checks['focused_validation']=observed['host_validation']['focused_validation']
 assert checks['focused_validation']['state']=='passed' and checks['focused_validation']['exit_code']==0
 validation=checks['focused_validation']['command']
-packet=('Objective: '+body['objective']+'\\nNon-goals: other actors, sends, claims, resource renewal, shared service changes.\\n'
-    +'Repository: CochranResearchGroup/codex-wake at '+ref+'\\n'
-    +'Canonical plan: https://github.com/CochranResearchGroup/codex-wake/blob/'+ref+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md\\n'
-    +'GitHub ref verified by host git ls-remote. Native and validation evidence was executed by the external controller and verified by this sandboxed preflight; no connector health claim.\\n'
-    +'Completed fixture work: exact source checkpoint read and hash verified; installed selected instructions read, native read-only MCP resource and focused public installed validation passed.\\n'
-    +'Next authorized packet: execute only the bounded continuation check named by the preserved objective after external goal activation.\\n'
-    +'Remaining full Plan0156 acceptance: same-tab, rollback, final review, integration/release and clean main. Fixture success does not close the program.\\n'
-    +'Validation command: '+repr(validation)+'\\n'
-    +'Authority: '+body['authority']+'; original expiry and cumulative counters remain externally enforced.\\n')
-pathlib.Path('successor-handoff.md').write_text(packet)
-checks['selected_workflow'].update(packet='successor-handoff.md',packet_sha256=sha('successor-handoff.md'),verified_ref=ref)
-pathlib.Path('preflight.json').write_text(json.dumps(dict(version=1,state='passed',source_thread_id=source,successor_thread_id=cid,checkpoint_sha256=digest,intent_fingerprint=nonce,selected_workflow='github-handoff',checks=checks)))
+# The reviewer, not this verifier, authors the semantic verdict and packet.
+review_path=pathlib.Path('work-review.json')
+review=json.loads(review_path.read_text())
+authority=host_read('review_authority')
+assert review['configuration_revision']==authority['configuration_revision']
+assert review['source_thread_id']==source and review['successor_thread_id']==cid
+assert review['checkpoint_sha256']==digest and review['intent_fingerprint']==nonce
+assert review['work_review']['verdict'] in ('accept','correct','blocked')
+assert review['work_review']['selected_review']=='github-handoff'
+assert validate_work_review(review['work_review'],authority['policy'],pathlib.Path.cwd(),body)
+packet=pathlib.Path('successor-handoff.md').read_text()
+assert packet.strip(),'reviewer handoff packet missing'
+checks['selected_workflow'].update(packet='successor-handoff.md',packet_sha256=sha('successor-handoff.md'),verified_ref=ref,
+    review_artifact='work-review.json',review_artifact_sha256=sha(review_path))
+pathlib.Path('preflight.json').write_text(json.dumps(dict(version=1,state='passed',source_thread_id=source,successor_thread_id=cid,checkpoint_sha256=digest,intent_fingerprint=nonce,selected_workflow='github-ask-matt',configuration_revision=authority['configuration_revision'],runtime_readiness=dict(state='passed',checks=checks),work_review=review['work_review'],checks=checks)))
 print(pathlib.Path('preflight.json').read_text())
 print(packet)
 print('preflight:'+cid+':'+nonce+':'+digest)
@@ -216,7 +243,8 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         host_validation=dict(verified_ref=ref,focused_validation=dict(state='passed',command=validation,
             exit_code=checked.returncode,result=checked.stderr[-500:],performed_by='host_controller'))
         write(root/'host-validation.json',host_validation)
-        (workspace/'AGENTS.md').write_text(f'For handoff preflight, first run {prefix}/bin/python {helper} --instructions using functions.exec with first-line // @exec: {{"max_output_tokens": 20000}} and tools.exec_command max_output_tokens=20000; emit text(result.output) directly, not text(result). Read both selected skill instructions, canonical plans and checkpoint completely from that output. The instruction output also contains the complete immutable approved helper source for inspection. Perform exactly two preflight shell commands: this complete instruction read, then the exact host preflight command with the three contract arguments. Inspect the supplied source and full selected instructions from the first output; do not reread them through extra commands. Apply checkpoint/live-state validation using the approved helper and inspect its actual result. If any required proof is absent or contradictory, report blocked without retries. The external controller performs native catalog/resource reads and publishes identity-bound observations outside your writable workspace; the script verifies those real observations. Do not access the protected native socket from sandbox shell. This private fixture has no GitHub connector; use the root-selected github-handoff workflow and canonical frozen repository evidence. Do not claim GitHub connector health. For the outgoing writer, execute only its supplied Python checkpoint script. No A2A enrollment, sends, claims or resource renewal.\n')
+        (workspace/'AGENTS.md').write_text(f"For reviewer preflight, first run {prefix}/bin/python {helper} --instructions {reviewer} {workflow} using functions.exec with first-line // @exec: {{\"max_output_tokens\": 20000}} and tools.exec_command max_output_tokens=20000; emit text(result.output) directly, not text(result). Read all selected instructions, canonical plans, checkpoint and immutable approved helper from this bounded output. Apply github-ask-matt to this continuation request: select and apply github-handoff. Check actual supplied source and host-approved evidence, then author successor-handoff.md and work-review.json in one shell command before the exact host verifier command. The review artifact must bind configuration_revision, source_thread_id, successor_thread_id, checkpoint_sha256 and intent_fingerprint from PREFLIGHT_CONTRACT; work_review must contain verdict (accept/correct/blocked), actual selected_review, changes, acceptance_progress (host-approved criterion, change, workspace-relative path/SHA256 evidence), scope_deviations, unsupported_claims, unfinished_work and exact checkpoint next_packet. Report actual gaps; do not fabricate acceptance or infer progress from counts. Evidence available in checkpoint.json and host-validation.json; inspect their actual content. Exactly three reviewer shell commands: instruction read, artifact authoring after applying instructions, host verifier. No retries, extra source reads, goal changes, protected native socket access, A2A effects or resource renewal. The host supplies identity-bound native observations and validation; do not claim GitHub connector health. Outgoing writer: first read the exact selected github-handoff instructions using a command containing its absolute path and print all bytes, apply them to the supplied fixture evidence, then run its supplied checkpoint script. No other work.\n")
+        shutil.copyfile(root/'host-validation.json',workspace/'host-validation.json')
         checkpoint_contract=dict(repo=str(repo),worktree=str(workspace),commit=head,dirty_work='clean frozen candidate',
             acceptance_remaining=['selected preflight','native bounded continuation','owned rollback'],
             evidence=[str(root/'host-validation.json')],pending_wakes=[],pending_messages=[],claim_holders=[],
@@ -224,7 +252,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
             expires_at=expiry,resources=dict(token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=0,
                 seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat()))
         script="import os,json,hashlib,pathlib\np=pathlib.Path('checkpoint.json')\np.write_text(json.dumps(dict(**"+repr(checkpoint_contract)+",source_thread_id=os.environ['CODEX_THREAD_ID'],objective="+repr(objective)+",authority='operator execute Plan0156; fixed bounded disposable continuation',next_packet='Read selected skill instructions and run host preflight before authorized bounded continuation',pending_obligations=[]),sort_keys=True)+'\\n')\nprint('checkpoint:'+os.environ['CODEX_THREAD_ID']+':'+hashlib.sha256(p.read_bytes()).hexdigest())\n"
-        task='Execute only this Python script to write your own outgoing checkpoint, then report checkpoint ready. Do not change any goal.\n```python\n'+script+'```'
+        task='First read and print the complete selected writer instructions at '+str(workflow)+' using a command containing that absolute path. Apply them to the supplied bounded fixture checkpoint. Then execute only this Python script to write your own outgoing checkpoint, then report checkpoint ready. Do not change any goal.\n```python\n'+script+'```'
         spawn=['sessions','spawn','--profiles',str(profiles),'--profile','worker','--intent','source-1','--name','checkpoint-source','--task',task,'--expires-at',expiry,'--json']
         deadline=time.monotonic()+180
         while True:
@@ -233,13 +261,22 @@ print('preflight:'+cid+':'+nonce+':'+digest)
             if state['state'] in ('blocked','expired') or time.monotonic()>deadline or (state['state']=='uncertain' and not(state.get('thread_id') and state.get('submission_id'))):raise RuntimeError('source held: '+state['state'])
             time.sleep(.5)
         source=state['thread_id'];native,spent=usage(source);receipt['source_usage']=spent;write(root/'native-source.json',native)
+        writer_selection=dict(path=str(workflow),instructions=workflow.read_text())
+        if not instruction_read(native,writer_selection,workspace):
+            raise RuntimeError('selected writer instruction bytes not observed')
         if spent['total_tokens']>=100000:raise RuntimeError('source exceeded fixture suballowance')
         receipt['source_goal']=request('thread/goal/set',dict(threadId=source,objective=objective,tokenBudget=250000-spent['total_tokens'],status='paused',origin='automatic'))['goal']
         # Qualify the host route on the settled source before buying a successor turn.
         receipt['host_source_preflight']=observe_native_preflight(request,source,source,guide,workspace)
         write(root/'state.json',receipt)
-        policy=dict(objective=objective,approval=receipt['authority'],token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=spent['total_tokens'],seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat(),preflight=dict(script=str(helper),sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',workflow='github-handoff',required_checks=['canonical_sources','selected_skill','selected_workflow','native_resource','installed_cli','focused_validation'],token_allowance=150000),activation=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=45))
-        write(profiles,dict(version=1,profiles={'worker':profile},continuations={source:policy},callers={source:['worker']}))
+        policy=dict(objective=objective,approval=receipt['authority'],token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=spent['total_tokens'],seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat(),preflight=dict(script=str(helper),sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',workflow='github-ask-matt',required_checks=['canonical_sources','selected_skill','selected_workflow','native_resource','installed_cli','focused_validation'],token_allowance=150000),activation=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=45))
+        policy['acceptance_criteria']=['restart-safe fixture checkpoint matches the approved objective, authority and next packet',
+            'host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance']
+        configured=dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults,continuations={source:policy},callers={source:['worker']})
+        effective=effective_configuration(configured,source,'worker')
+        receipt['configuration_revision']=effective['revision']
+        write(root/'review-authority.json',dict(configuration_revision=effective['revision'],policy=policy))
+        write(profiles,configured)
         checkpoint=workspace/'checkpoint.json';digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
         handoff=['sessions','handoff','--profiles',str(profiles),'--profile','worker','--intent','handoff-1','--thread-id',source,'--checkpoint','checkpoint.json','--checkpoint-sha256',digest,'--expires-at',expiry,'--mode',mode,'--json']
         deadline=time.monotonic()+240
@@ -252,7 +289,20 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         state=wait_for_preflight(invoke,handoff,deadline,observe_handoff)
         target=state['successor_thread_id'];native,spent=usage(target);receipt['preflight_usage']=spent;write(root/'native-preflight.json',native)
         instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and '--instructions' in i.get('command','') and i.get('exitCode')==0]
-        if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('guide','workflow')):raise RuntimeError('actual selected instruction read unverified')
+        if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('guide','reviewer','workflow')):raise RuntimeError('actual selected instruction read unverified')
+        if not instruction_read(native,effective['preflight_reviewer'],workspace):
+            raise RuntimeError('selected reviewer instruction bytes not observed')
+        if not instruction_read(native,effective['handoff_writer'],workspace):
+            raise RuntimeError('downstream handoff workflow instruction bytes not observed')
+        authored=[i for t in native['turns'] if t.get('status')=='completed' for i in t['items']
+            if i.get('type')=='commandExecution' and i.get('status')=='completed'
+            and i.get('exitCode')==0 and 'work-review.json' in i.get('command','')
+            and str(helper) not in i.get('command','')]
+        if len(authored)!=1:
+            raise RuntimeError('reviewer-authored work review native evidence unverified')
+        receipt['work_review_artifact']=dict(path=str(workspace/'work-review.json'),
+            sha256=hashlib.sha256((workspace/'work-review.json').read_bytes()).hexdigest(),
+            native_item_id=authored[0]['id'])
         receipt['instruction_read_item']=instructions[0]['id']
         mcp_args=dict(profile='worker',intent='handoff-1',thread_id=source,checkpoint='checkpoint.json',checkpoint_sha256=digest,expires_at=expiry,mode=mode,caller_thread_id=source)
         receipt['native_handoff_mcp_prepared']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)

@@ -95,6 +95,26 @@ class LifecycleConfigurationTests(unittest.TestCase):
                 self.assertEqual(extended['tokens_used'], 40)
                 self.assertEqual(extended['remaining_tokens'], 560)
                 self.assertEqual(len(extended['authorization_history']), 2)
+                config['lifecycle_defaults']['objective_token_limit'] = 100
+                profiles.write_text(json.dumps(config))
+                output = StringIO()
+                with redirect_stdout(output):
+                    run(['--wake-root', str(root / 'wake'), 'sessions', 'configuration', '--profiles', str(profiles),
+                         '--profile', 'worker', '--thread-id', caller, '--json'])
+                revision = json.loads(output.getvalue())['revision']
+                config['continuations'][caller]['budget_authorization'] = dict(action='reset',
+                    approval='explicit operator reset', revision=revision)
+                profiles.write_text(json.dumps(config))
+                for attempt in range(2):
+                    output = StringIO()
+                    with redirect_stdout(output):
+                        self.assertEqual(run(['--wake-root', str(root / 'wake'), 'sessions', 'configuration',
+                            '--profiles', str(profiles), '--profile', 'worker', '--thread-id', caller,
+                            '--apply-budget-authorization', '--json']), 0)
+                    reset = json.loads(output.getvalue())['objective_budget']
+                    self.assertEqual(reset['tokens_used'], 40)
+                    self.assertEqual(reset['remaining_tokens'], 60)
+                    self.assertEqual(len(reset['authorization_history']), 3)
             alternate.unlink()
             value, failed = runner.call('wake_sessions_configuration', dict(profile='worker',
                 thread_id=caller, caller_thread_id=caller))

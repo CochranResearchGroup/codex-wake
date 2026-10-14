@@ -133,10 +133,23 @@ identify the ledger. `sessions configuration` reads existing ledger state beside
 prospective defaults, without applying changed defaults to active work.
 Operator CLI `--apply-budget-authorization` requires an exact host
 `budget_authorization` revision/action/approval; agent MCP cannot submit this
-operation. The currently implemented action is `extend`, preserving original
-origin, spend, correction count and authorization history. A reset action remains
-unimplemented and must not be claimed from extension tests. Native refreshed
-sessions and both-mode installed proof remain unverified under the new ledger.
+operation. `extend` preserves origin and increases ceilings; `reset` explicitly
+replaces cumulative ceilings/deadline without zeroing usage or correction count.
+Reset requires settled, known actors. Both operations retain original deadline
+and attributable authorization history and reconcile exact replay idempotently.
+Durable native goal aliases bind preflight offsets to their assigned actor so a
+successor becoming the next source is charged once. Native refreshed sessions,
+general spawn accounting and both-mode installed proof remain open.
+
+Correct verdicts require a host `correction_scope` and a frozen `correction_packet`
+(approved criterion, relative paths, instructions, checked evidence path/hashes).
+The controller admits a distinct native assignment in the exact owned receiver,
+keeps its original session reservation/deadline, and asks for repair plus fresh
+review. It preserves previous review receipts. Correction admissions use stable
+keys and the objective's durable cycle counter; two repeated rejections end in a
+terminal checkpoint without goal preparation or extra assignments. Out-of-scope
+paths and changed/unavailable evidence cannot admit correction. This source proof
+does not yet establish installed correction or context-replacement acceptance.
 
 - Replace the single supported preflight workflow with configured instruction
   selection. Preserve host-controlled launch, grants, script approval and runtime

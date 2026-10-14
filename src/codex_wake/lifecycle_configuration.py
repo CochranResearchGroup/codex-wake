@@ -67,11 +67,13 @@ def configuration_command(args, root):
         if args.apply_budget_authorization:
             authorization = config['continuations'][args.thread_id].get('budget_authorization', {})
             if (args.caller_thread_id or authorization.get('revision') != effective['revision']
-                    or not authorization.get('approval') or authorization.get('action') != 'extend'):
+                    or not authorization.get('approval') or authorization.get('action') not in ('extend', 'reset')):
                 raise WakeError('exact host operator budget authorization unavailable')
             selected = {key: value for key, value in effective.items()
                         if key not in ('source_thread_id', 'profile')}
-            ObjectiveLedger(root, identity).extend(selected, authorization['approval'], now=trusted_upper())
+            ledger = ObjectiveLedger(root, identity)
+            operation = ledger.extend if authorization['action'] == 'extend' else ledger.reset
+            operation(selected, authorization['approval'], now=trusted_upper())
         effective['objective_budget'] = (ObjectiveLedger(root, identity).inspect(now=trusted_upper())
                                          if path.exists() else None)
     except (OSError, ValueError, WakeError) as exc:

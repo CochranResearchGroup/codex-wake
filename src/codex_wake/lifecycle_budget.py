@@ -33,7 +33,7 @@ def admit_handoff(root, receipt):
     ledger.configure(config, policy['approval'], policy['tokens_before_source'], now=now)
     source = receipt['source_goal']
     actor = 'goal:' + source['threadId'] + ':' + str(source['createdAt'])
-    view = ledger.record(actor, source['tokensUsed'], settled=True, now=now)
+    view = ledger.record_goal(actor, source['tokensUsed'], settled=True, now=now)
     successor = 'handoff:' + receipt['fingerprint']
     existing = view['actors'].get(successor)
     if existing and existing.get('terms'):
