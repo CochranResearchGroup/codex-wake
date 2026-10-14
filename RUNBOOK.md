@@ -6016,3 +6016,20 @@ is below2,000,000. Primary owns exact native handles, receipt readback and clean
 State ready→native acceptance; previous outcome_progress retained. Selected
 instruction catalog support is unverified; a setup rejection is not acceptance
 and cannot trigger a duplicate paid assignment. No merge/release/issue closure.
+
+## Turn 309 | 2026-10-14 UTC
+
+Configured new-tab01 sample rejected at native catalog setup before source or
+successor creation: plugin-cache paths outside the isolated home were not
+discovered by enablement configuration. Native rollout count0, model spend0,
+owned server terminal, no readable environment matches after fresh OS census.
+Curated receipt configured-new-tab01-setup.json retains failed outcome. This is
+not installed handoff acceptance. Corrective fixture configuration explicitly
+copies the selected skill folders into the owned home, verifies identical source/
+installed bytes and requires native catalog readback of installed paths. Original
+plugin selections remain source provenance; no workflow substitution or allowance
+increase. Provider-free supervision5 tests and syntax/diff checks pass. One fresh
+setup sample may proceed under the same250,000 reservation/150,000 preflight
+ceiling; original failed root is retained and cannot be replayed as accepted.
+Classification blocker_reduction; full plan OPEN. Installed14 package code still
+matches94 source/data files because only the harness configuration changed.

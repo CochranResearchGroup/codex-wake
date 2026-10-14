@@ -1,0 +1,24 @@
+{
+  "state": "failed",
+  "error": "actual native skill catalog did not load exact selected instructions",
+  "root": "/tmp/codex-wake-plan0156-configured-new-tab01",
+  "prefix": "/tmp/codex-wake-plan0156-installed14",
+  "source_commit": "3f3f7943c707a3e0ceee00db4c1565dd636498a1",
+  "started_at": 1791977029.0207345,
+  "deadline": 1791977629.0207345,
+  "server_exit": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      64283
+    ],
+    "private_readable_environment_matches": []
+  },
+  "native_rollout_count": 0,
+  "source_created": false,
+  "successor_created": false,
+  "model_tokens_used": 0,
+  "classification": "setup_rejected_before_assignment"
+}

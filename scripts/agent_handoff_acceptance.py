@@ -78,17 +78,30 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
     (home/'config.toml').write_text('\n'.join(lines)+'\n')
     if not (home/'auth.json').is_symlink():(home/'auth.json').symlink_to(Path.home()/'.codex/auth.json')
     skill=home/'skills/codex-wake';shutil.copytree(repo/'skills/codex-wake',skill,dirs_exist_ok=resume_setup)
-    workflow=Path.home()/'.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md'
-    reviewer=workflow.parent.parent/'github-ask-matt/SKILL.md'
+    workflow_source=Path.home()/'.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md'
+    reviewer_source=workflow_source.parent.parent/'github-ask-matt/SKILL.md'
     # Exact catalog selections: unreadable paths hold before any runtime effects.
-    for selected_path in (workflow, reviewer):
+    for selected_path in (workflow_source, reviewer_source):
         if not selected_path.is_file() or not selected_path.read_text().strip():
             raise RuntimeError('selected instructions unavailable; no substitution permitted')
+    # Explicit byte-preserving installation: isolated homes cannot discover the
+    # main home's plugin cache merely from skills.config enablement entries.
+    mirrors=[]
+    for selected_path in (workflow_source, reviewer_source):
+        installed=home/'skills'/selected_path.parent.name
+        shutil.copytree(selected_path.parent,installed,dirs_exist_ok=resume_setup)
+        destination=installed/'SKILL.md'
+        digest=hashlib.sha256(selected_path.read_bytes()).hexdigest()
+        if hashlib.sha256(destination.read_bytes()).hexdigest()!=digest:
+            raise RuntimeError('selected instruction mirror bytes changed')
+        mirrors.append(dict(source=str(selected_path),installed=str(destination),sha256=digest))
+    workflow=Path(mirrors[0]['installed']);reviewer=Path(mirrors[1]['installed'])
     guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
     head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
     receipt=dict(state='preparing',root=str(root),prefix=str(prefix),source_commit=head,
         selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
         token_cap=250000,time_cap_seconds=600,manual_assignment_limit=2,mode=mode,rollback_requested=rollback,
+        selected_instruction_mirrors=mirrors,
         root_window=dict(start='2026-10-14T10:38:06Z',deadline='2026-10-14T16:38:06Z',token_cap=2000000),
         adaptation_lane=dict(token_cap=100000,time_cap_seconds=900,goal_counter='unknown'))
     env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
