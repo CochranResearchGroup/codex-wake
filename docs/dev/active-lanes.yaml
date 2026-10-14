@@ -12,11 +12,13 @@ lanes:
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     integration: squash_pr_after_dependency
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/263
+    checkpoint: f5449adc32d457749365277f241f82fc64353863
     checkout_required: true
     dependencies: [P156]
     overlaps: [P156]
     updated_at: 2026-10-14
-    disposition: Isolated stacked worktree pinned5b14c05; port only feature changes after PR253 integration
+    disposition: Draft PR263 published; source/installed qualification passed; port only feature delta after PR253 integration
   - id: P156
     owner: primary / ecochran76
     objective: Implement verified spawn refresh and handoff lifecycle
