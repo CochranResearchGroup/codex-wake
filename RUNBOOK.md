@@ -6182,3 +6182,19 @@ pass precedes this isolated queued-cancellation change; focused validation and
 next published CI must qualify that increment. Source checkpoint receipt records
 file hashes, original failed run, passing rerun and remaining installed gates.
 Final affected68 tests pass10.355s. No new native assignments or model effects.
+
+Published source4481f6eb40e1b08bc8195cd323a67ab4df4b3cfe verified on origin
+feat/agent-lifecycle and OPEN draft PR253. CI38567059613 is actually in progress
+at that head. Fresh private installed16 wheel sha256
+6654dd989627e3a2304bae74cdfd2315b73cd108afce7911090c12082cc73ca8 matches95
+source/data files; zero mismatches. Installed affected87 tests pass11.884s;
+executable MCP smoke18 tools/11 calls passes with native_turns0, notifications0,
+children_after0 and owned fixture removed. Installed16-surface-qualified.json
+records exact prefix, wheel and evidence. This is installed surface proof, not
+native handoff/continuation/rollback acceptance. Current root795,225 at12:53:13UTC,
+211,310 since renewal; native paid work/external lanes0 in this window.
+Next ready packet: update acceptance harness bootstrap configuration/reference
+and source supervisor, retain100,000 source/150,000 preflight/250,000 total caps,
+qualify generated setup, then one bounded independent native mode after frozen
+published-head reconciliation. Context replacement and remaining full native
+acceptance/integration/release gates stay OPEN. No goal completion claimed.
