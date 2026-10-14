@@ -6548,3 +6548,10 @@ fresh OS readback is empty, no process mutation. Preserve initial receipt and
 qualify primary and later cleanup independently. Local plugin tests, entrypoint
 syntax and policy wiring passed. Classification:blocker_reduction/resource cost
 remediation, plus outcome_progress/configured native refresh. Full goal OPEN.
+
+## Turn | 2026-10-14 | Plan0162 start
+
+Operator accepted issue262 implementation. Main439f749 lacks lifecycle source;
+created isolated feat/mcp-tab-targets from pinned lifecycle5b14c05 as a documented
+stacked dependency exception. Root dirty acceptance script preserved. Plan0162
+freezes selector/result/policy semantics and public-seam tests.

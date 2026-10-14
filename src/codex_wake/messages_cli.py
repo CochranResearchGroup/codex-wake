@@ -53,6 +53,9 @@ def add_messages_parser(subparsers):
             command.add_argument('--tmux-socket')
             command.add_argument('--tmux-session')
             command.add_argument('--correlation')
+            from .tab_targets import add_target_options
+            add_target_options(command)
+            command.add_argument('--wake-root', type=Path)
         if verb in ('ack','reply'):
             command.add_argument('--outcome', choices=['accepted','declined','completed','failed'], required=verb == 'ack')
             command.add_argument('--evidence')
@@ -152,6 +155,12 @@ def messages_command(args):
             value = arm_reply(actor, args.message_id, args.wake_root,
                               args.sender_receipt_authority, args.idempotency_key, args.expires_at)
         elif verb == 'send':
+            if not args.to.startswith('thread:'):
+                from .tab_routing import routed_send
+                value, success = routed_send(args, bus, mailbox, actor, body_input(args.body_file),
+                                              intent_key, resolve_identity)
+                result(value, success=success)
+                return 0 if success else 5
             recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket,
                                          session=args.tmux_session, allow_offline=True)
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,

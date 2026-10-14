@@ -1,6 +1,22 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P162
+    owner: primary / ecochran76
+    objective: Resolve informal MCP tab targets and explicit dormant-session policies
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/262]
+    plan: docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md
+    plan_ref: feat/mcp-tab-targets
+    branch: feat/mcp-tab-targets
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    integration: squash_pr_after_dependency
+    checkout_required: true
+    dependencies: [P156]
+    overlaps: [P156]
+    updated_at: 2026-10-14
+    disposition: Isolated stacked worktree pinned5b14c05; port only feature changes after PR253 integration
   - id: P156
     owner: primary / ecochran76
     objective: Implement verified spawn refresh and handoff lifecycle

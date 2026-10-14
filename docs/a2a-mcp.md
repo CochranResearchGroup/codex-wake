@@ -131,3 +131,57 @@ real stdio MCP, sends/reads/claims/replies/reconciles, checks dedup and wrong-ac
 refusal, then removes its roots and children. It performs zero native turns or
 notifications. This fixture proves the facade boundary; live transport evidence
 remains in the separate accepted A2A campaign.
+
+
+## Informal Byobu targets (Plan0162)
+
+Pass human tab descriptors directly to `wake_messages_send.to`: `tab 18`,
+`18:policies` or a uniquely supported typo such as `poicys`. Wake owns inventory,
+normalization, matching, identity pinning and revalidation. Callers do not enumerate
+tabs or correct names with shell commands. Exact UUID sends remain supported.
+
+Use `wake_sessions_target(selector=...)` for inspection or explicit preparation.
+It returns `status`, the original/normalized descriptor, match method/confidence,
+canonical CWD and selected thread/pane evidence. Exact names win; case/whitespace
+normalize; fuzzy names require length>=4, edit distance<=1 for length4–5 or<=3
+for longer names, normalized distance<=0.4 and no runner-up within one edit.
+`18:other` conflicts if18 exists under another name. Multiple panes/sessions or
+plausible fuzzy names hold with candidates. Reserved `tab:NAME`, `pane:%N`,
+`window:@N` and `thread:UUID` retain exact semantics.
+
+`on_missing` and `on_inactive` independently select `error` (default), `tab_only`,
+`fresh` or `resume`. Mutation requires a host-approved `profile`, stable `intent`
+(for target) or `idempotency_key` (for send), and fixed `expires_at`. The MCP host
+supplies the private profiles registry and wake root. Callers cannot override
+credentials, sockets, executables or launch commands. Existing idle agents resolve;
+busy, unknown or unverified agents are not replaced.
+
+For a dormant single-pane shell, `fresh`/`resume` creates a Codex pane within the
+same window and preserves the shell and its input. The returned effects identify
+both panes. Subsequent loose tab-name lookup sees a split window and requires pane
+qualification; repeating the original preparation/send intent retains its exact
+Codex pane. `tab_only` reuses a dormant tab (`tab_ready`) or creates a shell tab
+(`tab_created`); neither admits a message. Missing tabs use explicit or approved
+profile CWD. The label never implies a repository path.
+
+`expected_cwd` guards assumptions; `cwd` cannot override an existing tab's observed
+CWD or the approved profile. Resume searches non-archived CLI/app-server saved
+sessions for that exact canonical directory (separate worktrees stay separate),
+including unloaded histories. It selects one candidate or the supplied
+`resume_thread_id`; multiple candidates return `resume_ambiguous`. No latest-session
+or fresh-session fallback occurs. Candidate summaries exclude transcripts and
+are capped at10; complete bounded pagination is required to prove uniqueness.
+
+Conditions include `tab_not_found`, `no_live_codex`, `target_busy`,
+`ambiguous_target`, `descriptor_conflict`, `inventory_unavailable`, `cwd_mismatch`,
+`resume_not_found`, `resume_ambiguous`, `policy_denied` and `target_changed`.
+`starting` means the recorded client has not yet proven ready: repeat the same
+intent. `effect_uncertain` preserves its journal and blocks duplicate creation;
+reconcile the recorded effect before any new attempt. Tab creation, client readiness,
+mailbox admission, notification and recipient completion are separate facts.
+A newly prepared session still requires explicit mailbox enrollment/capability
+before tracked delivery; preparation never enrolls it automatically.
+
+The CLI offers identical preparation via `sessions target DESCRIPTOR` and matching
+options on `messages send`; agents with this MCP should use the MCP interface.
+This feature's installed acceptance/release status is tracked in Plan0162.

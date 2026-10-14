@@ -1194,3 +1194,12 @@ Prototype preserved on prototype/agent-lifecycle at5e1b0ac; no production source
 or runtime rollout in this design packet.
 
 P156 operator-approved revision: [spec254](https://github.com/CochranResearchGroup/codex-wake/issues/254) covers configurable handoff/preflight review and nested user budgets. New slices #255 → #256 → #257; #257 also depends on #255. Execution resource gate remains; existing lifecycle issues remain open.
+
+## P162 | MCP informal tab targeting
+
+State: OPEN
+
+Issue: #262. Plan: [Plan0162](docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md).
+Implement tolerant resolution, explicit dormant/missing policies and CWD-scoped
+saved-session discovery through MCP. Stacked on unmerged Plan0156; integration
+and installed acceptance remain separate gates.
