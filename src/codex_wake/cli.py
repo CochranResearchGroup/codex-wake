@@ -2737,7 +2737,7 @@ def run(argv: list[str] | None = None) -> int:
     if args.command == "sessions":
         if args.sessions_command == 'configuration':
             from .lifecycle_configuration import configuration_command
-            return configuration_command(args)
+            return configuration_command(args, root)
         if args.sessions_command == 'handoff':
             from .agent_handoff import handoff_command
             return handoff_command(args, root)

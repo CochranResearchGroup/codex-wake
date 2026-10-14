@@ -124,7 +124,19 @@ workflow must match the selected reviewer name; no GitHub-only fallback remains.
 The public receipt separates `runtime_readiness` from `work_review`; accepted
 progress references host-approved criteria and existing evidence by path/hash.
 Legacy preflight-only profiles cannot prepare a successor goal under the revised
-contract. Budget fields are readback only until issue256 enforcement lands.
+contract. Issue256 now integrates durable objective accounting and atomic session
+reservation with source pause, preflight, preparation, monitor and rollback.
+Identical objective configuration revisions omit source thread/profile readback
+fields so successors retain the same approved settings. A host `objective_id`
+may be explicit; otherwise objective text and original start deterministically
+identify the ledger. `sessions configuration` reads existing ledger state beside
+prospective defaults, without applying changed defaults to active work.
+Operator CLI `--apply-budget-authorization` requires an exact host
+`budget_authorization` revision/action/approval; agent MCP cannot submit this
+operation. The currently implemented action is `extend`, preserving original
+origin, spend, correction count and authorization history. A reset action remains
+unimplemented and must not be claimed from extension tests. Native refreshed
+sessions and both-mode installed proof remain unverified under the new ledger.
 
 - Replace the single supported preflight workflow with configured instruction
   selection. Preserve host-controlled launch, grants, script approval and runtime

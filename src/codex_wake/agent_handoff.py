@@ -317,6 +317,9 @@ def rollback_handoff(path,receipt,profile,policy,root):
         remaining=max(0,remaining)
         result.update(source_goal_before=before,successor_tokens_used=used,remaining_tokens=remaining,
             requested_budget=goal['tokensUsed']+remaining,attachment=guard['source_attachment'])
+        if receipt.get('budget_actor'):
+            from .lifecycle_budget import record_successor
+            record_successor(root,receipt,used,settled=True)
         save(path,receipt)
         expected=result['requested_budget']
         if goal['tokenBudget']!=expected:
@@ -455,6 +458,9 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 stop['settled']=not any(turn.get('status')=='inProgress' and turn.get('id') in stop['turn_ids']
                                         for turn in observed.get('turns',[]))
                 if stop['settled']:receipt.pop('uncertain_effect',None)
+                if receipt.get('budget_actor'):
+                    from .lifecycle_budget import record_successor, native_usage
+                    record_successor(root, receipt, native_usage(observed, profile), settled=stop['settled'])
                 receipt.update(state='blocked' if stop['settled'] else 'uncertain',reason='preflight_allowance_exhausted')
                 return
             if receipt.get('successor_thread_id') and source_goal['status']!='paused':
@@ -486,6 +492,12 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 if remaining<preflight['token_allowance']:
                     receipt.update(state='blocked',reason='preflight_allowance_insufficient');return
             if receipt.get('uncertain_effect')=='thread/goal/pause':receipt.pop('uncertain_effect',None)
+            from .lifecycle_budget import admit_handoff, record_successor, native_usage
+            if receipt.get('budget_actor') and receipt.get('successor_thread_id'):
+                observed=request('thread/read',dict(threadId=receipt['successor_thread_id'],includeTurns=True))['thread']
+                if observed.get('id')!=receipt['successor_thread_id']:raise ValueError('successor usage identity changed')
+                record_successor(root, receipt, native_usage(observed, profile))
+            if not admit_handoff(root, receipt):return
             receipt.update(state='starting_successor');save(path,receipt)
             contract=dict(source_thread_id=receipt['thread_id'],checkpoint=str(Path(profile['cwd'])/args.checkpoint),
                 checkpoint_sha256=args.checkpoint_sha256,intent_fingerprint=receipt['fingerprint'],
@@ -525,6 +537,7 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             if worker.get('thread_id') and worker.get('submission_id'):
                 running=request('thread/read',{'threadId':worker['thread_id'],'includeTurns':True})['thread']
                 if running.get('id')!=worker['thread_id']:raise WakeError('preflight usage identity mismatch')
+                record_successor(root, receipt, native_usage(running, profile))
                 spent=None
                 lines=[]
                 if running.get('path'):
@@ -552,6 +565,7 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 receipt.update(state=worker['state'],reason='successor_assignment_'+worker['state']);return
             target=worker['thread_id']
             native=request('thread/read',{'threadId':target,'includeTurns':True})['thread']
+            record_successor(root, receipt, native_usage(native, profile))
             proof=json.loads(output.read_text())
             required=dict(source_thread_id=receipt['thread_id'],successor_thread_id=target,
                 checkpoint_sha256=args.checkpoint_sha256,intent_fingerprint=receipt['fingerprint'],
@@ -578,19 +592,22 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 receipt.update(state='blocked',reason='successor_usage_unknown');return
             if usage>preflight['token_allowance']:
                 receipt.update(state='blocked',reason='preflight_allowance_exhausted',preflight_tokens_used=usage);return
-            receipt.update(preflight=proof,preflight_tokens_used=usage,
-                remaining_tokens=max(0,receipt['source_remaining_tokens']-usage))
+            receipt.update(preflight=proof,preflight_tokens_used=usage)
+            record_successor(root, receipt, usage)
             receipt['runtime_readiness'] = dict(state='passed', checks=proof['checks'])
             review = proof.get('work_review', {})
             receipt['work_review'] = review
             if review.get('verdict') in ('correct', 'blocked'):
+                record_successor(root, receipt, usage, settled=True)
                 receipt.update(state='blocked', reason='work_review_' + review['verdict'])
                 return
             if review.get('verdict') != 'accept':
+                record_successor(root, receipt, usage, settled=True)
                 receipt.update(state='blocked', reason='substantive_work_review_unverified')
                 return
             if not validate_work_review(review, policy, Path(profile['cwd']),
                                         json.loads(Path(contract['checkpoint']).read_text())):
+                record_successor(root, receipt, usage, settled=True)
                 receipt.update(state='blocked', reason='substantive_work_review_unverified')
                 return
             if receipt['remaining_tokens']==0:
@@ -664,8 +681,31 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                         raise ValueError('owned paused goal changed')
                     observed[thread]=goal
                 receipt['monitor_observed_goals']=observed
+                objective_stop=None
+                if receipt.get('budget_actor'):
+                    from .lifecycle_budget import ledger_for, record_successor, trusted_upper
+                    from .native_clock import snapshot
+                    if not snapshot().get('utc'):
+                        objective_stop='objective_accounting_time_unavailable'
+                    else:
+                        now=trusted_upper()
+                        ledger=ledger_for(root,receipt)
+                        source_goal=observed[source]
+                        ledger.record('goal:'+source+':'+str(source_goal['createdAt']),
+                            source_goal.get('tokensUsed'),settled=True,now=now)
+                        counter=observed[target].get('tokensUsed')
+                        total=receipt['preflight_tokens_used']+counter if type(counter) is int and counter>=0 else None
+                        view=record_successor(root,receipt,total,settled=observed[target]['status']=='complete')
+                        actor=view['actors'][receipt['budget_actor']]
+                        if (not view['accounting_known'] or
+                                view['tokens_used']+view['tokens_reserved']>view['objective_token_limit'] or
+                                actor['tokens_remaining']==0 or now>=actor['session_deadline'] or
+                                now>=parse_timestamp(view['objective_deadline']).timestamp()):
+                            objective_stop='objective_budget_or_accounting_stop'
+                        if now>=actor['session_deadline'] or now>=parse_timestamp(view['objective_deadline']).timestamp():
+                            objective_stop='continuation_time_exhausted'
                 saved_source=receipt['source_goal'];current_source=observed[source]
-                accounting_stop=None
+                accounting_stop=objective_stop
                 for counter in ('tokensUsed','timeUsedSeconds'):
                     value=current_source.get(counter);previous=saved_source.get(counter)
                     if type(value) is not int or type(previous) is not int or value<previous:
@@ -674,7 +714,7 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                 if accounting_stop:
                     receipt['continuation_stop_reason']=accounting_stop
                     if receipt['state']=='awaiting_activation' or observed[target]['status']=='complete':
-                        receipt.update(state='blocked',reason=accounting_stop)
+                        receipt.update(state='expired' if accounting_stop=='continuation_time_exhausted' else 'blocked',reason=accounting_stop)
                         owner['state']='stopped';save(directory/('owner-'+key+'.json'),owner)
                         save(path,receipt);continue
                 if receipt['state']=='activating':
@@ -727,6 +767,11 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                             if any(t['status']=='inProgress' for t in final['turns']):raise ValueError('turn stop unverified')
                         receipt.pop('uncertain_effect',None)
                         receipt.pop('monitor_error',None)
+                        if receipt.get('budget_actor') and bounds:
+                            final_goal=request('thread/goal/get',dict(threadId=target))['goal']
+                            counter=final_goal.get('tokensUsed') if final_goal else None
+                            total=receipt['preflight_tokens_used']+counter if type(counter) is int and counter>=0 else None
+                            record_successor(root,receipt,total,settled=True)
                         receipt['state']='expired' if reason=='deadline_safety_stop' else 'blocked'
                         owner['state']='stopped';save(directory/('owner-'+key+'.json'),owner)
                     save(path,receipt)

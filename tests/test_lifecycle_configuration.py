@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from codex_wake.cli import run
 from codex_wake.mcp_server import CommandRunner
@@ -59,6 +60,41 @@ class LifecycleConfigurationTests(unittest.TestCase):
                 thread_id=caller, caller_thread_id=caller))
             self.assertFalse(failed, value)
             self.assertEqual(value['preflight_reviewer']['instructions'], 'Review local evidence without GitHub.')
+            from codex_wake.objective_ledger import ObjectiveLedger
+            from codex_wake.lifecycle_budget import objective_identity
+            ledger = ObjectiveLedger(root / 'wake', objective_identity(config['continuations'][caller]))
+            selected = {key: item for key, item in value.items()
+                        if key not in ('source_thread_id', 'profile', 'objective_budget')}
+            ledger.configure(selected, 'operator', prior_tokens=10, now=1893456000)
+            ledger.record('previous-session', 30, settled=True, now=1893456000)
+            with patch('codex_wake.native_clock.snapshot', return_value={'utc': {'upper': 1893456001}}):
+                output = StringIO()
+                with redirect_stdout(output):
+                    self.assertEqual(run(['--wake-root', str(root / 'wake'), 'sessions', 'configuration',
+                        '--profiles', str(profiles), '--profile', 'worker', '--thread-id', caller, '--json']), 0)
+                current = json.loads(output.getvalue())
+                self.assertEqual(current['objective_budget']['tokens_used'], 40)
+                self.assertEqual(current['objective_budget']['remaining_tokens'], 460)
+                config['lifecycle_defaults']['objective_token_limit'] = 600
+                profiles.write_text(json.dumps(config))
+                output = StringIO()
+                with redirect_stdout(output):
+                    run(['--wake-root', str(root / 'wake'), 'sessions', 'configuration', '--profiles', str(profiles),
+                         '--profile', 'worker', '--thread-id', caller, '--json'])
+                preview = json.loads(output.getvalue())
+                self.assertEqual(preview['objective_budget']['objective_token_limit'], 500)
+                config['continuations'][caller]['budget_authorization'] = dict(action='extend',
+                    approval='explicit operator extension', revision=preview['revision'])
+                profiles.write_text(json.dumps(config))
+                output = StringIO()
+                with redirect_stdout(output):
+                    self.assertEqual(run(['--wake-root', str(root / 'wake'), 'sessions', 'configuration',
+                        '--profiles', str(profiles), '--profile', 'worker', '--thread-id', caller,
+                        '--apply-budget-authorization', '--json']), 0)
+                extended = json.loads(output.getvalue())['objective_budget']
+                self.assertEqual(extended['tokens_used'], 40)
+                self.assertEqual(extended['remaining_tokens'], 560)
+                self.assertEqual(len(extended['authorization_history']), 2)
             alternate.unlink()
             value, failed = runner.call('wake_sessions_configuration', dict(profile='worker',
                 thread_id=caller, caller_thread_id=caller))

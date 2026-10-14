@@ -27,6 +27,9 @@ class HandoffPreflightTests(unittest.TestCase):
             with self.subTest(defect=defect):
                 self.scenario(bad_review=defect)
 
+    def test_successor_goal_is_bounded_by_session_and_shared_objective_allowance(self):
+        self.scenario(session_cap=100)
+
     def test_defaults_cannot_silently_rewrite_an_existing_assignment(self):
         self.scenario(changed_defaults=True)
 
@@ -56,6 +59,9 @@ class HandoffPreflightTests(unittest.TestCase):
 
     def test_continuous_monitor_activates_one_owner_with_remaining_allowance(self):
         self.scenario(activate=True)
+
+    def test_unknown_clock_still_fences_active_owned_work(self):
+        self.scenario(activate=True,enforce_deadline='unknown')
 
     def test_monitor_pauses_and_interrupts_owned_turn_before_original_deadline(self):
         self.scenario(activate=True,enforce_deadline=True)
@@ -126,7 +132,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -189,7 +195,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     command=shlex.join(['cat',str(writer)]),aggregatedOutput=read.stdout))
             policy['acceptance_criteria']=['bounded continuation']
             defaults=dict(handoff_writer=dict(name='local-writer',path=str(writer)),
-                preflight_reviewer=dict(name=workflow,path=str(reviewer)),session_token_limit=500,
+                preflight_reviewer=dict(name=workflow,path=str(reviewer)),session_token_limit=session_cap,
                 session_time_limit_seconds=1000,objective_token_limit=1000,
                 objective_time_limit_seconds=2000,max_correction_cycles=2)
             profiles.write_text(json.dumps(dict(version=1,profiles={'worker':profile},
@@ -374,7 +380,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             return
                         self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
                         self.assertEqual(receipt['successor_thread_id'],target)
-                        self.assertEqual(receipt['remaining_tokens'],920 if pause_used is None else 970-pause_used)
+                        self.assertEqual(receipt['remaining_tokens'],min(session_cap,950 if pause_used is None else 1000-pause_used)-30)
                         self.assertEqual(receipt['preflight']['state'],'passed')
                     if before_source:
                         from codex_wake.daemon import run as daemon_run
@@ -458,7 +464,8 @@ print('preflight:'+target+':'+nonce+':'+digest)
                                 return
                             if enforce_deadline and len(sleeps)==1:
                                 self.assertEqual(goals[target]['status'],'active')
-                                clock['utc'].update(lower=1990,upper=1991)
+                                if enforce_deadline=='unknown':clock.clear()
+                                else:clock['utc'].update(lower=1990,upper=1991)
                                 return
                             if lost_pause and len(sleeps)==2:return
                             if lost_activate and len(sleeps)==1:return
@@ -478,7 +485,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         if enforce_deadline:
                             self.assertEqual(interrupts,[dict(threadId=target,turnId='autonomous-turn')])
                             saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
-                            self.assertEqual(json.loads(saved.read_text())['state'],'expired')
+                            self.assertEqual(json.loads(saved.read_text())['state'],'blocked' if enforce_deadline=='unknown' else 'expired')
                         self.assertEqual(goals[source]['status'],'paused')
                         if lost_activate:
                             saved=root/'lifecycle'/ (hashlib.sha256(b'handoff-1').hexdigest()+'.json')
@@ -496,16 +503,6 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         self.assertEqual(len(goal_sets),1)
                         visibility['show_goal']=True
                         output=StringIO()
-                        if changed_defaults and _==1:
-                            from codex_wake.records import WakeError
-                            config=json.loads(profiles.read_text())
-                            config['lifecycle_defaults']['session_token_limit']=400
-                            profiles.write_text(json.dumps(config))
-                            with self.assertRaisesRegex(WakeError, 'different lifecycle assignment'):
-                                with redirect_stdout(output):run(argv)
-                            self.assertEqual(methods.count('thread/start'),1)
-                            self.assertEqual(goals[target]['status'],'paused')
-                            return
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         self.assertEqual(json.loads(output.getvalue())['state'],'awaiting_activation')
                 self.assertEqual(methods.count('thread/start'),1)
@@ -515,7 +512,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 self.assertEqual(goals[source]['tokensUsed'],150 if late_source and late_source!="time" else 50 if pause_used is None else pause_used)
                 self.assertEqual(goals[source]['status'],'paused')
                 self.assertEqual(goals[target]['status'],'active' if foreign_monitor else 'paused')
-                self.assertEqual(goals[target]['tokenBudget'],920 if pause_used is None else 970-pause_used)
+                self.assertEqual(goals[target]['tokenBudget'],min(session_cap,950 if pause_used is None else 1000-pause_used)-30)
                 if same_tab:
                     self.assertIsNotNone(clients[0].poll())
                     self.assertEqual(list(panes),['%159'])

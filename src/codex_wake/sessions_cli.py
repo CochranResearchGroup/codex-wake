@@ -17,6 +17,8 @@ def add_sessions_parser(subparsers):
     for option in ('profiles', 'profile', 'thread-id'):
         configuration.add_argument('--' + option, required=True)
     configuration.add_argument('--caller-thread-id')
+    configuration.add_argument('--apply-budget-authorization', action='store_true',
+        help='apply an exact operator authorization revision from the host registry; not exposed to agent MCP')
     configuration.add_argument('--json', dest='as_json', action='store_true')
     spawn = commands.add_parser('spawn', help='launch an agent using a host-approved profile')
     spawn.add_argument('--profiles', required=True)

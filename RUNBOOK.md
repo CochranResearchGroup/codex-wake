@@ -5959,3 +5959,25 @@ bounded20min/100,000tokens; primary owns integration/acceptance and reserves tha
 allowance until worker accounting settles. No new broad discovery review or
 native acceptance run. Existing acceptance harness requires the revised contract
 before use. Prior installed0.13.1 remains untouched.
+
+## Turn 306 | 2026-10-14 UTC
+
+Nested budget source checkpoint integrates worker/root/objective_ledger and
+primary CLI/native controller/monitor adapters. Durable shared snapshots and
+reservations survive restart, charge failed preflight, bound actual successor
+session tokens/deadlines and reconcile owned rollback. Native session fixture
+cap100 minus preflight30 yields70. Public readback preserves prior usage40 when
+explicit operator extension increases cap500→600; changed defaults alone leave
+active authority unchanged. Agent MCP has no extension operation. Original time
+expiry and unknown-time owned fencing remain enforced.
+Worker terminal result7 tests passed; primary accepted and integrated, including
+one bounded corrective packet for replay/path authority. Worker runtime model,
+effort and token counters unavailable; retain conservative100,000token reservation
+within current renewal. Final focused ledger/CLI/MCP/handoff selection62 tests
+passed22.394s; compileall, policy wiring and diff check passed. Earlier failures
+and fixes retained in docs/dev/evidence/plan0156/nested-budget-source.md.
+Classification outcome_progress; plan and issues remain OPEN. Explicit reset,
+refresh/spawn accounting, correction admission and both-mode native acceptance
+remain open. No release/install/merge or external issue closure. Memory disposition
+unavailable: no qualified repository cloud manifest from bounded atlas discovery;
+machine-readable non-write receipt retained, zero Graphiti writes attempted.

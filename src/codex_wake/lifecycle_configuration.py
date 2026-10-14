@@ -27,7 +27,7 @@ def effective_configuration(config, thread_id, profile_name, caller_thread_id=No
         effective = {**defaults, **overrides}
         for key in fields - {'handoff_writer', 'preflight_reviewer'}:
             value = effective[key]
-            if type(value) is not int or value <= 0:
+            if type(value) is not int or value < 0 or (value == 0 and key != 'max_correction_cycles'):
                 raise ValueError('invalid limit')
         if effective['max_correction_cycles'] > 2:
             raise ValueError('correction limit exceeds approved maximum')
@@ -47,17 +47,33 @@ def effective_configuration(config, thread_id, profile_name, caller_thread_id=No
         effective.update(objective=policy['objective'], source_thread_id=thread_id,
             profile=profile_name, started_at=policy['started_at'],
             objective_deadline=(started + timedelta(seconds=effective['objective_time_limit_seconds'])).isoformat())
-        effective['revision'] = hashlib.sha256(json.dumps(effective, sort_keys=True).encode()).hexdigest()
+        identity = {key: value for key, value in effective.items()
+                    if key not in ('source_thread_id', 'profile')}
+        effective['revision'] = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
         return effective
     except (OSError, UnicodeError, KeyError, TypeError, ValueError, OverflowError):
         raise WakeError('lifecycle configuration or selected instructions unavailable; no substitution permitted') from None
 
 
-def configuration_command(args):
+def configuration_command(args, root):
     from .sessions_cli import emit
     try:
         config = json.loads(Path(args.profiles).read_text())
         effective = effective_configuration(config, args.thread_id, args.profile, args.caller_thread_id)
+        from .lifecycle_budget import objective_identity, trusted_upper
+        from .objective_ledger import ObjectiveLedger
+        identity = objective_identity(config['continuations'][args.thread_id])
+        path = Path(root) / 'objective-ledgers' / (hashlib.sha256(identity.encode()).hexdigest() + '.json')
+        if args.apply_budget_authorization:
+            authorization = config['continuations'][args.thread_id].get('budget_authorization', {})
+            if (args.caller_thread_id or authorization.get('revision') != effective['revision']
+                    or not authorization.get('approval') or authorization.get('action') != 'extend'):
+                raise WakeError('exact host operator budget authorization unavailable')
+            selected = {key: value for key, value in effective.items()
+                        if key not in ('source_thread_id', 'profile')}
+            ObjectiveLedger(root, identity).extend(selected, authorization['approval'], now=trusted_upper())
+        effective['objective_budget'] = (ObjectiveLedger(root, identity).inspect(now=trusted_upper())
+                                         if path.exists() else None)
     except (OSError, ValueError, WakeError) as exc:
         emit({'error': {'code': 'configuration_unavailable', 'message': str(exc)}}, args.as_json)
         return 2
