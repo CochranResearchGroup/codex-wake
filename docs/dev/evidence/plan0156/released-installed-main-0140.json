@@ -1,0 +1,135 @@
+{
+  "state": "passed",
+  "source_commit": "3bde6d514c827bc6b810e5cd4bc93ff122b1feec",
+  "release": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.14.0",
+  "version": "0.14.0",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5",
+  "python_files": 95,
+  "python_mismatches": [],
+  "skill_parity": [
+    {
+      "path": "/home/ecochran76/.codex/shared/skills/codex-wake",
+      "files": 4,
+      "mismatches": []
+    },
+    {
+      "path": "/home/ecochran76/.agents/skills/codex-wake",
+      "files": 4,
+      "mismatches": []
+    }
+  ],
+  "install": {
+    "source_commit": "3bde6d514c827bc6b810e5cd4bc93ff122b1feec",
+    "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5",
+    "prior_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4",
+    "links": [
+      {
+        "path": "/home/ecochran76/.local/bin/codex-wake",
+        "before": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake",
+        "after": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake"
+      },
+      {
+        "path": "/home/ecochran76/.local/bin/codex-waked",
+        "before": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-waked",
+        "after": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-waked"
+      },
+      {
+        "path": "/home/ecochran76/.local/bin/codex-wake-hook",
+        "before": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake-hook",
+        "after": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-hook"
+      },
+      {
+        "path": "/home/ecochran76/.local/bin/codex-wake-github-webhook",
+        "before": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake-github-webhook",
+        "after": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-github-webhook"
+      },
+      {
+        "path": "/home/ecochran76/.local/bin/codex-wake-mcp",
+        "before": "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/codex-wake-mcp",
+        "after": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-mcp"
+      }
+    ],
+    "skills": [
+      {
+        "path": "/home/ecochran76/.codex/shared/skills/codex-wake",
+        "backup": "/tmp/plan0156-skill-before-shared",
+        "files": [
+          {
+            "path": "SKILL.md",
+            "sha256": "a68e51f7c5d8ebcb8eefaf8f427302a4a466bb25d1d05135ccee39adfb1833d4"
+          },
+          {
+            "path": "references/use-cases.md",
+            "sha256": "e84e476315b49f841b5037c949e22c7a9a986881b9f02f7c5387f2287beaa5b3"
+          },
+          {
+            "path": "references/a2a-responses.md",
+            "sha256": "15c6cd49c268c70f52f3d9211b4611ca9c700a48e2872303bc68499b3109891b"
+          },
+          {
+            "path": "agents/openai.yaml",
+            "sha256": "50143aea5f0adfed65aa52326862f7a9f80d6fb62609da55df4b01a273a010c7"
+          }
+        ]
+      },
+      {
+        "path": "/home/ecochran76/.agents/skills/codex-wake",
+        "backup": "/tmp/plan0156-skill-before-agents",
+        "files": [
+          {
+            "path": "SKILL.md",
+            "sha256": "a68e51f7c5d8ebcb8eefaf8f427302a4a466bb25d1d05135ccee39adfb1833d4"
+          },
+          {
+            "path": "references/use-cases.md",
+            "sha256": "e84e476315b49f841b5037c949e22c7a9a986881b9f02f7c5387f2287beaa5b3"
+          },
+          {
+            "path": "references/a2a-responses.md",
+            "sha256": "15c6cd49c268c70f52f3d9211b4611ca9c700a48e2872303bc68499b3109891b"
+          },
+          {
+            "path": "agents/openai.yaml",
+            "sha256": "50143aea5f0adfed65aa52326862f7a9f80d6fb62609da55df4b01a273a010c7"
+          }
+        ]
+      }
+    ],
+    "services_restarted": []
+  },
+  "released_native_qualification": {
+    "raw_root": "/tmp/codex-wake-plan0156-released-native-qualification01",
+    "raw_sha256": "51d0abeb5571dd323efc84485210c1f3774eec8ecca335ad536ef694e75afd54",
+    "state": "qualified_setup",
+    "native_mcp_setup": {
+      "configuration_revision": "6eb0f9470fbd07fd65ded10b813c4334a9694b1b7d7b00f3a9a0378b21ef7471",
+      "goal": null,
+      "handoff_negative_case_rejected": true,
+      "lifecycle_effects": 0,
+      "missing_checkpoint_held": true,
+      "negative_error": {
+        "error": {
+          "code": "invalid_cli_response"
+        },
+        "idempotency_key": null,
+        "reconciliation_required": true
+      },
+      "thread_id": "01a13b78-9af7-79f1-8642-c62f1fdd3dcc",
+      "turns": 0
+    },
+    "manual_assignments": 0,
+    "cleanup": {
+      "denied_environment_pids": [
+        612,
+        646,
+        3798,
+        68403,
+        82261
+      ],
+      "private_readable_environment_matches": []
+    },
+    "server_exit": 0
+  },
+  "global_mcp_smoke": "/tmp/plan0156-global-mcp-smoke.log",
+  "services_restarted": []
+}

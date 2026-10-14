@@ -24,21 +24,22 @@ lanes:
     objective: Implement verified spawn refresh and handoff lifecycle
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/248, https://github.com/CochranResearchGroup/codex-wake/issues/249, https://github.com/CochranResearchGroup/codex-wake/issues/250, https://github.com/CochranResearchGroup/codex-wake/issues/251, https://github.com/CochranResearchGroup/codex-wake/issues/254, https://github.com/CochranResearchGroup/codex-wake/issues/255, https://github.com/CochranResearchGroup/codex-wake/issues/256, https://github.com/CochranResearchGroup/codex-wake/issues/257]
     plan: docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md
-    plan_ref: feat/agent-lifecycle
+    plan_ref: origin/main
     branch: feat/agent-lifecycle
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 717ff4729edcf824b8066fda79a5fabc7aa3bf51
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 3bde6d514c827bc6b810e5cd4bc93ff122b1feec
+    integration_receipt: 3bde6d514c827bc6b810e5cd4bc93ff122b1feec
     remote_ref: refs/remotes/origin/feat/agent-lifecycle
     integration: squash_pr
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/253
-    checkout_required: true
+    checkout_required: false
     dependencies: []
     overlaps: []
     reconciled_overlaps: [P160, P161]
     updated_at: 2026-10-14
-    disposition: Native lifecycle and revised correction axes qualified; main documentation intents reconciled; PR253 release and installed exact-main gates remain open.
+    disposition: PR253 merged; v0.14.0 exact-main release and installed CLI/MCP/skills qualified; native acceptance and cleanup pass; source ref retained, no branch deletion.
   - id: P160
     owner: primary / ecochran76
     objective: Require explicit A2A reply and wait ownership
