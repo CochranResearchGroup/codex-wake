@@ -6568,3 +6568,15 @@ admission. One negative native sample, no same-case retry, source50,000,
 receiver350,000,total400,000,600s and originalmax2 stay fixed.
 Classification:outcome_progress (actual bounded correction followed by ACCEPT),
 next: rejection stop proof, installed replacement-count verification, release.
+
+Single-writer-correction-reject01 accepted: source33,283+receiver294,624
+=327,907 within50,000/350,000/400,000/600s. Exactly2 owned corrections,3 completed
+native review turns, final correct verdict and correction_cycles_exhausted.
+No successor goal or ordinary continuation, settled known ledger, clean OS/server0.
+Configured stale-MCP refresh passed v1 rejection, same goal/configuration and
+rollback with0 model turns and clean OS. Installed14 tests cover non-GitHub
+selection, shared cap, original deadline and replacement/restart correction bound.
+Current-window external1,486,520; previous659,999 remains separate. Native
+required axes qualified; next reconcile main docs conflicts and exact-main release.
+Classification:outcome_progress. Parent and children remain OPEN until integration,
+released installed combined proof, cleanup and issue closure are recorded.
