@@ -470,7 +470,9 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             native_item_id=authored[0]['id'])
         receipt['instruction_read_item']=instructions[0]['id']
         mcp_args=dict(profile='worker',intent='handoff-1',thread_id=source,checkpoint='checkpoint.json',checkpoint_sha256=digest,expires_at=expiry,mode=mode,caller_thread_id=source)
-        receipt['native_handoff_mcp_prepared']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
+        receipt['native_handoff_mcp_prepared']=call_source_mcp(
+            lambda method,params:native_request('unix://'+str(endpoint),str(codex),method,params,70),
+            source,receipt['source_goal'],'wake_sessions_handoff',mcp_args)
         monitor=subprocess.Popen([str(prefix/'bin/codex-waked'),'--wake-root',str(root/'wake'),'--no-dispatch','--interval','1'],env=env,stdout=mlog,stderr=mlog,start_new_session=True)
         deadline=time.monotonic()+min(180,max(0,end-snapshot()['utc']['upper']-50))
         while time.monotonic()<deadline and monitor.poll() is None:

@@ -1,0 +1,112 @@
+{
+  "raw_root": "/tmp/codex-wake-plan0156-context-same-tab01",
+  "raw_state_sha256": "0d09006a9f6d27dbdb074688737d97edcf409e8fc07ec7663fb137257c03a421",
+  "source_commit": "e61d66aa06d5701fdcf9325330ded367fab53078",
+  "prefix": "/tmp/codex-wake-plan0156-installed20",
+  "mode": "same-tab",
+  "state": "failed",
+  "error": "native lifecycle request rejected: mcpServer/tool/call",
+  "source_tokens": 64936,
+  "successor_tokens": 80674,
+  "total_tokens": 145610,
+  "resource_axis": "passed",
+  "work_review": {
+    "verdict": "accept",
+    "selected_review": "github-handoff",
+    "changes": [
+      "Reviewed frozen fixture checkpoint and attributable host validation against the two approved fixture criteria; no implementation change asserted."
+    ],
+    "acceptance_progress": [
+      {
+        "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+        "change": "Checkpoint retains exact bounded objective, operator authority, original resource caps, pending obligations and exact preflight next packet.",
+        "evidence": [
+          {
+            "path": "checkpoint.json",
+            "sha256": "f14214f4cfa2c6f9eb407e3e40882fce23a8da60eb9120cf28a681cb181065c7"
+          }
+        ]
+      },
+      {
+        "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+        "change": "Host controller validation identifies frozen ref and installed Python command; focused validation is attributable but does not establish native continuation, rollback or wider acceptance.",
+        "evidence": [
+          {
+            "path": "host-validation.json",
+            "sha256": "76fabb4b448e1f95ff0b35f16b76fa29505f7d06adb8011078ba545cf558e2fa"
+          }
+        ]
+      }
+    ],
+    "scope_deviations": [],
+    "unsupported_claims": [],
+    "unfinished_work": [
+      "Native bounded continuation and owned rollback remain unverified.",
+      "Wider Plan0156 combined installed/native, correction, accounting, integration and release acceptance remain open.",
+      "Continuation requires separate verified deadline fence and host authorization; this review grants neither."
+    ],
+    "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation"
+  },
+  "continuation_axis": "not_run",
+  "rollback_axis": "not_run",
+  "same_tab_identity": {
+    "same_pane": true,
+    "same_window": true,
+    "different_client_generation": true
+  },
+  "source_goal": {
+    "createdAt": 1791992272,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-context-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "paused",
+    "threadId": "01a13b0f-9f63-7fd1-b9e0-6cad304f95cb",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 185064,
+    "tokensUsed": 0,
+    "updatedAt": 1791992272
+  },
+  "successor_goal": {
+    "createdAt": 1791992349,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-context-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "paused",
+    "threadId": "01a13b10-2663-7c90-a79f-c89f998f6fd0",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 69326,
+    "tokensUsed": 0,
+    "updatedAt": 1791992349
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      21705,
+      53437
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0,
+  "ledger": {
+    "path": "/tmp/codex-wake-plan0156-context-same-tab01/wake/objective-ledgers/c4428a97f16a47bc34fc1d2e514c4f20c517736b0583da6bd9ecd576e5cb8d3e.json",
+    "sha256": "4b30378df4a001f16cfb19cfb5f38e9e829008da96454e838013bda53f787e5f",
+    "actors": {
+      "goal:01a13b0f-9f63-7fd1-b9e0-6cad304f95cb:1791992272": {
+        "known": true,
+        "settled": true,
+        "used": 0
+      },
+      "handoff:fcb16f1f5c3ecea8db98fcc9fa66c7636bc27a41859c7862d07745c55655d675": {
+        "known": true,
+        "settled": false,
+        "used": 80674
+      },
+      "spawn:a0ab5e0ea0c2f7f8baebf21ba5b5a5412de66147c3eeaade05cd971446b3edc3": {
+        "known": true,
+        "settled": true,
+        "used": 64936
+      }
+    }
+  },
+  "mcp_prepared": null,
+  "mcp_completed": null,
+  "mcp_rollback": null
+}

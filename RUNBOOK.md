@@ -6437,3 +6437,17 @@ no same-mode retry. Preserve original Turn317 outcomes and inherited discovery
 limits. Minimum proof forecast500,000 native+350,000 root/integration is covered
 by renewed2,000,000 allowance. No acceptance criteria or sample caps raised.
 Classification:blocker_reduction; full goal remains OPEN.
+
+Native context-new-tab01 passed selected reviewer ACCEPT, full resource limits,
+continuation, all nativeMCPreadbacks and rollback. Source64,772+receiver144,358
+=209,130; original paused source budget40,870 after full receiver debit.
+Cleanup no owned processes. Context-same-tab01 preserved actual selected ACCEPT
+and same-pane/fresh-generation preflight, but failed the earlier prepared-state
+MCPcall before continuation: source64,936+receiver80,674=145,610. Both goals
+paused/settled; no cleanup residue. The same unloaded-original-caller defect
+also affects this unguarded call. Guard it with the already zero-model qualified
+unchanged-paused-source load. This is the second/final correction for this MCP
+caller seam; any failed verification transitions to reframe/block, no blind retry.
+The original one-per-mode proof unit is ended with its failed axis preserved.
+Closed-world successor verifies all three call sites; one remaining same-tab
+verification only, unchanged250,000/150,000/600s caps, no new broad review.
