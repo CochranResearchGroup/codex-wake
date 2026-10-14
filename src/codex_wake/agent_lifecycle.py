@@ -319,6 +319,9 @@ def advance_spawn(path, receipt, profile):
                     native=request('thread/read',{'threadId':receipt['thread_id'],'includeTurns':True})['thread']
                     view=observe_spawn(path.parent.parent,receipt,native,profile,
                         settled=evidence.get('execution') in ('turn_completed','turn_failed','turn_interrupted'))
+                    actor=view['actors'][receipt['budget_actor']]
+                    if not receipt['intent'].get('budget_inherited') and actor['used']>actor['reservation']:
+                        receipt.update(state='blocked',reason='session_token_allowance_exceeded')
                     if receipt['state']=='completed' and not view['accounting_known']:
                         receipt.update(state='awaiting_preflight',reason='final_usage_unknown')
                 save(path, receipt)

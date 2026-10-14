@@ -182,6 +182,39 @@ def excluded_skill_paths(catalog, selected_paths):
     return sorted(enabled-selected)
 
 
+def checkpoint_program(contract,objective):
+    program=f"""import os,json,hashlib,pathlib
+p=pathlib.Path('checkpoint.json')
+p.write_text(json.dumps(dict(**{contract!r},source_thread_id=os.environ['CODEX_THREAD_ID'],objective={objective!r},authority='operator execute Plan0156; fixed bounded disposable continuation',next_packet='Read selected skill instructions and run host preflight before authorized bounded continuation',pending_obligations=[]),sort_keys=True)+{chr(10)!r})
+print('checkpoint:'+os.environ['CODEX_THREAD_ID']+':'+hashlib.sha256(p.read_bytes()).hexdigest())
+"""
+    compile(program,'<generated checkpoint>','exec')
+    return program
+
+
+def start_owned_monitor(prefix,root,env,log):
+    """Qualify the same resident supervision used before source model admission."""
+    from codex_wake.process import process_identity
+    process=subprocess.Popen([str(prefix/'bin/codex-waked'),'--wake-root',str(root/'wake'),
+        '--no-dispatch','--interval','1'],env=env,stdout=log,stderr=log,start_new_session=True)
+    deadline=time.monotonic()+15
+    try:
+        while process.poll() is None and time.monotonic()<deadline:
+            proof=root/'wake/lifecycle/supervision.json'
+            if proof.exists():
+                observed=json.loads(proof.read_text())
+                if (observed.get('active') and observed.get('pid')==process.pid
+                        and observed.get('identity')==process_identity(process.pid)
+                        and type(observed.get('observed_at')) in (int,float)):
+                    return process,observed
+            time.sleep(.1)
+        raise RuntimeError('source supervisor not ready')
+    except Exception:
+        if process.poll() is None:
+            os.killpg(process.pid,signal.SIGINT);process.wait(timeout=30)
+        raise
+
+
 def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',rollback=False,qualify_only=False):
     original=None
     if resume_setup:
@@ -226,7 +259,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
         token_cap=250000,time_cap_seconds=600,manual_assignment_limit=0 if qualify_only else 2,mode=mode,rollback_requested=rollback,
         selected_instruction_mirrors=mirrors,
-        root_window=dict(start='2026-10-14T10:38:06Z',deadline='2026-10-14T16:38:06Z',token_cap=2000000),
+        root_window=dict(start='2026-10-14T12:29:34Z',deadline='2026-10-14T18:29:34Z',token_cap=2000000),
         adaptation_lane=dict(token_cap=100000,time_cap_seconds=900,goal_counter='unknown'))
     env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
     for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):env.pop(k,None)
@@ -263,7 +296,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         if not bounds:raise RuntimeError('admissible UTC unavailable')
         started=original['started_at'] if original else bounds['upper']
         end=min(original['deadline'] if original else started+600,parent_deadline-60,
-            datetime(2026,10,14,16,38,6,tzinfo=UTC).timestamp()-60)
+            datetime(2026,10,14,18,29,34,tzinfo=UTC).timestamp()-60)
         if end-bounds['upper']<(240 if original else 480):raise RuntimeError('original/parent deadline leaves insufficient fixed fixture window')
         expiry=datetime.fromtimestamp(end,UTC).isoformat();receipt.update(started_at=started,deadline=end)
         # Resolve the owned listener before configuring MCP, without creating a thread.
@@ -304,12 +337,20 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             preflight_reviewer=dict(name='github-ask-matt',path=str(reviewer)),
             session_token_limit=150000,session_time_limit_seconds=int(end-started),
             objective_token_limit=250000,objective_time_limit_seconds=int(end-started),max_correction_cycles=0)
-        write(profiles,dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults))
         objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.'
+        bootstrap=dict(objective=objective,approval=receipt['authority'],spawn_token_limit=100000,
+            started_at=datetime.fromtimestamp(started,UTC).isoformat())
+        write(profiles,dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults,
+            continuations={'bootstrap':bootstrap}))
         constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),reviewer=str(reviewer),prefix=str(prefix),
             review_authority=str(root/'review-authority.json'),
             native_observations=str(root/'native-observations.json'),continuation_authority=str(root/'continuation-authority.json'))
         helper.write_text(preflight_program(constants))
+        bootstrap_effective=effective_configuration(json.loads(profiles.read_text()),'bootstrap','worker')
+        receipt['bootstrap_configuration']=dict(revision=bootstrap_effective['revision'],
+            objective_deadline=bootstrap_effective['objective_deadline'],spawn_token_limit=bootstrap['spawn_token_limit'],
+            session_token_limit=bootstrap_effective['session_token_limit'],objective_token_limit=bootstrap_effective['objective_token_limit'])
+        monitor,receipt['source_supervision']=start_owned_monitor(prefix,root,env,mlog)
         if qualify_only:
             receipt['generated_helper_syntax']='passed'
             raise SetupQualified
@@ -329,9 +370,9 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             reply_route='root controller via native result and '+str(root/'state.json'),hard_stops=['original token and time caps; no renewal'],
             expires_at=expiry,resources=dict(token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=0,
                 seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat()))
-        script="import os,json,hashlib,pathlib\np=pathlib.Path('checkpoint.json')\np.write_text(json.dumps(dict(**"+repr(checkpoint_contract)+",source_thread_id=os.environ['CODEX_THREAD_ID'],objective="+repr(objective)+",authority='operator execute Plan0156; fixed bounded disposable continuation',next_packet='Read selected skill instructions and run host preflight before authorized bounded continuation',pending_obligations=[]),sort_keys=True)+'\\n')\nprint('checkpoint:'+os.environ['CODEX_THREAD_ID']+':'+hashlib.sha256(p.read_bytes()).hexdigest())\n"
+        script=checkpoint_program(checkpoint_contract,objective)
         task='First read and print the complete selected writer instructions at '+str(workflow)+' using a command containing that absolute path. Apply them to the supplied bounded fixture checkpoint. Then execute only this Python script to write your own outgoing checkpoint, then report checkpoint ready. Do not change any goal.\n```python\n'+script+'```'
-        spawn=['sessions','spawn','--profiles',str(profiles),'--profile','worker','--intent','source-1','--name','checkpoint-source','--task',task,'--expires-at',expiry,'--json']
+        spawn=['sessions','spawn','--profiles',str(profiles),'--profile','worker','--objective-ref','bootstrap','--intent','source-1','--name','checkpoint-source','--task',task,'--expires-at',expiry,'--json']
         deadline=time.monotonic()+180
         while True:
             code,state=invoke(spawn);receipt['source']=state;write(root/'state.json',receipt)
@@ -343,6 +384,8 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         if not instruction_read(native,writer_selection,workspace):
             raise RuntimeError('selected writer instruction bytes not observed')
         if spent['total_tokens']>=100000:raise RuntimeError('source exceeded fixture suballowance')
+        os.killpg(monitor.pid,signal.SIGINT);monitor.wait(timeout=30)
+        receipt['source_supervisor_exit']=monitor.returncode;monitor=None
         receipt['source_goal']=request('thread/goal/set',dict(threadId=source,objective=objective,tokenBudget=250000-spent['total_tokens'],status='paused',origin='automatic'))['goal']
         # Qualify the host route on the settled source before buying a successor turn.
         receipt['host_source_preflight']=observe_native_preflight(request,source,source,guide,workspace)
@@ -453,6 +496,14 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             try:monitor.wait(timeout=30)
             except subprocess.TimeoutExpired:receipt['monitor_shutdown']='timed_out'
         receipt['monitor_exit']=monitor.poll() if monitor else None
+        cleanup_source=receipt.get('source',{}).get('thread_id')
+        if cleanup_source:
+            try:
+                receipt['owned_source_settlement']=settle_owned_successor(request,dict(
+                    successor_thread_id=cleanup_source,successor=receipt['source'],
+                    successor_goal=receipt.get('source_goal')))
+                _,receipt['source_usage']=usage(cleanup_source)
+            except Exception as exc:receipt['source_final_readback_error']=type(exc).__name__
         cleanup_target=receipt.get('handoff',{}).get('successor_thread_id')
         if cleanup_target:
             try:

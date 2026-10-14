@@ -123,6 +123,8 @@ def poll_spawns(root,stop_reason=None):
                 if reason and turn['status']=='inProgress':
                     request('turn/interrupt',{'threadId':receipt['thread_id'],'turnId':turn['id']})
                     receipt.update(state='blocked',reason=reason,supervisor_owned_turn_id=turn['id'])
+                elif terminal and reason:
+                    receipt.update(state='blocked',reason=reason)
                 elif terminal and view is not None and view['accounting_known']:
                     receipt.update(state='completed' if turn['status']=='completed' else 'blocked',
                         reason=None if turn['status']=='completed' else 'initial_task_turn_'+turn['status'])

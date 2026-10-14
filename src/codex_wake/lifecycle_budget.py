@@ -20,6 +20,9 @@ def operation_binding(config, args, source_ref=None):
     if args.caller_thread_id and reference!=args.caller_thread_id:
         raise WakeError('caller cannot select another objective reference')
     effective=effective_configuration(config,reference,args.profile,args.caller_thread_id)
+    lower=policies[reference].get('spawn_token_limit',effective['session_token_limit'])
+    if type(lower) is not int or not 0<lower<=effective['session_token_limit']:
+        raise WakeError('host spawn token limit must be within the configured session allowance')
     binding=dict(continuation=policies[reference],configuration=effective,objective_ref=reference)
     if inherited:
         if inherited.get('configuration_revision')!=effective['revision']:
@@ -110,7 +113,7 @@ def admit_spawn(root,receipt,request):
     else:
         if actor:tokens,seconds=actor['terms']
         else:
-            tokens=min(cfg['session_token_limit'],view['remaining_tokens'])
+            tokens=min(cfg['session_token_limit'],policy.get('spawn_token_limit',cfg['session_token_limit']),view['remaining_tokens'])
             seconds=int(min(cfg['session_time_limit_seconds'],view['remaining_seconds'],
                 parse_timestamp(receipt['intent']['expires_at']).timestamp()-now))
         view=ledger.reserve(actor_id,tokens,max(0,seconds),now=now) if tokens>0 and seconds>0 else dict(view,admitted=False)

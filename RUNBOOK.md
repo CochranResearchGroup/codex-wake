@@ -6198,3 +6198,44 @@ and source supervisor, retain100,000 source/150,000 preflight/250,000 total caps
 qualify generated setup, then one bounded independent native mode after frozen
 published-head reconciliation. Context replacement and remaining full native
 acceptance/integration/release gates stay OPEN. No goal completion claimed.
+
+## Turn 314 | 2026-10-14 UTC
+
+Reconciled CI38567059613: successful at source4481f6e. Installed17 replaces only
+this packet's private candidate: byte parity95 files, no mismatches. Host-approved
+lower spawn_token_limit enforces the100,000 source fixture suballowance within
+150,000 session config; public CLI red/green proves native completion cannot
+hide actual70 spend against50 allowance. Actual overspend stays charged. Terminal
+supervisor stops retain their resource reason instead of becoming completed.
+Acceptance harness now declares bootstrap objective/configuration/start before
+spawn, selects its exact reference, requires actual resident process-generation
+heartbeat and stops the source supervisor after settled source before preparation.
+Source cleanup observes actual usage on failures as well as successful paths.
+Root fixture metadata/deadline matches renewed12:29:34–18:29:34UTC window.
+Native setup05 actually qualifies generated helper, exact selected skill catalog,
+bootstrap configuration and resident supervision with zero manual assignments,
+zero rollouts, server exit0 and fresh OS private-process census empty. Original
+qualified setup04 and failed paid new-tab samples retained. Installed17 affected
+97 tests pass13.820s; syntax/whitespace pass. Curated setup05 receipt records
+harness/wheel hashes and actual supervisor/bootstrap readbacks.
+Before paid effects, root838,721 at13:04:39UTC, baseline583,915, delta254,806;
+known external/new native spend0 in this window. Available1,745,194 before further
+root work. Minimum remaining two-mode native proof reserves2x250,000; retain
+500,000 root/integration allowance, leaving745,194 contingency. One independent
+same-tab sample is the next bounded packet, capped100,000 source/150,000 combined
+preflight+continuation/250,000 total and600s including setup. At failure preserve
+actual counters/owned cleanup, reframe within two-attempt unit bound. Do not
+repeat the exhausted old new-tab loop or reset review discovery. Native semantic
+review must author its own actual verdict; helper cannot manufacture accept.
+Progress blocker_reduction; full plan/children/issues remain OPEN. Source package
+and harness will be checkpointed/published clean before native paid admission.
+
+Integration151 tests pass34.459s before writer-factory extraction. Executing the
+actual generated outgoing writer program exposed literal backslash-n appended
+to JSON (JSONDecodeError Extra data). The shared checkpoint_program factory now
+compiles its generated program and emits real newline/parseable native-identity
+JSON; public artifact red/green and all10 harness tests pass. This fixes the
+producer rather than relying on a native model to repair supplied script text.
+Source writer budgets/instructions remain unchanged. Setup06 repeats zero-model
+qualification of the changed harness; setup05 remains retained as earlier proof.
+Setup06 PASS: zero assignments/rollouts, actual bootstrap/supervisor proof, generated helper syntax, server exit0 and fresh owned-process census empty. Curated receipt preserves changed harness hash.

@@ -178,6 +178,9 @@ class AgentSpawnTests(unittest.TestCase):
     def test_daemon_cancels_exact_queued_spawn_after_lost_admission_response_and_expiry(self):
         self.spawn_scenario(budget=True,loss='queue/add',budget_queue_stop=True)
 
+    def test_host_lower_spawn_allowance_blocks_completed_native_overspend(self):
+        self.spawn_scenario(budget=True,budget_overrun=True)
+
     def test_lost_task_admission_response_reconciles_exact_queue_without_resend(self):
         self.spawn_scenario(loss='queue/add')
 
@@ -224,7 +227,7 @@ class AgentSpawnTests(unittest.TestCase):
         self.spawn_scenario(resource_profile=True)
 
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False,budget_overrun=False):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -320,6 +323,7 @@ class AgentSpawnTests(unittest.TestCase):
                     objective_token_limit=1000,objective_time_limit_seconds=1000,max_correction_cycles=2),
                     continuations={'bootstrap':dict(approval='operator fixture',objective='Finish fixture',
                         started_at='1970-01-01T00:16:40Z')})
+                if budget_overrun:registry['continuations']['bootstrap']['spawn_token_limit']=50
             profiles.write_text(json.dumps(registry))
             master, slave = pty.openpty()
             client = None
@@ -446,6 +450,17 @@ class AgentSpawnTests(unittest.TestCase):
                                     self.assertEqual(json.loads(held.getvalue())['reason'],'final_usage_unknown')
                                 with rollout.open('a') as stream:
                                     stream.write(json.dumps(dict(type='event_msg',payload=dict(type='task_complete',turn_id='turn157')))+'\n')
+                                if budget_overrun:
+                                    held=StringIO()
+                                    with redirect_stdout(held):self.assertEqual(run(argv),5)
+                                    receipt=json.loads(held.getvalue())
+                                    self.assertEqual(receipt['state'],'blocked')
+                                    self.assertEqual(receipt['reason'],'session_token_allowance_exceeded')
+                                    actor=receipt['objective_budget']['actors'][receipt['budget_actor']]
+                                    self.assertEqual(actor['reservation'],50)
+                                    self.assertEqual(actor['used'],70)
+                                    self.assertEqual(len(tasks),1)
+                                    return
                             for _ in range(2):
                                 output = StringIO()
                                 with redirect_stdout(output):

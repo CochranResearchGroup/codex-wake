@@ -158,8 +158,9 @@ replaces cumulative ceilings/deadline without zeroing usage or correction count.
 Reset requires settled, known actors. Both operations retain original deadline
 and attributable authorization history and reconcile exact replay idempotently.
 Durable native goal aliases bind preflight offsets to their assigned actor so a
-successor becoming the next source is charged once. Native refreshed sessions,
-general spawn accounting and both-mode installed proof remain open.
+successor becoming the next source is charged once. Configured refresh/general
+spawn accounting now has source and installed-fixture coverage; revised native
+refresh/combined both-mode handoff acceptance remains open.
 
 Correct verdicts require a host `correction_scope` and a frozen `correction_packet`
 (approved criterion, relative paths, instructions, checked evidence path/hashes).

@@ -1,5 +1,9 @@
 """Acceptance runner keeps the same native assignment alive during clock holds."""
 import sys
+import json
+import os
+import subprocess
+import tempfile
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -9,6 +13,17 @@ import agent_handoff_acceptance as runner
 
 
 class OwnedCleanupTests(unittest.TestCase):
+    def test_generated_writer_emits_parseable_checkpoint_with_native_identity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            program=runner.checkpoint_program({'commit':'a'*40},'Finish fixture')
+            result=subprocess.run([sys.executable,'-c',program],cwd=tmp,
+                env=dict(os.environ,CODEX_THREAD_ID='native-source'),capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            checkpoint=json.loads((Path(tmp)/'checkpoint.json').read_text())
+            self.assertEqual(checkpoint['source_thread_id'],'native-source')
+            self.assertEqual(checkpoint['objective'],'Finish fixture')
+            self.assertIn('checkpoint:native-source:',result.stdout)
+
     def test_generated_preflight_is_executable_python_before_paid_admission(self):
         program=runner.preflight_program({'repo': '/fixture', 'head': 'a'*40})
         compile(program, 'preflight.py', 'exec')

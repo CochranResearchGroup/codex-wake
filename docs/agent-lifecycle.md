@@ -64,6 +64,10 @@ does not publish admission authority. The daemon's owned process generation and
 fresh heartbeat must be available before creation and task effects.
 
 Configured spawn reserves its session within the shared objective allowance.
+An approved continuation entry may set `spawn_token_limit` to a positive lower
+allowance within `session_token_limit`; this cannot raise the session cap.
+Actual overspend remains charged and blocks a success claim even if the native
+turn completed.
 An active native parent keeps its finite future quota reserved before a worker
 is admitted. Repeated intents preserve the original reservation and deadline.
 The daemon observes native usage and interrupts only the assignment's exact
