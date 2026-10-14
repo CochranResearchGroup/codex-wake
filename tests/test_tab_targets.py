@@ -50,6 +50,12 @@ class TabTargetTests(unittest.TestCase):
         code,value=self.invoke('absent',state)
         self.assertEqual(code,5,value)
 
+    def test_normalized_numeric_name_precedes_a_different_tab_index(self):
+        state=snapshot(panes=[pane('4','18'),pane('18','policies',identifier='%18')])
+        code,value=self.invoke(' 18 ',state)
+        self.assertEqual(code,0,value)
+        self.assertEqual(value['session']['selected_attachment']['window_name'],'18')
+
     def test_saved_history_is_cwd_scoped_complete_and_metadata_only(self):
         from tests.test_shared_app_server import SharedReaderTests, result
         fixture=SharedReaderTests();fixture.setUp()
@@ -66,6 +72,7 @@ class TabTargetTests(unittest.TestCase):
             self.assertEqual(request['method'],'thread/list')
             self.assertEqual(request['params']['cwd'],'/repo')
             self.assertIs(request['params']['archived'],False)
+            self.assertIn('vscode',request['params']['sourceKinds'])
         finally:fixture.doCleanups()
 
     def test_nondefault_policy_requires_host_scope_before_any_effect(self):
@@ -117,6 +124,23 @@ class TargetLifecycleTests(unittest.TestCase):
         self.calls.append((command[0],command[1:]))
         return '@18\t%19' if command[0]=='split-window' else '@19\t%19'
 
+    def test_missing_and_inactive_policy_matrix_keeps_effects_explicit(self):
+        for n,(selector,option,policy,expected) in enumerate([
+                ('missing-worker','--on-missing','error','tab_not_found'),
+                ('missing-worker','--on-missing','tab_only','tab_created'),
+                ('missing-worker','--on-missing','fresh','starting'),
+                ('missing-worker','--on-missing','resume','resume_not_found'),
+                ('tab 18','--on-inactive','error','no_live_codex'),
+                ('tab 18','--on-inactive','tab_only','tab_ready'),
+                ('tab 18','--on-inactive','fresh','starting'),
+                ('tab 18','--on-inactive','resume','resume_not_found')]):
+            with self.subTest(selector=selector,policy=policy):
+                self.calls=[]
+                code,value=self.call(option,policy,'--intent','matrix'+str(n),selector=selector)
+                self.assertEqual(value['status'],expected,value)
+                if policy in ('error','resume') or expected=='tab_ready':
+                    self.assertEqual(self.calls,[])
+
     def test_resume_zero_and_multiple_histories_never_launch_or_fallback(self):
         for rows,expected in [([], 'resume_not_found'),([
             dict(id='a',cwd=str(self.root)),dict(id='b',cwd=str(self.root))],'resume_ambiguous')]:
@@ -156,6 +180,13 @@ class TargetLifecycleTests(unittest.TestCase):
         self.assertEqual([m for m,p in self.calls],['thread/read','split-window'])
         self.assertIn('saved-thread',self.calls[-1][1][-1])
 
+    def test_exact_resume_validates_cwd_even_when_native_history_list_omits_empty_thread(self):
+        self.saved=[]
+        code,value=self.call('--on-inactive','resume','--resume-thread-id','exact-thread')
+        self.assertEqual(value['status'],'starting',value)
+        self.assertEqual(value['thread_id'],'exact-thread')
+        self.assertNotIn('thread/start',[m for m,p in self.calls])
+
     def test_lost_launch_reply_holds_same_intent_without_duplicate_effects(self):
         original=self.tmux
         def lost(*args,**kwargs):
@@ -166,6 +197,20 @@ class TargetLifecycleTests(unittest.TestCase):
         self.assertEqual(value['status'],'effect_uncertain',value)
         self.calls=[]
         self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'effect_uncertain')
+        self.assertEqual(self.calls,[])
+
+    def test_lost_tab_reply_reconciles_visible_exact_client_without_relaunch(self):
+        original=self.tmux
+        def lost(*args,**kwargs):
+            original(*args,**kwargs)
+            raise TimeoutError('fixture lost reply')
+        self.tmux=lost
+        self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'effect_uncertain')
+        p=pane('18','policies',identifier='%19');p['pane_current_path']=str(self.root)
+        self.state=snapshot(threads=[dict(id='new-thread',cwd=str(self.root),name='Session',
+                                        status={'type':'idle'})],panes=[self.shell,p])
+        self.calls=[]
+        self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'resolved')
         self.assertEqual(self.calls,[])
 
     def test_startup_becomes_exact_ready_identity_and_reuse_is_detected(self):
@@ -181,6 +226,19 @@ class TargetLifecycleTests(unittest.TestCase):
         self.state=snapshot(threads=[],panes=[dict(p,client_start_time_ticks=999)])
         self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'target_changed')
 
+    def test_completed_intent_recovers_after_transient_busy_without_retargeting(self):
+        self.call('--on-inactive','fresh')
+        p=pane('18','policies',identifier='%19');p['pane_current_path']=str(self.root)
+        thread=dict(id='new-thread',cwd=str(self.root),name='Session',status={'type':'idle'})
+        self.state=snapshot(threads=[thread],panes=[self.shell,p])
+        self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'resolved')
+        thread['status']={'type':'active'}
+        self.state=snapshot(threads=[thread],panes=[self.shell,p])
+        self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'target_busy')
+        thread['status']={'type':'idle'}
+        self.state=snapshot(threads=[thread],panes=[self.shell,p])
+        self.assertEqual(self.call('--on-inactive','fresh')[1]['status'],'resolved')
+
     def test_changed_options_and_profile_or_cwd_cannot_reuse_launch_intent(self):
         self.call('--on-inactive','fresh')
         self.calls=[]
@@ -188,6 +246,24 @@ class TargetLifecycleTests(unittest.TestCase):
         self.assertEqual(self.calls,[])
 
 class HumanSendTests(unittest.TestCase):
+    def test_initial_busy_send_holds_identity_across_replacement(self):
+        from tests.test_messages_cli import MessageCLITests
+        fixture=MessageCLITests();fixture.setUp()
+        try:
+            p=pane('18','policies');p['pane_current_path']=str(fixture.repo)
+            thread=dict(id='recipient',name='Session',cwd=str(fixture.repo),status={'type':'active'})
+            state=snapshot(threads=[thread],panes=[p])
+            args=['send','--to','tab 18','--body-file',str(fixture.body),
+                  '--idempotency-key','busy-send','--delivery','inbox']
+            with patch('codex_wake.tab_targets.observe',return_value=state):
+                self.assertEqual(fixture.invoke(args)[1][0]['target']['status'],'target_busy')
+            state=snapshot(threads=[dict(thread,id='replacement',status={'type':'idle'})],
+                           panes=[dict(p,client_start_time_ticks=999)])
+            with patch('codex_wake.tab_targets.observe',return_value=state):
+                self.assertEqual(fixture.invoke(args)[1][0]['target']['status'],'target_changed')
+            self.assertEqual(fixture.invoke(['outbox'])[1][0]['messages'],[])
+        finally:fixture.doCleanups()
+
     def test_message_send_resolves_and_pins_inside_service_and_holds_reused_tab(self):
         from tests.test_messages_cli import MessageCLITests
         fixture=MessageCLITests();fixture.setUp()

@@ -35,7 +35,10 @@ def approved_profile(args):
     caller = args.caller_thread_id or os.environ.get('CODEX_THREAD_ID')
     if not caller or args.profile not in config.get('callers', {}).get(caller, []):
         raise ValueError('host caller grant does not authorize this launch profile')
-    if args.app_server != profile['app_server'] or args.tmux_socket != profile.get('tmux_socket'):
+    from .shared_app_server import locate_shared_endpoint
+    endpoint=locate_shared_endpoint() if args.app_server=='unix://' else args.app_server
+    socket=args.tmux_socket or (os.environ.get('TMUX','').split(',')[0] or None)
+    if endpoint != profile['app_server'] or socket != profile.get('tmux_socket'):
         raise ValueError('discovery and launch profile must use the same host runtime')
     if args.tmux_session and args.tmux_session != profile['tmux_session']:
         raise ValueError('tmux session differs from approved launch profile')
@@ -53,16 +56,33 @@ def prepare(args, root, value):
             value.update(status='cwd_mismatch')
             return value
         value['cwd'] = cwd
+        if value['status']=='tab_not_found' and args.selector.startswith(('thread:','pane:','window:')):
+            value.update(status='policy_denied',message='exact runtime identities cannot be recreated from a missing selector')
+            return value
         row = value.get('session')
         attachment = row.get('selected_attachment') if row else None
+        if attachment and profile['tmux_session'] not in (attachment['session_id'],attachment['session_name']):
+            value.update(status='policy_denied',message='observed tab is outside approved tmux session')
+            return value
         if attachment and attachment.get('pane_current_command') not in ('bash','zsh','fish','sh','dash'):
             value.update(status='target_busy', message='existing pane is not an observed shell')
             return value
         selected = None
         if value['applied_policy'] == 'resume':
-            rows = saved_history(profile['app_server'], cwd, profile['timeout'])
             if args.resume_thread_id:
-                rows = [r for r in rows if r['id'] == args.resume_thread_id]
+                # Exact metadata is authoritative even when thread/list omits a
+                # newly materialized conversation with no user turns yet.
+                thread=native_request(profile['app_server'],profile['codex_path'],'thread/read',
+                    dict(threadId=args.resume_thread_id,includeTurns=False),profile['timeout'])['thread']
+                if thread.get('id')!=args.resume_thread_id or canonical(thread['cwd'])!=cwd:
+                    value.update(status='cwd_mismatch',message='exact saved thread differs from selected CWD')
+                    return value
+                if isinstance(thread.get('source'),dict) or thread.get('source') not in (None,'cli','vscode','appServer'):
+                    value.update(status='policy_denied',message='exact saved thread is not an interactive session')
+                    return value
+                rows=[{k:thread[k] for k in ('id','cwd','name','updatedAt','source','status') if k in thread}]
+            else:
+                rows = saved_history(profile['app_server'], cwd, profile['timeout'])
             value['candidates'] = rows[:10]
             value['candidate_count'] = len(rows)
             if len(rows) != 1:
@@ -126,7 +146,7 @@ def same_attachment(old, new):
 
 def original_unchanged(receipt, profile):
     from .tab_targets import inspect_target
-    snapshot = observe(endpoint=profile['app_server'], socket_path=profile.get('tmux_socket'), timeout=profile['timeout'])
+    snapshot = observe(endpoint=profile['app_server'], socket_path=profile.get('tmux_socket'), timeout=profile['timeout'], shell_metadata=True)
     if not snapshot['complete']:
         return False
     old = receipt['original_attachment']
@@ -153,22 +173,41 @@ def advance(path, receipt, profile):
     import shlex
     value = receipt['report']
     runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile))
-    if receipt['state'] == 'starting':
-        receipt['state'] = 'uncertain'
-        mark(path, receipt, 'effect_uncertain', reconciliation_required=True)
-        return
-    if receipt['state'] == 'uncertain':
-        mark(path, receipt, 'effect_uncertain', reconciliation_required=True)
-        return  # no blind replay of thread/new-window/split-window
+    if receipt['state'] in ('starting','uncertain'):
+        effect=receipt.get('uncertain_effect')
+        matches=[]
+        if effect in ('tmux/new-window','tmux/split-window') and receipt['thread_id']:
+            observed=observe(endpoint=profile['app_server'],socket_path=profile.get('tmux_socket'),
+                             timeout=profile['timeout'],shell_metadata=True)
+            old=receipt['original_attachment']
+            if observed['complete']:
+                matches=[(r,p) for r in observed['sessions'] for p in r['attachments']
+                    if r['thread_id']==receipt['thread_id'] and canonical(r['cwd'])==value['cwd']
+                    and profile['tmux_session'] in (p['session_id'],p['session_name'])
+                    and (p['window_id']==old['window_id'] if old else
+                         p['window_name']==receipt.get('created_name'))]
+        if len(matches)!=1:
+            receipt['state']='uncertain'
+            mark(path,receipt,'effect_uncertain',uncertain_effect=effect,
+                 reconciliation_required=True,next_actions=['reconcile_same_intent'])
+            return
+        row,pane=matches[0]
+        receipt.update(pane_id=pane['pane_id'],window_id=pane['window_id'],state='awaiting_preflight')
+        receipt.pop('uncertain_effect',None)
+        value.pop('uncertain_effect',None)
+        value['reconciliation_required']=False
+        value['effects'].append(dict(operation=effect,pane_id=pane['pane_id'],window_id=pane['window_id'],
+                                     recovered_from='exact_native_binding'))
+        save(path,receipt)
     if receipt['state'] == 'completed':
-        if value['status'] == 'resolved':
+        if value.get('session') and value.get('thread_id'):
             from .tab_targets import revalidate_target
-            options=SimpleNamespace(app_server=profile['app_server'],tmux_socket=profile.get('tmux_socket'),timeout=profile['timeout'])
+            options=SimpleNamespace(app_server=profile['app_server'],tmux_socket=profile.get('tmux_socket'),timeout=profile['timeout'], shell_metadata=True)
             receipt['report']=revalidate_target(value,options)
             save(path,receipt)
         return
     if receipt.get('pane_id'):
-        current = observe(endpoint=profile['app_server'], socket_path=profile.get('tmux_socket'), timeout=profile['timeout'])
+        current = observe(endpoint=profile['app_server'], socket_path=profile.get('tmux_socket'), timeout=profile['timeout'], shell_metadata=True)
         matches = [(r,p) for r in current['sessions'] for p in r['attachments']
                    if p['pane_id'] == receipt['pane_id'] and p['window_id'] == receipt['window_id']]
         if not current['complete']:
@@ -215,7 +254,7 @@ def advance(path, receipt, profile):
             if thread and (thread.get('status',{}).get('type') not in ('idle','notLoaded') or thread.get('status',{}).get('activeFlags')):
                 mark(path,receipt,'target_busy');return
             if policy == 'resume':
-                live=observe(endpoint=profile['app_server'],socket_path=profile.get('tmux_socket'),timeout=profile['timeout'])
+                live=observe(endpoint=profile['app_server'],socket_path=profile.get('tmux_socket'),timeout=profile['timeout'], shell_metadata=True)
                 if not live['complete']:
                     mark(path,receipt,'inventory_unavailable');return
                 if any(r['thread_id']==receipt['thread_id'] and r['attachments'] for r in live['sessions']):
@@ -243,8 +282,18 @@ def advance(path, receipt, profile):
             flags+=['-t',old['pane_id'],'-c',value['cwd']]
         else:
             # A missing descriptor supplies a display name, never tmux target syntax.
+            import re
             name=value.get('normalized_selector') or receipt['intent']['selector']
-            flags+=['-t',profile['tmux_session']+':','-n',name,'-c',value['cwd']]
+            name=re.sub(r'^tab\s+', '', name)
+            if name.startswith('tab:'):name=name[4:]
+            parsed=re.fullmatch(r'(\d+)(?::(.+))?',name)
+            index=''
+            if parsed:
+                index,name=parsed.groups()
+                name=name or 'codex'
+            receipt['created_name']=name
+            save(path,receipt)
+            flags+=['-t',profile['tmux_session']+':'+index,'-n',name,'-c',value['cwd']]
         if command:flags.append(command)
         window,pane=tmux_command(runtime,effect,*flags).split('\t')
         receipt.update(window_id=window,pane_id=pane,state='completed' if policy=='tab_only' else 'awaiting_preflight')
@@ -256,4 +305,6 @@ def advance(path, receipt, profile):
     except Exception as exc:
         receipt['state']='uncertain' if receipt.get('uncertain_effect') else 'blocked'
         mark(path,receipt,'effect_uncertain' if receipt.get('uncertain_effect') else 'inventory_unavailable',
-             reconciliation_required=bool(receipt.get('uncertain_effect')),message=type(exc).__name__)
+             reconciliation_required=bool(receipt.get('uncertain_effect')),
+             uncertain_effect=receipt.get('uncertain_effect'),next_actions=['reconcile_same_intent'],
+             message=type(exc).__name__)

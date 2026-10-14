@@ -165,7 +165,7 @@ Codex pane. `tab_only` reuses a dormant tab (`tab_ready`) or creates a shell tab
 profile CWD. The label never implies a repository path.
 
 `expected_cwd` guards assumptions; `cwd` cannot override an existing tab's observed
-CWD or the approved profile. Resume searches non-archived CLI/app-server saved
+CWD or the approved profile. Resume searches non-archived CLI/VS Code/app-server saved
 sessions for that exact canonical directory (separate worktrees stay separate),
 including unloaded histories. It selects one candidate or the supplied
 `resume_thread_id`; multiple candidates return `resume_ambiguous`. No latest-session

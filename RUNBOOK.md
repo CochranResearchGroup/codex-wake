@@ -6647,3 +6647,19 @@ Operator accepted issue262 implementation. Main439f749 lacks lifecycle source;
 created isolated feat/mcp-tab-targets from pinned lifecycle5b14c05 as a documented
 stacked dependency exception. Root dirty acceptance script preserved. Plan0162
 freezes selector/result/policy semantics and public-seam tests.
+
+
+## Turn | 2026-10-14 | Plan0162 source and installed qualification
+
+Implemented informal target matching, guarded target preparation and pinned
+message admission. Independent review /root/tab_target_review found normalized
+numeric precedence and sticky-busy defects; both remediated with regressions.
+First full run1224 failed98+4 due to global tmux-field fixture incompatibility and
+host StableTime configuration. Optional target-only fields repaired compatibility;
+isolated time lane23 and lifecycle lane92 passed. Isolated full suite1227 then
+final1229 passed (125.098s final); later uncertainty reconciliation52 focused green.
+Installed private-bus MCP smoke:19 tools, request/read/claim/completion/reply and
+capability denials PASS; no native turns/notifications. Owned TUI proof03 fresh,
+exact resume and tab-only PASS, zero turns, no OS residue; two partial proofs kept.
+Final isolated prefix /tmp/codex-wake-p162-install, not the active0.13.1 installation.
+Plan/issue remain OPEN for dependency integration and remaining live acceptance.

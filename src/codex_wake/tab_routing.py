@@ -41,13 +41,13 @@ def routed_send(args, bus, mailbox, actor, body, key, resolve_identity):
         target_args.caller_thread_id=os.environ.get('CODEX_THREAD_ID')
         target_args.assignment_digest=fingerprint
         target_args.timeout=10
-        if receipt['report'] is None or receipt['report']['status'] not in ('resolved','tab_created','tab_ready'):
+        if receipt['report'] is None or receipt['report']['status'] in ('starting','effect_uncertain','inventory_unavailable'):
             report=prepare_target(target_args,root)
             receipt['report']=report
             save(path,receipt)
         else:
             report=receipt['report']
-        if report['status'] != 'resolved':
+        if report['status'] not in ('resolved','target_busy') or not report.get('thread_id'):
             return dict(target=report,idempotency_key=key,admitted=False), False
         report=revalidate_target(report,target_args)
         if report['status'] != 'resolved':
