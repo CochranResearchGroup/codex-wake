@@ -1,0 +1,113 @@
+{
+  "cleanup": {
+    "fresh_owned_process_matches": [],
+    "server_exit": 0
+  },
+  "continuation": "not_run",
+  "error": "handoff held: source_client_not_uniquely_ready",
+  "ledger": {
+    "accounting_known": true,
+    "actors": {
+      "goal:01a13aaf-5f92-7583-9f2c-4b5056ca622e:1791985968": {
+        "known": true,
+        "reservation": 0,
+        "session_deadline": null,
+        "settled": true,
+        "terms": null,
+        "tokens_remaining": 0,
+        "used": 0
+      },
+      "handoff:c2b3e99ab4114333d56a33f99866bd9c202a15c14751aa05269daa0dc0365821": {
+        "known": true,
+        "reservation": 150000,
+        "session_deadline": 1791986526.0853138,
+        "settled": true,
+        "terms": [
+          150000,
+          555
+        ],
+        "tokens_remaining": 127825,
+        "used": 22175
+      },
+      "spawn:bcf072c5f60b5cd9d940d5e3a1435f6a7069ac156bb959d9ee10c1a128b5f6b3": {
+        "known": true,
+        "reservation": 100000,
+        "session_deadline": 1791986526.4406135,
+        "settled": true,
+        "terms": [
+          100000,
+          592
+        ],
+        "tokens_remaining": 34891,
+        "used": 65109
+      }
+    },
+    "correction_cycles": 0,
+    "goal_aliases": {},
+    "objective_deadline": "2026-10-14T14:02:07+00:00",
+    "objective_id": "3066e967a9d897de9c92a56f0c7b8269f6eb205c57f3ba4393a92e1b696f6c35",
+    "original_deadline": "2026-10-14T14:02:07+00:00",
+    "remaining_tokens": 162716,
+    "revision": "229d54e0de7d747e5a051aac57c2cb23c94fdb2b97a4211de01340a2d2c06eb7",
+    "tokens_reserved": 0,
+    "tokens_used": 87284
+  },
+  "mode": "same-tab",
+  "prefix": "/tmp/codex-wake-plan0156-installed17",
+  "raw_state": "/tmp/codex-wake-plan0156-configured-same-tab02/state.json",
+  "rollback": "not_run",
+  "root": "/tmp/codex-wake-plan0156-configured-same-tab02",
+  "settlement": {
+    "goal": null,
+    "interrupted_turn_ids": [
+      "01a13ab0-1778-7fe0-b2a2-a7ac2ee6b952"
+    ],
+    "settled": true,
+    "thread_id": "01a13aaf-f634-7cb0-8bbe-887f79cb3888"
+  },
+  "source_attachment": {
+    "client_pid": 11660,
+    "client_start_time_ticks": 2213975,
+    "evidence": "metadata_matched",
+    "pane_current_path": "/tmp/codex-wake-plan0156-configured-same-tab02/workspace",
+    "pane_id": "%1",
+    "pane_index": "0",
+    "pane_title": "checkpoint-source-bcf072c5f60b",
+    "pane_tty": "/dev/pts/42",
+    "session_id": "$0",
+    "session_name": "owned-handoff",
+    "socket": "/tmp/codex-wake-plan0156-configured-same-tab02/tmux.sock",
+    "window_id": "@1",
+    "window_index": "1",
+    "window_name": "checkpoint-source"
+  },
+  "source_commit": "7789eaaa1e75464e7206b5e522d228baa0d90c23",
+  "source_detached": true,
+  "source_tokens": 65109,
+  "state": "failed_during_owned_preflight_observation",
+  "successor_attachment": {
+    "client_pid": 16133,
+    "client_start_time_ticks": 2217742,
+    "evidence": "metadata_matched",
+    "pane_current_path": "/tmp/codex-wake-plan0156-configured-same-tab02/workspace",
+    "pane_id": "%1",
+    "pane_index": "0",
+    "pane_title": "handoff-c2b3e99ab411-92604c294404",
+    "pane_tty": "/dev/pts/43",
+    "session_id": "$0",
+    "session_name": "owned-handoff",
+    "socket": "/tmp/codex-wake-plan0156-configured-same-tab02/tmux.sock",
+    "window_id": "@1",
+    "window_index": "1",
+    "window_name": "checkpoint-source"
+  },
+  "successor_execution": {
+    "client_message_id": "4728d530-2a94-4de9-96f7-dfa682ece158",
+    "execution": "turn_inProgress",
+    "source": "native_turn",
+    "turn_id": "01a13ab0-1778-7fe0-b2a2-a7ac2ee6b952",
+    "user_message_id": "01a13ab0-194e-7760-8847-3c581bde2de2"
+  },
+  "successor_tokens": 22175,
+  "total_tokens": 87284
+}

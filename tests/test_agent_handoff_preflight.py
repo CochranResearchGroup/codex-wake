@@ -30,6 +30,9 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_successor_goal_is_bounded_by_session_and_shared_objective_allowance(self):
         self.scenario(session_cap=100)
 
+    def test_replacement_context_preserves_existing_session_deadline_through_goal_alias(self):
+        self.scenario(inherited_deadline=1020)
+
     def test_defaults_cannot_silently_rewrite_an_existing_assignment(self):
         self.scenario(changed_defaults=True)
 
@@ -120,6 +123,12 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_same_tab_uses_fresh_identity_in_original_owned_pane_once(self):
         self.scenario(same_tab=True)
 
+    def test_same_tab_observes_owned_successor_after_detached_source_unloads(self):
+        self.scenario(same_tab=True,unloaded_source=True)
+
+    def test_unloaded_same_tab_source_with_active_native_turn_still_holds(self):
+        self.scenario(same_tab=True,unloaded_source=True,unloaded_active=True)
+
     def test_same_tab_lost_respawn_response_reconciles_new_generation_without_respawn(self):
         self.scenario(same_tab=True,lost_respawn=True)
 
@@ -144,7 +153,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -215,6 +224,16 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 objective_time_limit_seconds=2000,max_correction_cycles=2)
             profiles.write_text(json.dumps(dict(version=1,profiles={'worker':profile},
                 lifecycle_defaults=defaults,continuations={source:policy})))
+            if inherited_deadline:
+                from codex_wake.lifecycle_configuration import effective_configuration
+                from codex_wake.lifecycle_budget import objective_identity
+                from codex_wake.objective_ledger import ObjectiveLedger
+                cfg=effective_configuration(json.loads(profiles.read_text()),source,'worker')
+                cfg={k:v for k,v in cfg.items() if k not in ('source_thread_id','profile')}
+                ledger=ObjectiveLedger(root,objective_identity(policy))
+                ledger.configure(cfg,policy['approval'],policy['tokens_before_source'],now=1000)
+                ledger.reserve('original-session',1000,inherited_deadline-1000,now=1000)
+                ledger.bind_goal('goal:'+source+':'+str(goals[source]['createdAt']),'original-session',0,now=1000)
             def handler(ws):
                 for raw in ws:
                     req=json.loads(raw)
@@ -222,12 +241,15 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     method=req['method'];params=req.get('params',{});methods.append(method)
                     tid=params.get('threadId',target)
                     if method=='initialize':value={'userAgent':'fixture'}
-                    elif method=='thread/loaded/list':value={'data':list(threads),'nextCursor':None}
+                    elif method=='thread/loaded/list':value={'data':[tid for tid in threads
+                        if not (unloaded_source and tid==source and respawns)],'nextCursor':None}
                     elif method=='thread/start':threads[target]={'name':'','turns':[]};value={'thread':{'id':target}}
                     elif method=='thread/name/set':threads[tid]['name']=params['name'];value={}
                     elif method=='thread/read':
                         value={'thread':dict(id=tid,name=threads[tid]['name'],cwd=tmp,status={'type':'idle'},
                             canAcceptDirectInput=True,turns=threads[tid]['turns'],path=str(home/'sessions'/ (tid+'.jsonl')))}
+                        if unloaded_active and tid==source and respawns:
+                            value['thread']['turns']=value['thread']['turns']+[dict(id='foreign-source-turn',status='inProgress')]
                     elif method=='thread/goal/get':value={'goal':None if tid==target and not visibility['show_goal'] else goals.get(tid)}
                     elif method=='thread/goal/set':
                         goal_sets.append(params)
@@ -313,6 +335,8 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         if pending_usage:
                             threads[tid]['turns'][0]['status']='inProgress'
                             (home/'sessions'/ (tid+'.jsonl')).write_text('')
+                        if unloaded_active:
+                            threads[tid]['turns'][0]['status']='inProgress'
                         if running_overspend:
                             threads[tid]['turns'][0]['status']='inProgress'
                             (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':101}})))+'\n')
@@ -363,6 +387,8 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             return
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         receipt=json.loads(output.getvalue())
+                        if unloaded_active and _==0:
+                            continue
                         if unread_writer:
                             self.assertEqual(receipt['reason'], 'handoff_writer_instructions_unverified')
                             self.assertEqual(methods.count('thread/start'), 0)
@@ -448,7 +474,15 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertNotIn(target, goals)
                             self.assertEqual(receipt['runtime_readiness']['state'], 'passed')
                             return
+                        if unloaded_active:
+                            self.assertEqual(receipt['state'],'blocked')
+                            self.assertEqual(receipt['reason'],'detached_source_retirement_unverified')
+                            self.assertNotIn(target,goals)
+                            return
                         self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+                        if inherited_deadline:
+                            self.assertEqual(receipt['continuation_deadline'],inherited_deadline)
+                            self.assertEqual(receipt['objective_budget']['actors'][receipt['budget_actor']]['session_deadline'],inherited_deadline)
                         self.assertEqual(receipt['successor_thread_id'],target)
                         self.assertEqual(receipt['remaining_tokens'],min(session_cap,950 if pause_used is None else 1000-pause_used)-30)
                         self.assertEqual(receipt['preflight']['state'],'passed')

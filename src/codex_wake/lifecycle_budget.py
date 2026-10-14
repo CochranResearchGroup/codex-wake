@@ -145,6 +145,10 @@ def admit_handoff(root, receipt):
     source = receipt['source_goal']
     actor = 'goal:' + source['threadId'] + ':' + str(source['createdAt'])
     view = ledger.record_goal(actor, source['tokensUsed'], settled=True, now=now)
+    source_binding=view['goal_aliases'].get(actor)
+    source_actor=view['actors'][source_binding['actor_id'] if source_binding else actor]
+    if source_actor.get('session_deadline') is not None:
+        receipt['continuation_deadline']=min(receipt['continuation_deadline'],source_actor['session_deadline'])
     successor = 'handoff:' + receipt['fingerprint']
     existing = view['actors'].get(successor)
     if existing and existing.get('terms'):

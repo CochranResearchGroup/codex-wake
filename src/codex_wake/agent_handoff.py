@@ -367,9 +367,32 @@ def source_guard(receipt,profile,root):
     snapshot=observe(endpoint=profile['app_server'],socket_path=profile.get('tmux_socket'),
         timeout=profile['timeout'])
     rows=[r for r in snapshot['sessions'] if r['thread_id']==receipt['thread_id']]
-    if (not snapshot['complete'] or len(rows)!=1 or rows[0]['runtime_state']!='idle'
+    retired=False
+    if (snapshot['complete'] and not rows and receipt.get('intent',{}).get('mode')=='same-tab'
+            and receipt.get('successor_thread_id') and receipt.get('source_attachment')):
+        # A replaced TUI may unload its old conversation. Loaded-session
+        # inventory is then insufficient; prove retirement from native state.
+        try:
+            native=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                'thread/read',dict(threadId=receipt['thread_id'],includeTurns=True),profile['timeout'])['thread']
+            goal=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                'thread/goal/get',dict(threadId=receipt['thread_id']),profile['timeout'])['goal']
+            saved=receipt['source_goal']
+            if (native.get('id')!=receipt['thread_id'] or native.get('cwd')!=str(Path(profile['cwd']).resolve())
+                    or any(t.get('status') not in ('completed','failed','interrupted') for t in native['turns'])
+                    or not goal or goal.get('status')!='paused'
+                    or any(goal.get(k)!=saved.get(k) for k in ('threadId','objective','tokenBudget','createdAt'))
+                    or any(type(goal.get(k)) is not int or goal[k]<saved[k] for k in ('tokensUsed','timeUsedSeconds'))):
+                raise ValueError('detached source retirement unverified')
+            receipt['source_detached_readback']=dict(goal=goal,active_turns=0,cwd=native['cwd'])
+            rows=[dict(thread_id=receipt['thread_id'],cwd=native['cwd'],attachments=[],active_flags=[])]
+            retired=True
+        except (ValueError,KeyError,TypeError,OSError):
+            receipt['reason']='detached_source_retirement_unverified';return
+    if (not snapshot['complete'] or len(rows)!=1
             or rows[0]['cwd']!=str(Path(profile['cwd']).resolve()) or rows[0]['active_flags']
-            or rows[0]['can_accept_direct_input'] is not True):
+            or (not retired and (rows[0]['runtime_state']!='idle'
+                or rows[0]['can_accept_direct_input'] is not True))):
         receipt['reason']='source_client_not_uniquely_ready'
         return
     if not rows[0]['attachments'] and receipt.get('intent',{}).get('mode')=='same-tab' and receipt.get('successor_thread_id'):

@@ -6274,3 +6274,45 @@ At13:46:31UTC root975047 minus583915 baseline391132 plus actual native150205
 mode proofs reserve500000, root/integration500000, contingency458663. Next is one
 remaining corrected same-tab sample with frozen published source and unchanged
 100000/150000/250000/600s bounds. Full program still OPEN.
+
+## Turn 315 | 2026-10-14 UTC
+
+Same-tab02 failed during observation AFTER assigning its owned successor, not
+before assignment. Corrected initial source-only status readback: source65109
+plus successor22175=87284 actual tokens. Source detachment and replacement pane
+were already proved; old source disappeared from loaded-session inventory.
+The guard required a live source row while observing the new owned receiver,
+causing source_client_not_uniquely_ready and teardown. Actual exact receiver
+turn interrupted once, goalnull, sourcegoalpaused, server exit0 and fresh OS
+private-process census empty. Final ledger87284 is known/settled and charged once.
+Curated configured-same-tab02-failed.json retains original failure/assignment and
+cleanup. No accepted preflight, continuation or rollback in this sample.
+Two paid same-tab samples end that unit; no third immediate replay under a new
+root. Actual new-window native cost150205+87284=237489 remains counted.
+Provider-free CLI reproducer omits the old source from loaded inventory after
+owned respawn and fails before the fix. Source guard now reads persistent native
+source turns and its paused immutable goal, verifies no active turn/counter
+rollback, then retains existing pane/process-exit/pending-work checks. Positive
+case reaches prepared goal; paired active-source case still holds. The source
+is retired after replacement, so live-source input readiness cannot authorize
+or invalidate this independent owned-successor observation.
+Another public CLI regression demonstrates source goal alias had deadline1020
+but replacement received2000. Admission now clips to the recorded original
+session deadline before reservation. Existing native goal token limits already
+clip transferred allowance. Stable ledger contract test proves two correction
+cycles survive replacement/controller restart with cumulative30 spend charged
+once, session deadline140 and original objective deadline200 retained.
+Focused124 tests pass39.179s; fresh installed18 affected67 pass25.231s, package
+byte parity95 files/zero mismatches. Curated context-preservation-installed18.json
+records wheel/prefix and exact validation. Syntax/policy wiring/whitespace pass.
+Published7789eaa CI38575304556 is successful; current source increment remains
+to publish. At14:35:45UTC root1105912 minus583915 baseline521997 plus native237489
+=759486, remaining1240514 before subsequent root work, deadline18:29:34UTC.
+Progress blocker_reduction; full goal remains ACTIVE. Next bounded unit must
+qualify actual detached-source/context budget transitions with the repaired
+installed candidate and independent remaining native mode, rather than repeating
+the failed wrapper loop. Both-mode native continuation/rollback, combined gates,
+integration and exact-main release/install are still unproven. Existing raw
+native failures and source checkpoints preserved; no service-global effects.
+Memory disposition unavailable; same-tab01-memory-disposition.json records this
+turn's source-anchored non-write, no qualified repository group and zero writes.

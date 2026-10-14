@@ -11,6 +11,26 @@ def config(revision=1, limit=100, deadline=200):
 
 
 class ObjectiveLedgerTests(unittest.TestCase):
+    def test_correction_limit_survives_successor_replacement_and_controller_restart(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger=ObjectiveLedger(root,'objective')
+            ledger.configure(config(),'operator',now=100)
+            ledger.reserve('old-context',60,40,now=100)
+            ledger.record('old-context',20,now=110)
+            self.assertTrue(ledger.correction(key='old-context:review',actor_id='old-context',now=110)['admitted'])
+            ledger.record('old-context',20,settled=True,now=110)
+            ledger=ObjectiveLedger(root,'objective')
+            self.assertTrue(ledger.reserve('replacement-context',40,30,now=110)['admitted'])
+            ledger.record('replacement-context',10,now=120)
+            self.assertTrue(ledger.correction(key='replacement-context:review',actor_id='replacement-context',now=120)['admitted'])
+            ledger=ObjectiveLedger(root,'objective')
+            stopped=ledger.correction(key='replacement-context:rejected-again',actor_id='replacement-context',now=120)
+            self.assertFalse(stopped['admitted'])
+            self.assertEqual(stopped['correction_cycles'],2)
+            self.assertEqual(stopped['tokens_used'],30)
+            self.assertEqual(stopped['actors']['replacement-context']['session_deadline'],140)
+            self.assertEqual(stopped['original_deadline'],200)
+
     def test_active_native_parent_keeps_future_quota_reserved_before_worker_admission(self):
         with tempfile.TemporaryDirectory() as root:
             ledger=ObjectiveLedger(root,'objective')

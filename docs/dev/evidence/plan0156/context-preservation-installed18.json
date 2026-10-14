@@ -1,0 +1,27 @@
+{
+  "files": 95,
+  "installed_validation": {
+    "log": "/tmp/codex-wake-plan0156-installed18-focus.log",
+    "seconds": 25.231,
+    "tests": 67,
+    "tier": "focused"
+  },
+  "mismatches": [],
+  "native_paid_same_tab_loop": "ended_after_two_failed_samples",
+  "native_window_tokens": 237489,
+  "package": "/tmp/codex-wake-plan0156-installed18/lib/python3.12/site-packages/codex_wake",
+  "prefix": "/tmp/codex-wake-plan0156-installed18",
+  "remaining_gates": [
+    "installed native continuation and rollback for both modes",
+    "full release gates",
+    "integration and exact-main release/install"
+  ],
+  "source_validation": {
+    "log": "/tmp/codex-wake-plan0156-context-preservation-focus.log",
+    "seconds": 39.179,
+    "tests": 124,
+    "tier": "focused"
+  },
+  "state": "context_preservation_source_and_installed_fixture_qualified",
+  "wheel_sha256": "ad606d30026510bc9d26a170e2d6963852dcf6773bf65212514be1ddf826bc82"
+}
