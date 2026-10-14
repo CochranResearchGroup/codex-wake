@@ -1,0 +1,136 @@
+{
+  "state": "passed",
+  "source_commit": "45467abb2ba4e68c29885575c23773952875f0fd",
+  "prefix": "/tmp/codex-wake-plan0156-installed22",
+  "version": "0.14.0",
+  "source_unit_tests": {
+    "count": 1210,
+    "seconds": 145.375,
+    "result": "passed"
+  },
+  "plugin_tests": "passed",
+  "entrypoints": "passed",
+  "policy_wiring": "passed",
+  "installed_gates": [
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/source_registry_smoke.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-0.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/session_discovery_smoke.py",
+        "--cli",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-1.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/a2a_mailbox_smoke.py",
+        "--scheduler",
+        "--operations",
+        "--cli",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-2.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/a2a_mcp_smoke.py",
+        "--cli",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake",
+        "--mcp",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake-mcp"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-3.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/a2a_resource_qualification.py"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-4.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/a2a_recovery_qualification.py",
+        "--cli",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake",
+        "--legacy-python",
+        "/tmp/codex-wake-plan0156-legacy/bin/python"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-5.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/a2a_backup_qualification.py",
+        "--cli",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake",
+        "--restore"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-6.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/a2a_rollback_qualification.py",
+        "--cli",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-7.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/a2a_retention_qualification.py",
+        "--cli",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake",
+        "--legacy-python",
+        "/tmp/codex-wake-plan0156-legacy/bin/python"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-gate-8.log"
+    },
+    {
+      "command": [
+        "/tmp/codex-wake-plan0156-installed22/bin/python",
+        "scripts/product_smoke.py",
+        "--codex-wake-bin",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-wake",
+        "--codex-waked-bin",
+        "/tmp/codex-wake-plan0156-installed22/bin/codex-waked",
+        "--artifact-dir",
+        "/tmp/plan0156-release-product-smoke",
+        "--upgrade-wheel",
+        "/tmp/codex-wake-plan0156-release-wheels23/codex_wake-0.14.0-py3-none-any.whl",
+        "--json"
+      ],
+      "exit_code": 1,
+      "log": "/tmp/plan0156-release-gate-9.log"
+    },
+    {
+      "command": "product_smoke rerun with pip-seeded private venv",
+      "exit_code": 0,
+      "log": "/tmp/plan0156-release-product-smoke23.log"
+    }
+  ],
+  "initial_product_failure": "private uv venv lacked pip; no product failure; retained first log",
+  "hosted_ci": "standing operator instruction skips hosted waiting; all required local commands run"
+}

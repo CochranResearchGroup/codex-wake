@@ -1,0 +1,6 @@
+test_unapproved_profile_is_rejected_before_runtime_effects (tests.test_agent_spawn.AgentSpawnTests.test_unapproved_profile_is_rejected_before_runtime_effects) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.027s
+
+OK

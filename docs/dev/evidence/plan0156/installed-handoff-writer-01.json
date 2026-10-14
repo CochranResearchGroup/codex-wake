@@ -1,0 +1,49 @@
+{
+  "cleanup": {
+    "denied_environment_pids": [
+      696,
+      720,
+      6960,
+      22375,
+      25206,
+      38165,
+      50470,
+      91523
+    ],
+    "private_readable_environment_matches": []
+  },
+  "correction": "resolve owned native listener locator before storing host endpoint; public spawn now rejects unowned/non-socket endpoint before new journal",
+  "error": "outgoing writer did not complete: uncertain",
+  "limits": [
+    "original uncertain journal retained unchanged",
+    "no creation or task replay on original intent",
+    "post-restart empty thread inventory alone is not historical no-creation proof; unresolved transport rejection is reproduced before connection"
+  ],
+  "original_journal_state": "uncertain",
+  "original_uncertain_effect": "thread/start",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-07",
+  "qualification": "failed initial owned writer harness; endpoint preflight correction",
+  "read_only_observation": {
+    "locator": {
+      "owned": true,
+      "path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-writer-01/read-only2.sock",
+      "resolved": "/tmp/codex-daemon-1000/dcbdc0591047f2b8a0354c23083f3a499a50c722d05eb20bd4a45da8fb842ada",
+      "symlink": true
+    },
+    "mode": "read_only_no_thread_start_no_turn",
+    "server_exit": 0,
+    "thread/list": {
+      "data": [],
+      "nextCursor": null
+    },
+    "thread/loaded/list": {
+      "data": [],
+      "nextCursor": null
+    },
+    "unresolved_error": "native lifecycle endpoint must be an owned Unix socket"
+  },
+  "server_exit": 0,
+  "source_commit": "0a0729d",
+  "state": "failed",
+  "thread_id": null
+}

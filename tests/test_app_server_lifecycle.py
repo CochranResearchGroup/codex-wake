@@ -171,12 +171,15 @@ for line in sys.stdin:
                     except ConnectionClosed:pass
                 server=serve(handler,sock=listener,close_timeout=.05)
                 worker=threading.Thread(target=server.serve_forever);worker.start()
-                with patch('codex_wake.app_server.persistent_app_server_socket',return_value=path):
-                    client=UnixWebSocketAppServerClient(timeout_seconds=.08)
+                client=None
                 started=time.monotonic()
                 try:
+                    with patch('codex_wake.app_server.persistent_app_server_socket',return_value=path):
+                        client=UnixWebSocketAppServerClient(timeout_seconds=.08)
                     with self.assertRaises(WakeError):client.initialize()
-                finally:client.close();server.shutdown();worker.join(2)
+                finally:
+                    if client is not None:client.close()
+                    server.shutdown();worker.join(2)
                 self.assertLess(time.monotonic()-started,2)
 
     def test_rpc_timeout_reaps_only_owned_client(self):

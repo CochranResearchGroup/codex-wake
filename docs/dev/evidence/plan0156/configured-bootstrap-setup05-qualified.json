@@ -1,0 +1,53 @@
+{
+  "bootstrap_configuration": {
+    "objective_deadline": "2026-10-14T13:11:21+00:00",
+    "objective_token_limit": 250000,
+    "revision": "11b77a57d2f08e3be3e7dd2263672c468da89ea6e5f67b82d3f02c9a1156bce7",
+    "session_token_limit": 150000,
+    "spawn_token_limit": 100000
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      30825
+    ],
+    "private_readable_environment_matches": []
+  },
+  "files": 95,
+  "focused_validation": {
+    "log": "/tmp/codex-wake-plan0156-installed17-focus.log",
+    "seconds": 13.82,
+    "tests": 97
+  },
+  "generated_helper_syntax": "passed",
+  "harness_sha256": "efa8e90809b07b262c86a93b5fca80c99c85fb13091fad3eed69597216ddfa01",
+  "manual_assignment_limit": 0,
+  "mismatches": [],
+  "monitor_exit": -2,
+  "package": "/tmp/codex-wake-plan0156-installed17/lib/python3.12/site-packages/codex_wake",
+  "prefix": "/tmp/codex-wake-plan0156-installed17",
+  "rollouts": 0,
+  "server_exit": 0,
+  "source_supervision": {
+    "active": true,
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "active"
+      }
+    ],
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 1909502
+    },
+    "interval": 1.0,
+    "observed_at": 1791982884.5134163,
+    "pid": 30534,
+    "state": "active"
+  },
+  "state": "qualified_setup",
+  "wheel_sha256": "18de5be9994056c2607904bf420924aa308e4622647425d600e6eb806bf437d5"
+}

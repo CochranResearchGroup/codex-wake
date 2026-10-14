@@ -1,0 +1,117 @@
+{
+  "state": "passed",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-03",
+  "installed": {
+    "files": {
+      "agent_lifecycle.py": "715d4073f6ff4667d2d846871399f51518a94137054426d55ecad63c7e7a440c",
+      "cli.py": "9a32fcb7b79f6b2536d45dad047324f0868c73f6a4ed2475b12e1ef4272c0040",
+      "mcp_server.py": "265a78f1c257be0ae9b7b51a19f16f873de6d18c9146c155267c283f159720da",
+      "sessions_cli.py": "3a10f75f53de6b5f4160a9df133e527f1fb7c866e9cbaaaab823220b074e6a61"
+    },
+    "module": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-03/lib/python3.12/site-packages/codex_wake"
+  },
+  "interface": "MCP",
+  "selected_model": {
+    "model": "gpt-6.1-sol",
+    "model_reasoning_effort": "low"
+  },
+  "model_turn_limit": 1,
+  "remaining_private_processes": [],
+  "result": {
+    "answer": 42,
+    "thread_id": "01a130c1-4418-71c1-8507-4330768614f1"
+  },
+  "lifecycle": {
+    "state": "completed",
+    "thread_id": "01a130c1-4418-71c1-8507-4330768614f1",
+    "pane_id": "%1",
+    "window_id": "@1",
+    "attachment": {
+      "client_pid": 78329,
+      "client_start_time_ticks": 45840488,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-03/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "spawn-worker-381309d1e6e2",
+      "pane_tty": "/dev/pts/23",
+      "session_id": "$0",
+      "session_name": "plan0157-owned",
+      "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-03/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "spawn-worker"
+    },
+    "submission_id": "f252844c-d345-4849-a656-9a0deead7bf2",
+    "queue_id": "01a130c1-5209-7ca1-a2e0-217b8f893c2e",
+    "execution": {
+      "client_message_id": "f252844c-d345-4849-a656-9a0deead7bf2",
+      "execution": "turn_completed",
+      "source": "native_turn",
+      "turn_id": "01a130c1-520c-70d0-b942-2679a0fe494b",
+      "user_message_id": "01a130c1-53c2-7480-a2ad-ab13c4eae385"
+    },
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "prepared"
+      },
+      {
+        "effect": "thread/start",
+        "reason": null,
+        "state": "starting"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": "tmux/new-window",
+        "reason": null,
+        "state": "starting"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": "exact_idle_owned_client_not_ready",
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": "exact_idle_owned_client_not_ready",
+        "state": "ready"
+      },
+      {
+        "effect": "thread/queue/add",
+        "reason": "exact_idle_owned_client_not_ready",
+        "state": "starting"
+      },
+      {
+        "effect": "thread/queue/add",
+        "reason": "no_exact_native_evidence",
+        "state": "uncertain"
+      },
+      {
+        "effect": null,
+        "reason": "no_exact_native_evidence",
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "completed"
+      }
+    ]
+  },
+  "sources": {
+    "state.json": "14a470b9f396f7dcec99d530fdcb612d5a4683fee28af65ad20a61710a9d88bd",
+    "duplicate-readback.json": "06e1319bfd03bc342f00c66ca6ce6e3e6204c75dc6b72b2e97cb3b6c83d220b0",
+    "workspace/result.json": "916859caf793af44845fa63161af32911b9a5c551686da83f63f04ba3437e003"
+  }
+}

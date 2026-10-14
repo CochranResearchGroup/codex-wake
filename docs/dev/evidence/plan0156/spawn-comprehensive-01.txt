@@ -1,0 +1,182 @@
+...................................................................................................................................................................../home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+..........................................................................................................................................................................................................................................................................................................................................................................................................................................F.F.......................FFFE.FF.FFFFEF.F........................................................................................................................................usage: codex-wake sessions open [-h] [--json] [--app-server APP_SERVER]
+                                [--tmux-socket TMUX_SOCKET]
+                                [--tmux-session TMUX_SESSION]
+                                [--timeout TIMEOUT] (--new | --resume RESUME)
+                                [--cwd CWD] --name NAME
+                                [--codex-path CODEX_PATH] [--extra-attachment]
+codex-wake sessions open: error: one of the arguments --new --resume is required
+.........................................................................................................................................................................E.......................................................................................codex-wake: webhook listener configuration is invalid
+........................................{"native_delivery": {"next_reconciliation_at": "2026-10-12T15:21:23Z", "reconciliation": {"checked_at": "2026-10-12T15:21:18Z", "reason": "multiple_native_submissions", "state": "unresolved"}, "state": "uncertain"}, "result": "skipped", "status": "firing", "wake_id": "wake_20261012_152118_c6d4"}
+wake_intent_81507c0e319d4d9cb81568178333b7bf /tmp/tmp0xn_cled/wakes/pending/wake_intent_81507c0e319d4d9cb81568178333b7bf.json state=pending_time reason=scheduling_time_unavailable recovery=on_monitor_poll requires_worker_schema=6
+wake_intent_114c3ac6ae304281aeee412c952ef615 /tmp/tmpout_gsi8/wake/pending/wake_intent_114c3ac6ae304281aeee412c952ef615.json state=pending_time reason=scheduling_time_unavailable recovery=on_monitor_poll requires_worker_schema=6
+{"native_delivery": {"acknowledgment": "not_observed", "evidence": {"client_message_id": "client-exact", "execution": "turn_completed", "source": "native_turn", "turn_id": "turn-exact", "user_message_id": "message-exact"}, "execution": "turn_completed", "reconciled": true, "reconciliation": {"checked_at": "2026-10-12T15:21:19Z", "state": "resolved"}, "state": "accepted"}, "result": "submitted", "status": "submitted", "wake_id": "wake_20261012_152119_62fd"}
+{"cleanup": {"safe": true, "temporary_roots_removed": true}, "overall": "accepted", "phase": "cleaned"}
+{"cleanup": {"recovery_root": "/tmp/tmp1ck1vn7m/p53-c5-ingress-fixture", "safe": false}, "overall": "failed", "phase": "cleanup_uncertain"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 1, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-12T15:21:52.161366+00:00", "deadline": "2026-10-12T15:36:52.161366+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "COMMITTED", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": "METHOD", "leak_free": true, "status": 405}, "wrong_path": {"code": "ROUTE", "leak_free": true, "status": 404}}, "request_sha256": "eec29389371d2c04834be1d84908ca97de8c0a869852032355344d209f323c8e", "security_header_fingerprint": "9482154a82b44a33dbaab47243ecb82d359bfd295cc076d9ef6bde907efd19b5", "signed_delivery_id": "7bbf9d57-71f3-42f1-8c70-223d0a94a12a", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://127.0.0.1:8820"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 2, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-12T15:21:52.161366+00:00", "deadline": "2026-10-12T15:36:52.161366+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "eec29389371d2c04834be1d84908ca97de8c0a869852032355344d209f323c8e", "security_header_fingerprint": "9482154a82b44a33dbaab47243ecb82d359bfd295cc076d9ef6bde907efd19b5", "signed_delivery_id": "7bbf9d57-71f3-42f1-8c70-223d0a94a12a", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://codex-wake.localhost"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 3, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-12T15:21:52.161366+00:00", "deadline": "2026-10-12T15:36:52.161366+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": "codex-wake.ecochran.dyndns.org", "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "eec29389371d2c04834be1d84908ca97de8c0a869852032355344d209f323c8e", "security_header_fingerprint": "9482154a82b44a33dbaab47243ecb82d359bfd295cc076d9ef6bde907efd19b5", "signed_delivery_id": "7bbf9d57-71f3-42f1-8c70-223d0a94a12a", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://192.168.50.108"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 4, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-12T15:21:52.161366+00:00", "deadline": "2026-10-12T15:36:52.161366+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "eec29389371d2c04834be1d84908ca97de8c0a869852032355344d209f323c8e", "security_header_fingerprint": "9482154a82b44a33dbaab47243ecb82d359bfd295cc076d9ef6bde907efd19b5", "signed_delivery_id": "7bbf9d57-71f3-42f1-8c70-223d0a94a12a", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "https://codex-wake.ecochran.dyndns.org"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 1, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-12T15:21:52.177797+00:00", "deadline": "2026-10-12T15:36:52.177797+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "COMMITTED", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": "METHOD", "leak_free": true, "status": 405}, "wrong_path": {"code": "ROUTE", "leak_free": true, "status": 404}}, "request_sha256": "7a8f2d1dc30cfa9791751e3eba40b26f5cec75f9e2f7ed6c01e8603598c30635", "security_header_fingerprint": "241f63ce05fd80cca218066475ac5f0aeda021c6674c6cc6264f15563a5b0337", "signed_delivery_id": "c2cee55a-7913-414d-b92a-e8a74a4ccf9b", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://127.0.0.1:8820"}
+source=github-webhook
+enabled=true
+config=/tmp/tmpulanh6ns/wake/github/webhook-listeners.json
+{"address": "127.0.0.1", "allow_non_loopback": false, "current_generation": 1, "enabled": true, "max_body_bytes": 262144, "max_connections": 8, "operation_timeout_seconds": 8.0, "path": "/github/webhook", "port": 8820, "previous_generation": null, "previous_secret_ref": null, "request_timeout_seconds": 15.0, "secret_ref": "CODEX_WAKE_WEBHOOK_SECRET", "shutdown_timeout_seconds": 10.0, "source_instance": "github-webhook"}
+source=public-webhook
+enabled=true
+config=/tmp/tmpulanh6ns/wake/github/webhook-listeners.json
+{"counters": {"create": 0, "delete": 0, "dispatch": 0, "redelivery": 0, "trigger": 0}, "dispatch": "disabled", "identity": {"actor": "ecochran76", "callback_url": "https://codex-wake.ecochran.dyndns.org/github/webhook", "conclusion": "success", "github_host": "github.com", "listener": "127.0.0.1:8820", "ref": "refs/heads/main", "repository": "CochranResearchGroup/codex-wake", "repository_id": 1242753508, "secret_ref": "CODEX_WAKE_P53_C6_WEBHOOK_SECRET", "source_instance": "p53-c6-live-github", "token_ref": "CODEX_WAKE_P53_C6_GITHUB_TOKEN", "unit": "codex-wake-github-webhook-p53-c6-live-github.service", "workflow_id": 279450573, "workflow_path": ".github/workflows/ci.yml"}, "network": "absent", "phase": "read_only_preflight", "provider_transport": "absent", "runtime_counters": {"cleanup": 0, "establish": 0, "observation": 0, "secret_provision": 0, "secret_retirement": 0}}............
+======================================================================
+ERROR: test_migration_preserves_uncertainty_and_original_without_submission (test_native_migration.NativeMigrationTests.test_migration_preserves_uncertainty_and_original_without_submission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_migration.py", line 47, in test_migration_preserves_uncertainty_and_original_without_submission
+    record.pop('time_policy')
+KeyError: 'time_policy'
+
+======================================================================
+ERROR: test_provider_fallback_and_invalid_observations_at_cli (test_native_network_time.NativeNetworkTimeTests.test_provider_fallback_and_invalid_observations_at_cli)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 125, in test_provider_fallback_and_invalid_observations_at_cli
+    self.assertEqual(all_records(root)[0].record['time_observation']['status'],'windows')
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'time_observation'
+
+======================================================================
+ERROR: test_offline_command_shows_all_candidates_and_no_trusted_time (test_time_inspection.InspectionTests.test_offline_command_shows_all_candidates_and_no_trusted_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_time_inspection.py", line 17, in test_offline_command_shows_all_candidates_and_no_trusted_time
+    self.assertEqual([s['operator'] for s in report['sources']], ['cloudflare','nist','netnod','ptb','alastyr'])
+                                             ~~~~~~^^^^^^^^^^^
+KeyError: 'sources'
+
+======================================================================
+FAIL: test_explicit_missing_resume_uses_same_thread_without_opening_a_tab (test_native_delivery.NativeDeliveryTests.test_explicit_missing_resume_uses_same_thread_without_opening_a_tab)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_delivery.py", line 208, in test_explicit_missing_resume_uses_same_thread_without_opening_a_tab
+    self.assertEqual(result.submitted,1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_persisted_due_wake_uses_native_queue_and_records_acceptance (test_native_delivery.NativeDeliveryTests.test_persisted_due_wake_uses_native_queue_and_records_acceptance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_delivery.py", line 159, in test_persisted_due_wake_uses_native_queue_and_records_acceptance
+    self.assertEqual(result.submitted, 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) (field='expires_at')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_migration.py", line 90, in test_malformed_native_state_is_held_without_crashing_scheduler
+    self.assertEqual(found.path.read_bytes(), original)
+AssertionError: b'{\n  "ack_timeout_seconds": 30,\n  "attemp[2051 chars]n}\n' != b'{"ack_timeout_seconds": 30, "attempts": 0,[1531 chars] ""}'
+
+======================================================================
+FAIL: test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) (field='due_at')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_migration.py", line 90, in test_malformed_native_state_is_held_without_crashing_scheduler
+    self.assertEqual(found.path.read_bytes(), original)
+AssertionError: b'{\n  "ack_timeout_seconds": 30,\n  "attemp[2042 chars]n}\n' != b'{"ack_timeout_seconds": 30, "attempts": 0,[1522 chars] ""}'
+
+======================================================================
+FAIL: test_malformed_native_state_is_held_without_crashing_scheduler (test_native_migration.NativeMigrationTests.test_malformed_native_state_is_held_without_crashing_scheduler) (field='type')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_migration.py", line 90, in test_malformed_native_state_is_held_without_crashing_scheduler
+    self.assertEqual(found.path.read_bytes(), original)
+AssertionError: b'{\n  "ack_timeout_seconds": 30,\n  "attemp[2048 chars]n}\n' != b'{"ack_timeout_seconds": 30, "attempts": 0,[1531 chars] ""}'
+
+======================================================================
+FAIL: test_native_registration_uses_a_fail_closed_version_for_old_readers (test_native_migration.NativeMigrationTests.test_native_registration_uses_a_fail_closed_version_for_old_readers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_migration.py", line 30, in test_native_registration_uses_a_fail_closed_version_for_old_readers
+    self.assertEqual(record['schema_version'], 5)
+AssertionError: 6 != 5
+
+======================================================================
+FAIL: test_absolute_fraction_and_file_ttl_are_preserved (test_native_network_time.NativeNetworkTimeTests.test_absolute_fraction_and_file_ttl_are_preserved)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 48, in test_absolute_fraction_and_file_ttl_are_preserved
+    self.assertEqual(record['target']['expires_at'],'2027-01-15T08:03:00.123456Z')
+AssertionError: None != '2027-01-15T08:03:00.123456Z'
+
+======================================================================
+FAIL: test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake (test_native_network_time.NativeNetworkTimeTests.test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 62, in test_guest_skew_and_outage_cannot_fire_or_expire_new_native_wake
+    self.assertEqual(poll_once(root,dispatch=False,time_provider=lambda:due).fired,1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_interrupted_firing_cannot_bypass_time_gate (test_native_network_time.NativeNetworkTimeTests.test_interrupted_firing_cannot_bypass_time_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 78, in test_interrupted_firing_cannot_bypass_time_gate
+    self.assertEqual(result.status,'skipped')
+AssertionError: 'requeued' != 'skipped'
+- requeued
++ skipped
+
+
+======================================================================
+FAIL: test_malformed_policy_and_observation_are_held_without_effect (test_native_network_time.NativeNetworkTimeTests.test_malformed_policy_and_observation_are_held_without_effect)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 116, in test_malformed_policy_and_observation_are_held_without_effect
+    self.assertEqual(result.failed,0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_outage_expiry_boundary_restart_and_cancellation_keep_original_deadlines (test_native_network_time.NativeNetworkTimeTests.test_outage_expiry_boundary_restart_and_cancellation_keep_original_deadlines)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 91, in test_outage_expiry_boundary_restart_and_cancellation_keep_original_deadlines
+    self.assertEqual(result.failed,0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_relative_arm_uses_external_upper_bound_not_guest_time (test_native_network_time.NativeNetworkTimeTests.test_relative_arm_uses_external_upper_bound_not_guest_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 26, in test_relative_arm_uses_external_upper_bound_not_guest_time
+    self.assertEqual(record['predicate']['due_at'],'2027-01-15T08:01:01Z')
+AssertionError: None != '2027-01-15T08:01:01Z'
+
+======================================================================
+FAIL: test_uncertain_submission_reconciles_read_only_during_time_outage (test_native_network_time.NativeNetworkTimeTests.test_uncertain_submission_reconciles_read_only_during_time_outage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_native_network_time.py", line 150, in test_uncertain_submission_reconciles_read_only_during_time_outage
+    self.assertEqual(recovered['status'],'submitted')
+AssertionError: 'firing' != 'submitted'
+- firing
++ submitted
+
+
+----------------------------------------------------------------------
+Ran 1083 tests in 110.762s
+
+FAILED (failures=13, errors=3)
+

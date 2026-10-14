@@ -1,0 +1,26 @@
+test_tui_auto_start_is_observed_without_starting_another_turn (tests.test_agent_spawn.AgentSpawnTests.test_tui_auto_start_is_observed_without_starting_another_turn) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+FAIL
+
+======================================================================
+FAIL: test_tui_auto_start_is_observed_without_starting_another_turn (tests.test_agent_spawn.AgentSpawnTests.test_tui_auto_start_is_observed_without_starting_another_turn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 116, in test_tui_auto_start_is_observed_without_starting_another_turn
+    self.spawn_scenario(auto_start=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 256, in spawn_scenario
+    self.assertEqual(turn_starts, [])
+AssertionError: Lists differ: [{'threadId': '00000000-0000-7000-8000-000[41 chars]57'}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'threadId': '00000000-0000-7000-8000-000000000157', 'queuedSubmissionId': 'queue157'}
+
++ []
+- [{'queuedSubmissionId': 'queue157',
+-   'threadId': '00000000-0000-7000-8000-000000000157'}]
+
+----------------------------------------------------------------------
+Ran 1 test in 0.246s
+
+FAILED (failures=1)

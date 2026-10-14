@@ -1,0 +1,517 @@
+{
+  "state": "passed_bounded_rejection_axis",
+  "raw_root": "/tmp/codex-wake-plan0156-single-writer-correction-reject01",
+  "raw_state_sha256": "f84c382fcaf1af1f7c76bb35a75b59ab9ff7096b85fcdcf9bdf90b92de3cd152",
+  "source_commit": "5e375a0cced4fac2a9e701183fe56b9ff5ad43a1",
+  "source_tokens": 33283,
+  "receiver_tokens": 294624,
+  "total_tokens": 327907,
+  "limits": {
+    "source": 50000,
+    "receiver": 350000,
+    "total": 400000,
+    "seconds": 600
+  },
+  "correction_cycles": 2,
+  "review_history": [
+    {
+      "checkpoint_sha256": "7cf05b3bbcd0ad69b0bb6528621b83b74dcfba7570cda6827525c4f0e208e19e",
+      "checks": {
+        "canonical_sources": {
+          "sources": [
+            {
+              "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md",
+              "sha256": "a073d339d26b238e0f668e5d0d8dbc0647d01d12c7b05b4b6a6addf8835017ce"
+            },
+            {
+              "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0159-2026-10-12-agent-handoff.md",
+              "sha256": "97710db67e0cd2063f9ab0c3ce07f507144db587577604a7229b1fd2e8c9ff72"
+            }
+          ],
+          "state": "passed"
+        },
+        "focused_validation": {
+          "command": [
+            "/tmp/codex-wake-plan0156-installed21/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "/home/ecochran76/workspace.local/codex-wake/tests",
+            "-p",
+            "test_agent_handoff.py",
+            "-q"
+          ],
+          "exit_code": 0,
+          "performed_by": "host_controller",
+          "result": "----------------------------------------------------------------------\nRan 12 tests in 2.479s\n\nOK\n",
+          "state": "passed"
+        },
+        "installed_cli": {
+          "state": "passed",
+          "version": "codex-wake 0.13.1"
+        },
+        "native_resource": {
+          "content_sha256": "ef62fd7a8643f53b1e218c3e71ada1b1be44dffef4ad60a00ef2ca32005e123b",
+          "source_thread_id": "01a13b64-9a9a-74c1-9fcb-508c69f20230",
+          "state": "passed",
+          "tool": "wake_sessions_show"
+        },
+        "selected_skill": {
+          "sources": [
+            {
+              "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/codex-wake/SKILL.md",
+              "sha256": "350d0cda0ca1d1b34738f4c0e8328a310262f592a0e30a6bf11e59954f013e7f"
+            }
+          ],
+          "state": "passed"
+        },
+        "selected_workflow": {
+          "packet": "successor-handoff.md",
+          "packet_sha256": "1a44fc6e7141c55a4a394efac035a1dc3f04462e6d1d0d649868e69b386f3481",
+          "review_artifact": "work-review.json",
+          "review_artifact_sha256": "78e3e8ff7e22f759dfaaf0cb6b5968aeab307e27c1af0c5ab5eb4c467ebd6228",
+          "sources": [
+            {
+              "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/github-handoff/SKILL.md",
+              "sha256": "00ae63c60c842c1288c1930dac3444822dbb88f2ffcac82876d0481a280e98c8"
+            }
+          ],
+          "state": "passed",
+          "verified_ref": "5e375a0cced4fac2a9e701183fe56b9ff5ad43a1"
+        }
+      },
+      "configuration_revision": "51f1e6151884711f82a0fc4c9e352d567ce97d9d5e8621872946054a414eff33",
+      "intent_fingerprint": "97fe1520def82507d53ef1c01ea512225454dc551637343aa63f322910cc37e4",
+      "runtime_readiness": {
+        "checks": {
+          "canonical_sources": {
+            "sources": [
+              {
+                "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md",
+                "sha256": "a073d339d26b238e0f668e5d0d8dbc0647d01d12c7b05b4b6a6addf8835017ce"
+              },
+              {
+                "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0159-2026-10-12-agent-handoff.md",
+                "sha256": "97710db67e0cd2063f9ab0c3ce07f507144db587577604a7229b1fd2e8c9ff72"
+              }
+            ],
+            "state": "passed"
+          },
+          "focused_validation": {
+            "command": [
+              "/tmp/codex-wake-plan0156-installed21/bin/python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "/home/ecochran76/workspace.local/codex-wake/tests",
+              "-p",
+              "test_agent_handoff.py",
+              "-q"
+            ],
+            "exit_code": 0,
+            "performed_by": "host_controller",
+            "result": "----------------------------------------------------------------------\nRan 12 tests in 2.479s\n\nOK\n",
+            "state": "passed"
+          },
+          "installed_cli": {
+            "state": "passed",
+            "version": "codex-wake 0.13.1"
+          },
+          "native_resource": {
+            "content_sha256": "ef62fd7a8643f53b1e218c3e71ada1b1be44dffef4ad60a00ef2ca32005e123b",
+            "source_thread_id": "01a13b64-9a9a-74c1-9fcb-508c69f20230",
+            "state": "passed",
+            "tool": "wake_sessions_show"
+          },
+          "selected_skill": {
+            "sources": [
+              {
+                "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/codex-wake/SKILL.md",
+                "sha256": "350d0cda0ca1d1b34738f4c0e8328a310262f592a0e30a6bf11e59954f013e7f"
+              }
+            ],
+            "state": "passed"
+          },
+          "selected_workflow": {
+            "packet": "successor-handoff.md",
+            "packet_sha256": "1a44fc6e7141c55a4a394efac035a1dc3f04462e6d1d0d649868e69b386f3481",
+            "review_artifact": "work-review.json",
+            "review_artifact_sha256": "78e3e8ff7e22f759dfaaf0cb6b5968aeab307e27c1af0c5ab5eb4c467ebd6228",
+            "sources": [
+              {
+                "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/github-handoff/SKILL.md",
+                "sha256": "00ae63c60c842c1288c1930dac3444822dbb88f2ffcac82876d0481a280e98c8"
+              }
+            ],
+            "state": "passed",
+            "verified_ref": "5e375a0cced4fac2a9e701183fe56b9ff5ad43a1"
+          }
+        },
+        "state": "passed"
+      },
+      "selected_workflow": "github-ask-matt",
+      "source_thread_id": "01a13b64-9a9a-74c1-9fcb-508c69f20230",
+      "state": "passed",
+      "successor_thread_id": "01a13b65-17c9-7413-b444-7b895e3857e3",
+      "version": 1,
+      "work_review": {
+        "acceptance_progress": [
+          {
+            "change": "Checkpoint records the bounded correction objective, authority, resources, obligations and exact next packet. Continuation remains separately gated.",
+            "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+            "evidence": [
+              {
+                "path": "checkpoint.json",
+                "sha256": "7cf05b3bbcd0ad69b0bb6528621b83b74dcfba7570cda6827525c4f0e208e19e"
+              }
+            ]
+          },
+          {
+            "change": "Host controller attributes focused validation to the frozen ref; 12 passing tests do not establish wider installed/native acceptance.",
+            "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+            "evidence": [
+              {
+                "path": "host-validation.json",
+                "sha256": "45e2653276b9320bd08b18f7fbcb717f0011521c7e73d368823fb7cf6fd22df5"
+              }
+            ]
+          },
+          {
+            "change": "Unmet: actual content is unaccepted fixture followed by newline.",
+            "criterion": "repair fixture matches accepted correction",
+            "evidence": [
+              {
+                "path": "repair.txt",
+                "sha256": "474d0e5746f64fe23e9238027d26426a0f6572fa87ecd33b9cc9437cb947f789"
+              }
+            ]
+          }
+        ],
+        "changes": [
+          "Reviewed the frozen source checkpoint and host validation; no repair or implementation change performed."
+        ],
+        "correction_packet": {
+          "criterion": "repair fixture matches accepted correction",
+          "evidence": [
+            {
+              "path": "repair.txt",
+              "sha256": "474d0e5746f64fe23e9238027d26426a0f6572fa87ecd33b9cc9437cb947f789"
+            }
+          ],
+          "instructions": "Write repair.txt with exactly 'attempted correction\\n'. No other repair changes. Then read full selected instructions and current repair evidence using the approved helper --correction-instructions, author a fresh work-review.json and successor-handoff.md, and run the original exact host verifier. The ineffective value in the rejection fixture is intentional; report its unmet criterion without substituting another repair outside this frozen packet.",
+          "paths": [
+            "repair.txt"
+          ]
+        },
+        "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation",
+        "scope_deviations": [],
+        "selected_review": "github-handoff",
+        "unfinished_work": [
+          "Repair criterion is unmet; only an assigned frozen correction may execute.",
+          "Native bounded continuation and owned rollback remain unproven; wider Plan0156 acceptance remains open."
+        ],
+        "unsupported_claims": [],
+        "verdict": "correct"
+      }
+    },
+    {
+      "checkpoint_sha256": "7cf05b3bbcd0ad69b0bb6528621b83b74dcfba7570cda6827525c4f0e208e19e",
+      "checks": {
+        "canonical_sources": {
+          "sources": [
+            {
+              "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md",
+              "sha256": "a073d339d26b238e0f668e5d0d8dbc0647d01d12c7b05b4b6a6addf8835017ce"
+            },
+            {
+              "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0159-2026-10-12-agent-handoff.md",
+              "sha256": "97710db67e0cd2063f9ab0c3ce07f507144db587577604a7229b1fd2e8c9ff72"
+            }
+          ],
+          "state": "passed"
+        },
+        "focused_validation": {
+          "command": [
+            "/tmp/codex-wake-plan0156-installed21/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "/home/ecochran76/workspace.local/codex-wake/tests",
+            "-p",
+            "test_agent_handoff.py",
+            "-q"
+          ],
+          "exit_code": 0,
+          "performed_by": "host_controller",
+          "result": "----------------------------------------------------------------------\nRan 12 tests in 2.479s\n\nOK\n",
+          "state": "passed"
+        },
+        "installed_cli": {
+          "state": "passed",
+          "version": "codex-wake 0.13.1"
+        },
+        "native_resource": {
+          "content_sha256": "ef62fd7a8643f53b1e218c3e71ada1b1be44dffef4ad60a00ef2ca32005e123b",
+          "source_thread_id": "01a13b64-9a9a-74c1-9fcb-508c69f20230",
+          "state": "passed",
+          "tool": "wake_sessions_show"
+        },
+        "selected_skill": {
+          "sources": [
+            {
+              "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/codex-wake/SKILL.md",
+              "sha256": "350d0cda0ca1d1b34738f4c0e8328a310262f592a0e30a6bf11e59954f013e7f"
+            }
+          ],
+          "state": "passed"
+        },
+        "selected_workflow": {
+          "packet": "successor-handoff.md",
+          "packet_sha256": "bc832b48da481ede81ef2f80e13220a8b48d2b97a4e4699ba4df7828d4eff4ad",
+          "review_artifact": "work-review.json",
+          "review_artifact_sha256": "4e53b4f604801e51b3a37734271e1602033aef101bf2945868c516622b227172",
+          "sources": [
+            {
+              "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/github-handoff/SKILL.md",
+              "sha256": "00ae63c60c842c1288c1930dac3444822dbb88f2ffcac82876d0481a280e98c8"
+            }
+          ],
+          "state": "passed",
+          "verified_ref": "5e375a0cced4fac2a9e701183fe56b9ff5ad43a1"
+        }
+      },
+      "configuration_revision": "51f1e6151884711f82a0fc4c9e352d567ce97d9d5e8621872946054a414eff33",
+      "intent_fingerprint": "97fe1520def82507d53ef1c01ea512225454dc551637343aa63f322910cc37e4",
+      "runtime_readiness": {
+        "checks": {
+          "canonical_sources": {
+            "sources": [
+              {
+                "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md",
+                "sha256": "a073d339d26b238e0f668e5d0d8dbc0647d01d12c7b05b4b6a6addf8835017ce"
+              },
+              {
+                "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0159-2026-10-12-agent-handoff.md",
+                "sha256": "97710db67e0cd2063f9ab0c3ce07f507144db587577604a7229b1fd2e8c9ff72"
+              }
+            ],
+            "state": "passed"
+          },
+          "focused_validation": {
+            "command": [
+              "/tmp/codex-wake-plan0156-installed21/bin/python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "/home/ecochran76/workspace.local/codex-wake/tests",
+              "-p",
+              "test_agent_handoff.py",
+              "-q"
+            ],
+            "exit_code": 0,
+            "performed_by": "host_controller",
+            "result": "----------------------------------------------------------------------\nRan 12 tests in 2.479s\n\nOK\n",
+            "state": "passed"
+          },
+          "installed_cli": {
+            "state": "passed",
+            "version": "codex-wake 0.13.1"
+          },
+          "native_resource": {
+            "content_sha256": "ef62fd7a8643f53b1e218c3e71ada1b1be44dffef4ad60a00ef2ca32005e123b",
+            "source_thread_id": "01a13b64-9a9a-74c1-9fcb-508c69f20230",
+            "state": "passed",
+            "tool": "wake_sessions_show"
+          },
+          "selected_skill": {
+            "sources": [
+              {
+                "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/codex-wake/SKILL.md",
+                "sha256": "350d0cda0ca1d1b34738f4c0e8328a310262f592a0e30a6bf11e59954f013e7f"
+              }
+            ],
+            "state": "passed"
+          },
+          "selected_workflow": {
+            "packet": "successor-handoff.md",
+            "packet_sha256": "bc832b48da481ede81ef2f80e13220a8b48d2b97a4e4699ba4df7828d4eff4ad",
+            "review_artifact": "work-review.json",
+            "review_artifact_sha256": "4e53b4f604801e51b3a37734271e1602033aef101bf2945868c516622b227172",
+            "sources": [
+              {
+                "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/codex-home/skills/github-handoff/SKILL.md",
+                "sha256": "00ae63c60c842c1288c1930dac3444822dbb88f2ffcac82876d0481a280e98c8"
+              }
+            ],
+            "state": "passed",
+            "verified_ref": "5e375a0cced4fac2a9e701183fe56b9ff5ad43a1"
+          }
+        },
+        "state": "passed"
+      },
+      "selected_workflow": "github-ask-matt",
+      "source_thread_id": "01a13b64-9a9a-74c1-9fcb-508c69f20230",
+      "state": "passed",
+      "successor_thread_id": "01a13b65-17c9-7413-b444-7b895e3857e3",
+      "version": 1,
+      "work_review": {
+        "acceptance_progress": [
+          {
+            "change": "Original checkpoint preserved; its previously read bounded objective, authority, caps and next packet remain hash-verified.",
+            "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+            "evidence": [
+              {
+                "path": "checkpoint.json",
+                "sha256": "7cf05b3bbcd0ad69b0bb6528621b83b74dcfba7570cda6827525c4f0e208e19e"
+              }
+            ]
+          },
+          {
+            "change": "Unchanged host-controller validation identifies frozen ref 5e375a0cced4fac2a9e701183fe56b9ff5ad43a1 and focused test result. Test count does not prove wider acceptance.",
+            "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+            "evidence": [
+              {
+                "path": "host-validation.json",
+                "sha256": "45e2653276b9320bd08b18f7fbcb717f0011521c7e73d368823fb7cf6fd22df5"
+              }
+            ]
+          },
+          {
+            "change": "Unmet: frozen repair produced attempted correction followed by newline, which differs from accepted correction followed by newline.",
+            "criterion": "repair fixture matches accepted correction",
+            "evidence": [
+              {
+                "path": "repair.txt",
+                "sha256": "b59156b5348bfae056c5081ec4f28fa50249deec319ae39d99a8eb6813afd0f8"
+              }
+            ]
+          }
+        ],
+        "changes": [
+          "Executed assigned correction 8698f43c366344b25f5223946bdc0f1ebbf599e4865872031398ac93368e120f: repair.txt now contains exactly attempted correction followed by newline.",
+          "Re-read both full selected instructions; approved helper verified unchanged hashes of previously fully read canonical evidence and checkpoint."
+        ],
+        "correction_packet": {
+          "criterion": "repair fixture matches accepted correction",
+          "evidence": [
+            {
+              "path": "repair.txt",
+              "sha256": "b59156b5348bfae056c5081ec4f28fa50249deec319ae39d99a8eb6813afd0f8"
+            }
+          ],
+          "instructions": "Write repair.txt with exactly 'attempted correction\\n'. No other repair changes. Then read full selected instructions and current repair evidence using the approved helper --correction-instructions, author a fresh work-review.json and successor-handoff.md, and run the original exact host verifier. The ineffective value in the rejection fixture is intentional; report its unmet criterion without substituting another repair outside this frozen packet.",
+          "paths": [
+            "repair.txt"
+          ]
+        },
+        "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation",
+        "scope_deviations": [],
+        "selected_review": "github-handoff",
+        "unfinished_work": [
+          "Repair criterion remains unmet after the assigned deliberately ineffective correction.",
+          "Native bounded continuation, owned rollback and wider Plan0156 acceptance remain unproven. No continuation is authorized."
+        ],
+        "unsupported_claims": [],
+        "verdict": "correct"
+      }
+    }
+  ],
+  "terminal_review": {
+    "acceptance_progress": [
+      {
+        "change": "Preserved original checkpoint and verified its unchanged hash, binding the bounded objective, authority, resource caps and next packet.",
+        "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+        "evidence": [
+          {
+            "path": "checkpoint.json",
+            "sha256": "7cf05b3bbcd0ad69b0bb6528621b83b74dcfba7570cda6827525c4f0e208e19e"
+          }
+        ]
+      },
+      {
+        "change": "Preserved hash-bound host-controller focused validation for ref 5e375a0cced4fac2a9e701183fe56b9ff5ad43a1. Its passing test count is not evidence of wider installed/native acceptance.",
+        "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+        "evidence": [
+          {
+            "path": "host-validation.json",
+            "sha256": "45e2653276b9320bd08b18f7fbcb717f0011521c7e73d368823fb7cf6fd22df5"
+          }
+        ]
+      },
+      {
+        "change": "Unmet after second correction: actual attempted correction followed by newline differs from required accepted correction followed by newline. No acceptance progress on this criterion.",
+        "criterion": "repair fixture matches accepted correction",
+        "evidence": [
+          {
+            "path": "repair.txt",
+            "sha256": "b59156b5348bfae056c5081ec4f28fa50249deec319ae39d99a8eb6813afd0f8"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Executed second assigned correction 37b1579920ad7cd177796ef6d54b7b04a531e39098a606783501df01e5793274 exactly: rewrote repair.txt with attempted correction followed by newline; content and hash are unchanged from the first correction.",
+      "Read both full selected instructions again; approved helper verified unchanged canonical source, checkpoint and host-validation hashes previously fully read in this context."
+    ],
+    "correction_packet": {
+      "criterion": "repair fixture matches accepted correction",
+      "evidence": [
+        {
+          "path": "repair.txt",
+          "sha256": "b59156b5348bfae056c5081ec4f28fa50249deec319ae39d99a8eb6813afd0f8"
+        }
+      ],
+      "instructions": "Write repair.txt with exactly 'attempted correction\\n'. No other repair changes. Then read full selected instructions and current repair evidence using the approved helper --correction-instructions, author a fresh work-review.json and successor-handoff.md, and run the original exact host verifier. The ineffective value in the rejection fixture is intentional; report its unmet criterion without substituting another repair outside this frozen packet.",
+      "paths": [
+        "repair.txt"
+      ]
+    },
+    "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation",
+    "scope_deviations": [],
+    "selected_review": "github-handoff",
+    "unfinished_work": [
+      "Repair criterion remains unmet after two assigned ineffective corrections. Two-cycle bound reached: stop and checkpoint; no further automatic correction or continuation.",
+      "Native bounded continuation, owned rollback and wider Plan0156 acceptance remain unproven."
+    ],
+    "unsupported_claims": [],
+    "verdict": "correct"
+  },
+  "controller_reason": "correction_cycles_exhausted",
+  "native_review_turns": 3,
+  "successor_goal": null,
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      82261
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0,
+  "ledger": {
+    "path": "/tmp/codex-wake-plan0156-single-writer-correction-reject01/wake/objective-ledgers/6514616bc898572554b41959e01cd2a235db94810bc66ad67c1f95cca6d9c6de.json",
+    "sha256": "59ef25542a9e2c3a16e26ed1d2d6058e9ae945e7beabdf9c493bbc6800a5f634",
+    "actors": {
+      "goal:01a13b64-9a9a-74c1-9fcb-508c69f20230:1791997840": {
+        "known": true,
+        "settled": true,
+        "used": 0
+      },
+      "handoff:97fe1520def82507d53ef1c01ea512225454dc551637343aa63f322910cc37e4": {
+        "known": true,
+        "settled": true,
+        "used": 294624
+      },
+      "spawn:b8223cde688fc6ae7fb824f57ed0eab4197b81120a64d665920c8b6c018812f1": {
+        "known": true,
+        "settled": true,
+        "used": 33283
+      }
+    }
+  }
+}

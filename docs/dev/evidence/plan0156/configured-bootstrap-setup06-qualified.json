@@ -1,0 +1,50 @@
+{
+  "bootstrap_configuration": {
+    "objective_deadline": "2026-10-14T13:21:46+00:00",
+    "objective_token_limit": 250000,
+    "revision": "846bf9f688d178c1f9f8e29b561353fc48d5fe2aa4c230708c661e47da45da22",
+    "session_token_limit": 150000,
+    "spawn_token_limit": 100000
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      53437
+    ],
+    "private_readable_environment_matches": []
+  },
+  "generated_helper_syntax": "passed",
+  "harness_sha256": "5d1cd772b88947b5fb82f59ea6bfa3037819761e6eafb978bac3c6e63902197c",
+  "manual_assignment_limit": 0,
+  "monitor_exit": -2,
+  "prefix": "/tmp/codex-wake-plan0156-installed17",
+  "rollouts": 0,
+  "root": "/tmp/codex-wake-plan0156-configured-bootstrap-setup06",
+  "server_exit": 0,
+  "source_supervision": {
+    "active": true,
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "active"
+      }
+    ],
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 1971730
+    },
+    "interval": 1.0,
+    "observed_at": 1791983509.0212655,
+    "pid": 83346,
+    "state": "active"
+  },
+  "state": "qualified_setup",
+  "writer_factory_validation": {
+    "command": ".venv/bin/python -m unittest tests.test_handoff_acceptance_supervision",
+    "result": "pass",
+    "tests": 10
+  }
+}

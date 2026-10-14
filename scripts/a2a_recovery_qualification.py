@@ -74,8 +74,9 @@ def qualify(cli, legacy_python):
                 if verb == 'recover-backup':
                     command += ['--snapshot', str(snapshot), '--accept-unbacked-state-hold']
                 completed = subprocess.run(command, capture_output=True, text=True, timeout=min(10, remaining))
-                require((completed.returncode == 0) == success, 'installed ' + verb + ' status differs')
                 require(body not in completed.stdout, 'body leaked to operator output')
+                require((completed.returncode == 0) == success, 'installed ' + verb + ' status differs: exit='
+                    + str(completed.returncode) + ' stdout=' + completed.stdout[:1000] + ' stderr=' + completed.stderr[:300])
                 return json.loads(completed.stdout)
             if interrupted:
                 replace = os.replace

@@ -1,0 +1,19 @@
+{
+  "duplicate_contract_characters_removed": 2609,
+  "files": 95,
+  "installed_validation": {
+    "log": "/tmp/codex-wake-plan0156-installed20-focus.log",
+    "seconds": 33.709,
+    "tests": 58
+  },
+  "instructions": "full frozen host bytes and native file-read witness retained",
+  "mismatches": [],
+  "package": "/tmp/codex-wake-plan0156-installed20/lib/python3.12/site-packages/codex_wake",
+  "prefix": "/tmp/codex-wake-plan0156-installed20",
+  "source_validation": {
+    "log": "/tmp/codex-wake-plan0156-instruction-reference-focus.log",
+    "seconds": 32.074,
+    "tests": 81
+  },
+  "wheel_sha256": "1c76d15cacc726e909bcf30258e86dfe2ea220ac6d0164a61ccb9b2cdd919a2d"
+}

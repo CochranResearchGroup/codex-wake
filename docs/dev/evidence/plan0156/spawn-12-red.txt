@@ -1,0 +1,22 @@
+test_host_profile_uses_exact_isolated_socket_and_codex_home (tests.test_agent_spawn.AgentSpawnTests.test_host_profile_uses_exact_isolated_socket_and_codex_home) ... ERROR
+
+======================================================================
+ERROR: test_host_profile_uses_exact_isolated_socket_and_codex_home (tests.test_agent_spawn.AgentSpawnTests.test_host_profile_uses_exact_isolated_socket_and_codex_home)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 110, in test_host_profile_uses_exact_isolated_socket_and_codex_home
+    self.spawn_scenario(isolated_profile=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 213, in spawn_scenario
+    self.assertEqual(run(argv), 5, pending.getvalue())
+                     ^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake/src/codex_wake/cli.py", line 2740, in run
+    return spawn_command(args, root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake/src/codex_wake/agent_lifecycle.py", line 30, in spawn_command
+    raise WakeError('approved launch profile is incomplete')
+codex_wake.records.WakeError: approved launch profile is incomplete
+
+----------------------------------------------------------------------
+Ran 1 test in 0.062s
+
+FAILED (errors=1)

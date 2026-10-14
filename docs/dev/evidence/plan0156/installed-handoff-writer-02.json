@@ -1,0 +1,145 @@
+{
+  "additional_model_assignments": 0,
+  "checkpoint_sha256": "795309b0a9da71eaaac5b3b4d1b70b4cf714d34bfed5ce26ae9b8a226b5a63f1",
+  "cleanup": {
+    "denied_environment_pids": [
+      696,
+      720,
+      6960,
+      22375,
+      25206,
+      38165,
+      50470,
+      91523
+    ],
+    "private_readable_environment_matches": []
+  },
+  "limits": [
+    "checkpoint writer axis only",
+    "actual successor preflight and goal continuation not run",
+    "original harness failure remains recorded",
+    "no new model assignment during reconciliation"
+  ],
+  "model_assignments": 1,
+  "module_hash_parity": {
+    "agent_handoff": true,
+    "agent_lifecycle": true,
+    "cli": true,
+    "mcp_server": true,
+    "sessions_cli": true
+  },
+  "native_token_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 35200,
+    "input_tokens": 46741,
+    "output_tokens": 177,
+    "reasoning_output_tokens": 0,
+    "total_tokens": 46918
+  },
+  "original_harness_error": "outgoing writer did not complete: uncertain",
+  "original_harness_state": "failed",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-08",
+  "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-writer-02",
+  "scope": "existing checkpoint writer axis only; no goal mutation/task replay",
+  "server_exit": 0,
+  "source_commit": "cb89016",
+  "spawn": {
+    "attachment": {
+      "client_pid": 97632,
+      "client_start_time_ticks": 46614663,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-writer-02/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "checkpoint-writer-dfe5a4e47e51",
+      "pane_tty": "/dev/pts/23",
+      "session_id": "$0",
+      "session_name": "owned-handoff",
+      "socket": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-writer-02/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "checkpoint-writer"
+    },
+    "execution": {
+      "client_message_id": "9cc4b7ab-a500-4144-b9f1-d729ff675d0a",
+      "execution": "turn_completed",
+      "source": "native_turn",
+      "turn_id": "01a1312c-b1bc-7b52-ac38-7c4fd0127038",
+      "user_message_id": "01a1312c-b420-7183-83fb-1cc97be87f4b"
+    },
+    "fingerprint": "dfe5a4e47e5100f815a05ad63e7a146fade742c7234d7c6130cd760fe0f43ea0",
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "prepared"
+      },
+      {
+        "effect": "thread/start",
+        "reason": null,
+        "state": "starting"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": "tmux/new-window",
+        "reason": null,
+        "state": "starting"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": "exact_idle_owned_client_not_ready",
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": "exact_idle_owned_client_not_ready",
+        "state": "ready"
+      },
+      {
+        "effect": "thread/queue/add",
+        "reason": "exact_idle_owned_client_not_ready",
+        "state": "starting"
+      },
+      {
+        "effect": "thread/queue/add",
+        "reason": "no_exact_native_evidence",
+        "state": "uncertain"
+      },
+      {
+        "effect": null,
+        "reason": "no_exact_native_evidence",
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "completed"
+      }
+    ],
+    "intent_key": "writer-1",
+    "pane_id": "%1",
+    "queue_id": "01a1312c-b1b9-7530-b302-09fcf5ba4915",
+    "state": "completed",
+    "submission_id": "9cc4b7ab-a500-4144-b9f1-d729ff675d0a",
+    "thread_id": "01a1312c-a5cb-76d1-a56d-c2c960d40450",
+    "thread_name": "checkpoint-writer-dfe5a4e47e51",
+    "version": 1,
+    "window_id": "@1"
+  },
+  "state": "passed_checkpoint_axis",
+  "writer": {
+    "cwd": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-writer-02/workspace",
+    "exit_code": 0,
+    "item_id": "exec-e846d48f-9e1a-475e-b484-1254463f1d1c",
+    "turn_id": "01a1312c-b1bc-7b52-ac38-7c4fd0127038"
+  }
+}

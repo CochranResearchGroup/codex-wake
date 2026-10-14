@@ -1,0 +1,14 @@
+test_unknown_thread_creation_is_retained_without_duplicate_retry (tests.test_agent_spawn.AgentSpawnTests.test_unknown_thread_creation_is_retained_without_duplicate_retry) ... FAIL
+
+======================================================================
+FAIL: test_unknown_thread_creation_is_retained_without_duplicate_retry (tests.test_agent_spawn.AgentSpawnTests.test_unknown_thread_creation_is_retained_without_duplicate_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 61, in test_unknown_thread_creation_is_retained_without_duplicate_retry
+    self.assertEqual(run(argv), 5)
+AssertionError: None != 5
+
+----------------------------------------------------------------------
+Ran 1 test in 0.042s
+
+FAILED (failures=1)

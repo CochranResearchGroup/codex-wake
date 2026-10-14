@@ -1,0 +1,17 @@
+test_lost_tab_creation_response_reconciles_owned_generation_without_replacement (tests.test_agent_spawn.AgentSpawnTests.test_lost_tab_creation_response_reconciles_owned_generation_without_replacement) ... FAIL
+
+======================================================================
+FAIL: test_lost_tab_creation_response_reconciles_owned_generation_without_replacement (tests.test_agent_spawn.AgentSpawnTests.test_lost_tab_creation_response_reconciles_owned_generation_without_replacement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 81, in test_lost_tab_creation_response_reconciles_owned_generation_without_replacement
+    self.spawn_scenario(loss='new-window')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 171, in spawn_scenario
+    self.assertEqual(run(argv), 0, output.getvalue())
+AssertionError: 5 != 0 : {"fingerprint": "ad3f995f1bfffcf7718a53b9126720db3cb5a019da9c268e42b7cc8c9932d8eb", "intent": {"expires_at": "2030-01-01T00:00:00Z", "launch": {"app_server": "unix:///tmp/tmpsq0sdsib/native.sock", "codex_path": "/bin/true", "cwd": "/tmp/tmpsq0sdsib", "timeout": 1, "tmux_session": "fixture"}, "name": "worker", "operation": "spawn", "profile": "worker", "task": "Calculate 6 * 7 and report 42."}, "intent_key": "one-worker", "reason": "WakeError", "state": "uncertain", "thread_id": "00000000-0000-7000-8000-000000000157", "thread_name": "worker-ad3f995f1bff", "uncertain_effect": "tmux/new-window", "version": 1}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.110s
+
+FAILED (failures=1)

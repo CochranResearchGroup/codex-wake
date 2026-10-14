@@ -1,0 +1,24 @@
+{
+  "state": "failed",
+  "classification": "generated_helper_syntax_error",
+  "source_commit": "ef4fe9f979a00164c2cf017a07948fcb1a3efc0a",
+  "root": "/tmp/codex-wake-plan0156-configured-new-tab03",
+  "prefix": "/tmp/codex-wake-plan0156-installed15",
+  "error": "handoff held: FileNotFoundError",
+  "source_thread": "01a13a3b-0731-7032-a3ea-df0e592f985d",
+  "successor_thread": "01a13a3b-72f0-7df2-aa95-7248a3832509",
+  "source_tokens": 74586,
+  "successor_tokens": 81086,
+  "total_tokens": 155672,
+  "owned_settlement": {
+    "goal": null,
+    "interrupted_turn_ids": [],
+    "settled": true,
+    "thread_id": "01a13a3b-72f0-7df2-aa95-7248a3832509"
+  },
+  "server_exit": 0,
+  "final_process_matches": [],
+  "accounting_known": true,
+  "objective_tokens_used": 155672,
+  "generated_helper_sha256": "09fef301fac69a6909847fba2eb5a7507e5851ebe34d44e18bf7b0fe38214d0e"
+}

@@ -1,0 +1,16 @@
+{
+  "model_assignments": 0,
+  "permission_profile_sha256": "bb66ab6dbc9eba22a6508290f3214999d564b7e68b40b028271660a371ccdb55",
+  "workspace": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/workspace",
+  "socket": {
+    "host_exit": 0,
+    "sandbox_exit": 1,
+    "sandbox_permission_denied": true
+  },
+  "observation_bridge": {
+    "exit_code": 0,
+    "read_verified": true,
+    "write_denied": true
+  },
+  "state": "passed"
+}

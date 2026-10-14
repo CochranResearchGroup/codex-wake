@@ -1,0 +1,282 @@
+{
+  "state": "passed",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13",
+  "model_assignments": 0,
+  "schemas": {
+    "wake_sessions_spawn": {
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "intent": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32768
+        },
+        "expires_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "caller_thread_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        }
+      },
+      "required": [
+        "profile",
+        "intent",
+        "name",
+        "task",
+        "expires_at",
+        "caller_thread_id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "wake_sessions_refresh": {
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "intent": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "thread_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "checkpoint": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rollback": {
+          "type": "boolean"
+        },
+        "resources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "expires_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "caller_thread_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        }
+      },
+      "required": [
+        "profile",
+        "intent",
+        "thread_id",
+        "checkpoint",
+        "checkpoint_sha256",
+        "resources",
+        "expires_at",
+        "caller_thread_id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "wake_sessions_handoff": {
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "intent": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "thread_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "checkpoint": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "mode": {
+          "enum": [
+            "new-tab",
+            "same-tab"
+          ]
+        },
+        "expires_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "rollback": {
+          "type": "boolean"
+        },
+        "caller_thread_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        }
+      },
+      "required": [
+        "profile",
+        "intent",
+        "thread_id",
+        "checkpoint",
+        "checkpoint_sha256",
+        "mode",
+        "expires_at",
+        "caller_thread_id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    }
+  },
+  "rejected_calls": [
+    {
+      "tool": "wake_sessions_spawn",
+      "field": "profiles",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_spawn",
+      "field": "wake_root",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_spawn",
+      "field": "app_server",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_spawn",
+      "field": "script",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_spawn",
+      "field": "token_cap",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_spawn",
+      "field": "replacement",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_refresh",
+      "field": "profiles",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_refresh",
+      "field": "wake_root",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_refresh",
+      "field": "app_server",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_refresh",
+      "field": "script",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_refresh",
+      "field": "token_cap",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_refresh",
+      "field": "replacement",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_handoff",
+      "field": "profiles",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_handoff",
+      "field": "wake_root",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_handoff",
+      "field": "app_server",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_handoff",
+      "field": "script",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_handoff",
+      "field": "token_cap",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    },
+    {
+      "tool": "wake_sessions_handoff",
+      "field": "replacement",
+      "is_error": true,
+      "reason": "{\"error\": {\"code\": \"invalid_argument\", \"message\": \"Arguments do not match the tool schema.\"}}"
+    }
+  ],
+  "owned_journal_created": false
+}

@@ -1,0 +1,113 @@
+{
+  "state": "failed_native_invocation_proof",
+  "raw_root": "/tmp/codex-wake-plan0156-correction-accept-native01",
+  "raw_state_sha256": "3fa8ebd14dc58a04c7f6c5366408bc3c888a5149d9de19bd504cad29dfc89880",
+  "source_commit": "4ee3befa33e9939256af833965be75c7340ebb8d",
+  "source_tokens": 46952,
+  "successor_tokens": 81359,
+  "total_tokens": 128311,
+  "semantic_review": {
+    "configuration_revision": "a4fc5a94dba53047a80c0a847a1c6564df52bc7199e2a08e94c7a45c8792eabd",
+    "source_thread_id": "01a13b2b-f862-7ae1-8181-cfa770b6f9a2",
+    "successor_thread_id": "01a13b2c-6767-7873-868b-cb7ddaed4d78",
+    "checkpoint_sha256": "9ade64ad64c0921d34d718904e1c8f453a96344a5c785d02c0bc2327292c4d8f",
+    "intent_fingerprint": "5f7d65919a8076e742fd48536d882fe3fc6f90d519f2866e3321216ae7f56eb9",
+    "work_review": {
+      "verdict": "correct",
+      "selected_review": "github-handoff",
+      "changes": [
+        "Reviewed frozen checkpoint and host-attributed validation; authored successor handoff and review. No repair performed."
+      ],
+      "acceptance_progress": [
+        {
+          "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+          "change": "Checkpoint records bounded repair objective, authority, fixed caps, pending obligations and exact next packet.",
+          "evidence": [
+            {
+              "path": "checkpoint.json",
+              "sha256": "9ade64ad64c0921d34d718904e1c8f453a96344a5c785d02c0bc2327292c4d8f"
+            }
+          ]
+        },
+        {
+          "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+          "change": "Host validation attributes focused validation to host_controller at the frozen ref; wider native continuation and rollback remain open. Test count alone does not establish acceptance.",
+          "evidence": [
+            {
+              "path": "host-validation.json",
+              "sha256": "bbbdad2ca6bfb37d1b32920c053b92eb29f9a9272d0d6b07148d2b4c39cd07df"
+            }
+          ]
+        },
+        {
+          "criterion": "repair fixture matches accepted correction",
+          "change": "Unmet: actual repair.txt contains unaccepted fixture followed by newline.",
+          "evidence": [
+            {
+              "path": "repair.txt",
+              "sha256": "474d0e5746f64fe23e9238027d26426a0f6572fa87ecd33b9cc9437cb947f789"
+            }
+          ]
+        }
+      ],
+      "scope_deviations": [],
+      "unsupported_claims": [],
+      "unfinished_work": [
+        "Assigned bounded repair and fresh review required.",
+        "Native bounded continuation and owned rollback remain unverified; wider Plan0156 acceptance remains open."
+      ],
+      "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation",
+      "correction_packet": {
+        "criterion": "repair fixture matches accepted correction",
+        "paths": [
+          "repair.txt"
+        ],
+        "evidence": [
+          {
+            "path": "repair.txt",
+            "sha256": "474d0e5746f64fe23e9238027d26426a0f6572fa87ecd33b9cc9437cb947f789"
+          }
+        ],
+        "instructions": "Write repair.txt with exactly 'accepted correction\\n'. No other repair changes. Then read full selected instructions and current repair evidence using the approved helper --correction-instructions, author a fresh work-review.json and successor-handoff.md, and run the original exact host verifier. The ineffective value in the rejection fixture is intentional; report its unmet criterion without substituting another repair outside this frozen packet."
+      }
+    }
+  },
+  "controller_state": "blocked",
+  "controller_reason": "successor_preflight_unverified",
+  "correction_cycles": 0,
+  "native_command_mismatch": "subprocess.run([... ,root+'/preflight.py',source,nonce,digest],check=True) constructs the script path instead of including the exact absolute approved path in the command transcript",
+  "proof_artifact_present": true,
+  "repair_assignments_admitted": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      22478,
+      53437
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0,
+  "final_ledger": {
+    "path": "/tmp/codex-wake-plan0156-correction-accept-native01/wake/objective-ledgers/db52f26f40eca47a91359e21666b09bd431026d8a34ea53b4dbaba7373f8212f.json",
+    "sha256": "bee52c4dfd978d2d62ccdc554d3d6946edc1064171476ed51b726512730c9d06",
+    "actors": {
+      "goal:01a13b2b-f862-7ae1-8181-cfa770b6f9a2:1791994125": {
+        "known": true,
+        "settled": true,
+        "used": 0
+      },
+      "handoff:5f7d65919a8076e742fd48536d882fe3fc6f90d519f2866e3321216ae7f56eb9": {
+        "known": true,
+        "settled": false,
+        "used": 81359
+      },
+      "spawn:297a3fb304bb1e0d593cd4681dcf1f6ddc91c1bfc56f844b9874b37faa2f6b96": {
+        "known": true,
+        "settled": true,
+        "used": 46952
+      }
+    }
+  }
+}

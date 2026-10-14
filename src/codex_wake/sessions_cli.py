@@ -13,6 +13,39 @@ from .sessions import SelectionError, observe, resolve
 def add_sessions_parser(subparsers):
     parser = subparsers.add_parser('sessions', help='discover live Codex sessions by exact thread or Byobu tab')
     commands = parser.add_subparsers(dest='sessions_command', required=True)
+    configuration = commands.add_parser('configuration', help='inspect effective host-approved lifecycle policy without native admission')
+    for option in ('profiles', 'profile', 'thread-id'):
+        configuration.add_argument('--' + option, required=True)
+    configuration.add_argument('--caller-thread-id')
+    configuration.add_argument('--apply-budget-authorization', action='store_true',
+        help='apply an exact operator authorization revision from the host registry; not exposed to agent MCP')
+    configuration.add_argument('--json', dest='as_json', action='store_true')
+    spawn = commands.add_parser('spawn', help='launch an agent using a host-approved profile')
+    spawn.add_argument('--profiles', required=True)
+    spawn.add_argument('--profile', required=True)
+    spawn.add_argument('--intent', required=True)
+    spawn.add_argument('--name', required=True)
+    spawn.add_argument('--task', required=True)
+    spawn.add_argument('--expires-at', required=True)
+    spawn.add_argument('--caller-thread-id')
+    spawn.add_argument('--objective-ref', help='operator-selected objective registry key; agents inherit their own caller objective')
+    spawn.add_argument('--json', dest='as_json', action='store_true')
+    refresh = commands.add_parser('refresh', help='refresh selected resources in the exact owned thread')
+    for option in ('profiles', 'profile', 'intent', 'thread-id', 'checkpoint',
+                   'checkpoint-sha256', 'expires-at'):
+        refresh.add_argument('--' + option, required=True)
+    refresh.add_argument('--resource', action='append', required=True)
+    refresh.add_argument('--caller-thread-id')
+    refresh.add_argument('--rollback', action='store_true', help='reattach the original conversation within the same fixed intent')
+    refresh.add_argument('--json', dest='as_json', action='store_true')
+    handoff = commands.add_parser('handoff', help='prepare a bounded fresh-context continuation')
+    for option in ('profiles', 'profile', 'intent', 'thread-id', 'checkpoint',
+                   'checkpoint-sha256', 'expires-at'):
+        handoff.add_argument('--' + option, required=True)
+    handoff.add_argument('--mode', required=True, choices=('new-tab', 'same-tab'))
+    handoff.add_argument('--caller-thread-id')
+    handoff.add_argument('--rollback', action='store_true', help='restore the original paused conversation without renewing allowance')
+    handoff.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
         command = commands.add_parser(verb)
         command.add_argument('--json', dest='as_json', action='store_true')

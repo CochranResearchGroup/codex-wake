@@ -1,0 +1,65 @@
+{
+  "state": "qualified_no_model_assignment",
+  "thread_id": "01a134e5-14a6-73b3-94c7-b9c14faea04b",
+  "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+  "native_readback": {
+    "read_only": true,
+    "model_assignments": 0,
+    "source": {
+      "queue": {
+        "data": [],
+        "nextCursor": null
+      },
+      "thread_id": "01a134e4-d3b0-7500-9db9-b729de509da1",
+      "goal": {
+        "threadId": "01a134e4-d3b0-7500-9db9-b729de509da1",
+        "objective": "Operator-approved Plan0156 disposable continuation: execute /home/ecochran76/.local/state/codex-wake/plan0156/installed-11/bin/python /home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/workspace/preflight.py --continue exactly once, record actual result, then mark this goal complete. No other work, actors, resource renewal or goal budget change.",
+        "status": "paused",
+        "tokenBudget": 201931,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1791888789,
+        "updatedAt": 1791888789
+      },
+      "turns": [
+        {
+          "id": "01a134e4-d524-7d63-9951-db7cc49d0222",
+          "status": "completed",
+          "commands": [
+            {
+              "id": "exec-5f3ef714-324c-480d-b5cd-ec6662ff9364",
+              "status": "completed",
+              "exit_code": 0
+            }
+          ]
+        }
+      ]
+    },
+    "successor": {
+      "queue": {
+        "data": [],
+        "nextCursor": null
+      },
+      "thread_id": "01a134e5-14a6-73b3-94c7-b9c14faea04b",
+      "goal": null,
+      "turns": []
+    },
+    "server_exit": 0
+  },
+  "rollout_sha256": "1ae91a3886d8e20b3ea771c6b11801e18f17f0e2335c70bf352f559fcf772801",
+  "rollout_event_types": [
+    "session_meta"
+  ],
+  "journal_state": "awaiting_preflight",
+  "journal_effects": [
+    null,
+    "thread/start",
+    null,
+    "tmux/new-window",
+    null,
+    null
+  ],
+  "accounted_tokens": 0,
+  "qualification": "No native turns, no goal, empty complete queue, metadata-only rollout and pre-submission journal; zero assigned model work, not a fabricated usage report",
+  "model_assignments_during_reconciliation": 0
+}

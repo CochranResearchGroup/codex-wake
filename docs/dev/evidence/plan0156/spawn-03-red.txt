@@ -1,0 +1,14 @@
+test_spawn_executes_exact_assignment_once_and_returns_native_receipt (tests.test_agent_spawn.AgentSpawnTests.test_spawn_executes_exact_assignment_once_and_returns_native_receipt) ... FAIL
+
+======================================================================
+FAIL: test_spawn_executes_exact_assignment_once_and_returns_native_receipt (tests.test_agent_spawn.AgentSpawnTests.test_spawn_executes_exact_assignment_once_and_returns_native_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_spawn.py", line 150, in test_spawn_executes_exact_assignment_once_and_returns_native_receipt
+    self.assertEqual(run(argv), 0)
+AssertionError: 5 != 0
+
+----------------------------------------------------------------------
+Ran 1 test in 0.087s
+
+FAILED (failures=1)

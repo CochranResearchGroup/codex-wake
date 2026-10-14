@@ -1,0 +1,85 @@
+{
+  "state": "catalog_visible_selection_unproven",
+  "first_probe": "installed-04-skill.json",
+  "same_name_entries": [
+    {
+      "name": "codex-wake",
+      "description": "Use Codex Wake for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.",
+      "interface": {
+        "displayName": "Codex Wake",
+        "shortDescription": "Tracked A2A requests, replies and wake cycles",
+        "iconSmall": null,
+        "iconLarge": null,
+        "iconSmallUrl": null,
+        "iconLargeUrl": null,
+        "brandColor": null,
+        "defaultPrompt": "Use $codex-wake for tracked agent communication or a durable follow-up. Choose the reply route explicitly; a TUI answer alone does not deliver an A2A reply."
+      },
+      "path": "/home/ecochran76/.agents/skills/codex-wake/SKILL.md",
+      "scope": "user",
+      "enabled": true,
+      "pluginId": null
+    },
+    {
+      "name": "codex-wake",
+      "description": "Use Codex Wake for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.",
+      "interface": {
+        "displayName": "Codex Wake",
+        "shortDescription": "Tracked A2A requests, replies and wake cycles",
+        "iconSmall": null,
+        "iconLarge": null,
+        "iconSmallUrl": null,
+        "iconLargeUrl": null,
+        "brandColor": null,
+        "defaultPrompt": "Use $codex-wake for tracked agent communication or a durable follow-up. Choose the reply route explicitly; a TUI answer alone does not deliver an A2A reply."
+      },
+      "path": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-04-skill-proof/codex-home/skills/codex-wake/SKILL.md",
+      "scope": "user",
+      "enabled": true,
+      "pluginId": null
+    }
+  ],
+  "exact_candidate_count": 1,
+  "native_errors": [],
+  "model_turns": 0,
+  "source_skill_sha256": "255fe0741af073266f8ece58bf7a743db0b7ff9c10c22bfcc7238ee247f4cbfa",
+  "candidate_skill_sha256": "255fe0741af073266f8ece58bf7a743db0b7ff9c10c22bfcc7238ee247f4cbfa",
+  "proof_scope": "forceReload skills/list exact path; no model skill selection or loaded instruction claim",
+  "modules": {
+    "agent_lifecycle.py": {
+      "source": "428a883f41c8383fcb03b3fcf19c4fbeee5d727dda73ff5ae628005cd01377ca",
+      "installed": "428a883f41c8383fcb03b3fcf19c4fbeee5d727dda73ff5ae628005cd01377ca"
+    },
+    "session_lifecycle.py": {
+      "source": "776fa22e4e4ca91e0e09f60ab4bb53af26ed3affba064ac1b3303c8822d15d4c",
+      "installed": "776fa22e4e4ca91e0e09f60ab4bb53af26ed3affba064ac1b3303c8822d15d4c"
+    },
+    "sessions_cli.py": {
+      "source": "3a10f75f53de6b5f4160a9df133e527f1fb7c866e9cbaaaab823220b074e6a61",
+      "installed": "3a10f75f53de6b5f4160a9df133e527f1fb7c866e9cbaaaab823220b074e6a61"
+    },
+    "cli.py": {
+      "source": "9a32fcb7b79f6b2536d45dad047324f0868c73f6a4ed2475b12e1ef4272c0040",
+      "installed": "9a32fcb7b79f6b2536d45dad047324f0868c73f6a4ed2475b12e1ef4272c0040"
+    },
+    "mcp_server.py": {
+      "source": "265a78f1c257be0ae9b7b51a19f16f873de6d18c9146c155267c283f159720da",
+      "installed": "265a78f1c257be0ae9b7b51a19f16f873de6d18c9146c155267c283f159720da"
+    }
+  },
+  "cleanup": {
+    "private_readable_environment_matches": [],
+    "denied_environments": [
+      696,
+      720,
+      6960,
+      22375,
+      25206,
+      38165,
+      50470,
+      91523
+    ],
+    "owned_servers": "both exited0; no private tmux launched",
+    "scope": "same UID readable environments only"
+  }
+}

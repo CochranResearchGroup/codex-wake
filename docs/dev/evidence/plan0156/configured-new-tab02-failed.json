@@ -1,0 +1,38 @@
+{
+  "state": "failed",
+  "classification": "controller_hold_and_truncated_review",
+  "root": "/tmp/codex-wake-plan0156-configured-new-tab02",
+  "prefix": "/tmp/codex-wake-plan0156-installed14",
+  "source_commit": "4f4f7096816247bf664960c46e05bbacc728c619",
+  "source_thread_id": "01a13a29-a74f-7113-b6cf-39ebdbd34931",
+  "successor_thread_id": "01a13a29-f8a9-7922-918c-c3fb34af0f6f",
+  "source_tokens": 74313,
+  "successor_tokens": 144046,
+  "total_tokens": 218359,
+  "preflight_limit": 150000,
+  "objective_limit": 250000,
+  "model_task_complete": true,
+  "final_process_matches": [],
+  "work_verdict": "blocked",
+  "unfinished_work": [
+    "Instruction output was truncated; complete configured guide and canonical Plan0156 reading was not achieved.",
+    "Selected preflight runtime checks await exact host verifier.",
+    "Native bounded continuation and owned rollback remain open; separate verified deadline fence required."
+  ],
+  "trace_sha256": "04cd8735c7844ffc09c3d36be71aa48258b1e75c4c2ea610e74ecb79c54adc5b",
+  "settled_accounting_known": true,
+  "objective_tokens_used": 218359,
+  "original_cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      64283
+    ],
+    "private_readable_environment_matches": [
+      11095,
+      12131
+    ]
+  },
+  "original_server_shutdown": "timed_out"
+}

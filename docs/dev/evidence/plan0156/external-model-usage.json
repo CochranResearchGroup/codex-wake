@@ -1,0 +1,296 @@
+{
+  "state": "observed",
+  "scope": "thirteen owned native threads; twelve model assignments, one qualified pre-submission receiver with no model assignment",
+  "threads": [
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02",
+      "thread_id": "01a130b8-2411-7a52-9ac7-83823d4d77ef",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-02/codex-home/sessions/2026/10/12/rollout-2026-10-12T10-25-36-01a130b8-2411-7a52-9ac7-83823d4d77ef.jsonl"
+      ],
+      "events": [
+        {
+          "timestamp": "2026-10-12T15:25:46.459Z",
+          "total_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 156,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19586
+          },
+          "last_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 156,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19586
+          }
+        },
+        {
+          "timestamp": "2026-10-12T15:25:50.474Z",
+          "total_token_usage": {
+            "input_tokens": 39079,
+            "cached_input_tokens": 31360,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 39264
+          },
+          "last_token_usage": {
+            "input_tokens": 19649,
+            "cached_input_tokens": 19200,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 29,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19678
+          }
+        }
+      ]
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-03",
+      "thread_id": "01a130c1-4418-71c1-8507-4330768614f1",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-spawn-03/codex-home/sessions/2026/10/12/rollout-2026-10-12T10-35-34-01a130c1-4418-71c1-8507-4330768614f1.jsonl"
+      ],
+      "events": [
+        {
+          "timestamp": "2026-10-12T15:35:47.468Z",
+          "total_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 107,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19537
+          },
+          "last_token_usage": {
+            "input_tokens": 19430,
+            "cached_input_tokens": 12160,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 107,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19537
+          }
+        },
+        {
+          "timestamp": "2026-10-12T15:35:52.259Z",
+          "total_token_usage": {
+            "input_tokens": 39023,
+            "cached_input_tokens": 31360,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 136,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 39159
+          },
+          "last_token_usage": {
+            "input_tokens": 19593,
+            "cached_input_tokens": 19200,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 29,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 19622
+          }
+        }
+      ]
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-writer-02",
+      "thread_id": "01a1312c-a5cb-76d1-a56d-c2c960d40450",
+      "events": [
+        {
+          "total_token_usage": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 35200,
+            "input_tokens": 46741,
+            "output_tokens": 177,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 46918
+          }
+        }
+      ],
+      "source_artifact": "installed-handoff-writer-02.json"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01",
+      "thread_id": "01a1318d-7d31-7260-9650-052d65f66f22",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/codex-home/sessions/2026/10/12/rollout-2026-10-12T14-18-38-01a1318d-7d31-7260-9650-052d65f66f22.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 40117,
+        "cached_input_tokens": 31872,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 326,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 40443
+      },
+      "total_tokens": 40443
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01",
+      "thread_id": "01a1318d-bed9-7142-b969-dfe81043a6e6",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-01/codex-home/sessions/2026/10/12/rollout-2026-10-12T14-18-55-01a1318d-bed9-7142-b969-dfe81043a6e6.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 160575,
+        "cached_input_tokens": 137088,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 536,
+        "reasoning_output_tokens": 20,
+        "total_tokens": 161111
+      },
+      "total_tokens": 161111
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02",
+      "thread_id": "01a134d6-2ed6-7b80-81a9-1a86c1a097ef",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-36-54-01a134d6-2ed6-7b80-81a9-1a86c1a097ef.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 47623,
+        "cached_input_tokens": 35584,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 324,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 47947
+      },
+      "total_tokens": 47947,
+      "budget_window": "resume-2026-10-13"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02",
+      "thread_id": "01a134d6-767f-7061-bd4a-0ffa03547d98",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-37-12-01a134d6-767f-7061-bd4a-0ffa03547d98.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 166889,
+        "cached_input_tokens": 140288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 559,
+        "reasoning_output_tokens": 19,
+        "total_tokens": 167448
+      },
+      "total_tokens": 167448,
+      "budget_window": "resume-2026-10-13"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+      "thread_id": "01a134e5-14a6-73b3-94c7-b9c14faea04b",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-53-10-01a134e5-14a6-73b3-94c7-b9c14faea04b.jsonl"
+      ],
+      "final_native_usage": null,
+      "total_tokens": 0,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "qualified_no_model_assignment",
+      "usage_qualification": "unassigned-receiver-03.json"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03",
+      "thread_id": "01a134e4-d3b0-7500-9db9-b729de509da1",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-03/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-52-54-01a134e4-d3b0-7500-9db9-b729de509da1.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 47738,
+        "cached_input_tokens": 24320,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 331,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 48069
+      },
+      "total_tokens": 48069,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "observed"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-04",
+      "thread_id": "01a13531-d1a8-7dc1-9139-7b1f4f5c32c4",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-04/codex-home/sessions/2026/10/13/rollout-2026-10-13T07-16-59-01a13531-d1a8-7dc1-9139-7b1f4f5c32c4.jsonl"
+      ],
+      "final_native_usage": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 35584,
+        "input_tokens": 47781,
+        "output_tokens": 344,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 48125
+      },
+      "total_tokens": 48125,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "observed"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-04",
+      "thread_id": "01a13532-2034-7ef0-93e6-00f687cdaa90",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-04/codex-home/sessions/2026/10/13/rollout-2026-10-13T07-17-19-01a13532-2034-7ef0-93e6-00f687cdaa90.jsonl"
+      ],
+      "final_native_usage": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 153088,
+        "input_tokens": 187829,
+        "output_tokens": 557,
+        "reasoning_output_tokens": 15,
+        "total_tokens": 188386
+      },
+      "total_tokens": 188386,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "observed"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-05",
+      "thread_id": "01a13555-3b99-7ab0-b95f-8615daacee94",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-05/codex-home/sessions/2026/10/13/rollout-2026-10-13T07-55-41-01a13555-3b99-7ab0-b95f-8615daacee94.jsonl"
+      ],
+      "final_native_usage": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 35968,
+        "input_tokens": 48549,
+        "output_tokens": 598,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 49147
+      },
+      "total_tokens": 49147,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "observed"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-05",
+      "thread_id": "01a13555-98e7-7570-aa8b-ac74f3495a68",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-05/codex-home/sessions/2026/10/13/rollout-2026-10-13T07-56-04-01a13555-98e7-7570-aa8b-ac74f3495a68.jsonl"
+      ],
+      "final_native_usage": {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 146432,
+        "input_tokens": 173828,
+        "output_tokens": 705,
+        "reasoning_output_tokens": 93,
+        "total_tokens": 174533
+      },
+      "total_tokens": 174533,
+      "budget_window": "resume-2026-10-13",
+      "usage_status": "observed"
+    }
+  ],
+  "cumulative_external_tokens": 1050550,
+  "accounting_rule": "Add final cumulative total once per native thread; do not sum successive cumulative events. Count cached tokens conservatively.",
+  "resource_windows": {
+    "original_external_tokens": 326895,
+    "resume_2026_10_13_external_tokens": 723655,
+    "operator_reset_authority": "explicit counter reset and active Plan0156 goal at1791887366; historical spending retained",
+    "resume_unreported_thread_ids": [],
+    "resume_unreported_usage_reserve": 0,
+    "reserve_status": "prior250000 provisional reserve retired by unassigned-receiver-03.json; absence of native assignment qualified, not missing usage assumed zero"
+  },
+  "cumulative_external_tokens_status": "known complete assignment subtotal; metadata-only unassigned receiver contributes zero by reconciliation"
+}

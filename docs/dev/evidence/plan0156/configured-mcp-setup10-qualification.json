@@ -1,0 +1,48 @@
+{
+  "bootstrap_configuration": {
+    "objective_deadline": "2026-10-14T13:53:33+00:00",
+    "objective_token_limit": 250000,
+    "revision": "bee4075e89ef2b36c2477abfc1a0dcc2c0425604a8b1dd28739ee91eefcc4e11",
+    "session_token_limit": 150000,
+    "spawn_token_limit": 100000
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      53437,
+      68403,
+      71433
+    ],
+    "private_readable_environment_matches": []
+  },
+  "error": null,
+  "harness_sha256": "4407eec27a9ae5fe1b566eaeb0d659b479c82ef748a9f60055e63dc2ecc5934d",
+  "manual_assignment_limit": 0,
+  "model_assignments": 0,
+  "monitor_exit": -2,
+  "native_mcp_setup": {
+    "configuration_revision": "bee4075e89ef2b36c2477abfc1a0dcc2c0425604a8b1dd28739ee91eefcc4e11",
+    "goal": null,
+    "handoff_negative_case_rejected": true,
+    "lifecycle_effects": 0,
+    "missing_checkpoint_held": true,
+    "negative_error": {
+      "error": {
+        "code": "invalid_cli_response"
+      },
+      "idempotency_key": null,
+      "reconciliation_required": true
+    },
+    "thread_id": "01a13aa7-76ed-77c3-a82e-210627683953",
+    "turns": 0
+  },
+  "prefix": "/tmp/codex-wake-plan0156-installed17",
+  "rollouts": 0,
+  "root": "/tmp/codex-wake-plan0156-configured-mcp-setup10",
+  "server_exit": 0,
+  "source_commit": "092d3ba52d9a496f926d24197721da581393e031",
+  "state": "qualified_setup",
+  "token_count_events": 0
+}

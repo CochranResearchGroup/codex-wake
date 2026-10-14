@@ -1,0 +1,15 @@
+test_spawn_discovery_and_caller_cannot_override_host_launch_scope (tests.test_lifecycle_mcp.LifecycleMCPTests.test_spawn_discovery_and_caller_cannot_override_host_launch_scope) ... ok
+test_discovery_has_explicit_actor_tools_without_operator_escape (tests.test_a2a_mcp.AgentExchangeMCPTests.test_discovery_has_explicit_actor_tools_without_operator_escape) ... ok
+test_timeout_preserves_intent_and_does_not_retry_or_run_invalid_input (tests.test_a2a_mcp.AgentExchangeMCPTests.test_timeout_preserves_intent_and_does_not_retry_or_run_invalid_input) ... ok
+test_lost_tab_creation_response_reconciles_owned_generation_without_replacement (tests.test_agent_spawn.AgentSpawnTests.test_lost_tab_creation_response_reconciles_owned_generation_without_replacement) ... /home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+ok
+test_lost_task_admission_response_reconciles_exact_queue_without_resend (tests.test_agent_spawn.AgentSpawnTests.test_lost_task_admission_response_reconciles_exact_queue_without_resend) ... ok
+test_spawn_executes_exact_assignment_once_across_pending_observation (tests.test_agent_spawn.AgentSpawnTests.test_spawn_executes_exact_assignment_once_across_pending_observation) ... ok
+test_unapproved_profile_is_rejected_before_runtime_effects (tests.test_agent_spawn.AgentSpawnTests.test_unapproved_profile_is_rejected_before_runtime_effects) ... ok
+test_unknown_thread_creation_is_retained_without_duplicate_retry (tests.test_agent_spawn.AgentSpawnTests.test_unknown_thread_creation_is_retained_without_duplicate_retry) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 3.412s
+
+OK

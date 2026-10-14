@@ -1,0 +1,30 @@
+{
+  "state": "qualified_setup",
+  "root": "/tmp/codex-wake-plan0156-configured-setup04",
+  "prefix": "/tmp/codex-wake-plan0156-installed15",
+  "source_commit": "ef4fe9f979a00164c2cf017a07948fcb1a3efc0a",
+  "generated_helper_syntax": "passed",
+  "skill_catalog_scope": {
+    "excluded_count": 173,
+    "selected": [
+      "/tmp/codex-wake-plan0156-configured-setup04/codex-home/skills/github-handoff/SKILL.md",
+      "/tmp/codex-wake-plan0156-configured-setup04/codex-home/skills/github-ask-matt/SKILL.md",
+      "/tmp/codex-wake-plan0156-configured-setup04/codex-home/skills/codex-wake/SKILL.md"
+    ],
+    "verified_enabled_count": 3
+  },
+  "manual_assignment_limit": 0,
+  "server_exit": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      64283
+    ],
+    "private_readable_environment_matches": []
+  },
+  "native_rollouts": 0,
+  "model_tokens_used": 0,
+  "harness_sha256": "8aa6231fb4dc266c84583829dc8d921a3332f65fc029181e4f8e342b17a17298"
+}

@@ -1,0 +1,107 @@
+{
+  "state": "failed",
+  "error": "handoff held: preflight_allowance_exhausted",
+  "source_commit": "ff708d80cf6e0aed40ff7365bb8c3b3aafc4c44e",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-12",
+  "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-04",
+  "mode": "same-tab",
+  "rollback_requested": true,
+  "token_cap": 250000,
+  "time_cap_seconds": 600,
+  "deadline": 1791894416.3159816,
+  "source_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 35584,
+    "input_tokens": 47781,
+    "output_tokens": 344,
+    "reasoning_output_tokens": 0,
+    "total_tokens": 48125
+  },
+  "successor_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 153088,
+    "input_tokens": 187829,
+    "output_tokens": 557,
+    "reasoning_output_tokens": 15,
+    "total_tokens": 188386
+  },
+  "server_exit": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      552,
+      585,
+      5221,
+      52706,
+      92009
+    ],
+    "private_readable_environment_matches": []
+  },
+  "native_readback": {
+    "read_only": true,
+    "model_assignments": 0,
+    "source": {
+      "thread_id": "01a13531-d1a8-7dc1-9139-7b1f4f5c32c4",
+      "goal": {
+        "threadId": "01a13531-d1a8-7dc1-9139-7b1f4f5c32c4",
+        "objective": "Operator-approved Plan0156 disposable continuation: execute /home/ecochran76/.local/state/codex-wake/plan0156/installed-12/bin/python /home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-04/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+        "status": "paused",
+        "tokenBudget": 201875,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1791893838,
+        "updatedAt": 1791893838
+      },
+      "turns": [
+        {
+          "id": "01a13531-d9ba-7312-afd4-1aca4518732f",
+          "status": "completed",
+          "commands": [
+            {
+              "id": "exec-c6c8126d-7b89-4dca-ab14-5d10ca1605da",
+              "status": "completed",
+              "exit_code": 0
+            }
+          ]
+        }
+      ]
+    },
+    "successor": {
+      "thread_id": "01a13532-2034-7ef0-93e6-00f687cdaa90",
+      "goal": null,
+      "turns": [
+        {
+          "id": "01a13532-2b09-7a43-a27e-cc23eabbc7ee",
+          "status": "completed",
+          "commands": [
+            {
+              "id": "exec-5e003c1b-f50c-4336-90d3-9764ee379216",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-7d5bc3c7-9287-48e1-9fba-d64ba8ea5191",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-eaa297a2-9180-441c-aa21-9d0a2ce70f97",
+              "status": "completed",
+              "exit_code": 0
+            }
+          ]
+        }
+      ]
+    },
+    "server_exit": 0
+  },
+  "acceptance": "FAILED; no goal activation, continuation or rollback proof",
+  "diagnosis": {
+    "first_instruction_output_tokens": 12654,
+    "outer_output_limit": 10000,
+    "inner_output_limit": 20000,
+    "instruction_read_calls": 3,
+    "preflight_command_exit": 0,
+    "consequence": "instruction reread after outer truncation; raw receiver usage exceeds preflight allowance"
+  },
+  "raw_state": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-04/state.json"
+}

@@ -2735,6 +2735,18 @@ def run(argv: list[str] | None = None) -> int:
         from .a2a_cli import a2a_command
         return a2a_command(args)
     if args.command == "sessions":
+        if args.sessions_command == 'configuration':
+            from .lifecycle_configuration import configuration_command
+            return configuration_command(args, root)
+        if args.sessions_command == 'handoff':
+            from .agent_handoff import handoff_command
+            return handoff_command(args, root)
+        if args.sessions_command == 'refresh':
+            from .agent_refresh import refresh_command
+            return refresh_command(args, root)
+        if args.sessions_command == 'spawn':
+            from .agent_lifecycle import spawn_command
+            return spawn_command(args, root)
         if args.sessions_command in ('open', 'close'):
             from .session_lifecycle import lifecycle_command
             return lifecycle_command(args, root)

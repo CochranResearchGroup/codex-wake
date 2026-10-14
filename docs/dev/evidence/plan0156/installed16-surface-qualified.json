@@ -1,0 +1,125 @@
+{
+  "ci": {
+    "head": "4481f6eb40e1b08bc8195cd323a67ab4df4b3cfe",
+    "run": 38567059613,
+    "state": "in_progress"
+  },
+  "focused_validation": {
+    "environment": {
+      "CODEX_WAKE_STABLE_TIME_CONFIG": "",
+      "PYTHONPATH": "tests"
+    },
+    "exit_code": 0,
+    "log": "/tmp/codex-wake-plan0156-installed16-focus.log",
+    "seconds": 11.884,
+    "tests": 87,
+    "tier": "focused"
+  },
+  "mcp_smoke": {
+    "calls": [
+      {
+        "is_error": false,
+        "tool": "wake_sessions_current"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_send"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_send"
+      },
+      {
+        "is_error": true,
+        "shared_connection_child_claim": true,
+        "tool": "wake_messages_read"
+      },
+      {
+        "is_error": true,
+        "tool": "wake_messages_read"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_read"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_ack"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_ack"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_reply"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_read"
+      },
+      {
+        "is_error": false,
+        "tool": "wake_messages_reconcile"
+      }
+    ],
+    "children_after": 0,
+    "elapsed_seconds": 4.000143254001159,
+    "native_turns": 0,
+    "notifications": 0,
+    "owned_fixture_removed": true,
+    "runtime_methods": [
+      "initialize",
+      "initialized",
+      "thread/loaded/list",
+      "thread/read"
+    ],
+    "status": "PASS",
+    "tools": [
+      "wake_sessions_configuration",
+      "wake_sessions_handoff",
+      "wake_sessions_refresh",
+      "wake_sessions_spawn",
+      "wake_sessions_list",
+      "wake_sessions_resolve",
+      "wake_sessions_show",
+      "wake_sessions_current",
+      "wake_messages_send",
+      "wake_messages_inbox",
+      "wake_messages_outbox",
+      "wake_messages_show",
+      "wake_messages_read",
+      "wake_messages_ack",
+      "wake_messages_reply",
+      "wake_messages_reconcile",
+      "wake_messages_cancel",
+      "wake_messages_arm_reply"
+    ]
+  },
+  "parity": {
+    "files": 95,
+    "mismatches": [],
+    "package": "/tmp/codex-wake-plan0156-installed16/lib/python3.12/site-packages/codex_wake",
+    "prefix": "/tmp/codex-wake-plan0156-installed16",
+    "wheel_sha256": "6654dd989627e3a2304bae74cdfd2315b73cd108afce7911090c12082cc73ca8"
+  },
+  "remaining": [
+    "harness bootstrap objective reference and owned supervision",
+    "context-replacement correction",
+    "installed native both-mode preflight continuation rollback",
+    "current CI readback",
+    "integration exact-main release/install and cleanup"
+  ],
+  "resource_window": {
+    "deadline": "2026-10-14T18:29:34Z",
+    "new_external_lanes": 0,
+    "new_native_model_usage": 0,
+    "root_baseline": 583915,
+    "root_delta": 211310,
+    "root_observed": 795225,
+    "start": "2026-10-14T12:29:34Z",
+    "token_cap": 2000000
+  },
+  "source_head": "4481f6eb40e1b08bc8195cd323a67ab4df4b3cfe",
+  "state": "installed_surface_qualified_native_handoff_pending"
+}

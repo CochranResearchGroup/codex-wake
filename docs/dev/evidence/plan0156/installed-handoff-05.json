@@ -1,0 +1,119 @@
+{
+  "state": "failed",
+  "error": "handoff held: preflight_allowance_exhausted",
+  "source_commit": "0e111f97fb49268b824def62fc21bcfd5ca9be82",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-13",
+  "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-05",
+  "mode": "same-tab",
+  "rollback_requested": true,
+  "token_cap": 250000,
+  "time_cap_seconds": 600,
+  "deadline": 1791896738.2455404,
+  "source_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 35968,
+    "input_tokens": 48549,
+    "output_tokens": 598,
+    "reasoning_output_tokens": 0,
+    "total_tokens": 49147
+  },
+  "successor_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 146432,
+    "input_tokens": 173828,
+    "output_tokens": 705,
+    "reasoning_output_tokens": 93,
+    "total_tokens": 174533
+  },
+  "server_exit": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      552,
+      585,
+      5221,
+      52706,
+      92009
+    ],
+    "private_readable_environment_matches": []
+  },
+  "native_readback": {
+    "read_only": true,
+    "model_assignments": 0,
+    "source": {
+      "thread_id": "01a13555-3b99-7ab0-b95f-8615daacee94",
+      "goal": {
+        "threadId": "01a13555-3b99-7ab0-b95f-8615daacee94",
+        "objective": "Operator-approved Plan0156 disposable continuation: execute /home/ecochran76/.local/state/codex-wake/plan0156/installed-13/bin/python /home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-05/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+        "status": "paused",
+        "tokenBudget": 200853,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1791896162,
+        "updatedAt": 1791896162
+      },
+      "turns": [
+        {
+          "id": "01a13555-45bc-7083-9ff4-8175b0526e9e",
+          "status": "completed",
+          "commands": [
+            {
+              "id": "exec-b345a152-92c5-44ba-8887-b1b5b5823953",
+              "status": "completed",
+              "exit_code": 0
+            }
+          ]
+        }
+      ]
+    },
+    "successor": {
+      "thread_id": "01a13555-98e7-7570-aa8b-ac74f3495a68",
+      "goal": null,
+      "turns": [
+        {
+          "id": "01a13555-a416-7671-b342-b219db76cc7a",
+          "status": "interrupted",
+          "commands": [
+            {
+              "id": "exec-8bfa8d07-051c-4dc4-8485-da3cf8f9498a",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-bea00233-1c84-4dd7-9853-ff7fb04f8474",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-798ea8ae-c3cd-4347-9afc-3faa1fbc59a2",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-ad2333fe-5495-4cf7-9180-30012a7aeec2",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-d5161070-45d6-4a77-b0bc-e3a92ac26ac4",
+              "status": "completed",
+              "exit_code": 0
+            }
+          ]
+        }
+      ]
+    },
+    "server_exit": 0
+  },
+  "acceptance": "FAILED; no goal activation, continuation or rollback proof",
+  "diagnosis": {
+    "instruction_read_truncated": false,
+    "tool_calls": 5,
+    "extra_reads": [
+      "preflight helper source",
+      "two skill sections"
+    ],
+    "preflight_command_exit": 0,
+    "consequence": "required preflight completed but cumulative receiver usage exceeds original allowance"
+  },
+  "raw_state": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-05/state.json"
+}

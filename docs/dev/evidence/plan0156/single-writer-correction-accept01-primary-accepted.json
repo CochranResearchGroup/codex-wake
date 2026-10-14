@@ -1,0 +1,222 @@
+{
+  "state": "passed_native_repair_primary_failed_secondary_observer",
+  "raw_root": "/tmp/codex-wake-plan0156-single-writer-correction-accept01",
+  "raw_state_sha256": "5ef22eed113182a3fe7db61ca28132a9acf53d4975a4beebcf66bb0775f84d6d",
+  "source_commit": "5b14c0549257f3fe7b667efa97a457e198492b2d",
+  "source_tokens": 33245,
+  "receiver_tokens": 181449,
+  "total_tokens": 214694,
+  "limits": {
+    "source": 50000,
+    "receiver": 200000,
+    "total": 250000,
+    "seconds": 600
+  },
+  "runtime_readiness": {
+    "checks": {
+      "canonical_sources": {
+        "sources": [
+          {
+            "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md",
+            "sha256": "a073d339d26b238e0f668e5d0d8dbc0647d01d12c7b05b4b6a6addf8835017ce"
+          },
+          {
+            "path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/plans/0159-2026-10-12-agent-handoff.md",
+            "sha256": "97710db67e0cd2063f9ab0c3ce07f507144db587577604a7229b1fd2e8c9ff72"
+          }
+        ],
+        "state": "passed"
+      },
+      "focused_validation": {
+        "command": [
+          "/tmp/codex-wake-plan0156-installed21/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "/home/ecochran76/workspace.local/codex-wake/tests",
+          "-p",
+          "test_agent_handoff.py",
+          "-q"
+        ],
+        "exit_code": 0,
+        "performed_by": "host_controller",
+        "result": "----------------------------------------------------------------------\nRan 12 tests in 1.264s\n\nOK\n",
+        "state": "passed"
+      },
+      "installed_cli": {
+        "state": "passed",
+        "version": "codex-wake 0.13.1"
+      },
+      "native_resource": {
+        "content_sha256": "8a3eac8516997e2bbfa884be9927b1a4d0699efc3f797e98724d14ace2dd7566",
+        "source_thread_id": "01a13b57-ca83-7383-8abd-30ae9f4c4112",
+        "state": "passed",
+        "tool": "wake_sessions_show"
+      },
+      "selected_skill": {
+        "sources": [
+          {
+            "path": "/tmp/codex-wake-plan0156-single-writer-correction-accept01/codex-home/skills/codex-wake/SKILL.md",
+            "sha256": "350d0cda0ca1d1b34738f4c0e8328a310262f592a0e30a6bf11e59954f013e7f"
+          }
+        ],
+        "state": "passed"
+      },
+      "selected_workflow": {
+        "packet": "successor-handoff.md",
+        "packet_sha256": "130a3f4347d0a83ed721f55367fde1547cd8c83c6bf8f78edb37114681e64c89",
+        "review_artifact": "work-review.json",
+        "review_artifact_sha256": "c49f8d680c663b3d3ae20398eb73302766719566d30f714b191f19ba93cb9594",
+        "sources": [
+          {
+            "path": "/tmp/codex-wake-plan0156-single-writer-correction-accept01/codex-home/skills/github-handoff/SKILL.md",
+            "sha256": "00ae63c60c842c1288c1930dac3444822dbb88f2ffcac82876d0481a280e98c8"
+          }
+        ],
+        "state": "passed",
+        "verified_ref": "5b14c0549257f3fe7b667efa97a457e198492b2d"
+      }
+    },
+    "state": "passed"
+  },
+  "initial_review": {
+    "acceptance_progress": [
+      {
+        "change": "Verified checkpoint preserves correction-only scope, authority, hard stops, obligations and next packet.",
+        "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+        "evidence": [
+          {
+            "path": "checkpoint.json",
+            "sha256": "f3698aaf2405ba92280f32559417ac7f4f3ac919f5fd7b31124561f532af9140"
+          }
+        ]
+      },
+      {
+        "change": "Host-attributed focused validation identifies the frozen ref; its 12 passing tests do not establish wider native lifecycle acceptance. Runtime qualification remains a separate verifier result.",
+        "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+        "evidence": [
+          {
+            "path": "host-validation.json",
+            "sha256": "f1db336ba5b70a187aa3c557e5139987c1f0862c90e8259ae7067612be183284"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Outgoing checkpoint records the bounded correction objective, authority, fixed resource bounds and exact next packet.",
+      "Host validation attributes focused validation to frozen candidate 5b14c0549257f3fe7b667efa97a457e198492b2d.",
+      "repair.txt contains unaccepted fixture followed by newline; required accepted correction followed by newline is absent."
+    ],
+    "correction_packet": {
+      "criterion": "repair fixture matches accepted correction",
+      "evidence": [
+        {
+          "path": "repair.txt",
+          "sha256": "474d0e5746f64fe23e9238027d26426a0f6572fa87ecd33b9cc9437cb947f789"
+        }
+      ],
+      "instructions": "Write repair.txt with exactly 'accepted correction\\n'. No other repair changes. Then read full selected instructions and current repair evidence using the approved helper --correction-instructions, author a fresh work-review.json and successor-handoff.md, and run the original exact host verifier. The ineffective value in the rejection fixture is intentional; report its unmet criterion without substituting another repair outside this frozen packet.",
+      "paths": [
+        "repair.txt"
+      ]
+    },
+    "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation",
+    "scope_deviations": [],
+    "selected_review": "github-handoff",
+    "unfinished_work": [
+      "repair fixture matches accepted correction remains unmet.",
+      "Selected runtime preflight awaits the verifier in this command.",
+      "Native bounded continuation and owned rollback remain unproved; wider Plan0156 remains OPEN."
+    ],
+    "unsupported_claims": [],
+    "verdict": "correct"
+  },
+  "accepted_review": {
+    "acceptance_progress": [
+      {
+        "change": "Previously fully read checkpoint retains correction-only objective, operator authority, original resource ceilings/deadline, pending obligations and exact next packet; approved helper verified its unchanged hash.",
+        "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+        "evidence": [
+          {
+            "path": "checkpoint.json",
+            "sha256": "f3698aaf2405ba92280f32559417ac7f4f3ac919f5fd7b31124561f532af9140"
+          }
+        ]
+      },
+      {
+        "change": "Unchanged host-controller validation binds focused validation to ref 5b14c0549257f3fe7b667efa97a457e198492b2d. Its test count does not close wider Plan0156 acceptance; native installed qualification is separately checked by the host verifier.",
+        "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+        "evidence": [
+          {
+            "path": "host-validation.json",
+            "sha256": "f1db336ba5b70a187aa3c557e5139987c1f0862c90e8259ae7067612be183284"
+          }
+        ]
+      },
+      {
+        "change": "Frozen assigned correction applied exactly; helper printed accepted correction followed by newline and its current SHA256.",
+        "criterion": "repair fixture matches accepted correction",
+        "evidence": [
+          {
+            "path": "repair.txt",
+            "sha256": "ba2d8cf29ed344a6f1216800aa99c1a77f4169c128e86692215ab6ad3d29d3a5"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Assigned frozen repair changed only repair.txt from unaccepted fixture followed by newline to accepted correction followed by newline.",
+      "Fresh review and handoff record criterion-specific evidence; original canonical sources and checkpoint hashes remain unchanged."
+    ],
+    "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation",
+    "scope_deviations": [],
+    "selected_review": "github-handoff",
+    "unfinished_work": [
+      "Native bounded continuation and owned rollback remain unproved and outside this preflight-only assignment.",
+      "Wider Plan0156 acceptance remains OPEN; continuation requires separate verified deadline fence and authorization."
+    ],
+    "unsupported_claims": [],
+    "verdict": "accept"
+  },
+  "correction_cycles": 1,
+  "native_review_turns": [
+    {
+      "id": "01a13b58-3c53-7fb2-9fd6-13664fef90be",
+      "status": "completed"
+    },
+    {
+      "id": "01a13b59-1480-7010-8e30-49771a3e49cc",
+      "status": "completed"
+    }
+  ],
+  "instruction_read_item_ids": [
+    "exec-b041d89f-fd43-4439-9c02-6bf957966065",
+    "exec-0e76fee0-f611-469e-abe5-5cce2a022c0d"
+  ],
+  "full_selected_instruction_bytes_verified": true,
+  "repair_sha256": "ba2d8cf29ed344a6f1216800aa99c1a77f4169c128e86692215ab6ad3d29d3a5",
+  "prepared_goal": {
+    "createdAt": 1791997107,
+    "objective": "Operator-approved Plan0156 disposable correction proof: review and repair only repair.txt under the frozen host packet, at most two corrective cycles. Execute /tmp/codex-wake-plan0156-installed21/bin/python /tmp/codex-wake-plan0156-single-writer-correction-accept01/preflight.py --continue exactly once only after acceptance and report its actual result. The external controller completes an accepted goal after verification. Do not invoke goal tools or change goals, scope, actors or resources; rejected work cannot continue.",
+    "status": "paused",
+    "threadId": "01a13b58-2953-7e62-9b48-07cefe003baf",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 18551,
+    "tokensUsed": 0,
+    "updatedAt": 1791997107
+  },
+  "ordinary_continuation": "not_requested_axis_already_proven",
+  "secondary_observer_error": "actual selected instruction read unverified",
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      82261,
+      91932
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0
+}

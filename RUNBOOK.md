@@ -5531,7 +5531,1059 @@ without changing target/actions/provider labels; qualified preflight passed.
 Product implementation, real goal transfer and actual ask-Matt preflight remain
 future acceptance, not prototype claims. Memory target unavailable.
 
-## Turn 270 | 2026-10-14 UTC
+## Turn 270 | 2026-10-12 UTC
+
+Started operator execute-Plan0156 goal at clean origin/main a741010 on
+feat/agent-lifecycle; issue249 assigned/read back. Spawn public-CLI TDD now
+rejects unapproved profiles, preserves uncertain native creation without retry,
+and proves exact task completion without duplication across pending observation.
+Four red/green cycles and corrected failed attempts recorded in
+docs/dev/evidence/plan0156/checkpoint-01.md. Fixture socket and real PTY process
+are deterministic proof only. Controller recovery, MCP and installed acceptance
+remain unfinished;0158/0159 and combined release remain OPEN obligations.
+Read-only native schema worker completed; primary retained no-idempotent-create
+and no-native-goal-transfer constraints. No installed/shared service effects.
+Memory disposition unavailable: no reviewed Codex Wake Graphiti cloud.
+
+## Turn 271 | 2026-10-12 UTC
+
+Plan0156 checkpoint02: spawn public-seam TDD recovery/MCP/caller/env/expiry and
+native-normalization/auto-start corrections pass. Positive installed-03 stdio
+MCP created exact owned TUI/native worker and completed42; duplicate intent kept
+one submission. Two initial installed failures retained; original uncertain02
+submission reconciled read-only without replay. All private process censuses
+empty. Source comprehensive03 passes1085; final receipt delta has focused13,
+frozen final comprehensive still required. Full evidence and guard gaps are in
+docs/dev/evidence/plan0156/checkpoint-02.md. Native direct-input capability is not
+draft proof; no-model TUI probe needs explicit rendered-marker observation next.
+Source docs/skill now describe guarded spawn; global install/release/integration,
+0158 refresh and0159 handoff remain pending. Goal ACTIVE,344390 tokens/2789s at
+readback;45-minute checkpoint backstop exceeded89s, user2m/six-hour ceilings intact.
+Memory unavailable, existing no-write receipt retained; no shared runtime effects.
+
+## Turn 272 | 2026-10-12 UTC
+
+Plan0156 checkpoint03: actual no-model draft rendering established; public CLI
+red/green guards reject drafts, malformed host profiles and restart-time draft
+changes before unqueued admission. Existing active/unknown/split and lost-turn
+response guards qualified. Frozen1090 comprehensive tests pass; isolated wheel
+matches source and26 focused checks pass after retained test-import correction.
+Installed15-tool stdio MCP passes controlled synthetic-clock run; first host-clock
+anomaly retained, not declared diagnosed. Copied skill visible in actual native
+catalog alongside global same-name entry; selection remains unproven. Both owned
+no-model skill servers exit0; readable private-home census empty with denied
+entries explicit.0158/0159 and final integration/release remain pending; full goal
+ACTIVE. See checkpoint03 for exact evidence/gates. Memory unavailable; receipt
+retained. No new model assignment or global service/package/skill mutation.
+
+## Turn 273 | 2026-10-12 UTC
+
+Plan0156 source refresh cycles19–29 add checkpoint/draft guards, safe same-thread
+reattachment, unique lost-stop/tab reconciliation, fixed expiry, scoped16-tool
+MCP and actual resource behavior checks. Monotonic native counters preserved;
+budget changes/resets held.42 focused checks pass. Installed-05 no-model native
+MCP/TUI run proves changed skill catalogready and retainedv1MCPblocked despite
+newclient; source thread and nullgoal preserved. Owned server exits0; no readable
+private-home process matches, deniedentries explicit. See checkpoint04 and
+installed-refresh-01.json. Nonnullgoal/selectedskill/rollback,0159, consolidated
+review and final integration/release remain pending. Full goal ACTIVE,784954tokens/
+5528s readback, originalcaps retained. Memory unavailable; existing receipt retained.
+
+## Turn 274 | 2026-10-12 UTC
+
+Plan0156 cycles30–32 qualify shared spawn/refresh profile compatibility and
+explicit same-conversation rollback reuse/proven-absence reattachment at public
+CLI seams.35 focused tests pass11.352s. Actual GitHub ask-Matt selects handoff;
+successor preflight remains unexecuted. Issues250/251 owner assigned/read back,
+both OPEN. Installed nonnull-goal/rollback,0159, review/integration/release remain
+pending. See checkpoint05. Root ACTIVE881825tokens8105s, original caps unchanged.
+Memory unavailable; existing non-write receipt retained.
+
+## Turn 275 | 2026-10-12 UTC
+
+Isolated installed06/native no-model refresh preserves actual paused goal;
+automatic-origin fixture goal creation accepted, same-thread rollback completed,
+oldMCPv1 still blocks requestedv2. Ownedserverexit0/private readable censusempty;
+installed-refresh-02.json binds exactsource6ebd4a4 hashes. Public handoff TDD
+cycles33–35 hold unknown usage, cumulative exhaustion and fixed deadline without
+successor/goal effects. Actual preflight/ownership/activation and full integration
+remain pending; Plan0159 now IN_PROGRESS. Root950583tokens8766s ACTIVE readback.
+Memory unavailable; retained non-write receipt. No global update/model turn.
+
+## Turn 276 | 2026-10-12 UTC
+
+Plan0156 cycles36/37 guard unproven outgoing checkpoint writer and malformed
+host allowance before further effects.40 focused lifecycle tests PASS11.095s.
+Owned earlier two model assignments reconciled from cumulative native usage:
+39264+39159=78423tokens includingcache; countfinalonce perthread. Root984287/
+9152s ACTIVE, conservatively combined1,062,710; originalcaps unchanged. See
+checkpoint07. Actual fresh successor/preflight/activation and final integrated
+release remain pending. No new model/private/globalruntime effect this packet.
+Memory unavailable; retained non-write receipt.
+
+## Turn 277 | 2026-10-12 UTC
+
+Writer acceptance first held uncertain before thread ID/task admission. Private
+read-only probe reproduces native listener symlink rejected before transport;
+resolved socket pages empty, serverexit0. Original receipt untouched. Public
+cycle38 rejects invalid owned endpoint before new journal;24 spawn/handoff tests
+pass4.549s. Harness now resolves exact owned native listener. See checkpoint08;
+corrected writer/successor/goal continuation and final release remain pending.
+Root1064704tokens9728s ACTIVE + external78423, original caps unchanged. Memory
+unavailable; retained non-write receipt. No shared runtime/model assignment.
+
+## Turn 278 | 2026-10-12 UTC
+
+Installed writer02 exact original task completed and agent wrote checkpoint;
+initial harness stopped during brief history gap, retained. Read-only native
+then installed same-intent CLI reconciliation completes without another task or
+goal change.46918tokens adds externaltotal125341; root1105591/10269s ACTIVE.
+Public cycles39/40 hold source goal authority changes and unknown pending work,
+preserve oldclient;49 focused testsPASS9.174s. Extracted existing close inventory
+for handoff guard. Checkpoint09 and installed-handoff-writer-02.json carry actual
+evidence. Fresh successor/preflight/goal activation and final release remain open.
+Memory unavailable; existing non-write receipt retained. Private cleanup passed.
+
+## Turn 279 | 2026-10-12 UTC
+
+Plan0156 public CLI cycles41–46 prepare one fresh successor/preflight and paused
+remaining-budget goal through existing spawn. Actual-script/real-PTY fixture
+passes; no actual native successor claim. Source draft, counter reset, insufficient
+preflight allowance and uncertain goal creation hold without duplicate effect.
+55 focused tests PASS10.704s; checkpoint10 records earlier erroneous module name
+and corrected full run. Activation stays held pending independent deadline fence;
+full program integration/release remains open. Root1270670/14279s ACTIVE plus
+external125341, original caps unchanged. Memory unavailable, retained receipt.
+
+## Turn 280 | 2026-10-12 UTC
+
+Plan0156 cycle47 corrects source usage spent during pause before successor
+allowance preparation; public RED920→GREEN917. Existing late-expiry guard receives
+an honest GREEN qualification: completed preflight cannot prepare a goal after
+original deadline.57 focused tests PASS11.519s. Checkpoint11 retains full open
+program gates and proposes existing daemon deadline enforcement before activation.
+Root1303297/14421s ACTIVE plus external125341; original caps unchanged. No provider
+assignment or global runtime update. Memory unavailable; existing receipt retained.
+
+## Turn 281 | 2026-10-12 UTC
+
+Plan0156 cycles48–55 integrate original-deadline supervision into existing daemon.
+Fixture CLI/nativeWS/PTY checks prove explicit continuous activation, owned pause
+and exact turn interrupt, lost-effect reconciliation, graceful shutdown and live
+monitor generation protection.97 focused lifecycle/daemon tests PASS17.494s.
+Checkpoint12 distinguishes fixture proof from unexecuted installed native goal
+continuation and all final acceptance/integration/release gates. Root1378287/
+15262s ACTIVE plus external125341, original caps unchanged. Memory unavailable;
+retained receipt. No new provider assignment or shared installed runtime change.
+
+## Turn 282 | 2026-10-12 UTC
+
+Plan0156 cycles56–58 expose guarded handoff MCP17-tool discovery, apply explicit
+host caps to unlimited/larger native budget, and charge carried elapsed usage.
+104 focused lifecycle/daemon/MCP tests PASS24.569s. Candidate skill/operator docs
+retain gaps; opt-in native continuation runner generated scripts compile but
+acceptance is unexecuted. Checkpoint13 precedes isolated installed09 effects.
+Root1444180/16092s ACTIVE plus external125341, original caps unchanged. All full
+integration/release gates remain. Memory unavailable; retained non-write receipt.
+
+## Turn 283 | 2026-10-12 UTC
+
+Installed09 source35e1ce3 actual fresh successor reads checkpoint and both selected
+instructions, but preflight fails. Harness stopped on transient time hold during
+ongoing task; native resource then unavailable during teardown. Receiver161111
+also exceeds preflight150000. No successor goal/activation. Original source goal
+paused; read-only exact-history reconciliation and fresh private census pass.
+40443+161111 adds external201554, cumulative326895. Root1505800/17056s ACTIVE,
+conservative1832695; original caps unchanged. Checkpoint14 and curated failure
+retain full incomplete program gates. No new model replay. Memory unavailable;
+retained non-write receipt. Global package/services untouched.
+
+## Turn 284 | 2026-10-12 UTC
+
+Plan0156 cycles59/60 qualify public CLI rollback and ownership-before-effect.
+Original paused conversation and goal counters survive; receiver spending is
+deducted once. Lost setter response receives an honest GREEN recovery qualification,
+not a fabricated RED.107 focused lifecycle/daemon/MCP tests PASS24.613s.
+Checkpoint15 stops before the user's cumulative token/time ceilings with the full
+program incomplete. Root1616438/19657s plus external326895 gives conservative
+1943333 tokens at checkpoint preparation; final tool counters reported separately.
+No new provider assignment, shared install, release, issue closure or final review.
+Memory unavailable; existing checkpoint-01-memory.json non-write receipt retained.
+
+## Turn 285 | 2026-10-13 UTC
+
+Operator reset resource window and resumed full Plan0156 with Matt's process.
+New native goal start1791887366/deadline1791908966; old accounting and expired
+fixtures retained. Diagnosing-bugs actual polling-loop replay reproduces premature
+teardown on admissible_time_unavailable before observing existing task completion.
+Acceptance supervisor now re-polls identical intent for that hold within original
+observation deadline; other blocked reasons remain terminal. Public regression
+and handoff checks PASS29/8.533s; this is blocker reduction, not installed acceptance.
+Checkpoint16 records exact RED/GREEN limits and next live-budget observation seam.
+No external assignments, shared runtime effects, release or issue closure.
+Memory unavailable: healthy runtime but no reviewed Codex Wake atlas candidate.
+
+## Turn 286 | 2026-10-13 UTC
+
+Plan0156 public CLI/socket/PTY reproduction proves active successor usage101 above
+allowance100 was ignored until completion. Controller now observes running usage,
+fences continuation and interrupts only original assignment turn; lost interrupt
+response is persisted uncertain and read back without retry. Two actual RED/GREEN
+cycles and85 focused checks PASS16.458s; checkpoint17 before isolated native proof.
+Polling cannot guarantee zero provider overshoot. Full installed/product acceptance
+remains incomplete; no provider effects yet in resumed window. Memory unavailable.
+
+## Turn 287 | 2026-10-13 UTC
+
+Installed10 at76a379e matches eight modules; fresh native handoff02 fails selected
+preflight. Child socket lstat unavailable while parent still polls; cause unproven.
+Actual overspend167448/150000 now interrupts exact successor turn. Read-only native
+reconciliation confirms interrupted turn, source goal paused, successor goal null;
+fresh private census empty/server exits0. No activation or accepted handoff.
+External215395 in reset window (lifetime542290) retained in ledger. Checkpoint18
+reframes next work to provider-free transport reproduction; no unchanged provider
+retry. Full scope open; native budget-stop axis advances only. Memory unavailable.
+
+## Turn 288 | 2026-10-13 UTC
+
+Plan0156 provider-free recorded-sandbox replay reproduces socket lstat denial
+under protected daemon directory while host socket stays live. Boundary proof
+PASS: host observation readable outside workspace, sandbox overwrite denied.
+Acceptance fixture now uses real identity-bound external native observations;
+host performs remote/socket validation, successor verifies them. Continuation
+completion stays external after actual native command/active-owner proof.
+Checkpoint19 reframes exhausted socket-dependent method; no sandbox weakening or
+new model calls. Relevant checks PASS33/9.655s; native acceptance remains open.
+Memory unavailable; no reviewed target group.
+
+## Turn 289 | 2026-10-13 UTC
+
+Installed11/a211a62 handoff03 fails before selected preflight on invalid native
+method thread/mcp/tool/call. Source48069 known; receiver usage unreported, never
+zero. Fixed method from installed generated schema, regression RED/GREEN; actual
+mcpServer/tool/call reaches exact source via MCP without model assignment and
+honestly returns incomplete post-cleanup inventory. Goal unchanged/paused, target
+null, census empty. Host route now qualified before successor admission. Known
+resumed external263464 plus provisional250000 reserve for unknown receiver.
+Checkpoint20 retains failure and moves to provider-free same-tab source unit.
+Full acceptance remains OPEN; no new native retry. Memory unavailable.
+
+## Turn 290 | 2026-10-13 UTC
+
+Plan0156 same-tab public CLI RED/GREEN replaces only original verified pane with
+fresh native conversation. New generation/task admission, old source exit and
+paused goal conserved. Lost respawn reply reconciles without duplicate thread,
+pane replacement or assignment; positive recovery qualification only (initial
+bad test assertion corrected, not counted as product RED). Additional actual
+stale-title RED/GREEN keeps original source generation pinned while metadata
+catches up.117 focused tests PASS 23.840s. Checkpoint21 source seam advances; installed same-tab and full program
+acceptance remain open. No provider assignments; next active/missing-source
+rollback. Memory unavailable; retained non-write receipt.
+
+## Turn 291 | 2026-10-13 UTC
+
+Plan0156 public rollback RED/GREEN qualifies active owner pause/interrupt,
+missing-source reattachment in owned settled successor pane and fresh late-usage
+budget debit. Source ownership lock held through effects; continuation fenced,
+identities/counters preserved; unknown responses reconcile once. Positive lost
+pause/respawn and same-tab return qualifications retain original actor/goal.
+123 focused checks PASS28.580s; final lease-pointer guard handoff suite PASS27/
+14.748s. Checkpoint22 before combined native proof; no provider calls or installed
+rollback claim. Full program remains OPEN. Memory unavailable.
+
+## Turn 292 | 2026-10-13 UTC
+
+Plan0156 combined proof runner selects same-tab/rollback, protects approved helper
+outside workspace, prints actual checks/results and stops goal dispatch after
+verified command before checking complete turn and whole reported resource cap.
+Checkpoint23 freezes one bounded same-tab native packet with full remaining
+program allowance reconciliation. No provider calls or acceptance claim yet.
+Memory unavailable; prior discovery target remains unavailable.
+
+## Turn 293 | 2026-10-13 UTC
+
+Plan0156 native same-tab packet failed preflight spending188386>150000 despite
+successful helper command. Actual trace proves outer tool-output truncation and
+two additional instruction reads. Runner now supplies both output limits and
+prints raw output directly; no native retry or acceptance claim. Fresh read-only
+native source paused/receiver goalnull, completed turns, private serverexit0 and
+empty owned process census. Checkpoint24/installed-handoff04 preserve failure;
+ledger known reset-window499975 plus one unreported receiver. Review SP-01/SP-02
+await public reproduction and adjudication; full integration/release remains open.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 294 | 2026-10-13 UTC
+
+Accepted SP-01 after actual public seam RED: late paused-source token usage left
+successor active. Monitor now fences counter advances/unknown or regressed values
+before activation and during supervision, pauses owned goal and interrupts exact
+turn; original objective/caps/deadline preserved. Token regression GREEN plus time
+and preactivation positive qualification. Focused72 PASS19.007s; checkpoint25.
+No provider calls or installed acceptance. SP-02 and full delivery gates remain.
+Memory unavailable; existing non-write receipt retained.
+
+## Turn 295 | 2026-10-13 UTC
+
+SP-02 public RED proves incomplete checkpoint reached native reads. Guard now
+requires restart-safe contract and host cap/start/expiry correspondence before
+native/journal effects. Updated acceptance writers, generated scripts compile,
+public docs and fixtures. Focused47 PASS17.093s; checkpoint26 records proof limits,
+review adjudication and conservative resource headroom545479 at root704546.
+Full installed acceptance/integration/release remains OPEN. No provider calls.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 296 | 2026-10-13 UTC
+
+Installed13 matches88 source modules at0e111f9. Native same-tab packet still fails
+preflight174533>150000 after redundant reads (no output truncation); successful
+helper does not grant activation. Exact receiver interrupted/goalnull, sourcepaused,
+private serverexit0 and empty owned census. Checkpoint27/installed-handoff05 retain
+failure, raw IDs and ledger723655 known reset-window plus unknown receiver reserve.
+Full local suite first failed1158/146.681s on stale handoff fixtures, installed time
+configuration and a handshake timeout; corrected fixture contract and guaranteed
+server cleanup. Isolated configuration full suite PASS1158/136.977s/exit0; initial
+flake retained. Compilation/policy/build/plugin/static gates pass; full release
+lanes remain. Root goal unexpectedly BLOCKED/frozen715261, primary did not set it;
+resource headroom unverified, no further provider purchase. Full program OPEN.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 297 | 2026-10-13 UTC
+
+Resource refresh confirms ACTIVE goal without resetting original window. Receiver03
+reconciled as metadata-only/no native turns/no queue/no task journal effects;
+qualified zero model assignment retires250000 provisional reserve. External known
+723655. Installed release checks and Python3.11 full suite/complete surface pass;
+Python3.12 recovery first failure retained as non-reproduced intermittent after
+bounded diagnostics. Improved failure observability, no semantic/threshold change.
+Preflight includes approved helper source in complete first read and explicit
+two-command protocol; no provider attempt. Checkpoint28 before no-model installed
+nonnull-goal refresh/rollback. Full lifecycle acceptance/integration/release OPEN.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 298 | 2026-10-13 UTC
+
+Native installed refresh06 preserves a real nonnull paused goal through exact
+same-thread client replacement and guarded rollback; actual cached MCP v1 blocks
+success despite updated native skill v2. Fresh refresh07 positively qualifies hot
+MCP v2 and native catalog v2, completed public refresh/rollback with goal unchanged.
+Both zero model turns/serverexit0/owned census empty. Host instruction read clearly
+labeled, no refreshed actor model-consumption claim. Checkpoint29/curated receipts;
+Plan0158 current state reconciled, full lifecycle integration/release OPEN.
+Resource refresh ACTIVE823636 plus external723655=headroom452709; current window
+retained while clarification pending, no full500000 provider packet purchased.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 299 | 2026-10-13 UTC
+
+Prepared draft integration PR253 with self-contained truthful evidence and remaining
+native handoff gates, linked issues248–251 and Plan0156. Verified canonical target/
+actor/ADMIN, basea741010 and draft head8d7763f. No merge/release/auto-close. Checkpoint30
+records active resource snapshot851732+723655 and pending window clarification;
+no further provider assignments or silently renewed caps. Full objective OPEN.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 300 | 2026-10-13 UTC
+
+Installed CLI/MCP scope audit confirms documented field surfaces and rejects
+host path/budget/helper/replacement overrides at schema validation before journal
+creation. Actual installed stdio process,18 rejected calls,zero provider assignments;
+first harness over-specific error assertion corrected without product fix claim.
+Checkpoint31/curated schemas. Remaining full native handoff/integration/release
+scope unchanged; counter-window clarification pending, no resource reset inferred.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 301 | 2026-10-13 UTC
+
+Native no-model catalog reframe17tools/15152bytes→one session lookup/418bytes,
+private enabled_tools verified on0.162.1. Probe limitations retained; no model-token
+savings claim. Runner restricts unnecessary tools without dropping required proof.
+Checkpoint32 before resource stop: root971091+external723655 leaves305254; full
+remaining both-mode allocation500000 plus primary cannot be funded. Same window
+condition persisted3goal turns; safe ready lanes exhausted, requestBLOCKED pending
+explicit counter-window interpretation. Full goal OPEN, no native retry/merge/
+release/closure. Fresh restart handoff replaces expired original locator.
+Memory unavailable; prior non-write receipt retained.
+
+## Turn 302 | 2026-10-13 UTC
+
+Operator clarified configurable handoff/preflight skills, substantive objective
+progress review and user-controlled session/objective budgets. Approved defaults
+with objective overrides, overall wall-clock deadline including waiting, and two
+bounded corrective cycles. Recorded terminology and explicit Plan0156 revision
+with proposed public CLI/MCP acceptance seam and three dependency-linked vertical
+slices. Classification: hardening/design clarification, not native acceptance.
+Diff whitespace validation passes; no source implementation, provider assignment,
+issue publication, commit, integration or resource-window reset. Ticket breakdown
+and seam await the skill's user confirmation; existing resource block retained.
+Memory disposition unavailable; no write performed.
+
+## Turn 303 | 2026-10-13 UTC
+
+Operator approved the revised public CLI/MCP validation seam and ticket graph.
+Published spec254 and ready-for-agent enhancement slices255–257 to the canonical
+GitHub repository; verified returned identities, labels, bodies and OPEN state.
+Native blocking edges256←255 and257←255,256 created and read back. Retained
+attributable mutation receipts; parent248 unchanged. Classification: hardening/
+planning, not implementation or runtime acceptance. Local diff validation passes.
+No resource reset, provider assignment, integration, release or issue closure.
+Memory disposition unavailable; no write performed.
+
+## Turn 304 | 2026-10-14 UTC
+
+Operator explicitly renewed resources after the expired-window gate. Window
+10:38:06–16:38:06 UTC, 2,000,000 tokens; native thread baseline28,639 retained
+alongside previous-window accounting. ACTIVE goal readback confirmed. Verified
+feat/agent-lifecycle at c9ec8c2 and draft OPEN PR253 at the same full SHA; issues
+254–257 OPEN. Reviewed approved pending terminology/specification amendments;
+git diff --check passes. Ask Matt routes the ready issue255 through design of
+configuration/review seams then public CLI/MCP red/green implementation. Prior
+review findings remain closed-world; no new broad review. Graphiti doctor healthy,
+bounded atlas discovery returned no usable cloud manifests; repo evidence owns
+continuation. Classification: blocker_reduction (explicit resource renewal).
+Full plan remains OPEN; no native acceptance, integration or release claimed.
+
+## Turn 305 | 2026-10-14 UTC
+
+Issue255 source checkpoint: public CLI/MCP effective configuration, host defaults
+and objective overrides, actual selected instructions/hash revision, native
+writer/reviewer read proof, and substantive work verdict separate from readiness.
+Non-GitHub reviewer selection works; changed defaults cannot rewrite intent;
+missing instruction reads, unsupported acceptance, drift, unknown criteria and
+changed evidence hold admission. Correct/blocked do not create a successor goal.
+Evidence: docs/dev/evidence/plan0156/configurable-review-source.md. Focused CLI/
+MCP/handoff selection53 tests passed20.577s; compileall, policy wiring and diff
+check pass. Red-before-green receipts retained. Classification outcome_progress;
+full objective OPEN. New budget fields exposed but issue256 enforcement remains.
+One disjoint worker /root/objective_ledger owns only new ledger module and tests,
+bounded20min/100,000tokens; primary owns integration/acceptance and reserves that
+allowance until worker accounting settles. No new broad discovery review or
+native acceptance run. Existing acceptance harness requires the revised contract
+before use. Prior installed0.13.1 remains untouched.
+
+## Turn 306 | 2026-10-14 UTC
+
+Nested budget source checkpoint integrates worker/root/objective_ledger and
+primary CLI/native controller/monitor adapters. Durable shared snapshots and
+reservations survive restart, charge failed preflight, bound actual successor
+session tokens/deadlines and reconcile owned rollback. Native session fixture
+cap100 minus preflight30 yields70. Public readback preserves prior usage40 when
+explicit operator extension increases cap500→600; changed defaults alone leave
+active authority unchanged. Agent MCP has no extension operation. Original time
+expiry and unknown-time owned fencing remain enforced.
+Worker terminal result7 tests passed; primary accepted and integrated, including
+one bounded corrective packet for replay/path authority. Worker runtime model,
+effort and token counters unavailable; retain conservative100,000token reservation
+within current renewal. Final focused ledger/CLI/MCP/handoff selection62 tests
+passed22.394s; compileall, policy wiring and diff check passed. Earlier failures
+and fixes retained in docs/dev/evidence/plan0156/nested-budget-source.md.
+Classification outcome_progress; plan and issues remain OPEN. Explicit reset,
+refresh/spawn accounting, correction admission and both-mode native acceptance
+remain open. No release/install/merge or external issue closure. Memory disposition
+unavailable: no qualified repository cloud manifest from bounded atlas discovery;
+machine-readable non-write receipt retained, zero Graphiti writes attempted.
+
+## Turn 307 | 2026-10-14 UTC
+
+Outcome_progress: explicit budget reset/replay, durable goal accounting aliases,
+owned corrective assignments and two-cycle terminal stop implemented. Public
+worked examples: prior40 resetcap100 leaves60; preflight10+successor20 remains30
+after source/restart replay; actual repair accepted after60 preflight tokens;
+repeated rejection stops after two corrections/90tokens with no successor goal
+or fourth queue item. Outside-scope correction holds before admission.
+Focused selection72 tests passed22.251s, including harness supervision. Compile,
+policy wiring and whitespace pass. Executable MCP smoke passes18tools/11calls;
+CI's previous failure is an exact stale17-tool smoke assertion, now repaired.
+Evidence docs/dev/evidence/plan0156/correction-reset-source.md. Worker
+/root/native_harness_revision returned only script changes; primary inspected and
+accepted adaptation, validated under repo venv after worker's environment-import
+failure. Native effects withheld from worker. Counter/model unknown; conservative
+100,000token reservation retained alongside the prior ledger lane reservation.
+Full goal OPEN; general spawn/refresh accounting, context-replacement correction,
+installed both-mode acceptance, integration/release and cleanup remain open.
+
+## Turn 308 | 2026-10-14 UTC
+
+Before-effects checkpoint: installed candidate prefix
+/tmp/codex-wake-plan0156-installed14 from published283aaa1 package;94 Python/data
+files compare byte-for-byte with source, zero mismatches. Global installation
+unchanged. Admit one revised configured-review new-tab sample in a fresh isolated
+root, existing fixture250,000tokens/600seconds and preflight150,000 ceiling,
+source100,000 suballowance, no allowance increases. Original outer window remains
+10:38:06–16:38:06UTC. Latest native counter394,740 minus renewal baseline28,639,
+plus conservative200,000 for two completed external lanes; reserve250,000 for
+this native sample pending settlement. Total conservative use/reservation816,101
+is below2,000,000. Primary owns exact native handles, receipt readback and cleanup.
+State ready→native acceptance; previous outcome_progress retained. Selected
+instruction catalog support is unverified; a setup rejection is not acceptance
+and cannot trigger a duplicate paid assignment. No merge/release/issue closure.
+
+## Turn 309 | 2026-10-14 UTC
+
+Configured new-tab01 sample rejected at native catalog setup before source or
+successor creation: plugin-cache paths outside the isolated home were not
+discovered by enablement configuration. Native rollout count0, model spend0,
+owned server terminal, no readable environment matches after fresh OS census.
+Curated receipt configured-new-tab01-setup.json retains failed outcome. This is
+not installed handoff acceptance. Corrective fixture configuration explicitly
+copies the selected skill folders into the owned home, verifies identical source/
+installed bytes and requires native catalog readback of installed paths. Original
+plugin selections remain source provenance; no workflow substitution or allowance
+increase. Provider-free supervision5 tests and syntax/diff checks pass. One fresh
+setup sample may proceed under the same250,000 reservation/150,000 preflight
+ceiling; original failed root is retained and cannot be replayed as accepted.
+Classification blocker_reduction; full plan OPEN. Installed14 package code still
+matches94 source/data files because only the harness configuration changed.
+
+## Turn 310 | 2026-10-14 UTC
+
+Configured new-tab02 verified native selected skill mirrors/catalog and actual
+source checkpoint writing (74,313tokens). Receiver was already admitted/running,
+but absent first token snapshot made repeated admission return unknown; harness
+treated this observation hold as terminal and began teardown. Receiver eventually
+completed144,046tokens and authored a truthful blocked work verdict for truncated
+instruction output. Actual combined218,359 remains below250,000 and preflight
+below150,000; those resource facts do not accept the failed handoff packet.
+Initial cleanup timed out with two private processes; exact endpoint was gone
+on reconciliation, archived task_complete and final counters confirmed, fresh OS
+census found no remaining owned processes. Original failure retained; appended
+final settlement charges144,046 once and marks accounting known/settled. Curated
+configured-new-tab02-failed.json preserves both cleanup observations and blocked
+review; no goal continuation or rollback acceptance is claimed.
+Red/green public reproducer proves missing first snapshot now observes the exact
+owned reserved turn without queue/goal/new-actor admission; accounting remains
+unknown until real counters arrive. Harness cleanup explicitly pauses an owned
+goal and interrupts only an exact owned turn before private process shutdown.
+Instruction packaging retains both selected Matt files in full, full canonical
+operator revision and child scope/acceptance, plus checked checkpoint/evidence;
+unselected30KB product guide remains a separate native catalog/resource check.
+Review artifact authoring and verifier share one command to avoid an extra model
+round trip; no resource ceiling or acceptance criterion changed. Focused75 tests
+passed23.783s; syntax, policy wiring and diff checks pass. Next: fresh installed
+candidate and one remaining configured-new-tab paid correction sample under
+unchanged250,000/150,000/600s bounds. Classification blocker_reduction; goal OPEN.
+
+## Turn 311 | 2026-10-14 UTC
+
+Configured new-tab03 failed before complete instruction reading because the
+generated helper contained an unescaped newline in a Python string. Model
+truthfully returned blocked; no preflight receipt, continuation or rollback.
+Source74,586 + receiver81,086 =155,672 tokens retained; actual owned settlement
+proved receiver goalnull, no in-progress turns, server exit0 and fresh OS census
+empty. Final ledger settlement is known and charges that spend once. Curated
+configured-new-tab03-failed.json preserves this negative sample. The paid new-tab
+loop ends at its two samples; no immediate third paid retry is authorized by
+renaming a root. Reframe the next acceptance packet through source qualification
+and the independent remaining lifecycle work before further paid effects.
+Generated preflight now compiles through a public artifact factory before model
+admission; direct compile reproduced the original syntax failure. Initial native
+developer metadata was41,696characters, including unrelated skills. The isolated
+fixture now disables173 unrelated entries in its own config only and verifies
+exactly the two selected Matt skills plus product guide. Source files/global
+configuration/services remain untouched. Qualification-only setup04 actually
+passes with zero model assignments/rollouts, compiled helper and clean owned
+shutdown; curated configured-setup04-qualified.json records the dirty harness
+hash and installed prefix. This is setup proof, not handoff acceptance.
+Provider-free supervision9 tests, syntax, policy wiring and diff checks pass.
+Updated product skill guidance reflects configurable instruction selection,
+separate work/readiness verdicts, reserved-turn observation, budget authorization
+and bounded correction, with remaining installed/general-actor gaps explicit.
+Latest primary native counter516,302 at12:01:33UTC, renewal baseline28,639;
+known new-window native sample spend374,031 plus conservative200,000 external
+reservations gives1,061,694 before further root work. Deadline16:38:06UTC and
+2,000,000 ceiling remain. Full objective OPEN; standalone spawn/refresh ledger,
+context-replacement correction, qualified installed both-mode acceptance and
+integration/release/cleanup remain. Classification blocker_reduction.
+Memory disposition unavailable: no qualified repository cloud from bounded atlas
+discovery; configured-review-memory-disposition.json records zero attempted writes.
+
+## Turn 312 | 2026-10-14 UTC
+
+Operator renewed the resource window again:12:29:34–18:29:34UTC with
+2,000,000 attributable tokens, root baseline583,915. Previous-window conservative
+accounting1,229,307 retained, including three100,000-token external reservations.
+Canonical Plan0156 records renewal without resetting scope or retry history.
+Configured refresh now binds its frozen host objective before fingerprinting,
+observes the same goal before stop and after continuity, and preserves original
+session/objective deadlines. Public CLI red/green cases prove an expired original
+session cannot be renewed by a fresh intent, and two refreshes charge cumulative
+goal usage once. Worker lane changed only agent_refresh.py/test_agent_refresh.py;
+its counters remain unknown, conservatively reserved in the preceding window.
+Configured standalone spawn now requires an approved objective reference and
+holds before native thread creation without a live owner-validated resident
+supervisor heartbeat. Public CLI regression failed before the guard and passes
+after it; task/tab effects also recheck the supervisor. An initially overbroad
+shared effect guard blocked two refresh cases; restricting it to spawn restores
+the original refresh contract. Focused49 tests pass6.795s; log retained at
+/tmp/codex-wake-plan0156-spawn-refresh-focus.log. Legacy launch behavior retained.
+Implementation remains uncommitted. Resident heartbeat publication, standalone
+reservation/usage/owned-stop polling and harness bootstrap wiring are still
+incomplete; no configured paid spawn or native acceptance was attempted.
+Classification blocker_reduction; goal ACTIVE and full plan OPEN.
+Memory disposition forbidden: this continuation does not authorize memory-folder
+writes; canonical plan/runbook retain the execution record.
+
+## Turn 313 | 2026-10-14 UTC
+
+Configured standalone spawn now reserves one actor before native creation and
+rechecks source accounting and immutable reservation before task effects.
+Active native parents retain their finite future quota before child admission;
+late parent usage is recorded by the resident supervisor. Public CLI red/green
+proves one actor charges70 tokens once and preserves deadline1101 across replay.
+Daemon red/green proves deadline polling interrupts only owned turn157 once,
+without another task/thread/actor. Owner-private resident heartbeat binds a live
+process generation; publication is serialized and one-shot polling cannot admit
+configured work. Missing first counters remain observation-only; later unknown
+accounting and time/resource exhaustion fence the owned turn.
+A completed native turn initially released reservation before final rollout
+accounting. Public CLI regression reproduced this; settlement now requires the
+owned task_complete/turn_aborted marker and excludes later turns. Handoff child
+preflight retains its existing continuation reservation, so this standalone
+settlement guard does not prematurely settle an inherited actor. The initial
+broader run retained40 preflight failures from applying that marker requirement
+at the wrong boundary; inherited preflight correction restores the contract.
+Heartbeat publication initially threw on missing trusted time before handoff
+fencing; existing unknown-clock regression detected this and passes after repair.
+Focused142 integration tests pass34.527s; parent/spawn34 tests pass3.946s.
+Syntax, canonical policy wiring and whitespace checks pass. Full Python
+presubmit running as session10512 with logs/result in
+/tmp/codex-wake-plan0156-presubmit06; completion not yet claimed. CI38561086001
+readback confirms both3.11/3.12 success at prior published925dc45, not this dirty
+candidate. Product guide and lifecycle docs describe the new configured binding,
+resident supervision and explicit-expiry legacy boundary.
+Latest root counter735,817 at12:43:02UTC:151,902 since583,915 renewal baseline;
+new native effects/external lanes0. Deadline18:29:34UTC; previous-window costs
+retained. Classification outcome_progress; goal ACTIVE, Plan0156 OPEN.
+Next: frozen source checkpoint and fresh installed candidate, then harness
+bootstrap/supervisor wiring and bounded acceptance. Context-replacement correction,
+queued-but-not-started cancellation proof, installed both-mode substantive review,
+continuation/rollback, integration and exact-main release remain open.
+Memory disposition unavailable: bounded prior atlas discovery did not qualify a
+repository group; source-anchored non-write receipt records no attempted write.
+
+Additional presubmit evidence: initial full1191-test run failed13 assertions and
+3 errors in113.255s. Minimal two-test reproduction identifies local installed
+Stable Time auto-configuration overriding legacy fixture seams; both pass when
+CODEX_WAKE_STABLE_TIME_CONFIG is empty for the test process. Hermetic full rerun
+is session60880, /tmp/codex-wake-plan0156-presubmit07. Original failures remain.
+A public daemon regression also detects completed-turn settlement using stale
+usage after a rollout parse error; repaired by requiring the current accounting
+observation before completion. Native installed schema generation at
+/tmp/codex-wake-plan0156-native-schema08 establishes thread/queue/delete with
+exact threadId/queuedSubmissionId and a boolean deleted result. This is protocol
+qualification only; queued cancellation behavior still needs its public proof.
+
+Hermetic presubmit07 passes1192 tests in134.910s. Queued-but-not-started
+cancellation is now implemented through the qualified native delete method:
+public red/green detects a lost queue/add response followed by expiry, proves
+exact client/task-correlated deletion once, no turn start, and subsequent native
+empty-thread reconciliation settling zero usage. Final affected check runs as
+session35802 in /tmp/codex-wake-plan0156-queue-cancel-final.log. The full1192-test
+pass precedes this isolated queued-cancellation change; focused validation and
+next published CI must qualify that increment. Source checkpoint receipt records
+file hashes, original failed run, passing rerun and remaining installed gates.
+Final affected68 tests pass10.355s. No new native assignments or model effects.
+
+Published source4481f6eb40e1b08bc8195cd323a67ab4df4b3cfe verified on origin
+feat/agent-lifecycle and OPEN draft PR253. CI38567059613 is actually in progress
+at that head. Fresh private installed16 wheel sha256
+6654dd989627e3a2304bae74cdfd2315b73cd108afce7911090c12082cc73ca8 matches95
+source/data files; zero mismatches. Installed affected87 tests pass11.884s;
+executable MCP smoke18 tools/11 calls passes with native_turns0, notifications0,
+children_after0 and owned fixture removed. Installed16-surface-qualified.json
+records exact prefix, wheel and evidence. This is installed surface proof, not
+native handoff/continuation/rollback acceptance. Current root795,225 at12:53:13UTC,
+211,310 since renewal; native paid work/external lanes0 in this window.
+Next ready packet: update acceptance harness bootstrap configuration/reference
+and source supervisor, retain100,000 source/150,000 preflight/250,000 total caps,
+qualify generated setup, then one bounded independent native mode after frozen
+published-head reconciliation. Context replacement and remaining full native
+acceptance/integration/release gates stay OPEN. No goal completion claimed.
+
+## Turn 314 | 2026-10-14 UTC
+
+Reconciled CI38567059613: successful at source4481f6e. Installed17 replaces only
+this packet's private candidate: byte parity95 files, no mismatches. Host-approved
+lower spawn_token_limit enforces the100,000 source fixture suballowance within
+150,000 session config; public CLI red/green proves native completion cannot
+hide actual70 spend against50 allowance. Actual overspend stays charged. Terminal
+supervisor stops retain their resource reason instead of becoming completed.
+Acceptance harness now declares bootstrap objective/configuration/start before
+spawn, selects its exact reference, requires actual resident process-generation
+heartbeat and stops the source supervisor after settled source before preparation.
+Source cleanup observes actual usage on failures as well as successful paths.
+Root fixture metadata/deadline matches renewed12:29:34–18:29:34UTC window.
+Native setup05 actually qualifies generated helper, exact selected skill catalog,
+bootstrap configuration and resident supervision with zero manual assignments,
+zero rollouts, server exit0 and fresh OS private-process census empty. Original
+qualified setup04 and failed paid new-tab samples retained. Installed17 affected
+97 tests pass13.820s; syntax/whitespace pass. Curated setup05 receipt records
+harness/wheel hashes and actual supervisor/bootstrap readbacks.
+Before paid effects, root838,721 at13:04:39UTC, baseline583,915, delta254,806;
+known external/new native spend0 in this window. Available1,745,194 before further
+root work. Minimum remaining two-mode native proof reserves2x250,000; retain
+500,000 root/integration allowance, leaving745,194 contingency. One independent
+same-tab sample is the next bounded packet, capped100,000 source/150,000 combined
+preflight+continuation/250,000 total and600s including setup. At failure preserve
+actual counters/owned cleanup, reframe within two-attempt unit bound. Do not
+repeat the exhausted old new-tab loop or reset review discovery. Native semantic
+review must author its own actual verdict; helper cannot manufacture accept.
+Progress blocker_reduction; full plan/children/issues remain OPEN. Source package
+and harness will be checkpointed/published clean before native paid admission.
+
+Integration151 tests pass34.459s before writer-factory extraction. Executing the
+actual generated outgoing writer program exposed literal backslash-n appended
+to JSON (JSONDecodeError Extra data). The shared checkpoint_program factory now
+compiles its generated program and emits real newline/parseable native-identity
+JSON; public artifact red/green and all10 harness tests pass. This fixes the
+producer rather than relying on a native model to repair supplied script text.
+Source writer budgets/instructions remain unchanged. Setup06 repeats zero-model
+qualification of the changed harness; setup05 remains retained as earlier proof.
+Setup06 PASS: zero assignments/rollouts, actual bootstrap/supervisor proof, generated helper syntax, server exit0 and fresh owned-process census empty. Curated receipt preserves changed harness hash.
+
+Configured same-tab01 reached native source completion65034 and completed
+selected-review preflight85171 (total150205); actual work verdict accept binds
+approved criterion/path/hash evidence and selected github-handoff. Same-pane
+source-to-successor identity and fresh generation observed. A paused successor
+goal with64829 remaining tokens was prepared; no continuation/rollback occurred.
+Native MCP handoff call was rejected because the private allowlist exposed only
+wake_sessions_show. Sample remains failed; owned source/successor settled,
+server exit0, fresh OS census empty. Final ledger settlement charges150205 once,
+known/settled, with original failed root and raw final-settlement.json retained.
+Curated configured-same-tab01-failed.json records primary preflight acceptance
+separately from missing MCP/continuation/rollback axes. First same-tab attempt
+consumed; only one bounded correction sample remains in this unit.
+Private MCP allowlist now enables show/configuration/handoff. Setup07/08 failed
+because verifier expected checkpoint text but native MCP returned structured
+invalid_cli_response plus reconciliation_required for the missing file; originals
+retained with zero model work. Setup09 qualifies the actual route/error but its
+ephemeral native metadata read is rejected. Reframed setup10 uses a durable,
+unassigned metadata-only probe: native configuration revision readback succeeds,
+negative handoff returns its actual structured error, idle native/goalnull and
+lifecycle journal observations prove no model/lifecycle effect. Actual setup10
+PASS: zero token_count events, zero rollouts, server exit0, private OS census empty.
+The error alone is not used as an effect boundary. All11 public harness tests
+pass0.026s; generated helper/writer syntax and whitespace checks pass.
+Retained first preflight's last input32868 tokens leaves64829 for continuation;
+two similarly sized model requests would exceed that remainder. The verifier
+now leaves full author-owned packet/review/preflight artifacts on disk with all
+semantic checks/hashes unchanged and prints only its native proof marker. This
+removes duplicate artifact replay from subsequent context; complete selected
+instructions/canonical sources still read in full. No cap or criterion changed.
+At13:46:31UTC root975047 minus583915 baseline391132 plus actual native150205
+=541337 attributable; remaining1458663 before further root work. Two remaining
+mode proofs reserve500000, root/integration500000, contingency458663. Next is one
+remaining corrected same-tab sample with frozen published source and unchanged
+100000/150000/250000/600s bounds. Full program still OPEN.
+
+## Turn 315 | 2026-10-14 UTC
+
+Same-tab02 failed during observation AFTER assigning its owned successor, not
+before assignment. Corrected initial source-only status readback: source65109
+plus successor22175=87284 actual tokens. Source detachment and replacement pane
+were already proved; old source disappeared from loaded-session inventory.
+The guard required a live source row while observing the new owned receiver,
+causing source_client_not_uniquely_ready and teardown. Actual exact receiver
+turn interrupted once, goalnull, sourcegoalpaused, server exit0 and fresh OS
+private-process census empty. Final ledger87284 is known/settled and charged once.
+Curated configured-same-tab02-failed.json retains original failure/assignment and
+cleanup. No accepted preflight, continuation or rollback in this sample.
+Two paid same-tab samples end that unit; no third immediate replay under a new
+root. Actual new-window native cost150205+87284=237489 remains counted.
+Provider-free CLI reproducer omits the old source from loaded inventory after
+owned respawn and fails before the fix. Source guard now reads persistent native
+source turns and its paused immutable goal, verifies no active turn/counter
+rollback, then retains existing pane/process-exit/pending-work checks. Positive
+case reaches prepared goal; paired active-source case still holds. The source
+is retired after replacement, so live-source input readiness cannot authorize
+or invalidate this independent owned-successor observation.
+Another public CLI regression demonstrates source goal alias had deadline1020
+but replacement received2000. Admission now clips to the recorded original
+session deadline before reservation. Existing native goal token limits already
+clip transferred allowance. Stable ledger contract test proves two correction
+cycles survive replacement/controller restart with cumulative30 spend charged
+once, session deadline140 and original objective deadline200 retained.
+Focused124 tests pass39.179s; fresh installed18 affected67 pass25.231s, package
+byte parity95 files/zero mismatches. Curated context-preservation-installed18.json
+records wheel/prefix and exact validation. Syntax/policy wiring/whitespace pass.
+Published7789eaa CI38575304556 is successful; current source increment remains
+to publish. At14:35:45UTC root1105912 minus583915 baseline521997 plus native237489
+=759486, remaining1240514 before subsequent root work, deadline18:29:34UTC.
+Progress blocker_reduction; full goal remains ACTIVE. Next bounded unit must
+qualify actual detached-source/context budget transitions with the repaired
+installed candidate and independent remaining native mode, rather than repeating
+the failed wrapper loop. Both-mode native continuation/rollback, combined gates,
+integration and exact-main release/install are still unproven. Existing raw
+native failures and source checkpoints preserved; no service-global effects.
+Memory disposition unavailable; same-tab01-memory-disposition.json records this
+turn's source-anchored non-write, no qualified repository group and zero writes.
+
+## Turn 316 | 2026-10-14 UTC
+
+State transition: repaired source/installed fixture -> bounded integrated native
+proof. Acceptance state unchanged: actual continuation/rollback for both modes
+unproven. Prior wrapper units ended with failures retained; the new packet tests
+production fixes to detached-source retirement and original session-deadline
+transfer in published222e487/private installed18, not a renamed wrapper replay.
+Primary owns this paired proof, max2 native samples total (one per mode), no
+same-mode retry in this packet, each100000 source/150000 preflight+continuation/
+250000 total/600s including setup. First native continuation/rollback artifact
+must arrive within this packet's600s; at failure preserve cost/cleanup and stop
+repeating that axis. No new broad review, caps, scope or acceptance concessions.
+At14:39:46UTC root1121050 minus583915 baseline plus237489 native=774624 used,
+1225376 remaining. Reserve500000 for the two-mode minimum proof plus500000 root/
+integration, leaving225376 contingency before further root work. Deadline remains
+18:29:34UTC; old-window counters separately preserved. Exact source criteria,
+reviewer-authored verdict, native goal limits, cumulative usage and owned cleanup
+must pass; source tests/zero-work setup alone cannot accept this packet.
+Start independent new-tab mode against installed18 with qualified native MCP
+show/configuration/handoff and compiled writer/helper. On success, verify the
+retired-source same-tab mode once under the same packet bounds. Source222e487
+CI38582268662 was in progress; re-read actual state before integration. Current
+source/installed parity95 files and124/67 tests qualify this candidate only.
+Progress classification blocker_reduction; full Plan0156/goal remains OPEN/ACTIVE.
+
+Integrated new-tab01 actually completes selected model-authored accept, native
+continuous goal command, goal completion and owned rollback. Raw harness marked
+passed_continuation_axis; primary resource audit rejects overall acceptance:
+source65002 + successor151477=216479 total within250000, but successor exceeds
+150000 session limit by1477. Preflight84143, continuation rollout increment67334;
+native goal reports1668 tokensUsed and65857 tokenBudget. These are different
+accounting metrics; native goal counter cannot stand in for complete owned
+session cost. Actual rollback debits151477, returning original paused source
+budget33521 with identity/counters preserved. Native MCP calls and explicit
+continuation/rollback artifacts remain primary evidence; overspend is retained
+separately and cannot be erased by raw harness pass. Server exit0 and fresh OS
+private-process census empty. Curated integrated-new-tab01-resource-failed.json
+preserves actual native state and failed resource axis, with all original data.
+Public daemon red/green reproduces discounted goal counter1 hiding rollout120
+against session100; monitor now records full cumulative owned rollout including
+cached input, pauses and interrupts exact owned turn. Goal completion does not
+release reservation while an owned turn is still in progress. Final stop
+settlement uses rollout, not preflight+discounted goal counter. Bound source goal
+aliases likewise observe their owned rollout in handoff, refresh, concurrent
+spawn and supervision; transferred allowance clips to actual original actor
+remainder and deadline. Native goal identity/counter-decrease/own-limit checks
+remain separate. Harness now rejects actual successor session overspend before
+claiming continuation acceptance. No resource ceiling or criterion changed.
+Focused157 tests pass36.403s; fresh installed19 affected75 pass28.541s, parity95
+files/zero mismatches. Syntax/policy/whitespace pass. Source changes are the
+closed-world remediation of this observed metric discrepancy. No extra native
+sample after the finding. Paired proof still has one remaining mode sample, but
+full two-mode resource acceptance remains unproven; reevaluate minimum proof
+and context packing before spending it. At14:57:01UTC root1176355 minus583915
+baseline592440 plus237489 earlier-window-native-current+216479 this sample
+=1046408 attributable, remaining953592 before subsequent root work. Deadline
+18:29:34UTC. Full goal ACTIVE; no merge/release/issue closure. Memory disposition
+unavailable; integrated-accounting-memory-disposition.json records zero writes
+and no qualified repository group for this source-anchored outcome.
+
+## Turn 317 | 2026-10-14 UTC
+
+Measured context packing: selected writer/reviewer complete instruction bytes
+were duplicated in preflight user contract and mandatory native instruction-read
+output. Prompt contract now carries exact name/path/hash only; full frozen host
+configuration/readback and actual complete file-read witness remain required.
+Original native contract loses2609 duplicate characters; no selected instructions,
+canonical source, semantic field or criterion removed. CLI red/green validates
+reference identity and original unread-writer negative still holds. Source81 tests
+pass32.074s, installed20 affected58 pass33.709s, package parity95/zero mismatches.
+Source06feaaf CI38586398194 successful. New instruction-reference source increment
+will be published clean before paid effects. Earlier resource-failed216479 sample
+remains retained; no cap renewal or billable-metric substitution.
+Resource reframe at15:14:07UTC: root1231856-583915 plus453968 native=1101909,
+remaining898091 before later work. Paired resource proof is superseded by one
+bounded corrected-total packet, max2 samples one per mode, no same-mode retry.
+Actual baseline per-sample216479 and removed repeated2609 characters justify
+expected225000 each, but reserve hard250000 each (500000 pair). Remaining source
+implementation is validated and prior CI green; integration work is now bounded
+at350000 root tokens, deterministic existing release/CI checks preferred, leaving
+48091 contingency. This reduces internal orchestration allowance, never raises
+user2m/6h or native100000/150000/250000/600s ceilings. Reassess before each effect;
+if first failure makes the minimum complete proof impossible, stop paid repeats
+and continue safe repair/checkpoint inside remaining allowance. Preserve both
+previous ended units and accepted runtime versus failed resource evidence.
+Next actual evidence deadline:600s for same-tab physical retirement, semantic
+preflight, full-rollout bounded continuation and rollback; then new-tab once if
+resources and first result permit. No wrapper-only setup substituted for native
+acceptance, no broad review. Goal/plan/children/issues remain ACTIVE/OPEN.
+
+
+## Turn 318 | 2026-10-14 UTC
+
+Operator explicitly renewed resources:15:30:13–21:30:13UTC,2,000,000 tokens.
+Root baseline1,272,440; prior window known total1,348,524 includes659,999
+native external tokens and is retained separately. State remains ACTIVE,
+Plan0156 OPEN; renewal preserves all review/retry/scope controls. Classification:
+blocker_reduction (resource renewal). Next: preserve total-same-tab01 resource
+and continuation proof, qualify failed late MCP readback without model assignment,
+then complete remaining bounded native acceptance and integration gates.
+
+Preserved total-same-tab01 primary evidence: source64,976+successor141,055
+=206,031 within250,000 total/150,000 receiver caps; exact same pane/window,
+fresh client generation, actual selected review and continuation complete.
+Late native MCPreadback failed before rollback; final ledger known/settled
+206,031 once. Zero-model private restart reproduced -32600 thread-not-found
+for original unloaded paused caller. Exact thread/resume restored that caller;
+configuration read passed, goal/counters unchanged, no new turns or model calls.
+Private server exited0; fresh OS census no owned processes. Regression red
+(missing helper), then14 focused harness tests green including active-source and
+resume-goal-mutation rejection. Harness loads only exact unchanged paused source
+before lateMCPreadback; parent deadline now comes from explicit caller rather
+than a historical hardcoded window. Current7a65 CI38587785208 success.
+
+Bounded proof reframe: verified native caller-context defect is repaired; next
+unit is full rollback acceptance in both modes, at most one sample per mode,
+no same-mode retry. Preserve original Turn317 outcomes and inherited discovery
+limits. Minimum proof forecast500,000 native+350,000 root/integration is covered
+by renewed2,000,000 allowance. No acceptance criteria or sample caps raised.
+Classification:blocker_reduction; full goal remains OPEN.
+
+Native context-new-tab01 passed selected reviewer ACCEPT, full resource limits,
+continuation, all nativeMCPreadbacks and rollback. Source64,772+receiver144,358
+=209,130; original paused source budget40,870 after full receiver debit.
+Cleanup no owned processes. Context-same-tab01 preserved actual selected ACCEPT
+and same-pane/fresh-generation preflight, but failed the earlier prepared-state
+MCPcall before continuation: source64,936+receiver80,674=145,610. Both goals
+paused/settled; no cleanup residue. The same unloaded-original-caller defect
+also affects this unguarded call. Guard it with the already zero-model qualified
+unchanged-paused-source load. This is the second/final correction for this MCP
+caller seam; any failed verification transitions to reframe/block, no blind retry.
+The original one-per-mode proof unit is ended with its failed axis preserved.
+Closed-world successor verifies all three call sites; one remaining same-tab
+verification only, unchanged250,000/150,000/600s caps, no new broad review.
+
+Complete-context-same-tab01 passed full selected review, both handoffMCP
+readbacks, exact same-pane/fresh-client identity, continuation and resource limits:
+source65,132+receiver141,328=206,460. Rollback respawned original source but held
+on local_composer_not_proven_empty. Zero-model native TUI probe reproduced
+Resume paused goal dialog; Escape dismisses it with unchanged paused goal,
+counters and one original completed turn. A narrowly matched, generation-checked
+one-shot rollback adapter now journals Escape and verifies unchanged goal.
+Unknown dialogs remain blocked; lost key response reconciles without second key.
+Source86 tests passed34.808s; installed21 same86 passed30.290s;95 Python files
+match exactly. Installed native adapter probe passed with0 model assignments,
+unchanged goal/turn history, server exit0 and fresh OS census empty. Preserved
+zero-model probe setup failures (pane cwd/title, missing standalone journalstate);
+these emitted no keys or model turns. Classification:blocker_reduction.
+
+MCPcontext seam closed-world verification now passed. Separate same-tab rollback
+seam has one reproduced native failure and this first correction, qualified zero
+model; permit one installed same-tab verification with unchanged fixture caps.
+Current window external spend561,200 (209,130+145,610+206,460); prior window
+659,999 retained separately. Forecast250,000 rollback verification+800,000
+correction proof+150,000 primary/integration is below remaining1,268,790 at
+root1,442,450 (baseline1,272,440). Do not start another paid unit unless remaining
+minimum complete proof still fits. Full goal OPEN, no merge/release/closure.
+
+Paused-dialog-same-tab01 accepted: source46,461+receiver141,877=188,338,
+all fixed100,000/150,000/250,000/600s caps honored. Actual Matt instruction reads,
+model-authored ACCEPT, same-pane/fresh-generation handoff, bounded continuation,
+all three nativeMCPreadbacks and rollback completed. Original paused source
+restored with budget61,662; receiver spend141,877 charged once, ledger settled;
+server0 and fresh OS residue empty. Both native modes now have positive primary
+and rollback evidence. Full plan still OPEN for revised correction and release.
+
+Correction proof successor: one accept case (400,000 total/300,000 receiver),
+one deliberate ineffective-repair rejection case (500,000 total/400,000 receiver),
+600s each, source100,000 and global correction maximum2. These are fresh dedicated
+proof contracts for the approved repair criterion, not raised failed handoff caps.
+One sample per case, no blind retry. Initial canonical revision/helper/checkpoint
+read remains complete; later corrections re-read selected instruction bytes and
+actual repair, checking unchanged canonical/checkpoint/host-validation hashes
+already fully read in that same native context. No semantic review fabricated.
+Both private zero-model setups qualified with catalog/MCP/compiled helper and
+clean teardown. Harness14 tests pass. At16:03:17UTC root1,492,875 minusbaseline
+1,272,440 plus749,538 current-window external=969,973;1,030,027 remained.
+Forecast900,000 maximum native allocations+100,000 root/integration fits; recheck
+before paid cases. Historical native659,999 remains outside this window.
+Classification:outcome_progress (both-mode native continuation/rollback),
+next: bounded correction acceptance/stop plus installed replacement-limit tests,
+then combined release gates and exact-main integration/install readback.
+
+Correction-accept-native01 produced actual model-authored correct verdict with
+approved repair evidence and frozen packet, but native command constructed helper
+path as root+relative string. Exact approved path was absent from command text;
+public controller held successor_preflight_unverified before correction admission.
+Source46,952+receiver81,359=128,311;0 corrections, source paused/targetgoalnull,
+cleanup empty, raw/artifact/ledger preserved. No product guard weakened. Harness
+now requires literal full approved helper path in every verifier command.
+Original one-per-case unit ended on its failed axis; bounded successor repairs
+this proof-shape defect and has one verification per case, no same-case retry.
+
+Reframe avoids repeating ordinary continuation/rollback already proven in both
+modes: accepted repair proof ends at verified ACCEPT and paused remaining-budget
+goal preparation. Rejection must stop after exactly2 corrections/3 native reviews
+with no goal. Fresh dedicated limits reduced to accept300,000 total/250,000 receiver
+and reject400,000 total/350,000 receiver; source50,000,600s and globalmax2 retained.
+Measured preceding native source46,461/46,952 supports the bounded writer allocation.
+These tighter allocations keep minimum complete proof plus integration within
+remaining renewed parent resources; no failed allowance increased. Parent current
+external877,849 (749,538+128,311), previous659,999 remains historical.
+Source full release unit suite1208 passed139.035s; harness14 green.
+Classification:blocker_reduction; native correction verification remains open.
+
+Literal-correction-accept-native01 stopped at source resource gate before any
+reviewer:66,070>50,000 source cap. Published tighter allocation was too small for
+three native source model rounds; old cap/failure/ledger retained, no renewal.
+Cost remediation keeps50,000: supply complete frozen writer instructions before
+one native shell command that verifies/prints actual selected file bytes before
+checkpoint write. This preserves model consumption before action and native
+filesystem-read proof, while removing a separate paid read round. Provider-free
+actual generated-program tests prove ordered instruction output/checkpoint and
+changed-source rejection before write;16 harness tests pass. This is one source
+round-cost correction, not a quota increase. One remaining verification per
+correction outcome only; no retry on failed verification. Accept allocation250,000
+total/200,000 receiver; reject400,000/350,000; source50,000 and600s remain fixed.
+Accepted repair proof prepares paused quota, then metadata-only rollback settles
+its actor rather than purchasing duplicate ordinary continuation. Cleanup now
+uses approved rollback goal readback when verifying the original source wallet.
+At16:26:20UTC root1,567,861-baseline1,272,440+943,919external=1,239,340;
+760,660 remained. Forecast650,000 native allocations+100,000 root/integration
+fits, with actual-release before next sample admission.
+
+Configured native refresh positive passed effective configuration revision,
+original paused goal/counters, changed skill catalog, actual MCPv2 and rollback,
+0 model turns. Initial cleanup snapshot caught one terminating private child;
+fresh OS readback is empty, no process mutation. Preserve initial receipt and
+qualify primary and later cleanup independently. Local plugin tests, entrypoint
+syntax and policy wiring passed. Classification:blocker_reduction/resource cost
+remediation, plus outcome_progress/configured native refresh. Full goal OPEN.
+
+Single-writer-correction-accept01 primary accepted: native source one command
+reads/verifies/prints full selected bytes before checkpoint;33,245<50,000.
+Actual first reviewer correct verdict admitted one exact owned correction.
+Repair file changed to accepted correction newline; fresh native reviewer ACCEPT
+prepared paused goal18,551, original objective/deadline preserved. Receiver181,449
+<200,000, total214,694<250,000,2 completed native reviews. Secondary observer
+miscounted --correction-instructions mentioned inside authored packet as a read
+command. Saved native-preflight.json proves exactly2 successful complete-byte
+instruction-read outputs. Filter by actual output markers; no product relaxation
+or paid replay. Cleanup0/server0. Primary artifact accepted independently from
+failed advisory observer per causality policy.
+Current external1,158,613 (943,919+214,694). At root1,660,486-baseline1,272,440,
+453,341 parent tokens remain; negative proof400,000 maximum plus50,000 primary
+integration fits (observed source33,245,2 native reviews181,449 forecast third
+review ~120,000 gives ~335,000 minimum complete negative proof). Recheck before
+admission. One negative native sample, no same-case retry, source50,000,
+receiver350,000,total400,000,600s and originalmax2 stay fixed.
+Classification:outcome_progress (actual bounded correction followed by ACCEPT),
+next: rejection stop proof, installed replacement-count verification, release.
+
+Single-writer-correction-reject01 accepted: source33,283+receiver294,624
+=327,907 within50,000/350,000/400,000/600s. Exactly2 owned corrections,3 completed
+native review turns, final correct verdict and correction_cycles_exhausted.
+No successor goal or ordinary continuation, settled known ledger, clean OS/server0.
+Configured stale-MCP refresh passed v1 rejection, same goal/configuration and
+rollback with0 model turns and clean OS. Installed14 tests cover non-GitHub
+selection, shared cap, original deadline and replacement/restart correction bound.
+Current-window external1,486,520; previous659,999 remains separate. Native
+required axes qualified; next reconcile main docs conflicts and exact-main release.
+Classification:outcome_progress. Parent and children remain OPEN until integration,
+released installed combined proof, cleanup and issue closure are recorded.
+
+Imported from origin/main439f749; original standalone headings270/271 are preserved in Git and mapped to319/320 here to retain unique canonical IDs.
+
+## Turn 319 | 2026-10-14 UTC
 
 Plan0160 local standards packet: operator reported a peer answering only in
 chat and requester lacking a watch/return wake. Existing Plan0154 already
@@ -5553,7 +6605,7 @@ Issue258 created and assigned to ecochran76; exact readback verified. Publishing
 standards branch for CI, squash merge and exact-main installed-skill parity.
 No runtime release or unrelated lifecycle integration included.
 
-## Turn 271 | 2026-10-14 UTC
+## Turn 320 | 2026-10-14 UTC
 
 Plan0161 / issue260: reconciled registered worktrees and canonical custody after
 PR259 merge/deploy. Root lifecycle clean at published e61d66a; draft PR253 has
@@ -5566,3 +6618,25 @@ P156, integrated P160 and archived planning custody. Preserve historical logs.
 Publish documentation-only reconciliation; CI then squash merge, fresh final
 readbacks and temporary checkout removal. Memory disposition unavailable; no
 qualified repository group. No code, executable/service or active-owner effects.
+
+
+## Turn 321 | 2026-10-14 UTC
+
+Reconciled current main439f749 (PR259 A2A standards and PR261 custody docs)
+into lifecycle lane after owned native models settled. Preserved both roadmap
+intents and complete historical log bodies; standalone main270/271 mapped to
+canonical319/320 with explicit provenance. P156 catalog updated, P160/archive
+rows and P150 identity retained; bundled guide retains both lifecycle and
+mandatory A2A return/wait standards. No source conflict or scope change.
+Installed prefix remains0.13.1-241d7a4 (uvtool0.8 metadata is an inactive path).
+Prepare0.14.0 minor release after all local gates; no shared service restart.
+Classification:blocker_reduction; exact-main release/install/closure next.
+
+Candidate0.14.0 at45467abb2ba4e68c29885575c23773952875f0fd passed1210 tests145.375s, plugin/entrypoint/policy
+checks,9 installed compatibility/MCP/registry/discovery/mailbox gates and product
+smoke after seeding pip in the private uv venv. Initial wheel metadata mismatch
+(0.13.1 pyproject versus0.14 module) corrected before qualified build; initial
+product smoke lacked pip. Both failures/logs retained. No source/runtime defect
+in those setup failures. PR253 rewritten around final product and actual evidence;
+post-merge release/install remains open. No paid native work remains authorized
+in this proof packet. Classification:outcome_progress/release gates.

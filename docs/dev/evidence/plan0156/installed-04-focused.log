@@ -1,0 +1,37 @@
+installed_module=/home/ecochran76/.local/state/codex-wake/plan0156/installed-04/lib/python3.12/site-packages/codex_wake/__init__.py
+....................usage: codex-wake sessions open [-h] [--json] [--app-server APP_SERVER]
+                                [--tmux-socket TMUX_SOCKET]
+                                [--tmux-session TMUX_SESSION]
+                                [--timeout TIMEOUT] (--new | --resume RESUME)
+                                [--cwd CWD] --name NAME
+                                [--codex-path CODEX_PATH] [--extra-attachment]
+codex-wake sessions open: error: one of the arguments --new --resume is required
+.E.EE.
+======================================================================
+ERROR: test_pending_mailbox_work_prevents_ordinary_close (test_session_lifecycle.SessionLifecycleTests.test_pending_mailbox_work_prevents_ordinary_close)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_session_lifecycle.py", line 106, in test_pending_mailbox_work_prevents_ordinary_close
+    from tests.test_a2a_mailbox import MailboxTests
+ModuleNotFoundError: No module named 'tests'
+
+======================================================================
+ERROR: test_terminal_mailbox_receipts_allow_ordinary_idle_tab_close (test_session_lifecycle.SessionLifecycleTests.test_terminal_mailbox_receipts_allow_ordinary_idle_tab_close)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_session_lifecycle.py", line 128, in test_terminal_mailbox_receipts_allow_ordinary_idle_tab_close
+    from tests.test_a2a_mailbox import MailboxTests
+ModuleNotFoundError: No module named 'tests'
+
+======================================================================
+ERROR: test_unpublished_signal_registration_prevents_ordinary_close (test_session_lifecycle.SessionLifecycleTests.test_unpublished_signal_registration_prevents_ordinary_close)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_session_lifecycle.py", line 84, in test_unpublished_signal_registration_prevents_ordinary_close
+    from tests.test_signals import make_adapter, make_intent, NOW
+ModuleNotFoundError: No module named 'tests'
+
+----------------------------------------------------------------------
+Ran 26 tests in 5.735s
+
+FAILED (errors=3)

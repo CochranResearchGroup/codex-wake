@@ -1,0 +1,18 @@
+{
+  "files": 95,
+  "installed_validation": {
+    "log": "/tmp/codex-wake-plan0156-installed19-focus.log",
+    "seconds": 28.541,
+    "tests": 75
+  },
+  "mismatches": [],
+  "new_tab_fresh_owned_process_matches": [],
+  "package": "/tmp/codex-wake-plan0156-installed19/lib/python3.12/site-packages/codex_wake",
+  "prefix": "/tmp/codex-wake-plan0156-installed19",
+  "source_validation": {
+    "log": "/tmp/codex-wake-plan0156-cache-total-integration.log",
+    "seconds": 36.403,
+    "tests": 157
+  },
+  "wheel_sha256": "09c2dc78058303fd45292f48d8b1963c715429f137afe7295b035cfff8532a5f"
+}

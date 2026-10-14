@@ -1,0 +1,18 @@
+{
+  "artifact_path": "docs/dev/evidence/plan0156/integrated-accounting-memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": null,
+  "reason": "No qualified repository group from bounded atlas discovery; retain separate native runtime-axis and failed resource evidence in canonical files.",
+  "recorded_at": "2026-10-14T15:02:06.875006+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "docs/dev/evidence/plan0156/integrated-new-tab01-resource-failed.json",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}

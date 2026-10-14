@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "state": "failed_preflight_observed_overspend_stop",
+  "source_commit": "76a379eb9ad29eeeeeb10775ffe0781156c0bc51",
+  "prefix": "/home/ecochran76/.local/state/codex-wake/plan0156/installed-10",
+  "raw_root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02",
+  "selected_model": {
+    "model": "gpt-6.1-sol",
+    "model_reasoning_effort": "low"
+  },
+  "deadline": 1791888412.853127,
+  "preflight_allowance": 150000,
+  "usage": [
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02",
+      "thread_id": "01a134d6-2ed6-7b80-81a9-1a86c1a097ef",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-36-54-01a134d6-2ed6-7b80-81a9-1a86c1a097ef.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 47623,
+        "cached_input_tokens": 35584,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 324,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 47947
+      },
+      "total_tokens": 47947,
+      "budget_window": "resume-2026-10-13"
+    },
+    {
+      "root": "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02",
+      "thread_id": "01a134d6-767f-7061-bd4a-0ffa03547d98",
+      "rollout_matches": [
+        "/home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/codex-home/sessions/2026/10/13/rollout-2026-10-13T05-37-12-01a134d6-767f-7061-bd4a-0ffa03547d98.jsonl"
+      ],
+      "final_native_usage": {
+        "input_tokens": 166889,
+        "cached_input_tokens": 140288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 559,
+        "reasoning_output_tokens": 19,
+        "total_tokens": 167448
+      },
+      "total_tokens": 167448,
+      "budget_window": "resume-2026-10-13"
+    }
+  ],
+  "preflight_stop": {
+    "interrupt_response_received": true,
+    "thread_id": "01a134d6-767f-7061-bd4a-0ffa03547d98",
+    "turn_ids": [
+      "01a134d6-8039-7902-918c-dec408e03c65"
+    ]
+  },
+  "native_readback": {
+    "read_only": true,
+    "model_assignments": 0,
+    "source": {
+      "thread_id": "01a134d6-2ed6-7b80-81a9-1a86c1a097ef",
+      "goal": {
+        "threadId": "01a134d6-2ed6-7b80-81a9-1a86c1a097ef",
+        "objective": "Operator-approved Plan0156 disposable continuation: execute /home/ecochran76/.local/state/codex-wake/plan0156/installed-10/bin/python /home/ecochran76/.local/state/codex-wake/plan0156/live-handoff-02/workspace/preflight.py --continue exactly once, record actual result, then mark this goal complete. No other work, actors, resource renewal or goal budget change.",
+        "status": "paused",
+        "tokenBudget": 202053,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1791887831,
+        "updatedAt": 1791887831
+      },
+      "turns": [
+        {
+          "id": "01a134d6-36af-74e3-8219-c9e249f9c4be",
+          "status": "completed",
+          "commands": [
+            {
+              "id": "exec-b95a9bc8-4e3e-4d4a-ba45-8e9a796914e7",
+              "status": "completed",
+              "exit_code": 0
+            }
+          ]
+        }
+      ]
+    },
+    "successor": {
+      "thread_id": "01a134d6-767f-7061-bd4a-0ffa03547d98",
+      "goal": null,
+      "turns": [
+        {
+          "id": "01a134d6-8039-7902-918c-dec408e03c65",
+          "status": "interrupted",
+          "commands": [
+            {
+              "id": "exec-c02bd3ce-c507-4d97-8b3e-5400bbebfa03",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-e5099cf3-c2f2-4fd5-bbe2-e34513096882",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-20162003-c3b2-474c-a00b-f5bead779f48",
+              "status": "completed",
+              "exit_code": 0
+            },
+            {
+              "id": "exec-a8267be2-018e-4484-9a26-f272f5d1cb10",
+              "status": "failed",
+              "exit_code": 1
+            },
+            {
+              "id": "exec-daafebbb-f530-4c1a-a78c-a5902a61f4e5",
+              "status": "failed",
+              "exit_code": 2
+            }
+          ]
+        }
+      ]
+    },
+    "server_exit": 0
+  },
+  "installed_module_parity": {
+    "agent_lifecycle.py": true,
+    "agent_refresh.py": true,
+    "agent_handoff.py": true,
+    "mcp_server.py": true,
+    "daemon.py": true,
+    "sessions_cli.py": true,
+    "session_lifecycle.py": true,
+    "native_protocol.py": true
+  },
+  "preflight_receipt_exists": false,
+  "continuation_artifact_exists": false,
+  "failure": "host preflight script failed native socket lstat while parent controller continued polling; successor overspend stopped before any goal preparation",
+  "transport_cause": "unresolved; sandbox visibility versus endpoint identity/lifetime needs provider-free reproduction",
+  "cleanup": {
+    "private_readable_environment_matches": [],
+    "denied_environment_pids": [
+      552,
+      585,
+      5221,
+      52706,
+      69885
+    ]
+  },
+  "remaining_acceptance": "all full program gates remain; observed interrupt axis only"
+}

@@ -1,0 +1,16 @@
+{
+  "private_home_matches": [],
+  "denied_environment_pids": [
+    696,
+    720,
+    6960,
+    22375,
+    25206,
+    38165,
+    50470,
+    91523
+  ],
+  "owned_server_exit": 0,
+  "scope": "same-UID readable environments; protected environments not proven",
+  "model_turns": 0
+}

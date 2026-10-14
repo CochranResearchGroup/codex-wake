@@ -1,0 +1,18 @@
+{
+  "artifact_path": "docs/dev/evidence/plan0156/spawn-refresh-memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": null,
+  "reason": "No qualified repository group from bounded atlas discovery; retain canonical Plan0156 execution evidence without guessing a Graphiti destination.",
+  "recorded_at": "2026-10-14T12:43:51.731129+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "RUNBOOK.md",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}

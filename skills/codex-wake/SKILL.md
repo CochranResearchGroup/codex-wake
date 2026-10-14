@@ -99,6 +99,84 @@ attachment; extra attachment is explicit. Close guards pending work and active
 or unknown recipients. Force preserves conversations and wakes; cancel/archive
 are separate. Provide custom bus roots explicitly for close checks.
 
+For a bounded worker assignment, use `wake_sessions_spawn` when the host has
+configured lifecycle launch profiles and your caller/profile grant. Supply your
+actual native caller ID, one stable `intent`, approved `profile`, tab `name`,
+bounded `task` and fixed `expires_at`. The CLI equivalent is `sessions spawn`
+with operator-selected `--profiles` and `--wake-root`; peer bodies cannot select
+those paths. Creation/readiness, admission and execution are separate evidence.
+Retain the receipt and reconcile the same intent; uncertainty does not authorize
+another worker, intent, root or transport. Spawn supplies no A2A enrollment or
+parent capability. See `docs/agent-lifecycle.md` in the installed source version
+for profile setup, receipt states and limits.
+With lifecycle configuration, the host must bind your caller to an approved
+objective. Operator CLI launches select that registry entry with `--objective-ref`.
+Configured launches require a resident `codex-waked` polling at most every five
+seconds on the same wake root. The objective ledger reserves the task's session
+before creation, charges native usage and retains its original deadline on replay.
+Unknown final accounting holds completion until the owned rollout end marker.
+Profiles without lifecycle configuration retain explicit-expiry manual behavior;
+their receipts make no objective-budget enforcement claim.
+
+The development source exposes `wake_sessions_refresh` with the same host scope;
+isolated installed same-thread, stale/updated-MCP and nonnull-goal conservation
+evidence is recorded; combined lifecycle release remains pending. Write and preserve your source checkpoint,
+then supply its workspace-relative path and exact hash, your exact source thread,
+stable intent, selected named resources and fixed expiry. Draft/active/unknown or
+pending work holds the stop. A new client does not establish resource readiness:
+an old MCP behavior result blocks refresh. Reconcile the original stop/launch
+receipt instead of replacing it; no force or shared-daemon restart. See the
+matching source's lifecycle guide for checkpoint and host proof definitions.
+Explicit `rollback: true` reconciles the original conversation and retains a
+separate rollback result. Pending or ambiguous attachments hold; it never
+creates another conversation or renews expiry.
+The source candidate exposes `wake_sessions_handoff` / `sessions handoff`.
+Write your own checkpoint with exact native source identity, objective, original
+authority, next packet and preserved pending obligations. Supply its exact hash,
+stable intent, approved profile, source thread, explicit tab mode and fixed expiry.
+The host approves cumulative counters and the selected preflight script; callers
+cannot supply budgets or probes. Inspect `wake_sessions_configuration` first
+with your actual caller ID, approved profile and source thread. Its CLI equivalent
+is `sessions configuration --profiles FILE --profile NAME --thread-id ID --json`.
+User `lifecycle_defaults` are overlaid by the approved objective's `configuration`;
+readback shows writer/reviewer names, resolved instruction paths/bytes/hashes,
+session/objective limits, original deadline, revision and any existing ledger.
+Changing defaults does not authorize active work or renew its resources.
+Missing selected instructions block without substitution. Native writer and
+reviewer instruction-read evidence is required; a router must record its actual
+downstream choice. Runtime readiness and an evidence-based `accept`, `correct`
+or `blocked` work verdict are separate. Test counts do not establish acceptance.
+Pending work, unknown usage and changed goal authority hold. An already admitted
+turn without its first usage snapshot can be observed under its original reserved
+allowance; that observation permits no new assignment or goal admission.
+An accept verdict requires approved criterion/path/hash evidence, no unsupported
+claims or scope deviation, and the checkpoint's exact next packet.
+Preparation leaves its goal paused;
+only the existing continuous owned monitor with explicit host activation approval
+can activate the original remaining allowance. One-shot checks cannot activate.
+Keep the owned target untouched. Reconcile the same intent; do not reset a goal,
+renew time, copy claims/capabilities or create another actor to bypass a hold.
+The handoff ledger charges all associated source/preflight/continuation usage
+once, reserves session resources within the objective cap, and preserves original
+deadlines through restart. Corrective assignments require a host correction scope
+and checked frozen packet; at most two cycles are admitted across the objective.
+Continued rejection checkpoints and stops. A correct verdict does not accept the
+outgoing work or permit the ordinary continuation packet.
+Only the operator CLI can apply an exact host `budget_authorization` revision
+with `--apply-budget-authorization`; agent MCP cannot extend or reset a budget.
+Explicit reset retains spend, original deadline and correction history and
+requires settled known actors. Configured refresh observes the same goal before
+stop and after continuity, preserving its original deadline and usage history.
+Configured spawn/refresh and handoff account owned native rollout usage.
+Candidate native evidence covers review, bounded correction and cleanup.
+Native review, resource limits and continuation have passed in both tab modes;
+rollback passed in both modes. Release and installed-prefix proof are recorded
+separately in the canonical plan and runbook.
+A restored source may show the native paused-goal dialog. The controller dismisses
+only that recognized dialog on the exact restored client, retaining the paused
+goal, then requires the usual empty-composer proof. Other dialogs hold rollback.
+See the matching lifecycle guide for monitor setup and known acceptance gaps.
+
 For existing basic tmux workflows, select `--legacy-tmux`; advanced signals and
 tracked-mailbox workflows retain their compatibility contracts below. Read
 `docs/dev/native-workflow-migration.md` before migrating earlier native records

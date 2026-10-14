@@ -68,3 +68,16 @@ The external owner that observes and coordinates an agent's lifecycle transition
 **Continuation allowance**:
 The explicitly authorized resources remaining for work on the same objective.
 Fresh context does not replenish that allowance.
+
+**Session budget**:
+The user-authorized token and elapsed-time limits for one agent goal session.
+
+**Objective budget**:
+The user-authorized cumulative token and elapsed-time limits for an objective,
+including successors, reviewers, delegated work, retries and failed attempts.
+Changing conversation does not replenish this budget.
+
+**Handoff preflight**:
+The successor's verification of runtime readiness and assessment of whether the
+outgoing work advanced the approved objective with adequate evidence and scope
+discipline. Runtime readiness alone does not establish work acceptance.
