@@ -11,7 +11,7 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 717ff47
+    checkpoint: 717ff4729edcf824b8066fda79a5fabc7aa3bf51
     remote_ref: refs/remotes/origin/feat/agent-lifecycle
     integration: squash_pr
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/253
