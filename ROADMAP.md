@@ -1170,30 +1170,16 @@ include the [response standard](skills/codex-wake/references/a2a-responses.md).
 Existing MCP/CLI/worker contracts unchanged. Eight-scenario review and installed
 parity: docs/dev/evidence/plan0154/review.md. No live model-compliance claim.
 
-## P156 | Agent lifecycle delivery
+## P156 — Governed agent lifecycle
 
-State: PLANNED
-
-[Plan0156](docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md) /
-[issue248](https://github.com/CochranResearchGroup/codex-wake/issues/248)
-governs spawn, same-thread refresh and fresh-agent handoff. Plan0155 probe is
-CLOSED; findings show resumed TUI retains old MCP, while fresh conversation loaded
-new MCP and read the outgoing handoff. Feature branch feat/agent-lifecycle now
-contains guarded spawn/refresh with installed native evidence and first handoff
-allowance guards; full fresh continuation and combined integration/release are
-pending. Checkpoints under docs/dev/evidence/plan0156 retain exact readbacks.
-
-Ready frontier: [spawn249](https://github.com/CochranResearchGroup/codex-wake/issues/249)
-(Plan0157). Then [refresh250](https://github.com/CochranResearchGroup/codex-wake/issues/250)
-(Plan0158), then [handoff251](https://github.com/CochranResearchGroup/codex-wake/issues/251)
-(Plan0159). Installed spawn supplies the functional implementation frontier;
-refresh and handoff remain serial IN_PROGRESS, with combined acceptance still
-open. Refresh completion is not a handoff dependency. Primary serializes shared
-integration. No automatic goal/resource allowance reset.
-Prototype preserved on prototype/agent-lifecycle at5e1b0ac; no production source
-or runtime rollout in this design packet.
-
-P156 operator-approved revision: [spec254](https://github.com/CochranResearchGroup/codex-wake/issues/254) covers configurable handoff/preflight review and nested user budgets. New slices #255 → #256 → #257; #257 also depends on #255. Execution resource gate remains; existing lifecycle issues remain open.
+CLOSED Plan0156 and children0157–0159; issues248–251 and254–257 completed.
+PR253 merged3bde6d5; v0.14.0 released/installed from exact main. Owned spawn,
+configured same-thread refresh, both-mode native handoff/continuation/rollback,
+selected full instructions and substantive review, nested budgets and bounded
+correction are qualified. Original failures/deadlines/accounting retained.
+Installed public fixtures cover non-GitHub selection and replacement/restart
+bounds; released CLI/MCP/skills and cleanup pass. No shared daemon restart or
+implicit grant/claim transfer. Final matrix: docs/dev/evidence/plan0156/final-acceptance.md.
 
 ## P160 | Explicit A2A return obligations
 
