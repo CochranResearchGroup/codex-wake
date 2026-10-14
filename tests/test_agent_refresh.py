@@ -63,6 +63,12 @@ class AgentRefreshTests(unittest.TestCase):
                     run(argv)
                 self.assertFalse((root/'lifecycle').exists())
 
+    def test_configured_expired_original_session_preserves_client(self):
+        self.refresh_scenario(draft=False, budget=True, session_limit=1000)
+
+    def test_configured_refresh_twice_charges_same_goal_once(self):
+        self.refresh_scenario(draft=False, budget=True, twice=True)
+
     def test_local_draft_preserves_old_generation_and_blocks_refresh(self):
         self.refresh_scenario(draft=True)
 
@@ -110,7 +116,7 @@ class AgentRefreshTests(unittest.TestCase):
     def test_handoff_preserves_unsubmitted_source_draft(self):
         self.refresh_scenario(draft=True,operation='handoff')
 
-    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh'):
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -131,7 +137,7 @@ class AgentRefreshTests(unittest.TestCase):
             skill.write_text('---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n')
             goal = dict(objective='Finish fixture', status='paused', tokenBudget=1000,
                         tokensUsed=50, timeUsedSeconds=12, createdAt=100, updatedAt=100)
-            if operation=='handoff':goal['threadId']=thread_id
+            if operation=='handoff' or budget:goal['threadId']=thread_id
             def handler(ws):
                 for raw in ws:
                     request = json.loads(raw)
@@ -190,6 +196,15 @@ class AgentRefreshTests(unittest.TestCase):
                 app_server='unix://'+str(endpoint),codex_path=str(client_script),tmux_session='owned',
                 timeout=1,resources={'updated-skill':dict(kind='skill',path=str(skill),
                     description='Updated fixture',sha256=hashlib.sha256(skill.read_bytes()).hexdigest())})}}))
+            if budget:
+                registry=json.loads(profiles.read_text())
+                registry['continuations']={thread_id:dict(objective='Finish fixture',approval='operator fixture',
+                    tokens_before_source=20,started_at='1970-01-01T00:00:00Z')}
+                selection=dict(name='fixture',path=str(skill))
+                registry['lifecycle_defaults']=dict(handoff_writer=selection,preflight_reviewer=selection,
+                    session_token_limit=1000,session_time_limit_seconds=session_limit,
+                    objective_token_limit=2000,objective_time_limit_seconds=4000,max_correction_cycles=1)
+                profiles.write_text(json.dumps(registry))
             if stale_mcp or mcp_ready:
                 registry=json.loads(profiles.read_text())
                 registry['profiles']['worker']['resources']['updated-skill']=dict(kind='mcp',
@@ -252,9 +267,16 @@ class AgentRefreshTests(unittest.TestCase):
                                     self.assertIsNone(client.poll())
                                     return
                             output=StringIO()
-                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change else 0,output.getvalue())
+                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
                             receipt=json.loads(output.getvalue())
-                            if recipient_guard:
+                            if budget and session_limit<=1001:
+                                self.assertEqual(receipt['state'],'blocked')
+                                self.assertEqual(receipt['reason'],'objective_budget_or_accounting_stop')
+                                self.assertEqual(effects,[])
+                                self.assertIsNone(client.poll())
+                                self.assertEqual(client.pid,original_pid)
+                                self.assertEqual(receipt['assignment_deadline'],1000)
+                            elif recipient_guard:
                                 self.assertEqual(receipt['state'],'blocked')
                                 if operation=='handoff':self.assertEqual(receipt['reason'],'pending_thread_work')
                                 self.assertEqual(effects,[])
@@ -304,6 +326,21 @@ class AgentRefreshTests(unittest.TestCase):
                                 count=len(effects)
                                 with redirect_stdout(StringIO()):self.assertEqual(run(argv),0)
                                 self.assertEqual(len(effects),count)
+                                if budget:
+                                    self.assertEqual(receipt['objective_budget']['tokens_used'],70)
+                                    self.assertEqual(receipt['assignment_deadline'],2000)
+                                    if twice:
+                                        argv[argv.index('--intent')+1]='refresh-2'
+                                        again=StringIO()
+                                        with redirect_stdout(again):self.assertEqual(run(argv),0,again.getvalue())
+                                        second=json.loads(again.getvalue())
+                                        self.assertEqual(second['assignment_deadline'],receipt['assignment_deadline'])
+                                        self.assertEqual(second['objective_budget']['tokens_used'],70)
+                                        self.assertEqual(len(second['objective_budget']['actors']),1)
+                                        self.assertEqual(sum('new-window' in x for x in effects),2)
+                                        self.assertEqual(sum('kill-pane' in x for x in effects),2)
+                                else:
+                                    self.assertNotIn('objective_budget',receipt)
                             self.assertFalse(any(x in methods for x in ('thread/start','turn/start','thread/goal/set')))
                     finally:server.shutdown();worker.join(timeout=2)
             finally:

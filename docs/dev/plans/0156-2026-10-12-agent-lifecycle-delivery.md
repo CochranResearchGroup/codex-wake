@@ -8,6 +8,15 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
 
+2026-10-14 operator renewed resources again ("renew resources"). This window
+supersedes the remaining prior allowance: 12:29:34–18:29:34 UTC, at most
+2,000,000 attributable tokens. Same ACTIVE thread; native baseline583,915.
+Preserve previous accounting: known native samples374,031 and conservative
+100,000-token reservations for each of three completed external lanes; previous
+window conservative total1,229,307 at renewal. Charge subsequent root deltas
+and new external work to this window. Renewal preserves acceptance, scope,
+review discovery and retry limits; existing uncommitted implementation is retained.
+
 2026-10-14 operator explicitly renewed resources ("renew resources"). New
 execution window: 10:38:06–16:38:06 UTC, at most 2,000,000 attributable tokens.
 Thread 01a139e7-17bc-79c3-af66-0294a9a69e3f resumed ACTIVE; renewal baseline
@@ -110,6 +119,17 @@ configuration edits must not silently change an active assignment.
     usage or allowing an agent to authorize its own extension.
 
 ### Revised implementation decisions
+
+Configured standalone spawn and refresh source coverage now binds approved host
+objective configuration into immutable intents. Spawn reserves its session before
+creation, requires a live resident supervisor, accounts active parent quota, and
+stops exact owned turns/queued submissions at the original deadline. Final
+standalone settlement waits for the owned rollout accounting marker; completed
+receipt replay excludes later work. Refresh observes the same goal before stop
+and after continuity without renewing a deadline or allocating another actor.
+Source checkpoint evidence: docs/dev/evidence/plan0156/spawn-refresh-source-checkpoint.json.
+This advances issue256 source behavior; installed combined proof and all wider
+acceptance, integration and release gates remain open.
 
 Issue255 implementation seam: `sessions configuration --profiles FILE --profile
 NAME --thread-id ID` and host-bound `wake_sessions_configuration` read

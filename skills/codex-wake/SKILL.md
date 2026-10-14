@@ -101,6 +101,14 @@ Retain the receipt and reconcile the same intent; uncertainty does not authorize
 another worker, intent, root or transport. Spawn supplies no A2A enrollment or
 parent capability. See `docs/agent-lifecycle.md` in the installed source version
 for profile setup, receipt states and limits.
+With lifecycle configuration, the host must bind your caller to an approved
+objective. Operator CLI launches select that registry entry with `--objective-ref`.
+Configured launches require a resident `codex-waked` polling at most every five
+seconds on the same wake root. The objective ledger reserves the task's session
+before creation, charges native usage and retains its original deadline on replay.
+Unknown final accounting holds completion until the owned rollout end marker.
+Profiles without lifecycle configuration retain explicit-expiry manual behavior;
+their receipts make no objective-budget enforcement claim.
 
 The development source exposes `wake_sessions_refresh` with the same host scope;
 isolated installed same-thread, stale/updated-MCP and nonnull-goal conservation
@@ -149,8 +157,10 @@ outgoing work or permit the ordinary continuation packet.
 Only the operator CLI can apply an exact host `budget_authorization` revision
 with `--apply-budget-authorization`; agent MCP cannot extend or reset a budget.
 Explicit reset retains spend, original deadline and correction history and
-requires settled known actors. General standalone-spawn/refresh ledger coverage
-and installed configured-review acceptance remain open in this source candidate.
+requires settled known actors. Configured refresh observes the same goal before
+stop and after continuity, preserving its original deadline and usage history.
+Standalone spawn/refresh source tests cover shared accounting; installed combined
+configured-review acceptance remains open in this source candidate.
 Same-tab and handoff rollback acceptance remain pending in this source candidate.
 See the matching lifecycle guide for monitor setup and known acceptance gaps.
 

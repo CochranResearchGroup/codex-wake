@@ -11,6 +11,20 @@ def config(revision=1, limit=100, deadline=200):
 
 
 class ObjectiveLedgerTests(unittest.TestCase):
+    def test_active_native_parent_keeps_future_quota_reserved_before_worker_admission(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger=ObjectiveLedger(root,'objective')
+            ledger.configure(config(),'operator',now=100)
+            ledger.record_goal('parent',20,now=100)
+            self.assertTrue(ledger.adopt_active_goal('parent',60,150,now=100)['admitted'])
+            self.assertFalse(ledger.reserve('worker',45,20,now=100)['admitted'])
+            self.assertTrue(ledger.reserve('worker',40,20,now=100)['admitted'])
+            replay=ObjectiveLedger(root,'objective').adopt_active_goal('parent',60,200,now=110)
+            self.assertEqual(replay['actors']['parent']['session_deadline'],150)
+            late=ledger.record_goal('parent',70,now=110)
+            self.assertEqual(late['tokens_used']+late['tokens_reserved'],110)
+            self.assertFalse(ledger.reserve('worker',40,20,now=110)['admitted'])
+
     def test_successor_goal_and_preflight_are_charged_once_when_successor_becomes_source(self):
         with tempfile.TemporaryDirectory() as root:
             ledger = ObjectiveLedger(root, 'objective')

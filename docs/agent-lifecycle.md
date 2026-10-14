@@ -55,6 +55,25 @@ under the same key is rejected. Exit0 means the exact assignment's native turn
 completed. Exit5 means held, uncertain, expired or still awaiting evidence.
 Native failure/interruption is retained as blocked; history is preserved.
 
+When the registry supplies lifecycle defaults or objective configuration, spawn
+also requires an approved `continuations` entry. Operator launches select its
+key with `--objective-ref`; MCP uses the actual caller's entry and cannot select
+another objective. Start a resident `codex-waked --wake-root /owned/wake
+--no-dispatch --interval 1` before launching configured tasks. One-shot polling
+does not publish admission authority. The daemon's owned process generation and
+fresh heartbeat must be available before creation and task effects.
+
+Configured spawn reserves its session within the shared objective allowance.
+An active native parent keeps its finite future quota reserved before a worker
+is admitted. Repeated intents preserve the original reservation and deadline.
+The daemon observes native usage and interrupts only the assignment's exact
+owned turn on exhaustion, time loss or previously known accounting becoming
+unknown. A missing first snapshot permits observation under the existing
+reservation, with no further admission. Completion retains the reservation until
+the owned rollout's final accounting marker; later turns are excluded from that
+settlement. Profiles without lifecycle configuration use explicit expiry only,
+reported as `explicit_expiry_only_legacy_profile` in their receipts.
+
 Admission requires native idle, one exact client generation and an observed
 empty local composer. Drafts, unknown composer layouts and split tabs hold the
 assignment. The composer adapter recognizes the observed Codex0.162.1 ANSI

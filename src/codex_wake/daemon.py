@@ -309,6 +309,8 @@ def poll_once(
     current = now or utc_now()
     from .agent_handoff import poll_handoffs
     poll_handoffs(root,supervision=lifecycle_supervision)
+    from .lifecycle_supervision import poll_spawns
+    poll_spawns(root)
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
     if signal_runtime is None:
         journal = signal_journal_path(root)
@@ -610,6 +612,9 @@ def run(argv: list[str] | None = None) -> int:
     signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
     try:
         while True:
+            if args.interval<=5:
+                from .lifecycle_supervision import publish_supervision
+                publish_supervision(root,args.interval)
             result = poll_once(
                 root,
                 dispatch=not args.no_dispatch,
@@ -630,6 +635,10 @@ def run(argv: list[str] | None = None) -> int:
                 print(format_poll_result(result), flush=True)
             time.sleep(args.interval)
     finally:
+        if args.interval<=5:
+            from .lifecycle_supervision import publish_supervision,poll_spawns
+            publish_supervision(root,args.interval,active=False)
+            poll_spawns(root,stop_reason='monitor_stopped')
         from .agent_handoff import poll_handoffs
         poll_handoffs(root,stop_reason="monitor_stopped")
 

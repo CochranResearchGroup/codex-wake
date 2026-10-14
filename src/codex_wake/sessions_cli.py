@@ -28,6 +28,7 @@ def add_sessions_parser(subparsers):
     spawn.add_argument('--task', required=True)
     spawn.add_argument('--expires-at', required=True)
     spawn.add_argument('--caller-thread-id')
+    spawn.add_argument('--objective-ref', help='operator-selected objective registry key; agents inherit their own caller objective')
     spawn.add_argument('--json', dest='as_json', action='store_true')
     refresh = commands.add_parser('refresh', help='refresh selected resources in the exact owned thread')
     for option in ('profiles', 'profile', 'intent', 'thread-id', 'checkpoint',

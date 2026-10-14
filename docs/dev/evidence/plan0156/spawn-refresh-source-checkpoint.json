@@ -1,0 +1,60 @@
+{
+  "native_effects": 0,
+  "open_gates": [
+    "installed configured spawn/refresh combined proof",
+    "harness bootstrap and supervision wiring",
+    "context replacement correction",
+    "native both-mode substantive preflight continuation rollback",
+    "integration and exact-main release/install"
+  ],
+  "parent_head": "925dc4537cb574ce40bc6ff9317ce8a4ef85cb06",
+  "sources": {
+    "src/codex_wake/agent_handoff.py": "f4a9801a91914e062203293f30c65665336693ff07f0d15f1665402e5115eb18",
+    "src/codex_wake/agent_lifecycle.py": "d12c22577d077ce1b9a523e0cc1c72a387ff0e4eeec6d3f96916077fa02cb252",
+    "src/codex_wake/agent_refresh.py": "912a1c4626d020ffc2e7181907330c67eea0a1f96d57ae0dcf7275529bed8232",
+    "src/codex_wake/daemon.py": "812e85749abb581027c2db61cd5133d95aecda0fd60c34f97577f86686de610b",
+    "src/codex_wake/lifecycle_budget.py": "aee5d6109e4af4f318554122b4638a48cf94331c89a695cef345ba6ac7f8f8dd",
+    "src/codex_wake/lifecycle_supervision.py": "c2274a1e29a5a9450abb6f86ef279b07477b39ede0b1aeaf351ce85cb7a3036c",
+    "src/codex_wake/objective_ledger.py": "9acf1587b055831d6be68bcbf7eca477bd24560fb7ad13415f20b50596ae429b",
+    "src/codex_wake/sessions_cli.py": "0962633f7a001604e41852466b844d7baeced96cc2fe2c7640083a1e87b963b5"
+  },
+  "state": "source_validated_installed_acceptance_pending",
+  "validation": [
+    {
+      "log": "/tmp/codex-wake-plan0156-supervision-integration05.log",
+      "result": "pass_before_queued_cancellation",
+      "seconds": 34.527,
+      "tests": 142,
+      "tier": "focused"
+    },
+    {
+      "artifact": "/tmp/codex-wake-plan0156-presubmit07/result.json",
+      "environment": {
+        "CODEX_WAKE_STABLE_TIME_CONFIG": ""
+      },
+      "result": "pass_before_queued_cancellation",
+      "seconds": 134.91,
+      "tests": 1192,
+      "tier": "presubmit"
+    },
+    {
+      "artifact": "/tmp/codex-wake-plan0156-presubmit06/result.json",
+      "errors": 3,
+      "failures": 13,
+      "result": "failed_host_clock_configuration",
+      "seconds": 113.255,
+      "tests": 1191,
+      "tier": "presubmit"
+    },
+    {
+      "environment": {
+        "CODEX_WAKE_STABLE_TIME_CONFIG": ""
+      },
+      "log": "/tmp/codex-wake-plan0156-queue-cancel-final.log",
+      "result": "pass_final_queued_cancellation_increment",
+      "seconds": 10.355,
+      "tests": 68,
+      "tier": "focused"
+    }
+  ]
+}

@@ -6095,3 +6095,90 @@ context-replacement correction, qualified installed both-mode acceptance and
 integration/release/cleanup remain. Classification blocker_reduction.
 Memory disposition unavailable: no qualified repository cloud from bounded atlas
 discovery; configured-review-memory-disposition.json records zero attempted writes.
+
+## Turn 312 | 2026-10-14 UTC
+
+Operator renewed the resource window again:12:29:34–18:29:34UTC with
+2,000,000 attributable tokens, root baseline583,915. Previous-window conservative
+accounting1,229,307 retained, including three100,000-token external reservations.
+Canonical Plan0156 records renewal without resetting scope or retry history.
+Configured refresh now binds its frozen host objective before fingerprinting,
+observes the same goal before stop and after continuity, and preserves original
+session/objective deadlines. Public CLI red/green cases prove an expired original
+session cannot be renewed by a fresh intent, and two refreshes charge cumulative
+goal usage once. Worker lane changed only agent_refresh.py/test_agent_refresh.py;
+its counters remain unknown, conservatively reserved in the preceding window.
+Configured standalone spawn now requires an approved objective reference and
+holds before native thread creation without a live owner-validated resident
+supervisor heartbeat. Public CLI regression failed before the guard and passes
+after it; task/tab effects also recheck the supervisor. An initially overbroad
+shared effect guard blocked two refresh cases; restricting it to spawn restores
+the original refresh contract. Focused49 tests pass6.795s; log retained at
+/tmp/codex-wake-plan0156-spawn-refresh-focus.log. Legacy launch behavior retained.
+Implementation remains uncommitted. Resident heartbeat publication, standalone
+reservation/usage/owned-stop polling and harness bootstrap wiring are still
+incomplete; no configured paid spawn or native acceptance was attempted.
+Classification blocker_reduction; goal ACTIVE and full plan OPEN.
+Memory disposition forbidden: this continuation does not authorize memory-folder
+writes; canonical plan/runbook retain the execution record.
+
+## Turn 313 | 2026-10-14 UTC
+
+Configured standalone spawn now reserves one actor before native creation and
+rechecks source accounting and immutable reservation before task effects.
+Active native parents retain their finite future quota before child admission;
+late parent usage is recorded by the resident supervisor. Public CLI red/green
+proves one actor charges70 tokens once and preserves deadline1101 across replay.
+Daemon red/green proves deadline polling interrupts only owned turn157 once,
+without another task/thread/actor. Owner-private resident heartbeat binds a live
+process generation; publication is serialized and one-shot polling cannot admit
+configured work. Missing first counters remain observation-only; later unknown
+accounting and time/resource exhaustion fence the owned turn.
+A completed native turn initially released reservation before final rollout
+accounting. Public CLI regression reproduced this; settlement now requires the
+owned task_complete/turn_aborted marker and excludes later turns. Handoff child
+preflight retains its existing continuation reservation, so this standalone
+settlement guard does not prematurely settle an inherited actor. The initial
+broader run retained40 preflight failures from applying that marker requirement
+at the wrong boundary; inherited preflight correction restores the contract.
+Heartbeat publication initially threw on missing trusted time before handoff
+fencing; existing unknown-clock regression detected this and passes after repair.
+Focused142 integration tests pass34.527s; parent/spawn34 tests pass3.946s.
+Syntax, canonical policy wiring and whitespace checks pass. Full Python
+presubmit running as session10512 with logs/result in
+/tmp/codex-wake-plan0156-presubmit06; completion not yet claimed. CI38561086001
+readback confirms both3.11/3.12 success at prior published925dc45, not this dirty
+candidate. Product guide and lifecycle docs describe the new configured binding,
+resident supervision and explicit-expiry legacy boundary.
+Latest root counter735,817 at12:43:02UTC:151,902 since583,915 renewal baseline;
+new native effects/external lanes0. Deadline18:29:34UTC; previous-window costs
+retained. Classification outcome_progress; goal ACTIVE, Plan0156 OPEN.
+Next: frozen source checkpoint and fresh installed candidate, then harness
+bootstrap/supervisor wiring and bounded acceptance. Context-replacement correction,
+queued-but-not-started cancellation proof, installed both-mode substantive review,
+continuation/rollback, integration and exact-main release remain open.
+Memory disposition unavailable: bounded prior atlas discovery did not qualify a
+repository group; source-anchored non-write receipt records no attempted write.
+
+Additional presubmit evidence: initial full1191-test run failed13 assertions and
+3 errors in113.255s. Minimal two-test reproduction identifies local installed
+Stable Time auto-configuration overriding legacy fixture seams; both pass when
+CODEX_WAKE_STABLE_TIME_CONFIG is empty for the test process. Hermetic full rerun
+is session60880, /tmp/codex-wake-plan0156-presubmit07. Original failures remain.
+A public daemon regression also detects completed-turn settlement using stale
+usage after a rollout parse error; repaired by requiring the current accounting
+observation before completion. Native installed schema generation at
+/tmp/codex-wake-plan0156-native-schema08 establishes thread/queue/delete with
+exact threadId/queuedSubmissionId and a boolean deleted result. This is protocol
+qualification only; queued cancellation behavior still needs its public proof.
+
+Hermetic presubmit07 passes1192 tests in134.910s. Queued-but-not-started
+cancellation is now implemented through the qualified native delete method:
+public red/green detects a lost queue/add response followed by expiry, proves
+exact client/task-correlated deletion once, no turn start, and subsequent native
+empty-thread reconciliation settling zero usage. Final affected check runs as
+session35802 in /tmp/codex-wake-plan0156-queue-cancel-final.log. The full1192-test
+pass precedes this isolated queued-cancellation change; focused validation and
+next published CI must qualify that increment. Source checkpoint receipt records
+file hashes, original failed run, passing rerun and remaining installed gates.
+Final affected68 tests pass10.355s. No new native assignments or model effects.

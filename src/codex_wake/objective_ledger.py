@@ -117,6 +117,7 @@ class ObjectiveLedger:
                       exhausted=expired or used + reserved >= config['objective_token_limit'],
                       original_deadline=state['original_deadline'],
                       correction_cycles=state['correction_cycles'],
+                      goal_aliases=state.get('goal_aliases',{}),
                       authorization_history=state['authorization_history'],
                       remaining_seconds=max(0, _epoch(config['objective_deadline']) - max(now, state.get('observed_at', now))),
                       actors={key: dict(value, tokens_remaining=max(0, value['reservation'] - value['used']),
@@ -190,6 +191,31 @@ class ObjectiveLedger:
 
     def record_goal(self, goal_id, cumulative_tokens, settled=False, *, now):
         return self._record(goal_id, cumulative_tokens, settled=settled, goal=True, now=now)
+
+    def adopt_active_goal(self, goal_id, token_budget, deadline, *, now):
+        """Reserve an observed native parent's unchanged session quota atomically."""
+        _count(token_budget)
+        with self._transaction() as state:
+            self._observe(state,now)
+            view=self._view(state,now)
+            alias=state.get('goal_aliases',{}).get(goal_id)
+            actor_id=alias['actor_id'] if alias else goal_id
+            offset=alias['preflight_tokens'] if alias else 0
+            actor=state['actors'].get(actor_id)
+            quota=token_budget+offset
+            if (quota<=0 or quota>state['configuration']['session_token_limit']
+                    or not view['accounting_known'] or _epoch(deadline)<=state['observed_at']):
+                return self._view(state,now,admitted=False)
+            if actor and actor.get('terms') is not None:
+                valid=(actor['reservation']==quota and not actor['settled'] and actor['known']
+                       and actor['used']<quota and state['observed_at']<actor['session_deadline'])
+                return self._view(state,now,admitted=valid)
+            used=actor['used'] if actor else 0
+            if quota-used>view['remaining_tokens'] or used>=quota:
+                return self._view(state,now,admitted=False)
+            state['actors'][actor_id]=dict(terms=[quota,'native-goal'],reservation=quota,
+                used=used,known=True,settled=False,session_deadline=min(_epoch(deadline),_epoch(state['configuration']['objective_deadline'])))
+            return self._view(state,now,admitted=True)
 
     def bind_goal(self, goal_id, actor_id, preflight_tokens, *, now):
         _count(preflight_tokens)

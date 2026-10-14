@@ -45,6 +45,9 @@ def spawn_command(args, root):
     expiry = parse_timestamp(args.expires_at).timestamp()
     intent = dict(operation='spawn', profile=args.profile, launch=profile, name=args.name,
                   task=args.task, expires_at=args.expires_at, source_thread_id=args.caller_thread_id)
+    from .lifecycle_budget import operation_binding
+    binding=operation_binding(config,args)
+    if binding:intent.update(binding)
     replacement=getattr(args,'replacement',None)
     if replacement is not None:
         if not isinstance(replacement,dict) or not replacement.get('source_thread_id') or not isinstance(replacement.get('attachment'),dict):
@@ -74,11 +77,33 @@ def spawn_command(args, root):
         else:
             receipt = dict(version=1, intent_key=args.intent, fingerprint=fingerprint,
                            intent=intent, state='prepared', thread_id=None)
+            if not binding:receipt['budget_mode']='explicit_expiry_only_legacy_profile'
             save(path, receipt)
         if receipt['state'] == 'starting' and receipt['thread_id'] is None:
             receipt.update(state='uncertain', uncertain_effect='thread/start')
             save(path, receipt)
         if receipt['state'] == 'prepared':
+            if binding and not intent.get('budget_inherited'):
+                from .lifecycle_supervision import supervision_ready
+                if not supervision_ready(root,profile['timeout']):
+                    receipt['reason']='resident_objective_supervisor_required'
+                    save(path,receipt)
+                    from .sessions_cli import emit
+                    emit(receipt,args.as_json)
+                    return 5
+                receipt.pop('reason',None)
+            if binding:
+                from .lifecycle_budget import admit_spawn
+                from .native_protocol import native_request
+                from .app_server import resolve_codex_cmd
+                def budget_request(method,params):
+                    return native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                        method,params,profile['timeout'])
+                if not admit_spawn(root,receipt,budget_request):
+                    save(path,receipt)
+                    from .sessions_cli import emit
+                    emit(receipt,args.as_json)
+                    return 5
             from .native_clock import snapshot
             observation = snapshot()
             bounds = observation.get('utc')
@@ -104,7 +129,7 @@ def spawn_command(args, root):
                     # The peer may have created the thread before its connection failed.
                     receipt.update(state='uncertain', uncertain_effect='thread/start')
                 save(path, receipt)
-        if receipt['thread_id'] is not None:
+        if receipt['thread_id'] is not None and receipt['state']!='completed':
             advance_spawn(path, receipt, profile)
         from .sessions_cli import emit
         emit(receipt, args.as_json)
@@ -289,6 +314,13 @@ def advance_spawn(path, receipt, profile):
                     receipt.update(state='blocked', reason='initial_task_' + evidence['execution'])
                 else:
                     receipt['state'] = 'awaiting_preflight'
+                if receipt.get('budget_actor'):
+                    from .lifecycle_budget import observe_spawn
+                    native=request('thread/read',{'threadId':receipt['thread_id'],'includeTurns':True})['thread']
+                    view=observe_spawn(path.parent.parent,receipt,native,profile,
+                        settled=evidence.get('execution') in ('turn_completed','turn_failed','turn_interrupted'))
+                    if receipt['state']=='completed' and not view['accounting_known']:
+                        receipt.update(state='awaiting_preflight',reason='final_usage_unknown')
                 save(path, receipt)
     except Exception as exc:
         receipt.update(state='uncertain' if receipt.get('uncertain_effect') else 'blocked',
@@ -297,10 +329,29 @@ def advance_spawn(path, receipt, profile):
 
 
 def before_effect(path, receipt):
+    if (receipt['intent']['operation']=='spawn' and receipt['intent'].get('configuration')
+            and not receipt['intent'].get('budget_inherited')):
+        from .lifecycle_supervision import supervision_ready
+        if not supervision_ready(path.parent.parent,receipt['intent']['launch']['timeout']):
+            receipt['reason']='resident_objective_supervisor_required'
+            save(path,receipt)
+            return False
+    if receipt['intent']['operation']=='spawn' and receipt.get('budget_actor'):
+        from .lifecycle_budget import admit_spawn
+        from .native_protocol import native_request
+        from .app_server import resolve_codex_cmd
+        profile=receipt['intent']['launch']
+        def request(method,params):
+            return native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                method,params,profile['timeout'])
+        if not admit_spawn(path.parent.parent,receipt,request):
+            save(path,receipt)
+            return False
     from .native_clock import snapshot
     observation = snapshot()
     bounds = observation.get('utc')
-    if not bounds or bounds['upper'] >= parse_timestamp(receipt['intent']['expires_at']).timestamp():
+    deadline=min(parse_timestamp(receipt['intent']['expires_at']).timestamp(),receipt.get('assignment_deadline',float('inf')))
+    if not bounds or bounds['upper'] >= deadline:
         receipt.update(state='expired' if bounds else 'blocked',
                        reason='expiry_reached' if bounds else 'admissible_time_unavailable')
         save(path, receipt)

@@ -548,6 +548,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 intent='handoff-preflight:'+receipt['fingerprint'],name='handoff-'+receipt['fingerprint'][:12],
                 task=receipt['preflight_task'],expires_at=datetime.fromtimestamp(receipt['continuation_deadline'],UTC).isoformat(),
                 caller_thread_id=args.caller_thread_id,as_json=True)
+            child.budget_context=dict(source_ref=receipt['thread_id'],actor_id=receipt['budget_actor'],
+                configuration_revision=effective['revision'])
             if args.mode=='same-tab':
                 child.replacement=dict(source_thread_id=receipt['thread_id'],attachment=receipt['source_attachment'])
             if receipt.get('correction_assignment'):

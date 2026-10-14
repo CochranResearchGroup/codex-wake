@@ -10,6 +10,7 @@ from types import SimpleNamespace
 
 from .records import WakeError, parse_timestamp
 from .agent_lifecycle import save, before_effect
+from .lifecycle_budget import operation_binding, track_refresh_budget
 
 
 def refresh_command(args, root):
@@ -57,6 +58,9 @@ def refresh_command(args, root):
     intent = dict(operation='refresh', source_thread_id=args.thread_id, launch=profile,
                   checkpoint=str(checkpoint), checkpoint_sha256=args.checkpoint_sha256,
                   resources=args.resource, expires_at=args.expires_at)
+    binding = operation_binding(config, args, source_ref=args.thread_id)
+    if binding:
+        intent.update(binding)
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     journal = Path(root) / 'lifecycle'
     journal.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -171,6 +175,10 @@ def preflight(path, receipt, profile):
     runtime.codex = resolve_codex_cmd(runtime.codex_path, required=True)
     goal = native_request(runtime.app_server, runtime.codex, 'thread/goal/get',
                           {'threadId': receipt['thread_id']}, runtime.timeout)['goal']
+    if receipt['intent'].get('configuration'):
+        if not track_refresh_budget(path.parent.parent, receipt, goal):
+            save(path, receipt)
+            return
     if not before_effect(path, receipt):
         return
     receipt.update(state='stopping', uncertain_effect='tmux/kill-pane',
@@ -279,6 +287,10 @@ def advance_refresh(path, receipt, profile):
                 receipt.update(state='blocked', reason='goal_changed_during_refresh')
                 save(path, receipt)
                 return
+            if receipt['intent'].get('configuration'):
+                if not track_refresh_budget(path.parent.parent, receipt, after):
+                    save(path, receipt)
+                    return
             checks = {}
             catalog = request('skills/list', {'cwds': [runtime.cwd], 'forceReload': True})['data']
             for name in receipt['intent']['resources']:
