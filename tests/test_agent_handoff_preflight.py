@@ -108,6 +108,9 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_rollback_cannot_debit_source_after_another_transition_takes_ownership(self):
         self.scenario(rollback=True,owner_conflict=True)
 
+    def test_missing_first_usage_snapshot_observes_existing_turn_without_new_admission(self):
+        self.scenario(pending_usage=True)
+
     def test_running_preflight_over_allowance_interrupts_exact_assignment_once(self):
         self.scenario(running_overspend=True)
 
@@ -141,7 +144,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -307,6 +310,9 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             command=shlex.join(['cat',str(reviewer)]),aggregatedOutput=read.stdout))
                         (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(
                             type='token_count',info={'total_token_usage':{'total_tokens':30*len(threads[tid]['turns']) if correction else 30}})))+'\n')
+                        if pending_usage:
+                            threads[tid]['turns'][0]['status']='inProgress'
+                            (home/'sessions'/ (tid+'.jsonl')).write_text('')
                         if running_overspend:
                             threads[tid]['turns'][0]['status']='inProgress'
                             (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':101}})))+'\n')
@@ -343,7 +349,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
             try:
                 with patch('subprocess.run',side_effect=command),patch('codex_wake.native_clock.snapshot',
                         return_value=clock):
-                    for _ in range(3 if correction or stale_title else 2):
+                    for _ in range(3 if pending_usage or correction or stale_title else 2):
                         output=StringIO()
                         if changed_defaults and _==1:
                             from codex_wake.records import WakeError
@@ -361,6 +367,15 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(receipt['reason'], 'handoff_writer_instructions_unverified')
                             self.assertEqual(methods.count('thread/start'), 0)
                             return
+                        if pending_usage and _<2:
+                            self.assertEqual(receipt['state'],'awaiting_preflight')
+                            self.assertEqual(methods.count('thread/queue/add'),1)
+                            self.assertNotIn(target,goals)
+                            if _==1:
+                                threads[target]['turns'][0]['status']='completed'
+                                (home/'sessions'/ (target+'.jsonl')).write_text(json.dumps(dict(type='event_msg',
+                                    payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':30}})))+'\n')
+                            continue
                         if correction:
                             if correction=='drift':
                                 self.assertEqual(receipt['reason'],'work_review_correct')

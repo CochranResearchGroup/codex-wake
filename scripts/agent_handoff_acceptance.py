@@ -58,6 +58,30 @@ def observe_native_preflight(request, source, target, guide, cwd):
             content_sha256=hashlib.sha256(json.dumps(resource,sort_keys=True).encode()).hexdigest()))
 
 
+def settle_owned_successor(request, handoff):
+    target=handoff['successor_thread_id']
+    goal=request('thread/goal/get',dict(threadId=target))['goal']
+    saved=handoff.get('successor_goal')
+    owned_goal=bool(goal and saved and all(goal.get(k)==saved.get(k)
+        for k in ('threadId','objective','tokenBudget','createdAt')))
+    if goal and not owned_goal:raise RuntimeError('cleanup successor goal authority changed')
+    if owned_goal and goal['status']=='active':
+        goal=request('thread/goal/set',dict(threadId=target,status='paused',origin='automatic'))['goal']
+        if goal['status']!='paused':raise RuntimeError('cleanup pause not observed')
+    native=request('thread/read',dict(threadId=target,includeTurns=True))['thread']
+    if native.get('id')!=target:raise RuntimeError('cleanup successor identity changed')
+    running=[t for t in native['turns'] if t.get('status')=='inProgress']
+    if len(running)>1:raise RuntimeError('cleanup active turn ambiguous')
+    for turn in running:
+        if not owned_goal and not any(i.get('type')=='userMessage' and
+            i.get('clientId')==handoff['successor']['submission_id'] for i in turn['items']):
+            raise RuntimeError('cleanup turn not owned')
+        request('turn/interrupt',dict(threadId=target,turnId=turn['id']))
+    final=request('thread/read',dict(threadId=target,includeTurns=True))['thread']
+    if any(t.get('status')=='inProgress' for t in final['turns']):raise RuntimeError('cleanup turn not settled')
+    return dict(thread_id=target,goal=goal,interrupted_turn_ids=[t['id'] for t in running],settled=True)
+
+
 def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',rollback=False):
     original=None
     if resume_setup:
@@ -186,13 +210,22 @@ def host_read(key):
         time.sleep(.1)
     return json.loads(pathlib.Path(C[key]).read_text())
 if sys.argv[1:1+1]==['--instructions']:
-    for kind in ('guide','reviewer','workflow'):
+    for kind in ('reviewer','workflow'):
         print('SELECTED_INSTRUCTIONS:'+kind+':'+sha(C[kind]))
         print(pathlib.Path(C[kind]).read_text())
     for p in (C['repo']+'/docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md',
               C['repo']+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md','checkpoint.json','host-validation.json'):
         print('PREFLIGHT_SOURCE:'+p+':'+sha(p))
-        print(pathlib.Path(p).read_text())
+        content=pathlib.Path(p).read_text()
+        if p.endswith('0156-2026-10-12-agent-lifecycle-delivery.md'):
+            start=content.index('## Operator requirements revision')
+            end=content.index('\n## Problem Statement',start)
+            print(content[:content.index('## Current State')])
+            print(content[start:end])
+            print('Canonical operator revision shown in full; wider plan remains OPEN. Other sections are retained in the hashed source.')
+        elif p.endswith('0159-2026-10-12-agent-handoff.md'):
+            print(content[content.index('## Scope'):])
+        else:print(content)
     own=pathlib.Path(__file__).resolve()
     print('APPROVED_HELPER_SOURCE:'+str(own)+':'+sha(own))
     print(own.read_text())
@@ -256,7 +289,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         host_validation=dict(verified_ref=ref,focused_validation=dict(state='passed',command=validation,
             exit_code=checked.returncode,result=checked.stderr[-500:],performed_by='host_controller'))
         write(root/'host-validation.json',host_validation)
-        (workspace/'AGENTS.md').write_text(f"For reviewer preflight, first run {prefix}/bin/python {helper} --instructions {reviewer} {workflow} using functions.exec with first-line // @exec: {{\"max_output_tokens\": 20000}} and tools.exec_command max_output_tokens=20000; emit text(result.output) directly, not text(result). Read all selected instructions, canonical plans, checkpoint and immutable approved helper from this bounded output. Apply github-ask-matt to this continuation request: select and apply github-handoff. Check actual supplied source and host-approved evidence, then author successor-handoff.md and work-review.json in one shell command before the exact host verifier command. The review artifact must bind configuration_revision, source_thread_id, successor_thread_id, checkpoint_sha256 and intent_fingerprint from PREFLIGHT_CONTRACT; work_review must contain verdict (accept/correct/blocked), actual selected_review, changes, acceptance_progress (host-approved criterion, change, workspace-relative path/SHA256 evidence), scope_deviations, unsupported_claims, unfinished_work and exact checkpoint next_packet. Report actual gaps; do not fabricate acceptance or infer progress from counts. Evidence available in checkpoint.json and host-validation.json; inspect their actual content. Exactly three reviewer shell commands: instruction read, artifact authoring after applying instructions, host verifier. No retries, extra source reads, goal changes, protected native socket access, A2A effects or resource renewal. The host supplies identity-bound native observations and validation; do not claim GitHub connector health. Outgoing writer: first read the exact selected github-handoff instructions using a command containing its absolute path and print all bytes, apply them to the supplied fixture evidence, then run its supplied checkpoint script. No other work.\n")
+        (workspace/'AGENTS.md').write_text(f"For reviewer preflight, first run {prefix}/bin/python {helper} --instructions {reviewer} {workflow} using functions.exec with first-line // @exec: {{\"max_output_tokens\": 20000}} and tools.exec_command max_output_tokens=20000; emit text(result.output) directly, not text(result). Read both selected Matt instruction files in full, the complete canonical operator revision and child scope/acceptance, checkpoint and immutable approved helper from this bounded output. The product guide is a separate host-qualified native catalog/resource check, not a selected review instruction. Apply github-ask-matt to this continuation request: select and apply github-handoff. Check actual supplied source and host-approved evidence, then author successor-handoff.md and work-review.json and immediately run the exact host verifier in that same shell command. The review artifact must bind configuration_revision, source_thread_id, successor_thread_id, checkpoint_sha256 and intent_fingerprint from PREFLIGHT_CONTRACT; work_review must contain verdict (accept/correct/blocked), actual selected_review, changes, acceptance_progress (host-approved criterion, change, workspace-relative path/SHA256 evidence), scope_deviations, unsupported_claims, unfinished_work and exact checkpoint next_packet. Report actual gaps; do not fabricate acceptance or infer progress from counts. Evidence available in checkpoint.json and host-validation.json; inspect their actual content. Exactly two reviewer shell commands: selected instruction/source read, then artifact authoring followed by host verification in the same command. Both selected instruction files remain complete; do not accept truncated output. No retries, extra source reads, goal changes, protected native socket access, A2A effects or resource renewal. The host supplies identity-bound native observations and validation; do not claim GitHub connector health. Outgoing writer: first read the exact selected github-handoff instructions using a command containing its absolute path and print all bytes, apply them to the supplied fixture evidence, then run its supplied checkpoint script. No other work.\n")
         shutil.copyfile(root/'host-validation.json',workspace/'host-validation.json')
         checkpoint_contract=dict(repo=str(repo),worktree=str(workspace),commit=head,dirty_work='clean frozen candidate',
             acceptance_remaining=['selected preflight','native bounded continuation','owned rollback'],
@@ -302,15 +335,14 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         state=wait_for_preflight(invoke,handoff,deadline,observe_handoff)
         target=state['successor_thread_id'];native,spent=usage(target);receipt['preflight_usage']=spent;write(root/'native-preflight.json',native)
         instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and '--instructions' in i.get('command','') and i.get('exitCode')==0]
-        if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('guide','reviewer','workflow')):raise RuntimeError('actual selected instruction read unverified')
+        if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('reviewer','workflow')):raise RuntimeError('actual selected instruction read unverified')
         if not instruction_read(native,effective['preflight_reviewer'],workspace):
             raise RuntimeError('selected reviewer instruction bytes not observed')
         if not instruction_read(native,effective['handoff_writer'],workspace):
             raise RuntimeError('downstream handoff workflow instruction bytes not observed')
         authored=[i for t in native['turns'] if t.get('status')=='completed' for i in t['items']
             if i.get('type')=='commandExecution' and i.get('status')=='completed'
-            and i.get('exitCode')==0 and 'work-review.json' in i.get('command','')
-            and str(helper) not in i.get('command','')]
+            and i.get('exitCode')==0 and 'work-review.json' in i.get('command','')]
         if len(authored)!=1:
             raise RuntimeError('reviewer-authored work review native evidence unverified')
         receipt['work_review_artifact']=dict(path=str(workspace/'work-review.json'),
@@ -391,6 +423,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         cleanup_target=receipt.get('handoff',{}).get('successor_thread_id')
         if cleanup_target:
             try:
+                receipt['owned_successor_settlement']=settle_owned_successor(request,receipt['handoff'])
                 _,receipt['successor_usage']=usage(cleanup_target)
                 receipt['cleanup_successor_goal']=request('thread/goal/get',dict(threadId=cleanup_target))['goal']
             except Exception as exc:receipt['final_readback_error']=type(exc).__name__
@@ -398,7 +431,9 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         if server is not None and server.poll() is None:
             os.killpg(server.pid,signal.SIGTERM)
             try:server.wait(timeout=20)
-            except subprocess.TimeoutExpired:receipt['server_shutdown']='timed_out'
+            except subprocess.TimeoutExpired:
+                receipt['server_shutdown']='forced_after_owned_settlement_attempt'
+                os.killpg(server.pid,signal.SIGKILL);server.wait(timeout=10)
         log.close();mlog.close();receipt['server_exit']=server.poll() if server else None
         matches=[];denied=[]
         for p in Path('/proc').iterdir():

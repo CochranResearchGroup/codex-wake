@@ -510,7 +510,17 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             if receipt.get('budget_actor') and receipt.get('successor_thread_id'):
                 observed=request('thread/read',dict(threadId=receipt['successor_thread_id'],includeTurns=True))['thread']
                 if observed.get('id')!=receipt['successor_thread_id']:raise ValueError('successor usage identity changed')
-                record_successor(root, receipt, native_usage(observed, profile))
+                usage=native_usage(observed, profile)
+                record_successor(root, receipt, usage)
+                owned=[turn for turn in observed.get('turns',[]) if turn.get('status')=='inProgress'
+                    and any(item.get('type')=='userMessage' and item.get('clientId')==
+                            receipt.get('successor',{}).get('submission_id') for item in turn.get('items',[]))]
+                if usage is None and len(owned)==1:
+                    if not before_handoff_effect(path,receipt):return
+                    receipt.update(state='awaiting_preflight',reason='successor_usage_unknown')
+                    # Observe the existing reserved turn. No queue, goal or actor
+                    # admission may occur until actual accounting is available.
+                    return
             if not admit_handoff(root, receipt):return
             receipt.update(state='starting_successor');save(path,receipt)
             contract=dict(source_thread_id=receipt['thread_id'],checkpoint=str(Path(profile['cwd'])/args.checkpoint),

@@ -6033,3 +6033,31 @@ setup sample may proceed under the same250,000 reservation/150,000 preflight
 ceiling; original failed root is retained and cannot be replayed as accepted.
 Classification blocker_reduction; full plan OPEN. Installed14 package code still
 matches94 source/data files because only the harness configuration changed.
+
+## Turn 310 | 2026-10-14 UTC
+
+Configured new-tab02 verified native selected skill mirrors/catalog and actual
+source checkpoint writing (74,313tokens). Receiver was already admitted/running,
+but absent first token snapshot made repeated admission return unknown; harness
+treated this observation hold as terminal and began teardown. Receiver eventually
+completed144,046tokens and authored a truthful blocked work verdict for truncated
+instruction output. Actual combined218,359 remains below250,000 and preflight
+below150,000; those resource facts do not accept the failed handoff packet.
+Initial cleanup timed out with two private processes; exact endpoint was gone
+on reconciliation, archived task_complete and final counters confirmed, fresh OS
+census found no remaining owned processes. Original failure retained; appended
+final settlement charges144,046 once and marks accounting known/settled. Curated
+configured-new-tab02-failed.json preserves both cleanup observations and blocked
+review; no goal continuation or rollback acceptance is claimed.
+Red/green public reproducer proves missing first snapshot now observes the exact
+owned reserved turn without queue/goal/new-actor admission; accounting remains
+unknown until real counters arrive. Harness cleanup explicitly pauses an owned
+goal and interrupts only an exact owned turn before private process shutdown.
+Instruction packaging retains both selected Matt files in full, full canonical
+operator revision and child scope/acceptance, plus checked checkpoint/evidence;
+unselected30KB product guide remains a separate native catalog/resource check.
+Review artifact authoring and verifier share one command to avoid an extra model
+round trip; no resource ceiling or acceptance criterion changed. Focused75 tests
+passed23.783s; syntax, policy wiring and diff checks pass. Next: fresh installed
+candidate and one remaining configured-new-tab paid correction sample under
+unchanged250,000/150,000/600s bounds. Classification blocker_reduction; goal OPEN.

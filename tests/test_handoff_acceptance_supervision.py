@@ -8,6 +8,34 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import agent_handoff_acceptance as runner
 
 
+class OwnedCleanupTests(unittest.TestCase):
+    def test_prefight_without_goal_interrupts_only_its_exact_native_assignment(self):
+        calls=[]
+        running={'value':True}
+        def request(method, params):
+            calls.append((method,params))
+            if method=='thread/goal/get':return {'goal':None}
+            if method=='turn/interrupt':running['value']=False;return {}
+            return {'thread':dict(id='receiver',turns=[dict(id='owned-turn',
+                status='inProgress' if running['value'] else 'interrupted',
+                items=[dict(type='userMessage',clientId='owned-task')])])}
+        result=runner.settle_owned_successor(request,dict(successor_thread_id='receiver',
+            successor={'submission_id':'owned-task'}))
+        self.assertTrue(result['settled'])
+        self.assertEqual([p for m,p in calls if m=='turn/interrupt'],[dict(threadId='receiver',turnId='owned-turn')])
+
+    def test_foreign_preflight_turn_cannot_be_interrupted(self):
+        effects=[]
+        def request(method, params):
+            if method=='thread/goal/get':return {'goal':None}
+            if method=='turn/interrupt':effects.append(params)
+            return {'thread':dict(id='receiver',turns=[dict(id='foreign',status='inProgress',
+                items=[dict(type='userMessage',clientId='other-task')])])}
+        with self.assertRaisesRegex(RuntimeError,'not owned'):
+            runner.settle_owned_successor(request,dict(successor_thread_id='receiver',successor={'submission_id':'owned-task'}))
+        self.assertEqual(effects,[])
+
+
 class PreflightSupervisionTests(unittest.TestCase):
     def test_transient_time_hold_observes_same_intent_until_preflight_ready(self):
         intent = ['sessions', 'handoff', '--intent', 'original']
