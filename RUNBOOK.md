@@ -6663,3 +6663,10 @@ capability denials PASS; no native turns/notifications. Owned TUI proof03 fresh,
 exact resume and tab-only PASS, zero turns, no OS residue; two partial proofs kept.
 Final isolated prefix /tmp/codex-wake-p162-install, not the active0.13.1 installation.
 Plan/issue remain OPEN for dependency integration and remaining live acceptance.
+
+Published source checkpointf5449adc32d457749365277f241f82fc64353863 and verified
+remote equality. Draft PR263 targets feat/agent-lifecycle as a dependency stack;
+intended integration remains main after PR253. Final installed20 controls and
+own proof04 passed;7 installed module hashes match source, zero model turns and
+empty OS residue. Active installation unchanged; no production-notify claim.
+Memory disposition unavailable (no reviewed repo Graphiti group), receipt retained.

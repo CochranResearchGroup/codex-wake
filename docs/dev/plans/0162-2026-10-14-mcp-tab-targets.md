@@ -6,6 +6,7 @@ Owner: primary / ecochran76
 Target: origin/main
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/262
 Branch: feat/mcp-tab-targets
+Pull-Request: https://github.com/CochranResearchGroup/codex-wake/pull/263
 Dependency: Plan0156 / PR253, pinned source 5b14c05
 
 ## Current State
