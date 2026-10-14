@@ -254,6 +254,11 @@ def rollback_handoff(path,receipt,profile,policy,root):
         receipt['state']='rolling_back';owner['state']='rolling_back';save(owner_path,owner);save(path,receipt)
         guard=dict(thread_id=source,reason='successor_preflight_not_verified')
         source_guard(guard,profile,root)
+        if not guard.get('source_attachment') and result.get('restoration'):
+            from .lifecycle_rollback_ui import leave_restored_goal_paused
+            if leave_restored_goal_paused(path,receipt,profile,before,request):
+                guard=dict(thread_id=source,reason='successor_preflight_not_verified')
+                source_guard(guard,profile,root)
         if not guard.get('source_attachment'):
             from .sessions import observe
             from .session_lifecycle import pending_thread_work,tmux_command
@@ -301,7 +306,8 @@ def rollback_handoff(path,receipt,profile,policy,root):
             if (restored['pane_id']!=expected['pane_id'] or restored['window_id']!=expected['window_id']
                     or restored['client_pid']==expected['previous_client_pid']):
                 result.update(state='uncertain',reason='exact_restored_source_generation_unverified');return
-            if result.get('uncertain_effect')=='tmux/rollback_respawn':result.pop('uncertain_effect',None)
+            if result.get('uncertain_effect') in ('tmux/rollback_respawn','tmux/rollback_leave_paused'):
+                result.pop('uncertain_effect',None)
         goal=request('thread/goal/get',{'threadId':source})['goal']
         if (not goal or goal['status']!='paused'
                 or any(goal.get(k)!=before.get(k) for k in ('threadId','objective','createdAt'))

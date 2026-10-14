@@ -161,7 +161,11 @@ requires settled known actors. Configured refresh observes the same goal before
 stop and after continuity, preserving its original deadline and usage history.
 Standalone spawn/refresh source tests cover shared accounting; installed combined
 configured-review acceptance remains open in this source candidate.
-Same-tab and handoff rollback acceptance remain pending in this source candidate.
+Native review, resource limits and continuation have passed in both tab modes;
+new-tab rollback passed. Same-tab rollback and full product acceptance remain open.
+A restored source may show the native paused-goal dialog. The controller dismisses
+only that recognized dialog on the exact restored client, retaining the paused
+goal, then requires the usual empty-composer proof. Other dialogs hold rollback.
 See the matching lifecycle guide for monitor setup and known acceptance gaps.
 
 For existing basic tmux workflows, select `--legacy-tmux`; advanced signals and

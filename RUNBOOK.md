@@ -6451,3 +6451,26 @@ caller seam; any failed verification transitions to reframe/block, no blind retr
 The original one-per-mode proof unit is ended with its failed axis preserved.
 Closed-world successor verifies all three call sites; one remaining same-tab
 verification only, unchanged250,000/150,000/600s caps, no new broad review.
+
+Complete-context-same-tab01 passed full selected review, both handoffMCP
+readbacks, exact same-pane/fresh-client identity, continuation and resource limits:
+source65,132+receiver141,328=206,460. Rollback respawned original source but held
+on local_composer_not_proven_empty. Zero-model native TUI probe reproduced
+Resume paused goal dialog; Escape dismisses it with unchanged paused goal,
+counters and one original completed turn. A narrowly matched, generation-checked
+one-shot rollback adapter now journals Escape and verifies unchanged goal.
+Unknown dialogs remain blocked; lost key response reconciles without second key.
+Source86 tests passed34.808s; installed21 same86 passed30.290s;95 Python files
+match exactly. Installed native adapter probe passed with0 model assignments,
+unchanged goal/turn history, server exit0 and fresh OS census empty. Preserved
+zero-model probe setup failures (pane cwd/title, missing standalone journalstate);
+these emitted no keys or model turns. Classification:blocker_reduction.
+
+MCPcontext seam closed-world verification now passed. Separate same-tab rollback
+seam has one reproduced native failure and this first correction, qualified zero
+model; permit one installed same-tab verification with unchanged fixture caps.
+Current window external spend561,200 (209,130+145,610+206,460); prior window
+659,999 retained separately. Forecast250,000 rollback verification+800,000
+correction proof+150,000 primary/integration is below remaining1,268,790 at
+root1,442,450 (baseline1,272,440). Do not start another paid unit unless remaining
+minimum complete proof still fits. Full goal OPEN, no merge/release/closure.

@@ -153,13 +153,22 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_same_tab_rollback_restores_original_paused_conversation(self):
         self.scenario(same_tab=True,rollback=True)
 
+    def test_same_tab_rollback_leaves_resumed_goal_paused_before_composer_check(self):
+        self.scenario(same_tab=True,rollback=True,resume_modal=True)
+
+    def test_lost_leave_paused_response_observes_composer_without_second_key(self):
+        self.scenario(same_tab=True,rollback=True,resume_modal=True,lost_modal=True)
+
+    def test_restored_unknown_dialog_never_receives_an_automatic_key(self):
+        self.scenario(same_tab=True,rollback=True,resume_modal="other")
+
     def test_lost_source_restore_response_observes_existing_generation_without_respawn(self):
         self.scenario(rollback=True,missing_source=True,lost_restore=True)
 
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False,reference_contract=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False,reference_contract=False,resume_modal=False,lost_modal=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -352,13 +361,20 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         value={}
                     else:raise AssertionError('unexpected native method '+method)
                     ws.send(json.dumps(dict(id=req['id'],result=value)))
+            modal={"visible":False,"dismissals":0}
             def command(argv,**kwargs):
                 if 'list-panes' in argv:
                     if '-a' in argv:
                         out='\n'.join('\t'.join(['$1','owned','@'+pane[1:],'1',p['name'],pane,'0',
                             threads[source]['name'] if visibility['stale_title'] and p['thread']==target else threads[p['thread']]['name'],tmp,p['tty']]) for pane,p in panes.items())
                     else:out='\n'.join(p for p in panes if '@'+p[1:] in argv)
-                elif 'capture-pane' in argv:out='\n\n\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m\n'
+                elif 'capture-pane' in argv:
+                    out=('\x1b[1mResume paused goal?\x1b[0m\n\x1b[1;7m› 1. Resume goal   Mark it active and continue when idle\n2. Leave paused  Keep it paused; use /goal resume later\nenter select · esc back' if modal['visible'] else '\n\n\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m\n')
+                    if modal['visible'] and resume_modal=='other':out=out.replace('Resume paused goal?','Unknown dialog')
+                elif 'send-keys' in argv:
+                    self.assertEqual(argv[-1],'Escape');self.assertTrue(modal['visible'])
+                    modal['visible']=False;modal['dismissals']+=1;out=''
+                    if lost_modal:raise subprocess.TimeoutExpired(argv,1)
                 elif 'display-message' in argv:out='2,2'
                 elif 'respawn-pane' in argv:
                     self.assertTrue(same_tab or missing_source);respawns.append(argv)
@@ -367,6 +383,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     old=next(c for c in clients if c.pid==panes[pane]['pid'])
                     old.terminate();old.wait(timeout=2)
                     restored=source if source in argv[-1] else target
+                    modal['visible']=resume_modal and restored==source
                     launch(['sh','-c','exec '+argv[-1]],pane,'original-worker',restored);out=''
                     if lost_respawn or lost_restore and restored==source:raise subprocess.TimeoutExpired(argv,1)
                 elif 'new-window' in argv:
@@ -526,10 +543,26 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(goals[source]['tokenBudget'],1000)
                             self.assertEqual(len(goal_sets),1)
                             return
-                        for index in range(3 if late_usage else 2):
+                        for index in range(3 if late_usage or lost_modal else 2):
                             out=StringIO()
-                            with redirect_stdout(out):self.assertEqual(run(argv+['--rollback']),5 if late_usage and index<2 or (lost_rollback or lost_rollback_pause or lost_restore) and index==0 else 0)
+                            with redirect_stdout(out):self.assertEqual(run(argv+['--rollback']),5 if resume_modal=="other" or late_usage and index<2 or lost_modal and index<2 or (lost_rollback or lost_rollback_pause or lost_restore or resume_modal) and index==0 else 0)
                             restored=json.loads(out.getvalue())['rollback']
+                            if resume_modal=='other' and index==1:
+                                self.assertEqual(restored['state'],'blocked')
+                                self.assertEqual(modal['dismissals'],0)
+                                self.assertEqual(goals[source]['status'],'paused')
+                                self.assertEqual(goals[source]['tokenBudget'],1000)
+                                self.assertEqual(len(respawns),2)
+                                return
+                            if lost_modal and index==1:
+                                self.assertEqual(restored['state'],'uncertain')
+                                self.assertEqual(restored['uncertain_effect'],'tmux/rollback_leave_paused')
+                                self.assertEqual(modal['dismissals'],1)
+                                continue
+                            if resume_modal and index==0:
+                                self.assertEqual(restored['state'],'uncertain')
+                                self.assertEqual(goals[source]['status'],'paused')
+                                continue
                             if lost_restore and index==0:
                                 self.assertEqual(restored['state'],'uncertain')
                                 self.assertEqual(restored['uncertain_effect'],'tmux/rollback_respawn')
@@ -547,6 +580,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             if late_usage and index==0:
                                 (home/'sessions'/ (target+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':40}})))+'\n')
                             self.assertEqual(goals[source]['tokensUsed'],50)
+                        if resume_modal:self.assertEqual(modal['dismissals'],1)
                         if missing_source or same_tab:
                             self.assertIsNotNone(clients[0].poll())
                             self.assertEqual(restored['attachment']['pane_id'],'%159' if same_tab else '%160')

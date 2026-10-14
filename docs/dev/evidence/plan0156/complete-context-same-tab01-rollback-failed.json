@@ -1,0 +1,113 @@
+{
+  "state": "passed_primary_failed_rollback",
+  "raw_root": "/tmp/codex-wake-plan0156-complete-context-same-tab01",
+  "raw_state_sha256": "e236a5f03163f18a78db39bb4cd6d338c0c2811444f22de53072c14a066025ec",
+  "source_commit": "a08e13a6733c42bd0d536fb47ea005341a638bc4",
+  "prefix": "/tmp/codex-wake-plan0156-installed20",
+  "resource_axis": "passed",
+  "source_tokens": 65132,
+  "successor_tokens": 141328,
+  "total_tokens": 206460,
+  "review_axis": "passed",
+  "continuation_axis": "passed",
+  "mcp_prepared_axis": "passed",
+  "mcp_completed_axis": "passed",
+  "rollback_axis": "failed",
+  "rollback": {
+    "reason": "local_composer_not_proven_empty",
+    "restoration": {
+      "pane_id": "%1",
+      "previous_client_pid": 8259,
+      "window_id": "@1"
+    },
+    "state": "blocked",
+    "thread_id": "01a13b13-41ec-7590-a257-1441d35b3434",
+    "uncertain_effect": "tmux/rollback_respawn"
+  },
+  "same_tab_identity": {
+    "original": {
+      "client_pid": 4352,
+      "client_start_time_ticks": 2868399,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/tmp/codex-wake-plan0156-complete-context-same-tab01/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "checkpoint-source-52bf682cba56",
+      "pane_tty": "/dev/pts/44",
+      "session_id": "$0",
+      "session_name": "owned-handoff",
+      "socket": "/tmp/codex-wake-plan0156-complete-context-same-tab01/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "checkpoint-source"
+    },
+    "successor": {
+      "client_pid": 8259,
+      "client_start_time_ticks": 2872372,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/tmp/codex-wake-plan0156-complete-context-same-tab01/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "handoff-ee84dbbcee4b-a4eb5ab777f2",
+      "pane_tty": "/dev/pts/45",
+      "session_id": "$0",
+      "session_name": "owned-handoff",
+      "socket": "/tmp/codex-wake-plan0156-complete-context-same-tab01/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "checkpoint-source"
+    }
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      21705,
+      53437
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0,
+  "source_goal": {
+    "createdAt": 1791992514,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-complete-context-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "paused",
+    "threadId": "01a13b13-41ec-7590-a257-1441d35b3434",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 184868,
+    "tokensUsed": 0,
+    "updatedAt": 1791992514
+  },
+  "successor_goal": {
+    "createdAt": 1791992592,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-complete-context-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "complete",
+    "threadId": "01a13b13-dbde-7630-b065-0e6223c87789",
+    "timeUsedSeconds": 5,
+    "tokenBudget": 70229,
+    "tokensUsed": 1612,
+    "updatedAt": 1791992610
+  },
+  "final_ledger": {
+    "path": "/tmp/codex-wake-plan0156-complete-context-same-tab01/wake/objective-ledgers/41db81163572c2cab54f9189ce818c76cd8a8f3e881423683a22281e5823c334.json",
+    "sha256": "eff88724c4dd6f02efb07e0e49c301b602ecae20e125d3f1875be0e2e8379eee",
+    "actors": {
+      "goal:01a13b13-41ec-7590-a257-1441d35b3434:1791992514": {
+        "known": true,
+        "settled": true,
+        "used": 0
+      },
+      "handoff:ee84dbbcee4b1835c3dca04b7737ff44ec8130048250a302d2df3c970a2aa9a1": {
+        "known": true,
+        "settled": false,
+        "used": 110439
+      },
+      "spawn:52bf682cba5693427a27d815b355b664b7c2d2dbe2e3985c76928f0d5b8bef50": {
+        "known": true,
+        "settled": true,
+        "used": 65132
+      }
+    }
+  }
+}
