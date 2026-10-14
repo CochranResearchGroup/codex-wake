@@ -6406,3 +6406,34 @@ Next actual evidence deadline:600s for same-tab physical retirement, semantic
 preflight, full-rollout bounded continuation and rollback; then new-tab once if
 resources and first result permit. No wrapper-only setup substituted for native
 acceptance, no broad review. Goal/plan/children/issues remain ACTIVE/OPEN.
+
+
+## Turn 318 | 2026-10-14 UTC
+
+Operator explicitly renewed resources:15:30:13–21:30:13UTC,2,000,000 tokens.
+Root baseline1,272,440; prior window known total1,348,524 includes659,999
+native external tokens and is retained separately. State remains ACTIVE,
+Plan0156 OPEN; renewal preserves all review/retry/scope controls. Classification:
+blocker_reduction (resource renewal). Next: preserve total-same-tab01 resource
+and continuation proof, qualify failed late MCP readback without model assignment,
+then complete remaining bounded native acceptance and integration gates.
+
+Preserved total-same-tab01 primary evidence: source64,976+successor141,055
+=206,031 within250,000 total/150,000 receiver caps; exact same pane/window,
+fresh client generation, actual selected review and continuation complete.
+Late native MCPreadback failed before rollback; final ledger known/settled
+206,031 once. Zero-model private restart reproduced -32600 thread-not-found
+for original unloaded paused caller. Exact thread/resume restored that caller;
+configuration read passed, goal/counters unchanged, no new turns or model calls.
+Private server exited0; fresh OS census no owned processes. Regression red
+(missing helper), then14 focused harness tests green including active-source and
+resume-goal-mutation rejection. Harness loads only exact unchanged paused source
+before lateMCPreadback; parent deadline now comes from explicit caller rather
+than a historical hardcoded window. Current7a65 CI38587785208 success.
+
+Bounded proof reframe: verified native caller-context defect is repaired; next
+unit is full rollback acceptance in both modes, at most one sample per mode,
+no same-mode retry. Preserve original Turn317 outcomes and inherited discovery
+limits. Minimum proof forecast500,000 native+350,000 root/integration is covered
+by renewed2,000,000 allowance. No acceptance criteria or sample caps raised.
+Classification:blocker_reduction; full goal remains OPEN.

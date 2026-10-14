@@ -97,6 +97,39 @@ class PreflightSupervisionTests(unittest.TestCase):
 
 
 class HostNativeObservationTests(unittest.TestCase):
+    def test_retired_source_mcp_readback_loads_only_same_paused_context(self):
+        calls=[];goal=dict(threadId='source',objective='fixed',tokenBudget=100,createdAt=1,status='paused',tokensUsed=0,timeUsedSeconds=0)
+        def request(method,params):
+            calls.append((method,params))
+            if method=='thread/goal/get':return {'goal':goal}
+            if method=='thread/resume':return {'thread':dict(id='source',turns=[])}
+            return {'content':[]}
+        runner.call_source_mcp(request,'source',goal,'wake_sessions_handoff',{'intent':'same-intent'})
+        self.assertEqual([m for m,_ in calls],['thread/goal/get','thread/resume','thread/goal/get','mcpServer/tool/call'])
+        self.assertEqual(calls[1][1],{'threadId':'source'})
+        self.assertEqual(calls[-1][1]['arguments'],{'intent':'same-intent'})
+
+    def test_source_mcp_readback_rejects_active_source_without_loading(self):
+        goal=dict(threadId='source',objective='fixed',tokenBudget=100,createdAt=1,status='active')
+        calls=[]
+        def request(method,params):
+            calls.append(method)
+            return {'goal':goal}
+        with self.assertRaisesRegex(RuntimeError,'authority changed'):
+            runner.call_source_mcp(request,'source',goal,'wake_sessions_handoff',{})
+        self.assertEqual(calls,['thread/goal/get'])
+
+    def test_source_mcp_readback_rejects_resume_goal_mutation_before_tool(self):
+        goal=dict(threadId='source',objective='fixed',tokenBudget=100,createdAt=1,status='paused')
+        calls=[]
+        def request(method,params):
+            calls.append(method)
+            if method=='thread/resume':return {'thread':dict(id='source',turns=[])}
+            return {'goal':dict(goal,tokenBudget=101) if len(calls)==3 else goal}
+        with self.assertRaisesRegex(RuntimeError,'changed its paused goal'):
+            runner.call_source_mcp(request,'source',goal,'wake_sessions_handoff',{})
+        self.assertNotIn('mcpServer/tool/call',calls)
+
     def test_native_mcp_setup_proves_readback_and_missing_checkpoint_stays_effect_free(self):
         calls=[]
         def request(method,params):

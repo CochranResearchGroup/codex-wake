@@ -1,0 +1,85 @@
+{
+  "state": "failed_secondary_readback_gate",
+  "source_commit": "7a65fb0f03e62ddf8e8c1051a69458ef2eecb8fc",
+  "raw_root": "/tmp/codex-wake-plan0156-total-same-tab01",
+  "raw_state_sha256": "dc56567bf98d484a0c3dcd9b09206f6558df7da1b5c21870852541d05b117f43",
+  "mode": "same-tab",
+  "source_tokens": 64976,
+  "successor_tokens": 141055,
+  "total_tokens": 206031,
+  "session_limit": 150000,
+  "total_limit": 250000,
+  "resource_axis": "passed",
+  "continuation_axis": "passed",
+  "same_tab_identity_axis": "passed",
+  "late_mcp_readback_axis": "failed",
+  "rollback_axis": "not_run",
+  "error": "native lifecycle request rejected: mcpServer/tool/call",
+  "source_goal": {
+    "createdAt": 1791991017,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-total-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "paused",
+    "threadId": "01a13afc-6c9d-7082-a273-693b382a230b",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 185024,
+    "tokensUsed": 0,
+    "updatedAt": 1791991017
+  },
+  "successor_goal": {
+    "createdAt": 1791991079,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-total-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "complete",
+    "threadId": "01a13afd-0126-7770-b178-f64755dbcb47",
+    "timeUsedSeconds": 5,
+    "tokenBudget": 70382,
+    "tokensUsed": 1678,
+    "updatedAt": 1791991097
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      53437
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0,
+  "owned_successor_settlement": {
+    "goal": {
+      "createdAt": 1791991079,
+      "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-total-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+      "status": "complete",
+      "threadId": "01a13afd-0126-7770-b178-f64755dbcb47",
+      "timeUsedSeconds": 5,
+      "tokenBudget": 70382,
+      "tokensUsed": 1678,
+      "updatedAt": 1791991097
+    },
+    "interrupted_turn_ids": [],
+    "settled": true,
+    "thread_id": "01a13afd-0126-7770-b178-f64755dbcb47"
+  },
+  "final_ledger": {
+    "path": "/tmp/codex-wake-plan0156-total-same-tab01/wake/objective-ledgers/82adf7760e571d8f0cf5b6c212b964526ccbe0a0e4380e3b5d727eea6e1481e7.json",
+    "sha256": "a253dbf55d00490055d6f9c8280f8b7816a732aa3a6b48090ef377c44fd62a95",
+    "actors": {
+      "goal:01a13afc-6c9d-7082-a273-693b382a230b:1791991017": {
+        "known": true,
+        "settled": true,
+        "used": 0
+      },
+      "handoff:8111883c1e2a341fcf87edc45e264f2e4c8e1b0169b96f24d839d1903935165f": {
+        "known": true,
+        "settled": true,
+        "used": 141055
+      },
+      "spawn:490b3cc54284ad3891dbfd6d9dea0dce8d37d057d502044e420f193ac2e3004d": {
+        "known": true,
+        "settled": true,
+        "used": 64976
+      }
+    },
+    "total_tokens": 206031
+  }
+}

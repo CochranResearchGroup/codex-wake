@@ -62,6 +62,22 @@ def observe_native_preflight(request, source, target, guide, cwd):
             content_sha256=hashlib.sha256(json.dumps(resource,sort_keys=True).encode()).hexdigest()))
 
 
+def call_source_mcp(request,source,saved_goal,tool,arguments):
+    """Load the original paused caller without assigning work or changing its goal."""
+    before=request('thread/goal/get',dict(threadId=source))['goal']
+    identity=('threadId','objective','tokenBudget','createdAt')
+    if (not before or before.get('status')!='paused' or before.get('threadId')!=source
+            or any(before.get(k)!=saved_goal.get(k) for k in identity)):
+        raise RuntimeError('source MCP caller goal authority changed')
+    native=request('thread/resume',dict(threadId=source))['thread']
+    if native.get('id')!=source or any(t.get('status')=='inProgress' for t in native['turns']):
+        raise RuntimeError('source MCP caller is not the idle original context')
+    after=request('thread/goal/get',dict(threadId=source))['goal']
+    if after!=before:
+        raise RuntimeError('source MCP caller resume changed its paused goal')
+    return request('mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool=tool,arguments=arguments))
+
+
 def qualify_lifecycle_mcp(request,thread,profile,expiry):
     def call(tool,arguments):
         return request('mcpServer/tool/call',dict(threadId=thread,server='codex-wake',tool=tool,arguments=arguments))
@@ -278,7 +294,8 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
         token_cap=250000,time_cap_seconds=600,manual_assignment_limit=0 if qualify_only else 2,mode=mode,rollback_requested=rollback,
         selected_instruction_mirrors=mirrors,
-        root_window=dict(start='2026-10-14T12:29:34Z',deadline='2026-10-14T18:29:34Z',token_cap=2000000),
+        root_window=dict(start=datetime.fromtimestamp(parent_deadline-21600,UTC).isoformat(),
+            deadline=datetime.fromtimestamp(parent_deadline,UTC).isoformat(),token_cap=2000000),
         adaptation_lane=dict(token_cap=100000,time_cap_seconds=900,goal_counter='unknown'))
     env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
     for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):env.pop(k,None)
@@ -314,8 +331,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         bounds=snapshot().get('utc')
         if not bounds:raise RuntimeError('admissible UTC unavailable')
         started=original['started_at'] if original else bounds['upper']
-        end=min(original['deadline'] if original else started+600,parent_deadline-60,
-            datetime(2026,10,14,18,29,34,tzinfo=UTC).timestamp()-60)
+        end=min(original['deadline'] if original else started+600,parent_deadline-60)
         if end-bounds['upper']<(240 if original else 480):raise RuntimeError('original/parent deadline leaves insufficient fixed fixture window')
         expiry=datetime.fromtimestamp(end,UTC).isoformat();receipt.update(started_at=started,deadline=end)
         # Resolve the owned listener before configuring MCP, without creating a thread.
@@ -499,7 +515,9 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             raise RuntimeError('final native goal completion/accounting unverified')
         done=final_goal
         receipt.update(state='passed_continuation_axis',successor_usage=spent,continuation_turn_id=matching[0]['id'],final_source_goal=request('thread/goal/get',dict(threadId=source))['goal'],final_successor_goal=done)
-        receipt['native_handoff_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=mcp_args),70)
+        receipt['native_handoff_mcp_result']=call_source_mcp(
+            lambda method,params:native_request('unix://'+str(endpoint),str(codex),method,params,70),
+            source,receipt['final_source_goal'],'wake_sessions_handoff',mcp_args)
         write(root/'native-continuation.json',native)
         if mode=='same-tab':
             old=receipt['handoff']['source_attachment'];fresh=receipt['handoff']['successor']['attachment']
@@ -517,7 +535,9 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             if (after['status']!='paused' or any(after.get(k)!=before.get(k) for k in ('threadId','objective','createdAt'))
                     or any(after[k]<before[k] for k in ('tokensUsed','timeUsedSeconds'))):
                 raise RuntimeError('rollback source identity/counters not conserved')
-            receipt['native_rollback_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=dict(mcp_args,rollback=True)),70)
+            receipt['native_rollback_mcp_result']=call_source_mcp(
+                lambda method,params:native_request('unix://'+str(endpoint),str(codex),method,params,70),
+                source,after,'wake_sessions_handoff',dict(mcp_args,rollback=True))
             receipt['rollback_source_goal']=request('thread/goal/get',dict(threadId=source))['goal']
     except SetupQualified:receipt.update(state='qualified_setup')
     except Exception as exc:receipt.update(state='failed',error=str(exc))

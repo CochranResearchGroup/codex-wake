@@ -8,6 +8,13 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
 
+2026-10-14 operator renewed resources ("renew resources") at15:30:13UTC.
+Current window15:30:13–21:30:13UTC, at most2,000,000 attributable tokens;
+same ACTIVE thread, root baseline1,272,440. Prior window known spend1,348,524
+(root1,272,440 minus583,915 plus659,999 native) retained separately. Native
+rollout baselines retained; charge only subsequent deltas and new work.
+Acceptance, review-discovery and retry history remain unchanged.
+
 2026-10-14 operator renewed resources again ("renew resources"). This window
 supersedes the remaining prior allowance: 12:29:34–18:29:34 UTC, at most
 2,000,000 attributable tokens. Same ACTIVE thread; native baseline583,915.

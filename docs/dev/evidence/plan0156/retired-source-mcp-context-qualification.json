@@ -1,0 +1,157 @@
+{
+  "model_assignments": 0,
+  "source": "01a13afc-6c9d-7082-a273-693b382a230b",
+  "raw_root": "/tmp/codex-wake-plan0156-total-same-tab01",
+  "loaded_before": {
+    "id": 2,
+    "result": {
+      "data": [],
+      "nextCursor": null
+    }
+  },
+  "goal_before": {
+    "id": 2,
+    "result": {
+      "goal": {
+        "threadId": "01a13afc-6c9d-7082-a273-693b382a230b",
+        "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-total-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+        "status": "paused",
+        "tokenBudget": 185024,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1791991017,
+        "updatedAt": 1791991017
+      }
+    }
+  },
+  "mcp_before_resume": {
+    "error": {
+      "code": -32600,
+      "message": "thread not found: 01a13afc-6c9d-7082-a273-693b382a230b"
+    },
+    "id": 2
+  },
+  "resume": {
+    "id": "01a13afc-6c9d-7082-a273-693b382a230b",
+    "status": {
+      "type": "idle"
+    },
+    "turns": [
+      {
+        "id": "01a13afc-8636-7413-8538-5b50fd4ca859",
+        "status": "completed"
+      }
+    ]
+  },
+  "resume_error": null,
+  "goal_after": {
+    "id": 2,
+    "result": {
+      "goal": {
+        "threadId": "01a13afc-6c9d-7082-a273-693b382a230b",
+        "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed20/bin/python /tmp/codex-wake-plan0156-total-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+        "status": "paused",
+        "tokenBudget": 185024,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1791991017,
+        "updatedAt": 1791991017
+      }
+    }
+  },
+  "mcp_after_resume": {
+    "error": null,
+    "isError": false
+  },
+  "loaded_after": {
+    "id": 2,
+    "result": {
+      "data": [
+        "01a13afc-6c9d-7082-a273-693b382a230b"
+      ],
+      "nextCursor": null
+    }
+  },
+  "server_exit": 0,
+  "state": "passed_zero_model_context_qualification",
+  "source_artifact": "/tmp/codex-wake-plan0156-total-same-tab01/retired-source-probe.json",
+  "fresh_process_census": {
+    "private_readable_environment_matches": [],
+    "denied_environment_pids": [
+      1,
+      2,
+      9,
+      62,
+      122,
+      127,
+      134,
+      144,
+      157,
+      161,
+      164,
+      183,
+      188,
+      206,
+      209,
+      224,
+      239,
+      242,
+      244,
+      245,
+      256,
+      266,
+      271,
+      380,
+      408,
+      409,
+      413,
+      416,
+      417,
+      420,
+      425,
+      587,
+      589,
+      590,
+      593,
+      610,
+      612,
+      616,
+      632,
+      643,
+      646,
+      678,
+      713,
+      732,
+      782,
+      783,
+      902,
+      1372,
+      1541,
+      1948,
+      1986,
+      1995,
+      3798,
+      5086,
+      12624,
+      12651,
+      12811,
+      12920,
+      12921,
+      13069,
+      14088,
+      14091,
+      21170,
+      21705,
+      44464,
+      48210,
+      53323,
+      53437,
+      60366,
+      64098,
+      65698,
+      66244,
+      68403,
+      98790
+    ]
+  }
+}
