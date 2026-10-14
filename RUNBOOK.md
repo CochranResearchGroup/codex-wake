@@ -6631,3 +6631,12 @@ mandatory A2A return/wait standards. No source conflict or scope change.
 Installed prefix remains0.13.1-241d7a4 (uvtool0.8 metadata is an inactive path).
 Prepare0.14.0 minor release after all local gates; no shared service restart.
 Classification:blocker_reduction; exact-main release/install/closure next.
+
+Candidate0.14.0 at45467abb2ba4e68c29885575c23773952875f0fd passed1210 tests145.375s, plugin/entrypoint/policy
+checks,9 installed compatibility/MCP/registry/discovery/mailbox gates and product
+smoke after seeding pip in the private uv venv. Initial wheel metadata mismatch
+(0.13.1 pyproject versus0.14 module) corrected before qualified build; initial
+product smoke lacked pip. Both failures/logs retained. No source/runtime defect
+in those setup failures. PR253 rewritten around final product and actual evidence;
+post-merge release/install remains open. No paid native work remains authorized
+in this proof packet. Classification:outcome_progress/release gates.
