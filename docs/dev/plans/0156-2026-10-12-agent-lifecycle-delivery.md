@@ -8,6 +8,15 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
 
+2026-10-14 operator explicitly renewed resources ("renew resources"). New
+execution window: 10:38:06–16:38:06 UTC, at most 2,000,000 attributable tokens.
+Thread 01a139e7-17bc-79c3-af66-0294a9a69e3f resumed ACTIVE; renewal baseline
+28,639 native tokens. Count subsequent native deltas plus any external actor
+usage in this window. Preserve all previous-window receipts and counters;
+renewal does not reset acceptance, review discovery or retry history. Primary
+owns issue255 then256 then257 on feat/agent-lifecycle. Checkpoint each bounded
+slice and before native effects, with the existing 45-minute backstop.
+
 Draft integration PR: https://github.com/CochranResearchGroup/codex-wake/pull/253
 (base main, verified8d7763f at creation). Draft remains not merge-ready; full native
 handoff acceptance and release gates remain open. No issue auto-close directives.
@@ -47,6 +56,143 @@ TUI restart retains its thread's MCP connection on installed Codex0.162.1; fresh
 conversation loads the revised MCP. This plan specifies a future lifecycle product,
 the controller now implements guarded spawn and partial refresh. Goal migration
 and actual successor preflight remain pending Plan0159 work.
+
+## Operator requirements revision — configurable review and nested budgets
+
+The operator clarified that handoff-writing and preflight-review skills must be
+selectable, including Matt Pocock handoff and ask-Matt. Preflight must assess
+actual objective progress, scope drift and unsupported completion claims, separate
+from runtime readiness. Test count alone is not acceptance evidence.
+
+The operator controls both session and cumulative objective token/time budgets.
+Successors, reviewers, delegated work, retries and failed preflight count toward
+the objective budget; transitions cannot renew it. Preserve prior accounting
+when the operator explicitly extends or resets an allowance.
+
+Approved correction policy: rejected outgoing work may receive bounded correction
+within the existing objective, authority and remaining budgets. Scope expansion
+or resource increases require an explicit operator decision. This revision does
+not reset the current execution window or establish native acceptance.
+
+The operator approved user defaults with per-objective overrides, overall
+wall-clock time including waiting, and at most two automatic correction cycles.
+Existing implementation and failed acceptance receipts remain historical
+evidence; do not relabel them as meeting the new requirements.
+
+### Revised solution and user stories
+
+Expose an effective configuration before starting an objective: selected handoff
+writer and preflight reviewer, their resolved instruction sources, session token
+and time limits, objective token and time limits, original objective start and
+deadline, and correction-cycle bound. Apply user defaults then explicit objective
+overrides. Persist the resolved configuration with the approved objective;
+configuration edits must not silently change an active assignment.
+
+1. As an operator, select handoff-writing instructions such as Matt Pocock's
+   handoff skill so the outgoing checkpoint follows my chosen process.
+2. As an operator, select preflight instructions such as ask-Matt so the successor
+   chooses a relevant review process instead of a hardcoded GitHub workflow.
+3. As an operator, inspect the effective configuration before work starts so
+   overrides and actual limits are visible.
+4. As a successor, compare outgoing claims against the approved objective,
+   acceptance criteria, actual changes and evidence before accepting the work.
+5. As an operator, see runtime readiness separately from work acceptance so a
+   successful launch or test count cannot masquerade as objective progress.
+6. As a successor, perform at most two corrective cycles within approved scope
+   and remaining resources, then checkpoint and stop if acceptance still fails.
+7. As an operator, bound each agent goal session and the whole objective so
+   multiple bounded sessions cannot create an unlimited execution loop.
+8. As an operator, see all attributable model spend, including failed attempts,
+   reviewers and delegated work, without double counting cumulative counters.
+9. As an operator, retain original deadlines through waiting, controller restart,
+   refresh, handoff and retry; unknown accounting holds new admission.
+10. As an operator, explicitly extend or reset a budget without erasing prior
+    usage or allowing an agent to authorize its own extension.
+
+### Revised implementation decisions
+
+- Replace the single supported preflight workflow with configured instruction
+  selection. Preserve host-controlled launch, grants, script approval and runtime
+  ownership checks. Skills guide procedure; they do not grant capabilities,
+  change scope or enlarge budgets. Missing or unreadable selected instructions
+  block the affected transition; do not silently substitute another skill.
+- Retain the mandatory checkpoint contract even when a selected writer uses a
+  different presentation. Bind the checkpoint and review to exact source,
+  successor, objective, configuration and evidence identities. Record the
+  selected router's actual downstream review choice and evidence; invoking
+  ask-Matt alone is not a review result.
+- Record runtime readiness independently from a work verdict of accept, correct
+  or blocked. Work review must state what changed, which acceptance criterion it
+  advanced, evidence checked, scope deviations, unsupported claims, unfinished
+  work and the justified next packet. A reviewer assertion alone cannot replace
+  command, diff or native evidence.
+- An accept verdict permits the authorized next packet only after runtime and
+  budget gates pass. A correct verdict permits only a bounded remediation packet;
+  it does not accept previous work. Count correction cycles at objective level
+  across conversation replacement and controller restart. After two unsuccessful
+  cycles stop and checkpoint. Scope/resource changes require the operator.
+- Give each objective a durable identity, approved configuration revision,
+  original wall-clock start/deadline and cumulative usage ledger. Count every
+  assigned actor and attempt, including preflight and overlapping workers. Do
+  not sum repeated snapshots of the same cumulative counter. Unsettled usage
+  must be reconciled or conservatively reserved before admitting more work.
+- Session allowance is bounded by both its configured limits and the remaining
+  objective allowance. Reserve resources atomically before concurrent admission;
+  reconcile actual usage afterward. Session and objective time deadlines are
+  both enforced; overall elapsed time includes waiting and pauses. Context
+  replacement does not reset either an existing session or the objective.
+- At exhaustion, fence further model assignments, settle owned active work and
+  preserve a checkpoint. Explicit operator extensions or resets append an
+  attributable authorization revision retaining old spend, deadlines and
+  receipts. Changing defaults alone does not renew an active objective.
+
+### Revised testing and acceptance
+
+Prefer the existing public CLI/MCP lifecycle seam, then verify an isolated
+installed native transition. Tests assert observable decisions and effects,
+not private implementation layout. Proposed seam remains subject to operator
+confirmation in the skill's specification step.
+
+- Effective configuration readback proves defaults and objective overrides,
+  exact instruction selection and rejection of missing instructions before
+  successor admission. Exercise a non-GitHub handoff/review selection.
+- A ready runtime with unsupported completion claims receives correct or
+  blocked, never accept. Demonstrate a meaningful change accepted against an
+  objective and a scope-drifting/test-count-only packet rejected.
+- Demonstrate bounded correction followed by acceptance, and repeated rejection
+  stopping after two cycles across controller restart and successor replacement.
+- Demonstrate two individually admissible sessions exhausting one overall
+  budget; the next assignment is denied. Concurrent actors cannot over-reserve,
+  failed preflight remains charged and replay cannot double-debit usage.
+- Waiting past the original objective deadline prevents continuation despite a
+  fresh session allowance. Unknown usage prevents new admission; an explicit
+  operator extension retains the prior ledger and resumes only within its grant.
+- Installed proof identifies actual selected instructions, actual review
+  evidence/verdict, native goal limits, cumulative accounting and owned cleanup.
+  Existing isolated refresh success does not prove this revised handoff contract.
+
+### Proposed vertical slices and blocking edges
+
+1. Configurable handoff and substantive preflight: effective configuration,
+   selected writer/reviewer instructions, complete checkpoint and separate
+   readiness/work verdict through public CLI/MCP. Blocked by: none for design;
+   implementation follows confirmed specification and execution allowance.
+2. Nested objective/session budgets: user configuration, durable accounting,
+   reservations, deadlines, stop and explicit extension through the same public
+   lifecycle path. Blocked by: slice1's configuration identity and readback.
+3. Bounded correction and installed acceptance: exercise correction/accept/stop
+   across successors, both tab modes, selected Matt workflows and actual native
+   accounting; then reconcile integration/release gates. Blocked by: slices1–2.
+
+The operator confirmed the public CLI/MCP seam, granularity and blocking edges.
+Published specification: https://github.com/CochranResearchGroup/codex-wake/issues/254.
+Approved slices: #255 configurable review, #256 nested budgets (blocked by #255),
+and #257 bounded correction/native acceptance (blocked by #255 and #256).
+All carry enhancement and ready-for-agent; readiness does not waive dependencies
+or the execution-resource gate. Mutation/readback receipts are retained under
+docs/dev/evidence/plan0156/configurable-review-issue-receipts.json.
+Existing issues248–251 remain open; publication does not establish implementation,
+acceptance, integration, release or a resource-window reset.
 
 ## Problem Statement
 

@@ -1192,3 +1192,5 @@ open. Refresh completion is not a handoff dependency. Primary serializes shared
 integration. No automatic goal/resource allowance reset.
 Prototype preserved on prototype/agent-lifecycle at5e1b0ac; no production source
 or runtime rollout in this design packet.
+
+P156 operator-approved revision: [spec254](https://github.com/CochranResearchGroup/codex-wake/issues/254) covers configurable handoff/preflight review and nested user budgets. New slices #255 → #256 → #257; #257 also depends on #255. Execution resource gate remains; existing lifecycle issues remain open.
