@@ -1,0 +1,99 @@
+{
+  "artifact_dir": "/tmp/codex-wake-p162-product-smoke",
+  "checks": {
+    "live_codex_app_server": {
+      "reason": "--live-codex-thread-id was not provided",
+      "status": "skipped"
+    },
+    "live_monitor": {
+      "reason": "--expect-monitor-ready was not provided",
+      "status": "skipped"
+    },
+    "live_openclaw_gateway": {
+      "reason": "--live-openclaw-agent and --live-openclaw-session-key were not provided",
+      "status": "skipped"
+    },
+    "surface": {
+      "cli_version": "0.15.0",
+      "github_fixture_lifecycle": {
+        "readiness": {
+          "checkpoint": {
+            "present": true,
+            "status": "ready"
+          },
+          "configuration": {
+            "enabled": true,
+            "status": "ready"
+          },
+          "credential_capability": {
+            "status": "ready"
+          },
+          "disabled": false,
+          "health": {
+            "degraded": false,
+            "status": "ready"
+          },
+          "health_code": "",
+          "observed_at": "2026-09-14T18:00:00+00:00",
+          "replay_lag": {
+            "seconds": 0,
+            "status": "ready"
+          },
+          "retry_at": null,
+          "status": "ready",
+          "terminal_failure": {
+            "code": "",
+            "status": "not_present"
+          },
+          "unsupported": false
+        },
+        "receipts": 1,
+        "source": "github",
+        "status": "matched"
+      },
+      "isolated_state": true,
+      "monitor_ready": false,
+      "product_readiness_overall": "blocked",
+      "runtime_fixture_lifecycle": {
+        "cleanup_deleted": 2,
+        "dispatch_attempted": false,
+        "sources": [
+          "process.exit",
+          "systemd.unit"
+        ],
+        "status": "matched",
+        "wake_ids": [
+          "wake-process-fixture",
+          "wake-systemd-fixture"
+        ]
+      },
+      "schema_version": 1,
+      "signal_lifecycle": {
+        "cleanup_deleted": true,
+        "dispatch_attempted": false,
+        "observed_status": "firing",
+        "retired_status": "archived",
+        "support_size_bytes": 4232,
+        "upgrade_reinstall": true,
+        "upgrade_restart": true,
+        "wake_id": "wake_763bba8ba1f644abb828d99fdf0a55d8"
+      },
+      "supervisor_once_roots": 1,
+      "surface_wake_root": "/tmp/codex-wake-p162-product-smoke/surface-wake"
+    },
+    "tmux": {
+      "reason": "tmux smoke can paste into the active pane and requires operator-visible pane evidence",
+      "status": "manual_only",
+      "tmux_env_present": true,
+      "tmux_pane_present": true
+    }
+  },
+  "codex_wake_bin": "/tmp/codex-wake-p162-release-candidate/bin/codex-wake",
+  "codex_waked_bin": "/tmp/codex-wake-p162-release-candidate/bin/codex-waked",
+  "generated_at": "2026-10-14T17:37:16.543569Z",
+  "live_wake_root": "/home/ecochran76/workspace.local/codex-wake-tab-targets/.codex/wake",
+  "public_tag": "",
+  "public_tag_work_dir": "",
+  "repo_root": "/home/ecochran76/workspace.local/codex-wake-tab-targets",
+  "schema_version": 1
+}

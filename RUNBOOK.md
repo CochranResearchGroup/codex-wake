@@ -6703,3 +6703,21 @@ PR263 retarget to main, exact merged-main installation and final custody readbac
 Reconciled parent closeout PR264/a72f8f5 without reopening lifecycle obligations.
 Plan0162 imported headings assigned323/324 and deployment325 to retain unique
 canonical turn IDs alongside the parent released-installed closeout322.
+
+## Turn 326 | 2026-10-14 UTC | Plan0162 released installed closeout
+
+PR263 integrated88f008d after both required CI gates. Published/activated0.15.0,
+then owned post-install proof exposed premature target_changed while Codex process
+was present but native identity pending. Restored all5 prior0.14.0 command links
+and both skill roots before repair. Red/green regression,36 focused controls and
+owned patch candidate PASS. PR265 integrated1ee7229 after both3.11/3.12 release
+gates (1,231 unit tests). Released stable0.15.1, public wheel/sdist exact download
+parity,99 installed Python files and both4-file skill roots match main. Global
+MCP19 tools/private-bus smoke and actual owned tab-only/fresh/exact resume PASS,
+zero model turns. Separate fresh /proc census found0 owned clients and0 denied
+reads; raw harness parent-shell observer row retained. All10 active services keep
+baseline PIDs/states; no shared restarts. Failed0.15.0 retained as superseded
+prerelease,0.14.0/backups and source/archive refs preserved. Source, installed
+identity and runtime boundaries recorded in final-acceptance.md. Closeout PR
+reconciles plan/roadmap/lane, then exact root fast-forward/clean worktree removal.
+Memory disposition unavailable: no reviewed Graphiti repo group; no memory writes.

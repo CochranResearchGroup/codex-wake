@@ -1,0 +1,36 @@
+{
+  "tool_count": 19,
+  "target_tool": true,
+  "read_only_targets": [
+    {
+      "selector": "tab 18",
+      "is_error": true,
+      "code": null,
+      "status": "no_live_codex",
+      "thread_id": null,
+      "cwd": "/home/ecochran76/workspace.local/agent-policies",
+      "match_method": "index",
+      "effects": []
+    },
+    {
+      "selector": "18:policies",
+      "is_error": true,
+      "code": null,
+      "status": "no_live_codex",
+      "thread_id": null,
+      "cwd": "/home/ecochran76/workspace.local/agent-policies",
+      "match_method": "index",
+      "effects": []
+    },
+    {
+      "selector": "poicys",
+      "is_error": true,
+      "code": null,
+      "status": "no_live_codex",
+      "thread_id": null,
+      "cwd": "/home/ecochran76/workspace.local/agent-policies",
+      "match_method": "fuzzy",
+      "effects": []
+    }
+  ]
+}

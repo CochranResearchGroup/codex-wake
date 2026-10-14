@@ -1,58 +1,46 @@
 # Plan0162 — MCP tab targeting
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary / ecochran76
 Target: origin/main
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/262
-Branch: feat/mcp-tab-targets
-Pull-Request: https://github.com/CochranResearchGroup/codex-wake/pull/263
-Dependency: Plan0156 / PR253, pinned source 5b14c05
+Branch: fix/p162-startup-readiness
+Pull-Request: https://github.com/CochranResearchGroup/codex-wake/pull/265
+Dependency: Plan0156 / PR253 integrated and closed (PR264); original pinned source5b14c05 retained
 
 ## Current State
 
-0.15.0 merged via PR263/88f008d and was briefly activated. Its owned post-install
-startup proof exposed an unbound-process readiness race; no model turns or residue.
-Restored all five prior0.14.0 links and both skill roots before repair. New bounded
-patch lane fix/p162-startup-readiness distinguishes pending identity from a known
-wrong thread; red/green public CLI regression. Prepare0.15.1, exact-main deployment
-and fresh proof before closure. Earlier deployment notes below are historical.
+DONE. Feature PR263 integrated88f008d; corrective PR265 integrated1ee7229.
+Released v0.15.1 from exact main1ee722979234ade7f5e675f1c995e6ac8e6b4ab8.
+Active prefix:/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229.
+Five command links match;99 Python files byte-match main; both installed skill
+roots match all4 canonical files. Release wheel/sdist downloaded with exact parity.
+Hosted3.11/3.12 release gates passed;1,231 unit tests in the patch CI. Local
+integration1,230 and focused startup36 passed; public installed MCP19-tool smoke
+covers request/read/claim/completion/reply and capability denials without turns.
 
+Actual installed owned tab-only/fresh/exact-resume proof PASS with0 model turns.
+Its raw process observer included the invoking verification shell; a separate
+fresh native-process environment census after shell exit found0 owned processes
+and0 denied reads. All ten active Wake services retain baseline PIDs/states;
+no shared services or unrelated TUIs restarted. New MCP processes expose19 tools;
+existing TUI clients require ordinary resource/session refresh for new schemas.
+Startup policies still require explicit host-approved profile/caller grants;
+installation does not auto-enroll messaging actors or approve workspaces.
 
-Deployment continuation authorized by operator: `install and deploy and reconcile
-the repo`. Parent PR253 merged as3bde6d5 and0.14.0 is installed. Rebased only the
-three feature commits from original base5b14c05 onto current main3bde6d5; original
-publishedb5ce1ea retained at archive/plan0162-pre-main-20261014. ROADMAP/RUNBOOK
-conflicts preserved both history/intents; lifecycle and A2A skill changes retained.
-Prepare0.15.0 minor release, exact-main install, skill parity, owned startup proof
-and truthful lane/issue/worktree reconciliation. No unrelated session shutdown or
-production-peer assignments. Historical stack gate below is now satisfied.
+0.15.0 post-install proof exposed a pending-binding race. Restored0.14.0 links
+and both skills before repair, observed red/green, then qualified0.15.1 in candidate
+and exact-main installed prefixes. Failed0.15.0 tag/assets retained as superseded
+prerelease;0.14.0 prefix and deployment backups remain for rollback. Source/backup
+refs retained. Production-peer notifications/model execution are unclaimed and
+unchanged; qualification targets routing, persistence and owned lifecycle startup.
 
-
-Source implementation and independent review remediation complete in isolated
-feat/mcp-tab-targets. Public CLI/MCP resolve informal descriptors; send pins exact
-identity; guarded preparation shares lifecycle persistence/expiry and preserves
-dormant shells. Canonical-CWD history and explicit-ID metadata support resume.
-Fixture matrix, races, lost-response holding/reconciliation and final target
-regressions pass. Full isolated unit lane1229 passed125.098s;52 final target tests
-cover the later read-only lost-tab-response reconciliation change. Installed
-fixtures and public private-bus MCP smoke qualify packaging independently.
-
-Owned installed TUI proof03: tab-only, fresh and exact-thread resume PASS,
-zero model turns and fresh OS residue empty. Two initial zero-turn history-list
-proofs retained as partial: Codex omitted the empty thread from list although its
-exact metadata remained resumable. Exact-ID repair has red/green evidence;
-final artifact proof04 also PASS, zero turns/residue and7 module hashes match source. No fake transcripts,
-provider turns, notifications or production messages were introduced.
-
-Integration remains gated on Plan0156 / PR253 (still draft at last readback).
-This worktree was created from pinned5b14c05 because main439f749 lacks the lifecycle
-controller. Only this feature delta may port after dependency integration; parent
-acceptance is not inherited. Root checkout concurrent work was preserved.
-Work item262 stays OPEN. Release/activation and live notified-recipient execution
-are unclaimed. Graphiti disposition is unavailable: no reviewed repo group.
-One primary integrated independent reviewer /root/tab_target_review; no nested
-agents. Exact evidence: docs/dev/evidence/plan0162/.
+Evidence: docs/dev/evidence/plan0162/final-installed-acceptance.json and
+final-acceptance.md. Final documentation custody/issue closure travels through a
+separate closeout PR; remove only its clean temporary checkout after integration.
+Graphiti disposition unavailable: no reviewed repo target group. No memory-folder
+writes. Independent reviewer /root/tab_target_review findings were remediated.
 
 ## Scope and interface
 

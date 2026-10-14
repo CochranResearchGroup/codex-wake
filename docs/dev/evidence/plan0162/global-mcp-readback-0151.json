@@ -1,0 +1,33 @@
+{
+  "tool_count": 19,
+  "target_tool": true,
+  "read_only_targets": [
+    {
+      "selector": "tab 18",
+      "is_error": true,
+      "code": 6,
+      "status": "no_live_codex",
+      "thread_id": null,
+      "cwd": null,
+      "resolution": null
+    },
+    {
+      "selector": "18:policies",
+      "is_error": true,
+      "code": 6,
+      "status": "no_live_codex",
+      "thread_id": null,
+      "cwd": null,
+      "resolution": null
+    },
+    {
+      "selector": "poicys",
+      "is_error": true,
+      "code": 6,
+      "status": "no_live_codex",
+      "thread_id": null,
+      "cwd": null,
+      "resolution": null
+    }
+  ]
+}

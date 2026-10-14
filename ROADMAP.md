@@ -1206,9 +1206,12 @@ Receipt: docs/dev/evidence/plan0161/reconciliation.md.
 
 ## P162 | MCP informal tab targeting
 
-State: OPEN
+State: CLOSED
 
-Issue: #262. Plan: [Plan0162](docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md).
-Implement tolerant resolution, explicit dormant/missing policies and CWD-scoped
-saved-session discovery through MCP. Stacked on unmerged Plan0156; integration
-and installed acceptance remain separate gates.
+Issue262 / [Plan0162](docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md):
+PR263/88f008d and corrective PR265/1ee7229 integrated. Released/activated0.15.1;
+99 Python files, both skill roots,19-tool MCP and owned tab-only/fresh/exact resume
+qualified. Hosted3.11/3.12 gates passed (1,231 unit tests). First0.15.0 startup
+race/rollback retained; superseded prerelease preserved. Shared services and
+unrelated sessions unchanged. Current clients need resource refresh for schemas.
+Receipt: docs/dev/evidence/plan0162/final-acceptance.md.

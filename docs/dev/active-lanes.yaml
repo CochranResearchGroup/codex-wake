@@ -6,19 +6,24 @@ lanes:
     objective: Resolve informal MCP tab targets and explicit dormant-session policies
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/262]
     plan: docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md
-    plan_ref: fix/p162-startup-readiness
+    plan_ref: origin/main
     branch: fix/p162-startup-readiness
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    integration: squash_pr_after_dependency
-    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/263
-    checkpoint: f5449adc32d457749365277f241f82fc64353863
-    checkout_required: true
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    integration: squash_pr
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/265
+    checkpoint: 02246b507216133863ffa54634d5774b4cc647eb
+    checkout_required: false
     dependencies: [P156]
     overlaps: [P156]
     updated_at: 2026-10-14
-    disposition: Draft PR263 published; source/installed qualification passed; port only feature delta after PR253 integration
+    integration_receipt: 1ee722979234ade7f5e675f1c995e6ac8e6b4ab8
+    prior_integration_receipt: 88f008d2cf7434660ad37cfe0d69f1d1e534bcbb
+    release_tag: v0.15.1
+    remote_ref: refs/remotes/origin/fix/p162-startup-readiness
+    installed_acceptance: docs/dev/evidence/plan0162/final-acceptance.md
+    disposition: Released/installed0.15.1; source refs retained; close only clean temporary docs checkout after its PR
   - id: P156
     owner: primary / ecochran76
     objective: Implement verified spawn refresh and handoff lifecycle

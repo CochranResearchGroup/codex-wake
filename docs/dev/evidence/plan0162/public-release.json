@@ -1,0 +1,9 @@
+{
+  "source_commit": "88f008d2cf7434660ad37cfe0d69f1d1e534bcbb",
+  "release": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.15.0",
+  "download_parity": true,
+  "sha256": {
+    "codex_wake-0.15.0-py3-none-any.whl": "fc5170699653da3d5a8d6a7827f5bacff0395b1b421d7f9d37e38d1e6cc65f1e",
+    "codex_wake-0.15.0.tar.gz": "ee41d748ab218615618fc06d100e3e2e3144387754bdb052d93ee7984597bd99"
+  }
+}
