@@ -6521,3 +6521,30 @@ remaining renewed parent resources; no failed allowance increased. Parent curren
 external877,849 (749,538+128,311), previous659,999 remains historical.
 Source full release unit suite1208 passed139.035s; harness14 green.
 Classification:blocker_reduction; native correction verification remains open.
+
+Literal-correction-accept-native01 stopped at source resource gate before any
+reviewer:66,070>50,000 source cap. Published tighter allocation was too small for
+three native source model rounds; old cap/failure/ledger retained, no renewal.
+Cost remediation keeps50,000: supply complete frozen writer instructions before
+one native shell command that verifies/prints actual selected file bytes before
+checkpoint write. This preserves model consumption before action and native
+filesystem-read proof, while removing a separate paid read round. Provider-free
+actual generated-program tests prove ordered instruction output/checkpoint and
+changed-source rejection before write;16 harness tests pass. This is one source
+round-cost correction, not a quota increase. One remaining verification per
+correction outcome only; no retry on failed verification. Accept allocation250,000
+total/200,000 receiver; reject400,000/350,000; source50,000 and600s remain fixed.
+Accepted repair proof prepares paused quota, then metadata-only rollback settles
+its actor rather than purchasing duplicate ordinary continuation. Cleanup now
+uses approved rollback goal readback when verifying the original source wallet.
+At16:26:20UTC root1,567,861-baseline1,272,440+943,919external=1,239,340;
+760,660 remained. Forecast650,000 native allocations+100,000 root/integration
+fits, with actual-release before next sample admission.
+
+Configured native refresh positive passed effective configuration revision,
+original paused goal/counters, changed skill catalog, actual MCPv2 and rollback,
+0 model turns. Initial cleanup snapshot caught one terminating private child;
+fresh OS readback is empty, no process mutation. Preserve initial receipt and
+qualify primary and later cleanup independently. Local plugin tests, entrypoint
+syntax and policy wiring passed. Classification:blocker_reduction/resource cost
+remediation, plus outcome_progress/configured native refresh. Full goal OPEN.

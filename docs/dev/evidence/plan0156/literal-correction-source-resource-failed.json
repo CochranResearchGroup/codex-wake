@@ -1,0 +1,32 @@
+{
+  "state": "failed_source_session_limit",
+  "raw_root": "/tmp/codex-wake-plan0156-literal-correction-accept-native01",
+  "raw_state_sha256": "9be6fa00a88be67d7b9e3ede415392112170ecbfd101922cb8e58eb857765f66",
+  "source_commit": "38bab33e2f3cf120d3235a9341b94244a4fcab12",
+  "source_tokens": 66070,
+  "source_limit": 50000,
+  "reviewer_assignments": 0,
+  "controller_state": "blocked",
+  "controller_reason": "session_token_allowance_exceeded",
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      53437
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0,
+  "final_ledger": {
+    "path": "/tmp/codex-wake-plan0156-literal-correction-accept-native01/wake/objective-ledgers/593f66c0fba16ff67c70ff2c4c332ebf49aaf996b7792c7b1ed0ea7b99604ca9.json",
+    "sha256": "72e1de001e4d10fbbf2b5a9a4c954940da8d0d081b717477d76f0aa7d7219cc6",
+    "actors": {
+      "spawn:d2a7fa8094ccd145429dc465fb3539582ec2fd7db00b7e192d1f64e1576eed88": {
+        "known": true,
+        "settled": true,
+        "used": 66070
+      }
+    }
+  }
+}

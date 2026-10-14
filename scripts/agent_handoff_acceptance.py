@@ -237,12 +237,17 @@ def excluded_skill_paths(catalog, selected_paths):
     return sorted(enabled-selected)
 
 
-def checkpoint_program(contract,objective):
+def checkpoint_program(contract,objective,selection=None):
     program=f"""import os,json,hashlib,pathlib
 p=pathlib.Path('checkpoint.json')
 p.write_text(json.dumps(dict(**{contract!r},source_thread_id=os.environ['CODEX_THREAD_ID'],objective={objective!r},authority='operator execute Plan0156; fixed bounded disposable continuation',next_packet='Read selected skill instructions and run host preflight before authorized bounded continuation',pending_obligations=[]),sort_keys=True)+{chr(10)!r})
 print('checkpoint:'+os.environ['CODEX_THREAD_ID']+':'+hashlib.sha256(p.read_bytes()).hexdigest())
 """
+    if selection:
+        program=('import pathlib,hashlib\n'
+            f'instructions=pathlib.Path({selection["path"]!r}).read_text()\n'
+            f'assert instructions=={selection["instructions"]!r}\n'
+            'print(instructions,flush=True)\n'+program)
     compile(program,'<generated checkpoint>','exec')
     return program
 
@@ -308,8 +313,8 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             raise RuntimeError('selected instruction mirror bytes changed')
         mirrors.append(dict(source=str(selected_path),installed=str(destination),sha256=digest))
     workflow=Path(mirrors[0]['installed']);reviewer=Path(mirrors[1]['installed'])
-    token_cap=400000 if correction=='reject' else 300000 if correction else 250000
-    session_cap=350000 if correction=='reject' else 250000 if correction else 150000
+    token_cap=400000 if correction=='reject' else 250000
+    session_cap=350000 if correction=='reject' else 200000 if correction else 150000
     source_cap=50000 if correction else 100000
     if correction:(workspace/'repair.txt').write_text('unaccepted fixture\n')
     guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
@@ -452,8 +457,16 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             constants['original_source_hashes']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in
                 (repo/'docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md',repo/'docs/dev/plans/0159-2026-10-12-agent-handoff.md',workspace/'host-validation.json')}
             # checkpoint is authored below; fill its immutable hash before receiver admission.
-        script=checkpoint_program(checkpoint_contract,objective)
+        writer_selection=dict(path=str(workflow),instructions=workflow.read_text())
+        script=checkpoint_program(checkpoint_contract,objective,writer_selection if correction else None)
         task='First read and print the complete selected writer instructions at '+str(workflow)+' using a command containing that absolute path. Apply them to the supplied bounded fixture checkpoint. Then execute only this Python script to write your own outgoing checkpoint, then report checkpoint ready. Do not change any goal.\n```python\n'+script+'```'
+        if correction:
+            task=('Apply the complete selected writer instructions below to the supplied frozen checkpoint. '
+                'Use exactly one shell command executing the supplied script: it reads and verifies the '
+                'actual selected file, prints all bytes before writing your checkpoint, and retains exact '
+                'source identity. The selected instructions are supplied in full before this action; '
+                'do not purchase a separate instruction-read model round. No other work or goal changes.\n'
+                +writer_selection['instructions']+'\n```python\n'+script+'```')
         spawn=['sessions','spawn','--profiles',str(profiles),'--profile','worker','--objective-ref','bootstrap','--intent','source-1','--name','checkpoint-source','--task',task,'--expires-at',expiry,'--json']
         deadline=time.monotonic()+180
         while True:
@@ -539,6 +552,13 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         if correction:
             # Repair acceptance is its own axis. Both-mode continuation and
             # rollback already have native proof; do not purchase a duplicate.
+            deadline=time.monotonic()+30
+            while True:
+                code,restored=invoke(handoff+['--rollback']);receipt['rollback']=restored
+                if restored.get('rollback',{}).get('state')=='completed':break
+                if time.monotonic()>deadline:raise RuntimeError('accepted repair cleanup rollback did not settle')
+                time.sleep(.5)
+            receipt['rollback_source_goal']=request('thread/goal/get',dict(threadId=source))['goal']
             receipt.update(state='passed_correction_acceptance_axis',successor_usage=spent,
                 accepted_repair_sha256=hashlib.sha256((workspace/'repair.txt').read_bytes()).hexdigest(),
                 final_source_goal=request('thread/goal/get',dict(threadId=source))['goal'],
@@ -627,7 +647,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             try:
                 receipt['owned_source_settlement']=settle_owned_successor(request,dict(
                     successor_thread_id=cleanup_source,successor=receipt['source'],
-                    successor_goal=receipt.get('source_goal')))
+                    successor_goal=receipt.get('rollback_source_goal',receipt.get('source_goal'))))
                 _,receipt['source_usage']=usage(cleanup_source)
             except Exception as exc:receipt['source_final_readback_error']=type(exc).__name__
         cleanup_target=receipt.get('handoff',{}).get('successor_thread_id')

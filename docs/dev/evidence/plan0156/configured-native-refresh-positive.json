@@ -1,0 +1,411 @@
+{
+  "state": "passed_primary_cleanup_settled_on_fresh_readback",
+  "raw_root": "/tmp/codex-wake-plan0156-configured-refresh-positive01",
+  "raw_state_sha256": "8911e5a8e45bdf2c5e278b7a57f660a7f7563e4b7a7fe21d8a1137640b17ddf8",
+  "prefix": "/tmp/codex-wake-plan0156-installed21",
+  "thread_id": "01a13b37-b987-7280-806c-0d617b20f37b",
+  "goal_before": {
+    "createdAt": 1791994872,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "status": "paused",
+    "threadId": "01a13b37-b987-7280-806c-0d617b20f37b",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 1000,
+    "tokensUsed": 0,
+    "updatedAt": 1791994872
+  },
+  "goal_after": {
+    "createdAt": 1791994872,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "status": "paused",
+    "threadId": "01a13b37-b987-7280-806c-0d617b20f37b",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 1000,
+    "tokensUsed": 0,
+    "updatedAt": 1791994872
+  },
+  "configuration_before": {
+    "handoff_writer": {
+      "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+      "name": "refresh-marker",
+      "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+      "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+    },
+    "max_correction_cycles": 2,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "objective_budget": null,
+    "objective_deadline": "2026-10-14T16:24:12+00:00",
+    "objective_time_limit_seconds": 180,
+    "objective_token_limit": 1000,
+    "preflight_reviewer": {
+      "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+      "name": "refresh-marker",
+      "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+      "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+    },
+    "profile": "worker",
+    "revision": "2fc528330e51d5daca45d061130541c4049e6256ced18051c1027db10d375069",
+    "session_time_limit_seconds": 180,
+    "session_token_limit": 1000,
+    "source_thread_id": "01a13b37-b987-7280-806c-0d617b20f37b",
+    "started_at": "2026-10-14T16:21:12+00:00"
+  },
+  "configuration_after": {
+    "handoff_writer": {
+      "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+      "name": "refresh-marker",
+      "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+      "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+    },
+    "max_correction_cycles": 2,
+    "objective": "Plan0156 disposable paused-goal continuity probe",
+    "objective_budget": null,
+    "objective_deadline": "2026-10-14T16:24:12+00:00",
+    "objective_time_limit_seconds": 180,
+    "objective_token_limit": 1000,
+    "preflight_reviewer": {
+      "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+      "name": "refresh-marker",
+      "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+      "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+    },
+    "profile": "worker",
+    "revision": "2fc528330e51d5daca45d061130541c4049e6256ced18051c1027db10d375069",
+    "session_time_limit_seconds": 180,
+    "session_token_limit": 1000,
+    "source_thread_id": "01a13b37-b987-7280-806c-0d617b20f37b",
+    "started_at": "2026-10-14T16:21:12+00:00"
+  },
+  "mcp_refresh": {
+    "assignment_deadline": 1791995052.0,
+    "attachment": {
+      "client_pid": 43296,
+      "client_start_time_ticks": 3107986,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace",
+      "pane_id": "%2",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/42",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/tmp/codex-wake-plan0156-configured-refresh-positive01/tmux.sock",
+      "window_id": "@2",
+      "window_index": "1",
+      "window_name": "worker-refresh-e5be4826fa9c"
+    },
+    "fingerprint": "e5be4826fa9c1c6e3f222735a2c5cd45dc5f2bc65b6af212371fd0f983764b9d",
+    "goal_after": {
+      "createdAt": 1791994872,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a13b37-b987-7280-806c-0d617b20f37b",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791994872
+    },
+    "goal_before": {
+      "createdAt": 1791994872,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a13b37-b987-7280-806c-0d617b20f37b",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791994872
+    },
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "prepared"
+      },
+      {
+        "effect": "tmux/kill-pane",
+        "reason": null,
+        "state": "stopping"
+      },
+      {
+        "effect": "tmux/new-window",
+        "reason": null,
+        "state": "starting"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": "exact_replacement_client_not_ready",
+        "state": "awaiting_preflight"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "completed"
+      }
+    ],
+    "intent": {
+      "checkpoint": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/checkpoint.json",
+      "checkpoint_sha256": "990fd9d9dff5da9c48845cdee9543c11258e3fa9d2f22b72613f37cc0ae11a12",
+      "configuration": {
+        "handoff_writer": {
+          "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+          "name": "refresh-marker",
+          "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+          "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+        },
+        "max_correction_cycles": 2,
+        "objective": "Plan0156 disposable paused-goal continuity probe",
+        "objective_deadline": "2026-10-14T16:24:12+00:00",
+        "objective_time_limit_seconds": 180,
+        "objective_token_limit": 1000,
+        "preflight_reviewer": {
+          "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+          "name": "refresh-marker",
+          "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+          "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+        },
+        "profile": "worker",
+        "revision": "2fc528330e51d5daca45d061130541c4049e6256ced18051c1027db10d375069",
+        "session_time_limit_seconds": 180,
+        "session_token_limit": 1000,
+        "source_thread_id": "01a13b37-b987-7280-806c-0d617b20f37b",
+        "started_at": "2026-10-14T16:21:12+00:00"
+      },
+      "continuation": {
+        "approval": "execute Plan0156; disposable no-model resource refresh proof",
+        "objective": "Plan0156 disposable paused-goal continuity probe",
+        "started_at": "2026-10-14T16:21:12+00:00"
+      },
+      "expires_at": "2026-10-14T16:24:13.795082+00:00",
+      "launch": {
+        "app_server": "unix:///tmp/codex-daemon-1000/78c343ad293c49ad77cd6dcc49e5af3c178d6d6e0390c19697ce9b58eaeb664c",
+        "codex_home": "/tmp/codex-wake-plan0156-configured-refresh-positive01/codex-home",
+        "codex_path": "/home/ecochran76/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/bin/codex",
+        "cwd": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace",
+        "resources": {
+          "mcp": {
+            "arguments": {},
+            "expected_content": [
+              {
+                "text": "v2",
+                "type": "text"
+              }
+            ],
+            "kind": "mcp",
+            "read_only": true,
+            "server": "toy",
+            "tool": "version"
+          },
+          "skill": {
+            "description": "Refresh marker v2",
+            "kind": "skill",
+            "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+            "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+          }
+        },
+        "timeout": 10,
+        "tmux_session": "owned-refresh",
+        "tmux_socket": "/tmp/codex-wake-plan0156-configured-refresh-positive01/tmux.sock"
+      },
+      "objective_ref": "01a13b37-b987-7280-806c-0d617b20f37b",
+      "operation": "refresh",
+      "resources": [
+        "skill",
+        "mcp"
+      ],
+      "source_thread_id": "01a13b37-b987-7280-806c-0d617b20f37b"
+    },
+    "intent_key": "refresh-resources",
+    "objective_budget": {
+      "accounting_known": true,
+      "actors": {
+        "goal:01a13b37-b987-7280-806c-0d617b20f37b:1791994872": {
+          "known": true,
+          "reservation": 0,
+          "session_deadline": null,
+          "settled": true,
+          "terms": null,
+          "tokens_remaining": 0,
+          "used": 0
+        }
+      },
+      "authorization_history": [
+        {
+          "action": "initial",
+          "approval": "execute Plan0156; disposable no-model resource refresh proof",
+          "at": 1791994874.6571817,
+          "configuration": {
+            "handoff_writer": {
+              "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+              "name": "refresh-marker",
+              "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+              "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+            },
+            "max_correction_cycles": 2,
+            "objective": "Plan0156 disposable paused-goal continuity probe",
+            "objective_deadline": "2026-10-14T16:24:12+00:00",
+            "objective_time_limit_seconds": 180,
+            "objective_token_limit": 1000,
+            "preflight_reviewer": {
+              "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+              "name": "refresh-marker",
+              "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+              "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+            },
+            "revision": "2fc528330e51d5daca45d061130541c4049e6256ced18051c1027db10d375069",
+            "session_time_limit_seconds": 180,
+            "session_token_limit": 1000,
+            "started_at": "2026-10-14T16:21:12+00:00"
+          }
+        }
+      ],
+      "correction_cycles": 0,
+      "exhausted": false,
+      "goal_aliases": {},
+      "handoff_writer": {
+        "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+        "name": "refresh-marker",
+        "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+        "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+      },
+      "max_correction_cycles": 2,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "objective_deadline": "2026-10-14T16:24:12+00:00",
+      "objective_id": "f84abf42bbd7d705eee49c2bd894b3b6b8a365665c9cc178bcfc0903074aa96b",
+      "objective_time_limit_seconds": 180,
+      "objective_token_limit": 1000,
+      "original_deadline": "2026-10-14T16:24:12+00:00",
+      "preflight_reviewer": {
+        "instructions": "---\nname: refresh-marker\ndescription: Refresh marker v2\n---\nMarker v2.\n",
+        "name": "refresh-marker",
+        "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+        "sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd"
+      },
+      "ready": true,
+      "remaining_seconds": 174.9276704788208,
+      "remaining_tokens": 1000,
+      "revision": "2fc528330e51d5daca45d061130541c4049e6256ced18051c1027db10d375069",
+      "session_time_limit_seconds": 180,
+      "session_token_limit": 1000,
+      "started_at": "2026-10-14T16:21:12+00:00",
+      "state": "ready",
+      "tokens_reserved": 0,
+      "tokens_used": 0
+    },
+    "old_attachment": {
+      "client_pid": 41042,
+      "client_start_time_ticks": 3107637,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/42",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/tmp/codex-wake-plan0156-configured-refresh-positive01/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "worker"
+    },
+    "old_generation_exit_observed": true,
+    "pane_id": "%2",
+    "resources": {
+      "mcp": {
+        "is_error": false,
+        "observed_content": [
+          {
+            "text": "v2",
+            "type": "text"
+          }
+        ],
+        "server": "toy",
+        "state": "ready",
+        "tool": "version"
+      },
+      "skill": {
+        "catalog": [
+          {
+            "description": "Refresh marker v2",
+            "enabled": true,
+            "name": "refresh-marker",
+            "path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace/.agents/skills/refresh-marker/SKILL.md",
+            "pluginId": null,
+            "scope": "repo"
+          }
+        ],
+        "observed_sha256": "ac60924f48ce6bc3bf0cd623d2b49a5a2e7fa8ea5a708460c683d45b642349fd",
+        "state": "ready"
+      }
+    },
+    "state": "completed",
+    "tab_name": "worker-refresh-e5be4826fa9c",
+    "thread_id": "01a13b37-b987-7280-806c-0d617b20f37b",
+    "thread_name": "owned-refresh-worker",
+    "version": 1,
+    "window_id": "@2"
+  },
+  "rollback": {
+    "action": "reused_original_conversation",
+    "attachment": {
+      "client_pid": 43296,
+      "client_start_time_ticks": 3107986,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/tmp/codex-wake-plan0156-configured-refresh-positive01/workspace",
+      "pane_id": "%2",
+      "pane_index": "0",
+      "pane_title": "owned-refresh-worker",
+      "pane_tty": "/dev/pts/42",
+      "session_id": "$0",
+      "session_name": "owned-refresh",
+      "socket": "/tmp/codex-wake-plan0156-configured-refresh-positive01/tmux.sock",
+      "window_id": "@2",
+      "window_index": "1",
+      "window_name": "worker-refresh-e5be4826fa9c"
+    },
+    "goal": {
+      "createdAt": 1791994872,
+      "objective": "Plan0156 disposable paused-goal continuity probe",
+      "status": "paused",
+      "threadId": "01a13b37-b987-7280-806c-0d617b20f37b",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1791994872
+    },
+    "state": "completed",
+    "thread_id": "01a13b37-b987-7280-806c-0d617b20f37b"
+  },
+  "model_turns": 0,
+  "initial_cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      53437
+    ],
+    "private_readable_environment_matches": [
+      40386
+    ]
+  },
+  "fresh_cleanup": {
+    "private_readable_environment_matches": [],
+    "original_cleanup": {
+      "denied_environment_pids": [
+        612,
+        646,
+        3798,
+        53437
+      ],
+      "private_readable_environment_matches": [
+        40386
+      ]
+    },
+    "no_process_mutation": true
+  },
+  "server_exit": null
+}

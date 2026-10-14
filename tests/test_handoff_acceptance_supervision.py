@@ -28,6 +28,28 @@ class OwnedCleanupTests(unittest.TestCase):
         program=runner.preflight_program({'repo': '/fixture', 'head': 'a'*40})
         compile(program, 'preflight.py', 'exec')
 
+    def test_single_command_writer_reads_frozen_instructions_before_checkpoint(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            selection=Path(tmp)/'writer.md';selection.write_text('Apply the complete checkpoint contract.\n')
+            program=runner.checkpoint_program({'commit':'a'*40},'Finish fixture',
+                dict(path=str(selection),instructions=selection.read_text()))
+            result=subprocess.run([sys.executable,'-c',program],cwd=tmp,
+                env=dict(os.environ,CODEX_THREAD_ID='native-source'),capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertLess(result.stdout.index(selection.read_text()),result.stdout.index('checkpoint:native-source:'))
+            self.assertEqual(json.loads((Path(tmp)/'checkpoint.json').read_text())['source_thread_id'],'native-source')
+
+    def test_changed_writer_instructions_hold_before_checkpoint_write(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            selection=Path(tmp)/'writer.md';selection.write_text('original')
+            program=runner.checkpoint_program({'commit':'a'*40},'Finish fixture',
+                dict(path=str(selection),instructions='original'))
+            selection.write_text('changed')
+            result=subprocess.run([sys.executable,'-c',program],cwd=tmp,
+                env=dict(os.environ,CODEX_THREAD_ID='native-source'),capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0)
+            self.assertFalse((Path(tmp)/'checkpoint.json').exists())
+
     def test_paid_fixture_catalog_keeps_exact_selected_skills_and_holds_missing_sources(self):
         catalog={'data':[{'skills':[{'path':p,'enabled':True} for p in ('writer','reviewer','guide','unrelated')]}]}
         self.assertEqual(runner.excluded_skill_paths(catalog,['writer','reviewer','guide']),['unrelated'])
