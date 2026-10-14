@@ -19,6 +19,23 @@ from codex_wake.cli import run
 
 
 class HandoffPreflightTests(unittest.TestCase):
+    def test_non_github_review_accepts_evidence_without_changing_native_guards(self):
+        self.scenario(workflow='local-review')
+
+    def test_accept_assertion_cannot_replace_criterion_evidence(self):
+        for defect in ('scope_drift', 'test_count_only', 'changed_evidence', 'unknown_criterion'):
+            with self.subTest(defect=defect):
+                self.scenario(bad_review=defect)
+
+    def test_defaults_cannot_silently_rewrite_an_existing_assignment(self):
+        self.scenario(changed_defaults=True)
+
+    def test_missing_writer_instruction_read_blocks_before_successor_admission(self):
+        self.scenario(unread_writer=True)
+
+    def test_ready_runtime_with_unsupported_completion_cannot_prepare_a_goal(self):
+        self.scenario(work_verdict='correct')
+
     def test_one_successor_runs_preflight_without_two_active_goals_or_duplicate_assignment(self):
         self.scenario()
 
@@ -109,7 +126,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -162,7 +179,21 @@ print('preflight:'+target+':'+nonce+':'+digest)
             checkpoint.write_text(json.dumps(body));digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
             threads[source]['turns'][0]['items'][0]['aggregatedOutput']='checkpoint:'+source+':'+digest
             if activate:policy['activation']=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=10)
-            profiles.write_text(json.dumps(dict(version=1,profiles={'worker':profile},continuations={source:policy})))
+            policy['preflight']['workflow']=workflow
+            writer=root/'writer.md';writer.write_text('Write the complete evidence checkpoint.')
+            reviewer=root/'reviewer.md';reviewer.write_text('Review progress against actual evidence.')
+            if not unread_writer:
+                read=external_run(['cat',str(writer)],capture_output=True,text=True,check=True)
+                threads[source]['turns'][0]['items'].append(dict(id='writer-instructions',
+                    type='commandExecution',status='completed',exitCode=read.returncode,cwd=tmp,
+                    command=shlex.join(['cat',str(writer)]),aggregatedOutput=read.stdout))
+            policy['acceptance_criteria']=['bounded continuation']
+            defaults=dict(handoff_writer=dict(name='local-writer',path=str(writer)),
+                preflight_reviewer=dict(name=workflow,path=str(reviewer)),session_token_limit=500,
+                session_time_limit_seconds=1000,objective_token_limit=1000,
+                objective_time_limit_seconds=2000,max_correction_cycles=2)
+            profiles.write_text(json.dumps(dict(version=1,profiles={'worker':profile},
+                lifecycle_defaults=defaults,continuations={source:policy})))
             def handler(ws):
                 for raw in ws:
                     req=json.loads(raw)
@@ -212,10 +243,33 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         contract=json.loads(task.split('PREFLIGHT_CONTRACT=',1)[1].split('\n',1)[0])
                         cmd=[sys.executable,str(helper),source,contract['intent_fingerprint'],digest]
                         p=external_run(cmd,cwd=tmp,env=dict(os.environ,CODEX_THREAD_ID=tid),capture_output=True,text=True,check=True)
+                        proof=json.loads((root/'preflight.json').read_text())
+                        proof['selected_workflow']=workflow
+                        proof['configuration_revision']=contract['configuration_revision']
+                        proof['work_review']=dict(verdict='accept',selected_review='local evidence review',
+                            changes=['Outgoing checkpoint preserves remaining work'],
+                            acceptance_progress=[dict(criterion='bounded continuation',change='Restart-safe checkpoint written',
+                                evidence=[dict(path='checkpoint.json',sha256=digest)])],
+                            scope_deviations=[],unsupported_claims=[],unfinished_work=['Native continuation'],
+                            next_packet='Run selected preflight')
+                        if bad_review=='scope_drift':proof['work_review']['scope_deviations']=['Changed unrelated service']
+                        if bad_review=='test_count_only':proof['work_review']['acceptance_progress']=[]
+                        if bad_review=='changed_evidence':proof['work_review']['acceptance_progress'][0]['evidence'][0]['sha256']='0'*64
+                        if bad_review=='unknown_criterion':proof['work_review']['acceptance_progress'][0]['criterion']='invented acceptance'
+                        (root/'preflight.json').write_text(json.dumps(proof))
+                        if work_verdict:
+                            proof=json.loads((root/'preflight.json').read_text())
+                            proof['work_review']=dict(verdict=work_verdict,
+                                unsupported_claims=['Completion based only on test count'])
+                            (root/'preflight.json').write_text(json.dumps(proof))
                         threads[tid]['turns']=[dict(id='preflight-turn',status='completed',items=[
                             dict(id='user',type='userMessage',clientId=q['clientUserMessageId'],content=q['input']),
                             dict(id='preflight-command',type='commandExecution',status='completed',exitCode=p.returncode,
                                 cwd=tmp,command=shlex.join(cmd),aggregatedOutput=p.stdout)])]
+                        read=external_run(['cat',str(reviewer)],capture_output=True,text=True,check=True)
+                        threads[tid]['turns'][0]['items'].append(dict(id='review-instructions',
+                            type='commandExecution',status='completed',exitCode=read.returncode,cwd=tmp,
+                            command=shlex.join(['cat',str(reviewer)]),aggregatedOutput=read.stdout))
                         (home/'sessions'/ (tid+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(
                             type='token_count',info={'total_token_usage':{'total_tokens':30}})))+'\n')
                         if running_overspend:
@@ -256,8 +310,22 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         return_value=clock):
                     for _ in range(3 if stale_title else 2):
                         output=StringIO()
+                        if changed_defaults and _==1:
+                            from codex_wake.records import WakeError
+                            config=json.loads(profiles.read_text())
+                            config['lifecycle_defaults']['session_token_limit']=400
+                            profiles.write_text(json.dumps(config))
+                            with self.assertRaisesRegex(WakeError, 'different lifecycle assignment'):
+                                with redirect_stdout(output):run(argv)
+                            self.assertEqual(methods.count('thread/start'),1)
+                            self.assertEqual(goals[target]['status'],'paused')
+                            return
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         receipt=json.loads(output.getvalue())
+                        if unread_writer:
+                            self.assertEqual(receipt['reason'], 'handoff_writer_instructions_unverified')
+                            self.assertEqual(methods.count('thread/start'), 0)
+                            return
                         if stale_title and _<2:
                             if _==0:self.assertEqual(receipt['state'],'awaiting_preflight')
                             else:
@@ -285,6 +353,11 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(goal_sets,[])
                             self.assertEqual(methods.count('thread/start'),1)
                             return
+                        if bad_review:
+                            self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+                            self.assertNotIn(target, goals)
+                            self.assertEqual(receipt['preflight_tokens_used'], 30)
+                            return
                         if source_budget==60:
                             self.assertEqual(receipt['reason'],'preflight_allowance_insufficient')
                             self.assertEqual(methods.count('thread/start'),0)
@@ -294,6 +367,11 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(receipt['state'],'uncertain')
                             self.assertEqual(receipt['uncertain_effect'],'thread/goal/prepare_successor')
                             continue
+                        if work_verdict:
+                            self.assertEqual(receipt['reason'], 'work_review_correct')
+                            self.assertNotIn(target, goals)
+                            self.assertEqual(receipt['runtime_readiness']['state'], 'passed')
+                            return
                         self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
                         self.assertEqual(receipt['successor_thread_id'],target)
                         self.assertEqual(receipt['remaining_tokens'],920 if pause_used is None else 970-pause_used)
@@ -418,6 +496,16 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         self.assertEqual(len(goal_sets),1)
                         visibility['show_goal']=True
                         output=StringIO()
+                        if changed_defaults and _==1:
+                            from codex_wake.records import WakeError
+                            config=json.loads(profiles.read_text())
+                            config['lifecycle_defaults']['session_token_limit']=400
+                            profiles.write_text(json.dumps(config))
+                            with self.assertRaisesRegex(WakeError, 'different lifecycle assignment'):
+                                with redirect_stdout(output):run(argv)
+                            self.assertEqual(methods.count('thread/start'),1)
+                            self.assertEqual(goals[target]['status'],'paused')
+                            return
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         self.assertEqual(json.loads(output.getvalue())['state'],'awaiting_activation')
                 self.assertEqual(methods.count('thread/start'),1)

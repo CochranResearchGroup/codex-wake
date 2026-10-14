@@ -15,6 +15,7 @@ from .agent_lifecycle import save
 from .app_server import resolve_codex_cmd
 from .native_protocol import native_request
 from .records import WakeError, parse_timestamp
+from .lifecycle_review import instruction_read, validate_work_review
 
 
 def handoff_command(args, root):
@@ -66,6 +67,9 @@ def handoff_command(args, root):
     intent=dict(operation='handoff',source_thread_id=args.thread_id,launch=profile,
         continuation=policy,checkpoint=str(checkpoint),checkpoint_sha256=args.checkpoint_sha256,
         mode=args.mode,expires_at=args.expires_at)
+    if config.get('lifecycle_defaults') or policy.get('configuration'):
+        from .lifecycle_configuration import effective_configuration
+        intent['configuration'] = effective_configuration(config, args.thread_id, args.profile, args.caller_thread_id)
     fingerprint=hashlib.sha256(json.dumps(intent,sort_keys=True).encode()).hexdigest()
     journal=Path(root)/'lifecycle';journal.mkdir(mode=0o700,parents=True,exist_ok=True)
     key=hashlib.sha256(args.intent.encode()).hexdigest();path=journal/(key+'.json')
@@ -78,6 +82,8 @@ def handoff_command(args, root):
         else:
             receipt=dict(version=1,intent_key=args.intent,fingerprint=fingerprint,
                 intent=intent,thread_id=args.thread_id,state='prepared')
+        if 'configuration' in intent:
+            receipt['configuration'] = intent['configuration']
         if getattr(args,'rollback',False):
             rollback_handoff(path,receipt,profile,policy,root)
             save(path,receipt)
@@ -157,6 +163,9 @@ def handoff_command(args, root):
                 and item.get('cwd')==str(workspace) and marker in (item.get('aggregatedOutput') or '')]
             if thread.get('id')!=args.thread_id or len(writers)!=1:
                 receipt['reason']='checkpoint_writer_unverified'
+            elif receipt.get('configuration') and not instruction_read(
+                    thread, receipt['configuration']['handoff_writer'], workspace):
+                receipt['reason']='handoff_writer_instructions_unverified'
             else:
                 receipt['checkpoint_writer']=writers[0]
                 source_guard(receipt,profile,root)
@@ -402,11 +411,13 @@ def advance_handoff(path,receipt,profile,policy,args,root):
     from .agent_lifecycle import spawn_command
     preflight=policy.get('preflight',{})
     try:
+        effective = receipt['configuration']
         script=Path(preflight['script'])
         output=(Path(profile['cwd'])/preflight['receipt']).resolve()
         output.relative_to(Path(profile['cwd']).resolve())
         if (not script.is_absolute() or hashlib.sha256(script.read_bytes()).hexdigest()!=preflight['sha256']
-                or preflight['workflow']!='github-handoff' or not preflight['required_checks']):raise ValueError
+                or preflight['workflow']!=effective['preflight_reviewer']['name']
+                or not preflight['required_checks']):raise ValueError
     except (OSError,ValueError,KeyError,TypeError):
         receipt.update(state='blocked',reason='preflight_policy_unavailable')
         return
@@ -479,9 +490,17 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             contract=dict(source_thread_id=receipt['thread_id'],checkpoint=str(Path(profile['cwd'])/args.checkpoint),
                 checkpoint_sha256=args.checkpoint_sha256,intent_fingerprint=receipt['fingerprint'],
                 selected_workflow=preflight['workflow'],script=str(script),receipt=str(output),
-                token_allowance=preflight['token_allowance'])
+                token_allowance=preflight['token_allowance'], configuration_revision=effective['revision'],
+                handoff_writer=effective['handoff_writer'], preflight_reviewer=effective['preflight_reviewer'],
+                acceptance_criteria=policy.get('acceptance_criteria', []),
+                work_review_fields=['verdict','selected_review','changes','acceptance_progress',
+                    'scope_deviations','unsupported_claims','unfinished_work','next_packet'])
             receipt.setdefault('preflight_task',
-                'Preflight only. Apply the selected github-handoff workflow and read the exact source checkpoint. '
+                'Preflight only. Read and apply the configured reviewer instructions in PREFLIGHT_CONTRACT '
+                'and the exact source checkpoint. Record the actual downstream review selected by any router. '
+                'Assess changes against the approved criteria and hash-bound evidence; test counts alone '
+                'do not prove progress. Return runtime checks separately from work_review with accept/correct/blocked. '
+                'Acceptance requires criterion-specific evidence; unsupported claims or scope drift cannot accept. '
                 'Run the host-approved Python preflight script with source_thread_id, intent_fingerprint and '
                 'checkpoint_sha256 as its three arguments. Read its actual checks; do not fabricate results. '
                 'Do not create/activate a goal, enroll in A2A, copy claims or send to another actor. '
@@ -536,7 +555,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             proof=json.loads(output.read_text())
             required=dict(source_thread_id=receipt['thread_id'],successor_thread_id=target,
                 checkpoint_sha256=args.checkpoint_sha256,intent_fingerprint=receipt['fingerprint'],
-                selected_workflow=preflight['workflow'],state='passed')
+                selected_workflow=preflight['workflow'],state='passed',
+                configuration_revision=effective['revision'])
             marker='preflight:'+target+':'+receipt['fingerprint']+':'+args.checkpoint_sha256
             executions=[i for turn in native['turns'] for i in turn['items']
                 if turn['status']=='completed' and i.get('type')=='commandExecution' and i.get('status')=='completed'
@@ -545,6 +565,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             if (any(proof.get(k)!=v for k,v in required.items()) or len(executions)!=1
                     or any(proof.get('checks',{}).get(k,{}).get('state')!='passed' for k in preflight['required_checks'])):
                 receipt.update(state='blocked',reason='successor_preflight_unverified');return
+            if not instruction_read(native, effective['preflight_reviewer'], Path(profile['cwd'])):
+                receipt.update(state='blocked', reason='reviewer_instructions_unverified');return
             rollout=Path(native['path']).resolve(strict=True)
             rollout.relative_to(Path(profile.get('codex_home',Path.home()/'.codex'))/'sessions')
             usage=None
@@ -558,6 +580,19 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 receipt.update(state='blocked',reason='preflight_allowance_exhausted',preflight_tokens_used=usage);return
             receipt.update(preflight=proof,preflight_tokens_used=usage,
                 remaining_tokens=max(0,receipt['source_remaining_tokens']-usage))
+            receipt['runtime_readiness'] = dict(state='passed', checks=proof['checks'])
+            review = proof.get('work_review', {})
+            receipt['work_review'] = review
+            if review.get('verdict') in ('correct', 'blocked'):
+                receipt.update(state='blocked', reason='work_review_' + review['verdict'])
+                return
+            if review.get('verdict') != 'accept':
+                receipt.update(state='blocked', reason='substantive_work_review_unverified')
+                return
+            if not validate_work_review(review, policy, Path(profile['cwd']),
+                                        json.loads(Path(contract['checkpoint']).read_text())):
+                receipt.update(state='blocked', reason='substantive_work_review_unverified')
+                return
             if receipt['remaining_tokens']==0:
                 receipt.update(state='blocked',reason='cumulative_token_budget_exhausted');return
             goal=request('thread/goal/get',{'threadId':target})['goal']

@@ -5941,3 +5941,21 @@ review findings remain closed-world; no new broad review. Graphiti doctor health
 bounded atlas discovery returned no usable cloud manifests; repo evidence owns
 continuation. Classification: blocker_reduction (explicit resource renewal).
 Full plan remains OPEN; no native acceptance, integration or release claimed.
+
+## Turn 305 | 2026-10-14 UTC
+
+Issue255 source checkpoint: public CLI/MCP effective configuration, host defaults
+and objective overrides, actual selected instructions/hash revision, native
+writer/reviewer read proof, and substantive work verdict separate from readiness.
+Non-GitHub reviewer selection works; changed defaults cannot rewrite intent;
+missing instruction reads, unsupported acceptance, drift, unknown criteria and
+changed evidence hold admission. Correct/blocked do not create a successor goal.
+Evidence: docs/dev/evidence/plan0156/configurable-review-source.md. Focused CLI/
+MCP/handoff selection53 tests passed20.577s; compileall, policy wiring and diff
+check pass. Red-before-green receipts retained. Classification outcome_progress;
+full objective OPEN. New budget fields exposed but issue256 enforcement remains.
+One disjoint worker /root/objective_ledger owns only new ledger module and tests,
+bounded20min/100,000tokens; primary owns integration/acceptance and reserves that
+allowance until worker accounting settles. No new broad discovery review or
+native acceptance run. Existing acceptance harness requires the revised contract
+before use. Prior installed0.13.1 remains untouched.

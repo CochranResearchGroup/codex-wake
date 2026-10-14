@@ -111,6 +111,21 @@ configuration edits must not silently change an active assignment.
 
 ### Revised implementation decisions
 
+Issue255 implementation seam: `sessions configuration --profiles FILE --profile
+NAME --thread-id ID` and host-bound `wake_sessions_configuration` read
+`lifecycle_defaults`, overlaid by `continuations[ID].configuration`. Writer and
+reviewer selections each contain `name` and absolute `path`; readback includes
+actual UTF-8 instructions and SHA256. Limits use `session_token_limit`,
+`session_time_limit_seconds`, `objective_token_limit`,
+`objective_time_limit_seconds`, and `max_correction_cycles` (maximum2).
+Handoff intent freezes the resolved revision. Native completed command evidence
+must show selected instruction bytes read by writer and reviewer. Host preflight
+workflow must match the selected reviewer name; no GitHub-only fallback remains.
+The public receipt separates `runtime_readiness` from `work_review`; accepted
+progress references host-approved criteria and existing evidence by path/hash.
+Legacy preflight-only profiles cannot prepare a successor goal under the revised
+contract. Budget fields are readback only until issue256 enforcement lands.
+
 - Replace the single supported preflight workflow with configured instruction
   selection. Preserve host-controlled launch, grants, script approval and runtime
   ownership checks. Skills guide procedure; they do not grant capabilities,
