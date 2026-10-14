@@ -23,7 +23,7 @@ class SharedSourceError(WakeError):
 
 
 class SharedAppServerReader:
-    ALLOWED_METHODS = frozenset({"initialize", "thread/loaded/list", "thread/read"})
+    ALLOWED_METHODS = frozenset({"initialize", "thread/loaded/list", "thread/list", "thread/read"})
 
     def __init__(self, endpoint: str, *, timeout: float = 10.0,
                  connector: Callable[..., Any] | None = None):
@@ -130,6 +130,41 @@ class SharedAppServerReader:
                 raise SharedSourceError("invalid or repeated loaded-thread cursor")
             cursors.add(cursor)
         return [self.read_thread(thread_id) for thread_id in ids]
+
+    def saved_threads(self, cwd: str, *, maximum: int = 1000) -> list[dict[str, Any]]:
+        """Complete bounded history metadata, including unloaded CLI conversations."""
+        from .tab_targets import canonical
+        if type(maximum) is not int or maximum <= 0:
+            raise WakeError('saved-thread population bound must be positive')
+        canonical_cwd = canonical(cwd)
+        rows, ids, cursors = [], set(), set()
+        cursor = None
+        while True:
+            page = self.request('thread/list', dict(cwd=canonical_cwd, cursor=cursor,
+                limit=100, archived=False, sourceKinds=['cli', 'appServer'], sortKey='updated_at'))
+            data = page.get('data')
+            if not isinstance(data, list):
+                raise SharedSourceError('invalid saved-thread page')
+            for thread in data:
+                if (not isinstance(thread, dict) or not isinstance(thread.get('id'), str)
+                        or not thread['id'] or thread['id'] in ids):
+                    raise SharedSourceError('saved-thread pagination changed or repeated')
+                ids.add(thread['id'])
+                if len(ids) > maximum:
+                    raise SharedSourceError('saved-thread population exceeds observation bound')
+                try:
+                    if canonical(thread['cwd']) != canonical_cwd:
+                        raise SharedSourceError('saved-thread CWD filter mismatch')
+                except (KeyError, TypeError, ValueError, OSError):
+                    raise SharedSourceError('saved-thread CWD unavailable') from None
+                rows.append({key: thread[key] for key in
+                    ('id', 'cwd', 'name', 'updatedAt', 'source', 'status') if key in thread})
+            cursor = page.get('nextCursor')
+            if cursor is None:
+                return rows
+            if not isinstance(cursor, str) or not cursor or cursor in cursors:
+                raise SharedSourceError('invalid or repeated saved-thread cursor')
+            cursors.add(cursor)
 
     def read_thread(self, thread_id: str) -> dict[str, Any]:
         result = self.request("thread/read", {"threadId": thread_id, "includeTurns": False})

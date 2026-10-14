@@ -13,6 +13,15 @@ from .sessions import SelectionError, observe, resolve
 def add_sessions_parser(subparsers):
     parser = subparsers.add_parser('sessions', help='discover live Codex sessions by exact thread or Byobu tab')
     commands = parser.add_subparsers(dest='sessions_command', required=True)
+    target = commands.add_parser('target', help='resolve or prepare an informal tab target')
+    target.add_argument('selector')
+    target.add_argument('--json', dest='as_json', action='store_true')
+    target.add_argument('--app-server', default='unix://')
+    target.add_argument('--tmux-socket')
+    target.add_argument('--tmux-session')
+    target.add_argument('--timeout', type=float, default=10)
+    from .tab_targets import add_target_options
+    add_target_options(target)
     configuration = commands.add_parser('configuration', help='inspect effective host-approved lifecycle policy without native admission')
     for option in ('profiles', 'profile', 'thread-id'):
         configuration.add_argument('--' + option, required=True)
@@ -149,10 +158,10 @@ def _sessions_command(args):
             if other:
                 raise SelectionError(6, 'inherited pane conflicts with invoking thread', 'current')
         emit(dict(schema_version=1, observed_at=snapshot['observed_at'], complete=snapshot['complete'],
-                  sources=snapshot['sources'], session=row), args.as_json)
+                  sources=snapshot['sources'], session=row, resolution=row.get('resolution')), args.as_json)
         return 0
     except SelectionError as exc:
-        emit(dict(code=exc.code, message=str(exc), selector=exc.selector, candidates=exc.candidates,
+        emit(dict(code=exc.code, status=getattr(exc, 'condition', {2:'invalid_descriptor',3:'tab_not_found',4:'ambiguous_target',5:'inventory_unavailable',6:'no_live_codex'}[exc.code]), message=str(exc), selector=exc.selector, candidates=exc.candidates,
                   sources=snapshot['sources']), args.as_json)
         return exc.code
 

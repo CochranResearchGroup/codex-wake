@@ -6640,3 +6640,10 @@ product smoke lacked pip. Both failures/logs retained. No source/runtime defect
 in those setup failures. PR253 rewritten around final product and actual evidence;
 post-merge release/install remains open. No paid native work remains authorized
 in this proof packet. Classification:outcome_progress/release gates.
+
+## Turn | 2026-10-14 | Plan0162 start
+
+Operator accepted issue262 implementation. Main439f749 lacks lifecycle source;
+created isolated feat/mcp-tab-targets from pinned lifecycle5b14c05 as a documented
+stacked dependency exception. Root dirty acceptance script preserved. Plan0162
+freezes selector/result/policy semantics and public-seam tests.
