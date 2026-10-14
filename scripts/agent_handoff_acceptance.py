@@ -525,7 +525,10 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
 
         state=wait_for_preflight(invoke,handoff,deadline,observe_handoff)
         target=state['successor_thread_id'];native,spent=usage(target);receipt['preflight_usage']=spent;write(root/'native-preflight.json',native)
-        instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and ('--instructions' in i.get('command','') or '--correction-instructions' in i.get('command','')) and i.get('exitCode')==0]
+        instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution'
+            and ('--instructions' in i.get('command','') or '--correction-instructions' in i.get('command',''))
+            and i.get('exitCode')==0 and all('SELECTED_INSTRUCTIONS:'+k+':' in
+                (i.get('aggregatedOutput') or '') for k in ('reviewer','workflow'))]
         expected_reviews=1+state.get('objective_budget',{}).get('correction_cycles',0)
         if len(instructions)!=expected_reviews or not all(all('SELECTED_INSTRUCTIONS:'+k+':' in item.get('aggregatedOutput','') for k in ('reviewer','workflow')) for item in instructions):raise RuntimeError('actual selected instruction read unverified')
         if not instruction_read(native,effective['preflight_reviewer'],workspace):

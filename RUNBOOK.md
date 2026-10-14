@@ -6548,3 +6548,23 @@ fresh OS readback is empty, no process mutation. Preserve initial receipt and
 qualify primary and later cleanup independently. Local plugin tests, entrypoint
 syntax and policy wiring passed. Classification:blocker_reduction/resource cost
 remediation, plus outcome_progress/configured native refresh. Full goal OPEN.
+
+Single-writer-correction-accept01 primary accepted: native source one command
+reads/verifies/prints full selected bytes before checkpoint;33,245<50,000.
+Actual first reviewer correct verdict admitted one exact owned correction.
+Repair file changed to accepted correction newline; fresh native reviewer ACCEPT
+prepared paused goal18,551, original objective/deadline preserved. Receiver181,449
+<200,000, total214,694<250,000,2 completed native reviews. Secondary observer
+miscounted --correction-instructions mentioned inside authored packet as a read
+command. Saved native-preflight.json proves exactly2 successful complete-byte
+instruction-read outputs. Filter by actual output markers; no product relaxation
+or paid replay. Cleanup0/server0. Primary artifact accepted independently from
+failed advisory observer per causality policy.
+Current external1,158,613 (943,919+214,694). At root1,660,486-baseline1,272,440,
+453,341 parent tokens remain; negative proof400,000 maximum plus50,000 primary
+integration fits (observed source33,245,2 native reviews181,449 forecast third
+review ~120,000 gives ~335,000 minimum complete negative proof). Recheck before
+admission. One negative native sample, no same-case retry, source50,000,
+receiver350,000,total400,000,600s and originalmax2 stay fixed.
+Classification:outcome_progress (actual bounded correction followed by ACCEPT),
+next: rejection stop proof, installed replacement-count verification, release.
