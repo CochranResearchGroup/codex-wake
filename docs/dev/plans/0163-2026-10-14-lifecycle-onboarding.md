@@ -11,9 +11,12 @@ Dependency: P156 and P162 integrated
 
 ## Current State
 
-Source edits and bounded review complete. Delivery is through a protected-main
-PR; installed skill synchronization follows verified merge, without a package
-release or service restart. Source outcome and Git custody remain separate.
+PR268 merged at 72b1e5e57af9c9e16f9b9baf11cf76d8bb19dd61 after both required
+Python 3.11/3.12 gates passed. Issue267 closed on integration. Both installed
+skill roots now match all five source files from that merge, including the
+portable lifecycle reference; complete prior roots retained as backups. Runtime
+remains 0.15.1. No shared service/client restart or native turn. Delivery evidence
+is in docs/dev/evidence/plan0163/{integration-readback,installed-skills}.json.
 
 User approved polishing existing documentation/help/skill surfaces after Ask Matt
 routing. Clean main base d587b86bba9ff23e03147738092e4c42a047e675; one registered
@@ -56,4 +59,5 @@ transition run. Whitespace PASS. Active planning audit PASS with the repository'
 existing accepted baseline, no unused baseline or new findings. Primary reviewed
 Standards and Spec separately; fixed S163-01 hardcoded reviewer workflow and S163-02 installed portability, and
 verified it closed-world. Evidence: docs/dev/evidence/plan0163/review.md.
-Installed skills remain unchanged until merged-main byte verification.
+Installed skills synchronized only after merged-main byte verification; existing
+clients load updated guidance through ordinary refresh or a new session.

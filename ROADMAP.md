@@ -1219,8 +1219,12 @@ Receipt: docs/dev/evidence/plan0162/final-acceptance.md.
 
 ## P163 | Lifecycle discovery and onboarding
 
-State: CLOSED (source). Owner: primary / ecochran76. Workflow: DONE.
+State: CLOSED. Owner: primary / ecochran76. Workflow: DONE.
 Issue267 / [Plan0163](docs/dev/plans/0163-2026-10-14-lifecycle-onboarding.md) polishes existing
 README, lifecycle quickstart and agent skill for released spawn/refresh/handoff.
 Depends on integrated P156/P162; no runtime changes or blockers. Acceptance:
 CLI/MCP templates, accurate release claims, links and installed skill parity.
+
+P163 delivery: PR268 merged72b1e5e after both required gates; issue267 closed.
+Both installed skill roots synchronized to all five merged files with backups;
+runtime stays0.15.1, no client/service restart. Exact receipts in Plan0163 evidence.

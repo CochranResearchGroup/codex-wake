@@ -6,17 +6,21 @@ lanes:
     objective: Make released lifecycle operations discoverable and usable
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/267]
     plan: docs/dev/plans/0163-2026-10-14-lifecycle-onboarding.md
-    plan_ref: docs/lifecycle-onboarding
+    plan_ref: origin/main
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/268
     branch: docs/lifecycle-onboarding
     target: origin/main
     plan_state: CLOSED
-    custody_state: INTEGRATION_READY
+    custody_state: INTEGRATED
     integration: squash_pr
     dependencies: [P156, P162]
     overlaps: []
     updated_at: 2026-10-14
-    disposition: Source validated; protected-main PR and installed skill synchronization pending
+    checkpoint: 149efa71f41c0ad881bd529fe22c3173cf796afc
+    integration_receipt: 72b1e5e57af9c9e16f9b9baf11cf76d8bb19dd61
+    remote_ref: refs/remotes/origin/docs/lifecycle-onboarding
+    checkout_required: false
+    disposition: PR268 merged; both installed skill roots match five merged files; source branch retained
   - id: P162
     owner: primary / ecochran76
     objective: Resolve informal MCP tab targets and explicit dormant-session policies

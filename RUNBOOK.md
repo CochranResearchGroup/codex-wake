@@ -6740,3 +6740,22 @@ sync follow protected-main checks; no shared service or client restart.
 Graphiti discovery skipped: current source and supplied scope were sufficient.
 Memory disposition unavailable: no configured reviewed repository group; receipt
 records no Graphiti write. No memory-folder files changed.
+
+
+## Turn 328 | 2026-10-14 UTC | Lifecycle onboarding installed closeout
+
+PR268 merged72b1e5e57af9c9e16f9b9baf11cf76d8bb19dd61 after Python3.11 gate
+2m16s and3.12 gate2m55s passed (CI38631538695). Issue267 closed/read back.
+Packaged MCP templates in skill references/lifecycle.md so installed agents do
+not depend on a repository checkout; both guide and skill point to that source.
+Final four CLI/four MCP/six JSON/13-link validation PASS,19-tool surface unchanged.
+Before synchronization both installed roots matched the prior four-file source;
+backed up both complete roots, atomically replaced files and added reference.
+Both now match all five files from exact merged main; links resolve locally.
+Runtime remains0.15.1; no native turns, shared service restarts or client reloads.
+Existing clients consume updated guidance by ordinary refresh/new session.
+Receipts: docs/dev/evidence/plan0163/{integration-readback,installed-skills,
+issue-closeout}.json. Closed-world review confirms S163-01/S163-02 resolved,
+no new source behavior. Prior explicit memory disposition remains the single
+closeout receipt; no additional memory operation. Documentation custody closeout
+uses a separate protected-main PR; source ref retained.
