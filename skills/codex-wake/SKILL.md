@@ -59,6 +59,14 @@ handoff needs existing explicit authorization and its own exact-target send and
 correlation; it never redirects the original correlated reply. Missing authority
 or uncertain delivery requires a truthful local blocker and reconciliation.
 
+Every pending question needs an explicit wait owner, fixed deadline and next
+action. Across tabs, default to a tracked request with a verified reply arm before
+yielding. Foreground/inbox-only/TUI observation requires an explicitly owned,
+bounded read or watch; ending that wait requires a verified continuation or a
+truthful blocker. Recipient closeout must inspect the correlated reply admission
+before reporting locally. Requester completion requires reading the result and
+its evidence. Retain request/arm IDs and return strategy in a durable checkpoint.
+
 Read [A2A response standards and examples](references/a2a-responses.md) before
 sending or processing an A2A exchange. Follow its request/result defaults, claim
 rules, native/Wake distinction, third-party limits and no-reply-loop rules.
