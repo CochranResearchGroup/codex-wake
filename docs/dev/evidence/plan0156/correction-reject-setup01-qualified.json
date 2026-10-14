@@ -1,0 +1,37 @@
+{
+  "state": "qualified_setup",
+  "raw_root": "/tmp/codex-wake-plan0156-correction-reject-setup01",
+  "raw_sha256": "5f2cb96a0cd967a449ef88bbddfda56b8a8fa5de2b4b65b5c91099e9edd1d619",
+  "native_mcp_setup": {
+    "configuration_revision": "29d80a1c21b7ade82e41c62b9e32841c90463f52d30ea310b3ade39cec7d3f26",
+    "goal": null,
+    "handoff_negative_case_rejected": true,
+    "lifecycle_effects": 0,
+    "missing_checkpoint_held": true,
+    "negative_error": {
+      "error": {
+        "code": "invalid_cli_response"
+      },
+      "idempotency_key": null,
+      "reconciliation_required": true
+    },
+    "thread_id": "01a13b2a-23f7-7182-9566-c04718b913f1",
+    "turns": 0
+  },
+  "generated_helper_syntax": "passed",
+  "manual_assignment_limit": 0,
+  "native_rollouts": 0,
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      21705,
+      22478,
+      53437,
+      68403
+    ],
+    "private_readable_environment_matches": []
+  },
+  "server_exit": 0
+}

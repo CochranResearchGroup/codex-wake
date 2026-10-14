@@ -20,6 +20,10 @@ from codex_wake.native_protocol import native_request
 
 class SetupQualified(Exception):
     """Exit the qualification-only path through common owned cleanup."""
+
+
+class CorrectionStopped(Exception):
+    """Qualified rejected work reached the original two-cycle boundary."""
 from agent_handoff_writer_acceptance import write
 
 
@@ -132,7 +136,8 @@ def host_read(key):
         assert time.monotonic()<deadline,'host native observation unavailable'
         time.sleep(.1)
     return json.loads(pathlib.Path(C[key]).read_text())
-if sys.argv[1:1+1]==['--instructions']:
+if sys.argv[1:1+1] in (['--instructions'],['--correction-instructions']):
+    correction_read=sys.argv[1]=='--correction-instructions'
     for kind in ('reviewer','workflow'):
         print('SELECTED_INSTRUCTIONS:'+kind+':'+sha(C[kind]))
         print(pathlib.Path(C[kind]).read_text())
@@ -140,6 +145,9 @@ if sys.argv[1:1+1]==['--instructions']:
               C['repo']+'/docs/dev/plans/0159-2026-10-12-agent-handoff.md','checkpoint.json','host-validation.json'):
         print('PREFLIGHT_SOURCE:'+p+':'+sha(p))
         content=pathlib.Path(p).read_text()
+        if correction_read:
+            assert sha(p)==C['original_source_hashes'][p],'previously read canonical evidence changed'
+            continue
         if p.endswith('0156-2026-10-12-agent-lifecycle-delivery.md'):
             start=content.index('## Operator requirements revision')
             end=content.index('\\n## Problem Statement',start)
@@ -151,7 +159,10 @@ if sys.argv[1:1+1]==['--instructions']:
         else:print(content)
     own=pathlib.Path(__file__).resolve()
     print('APPROVED_HELPER_SOURCE:'+str(own)+':'+sha(own))
-    print(own.read_text())
+    if not correction_read:print(own.read_text())
+    if C.get('correction'):
+        print('REPAIR_EVIDENCE:'+sha('repair.txt'))
+        print(pathlib.Path('repair.txt').read_text())
     raise SystemExit(0)
 if sys.argv[1:]==['--continue']:
     proof=json.loads(pathlib.Path('preflight.json').read_text())
@@ -194,7 +205,16 @@ assert review['source_thread_id']==source and review['successor_thread_id']==cid
 assert review['checkpoint_sha256']==digest and review['intent_fingerprint']==nonce
 assert review['work_review']['verdict'] in ('accept','correct','blocked')
 assert review['work_review']['selected_review']=='github-handoff'
-assert validate_work_review(review['work_review'],authority['policy'],pathlib.Path.cwd(),body)
+if review['work_review']['verdict']=='accept':
+    assert validate_work_review(review['work_review'],authority['policy'],pathlib.Path.cwd(),body)
+    if C.get('correction'):assert pathlib.Path('repair.txt').read_text()=='accepted correction\\n'
+elif C.get('correction') and review['work_review']['verdict']=='correct':
+    packet=review['work_review']['correction_packet']
+    assert packet['criterion']=='repair fixture matches accepted correction' and packet['paths']==['repair.txt']
+    assert packet['evidence']==[dict(path='repair.txt',sha256=sha('repair.txt'))]
+    assert packet['instructions']==C['repair_instructions']
+    assert pathlib.Path('repair.txt').read_text()!='accepted correction\\n'
+else:assert validate_work_review(review['work_review'],authority['policy'],pathlib.Path.cwd(),body)
 packet=pathlib.Path('successor-handoff.md').read_text()
 assert packet.strip(),'reviewer handoff packet missing'
 checks['selected_workflow'].update(packet='successor-handoff.md',packet_sha256=sha('successor-handoff.md'),verified_ref=ref,
@@ -250,7 +270,7 @@ def start_owned_monitor(prefix,root,env,log):
         raise
 
 
-def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',rollback=False,qualify_only=False):
+def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',rollback=False,qualify_only=False,correction=None):
     original=None
     if resume_setup:
         original=json.loads((root/'state.json').read_text())
@@ -288,11 +308,14 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             raise RuntimeError('selected instruction mirror bytes changed')
         mirrors.append(dict(source=str(selected_path),installed=str(destination),sha256=digest))
     workflow=Path(mirrors[0]['installed']);reviewer=Path(mirrors[1]['installed'])
+    token_cap=500000 if correction=='reject' else 400000 if correction else 250000
+    session_cap=400000 if correction=='reject' else 300000 if correction else 150000
+    if correction:(workspace/'repair.txt').write_text('unaccepted fixture\n')
     guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
     head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
     receipt=dict(state='preparing',root=str(root),prefix=str(prefix),source_commit=head,
         selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
-        token_cap=250000,time_cap_seconds=600,manual_assignment_limit=0 if qualify_only else 2,mode=mode,rollback_requested=rollback,
+        token_cap=token_cap,time_cap_seconds=600,manual_assignment_limit=0 if qualify_only else 4 if correction else 2,mode=mode,rollback_requested=rollback,correction_case=correction,
         selected_instruction_mirrors=mirrors,
         root_window=dict(start=datetime.fromtimestamp(parent_deadline-21600,UTC).isoformat(),
             deadline=datetime.fromtimestamp(parent_deadline,UTC).isoformat(),token_cap=2000000),
@@ -370,9 +393,11 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
         defaults=dict(handoff_writer=dict(name='github-handoff',path=str(workflow)),
             preflight_reviewer=dict(name='github-ask-matt',path=str(reviewer)),
-            session_token_limit=150000,session_time_limit_seconds=int(end-started),
-            objective_token_limit=250000,objective_time_limit_seconds=int(end-started),max_correction_cycles=0)
+            session_token_limit=session_cap,session_time_limit_seconds=int(end-started),
+            objective_token_limit=token_cap,objective_time_limit_seconds=int(end-started),max_correction_cycles=2 if correction else 0)
         objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.'
+        if correction:
+            objective=f'Operator-approved Plan0156 disposable correction proof: review and repair only repair.txt under the frozen host packet, at most two corrective cycles. Execute {prefix}/bin/python {helper} --continue exactly once only after acceptance and report its actual result. The external controller completes an accepted goal after verification. Do not invoke goal tools or change goals, scope, actors or resources; rejected work cannot continue.'
         bootstrap=dict(objective=objective,approval=receipt['authority'],spawn_token_limit=100000,
             started_at=datetime.fromtimestamp(started,UTC).isoformat())
         write(profiles,dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults,
@@ -380,6 +405,10 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),reviewer=str(reviewer),prefix=str(prefix),
             review_authority=str(root/'review-authority.json'),
             native_observations=str(root/'native-observations.json'),continuation_authority=str(root/'continuation-authority.json'))
+        if correction:
+            repair_value='accepted correction\n' if correction=='accept' else 'attempted correction\n'
+            constants.update(correction=correction,original_source_hashes={},repair_instructions=
+                'Write repair.txt with exactly '+repr(repair_value)+'. No other repair changes. Then read full selected instructions and current repair evidence using the approved helper --correction-instructions, author a fresh work-review.json and successor-handoff.md, and run the original exact host verifier. The ineffective value in the rejection fixture is intentional; report its unmet criterion without substituting another repair outside this frozen packet.')
         helper.write_text(preflight_program(constants))
         bootstrap_effective=effective_configuration(json.loads(profiles.read_text()),'bootstrap','worker')
         receipt['bootstrap_configuration']=dict(revision=bootstrap_effective['revision'],
@@ -413,8 +442,13 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             acceptance_remaining=['selected preflight','native bounded continuation','owned rollback'],
             evidence=[str(root/'host-validation.json')],pending_wakes=[],pending_messages=[],claim_holders=[],
             reply_route='root controller via native result and '+str(root/'state.json'),hard_stops=['original token and time caps; no renewal'],
-            expires_at=expiry,resources=dict(token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=0,
+            expires_at=expiry,resources=dict(token_cap=token_cap,time_cap_seconds=int(end-started),tokens_before_source=0,
                 seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat()))
+        if correction:
+            (workspace/'AGENTS.md').write_text((workspace/'AGENTS.md').read_text()+'\nDedicated correction fixture: compare actual repair.txt against accepted correction followed by newline. Until it matches, report correct with a correction_packet: criterion=repair fixture matches accepted correction; paths=[repair.txt]; actual repair path/hash evidence; instructions copied exactly from C[repair_instructions] in the approved helper. Do not repair before an assigned correction. During correction, execute only that frozen repair and use --correction-instructions for the first read command; it prints full selected instructions and current repair evidence, and verifies unchanged hashes for canonical sources already fully read in this same context. The ineffective rejection packet is deliberate fault injection: obey it and report correct again rather than inventing a different repair or claiming acceptance. Author fresh review and handoff artifacts, then run the original verifier in the second command. The source writer emits only its checkpoint. No goal or ordinary continuation before accepted repair.\n')
+            constants['original_source_hashes']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in
+                (repo/'docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md',repo/'docs/dev/plans/0159-2026-10-12-agent-handoff.md',workspace/'host-validation.json')}
+            # checkpoint is authored below; fill its immutable hash before receiver admission.
         script=checkpoint_program(checkpoint_contract,objective)
         task='First read and print the complete selected writer instructions at '+str(workflow)+' using a command containing that absolute path. Apply them to the supplied bounded fixture checkpoint. Then execute only this Python script to write your own outgoing checkpoint, then report checkpoint ready. Do not change any goal.\n```python\n'+script+'```'
         spawn=['sessions','spawn','--profiles',str(profiles),'--profile','worker','--objective-ref','bootstrap','--intent','source-1','--name','checkpoint-source','--task',task,'--expires-at',expiry,'--json']
@@ -431,13 +465,20 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         if spent['total_tokens']>=100000:raise RuntimeError('source exceeded fixture suballowance')
         os.killpg(monitor.pid,signal.SIGINT);monitor.wait(timeout=30)
         receipt['source_supervisor_exit']=monitor.returncode;monitor=None
-        receipt['source_goal']=request('thread/goal/set',dict(threadId=source,objective=objective,tokenBudget=250000-spent['total_tokens'],status='paused',origin='automatic'))['goal']
+        receipt['source_goal']=request('thread/goal/set',dict(threadId=source,objective=objective,tokenBudget=token_cap-spent['total_tokens'],status='paused',origin='automatic'))['goal']
         # Qualify the host route on the settled source before buying a successor turn.
         receipt['host_source_preflight']=observe_native_preflight(request,source,source,guide,workspace)
         write(root/'state.json',receipt)
-        policy=dict(objective=objective,approval=receipt['authority'],token_cap=250000,time_cap_seconds=int(end-started),tokens_before_source=spent['total_tokens'],seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat(),preflight=dict(script=str(helper),sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',workflow='github-ask-matt',required_checks=['canonical_sources','selected_skill','selected_workflow','native_resource','installed_cli','focused_validation'],token_allowance=150000),activation=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=45))
+        policy=dict(objective=objective,approval=receipt['authority'],token_cap=token_cap,time_cap_seconds=int(end-started),tokens_before_source=spent['total_tokens'],seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat(),preflight=dict(script=str(helper),sha256=hashlib.sha256(helper.read_bytes()).hexdigest(),receipt='preflight.json',workflow='github-ask-matt',required_checks=['canonical_sources','selected_skill','selected_workflow','native_resource','installed_cli','focused_validation'],token_allowance=session_cap),activation=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=45))
         policy['acceptance_criteria']=['restart-safe fixture checkpoint matches the approved objective, authority and next packet',
             'host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance']
+        if correction:
+            policy['correction_scope']=['repair.txt']
+            policy['acceptance_criteria'].append('repair fixture matches accepted correction')
+            constants['original_source_hashes']['checkpoint.json']=hashlib.sha256((workspace/'checkpoint.json').read_bytes()).hexdigest()
+            constants['original_source_hashes']['host-validation.json']=hashlib.sha256((workspace/'host-validation.json').read_bytes()).hexdigest()
+            helper.write_text(preflight_program(constants))
+            policy['preflight']['sha256']=hashlib.sha256(helper.read_bytes()).hexdigest()
         configured=dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults,continuations={source:policy},callers={source:['worker']})
         effective=effective_configuration(configured,source,'worker')
         receipt['configuration_revision']=effective['revision']
@@ -445,17 +486,32 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         write(profiles,configured)
         checkpoint=workspace/'checkpoint.json';digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
         handoff=['sessions','handoff','--profiles',str(profiles),'--profile','worker','--intent','handoff-1','--thread-id',source,'--checkpoint','checkpoint.json','--checkpoint-sha256',digest,'--expires-at',expiry,'--mode',mode,'--json']
-        deadline=time.monotonic()+240
+        deadline=time.monotonic()+min(480 if correction else 240,max(0,end-snapshot()['utc']['upper']-50))
         def observe_handoff(state):
             receipt['handoff']=state;write(root/'state.json',receipt)
             if state.get('successor_thread_id') and not (root/'native-observations.json').exists():
                 observed=observe_native_preflight(request,source,state['successor_thread_id'],guide,workspace)
                 observed.update(checkpoint_sha256=digest,intent_fingerprint=state['fingerprint'],host_validation=host_validation)
                 write(root/'native-observations.json',observed)
+            if correction=='reject' and state.get('terminal_review') and state.get('reason')=='correction_cycles_exhausted':
+                if state['objective_budget']['correction_cycles']!=2 or len(state['review_history'])!=2:
+                    raise RuntimeError('rejection did not retain exactly two corrective cycles')
+                if request('thread/goal/get',dict(threadId=state['successor_thread_id']))['goal'] is not None:
+                    raise RuntimeError('rejected work prepared an unauthorized goal')
+                native,spent=usage(state['successor_thread_id'])
+                if len(native['turns'])!=3 or any(t['status']!='completed' for t in native['turns']):
+                    raise RuntimeError('rejection did not stop at three completed native review turns')
+                if spent['total_tokens']>session_cap or receipt['source_usage']['total_tokens']+spent['total_tokens']>token_cap:
+                    raise RuntimeError('rejection proof exceeded its fixed resource contract')
+                receipt.update(successor_usage=spent,rejection_goal=None,correction_cycles=2,
+                    review_history=state['review_history'],rejection_native_turns=3)
+                raise CorrectionStopped
+
         state=wait_for_preflight(invoke,handoff,deadline,observe_handoff)
         target=state['successor_thread_id'];native,spent=usage(target);receipt['preflight_usage']=spent;write(root/'native-preflight.json',native)
-        instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and '--instructions' in i.get('command','') and i.get('exitCode')==0]
-        if len(instructions)!=1 or not all('SELECTED_INSTRUCTIONS:'+k+':' in instructions[0].get('aggregatedOutput','') for k in ('reviewer','workflow')):raise RuntimeError('actual selected instruction read unverified')
+        instructions=[i for t in native['turns'] for i in t['items'] if i['type']=='commandExecution' and ('--instructions' in i.get('command','') or '--correction-instructions' in i.get('command','')) and i.get('exitCode')==0]
+        expected_reviews=1+state.get('objective_budget',{}).get('correction_cycles',0)
+        if len(instructions)!=expected_reviews or not all(all('SELECTED_INSTRUCTIONS:'+k+':' in item.get('aggregatedOutput','') for k in ('reviewer','workflow')) for item in instructions):raise RuntimeError('actual selected instruction read unverified')
         if not instruction_read(native,effective['preflight_reviewer'],workspace):
             raise RuntimeError('selected reviewer instruction bytes not observed')
         if not instruction_read(native,effective['handoff_writer'],workspace):
@@ -463,11 +519,15 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         authored=[i for t in native['turns'] if t.get('status')=='completed' for i in t['items']
             if i.get('type')=='commandExecution' and i.get('status')=='completed'
             and i.get('exitCode')==0 and 'work-review.json' in i.get('command','')]
-        if len(authored)!=1:
+        if len(authored)!=expected_reviews:
             raise RuntimeError('reviewer-authored work review native evidence unverified')
         receipt['work_review_artifact']=dict(path=str(workspace/'work-review.json'),
             sha256=hashlib.sha256((workspace/'work-review.json').read_bytes()).hexdigest(),
-            native_item_id=authored[0]['id'])
+            native_item_id=authored[-1]['id'])
+        if correction:
+            if expected_reviews!=2 or len(state['review_history'])!=1:
+                raise RuntimeError('accepted repair did not consume exactly one correction')
+            receipt.update(correction_cycles=1,review_history=state['review_history'])
         receipt['instruction_read_item']=instructions[0]['id']
         mcp_args=dict(profile='worker',intent='handoff-1',thread_id=source,checkpoint='checkpoint.json',checkpoint_sha256=digest,expires_at=expiry,mode=mode,caller_thread_id=source)
         receipt['native_handoff_mcp_prepared']=call_source_mcp(
@@ -542,6 +602,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
                 source,after,'wake_sessions_handoff',dict(mcp_args,rollback=True))
             receipt['rollback_source_goal']=request('thread/goal/get',dict(threadId=source))['goal']
     except SetupQualified:receipt.update(state='qualified_setup')
+    except CorrectionStopped:receipt.update(state='passed_bounded_rejection_axis')
     except Exception as exc:receipt.update(state='failed',error=str(exc))
     finally:
         if monitor is not None and monitor.poll() is None:
@@ -583,14 +644,15 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         if matches or receipt['server_exit'] is None or receipt.get('monitor_shutdown'):receipt.update(state='failed',cleanup_error='owned processes remain or shutdown unverified')
         write(root/'state.json',receipt)
     print(json.dumps({k:receipt.get(k) for k in ('state','error','root','source_usage','successor_usage','cleanup')}))
-    return 0 if receipt['state'] in ('passed_continuation_axis','qualified_setup') else 1
+    return 0 if receipt['state'] in ('passed_continuation_axis','qualified_setup','passed_bounded_rejection_axis') else 1
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--execute',action='store_true');p.add_argument('--resume-setup',action='store_true');p.add_argument('--root',type=Path,required=True);p.add_argument('--prefix',type=Path,required=True);p.add_argument('--repo',type=Path,required=True);p.add_argument('--parent-deadline',type=float,required=True)
     p.add_argument('--mode',choices=['new-tab','same-tab'],default='new-tab');p.add_argument('--rollback',action='store_true')
     p.add_argument('--qualify-only',action='store_true',help='verify isolated catalog/helper and cleanup without any model assignment')
+    p.add_argument('--correction',choices=['accept','reject'],help='dedicated bounded correction proof, at most two corrective assignments')
     args=p.parse_args()
     if not args.execute:p.error('--execute required for two owned assignments and bounded native goal effects')
-    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline,args.resume_setup,args.mode,args.rollback,args.qualify_only)
+    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline,args.resume_setup,args.mode,args.rollback,args.qualify_only,args.correction)
 if __name__=='__main__':raise SystemExit(main())

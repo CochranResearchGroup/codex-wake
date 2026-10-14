@@ -6474,3 +6474,28 @@ Current window external spend561,200 (209,130+145,610+206,460); prior window
 correction proof+150,000 primary/integration is below remaining1,268,790 at
 root1,442,450 (baseline1,272,440). Do not start another paid unit unless remaining
 minimum complete proof still fits. Full goal OPEN, no merge/release/closure.
+
+Paused-dialog-same-tab01 accepted: source46,461+receiver141,877=188,338,
+all fixed100,000/150,000/250,000/600s caps honored. Actual Matt instruction reads,
+model-authored ACCEPT, same-pane/fresh-generation handoff, bounded continuation,
+all three nativeMCPreadbacks and rollback completed. Original paused source
+restored with budget61,662; receiver spend141,877 charged once, ledger settled;
+server0 and fresh OS residue empty. Both native modes now have positive primary
+and rollback evidence. Full plan still OPEN for revised correction and release.
+
+Correction proof successor: one accept case (400,000 total/300,000 receiver),
+one deliberate ineffective-repair rejection case (500,000 total/400,000 receiver),
+600s each, source100,000 and global correction maximum2. These are fresh dedicated
+proof contracts for the approved repair criterion, not raised failed handoff caps.
+One sample per case, no blind retry. Initial canonical revision/helper/checkpoint
+read remains complete; later corrections re-read selected instruction bytes and
+actual repair, checking unchanged canonical/checkpoint/host-validation hashes
+already fully read in that same native context. No semantic review fabricated.
+Both private zero-model setups qualified with catalog/MCP/compiled helper and
+clean teardown. Harness14 tests pass. At16:03:17UTC root1,492,875 minusbaseline
+1,272,440 plus749,538 current-window external=969,973;1,030,027 remained.
+Forecast900,000 maximum native allocations+100,000 root/integration fits; recheck
+before paid cases. Historical native659,999 remains outside this window.
+Classification:outcome_progress (both-mode native continuation/rollback),
+next: bounded correction acceptance/stop plus installed replacement-limit tests,
+then combined release gates and exact-main integration/install readback.
