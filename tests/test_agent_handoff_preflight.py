@@ -22,6 +22,9 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_non_github_review_accepts_evidence_without_changing_native_guards(self):
         self.scenario(workflow='local-review')
 
+    def test_preflight_references_exact_instruction_files_and_requires_native_read(self):
+        self.scenario(reference_contract=True)
+
     def test_accept_assertion_cannot_replace_criterion_evidence(self):
         for defect in ('scope_drift', 'test_count_only', 'changed_evidence', 'unknown_criterion'):
             with self.subTest(defect=defect):
@@ -156,7 +159,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False,reference_contract=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -392,6 +395,11 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             return
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         receipt=json.loads(output.getvalue())
+                        if reference_contract:
+                            contract=json.loads(receipt['preflight_task'].split('PREFLIGHT_CONTRACT=',1)[1].split('\n',1)[0])
+                            for selection in ('handoff_writer','preflight_reviewer'):
+                                self.assertEqual(set(contract[selection]),{'name','path','sha256'})
+                                self.assertEqual(contract[selection]['sha256'],receipt['configuration'][selection]['sha256'])
                         if unloaded_active and _==0:
                             continue
                         if unread_writer:

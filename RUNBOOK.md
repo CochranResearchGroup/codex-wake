@@ -6376,3 +6376,33 @@ baseline592440 plus237489 earlier-window-native-current+216479 this sample
 18:29:34UTC. Full goal ACTIVE; no merge/release/issue closure. Memory disposition
 unavailable; integrated-accounting-memory-disposition.json records zero writes
 and no qualified repository group for this source-anchored outcome.
+
+## Turn 317 | 2026-10-14 UTC
+
+Measured context packing: selected writer/reviewer complete instruction bytes
+were duplicated in preflight user contract and mandatory native instruction-read
+output. Prompt contract now carries exact name/path/hash only; full frozen host
+configuration/readback and actual complete file-read witness remain required.
+Original native contract loses2609 duplicate characters; no selected instructions,
+canonical source, semantic field or criterion removed. CLI red/green validates
+reference identity and original unread-writer negative still holds. Source81 tests
+pass32.074s, installed20 affected58 pass33.709s, package parity95/zero mismatches.
+Source06feaaf CI38586398194 successful. New instruction-reference source increment
+will be published clean before paid effects. Earlier resource-failed216479 sample
+remains retained; no cap renewal or billable-metric substitution.
+Resource reframe at15:14:07UTC: root1231856-583915 plus453968 native=1101909,
+remaining898091 before later work. Paired resource proof is superseded by one
+bounded corrected-total packet, max2 samples one per mode, no same-mode retry.
+Actual baseline per-sample216479 and removed repeated2609 characters justify
+expected225000 each, but reserve hard250000 each (500000 pair). Remaining source
+implementation is validated and prior CI green; integration work is now bounded
+at350000 root tokens, deterministic existing release/CI checks preferred, leaving
+48091 contingency. This reduces internal orchestration allowance, never raises
+user2m/6h or native100000/150000/250000/600s ceilings. Reassess before each effect;
+if first failure makes the minimum complete proof impossible, stop paid repeats
+and continue safe repair/checkpoint inside remaining allowance. Preserve both
+previous ended units and accepted runtime versus failed resource evidence.
+Next actual evidence deadline:600s for same-tab physical retirement, semantic
+preflight, full-rollout bounded continuation and rollback; then new-tab once if
+resources and first result permit. No wrapper-only setup substituted for native
+acceptance, no broad review. Goal/plan/children/issues remain ACTIVE/OPEN.

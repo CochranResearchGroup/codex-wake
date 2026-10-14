@@ -550,12 +550,13 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 checkpoint_sha256=args.checkpoint_sha256,intent_fingerprint=receipt['fingerprint'],
                 selected_workflow=preflight['workflow'],script=str(script),receipt=str(output),
                 token_allowance=preflight['token_allowance'], configuration_revision=effective['revision'],
-                handoff_writer=effective['handoff_writer'], preflight_reviewer=effective['preflight_reviewer'],
+                handoff_writer={k:v for k,v in effective['handoff_writer'].items() if k!='instructions'},
+                preflight_reviewer={k:v for k,v in effective['preflight_reviewer'].items() if k!='instructions'},
                 acceptance_criteria=policy.get('acceptance_criteria', []),
                 work_review_fields=['verdict','selected_review','changes','acceptance_progress',
                     'scope_deviations','unsupported_claims','unfinished_work','next_packet'])
             receipt.setdefault('preflight_task',
-                'Preflight only. Read and apply the configured reviewer instructions in PREFLIGHT_CONTRACT '
+                'Preflight only. Read and apply the exact instruction files selected in PREFLIGHT_CONTRACT '
                 'and the exact source checkpoint. Record the actual downstream review selected by any router. '
                 'Assess changes against the approved criteria and hash-bound evidence; test counts alone '
                 'do not prove progress. Return runtime checks separately from work_review with accept/correct/blocked. '
