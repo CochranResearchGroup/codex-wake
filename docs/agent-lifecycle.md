@@ -63,65 +63,9 @@ can extend resources; agent MCP cannot reset them.
 
 ### Agent requests
 
-Use the same operation choice through MCP. These are argument templates, not
-requests to execute; replace placeholders with your actual identity, approved
-profile, checkpoint hash and expiry. Host registry and wake-root paths are
-configured on the MCP server, never supplied by an agent.
-
-`wake_sessions_configuration`:
-
-```json
-{
-  "caller_thread_id": "SOURCE_THREAD_UUID",
-  "thread_id": "SOURCE_THREAD_UUID",
-  "profile": "worker"
-}
-```
-
-`wake_sessions_spawn`:
-
-```json
-{
-  "caller_thread_id": "SOURCE_THREAD_UUID",
-  "profile": "worker",
-  "intent": "task-001",
-  "name": "worker",
-  "task": "Inspect the agreed fixture and return the result.",
-  "expires_at": "FIXED_FUTURE_ISO8601"
-}
-```
-
-`wake_sessions_refresh`:
-
-```json
-{
-  "caller_thread_id": "SOURCE_THREAD_UUID",
-  "thread_id": "SOURCE_THREAD_UUID",
-  "profile": "worker",
-  "intent": "refresh-001",
-  "checkpoint": "checkpoints/source.json",
-  "checkpoint_sha256": "CHECKPOINT_SHA256",
-  "expires_at": "FIXED_FUTURE_ISO8601",
-  "resources": [
-    "APPROVED_RESOURCE_NAME"
-  ]
-}
-```
-
-`wake_sessions_handoff`:
-
-```json
-{
-  "caller_thread_id": "SOURCE_THREAD_UUID",
-  "thread_id": "SOURCE_THREAD_UUID",
-  "profile": "worker",
-  "intent": "handoff-001",
-  "checkpoint": "checkpoints/source.json",
-  "checkpoint_sha256": "CHECKPOINT_SHA256",
-  "expires_at": "FIXED_FUTURE_ISO8601",
-  "mode": "new-tab"
-}
-```
+Use the [packaged agent request reference](../skills/codex-wake/references/lifecycle.md)
+for configuration, spawn, refresh and handoff MCP templates. This same file ships
+with the installed skill, so agents can reach it outside this repository.
 
 ## Operator setup and spawn
 

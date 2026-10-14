@@ -127,8 +127,10 @@ Choose the lifecycle operation by the requested outcome:
 Inspect configuration before configured work. Obtain your actual native caller
 identity and use only a granted profile. Refresh/handoff require your own durable
 checkpoint and exact hash. Preserve the returned receipt and reconcile the same
-intent on a hold; changing context never renews resources. See the source
-`docs/agent-lifecycle.md` quickstart for operator setup and CLI templates.
+intent on a hold; changing context never renews resources. Before constructing
+a lifecycle request, read [agent lifecycle requests](references/lifecycle.md)
+for MCP templates and checkpoint preparation. Operator setup and CLI templates
+are in the source `docs/agent-lifecycle.md` quickstart.
 
 For a bounded worker assignment, use `wake_sessions_spawn` when the host has
 configured lifecycle launch profiles and your caller/profile grant. Supply your

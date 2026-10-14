@@ -50,9 +50,9 @@ answer this documentation correction; no historical decision needs recovery.
 ## Validation and review
 
 surface-validation.json: four CLI parsers, four MCP schemas, six JSON examples,
-11 local links and 19-tool catalog PASS. Documentation-only: no paid/native
+13 local links and 19-tool catalog PASS. Documentation-only: no paid/native
 transition run. Whitespace PASS. Active planning audit PASS with the repository's
 existing accepted baseline, no unused baseline or new findings. Primary reviewed
-Standards and Spec separately; fixed S163-01 hardcoded reviewer workflow and
+Standards and Spec separately; fixed S163-01 hardcoded reviewer workflow and S163-02 installed portability, and
 verified it closed-world. Evidence: docs/dev/evidence/plan0163/review.md.
 Installed skills remain unchanged until merged-main byte verification.

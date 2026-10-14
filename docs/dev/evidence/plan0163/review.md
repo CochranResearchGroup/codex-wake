@@ -26,5 +26,8 @@ Native candidate/released-prefix evidence remains explicitly separate.
 S163-01 (fixed reviewer workflow): blocking, resolved against current
 agent_handoff.py preflight/effective reviewer comparison and configuration fixture.
 Closed-world verification: old fixed workflow text absent; effective reviewer
-name appears in guide. No runtime changes. No other candidates accepted.
-Standards: 0 blocking. Spec: 1 blocking resolved, 0 remaining.
+name appears in guide. No runtime changes. S163-02 (installed portability): blocking, resolved by packaging MCP templates
+in references/lifecycle.md and linking both source guide and installed skill.
+Verified all reference paths within the skill resolve without a repository checkout.
+No other candidates accepted.
+Standards: 0 blocking. Spec: 2 blocking resolved, 0 remaining.
