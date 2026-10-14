@@ -1,0 +1,18 @@
+{
+  "artifact_path": "/home/ecochran76/workspace.local/codex-wake-tab-targets/docs/dev/evidence/plan0162/memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": "codex-wake-plan0162-tab-targets",
+  "reason": "No reviewed Codex Wake Graphiti target group configured; source and qualification evidence remain in Plan0162 and issue262.",
+  "recorded_at": "2026-10-14T17:29:44.971620+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "/home/ecochran76/workspace.local/codex-wake-tab-targets/docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}

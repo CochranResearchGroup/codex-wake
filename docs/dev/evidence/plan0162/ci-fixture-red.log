@@ -1,0 +1,12 @@
+======================================================================
+FAIL: test_mcp_accepts_human_descriptor_and_returns_canonical_target (test_tab_targets_mcp.TabTargetMCPTests.test_mcp_accepts_human_descriptor_and_returns_canonical_target)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-tab-targets/tests/test_tab_targets_mcp.py", line 29, in test_mcp_accepts_human_descriptor_and_returns_canonical_target
+    self.assertFalse(failed,value)
+AssertionError: True is not false : {'error': {'code': 'invalid_cli_response'}, 'reconciliation_required': True, 'idempotency_key': None}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.145s
+
+FAILED (failures=1)

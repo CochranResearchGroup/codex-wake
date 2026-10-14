@@ -1,0 +1,13 @@
+{
+  "prefix": "/tmp/codex-wake-p162-install",
+  "wheel_sha256": "8e2fd2121e0b7b995737713c9b6be891302077f23db2b73edb457b057022c945",
+  "modules": {
+    "mcp_server.py": "2d05413a972cd3484be057fe23a24a6a102240dbe849f363b3cf96602ab44626",
+    "sessions.py": "429cbb60dc9656d341bc3972b3fba2de27376639e9b420844cfe7ed69055aafe",
+    "shared_app_server.py": "a30042a1e2eca6aff4e6460973b77102e644f5fe0024a9387b32fb28e8942027",
+    "tab_matching.py": "02be865c1cc45b7225d52e819ab711eb093ad1f1826c4a6acc6197ad4e18ced1",
+    "tab_targets.py": "5694da1020533de636dd5ca8b1a69eec2f09e7a0e122be784aaa3d627f5df6ce",
+    "tab_routing.py": "8c53f7583f272529edb954de84c8f82db0d87b8dc3106bdc6d34f0641ab5054d",
+    "target_lifecycle.py": "d6ed7c7067c11b49ca201a37c01a4a6a32c6695673d88f30f9ff978f38684a6d"
+  }
+}

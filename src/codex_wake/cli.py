@@ -2735,6 +2735,9 @@ def run(argv: list[str] | None = None) -> int:
         from .a2a_cli import a2a_command
         return a2a_command(args)
     if args.command == "sessions":
+        if args.sessions_command == 'target':
+            from .tab_targets import target_command
+            return target_command(args, root)
         if args.sessions_command == 'configuration':
             from .lifecycle_configuration import configuration_command
             return configuration_command(args, root)

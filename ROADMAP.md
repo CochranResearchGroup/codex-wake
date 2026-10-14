@@ -1203,3 +1203,12 @@ repairs duplicate P72 policy-pilot identity as P150, and retires archived Plan12
 checkout after fresh zero-CWD-owner readback. Lifecycle PR253 remains draft with
 shared ROADMAP/RUNBOOK conflicts and open acceptance; active owner retains it.
 Receipt: docs/dev/evidence/plan0161/reconciliation.md.
+
+## P162 | MCP informal tab targeting
+
+State: OPEN
+
+Issue: #262. Plan: [Plan0162](docs/dev/plans/0162-2026-10-14-mcp-tab-targets.md).
+Implement tolerant resolution, explicit dormant/missing policies and CWD-scoped
+saved-session discovery through MCP. Stacked on unmerged Plan0156; integration
+and installed acceptance remain separate gates.

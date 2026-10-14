@@ -23,11 +23,13 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def tmux_inventory(socket_path: str | None, timeout: float) -> list[dict[str, Any]]:
+def tmux_inventory(socket_path: str | None, timeout: float, *, shell_metadata: bool = False) -> list[dict[str, Any]]:
     deadline = time.monotonic() + timeout
     command = ['tmux'] + (['-S', socket_path] if socket_path else [])
     fields = ['session_id', 'session_name', 'window_id', 'window_index', 'window_name',
               'pane_id', 'pane_index', 'pane_title', 'pane_current_path', 'pane_tty']
+    if shell_metadata:
+        fields += ['pane_current_command', 'pane_pid']
     result = subprocess.run(command + ['list-panes', '-a', '-F', '\t'.join('#{' + x + '}' for x in fields)],
                             capture_output=True, text=True, timeout=timeout, check=True)
     rows = []
@@ -91,7 +93,7 @@ def build_snapshot(threads: list[dict[str, Any]], panes: list[dict[str, Any]], s
         value['availability'] == 'available' for value in sources.values()), sources=sources, sessions=rows)
 
 
-def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeout: float = 10) -> dict[str, Any]:
+def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeout: float = 10, shell_metadata: bool = False) -> dict[str, Any]:
     sources = {}
     threads, panes = [], []
     if socket_path is None and os.environ.get('TMUX'):
@@ -105,7 +107,8 @@ def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeou
     except (SharedSourceError, OSError) as exc:
         sources['app_server'] = dict(endpoint=endpoint, observed_at=now(), availability='unavailable', error_code=type(exc).__name__)
     try:
-        panes = tmux_inventory(socket_path, timeout)
+        panes = (tmux_inventory(socket_path, timeout, shell_metadata=True) if shell_metadata
+                 else tmux_inventory(socket_path, timeout))
         sources['tmux'] = dict(endpoint=socket_path, observed_at=now(), availability='available', error_code=None)
     except (OSError, subprocess.SubprocessError, SharedSourceError) as exc:
         sources['tmux'] = dict(endpoint=socket_path, observed_at=now(), availability='unavailable', error_code=type(exc).__name__)
@@ -114,7 +117,7 @@ def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeou
 
 def resolve(snapshot: dict[str, Any], selector: str, *, session: str | None = None,
             eligible: bool = True, require_attested: bool = False) -> dict[str, Any]:
-    if not selector or selector in ('thread:', 'tab:') or (selector.startswith('pane:') and not re.fullmatch(r'pane:%\d+', selector)) or (selector.startswith('window:') and not re.fullmatch(r'window:@\d+', selector)):
+    if not isinstance(selector, str) or not selector.strip() or len(selector) > 1024 or any(ord(c) < 32 for c in selector) or selector in ('thread:', 'tab:') or (selector.startswith('pane:') and not re.fullmatch(r'pane:%\d+', selector)) or (selector.startswith('window:') and not re.fullmatch(r'window:@\d+', selector)):
         raise SelectionError(2, 'invalid selector syntax', selector)
     if require_attested:
         raise SelectionError(5, 'runtime-issued binding is unsupported', selector)
@@ -134,27 +137,16 @@ def resolve(snapshot: dict[str, Any], selector: str, *, session: str | None = No
                 if len(context) == 1:
                     session = next(iter(context))
             if session is None:
+                if not sessions:
+                    raise SelectionError(3, 'session not found', selector)
                 if len(sessions) != 1:
                     raise SelectionError(4, 'qualify the tmux session', selector, sorted(sessions))
                 session = next(iter(sessions))[0]
             attachments = [(r, p) for r, p in attachments if session in (p['session_id'], p['session_name'])]
         elif session:
             attachments = [(r, p) for r, p in attachments if session in (p['session_id'], p['session_name'])]
-        if selector.startswith('pane:'):
-            attachments = [(r, p) for r, p in attachments if p['pane_id'] == selector[5:]]
-        elif selector.startswith('window:'):
-            attachments = [(r, p) for r, p in attachments if p['window_id'] == selector[7:]]
-        elif selector.startswith('tab:'):
-            attachments = [(r, p) for r, p in attachments if p['window_name'] == selector[4:]]
-        else:
-            parsed = re.fullmatch(r'(\d+)(?::(.*?))?(?:\.(\d+))?', selector)
-            if parsed:
-                index, name, pane_index = parsed.groups()
-                attachments = [(r, p) for r, p in attachments if p['window_index'] == index
-                               and (name is None or p['window_name'] == name)
-                               and (pane_index is None or p['pane_index'] == pane_index)]
-            else:
-                attachments = [(r, p) for r, p in attachments if p['window_name'] == selector]
+        from .tab_matching import match_tabs
+        attachments, resolution = match_tabs(attachments, selector)
         if len(attachments) > 1:
             raise SelectionError(4, 'selector matches multiple panes or windows', selector,
                                  [p['window_index'] + ':' + p['window_name'] + '.' + p['pane_index'] for _, p in attachments])
@@ -167,7 +159,9 @@ def resolve(snapshot: dict[str, Any], selector: str, *, session: str | None = No
     if eligible and not row['thread_id']:
         raise SelectionError(4 if row['binding_status'] == 'ambiguous' else 6,
                              'selection has no unique Codex identity', selector, row.get('candidates'))
-    return row
+    return dict(row, selected_attachment=attachments[0][1] if not exact_thread else None,
+                resolution=resolution if not exact_thread else dict(
+        selector=selector, normalized_selector=selector, match_method='exact', confidence=1.0))
 
 
 def revalidate_attachment(attachment: dict[str, Any]) -> bool:

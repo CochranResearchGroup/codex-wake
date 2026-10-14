@@ -22,8 +22,14 @@ PAGE = {"cursor": {"type": "integer", "minimum": 0},
 SEND = {"body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery": DELIVERY,
         "ttl": TEXT, "subject": {**TEXT, "maxLength": 200}, "kind": {"enum": ["notice", "request", "result"]},
         "resume_missing": {"type": "boolean"}}
+TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
+          "on_inactive": {"enum": ["error", "tab_only", "fresh", "resume"]},
+          "expected_cwd": TEXT, "cwd": TEXT, "resume_thread_id": TEXT,
+          "profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "expires_at": TEXT}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_sessions_target": ("sessions", "target", "Resolve an informal Byobu descriptor (tab 18, 18:policies, typo). Return canonical identity or structured missing/inactive/ambiguous conditions. Default policies error; explicitly select tab_only, fresh or CWD-scoped resume with approved profile, stable intent and expiry. Starting is not readiness or delivery. Reuse the same intent to inspect startup; never enumerate tabs or repair spelling in the caller.",
+        {"selector": TEXT, **TARGET}, ["selector"], False),
     "wake_sessions_configuration": ("sessions", "configuration", "Read effective host-approved instruction selection and lifecycle limits before admission. Defaults and objective overrides do not renew active resource authority.",
         {"profile": MESSAGE, "thread_id": TEXT}, ["profile", "thread_id"], True),
     "wake_sessions_handoff": ("sessions", "handoff", "Prepare an explicitly approved fresh-context continuation from the source agent's verified checkpoint. Preserve cumulative allowance and original deadline; activation requires the owned continuous monitor. No inherited claims or automatic A2A enrollment.",
@@ -45,7 +51,7 @@ SPECS = {
     "wake_sessions_resolve": ("sessions", "resolve", "Resolve a tab/name/thread selector to an exact thread. Pin the returned UUID before sending; discovery grants no delivery authority.", {"selector": TEXT}, ["selector"], True),
     "wake_sessions_show": ("sessions", "show", "Inspect an exact session or tab and its binding evidence without starting a turn.", {"selector": TEXT}, ["selector"], True),
     "wake_sessions_current": ("sessions", "current", "Validate this host's invoking thread and reject conflicting inherited pane claims.", {}, [], True),
-    "wake_messages_send": ("messages", "send", "Send a durable tracked request/notice using the host's enrolled actor capability. Requires a stable intent key and explicit inbox or notify delivery. Notify requires an operator-bound worker; acceptance is not execution. Reconcile uncertainty; never resend with a new key.", {"to": TEXT, **SEND, "correlation": {**TEXT, "maxLength": 200}}, ["to", "body", "idempotency_key", "delivery"], False),
+    "wake_messages_send": ("messages", "send", "Send a durable tracked request/notice using the host's enrolled actor capability. Requires a stable intent key and explicit inbox or notify delivery. Pass informal tab descriptors directly in to; Wake resolves and pins identity internally. Optional on_missing/on_inactive policies use approved host launch scope; error is default. Starting/tab creation is not message admission. Notify requires an operator-bound worker; acceptance is not execution. Reconcile uncertainty; never resend with a new key.", {"to": TEXT, **SEND, **{k:v for k,v in TARGET.items() if k != "intent"}, "correlation": {**TEXT, "maxLength": 200}}, ["to", "body", "idempotency_key", "delivery"], False),
     "wake_messages_inbox": ("messages", "inbox", "List this actor's inbox metadata, with bounded pagination; bodies require read. Legacy stores may update expiry and clock state.", {**PAGE, "state": TEXT}, [], False),
     "wake_messages_outbox": ("messages", "outbox", "List this actor's sent message metadata and receipt states. Legacy stores may update expiry and clock state.", {**PAGE, "state": TEXT}, [], False),
     "wake_messages_show": ("messages", "show", "Inspect one authorized message's metadata and receipts without reading its body. Legacy stores may update expiry and clock state.", {"message_id": MESSAGE}, ["message_id"], False),
@@ -58,7 +64,7 @@ SPECS = {
 }
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 for _name, _spec in list(SPECS.items()):
-    if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff", "configuration"):
+    if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff", "configuration", "target"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
                        {**_spec[3], "caller_thread_id": CALLER}, [*_spec[4], "caller_thread_id"], _spec[5])
 
@@ -84,6 +90,12 @@ class CommandRunner:
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        if any(isinstance(arguments.get(k), str) and arguments[k].startswith('-') for k in ('selector', 'to')):
+            return {"error": {"code": "invalid_argument", "message": "Descriptor cannot start with an option prefix."}}, True
+        if name in ('wake_sessions_target', 'wake_messages_send') and any(
+                arguments.get(k, 'error') != 'error' for k in ('on_missing', 'on_inactive')):
+            if self.lifecycle_profiles is None or self.wake_root is None:
+                return {"error": {"code": "policy_denied", "message": "Host lifecycle scope is required."}}, True
         body = arguments.get("body")
         if body is not None:
             try:
@@ -99,6 +111,11 @@ class CommandRunner:
                        '--profiles', str(self.lifecycle_profiles)]
         else:
             command = [*self.cli, group, verb]
+        if verb == 'target':
+            if self.wake_root is not None:
+                command = [*self.cli, '--wake-root', str(self.wake_root), group, verb]
+            if self.lifecycle_profiles is not None:
+                command += ['--profiles', str(self.lifecycle_profiles)]
         positional = "selector" if group == "sessions" else "message_id"
         if positional in arguments:
             command.append(arguments[positional])
@@ -113,12 +130,16 @@ class CommandRunner:
             for flag, value in (("--tmux-socket", self.tmux_socket), ("--tmux-session", self.tmux_session)):
                 if value:
                     command += [flag, value]
+        if verb == 'send':
+            for flag, value in (('--profiles', self.lifecycle_profiles), ('--wake-root', self.wake_root)):
+                if value is not None:
+                    command += [flag, str(value)]
         if verb == "arm-reply":
             for flag, value in (("--wake-root", self.wake_root), ("--sender-receipt-authority", self.sender_authority)):
                 if value is not None:
                     command += [flag, str(value)]
         for key, value in arguments.items():
-            if key == positional or (key == 'caller_thread_id' and verb not in ('spawn', 'refresh', 'handoff', 'configuration')):
+            if key == positional or (key == 'caller_thread_id' and verb not in ('spawn', 'refresh', 'handoff', 'configuration', 'target')):
                 continue
             flag = "--" + key.replace("_", "-")
             if key == 'resources':

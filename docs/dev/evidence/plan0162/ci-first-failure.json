@@ -1,0 +1,8 @@
+{
+  "run": 38608206079,
+  "head": "221eb08",
+  "failure": "test fixture child imported tests package through implicit PYTHONPATH root",
+  "production_change": false,
+  "reproduction": "PYTHONPATH=src <python> -m unittest discover -s tests -p test_tab_targets_mcp.py -q",
+  "correction": "embed generated fixture metadata in child; no tests-package import"
+}

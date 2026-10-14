@@ -1,0 +1,35 @@
+Using Python 3.12.13 environment at: /tmp/codex-wake-p162-install
+Resolved 31 packages in 637ms
+Prepared 1 package in 36ms
+Installed 31 packages in 129ms
+ + annotated-types==0.8.0
+ + anyio==4.15.1
+ + attrs==26.1.0
+ + cffi==2.1.1
+ + click==8.5.0
+ + codex-wake==0.13.1 (from file:///tmp/codex-wake-p162-dist/codex_wake-0.13.1-py3-none-any.whl)
+ + cryptography==50.0.2
+ + dbus-next==0.2.3
+ + h11==0.16.0
+ + httpcore2==2.13.1
+ + httpx2==2.13.1
+ + idna==3.20
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + mcp==2.2.0
+ + mcp-types==2.2.0
+ + opentelemetry-api==1.45.1
+ + pycparser==3.11
+ + pydantic==2.14.1
+ + pydantic-core==2.50.1
+ + pyjwt==2.15.1
+ + python-multipart==0.0.32
+ + referencing==0.37.0
+ + rpds-py==2026.9.1
+ + sse-starlette==3.5.0
+ + starlette==1.8.0
+ + truststore==0.10.5
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + uvicorn==0.54.0
+ + websockets==17.2

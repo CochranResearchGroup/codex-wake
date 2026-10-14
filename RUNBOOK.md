@@ -6661,3 +6661,45 @@ retained; root returns clean current main after this docs PR. Classification:
 outcome_progress (released installed lifecycle delivered). Memory disposition:
 unavailable; no qualified Graphiti repo group after bounded atlas, one machine
 non-write receipt final-memory-disposition.json; no memory-folder edits.
+
+## Turn 323 | 2026-10-14 UTC | Plan0162 start (imported history)
+
+Operator accepted issue262 implementation. Main439f749 lacks lifecycle source;
+created isolated feat/mcp-tab-targets from pinned lifecycle5b14c05 as a documented
+stacked dependency exception. Root dirty acceptance script preserved. Plan0162
+freezes selector/result/policy semantics and public-seam tests.
+
+
+## Turn 324 | 2026-10-14 UTC | Plan0162 source and installed qualification (imported history)
+
+Implemented informal target matching, guarded target preparation and pinned
+message admission. Independent review /root/tab_target_review found normalized
+numeric precedence and sticky-busy defects; both remediated with regressions.
+First full run1224 failed98+4 due to global tmux-field fixture incompatibility and
+host StableTime configuration. Optional target-only fields repaired compatibility;
+isolated time lane23 and lifecycle lane92 passed. Isolated full suite1227 then
+final1229 passed (125.098s final); later uncertainty reconciliation52 focused green.
+Installed private-bus MCP smoke:19 tools, request/read/claim/completion/reply and
+capability denials PASS; no native turns/notifications. Owned TUI proof03 fresh,
+exact resume and tab-only PASS, zero turns, no OS residue; two partial proofs kept.
+Final isolated prefix /tmp/codex-wake-p162-install, not the active0.13.1 installation.
+Plan/issue remain OPEN for dependency integration and remaining live acceptance.
+
+Published source checkpointf5449adc32d457749365277f241f82fc64353863 and verified
+remote equality. Draft PR263 targets feat/agent-lifecycle as a dependency stack;
+intended integration remains main after PR253. Final installed20 controls and
+own proof04 passed;7 installed module hashes match source, zero model turns and
+empty OS residue. Active installation unchanged; no production-notify claim.
+Memory disposition unavailable (no reviewed repo Graphiti group), receipt retained.
+
+## Turn 325 | 2026-10-14 UTC | Plan0162 deployment
+
+Operator authorized installation/deployment/reconciliation. Main3bde6d5 includes
+merged PR253; active prefix0.14.0-3bde6d5. Archived original tab-feature tipb5ce1ea
+and rebased only3 feature commits onto main. Both roadmap/log intents retained;
+new A2A standards and lifecycle source preserved. Preparing0.15.0 with validation,
+PR263 retarget to main, exact merged-main installation and final custody readback.
+
+Reconciled parent closeout PR264/a72f8f5 without reopening lifecycle obligations.
+Plan0162 imported headings assigned323/324 and deployment325 to retain unique
+canonical turn IDs alongside the parent released-installed closeout322.

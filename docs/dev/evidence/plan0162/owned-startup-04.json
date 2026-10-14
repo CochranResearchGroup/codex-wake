@@ -1,0 +1,361 @@
+{
+  "before": {
+    "applied_policy": "error",
+    "candidates": [],
+    "confidence": 1.0,
+    "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+    "effects": [],
+    "match_method": "index",
+    "next_actions": [
+      "error",
+      "tab_only",
+      "fresh",
+      "resume"
+    ],
+    "normalized_selector": "18",
+    "requested_policy": {
+      "on_inactive": "error",
+      "on_missing": "error"
+    },
+    "schema_version": 1,
+    "selector": "tab 18",
+    "session": {
+      "active_flags": [],
+      "agent_path": null,
+      "attachments": [
+        {
+          "client_pid": null,
+          "client_start_time_ticks": null,
+          "evidence": "no_unique_codex_client",
+          "pane_current_command": "zsh",
+          "pane_current_path": "/tmp/codex-wake-p162-live-04/workspace",
+          "pane_id": "%1",
+          "pane_index": "0",
+          "pane_pid": "29619",
+          "pane_title": "cooper",
+          "pane_tty": "/dev/pts/43",
+          "session_id": "$0",
+          "session_name": "p162-owned",
+          "socket": "/tmp/codex-wake-p162-live-04/tmux.sock",
+          "window_id": "@1",
+          "window_index": "18",
+          "window_name": "policies"
+        }
+      ],
+      "binding_status": "not_codex",
+      "candidates": [],
+      "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+      "name": "cooper",
+      "parent_thread_id": null,
+      "provider_status": null,
+      "resolution": {
+        "confidence": 1.0,
+        "match_method": "index",
+        "normalized_selector": "18",
+        "selector": "tab 18"
+      },
+      "runtime_state": "unknown",
+      "selected_attachment": {
+        "client_pid": null,
+        "client_start_time_ticks": null,
+        "evidence": "no_unique_codex_client",
+        "pane_current_command": "zsh",
+        "pane_current_path": "/tmp/codex-wake-p162-live-04/workspace",
+        "pane_id": "%1",
+        "pane_index": "0",
+        "pane_pid": "29619",
+        "pane_title": "cooper",
+        "pane_tty": "/dev/pts/43",
+        "session_id": "$0",
+        "session_name": "p162-owned",
+        "socket": "/tmp/codex-wake-p162-live-04/tmux.sock",
+        "window_id": "@1",
+        "window_index": "18",
+        "window_name": "policies"
+      },
+      "source": "tmux",
+      "thread_id": null,
+      "warnings": []
+    },
+    "sources": {
+      "app_server": {
+        "availability": "available",
+        "endpoint": "unix:///tmp/codex-daemon-1000/be9278a055259f08c370526df2590a94dcae991894886c826ead8e5cde98a556",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:52.702454+00:00"
+      },
+      "tmux": {
+        "availability": "available",
+        "endpoint": "/tmp/codex-wake-p162-live-04/tmux.sock",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:52.732356+00:00"
+      }
+    },
+    "status": "no_live_codex",
+    "thread_id": null
+  },
+  "fresh": {
+    "applied_policy": "fresh",
+    "candidates": [],
+    "confidence": 0.625,
+    "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+    "effects": [
+      {
+        "operation": "thread/start",
+        "thread_id": "01a13b75-bad3-7e40-9e4f-be434618f0bf"
+      },
+      {
+        "operation": "tmux/split-window",
+        "pane_id": "%3",
+        "preserved_pane_id": "%1",
+        "window_id": "@1"
+      }
+    ],
+    "match_method": "fuzzy",
+    "next_actions": [
+      "send"
+    ],
+    "normalized_selector": "poicys",
+    "requested_policy": {
+      "on_inactive": "fresh",
+      "on_missing": "error"
+    },
+    "schema_version": 1,
+    "selector": "poicys",
+    "session": {
+      "active_flags": [],
+      "agent_nickname": null,
+      "agent_path": null,
+      "agent_role": null,
+      "attachments": [
+        {
+          "client_pid": 30195,
+          "client_start_time_ticks": 3515203,
+          "evidence": "metadata_matched",
+          "pane_current_command": "codex",
+          "pane_current_path": "/tmp/codex-wake-p162-live-04/workspace",
+          "pane_id": "%3",
+          "pane_index": "1",
+          "pane_pid": "30195",
+          "pane_title": "Wake target 77b0b35f0b55",
+          "pane_tty": "/dev/pts/45",
+          "session_id": "$0",
+          "session_name": "p162-owned",
+          "socket": "/tmp/codex-wake-p162-live-04/tmux.sock",
+          "window_id": "@1",
+          "window_index": "18",
+          "window_name": "policies"
+        }
+      ],
+      "binding_status": "metadata_matched",
+      "can_accept_direct_input": true,
+      "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+      "model_provider": "openai",
+      "name": "Wake target 77b0b35f0b55",
+      "parent_thread_id": null,
+      "provider_status": {
+        "type": "idle"
+      },
+      "runtime_state": "idle",
+      "selected_attachment": {
+        "client_pid": 30195,
+        "client_start_time_ticks": 3515203,
+        "evidence": "metadata_matched",
+        "pane_current_command": "codex",
+        "pane_current_path": "/tmp/codex-wake-p162-live-04/workspace",
+        "pane_id": "%3",
+        "pane_index": "1",
+        "pane_pid": "30195",
+        "pane_title": "Wake target 77b0b35f0b55",
+        "pane_tty": "/dev/pts/45",
+        "session_id": "$0",
+        "session_name": "p162-owned",
+        "socket": "/tmp/codex-wake-p162-live-04/tmux.sock",
+        "window_id": "@1",
+        "window_index": "18",
+        "window_name": "policies"
+      },
+      "source": "vscode",
+      "thread_id": "01a13b75-bad3-7e40-9e4f-be434618f0bf",
+      "warnings": []
+    },
+    "sources": {
+      "app_server": {
+        "availability": "available",
+        "endpoint": "unix:///tmp/codex-daemon-1000/be9278a055259f08c370526df2590a94dcae991894886c826ead8e5cde98a556",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:53.360402+00:00"
+      },
+      "tmux": {
+        "availability": "available",
+        "endpoint": "/tmp/codex-wake-p162-live-04/tmux.sock",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:53.407273+00:00"
+      }
+    },
+    "status": "resolved",
+    "thread_id": "01a13b75-bad3-7e40-9e4f-be434618f0bf"
+  },
+  "fresh_observations": 2,
+  "fresh_os_residue": [],
+  "model_turns": 0,
+  "prefix": "/tmp/codex-wake-p162-install",
+  "resume": {
+    "applied_policy": "resume",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+        "id": "01a13b75-bad3-7e40-9e4f-be434618f0bf",
+        "name": "Wake target 77b0b35f0b55",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "updatedAt": 1791998933
+      }
+    ],
+    "confidence": 1.0,
+    "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+    "effects": [
+      {
+        "operation": "tmux/split-window",
+        "pane_id": "%4",
+        "preserved_pane_id": "%1",
+        "window_id": "@1"
+      }
+    ],
+    "match_method": "index",
+    "next_actions": [
+      "send"
+    ],
+    "normalized_selector": "18",
+    "requested_policy": {
+      "on_inactive": "resume",
+      "on_missing": "error"
+    },
+    "schema_version": 1,
+    "selector": "tab 18",
+    "session": {
+      "active_flags": [],
+      "agent_nickname": null,
+      "agent_path": null,
+      "agent_role": null,
+      "attachments": [
+        {
+          "client_pid": 30613,
+          "client_start_time_ticks": 3515399,
+          "evidence": "metadata_matched",
+          "pane_current_command": "codex",
+          "pane_current_path": "/tmp/codex-wake-p162-live-04/workspace",
+          "pane_id": "%4",
+          "pane_index": "1",
+          "pane_pid": "30613",
+          "pane_title": "Wake target 77b0b35f0b55",
+          "pane_tty": "/dev/pts/45",
+          "session_id": "$0",
+          "session_name": "p162-owned",
+          "socket": "/tmp/codex-wake-p162-live-04/tmux.sock",
+          "window_id": "@1",
+          "window_index": "18",
+          "window_name": "policies"
+        }
+      ],
+      "binding_status": "metadata_matched",
+      "can_accept_direct_input": true,
+      "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+      "model_provider": "openai",
+      "name": "Wake target 77b0b35f0b55",
+      "parent_thread_id": null,
+      "provider_status": {
+        "type": "idle"
+      },
+      "runtime_state": "idle",
+      "selected_attachment": {
+        "client_pid": 30613,
+        "client_start_time_ticks": 3515399,
+        "evidence": "metadata_matched",
+        "pane_current_command": "codex",
+        "pane_current_path": "/tmp/codex-wake-p162-live-04/workspace",
+        "pane_id": "%4",
+        "pane_index": "1",
+        "pane_pid": "30613",
+        "pane_title": "Wake target 77b0b35f0b55",
+        "pane_tty": "/dev/pts/45",
+        "session_id": "$0",
+        "session_name": "p162-owned",
+        "socket": "/tmp/codex-wake-p162-live-04/tmux.sock",
+        "window_id": "@1",
+        "window_index": "18",
+        "window_name": "policies"
+      },
+      "source": "vscode",
+      "thread_id": "01a13b75-bad3-7e40-9e4f-be434618f0bf",
+      "warnings": []
+    },
+    "sources": {
+      "app_server": {
+        "availability": "available",
+        "endpoint": "unix:///tmp/codex-daemon-1000/be9278a055259f08c370526df2590a94dcae991894886c826ead8e5cde98a556",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:55.756397+00:00"
+      },
+      "tmux": {
+        "availability": "available",
+        "endpoint": "/tmp/codex-wake-p162-live-04/tmux.sock",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:55.800801+00:00"
+      }
+    },
+    "status": "resolved",
+    "thread_id": "01a13b75-bad3-7e40-9e4f-be434618f0bf"
+  },
+  "resume_observations": 2,
+  "root": "/tmp/codex-wake-p162-live-04",
+  "scope": "operator issue262 implementation; owned startup only",
+  "server_pid": 29266,
+  "server_returncode": -9,
+  "state": "passed",
+  "tab_only": {
+    "applied_policy": "tab_only",
+    "candidates": [],
+    "cwd": "/tmp/codex-wake-p162-live-04/workspace",
+    "effects": [
+      {
+        "operation": "tmux/new-window",
+        "pane_id": "%2",
+        "preserved_pane_id": null,
+        "window_id": "@2"
+      }
+    ],
+    "message": "session not found",
+    "next_actions": [
+      "retry_same_intent"
+    ],
+    "normalized_selector": "new-shell",
+    "requested_policy": {
+      "on_inactive": "error",
+      "on_missing": "tab_only"
+    },
+    "schema_version": 1,
+    "selector": "new-shell",
+    "session": null,
+    "sources": {
+      "app_server": {
+        "availability": "available",
+        "endpoint": "unix:///tmp/codex-daemon-1000/be9278a055259f08c370526df2590a94dcae991894886c826ead8e5cde98a556",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:52.876190+00:00"
+      },
+      "tmux": {
+        "availability": "available",
+        "endpoint": "/tmp/codex-wake-p162-live-04/tmux.sock",
+        "error_code": null,
+        "observed_at": "2026-10-14T17:28:52.904364+00:00"
+      }
+    },
+    "status": "tab_created",
+    "thread_id": null
+  },
+  "tool_discovered": true
+}
