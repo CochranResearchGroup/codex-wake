@@ -8,6 +8,13 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/248
 
 ## Current State
 
+2026-10-14 current: candidate native spawn, configured refresh (positive/stale),
+both-mode handoff/continuation/rollback, actual cumulative cached-token accounting,
+one accepted repair and exact two-cycle rejection are qualified. Installed public
+fixtures cover non-GitHub selection and replacement/restart limits. Historical
+failures remain retained. PR253 main documentation conflicts reconciled;0.14.0
+release/installed exact-main gates remain open. Plans stay OPEN until closeout.
+
 2026-10-14 operator renewed resources ("renew resources") at15:30:13UTC.
 Current window15:30:13–21:30:13UTC, at most2,000,000 attributable tokens;
 same ACTIVE thread, root baseline1,272,440. Prior window known spend1,348,524

@@ -16,6 +16,13 @@ inbox-only exchanges return one inbox reply and the sender owns checking it.
 For no-reply observations use a notice. Include the expected response route,
 recipient, scope, fixed deadline and evidence in each request.
 
+Every pending question has a return strategy, wait owner, fixed deadline and next
+action. Across tabs, default to a tracked request and verify its exact reply arm
+before yielding. Foreground and explicit inbox-only/TUI observation need bounded
+supervision or a verified continuation; neither agent assumes the other watches
+chat. Recipient closeout inspects reply admission; requester completion inspects
+the correlated answer and evidence. See the standard's mandatory checklist.
+
 A third-party handoff needs existing explicit authority, a separately resolved
 recipient and new send with correlation; `reply` always targets the original
 sender. Do not silently downgrade delivery or call TUI output a delivered result.
@@ -60,7 +67,9 @@ codex-wake messages send --to thread:RECIPIENT_UUID --body-file request.txt \
 
 Keep the returned `message.message_id`. The intent key identifies this exact
 request; reuse it to reconcile the same intent, never change the key after an
-uncertain effect. Choose `--delivery inbox` when notification setup is absent.
+uncertain effect. Choose `--delivery inbox` only for an explicitly agreed inbox-only exchange
+with an owned bounded read/continuation; otherwise report missing setup before
+sending a dependent request.
 
 Recipient, after receiving an `A2A_NOTIFICATION` pointer:
 

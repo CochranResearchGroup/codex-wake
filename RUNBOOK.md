@@ -6580,3 +6580,54 @@ Current-window external1,486,520; previous659,999 remains separate. Native
 required axes qualified; next reconcile main docs conflicts and exact-main release.
 Classification:outcome_progress. Parent and children remain OPEN until integration,
 released installed combined proof, cleanup and issue closure are recorded.
+
+Imported from origin/main439f749; original standalone headings270/271 are preserved in Git and mapped to319/320 here to retain unique canonical IDs.
+
+## Turn 319 | 2026-10-14 UTC
+
+Plan0160 local standards packet: operator reported a peer answering only in
+chat and requester lacking a watch/return wake. Existing Plan0154 already
+required replies and arms; added mandatory exchange checklist with wait owner,
+exact checkpoint, bounded timeout action and both completion gates. Corrected
+guide's unconditional inbox fallback to require explicit owned inbox workflow.
+Separate docs/a2a-return-obligations worktree from origin/main a741010 preserves
+feat/agent-lifecycle checkout. Updated both installed skill copies with prior
+bytes backed up and four-file SHA-256 parity. Nine primary scenario checks,
+changed links, policy wiring and whitespace pass. No live messages, incident
+replay, tests for prose, service effect or publication; model compliance and
+runtime enforcement remain unproven. Plan closes only this local docs/install
+outcome. Review: docs/dev/evidence/plan0160/review.md. Memory disposition
+unavailable: atlas returned no reviewed target cloud; non-write receipt in
+plan0160 evidence. No delegation needed for the coupled standards packet.
+
+Plan0160 delivery continuation: operator explicitly authorized PR/merge/deploy.
+Issue258 created and assigned to ecochran76; exact readback verified. Publishing
+standards branch for CI, squash merge and exact-main installed-skill parity.
+No runtime release or unrelated lifecycle integration included.
+
+## Turn 320 | 2026-10-14 UTC
+
+Plan0161 / issue260: reconciled registered worktrees and canonical custody after
+PR259 merge/deploy. Root lifecycle clean at published e61d66a; draft PR253 has
+ROADMAP/RUNBOOK conflicts and open native acceptance, active owner retained.
+Old Plan127 checkout clean f845e39; exact local/remote archive matches, fresh
+/proc census zero CWD owners; removed normally without refs/process deletion.
+Unused local main advanced one commit to b4e2eb7. All15 prior catalog remote
+checkpoints match. Repair duplicate P72 policy pilot to P150; register active
+P156, integrated P160 and archived planning custody. Preserve historical logs.
+Publish documentation-only reconciliation; CI then squash merge, fresh final
+readbacks and temporary checkout removal. Memory disposition unavailable; no
+qualified repository group. No code, executable/service or active-owner effects.
+
+
+## Turn 321 | 2026-10-14 UTC
+
+Reconciled current main439f749 (PR259 A2A standards and PR261 custody docs)
+into lifecycle lane after owned native models settled. Preserved both roadmap
+intents and complete historical log bodies; standalone main270/271 mapped to
+canonical319/320 with explicit provenance. P156 catalog updated, P160/archive
+rows and P150 identity retained; bundled guide retains both lifecycle and
+mandatory A2A return/wait standards. No source conflict or scope change.
+Installed prefix remains0.13.1-241d7a4 (uvtool0.8 metadata is an inactive path).
+Prepare0.14.0 minor release after all local gates; no shared service restart.
+Classification:blocker_reduction; exact-main release/install/closure next.

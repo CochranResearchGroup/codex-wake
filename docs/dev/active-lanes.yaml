@@ -4,19 +4,61 @@ lanes:
   - id: P156
     owner: primary / ecochran76
     objective: Implement verified spawn refresh and handoff lifecycle
-    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/248, https://github.com/CochranResearchGroup/codex-wake/issues/249]
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/248, https://github.com/CochranResearchGroup/codex-wake/issues/249, https://github.com/CochranResearchGroup/codex-wake/issues/250, https://github.com/CochranResearchGroup/codex-wake/issues/251, https://github.com/CochranResearchGroup/codex-wake/issues/254, https://github.com/CochranResearchGroup/codex-wake/issues/255, https://github.com/CochranResearchGroup/codex-wake/issues/256, https://github.com/CochranResearchGroup/codex-wake/issues/257]
     plan: docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md
     plan_ref: feat/agent-lifecycle
     branch: feat/agent-lifecycle
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
+    checkpoint: 717ff47
+    remote_ref: refs/remotes/origin/feat/agent-lifecycle
     integration: squash_pr
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/253
     checkout_required: true
     dependencies: []
     overlaps: []
-    updated_at: 2026-10-12
-    disposition: Spawn test-first implementation in progress; no installed acceptance or release claimed
+    reconciled_overlaps: [P160, P161]
+    updated_at: 2026-10-14
+    disposition: Native lifecycle and revised correction axes qualified; main documentation intents reconciled; PR253 release and installed exact-main gates remain open.
+  - id: P160
+    owner: primary / ecochran76
+    objective: Require explicit A2A reply and wait ownership
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/258]
+    plan: docs/dev/plans/0160-2026-10-14-a2a-return-obligations.md
+    plan_ref: origin/main
+    branch: docs/a2a-return-obligations
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 0f4a2385e73d6a2ac99d52ff13d719be1e3bd40f
+    remote_ref: refs/remotes/origin/docs/a2a-return-obligations
+    integration: squash_pr
+    integration_receipt: b4e2eb7ca41e5e33cf15cd9b298179121066b703
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/259
+    checkout_required: false
+    dependencies: []
+    overlaps: [P156]
+    updated_at: 2026-10-14
+    disposition: PR259 merged; both CI gates pass; two installed skill roots match four merged files. Source worktree closed; runtime compliance unproven.
+  - id: P127-ARCHIVE
+    owner: primary / ecochran76
+    objective: Preserve superseded native time planning checkpoint
+    work_items: [docs/dev/plans/0133-2026-10-10-native-network-time-parity.md]
+    plan: docs/dev/plans/0133-2026-10-10-native-network-time-parity.md
+    plan_ref: origin/main
+    branch: docs/native-time-parity
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ARCHIVED
+    checkpoint: f845e392f04b2032c706b208d10d52ec1ed96fec
+    remote_ref: refs/remotes/origin/archive/reconcile-20261010-plan133-planning
+    integration: archived_planning_checkpoint
+    checkout_required: false
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-14
+    disposition: Clean old Plan127 checkout removed after zero live CWD owners; original branch and exact matching local/remote archive retained. Closed successor acceptance remains authoritative.
   - id: P153
     owner: primary
     objective: Retain native wake intent and recover conservative deadlines during time outages
@@ -315,7 +357,7 @@ lanes:
     reconciled_overlaps: [P71]
     updated_at: 2026-10-10
     disposition: Ticket0147 DONE; PR236 integrated85d9f73bfe184361c45361e64ac3b825f48c4fea; installed native-context proof and57 controls PASS; owned clean checkout closed, published source ref retained.
-  - id: P72
+  - id: P150
     owner: primary / ecochran76
     objective: Repair policy routing and admit one scoped governance MCP pilot
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/237]

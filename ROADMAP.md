@@ -1130,7 +1130,7 @@ Order:0134 arming →0135 evaluation/recovery →0136 installed acceptance.
 The ready frontier contains0134 only. Rejected uncertain-time arms create no wake;
 armed wakes retain deadlines during time holds.
 
-## P72 — Policy routing and gov_policy pilot
+## P150 — Policy routing and gov_policy pilot
 
 CLOSED Plan0150 / issue237: reconcile policy pointers and admit one read-only scoped
 policy-maintenance profile with canonical fallback and deterministic CI guard.
@@ -1194,3 +1194,26 @@ Prototype preserved on prototype/agent-lifecycle at5e1b0ac; no production source
 or runtime rollout in this design packet.
 
 P156 operator-approved revision: [spec254](https://github.com/CochranResearchGroup/codex-wake/issues/254) covers configurable handoff/preflight review and nested user budgets. New slices #255 → #256 → #257; #257 also depends on #255. Execution resource gate remains; existing lifecycle issues remain open.
+
+## P160 | Explicit A2A return obligations
+
+State: CLOSED
+
+[Plan0160](docs/dev/plans/0160-2026-10-14-a2a-return-obligations.md) completes a
+local standards follow-up to P154: mandatory return/wait owners, verified reply
+arm before yielding, bounded observation and timeout checkpoints, recipient
+reply-admission and requester result-read gates. Bundled and installed skills
+aligned; PR259 merged as b4e2eb7 and deployed to both installed skill roots
+with four-file parity. Both hosted CI gates pass; source worktree closed. No
+runtime enforcement or live model-compliance proof. Review: docs/dev/evidence/plan0160/review.md.
+
+## P161 | Repository custody reconciliation
+
+State: CLOSED
+
+[Plan0161](docs/dev/plans/0161-2026-10-14-repository-reconciliation.md) / issue260:
+reconciles current worktrees and published checkpoints, registers P156/P160,
+repairs duplicate P72 policy-pilot identity as P150, and retires archived Plan127
+checkout after fresh zero-CWD-owner readback. Lifecycle PR253 remains draft with
+shared ROADMAP/RUNBOOK conflicts and open acceptance; active owner retains it.
+Receipt: docs/dev/evidence/plan0161/reconciliation.md.
