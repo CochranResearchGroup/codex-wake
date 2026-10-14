@@ -5552,3 +5552,17 @@ Plan0160 delivery continuation: operator explicitly authorized PR/merge/deploy.
 Issue258 created and assigned to ecochran76; exact readback verified. Publishing
 standards branch for CI, squash merge and exact-main installed-skill parity.
 No runtime release or unrelated lifecycle integration included.
+
+## Turn 271 | 2026-10-14 UTC
+
+Plan0161 / issue260: reconciled registered worktrees and canonical custody after
+PR259 merge/deploy. Root lifecycle clean at published e61d66a; draft PR253 has
+ROADMAP/RUNBOOK conflicts and open native acceptance, active owner retained.
+Old Plan127 checkout clean f845e39; exact local/remote archive matches, fresh
+/proc census zero CWD owners; removed normally without refs/process deletion.
+Unused local main advanced one commit to b4e2eb7. All15 prior catalog remote
+checkpoints match. Repair duplicate P72 policy pilot to P150; register active
+P156, integrated P160 and archived planning custody. Preserve historical logs.
+Publish documentation-only reconciliation; CI then squash merge, fresh final
+readbacks and temporary checkout removal. Memory disposition unavailable; no
+qualified repository group. No code, executable/service or active-owner effects.
