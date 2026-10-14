@@ -1,0 +1,8 @@
+{
+  "source_commit": "1ee722979234ade7f5e675f1c995e6ac8e6b4ab8",
+  "download_parity": true,
+  "sha256": {
+    "codex_wake-0.15.1-py3-none-any.whl": "4deb8bce3aea957518bab277aa678ec356d0e8aac2daa5ca308a44cf9131af01",
+    "codex_wake-0.15.1.tar.gz": "d7fe2304f7938a0356ccb43a08edc5f75f040884ca16fc136d6a7cbb4e43960b"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "source_commit": "1ee722979234ade7f5e675f1c995e6ac8e6b4ab8",
+  "version": "0.15.1",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229",
+  "prior_links": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-waked",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-github-webhook",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-mcp"
+  },
+  "python_files": 99,
+  "python_mismatches": [],
+  "backup": "/home/ecochran76/.local/share/codex-wake/deploy-backups/0.15.1-1ee7229",
+  "skills": [
+    {
+      "root": "/home/ecochran76/.codex/shared/skills/codex-wake",
+      "files": {
+        "SKILL.md": "0bc89fed322f2e13fe472ac5e00eecef78a83714884f6ad7b3cd31dc8417546e",
+        "references/use-cases.md": "e84e476315b49f841b5037c949e22c7a9a986881b9f02f7c5387f2287beaa5b3",
+        "references/a2a-responses.md": "15c6cd49c268c70f52f3d9211b4611ca9c700a48e2872303bc68499b3109891b",
+        "agents/openai.yaml": "50143aea5f0adfed65aa52326862f7a9f80d6fb62609da55df4b01a273a010c7"
+      }
+    },
+    {
+      "root": "/home/ecochran76/.agents/skills/codex-wake",
+      "files": {
+        "SKILL.md": "0bc89fed322f2e13fe472ac5e00eecef78a83714884f6ad7b3cd31dc8417546e",
+        "references/use-cases.md": "e84e476315b49f841b5037c949e22c7a9a986881b9f02f7c5387f2287beaa5b3",
+        "references/a2a-responses.md": "15c6cd49c268c70f52f3d9211b4611ca9c700a48e2872303bc68499b3109891b",
+        "agents/openai.yaml": "50143aea5f0adfed65aa52326862f7a9f80d6fb62609da55df4b01a273a010c7"
+      }
+    }
+  ],
+  "services_restarted": [],
+  "links": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-waked",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake-github-webhook",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake-mcp"
+  },
+  "state": "activated"
+}

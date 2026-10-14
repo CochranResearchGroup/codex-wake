@@ -1,0 +1,488 @@
+{
+  "state": "passed",
+  "version": "0.15.1",
+  "source_commit": "1ee722979234ade7f5e675f1c995e6ac8e6b4ab8",
+  "release": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.15.1",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229",
+  "python_files": 99,
+  "python_mismatches": [],
+  "skills": [
+    {
+      "root": "/home/ecochran76/.codex/shared/skills/codex-wake",
+      "files": 4,
+      "mismatches": []
+    },
+    {
+      "root": "/home/ecochran76/.agents/skills/codex-wake",
+      "files": 4,
+      "mismatches": []
+    }
+  ],
+  "services": [
+    {
+      "unit": "codex-wake-agent-browser-lease-authority.service",
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-agent-browser.service",
+      "MainPID": "23538",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-auracall.service",
+      "MainPID": "23540",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-github-webhook-p54-c4-retained-v6s.service",
+      "MainPID": "23542",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-graphiti.service",
+      "MainPID": "23543",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-litscout-0553-integration.service",
+      "MainPID": "23545",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-mail-receipts.service",
+      "MainPID": "23546",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-odollo-main-production-install.service",
+      "MainPID": "23548",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-odollo.service",
+      "MainPID": "23549",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-p54-c4-retained-v6s-poll.service",
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service",
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-soylei-website.service",
+      "MainPID": "83747",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    },
+    {
+      "unit": "codex-wake-supervisor.service",
+      "MainPID": "23556",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unchanged": true
+    }
+  ],
+  "services_restarted": [],
+  "owned_codex_processes": [],
+  "denied_environment_reads": [],
+  "startup": {
+    "before": {
+      "applied_policy": "error",
+      "candidates": [],
+      "confidence": 1.0,
+      "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+      "effects": [],
+      "match_method": "index",
+      "next_actions": [
+        "error",
+        "tab_only",
+        "fresh",
+        "resume"
+      ],
+      "normalized_selector": "18",
+      "requested_policy": {
+        "on_inactive": "error",
+        "on_missing": "error"
+      },
+      "schema_version": 1,
+      "selector": "tab 18",
+      "session": {
+        "active_flags": [],
+        "agent_path": null,
+        "attachments": [
+          {
+            "client_pid": null,
+            "client_start_time_ticks": null,
+            "evidence": "no_unique_codex_client",
+            "pane_current_command": "zsh",
+            "pane_current_path": "/tmp/codex-wake-p162-deployed-0151/workspace",
+            "pane_id": "%1",
+            "pane_index": "0",
+            "pane_pid": "12316",
+            "pane_title": "cooper",
+            "pane_tty": "/dev/pts/43",
+            "session_id": "$0",
+            "session_name": "p162-owned",
+            "socket": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+            "window_id": "@1",
+            "window_index": "18",
+            "window_name": "policies"
+          }
+        ],
+        "binding_status": "not_codex",
+        "candidates": [],
+        "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+        "name": "cooper",
+        "parent_thread_id": null,
+        "provider_status": null,
+        "resolution": {
+          "confidence": 1.0,
+          "match_method": "index",
+          "normalized_selector": "18",
+          "selector": "tab 18"
+        },
+        "runtime_state": "unknown",
+        "selected_attachment": {
+          "client_pid": null,
+          "client_start_time_ticks": null,
+          "evidence": "no_unique_codex_client",
+          "pane_current_command": "zsh",
+          "pane_current_path": "/tmp/codex-wake-p162-deployed-0151/workspace",
+          "pane_id": "%1",
+          "pane_index": "0",
+          "pane_pid": "12316",
+          "pane_title": "cooper",
+          "pane_tty": "/dev/pts/43",
+          "session_id": "$0",
+          "session_name": "p162-owned",
+          "socket": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+          "window_id": "@1",
+          "window_index": "18",
+          "window_name": "policies"
+        },
+        "source": "tmux",
+        "thread_id": null,
+        "warnings": []
+      },
+      "sources": {
+        "app_server": {
+          "availability": "available",
+          "endpoint": "unix:///tmp/codex-daemon-1000/38a2ec5900bc0f2b51ffc9add0e9320b54dce540a5ea77d12349027c88500432",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:35.400040+00:00"
+        },
+        "tmux": {
+          "availability": "available",
+          "endpoint": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:35.431330+00:00"
+        }
+      },
+      "status": "no_live_codex",
+      "thread_id": null
+    },
+    "fresh": {
+      "applied_policy": "fresh",
+      "candidates": [],
+      "confidence": 0.625,
+      "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+      "effects": [
+        {
+          "operation": "thread/start",
+          "thread_id": "01a13b89-9c52-7632-825c-96231ed0abb4"
+        },
+        {
+          "operation": "tmux/split-window",
+          "pane_id": "%3",
+          "preserved_pane_id": "%1",
+          "window_id": "@1"
+        }
+      ],
+      "match_method": "fuzzy",
+      "next_actions": [
+        "send"
+      ],
+      "normalized_selector": "poicys",
+      "requested_policy": {
+        "on_inactive": "fresh",
+        "on_missing": "error"
+      },
+      "schema_version": 1,
+      "selector": "poicys",
+      "session": {
+        "active_flags": [],
+        "agent_nickname": null,
+        "agent_path": null,
+        "agent_role": null,
+        "attachments": [
+          {
+            "client_pid": 14838,
+            "client_start_time_ticks": 3646026,
+            "evidence": "metadata_matched",
+            "pane_current_command": "codex",
+            "pane_current_path": "/tmp/codex-wake-p162-deployed-0151/workspace",
+            "pane_id": "%3",
+            "pane_index": "1",
+            "pane_pid": "14838",
+            "pane_title": "Wake target a7d657413327",
+            "pane_tty": "/dev/pts/45",
+            "session_id": "$0",
+            "session_name": "p162-owned",
+            "socket": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+            "window_id": "@1",
+            "window_index": "18",
+            "window_name": "policies"
+          }
+        ],
+        "binding_status": "metadata_matched",
+        "can_accept_direct_input": true,
+        "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+        "model_provider": "openai",
+        "name": "Wake target a7d657413327",
+        "parent_thread_id": null,
+        "provider_status": {
+          "type": "idle"
+        },
+        "runtime_state": "idle",
+        "selected_attachment": {
+          "client_pid": 14838,
+          "client_start_time_ticks": 3646026,
+          "evidence": "metadata_matched",
+          "pane_current_command": "codex",
+          "pane_current_path": "/tmp/codex-wake-p162-deployed-0151/workspace",
+          "pane_id": "%3",
+          "pane_index": "1",
+          "pane_pid": "14838",
+          "pane_title": "Wake target a7d657413327",
+          "pane_tty": "/dev/pts/45",
+          "session_id": "$0",
+          "session_name": "p162-owned",
+          "socket": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+          "window_id": "@1",
+          "window_index": "18",
+          "window_name": "policies"
+        },
+        "source": "vscode",
+        "thread_id": "01a13b89-9c52-7632-825c-96231ed0abb4",
+        "warnings": []
+      },
+      "sources": {
+        "app_server": {
+          "availability": "available",
+          "endpoint": "unix:///tmp/codex-daemon-1000/38a2ec5900bc0f2b51ffc9add0e9320b54dce540a5ea77d12349027c88500432",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:36.193844+00:00"
+        },
+        "tmux": {
+          "availability": "available",
+          "endpoint": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:36.239865+00:00"
+        }
+      },
+      "status": "resolved",
+      "thread_id": "01a13b89-9c52-7632-825c-96231ed0abb4"
+    },
+    "fresh_observations": 2,
+    "fresh_os_residue": [
+      "11495 67086 /bin/zsh -lc set -e python - <<'PY' from pathlib import Path s=Path('/tmp/p162-patch-acceptance.py').read_text().replace('/tmp/codex-wake-p162-patch-01','/tmp/codex-wake-p162-deployed-0151').replace('/tmp/codex-wake-p162-patch-candidate','/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229') Path('/tmp/p162-installed-patch-proof.py').write_text(s) PY /home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/python -I /tmp/p162-installed-patch-proof.py > docs/dev/evidence/plan0162/deployed-startup-0151.log 2>&1 /home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/python -I /tmp/p162-global-readback.py > docs/dev/evidence/plan0162/global-mcp-readback-0151.json /home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/python scripts/a2a_mcp_smoke.py --cli /home/ecochran76/.local/bin/codex-wake --mcp /home/ecochran76/.local/bin/codex-wake-mcp --receipt docs/dev/evidence/plan0162/deployed-mcp-0151.json > docs/dev/evidence/plan0162/deployed-mcp-0151.log 2>&1"
+    ],
+    "model_turns": 0,
+    "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229",
+    "resume": {
+      "applied_policy": "resume",
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+          "id": "01a13b89-9c52-7632-825c-96231ed0abb4",
+          "name": "Wake target a7d657413327",
+          "source": "vscode",
+          "status": {
+            "type": "idle"
+          },
+          "updatedAt": 1792000236
+        }
+      ],
+      "confidence": 1.0,
+      "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+      "effects": [
+        {
+          "operation": "tmux/split-window",
+          "pane_id": "%4",
+          "preserved_pane_id": "%1",
+          "window_id": "@1"
+        }
+      ],
+      "match_method": "index",
+      "next_actions": [
+        "send"
+      ],
+      "normalized_selector": "18",
+      "requested_policy": {
+        "on_inactive": "resume",
+        "on_missing": "error"
+      },
+      "schema_version": 1,
+      "selector": "tab 18",
+      "session": {
+        "active_flags": [],
+        "agent_nickname": null,
+        "agent_path": null,
+        "agent_role": null,
+        "attachments": [
+          {
+            "client_pid": 16308,
+            "client_start_time_ticks": 3646218,
+            "evidence": "metadata_matched",
+            "pane_current_command": "codex",
+            "pane_current_path": "/tmp/codex-wake-p162-deployed-0151/workspace",
+            "pane_id": "%4",
+            "pane_index": "1",
+            "pane_pid": "16308",
+            "pane_title": "Wake target a7d657413327",
+            "pane_tty": "/dev/pts/45",
+            "session_id": "$0",
+            "session_name": "p162-owned",
+            "socket": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+            "window_id": "@1",
+            "window_index": "18",
+            "window_name": "policies"
+          }
+        ],
+        "binding_status": "metadata_matched",
+        "can_accept_direct_input": true,
+        "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+        "model_provider": "openai",
+        "name": "Wake target a7d657413327",
+        "parent_thread_id": null,
+        "provider_status": {
+          "type": "idle"
+        },
+        "runtime_state": "idle",
+        "selected_attachment": {
+          "client_pid": 16308,
+          "client_start_time_ticks": 3646218,
+          "evidence": "metadata_matched",
+          "pane_current_command": "codex",
+          "pane_current_path": "/tmp/codex-wake-p162-deployed-0151/workspace",
+          "pane_id": "%4",
+          "pane_index": "1",
+          "pane_pid": "16308",
+          "pane_title": "Wake target a7d657413327",
+          "pane_tty": "/dev/pts/45",
+          "session_id": "$0",
+          "session_name": "p162-owned",
+          "socket": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+          "window_id": "@1",
+          "window_index": "18",
+          "window_name": "policies"
+        },
+        "source": "vscode",
+        "thread_id": "01a13b89-9c52-7632-825c-96231ed0abb4",
+        "warnings": []
+      },
+      "sources": {
+        "app_server": {
+          "availability": "available",
+          "endpoint": "unix:///tmp/codex-daemon-1000/38a2ec5900bc0f2b51ffc9add0e9320b54dce540a5ea77d12349027c88500432",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:38.506357+00:00"
+        },
+        "tmux": {
+          "availability": "available",
+          "endpoint": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:38.558498+00:00"
+        }
+      },
+      "status": "resolved",
+      "thread_id": "01a13b89-9c52-7632-825c-96231ed0abb4"
+    },
+    "resume_observations": 2,
+    "root": "/tmp/codex-wake-p162-deployed-0151",
+    "scope": "operator issue262 implementation; owned startup only",
+    "server_pid": 12033,
+    "server_returncode": -9,
+    "state": "passed",
+    "tab_only": {
+      "applied_policy": "tab_only",
+      "candidates": [],
+      "cwd": "/tmp/codex-wake-p162-deployed-0151/workspace",
+      "effects": [
+        {
+          "operation": "tmux/new-window",
+          "pane_id": "%2",
+          "preserved_pane_id": null,
+          "window_id": "@2"
+        }
+      ],
+      "message": "session not found",
+      "next_actions": [
+        "retry_same_intent"
+      ],
+      "normalized_selector": "new-shell",
+      "requested_policy": {
+        "on_inactive": "error",
+        "on_missing": "tab_only"
+      },
+      "schema_version": 1,
+      "selector": "new-shell",
+      "session": null,
+      "sources": {
+        "app_server": {
+          "availability": "available",
+          "endpoint": "unix:///tmp/codex-daemon-1000/38a2ec5900bc0f2b51ffc9add0e9320b54dce540a5ea77d12349027c88500432",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:35.608182+00:00"
+        },
+        "tmux": {
+          "availability": "available",
+          "endpoint": "/tmp/codex-wake-p162-deployed-0151/tmux.sock",
+          "error_code": null,
+          "observed_at": "2026-10-14T17:50:35.639648+00:00"
+        }
+      },
+      "status": "tab_created",
+      "thread_id": null
+    },
+    "tool_discovered": true
+  },
+  "process_observer_note": "raw startup capture included its invoking verification shell; independent census after shell exit has no owned Codex processes",
+  "links": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-waked",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake-github-webhook",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.15.1-1ee7229/bin/codex-wake-mcp"
+  }
+}

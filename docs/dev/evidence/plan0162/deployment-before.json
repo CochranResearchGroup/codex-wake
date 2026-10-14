@@ -1,0 +1,132 @@
+{
+  "links": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-waked",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-github-webhook",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.14.0-3bde6d5/bin/codex-wake-mcp"
+  },
+  "services": [
+    {
+      "unit": "codex-wake-agent-browser-lease-authority.service",
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "command": []
+    },
+    {
+      "unit": "codex-wake-agent-browser.service",
+      "MainPID": "23538",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-auracall.service",
+      "MainPID": "23540",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-github-webhook-p54-c4-retained-v6s.service",
+      "MainPID": "23542",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/p54-c4-sentinel-successor-20260924/runtime-450834c/venv/bin/python",
+        "/home/ecochran76/.local/state/codex-wake/p54-c4-sentinel-successor-20260924/runtime-450834c/venv/bin/codex-wake-github-webhook"
+      ]
+    },
+    {
+      "unit": "codex-wake-graphiti.service",
+      "MainPID": "23543",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-litscout-0553-integration.service",
+      "MainPID": "23545",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-mail-receipts.service",
+      "MainPID": "23546",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-odollo-main-production-install.service",
+      "MainPID": "23548",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-odollo.service",
+      "MainPID": "23549",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-p54-c4-retained-v6s-poll.service",
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "command": []
+    },
+    {
+      "unit": "codex-wake-soylei-website-fulfillment-authority-reconciliation-20260808.service",
+      "MainPID": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "command": []
+    },
+    {
+      "unit": "codex-wake-soylei-website.service",
+      "MainPID": "83747",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-waked"
+      ]
+    },
+    {
+      "unit": "codex-wake-supervisor.service",
+      "MainPID": "23556",
+      "ActiveState": "active",
+      "SubState": "running",
+      "command": [
+        "/home/ecochran76/.local/share/codex-wake/releases/0.13.1-241d7a4/bin/python",
+        "/home/ecochran76/.local/bin/codex-wake"
+      ]
+    }
+  ]
+}
