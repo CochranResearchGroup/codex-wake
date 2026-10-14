@@ -141,7 +141,7 @@ class SharedAppServerReader:
         cursor = None
         while True:
             page = self.request('thread/list', dict(cwd=canonical_cwd, cursor=cursor,
-                limit=100, archived=False, sourceKinds=['cli', 'appServer'], sortKey='updated_at'))
+                limit=100, archived=False, sourceKinds=['cli', 'vscode', 'appServer'], sortKey='updated_at'))
             data = page.get('data')
             if not isinstance(data, list):
                 raise SharedSourceError('invalid saved-thread page')

@@ -56,7 +56,7 @@ def prepare_target(args, root=None):
         existing = replay(args, root)
         if existing is not None:
             return existing
-    snapshot = observe(endpoint=args.app_server, socket_path=args.tmux_socket, timeout=args.timeout)
+    snapshot = observe(endpoint=args.app_server, socket_path=args.tmux_socket, timeout=args.timeout, shell_metadata=True)
     value = inspect_target(snapshot, args.selector, session=args.tmux_session,
                            expected_cwd=args.expected_cwd)
     policy = (args.on_missing if value['status'] == 'tab_not_found' else
@@ -90,7 +90,7 @@ def add_target_options(parser):
 
 def revalidate_target(report, args):
     from .target_lifecycle import same_attachment
-    snapshot = observe(endpoint=args.app_server, socket_path=args.tmux_socket, timeout=args.timeout)
+    snapshot = observe(endpoint=args.app_server, socket_path=args.tmux_socket, timeout=args.timeout, shell_metadata=True)
     row = report['session']
     old = row.get('selected_attachment')
     if not snapshot['complete']:
@@ -108,4 +108,4 @@ def revalidate_target(report, args):
         return dict(report,status='target_changed')
     if current['runtime_state']!='idle' or current.get('active_flags'):
         return dict(report,status='target_busy')
-    return report
+    return dict(report,status='resolved')

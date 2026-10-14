@@ -30,6 +30,9 @@ def match_tabs(attachments, selector):
     value = normalized(selector)
     value = re.sub(r'^tab\s+', '', value)
     metadata.update(normalized_selector=value, match_method='normalized')
+    matches = [(r, p) for r, p in attachments if normalized(p['window_name']) == value]
+    if matches:
+        return matches, metadata
     parsed = re.fullmatch(r'(\d+)(?::\s*(.+?))?(?:\.(\d+))?', value)
     if parsed:
         index, name, pane = parsed.groups()
@@ -42,9 +45,6 @@ def match_tabs(attachments, selector):
         metadata['match_method'] = 'index'
         return [(r, p) for r, p in selected if (name is None or normalized(p['window_name']) == name)
                 and (pane is None or p['pane_index'] == str(int(pane)))], metadata
-    matches = [(r, p) for r, p in attachments if normalized(p['window_name']) == value]
-    if matches:
-        return matches, metadata
     if len(value) < 4 or len(value) > 200 or ':' in value:
         return [], metadata
     names = {normalized(p['window_name']) for _, p in attachments if len(p['window_name']) <= 200}

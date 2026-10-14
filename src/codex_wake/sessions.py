@@ -23,11 +23,13 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def tmux_inventory(socket_path: str | None, timeout: float) -> list[dict[str, Any]]:
+def tmux_inventory(socket_path: str | None, timeout: float, *, shell_metadata: bool = False) -> list[dict[str, Any]]:
     deadline = time.monotonic() + timeout
     command = ['tmux'] + (['-S', socket_path] if socket_path else [])
     fields = ['session_id', 'session_name', 'window_id', 'window_index', 'window_name',
-              'pane_id', 'pane_index', 'pane_title', 'pane_current_path', 'pane_tty', 'pane_current_command', 'pane_pid']
+              'pane_id', 'pane_index', 'pane_title', 'pane_current_path', 'pane_tty']
+    if shell_metadata:
+        fields += ['pane_current_command', 'pane_pid']
     result = subprocess.run(command + ['list-panes', '-a', '-F', '\t'.join('#{' + x + '}' for x in fields)],
                             capture_output=True, text=True, timeout=timeout, check=True)
     rows = []
@@ -91,7 +93,7 @@ def build_snapshot(threads: list[dict[str, Any]], panes: list[dict[str, Any]], s
         value['availability'] == 'available' for value in sources.values()), sources=sources, sessions=rows)
 
 
-def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeout: float = 10) -> dict[str, Any]:
+def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeout: float = 10, shell_metadata: bool = False) -> dict[str, Any]:
     sources = {}
     threads, panes = [], []
     if socket_path is None and os.environ.get('TMUX'):
@@ -105,7 +107,8 @@ def observe(*, endpoint: str = 'unix://', socket_path: str | None = None, timeou
     except (SharedSourceError, OSError) as exc:
         sources['app_server'] = dict(endpoint=endpoint, observed_at=now(), availability='unavailable', error_code=type(exc).__name__)
     try:
-        panes = tmux_inventory(socket_path, timeout)
+        panes = (tmux_inventory(socket_path, timeout, shell_metadata=True) if shell_metadata
+                 else tmux_inventory(socket_path, timeout))
         sources['tmux'] = dict(endpoint=socket_path, observed_at=now(), availability='available', error_code=None)
     except (OSError, subprocess.SubprocessError, SharedSourceError) as exc:
         sources['tmux'] = dict(endpoint=socket_path, observed_at=now(), availability='unavailable', error_code=type(exc).__name__)

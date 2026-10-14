@@ -10,15 +10,30 @@ Dependency: Plan0156 / PR253, pinned source 5b14c05
 
 ## Current State
 
-Issue262 accepted for execution by operator `ok go`. Isolated worktree at
-/home/ecochran76/workspace.local/codex-wake-tab-targets preserves dirty lifecycle
-acceptance work in the root checkout. Main readback439f749 lacks the lifecycle
-controller. This is a stacked dependency exception to normal main-based work:
-only Plan0162 changes may be ported after PR253 integration, never merge the
-parent's unaccepted work through this feature. Integration/install gates remain.
-Graphiti discovery skipped: supplied feature and current source are sufficient;
-no approved repository group is configured. Local memory quick pass had no
-relevant project decisions. One primary owns coupled resolution/lifecycle work.
+Source implementation and independent review remediation complete in isolated
+feat/mcp-tab-targets. Public CLI/MCP resolve informal descriptors; send pins exact
+identity; guarded preparation shares lifecycle persistence/expiry and preserves
+dormant shells. Canonical-CWD history and explicit-ID metadata support resume.
+Fixture matrix, races, lost-response holding/reconciliation and final target
+regressions pass. Full isolated unit lane1229 passed125.098s;52 final target tests
+cover the later read-only lost-tab-response reconciliation change. Installed
+fixtures and public private-bus MCP smoke qualify packaging independently.
+
+Owned installed TUI proof03: tab-only, fresh and exact-thread resume PASS,
+zero model turns and fresh OS residue empty. Two initial zero-turn history-list
+proofs retained as partial: Codex omitted the empty thread from list although its
+exact metadata remained resumable. Exact-ID repair has red/green evidence;
+final artifact proof04 also PASS, zero turns/residue and7 module hashes match source. No fake transcripts,
+provider turns, notifications or production messages were introduced.
+
+Integration remains gated on Plan0156 / PR253 (still draft at last readback).
+This worktree was created from pinned5b14c05 because main439f749 lacks the lifecycle
+controller. Only this feature delta may port after dependency integration; parent
+acceptance is not inherited. Root checkout concurrent work was preserved.
+Work item262 stays OPEN. Release/activation and live notified-recipient execution
+are unclaimed. Graphiti disposition is unavailable: no reviewed repo group.
+One primary integrated independent reviewer /root/tab_target_review; no nested
+agents. Exact evidence: docs/dev/evidence/plan0162/.
 
 ## Scope and interface
 

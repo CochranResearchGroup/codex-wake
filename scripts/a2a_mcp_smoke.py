@@ -93,7 +93,8 @@ async def smoke(cli, mcp_command):
 
                 async with Client(parameters(0), mode="legacy") as sender, Client(parameters(1), mode="legacy") as recipient:
                     discovered = [tool.name for tool in (await sender.list_tools()).tools]
-                    assert len(discovered) == 18
+                    assert len(discovered) == 19
+                    assert 'wake_sessions_target' in discovered
                     assert 'wake_sessions_configuration' in discovered
                     assert 'wake_sessions_spawn' in discovered
                     assert 'wake_sessions_refresh' in discovered
