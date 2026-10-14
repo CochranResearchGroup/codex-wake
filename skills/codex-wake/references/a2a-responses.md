@@ -28,6 +28,65 @@ the sender continues its authorized work locally without sending an automatic
 result-of-result back. A further question/work assignment starts a separately
 identified request.
 
+## Mandatory exchange checklist
+
+Every question or work request has two owners: the recipient owns transmitting
+one correlated answer; the requester owns observing it and continuing. Neither
+may assume the other is watching a chat pane. A local answer, an accepted work
+claim or a registered wake alone does not complete the exchange.
+
+Before sending, choose one return strategy and record it in the request:
+
+| Strategy | Requester obligation | Before yielding |
+| --- | --- | --- |
+| Notified tracked reply (default across tabs) | Preflight delegated return authority and worker readiness; send, retain exact request ID, register its reply arm and verify the receipt | Save exact request/arm IDs, fixed expiry and next action |
+| Foreground tracked reply | Stay active and use a bounded exact-message reply wait/read; record its deadline and timeout action | Consume the reply, or establish and verify the authorized suspended return route |
+| Explicit inbox-only exchange | Own a bounded inbox read schedule and deadline; tell recipient to reply inbox-only | Finish the read, or verify an authorized wake that resumes the requester to inspect that exact exchange |
+| Explicit TUI-only observation | Pin the exact peer thread and own a bounded observation with a clear answer/timeout condition | Complete observation, or verify an authorized continuation to inspect it |
+
+TUI-only is an explicit exception, never the inferred default for a question.
+A session watch observes a thread; it does not transmit a reply or prove a
+correlated answer. An inbox-only message does not create an unattended wake.
+If no authorized wait/return route can be established, report the blocker
+before dispatch. Do not send a dependent question and abandon its answer.
+The exact reply arm is registered after send because it needs the request ID;
+if that registration fails after admission, preserve the ID, reconcile and
+retain bounded foreground supervision when available. Do not resend.
+
+For every pending request, retain a compact checkpoint outside transient chat:
+exact sender/recipient thread identities, request ID, stable intent key, selected
+return strategy, observation/arm receipt, fixed deadline, next action and owner.
+These are workflow records, not new mailbox schema fields. If a foreground wait
+expires, explicitly record pending/timeout and its next owner; either establish
+a verified continuation within the original expiry or stop dependent work with
+a truthful blocker. Silence and expiry never mean success. Do not extend expiry,
+retry or change transport by inference.
+
+Recipient closeout requires a reply tool/CLI result for the exact request and
+chosen delivery route, or an explicit delivery blocker. Write the local chat
+summary only after attempting the authorized transmission and inspecting its
+receipt. When transmission is ambiguous, reconcile the same intent; do not
+mark it delivered or send a second answer. A processing outcome of completed
+can coexist with failed reply delivery; report those boundaries separately.
+
+Requester closeout requires inspection of the correlated result and its
+outcome/evidence, then the recorded next action (or an explicit pending/blocker
+checkpoint). Notification admission does not prove the requester read it.
+Terminal results require no courtesy response; this checklist does not create
+acknowledgement loops.
+
+### Reported failure pattern
+
+An operator reported that `7:remote-view` asked `4:grokbot` a question, received
+only a local chat answer, and had neither watched nor armed a return. Treat this
+as a reported workflow failure, not a verified transport defect. Correct flow:
+resolve both tabs to exact threads; requester declares a notified correlated
+reply, sends once and verifies its exact reply arm before yielding; recipient
+claims the request and transmits its answer with `messages reply`; requester
+reads the returned result and continues. If notification is unavailable, choose
+an explicitly supervised alternative before sending. No step relies on a peer
+noticing local chat. Tab numbers here are incident labels, not durable addresses.
+
 ## Sender responsibilities
 
 State these in plain language in the body; they are a communication convention,

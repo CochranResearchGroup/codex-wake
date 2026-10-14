@@ -1187,3 +1187,14 @@ Ready frontier: [spawn249](https://github.com/CochranResearchGroup/codex-wake/is
 primary serializes shared integration. No automatic goal/resource allowance reset.
 Prototype preserved on prototype/agent-lifecycle at5e1b0ac; no production source
 or runtime rollout in this design packet.
+
+## P160 | Explicit A2A return obligations
+
+State: CLOSED
+
+[Plan0160](docs/dev/plans/0160-2026-10-14-a2a-return-obligations.md) completes a
+local standards follow-up to P154: mandatory return/wait owners, verified reply
+arm before yielding, bounded observation and timeout checkpoints, recipient
+reply-admission and requester result-read gates. Bundled and installed skills
+aligned; source remains on docs/a2a-return-obligations, unpublished. No runtime
+enforcement or live model-compliance proof. Review: docs/dev/evidence/plan0160/review.md.

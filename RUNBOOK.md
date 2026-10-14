@@ -5530,3 +5530,25 @@ links verified. Canonical forge preflight duplicate enhancement alias removed
 without changing target/actions/provider labels; qualified preflight passed.
 Product implementation, real goal transfer and actual ask-Matt preflight remain
 future acceptance, not prototype claims. Memory target unavailable.
+
+## Turn 270 | 2026-10-14 UTC
+
+Plan0160 local standards packet: operator reported a peer answering only in
+chat and requester lacking a watch/return wake. Existing Plan0154 already
+required replies and arms; added mandatory exchange checklist with wait owner,
+exact checkpoint, bounded timeout action and both completion gates. Corrected
+guide's unconditional inbox fallback to require explicit owned inbox workflow.
+Separate docs/a2a-return-obligations worktree from origin/main a741010 preserves
+feat/agent-lifecycle checkout. Updated both installed skill copies with prior
+bytes backed up and four-file SHA-256 parity. Nine primary scenario checks,
+changed links, policy wiring and whitespace pass. No live messages, incident
+replay, tests for prose, service effect or publication; model compliance and
+runtime enforcement remain unproven. Plan closes only this local docs/install
+outcome. Review: docs/dev/evidence/plan0160/review.md. Memory disposition
+unavailable: atlas returned no reviewed target cloud; non-write receipt in
+plan0160 evidence. No delegation needed for the coupled standards packet.
+
+Plan0160 delivery continuation: operator explicitly authorized PR/merge/deploy.
+Issue258 created and assigned to ecochran76; exact readback verified. Publishing
+standards branch for CI, squash merge and exact-main installed-skill parity.
+No runtime release or unrelated lifecycle integration included.
