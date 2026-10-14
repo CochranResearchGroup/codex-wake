@@ -6316,3 +6316,28 @@ integration and exact-main release/install are still unproven. Existing raw
 native failures and source checkpoints preserved; no service-global effects.
 Memory disposition unavailable; same-tab01-memory-disposition.json records this
 turn's source-anchored non-write, no qualified repository group and zero writes.
+
+## Turn 316 | 2026-10-14 UTC
+
+State transition: repaired source/installed fixture -> bounded integrated native
+proof. Acceptance state unchanged: actual continuation/rollback for both modes
+unproven. Prior wrapper units ended with failures retained; the new packet tests
+production fixes to detached-source retirement and original session-deadline
+transfer in published222e487/private installed18, not a renamed wrapper replay.
+Primary owns this paired proof, max2 native samples total (one per mode), no
+same-mode retry in this packet, each100000 source/150000 preflight+continuation/
+250000 total/600s including setup. First native continuation/rollback artifact
+must arrive within this packet's600s; at failure preserve cost/cleanup and stop
+repeating that axis. No new broad review, caps, scope or acceptance concessions.
+At14:39:46UTC root1121050 minus583915 baseline plus237489 native=774624 used,
+1225376 remaining. Reserve500000 for the two-mode minimum proof plus500000 root/
+integration, leaving225376 contingency before further root work. Deadline remains
+18:29:34UTC; old-window counters separately preserved. Exact source criteria,
+reviewer-authored verdict, native goal limits, cumulative usage and owned cleanup
+must pass; source tests/zero-work setup alone cannot accept this packet.
+Start independent new-tab mode against installed18 with qualified native MCP
+show/configuration/handoff and compiled writer/helper. On success, verify the
+retired-source same-tab mode once under the same packet bounds. Source222e487
+CI38582268662 was in progress; re-read actual state before integration. Current
+source/installed parity95 files and124/67 tests qualify this candidate only.
+Progress classification blocker_reduction; full Plan0156/goal remains OPEN/ACTIVE.
