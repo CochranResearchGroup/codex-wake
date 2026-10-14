@@ -6341,3 +6341,38 @@ retired-source same-tab mode once under the same packet bounds. Source222e487
 CI38582268662 was in progress; re-read actual state before integration. Current
 source/installed parity95 files and124/67 tests qualify this candidate only.
 Progress classification blocker_reduction; full Plan0156/goal remains OPEN/ACTIVE.
+
+Integrated new-tab01 actually completes selected model-authored accept, native
+continuous goal command, goal completion and owned rollback. Raw harness marked
+passed_continuation_axis; primary resource audit rejects overall acceptance:
+source65002 + successor151477=216479 total within250000, but successor exceeds
+150000 session limit by1477. Preflight84143, continuation rollout increment67334;
+native goal reports1668 tokensUsed and65857 tokenBudget. These are different
+accounting metrics; native goal counter cannot stand in for complete owned
+session cost. Actual rollback debits151477, returning original paused source
+budget33521 with identity/counters preserved. Native MCP calls and explicit
+continuation/rollback artifacts remain primary evidence; overspend is retained
+separately and cannot be erased by raw harness pass. Server exit0 and fresh OS
+private-process census empty. Curated integrated-new-tab01-resource-failed.json
+preserves actual native state and failed resource axis, with all original data.
+Public daemon red/green reproduces discounted goal counter1 hiding rollout120
+against session100; monitor now records full cumulative owned rollout including
+cached input, pauses and interrupts exact owned turn. Goal completion does not
+release reservation while an owned turn is still in progress. Final stop
+settlement uses rollout, not preflight+discounted goal counter. Bound source goal
+aliases likewise observe their owned rollout in handoff, refresh, concurrent
+spawn and supervision; transferred allowance clips to actual original actor
+remainder and deadline. Native goal identity/counter-decrease/own-limit checks
+remain separate. Harness now rejects actual successor session overspend before
+claiming continuation acceptance. No resource ceiling or criterion changed.
+Focused157 tests pass36.403s; fresh installed19 affected75 pass28.541s, parity95
+files/zero mismatches. Syntax/policy/whitespace pass. Source changes are the
+closed-world remediation of this observed metric discrepancy. No extra native
+sample after the finding. Paired proof still has one remaining mode sample, but
+full two-mode resource acceptance remains unproven; reevaluate minimum proof
+and context packing before spending it. At14:57:01UTC root1176355 minus583915
+baseline592440 plus237489 earlier-window-native-current+216479 this sample
+=1046408 attributable, remaining953592 before subsequent root work. Deadline
+18:29:34UTC. Full goal ACTIVE; no merge/release/issue closure. Memory disposition
+unavailable; integrated-accounting-memory-disposition.json records zero writes
+and no qualified repository group for this source-anchored outcome.

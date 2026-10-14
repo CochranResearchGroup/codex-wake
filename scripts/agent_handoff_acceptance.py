@@ -490,6 +490,8 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             time.sleep(.5)
         if receipt['source_usage']['total_tokens']+spent['total_tokens']>receipt['token_cap']:
             raise RuntimeError('reported native fixture usage exceeded total cap')
+        if spent['total_tokens']>defaults['session_token_limit']:
+            raise RuntimeError('actual successor rollout exceeded configured session cap')
         final_goal=request('thread/goal/get',dict(threadId=target))['goal']
         if (not final_goal or final_goal['status']!='complete'
                 or any(final_goal.get(k)!=done.get(k) for k in ('threadId','objective','tokenBudget','createdAt'))

@@ -98,7 +98,7 @@ def poll_spawns(root,stop_reason=None):
                 view=None
                 try:
                     from uuid import UUID
-                    from .lifecycle_budget import configured_ledger
+                    from .lifecycle_budget import configured_ledger,record_goal_observation
                     try:UUID(intent['objective_ref'])
                     except ValueError:pass
                     else:
@@ -106,8 +106,8 @@ def poll_spawns(root,stop_reason=None):
                         if (not parent or parent.get('threadId')!=intent['objective_ref']
                                 or parent.get('objective')!=intent['continuation']['objective']):
                             raise ValueError('source goal identity changed')
-                        configured_ledger(root,receipt).record_goal(
-                            'goal:'+parent['threadId']+':'+str(parent['createdAt']),parent.get('tokensUsed'),
+                        record_goal_observation(configured_ledger(root,receipt),
+                            'goal:'+parent['threadId']+':'+str(parent['createdAt']),parent,profile,request,
                             settled=parent['status']!='active',now=trusted_upper())
                     view=observe_spawn(root,receipt,native,profile,settled=terminal)
                     actor=view['actors'][receipt['budget_actor']];now=trusted_upper()

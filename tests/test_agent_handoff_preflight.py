@@ -72,6 +72,9 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_continuous_monitor_activates_one_owner_with_remaining_allowance(self):
         self.scenario(activate=True)
 
+    def test_monitor_charges_cached_rollout_tokens_instead_of_discounted_goal_counter(self):
+        self.scenario(activate=True,session_cap=100,cached_goal=True)
+
     def test_unknown_clock_still_fences_active_owned_work(self):
         self.scenario(activate=True,enforce_deadline='unknown')
 
@@ -153,11 +156,12 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);home=root/'home';(home/'sessions').mkdir(parents=True)
+            (home/'sessions'/(source+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':50}})))+'\n')
             codex=root/'codex';codex.write_text(f'#!{sys.executable}\nimport ctypes,time\n'
                 "ctypes.CDLL(None).prctl(15,b'codex',0,0,0)\nprint('ready',flush=True)\ntime.sleep(60)\n")
             codex.chmod(0o700)
@@ -262,8 +266,9 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             continue
                         if 'objective' not in params:
                             goals[tid].update(status=params['status'],updatedAt=1003)
-                            if params['status']=='active' and (enforce_deadline or late_source):
+                            if params['status']=='active' and (enforce_deadline or late_source or cached_goal):
                                 threads[tid]['turns'].append(dict(id='autonomous-turn',status='inProgress',items=[]))
+                            if params['status']=='active' and cached_goal:goals[tid]['tokensUsed']=1
                             if ((lost_pause or lost_rollback_pause) and params['status']=='paused') or (lost_activate and params['status']=='active'):ws.close();return
                             ws.send(json.dumps(dict(id=req['id'],result={'goal':goals[tid]})))
                             continue
@@ -547,6 +552,16 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         sleeps=[]
                         def sleep(_):
                             sleeps.append(1)
+                            if cached_goal:
+                                if len(sleeps)==1:
+                                    self.assertEqual(goals[target]['status'],'active')
+                                    (home/'sessions'/ (target+'.jsonl')).write_text(json.dumps(dict(type='event_msg',payload=dict(type='token_count',info={'total_token_usage':{'total_tokens':120}})))+'\n')
+                                    return
+                                self.assertEqual(goals[target]['status'],'paused')
+                                self.assertEqual(interrupts,[dict(threadId=target,turnId='autonomous-turn')])
+                                saved=json.loads((root/'lifecycle'/(hashlib.sha256(b'handoff-1').hexdigest()+'.json')).read_text())
+                                self.assertEqual(saved['objective_budget']['actors'][saved['budget_actor']]['used'],120)
+                                raise KeyboardInterrupt
                             if late_source:
                                 if len(sleeps)==1:
                                     self.assertEqual(goals[target]["status"],"active")

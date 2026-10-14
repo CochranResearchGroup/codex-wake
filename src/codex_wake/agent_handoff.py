@@ -752,7 +752,7 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                 receipt['monitor_observed_goals']=observed
                 objective_stop=None
                 if receipt.get('budget_actor'):
-                    from .lifecycle_budget import ledger_for, record_successor, trusted_upper
+                    from .lifecycle_budget import ledger_for, record_successor, trusted_upper,native_usage,record_goal_observation
                     from .native_clock import snapshot
                     if not snapshot().get('utc'):
                         objective_stop='objective_accounting_time_unavailable'
@@ -760,11 +760,17 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                         now=trusted_upper()
                         ledger=ledger_for(root,receipt)
                         source_goal=observed[source]
-                        ledger.record_goal('goal:'+source+':'+str(source_goal['createdAt']),
-                            source_goal.get('tokensUsed'),settled=True,now=now)
-                        counter=observed[target].get('tokensUsed')
-                        total=receipt['preflight_tokens_used']+counter if type(counter) is int and counter>=0 else None
-                        view=record_successor(root,receipt,total,settled=observed[target]['status']=='complete')
+                        def observe_request(method,params):
+                            return native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                                method,params,profile['timeout'])
+                        record_goal_observation(ledger,'goal:'+source+':'+str(source_goal['createdAt']),
+                            source_goal,profile,observe_request,settled=True,now=now)
+                        rollout=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                            'thread/read',dict(threadId=target,includeTurns=True),profile['timeout'])['thread']
+                        if rollout.get('id')!=target:raise ValueError('owned rollout identity changed')
+                        total=native_usage(rollout,profile)
+                        terminal=not any(t.get('status')=='inProgress' for t in rollout['turns'])
+                        view=record_successor(root,receipt,total,settled=observed[target]['status']=='complete' and terminal)
                         actor=view['actors'][receipt['budget_actor']]
                         if (not view['accounting_known'] or
                                 view['tokens_used']+view['tokens_reserved']>view['objective_token_limit'] or
@@ -798,6 +804,8 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                     bounds=snapshot().get('utc')
                     target_goal=observed[target]
                     if target_goal['status']=='complete':
+                        if receipt.get('budget_actor') and (not terminal or not view['accounting_known']):
+                            receipt['monitor_error']='goal_complete_final_accounting_pending';save(path,receipt);continue
                         receipt.update(state='completed',reason='successor_goal_complete',successor_goal=target_goal)
                         owner['state']='completed';save(directory/('owner-'+key+'.json'),owner);save(path,receipt)
                         continue
@@ -837,9 +845,8 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                         receipt.pop('uncertain_effect',None)
                         receipt.pop('monitor_error',None)
                         if receipt.get('budget_actor') and bounds:
-                            final_goal=request('thread/goal/get',dict(threadId=target))['goal']
-                            counter=final_goal.get('tokensUsed') if final_goal else None
-                            total=receipt['preflight_tokens_used']+counter if type(counter) is int and counter>=0 else None
+                            final_native=request('thread/read',dict(threadId=target,includeTurns=True))['thread']
+                            total=native_usage(final_native,profile)
                             record_successor(root,receipt,total,settled=True)
                         receipt['state']='expired' if reason=='deadline_safety_stop' else 'blocked'
                         owner['state']='stopped';save(directory/('owner-'+key+'.json'),owner)

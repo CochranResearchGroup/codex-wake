@@ -68,6 +68,11 @@ An approved continuation entry may set `spawn_token_limit` to a positive lower
 allowance within `session_token_limit`; this cannot raise the session cap.
 Actual overspend remains charged and blocks a success claim even if the native
 turn completed.
+For owned sessions, the ledger uses cumulative rollout `total_tokens`, including
+cached input. A native goal's displayed `tokensUsed` can use a smaller accounting
+metric and does not replace that session counter. Native goal identity and its
+own limits remain separate checks. Goal completion waits for final owned-turn
+accounting before releasing a session reservation.
 An active native parent keeps its finite future quota reserved before a worker
 is admitted. Repeated intents preserve the original reservation and deadline.
 The daemon observes native usage and interrupts only the assignment's exact

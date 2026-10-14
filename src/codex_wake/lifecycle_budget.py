@@ -58,6 +58,17 @@ def configured_ledger(root,receipt):
     return ledger
 
 
+def record_goal_observation(ledger,key,goal,profile,request,*,settled,now):
+    """Native goal counters may discount cache; owned session rollouts do not."""
+    view=ledger.view(now=now);binding=view['goal_aliases'].get(key)
+    if not binding:
+        return ledger.record_goal(key,goal.get('tokensUsed'),settled=settled,now=now)
+    native=request('thread/read',dict(threadId=goal['threadId'],includeTurns=True))['thread']
+    if native.get('id')!=goal['threadId']:raise ValueError('source rollout identity changed')
+    return ledger.record(binding['actor_id'],native_usage(native,profile),
+        settled=settled and not any(t.get('status')=='inProgress' for t in native['turns']),now=now)
+
+
 def track_refresh_budget(root,receipt,goal):
     """Refresh observes the same goal; it never reserves a replacement session."""
     from .records import parse_timestamp
@@ -67,7 +78,12 @@ def track_refresh_budget(root,receipt,goal):
             or type(goal.get('tokensUsed')) is not int or goal['tokensUsed']<0):
         receipt.update(state='blocked',reason='source_goal_accounting_unknown');return False
     key='goal:'+goal['threadId']+':'+str(goal['createdAt'])
-    view=ledger.record_goal(key,goal['tokensUsed'],settled=goal['status']=='paused',now=now)
+    from .native_protocol import native_request
+    from .app_server import resolve_codex_cmd
+    profile=receipt['intent']['launch']
+    def request(method,params):
+        return native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),method,params,profile['timeout'])
+    view=record_goal_observation(ledger,key,goal,profile,request,settled=goal['status']=='paused',now=now)
     alias=view['goal_aliases'].get(key)
     actor=view['actors'][alias['actor_id'] if alias else key]
     session_deadline=actor.get('session_deadline') or (parse_timestamp(
@@ -95,7 +111,7 @@ def admit_spawn(root,receipt,request):
         if not goal or goal.get('threadId')!=reference or goal.get('objective')!=policy['objective']:
             receipt['reason']='source_goal_identity_unverified';return False
         key='goal:'+reference+':'+str(goal['createdAt'])
-        view=ledger.record_goal(key,goal.get('tokensUsed'),settled=goal['status']!='active',now=now)
+        view=record_goal_observation(ledger,key,goal,receipt['intent']['launch'],request,settled=goal['status']!='active',now=now)
         if goal['status']=='active':
             if type(goal.get('tokenBudget')) is not int or goal['tokenBudget']<=0:
                 receipt.update(reason='source_session_allowance_unverified',objective_budget=view);return False
@@ -144,9 +160,17 @@ def admit_handoff(root, receipt):
     ledger.configure(config, policy['approval'], policy['tokens_before_source'], now=now)
     source = receipt['source_goal']
     actor = 'goal:' + source['threadId'] + ':' + str(source['createdAt'])
-    view = ledger.record_goal(actor, source['tokensUsed'], settled=True, now=now)
+    from .native_protocol import native_request
+    from .app_server import resolve_codex_cmd
+    profile=receipt['intent']['launch']
+    def request(method,params):
+        return native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+            method,params,profile['timeout'])
+    view = record_goal_observation(ledger,actor,source,profile,request,settled=True,now=now)
     source_binding=view['goal_aliases'].get(actor)
     source_actor=view['actors'][source_binding['actor_id'] if source_binding else actor]
+    if source_actor.get('terms') is not None:
+        receipt['source_remaining_tokens']=min(receipt['source_remaining_tokens'],source_actor['tokens_remaining'])
     if source_actor.get('session_deadline') is not None:
         receipt['continuation_deadline']=min(receipt['continuation_deadline'],source_actor['session_deadline'])
     successor = 'handoff:' + receipt['fingerprint']
