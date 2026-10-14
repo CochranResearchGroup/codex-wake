@@ -11,7 +11,9 @@ Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/258
 
 Local standard and both installed agent skill copies updated and verified.
 Review: docs/dev/evidence/plan0160/review.md. Local documentation outcome complete;
-Git integration remains unpublished. Active lifecycle checkout preserved.
+PR259 merged as b4e2eb7; both hosted CI gates passed. Deployment from exact
+merged source verified four-file parity in both installed roots. Active lifecycle
+checkout preserved; standards worktree closed.
 
 ## Scope
 
