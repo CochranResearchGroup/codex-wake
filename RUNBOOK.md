@@ -6239,3 +6239,38 @@ producer rather than relying on a native model to repair supplied script text.
 Source writer budgets/instructions remain unchanged. Setup06 repeats zero-model
 qualification of the changed harness; setup05 remains retained as earlier proof.
 Setup06 PASS: zero assignments/rollouts, actual bootstrap/supervisor proof, generated helper syntax, server exit0 and fresh owned-process census empty. Curated receipt preserves changed harness hash.
+
+Configured same-tab01 reached native source completion65034 and completed
+selected-review preflight85171 (total150205); actual work verdict accept binds
+approved criterion/path/hash evidence and selected github-handoff. Same-pane
+source-to-successor identity and fresh generation observed. A paused successor
+goal with64829 remaining tokens was prepared; no continuation/rollback occurred.
+Native MCP handoff call was rejected because the private allowlist exposed only
+wake_sessions_show. Sample remains failed; owned source/successor settled,
+server exit0, fresh OS census empty. Final ledger settlement charges150205 once,
+known/settled, with original failed root and raw final-settlement.json retained.
+Curated configured-same-tab01-failed.json records primary preflight acceptance
+separately from missing MCP/continuation/rollback axes. First same-tab attempt
+consumed; only one bounded correction sample remains in this unit.
+Private MCP allowlist now enables show/configuration/handoff. Setup07/08 failed
+because verifier expected checkpoint text but native MCP returned structured
+invalid_cli_response plus reconciliation_required for the missing file; originals
+retained with zero model work. Setup09 qualifies the actual route/error but its
+ephemeral native metadata read is rejected. Reframed setup10 uses a durable,
+unassigned metadata-only probe: native configuration revision readback succeeds,
+negative handoff returns its actual structured error, idle native/goalnull and
+lifecycle journal observations prove no model/lifecycle effect. Actual setup10
+PASS: zero token_count events, zero rollouts, server exit0, private OS census empty.
+The error alone is not used as an effect boundary. All11 public harness tests
+pass0.026s; generated helper/writer syntax and whitespace checks pass.
+Retained first preflight's last input32868 tokens leaves64829 for continuation;
+two similarly sized model requests would exceed that remainder. The verifier
+now leaves full author-owned packet/review/preflight artifacts on disk with all
+semantic checks/hashes unchanged and prints only its native proof marker. This
+removes duplicate artifact replay from subsequent context; complete selected
+instructions/canonical sources still read in full. No cap or criterion changed.
+At13:46:31UTC root975047 minus583915 baseline391132 plus actual native150205
+=541337 attributable; remaining1458663 before further root work. Two remaining
+mode proofs reserve500000, root/integration500000, contingency458663. Next is one
+remaining corrected same-tab sample with frozen published source and unchanged
+100000/150000/250000/600s bounds. Full program still OPEN.

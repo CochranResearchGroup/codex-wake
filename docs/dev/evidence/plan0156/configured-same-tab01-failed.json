@@ -1,0 +1,162 @@
+{
+  "cleanup": {
+    "fresh_owned_process_matches": [],
+    "server_exit": 0
+  },
+  "continuation": "not_run",
+  "error": "native lifecycle request rejected: mcpServer/tool/call",
+  "ledger": {
+    "accounting_known": true,
+    "actors": {
+      "goal:01a13a8f-c27d-7272-96dd-c7fd4a7d0f57:1791983903": {
+        "known": true,
+        "reservation": 0,
+        "session_deadline": null,
+        "settled": true,
+        "terms": null,
+        "tokens_remaining": 0,
+        "used": 0
+      },
+      "handoff:cfc89380d6fc70d62527a9fb606fecacbae6615bd5a46477db60da81275584e6": {
+        "known": true,
+        "reservation": 150000,
+        "session_deadline": 1791984455.4374518,
+        "settled": true,
+        "terms": [
+          150000,
+          550
+        ],
+        "tokens_remaining": 64829,
+        "used": 85171
+      },
+      "spawn:95a0e868316f9fbb8eda74a5391a7c72fe2f63291cfcf0dca45b02b26da1edef": {
+        "known": true,
+        "reservation": 100000,
+        "session_deadline": 1791984455.704731,
+        "settled": true,
+        "terms": [
+          100000,
+          593
+        ],
+        "tokens_remaining": 34966,
+        "used": 65034
+      }
+    },
+    "correction_cycles": 0,
+    "goal_aliases": {
+      "goal:01a13a90-710a-71b3-ab3c-1d4ed6c59255:1791983972": {
+        "actor_id": "handoff:cfc89380d6fc70d62527a9fb606fecacbae6615bd5a46477db60da81275584e6",
+        "preflight_tokens": 85171
+      }
+    },
+    "objective_deadline": "2026-10-14T13:27:36+00:00",
+    "objective_id": "849c7953511146f4a6c7aa602b9423d0215bfcd8f4d90eeac010982f057ca79a",
+    "original_deadline": "2026-10-14T13:27:36+00:00",
+    "remaining_tokens": 99795,
+    "revision": "3eada73bb64cd0f624b4b45598a026d4aa8760b4bb137f0d241abd4037e7f78a",
+    "tokens_reserved": 0,
+    "tokens_used": 150205
+  },
+  "mode": "same-tab",
+  "prefix": "/tmp/codex-wake-plan0156-installed17",
+  "raw_state": "/tmp/codex-wake-plan0156-configured-same-tab01/state.json",
+  "rollback": "not_run",
+  "root": "/tmp/codex-wake-plan0156-configured-same-tab01",
+  "same_tab_attachment": {
+    "source": {
+      "client_pid": 84319,
+      "client_start_time_ticks": 2007379,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/tmp/codex-wake-plan0156-configured-same-tab01/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "checkpoint-source-95a0e868316f",
+      "pane_tty": "/dev/pts/42",
+      "session_id": "$0",
+      "session_name": "owned-handoff",
+      "socket": "/tmp/codex-wake-plan0156-configured-same-tab01/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "checkpoint-source"
+    },
+    "successor": {
+      "client_pid": 87874,
+      "client_start_time_ticks": 2011770,
+      "evidence": "metadata_matched",
+      "pane_current_path": "/tmp/codex-wake-plan0156-configured-same-tab01/workspace",
+      "pane_id": "%1",
+      "pane_index": "0",
+      "pane_title": "handoff-cfc89380d6fc-213952c57d5e",
+      "pane_tty": "/dev/pts/43",
+      "session_id": "$0",
+      "session_name": "owned-handoff",
+      "socket": "/tmp/codex-wake-plan0156-configured-same-tab01/tmux.sock",
+      "window_id": "@1",
+      "window_index": "1",
+      "window_name": "checkpoint-source"
+    }
+  },
+  "source_commit": "092d3ba52d9a496f926d24197721da581393e031",
+  "source_goal": {
+    "createdAt": 1791983903,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed17/bin/python /tmp/codex-wake-plan0156-configured-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "paused",
+    "threadId": "01a13a8f-c27d-7272-96dd-c7fd4a7d0f57",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 184966,
+    "tokensUsed": 0,
+    "updatedAt": 1791983903
+  },
+  "source_tokens": 65034,
+  "state": "failed_after_accepted_preflight",
+  "successor_goal": {
+    "createdAt": 1791983972,
+    "objective": "Operator-approved Plan0156 disposable continuation: execute /tmp/codex-wake-plan0156-installed17/bin/python /tmp/codex-wake-plan0156-configured-same-tab01/preflight.py --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.",
+    "status": "paused",
+    "threadId": "01a13a90-710a-71b3-ab3c-1d4ed6c59255",
+    "timeUsedSeconds": 0,
+    "tokenBudget": 64829,
+    "tokensUsed": 0,
+    "updatedAt": 1791983972
+  },
+  "successor_tokens": 85171,
+  "total_tokens": 150205,
+  "work_review": {
+    "acceptance_progress": [
+      {
+        "change": "Checkpoint preserves the fixed disposable objective, operator authority, original resource caps, pending obligations and exact next packet; review does not authorize continuation.",
+        "criterion": "restart-safe fixture checkpoint matches the approved objective, authority and next packet",
+        "evidence": [
+          {
+            "path": "checkpoint.json",
+            "sha256": "e24b95f78b4bb3fbd358114fb21e474e45fda4da577ffeda917467af9756780f"
+          }
+        ]
+      },
+      {
+        "change": "Host controller validation identifies the exact command, successful exit and verified candidate ref; this supports candidate attribution only. Native bounded continuation, owned rollback and wider acceptance remain open.",
+        "criterion": "host-qualified installed candidate evidence is attributable and does not close wider Plan0156 acceptance",
+        "evidence": [
+          {
+            "path": "host-validation.json",
+            "sha256": "e9d11bf410954476fa69b4bff3672c78ff93ebea519f2e6191177cd5454506a4"
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Reviewed the frozen disposable continuation checkpoint against the canonical operator revision and child scope; produced a restart-safe successor handoff.",
+      "Attributed focused installed candidate validation to the host controller and exact frozen ref without treating test counts as wider acceptance."
+    ],
+    "next_packet": "Read selected skill instructions and run host preflight before authorized bounded continuation",
+    "scope_deviations": [],
+    "selected_review": "github-handoff",
+    "unfinished_work": [
+      "Host preflight runtime verification is pending at artifact authoring.",
+      "Native bounded continuation requires a separate verified deadline fence and host authorization before executing the frozen continuation command.",
+      "Owned rollback and wider Plan0156 installed/native, integration and release acceptance remain open."
+    ],
+    "unsupported_claims": [],
+    "verdict": "accept"
+  }
+}

@@ -97,6 +97,19 @@ class PreflightSupervisionTests(unittest.TestCase):
 
 
 class HostNativeObservationTests(unittest.TestCase):
+    def test_native_mcp_setup_proves_readback_and_missing_checkpoint_stays_effect_free(self):
+        calls=[]
+        def request(method,params):
+            calls.append((method,params))
+            if params['tool']=='wake_sessions_configuration':
+                return {'content':[dict(type='text',text=json.dumps(dict(source_thread_id='probe',revision='frozen')))]}
+            return dict(isError=True,content=[dict(type='text',text=json.dumps(
+                dict(error={'code':'invalid_cli_response'},reconciliation_required=True)))])
+        proof=runner.qualify_lifecycle_mcp(request,'probe','worker','2030-01-01T00:00:00Z')
+        self.assertEqual(proof['configuration_revision'],'frozen')
+        self.assertTrue(proof['handoff_negative_case_rejected'])
+        self.assertEqual([p['tool'] for _,p in calls],['wake_sessions_configuration','wake_sessions_handoff'])
+
     def test_host_readback_binds_resource_to_source_and_successor(self):
         calls = []
         def request(method, params):

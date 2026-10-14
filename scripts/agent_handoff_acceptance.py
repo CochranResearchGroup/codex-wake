@@ -62,6 +62,25 @@ def observe_native_preflight(request, source, target, guide, cwd):
             content_sha256=hashlib.sha256(json.dumps(resource,sort_keys=True).encode()).hexdigest()))
 
 
+def qualify_lifecycle_mcp(request,thread,profile,expiry):
+    def call(tool,arguments):
+        return request('mcpServer/tool/call',dict(threadId=thread,server='codex-wake',tool=tool,arguments=arguments))
+    result=call('wake_sessions_configuration',dict(thread_id=thread,profile=profile,caller_thread_id=thread))
+    if result.get('isError'):raise RuntimeError('native configuration readback rejected')
+    configuration=json.loads(result['content'][0]['text'])
+    if configuration['source_thread_id']!=thread:raise RuntimeError('native configuration identity changed')
+    held=call('wake_sessions_handoff',dict(thread_id=thread,profile=profile,caller_thread_id=thread,
+        intent='qualification-missing-checkpoint',checkpoint='missing-checkpoint.json',checkpoint_sha256='a'*64,
+        expires_at=expiry,mode='new-tab'))
+    error=json.loads(held['content'][0]['text'])
+    if held.get('isError') is not True or not error.get('error',{}).get('code'):
+        raise RuntimeError('native negative handoff case did not return a structured error')
+    # A transport error alone proves no effect boundary. The caller must also
+    # inspect native turns/goals and the private lifecycle journal.
+    return dict(configuration_revision=configuration['revision'],handoff_negative_case_rejected=True,
+                negative_error=error)
+
+
 def settle_owned_successor(request, handoff):
     target=handoff['successor_thread_id']
     goal=request('thread/goal/get',dict(threadId=target))['goal']
@@ -165,8 +184,8 @@ assert packet.strip(),'reviewer handoff packet missing'
 checks['selected_workflow'].update(packet='successor-handoff.md',packet_sha256=sha('successor-handoff.md'),verified_ref=ref,
     review_artifact='work-review.json',review_artifact_sha256=sha(review_path))
 pathlib.Path('preflight.json').write_text(json.dumps(dict(version=1,state='passed',source_thread_id=source,successor_thread_id=cid,checkpoint_sha256=digest,intent_fingerprint=nonce,selected_workflow='github-ask-matt',configuration_revision=authority['configuration_revision'],runtime_readiness=dict(state='passed',checks=checks),work_review=review['work_review'],checks=checks)))
-print(pathlib.Path('preflight.json').read_text())
-print(packet)
+# The host reads the authored artifacts and verifies their hashes. Avoid replaying
+# those complete artifacts into the next model context after semantic verification.
 print('preflight:'+cid+':'+nonce+':'+digest)
 '''
     compile(program, '<generated preflight>', 'exec')
@@ -307,7 +326,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         lines+=['[mcp_servers.codex-wake]',f'command = {json.dumps(str(prefix/"bin/codex-wake-mcp"))}',
             'args = '+json.dumps(['--wake-root',str(root/'wake'),'--lifecycle-profiles',str(profiles),
                 '--app-server','unix://'+str(endpoint),'--tmux-socket',str(socket),'--tmux-session',session]),
-            'enabled_tools = ["wake_sessions_show"]',
+            'enabled_tools = ["wake_sessions_show", "wake_sessions_configuration", "wake_sessions_handoff"]',
             'startup_timeout_sec = 20','tool_timeout_sec = 20']
         (home/'config.toml').write_text('\n'.join(lines)+'\n');server=launch_server()
         if locator.resolve()!=endpoint:raise RuntimeError('owned endpoint changed')
@@ -352,6 +371,16 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             session_token_limit=bootstrap_effective['session_token_limit'],objective_token_limit=bootstrap_effective['objective_token_limit'])
         monitor,receipt['source_supervision']=start_owned_monitor(prefix,root,env,mlog)
         if qualify_only:
+            probe=request('thread/start',dict(cwd=str(workspace),ephemeral=False))['thread']['id']
+            registry=json.loads(profiles.read_text());registry['continuations'][probe]=bootstrap
+            registry['callers']={probe:['worker']};write(profiles,registry)
+            receipt['native_mcp_setup']=qualify_lifecycle_mcp(request,probe,'worker',expiry)
+            observed=request('thread/read',dict(threadId=probe,includeTurns=False))['thread']
+            if observed['status']['type']!='idle' or request('thread/goal/get',dict(threadId=probe))['goal'] is not None:
+                raise RuntimeError('setup probe admitted unexpected native work')
+            if set(p.name for p in (root/'wake/lifecycle').glob('*.json'))!={'supervision.json'}:
+                raise RuntimeError('missing checkpoint made a lifecycle effect')
+            receipt['native_mcp_setup'].update(thread_id=probe,turns=0,goal=None,lifecycle_effects=0,missing_checkpoint_held=True)
             receipt['generated_helper_syntax']='passed'
             raise SetupQualified
         ref=subprocess.check_output(['git','-C',str(repo),'ls-remote','--exit-code','origin','refs/heads/feat/agent-lifecycle'],text=True,timeout=15).split()[0]

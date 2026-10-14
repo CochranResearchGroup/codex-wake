@@ -1,0 +1,31 @@
+{
+  "bootstrap_configuration": {
+    "objective_deadline": "2026-10-14T13:40:19+00:00",
+    "objective_token_limit": 250000,
+    "revision": "e69ae6905b02b8e54215184682b770465bb5cb0a90f7224819198db4ccb932dc",
+    "session_token_limit": 150000,
+    "spawn_token_limit": 100000
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      612,
+      646,
+      3798,
+      53437,
+      68403
+    ],
+    "private_readable_environment_matches": []
+  },
+  "error": "missing checkpoint did not hold native handoff before effects",
+  "harness_sha256": null,
+  "manual_assignment_limit": 0,
+  "model_assignments": 0,
+  "monitor_exit": -2,
+  "native_mcp_setup": null,
+  "prefix": "/tmp/codex-wake-plan0156-installed17",
+  "rollouts": 0,
+  "root": "/tmp/codex-wake-plan0156-configured-mcp-setup07",
+  "server_exit": 0,
+  "source_commit": "092d3ba52d9a496f926d24197721da581393e031",
+  "state": "failed"
+}
