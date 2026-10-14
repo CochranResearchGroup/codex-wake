@@ -6499,3 +6499,25 @@ before paid cases. Historical native659,999 remains outside this window.
 Classification:outcome_progress (both-mode native continuation/rollback),
 next: bounded correction acceptance/stop plus installed replacement-limit tests,
 then combined release gates and exact-main integration/install readback.
+
+Correction-accept-native01 produced actual model-authored correct verdict with
+approved repair evidence and frozen packet, but native command constructed helper
+path as root+relative string. Exact approved path was absent from command text;
+public controller held successor_preflight_unverified before correction admission.
+Source46,952+receiver81,359=128,311;0 corrections, source paused/targetgoalnull,
+cleanup empty, raw/artifact/ledger preserved. No product guard weakened. Harness
+now requires literal full approved helper path in every verifier command.
+Original one-per-case unit ended on its failed axis; bounded successor repairs
+this proof-shape defect and has one verification per case, no same-case retry.
+
+Reframe avoids repeating ordinary continuation/rollback already proven in both
+modes: accepted repair proof ends at verified ACCEPT and paused remaining-budget
+goal preparation. Rejection must stop after exactly2 corrections/3 native reviews
+with no goal. Fresh dedicated limits reduced to accept300,000 total/250,000 receiver
+and reject400,000 total/350,000 receiver; source50,000,600s and globalmax2 retained.
+Measured preceding native source46,461/46,952 supports the bounded writer allocation.
+These tighter allocations keep minimum complete proof plus integration within
+remaining renewed parent resources; no failed allowance increased. Parent current
+external877,849 (749,538+128,311), previous659,999 remains historical.
+Source full release unit suite1208 passed139.035s; harness14 green.
+Classification:blocker_reduction; native correction verification remains open.

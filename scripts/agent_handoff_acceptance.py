@@ -308,8 +308,9 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
             raise RuntimeError('selected instruction mirror bytes changed')
         mirrors.append(dict(source=str(selected_path),installed=str(destination),sha256=digest))
     workflow=Path(mirrors[0]['installed']);reviewer=Path(mirrors[1]['installed'])
-    token_cap=500000 if correction=='reject' else 400000 if correction else 250000
-    session_cap=400000 if correction=='reject' else 300000 if correction else 150000
+    token_cap=400000 if correction=='reject' else 300000 if correction else 250000
+    session_cap=350000 if correction=='reject' else 250000 if correction else 150000
+    source_cap=50000 if correction else 100000
     if correction:(workspace/'repair.txt').write_text('unaccepted fixture\n')
     guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
     head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
@@ -398,7 +399,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.'
         if correction:
             objective=f'Operator-approved Plan0156 disposable correction proof: review and repair only repair.txt under the frozen host packet, at most two corrective cycles. Execute {prefix}/bin/python {helper} --continue exactly once only after acceptance and report its actual result. The external controller completes an accepted goal after verification. Do not invoke goal tools or change goals, scope, actors or resources; rejected work cannot continue.'
-        bootstrap=dict(objective=objective,approval=receipt['authority'],spawn_token_limit=100000,
+        bootstrap=dict(objective=objective,approval=receipt['authority'],spawn_token_limit=source_cap,
             started_at=datetime.fromtimestamp(started,UTC).isoformat())
         write(profiles,dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults,
             continuations={'bootstrap':bootstrap}))
@@ -446,6 +447,8 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
                 seconds_before_source=0,started_at=datetime.fromtimestamp(started,UTC).isoformat()))
         if correction:
             (workspace/'AGENTS.md').write_text((workspace/'AGENTS.md').read_text()+'\nDedicated correction fixture: compare actual repair.txt against accepted correction followed by newline. Until it matches, report correct with a correction_packet: criterion=repair fixture matches accepted correction; paths=[repair.txt]; actual repair path/hash evidence; instructions copied exactly from C[repair_instructions] in the approved helper. Do not repair before an assigned correction. During correction, execute only that frozen repair and use --correction-instructions for the first read command; it prints full selected instructions and current repair evidence, and verifies unchanged hashes for canonical sources already fully read in this same context. The ineffective rejection packet is deliberate fault injection: obey it and report correct again rather than inventing a different repair or claiming acceptance. Author fresh review and handoff artifacts, then run the original verifier in the second command. The source writer emits only its checkpoint. No goal or ordinary continuation before accepted repair.\n')
+            with (workspace/'AGENTS.md').open('a') as instructions:
+                instructions.write('Native proof requires the absolute approved helper path literally in the second command transcript. After artifact writing, invoke '+str(prefix/'bin/python')+' '+str(helper)+' followed by the exact source, fingerprint and checkpoint hash arguments from PREFLIGHT_CONTRACT. Do not construct the executable or helper path from root variables or string concatenation. This also applies to every corrective review.\n')
             constants['original_source_hashes']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in
                 (repo/'docs/dev/plans/0156-2026-10-12-agent-lifecycle-delivery.md',repo/'docs/dev/plans/0159-2026-10-12-agent-handoff.md',workspace/'host-validation.json')}
             # checkpoint is authored below; fill its immutable hash before receiver admission.
@@ -462,7 +465,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         writer_selection=dict(path=str(workflow),instructions=workflow.read_text())
         if not instruction_read(native,writer_selection,workspace):
             raise RuntimeError('selected writer instruction bytes not observed')
-        if spent['total_tokens']>=100000:raise RuntimeError('source exceeded fixture suballowance')
+        if spent['total_tokens']>=source_cap:raise RuntimeError('source exceeded fixture suballowance')
         os.killpg(monitor.pid,signal.SIGINT);monitor.wait(timeout=30)
         receipt['source_supervisor_exit']=monitor.returncode;monitor=None
         receipt['source_goal']=request('thread/goal/set',dict(threadId=source,objective=objective,tokenBudget=token_cap-spent['total_tokens'],status='paused',origin='automatic'))['goal']
@@ -533,6 +536,14 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         receipt['native_handoff_mcp_prepared']=call_source_mcp(
             lambda method,params:native_request('unix://'+str(endpoint),str(codex),method,params,70),
             source,receipt['source_goal'],'wake_sessions_handoff',mcp_args)
+        if correction:
+            # Repair acceptance is its own axis. Both-mode continuation and
+            # rollback already have native proof; do not purchase a duplicate.
+            receipt.update(state='passed_correction_acceptance_axis',successor_usage=spent,
+                accepted_repair_sha256=hashlib.sha256((workspace/'repair.txt').read_bytes()).hexdigest(),
+                final_source_goal=request('thread/goal/get',dict(threadId=source))['goal'],
+                final_successor_goal=request('thread/goal/get',dict(threadId=target))['goal'])
+            raise SetupQualified
         monitor=subprocess.Popen([str(prefix/'bin/codex-waked'),'--wake-root',str(root/'wake'),'--no-dispatch','--interval','1'],env=env,stdout=mlog,stderr=mlog,start_new_session=True)
         deadline=time.monotonic()+min(180,max(0,end-snapshot()['utc']['upper']-50))
         while time.monotonic()<deadline and monitor.poll() is None:
@@ -601,7 +612,8 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
                 lambda method,params:native_request('unix://'+str(endpoint),str(codex),method,params,70),
                 source,after,'wake_sessions_handoff',dict(mcp_args,rollback=True))
             receipt['rollback_source_goal']=request('thread/goal/get',dict(threadId=source))['goal']
-    except SetupQualified:receipt.update(state='qualified_setup')
+    except SetupQualified:
+        if receipt['state']!='passed_correction_acceptance_axis':receipt.update(state='qualified_setup')
     except CorrectionStopped:receipt.update(state='passed_bounded_rejection_axis')
     except Exception as exc:receipt.update(state='failed',error=str(exc))
     finally:
@@ -644,7 +656,7 @@ def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',r
         if matches or receipt['server_exit'] is None or receipt.get('monitor_shutdown'):receipt.update(state='failed',cleanup_error='owned processes remain or shutdown unverified')
         write(root/'state.json',receipt)
     print(json.dumps({k:receipt.get(k) for k in ('state','error','root','source_usage','successor_usage','cleanup')}))
-    return 0 if receipt['state'] in ('passed_continuation_axis','qualified_setup','passed_bounded_rejection_axis') else 1
+    return 0 if receipt['state'] in ('passed_continuation_axis','qualified_setup','passed_bounded_rejection_axis','passed_correction_acceptance_axis') else 1
 
 
 def main():
