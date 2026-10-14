@@ -6000,3 +6000,19 @@ failure. Native effects withheld from worker. Counter/model unknown; conservativ
 100,000token reservation retained alongside the prior ledger lane reservation.
 Full goal OPEN; general spawn/refresh accounting, context-replacement correction,
 installed both-mode acceptance, integration/release and cleanup remain open.
+
+## Turn 308 | 2026-10-14 UTC
+
+Before-effects checkpoint: installed candidate prefix
+/tmp/codex-wake-plan0156-installed14 from published283aaa1 package;94 Python/data
+files compare byte-for-byte with source, zero mismatches. Global installation
+unchanged. Admit one revised configured-review new-tab sample in a fresh isolated
+root, existing fixture250,000tokens/600seconds and preflight150,000 ceiling,
+source100,000 suballowance, no allowance increases. Original outer window remains
+10:38:06–16:38:06UTC. Latest native counter394,740 minus renewal baseline28,639,
+plus conservative200,000 for two completed external lanes; reserve250,000 for
+this native sample pending settlement. Total conservative use/reservation816,101
+is below2,000,000. Primary owns exact native handles, receipt readback and cleanup.
+State ready→native acceptance; previous outcome_progress retained. Selected
+instruction catalog support is unverified; a setup rejection is not acceptance
+and cannot trigger a duplicate paid assignment. No merge/release/issue closure.
