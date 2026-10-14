@@ -6061,3 +6061,37 @@ round trip; no resource ceiling or acceptance criterion changed. Focused75 tests
 passed23.783s; syntax, policy wiring and diff checks pass. Next: fresh installed
 candidate and one remaining configured-new-tab paid correction sample under
 unchanged250,000/150,000/600s bounds. Classification blocker_reduction; goal OPEN.
+
+## Turn 311 | 2026-10-14 UTC
+
+Configured new-tab03 failed before complete instruction reading because the
+generated helper contained an unescaped newline in a Python string. Model
+truthfully returned blocked; no preflight receipt, continuation or rollback.
+Source74,586 + receiver81,086 =155,672 tokens retained; actual owned settlement
+proved receiver goalnull, no in-progress turns, server exit0 and fresh OS census
+empty. Final ledger settlement is known and charges that spend once. Curated
+configured-new-tab03-failed.json preserves this negative sample. The paid new-tab
+loop ends at its two samples; no immediate third paid retry is authorized by
+renaming a root. Reframe the next acceptance packet through source qualification
+and the independent remaining lifecycle work before further paid effects.
+Generated preflight now compiles through a public artifact factory before model
+admission; direct compile reproduced the original syntax failure. Initial native
+developer metadata was41,696characters, including unrelated skills. The isolated
+fixture now disables173 unrelated entries in its own config only and verifies
+exactly the two selected Matt skills plus product guide. Source files/global
+configuration/services remain untouched. Qualification-only setup04 actually
+passes with zero model assignments/rollouts, compiled helper and clean owned
+shutdown; curated configured-setup04-qualified.json records the dirty harness
+hash and installed prefix. This is setup proof, not handoff acceptance.
+Provider-free supervision9 tests, syntax, policy wiring and diff checks pass.
+Updated product skill guidance reflects configurable instruction selection,
+separate work/readiness verdicts, reserved-turn observation, budget authorization
+and bounded correction, with remaining installed/general-actor gaps explicit.
+Latest primary native counter516,302 at12:01:33UTC, renewal baseline28,639;
+known new-window native sample spend374,031 plus conservative200,000 external
+reservations gives1,061,694 before further root work. Deadline16:38:06UTC and
+2,000,000 ceiling remain. Full objective OPEN; standalone spawn/refresh ledger,
+context-replacement correction, qualified installed both-mode acceptance and
+integration/release/cleanup remain. Classification blocker_reduction.
+Memory disposition unavailable: no qualified repository cloud from bounded atlas
+discovery; configured-review-memory-disposition.json records zero attempted writes.

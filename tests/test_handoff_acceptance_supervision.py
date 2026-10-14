@@ -9,6 +9,15 @@ import agent_handoff_acceptance as runner
 
 
 class OwnedCleanupTests(unittest.TestCase):
+    def test_generated_preflight_is_executable_python_before_paid_admission(self):
+        program=runner.preflight_program({'repo': '/fixture', 'head': 'a'*40})
+        compile(program, 'preflight.py', 'exec')
+
+    def test_paid_fixture_catalog_keeps_exact_selected_skills_and_holds_missing_sources(self):
+        catalog={'data':[{'skills':[{'path':p,'enabled':True} for p in ('writer','reviewer','guide','unrelated')]}]}
+        self.assertEqual(runner.excluded_skill_paths(catalog,['writer','reviewer','guide']),['unrelated'])
+        with self.assertRaisesRegex(RuntimeError,'exact selected'):
+            runner.excluded_skill_paths(catalog,['missing'])
     def test_prefight_without_goal_interrupts_only_its_exact_native_assignment(self):
         calls=[]
         running={'value':True}

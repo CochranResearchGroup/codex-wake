@@ -16,6 +16,10 @@ from codex_wake.lifecycle_configuration import effective_configuration
 from codex_wake.lifecycle_review import instruction_read
 from codex_wake.native_clock import snapshot
 from codex_wake.native_protocol import native_request
+
+
+class SetupQualified(Exception):
+    """Exit the qualification-only path through common owned cleanup."""
 from agent_handoff_writer_acceptance import write
 
 
@@ -82,124 +86,8 @@ def settle_owned_successor(request, handoff):
     return dict(thread_id=target,goal=goal,interrupted_turn_ids=[t['id'] for t in running],settled=True)
 
 
-def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',rollback=False):
-    original=None
-    if resume_setup:
-        original=json.loads((root/'state.json').read_text())
-        if (original.get('state')!='failed' or original.get('source') or original.get('handoff')
-                or 'launch profile requires an existing owned Unix socket' not in original.get('error','')
-                or list((root/'wake/lifecycle').glob('*.json')) or list((root/'codex-home/sessions').rglob('*.jsonl'))
-                or original.get('cleanup',{}).get('private_readable_environment_matches')!=[]):
-            raise RuntimeError('setup resume requires proved pre-creation rejection and clean owned runtime')
-        write(root/'setup-failure-01.json',original)
-    root.mkdir(mode=0o700,parents=True,exist_ok=resume_setup)
-    workspace=root/'workspace';workspace.mkdir(exist_ok=resume_setup);home=root/'codex-home';home.mkdir(mode=0o700,exist_ok=resume_setup)
-    codex=Path(subprocess.check_output(['which','codex'],text=True).strip()).resolve()
-    config=tomllib.loads((Path.home()/'.codex/config.toml').read_text())
-    selected={k:config[k] for k in ('model','model_reasoning_effort','model_provider') if k in config}
-    lines=[f'{k} = {json.dumps(v)}' for k,v in selected.items()]
-    lines+=['approval_policy = "never"','sandbox_mode = "workspace-write"',f'[projects.{json.dumps(str(workspace))}]','trust_level = "trusted"']
-    (home/'config.toml').write_text('\n'.join(lines)+'\n')
-    if not (home/'auth.json').is_symlink():(home/'auth.json').symlink_to(Path.home()/'.codex/auth.json')
-    skill=home/'skills/codex-wake';shutil.copytree(repo/'skills/codex-wake',skill,dirs_exist_ok=resume_setup)
-    workflow_source=Path.home()/'.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md'
-    reviewer_source=workflow_source.parent.parent/'github-ask-matt/SKILL.md'
-    # Exact catalog selections: unreadable paths hold before any runtime effects.
-    for selected_path in (workflow_source, reviewer_source):
-        if not selected_path.is_file() or not selected_path.read_text().strip():
-            raise RuntimeError('selected instructions unavailable; no substitution permitted')
-    # Explicit byte-preserving installation: isolated homes cannot discover the
-    # main home's plugin cache merely from skills.config enablement entries.
-    mirrors=[]
-    for selected_path in (workflow_source, reviewer_source):
-        installed=home/'skills'/selected_path.parent.name
-        shutil.copytree(selected_path.parent,installed,dirs_exist_ok=resume_setup)
-        destination=installed/'SKILL.md'
-        digest=hashlib.sha256(selected_path.read_bytes()).hexdigest()
-        if hashlib.sha256(destination.read_bytes()).hexdigest()!=digest:
-            raise RuntimeError('selected instruction mirror bytes changed')
-        mirrors.append(dict(source=str(selected_path),installed=str(destination),sha256=digest))
-    workflow=Path(mirrors[0]['installed']);reviewer=Path(mirrors[1]['installed'])
-    guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
-    head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
-    receipt=dict(state='preparing',root=str(root),prefix=str(prefix),source_commit=head,
-        selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
-        token_cap=250000,time_cap_seconds=600,manual_assignment_limit=2,mode=mode,rollback_requested=rollback,
-        selected_instruction_mirrors=mirrors,
-        root_window=dict(start='2026-10-14T10:38:06Z',deadline='2026-10-14T16:38:06Z',token_cap=2000000),
-        adaptation_lane=dict(token_cap=100000,time_cap_seconds=900,goal_counter='unknown'))
-    env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
-    for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):env.pop(k,None)
-    socket=root/'tmux.sock';session='owned-handoff';locator=root/'native.sock';server=None;monitor=None;created=False
-    log=(root/'server.log').open('a' if resume_setup else 'w');mlog=(root/'monitor.log').open('a' if resume_setup else 'w')
-    def launch_server():
-        proc=subprocess.Popen([str(codex),'app-server','--listen','unix://'+str(locator)],env=env,stdout=log,stderr=log,start_new_session=True)
-        deadline=time.monotonic()+20
-        while proc.poll() is None and time.monotonic()<deadline:
-            try:
-                endpoint=locator.resolve(strict=True)
-                ready=native_request('unix://'+str(endpoint),str(codex),'thread/loaded/list',{},2)
-                if ready.get('data')==[] and ready.get('nextCursor') is None:return proc
-                raise RuntimeError('unexpected existing native threads in setup')
-            except (OSError,ValueError,RuntimeError):time.sleep(.1)
-        if proc.poll() is None:
-            os.killpg(proc.pid,signal.SIGTERM);proc.wait(timeout=10)
-        raise RuntimeError('owned native socket did not answer readiness')
-    def invoke(args):
-        p=subprocess.run([str(prefix/'bin/codex-wake'),'--wake-root',str(root/'wake'),*args],env=env,text=True,capture_output=True,timeout=40)
-        if not p.stdout:raise RuntimeError('installed CLI empty response '+p.stderr[-300:])
-        return p.returncode,json.loads(p.stdout)
-    def usage(thread):
-        native=request('thread/read',dict(threadId=thread,includeTurns=True))['thread']
-        path=Path(native['path']).resolve();path.relative_to(home/'sessions')
-        values=[]
-        for line in path.read_text().splitlines():
-            e=json.loads(line);p=e.get('payload',{});i=p.get('info') or {}
-            if e.get('type')=='event_msg' and p.get('type')=='token_count' and i.get('total_token_usage'):values.append(i['total_token_usage'])
-        if not values:raise RuntimeError('native cumulative usage unavailable')
-        return native,values[-1]
-    try:
-        bounds=snapshot().get('utc')
-        if not bounds:raise RuntimeError('admissible UTC unavailable')
-        started=original['started_at'] if original else bounds['upper']
-        end=min(original['deadline'] if original else started+600,parent_deadline-60,
-            datetime(2026,10,14,16,38,6,tzinfo=UTC).timestamp()-60)
-        if end-bounds['upper']<(240 if original else 480):raise RuntimeError('original/parent deadline leaves insufficient fixed fixture window')
-        expiry=datetime.fromtimestamp(end,UTC).isoformat();receipt.update(started_at=started,deadline=end)
-        # Resolve the owned listener before configuring MCP, without creating a thread.
-        server=launch_server();endpoint=locator.resolve(strict=True)
-        os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=15)
-        for selected_path in (workflow,reviewer):
-            lines+=['[[skills.config]]',f'path = {json.dumps(str(selected_path))}','enabled = true']
-        lines+=['[mcp_servers.codex-wake]',f'command = {json.dumps(str(prefix/"bin/codex-wake-mcp"))}',
-            'args = '+json.dumps(['--wake-root',str(root/'wake'),'--lifecycle-profiles',str(profiles),
-                '--app-server','unix://'+str(endpoint),'--tmux-socket',str(socket),'--tmux-session',session]),
-            'enabled_tools = ["wake_sessions_show"]',
-            'startup_timeout_sec = 20','tool_timeout_sec = 20']
-        (home/'config.toml').write_text('\n'.join(lines)+'\n');server=launch_server()
-        if locator.resolve()!=endpoint:raise RuntimeError('owned endpoint changed')
-        def request(method,params):return native_request('unix://'+str(endpoint),str(codex),method,params,10)
-        catalog=request('skills/list',dict(cwds=[str(workspace)],forceReload=True))
-        for selection in (workflow,reviewer):
-            if not any(entry.get('path')==str(selection) and entry.get('enabled') is True
-                       for group in catalog['data'] for entry in group['skills']):
-                raise RuntimeError('actual native skill catalog did not load exact selected instructions')
-        receipt['selected_instruction_catalog']=dict(writer=str(workflow),reviewer=str(reviewer))
-        empty=request('thread/list',{'limit':100})
-        if empty.get('data')!=[] or empty.get('nextCursor') is not None:raise RuntimeError('existing conversations hold setup resume')
-        receipt['setup_readiness']=dict(loaded_threads=[],persisted_threads=[],original_window_retained=bool(original))
-        subprocess.run(['tmux','-S',str(socket),'new-session','-d','-s',session,'-x','160','-y','40','sleep 700'],env=env,check=True,capture_output=True,timeout=10);created=True
-        profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
-        defaults=dict(handoff_writer=dict(name='github-handoff',path=str(workflow)),
-            preflight_reviewer=dict(name='github-ask-matt',path=str(reviewer)),
-            session_token_limit=150000,session_time_limit_seconds=int(end-started),
-            objective_token_limit=250000,objective_time_limit_seconds=int(end-started),max_correction_cycles=0)
-        write(profiles,dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults))
-        objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.'
-        constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),reviewer=str(reviewer),prefix=str(prefix),
-            review_authority=str(root/'review-authority.json'),
-            native_observations=str(root/'native-observations.json'),continuation_authority=str(root/'continuation-authority.json'))
-        helper.write_text('C='+repr(constants)+'\n'+'''import os,sys,json,pathlib,hashlib,subprocess,time
+def preflight_program(constants):
+    program='C='+repr(constants)+'\n'+'''import os,sys,json,pathlib,hashlib,subprocess,time
 from codex_wake.lifecycle_review import validate_work_review
 cid=os.environ['CODEX_THREAD_ID']
 def sha(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
@@ -219,7 +107,7 @@ if sys.argv[1:1+1]==['--instructions']:
         content=pathlib.Path(p).read_text()
         if p.endswith('0156-2026-10-12-agent-lifecycle-delivery.md'):
             start=content.index('## Operator requirements revision')
-            end=content.index('\n## Problem Statement',start)
+            end=content.index('\\n## Problem Statement',start)
             print(content[:content.index('## Current State')])
             print(content[start:end])
             print('Canonical operator revision shown in full; wider plan remains OPEN. Other sections are retained in the hashed source.')
@@ -280,7 +168,151 @@ pathlib.Path('preflight.json').write_text(json.dumps(dict(version=1,state='passe
 print(pathlib.Path('preflight.json').read_text())
 print(packet)
 print('preflight:'+cid+':'+nonce+':'+digest)
-''')
+'''
+    compile(program, '<generated preflight>', 'exec')
+    return program
+
+
+def excluded_skill_paths(catalog, selected_paths):
+    selected=set(map(str,selected_paths))
+    enabled={entry['path'] for group in catalog['data'] for entry in group['skills']
+             if entry.get('enabled') is True}
+    if not selected <= enabled:
+        raise RuntimeError('actual native skill catalog did not load exact selected instructions')
+    return sorted(enabled-selected)
+
+
+def execute(root,prefix,repo,parent_deadline,resume_setup=False,mode='new-tab',rollback=False,qualify_only=False):
+    original=None
+    if resume_setup:
+        original=json.loads((root/'state.json').read_text())
+        if (original.get('state')!='failed' or original.get('source') or original.get('handoff')
+                or 'launch profile requires an existing owned Unix socket' not in original.get('error','')
+                or list((root/'wake/lifecycle').glob('*.json')) or list((root/'codex-home/sessions').rglob('*.jsonl'))
+                or original.get('cleanup',{}).get('private_readable_environment_matches')!=[]):
+            raise RuntimeError('setup resume requires proved pre-creation rejection and clean owned runtime')
+        write(root/'setup-failure-01.json',original)
+    root.mkdir(mode=0o700,parents=True,exist_ok=resume_setup)
+    workspace=root/'workspace';workspace.mkdir(exist_ok=resume_setup);home=root/'codex-home';home.mkdir(mode=0o700,exist_ok=resume_setup)
+    codex=Path(subprocess.check_output(['which','codex'],text=True).strip()).resolve()
+    config=tomllib.loads((Path.home()/'.codex/config.toml').read_text())
+    selected={k:config[k] for k in ('model','model_reasoning_effort','model_provider') if k in config}
+    lines=[f'{k} = {json.dumps(v)}' for k,v in selected.items()]
+    lines+=['approval_policy = "never"','sandbox_mode = "workspace-write"',f'[projects.{json.dumps(str(workspace))}]','trust_level = "trusted"']
+    (home/'config.toml').write_text('\n'.join(lines)+'\n')
+    if not (home/'auth.json').is_symlink():(home/'auth.json').symlink_to(Path.home()/'.codex/auth.json')
+    skill=home/'skills/codex-wake';shutil.copytree(repo/'skills/codex-wake',skill,dirs_exist_ok=resume_setup)
+    workflow_source=Path.home()/'.codex/plugins/cache/created-by-me-remote/chatgpt-github-engineering/0.1.0/skills/github-handoff/SKILL.md'
+    reviewer_source=workflow_source.parent.parent/'github-ask-matt/SKILL.md'
+    # Exact catalog selections: unreadable paths hold before any runtime effects.
+    for selected_path in (workflow_source, reviewer_source):
+        if not selected_path.is_file() or not selected_path.read_text().strip():
+            raise RuntimeError('selected instructions unavailable; no substitution permitted')
+    # Explicit byte-preserving installation: isolated homes cannot discover the
+    # main home's plugin cache merely from skills.config enablement entries.
+    mirrors=[]
+    for selected_path in (workflow_source, reviewer_source):
+        installed=home/'skills'/selected_path.parent.name
+        shutil.copytree(selected_path.parent,installed,dirs_exist_ok=resume_setup)
+        destination=installed/'SKILL.md'
+        digest=hashlib.sha256(selected_path.read_bytes()).hexdigest()
+        if hashlib.sha256(destination.read_bytes()).hexdigest()!=digest:
+            raise RuntimeError('selected instruction mirror bytes changed')
+        mirrors.append(dict(source=str(selected_path),installed=str(destination),sha256=digest))
+    workflow=Path(mirrors[0]['installed']);reviewer=Path(mirrors[1]['installed'])
+    guide=skill/'SKILL.md';helper=root/'preflight.py';profiles=root/'profiles.json'
+    head=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()
+    receipt=dict(state='preparing',root=str(root),prefix=str(prefix),source_commit=head,
+        selected_model=selected,authority='operator execute Plan0156; isolated bounded continuation fixture',
+        token_cap=250000,time_cap_seconds=600,manual_assignment_limit=0 if qualify_only else 2,mode=mode,rollback_requested=rollback,
+        selected_instruction_mirrors=mirrors,
+        root_window=dict(start='2026-10-14T10:38:06Z',deadline='2026-10-14T16:38:06Z',token_cap=2000000),
+        adaptation_lane=dict(token_cap=100000,time_cap_seconds=900,goal_counter='unknown'))
+    env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
+    for k in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):env.pop(k,None)
+    socket=root/'tmux.sock';session='owned-handoff';locator=root/'native.sock';server=None;monitor=None;created=False
+    log=(root/'server.log').open('a' if resume_setup else 'w');mlog=(root/'monitor.log').open('a' if resume_setup else 'w')
+    def launch_server():
+        proc=subprocess.Popen([str(codex),'app-server','--listen','unix://'+str(locator)],env=env,stdout=log,stderr=log,start_new_session=True)
+        deadline=time.monotonic()+20
+        while proc.poll() is None and time.monotonic()<deadline:
+            try:
+                endpoint=locator.resolve(strict=True)
+                ready=native_request('unix://'+str(endpoint),str(codex),'thread/loaded/list',{},2)
+                if ready.get('data')==[] and ready.get('nextCursor') is None:return proc
+                raise RuntimeError('unexpected existing native threads in setup')
+            except (OSError,ValueError,RuntimeError):time.sleep(.1)
+        if proc.poll() is None:
+            os.killpg(proc.pid,signal.SIGTERM);proc.wait(timeout=10)
+        raise RuntimeError('owned native socket did not answer readiness')
+    def invoke(args):
+        p=subprocess.run([str(prefix/'bin/codex-wake'),'--wake-root',str(root/'wake'),*args],env=env,text=True,capture_output=True,timeout=40)
+        if not p.stdout:raise RuntimeError('installed CLI empty response '+p.stderr[-300:])
+        return p.returncode,json.loads(p.stdout)
+    def usage(thread):
+        native=request('thread/read',dict(threadId=thread,includeTurns=True))['thread']
+        path=Path(native['path']).resolve();path.relative_to(home/'sessions')
+        values=[]
+        for line in path.read_text().splitlines():
+            e=json.loads(line);p=e.get('payload',{});i=p.get('info') or {}
+            if e.get('type')=='event_msg' and p.get('type')=='token_count' and i.get('total_token_usage'):values.append(i['total_token_usage'])
+        if not values:raise RuntimeError('native cumulative usage unavailable')
+        return native,values[-1]
+    try:
+        bounds=snapshot().get('utc')
+        if not bounds:raise RuntimeError('admissible UTC unavailable')
+        started=original['started_at'] if original else bounds['upper']
+        end=min(original['deadline'] if original else started+600,parent_deadline-60,
+            datetime(2026,10,14,16,38,6,tzinfo=UTC).timestamp()-60)
+        if end-bounds['upper']<(240 if original else 480):raise RuntimeError('original/parent deadline leaves insufficient fixed fixture window')
+        expiry=datetime.fromtimestamp(end,UTC).isoformat();receipt.update(started_at=started,deadline=end)
+        # Resolve the owned listener before configuring MCP, without creating a thread.
+        server=launch_server();endpoint=locator.resolve(strict=True)
+        os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=15)
+        for selected_path in (workflow,reviewer):
+            lines+=['[[skills.config]]',f'path = {json.dumps(str(selected_path))}','enabled = true']
+        lines+=['[mcp_servers.codex-wake]',f'command = {json.dumps(str(prefix/"bin/codex-wake-mcp"))}',
+            'args = '+json.dumps(['--wake-root',str(root/'wake'),'--lifecycle-profiles',str(profiles),
+                '--app-server','unix://'+str(endpoint),'--tmux-socket',str(socket),'--tmux-session',session]),
+            'enabled_tools = ["wake_sessions_show"]',
+            'startup_timeout_sec = 20','tool_timeout_sec = 20']
+        (home/'config.toml').write_text('\n'.join(lines)+'\n');server=launch_server()
+        if locator.resolve()!=endpoint:raise RuntimeError('owned endpoint changed')
+        def request(method,params):return native_request('unix://'+str(endpoint),str(codex),method,params,10)
+        catalog=request('skills/list',dict(cwds=[str(workspace)],forceReload=True))
+        exclusions=excluded_skill_paths(catalog,(workflow,reviewer,guide))
+        if exclusions:
+            # Keep the paid fixture's catalog bounded to its exact three resources.
+            # Global skill files and every unrelated service remain unchanged.
+            for excluded in exclusions:
+                lines+=['[[skills.config]]',f'path = {json.dumps(excluded)}','enabled = false']
+            (home/'config.toml').write_text('\n'.join(lines)+'\n')
+            os.killpg(server.pid,signal.SIGTERM);server.wait(timeout=15)
+            server=launch_server()
+            catalog=request('skills/list',dict(cwds=[str(workspace)],forceReload=True))
+            if excluded_skill_paths(catalog,(workflow,reviewer,guide)):
+                raise RuntimeError('owned fixture skill catalog filtering did not take effect')
+        receipt['skill_catalog_scope']=dict(selected=[str(workflow),str(reviewer),str(guide)],
+            excluded_count=len(exclusions),verified_enabled_count=3)
+        receipt['selected_instruction_catalog']=dict(writer=str(workflow),reviewer=str(reviewer))
+        empty=request('thread/list',{'limit':100})
+        if empty.get('data')!=[] or empty.get('nextCursor') is not None:raise RuntimeError('existing conversations hold setup resume')
+        receipt['setup_readiness']=dict(loaded_threads=[],persisted_threads=[],original_window_retained=bool(original))
+        subprocess.run(['tmux','-S',str(socket),'new-session','-d','-s',session,'-x','160','-y','40','sleep 700'],env=env,check=True,capture_output=True,timeout=10);created=True
+        profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server='unix://'+str(endpoint),tmux_socket=str(socket),tmux_session=session,timeout=10)
+        defaults=dict(handoff_writer=dict(name='github-handoff',path=str(workflow)),
+            preflight_reviewer=dict(name='github-ask-matt',path=str(reviewer)),
+            session_token_limit=150000,session_time_limit_seconds=int(end-started),
+            objective_token_limit=250000,objective_time_limit_seconds=int(end-started),max_correction_cycles=0)
+        write(profiles,dict(version=1,profiles={'worker':profile},lifecycle_defaults=defaults))
+        objective=f'Operator-approved Plan0156 disposable continuation: execute {prefix}/bin/python {helper} --continue exactly once and report its actual result. The external controller completes this goal after verifying the command; do not invoke goal tools or change any goal. No other work, actors, resource renewal or goal budget change.'
+        constants=dict(repo=str(repo),head=head,guide=str(guide),workflow=str(workflow),reviewer=str(reviewer),prefix=str(prefix),
+            review_authority=str(root/'review-authority.json'),
+            native_observations=str(root/'native-observations.json'),continuation_authority=str(root/'continuation-authority.json'))
+        helper.write_text(preflight_program(constants))
+        if qualify_only:
+            receipt['generated_helper_syntax']='passed'
+            raise SetupQualified
         ref=subprocess.check_output(['git','-C',str(repo),'ls-remote','--exit-code','origin','refs/heads/feat/agent-lifecycle'],text=True,timeout=15).split()[0]
         if ref!=head:raise RuntimeError('published candidate differs before native assignments')
         validation=[str(prefix/'bin/python'),'-m','unittest','discover','-s',str(repo/'tests'),'-p','test_agent_handoff.py','-q']
@@ -413,6 +445,7 @@ print('preflight:'+cid+':'+nonce+':'+digest)
                 raise RuntimeError('rollback source identity/counters not conserved')
             receipt['native_rollback_mcp_result']=native_request('unix://'+str(endpoint),str(codex),'mcpServer/tool/call',dict(threadId=source,server='codex-wake',tool='wake_sessions_handoff',arguments=dict(mcp_args,rollback=True)),70)
             receipt['rollback_source_goal']=request('thread/goal/get',dict(threadId=source))['goal']
+    except SetupQualified:receipt.update(state='qualified_setup')
     except Exception as exc:receipt.update(state='failed',error=str(exc))
     finally:
         if monitor is not None and monitor.poll() is None:
@@ -446,13 +479,14 @@ print('preflight:'+cid+':'+nonce+':'+digest)
         if matches or receipt['server_exit'] is None or receipt.get('monitor_shutdown'):receipt.update(state='failed',cleanup_error='owned processes remain or shutdown unverified')
         write(root/'state.json',receipt)
     print(json.dumps({k:receipt.get(k) for k in ('state','error','root','source_usage','successor_usage','cleanup')}))
-    return 0 if receipt['state']=='passed_continuation_axis' else 1
+    return 0 if receipt['state'] in ('passed_continuation_axis','qualified_setup') else 1
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--execute',action='store_true');p.add_argument('--resume-setup',action='store_true');p.add_argument('--root',type=Path,required=True);p.add_argument('--prefix',type=Path,required=True);p.add_argument('--repo',type=Path,required=True);p.add_argument('--parent-deadline',type=float,required=True)
     p.add_argument('--mode',choices=['new-tab','same-tab'],default='new-tab');p.add_argument('--rollback',action='store_true')
+    p.add_argument('--qualify-only',action='store_true',help='verify isolated catalog/helper and cleanup without any model assignment')
     args=p.parse_args()
     if not args.execute:p.error('--execute required for two owned assignments and bounded native goal effects')
-    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline,args.resume_setup,args.mode,args.rollback)
+    return execute(args.root.resolve(),args.prefix.resolve(),args.repo.resolve(),args.parent_deadline,args.resume_setup,args.mode,args.rollback,args.qualify_only)
 if __name__=='__main__':raise SystemExit(main())

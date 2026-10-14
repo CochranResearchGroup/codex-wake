@@ -103,8 +103,8 @@ parent capability. See `docs/agent-lifecycle.md` in the installed source version
 for profile setup, receipt states and limits.
 
 The development source exposes `wake_sessions_refresh` with the same host scope;
-isolated installed same-thread/stale-MCP evidence is recorded; full readiness
-and nonnull-goal acceptance remain pending. Write and preserve your source checkpoint,
+isolated installed same-thread, stale/updated-MCP and nonnull-goal conservation
+evidence is recorded; combined lifecycle release remains pending. Write and preserve your source checkpoint,
 then supply its workspace-relative path and exact hash, your exact source thread,
 stable intent, selected named resources and fixed expiry. Draft/active/unknown or
 pending work holds the stop. A new client does not establish resource readiness:
@@ -119,13 +119,38 @@ Write your own checkpoint with exact native source identity, objective, original
 authority, next packet and preserved pending obligations. Supply its exact hash,
 stable intent, approved profile, source thread, explicit tab mode and fixed expiry.
 The host approves cumulative counters and the selected preflight script; callers
-cannot supply budgets or probes. Pending work, unknown usage and changed goal
-authority hold. The successor must execute the selected github-handoff preflight
-and produce actual native command evidence. Preparation leaves its goal paused;
+cannot supply budgets or probes. Inspect `wake_sessions_configuration` first
+with your actual caller ID, approved profile and source thread. Its CLI equivalent
+is `sessions configuration --profiles FILE --profile NAME --thread-id ID --json`.
+User `lifecycle_defaults` are overlaid by the approved objective's `configuration`;
+readback shows writer/reviewer names, resolved instruction paths/bytes/hashes,
+session/objective limits, original deadline, revision and any existing ledger.
+Changing defaults does not authorize active work or renew its resources.
+Missing selected instructions block without substitution. Native writer and
+reviewer instruction-read evidence is required; a router must record its actual
+downstream choice. Runtime readiness and an evidence-based `accept`, `correct`
+or `blocked` work verdict are separate. Test counts do not establish acceptance.
+Pending work, unknown usage and changed goal authority hold. An already admitted
+turn without its first usage snapshot can be observed under its original reserved
+allowance; that observation permits no new assignment or goal admission.
+An accept verdict requires approved criterion/path/hash evidence, no unsupported
+claims or scope deviation, and the checkpoint's exact next packet.
+Preparation leaves its goal paused;
 only the existing continuous owned monitor with explicit host activation approval
 can activate the original remaining allowance. One-shot checks cannot activate.
 Keep the owned target untouched. Reconcile the same intent; do not reset a goal,
 renew time, copy claims/capabilities or create another actor to bypass a hold.
+The handoff ledger charges all associated source/preflight/continuation usage
+once, reserves session resources within the objective cap, and preserves original
+deadlines through restart. Corrective assignments require a host correction scope
+and checked frozen packet; at most two cycles are admitted across the objective.
+Continued rejection checkpoints and stops. A correct verdict does not accept the
+outgoing work or permit the ordinary continuation packet.
+Only the operator CLI can apply an exact host `budget_authorization` revision
+with `--apply-budget-authorization`; agent MCP cannot extend or reset a budget.
+Explicit reset retains spend, original deadline and correction history and
+requires settled known actors. General standalone-spawn/refresh ledger coverage
+and installed configured-review acceptance remain open in this source candidate.
 Same-tab and handoff rollback acceptance remain pending in this source candidate.
 See the matching lifecycle guide for monitor setup and known acceptance gaps.
 
