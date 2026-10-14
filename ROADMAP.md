@@ -1215,3 +1215,12 @@ qualified. Hosted3.11/3.12 gates passed (1,231 unit tests). First0.15.0 startup
 race/rollback retained; superseded prerelease preserved. Shared services and
 unrelated sessions unchanged. Current clients need resource refresh for schemas.
 Receipt: docs/dev/evidence/plan0162/final-acceptance.md.
+
+
+## P163 | Lifecycle discovery and onboarding
+
+State: CLOSED (source). Owner: primary / ecochran76. Workflow: DONE.
+Issue267 / [Plan0163](docs/dev/plans/0163-2026-10-14-lifecycle-onboarding.md) polishes existing
+README, lifecycle quickstart and agent skill for released spawn/refresh/handoff.
+Depends on integrated P156/P162; no runtime changes or blockers. Acceptance:
+CLI/MCP templates, accurate release claims, links and installed skill parity.

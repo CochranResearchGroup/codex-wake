@@ -11,9 +11,10 @@ The package provides:
 - `native after|at|file` for an exact thread, with expiry and explicit same-thread resume.
 - `native reconcile` for uncertain submission and `native migrate` for earlier candidate records.
 - `sessions list|show|resolve|current|watch|open|close` for discovery and visible tab lifecycle.
+- `sessions configuration|spawn|refresh|handoff` for approved worker tasks, resource reloads and fresh-context continuation.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
 - Tracked requests and correlated replies, work claims, completion receipts and generation-safe recovery.
-- Optional `codex-wake-mcp`: 15 tools for session discovery, host-approved worker spawn and authorized agent exchanges.
+- Optional `codex-wake-mcp`: 19 tools for session discovery, host-approved spawn, refresh and handoff, and authorized agent exchanges.
 - Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
 
 Native queue acceptance is separate from execution and acknowledgment. Busy or
@@ -179,10 +180,20 @@ codex-wake native reconcile WAKE_ID
 codex-wake sessions close thread:THREAD_UUID
 ```
 
-For task delivery after exact worker readiness, use guarded `sessions spawn` or
-`wake_sessions_spawn` with an operator-configured launch profile, stable intent
-and fixed expiry. See [agent lifecycle](docs/agent-lifecycle.md) for host scope,
-durable receipts and uncertainty recovery.
+### Choose an agent lifecycle operation
+
+| You want to… | Human CLI | Agent MCP tool |
+|---|---|---|
+| Inspect approved settings and remaining resources | `sessions configuration` | `wake_sessions_configuration` |
+| Give a separate worker a bounded task | `sessions spawn` | `wake_sessions_spawn` |
+| Reload selected skills or MCP resources in the same conversation | `sessions refresh` | `wake_sessions_refresh` |
+| Continue an objective in a fresh conversation | `sessions handoff` | `wake_sessions_handoff` |
+
+Start with the [lifecycle quickstart](docs/agent-lifecycle.md#quickstart).
+An operator configures the approved host profile and caller access first.
+Refresh and handoff require a checkpoint; handoff supports a new tab or the same
+pane. Receipts distinguish readiness, task admission and completed work.
+Fresh context preserves the objective's remaining budget and original deadline.
 
 Native scheduling retains the original request when trusted time is unavailable.
 Use a stable key for each automated follow-up so retries return the same wake:
