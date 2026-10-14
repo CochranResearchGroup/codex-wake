@@ -11,6 +11,16 @@ Dependency: Plan0156 / PR253, pinned source 5b14c05
 
 ## Current State
 
+Deployment continuation authorized by operator: `install and deploy and reconcile
+the repo`. Parent PR253 merged as3bde6d5 and0.14.0 is installed. Rebased only the
+three feature commits from original base5b14c05 onto current main3bde6d5; original
+publishedb5ce1ea retained at archive/plan0162-pre-main-20261014. ROADMAP/RUNBOOK
+conflicts preserved both history/intents; lifecycle and A2A skill changes retained.
+Prepare0.15.0 minor release, exact-main install, skill parity, owned startup proof
+and truthful lane/issue/worktree reconciliation. No unrelated session shutdown or
+production-peer assignments. Historical stack gate below is now satisfied.
+
+
 Source implementation and independent review remediation complete in isolated
 feat/mcp-tab-targets. Public CLI/MCP resolve informal descriptors; send pins exact
 identity; guarded preparation shares lifecycle persistence/expiry and preserves
