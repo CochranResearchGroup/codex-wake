@@ -1,6 +1,6 @@
 ---
 name: codex-wake
-description: Use Codex Wake for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
@@ -115,6 +115,23 @@ attachment; extra attachment is explicit. Close guards pending work and active
 or unknown recipients. Force preserves conversations and wakes; cancel/archive
 are separate. Provide custom bus roots explicitly for close checks.
 
+Choose the lifecycle operation by the requested outcome:
+
+| Requested outcome | Tool |
+|---|---|
+| Inspect approved instructions, limits and existing ledger | `wake_sessions_configuration` |
+| Assign a bounded task to a separate worker | `wake_sessions_spawn` |
+| Reload named resources in your same conversation | `wake_sessions_refresh` |
+| Continue the objective in fresh context | `wake_sessions_handoff` |
+
+Inspect configuration before configured work. Obtain your actual native caller
+identity and use only a granted profile. Refresh/handoff require your own durable
+checkpoint and exact hash. Preserve the returned receipt and reconcile the same
+intent on a hold; changing context never renews resources. Before constructing
+a lifecycle request, read [agent lifecycle requests](references/lifecycle.md)
+for MCP templates and checkpoint preparation. Operator setup and CLI templates
+are in the source `docs/agent-lifecycle.md` quickstart.
+
 For a bounded worker assignment, use `wake_sessions_spawn` when the host has
 configured lifecycle launch profiles and your caller/profile grant. Supply your
 actual native caller ID, one stable `intent`, approved `profile`, tab `name`,
@@ -134,9 +151,9 @@ Unknown final accounting holds completion until the owned rollout end marker.
 Profiles without lifecycle configuration retain explicit-expiry manual behavior;
 their receipts make no objective-budget enforcement claim.
 
-The development source exposes `wake_sessions_refresh` with the same host scope;
-isolated installed same-thread, stale/updated-MCP and nonnull-goal conservation
-evidence is recorded; combined lifecycle release remains pending. Write and preserve your source checkpoint,
+Use `wake_sessions_refresh` with the same host scope. Released lifecycle
+acceptance records same-thread, stale/updated-MCP and goal-conservation evidence.
+Write and preserve your source checkpoint,
 then supply its workspace-relative path and exact hash, your exact source thread,
 stable intent, selected named resources and fixed expiry. Draft/active/unknown or
 pending work holds the stop. A new client does not establish resource readiness:
@@ -146,7 +163,7 @@ matching source's lifecycle guide for checkpoint and host proof definitions.
 Explicit `rollback: true` reconciles the original conversation and retains a
 separate rollback result. Pending or ambiguous attachments hold; it never
 creates another conversation or renews expiry.
-The source candidate exposes `wake_sessions_handoff` / `sessions handoff`.
+Use `wake_sessions_handoff` / `sessions handoff` for fresh-context continuation.
 Write your own checkpoint with exact native source identity, objective, original
 authority, next packet and preserved pending obligations. Supply its exact hash,
 stable intent, approved profile, source thread, explicit tab mode and fixed expiry.
@@ -184,7 +201,8 @@ Explicit reset retains spend, original deadline and correction history and
 requires settled known actors. Configured refresh observes the same goal before
 stop and after continuity, preserving its original deadline and usage history.
 Configured spawn/refresh and handoff account owned native rollout usage.
-Candidate native evidence covers review, bounded correction and cleanup.
+The release acceptance matrix distinguishes native candidate evidence for review,
+bounded correction and cleanup from exact released-prefix qualification.
 Native review, resource limits and continuation have passed in both tab modes;
 rollback passed in both modes. Release and installed-prefix proof are recorded
 separately in the canonical plan and runbook.

@@ -1,0 +1,12 @@
+{
+  "body": "Improve discovery and onboarding for released spawn, refresh and handoff.\n\nOwner: ecochran76. State: IN_PROGRESS. Branch: docs/lifecycle-onboarding.\nPlan: docs/dev/plans/0163-2026-10-14-lifecycle-onboarding.md.\nDepends on integrated P156/P162. No active overlaps or blockers.\n\nObserved on 0.15.1: README says 15 tools (actual 19), lifecycle guide and\ninstalled skill retain obsolete candidate/pending language, and operation choice\nand request templates are hard to find.\n\nAcceptance: README chooser; CLI/MCP templates checked against current interfaces;\naccurate release evidence boundaries; clear host setup, checkpoint and resource\nrequirements; installed skill parity. Documentation only, no runtime behavior,\npaid native turns or shared service restart. Integration/deployment are separate.\n\n<!-- codex-wake-p163-lifecycle-onboarding -->\n",
+  "number": 267,
+  "state": "OPEN",
+  "title": "Make released agent lifecycle operations discoverable and easy to use",
+  "url": "https://github.com/CochranResearchGroup/codex-wake/issues/267",
+  "actor": "ecochran76",
+  "host": "github.com",
+  "repository": "CochranResearchGroup/codex-wake",
+  "action": "create",
+  "idempotency_key": "codex-wake-p163-lifecycle-onboarding"
+}

@@ -1,5 +1,74 @@
 # Agent lifecycle
 
+## Quickstart
+
+Choose **spawn** for a separate worker assignment, **refresh** to reload named
+resources while keeping the conversation, or **handoff** to continue the same
+objective in fresh context. Use `sessions open` when you only want a visible tab.
+
+For humans, start with `codex-wake sessions --help` and the chosen subcommand's
+`--help`. For agents, use the corresponding `wake_sessions_*` MCP tool and the
+installed Codex Wake skill. The operator must configure a trusted workspace,
+owned endpoint, launch profile and caller grants before these operations work;
+installation alone does not configure or authorize them.
+
+1. Obtain the operator-approved profile and wake root. Inspect effective
+   configuration before a configured launch or handoff:
+
+   ```bash
+   codex-wake --wake-root /owned/wake sessions configuration \
+     --profiles /host/launch-profiles.json --profile worker \
+     --thread-id SOURCE_THREAD_UUID --json
+   ```
+
+   Read the selected writer/reviewer instructions, resource limits, deadline and
+   existing ledger. Agents use `wake_sessions_configuration` with their actual
+   `caller_thread_id`, approved `profile` and source `thread_id`; host paths stay
+   outside the tool arguments.
+
+2. Prepare the bounded task for spawn, or write the checkpoint described below
+   for refresh/handoff and compute its exact SHA256. Choose one stable intent and
+   a fixed future timezone-aware expiry within the approved allowance.
+3. Submit the chosen operation. The following are templates: replace every
+   placeholder and path with approved values. Refresh resource names must exist
+   in the host profile; handoff needs an approved continuation entry.
+
+   ```bash
+   codex-wake --wake-root /owned/wake sessions refresh \
+     --profiles /host/launch-profiles.json --profile worker \
+     --intent refresh-001 --thread-id SOURCE_THREAD_UUID \
+     --checkpoint checkpoints/source.json --checkpoint-sha256 CHECKPOINT_SHA256 \
+     --expires-at FIXED_FUTURE_ISO8601 --resource APPROVED_RESOURCE_NAME --json
+
+   codex-wake --wake-root /owned/wake sessions handoff \
+     --profiles /host/launch-profiles.json --profile worker \
+     --intent handoff-001 --thread-id SOURCE_THREAD_UUID \
+     --checkpoint checkpoints/source.json --checkpoint-sha256 CHECKPOINT_SHA256 \
+     --expires-at FIXED_FUTURE_ISO8601 --mode new-tab --json
+   ```
+
+   Use `--mode same-tab` to replace the source in its pane instead. Keep the
+   owned target untouched while the controller checks and changes its client.
+4. Read and retain the receipt. A held or uncertain result means reconcile the
+   **same intent**, retaining its original arguments and expiry. Do not create a
+   replacement intent to bypass a hold. A prepared successor can remain paused
+   awaiting the already approved resident monitor; readiness is separate from
+   work acceptance and permission to continue.
+
+Configured operations require a resident monitor on the same wake root. Fresh
+context, refresh and rollback preserve cumulative spending and original
+deadlines. Missing instructions, stale probes, pending obligations and unknown
+accounting hold the operation. Only an operator's explicit budget authorization
+can extend resources; agent MCP cannot reset them.
+
+### Agent requests
+
+Use the [packaged agent request reference](../skills/codex-wake/references/lifecycle.md)
+for configuration, spawn, refresh and handoff MCP templates. This same file ships
+with the installed skill, so agents can reach it outside this repository.
+
+## Operator setup and spawn
+
 `sessions spawn` creates a worker conversation, attaches one visible tab and
 admits a bounded initial assignment only after its exact client is ready. Use
 `sessions open` for attachment without task delivery. Tab creation, task
@@ -12,7 +81,11 @@ be trusted in the selected Codex home. Example registry:
 ```json
 {
   "version": 1,
-  "callers": {"00000000-0000-7000-8000-000000000011": ["worker"]},
+  "callers": {
+    "00000000-0000-7000-8000-000000000011": [
+      "worker"
+    ]
+  },
   "profiles": {
     "worker": {
       "cwd": "/approved/workspace",
@@ -42,7 +115,7 @@ parent's mailbox capability, bus selection, receipt authority or thread identity
 ```bash
 codex-wake --wake-root /owned/wake sessions spawn \
   --profiles /host/launch-profiles.json --profile worker \
-  --intent task-001 --name worker --expires-at 2026-10-12T18:00:00Z \
+  --intent task-001 --name worker --expires-at FIXED_FUTURE_ISO8601 \
   --task 'Inspect the agreed fixture and return the result.' --json
 ```
 
@@ -110,9 +183,11 @@ the actual `caller_thread_id`. Tools cannot override profiles files, journal
 roots, launch commands, endpoints or credential locations. Missing host scope
 or caller grant holds the operation.
 
-The source candidate also exposes `sessions refresh` / `wake_sessions_refresh`.
-Installed candidate evidence proves the same-thread transition and stale-MCP
-hold with no goal; nonnull-goal and full readiness acceptance remain pending.
+## Refresh the same conversation
+
+Use `sessions refresh` / `wake_sessions_refresh` to reload approved resources.
+Released lifecycle acceptance covers configured goal preservation and updated
+versus stale resource behavior; see the acceptance evidence linked below.
 Supply the exact `thread_id`,
 stable `intent`, workspace-contained `checkpoint`, its `checkpoint_sha256`,
 fixed `expires_at` and named `resources` (CLI repeats `--resource`). The checkpoint
@@ -141,16 +216,19 @@ reattach only after complete absence of the owned replacement tab and observed
 exit of the original OS generation. Pending or ambiguous tabs hold rollback;
 expiry still prevents a new attachment. Rollback adds a separate receipt result,
 preserves resource failures and does not create a fresh thread or submit work.
-The current rollback comparison requires the saved goal to match exactly;
-changing accounting counters can hold it. Live nonnull-goal proof is pending.
+Rollback requires matching saved goal evidence; changed or unknown goal
+authority holds the operation.
 
-The source candidate exposes `sessions handoff` / `wake_sessions_handoff` with
+## Handoff to fresh context
+
+Use `sessions handoff` / `wake_sessions_handoff` with
 `thread_id`, checkpoint path/hash, stable intent, profile, explicit `mode` and
 fixed expiry. A host `continuations` entry keyed by source UUID supplies objective,
 approval locator, original `started_at`, `token_cap`, `time_cap_seconds`,
 `tokens_before_source`, `seconds_before_source` and a `preflight` descriptor:
 absolute `script`, pinned `sha256`, workspace-contained `receipt`,
-`workflow: "github-handoff"`, nonempty `required_checks` and bounded
+`workflow` matching the effective `preflight_reviewer.name`, nonempty
+`required_checks` and bounded
 `token_allowance`. Native source usage and any smaller native budget constrain
 the host cumulative ceiling. An unlimited native budget grants no additional
 allowance; the explicit host cap still binds.
@@ -190,11 +268,53 @@ at its deadline safety boundary. One-shot polling cannot activate. Graceful
 monitor exit pauses its goal; a different live PID generation prevents takeover.
 Monitor availability is a runtime requirement, not a claim of enforcement during
 host outages. Unknown effects retain original receipts for reconciliation.
-Current source supports new-tab preparation and explicit handoff `--rollback`
+Handoff supports new-tab and same-tab preparation and explicit `--rollback`
 (MCP `rollback: true`) when the successor is paused and settled and the original
-source attachment remains ready. Rollback keeps the original goal paused and
+source can be restored with exact ownership and goal evidence. Rollback keeps
+the original goal paused and
 subtracts observed receiver spending once; uncertain effects reconcile before
-retry. An active successor or missing source attachment holds. Same-tab, broader
-rollback and full installed native continuation acceptance remain open Plan0159
-gates. TUI restart,
+retry. An active successor or ambiguous source ownership holds. Both tab modes and
+rollback have native acceptance evidence. TUI restart,
 fresh context and a file read do not prove MCP readiness or renewed allowance.
+
+## Select writer, reviewer and limits
+
+The operator adds `lifecycle_defaults` to the registry and can overlay those
+fields in the approved continuation entry's `configuration`. This is a registry
+fragment; it does not replace the required profiles, callers and continuation
+approval/preflight fields described above. Paths must resolve to existing,
+nonempty UTF-8 instruction files. Names identify the selected workflow; the
+preflight descriptor's `workflow` must match the effective reviewer name.
+
+```json
+{
+  "lifecycle_defaults": {
+    "handoff_writer": {
+      "name": "checkpoint-writer",
+      "path": "/approved/instructions/writer.md"
+    },
+    "preflight_reviewer": {
+      "name": "local-review",
+      "path": "/approved/instructions/reviewer.md"
+    },
+    "session_token_limit": 100000,
+    "session_time_limit_seconds": 1800,
+    "objective_token_limit": 300000,
+    "objective_time_limit_seconds": 7200,
+    "max_correction_cycles": 2
+  }
+}
+```
+
+Run configuration readback after editing the registry. It returns the selected
+instruction text and hashes, effective limits and revision. Editing defaults
+does not authorize active work or replenish its budget. A new authorization
+requires the operator's exact approved revision; agent MCP cannot apply one.
+
+## Release evidence
+
+Lifecycle operations shipped in 0.14.0. The [acceptance matrix](dev/evidence/plan0156/final-acceptance.md)
+separates paid native candidate runs, public fixture coverage and exact released
+installation checks. The [0.15.1 installed closeout](dev/evidence/plan0162/final-acceptance.md)
+records later tab targeting and installation qualification. These receipts do not
+configure profiles or grant authority on another host.

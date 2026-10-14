@@ -6721,3 +6721,22 @@ prerelease,0.14.0/backups and source/archive refs preserved. Source, installed
 identity and runtime boundaries recorded in final-acceptance.md. Closeout PR
 reconciles plan/roadmap/lane, then exact root fast-forward/clean worktree removal.
 Memory disposition unavailable: no reviewed Graphiti repo group; no memory writes.
+
+
+## Turn 327 | 2026-10-14 UTC | Lifecycle onboarding
+
+Operator approved the Ask Matt recommendation to polish existing surfaces.
+Plan0163/issue267, docs/lifecycle-onboarding from clean main d587b86. README now
+advertises 19 MCP tools and offers a lifecycle chooser; guide supplies CLI/MCP
+templates, setup boundaries, configurable instruction/limit fragment and current
+release evidence. Skill discovery metadata and operation routing include all
+three lifecycle operations. Existing glossary retained. No runtime code changes.
+Four CLI templates and four MCP schemas validated without native effects; six
+JSON blocks and11 local links PASS. Standards and Spec reviewed separately;
+fixed S163-01 stale hardcoded reviewer workflow. Active planning audit PASS with
+existing accepted baseline; whitespace PASS. Issue267 created/read back through
+canonical target after empty duplicate search. Integration and installed skill
+sync follow protected-main checks; no shared service or client restart.
+Graphiti discovery skipped: current source and supplied scope were sufficient.
+Memory disposition unavailable: no configured reviewed repository group; receipt
+records no Graphiti write. No memory-folder files changed.
