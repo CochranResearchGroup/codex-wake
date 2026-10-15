@@ -6759,3 +6759,18 @@ issue-closeout}.json. Closed-world review confirms S163-01/S163-02 resolved,
 no new source behavior. Prior explicit memory disposition remains the single
 closeout receipt; no additional memory operation. Documentation custody closeout
 uses a separate protected-main PR; source ref retained.
+
+## Turn 329 | 2026-10-15 UTC | Issue270 enforcement feasibility research
+
+Plan0165 closed as research only on docs/270-resource-enforcement-feasibility,
+base75c54a9053942f9d8ed16f4b04a392880f30dabf. Preserved root emergency-controls
+work by using an isolated worktree. Report: docs/dev/notes/2026-10-15-issue0270-resource-enforcement.md.
+Three disposable systemd/cgroup tests: deadline4.138s, injected token stop1.082s,
+controller-loss analogue4.122s; no live owned processes/cgroups remained and
+sentinel survived. Kernel control readback recorded; no stress campaign.
+Ledger11 and spawn27 fixture tests PASS. Initial plain-python dependency failure
+is retained. Four relevant modules match installed0.15.1. Conditional GO for
+owned executor adapter; actual native containment, finite token overshoot,
+accounting-loss lease and suspend-aware stop are not proven. No product code,
+issue state, shared service or live session mutations. Memory unavailable: no
+appropriate reviewed Codex Wake group found in bounded atlas discovery.

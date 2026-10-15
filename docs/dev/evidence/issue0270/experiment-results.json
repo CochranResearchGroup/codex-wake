@@ -1,0 +1,124 @@
+[
+  {
+    "case": "deadline",
+    "unit": "cw270-aca235c8e367.service",
+    "properties": [
+      "Type=exec",
+      "RuntimeMaxSec=3s",
+      "TimeoutStopSec=1s",
+      "KillMode=control-group",
+      "SendSIGKILL=yes",
+      "Restart=no",
+      "MemoryMax=128M",
+      "MemorySwapMax=0",
+      "CPUQuota=20%",
+      "TasksMax=16"
+    ],
+    "launch_rc": 0,
+    "launch_stderr": "Running as unit: cw270-aca235c8e367.service; invocation ID: 572a8a7c00e14c2fa3a15e3e6be6c153\n",
+    "pids": [
+      17458,
+      17461
+    ],
+    "configuration": "TimeoutStopUSec=1s\nRuntimeMaxUSec=3s\nControlGroup=/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-aca235c8e367.service\nCPUQuotaPerSecUSec=200ms\nMemoryMax=134217728\nMemorySwapMax=0\nTasksMax=16\nKillMode=control-group\n",
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "20000 100000",
+      "pids.max": "16"
+    },
+    "memberships": {
+      "17458": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-aca235c8e367.service",
+      "17461": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-aca235c8e367.service"
+    },
+    "elapsed_to_no_live_owned_seconds": 4.138449103978928,
+    "owned_live_after": [],
+    "cgroup_populated_after": "removed",
+    "sentinel_survived": true,
+    "final": "Result=timeout\nExecMainStatus=9\nActiveState=failed\nSubState=failed\n"
+  },
+  {
+    "case": "synthetic-token",
+    "unit": "cw270-fddb9a3687da.service",
+    "properties": [
+      "Type=exec",
+      "RuntimeMaxSec=3s",
+      "TimeoutStopSec=1s",
+      "KillMode=control-group",
+      "SendSIGKILL=yes",
+      "Restart=no",
+      "MemoryMax=128M",
+      "MemorySwapMax=0",
+      "CPUQuota=20%",
+      "TasksMax=16"
+    ],
+    "launch_rc": 0,
+    "launch_stderr": "Running as unit: cw270-fddb9a3687da.service; invocation ID: 030c8815e62440968ff789017bfb7852\n",
+    "pids": [
+      18252,
+      18261
+    ],
+    "configuration": "TimeoutStopUSec=1s\nRuntimeMaxUSec=3s\nControlGroup=/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-fddb9a3687da.service\nCPUQuotaPerSecUSec=200ms\nMemoryMax=134217728\nMemorySwapMax=0\nTasksMax=16\nKillMode=control-group\n",
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "20000 100000",
+      "pids.max": "16"
+    },
+    "memberships": {
+      "18252": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-fddb9a3687da.service",
+      "18261": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-fddb9a3687da.service"
+    },
+    "injected_usage": {
+      "cap": 100,
+      "total": 125,
+      "overshoot": 25
+    },
+    "stop_rc": 0,
+    "stop_action_seconds": 1.0822826549992897,
+    "elapsed_to_no_live_owned_seconds": 1.3287560229946394,
+    "owned_live_after": [],
+    "cgroup_populated_after": "removed",
+    "sentinel_survived": true,
+    "final": "Result=timeout\nExecMainStatus=9\nActiveState=failed\nSubState=failed\n"
+  },
+  {
+    "case": "controller-loss",
+    "unit": "cw270-44a7f297b2a9.service",
+    "properties": [
+      "Type=exec",
+      "RuntimeMaxSec=3s",
+      "TimeoutStopSec=1s",
+      "KillMode=control-group",
+      "SendSIGKILL=yes",
+      "Restart=no",
+      "MemoryMax=128M",
+      "MemorySwapMax=0",
+      "CPUQuota=20%",
+      "TasksMax=16"
+    ],
+    "launch_rc": 0,
+    "launch_stderr": "Running as unit: cw270-44a7f297b2a9.service; invocation ID: 5230e5b647b748a18290b26e6c9210c0\n",
+    "pids": [
+      18402,
+      18407
+    ],
+    "configuration": "TimeoutStopUSec=1s\nRuntimeMaxUSec=3s\nControlGroup=/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-44a7f297b2a9.service\nCPUQuotaPerSecUSec=200ms\nMemoryMax=134217728\nMemorySwapMax=0\nTasksMax=16\nKillMode=control-group\n",
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "20000 100000",
+      "pids.max": "16"
+    },
+    "memberships": {
+      "18402": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-44a7f297b2a9.service",
+      "18407": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw270-44a7f297b2a9.service"
+    },
+    "dummy_controller_exit": -9,
+    "elapsed_to_no_live_owned_seconds": 4.121900044003269,
+    "owned_live_after": [],
+    "cgroup_populated_after": "removed",
+    "sentinel_survived": true,
+    "final": "Result=timeout\nExecMainStatus=9\nActiveState=failed\nSubState=failed\n"
+  }
+]

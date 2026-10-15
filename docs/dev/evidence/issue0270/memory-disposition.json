@@ -1,0 +1,18 @@
+{
+  "artifact_path": "/home/ecochran76/workspace.local/codex-wake-resource-research/docs/dev/evidence/issue0270/memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": "codex-wake-issue270-feasibility",
+  "reason": "Bounded atlas discovery identified no appropriate reviewed Codex Wake target group; source-backed research is retained in Plan0165 and its report.",
+  "recorded_at": "2026-10-15T20:27:04.113163+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "/home/ecochran76/workspace.local/codex-wake-resource-research/docs/dev/notes/2026-10-15-issue0270-resource-enforcement.md",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}
