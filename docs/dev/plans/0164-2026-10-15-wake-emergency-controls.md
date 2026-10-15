@@ -72,3 +72,13 @@ Approved controls implemented, documented and validated with explicit limitation
 source integrated through protected-main checks and coherent installed rollout
 qualified without changing unrelated live state. Plan/roadmap/lane and issue
 readback reconciled, owned fixtures cleaned, one explicit memory disposition.
+
+## Validation checkpoint
+
+Source5191cf3: final local1267 tests PASS206.442s within240s presubmit budget.
+Focused36 PASS. Isolated installed0.16.0 matches101 Python sources, actual CLI
+pause blocks daemon, both fixture roots cancel/resume, six MCP controls work and
+ungranted root denied,25 tools. No model turns or shared-service restart.
+CI38802564058 exposed only obsolete19-tool smoke expectation; corrected to25 and
+six control names. New installed qualification added to CI. Evidence includes
+initial failure retention and source/install/runtime distinction.

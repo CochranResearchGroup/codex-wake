@@ -6779,3 +6779,20 @@ PASS at current slice; first full run1253 passed205.301s, before final additions
 No live wakes cancelled, native operator turns interrupted or shared services
 restarted. Current worker compatibility is an explicit readback boundary.
 One fresh bounded Standards/Spec review underway; source not yet accepted/released.
+
+
+## Turn 330 | 2026-10-15 UTC | Wake emergency controls acceptance
+
+Source5191cf3 final local1267 tests PASS206.442s; focused36 PASS. New private
+installed0.16.0 CLI/MCP qualification matches101 Python sources, blocks actual
+one-shot daemon delivery under pause, cancels/resumes two registered fixture
+roots, exercises six new tools and denies ungranted scope. No model turns or
+operator wake mutations. Main runtime still0.15.1, existing services preserved.
+
+One fresh reviewer accepted EC-R1 stale legacy predicate resurrecting cancellation
+and EC-R2 malformed inventory hidden by interrupt. Both reproduced red, repaired,
+and independently verified closed-world34 tests; added duplicate-state failclosed
+and OS-process lock checks, final36. No broad review reopened. Existing installed
+MCP smoke failed CI38802564058 due exact19-tool assertion; corrected25-tool
+expectation and required new names. New installed-control qualification wired into
+CI. Original failures retained, no claim of green hosted release gates yet.
