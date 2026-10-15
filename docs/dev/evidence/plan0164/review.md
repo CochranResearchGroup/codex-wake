@@ -32,3 +32,7 @@ Native provider fixtures establish exact ownership/control behavior; they are
 not paid native model acceptance or a claim that unrelated existing workers
 were upgraded. Queue-only work holds; legacy submitted transports unsupported;
 unavailable handoff owner leaves a durable pending stop request.
+
+Primary compatibility readback regression: an observed old worker now yields
+held/exit5 with its persisted pause retained, rather than successful enforcement
+implication. Explicit red/green retained; no change to authorized scope or effects.

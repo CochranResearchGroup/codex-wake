@@ -182,3 +182,13 @@ class WakeControlTests(unittest.TestCase):
                 child.communicate('\n',timeout=5)
             self.assertEqual(child.returncode,0)
             self.assertEqual(self.command(root,'cancel','--all')[0],0)
+
+    def test_pause_keeps_marker_but_reports_observed_incompatible_worker_as_held(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)/'wake'
+            with patch('codex_wake.wake_control.worker_enforcement',return_value='upgrade_required_observed_worker'):
+                code,result=self.command(root,'pause')
+            self.assertEqual(code,5)
+            self.assertTrue(result['roots'][0]['paused'])
+            self.assertEqual(result['roots'][0]['state'],'held')

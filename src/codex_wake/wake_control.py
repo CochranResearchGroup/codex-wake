@@ -226,7 +226,7 @@ def _control_command(args, root):
                     row['inventory_errors'] = inventory_errors(selected)
                     from .emergency_interrupt import interrupt_owned
                     row['results'] = interrupt_owned(selected)
-            row['state'] = 'held' if row.get('inventory_errors') or any(x.get('state') in ('held','uncertain','unsupported','monitor_required')
+            row['state'] = 'held' if row.get('enforcement') == 'upgrade_required_observed_worker' or row.get('inventory_errors') or any(x.get('state') in ('held','uncertain','unsupported','monitor_required')
                                        for x in row.get('results',[])) else 'ok'
         except (OSError,ValueError) as exc:
             row.update(state='held',error=type(exc).__name__,message=str(exc))

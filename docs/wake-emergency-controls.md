@@ -34,7 +34,8 @@ possibly ambiguous external submission.
 Only control-capable workers enforce this protocol. `enforcement` reports
 `upgrade_required_observed_worker`, an unverified worker state, or a capable
 worker observation. An observed capable worker is not an exclusive process
-census. Upgrade all responsible readers before relying on the control across a
+census. An observed incompatible reader returns held/exit5 even though the pause
+marker is retained. Upgrade all responsible readers before relying on the control across a
 host; changing a CLI link or writing the marker does not upgrade an existing
 process. Unsupported transports/readers are never described as stopped.
 
@@ -63,7 +64,8 @@ rather than claiming queue deletion. Submitted legacy transports return unsuppor
 Handoff stop requests persist for the original resident owner; if it is unavailable
 or another generation owns the fence, the result stays `monitor_required`.
 Uncertain interrupt responses reconcile by observation, without blind resend.
-This is an owned-work control, not an OS process `killall`.
+This is an owned-work control, not an OS process `killall`. Mailbox message
+delivery is separate; these commands control wake records and lifecycle work.
 
 Explicitly resume eligible delivery when ready:
 
