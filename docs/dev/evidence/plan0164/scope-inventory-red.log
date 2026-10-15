@@ -1,0 +1,42 @@
+test_bulk_cancel_reports_uncertain_and_terminal_records_without_erasing_history (tests.test_wake_control.WakeControlTests.test_bulk_cancel_reports_uncertain_and_terminal_records_without_erasing_history) ... ok
+test_corrupt_pause_state_blocks_dispatch_and_resume (tests.test_wake_control.WakeControlTests.test_corrupt_pause_state_blocks_dispatch_and_resume) ... ok
+test_new_process_observes_same_pause_and_explicit_interrupt_requires_it (tests.test_wake_control.WakeControlTests.test_new_process_observes_same_pause_and_explicit_interrupt_requires_it) ... ok
+test_pause_blocks_actual_dispatch_and_retains_the_record (tests.test_wake_control.WakeControlTests.test_pause_blocks_actual_dispatch_and_retains_the_record) ... ok
+test_pause_persists_across_cli_calls_and_resume_is_explicit (tests.test_wake_control.WakeControlTests.test_pause_persists_across_cli_calls_and_resume_is_explicit) ... ok
+test_pause_reports_in_flight_admission_without_waiting_and_blocks_next_generation (tests.test_wake_control.WakeControlTests.test_pause_reports_in_flight_admission_without_waiting_and_blocks_next_generation) ... ok
+test_registered_inventory_reports_unreadable_records (tests.test_wake_control.WakeControlTests.test_registered_inventory_reports_unreadable_records) ... FAIL
+test_registered_scope_includes_disabled_roots_and_frozen_grant_rejects_new_root (tests.test_wake_control.WakeControlTests.test_registered_scope_includes_disabled_roots_and_frozen_grant_rejects_new_root) ... codex-wake: host-authorized root snapshot changed; no operation performed
+ERROR
+
+======================================================================
+ERROR: test_registered_scope_includes_disabled_roots_and_frozen_grant_rejects_new_root (tests.test_wake_control.WakeControlTests.test_registered_scope_includes_disabled_roots_and_frozen_grant_rejects_new_root)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_wake_control.py", line 72, in test_registered_scope_includes_disabled_roots_and_frozen_grant_rejects_new_root
+    code,result=self.command(a,'pause','--all-roots','--registry-dir',str(registry),'--authorized-root',str(a))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_wake_control.py", line 14, in command
+    return code,json.loads(out.getvalue())
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+FAIL: test_registered_inventory_reports_unreadable_records (tests.test_wake_control.WakeControlTests.test_registered_inventory_reports_unreadable_records)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_wake_control.py", line 133, in test_registered_inventory_reports_unreadable_records
+    self.assertEqual(code,5)
+AssertionError: 0 != 5
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.614s
+
+FAILED (failures=1, errors=1)

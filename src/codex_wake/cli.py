@@ -96,6 +96,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="wake runtime root; defaults to .codex/wake under the current directory",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from .wake_control import add_control_parsers
+    add_control_parsers(subparsers)
     from .time_inspection import add_time_parser
     add_time_parser(subparsers)
     from .sessions_cli import add_sessions_parser
@@ -528,6 +530,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_monitor_gate_options(pid)
 
     list_cmd = subparsers.add_parser("list", help="list wake records")
+    from .wake_control import add_scope_options
+    add_scope_options(list_cmd)
     list_cmd.add_argument("--json", action="store_true", dest="as_json")
     list_cmd.add_argument("--archived", action="store_true", help="include archived wake records")
 
@@ -543,7 +547,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     cancel = subparsers.add_parser("cancel", help="cancel a pending or firing wake")
-    cancel.add_argument("wake_id")
+    cancel.add_argument("wake_id", nargs="?")
+    cancel.add_argument("--all", action="store_true", help="cancel all eligible wakes in the selected scope")
+    cancel.add_argument("--json", action="store_true", dest="as_json")
+    add_scope_options(cancel)
 
     archive = subparsers.add_parser("archive", help="archive terminal wake records")
     archive.add_argument("wake_id", nargs="?", help="specific wake id to archive")
@@ -2099,8 +2106,12 @@ def show_record(args: argparse.Namespace, root: Path) -> int:
 
 
 def cancel(args: argparse.Namespace, root: Path) -> int:
-    path = cancel_record(root, args.wake_id)
-    print(f"cancelled {args.wake_id} {path}")
+    from .wake_control import _cancel
+    results = _cancel(root,args)
+    result = results[0]
+    if result['state'] != 'cancelled':
+        raise WakeError(result.get('reason','wake cancellation held'))
+    print(f"cancelled {args.wake_id} {root / 'cancelled' / (args.wake_id + '.json')}")
     return 0
 
 
@@ -2728,6 +2739,12 @@ def run(argv: list[str] | None = None) -> int:
         from .time_inspection import time_command
         return time_command(args)
     root = resolve_root(args)
+    if (args.command in ('pause','resume','pause-status','interrupt')
+            or args.command == 'cancel' and (args.all or args.all_roots or args.as_json or args.authorized_root)
+            or args.command == 'list' and (args.all_roots or args.authorized_root)):
+        from .wake_control import control_command
+        return control_command(args, root)
+
     if args.command == "messages":
         from .messages_cli import messages_command
         return messages_command(args)

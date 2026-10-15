@@ -6759,3 +6759,40 @@ issue-closeout}.json. Closed-world review confirms S163-01/S163-02 resolved,
 no new source behavior. Prior explicit memory disposition remains the single
 closeout receipt; no additional memory operation. Documentation custody closeout
 uses a separate protected-main PR; source ref retained.
+
+
+## Turn 329 | 2026-10-15 UTC | Wake emergency controls implementation
+
+Operator accepted Ask Matt full scope: list/cancel across explicit registered
+roots, persistent emergency pause/resume and separate owned-turn interruption,
+CLI/MCP parity with host grants. Plan0164/issue271 from75c54a9. Primary owns
+root sidecar/effect gate and CLI; bounded emergency_ownership_discovery worker
+owns exact interruption adapter; wake_control_mcp owns six MCP tools/grants.
+Frozen root/action/command contract and three-agent ceiling; no nested agents.
+
+Primary CLI pause and actual-dispatch red/green captured; extra scope/inventory
+red/green retains malformed-root and authority-race failures before fix. Worker
+interrupt initial tests followed implementation (no false red claim); later
+private-journal and fulfilled-handoff regressions captured red/green. MCP worker
+reported initial unknown-tool/missing-host-config red then green.32 focused tests
+PASS at current slice; first full run1253 passed205.301s, before final additions.
+No live wakes cancelled, native operator turns interrupted or shared services
+restarted. Current worker compatibility is an explicit readback boundary.
+One fresh bounded Standards/Spec review underway; source not yet accepted/released.
+
+
+## Turn 330 | 2026-10-15 UTC | Wake emergency controls acceptance
+
+Source5191cf3 final local1267 tests PASS206.442s; focused36 PASS. New private
+installed0.16.0 CLI/MCP qualification matches101 Python sources, blocks actual
+one-shot daemon delivery under pause, cancels/resumes two registered fixture
+roots, exercises six new tools and denies ungranted scope. No model turns or
+operator wake mutations. Main runtime still0.15.1, existing services preserved.
+
+One fresh reviewer accepted EC-R1 stale legacy predicate resurrecting cancellation
+and EC-R2 malformed inventory hidden by interrupt. Both reproduced red, repaired,
+and independently verified closed-world34 tests; added duplicate-state failclosed
+and OS-process lock checks, final36. No broad review reopened. Existing installed
+MCP smoke failed CI38802564058 due exact19-tool assertion; corrected25-tool
+expectation and required new names. New installed-control qualification wired into
+CI. Original failures retained, no claim of green hosted release gates yet.

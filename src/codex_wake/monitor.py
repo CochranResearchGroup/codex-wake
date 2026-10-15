@@ -72,7 +72,7 @@ def write_monitor_health(
         "reader_id": f"{source}:{pid}",
         "reader_generation": generation,
         "reader_schema_versions": schema_summary()['read_versions'],
-        "reader_capabilities": ["signal_records_v2"],
+        "reader_capabilities": ["signal_records_v2", "emergency_control_v1"],
         "checked_at": format_utc(current),
         "poll_result": poll_result or {},
     }

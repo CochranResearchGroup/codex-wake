@@ -14,6 +14,10 @@ from types import SimpleNamespace
 from .records import WakeError, parse_timestamp
 
 
+from .wake_control import guard_command
+
+
+@guard_command
 def spawn_command(args, root):
     try:
         config = json.loads(Path(args.profiles).read_text())

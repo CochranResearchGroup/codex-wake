@@ -69,10 +69,21 @@ for _name, _spec in list(SPECS.items()):
                        {**_spec[3], "caller_thread_id": CALLER}, [*_spec[4], "caller_thread_id"], _spec[5])
 
 
+WAKE_ACTIONS = ('list', 'cancel', 'pause', 'resume', 'pause-status', 'interrupt')
+for _action in WAKE_ACTIONS:
+    _props = {"caller_thread_id": CALLER, "all_roots": {"type": "boolean"}}
+    if _action == 'cancel':
+        _props.update({"wake_id": TEXT, "all": {"type": "boolean"}})
+    SPECS['wake_' + _action.replace('-', '_')] = (
+        'wake-control', _action,
+        'Host-authorized wake ' + _action + '. Scope is the host root or all registered roots; every selected root must be granted. Supply actual native CODEX_THREAD_ID; the claim alone grants no authority. Interruption is limited to provably Wake-owned active turns; pause blocks future deliveries and survives restart.',
+        _props, ['caller_thread_id'], _action in ('list', 'pause-status'))
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
-                 call_timeout=90, lifecycle_profiles=None):
+                 call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None):
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
         self.app_server = app_server
@@ -80,6 +91,61 @@ class CommandRunner:
         self.wake_root, self.sender_authority = wake_root, sender_authority
         self.call_timeout = call_timeout
         self.lifecycle_profiles = lifecycle_profiles
+        self.wake_control_config = wake_control_config
+        self.wake_registry = wake_registry
+
+    def _wake_control_command(self, action, arguments):
+        import re
+        if self.wake_control_config is None or self.wake_root is None:
+            raise ValueError('Missing host scope')
+        def unique_object(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ValueError('Duplicate grant key')
+                result[key] = value
+            return result
+        config = json.loads(Path(self.wake_control_config).read_text(encoding='utf-8'), object_pairs_hook=unique_object)
+        if not isinstance(config, dict) or set(config) != {'version', 'callers'} or type(config['version']) is not int or config['version'] != 1 or not isinstance(config['callers'], dict):
+            raise ValueError('Invalid grant config')
+        for caller, grant in config['callers'].items():
+            if not re.fullmatch(CALLER['pattern'], caller) or not isinstance(grant, dict) or set(grant) != {'roots', 'actions'}:
+                raise ValueError('Invalid caller grant')
+            roots, actions = grant['roots'], grant['actions']
+            if not isinstance(roots, list) or not roots or any(not isinstance(root, str) or not Path(root).is_absolute() for root in roots):
+                raise ValueError('Invalid roots')
+            if not isinstance(actions, list) or not actions or any(item not in WAKE_ACTIONS for item in actions):
+                raise ValueError('Invalid actions')
+        grant = config['callers'].get(arguments['caller_thread_id'])
+        if grant is None or action not in grant['actions']:
+            raise ValueError('Action denied')
+        root = Path(self.wake_root)
+        if not root.is_absolute():
+            raise ValueError('Absolute host root required')
+        selected = [root]
+        if arguments.get('all_roots'):
+            from .wake_control import select_roots
+            selected = select_roots(root, all_roots=True, registry_dir=self.wake_registry)
+        allowed = {Path(item).resolve() for item in grant['roots']}
+        if not selected or any(Path(item).resolve() not in allowed for item in selected):
+            raise ValueError('Root denied')
+        command = [*self.cli, '--wake-root', str(root), action, '--json']
+        # The CLI checks its fresh registry snapshot against this frozen scope.
+        # A registry addition between authorization and execution cannot widen effects.
+        for selected_root in selected:
+            command += ['--authorized-root', str(Path(selected_root).resolve())]
+        if arguments.get('all_roots'):
+            command.append('--all-roots')
+            if self.wake_registry is not None:
+                command += ['--registry-dir', str(self.wake_registry)]
+        if action == 'cancel':
+            if 'wake_id' in arguments:
+                if arguments['wake_id'].startswith('-'):
+                    raise ValueError('Invalid wake identity')
+                command.append(arguments['wake_id'])
+            if arguments.get('all'):
+                command.append('--all')
+        return command
 
     def call(self, name, arguments):
         from jsonschema import Draft202012Validator
@@ -96,6 +162,12 @@ class CommandRunner:
                 arguments.get(k, 'error') != 'error' for k in ('on_missing', 'on_inactive')):
             if self.lifecycle_profiles is None or self.wake_root is None:
                 return {"error": {"code": "policy_denied", "message": "Host lifecycle scope is required."}}, True
+        if group == 'wake-control':
+            try:
+                command = self._wake_control_command(verb, arguments)
+            except (ValueError, OSError, TypeError, KeyError, ImportError):
+                return {"error": {"code": "policy_denied", "message": "Host wake-control root and action grants are required for the entire selected scope."}}, True
+            return self._execute(command, arguments, readonly)
         body = arguments.get("body")
         if body is not None:
             try:
@@ -154,6 +226,9 @@ class CommandRunner:
                 command += [flag, str(value)]
         if verb == "list":
             command += ["--limit", str(arguments.get("limit", 100))]
+        return self._execute(command, arguments, readonly, body)
+
+    def _execute(self, command, arguments, readonly, body=None):
         try:
             environment = dict(os.environ)
             if "caller_thread_id" in arguments:
@@ -224,6 +299,8 @@ def main(argv=None):
     parser.add_argument("--wake-root", type=Path, default=os.environ.get("CODEX_WAKE_WAKE_ROOT"))
     parser.add_argument("--sender-authority", type=Path, default=os.environ.get("CODEX_WAKE_SENDER_RECEIPT_AUTHORITY"))
     parser.add_argument('--lifecycle-profiles', type=Path, help='host-approved lifecycle launch registry')
+    parser.add_argument('--wake-control-config', type=Path, help='host-approved caller root/action grants')
+    parser.add_argument('--wake-registry', type=Path, help='host-owned registered wake-root directory')
     args = parser.parse_args(argv)
     if not 0 < args.call_timeout <= 90:
         parser.error("--call-timeout must be positive and at most 90 seconds")

@@ -1228,3 +1228,11 @@ CLI/MCP templates, accurate release claims, links and installed skill parity.
 P163 delivery: PR268 merged72b1e5e after both required gates; issue267 closed.
 Both installed skill roots synchronized to all five merged files with backups;
 runtime stays0.15.1, no client/service restart. Exact receipts in Plan0163 evidence.
+
+
+## P164 | Wake emergency controls
+
+State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
+Issue271 / [Plan0164](docs/dev/plans/0164-2026-10-15-wake-emergency-controls.md):
+scoped inventory/cancellation, persistent pause/resume and separate owned-turn
+interrupt, with CLI/MCP parity. Depends on integrated P156/P162/P163.

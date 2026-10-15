@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_pause_keeps_marker_but_reports_observed_incompatible_worker_as_held (tests.test_wake_control.WakeControlTests.test_pause_keeps_marker_but_reports_observed_incompatible_worker_as_held)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_wake_control.py", line 192, in test_pause_keeps_marker_but_reports_observed_incompatible_worker_as_held
+    self.assertEqual(code,5)
+AssertionError: 0 != 5
+
+----------------------------------------------------------------------
+Ran 1 test in 0.042s
+
+FAILED (failures=1)

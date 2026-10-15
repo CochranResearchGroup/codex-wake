@@ -1,0 +1,14 @@
+{
+  "source_commit": "5191cf3d0eb9f43b8a787b763c80cb7d928751e3",
+  "tier": "presubmit",
+  "environment": "CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONWARNINGS=ignore PYTHONPATH=src",
+  "command": ".venv/bin/python -m unittest discover -s tests -p 'test_*.py'",
+  "summary": [
+    "Ran 1267 tests in 206.442s",
+    "OK"
+  ],
+  "wall_seconds": 206.442,
+  "budget_seconds": 240,
+  "retries": 0,
+  "live_native_turns": 0
+}

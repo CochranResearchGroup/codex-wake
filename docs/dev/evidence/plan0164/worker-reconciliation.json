@@ -1,0 +1,28 @@
+{
+  "base": "75c54a9053942f9d8ed16f4b04a392880f30dabf",
+  "workers": [
+    {
+      "handle": "/root/emergency_ownership_discovery",
+      "scope": [
+        "src/codex_wake/emergency_interrupt.py",
+        "tests/test_emergency_interrupt.py"
+      ],
+      "status": "completed",
+      "tests": 15,
+      "decision": "accepted after source inspection; no live effects; initial red-first omission retained"
+    },
+    {
+      "handle": "/root/wake_control_mcp",
+      "scope": [
+        "src/codex_wake/mcp_server.py",
+        "tests/test_wake_control_mcp.py"
+      ],
+      "status": "completed",
+      "tests": 9,
+      "decision": "accepted; frozen authorized-root binding closes registry authorization race"
+    }
+  ],
+  "primary_tests": 32,
+  "resource_metadata": "worker token counters unavailable; no model override or extra native turns",
+  "review_handle": "/root/emergency_control_review"
+}
