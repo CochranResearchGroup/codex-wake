@@ -1,0 +1,18 @@
+{
+  "artifact_path": "/home/ecochran76/workspace.local/codex-wake/docs/dev/evidence/plan0164/memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": null,
+  "reason": "No configured reviewed codex-wake Graphiti group; canonical release installed control and fleet receipts retain qualified outcome.",
+  "recorded_at": "2026-10-15T20:51:03.157237+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "/home/ecochran76/workspace.local/codex-wake/docs/dev/evidence/plan0164/final-acceptance.md",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}

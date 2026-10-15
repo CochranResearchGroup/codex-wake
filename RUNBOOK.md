@@ -6796,3 +6796,32 @@ and OS-process lock checks, final36. No broad review reopened. Existing installe
 MCP smoke failed CI38802564058 due exact19-tool assertion; corrected25-tool
 expectation and required new names. New installed-control qualification wired into
 CI. Original failures retained, no claim of green hosted release gates yet.
+
+
+## Turn 331 | 2026-10-15 UTC | Wake emergency controls released rollout
+
+PR272 mergedd3ea192 after both release gates passed (CI38803279350; final1268
+unit tests83.519s/97.456s on3.11/3.12). Released0.16.0 annotated tag and public
+wheel/sdist; downloaded exact parity. New versioned prefix101 Python files match
+merged main, actual CLI/MCP fixture qualification PASS,25 tools. Five stable
+command links switched after exact old-target checks, both six-file skills
+synchronized with backups. First two idle related workers upgraded, six roots
+reported capability, other eleven service PID/state snapshots then unchanged.
+
+Fresh OS census revealed seven additional0.13.1 Wake readers with roots absent
+from registry. Bounded deployment reconciliation verified exact service/PID
+ownership, no firing wakes or lifecycle stop hazards, registered these existing
+roots disabled (inventory only), then upgraded their seven existing workers.
+Two Odollo units used obsolete uv-tool executable paths; changed only those
+executable locators to stable codex-waked, preserving flags/environment/backups.
+Final inventory13 roots; nine current-prefix Wake readers; all13 report protocol
+capability; four other service PID/state snapshots remain unchanged. No live
+pause/cancel/interrupt or paid model turn. Failed preflight on obsolete locators
+made no runtime change before repair; initial registry backup retained.
+
+No owned fixture MCP children remain. One initial once-health fixture receipt
+removed only after process-generation/missing-root verification. Final receipt
+records current-user census limits; existing MCP clients require ordinary reload
+and host grants. Plan/roadmap/lane closed; issue closure follows this qualified
+acceptance. One memory disposition unavailable: no reviewed repository group,
+zero Graphiti/memory-folder writes. Old prefix and deployment backups retained.

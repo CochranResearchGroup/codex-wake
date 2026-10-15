@@ -1,0 +1,183 @@
+{
+  "source_commit": "d3ea192eb9071be3c49f89bbb346cec7aecd3b83",
+  "version": "0.16.0",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.16.0-d3ea192",
+  "release_url": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.16.0",
+  "assets": {
+    "codex_wake-0.16.0-py3-none-any.whl": "1b5d2b7a607d8423c47dc864665e3664d7b3059bf5efabd67176fd3067326a43",
+    "codex_wake-0.16.0.tar.gz": "5b74da42e59423774d5083eccbb23580f3185b1d0a95b370aa22751c7e633ca6"
+  },
+  "download_parity": true,
+  "observed_wake_readers": [
+    {
+      "pid": 6980,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 6997,
+      "kind": "codex-wake",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 51962,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 51981,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 52039,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 52064,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 52068,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 52071,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    },
+    {
+      "pid": 52091,
+      "kind": "codex-waked",
+      "versioned_prefix": true
+    }
+  ],
+  "owned_fixture_mcp_processes": [],
+  "proc_reads_denied": 1,
+  "registered_roots": 13,
+  "worker_capabilities": {
+    "capable_worker_observed_not_exclusive_census": 13
+  },
+  "related_units": {
+    "codex-wake-litscout-0553-integration.service": {
+      "before": {
+        "MainPID": "23545",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "52064",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-mail-receipts.service": {
+      "before": {
+        "MainPID": "23546",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "52068",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-supervisor.service": {
+      "before": {
+        "MainPID": "23556",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "6997",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-auracall.service": {
+      "before": {
+        "MainPID": "23540",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "51981",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-odollo-main-production-install.service": {
+      "before": {
+        "MainPID": "23548",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "52071",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-odollo.service": {
+      "before": {
+        "MainPID": "23549",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "52091",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-agent-browser.service": {
+      "before": {
+        "MainPID": "23538",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "51962",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-soylei-website.service": {
+      "before": {
+        "MainPID": "80762",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "6980",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "codex-wake-graphiti.service": {
+      "before": {
+        "MainPID": "23543",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "after": {
+        "MainPID": "52039",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    }
+  },
+  "unrelated_services_unchanged": 4,
+  "new_disabled_inventory_registrations": 7,
+  "repaired_unit_executable_locators": [
+    "codex-wake-odollo-main-production-install.service",
+    "codex-wake-odollo.service"
+  ],
+  "operator_emergency_actions": 0,
+  "scope": "current user-owned Wake reader census and registered roots; not an OS-wide all-user census",
+  "recorded_at": "2026-10-15T20:51:01.803840+00:00"
+}

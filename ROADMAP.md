@@ -1232,7 +1232,12 @@ runtime stays0.15.1, no client/service restart. Exact receipts in Plan0163 evide
 
 ## P164 | Wake emergency controls
 
-State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
+State: CLOSED. Owner: primary / ecochran76. Workflow: DONE.
 Issue271 / [Plan0164](docs/dev/plans/0164-2026-10-15-wake-emergency-controls.md):
 scoped inventory/cancellation, persistent pause/resume and separate owned-turn
 interrupt, with CLI/MCP parity. Depends on integrated P156/P162/P163.
+
+P164 delivery: PR272 merged d3ea192, v0.16.0 published/installed; final hosted
+1268 tests and all release gates pass. Global inventory now13 service-owned roots,
+9 upgraded existing readers, no duplicate supervisor monitoring. Exact source,
+release/install/census and preservation receipts in Plan0164 final acceptance.

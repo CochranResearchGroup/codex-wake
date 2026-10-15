@@ -1,18 +1,31 @@
 # Plan0164 — Wake emergency controls
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE
 Owner: primary / ecochran76
 Branch: feat/wake-emergency-controls
 Target: origin/main
+Pull-Request: https://github.com/CochranResearchGroup/codex-wake/pull/272
 Work-Item: https://github.com/CochranResearchGroup/codex-wake/issues/271
 Dependencies: integrated P156/P162/P163
 
 ## Current State
 
-Clean base75c54a9, one registered checkout. Operator accepted all recommended
-controls through Ask Matt, including separate explicit owned-turn interruption.
-Existing list/cancel operate one root; no bulk command or persistent pause.
+DONE. PR272 merged d3ea192; v0.16.0 released, exact installed101-file parity,
+25 MCP tools and isolated actual daemon/MCP qualification pass. Final CI1268
+unit tests plus all release gates pass both Python versions. Both installed
+skills match six files. Source, installation and runtime boundaries are recorded
+in docs/dev/evidence/plan0164/final-acceptance.md.
+
+Deployment reconciliation: initial six-root registry omitted seven existing
+systemd-owned Wake roots, revealed by fresh OS census. All were verified idle;
+added disabled inventory-only registrations and upgraded their existing workers.
+Two obsolete uv executable locators repaired without changing other unit flags.
+Nine related worker processes now use current prefix and13 roots report protocol
+capability. Four unrelated service PID/state snapshots unchanged. No live
+emergency action or paid native turn; old prefixes/backups retained. This is an
+explicit bounded deployment reconciliation of the user's all-wakes intent, not
+new monitoring/A2A permission. Future registry additions remain outside prior scope.
 
 ## Frozen scope
 
@@ -82,3 +95,12 @@ ungranted root denied,25 tools. No model turns or shared-service restart.
 CI38802564058 exposed only obsolete19-tool smoke expectation; corrected to25 and
 six control names. New installed qualification added to CI. Evidence includes
 initial failure retention and source/install/runtime distinction.
+
+## Delivery closure
+
+Public release assets downloaded with exact parity. Release/install/readback
+receipts bind source tag,101 Python files,25 tools,13 roots and9 readers.
+37 focused tests passed; final hosted1268 tests plus installed qualification pass.
+Memory disposition unavailable: no configured reviewed repository group; canonical
+receipts retain source-backed outcome with no Graphiti or memory-folder write.
+Source ref retained; final doc custody closeout uses protected-main workflow.
