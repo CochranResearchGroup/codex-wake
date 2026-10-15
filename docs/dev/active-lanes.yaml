@@ -6,16 +6,23 @@ lanes:
     objective: Scoped wake listing cancellation and emergency controls
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/271]
     plan: docs/dev/plans/0164-2026-10-15-wake-emergency-controls.md
-    plan_ref: feat/wake-emergency-controls
+    plan_ref: origin/main
     branch: feat/wake-emergency-controls
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     integration: squash_pr
     dependencies: [P156, P162, P163]
     overlaps: []
     updated_at: 2026-10-15
-    disposition: Bounded implementation; no live emergency effects authorized by fixtures
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/272
+    checkpoint: bcecae79c3308608e009c9f39575311a91104a89
+    integration_receipt: d3ea192eb9071be3c49f89bbb346cec7aecd3b83
+    remote_ref: refs/remotes/origin/feat/wake-emergency-controls
+    release_tag: v0.16.0
+    checkout_required: false
+    installed_acceptance: docs/dev/evidence/plan0164/final-acceptance.md
+    disposition: Released installed0.16.0;13 roots inventoried and9 existing readers upgraded; source ref retained
   - id: P163
     owner: primary / ecochran76
     objective: Make released lifecycle operations discoverable and usable
