@@ -14,7 +14,7 @@ The package provides:
 - `sessions configuration|spawn|refresh|handoff` for approved worker tasks, resource reloads and fresh-context continuation.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
 - Tracked requests and correlated replies, work claims, completion receipts and generation-safe recovery.
-- Optional `codex-wake-mcp`: 19 tools for session discovery, host-approved spawn, refresh and handoff, and authorized agent exchanges.
+- Optional `codex-wake-mcp`: 25 tools for wake controls, session discovery, host-approved spawn, refresh and handoff, and authorized agent exchanges.
 - Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
 
 Native queue acceptance is separate from execution and acknowledgment. Busy or
@@ -581,7 +581,13 @@ An unsafe preflight records privacy-safe rule and region metadata, requeues
 under its own three-deferral bound, and does not consume a delivery attempt.
 Raw pane text and matching lines are never stored.
 
-Inspect and manage wakes:
+Inspect and manage wakes. For a persistent emergency hold use
+`codex-wake pause --all-roots`; inspect with `pause-status`, optionally cancel
+eligible wakes with `cancel --all --all-roots`, and separately request owned-turn
+interruption with `interrupt --all-roots`. Only explicit `resume` releases the
+hold. See [wake emergency controls](docs/wake-emergency-controls.md) for scope,
+worker upgrade requirements and agent grants.
+
 
 ```bash
 codex-wake list

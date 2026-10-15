@@ -18,6 +18,10 @@ from .records import WakeError, parse_timestamp
 from .lifecycle_review import instruction_read, validate_work_review
 
 
+from .wake_control import guard_command
+
+
+@guard_command
 def handoff_command(args, root):
     try:
         config=json.loads(Path(args.profiles).read_text())
@@ -872,12 +876,14 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                     if not bounds or bounds['upper']+activation['deadline_margin_seconds']>=receipt['continuation_deadline']:continue
                     identity=process_identity(os.getpid())
                     if not identity:continue
-                    receipt.update(state='activating',uncertain_effect='thread/goal/activate_successor',
-                        deadline_fence=dict(pid=os.getpid(),identity=identity,utc=bounds,
-                            interval=supervision['interval'],deadline=receipt['continuation_deadline']))
-                    save(path,receipt)
-                    active=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
-                        'thread/goal/set',dict(threadId=target,status='active',origin='automatic'),profile['timeout'])['goal']
+                    from .wake_control import delivery_guard
+                    with delivery_guard(root):
+                        receipt.update(state='activating',uncertain_effect='thread/goal/activate_successor',
+                            deadline_fence=dict(pid=os.getpid(),identity=identity,utc=bounds,
+                                interval=supervision['interval'],deadline=receipt['continuation_deadline']))
+                        save(path,receipt)
+                        active=native_request(profile['app_server'],resolve_codex_cmd(profile['codex_path'],required=True),
+                            'thread/goal/set',dict(threadId=target,status='active',origin='automatic'),profile['timeout'])['goal']
                     if active.get('status')!='active':raise ValueError('goal activation unverified')
                     receipt.update(state='active',reason='continuation_active',successor_goal=active)
                     receipt.pop('uncertain_effect',None)

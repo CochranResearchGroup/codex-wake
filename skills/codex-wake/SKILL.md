@@ -1,11 +1,21 @@
 ---
 name: codex-wake
-description: Use Codex Wake for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
 
 Use `codex-wake` when work should resume after a defined trigger instead of relying on model memory or a foreground sleep.
+
+## Wake controls
+
+For listing, cancellation or emergency control, read
+[wake controls](references/wake-controls.md) before making the request. Prefer
+`wake_list`, `wake_cancel`, `wake_pause`, `wake_pause_status`, `wake_interrupt`
+and `wake_resume` when the host grants the actual caller the selected roots and
+action. Pause holds future deliveries; interrupt is a separate explicit request
+against proven Wake-owned turns. An agent may have pause rights without resume
+rights. Inspect all per-root outcomes and retain uncertain receipts.
 
 ## Tracked agent-to-agent work
 

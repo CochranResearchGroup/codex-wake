@@ -1,0 +1,31 @@
+test_bulk_cancel_reports_uncertain_and_terminal_records_without_erasing_history (tests.test_wake_control.WakeControlTests.test_bulk_cancel_reports_uncertain_and_terminal_records_without_erasing_history) ... ok
+test_cancel_during_slow_predicate_cannot_resurrect_legacy_wake (tests.test_wake_control.WakeControlTests.test_cancel_during_slow_predicate_cannot_resurrect_legacy_wake) ... FAIL
+test_corrupt_pause_state_blocks_dispatch_and_resume (tests.test_wake_control.WakeControlTests.test_corrupt_pause_state_blocks_dispatch_and_resume) ... ok
+test_interrupt_reports_corrupt_submitted_inventory_as_incomplete (tests.test_wake_control.WakeControlTests.test_interrupt_reports_corrupt_submitted_inventory_as_incomplete) ... FAIL
+test_new_process_observes_same_pause_and_explicit_interrupt_requires_it (tests.test_wake_control.WakeControlTests.test_new_process_observes_same_pause_and_explicit_interrupt_requires_it) ... ok
+test_pause_blocks_actual_dispatch_and_retains_the_record (tests.test_wake_control.WakeControlTests.test_pause_blocks_actual_dispatch_and_retains_the_record) ... ok
+test_pause_persists_across_cli_calls_and_resume_is_explicit (tests.test_wake_control.WakeControlTests.test_pause_persists_across_cli_calls_and_resume_is_explicit) ... ok
+test_pause_reports_in_flight_admission_without_waiting_and_blocks_next_generation (tests.test_wake_control.WakeControlTests.test_pause_reports_in_flight_admission_without_waiting_and_blocks_next_generation) ... ok
+test_registered_inventory_reports_unreadable_records (tests.test_wake_control.WakeControlTests.test_registered_inventory_reports_unreadable_records) ... ok
+test_registered_scope_includes_disabled_roots_and_frozen_grant_rejects_new_root (tests.test_wake_control.WakeControlTests.test_registered_scope_includes_disabled_roots_and_frozen_grant_rejects_new_root) ... ok
+
+======================================================================
+FAIL: test_cancel_during_slow_predicate_cannot_resurrect_legacy_wake (tests.test_wake_control.WakeControlTests.test_cancel_during_slow_predicate_cannot_resurrect_legacy_wake)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_wake_control.py", line 150, in test_cancel_during_slow_predicate_cannot_resurrect_legacy_wake
+    self.assertFalse((root/'firing/wake_race.json').exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_interrupt_reports_corrupt_submitted_inventory_as_incomplete (tests.test_wake_control.WakeControlTests.test_interrupt_reports_corrupt_submitted_inventory_as_incomplete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_wake_control.py", line 158, in test_interrupt_reports_corrupt_submitted_inventory_as_incomplete
+    self.assertEqual(code,5)
+AssertionError: 0 != 5
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.625s
+
+FAILED (failures=2)

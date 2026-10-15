@@ -328,6 +328,10 @@ def backoff_for_attempt(attempt: int) -> int:
     return DEFAULT_BACKOFF_SECONDS[min(attempt - 1, len(DEFAULT_BACKOFF_SECONDS) - 1)]
 
 
+from .wake_control import guard_dispatch
+
+
+@guard_dispatch
 def dispatch_firing_record(
     root: Path,
     found: WakePath,

@@ -308,7 +308,10 @@ def poll_once(
 ) -> PollResult:
     current = now or utc_now()
     from .agent_handoff import poll_handoffs
-    poll_handoffs(root,supervision=lifecycle_supervision)
+    from .wake_control import read_control
+    emergency = read_control(root)
+    poll_handoffs(root,supervision=None if emergency['paused'] else lifecycle_supervision,
+                  stop_reason='emergency_interrupt' if emergency['interrupt_requested'] else None)
     from .lifecycle_supervision import poll_spawns
     poll_spawns(root)
     checked = fired = failed = pending = dispatched = requeued = submitted = 0
@@ -500,7 +503,8 @@ def poll_once(
         try:
             ready, message = predicate_is_ready(item.record, item_current)
         except WakeError as exc:
-            move_record(
+            from .wake_control import transition_pending
+            changed = transition_pending(
                 root,
                 item,
                 "failed",
@@ -509,10 +513,11 @@ def poll_once(
                 now=item_current,
                 last_error=str(exc),
             )
-            failed += 1
+            failed += int(changed)
             continue
         if ready:
-            move_record(
+            from .wake_control import transition_pending
+            changed = transition_pending(
                 root,
                 item,
                 "firing",
@@ -520,7 +525,7 @@ def poll_once(
                 message=message,
                 now=item_current,
             )
-            fired += 1
+            fired += int(changed)
         else:
             pending += 1
     if dispatch:

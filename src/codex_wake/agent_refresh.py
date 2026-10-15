@@ -13,6 +13,10 @@ from .agent_lifecycle import save, before_effect
 from .lifecycle_budget import operation_binding, track_refresh_budget
 
 
+from .wake_control import guard_command
+
+
+@guard_command
 def refresh_command(args, root):
     try:
         config = json.loads(Path(args.profiles).read_text())

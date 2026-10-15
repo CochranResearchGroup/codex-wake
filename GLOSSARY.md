@@ -81,3 +81,16 @@ Changing conversation does not replenish this budget.
 The successor's verification of runtime readiness and assessment of whether the
 outgoing work advanced the approved objective with adequate evidence and scope
 discipline. Runtime readiness alone does not establish work acceptance.
+
+
+**Emergency pause**:
+An operator-controlled hold preventing new wake deliveries in its selected scope
+until explicitly resumed. It preserves scheduled work and original deadlines.
+
+**Wake cancellation**:
+Retiring an eligible wake so it no longer delivers, while preserving its history.
+It cannot retract work already submitted to a recipient.
+
+**Owned-turn interruption**:
+Stopping a running turn only when durable assignment evidence identifies it as
+Wake-owned. It is separate from pausing future deliveries and cancelling wakes.

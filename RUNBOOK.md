@@ -6759,3 +6759,23 @@ issue-closeout}.json. Closed-world review confirms S163-01/S163-02 resolved,
 no new source behavior. Prior explicit memory disposition remains the single
 closeout receipt; no additional memory operation. Documentation custody closeout
 uses a separate protected-main PR; source ref retained.
+
+
+## Turn 329 | 2026-10-15 UTC | Wake emergency controls implementation
+
+Operator accepted Ask Matt full scope: list/cancel across explicit registered
+roots, persistent emergency pause/resume and separate owned-turn interruption,
+CLI/MCP parity with host grants. Plan0164/issue271 from75c54a9. Primary owns
+root sidecar/effect gate and CLI; bounded emergency_ownership_discovery worker
+owns exact interruption adapter; wake_control_mcp owns six MCP tools/grants.
+Frozen root/action/command contract and three-agent ceiling; no nested agents.
+
+Primary CLI pause and actual-dispatch red/green captured; extra scope/inventory
+red/green retains malformed-root and authority-race failures before fix. Worker
+interrupt initial tests followed implementation (no false red claim); later
+private-journal and fulfilled-handoff regressions captured red/green. MCP worker
+reported initial unknown-tool/missing-host-config red then green.32 focused tests
+PASS at current slice; first full run1253 passed205.301s, before final additions.
+No live wakes cancelled, native operator turns interrupted or shared services
+restarted. Current worker compatibility is an explicit readback boundary.
+One fresh bounded Standards/Spec review underway; source not yet accepted/released.

@@ -1,0 +1,6 @@
+test_pause_persists_across_cli_calls_and_resume_is_explicit (tests.test_wake_control.WakeControlTests.test_pause_persists_across_cli_calls_and_resume_is_explicit) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.066s
+
+OK
