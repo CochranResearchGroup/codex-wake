@@ -6,6 +6,22 @@ from codex_wake.strict_executor import Guard
 
 
 class StrictExecutorTests(unittest.TestCase):
+    def test_guard_accounting_persists_directory_update(self):
+        import os, stat
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as root:
+            guard, ledger, _ = self.fixture(root)
+            synced_directories = []
+            original_fsync = os.fsync
+            def observe_fsync(descriptor):
+                if stat.S_ISDIR(os.fstat(descriptor).st_mode):
+                    synced_directories.append(os.readlink('/proc/self/fd/' + str(descriptor)))
+                return original_fsync(descriptor)
+            with patch('os.fsync', side_effect=observe_fsync):
+                self.assertIsNone(guard.check(boottime=11))
+            self.assertIn(str(ledger.directory), synced_directories)
+            self.assertEqual(ledger.inspect(now=101)['actors']['worker']['used'], 20)
+
     def test_boot_generation_mismatch_fences_before_launch(self):
         with tempfile.TemporaryDirectory() as root:
             guard = Guard(dict(wake_root=root, objective_id='goal', endpoint='unix:///tmp/owned.sock',

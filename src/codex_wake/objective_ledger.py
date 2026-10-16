@@ -37,6 +37,8 @@ def _private(path, directory=False):
 
 
 class ObjectiveLedger:
+    _lock_flags = fcntl.LOCK_EX
+
     def __init__(self, root, objective_id):
         if not isinstance(objective_id, str) or not objective_id.strip():
             raise ValueError('objective identity required')
@@ -59,7 +61,7 @@ class ObjectiveLedger:
         fd = os.open(self.lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, 'a+') as lock:
             _private(self.lock_path)
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            fcntl.flock(lock, self._lock_flags)
             if self.path.exists() or self.path.is_symlink():
                 _private(self.path)
                 data_fd = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW)

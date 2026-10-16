@@ -5,7 +5,6 @@ lets KillMode=control-group stop every descendant, including blocked tools.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
 import fcntl
 import json
 from itertools import islice
@@ -15,7 +14,7 @@ import tempfile
 from pathlib import Path
 import time
 
-from .objective_ledger import ObjectiveLedger, _private
+from .objective_ledger import ObjectiveLedger
 from .records import parse_timestamp
 from .lifecycle_budget import objective_identity
 from .process import boot_id_value, process_exists, process_identity
@@ -24,29 +23,8 @@ MAX_ACCOUNTING_BYTES = 32 * 1024 * 1024
 
 
 class _NonblockingLedger(ObjectiveLedger):
-    @contextmanager
-    def _transaction(self, *, write=True):
-        _private(self.directory, directory=True)
-        descriptor = os.open(self.lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
-        with os.fdopen(descriptor, 'a+') as lock:
-            _private(self.lock_path)
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            _private(self.path)
-            descriptor = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW)
-            with os.fdopen(descriptor) as source:
-                state = json.load(source)
-            yield state
-            if write:
-                descriptor, temporary = tempfile.mkstemp(dir=self.directory)
-                try:
-                    with os.fdopen(descriptor, 'w') as target:
-                        json.dump(state, target, sort_keys=True)
-                        target.flush()
-                        os.fsync(target.fileno())
-                    os.replace(temporary, self.path)
-                finally:
-                    if os.path.exists(temporary):
-                        os.unlink(temporary)
+    # Keep the ledger's persistence protocol; only lock acquisition differs.
+    _lock_flags = fcntl.LOCK_EX | fcntl.LOCK_NB
 
 
 class Guard:
