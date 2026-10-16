@@ -9,13 +9,13 @@ lanes:
     plan_ref: feat/objective-enforcement
     branch: feat/objective-enforcement
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: bb8aab3
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    checkpoint: 4ce6ae5
     dependencies: [P164]
     overlaps: []
     updated_at: 2026-10-16
-    disposition: User-authorized implement-spec; public native acceptance pending, no deployment
+    disposition: Validated branch; all four tickets and single review/remediation complete; tracker open, no deployment
   - id: P164
     owner: primary / ecochran76
     objective: Scoped wake listing cancellation and emergency controls

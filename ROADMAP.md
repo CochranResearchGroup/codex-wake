@@ -1244,9 +1244,12 @@ release/install/census and preservation receipts in Plan0164 final acceptance.
 
 ## P166 | Strict objective execution enforcement
 
-State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
-Spec#274, tickets#275–278 / [Plan0166](docs/dev/plans/0166-2026-10-16-objective-enforcement.md).
-User-authorized implementation in dependency order with original objective ledger
-and released emergency controls. Public lifecycle admission/status/stop and real
-native process containment required. No deployment; cumulative token ceiling
-remains sampled with unknown overshoot. Goal stop/checkpoint before1MM tokens/3h.
+State: CLOSED. Owner: primary / ecochran76. Workflow: DONE (validated branch).
+Spec #274, tickets #275–278 / [Plan0166](docs/dev/plans/0166-2026-10-16-objective-enforcement.md).
+Final source `4ce6ae5` on `feat/objective-enforcement`; all four tickets are validated.
+One whole-branch review and bounded remediation are complete. Native containment,
+deadline, accounting, concurrency, refresh, renewal and successor evidence is retained.
+The final full suite passed 1,326 tests with one optional host skip; installed-package
+and live-host selection passed all 69 checks. Sampled token limits, unknown overshoot
+and the failed local provider-turn count axis remain explicit. Tracker issues remain
+OPEN and main is unchanged. Merge, release and production deployment are separate.

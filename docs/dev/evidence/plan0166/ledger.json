@@ -325,11 +325,35 @@
       "reservations": 0,
       "receipt": "native-probe/native-lifecycle-partial.json",
       "qualification": "Partial acceptance only; failedpreflight and unprovencontinuation retained. Sentinel already lost in first launcher; no finalsentinelsurvivalclaim."
+    },
+    {
+      "kind": "review durability regression",
+      "result": "PASS",
+      "tests": 62,
+      "red": "review-durability-red.log",
+      "green": "review-durability-green.log"
+    },
+    {
+      "kind": "final full source4ce6ae5",
+      "result": "PASS",
+      "tests": 1326,
+      "skips": 1,
+      "seconds": 726.676,
+      "artifact": "full-review-remediation.log",
+      "qualification": "Longer runtime than prior297.419s; observed filesystemI/O and journalwaits, no retry."
+    },
+    {
+      "kind": "final installed package plusactualhost",
+      "result": "PASS",
+      "tests": 69,
+      "skips": 0,
+      "artifact": "wheel-final-strict-host.log",
+      "parity": "installed-final-parity.json"
     }
   ],
-  "integration_tip": "8de38d5",
+  "integration_tip": "4ce6ae5",
   "resource_accounting": {
-    "root_goal_checkpoint_tokens": 1419384,
+    "root_goal_checkpoint_tokens": 1652641,
     "native_observed_tokens": 618851,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
@@ -363,15 +387,15 @@
     "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
   "checkpoint": {
-    "state_transition": "active_to_resource_checkpoint",
-    "acceptance_state": "275\u2013277validated;278incomplete",
+    "state_transition": "active_to_complete_validated_branch",
+    "acceptance_state": "all275\u2013278validated;reviewcomplete",
     "progress_classification": "outcome_progress",
-    "root_tokens_at_check": 1356795,
-    "external_native_observed_tokens": 427289,
+    "root_tokens_at_check": 1652641,
+    "external_native_observed_tokens": 618851,
     "unknown_historical_reserve": 200000,
-    "nominal_accounted_total": 1984084,
+    "nominal_accounted_total": 2471492,
     "qualification": "Observed counters are floors; reserves are estimates, not exact charge bounds. Missing final accounting stays unknown.",
-    "stop_reason": "Nominal cumulative1984084 leaves15916; insufficient remaining acceptance and mandatedreview. User resource checkpoint binding.",
+    "stop_reason": "Approvedimplementation scope complete; no merge/release/deployment.",
     "next_action": "Recover from checkpoint-20261016-2118.md; qualify failed harness correction before any new native campaign. No further paid turns in this allocation.",
     "final_campaign_accounting": "266117 known settled; zero reservations/unknown; historical unknown reserve unchanged",
     "resumed": true,
@@ -423,18 +447,31 @@
       "followup_result": "native-probe/native-observer-death.json"
     }
   ],
-  "goal_level_remaining": [
-    "one whole-branch review after all tickets validated",
-    "one bounded remediation and focused verification"
-  ],
+  "goal_level_remaining": [],
   "review": {
-    "state": "ready",
-    "broad_passes_used": 0,
+    "state": "complete",
+    "broad_passes_used": 1,
     "base": "0a5c8d1",
     "frozen_source": "beeacfa",
     "axes": [
       "standards",
       "spec"
-    ]
+    ],
+    "frozen_tip": "1b0848a",
+    "standards_reviewer": "/root/review_standards",
+    "spec_reviewer": "/root/review_spec",
+    "remediation_passes_used": 1,
+    "accepted_blockers": [
+      "S1"
+    ],
+    "unresolved_blockers": [],
+    "fix_commit": "4ce6ae5"
+  },
+  "tracker_state": {
+    "278": "OPEN",
+    "277": "OPEN",
+    "276": "OPEN",
+    "275": "OPEN",
+    "274": "OPEN"
   }
 }

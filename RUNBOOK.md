@@ -6929,3 +6929,25 @@ turn hadno tool/userassignment, fullycharged. Originalrunnerlen2failure preserve
 This doesnot invalidate identity/accounting/deadline/one-command acceptance; no
 exactproviderturn guarantee claimed. Priorqfailedschema and otherfailedpackets
 retained. Allticketsvalidated unlocksinglebroadreview; notyetmerge/release/deploy.
+
+## Turn 338 | 2026-10-16 UTC | Validated implementation closeout
+
+Outcome_progress → complete approved implementation branch. One whole-branch
+review compared base0a5c8d1 with frozen1b0848a. The spec axis found no substantiated
+issue; standards finding S1 confirmed a missing directory fsync. A red regression
+proved the failure;4ce6ae5 shares the ledger persistence protocol while retaining
+nonblocking guard locking.62 focused checks passed. The final full suite passed
+1326 tests with one optional host skip in726.676s;69 installed-package checks,
+including actual systemd, passed.106 Python files match the wheel. The slower full
+run showed filesystem/journal waits; no retry occurred. Closed-world verification
+passed and no second broad review ran.
+
+All275–278 are validated. The native extra DONE turn exceeded the local count
+(4 versus3), but issued no command and was fully charged; the functional acceptance
+remains valid. Plan and roadmap are CLOSED; custody is INTEGRATION_READY. Worktrees
+are retained. Tracker274–278 remain OPEN, main remains0a5c8d1 and the stable
+production0.16.0-d3ea192 prefix is unchanged. No merge, release, deployment or issue
+closure occurred. Final source is4ce6ae5; the closeout commit carries the receipts.
+Root1,652,641 + external618,851 + estimated historical reserve200,000 gives
+approximately2,471,492 cumulative tokens, approximately480k in the renewed window.
+These observations and reserves are not an exact billing bound.

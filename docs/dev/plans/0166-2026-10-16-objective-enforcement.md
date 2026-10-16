@@ -1,8 +1,8 @@
 # Plan0166 — Strict objective execution enforcement
 
-State: OPEN. Owner: ecochran76 / primary. Spec#274; tickets#275–278.
+State: CLOSED. Owner: ecochran76 / primary. Spec#274; tickets#275–278.
 Integration branch: feat/objective-enforcement. Base:0a5c8d1.
-Current user ceiling: checkpoint before2,000,000 cumulative tokens or4h. Preserve original start2026-10-16T19:41:41Z and historical consumption; conservative hardstop23:41:41Z/checkpoint23:31:41Z. Earlier1MM/3h authority is historical and superseded. Track root plus external native costs and uncertainty.
+Latest renewed allowance: NEW2MMtokens/4h from2026-10-16T22:01:51Z; historical counters preserved inledger.json. Implementation completed within this renewed window.
 
 ## Acceptance / non-goals
 Implement full published#274 contract and each#275–278 acceptance criterion, using public lifecycle operations, native execution containment and independent OS readback. No deployment/fleet changes, shared-session termination, provider cancellation or exact token ceiling claims. Unsupported guarantees reject before task effects.
@@ -20,23 +20,35 @@ At most3 active agents total. No nested workers.
 
 ## Current State
 
-Resumed2026-10-16T22:01:51Z under explicit NEW2MMtokens/4h allowance.
-Historical costs remain: rootbaseline1364205 +external427289 +unknownreserve200000.
-Newwindow hardtime2026-10-17T02:01:51Z/checkpoint01:51:51Z, nominalcumulativeceiling3991494.
-275–277validated;278running. Frozen sourcebeeacfa, clean checkpointce700d7.
-Prior full1325PASS/1optionalhostskip, installed53PASS/1skip plus7livehostPASS.
+CLOSED: tickets #275–278 are implemented, integrated and validated on
+`feat/objective-enforcement`, with final source commit `4ce6ae5`. Native public
+acceptance covers concurrency, failed checkpoint preservation, explicit renewal,
+refresh, semantic review, successor continuation, final accounting and unrelated
+sentinel preservation. The final campaign settled 191,562 tokens with zero
+reservations or unknown actors.
 
-Native worker owns corrected exactnestedreview harness and privatefixture evidence.
-Newpacket atmost3turns/350kestimate: freshwriter then semanticpreflight then one
-continuation. Firstauthorizeeffectfreeverifierfixture+onewriter; actualcostreadback
-before remainingtwo. StartprivateXDGregistry+durablemonitor fromadmission and
-choose sufficientoriginalsessiontime, preservingfixeddeadline semantics.
-No direct ledgeraliases/settlements, hostauthoredreview or correction of oldfailed
-artifact. Priorfourturn266117 campaign remainsknownsettled andcleaned.
+The local provider-turn count axis failed: four turns occurred against three
+planned. The extra automatic DONE turn issued no command and was fully charged.
+The approved continuation command ran exactly once; this retained failure does
+not invalidate the functional identity, accounting or deadline evidence.
 
-After278actualproof validated, perform exactlyone broadreview ofbase0a5c8d1...HEAD
-withstandards/specaxes, oneboundedremediation then focusedcriticalverification.
-No merge/release/deployment or trackerclosure implied by branchvalidation.
+Exactly one whole-branch review compared `0a5c8d1` with `1b0848a`, followed by one
+bounded remediation. Standards finding S1 confirmed a missing directory fsync;
+`4ce6ae5` fixes it. The spec axis found no substantiated issue. Verification:
+62 focused checks passed; the final full suite passed 1,326 tests with one optional
+host skip in 726.676 seconds; the isolated installed-package selection passed all
+69 checks, including actual systemd. Its 106 Python files match source. Compilation,
+policy wiring and plugin checks pass. No accepted blocker remains. See
+`evidence/plan0166/acceptance-audit.md` and `review-adjudication.json`.
+
+Tracker issues #274–278 remain OPEN. `origin/main` remains `0a5c8d1`. The validated
+branch and worker worktrees are retained; merge, release and production deployment
+were outside this specification. Earlier failures and checkpoints remain historical.
+
+The latest renewal preserved root baseline 1,364,205, external observations 427,289
+and a 200,000 historical unknown-cost reserve. At closeout these were 1,652,641,
+618,851 and 200,000 respectively: approximately 480k tokens in the renewed window.
+Unknown-cost reserves are estimates, not guaranteed billing bounds.
 
 ## Historical authority and evidence
 
