@@ -60,9 +60,64 @@ def read_execution(root, objective_id):
     return binding
 
 
+def _renewal_actors(root,receipt,old,*,allow_fresh):
+    from .lifecycle_budget import trusted_upper
+    cfg=receipt['intent']['configuration']
+    historical_actors={}
+    final_usage=old.get('final_usage',old.get('guard',{}).get('final_usage',{}))
+    if final_usage.get('state')=='accounting_unknown':
+        raise WakeError('strict execution renewal requires explicit final-usage reconciliation')
+    # Renewal must already be recorded by the existing operator-only ledger API.
+    from .objective_ledger import ObjectiveLedger
+    ledger=ObjectiveLedger(root,old['objective_id']).inspect(now=trusted_upper())
+    if (not old.get('identity') or old.get('host',{}).get('populated')
+            or old.get('host',{}).get('members') or ledger['revision']!=cfg['revision']
+            or ledger['authorization_history'][-1].get('action') not in ('extend','reset')
+            or ledger['authorization_history'][-1]['configuration']['revision']!=cfg['revision']):
+        raise WakeError('strict execution renewal requires settled prior execution and ledger authorization')
+    # Spawn reserves before host effects. Only the untouched current
+    # fresh reservation may be excluded from PRIOR actor settlement.
+    fresh=receipt.get('budget_actor')
+    candidate=ledger['actors'].get(fresh,{})
+    may_exclude=(allow_fresh and receipt.get('thread_id') is None and receipt.get('state')=='prepared'
+        and not receipt.get('uncertain_effect') and not receipt['intent'].get('budget_inherited')
+        and fresh=='spawn:'+receipt.get('fingerprint','') and candidate.get('used')==0
+        and candidate.get('known') is True and candidate.get('settled') is False)
+    if may_exclude:
+        for prior_path in (Path(root)/'lifecycle').glob('*.json'):
+            if prior_path.name.startswith('owner-') or prior_path.name=='supervision.json':continue
+            prior=json.loads(prior_path.read_text())
+            prior_cfg=prior.get('configuration') or prior.get('intent',{}).get('configuration') or {}
+            if prior.get('budget_actor')==fresh and (prior.get('thread_id') or prior_cfg.get('revision')!=cfg['revision']):
+                may_exclude=False;break
+    for actor_id,actor in ledger['actors'].items():
+        if may_exclude and actor_id==fresh:continue
+        if not actor['known'] or not actor['settled']:
+            raise WakeError('strict execution renewal requires every prior actor settled and known')
+        historical_actors[actor_id]=actor['used']
+    return historical_actors
+
+
+def preflight_execution(root,receipt):
+    """Read-only eligibility before reservation; actual effects still follow it."""
+    from .lifecycle_budget import objective_identity
+    cfg=receipt['intent']['configuration']
+    if 'strict_execution' not in cfg:return
+    objective=objective_identity(receipt['intent']['continuation'])
+    directory=location(root,objective)
+    if not (directory/'binding.json').exists():return
+    with _lock(directory):
+        old=read_execution(root,objective)
+        if not old:return
+        if old['configuration_revision']!=cfg['revision']:
+            _renewal_actors(root,receipt,old,allow_fresh=False)
+        elif old.get('state')!='running' or old.get('guard',{}).get('state','running')!='running':
+            raise WakeError('strict execution is fenced; explicit operator renewal required')
+
+
 def ensure_execution(root,receipt):
     """Reserve precedes this call; no shared server is adopted or replaced."""
-    from .lifecycle_budget import objective_identity,configured_ledger,trusted_upper
+    from .lifecycle_budget import objective_identity,trusted_upper
     profile=receipt['intent']['launch'];cfg=receipt['intent']['configuration']
     policy=receipt['intent']['continuation'];objective=objective_identity(policy)
     directory=location(root,objective)
@@ -73,36 +128,7 @@ def ensure_execution(root,receipt):
         historical_actors={}
         if old:
             if old['configuration_revision']!=cfg['revision']:
-                final_usage=old.get('final_usage',old.get('guard',{}).get('final_usage',{}))
-                if final_usage.get('state')=='accounting_unknown':
-                    raise WakeError('strict execution renewal requires explicit final-usage reconciliation')
-                # Renewal must already be recorded by the existing operator-only ledger API.
-                ledger=configured_ledger(root,receipt).inspect(now=trusted_upper())
-                if (not old.get('identity') or old.get('host',{}).get('populated')
-                        or old.get('host',{}).get('members') or ledger['revision']!=cfg['revision']
-                        or ledger['authorization_history'][-1].get('action') not in ('extend','reset')
-                        or ledger['authorization_history'][-1]['configuration']['revision']!=cfg['revision']):
-                    raise WakeError('strict execution renewal requires settled prior execution and ledger authorization')
-                # Spawn reserves before host effects. Only the untouched current
-                # fresh reservation may be excluded from PRIOR actor settlement.
-                fresh=receipt.get('budget_actor')
-                candidate=ledger['actors'].get(fresh,{})
-                may_exclude=(receipt.get('thread_id') is None and receipt.get('state')=='prepared'
-                    and not receipt.get('uncertain_effect') and not receipt['intent'].get('budget_inherited')
-                    and fresh=='spawn:'+receipt.get('fingerprint','') and candidate.get('used')==0
-                    and candidate.get('known') is True and candidate.get('settled') is False)
-                if may_exclude:
-                    for prior_path in (Path(root)/'lifecycle').glob('*.json'):
-                        if prior_path.name.startswith('owner-') or prior_path.name=='supervision.json':continue
-                        prior=json.loads(prior_path.read_text())
-                        prior_cfg=prior.get('configuration') or prior.get('intent',{}).get('configuration') or {}
-                        if prior.get('budget_actor')==fresh and (prior.get('thread_id') or prior_cfg.get('revision')!=cfg['revision']):
-                            may_exclude=False;break
-                for actor_id,actor in ledger['actors'].items():
-                    if may_exclude and actor_id==fresh:continue
-                    if not actor['known'] or not actor['settled']:
-                        raise WakeError('strict execution renewal requires every prior actor settled and known')
-                    historical_actors[actor_id]=actor['used']
+                historical_actors=_renewal_actors(root,receipt,old,allow_fresh=True)
             elif old.get('state')=='running' and old.get('guard',{}).get('state','running')=='running':
                 receipt['strict_execution']=old
                 return

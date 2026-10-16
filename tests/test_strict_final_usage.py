@@ -217,3 +217,28 @@ class StrictFinalUsageTests(unittest.TestCase):
             self.assertFalse(actor['known'])
             self.assertFalse(actor['settled'])
             self.assertEqual(actor['used'],27)
+
+    def test_preflight_stopped_or_unknown_final_is_read_only_before_reservation(self):
+        from codex_wake.strict_runtime import preflight_execution
+        from codex_wake.records import WakeError
+        for new_revision in (False,True):
+            with self.subTest(new_revision=new_revision),tempfile.TemporaryDirectory() as directory:
+                root,_,ledger,_,_=self.fixture(directory)
+                layout=location(root,'objective');path=layout/'binding.json'
+                binding=json.loads(path.read_text())
+                config=json.loads((layout/'guard-original.json').read_text())['configuration']
+                if new_revision:
+                    binding['final_usage']={'state':'accounting_unknown'}
+                    path.write_text(json.dumps(binding))
+                    config['revision']='new-unadmitted-revision'
+                before=ledger.path.read_bytes()
+                receipt=dict(state='prepared',thread_id=None,fingerprint='new',intent=dict(
+                    configuration=config,continuation={'objective_id':'objective'}))
+                with (patch('codex_wake.strict_runtime.SystemdExecution.inspect',return_value=dict(populated=False,members=[],state='inactive')),
+                        patch('codex_wake.strict_runtime.SystemdExecution.launch') as launch,
+                        patch('codex_wake.native_clock.snapshot',return_value={'utc':{'upper':1893456001}})):
+                    with self.assertRaisesRegex(WakeError,'final-usage reconciliation' if new_revision else 'is fenced'):
+                        preflight_execution(root,receipt)
+                    launch.assert_not_called()
+                self.assertEqual(ledger.path.read_bytes(),before)
+                self.assertEqual(set(ledger.inspect(now=1893456001)['actors']),{'spawn:owned'})
