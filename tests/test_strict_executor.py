@@ -145,8 +145,13 @@ class StrictExecutorTests(unittest.TestCase):
             with ledger.lock_path.open('a') as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX)
                 started=time.monotonic()
-                self.assertEqual(guard.check(boottime=11), 'accounting_unavailable')
+                self.assertIsNone(guard.check(boottime=11))
                 self.assertLess(time.monotonic()-started, .2)
+                import json
+                heartbeat=Path(root)/'lifecycle/supervision.json'
+                value=json.loads(heartbeat.read_text());value['observed_boottime']=16
+                heartbeat.write_text(json.dumps(value))
+                self.assertEqual(guard.check(boottime=16), 'accounting_unavailable')
 
     def test_renewed_ledger_does_not_silently_reauthorize_old_guard_generation(self):
         with tempfile.TemporaryDirectory() as root:

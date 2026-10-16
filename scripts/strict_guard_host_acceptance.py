@@ -42,7 +42,8 @@ def execute(output):
                 identity=None;unit='codex-wake-objective-'+uuid4().hex+'.service'
                 try:
                     write(lifecycle/'supervision.json',dict(active=True,pid=controller.pid,
-                        identity=process_identity(controller.pid),observed_at=now,interval=.05))
+                        identity=process_identity(controller.pid),observed_at=now,interval=.05,
+                        observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),boot_id=boot_id_value()))
                     write(lifecycle/'spawn.json',dict(thread_id='fixture-thread',budget_actor='worker',
                         intent=dict(operation='spawn',configuration=cfg,continuation=dict(objective_id='fixture'),
                             launch=dict(app_server='unix:///fixture.sock',codex_home=str(home)))))
@@ -74,8 +75,15 @@ def execute(output):
                         rollout.write_text('\n'.join(json.dumps(r) for r in rows)+'\n')
                     triggered=time.monotonic()
                     until=start+10
+                    observation_errors=[]
                     while time.monotonic()<until:
-                        after=host.inspect(identity)
+                        try:
+                            after=host.inspect(identity)
+                        except RuntimeError as exc:
+                            if str(exc)!='active executor cgroup unavailable':raise
+                            observation_errors.append(str(exc))
+                            time.sleep(.02)
+                            continue
                         if not after['populated']:break
                         time.sleep(.02)
                     status=json.loads((root/'status.json').read_text())
@@ -83,7 +91,7 @@ def execute(output):
                     assert sentinel.poll() is None
                     results.append(dict(case=case,telemetry='injected_fixture',identity=identity,
                         kernel_limits=before['kernel_limits'],status=status,after=after,
-                        elapsed_seconds=time.monotonic()-start,trigger_to_empty_seconds=time.monotonic()-triggered,
+                        observation_errors=observation_errors,elapsed_seconds=time.monotonic()-start,trigger_to_empty_seconds=time.monotonic()-triggered,
                         sentinel_survived=True))
                 finally:
                     if identity:host.stop(identity)

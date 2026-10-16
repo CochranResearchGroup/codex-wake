@@ -54,6 +54,8 @@ class Guard:
         self.limits = strict.get('limits', strict)
         self.seen_usage = set()
         self.usage_observations = {}
+        self.last_verified_accounting_elapsed = 0
+        self.last_accounting_error = None
 
     def check(self, *, boottime=None):
         if boot_id_value() != self.config['boot_id']:
@@ -203,8 +205,18 @@ class Guard:
                 return 'objective_tokens_exhausted'
             if not owned and elapsed >= self.limits['accounting_max_age_seconds']:
                 return 'accounting_missing'
+            self.last_verified_accounting_elapsed=elapsed
+            self.last_accounting_error=None
             return None
-        except (OSError, ValueError, KeyError, TypeError):
+        except BlockingIOError:
+            self.last_accounting_error='ledger_lock_busy'
+            # Admission/accounting updates legitimately hold this lock briefly.
+            # Contention is not fresh evidence and cannot extend its lease.
+            if elapsed-self.last_verified_accounting_elapsed < self.limits['accounting_max_age_seconds']:
+                return None
+            return 'accounting_unavailable'
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            self.last_accounting_error=type(exc).__name__
             return 'accounting_unavailable'
 
 
@@ -217,7 +229,8 @@ def _status(config, state, reason=None, child_pid=None):
             json.dump(dict(state=state, reason=reason, generation=config['generation'],
                 pid=os.getpid(), identity=process_identity(os.getpid()), child_pid=child_pid,
                 endpoint=config['endpoint'], objective_id=config['objective_id'],
-                observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)), stream, sort_keys=True)
+                observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
+                accounting_error=config.get('accounting_error')), stream, sort_keys=True)
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, destination)
@@ -250,6 +263,7 @@ def run(config):
     except Exception:
         reason = 'guard_observation_failed'
     finally:
+        config['accounting_error']=guard.last_accounting_error
         _status(config, 'stopping', reason, child_pid=child.pid if child else None)
         if child is not None and child.poll() is None:
             # Allow native shutdown to persist what it can within the original
