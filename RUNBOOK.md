@@ -6854,3 +6854,21 @@ reserved100k each; reservations are not exact upper bounds. No further native
 spend. See evidence/plan0166/checkpoint.md and ledger.json for restart gates.
 No install/deploy/merge/closure. Memory disposition unavailable: no reviewed
 Codex Wake Graphiti group; explicit non-write receipt retained, zero memory writes.
+
+## Turn 333 | 2026-10-16 UTC | Native token proof and renewed execution authority
+
+Outcome_progress:275 validated;276running;277/278pending. Native rootm completed
+actual module setup/compile/assert under ownedcgroup, published22,874tokens,
+and independentguard stopped on cap1.22,873overshoot is observed, not maximum.
+Full isolated1303testsPASS/1opt-in skip; isolatedhandoff/refresh68PASS; disposable
+wheel35checks incllivehostPASS after retained first-observation-race failure.
+Full unisolated failures matched baseexactly and traced to user config/state.
+Loststop completion now settles without repeating effects. Ambiguouslaunch
+operatorstop recovers only guardgeneration/process/currentInvocationID/membership
+proof; actualsystemd/publicCLI genericfixture passes. Four independentguardOS
+cases pass, with injectedtelemetry explicitly separate from nativeproof.
+
+User renewed allocation at20:33:11Z, editedgoal to2MMtokens/4h. Preserve root689,337,
+native69,585observed and200kreservedunknown at renewal. Conservative deadline
+23:41:41Z from originalstart; no budget reset. Native276 packet and separate
+hostcontinuity tests resumed under bounded scope. Sourceab7bf49; no deployment.

@@ -21,3 +21,13 @@ At most3 active agents total. No nested workers.
 ## Ledger
 
 Current public containment/stop proof: evidence/plan0166/native-probe/public-containment-stop.json. Ticket275 integrated, not yet validated; downstream tickets remain pending. Full development suite failed; handoff failure counts reproduced on unchanged base (49tests,50failures,1error); default user clock config contaminated a separate clock selection (cleared-config10tests pass). No broad final review, installation, deployment, or tracker closure performed.
+
+## Renewed authority | 2026-10-16T20:33:11Z
+
+User resumed and renewed allocation, then edited stable goal ceiling to2MMtokens/4h. Preserve historical consumption; latest cumulative2MM ceiling supersedes original1MM. Conservative4h deadline from original19:41:41Z start is23:41:41Z; checkpoint by23:31:41Z. Earlier600k/700k planning checkpoints are superseded, not approval gates. At renewal root689,337 plus external native69,585 observed and200k reservedunknown. No claim that reservations prove exact total cost.
+
+275 validated on contained launch/cleanup slice: native Codex/code-mode/shell/child and setup/build/test, effective kernel controls, public stop, sentinel, public unsupported/shared refusals. Full isolated1303testsPASS/1opt-in skip; installed35checks including livehostPASS. Sourcefrozen full run precedes ab7bf49 exactidentity-stop fix; focused37 and four actualOS/injectedtelemetry cases cover that change. The initial live-test cgroup-removal race remains retained as firstfailure, with exact-invocation same-deadline polling repair.
+
+276 nowrunning: public lostlaunchresponse recovery proved on actualsystemd/guard/CLI with generic sleep+injectedaccounting; no native/provider substitution. Replacement invocation and wronggeneration remain unadopted. Native worker owns one actualblockedtool/TERMresistant-child/deadline/transportloss proof; host worker owns separate restart/BOOTTIME continuity tests only. Both fromab7bf49; primary retains production-source ownership. Native deadline packet: max1paidturn/75kestimated/120sec; unknownfinalusage reserves100k. One authoritativezero-effect startupretry only. No host suspend/reboot or shared-session/service effects.
+
+277 pending (blocked276), supporting actual native sampledcap evidence already retained:22,874totalincluding12,160cachedinput againstcap1;22,873observedovershoot. Not a maximumovershoot bound. 278 pending. One wholebranchreview remains unused and occurs onlyafterallticketsvalidated. No deployment/merge/trackerclosure.

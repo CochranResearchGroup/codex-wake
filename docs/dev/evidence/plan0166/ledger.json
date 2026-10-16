@@ -3,7 +3,7 @@
   "branch": "feat/objective-enforcement",
   "base": "0a5c8d1",
   "started_at": "2026-10-16T19:41:41Z",
-  "checkpoint_by": "2026-10-16T22:31:00Z",
+  "checkpoint_by": "2026-10-16T23:31:41Z",
   "tickets": {
     "275": {
       "state": "validated",
@@ -187,20 +187,34 @@
       "qualification": "Injected telemetry; actual guard/systemd/TERM-resistant child; identity metadata matches independent manager invocation in each case. No native/provider proof."
     }
   ],
-  "integration_tip": "18dbfec",
+  "integration_tip": "ab7bf49",
   "resource_accounting": {
-    "root_goal_checkpoint_tokens": 700000,
+    "root_goal_checkpoint_tokens": null,
     "native_observed_tokens": 69585,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
-    "further_native_turns_authorized": false,
+    "further_native_turns_authorized": true,
     "final_native_packet": {
       "max_turns": 1,
       "turns_used": 1,
       "observed_tokens": 22874,
       "failed_effect_free_startups": 1,
       "no_further_calls": true
-    }
+    },
+    "cumulative_token_ceiling": 2000000,
+    "external_native_observed_tokens": 69585,
+    "external_native_unknown_reserved_tokens": 200000,
+    "current_packet": {
+      "ticket": 276,
+      "native_agent": "/root/native_containment_probe",
+      "max_paid_turns": 1,
+      "estimated_tokens": 75000,
+      "unknown_reservation": 100000,
+      "hard_seconds": 120,
+      "effect_free_startup_retries": 1,
+      "source": "ab7bf49"
+    },
+    "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
   "checkpoint": {
     "state_transition": "active_to_resource_checkpoint",
@@ -214,5 +228,17 @@
     "next_action": "Resume from checkpoint.md; first finish275 validation without paid effects, then independently qualify276 before277/278.",
     "resumed": true,
     "resume_reason": "User resumed active goal; continue safe work under original cumulative bounds."
-  }
+  },
+  "renewals": [
+    {
+      "authority": "User: continue with renewed allocation of1MMtoken/4h; latest edited objective: stop/checkpoint before2MMtokens/4h",
+      "at": "2026-10-16T20:33:11Z",
+      "root_goal_counter": 689337,
+      "external_native_observed_tokens": 69585,
+      "external_native_unknown_reserved_tokens": 200000,
+      "cumulative_token_ceiling": 2000000,
+      "hard_time_ceiling": "2026-10-16T23:41:41Z",
+      "time_qualification": "Conservative4h from original goal start19:41:41Z, not a reset of historical consumption."
+    }
+  ]
 }
