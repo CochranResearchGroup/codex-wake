@@ -254,11 +254,18 @@ def run(config):
     except Exception:
         reason = 'guard_observation_failed'
     finally:
-        _status(config, 'stopped', reason, child_pid=child.pid if child else None)
+        _status(config, 'stopping', reason, child_pid=child.pid if child else None)
         if child is not None and child.poll() is None:
-            # Never wait for tools to cooperate. Exiting this service main makes
-            # systemd apply the configured control-group stop and bounded grace.
+            # Allow native shutdown to persist what it can within the original
+            # allowance. This is no new model turn or invented semantic checkpoint.
             child.terminate()
+            try:
+                child.wait(timeout=guard.limits['checkpoint_grace_seconds'])
+            except subprocess.TimeoutExpired:
+                pass
+        _status(config, 'stopped', reason, child_pid=child.pid if child else None)
+        # Exiting the service main makes systemd stop all descendants under its
+        # separate bounded stop grace, even when native shutdown did not finish.
     return 5
 
 

@@ -76,7 +76,7 @@ def ensure_execution(root,receipt):
                 ledger=configured_ledger(root,receipt).inspect(now=trusted_upper())
                 if old.get('host',{}).get('populated') or ledger['revision']!=cfg['revision']:
                     raise WakeError('strict execution renewal requires settled prior execution and ledger authorization')
-            elif old.get('state')=='running' and old.get('guard',{}).get('state')!='stopped':
+            elif old.get('state')=='running' and old.get('guard',{}).get('state','running')=='running':
                 receipt['strict_execution']=old
                 return
             else:
@@ -153,7 +153,7 @@ def guard_execution(root,receipt):
     identity=objective_identity(receipt['intent']['continuation'])
     observed=read_execution(root,identity)
     receipt['strict_execution']=observed
-    if not observed or observed['state']!='running' or observed.get('guard',{}).get('state')=='stopped':
+    if not observed or observed['state']!='running' or observed.get('guard',{}).get('state','running')!='running':
         receipt.update(state='blocked',reason='strict_execution_not_running');return False
     return True
 

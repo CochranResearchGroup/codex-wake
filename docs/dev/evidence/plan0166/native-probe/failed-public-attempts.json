@@ -1,0 +1,88 @@
+[
+  {
+    "root": "/tmp/cw166-a",
+    "raw_sha256": "7824b2b1e8874b1b9bfcc95595723c21746347ffc56f5102b36940e390fa8ce1",
+    "state": "failed",
+    "error": "guard rejected valid fresh heartbeat due independent trusted UTC upper jitter; exact harness interrupted after source diagnosis",
+    "native_turns": 0,
+    "owned_processes_remaining": [],
+    "last_guard": null,
+    "unit_final": null
+  },
+  {
+    "root": "/tmp/cw166-c",
+    "raw_sha256": "d5d96a2d73e13d726404e7e16c8180081f2d4711a0b91452407589dcd111e960",
+    "state": "failed",
+    "error": "RuntimeError: guard stopped before child proof: controller_unavailable",
+    "native_turns": 0,
+    "owned_processes_remaining": [],
+    "last_guard": {
+      "child_pid": 21721,
+      "endpoint": "unix:///tmp/cw166-c/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+      "generation": "3a2a88116b9345fdbf2b8b94538f39d1",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 22943447
+      },
+      "objective_id": "acceptance",
+      "observed_boottime": 229455.824658004,
+      "pid": 21705,
+      "reason": "controller_unavailable",
+      "state": "stopped"
+    },
+    "unit_final": "MainPID=0\nResult=exit-code\nControlGroup=\nActiveState=failed\n"
+  },
+  {
+    "root": "/tmp/cw166-d",
+    "raw_sha256": "84508cf6fed50aca8061e65ee7b553e75b61576cf6a28e3143428f5270646910",
+    "state": "failed",
+    "error": "WakeError: strict executor endpoint not ready; reconcile existing binding",
+    "native_turns": null,
+    "owned_processes_remaining": null,
+    "last_guard": null,
+    "unit_final": null
+  },
+  {
+    "root": "/tmp/cw166-f",
+    "raw_sha256": "80be1f1208f6424140b987d49a3a671251ecb74141b15a2958e4cbaeb23f2552",
+    "state": "passed",
+    "error": null,
+    "native_turns": 0,
+    "owned_processes_remaining": null,
+    "last_guard": null,
+    "unit_final": null
+  },
+  {
+    "root": "/tmp/cw166-g",
+    "raw_sha256": "c9f0635433d141bbd707903a838f80b4df6e363431b40ac92924ec70ddd49f0f",
+    "state": "failed",
+    "error": "FileNotFoundError: [Errno 2] No such file or directory",
+    "native_turns": null,
+    "owned_processes_remaining": null,
+    "last_guard": null,
+    "unit_final": null
+  },
+  {
+    "root": "/tmp/cw166-h",
+    "raw_sha256": "64bbeac8c4cadb9392e80186ad7239741831bd31fd6904540aa3ca3d7531a40b",
+    "state": "failed",
+    "error": "RuntimeError: guard stopped before child proof: controller_unavailable",
+    "native_turns": 0,
+    "owned_processes_remaining": [],
+    "last_guard": {
+      "child_pid": 3971,
+      "endpoint": "unix:///tmp/cw166-h/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+      "generation": "30221308f1be41e198555c66d662e0b5",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 22982569
+      },
+      "objective_id": "acceptance",
+      "observed_boottime": 229859.248190008,
+      "pid": 3897,
+      "reason": "controller_unavailable",
+      "state": "stopped"
+    },
+    "unit_final": null
+  }
+]
