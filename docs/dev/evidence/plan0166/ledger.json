@@ -1,0 +1,37 @@
+{
+  "spec": 274,
+  "branch": "feat/objective-enforcement",
+  "base": "0a5c8d1",
+  "started_at": "2026-10-16T19:41:41Z",
+  "checkpoint_by": "2026-10-16T22:31:00Z",
+  "tickets": {
+    "275": {
+      "state": "running",
+      "blocked_by": []
+    },
+    "276": {
+      "state": "pending",
+      "blocked_by": [
+        275
+      ]
+    },
+    "277": {
+      "state": "pending",
+      "blocked_by": [
+        275,
+        276
+      ]
+    },
+    "278": {
+      "state": "pending",
+      "blocked_by": [
+        277
+      ]
+    }
+  },
+  "workers": {
+    "host": "/root/host_execution_adapter",
+    "native": "/root/native_containment_probe"
+  },
+  "validations": []
+}

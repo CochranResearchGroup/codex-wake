@@ -29,6 +29,11 @@ def add_sessions_parser(subparsers):
     configuration.add_argument('--apply-budget-authorization', action='store_true',
         help='apply an exact operator authorization revision from the host registry; not exposed to agent MCP')
     configuration.add_argument('--json', dest='as_json', action='store_true')
+    execution=commands.add_parser('execution',help='inspect or stop the exact dedicated objective executor (operator)')
+    for option in ('profiles','profile','thread-id'):
+        execution.add_argument('--'+option,required=True)
+    execution.add_argument('--stop',action='store_true')
+    execution.add_argument('--json',dest='as_json',action='store_true')
     spawn = commands.add_parser('spawn', help='launch an agent using a host-approved profile')
     spawn.add_argument('--profiles', required=True)
     spawn.add_argument('--profile', required=True)

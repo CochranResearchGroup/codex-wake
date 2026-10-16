@@ -1241,3 +1241,12 @@ P164 delivery: PR272 merged d3ea192, v0.16.0 published/installed; final hosted
 1268 tests and all release gates pass. Global inventory now13 service-owned roots,
 9 upgraded existing readers, no duplicate supervisor monitoring. Exact source,
 release/install/census and preservation receipts in Plan0164 final acceptance.
+
+## P166 | Strict objective execution enforcement
+
+State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
+Spec#274, tickets#275–278 / [Plan0166](docs/dev/plans/0166-2026-10-16-objective-enforcement.md).
+User-authorized implementation in dependency order with original objective ledger
+and released emergency controls. Public lifecycle admission/status/stop and real
+native process containment required. No deployment; cumulative token ceiling
+remains sampled with unknown overshoot. Goal stop/checkpoint before1MM tokens/3h.

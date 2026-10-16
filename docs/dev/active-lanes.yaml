@@ -1,6 +1,21 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P166
+    owner: primary / ecochran76
+    objective: Implement strict objective execution resource enforcement
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/275, https://github.com/CochranResearchGroup/codex-wake/issues/276, https://github.com/CochranResearchGroup/codex-wake/issues/277, https://github.com/CochranResearchGroup/codex-wake/issues/278]
+    plan: docs/dev/plans/0166-2026-10-16-objective-enforcement.md
+    plan_ref: feat/objective-enforcement
+    branch: feat/objective-enforcement
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: bb8aab3
+    dependencies: [P164]
+    overlaps: []
+    updated_at: 2026-10-16
+    disposition: User-authorized implement-spec; public native acceptance pending, no deployment
   - id: P164
     owner: primary / ecochran76
     objective: Scoped wake listing cancellation and emergency controls

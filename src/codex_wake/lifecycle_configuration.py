@@ -43,6 +43,9 @@ def effective_configuration(config, thread_id, profile_name, caller_thread_id=No
                 raise ValueError('empty instructions')
             effective[key] = dict(name=selection['name'], path=str(path),
                 sha256=hashlib.sha256(content).hexdigest(), instructions=instructions)
+        if 'strict_execution' in profile:
+            from .strict_policy import strict_policy
+            effective['strict_execution']=strict_policy(profile['strict_execution'],effective)
         started = parse_timestamp(policy['started_at'])
         effective.update(objective=policy['objective'], source_thread_id=thread_id,
             profile=profile_name, started_at=policy['started_at'],
@@ -76,6 +79,11 @@ def configuration_command(args, root):
             operation(selected, authorization['approval'], now=trusted_upper())
         effective['objective_budget'] = (ObjectiveLedger(root, identity).inspect(now=trusted_upper())
                                          if path.exists() else None)
+        if effective.get('strict_execution'):
+            from .strict_runtime import location,read_execution
+            directory=location(root,identity)
+            effective['execution_layout']=dict(home=str(directory/'home'),app_server='unix://'+str(directory/'app-server.sock'))
+            effective['objective_execution']=read_execution(root,identity)
     except (OSError, ValueError, WakeError) as exc:
         emit({'error': {'code': 'configuration_unavailable', 'message': str(exc)}}, args.as_json)
         return 2

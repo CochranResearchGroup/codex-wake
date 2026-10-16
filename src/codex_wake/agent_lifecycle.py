@@ -32,7 +32,7 @@ def spawn_command(args, root):
             raise WakeError('host caller grant does not authorize this launch profile')
     required = {'cwd', 'app_server', 'codex_path', 'tmux_session', 'timeout'}
     strings = (required - {'timeout'}) | (set(profile) & {'tmux_socket', 'codex_home'})
-    if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home', 'resources'}
+    if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home', 'resources', 'strict_execution'}
             or ('resources' in profile and not isinstance(profile['resources'], dict))
             or any(not isinstance(profile.get(k), str) or not profile[k]
                    or '\x00' in profile[k] for k in strings)
@@ -51,6 +51,8 @@ def spawn_command(args, root):
                   task=args.task, expires_at=args.expires_at, source_thread_id=args.caller_thread_id)
     from .lifecycle_budget import operation_binding
     binding=operation_binding(config,args)
+    if 'strict_execution' in profile and not binding:
+        raise WakeError('strict execution requires an approved objective')
     if binding:intent.update(binding)
     replacement=getattr(args,'replacement',None)
     if replacement is not None:
@@ -61,7 +63,7 @@ def spawn_command(args, root):
     journal = Path(root) / 'lifecycle'
     key = hashlib.sha256(args.intent.encode()).hexdigest()
     path = journal / (key + '.json')
-    if not path.exists():
+    if not path.exists() and 'strict_execution' not in profile:
         endpoint=profile['app_server']
         try:
             socket=Path(endpoint[7:])
@@ -108,6 +110,11 @@ def spawn_command(args, root):
                     from .sessions_cli import emit
                     emit(receipt,args.as_json)
                     return 5
+            if 'strict_execution' in profile:
+                save(path,receipt)
+                from .strict_runtime import ensure_execution
+                ensure_execution(root,receipt)
+                save(path,receipt)
             from .native_clock import snapshot
             observation = snapshot()
             bounds = observation.get('utc')
@@ -336,6 +343,10 @@ def advance_spawn(path, receipt, profile):
 
 
 def before_effect(path, receipt):
+    from .strict_runtime import guard_execution
+    if not guard_execution(path.parent.parent,receipt):
+        save(path,receipt)
+        return False
     if (receipt['intent']['operation']=='spawn' and receipt['intent'].get('configuration')
             and not receipt['intent'].get('budget_inherited')):
         from .lifecycle_supervision import supervision_ready

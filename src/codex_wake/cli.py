@@ -2755,6 +2755,9 @@ def run(argv: list[str] | None = None) -> int:
         if args.sessions_command == 'target':
             from .tab_targets import target_command
             return target_command(args, root)
+        if args.sessions_command == 'execution':
+            from .strict_runtime import execution_command
+            return execution_command(args,root)
         if args.sessions_command == 'configuration':
             from .lifecycle_configuration import configuration_command
             return configuration_command(args, root)
