@@ -51,13 +51,19 @@
       "qualification": "Native sampled exhaustion and actual observerdeath/RPCunavailability proved. Freshness/malformed/decreasing/preflight/failedwork fixtures and independentOS/injected cases supplement, not substitute. Publicationdelay explicitly unmeasured; no maximumovershootbound."
     },
     "278": {
-      "state": "running",
+      "state": "validated",
       "blocked_by": [
         277
       ],
-      "remaining_validation": [
-        "successful actual native public successor semantic preflight and bounded goal continuation"
-      ]
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/native-lifecycle-partial.json",
+        "native-probe/native-successor-summary.json",
+        "native-probe/native-successor-handoff-public.json",
+        "native-probe/native-successor-final-reconcile.json",
+        "native-probe/native-successor-sentinel.json"
+      ],
+      "qualification": "Functional spec criteria validated across q/r native packets: concurrency, failedreplacement/deadline, renewal, refresh, semanticreview/successor, exactcleanup. Localproviderturn-count axis FAILED4vs3, extraautomaticDONE hadno command; all191562chargedonce. This failure has no causal path to identity/deadline/accounting/one-command proof and is retained, not waived."
     }
   },
   "workers": {
@@ -323,11 +329,11 @@
   ],
   "integration_tip": "8de38d5",
   "resource_accounting": {
-    "root_goal_checkpoint_tokens": 1356795,
-    "native_observed_tokens": 427289,
+    "root_goal_checkpoint_tokens": 1419384,
+    "native_observed_tokens": 618851,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
-    "further_native_turns_authorized": true,
+    "further_native_turns_authorized": false,
     "final_native_packet": {
       "max_turns": 1,
       "turns_used": 1,
@@ -336,15 +342,23 @@
       "no_further_calls": true
     },
     "cumulative_token_ceiling": 2000000,
-    "external_native_observed_tokens": 427289,
+    "external_native_observed_tokens": 618851,
     "external_native_unknown_reserved_tokens": 200000,
     "current_packet": {
-      "state": "correctedharnessvalidation+onewriter dispatched",
+      "state": "functional proof validated; localturncount axis failed; runtimecleaned",
       "max_turns": 3,
       "estimate_tokens": 350000,
       "initial_authorized_turns": 1,
       "remaining_two": "HOLDforwriterreadback",
-      "source": "ce700d7"
+      "source": "ce700d7",
+      "turns_used": 1,
+      "observed_tokens": 191562,
+      "remaining_estimate_tokens": 304090,
+      "authorized_remaining_turns": 2,
+      "root": "/tmp/cw166-r",
+      "actual_provider_turns": 4,
+      "planned_provider_turns": 3,
+      "unknown_tokens": 0
     },
     "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
@@ -410,8 +424,17 @@
     }
   ],
   "goal_level_remaining": [
-    "all278nativeacceptance",
     "one whole-branch review after all tickets validated",
     "one bounded remediation and focused verification"
-  ]
+  ],
+  "review": {
+    "state": "ready",
+    "broad_passes_used": 0,
+    "base": "0a5c8d1",
+    "frozen_source": "beeacfa",
+    "axes": [
+      "standards",
+      "spec"
+    ]
+  }
 }

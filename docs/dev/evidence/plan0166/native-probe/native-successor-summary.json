@@ -1,0 +1,285 @@
+{
+  "state": "qualified_handoff_and_one_command_with_extra_automatic_turn",
+  "source_commit": "beeacfa",
+  "frozen_tip": "ce700d7",
+  "preflight_tokens": 55175,
+  "final_usage": {
+    "objective_budget": {
+      "accounting_known": true,
+      "actors": {
+        "handoff:0ccdd86d7a012098b1f50c5771259ac58dcd9b8722766a6f26cdfc5e79cfe871": {
+          "known": true,
+          "reservation": 254090,
+          "session_deadline": 1792189447.6439784,
+          "settled": true,
+          "terms": [
+            254090,
+            1009
+          ],
+          "tokens_remaining": 108438,
+          "used": 145652
+        },
+        "spawn:7d986c2636dae91f6e13a9599ed67d9d8ee09a6763245d58a7f49324f6d287ac": {
+          "known": true,
+          "reservation": 300000,
+          "session_deadline": 1792189447.7571821,
+          "settled": true,
+          "terms": [
+            300000,
+            1200
+          ],
+          "tokens_remaining": 254090,
+          "used": 45910
+        }
+      },
+      "authorization_history": [
+        {
+          "action": "initial",
+          "approval": "Operator phaseA issue278",
+          "at": 1792188247.2747073,
+          "configuration": {
+            "handoff_writer": {
+              "instructions": "Create an exact restart-safe fixture checkpoint from real thread, git identity, original resource contract and evidence. Preserve prior verified artifacts. Do only the approved bounded packet.\n",
+              "name": "fixture-writer",
+              "path": "/tmp/cw166-r/writer.md",
+              "sha256": "2cbfdac3b61277afc2aa45b184e440270e20e6b3c408b01229f7a1b5869c75cb"
+            },
+            "max_correction_cycles": 0,
+            "objective": "Disposable fixture continuation: execute python3 continue_once.py exactly once, report its actual result, then stop. Do not create or change goals, actors, scope or resources.",
+            "objective_deadline": "2026-10-16T22:28:30+00:00",
+            "objective_time_limit_seconds": 1500,
+            "objective_token_limit": 600000,
+            "preflight_reviewer": {
+              "instructions": "Read selected instructions and source checkpoint. Review actual fixture evidence against approved criteria. Author an attributable semantic verdict and successor handoff; execute only the pinned verifier.\n",
+              "name": "fixture-reviewer",
+              "path": "/tmp/cw166-r/reviewer.md",
+              "sha256": "731f573a98d312af1ce3c70914ab932ae9d8de20f8abf1215c5151418e678b1a"
+            },
+            "revision": "944c22a059f5f19e4f6c5ef1f92b9fa3ffdcf284f91143b26ca2fba013ce6bc0",
+            "session_time_limit_seconds": 1200,
+            "session_token_limit": 300000,
+            "started_at": "2026-10-16T22:03:30.929800+00:00",
+            "strict_execution": {
+              "coverage": "dedicated_local_executor_and_descendants",
+              "exclusions": [
+                "shared_services",
+                "external_provider_execution",
+                "same_user_ipc_escape"
+              ],
+              "limits": {
+                "accounting_max_age_seconds": 90,
+                "checkpoint_grace_seconds": 1,
+                "cpu_quota_percent": 50,
+                "memory_max_bytes": 2147483648,
+                "memory_swap_max_bytes": 0,
+                "poll_seconds": 0.2,
+                "stop_grace_seconds": 2,
+                "tasks_max": 128
+              },
+              "maximum_token_overshoot": null,
+              "token_enforcement": "sampled_stop"
+            }
+          }
+        }
+      ],
+      "correction_cycles": 0,
+      "exhausted": false,
+      "goal_aliases": {
+        "goal:01a146be-7b1d-7b80-bc2d-37e2453fb1c1:1792188363": {
+          "actor_id": "spawn:7d986c2636dae91f6e13a9599ed67d9d8ee09a6763245d58a7f49324f6d287ac",
+          "preflight_tokens": 45910
+        },
+        "goal:01a146c1-680a-7340-bcc8-7e17994dd5f4:1792188491": {
+          "actor_id": "handoff:0ccdd86d7a012098b1f50c5771259ac58dcd9b8722766a6f26cdfc5e79cfe871",
+          "preflight_tokens": 55175
+        }
+      },
+      "handoff_writer": {
+        "instructions": "Create an exact restart-safe fixture checkpoint from real thread, git identity, original resource contract and evidence. Preserve prior verified artifacts. Do only the approved bounded packet.\n",
+        "name": "fixture-writer",
+        "path": "/tmp/cw166-r/writer.md",
+        "sha256": "2cbfdac3b61277afc2aa45b184e440270e20e6b3c408b01229f7a1b5869c75cb"
+      },
+      "max_correction_cycles": 0,
+      "objective": "Disposable fixture continuation: execute python3 continue_once.py exactly once, report its actual result, then stop. Do not create or change goals, actors, scope or resources.",
+      "objective_deadline": "2026-10-16T22:28:30+00:00",
+      "objective_id": "acceptance278",
+      "objective_time_limit_seconds": 1500,
+      "objective_token_limit": 600000,
+      "original_deadline": "2026-10-16T22:28:30+00:00",
+      "preflight_reviewer": {
+        "instructions": "Read selected instructions and source checkpoint. Review actual fixture evidence against approved criteria. Author an attributable semantic verdict and successor handoff; execute only the pinned verifier.\n",
+        "name": "fixture-reviewer",
+        "path": "/tmp/cw166-r/reviewer.md",
+        "sha256": "731f573a98d312af1ce3c70914ab932ae9d8de20f8abf1215c5151418e678b1a"
+      },
+      "ready": true,
+      "remaining_seconds": 1114.8765830993652,
+      "remaining_tokens": 408438,
+      "revision": "944c22a059f5f19e4f6c5ef1f92b9fa3ffdcf284f91143b26ca2fba013ce6bc0",
+      "session_time_limit_seconds": 1200,
+      "session_token_limit": 300000,
+      "started_at": "2026-10-16T22:03:30.929800+00:00",
+      "state": "ready",
+      "strict_execution": {
+        "coverage": "dedicated_local_executor_and_descendants",
+        "exclusions": [
+          "shared_services",
+          "external_provider_execution",
+          "same_user_ipc_escape"
+        ],
+        "limits": {
+          "accounting_max_age_seconds": 90,
+          "checkpoint_grace_seconds": 1,
+          "cpu_quota_percent": 50,
+          "memory_max_bytes": 2147483648,
+          "memory_swap_max_bytes": 0,
+          "poll_seconds": 0.2,
+          "stop_grace_seconds": 2,
+          "tasks_max": 128
+        },
+        "maximum_token_overshoot": null,
+        "token_enforcement": "sampled_stop"
+      },
+      "tokens_reserved": 0,
+      "tokens_used": 191562
+    },
+    "objective_id": "acceptance278",
+    "settled": [],
+    "state": "settled",
+    "unknown": []
+  },
+  "campaign_provider_turns": 4,
+  "successor_provider_turns": 3,
+  "continuation_successful_commands": 1,
+  "extra_automatic_turn": {
+    "tool_calls": 0,
+    "result": "DONE",
+    "boundary": "intended exact provider-turn envelope missed"
+  },
+  "original_source_deadline": 1792189447.7571821,
+  "original_objective_deadline": "2026-10-16T22:28:30+00:00",
+  "cleanup": {
+    "daemon": {
+      "pid": 45108,
+      "expected": {
+        "start_time_ticks": 23736748,
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+      },
+      "before": {
+        "start_time_ticks": 23736748,
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+      },
+      "after": null
+    },
+    "sentinel": {
+      "pid": 45109,
+      "expected": {
+        "start_time_ticks": 23736748,
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+      },
+      "before": {
+        "start_time_ticks": 23736748,
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+      },
+      "after": null
+    },
+    "unit": "codex-wake-objective-b8da6aa404e045ca8140a2203c598d1a.service",
+    "unit_final": "MainPID=0\nControlGroup=\nActiveState=inactive\n",
+    "cgroup_exists": false,
+    "dedicated_home_processes": [],
+    "sentinel_survival_receipt": "sentinel-survival-after-objective-stop.json"
+  },
+  "memory_disposition": {
+    "disposition": "forbidden",
+    "reason": "Lane permits /tmp evidence only; no external memory writes"
+  },
+  "explicit_native_user_assignments": 2,
+  "source_writer_turns": 1,
+  "successor_preflight_user_turns": 1,
+  "successor_automatic_goal_turns": 2,
+  "local_provider_turn_count_axis": "FAILED:4 actual campaign provider turns versus3 planned",
+  "runner_failure": {
+    "reason": "assumed exactly2 successor turns; observed3 and interrupted observation only",
+    "original_state": "failed_hold",
+    "original_error": "KeyboardInterrupt: "
+  },
+  "native_turn_receipt": [
+    {
+      "id": "01a146c1-a973-7c11-9803-ba49fdfdf082",
+      "status": "completed",
+      "user_messages": 1,
+      "successful_commands": 1
+    },
+    {
+      "id": "01a146c2-3916-7db3-9264-1bd33d9e4bec",
+      "status": "completed",
+      "user_messages": 0,
+      "successful_commands": 1
+    },
+    {
+      "id": "01a146c2-4e60-75e2-8d5c-41ed8b294873",
+      "status": "completed",
+      "user_messages": 0,
+      "successful_commands": 0
+    }
+  ],
+  "final_successor_goal": {
+    "threadId": "01a146c1-680a-7340-bcc8-7e17994dd5f4",
+    "objective": "Disposable fixture continuation: execute python3 continue_once.py exactly once, report its actual result, then stop. Do not create or change goals, actors, scope or resources.",
+    "status": "complete",
+    "tokenBudget": 198915,
+    "tokensUsed": 1869,
+    "timeUsedSeconds": 6,
+    "createdAt": 1792188491,
+    "updatedAt": 1792188502
+  },
+  "handoff_public_state": {
+    "state": "active",
+    "reason": "continuation_active",
+    "fingerprint": "0ccdd86d7a012098b1f50c5771259ac58dcd9b8722766a6f26cdfc5e79cfe871",
+    "source_thread_id": null,
+    "successor_thread_id": "01a146c1-680a-7340-bcc8-7e17994dd5f4",
+    "preflight_tokens_used": 55175,
+    "assignment_deadline": null,
+    "configuration_revision": null
+  },
+  "continued": {
+    "thread_id": "01a146c1-680a-7340-bcc8-7e17994dd5f4",
+    "answer": 42
+  },
+  "schema_fixture": {
+    "state": "passed",
+    "positive_nested": true,
+    "negative_cases": [
+      "flat_missing_nested",
+      "bad_verdict",
+      "wrong_evidence",
+      "wrong_identity"
+    ],
+    "runtime_verdict_enum": [
+      "accept",
+      "correct",
+      "blocked"
+    ],
+    "fixture_only": true
+  },
+  "receipt_sha256": {
+    "nested-contract-fixture.json": "bffe2266cd964f741c5f78b942af6d82afc7143ca363a74531cd420381b22e70",
+    "durable-after-toolreturn.json": "6ad09de70b743ba74e4986d79c8562c5c5ad78c79c141b27a711739126485554",
+    "writer-public.json": "4d118508782d1d8229491514c25ba1a68332c464d8936f7e1db224bf9d6840d1",
+    "writer-configuration.json": "68fe99dae084c42e5d958298dd547a164cb30b37a6167a3bf9b85ad44786998f",
+    "source-paused-goal.json": "bca760305e3b9cc4919644592bd8592fb0fc6afed2cbb22e6684d72e5a142cfd",
+    "refresh-public.json": "b786ad7588ff9f91493fe64cc9a474b2d57d55a678727ac53f2716c5cf12d860",
+    "goal-after-leave-paused.json": "bca760305e3b9cc4919644592bd8592fb0fc6afed2cbb22e6684d72e5a142cfd",
+    "handoff-public.json": "9a5ccda2d69e5f17ef7edb12fb15a1d206e77162189bcc43a09badc1d3b3d44b",
+    "preflight-cost.json": "263e59659d9a97b547ed075757aa14f9bed4007bcbd9dd42960df8415dfdeb9d",
+    "workspace/work-review.json": "413938ff33fa43484ac9c64fc9a23ceb3a8af3ab0b40133990e9fa64d11c2049",
+    "workspace/preflight.json": "a53ac5d633c66b3e2d812ab3517e6e1b0babcbda77f7b2a0b10f8399672618fa",
+    "workspace/successor-handoff.md": "27b58e9683de878a9cdc70677b215f65c3c98bf0f3f1b311fca0bb73e424fdc0",
+    "workspace/continued.json": "1fe2358e9cba7199ef4003c6787080252ee174ada50a0eb32c18f33e8fd59561",
+    "final-reconcile.json": "0604d971a5a36661eafd7a3998cad53f8d97a9f80b20412369797a3315ed2f9b",
+    "sentinel-survival-after-objective-stop.json": "0322ab136295e89af6dab5415c4a8530b7c7ea8c4ef7d4b4c562ab184cf3a95a",
+    "cleanup.json": "4e7a43ba236ceaf5ac1d20bc9da1fba5cc3c50a70435728b8c0b5b9fb4166ad3"
+  }
+}

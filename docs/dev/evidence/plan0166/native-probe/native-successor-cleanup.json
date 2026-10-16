@@ -1,0 +1,31 @@
+{
+  "daemon": {
+    "pid": 45108,
+    "expected": {
+      "start_time_ticks": 23736748,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+    },
+    "before": {
+      "start_time_ticks": 23736748,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+    },
+    "after": null
+  },
+  "sentinel": {
+    "pid": 45109,
+    "expected": {
+      "start_time_ticks": 23736748,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+    },
+    "before": {
+      "start_time_ticks": 23736748,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+    },
+    "after": null
+  },
+  "unit": "codex-wake-objective-b8da6aa404e045ca8140a2203c598d1a.service",
+  "unit_final": "MainPID=0\nControlGroup=\nActiveState=inactive\n",
+  "cgroup_exists": false,
+  "dedicated_home_processes": [],
+  "sentinel_survival_receipt": "sentinel-survival-after-objective-stop.json"
+}

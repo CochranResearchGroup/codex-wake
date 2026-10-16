@@ -6914,3 +6914,18 @@ fromce700d7, exactnestedreviewfixture beforepaidwriter; atmost3turns/350k
 estimate, initialonewriter onlythen actualcostreadback. Priorfailedreview
 nevernormalized; priorfixturecleaned.275–277validated;278running.
 Onebroadreviewunused, sourcefrozenbeeacfa, no productiondeployment.
+
+## Turn 337 | 2026-10-16 UTC | Native successor accepted with failed turn-count axis
+
+Outcome_progress:278functionalacceptance validated, all275–278nowvalidated onbranch.
+Publicrefresh preservedsource/goal/counters/deadlines; nativeauthorednestedreview
+and pinnedverifier passed; exactlyonecontinuationcommand returned42, goalcomplete.
+Finalpublicreconcile191562knownsettled=45910source+145652successor including55175
+preflightonce; reservations0/unknown[]. Sentinelgeneration survivedobjective stop;
+exactunit empty/cgroupabsent/privatehomeprocessesnone, fixturescleaned.
+
+Localproviderturn-count axis FAILED4actualvs3planned: additionalautomaticDONE
+turn hadno tool/userassignment, fullycharged. Originalrunnerlen2failure preserved.
+This doesnot invalidate identity/accounting/deadline/one-command acceptance; no
+exactproviderturn guarantee claimed. Priorqfailedschema and otherfailedpackets
+retained. Allticketsvalidated unlocksinglebroadreview; notyetmerge/release/deploy.

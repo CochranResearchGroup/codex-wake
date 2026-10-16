@@ -1,0 +1,14 @@
+{
+  "sentinel_pid": 45109,
+  "expected": {
+    "start_time_ticks": 23736748,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+  },
+  "actual": {
+    "start_time_ticks": 23736748,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+  },
+  "unit": "codex-wake-objective-b8da6aa404e045ca8140a2203c598d1a.service",
+  "unit_readback": "MainPID=0\nControlGroup=\nActiveState=inactive\n",
+  "cgroup_exists": false
+}
