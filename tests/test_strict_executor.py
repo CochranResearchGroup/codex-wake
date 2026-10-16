@@ -163,3 +163,49 @@ class StrictExecutorTests(unittest.TestCase):
             value=json.loads(heartbeat.read_text());value['observed_at']=120;heartbeat.write_text(json.dumps(value))
             self.assertIsNone(guard.check(boottime=11))
             self.assertEqual(guard.check(boottime=17), 'controller_unavailable')
+    def test_handoff_preflight_and_inherited_spawn_charge_one_cumulative_actor(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard, ledger, source_rollout = self.fixture(root)
+            ledger.record('worker', 20, settled=True, now=100)
+            ledger.bind_goal('goal:owned-thread:100', 'worker', 0, now=100)
+            ledger.reserve('handoff:next', 100, 80, now=100)
+            ledger.record('handoff:next', 10, now=100)
+            ledger.bind_goal('goal:successor-thread:101', 'handoff:next', 10, now=100)
+            lifecycle = Path(root)/'lifecycle'
+            intent = dict(operation='handoff', continuation=dict(objective_id='goal'),
+                launch=dict(app_server=guard.config['endpoint'], codex_home=root))
+            (lifecycle/'handoff.json').write_text(json.dumps(dict(thread_id='owned-thread',
+                successor_thread_id='successor-thread', budget_actor='handoff:next',
+                configuration=guard.config['configuration'], source_goal=dict(threadId='owned-thread',createdAt=100),
+                successor_goal=dict(threadId='successor-thread',createdAt=101),intent=intent)))
+            inherited = json.loads((lifecycle/'spawn.json').read_text())
+            inherited.update(thread_id='successor-thread', budget_actor='handoff:next')
+            inherited['intent']['budget_inherited']='handoff:next'
+            (lifecycle/'inherited.json').write_text(json.dumps(inherited))
+            (Path(root)/'sessions/successor.jsonl').write_text(source_rollout.read_text()
+                .replace('owned-thread','successor-thread').replace('"total_tokens": 20','"total_tokens": 30'))
+            self.assertIsNone(guard.check(boottime=11))
+            view = ledger.inspect(now=101)
+            self.assertEqual(view['tokens_used'], 50)
+            self.assertEqual(view['actors']['handoff:next']['used'], 30)
+            self.assertEqual(set(view['actors']), {'worker','handoff:next'})
+            # Removing the redundant inherited receipt must retain attribution
+            # through the canonical handoff; preflight and successor stay one actor.
+            (lifecycle/'inherited.json').unlink()
+            successor_rollout = Path(root)/'sessions/successor.jsonl'
+            successor_rollout.write_text(successor_rollout.read_text().replace('"total_tokens": 30','"total_tokens": 40'))
+            self.assertIsNone(guard.check(boottime=12))
+            self.assertEqual(ledger.inspect(now=102)['tokens_used'], 60)
+
+    def test_native_wall_timestamp_cannot_extend_monotonic_observation_lease(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard, ledger, rollout = self.fixture(root)
+            rollout.write_text(rollout.read_text().replace('1970-01-01T00:01:40Z','2099-01-01T00:00:00Z'))
+            self.assertIsNone(guard.check(boottime=11))
+            self.assertEqual(ledger.inspect(now=101)['tokens_used'], 20)
+            heartbeat = Path(root)/'lifecycle/supervision.json'
+            value = json.loads(heartbeat.read_text()); value['observed_at']=106
+            heartbeat.write_text(json.dumps(value))
+            self.assertEqual(guard.check(boottime=16), 'accounting_stale')

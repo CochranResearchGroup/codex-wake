@@ -55,6 +55,7 @@ class Guard:
         self.seen_usage = set()
         self.controller_fingerprint = None
         self.controller_seen_elapsed = None
+        self.usage_observations = {}
 
     def check(self, *, boottime=None):
         if boot_id_value() != self.config['boot_id']:
@@ -95,21 +96,35 @@ class Guard:
                     continue
                 receipt = json.loads(path.read_text())
                 intent = receipt.get('intent', {})
-                if intent.get('operation') != 'spawn' or not receipt.get('thread_id'):
+                operation = intent.get('operation')
+                if operation not in {'spawn', 'handoff'} or not receipt.get('thread_id'):
                     continue
                 launch = intent.get('launch', {})
-                if ((intent.get('configuration') or {}).get('revision') != self.config['configuration']['revision']
+                configuration = receipt.get('configuration') if operation == 'handoff' else intent.get('configuration')
+                if ((configuration or {}).get('revision') != self.config['configuration']['revision']
                         or objective_identity(intent.get('continuation', {})) != self.config['objective_id']
                         or launch.get('app_server') != self.config['endpoint']
                         or Path(launch.get('codex_home', '')).resolve() != Path(self.config['codex_home']).resolve()):
                     continue
                 actor = receipt.get('budget_actor')
-                if actor not in view['actors']:
-                    return 'actor_binding_unknown'
-                thread = receipt['thread_id']
-                if thread in owned and owned[thread] != actor:
-                    return 'actor_binding_changed'
-                owned[thread] = actor
+                if not actor:
+                    continue  # An intent is not a ledger admission.
+                bindings = [(receipt['thread_id'], actor)]
+                if operation == 'handoff':
+                    bindings = []
+                    if receipt.get('successor_thread_id'):
+                        bindings.append((receipt['successor_thread_id'], actor))
+                    source = receipt.get('source_goal')
+                    if source and source.get('threadId') == receipt['thread_id']:
+                        key = 'goal:' + source['threadId'] + ':' + str(source['createdAt'])
+                        source_actor = view['goal_aliases'].get(key, {}).get('actor_id', key)
+                        bindings.append((source['threadId'], source_actor))
+                for thread, bound_actor in bindings:
+                    if bound_actor not in view['actors']:
+                        return 'actor_binding_unknown'
+                    if thread in owned and owned[thread] != bound_actor:
+                        return 'actor_binding_changed'
+                    owned[thread] = bound_actor
             snapshots = {}
             home = Path(self.config['codex_home']) / 'sessions'
             paths = list(home.rglob('*.jsonl')) if home.exists() else []
@@ -161,7 +176,21 @@ class Guard:
                     if actor_id in self.seen_usage or actor['used'] > 0 or elapsed >= self.limits['accounting_max_age_seconds']:
                         return 'accounting_missing'
                     continue
-                if not 0 <= upper - observed <= self.limits['accounting_max_age_seconds']:
+                # Native wall time is not an elapsed-time authority. Lease the
+                # immutable native observation against this guard's BOOTTIME
+                # epoch; first observation gets only admission's original grace.
+                previous = self.usage_observations.get(actor_id)
+                fingerprint = (usage, observed)
+                if previous is None:
+                    seen_elapsed = 0
+                else:
+                    old_fingerprint, seen_elapsed = previous
+                    if observed < old_fingerprint[1]:
+                        return 'accounting_invalid'
+                    if fingerprint != old_fingerprint:
+                        seen_elapsed = elapsed
+                self.usage_observations[actor_id] = fingerprint, seen_elapsed
+                if not 0 <= elapsed - seen_elapsed <= self.limits['accounting_max_age_seconds']:
                     return 'accounting_stale'
                 self.seen_usage.add(actor_id)
                 view = ledger.record(actor_id, usage, settled=actor['settled'], now=upper)
