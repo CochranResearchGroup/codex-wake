@@ -6838,3 +6838,19 @@ Initial direct-native containment proof passed separately; local20k native probe
 allowance exceeded by46,711 tokens and is retained as a failed budget axis.
 Remaining native packet bounded to2 total turns/150k tokens including prior spend.
 No deployment or production-session effects.
+
+## Turn 332 | 2026-10-16 UTC | Objective enforcement resource checkpoint
+
+Plan0166 OPEN; active→resource checkpoint, outcome_progress, acceptance incomplete.
+Code87532d0 on feat/objective-enforcement. Public native containment and operator
+stop pass with real Codex/tool/child membership, kernel limits, exact cleanup and
+unrelated sentinel. First native usage grace, BOOTTIME heartbeat, attribution and
+ledger contention fixes integrated.97 focused tests pass with1 opt-in skip.
+Full development suite fails; unchanged-base handoff selection reproduces same
+50failures/1error. No frozen full pass or whole-branch review.
+275 integrated/notvalidated;276–278 pending. Resource checkpoint preserves root
+539,553 observed plus native46,711 and two unknown-cost turns conservatively
+reserved100k each; reservations are not exact upper bounds. No further native
+spend. See evidence/plan0166/checkpoint.md and ledger.json for restart gates.
+No install/deploy/merge/closure. Memory disposition unavailable: no reviewed
+Codex Wake Graphiti group; explicit non-write receipt retained, zero memory writes.

@@ -90,14 +90,33 @@
         "baseline-handoff.log",
         "handoff-hermetic.log"
       ]
+    },
+    {
+      "kind": "frozen checkpoint focused regression",
+      "result": "PASS",
+      "tests": 97,
+      "skipped": 1,
+      "artifact": "checkpoint-focused.log",
+      "qualification": "One opt-in host test skipped here; earlier independent live host evidence retained."
     }
   ],
-  "integration_tip": "9c34f17 plus first-native-usage lease repair pending commit",
+  "integration_tip": "87532d0",
   "resource_accounting": {
     "root_goal_checkpoint_tokens": 600000,
     "native_observed_tokens": 46711,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
     "further_native_turns_authorized": false
+  },
+  "checkpoint": {
+    "state_transition": "active_to_resource_checkpoint",
+    "acceptance_state": "incomplete",
+    "progress_classification": "outcome_progress",
+    "root_tokens_at_check": 539553,
+    "native_observed_tokens": 46711,
+    "native_unknown_turns": 2,
+    "conservative_unknown_reservations": 200000,
+    "stop_reason": "User requests checkpoint before 1MM tokens or3h; unknown native usage makes further complete native acceptance unsafe to budget in this window.",
+    "next_action": "Resume from checkpoint.md; first finish275 validation without paid effects, then independently qualify276 before277/278."
   }
 }
