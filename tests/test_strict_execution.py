@@ -91,3 +91,46 @@ class StrictConfigurationTests(unittest.TestCase):
                     with SharedAppServerReader(endpoint,timeout=2) as reader:
                         self.assertEqual(reader.request('thread/list',{'limit':1}),{'data':[]})
             finally:server.shutdown();worker.join(2)
+
+
+class StrictLaunchRefusalTests(unittest.TestCase):
+    def test_public_spawn_refuses_shared_endpoint_and_unsupported_host_before_native_effect(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        from codex_wake.strict_runtime import location
+        from codex_wake.lifecycle_supervision import publish_supervision
+        from codex_wake.objective_ledger import ObjectiveLedger
+        from codex_wake.records import WakeError
+        for shared in (True,False):
+            with self.subTest(shared=shared),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp);wake=root/'wake';wake.mkdir(mode=0o700)
+                home=location(wake,'goal')/'home';home.mkdir(parents=True,mode=0o700)
+                home.parent.chmod(0o700)
+                instruction=root/'review.md';instruction.write_text('Review fixture only.')
+                selection=dict(name='fixture',path=str(instruction))
+                limits=dict(memory_max_bytes=134217728,memory_swap_max_bytes=0,cpu_quota_percent=20,
+                    tasks_max=16,stop_grace_seconds=1,checkpoint_grace_seconds=1,
+                    poll_seconds=.2,accounting_max_age_seconds=2)
+                profile=dict(cwd=tmp,codex_home=str(home),codex_path='/bin/true',tmux_session='fixture',
+                    timeout=1,app_server='unix://'+str(root/'shared.sock' if shared else home.parent/'app-server.sock'),
+                    strict_execution=limits)
+                config=dict(version=1,profiles={'worker':profile},lifecycle_defaults=dict(
+                    handoff_writer=selection,preflight_reviewer=selection,session_token_limit=100,
+                    objective_token_limit=500,session_time_limit_seconds=80,objective_time_limit_seconds=100,
+                    max_correction_cycles=1),continuations={'source':dict(objective_id='goal',objective='work',
+                    approval='operator fixture',started_at='1970-01-01T00:01:40Z')})
+                profiles=root/'profiles.json';profiles.write_text(json.dumps(config))
+                expected='objective-owned home and endpoint' if shared else 'cgroup-v2 and suspend-aware BOOTTIME'
+                with patch('codex_wake.native_clock.snapshot',return_value={'utc':{'lower':100,'upper':101}}), \
+                        patch('codex_wake.strict_runtime.time',SimpleNamespace()), \
+                        patch('codex_wake.native_protocol.native_request') as native, \
+                        patch('codex_wake.host_execution.subprocess.run') as host:
+                    publish_supervision(wake,1)
+                    with redirect_stdout(StringIO()),self.assertRaisesRegex(WakeError,expected):
+                        run(['--wake-root',str(wake),'sessions','spawn','--profiles',str(profiles),
+                            '--profile','worker','--objective-ref','source','--intent','refusal','--name','worker',
+                            '--task','No effects permitted','--expires-at','2030-01-01T00:00:00Z','--json'])
+                    native.assert_not_called();host.assert_not_called()
+                view=ObjectiveLedger(wake,'goal').inspect(now=101)
+                self.assertEqual(len(view['actors']),1)
+                self.assertEqual(view['tokens_used'],0)

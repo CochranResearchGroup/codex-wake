@@ -79,7 +79,15 @@ class HostExecutionTests(unittest.TestCase):
                 self.assertEqual(running['kernel_limits']['memory.max'], '67108864')
                 deadline = time.monotonic() + 5
                 while time.monotonic() < deadline:
-                    state = adapter.inspect(identity)
+                    try:
+                        state = adapter.inspect(identity)
+                    except RuntimeError as exc:
+                        if str(exc) != 'active executor cgroup unavailable':
+                            raise
+                        # Manager state and kernel cgroup removal are not atomic.
+                        # Re-observe this exact invocation under the same deadline.
+                        time.sleep(.05)
+                        continue
                     if not state['populated']:
                         break
                     time.sleep(.05)

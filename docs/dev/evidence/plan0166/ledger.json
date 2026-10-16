@@ -9,8 +9,6 @@
       "state": "integrated",
       "blocked_by": [],
       "remaining_validation": [
-        "unsupported/shared refusal coverage",
-        "setup/build/test descendant qualification",
         "frozen integration regression gate"
       ]
     },
@@ -98,15 +96,73 @@
       "skipped": 1,
       "artifact": "checkpoint-focused.log",
       "qualification": "One opt-in host test skipped here; earlier independent live host evidence retained."
+    },
+    {
+      "kind": "public refusal",
+      "result": "PASS",
+      "artifact": "refusal-public.log"
+    },
+    {
+      "kind": "actual native build/test and token exhaustion",
+      "result": "PASS",
+      "artifact": "native-probe/native-token-exhaustion.json",
+      "native_tokens": 22874,
+      "overshoot": 22873,
+      "qualification": "Not publication-to-stop timing; whole packet20.124sec. Does not validate other277 criteria or unlock dependencies."
+    },
+    {
+      "kind": "settled cap fence",
+      "result": "PASS",
+      "tests": 24,
+      "red": "settled-cap-red.log",
+      "green": "settled-cap-green.log"
+    },
+    {
+      "kind": "full branch comparison",
+      "result": "SAME_FAILURE_IDENTITIES",
+      "baseline_tests": 1268,
+      "candidate_tests": 1302,
+      "failures": 63,
+      "errors": 1,
+      "artifact": "full-comparison.json"
+    },
+    {
+      "kind": "wheel",
+      "result": "BUILD_AND_ISOLATED_INSTALL_PASS",
+      "wheel_sha256": "8450d0024ccaf0e3a78a72fb4406f352f16333eaed7a39002f1e495120bbeaed",
+      "prefix": "/tmp/cw166-wheel-installed",
+      "interpreter": "/home/ecochran76/.local/share/codex-wake/releases/0.16.0-d3ea192/bin/python",
+      "qualification": "Disposable qualification install only; production prefix unchanged."
+    },
+    {
+      "kind": "installed live host regression",
+      "result": "FIRST_ATTEMPT_ERROR",
+      "reason": "manager/kernel cgroup-removal observation race in opt-in test; exact-invocation bounded re-observation added",
+      "artifact": "installed-strict-host.log"
+    },
+    {
+      "kind": "installed live host corrected regression",
+      "result": "PASS",
+      "tests": 35,
+      "skips": 0,
+      "artifact": "installed-strict-host-corrected.log",
+      "qualification": "First observation-race failure retained; exact-invocation same-deadline polling repair."
     }
   ],
   "integration_tip": "87532d0",
   "resource_accounting": {
-    "root_goal_checkpoint_tokens": 600000,
-    "native_observed_tokens": 46711,
+    "root_goal_checkpoint_tokens": 700000,
+    "native_observed_tokens": 69585,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
-    "further_native_turns_authorized": false
+    "further_native_turns_authorized": false,
+    "final_native_packet": {
+      "max_turns": 1,
+      "turns_used": 1,
+      "observed_tokens": 22874,
+      "failed_effect_free_startups": 1,
+      "no_further_calls": true
+    }
   },
   "checkpoint": {
     "state_transition": "active_to_resource_checkpoint",
@@ -117,6 +173,8 @@
     "native_unknown_turns": 2,
     "conservative_unknown_reservations": 200000,
     "stop_reason": "User requests checkpoint before 1MM tokens or3h; unknown native usage makes further complete native acceptance unsafe to budget in this window.",
-    "next_action": "Resume from checkpoint.md; first finish275 validation without paid effects, then independently qualify276 before277/278."
+    "next_action": "Resume from checkpoint.md; first finish275 validation without paid effects, then independently qualify276 before277/278.",
+    "resumed": true,
+    "resume_reason": "User resumed active goal; continue safe work under original cumulative bounds."
   }
 }

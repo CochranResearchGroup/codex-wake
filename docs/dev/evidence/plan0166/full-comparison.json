@@ -1,0 +1,16 @@
+{
+  "baseline_summary": [
+    "Ran 1268 tests in 273.918s",
+    "FAILED (failures=63, errors=1)"
+  ],
+  "candidate_summary": [
+    "Ran 1302 tests in 275.093s",
+    "FAILED (failures=63, errors=1, skipped=1)"
+  ],
+  "identical_failure_identities": true,
+  "candidate_only": [],
+  "baseline_only": [],
+  "baseline_sha256": "fa9c15450febbeec4b6a86b9a411bdcf7baee35a190bfea394fd4ac1fd729791",
+  "candidate_sha256": "3ff99dd1c02200685252d0b709258ef05e4a4a3093e9f614a0383900c98b6bb8",
+  "qualification": "Clock config cleared; shared user registry still visible. Candidate source edited during run; settled-cap guard and refusal selections verified separately; this is comparison evidence, not a pristine full-suite pass."
+}

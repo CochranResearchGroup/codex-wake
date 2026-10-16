@@ -176,6 +176,8 @@ class Guard:
             for actor_id in view['actors']:
                 actor = view['actors'][actor_id]
                 usage, observed = snapshots.get(actor_id, (None, None))
+                if actor['used'] >= actor['reservation']:
+                    return 'session_tokens_exhausted'
                 if not actor['settled'] and upper >= actor['session_deadline'] - self.limits['stop_grace_seconds'] - self.limits['checkpoint_grace_seconds']:
                     return 'session_deadline_reached'
                 if actor['settled']:

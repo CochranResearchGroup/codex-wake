@@ -83,6 +83,13 @@ class StrictExecutorTests(unittest.TestCase):
             value=json.loads(heartbeat.read_text());value['observed_at']=110;value['observed_boottime']=20;heartbeat.write_text(json.dumps(value))
             self.assertIsNone(guard.check(boottime=20))
 
+    def test_settlement_at_session_cap_does_not_remove_exhaustion_fence(self):
+        with tempfile.TemporaryDirectory() as root:
+            guard, ledger, rollout = self.fixture(root)
+            rollout.write_text(rollout.read_text().replace('"total_tokens": 20','"total_tokens": 100'))
+            ledger.record('worker',100,settled=True,now=100)
+            self.assertEqual(guard.check(boottime=11),'session_tokens_exhausted')
+
     def test_old_usage_cannot_be_refreshed_by_repeated_polling(self):
         with tempfile.TemporaryDirectory() as root:
             import json

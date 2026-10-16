@@ -190,6 +190,7 @@ codex-wake sessions close thread:THREAD_UUID
 | Continue an objective in a fresh conversation | `sessions handoff` | `wake_sessions_handoff` |
 
 Start with the [lifecycle quickstart](docs/agent-lifecycle.md#quickstart).
+Development branch: [strict objective execution controls and limits](docs/agents/strict-objectives.md).
 An operator configures the approved host profile and caller access first.
 Refresh and handoff require a checkpoint; handoff supports a new tab or the same
 pane. Receipts distinguish readiness, task admission and completed work.
