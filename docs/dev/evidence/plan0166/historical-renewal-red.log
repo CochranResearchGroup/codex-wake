@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_explicit_renewal_keeps_settled_historical_usage_without_reapplying_old_session_cap (test_strict_executor.StrictExecutorTests.test_explicit_renewal_keeps_settled_historical_usage_without_reapplying_old_session_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 126, in test_explicit_renewal_keeps_settled_historical_usage_without_reapplying_old_session_cap
+    self.assertIsNone(guard.check(boottime=11))
+AssertionError: 'session_tokens_exhausted' is not None
+
+----------------------------------------------------------------------
+Ran 1 test in 0.079s
+
+FAILED (failures=1)

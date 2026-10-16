@@ -99,6 +99,8 @@ def spawn_command(args, root):
                     return 5
                 receipt.pop('reason',None)
             if binding:
+                from .strict_runtime import preflight_execution
+                preflight_execution(root,receipt)
                 from .lifecycle_budget import admit_spawn
                 from .native_protocol import native_request
                 from .app_server import resolve_codex_cmd

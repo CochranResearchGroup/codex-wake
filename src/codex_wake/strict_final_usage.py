@@ -37,7 +37,8 @@ def _read(path, remaining, *, private=False):
     descriptor=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
     with os.fdopen(descriptor,'rb') as stream:
         info=os.fstat(stream.fileno())
-        if not stat.S_ISREG(info.st_mode):raise ValueError('nonregular accounting artifact')
+        if not stat.S_ISREG(info.st_mode) or info.st_uid!=os.geteuid():
+            raise ValueError('accounting artifact must be an owned regular file')
         data=stream.read(remaining+1)
     if len(data)>remaining:raise ValueError('accounting_capacity_exceeded')
     return data
@@ -139,7 +140,10 @@ def reconcile_final_usage(root, binding):
                     if source['threadId'] in bindings and bindings[source['threadId']]!=source_actor:raise ValueError('actor_binding_changed')
                     bindings[source['threadId']]=source_actor
         sessions=home/'sessions'
-        if sessions.exists():_private(sessions,True)
+        if sessions.exists():
+            info=sessions.lstat()
+            if not stat.S_ISDIR(info.st_mode) or info.st_uid!=os.geteuid():
+                raise ValueError('native sessions must be an owned directory without symlinks')
         paths=list(islice(sessions.rglob('*.jsonl'),513)) if sessions.exists() else []
         if len(paths)+len(receipts)>512:raise ValueError('accounting_capacity_exceeded')
         observations={}
@@ -164,7 +168,10 @@ def reconcile_final_usage(root, binding):
             if terminal and usage is not None and usage>=actor['used']:
                 ledger.record(actor_id,usage,settled=True,now=now)
                 result['settled'].append(actor_id)
-            else:result['unknown'].append(actor_id)
+            else:
+                if usage is not None:
+                    ledger.record_sampled_floor(actor_id,usage,now=now)
+                result['unknown'].append(actor_id)
         after=ledger.inspect(now=now)
         result.update(state='settled' if not result['unknown'] and all(a['known'] and a['settled'] for a in after['actors'].values()) else 'accounting_unknown',
             objective_budget=after)

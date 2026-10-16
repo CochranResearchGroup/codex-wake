@@ -75,6 +75,14 @@ class StrictFinalUsageTests(unittest.TestCase):
             self.assertTrue(view['actors']['spawn:owned']['settled'])
             self.assertTrue(view['actors']['spawn:owned']['known'])
 
+    def test_native_sessions_permissions_inside_private_home_do_not_block_reconciliation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,profiles,ledger,log,_=self.fixture(directory)
+            log.parent.chmod(0o775)  # Actual Codex creates this beneath its private 0700 home.
+            code,result=self.command(root,profiles,'--reconcile')
+            self.assertEqual(code,0,result)
+            self.assertEqual(ledger.inspect(now=1893456001)['tokens_used'],27)
+
     def test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown(self):
         for variant in ('missing_terminal','later_inprogress','counter_after_terminal','decreased'):
             with self.subTest(variant=variant),tempfile.TemporaryDirectory() as directory:
@@ -89,7 +97,7 @@ class StrictFinalUsageTests(unittest.TestCase):
                 actor=ledger.inspect(now=1893456001)['actors']['spawn:owned']
                 self.assertFalse(actor['known'])
                 self.assertFalse(actor['settled'])
-                self.assertEqual(actor['used'],20)
+                self.assertEqual(actor['used'],20 if variant=='decreased' else 27)
                 self.assertEqual(actor['reservation'],100)
 
     def test_nonblocking_fence_reports_lock_busy_without_claiming_final(self):

@@ -106,6 +106,70 @@ class StrictExecutorTests(unittest.TestCase):
             rollout.unlink()
             self.assertEqual(guard.check(boottime=12), 'accounting_missing')
 
+    def test_explicit_renewal_keeps_settled_historical_usage_without_reapplying_old_session_cap(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard,ledger,old_rollout=self.fixture(root)
+            old_rollout.write_text(old_rollout.read_text().replace('"total_tokens": 20','"total_tokens": 100'))
+            ledger.record('worker',100,settled=True,now=100)
+            revised=guard.config['configuration'] | dict(revision=2,objective_token_limit=300)
+            ledger.extend(revised,'explicit operator renewal',now=101)
+            self.assertTrue(ledger.reserve('new-worker',100,60,now=101)['admitted'])
+            path=Path(root)/'lifecycle/spawn.json';receipt=json.loads(path.read_text())
+            receipt.update(thread_id='new-thread',budget_actor='new-worker')
+            receipt['intent']['configuration']=revised
+            (path.parent/'new-spawn.json').write_text(json.dumps(receipt))
+            (old_rollout.parent/'new.jsonl').write_text(old_rollout.read_text()
+                .replace('owned-thread','new-thread').replace('"total_tokens": 100','"total_tokens": 10'))
+            guard.config['configuration']=revised
+            guard.config['historical_actors']={'worker':100}
+            self.assertIsNone(guard.check(boottime=11))
+            view=ledger.inspect(now=101)
+            self.assertEqual(view['tokens_used'],110)
+            self.assertEqual(view['actors']['worker']['used'],100)
+            old_rollout.write_text(old_rollout.read_text().replace('"total_tokens": 100','"total_tokens": 105'))
+            self.assertEqual(guard.check(boottime=12),'settled_actor_usage_changed')
+
+    def test_fresh_paused_goal_adopts_proven_spawn_actor_without_double_charging(self):
+        import json
+        from codex_wake.lifecycle_budget import record_goal_observation
+        with tempfile.TemporaryDirectory() as root:
+            guard,ledger,rollout=self.fixture(root)
+            ledger.record('worker',20,settled=True,now=100)
+            with rollout.open('a') as stream:
+                stream.write(json.dumps(dict(type='event_msg',payload=dict(type='task_complete',turn_id='done')))+'\n')
+            native=dict(id='owned-thread',path=str(rollout),turns=[dict(id='done',status='completed')])
+            goal=dict(threadId='owned-thread',createdAt=101,status='paused',tokensUsed=0,
+                timeUsedSeconds=0,tokenBudget=80)
+            profile=dict(codex_home=root,app_server=guard.config['endpoint'],strict_execution={})
+            view=record_goal_observation(ledger,'goal:owned-thread:101',goal,profile,
+                lambda method,params:dict(thread=native),settled=True,now=101)
+            self.assertEqual(set(view['actors']),{'worker'})
+            self.assertEqual(view['tokens_used'],20)
+            self.assertEqual(view['goal_aliases']['goal:owned-thread:101'],
+                dict(actor_id='worker',preflight_tokens=20))
+
+    def test_owned_goal_does_not_guess_offsets_for_progressed_or_mismatched_goals(self):
+        import json
+        from codex_wake.lifecycle_budget import record_goal_observation
+        for change in ({'tokensUsed':1},{'tokenBudget':81},{'status':'active'}):
+            with self.subTest(change=change),tempfile.TemporaryDirectory() as root:
+                guard,ledger,rollout=self.fixture(root)
+                ledger.record('worker',20,settled=True,now=100)
+                with rollout.open('a') as stream:
+                    stream.write(json.dumps(dict(type='event_msg',payload=dict(type='task_complete',turn_id='done')))+'\n')
+                native=dict(id='owned-thread',path=str(rollout),turns=[dict(id='done',status='completed')])
+                goal=dict(threadId='owned-thread',createdAt=101,status='paused',tokensUsed=0,
+                    timeUsedSeconds=0,tokenBudget=80) | change
+                profile=dict(codex_home=root,app_server=guard.config['endpoint'],strict_execution={})
+                with self.assertRaisesRegex(ValueError,'budget binding unavailable'):
+                    record_goal_observation(ledger,'goal:owned-thread:101',goal,profile,
+                        lambda method,params:dict(thread=native),settled=True,now=101)
+                view=ledger.inspect(now=101)
+                self.assertEqual(set(view['actors']),{'worker'})
+                self.assertEqual(view['goal_aliases'],{})
+                self.assertEqual(view['tokens_used'],20)
+
     def test_failed_native_turn_retains_cumulative_usage_including_cached_input(self):
         import json
         with tempfile.TemporaryDirectory() as root:
@@ -135,7 +199,7 @@ class StrictExecutorTests(unittest.TestCase):
     def test_guard_executable_readback_separates_ledger_poll_from_native_usage_observation(self):
         import json,subprocess,sys,time,os
         with tempfile.TemporaryDirectory() as root:
-            guard,_,_=self.fixture(root)
+            guard,ledger,_=self.fixture(root)
             now=time.clock_gettime(time.CLOCK_BOOTTIME)
             heartbeat=Path(root)/'lifecycle/supervision.json'
             value=json.loads(heartbeat.read_text());value['observed_boottime']=now
@@ -156,6 +220,11 @@ class StrictExecutorTests(unittest.TestCase):
             self.assertGreater(actor['lease_age_seconds'],0)
             self.assertIsNone(accounting['publication_delay_seconds'])
             self.assertIsNone(accounting['maximum_token_overshoot'])
+            self.assertEqual(status['final_usage']['state'],'accounting_unknown')
+            view=ledger.inspect(now=101)
+            self.assertEqual(view['tokens_used'],20)
+            self.assertFalse(view['actors']['worker']['known'])
+            self.assertFalse(view['actors']['worker']['settled'])
 
     def test_guard_cli_writes_private_generation_fence_before_any_child_launch(self):
         import json, subprocess, sys

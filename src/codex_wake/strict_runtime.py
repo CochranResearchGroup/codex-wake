@@ -240,6 +240,19 @@ def stop_execution(root,objective_id,reason='operator_stop'):
         try:
             observed=SystemdExecution().stop(binding['identity'])
             binding.update(state='stopped',reason=reason,host=observed)
+            # systemctl may terminate the guard before its Python finally runs.
+            # Preserve unknown final cost even when local termination is proven.
+            try:
+                from .strict_executor import Guard
+                config_path=directory/('guard-'+binding['generation']+'.json')
+                _private(config_path)
+                config=json.loads(config_path.read_text())
+                if (config['generation']!=binding['generation'] or config['objective_id']!=objective_id
+                        or Path(config['wake_root']).resolve()!=Path(root).resolve()):
+                    raise ValueError('guard configuration changed')
+                binding['final_usage']=Guard(config).final_accounting_fence()
+            except (OSError,ValueError,KeyError,TypeError):
+                binding['final_usage']=dict(state='accounting_unknown',reason='final_usage_unavailable')
         except Exception as exc:
             binding.update(state='uncertain',reason='executor_stop_unverified',error=type(exc).__name__)
         _save(directory/'binding.json',binding)

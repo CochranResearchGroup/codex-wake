@@ -61,9 +61,47 @@ def configured_ledger(root,receipt):
 def record_goal_observation(ledger,key,goal,profile,request,*,settled,now):
     """Native goal counters may discount cache; owned session rollouts do not."""
     view=ledger.view(now=now);binding=view['goal_aliases'].get(key)
+    native=None
+    if not binding and 'strict_execution' in profile:
+        # A paused native goal may be created after an owned spawn finishes.
+        # Bind it only at an exact, verified budget boundary; display counters
+        # cannot be subtracted from cumulative usage to invent an offset.
+        candidates=set()
+        for path in (ledger.directory.parent/'lifecycle').glob('*.json'):
+            if path.name=='supervision.json' or path.name.startswith('owner-'):continue
+            receipt=json.loads(path.read_text());intent=receipt.get('intent',{})
+            launch=intent.get('launch',{})
+            thread=(receipt.get('successor_thread_id') if intent.get('operation')=='handoff'
+                    else receipt.get('thread_id') if intent.get('operation')=='spawn' else None)
+            configuration=receipt.get('configuration') or intent.get('configuration',{})
+            if (thread==goal['threadId'] and objective_identity(intent.get('continuation',{}))==ledger.objective_id
+                    and configuration.get('revision')==view['revision']
+                    and launch.get('app_server')==profile.get('app_server')
+                    and Path(launch.get('codex_home','')).resolve()==Path(profile.get('codex_home','')).resolve()
+                    and receipt.get('budget_actor') in view['actors']):
+                candidates.add(receipt['budget_actor'])
+        if len(candidates)!=1:
+            raise ValueError('strict native goal has no unique owned accounting binding')
+        actor_id=next(iter(candidates));actor=view['actors'][actor_id]
+        native=request('thread/read',dict(threadId=goal['threadId'],includeTurns=True))['thread']
+        turns=native.get('turns',[])
+        if (native.get('id')!=goal['threadId'] or not turns
+                or any(t.get('status') not in ('completed','failed','interrupted') for t in turns)):
+            raise ValueError('owned native goal work is not settled')
+        usage=native_usage(native,profile,settled_turn_id=turns[-1]['id'])
+        if (not actor['known'] or not actor['settled'] or usage is None or usage!=actor['used']
+                or key!='goal:'+goal['threadId']+':'+str(goal['createdAt'])
+                or goal.get('status')!='paused' or type(goal.get('tokensUsed')) is not int
+                or goal['tokensUsed']!=0 or type(goal.get('timeUsedSeconds')) is not int
+                or goal['timeUsedSeconds']!=0
+                or type(goal.get('tokenBudget')) is not int or goal['tokenBudget']<=0
+                or goal['tokenBudget']!=actor['tokens_remaining']):
+            raise ValueError('owned native goal budget binding unavailable')
+        view=ledger.bind_goal(key,actor_id,usage,now=now)
+        binding=view['goal_aliases'][key]
     if not binding:
         return ledger.record_goal(key,goal.get('tokensUsed'),settled=settled,now=now)
-    native=request('thread/read',dict(threadId=goal['threadId'],includeTurns=True))['thread']
+    if native is None:native=request('thread/read',dict(threadId=goal['threadId'],includeTurns=True))['thread']
     if native.get('id')!=goal['threadId']:raise ValueError('source rollout identity changed')
     return ledger.record(binding['actor_id'],native_usage(native,profile),
         settled=settled and not any(t.get('status')=='inProgress' for t in native['turns']),now=now)

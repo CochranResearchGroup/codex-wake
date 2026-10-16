@@ -189,6 +189,18 @@ class ObjectiveLedger:
     def record(self, actor_id, cumulative_tokens, settled=False, *, now):
         return self._record(actor_id, cumulative_tokens, settled=settled, now=now)
 
+    def record_sampled_floor(self, actor_id, cumulative_tokens, *, now):
+        """Retain a later observed floor without asserting final accounting."""
+        _count(cumulative_tokens)
+        with self._transaction() as state:
+            self._observe(state,now)
+            self._view(state,now)
+            if actor_id not in state['actors']:
+                raise ValueError('sampled floor requires an enrolled actor')
+            actor=state['actors'][actor_id]
+            actor.update(used=max(actor['used'],cumulative_tokens),known=False,settled=False)
+            return self._view(state,now)
+
     def record_goal(self, goal_id, cumulative_tokens, settled=False, *, now):
         return self._record(goal_id, cumulative_tokens, settled=settled, goal=True, now=now)
 

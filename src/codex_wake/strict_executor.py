@@ -64,6 +64,7 @@ class Guard:
         self.accounting_view = None
         self.accounting_verified = False
         self.native_observed_elapsed = {}
+        self.invalidated_actors = set()
 
     def accounting_readback(self, *, boottime=None):
         current = time.clock_gettime(time.CLOCK_BOOTTIME) if boottime is None else boottime
@@ -76,6 +77,7 @@ class Guard:
             first, latest = self.native_observed_elapsed.get(actor_id, (None, None))
             epoch = self.config['started_boottime']
             actors[actor_id] = dict(known=actor['known'], settled=actor['settled'],
+                historical=actor_id in self.config.get('historical_actors', {}),
                 native_total_tokens=fingerprint[0], native_published_epoch=fingerprint[1],
                 first_observed_boottime=None if first is None else epoch + first,
                 last_observed_boottime=None if latest is None else epoch + latest,
@@ -89,6 +91,31 @@ class Guard:
             detection_interval_seconds=self.limits['poll_seconds'],
             publication_delay_seconds=None, publication_delay_status='unmeasured_independent_clock',
             maximum_token_overshoot=None, enforcement='sampled_stop')
+
+    def final_accounting_fence(self):
+        """A forced stop does not turn the last sampled floor into final usage."""
+        from .strict_final_usage import fence_final_usage
+        upper=self.config['started_upper']
+        if boot_id_value()==self.config['boot_id']:
+            upper+=max(0,time.clock_gettime(time.CLOCK_BOOTTIME)-self.config['started_boottime'])
+        try:
+            ledger=_NonblockingLedger(self.config['wake_root'],self.config['objective_id'])
+            view=ledger.inspect(now=upper)
+            if self.accounting_view is None:
+                if view['revision']!=self.config['configuration']['revision']:
+                    return dict(state='accounting_unknown',reason='configuration_changed')
+                actor_ids=list(view['actors'])
+            else:
+                actor_ids=list(self.accounting_view['actors'])
+            for actor_id in self.invalidated_actors:
+                ledger.record(actor_id,None,settled=False,now=upper)
+            result=fence_final_usage(ledger,actor_ids,now=upper)
+            self.accounting_view=ledger.inspect(now=upper)
+            return result
+        except BlockingIOError:
+            return dict(state='accounting_unknown',reason='ledger_lock_busy')
+        except (OSError,ValueError,KeyError,TypeError):
+            return dict(state='accounting_unknown',reason='ledger_unavailable')
 
     def check(self, *, boottime=None):
         if boot_id_value() != self.config['boot_id']:
@@ -119,10 +146,12 @@ class Guard:
         try:
             ledger = _NonblockingLedger(self.config['wake_root'], self.config['objective_id'])
             view = ledger.inspect(now=upper)
-            self.accounting_view = view
-            self.last_accounting_error = None
             if view['revision'] != self.config['configuration']['revision']:
                 return 'configuration_changed'
+            self.accounting_view = view
+            self.last_accounting_error = None
+            historical = self.config.get('historical_actors', {})
+            authorized_revisions = {item['configuration']['revision'] for item in view['authorization_history']}
             # Existing actors inherit the service admission epoch. Actors enrolled
             # later receive a bounded first-observation lease when their ledger
             # admission becomes visible, even before a native thread is bound.
@@ -141,12 +170,14 @@ class Guard:
                     continue
                 launch = intent.get('launch', {})
                 configuration = receipt.get('configuration') if operation == 'handoff' else intent.get('configuration')
-                if ((configuration or {}).get('revision') != self.config['configuration']['revision']
+                actor = receipt.get('budget_actor')
+                revision = (configuration or {}).get('revision')
+                approved_history = actor in historical and revision in authorized_revisions
+                if ((revision != self.config['configuration']['revision'] and not approved_history)
                         or objective_identity(intent.get('continuation', {})) != self.config['objective_id']
                         or launch.get('app_server') != self.config['endpoint']
                         or Path(launch.get('codex_home', '')).resolve() != Path(self.config['codex_home']).resolve()):
                     continue
-                actor = receipt.get('budget_actor')
                 if not actor:
                     continue  # An intent is not a ledger admission.
                 bindings = [(receipt['thread_id'], actor)]
@@ -224,12 +255,21 @@ class Guard:
             for actor_id in view['actors']:
                 actor = view['actors'][actor_id]
                 usage, observed = snapshots.get(actor_id, (None, None))
+                if actor_id in historical:
+                    if not actor['settled'] or not actor['known'] or actor['used'] != historical[actor_id]:
+                        self.invalidated_actors.add(actor_id)
+                        return 'historical_actor_accounting_changed'
+                    if usage is not None and usage != historical[actor_id]:
+                        self.invalidated_actors.add(actor_id)
+                        return 'settled_actor_usage_changed'
+                    continue
                 if actor['used'] >= actor['reservation']:
                     return 'session_tokens_exhausted'
                 if not actor['settled'] and upper >= actor['session_deadline'] - self.limits['stop_grace_seconds'] - self.limits['checkpoint_grace_seconds']:
                     return 'session_deadline_reached'
                 if actor['settled']:
                     if usage is not None and usage != actor['used']:
+                        self.invalidated_actors.add(actor_id)
                         return 'settled_actor_usage_changed'
                     continue
                 if usage is None:
@@ -310,6 +350,7 @@ def _status(config, state, reason=None, child_pid=None, accounting=None):
                 endpoint=config['endpoint'], objective_id=config['objective_id'],
                 service_identity=service_identity,
                 accounting=accounting,
+                final_usage=config.get('final_usage'),
                 observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
                 accounting_error=config.get('accounting_error')), stream, sort_keys=True)
             stream.flush()
@@ -349,6 +390,7 @@ def run(config):
         reason = 'guard_observation_failed'
     finally:
         config['accounting_error']=guard.last_accounting_error
+        config['final_usage']=guard.final_accounting_fence()
         _status(config, 'stopping', reason, child_pid=child.pid if child else None,
             accounting=guard.accounting_readback())
         if child is not None and child.poll() is None:
