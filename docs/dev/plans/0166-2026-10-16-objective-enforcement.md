@@ -24,7 +24,7 @@ At most3 active agents total. No nested workers.
 observerdeath, sampled exhaustion and containment receipts are in
 `docs/dev/evidence/plan0166/ledger.json`. Sourcebeeacfa adds final usage fencing,
 public offline reconciliation, exact owned paused-goal binding and renewal
-historical cohorts.61 focused tests pass; current full isolated suite running.
+historical cohorts.61 focused tests pass; current full isolated1325testsPASS/1opt-in skip; separate installed livehost7PASS.
 Earlier1303 fulltest pass is a prior snapshot, not currenttip proof.
 
 278 phaseA: actual concurrent checkpoint writer and failed replacement worker,

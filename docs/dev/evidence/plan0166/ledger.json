@@ -261,12 +261,43 @@
         "p": "unknown floor22889",
         "m": "unknown floor22874"
       }
+    },
+    {
+      "kind": "278 actual native concurrent admission and failed checkpoint replacement",
+      "result": "PASS",
+      "native_turns": 2,
+      "native_tokens": 163907,
+      "receipt": "/tmp/cw166-q/state.json",
+      "qualification": "Both actors known settled; actual third admission denied before thread/submission; fixture checkpoint retained. Successor/refresh/renewal not yet validated."
+    },
+    {
+      "kind": "full isolated frozen source beeacfa",
+      "result": "PASS",
+      "tests": 1325,
+      "skips": 1,
+      "seconds": 297.419,
+      "artifact": "full-beeacfa-isolated.log"
+    },
+    {
+      "kind": "installed wheel beeacfa",
+      "result": "PASS",
+      "tests": 53,
+      "skips": 1,
+      "artifact": "wheel-beeacfa-strict.log",
+      "wheel_sha256": "b53c1f58d2e3d753388052e27dea61f8290ed067dee0933fb8639bc02fba8079"
+    },
+    {
+      "kind": "installed wheel actual systemd",
+      "result": "PASS",
+      "tests": 7,
+      "skips": 0,
+      "artifact": "wheel-beeacfa-host-live.log"
     }
   ],
   "integration_tip": "beeacfa",
   "resource_accounting": {
-    "root_goal_checkpoint_tokens": 1013786,
-    "native_observed_tokens": 161172,
+    "root_goal_checkpoint_tokens": 1204809,
+    "native_observed_tokens": 325079,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
     "further_native_turns_authorized": true,
@@ -278,17 +309,21 @@
       "no_further_calls": true
     },
     "cumulative_token_ceiling": 2000000,
-    "external_native_observed_tokens": 161172,
+    "external_native_observed_tokens": 325079,
     "external_native_unknown_reserved_tokens": 200000,
     "current_packet": {
       "ticket": 278,
       "source": "beeacfa",
-      "state": "phaseA dispatched",
+      "state": "phaseA passed; phaseB zero-paid-call harness failure; public renewal recovery",
       "authorized_now_turns": 2,
       "campaign_max_turns": 5,
       "campaign_estimate_tokens": 350000,
       "remaining_phases": "HOLD for actual cost readback",
-      "uncertainty": "200k historical missing-counter reserve is not a guaranteed cap; later interrupted counters are observed floors without terminal final billing proof"
+      "uncertainty": "200k historical missing-counter reserve is not a guaranteed cap; later interrupted counters are observed floors without terminal final billing proof",
+      "phaseA_tokens": 163907,
+      "phaseA_turns": 2,
+      "campaign_remaining_estimate_tokens": 186093,
+      "optional_fifth_turn": "HOLD"
     },
     "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
@@ -343,7 +378,6 @@
   "goal_level_remaining": [
     "all278nativeacceptance",
     "one whole-branch review after all tickets validated",
-    "one bounded remediation and focused verification",
-    "current full isolated regression"
+    "one bounded remediation and focused verification"
   ]
 }

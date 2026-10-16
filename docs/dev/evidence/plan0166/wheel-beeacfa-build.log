@@ -1,0 +1,13 @@
+Processing ./.
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: codex-wake
+  Building wheel for codex-wake (pyproject.toml): started
+  Building wheel for codex-wake (pyproject.toml): finished with status 'done'
+  Created wheel for codex-wake: filename=codex_wake-0.16.0-py3-none-any.whl size=468430 sha256=b53c1f58d2e3d753388052e27dea61f8290ed067dee0933fb8639bc02fba8079
+  Stored in directory: /tmp/pip-ephem-wheel-cache-92mxgds8/wheels/e4/3a/0d/77a3b949fda895ce59f3aec217e1be74cc35ed393394d5a2a2
+Successfully built codex-wake
