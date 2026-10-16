@@ -51,7 +51,7 @@ class StrictExecutorTests(unittest.TestCase):
             accounting_max_age_seconds=5, stop_grace_seconds=2, checkpoint_grace_seconds=1))
         lifecycle = Path(root)/'lifecycle'; lifecycle.mkdir()
         (lifecycle/'supervision.json').write_text(json.dumps(dict(active=True, pid=os.getpid(),
-            identity=process_identity(os.getpid()), observed_at=100, interval=1)))
+            identity=process_identity(os.getpid()), observed_at=100, interval=1, observed_boottime=10, boot_id=boot_id_value())))
         ledger = ObjectiveLedger(root, 'goal'); ledger.configure(cfg, 'operator', now=100)
         ledger.reserve('worker', 100, 80, now=100)
         (lifecycle/'spawn.json').write_text(json.dumps(dict(thread_id='owned-thread', budget_actor='worker',
@@ -80,7 +80,7 @@ class StrictExecutorTests(unittest.TestCase):
             guard, ledger, _ = self.fixture(root)
             ledger.record('worker', 20, settled=True, now=100)
             heartbeat=Path(root)/'lifecycle/supervision.json'
-            value=json.loads(heartbeat.read_text());value['observed_at']=110;heartbeat.write_text(json.dumps(value))
+            value=json.loads(heartbeat.read_text());value['observed_at']=110;value['observed_boottime']=20;heartbeat.write_text(json.dumps(value))
             self.assertIsNone(guard.check(boottime=20))
 
     def test_old_usage_cannot_be_refreshed_by_repeated_polling(self):
@@ -89,7 +89,7 @@ class StrictExecutorTests(unittest.TestCase):
             guard, _, _ = self.fixture(root)
             self.assertIsNone(guard.check(boottime=11))
             heartbeat=Path(root)/'lifecycle/supervision.json'
-            value=json.loads(heartbeat.read_text());value['observed_at']=110;heartbeat.write_text(json.dumps(value))
+            value=json.loads(heartbeat.read_text());value['observed_at']=110;value['observed_boottime']=20;heartbeat.write_text(json.dumps(value))
             self.assertEqual(guard.check(boottime=20), 'accounting_stale')
 
     def test_known_usage_disappearing_stops_instead_of_restarting_grace(self):
@@ -206,6 +206,40 @@ class StrictExecutorTests(unittest.TestCase):
             self.assertIsNone(guard.check(boottime=11))
             self.assertEqual(ledger.inspect(now=101)['tokens_used'], 20)
             heartbeat = Path(root)/'lifecycle/supervision.json'
-            value = json.loads(heartbeat.read_text()); value['observed_at']=106
+            value = json.loads(heartbeat.read_text()); value['observed_at']=106;value['observed_boottime']=16
             heartbeat.write_text(json.dumps(value))
             self.assertEqual(guard.check(boottime=16), 'accounting_stale')
+
+    def test_fresh_suspend_aware_heartbeat_survives_utc_observation_loss(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard, _, _ = self.fixture(root)
+            path=Path(root)/'lifecycle/supervision.json'
+            heartbeat=json.loads(path.read_text())
+            heartbeat.update(observed_at=None, observed_boottime=10, boot_id=boot_id_value())
+            path.write_text(json.dumps(heartbeat))
+            self.assertIsNone(guard.check(boottime=11))
+            self.assertEqual(guard.check(boottime=16), 'controller_unavailable')
+
+    def test_supervisor_publishes_boottime_even_when_authenticated_utc_is_unavailable(self):
+        import time
+        from unittest.mock import patch
+        from codex_wake.lifecycle_supervision import publish_supervision
+        with tempfile.TemporaryDirectory() as root:
+            before=time.clock_gettime(time.CLOCK_BOOTTIME)
+            with patch('codex_wake.lifecycle_supervision.trusted_upper',side_effect=ValueError('no UTC')):
+                heartbeat=publish_supervision(root,.2)
+            self.assertIsNone(heartbeat['observed_at'])
+            self.assertEqual(heartbeat['boot_id'],boot_id_value())
+            self.assertGreaterEqual(heartbeat['observed_boottime'],before)
+
+    def test_strict_controller_heartbeat_requires_same_boot_and_nonfuture_elapsed_clock(self):
+        import json
+        for changes in ({'boot_id': 'different-boot'}, {'observed_boottime': 12},
+                        {'observed_boottime': None}):
+            with self.subTest(changes=changes), tempfile.TemporaryDirectory() as root:
+                guard, _, _ = self.fixture(root)
+                path=Path(root)/'lifecycle/supervision.json'
+                heartbeat=json.loads(path.read_text());heartbeat.update(changes)
+                path.write_text(json.dumps(heartbeat))
+                self.assertEqual(guard.check(boottime=11), 'controller_unavailable')

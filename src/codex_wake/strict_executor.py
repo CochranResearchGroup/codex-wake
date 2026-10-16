@@ -53,14 +53,13 @@ class Guard:
         strict = configuration['configuration']['strict_execution']
         self.limits = strict.get('limits', strict)
         self.seen_usage = set()
-        self.controller_fingerprint = None
-        self.controller_seen_elapsed = None
         self.usage_observations = {}
 
     def check(self, *, boottime=None):
         if boot_id_value() != self.config['boot_id']:
             return 'boot_identity_changed'
-        elapsed = (time.clock_gettime(time.CLOCK_BOOTTIME) if boottime is None else boottime) - self.config['started_boottime']
+        current_boottime = time.clock_gettime(time.CLOCK_BOOTTIME) if boottime is None else boottime
+        elapsed = current_boottime - self.config['started_boottime']
         if elapsed < 0:
             return 'elapsed_time_invalid'
         upper = self.config['started_upper'] + elapsed
@@ -69,15 +68,12 @@ class Guard:
         try:
             controller = json.loads((Path(self.config['wake_root']) / 'lifecycle/supervision.json').read_text())
             pid = controller['pid']
-            fingerprint = (pid, json.dumps(controller['identity'], sort_keys=True), controller['observed_at'])
-            if fingerprint != self.controller_fingerprint:
-                self.controller_fingerprint = fingerprint
-                self.controller_seen_elapsed = elapsed
             if (controller.get('active') is not True or not process_exists(pid)
                     or process_identity(pid) != controller['identity']
                     or Path('/proc', str(pid), 'stat').read_text().rsplit(')', 1)[1].split()[0] == 'Z'
-                    or type(controller.get('observed_at')) not in (int,float)
-                    or elapsed - self.controller_seen_elapsed > self.limits['accounting_max_age_seconds']):
+                    or controller.get('boot_id') != self.config['boot_id']
+                    or type(controller.get('observed_boottime')) not in (int, float)
+                    or not 0 <= current_boottime - controller['observed_boottime'] <= self.limits['accounting_max_age_seconds']):
                 return 'controller_unavailable'
         except (OSError, ValueError, KeyError, TypeError, IndexError):
             return 'controller_unavailable'
