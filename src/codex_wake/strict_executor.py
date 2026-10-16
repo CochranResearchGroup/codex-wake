@@ -56,6 +56,7 @@ class Guard:
         self.usage_observations = {}
         self.last_verified_accounting_elapsed = 0
         self.last_accounting_error = None
+        self.actor_admissions = None
 
     def check(self, *, boottime=None):
         if boot_id_value() != self.config['boot_id']:
@@ -88,6 +89,14 @@ class Guard:
             view = ledger.inspect(now=upper)
             if view['revision'] != self.config['configuration']['revision']:
                 return 'configuration_changed'
+            # Existing actors inherit the service admission epoch. Actors enrolled
+            # later receive a bounded first-observation lease when their ledger
+            # admission becomes visible, even before a native thread is bound.
+            if self.actor_admissions is None:
+                self.actor_admissions = {actor_id: 0 for actor_id in view['actors']}
+            else:
+                for actor_id in view['actors']:
+                    self.actor_admissions.setdefault(actor_id, elapsed)
             owned = {}
             for path in (Path(self.config['wake_root']) / 'lifecycle').glob('*.json'):
                 if path.name == 'supervision.json' or path.name.startswith('owner-'):
@@ -161,7 +170,7 @@ class Guard:
                             return 'accounting_invalid'
                         usage, observed = value, stamp
                 snapshots[actor] = usage, observed
-            for actor_id in owned.values():
+            for actor_id in view['actors']:
                 actor = view['actors'][actor_id]
                 usage, observed = snapshots.get(actor_id, (None, None))
                 if not actor['settled'] and upper >= actor['session_deadline'] - self.limits['stop_grace_seconds'] - self.limits['checkpoint_grace_seconds']:
@@ -171,7 +180,7 @@ class Guard:
                         return 'settled_actor_usage_changed'
                     continue
                 if usage is None:
-                    if actor_id in self.seen_usage or actor['used'] > 0 or elapsed >= self.limits['accounting_max_age_seconds']:
+                    if actor_id in self.seen_usage or actor['used'] > 0 or elapsed - self.actor_admissions[actor_id] >= self.limits['accounting_max_age_seconds']:
                         return 'accounting_missing'
                     continue
                 # Native wall time is not an elapsed-time authority. Lease the
@@ -180,7 +189,7 @@ class Guard:
                 previous = self.usage_observations.get(actor_id)
                 fingerprint = (usage, observed)
                 if previous is None:
-                    seen_elapsed = 0
+                    seen_elapsed = self.actor_admissions[actor_id]
                 else:
                     old_fingerprint, seen_elapsed = previous
                     if observed < old_fingerprint[1]:
@@ -203,7 +212,7 @@ class Guard:
                 return 'objective_accounting_unknown'
             if view['tokens_used'] >= view['objective_token_limit']:
                 return 'objective_tokens_exhausted'
-            if not owned and elapsed >= self.limits['accounting_max_age_seconds']:
+            if not view['actors'] and elapsed >= self.limits['accounting_max_age_seconds']:
                 return 'accounting_missing'
             self.last_verified_accounting_elapsed=elapsed
             self.last_accounting_error=None

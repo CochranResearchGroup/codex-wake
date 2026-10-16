@@ -248,3 +248,47 @@ class StrictExecutorTests(unittest.TestCase):
                 heartbeat=json.loads(path.read_text());heartbeat.update(changes)
                 path.write_text(json.dumps(heartbeat))
                 self.assertEqual(guard.check(boottime=11), 'controller_unavailable')
+
+    def test_later_admission_gets_only_its_own_first_snapshot_lease(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard, ledger, rollout = self.fixture(root)
+            ledger.record('worker', 20, settled=True, now=100)
+            heartbeat = Path(root)/'lifecycle/supervision.json'
+            def check(elapsed):
+                value=json.loads(heartbeat.read_text())
+                value.update(observed_boottime=10+elapsed)
+                heartbeat.write_text(json.dumps(value))
+                return guard.check(boottime=10+elapsed)
+            self.assertIsNone(check(1))
+            self.assertIsNone(check(45))
+            self.assertTrue(ledger.reserve('next-worker', 100, 40, now=145)['admitted'])
+            # Admission is visible before thread receipt or first usage exists.
+            self.assertIsNone(check(46))
+            receipt=json.loads((Path(root)/'lifecycle/spawn.json').read_text())
+            receipt.update(thread_id='next-thread',budget_actor='next-worker')
+            receipt['intent']['budget_inherited']='next-worker'
+            (Path(root)/'lifecycle/next.json').write_text(json.dumps(receipt))
+            self.assertIsNone(check(47))
+            target=Path(root)/'sessions/next.jsonl'
+            target.write_text(rollout.read_text().replace('owned-thread','next-thread')
+                .replace('"total_tokens": 20','"total_tokens": 7'))
+            self.assertIsNone(check(48))
+            self.assertEqual(ledger.inspect(now=148)['tokens_used'],27)
+            # Its first snapshot cannot start a fresh grace at observation48.
+            self.assertEqual(check(52),'accounting_stale')
+
+    def test_later_unbound_admission_without_snapshot_expires(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard, ledger, _ = self.fixture(root)
+            ledger.record('worker',20,settled=True,now=100)
+            heartbeat=Path(root)/'lifecycle/supervision.json'
+            def check(elapsed):
+                value=json.loads(heartbeat.read_text());value['observed_boottime']=10+elapsed
+                heartbeat.write_text(json.dumps(value))
+                return guard.check(boottime=10+elapsed)
+            self.assertIsNone(check(1))
+            self.assertTrue(ledger.reserve('unbound-worker',100,40,now=145)['admitted'])
+            self.assertIsNone(check(45))
+            self.assertEqual(check(51),'accounting_missing')
