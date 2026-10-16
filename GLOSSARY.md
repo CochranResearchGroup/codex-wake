@@ -81,3 +81,15 @@ Changing conversation does not replenish this budget.
 The successor's verification of runtime readiness and assessment of whether the
 outgoing work advanced the approved objective with adequate evidence and scope
 discipline. Runtime readiness alone does not establish work acceptance.
+
+**Execution boundary**:
+The set of execution resources owned by an objective and covered by its resource
+limits. Work outside that set is excluded from its containment guarantee.
+
+**Sampled token stop**:
+Stopping work after observed cumulative token consumption reaches its allowance.
+Observation delay means the stop does not promise an exact token ceiling.
+
+**Accounting loss**:
+The inability to establish sufficiently fresh, attributable resource consumption
+for an objective that is executing.

@@ -17,3 +17,12 @@ Acceptance / done: map current controls; record experiment commands/results and 
 Outcome: conditional GO for bounded executor-containment implementation design; NO-GO for exact token ceilings/live rollout. Three synthetic local host experiments removed their exact cgroups with sentinel preserved. Existing ledger11 and spawn27 fixture tests PASS; initial plain-python dependency failure retained. Actual native Codex containment, accounting-loss lease, suspend/resume and finite token overshoot remain unproven. Source baseline matches installed0.15.1 in four relevant modules. Report and raw evidence are under the locators above. No implementation, issue state mutation or activation.
 
 Discovery bounds: two structural queries (second exposed absent worktree index), bounded known-source reads, one five-fact atlas routing query, primary systemd/kernel lookups. No delegation: coupled small source/host investigation remained local. Memory disposition unavailable: no appropriate reviewed Codex Wake group identified.
+
+## Confirmed design follow-up |2026-10-16
+
+Operator accepted all three proposed decisions: dedicated strict execution
+boundaries with explicit shared-service exclusions; objective-wide sampled token
+accounting including cached input and all actors/attempts; stop on stale/missing
+accounting with explicit renewal after exhaustion. Captured in the2026-10-16
+implementation brief and domain glossary. Research remains CLOSED; this records
+design preparation, not an implementation/deployment claim.
