@@ -106,6 +106,57 @@ class StrictExecutorTests(unittest.TestCase):
             rollout.unlink()
             self.assertEqual(guard.check(boottime=12), 'accounting_missing')
 
+    def test_failed_native_turn_retains_cumulative_usage_including_cached_input(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard,ledger,rollout=self.fixture(root)
+            self.assertIsNone(guard.check(boottime=11))
+            with rollout.open('a') as stream:
+                stream.write(json.dumps(dict(type='event_msg',timestamp='1970-01-01T00:01:41Z',
+                    payload=dict(type='token_count',info=dict(total_token_usage=dict(
+                        total_tokens=35,input_tokens=30,cached_input_tokens=15,output_tokens=5)))))+'\n')
+                stream.write(json.dumps(dict(type='event_msg',payload=dict(type='turn_aborted',
+                    turn_id='failed-native-turn')))+'\n')
+            self.assertIsNone(guard.check(boottime=12))
+            view=ledger.inspect(now=102)
+            self.assertEqual(view['tokens_used'],35)
+            self.assertEqual(view['actors']['worker']['used'],35)
+
+    def test_aggregate_rollout_capacity_fences_before_scanning_large_valid_files(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard,_,rollout=self.fixture(root)
+            padding=json.dumps(dict(type='padding',payload='x'*(17*1024*1024)))+'\n'
+            rollout.write_text(rollout.read_text()+padding)
+            (rollout.parent/'second.jsonl').write_text(json.dumps(dict(type='session_meta',
+                payload=dict(id='not-yet-attributed')))+'\n'+padding)
+            self.assertEqual(guard.check(boottime=11),'accounting_capacity_exceeded')
+
+    def test_guard_executable_readback_separates_ledger_poll_from_native_usage_observation(self):
+        import json,subprocess,sys,time,os
+        with tempfile.TemporaryDirectory() as root:
+            guard,_,_=self.fixture(root)
+            now=time.clock_gettime(time.CLOCK_BOOTTIME)
+            heartbeat=Path(root)/'lifecycle/supervision.json'
+            value=json.loads(heartbeat.read_text());value['observed_boottime']=now
+            heartbeat.write_text(json.dumps(value))
+            cfg=guard.config | dict(started_boottime=now,generation='readback-fixture',argv=['/bin/sleep','.5'])
+            source=Path(root)/'guard.json';source.write_text(json.dumps(cfg))
+            environment=dict(os.environ);environment.pop('INVOCATION_ID',None)
+            result=subprocess.run([sys.executable,'-m','codex_wake.strict_executor',str(source)],
+                env=environment,capture_output=True,text=True,timeout=3)
+            self.assertEqual(result.returncode,5,result.stderr)
+            status=json.loads((Path(root)/'status.json').read_text())
+            self.assertEqual(status['reason'],'executor_exited')
+            accounting=status['accounting'];actor=accounting['actors']['worker']
+            self.assertEqual(accounting['tokens_used'],20)
+            self.assertEqual(actor['native_total_tokens'],20)
+            self.assertEqual(actor['native_published_epoch'],100)
+            self.assertGreater(accounting['last_verified_boottime'],actor['first_observed_boottime'])
+            self.assertGreater(actor['lease_age_seconds'],0)
+            self.assertIsNone(accounting['publication_delay_seconds'])
+            self.assertIsNone(accounting['maximum_token_overshoot'])
+
     def test_guard_cli_writes_private_generation_fence_before_any_child_launch(self):
         import json, subprocess, sys
         with tempfile.TemporaryDirectory() as root:

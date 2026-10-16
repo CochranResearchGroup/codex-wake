@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_aggregate_rollout_capacity_fences_before_scanning_large_valid_files (test_strict_executor.StrictExecutorTests.test_aggregate_rollout_capacity_fences_before_scanning_large_valid_files)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 117, in test_aggregate_rollout_capacity_fences_before_scanning_large_valid_files
+    self.assertEqual(guard.check(boottime=11),'accounting_capacity_exceeded')
+AssertionError: None != 'accounting_capacity_exceeded'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.323s
+
+FAILED (failures=1)

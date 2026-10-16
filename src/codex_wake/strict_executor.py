@@ -8,7 +8,9 @@ from __future__ import annotations
 from contextlib import contextmanager
 import fcntl
 import json
+from itertools import islice
 import os
+import stat
 import tempfile
 from pathlib import Path
 import time
@@ -17,6 +19,8 @@ from .objective_ledger import ObjectiveLedger, _private
 from .records import parse_timestamp
 from .lifecycle_budget import objective_identity
 from .process import boot_id_value, process_exists, process_identity
+
+MAX_ACCOUNTING_BYTES = 32 * 1024 * 1024
 
 
 class _NonblockingLedger(ObjectiveLedger):
@@ -57,6 +61,34 @@ class Guard:
         self.last_verified_accounting_elapsed = 0
         self.last_accounting_error = None
         self.actor_admissions = None
+        self.accounting_view = None
+        self.accounting_verified = False
+        self.native_observed_elapsed = {}
+
+    def accounting_readback(self, *, boottime=None):
+        current = time.clock_gettime(time.CLOCK_BOOTTIME) if boottime is None else boottime
+        elapsed = current - self.config['started_boottime']
+        view = self.accounting_view or {}
+        actors = {}
+        for actor_id, actor in view.get('actors', {}).items():
+            observation = self.usage_observations.get(actor_id)
+            fingerprint, lease = observation if observation else ((None, None), None)
+            first, latest = self.native_observed_elapsed.get(actor_id, (None, None))
+            epoch = self.config['started_boottime']
+            actors[actor_id] = dict(known=actor['known'], settled=actor['settled'],
+                native_total_tokens=fingerprint[0], native_published_epoch=fingerprint[1],
+                first_observed_boottime=None if first is None else epoch + first,
+                last_observed_boottime=None if latest is None else epoch + latest,
+                lease_started_boottime=None if lease is None else epoch + lease,
+                lease_age_seconds=None if lease is None else elapsed - lease)
+        return dict(tokens_used=view.get('tokens_used'), accounting_known=view.get('accounting_known'),
+            actors=actors, metric='native_cumulative_total_tokens_including_cached_input',
+            last_verified_boottime=(self.config['started_boottime'] + self.last_verified_accounting_elapsed
+                if self.accounting_verified else None),
+            observation_lease_seconds=self.limits['accounting_max_age_seconds'],
+            detection_interval_seconds=self.limits['poll_seconds'],
+            publication_delay_seconds=None, publication_delay_status='unmeasured_independent_clock',
+            maximum_token_overshoot=None, enforcement='sampled_stop')
 
     def check(self, *, boottime=None):
         if boot_id_value() != self.config['boot_id']:
@@ -87,6 +119,8 @@ class Guard:
         try:
             ledger = _NonblockingLedger(self.config['wake_root'], self.config['objective_id'])
             view = ledger.inspect(now=upper)
+            self.accounting_view = view
+            self.last_accounting_error = None
             if view['revision'] != self.config['configuration']['revision']:
                 return 'configuration_changed'
             # Existing actors inherit the service admission epoch. Actors enrolled
@@ -133,15 +167,29 @@ class Guard:
                     owned[thread] = bound_actor
             snapshots = {}
             home = Path(self.config['codex_home']) / 'sessions'
-            paths = list(home.rglob('*.jsonl')) if home.exists() else []
+            paths = list(islice(home.rglob('*.jsonl'), 513)) if home.exists() else []
             if len(paths) > 512:
                 return 'accounting_capacity_exceeded'
+            total = 0
             for path in paths:
-                if path.is_symlink() or path.stat().st_size > 32 * 1024 * 1024:
+                info = path.lstat()
+                if not stat.S_ISREG(info.st_mode):
                     return 'accounting_capacity_exceeded'
+                total += info.st_size
+                if total > MAX_ACCOUNTING_BYTES:
+                    return 'accounting_capacity_exceeded'
+            remaining = MAX_ACCOUNTING_BYTES
+            for path in paths:
                 path.resolve().relative_to(home.resolve())
-                data = path.read_text()
-                complete = data[:data.rfind('\n') + 1] if not data.endswith('\n') else data
+                descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+                with os.fdopen(descriptor, 'rb') as stream:
+                    if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                        return 'accounting_capacity_exceeded'
+                    data = stream.read(remaining + 1)
+                if len(data) > remaining:
+                    return 'accounting_capacity_exceeded'
+                remaining -= len(data)
+                complete = (data[:data.rfind(b'\n') + 1] if not data.endswith(b'\n') else data).decode('utf-8')
                 rows = [json.loads(line) for line in complete.splitlines()]
                 identities = {row.get('payload', {}).get('id') for row in rows if row.get('type') == 'session_meta'}
                 if not rows and elapsed < self.limits['accounting_max_age_seconds']:
@@ -203,10 +251,15 @@ class Guard:
                     if fingerprint != old_fingerprint:
                         seen_elapsed = elapsed
                 self.usage_observations[actor_id] = fingerprint, seen_elapsed
+                first, latest = self.native_observed_elapsed.get(actor_id, (elapsed, elapsed))
+                if previous is None or previous[0] != fingerprint:
+                    latest = elapsed
+                self.native_observed_elapsed[actor_id] = first, latest
                 if not 0 <= elapsed - seen_elapsed <= self.limits['accounting_max_age_seconds']:
                     return 'accounting_stale'
                 self.seen_usage.add(actor_id)
                 view = ledger.record(actor_id, usage, settled=actor['settled'], now=upper)
+                self.accounting_view = view
                 actor = view['actors'][actor_id]
                 if not actor['known']:
                     return 'accounting_decreased'
@@ -222,6 +275,7 @@ class Guard:
             if not view['actors'] and elapsed >= self.limits['accounting_max_age_seconds']:
                 return 'accounting_missing'
             self.last_verified_accounting_elapsed=elapsed
+            self.accounting_verified=True
             self.last_accounting_error=None
             return None
         except BlockingIOError:
@@ -236,7 +290,7 @@ class Guard:
             return 'accounting_unavailable'
 
 
-def _status(config, state, reason=None, child_pid=None):
+def _status(config, state, reason=None, child_pid=None, accounting=None):
     service_identity = None
     invocation = os.environ.get('INVOCATION_ID')
     if invocation:
@@ -255,6 +309,7 @@ def _status(config, state, reason=None, child_pid=None):
                 pid=os.getpid(), identity=process_identity(os.getpid()), child_pid=child_pid,
                 endpoint=config['endpoint'], objective_id=config['objective_id'],
                 service_identity=service_identity,
+                accounting=accounting,
                 observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
                 accounting_error=config.get('accounting_error')), stream, sort_keys=True)
             stream.flush()
@@ -279,18 +334,23 @@ def run(config):
                 environment.pop(key, None)
             child = subprocess.Popen(config['argv'], cwd=config['cwd'], env=environment,
                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            _status(config, 'running', child_pid=child.pid)
+            config['accounting_error']=guard.last_accounting_error
+            _status(config, 'running', child_pid=child.pid, accounting=guard.accounting_readback())
             while reason is None:
                 if child.poll() is not None:
                     reason = 'executor_exited'
                     break
                 time.sleep(guard.limits['poll_seconds'])
                 reason = guard.check()
+                if reason is None:
+                    config['accounting_error']=guard.last_accounting_error
+                    _status(config, 'running', child_pid=child.pid, accounting=guard.accounting_readback())
     except Exception:
         reason = 'guard_observation_failed'
     finally:
         config['accounting_error']=guard.last_accounting_error
-        _status(config, 'stopping', reason, child_pid=child.pid if child else None)
+        _status(config, 'stopping', reason, child_pid=child.pid if child else None,
+            accounting=guard.accounting_readback())
         if child is not None and child.poll() is None:
             # Allow native shutdown to persist what it can within the original
             # allowance. This is no new model turn or invented semantic checkpoint.
@@ -299,7 +359,8 @@ def run(config):
                 child.wait(timeout=guard.limits['checkpoint_grace_seconds'])
             except subprocess.TimeoutExpired:
                 pass
-        _status(config, 'stopped', reason, child_pid=child.pid if child else None)
+        _status(config, 'stopped', reason, child_pid=child.pid if child else None,
+            accounting=guard.accounting_readback())
         # Exiting the service main makes systemd stop all descendants under its
         # separate bounded stop grace, even when native shutdown did not finish.
     return 5

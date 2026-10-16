@@ -19,26 +19,48 @@
       "qualification": "Validated contained launch/cleanup slice on branch, not shipped or tracker-closed. Full regression production-source snapshot18dbfec plus focused later exact-identity stop changes."
     },
     "276": {
-      "state": "running",
+      "state": "validated",
       "blocked_by": [
         275
       ],
-      "remaining_validation": [
-        "public/native blocked-tool deadline and TERM-resistant-child qualification",
-        "documented restart/suspend timing qualification"
-      ]
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/native-deadline.json",
+        "native-probe/native-deadline-external-live.json",
+        "deadline-continuity-integrated.log",
+        "lost-launch-public-host.json",
+        "lost-stop-green.log",
+        "docs/agents/strict-objectives.md"
+      ],
+      "qualification": "Actual native blockedtool/TERMresistance/RPCunavailable/deadline/empty/sentinel. Restart proof realguardexecutables; suspend contract+injection, no host suspend. Exact descendant termination signal not isolated."
     },
     "277": {
-      "state": "pending",
+      "state": "validated",
       "blocked_by": [
         275,
         276
-      ]
+      ],
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/native-token-exhaustion.json",
+        "native-probe/native-observer-death.json",
+        "native-probe/native-deadline.json",
+        "accounting-focused-corrected.log",
+        "guard-host-accounting.json"
+      ],
+      "qualification": "Native sampled exhaustion and actual observerdeath/RPCunavailability proved. Freshness/malformed/decreasing/preflight/failedwork fixtures and independentOS/injected cases supplement, not substitute. Publicationdelay explicitly unmeasured; no maximumovershootbound."
     },
     "278": {
-      "state": "pending",
+      "state": "running",
       "blocked_by": [
         277
+      ],
+      "remaining_validation": [
+        "public native concurrent actor/reviewer/delegate aggregate admission",
+        "native successor/refresh/restart cumulative continuity",
+        "failedcheckpoint/lastartifact and bounded termination",
+        "explicit operator renewal history/consumption",
+        "wholebranch review after all ticketsvalidated"
       ]
     }
   },
@@ -185,15 +207,59 @@
       "cases": 4,
       "artifact": "guard-host-reconciliation.json",
       "qualification": "Injected telemetry; actual guard/systemd/TERM-resistant child; identity metadata matches independent manager invocation in each case. No native/provider proof."
+    },
+    {
+      "kind": "original deadline continuity",
+      "result": "PASS",
+      "tests": 3,
+      "artifact": "deadline-continuity-integrated.log",
+      "qualification": "Real executable restart and changedboot fences; injectedBOOTTIMEjump, not actualhost suspend."
+    },
+    {
+      "kind": "actual native independent deadline",
+      "result": "PASS",
+      "artifact": "native-probe/native-deadline.json",
+      "native_tokens": 45830,
+      "seconds_before_original_deadline": 3.425,
+      "qualification": "Actual native execution; does not claim managerSIGKILL killed each particular descendant."
+    },
+    {
+      "kind": "actual native observer death",
+      "result": "PASS",
+      "artifact": "native-probe/native-observer-death.json",
+      "native_tokens": 22889,
+      "controller_loss_detection_seconds": 0.022,
+      "controller_loss_to_empty_seconds": 1.351,
+      "qualification": "Actual native tool; preserved hostfixture artifact, not a model-authored checkpoint."
+    },
+    {
+      "kind": "accounting executable readback",
+      "result": "PASS",
+      "red": "accounting-readback-red.log",
+      "green": "accounting-readback-green.log",
+      "qualification": "Ledgerpoll and actual native usage observation separately visible; nativepublicationdelayunknown."
+    },
+    {
+      "kind": "bounded aggregate accounting scan",
+      "result": "PASS",
+      "red": "accounting-capacity-red.log",
+      "green": "accounting-capacity-green.log",
+      "qualification": "32MiBaggregate/512files, growth-bounded nonblockingregularreads."
+    },
+    {
+      "kind": "final accounting selection",
+      "result": "PASS",
+      "artifact": "accounting-focused-corrected.log",
+      "qualification": "Initial selection named absentmodule; retained accounting-focused-final.log as runnererror, not productfailure."
     }
   ],
-  "integration_tip": "ab7bf49",
+  "integration_tip": "ff7d57d",
   "resource_accounting": {
     "root_goal_checkpoint_tokens": null,
-    "native_observed_tokens": 69585,
+    "native_observed_tokens": 161172,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
-    "further_native_turns_authorized": true,
+    "further_native_turns_authorized": false,
     "final_native_packet": {
       "max_turns": 1,
       "turns_used": 1,
@@ -202,18 +268,9 @@
       "no_further_calls": true
     },
     "cumulative_token_ceiling": 2000000,
-    "external_native_observed_tokens": 69585,
+    "external_native_observed_tokens": 161172,
     "external_native_unknown_reserved_tokens": 200000,
-    "current_packet": {
-      "ticket": 276,
-      "native_agent": "/root/native_containment_probe",
-      "max_paid_turns": 1,
-      "estimated_tokens": 75000,
-      "unknown_reservation": 100000,
-      "hard_seconds": 120,
-      "effect_free_startup_retries": 1,
-      "source": "ab7bf49"
-    },
+    "current_packet": null,
     "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
   "checkpoint": {
@@ -239,6 +296,29 @@
       "cumulative_token_ceiling": 2000000,
       "hard_time_ceiling": "2026-10-16T23:41:41Z",
       "time_qualification": "Conservative4h from original goal start19:41:41Z, not a reset of historical consumption."
+    }
+  ],
+  "worker_results": [
+    {
+      "handle": "/root/host_execution_adapter",
+      "scope": "restart/BOOTTIME continuity test-only",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-deadline-continuity",
+      "branch": "test/deadline-continuity",
+      "base": "ab7bf49",
+      "result": "69b3d29",
+      "integrated": "ff7d57d",
+      "state": "validated",
+      "evidence": "deadline-continuity-integrated.log"
+    },
+    {
+      "handle": "/root/native_containment_probe",
+      "scope": "actual native blocked-tool original deadline acceptance",
+      "base": "ab7bf49",
+      "state": "validated",
+      "failed_attempt": "native-probe/deadline-harness-failed.json",
+      "current_root": "/tmp/cw166-o",
+      "result": "native-probe/native-deadline.json",
+      "followup_result": "native-probe/native-observer-death.json"
     }
   ]
 }

@@ -1,0 +1,82 @@
+{
+  "observed_boottime": 232109.831384553,
+  "host": {
+    "properties": {
+      "RuntimeMaxUSec": "56.583262s",
+      "MainPID": "69465",
+      "Result": "success",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+      "CPUQuotaPerSecUSec": "500ms",
+      "MemoryMax": "2147483648",
+      "MemorySwapMax": "0",
+      "TasksMax": "128",
+      "KillMode": "control-group",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "processes": {
+      "69465": {
+        "comm": "python",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "612"
+      },
+      "69558": {
+        "comm": "codex",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "69465"
+      },
+      "72906": {
+        "comm": "codex-code-mode",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "69558"
+      },
+      "72975": {
+        "comm": "zsh",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "69558"
+      },
+      "73016": {
+        "comm": "python3.12",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "72975"
+      }
+    }
+  },
+  "child": {
+    "pid": 73016,
+    "ppid": 72975,
+    "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service\n",
+    "handler": "SIGTERM writes event and returns without exiting",
+    "ready_boottime": 232093.945628177
+  },
+  "term_events": [
+    232096.495347471
+  ],
+  "alias_unavailable": true,
+  "guard": {
+    "accounting_error": null,
+    "child_pid": 69558,
+    "endpoint": "unix:///tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23207733
+    },
+    "objective_id": "acceptance",
+    "observed_boottime": 232077.461013606,
+    "pid": 69465,
+    "reason": null,
+    "service_identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+      "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+      "main_pid": 69465,
+      "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+    },
+    "state": "running"
+  }
+}

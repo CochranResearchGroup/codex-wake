@@ -1,0 +1,585 @@
+{
+  "state": "passed",
+  "source": "/home/ecochran76/workspace.local/codex-wake-objective-enforcement",
+  "root": "/tmp/cw166-o",
+  "native_turn_limit": 1,
+  "previous_native_tokens": 46711,
+  "cumulative_native_allowance": 150000,
+  "clock": {
+    "utc": {
+      "status": "network",
+      "sources": [
+        "stable-time:cloudflare",
+        "stable-time:netnod"
+      ],
+      "lower": 1792182979.21535,
+      "upper": 1792182980.0994432,
+      "reason": ""
+    },
+    "counter": {
+      "epoch": "bce18f02-753a-42bd-be7e-9bc653523b91",
+      "counter": 2197644351398,
+      "frequency": 10000000,
+      "rate_ppm": 5000
+    },
+    "reason": "authenticated_utc"
+  },
+  "sentinel_pid": 69279,
+  "socket_proof": {
+    "alias": "/tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "is_symlink": true,
+    "alias_uid": 1000,
+    "resolved": "/tmp/codex-daemon-1000/1490e7e1c6c6838dd32dc7bb4e502290a4c46742f95e7731d238c940174f178a",
+    "target_uid": 1000
+  },
+  "resolved_endpoint": "unix:///tmp/codex-daemon-1000/1490e7e1c6c6838dd32dc7bb4e502290a4c46742f95e7731d238c940174f178a",
+  "effect_free_thread_list": {
+    "data": [],
+    "readStates": {},
+    "nextCursor": null,
+    "backwardsCursor": null
+  },
+  "prepaid_guard": {
+    "accounting_error": null,
+    "child_pid": 69558,
+    "endpoint": "unix:///tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23207733
+    },
+    "objective_id": "acceptance",
+    "observed_boottime": 232077.461013606,
+    "pid": 69465,
+    "reason": null,
+    "service_identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+      "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+      "main_pid": 69465,
+      "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+    },
+    "state": "running"
+  },
+  "child_ready_observed_boottime": 232096.303588495,
+  "execution_receipt": {
+    "configuration_revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+    "coverage": "dedicated_local_executor_and_descendants",
+    "exclusions": [
+      "shared_services",
+      "external_provider_execution",
+      "same_user_ipc_escape"
+    ],
+    "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "preparing"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "running"
+      }
+    ],
+    "identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+      "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+      "main_pid": 69465,
+      "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+    },
+    "objective_id": "acceptance",
+    "prior_execution": null,
+    "state": "running",
+    "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+  },
+  "containment": {
+    "child": {
+      "pid": 73016,
+      "ppid": 72975,
+      "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service\n",
+      "handler": "SIGTERM writes event and returns without exiting",
+      "ready_boottime": 232093.945628177
+    },
+    "unit": {
+      "properties": {
+        "RuntimeMaxUSec": "56.583262s",
+        "MainPID": "69465",
+        "Result": "success",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "CPUQuotaPerSecUSec": "500ms",
+        "MemoryMax": "2147483648",
+        "MemorySwapMax": "0",
+        "TasksMax": "128",
+        "KillMode": "control-group",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "processes": {
+        "69465": {
+          "comm": "python",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+          "state": "S",
+          "ppid": "612"
+        },
+        "69558": {
+          "comm": "codex",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+          "state": "S",
+          "ppid": "69465"
+        },
+        "72906": {
+          "comm": "codex-code-mode",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+          "state": "S",
+          "ppid": "69558"
+        },
+        "72975": {
+          "comm": "zsh",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+          "state": "S",
+          "ppid": "69558"
+        },
+        "73016": {
+          "comm": "python3.12",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+          "state": "S",
+          "ppid": "72975"
+        }
+      }
+    }
+  },
+  "initial_host": {
+    "properties": {
+      "RuntimeMaxUSec": "56.583262s",
+      "MainPID": "69465",
+      "Result": "success",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+      "CPUQuotaPerSecUSec": "500ms",
+      "MemoryMax": "2147483648",
+      "MemorySwapMax": "0",
+      "TasksMax": "128",
+      "KillMode": "control-group",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "processes": {
+      "69465": {
+        "comm": "python",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "612"
+      },
+      "69558": {
+        "comm": "codex",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "69465"
+      },
+      "72906": {
+        "comm": "codex-code-mode",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "69558"
+      },
+      "72975": {
+        "comm": "zsh",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "69558"
+      },
+      "73016": {
+        "comm": "python3.12",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "state": "S",
+        "ppid": "72975"
+      }
+    }
+  },
+  "guard_configuration_bounds": {
+    "started_upper": 1792182981.416737,
+    "started_boottime": 232077.119526158,
+    "deadline": 1792183040.0,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+  },
+  "ledger_before_stop": {
+    "handoff_writer": {
+      "instructions": "Preserve exact checkpoint evidence.",
+      "name": "writer",
+      "path": "/tmp/cw166-o/writer.md",
+      "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+    },
+    "max_correction_cycles": 0,
+    "objective": "Disposable strict execution acceptance",
+    "objective_deadline": "2026-10-16T20:37:20+00:00",
+    "objective_time_limit_seconds": 60,
+    "objective_token_limit": 150000,
+    "preflight_reviewer": {
+      "instructions": "Review owned acceptance evidence only.",
+      "name": "reviewer",
+      "path": "/tmp/cw166-o/reviewer.md",
+      "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+    },
+    "revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+    "session_time_limit_seconds": 60,
+    "session_token_limit": 100000,
+    "started_at": "2026-10-16T20:36:20.099443+00:00",
+    "strict_execution": {
+      "coverage": "dedicated_local_executor_and_descendants",
+      "exclusions": [
+        "shared_services",
+        "external_provider_execution",
+        "same_user_ipc_escape"
+      ],
+      "limits": {
+        "accounting_max_age_seconds": 90,
+        "checkpoint_grace_seconds": 1,
+        "cpu_quota_percent": 50,
+        "memory_max_bytes": 2147483648,
+        "memory_swap_max_bytes": 0,
+        "poll_seconds": 0.2,
+        "stop_grace_seconds": 2,
+        "tasks_max": 128
+      },
+      "maximum_token_overshoot": null,
+      "token_enforcement": "sampled_stop"
+    },
+    "objective_id": "acceptance",
+    "tokens_used": 22877,
+    "tokens_reserved": 77123,
+    "remaining_tokens": 50000,
+    "accounting_known": true,
+    "state": "ready",
+    "ready": true,
+    "exhausted": false,
+    "original_deadline": "2026-10-16T20:37:20+00:00",
+    "correction_cycles": 0,
+    "goal_aliases": {},
+    "authorization_history": [
+      {
+        "action": "initial",
+        "approval": "operator acceptance",
+        "at": 1792182980.0994432,
+        "configuration": {
+          "handoff_writer": {
+            "instructions": "Preserve exact checkpoint evidence.",
+            "name": "writer",
+            "path": "/tmp/cw166-o/writer.md",
+            "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+          },
+          "max_correction_cycles": 0,
+          "objective": "Disposable strict execution acceptance",
+          "objective_deadline": "2026-10-16T20:37:20+00:00",
+          "objective_time_limit_seconds": 60,
+          "objective_token_limit": 150000,
+          "preflight_reviewer": {
+            "instructions": "Review owned acceptance evidence only.",
+            "name": "reviewer",
+            "path": "/tmp/cw166-o/reviewer.md",
+            "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+          },
+          "revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+          "session_time_limit_seconds": 60,
+          "session_token_limit": 100000,
+          "started_at": "2026-10-16T20:36:20.099443+00:00",
+          "strict_execution": {
+            "coverage": "dedicated_local_executor_and_descendants",
+            "exclusions": [
+              "shared_services",
+              "external_provider_execution",
+              "same_user_ipc_escape"
+            ],
+            "limits": {
+              "accounting_max_age_seconds": 90,
+              "checkpoint_grace_seconds": 1,
+              "cpu_quota_percent": 50,
+              "memory_max_bytes": 2147483648,
+              "memory_swap_max_bytes": 0,
+              "poll_seconds": 0.2,
+              "stop_grace_seconds": 2,
+              "tasks_max": 128
+            },
+            "maximum_token_overshoot": null,
+            "token_enforcement": "sampled_stop"
+          }
+        }
+      }
+    ],
+    "remaining_seconds": 39.2076780796051,
+    "actors": {
+      "spawn:15752962cb4e02b51af8624b5caf786ab83e25b9ce3edf77f8d9c11dbd8fbcd1": {
+        "known": true,
+        "reservation": 100000,
+        "session_deadline": 1792183039.072469,
+        "settled": false,
+        "terms": [
+          100000,
+          54
+        ],
+        "used": 22877,
+        "tokens_remaining": 77123
+      }
+    }
+  },
+  "child_term_sent_boottime": 232096.495286352,
+  "term_events_before_deadline": [
+    232096.495347471
+  ],
+  "child_survived_sigterm": true,
+  "rpc_alias_removed_boottime": 232096.515768866,
+  "rpc_unavailable_error": "WakeError: native lifecycle endpoint is unavailable",
+  "first_fence": {
+    "state": {
+      "accounting_error": null,
+      "child_pid": 69558,
+      "endpoint": "unix:///tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+      "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23207733
+      },
+      "objective_id": "acceptance",
+      "observed_boottime": 232131.961090088,
+      "pid": 69465,
+      "reason": "session_deadline_reached",
+      "service_identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+        "main_pid": 69465,
+        "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+      },
+      "state": "stopping"
+    },
+    "observed_boottime": 232131.971045021
+  },
+  "empty_observed_boottime": 232132.277441652,
+  "final_guard": {
+    "accounting_error": null,
+    "child_pid": 69558,
+    "endpoint": "unix:///tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23207733
+    },
+    "objective_id": "acceptance",
+    "observed_boottime": 232132.243795158,
+    "pid": 69465,
+    "reason": "session_deadline_reached",
+    "service_identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+      "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+      "main_pid": 69465,
+      "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+    },
+    "state": "stopped"
+  },
+  "remaining_live_owned_pids": [],
+  "sentinel_survived": true,
+  "unit_after_deadline": {
+    "properties": {
+      "RuntimeMaxUSec": "56.583262s",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "ControlGroup": "",
+      "CPUQuotaPerSecUSec": "500ms",
+      "MemoryMax": "2147483648",
+      "MemorySwapMax": "0",
+      "TasksMax": "128",
+      "KillMode": "control-group",
+      "ActiveState": "failed",
+      "SubState": "failed"
+    },
+    "processes": {}
+  },
+  "upper_at_empty": 1792183036.5746527,
+  "before_original_deadline": true,
+  "native_usage_snapshots": [
+    {
+      "source": "/tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/home/sessions/2026/10/16/rollout-2026-10-16T15-36-25-01a1466e-232a-7a13-95aa-c788e6402ee9.jsonl",
+      "usage": {
+        "input_tokens": 22838,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 39,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 22877
+      }
+    },
+    {
+      "source": "/tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/home/sessions/2026/10/16/rollout-2026-10-16T15-36-25-01a1466e-232a-7a13-95aa-c788e6402ee9.jsonl",
+      "usage": {
+        "input_tokens": 45773,
+        "cached_input_tokens": 34816,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 57,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 45830
+      }
+    }
+  ],
+  "same_revision_restart": {
+    "code": 2,
+    "stdout": "",
+    "stderr": "codex-wake: strict execution is fenced; explicit operator renewal required\n"
+  },
+  "ledger_after_restart": {
+    "handoff_writer": {
+      "instructions": "Preserve exact checkpoint evidence.",
+      "name": "writer",
+      "path": "/tmp/cw166-o/writer.md",
+      "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+    },
+    "max_correction_cycles": 0,
+    "objective": "Disposable strict execution acceptance",
+    "objective_deadline": "2026-10-16T20:37:20+00:00",
+    "objective_time_limit_seconds": 60,
+    "objective_token_limit": 150000,
+    "preflight_reviewer": {
+      "instructions": "Review owned acceptance evidence only.",
+      "name": "reviewer",
+      "path": "/tmp/cw166-o/reviewer.md",
+      "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+    },
+    "revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+    "session_time_limit_seconds": 60,
+    "session_token_limit": 100000,
+    "started_at": "2026-10-16T20:36:20.099443+00:00",
+    "strict_execution": {
+      "coverage": "dedicated_local_executor_and_descendants",
+      "exclusions": [
+        "shared_services",
+        "external_provider_execution",
+        "same_user_ipc_escape"
+      ],
+      "limits": {
+        "accounting_max_age_seconds": 90,
+        "checkpoint_grace_seconds": 1,
+        "cpu_quota_percent": 50,
+        "memory_max_bytes": 2147483648,
+        "memory_swap_max_bytes": 0,
+        "poll_seconds": 0.2,
+        "stop_grace_seconds": 2,
+        "tasks_max": 128
+      },
+      "maximum_token_overshoot": null,
+      "token_enforcement": "sampled_stop"
+    },
+    "objective_id": "acceptance",
+    "tokens_used": 45830,
+    "tokens_reserved": 54170,
+    "remaining_tokens": 50000,
+    "accounting_known": true,
+    "state": "ready",
+    "ready": true,
+    "exhausted": false,
+    "original_deadline": "2026-10-16T20:37:20+00:00",
+    "correction_cycles": 0,
+    "goal_aliases": {},
+    "authorization_history": [
+      {
+        "action": "initial",
+        "approval": "operator acceptance",
+        "at": 1792182980.0994432,
+        "configuration": {
+          "handoff_writer": {
+            "instructions": "Preserve exact checkpoint evidence.",
+            "name": "writer",
+            "path": "/tmp/cw166-o/writer.md",
+            "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+          },
+          "max_correction_cycles": 0,
+          "objective": "Disposable strict execution acceptance",
+          "objective_deadline": "2026-10-16T20:37:20+00:00",
+          "objective_time_limit_seconds": 60,
+          "objective_token_limit": 150000,
+          "preflight_reviewer": {
+            "instructions": "Review owned acceptance evidence only.",
+            "name": "reviewer",
+            "path": "/tmp/cw166-o/reviewer.md",
+            "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+          },
+          "revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+          "session_time_limit_seconds": 60,
+          "session_token_limit": 100000,
+          "started_at": "2026-10-16T20:36:20.099443+00:00",
+          "strict_execution": {
+            "coverage": "dedicated_local_executor_and_descendants",
+            "exclusions": [
+              "shared_services",
+              "external_provider_execution",
+              "same_user_ipc_escape"
+            ],
+            "limits": {
+              "accounting_max_age_seconds": 90,
+              "checkpoint_grace_seconds": 1,
+              "cpu_quota_percent": 50,
+              "memory_max_bytes": 2147483648,
+              "memory_swap_max_bytes": 0,
+              "poll_seconds": 0.2,
+              "stop_grace_seconds": 2,
+              "tasks_max": 128
+            },
+            "maximum_token_overshoot": null,
+            "token_enforcement": "sampled_stop"
+          }
+        }
+      }
+    ],
+    "remaining_seconds": 1.1097631454467773,
+    "actors": {
+      "spawn:15752962cb4e02b51af8624b5caf786ab83e25b9ce3edf77f8d9c11dbd8fbcd1": {
+        "known": true,
+        "reservation": 100000,
+        "session_deadline": 1792183039.072469,
+        "settled": false,
+        "terms": [
+          100000,
+          54
+        ],
+        "used": 45830,
+        "tokens_remaining": 54170
+      }
+    }
+  },
+  "fresh_unit_state": "MainPID=0\nControlGroup=\nActiveState=failed\n",
+  "fresh_cgroup_exists": false,
+  "fresh_remaining_home_processes": [],
+  "final_guard_status": {
+    "accounting_error": null,
+    "child_pid": 69558,
+    "endpoint": "unix:///tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23207733
+    },
+    "objective_id": "acceptance",
+    "observed_boottime": 232132.243795158,
+    "pid": 69465,
+    "reason": "session_deadline_reached",
+    "service_identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+      "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+      "main_pid": 69465,
+      "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+    },
+    "state": "stopped"
+  },
+  "same_revision_generation_unchanged": true,
+  "original_deadline_unchanged": true,
+  "observed_total_tokens": 45830,
+  "native_turns": 1,
+  "native_usage_known": true,
+  "source_revision": "ab7bf493b5ae9288fb70ca061d7728395b6338d0",
+  "deadline_margin_seconds": 3.425347328186035,
+  "stop_scope_note": "No operator group stop before observed empty owned process set; source guard initiated native server signal shutdown. Group manager remained independent fallback; this run does not isolate which shutdown signal killed each descendant.",
+  "source_hashes": {
+    "src/codex_wake/strict_executor.py": "662f978f69ea892e6fce15ca4823f1377a8473ebcc218fe54c61c8582346520c",
+    "src/codex_wake/strict_runtime.py": "84f71b0902775463d27766a42fa742e1783507f16e2d743ae654be3a80bd2ebd",
+    "src/codex_wake/lifecycle_supervision.py": "42cc8d7a0fb576b46c7f9c02363219771b55aa0e2854c28c46c233bed02b70f2",
+    "src/codex_wake/lifecycle_budget.py": "bbad0f0e564ba70611caecb4a5718bef2740a8838199e9b01c76b5ce184df03e",
+    "src/codex_wake/agent_lifecycle.py": "80b7b62b40693d9ac2becf86fbe17c23e00c8a0f5910e18b067f043be3edefab"
+  },
+  "raw_sha256": "c5288485c6f45cbc397326544b18a8f2e759e036ec38a15d4e222380ad92e9ed"
+}

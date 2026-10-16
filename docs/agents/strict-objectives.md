@@ -39,7 +39,7 @@ stops enrolled strict executors. Preserve ordinary capability/grant requirements
 The host needs Linux cgroupv2, a functioning user systemd manager, a supported
 Codex executable and CLOCK_BOOTTIME. Initial deadline admission requires trusted
 UTC; ongoing elapsed-time and observation leases use same-boot BOOTTIME, counting
-suspend. A changed boot identity fences the guard. Restart does not grant a new
+suspend. This follows the [Python CLOCK_BOOTTIME contract](https://docs.python.org/3.12/library/time.html#time.CLOCK_BOOTTIME); the continuity tests inject elapsed-time jumps and do not claim an actual host suspend trial. A changed boot identity fences the guard. Restart does not grant a new
 deadline. Host failure, scheduler delay and suspended execution prevent a
 universal real-time termination guarantee; enforcement resumes when the host can
 schedule it. Dedicated RuntimeMaxSec provides an independent service-manager
@@ -70,6 +70,16 @@ lease. Initial null counters get only the bounded admission observation lease;
 new admission remains held while accounting is unknown. Missing/decreasing or
 malformed accounting, lost controller identity and expired leases fence work.
 Brief ledger contention consumes the existing lease and cannot renew it.
+Guard readback reports ledger-verification BOOTTIME separately from each actor's
+first/latest native observation, native total, publication timestamp fingerprint
+and lease age. The reported native wall timestamp is not an elapsed-time
+source. Publication delay is explicitly unmeasured across independent clocks;
+poll interval is configured detection cadence, not a universal latency bound.
+The native observer-death acceptance measured22ms detection and1.351s to empty;
+these are bounded observations, not guaranteed limits. Accounting scans refuse
+more than512rollouts or32MiB aggregate per poll; bounded nonblocking regular-file
+reads also reject concurrent growth beyond that capacity. This internal parsing
+capacity is independent of the operator's host resource limits.
 
 Guard shutdown fences new effects first, requests native termination for at most
 checkpoint_grace_seconds, then exits so systemd terminates all cgroup descendants
