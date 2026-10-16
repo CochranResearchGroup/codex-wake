@@ -6904,3 +6904,13 @@ Checkpointnominalroot1292683+external427289+unknownreserve200000=1919972;
 reservesnotexactbounds. Remaining80028 cannot cover minimum2turnproof+review.
 No furtherpaidturns; no broadreviewused; no merge/release/deployment/closure.
 Restart: evidence/plan0166/checkpoint-20261016-2118.md andledger.json.
+
+## Turn 336 | 2026-10-16 UTC | Renewed allocation and native successor proof
+
+Explicit userrenewal NEW2MMtokens/4h andactive status. Rootbaseline1364205,
+external427289observed+200kunknownhistoricalreserve retained. Newwindow
+22:01:51Z→02:01:51Z with10mincheckpointreserve. Nativeworker reactivated
+fromce700d7, exactnestedreviewfixture beforepaidwriter; atmost3turns/350k
+estimate, initialonewriter onlythen actualcostreadback. Priorfailedreview
+nevernormalized; priorfixturecleaned.275–277validated;278running.
+Onebroadreviewunused, sourcefrozenbeeacfa, no productiondeployment.

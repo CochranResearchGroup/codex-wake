@@ -327,7 +327,7 @@
     "native_observed_tokens": 427289,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
-    "further_native_turns_authorized": false,
+    "further_native_turns_authorized": true,
     "final_native_packet": {
       "max_turns": 1,
       "turns_used": 1,
@@ -339,22 +339,12 @@
     "external_native_observed_tokens": 427289,
     "external_native_unknown_reserved_tokens": 200000,
     "current_packet": {
-      "ticket": 278,
-      "source": "beeacfa",
-      "state": "checkpoint: preflight harness schema failed; no continuation",
-      "authorized_now_turns": 2,
-      "campaign_max_turns": 5,
-      "campaign_estimate_tokens": 350000,
-      "remaining_phases": "HOLD for actual cost readback",
-      "uncertainty": "200k historical missing-counter reserve is not a guaranteed cap; later interrupted counters are observed floors without terminal final billing proof",
-      "phaseA_tokens": 163907,
-      "phaseA_turns": 2,
-      "campaign_remaining_estimate_tokens": 186093,
-      "optional_fifth_turn": "HOLD",
-      "turns_used": 4,
-      "observed_tokens": 266117,
-      "remaining_estimate_tokens": 138422,
-      "max_additional_turns": 0
+      "state": "correctedharnessvalidation+onewriter dispatched",
+      "max_turns": 3,
+      "estimate_tokens": 350000,
+      "initial_authorized_turns": 1,
+      "remaining_two": "HOLDforwriterreadback",
+      "source": "ce700d7"
     },
     "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
@@ -369,7 +359,9 @@
     "qualification": "Observed counters are floors; reserves are estimates, not exact charge bounds. Missing final accounting stays unknown.",
     "stop_reason": "Nominal cumulative1984084 leaves15916; insufficient remaining acceptance and mandatedreview. User resource checkpoint binding.",
     "next_action": "Recover from checkpoint-20261016-2118.md; qualify failed harness correction before any new native campaign. No further paid turns in this allocation.",
-    "final_campaign_accounting": "266117 known settled; zero reservations/unknown; historical unknown reserve unchanged"
+    "final_campaign_accounting": "266117 known settled; zero reservations/unknown; historical unknown reserve unchanged",
+    "resumed": true,
+    "resume_reason": "Explicit new2MM/4h allocation; preserve priorcosts"
   },
   "renewals": [
     {
@@ -381,6 +373,17 @@
       "cumulative_token_ceiling": 2000000,
       "hard_time_ceiling": "2026-10-16T23:41:41Z",
       "time_qualification": "Conservative4h from original goal start19:41:41Z, not a reset of historical consumption."
+    },
+    {
+      "authority": "User explicitly renewed2MMtokens/4h and resumedactive",
+      "at": "2026-10-16T22:01:51Z",
+      "root_baseline": 1364205,
+      "external_native_observed_baseline": 427289,
+      "historical_unknown_reserve": 200000,
+      "new_window_tokens": 2000000,
+      "nominal_cumulative_ceiling": 3991494,
+      "hard_time_ceiling": "2026-10-17T02:01:51Z",
+      "checkpoint_by": "2026-10-17T01:51:51Z"
     }
   ],
   "worker_results": [

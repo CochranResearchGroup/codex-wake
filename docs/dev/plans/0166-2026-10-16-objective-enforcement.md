@@ -20,17 +20,23 @@ At most3 active agents total. No nested workers.
 
 ## Current State
 
-275–277 validated;278incomplete at resource checkpoint. Sourcebeeacfa full1325
-PASS/1optionalhostskip, installed53PASS/1skip plus7livehostPASS. Actualnative
-concurrency, failedcheckpointreplacement preservation, publicrefresh/freshownedgoal
-binding and explicitrenewal passed. Successorpreflight failed harnessreviewshape;
-no continuationstarted. Preserve failures and do not mark278validated.
+Resumed2026-10-16T22:01:51Z under explicit NEW2MMtokens/4h allowance.
+Historical costs remain: rootbaseline1364205 +external427289 +unknownreserve200000.
+Newwindow hardtime2026-10-17T02:01:51Z/checkpoint01:51:51Z, nominalcumulativeceiling3991494.
+275–277validated;278running. Frozen sourcebeeacfa, clean checkpointce700d7.
+Prior full1325PASS/1optionalhostskip, installed53PASS/1skip plus7livehostPASS.
 
-Current restart authority is evidence/plan0166/checkpoint-20261016-2118.md and
-ledger.json. Nominal1919972 includingunknownreserves leavesinsufficientcomplete
-proof+reviewheadroom under2MM. No furtherpaidturns inthisallocation. One broad
-review remains unused until allticketsvalidated; oneboundedremediation follows.
-No production install/deployment/merge/trackerclosure. Plan remainsOPEN.
+Native worker owns corrected exactnestedreview harness and privatefixture evidence.
+Newpacket atmost3turns/350kestimate: freshwriter then semanticpreflight then one
+continuation. Firstauthorizeeffectfreeverifierfixture+onewriter; actualcostreadback
+before remainingtwo. StartprivateXDGregistry+durablemonitor fromadmission and
+choose sufficientoriginalsessiontime, preservingfixeddeadline semantics.
+No direct ledgeraliases/settlements, hostauthoredreview or correction of oldfailed
+artifact. Priorfourturn266117 campaign remainsknownsettled andcleaned.
+
+After278actualproof validated, perform exactlyone broadreview ofbase0a5c8d1...HEAD
+withstandards/specaxes, oneboundedremediation then focusedcriticalverification.
+No merge/release/deployment or trackerclosure implied by branchvalidation.
 
 ## Historical authority and evidence
 
