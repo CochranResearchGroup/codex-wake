@@ -33,5 +33,25 @@
     "host": "/root/host_execution_adapter",
     "native": "/root/native_containment_probe"
   },
-  "validations": []
+  "validations": [
+    {
+      "kind": "focused",
+      "selection": "legacy spawn",
+      "result": "PASS",
+      "count": 27
+    },
+    {
+      "kind": "focused",
+      "selection": "emergency interruption",
+      "result": "PASS",
+      "count": 15
+    },
+    {
+      "kind": "native public launch",
+      "result": "FAIL_BEFORE_MODEL",
+      "reason": "independent UTC upper bounds compared as elapsed heartbeat freshness",
+      "paid_turns": 0
+    }
+  ],
+  "integration_tip": "4e1bae9"
 }

@@ -1,0 +1,16 @@
+.E..
+======================================================================
+ERROR: test_only_bound_executor_socket_alias_is_accepted_by_both_native_readers (test_strict_execution.StrictConfigurationTests.test_only_bound_executor_socket_alias_is_accepted_by_both_native_readers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_execution.py", line 90, in test_only_bound_executor_socket_alias_is_accepted_by_both_native_readers
+    self.assertEqual(native_request(endpoint,'/bin/true','thread/list',{'limit':1},2),{'data':[]})
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/native_protocol.py", line 27, in native_request
+    raise WakeError('native lifecycle endpoint must be an owned Unix socket')
+codex_wake.records.WakeError: native lifecycle endpoint must be an owned Unix socket
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.161s
+
+FAILED (errors=1)

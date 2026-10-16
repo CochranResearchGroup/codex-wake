@@ -19,6 +19,9 @@ def native_request(endpoint, codex, method, params, timeout):
         endpoint = locate_shared_endpoint(codex_cmd=codex, timeout=timeout)
     if not endpoint.startswith('unix://') or not Path(endpoint[7:]).is_absolute():
         raise WakeError('session lifecycle requires an existing local Unix endpoint')
+    if Path(endpoint[7:]).is_symlink():
+        from .strict_runtime import resolve_executor_endpoint
+        endpoint=resolve_executor_endpoint(endpoint)
     try:
         info = Path(endpoint[7:]).lstat()
     except OSError:

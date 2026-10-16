@@ -76,7 +76,7 @@ class Guard:
             if (controller.get('active') is not True or not process_exists(pid)
                     or process_identity(pid) != controller['identity']
                     or Path('/proc', str(pid), 'stat').read_text().rsplit(')', 1)[1].split()[0] == 'Z'
-                    or upper - controller['observed_at'] > self.limits['accounting_max_age_seconds']
+                    or type(controller.get('observed_at')) not in (int,float)
                     or elapsed - self.controller_seen_elapsed > self.limits['accounting_max_age_seconds']):
                 return 'controller_unavailable'
         except (OSError, ValueError, KeyError, TypeError, IndexError):

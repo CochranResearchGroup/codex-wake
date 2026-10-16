@@ -65,3 +65,29 @@ class StrictConfigurationTests(unittest.TestCase):
             self.assertEqual(code,0)
             self.assertIsNone(json.loads(out.getvalue())['execution'])
             self.assertFalse((root/'wake').exists())
+
+    def test_only_bound_executor_socket_alias_is_accepted_by_both_native_readers(self):
+        from codex_wake.native_protocol import native_request
+        from codex_wake.shared_app_server import SharedAppServerReader
+        from codex_wake.strict_runtime import location
+        from websockets.sync.server import unix_serve
+        import os,threading
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);directory=location(root,'owned');directory.mkdir(parents=True,mode=0o700)
+            target=root/'real.sock';alias=directory/'app-server.sock'
+            def handle(ws):
+                for raw in ws:
+                    msg=json.loads(raw)
+                    if 'id' in msg:ws.send(json.dumps(dict(id=msg['id'],result={} if msg['method']=='initialize' else {'data':[]})))
+            server=unix_serve(handle,str(target));worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+            alias.symlink_to(target)
+            binding=directory/'binding.json';binding.write_text(json.dumps(dict(objective_id='owned',state='running',
+                identity=dict(unit='codex-wake-objective-fixture.service',invocation_id='fixture',control_group='/fixture'))));binding.chmod(0o600)
+            try:
+                with patch('codex_wake.strict_runtime.SystemdExecution.inspect',return_value={'members':[os.getpid()],'populated':True}):
+                    endpoint='unix://'+str(alias)
+                    self.assertEqual(native_request(endpoint,'/bin/true','thread/list',{'limit':1},2),{'data':[]})
+                    with SharedAppServerReader(endpoint,timeout=2) as reader:
+                        self.assertEqual(reader.request('thread/list',{'limit':1}),{'data':[]})
+            finally:server.shutdown();worker.join(2)

@@ -84,7 +84,7 @@ def configuration_command(args, root):
             directory=location(root,identity)
             effective['execution_layout']=dict(home=str(directory/'home'),app_server='unix://'+str(directory/'app-server.sock'))
             effective['objective_execution']=read_execution(root,identity)
-    except (OSError, ValueError, WakeError) as exc:
+    except (OSError, ValueError, RuntimeError, WakeError) as exc:
         emit({'error': {'code': 'configuration_unavailable', 'message': str(exc)}}, args.as_json)
         return 2
     emit(effective, args.as_json)

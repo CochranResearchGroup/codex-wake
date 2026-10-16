@@ -131,7 +131,16 @@ def ensure_execution(root,receipt):
         receipt['strict_execution']=binding
         until=time.monotonic()+profile['timeout']
         while time.monotonic()<until:
-            if (directory/'app-server.sock').is_socket():return
+            if (directory/'app-server.sock').is_socket():
+                from .native_protocol import native_request
+                try:
+                    native_request(endpoint,profile['codex_path'],'thread/list',{'limit':1},
+                        min(2,max(.1,until-time.monotonic())))
+                    return
+                except Exception as exc:
+                    binding['readiness_error']=type(exc).__name__+': '+str(exc)[:240]
+                    _save(path,binding)
+                    # Read-only readiness may be retried; thread/start may not.
             observed=read_execution(root,objective)
             if observed['state']=='stopped':raise WakeError('strict executor stopped during startup')
             time.sleep(.025)
@@ -184,3 +193,36 @@ def execution_command(args,root):
     except (OSError,ValueError,KeyError,RuntimeError,WakeError) as exc:
         emit(dict(error=dict(code='execution_unavailable',message=str(exc))),args.as_json)
         return 2
+
+
+def resolve_executor_endpoint(endpoint):
+    """Resolve Codex's alias only for a proven, still-owned strict executor.
+
+    Ordinary explicit endpoints retain their no-symlink contract. A peer PID in
+    the exact invocation's cgroup proves this alias is not a shared-server route.
+    """
+    import socket
+    import struct
+    path=Path(endpoint[7:])
+    if not path.is_symlink():return endpoint
+    directory=path.parent;root=directory.parent.parent
+    if path.name!='app-server.sock' or not (directory/'binding.json').is_file():return endpoint
+    try:
+        _private(directory,True)
+        binding_path=directory/'binding.json';_private(binding_path)
+        binding=json.loads(binding_path.read_text())
+        if (path.name!='app-server.sock' or directory!=location(root,binding['objective_id'])
+                or binding['state']!='running' or path.lstat().st_uid!=os.geteuid()):
+            raise ValueError('alias binding unavailable')
+        target=path.resolve(strict=True);info=target.lstat()
+        if info.st_uid!=os.geteuid() or not stat.S_ISSOCK(info.st_mode):
+            raise ValueError('alias target unavailable')
+        observed=SystemdExecution().inspect(binding['identity'])
+        with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as peer:
+            peer.settimeout(1);peer.connect(str(target))
+            pid,uid,_=struct.unpack('3i',peer.getsockopt(socket.SOL_SOCKET,socket.SO_PEERCRED,12))
+        if uid!=os.geteuid() or pid not in observed['members']:
+            raise ValueError('alias peer outside executor')
+        return 'unix://'+str(target)
+    except (OSError,KeyError,ValueError,RuntimeError,WakeError) as exc:
+        raise WakeError('strict executor socket alias ownership unavailable') from exc

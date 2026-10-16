@@ -136,9 +136,10 @@ def spawn_command(args, root):
                         {'cwd': str(Path(runtime.cwd).resolve()), 'ephemeral': False}, runtime.timeout)
                     receipt.update(thread_id=response['thread']['id'], state='awaiting_preflight')
                     receipt.pop('uncertain_effect', None)
-                except Exception:
+                except Exception as exc:
                     # The peer may have created the thread before its connection failed.
-                    receipt.update(state='uncertain', uncertain_effect='thread/start')
+                    receipt.update(state='uncertain', uncertain_effect='thread/start',
+                        native_start_error=type(exc).__name__+': '+str(exc)[:240])
                 save(path, receipt)
         if receipt['thread_id'] is not None and receipt['state']!='completed':
             advance_spawn(path, receipt, profile)

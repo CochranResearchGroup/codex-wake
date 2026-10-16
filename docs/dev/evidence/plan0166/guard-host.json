@@ -1,0 +1,190 @@
+[
+  {
+    "case": "deadline",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-22ce314af4f0443e83b2ef1fbc6f7306.service",
+      "invocation_id": "70fa2245cb1e4a5e8eb75b4fb1a21c7b",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-22ce314af4f0443e83b2ef1fbc6f7306.service",
+      "main_pid": 50247
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 50284,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-22ce314af4f0443e83b2ef1fbc6f7306.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 22957289
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 229575.31566875,
+      "pid": 50247,
+      "reason": "deadline_reached",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "elapsed_seconds": 2.82643383499817,
+    "trigger_to_empty_seconds": 2.499914562009508,
+    "sentinel_survived": true
+  },
+  {
+    "case": "controller_death",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-10e00d73e4314b57bc7cfcbdb556732d.service",
+      "invocation_id": "ebd7df321253481fb215126aa591f7b7",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-10e00d73e4314b57bc7cfcbdb556732d.service",
+      "main_pid": 51174
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 51201,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-10e00d73e4314b57bc7cfcbdb556732d.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 22957595
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 229576.33474061,
+      "pid": 51174,
+      "reason": "controller_unavailable",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "elapsed_seconds": 0.871646701998543,
+    "trigger_to_empty_seconds": 0.47499573600362055,
+    "sentinel_survived": true
+  },
+  {
+    "case": "accounting_loss",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-ac0c2356abcb4997852b3f48bd69fc4a.service",
+      "invocation_id": "c1ac25e171e74c14b36bb72028eee476",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-ac0c2356abcb4997852b3f48bd69fc4a.service",
+      "main_pid": 51315
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 51403,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-ac0c2356abcb4997852b3f48bd69fc4a.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 22957707
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 229577.397574648,
+      "pid": 51315,
+      "reason": "accounting_unavailable",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "elapsed_seconds": 0.8059999499819241,
+    "trigger_to_empty_seconds": 0.4036427290120628,
+    "sentinel_survived": true
+  },
+  {
+    "case": "injected_token_exhaustion",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-499aa68c55804cf98673eb6a190baba0.service",
+      "invocation_id": "00a91b1c3a1e4d7eb4b45b9b9205d5b8",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-499aa68c55804cf98673eb6a190baba0.service",
+      "main_pid": 51689
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 51725,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-499aa68c55804cf98673eb6a190baba0.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 22957829
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 229578.648829208,
+      "pid": 51689,
+      "reason": "session_tokens_exhausted",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "elapsed_seconds": 1.1498969420208596,
+    "trigger_to_empty_seconds": 0.4716150300228037,
+    "sentinel_survived": true
+  }
+]
