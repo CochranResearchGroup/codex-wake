@@ -70,12 +70,39 @@ def ensure_execution(root,receipt):
     with _lock(directory):
         path=directory/'binding.json'
         old=read_execution(root,objective)
+        historical_actors={}
         if old:
             if old['configuration_revision']!=cfg['revision']:
+                final_usage=old.get('final_usage',old.get('guard',{}).get('final_usage',{}))
+                if final_usage.get('state')=='accounting_unknown':
+                    raise WakeError('strict execution renewal requires explicit final-usage reconciliation')
                 # Renewal must already be recorded by the existing operator-only ledger API.
                 ledger=configured_ledger(root,receipt).inspect(now=trusted_upper())
-                if old.get('host',{}).get('populated') or ledger['revision']!=cfg['revision']:
+                if (not old.get('identity') or old.get('host',{}).get('populated')
+                        or old.get('host',{}).get('members') or ledger['revision']!=cfg['revision']
+                        or ledger['authorization_history'][-1].get('action') not in ('extend','reset')
+                        or ledger['authorization_history'][-1]['configuration']['revision']!=cfg['revision']):
                     raise WakeError('strict execution renewal requires settled prior execution and ledger authorization')
+                # Spawn reserves before host effects. Only the untouched current
+                # fresh reservation may be excluded from PRIOR actor settlement.
+                fresh=receipt.get('budget_actor')
+                candidate=ledger['actors'].get(fresh,{})
+                may_exclude=(receipt.get('thread_id') is None and receipt.get('state')=='prepared'
+                    and not receipt.get('uncertain_effect') and not receipt['intent'].get('budget_inherited')
+                    and fresh=='spawn:'+receipt.get('fingerprint','') and candidate.get('used')==0
+                    and candidate.get('known') is True and candidate.get('settled') is False)
+                if may_exclude:
+                    for prior_path in (Path(root)/'lifecycle').glob('*.json'):
+                        if prior_path.name.startswith('owner-') or prior_path.name=='supervision.json':continue
+                        prior=json.loads(prior_path.read_text())
+                        prior_cfg=prior.get('configuration') or prior.get('intent',{}).get('configuration') or {}
+                        if prior.get('budget_actor')==fresh and (prior.get('thread_id') or prior_cfg.get('revision')!=cfg['revision']):
+                            may_exclude=False;break
+                for actor_id,actor in ledger['actors'].items():
+                    if may_exclude and actor_id==fresh:continue
+                    if not actor['known'] or not actor['settled']:
+                        raise WakeError('strict execution renewal requires every prior actor settled and known')
+                    historical_actors[actor_id]=actor['used']
             elif old.get('state')=='running' and old.get('guard',{}).get('state','running')=='running':
                 receipt['strict_execution']=old
                 return
@@ -116,7 +143,7 @@ def ensure_execution(root,receipt):
             codex_home=str(home),argv=[profile['codex_path'],'app-server','--listen',endpoint],cwd=profile['cwd'],
             configuration=cfg,started_upper=upper,started_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
             boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(),deadline=deadline,
-            status_path=str(directory/'status.json'),generation=generation)
+            status_path=str(directory/'status.json'),generation=generation,historical_actors=historical_actors)
         config_path=directory/('guard-'+generation+'.json');_save(config_path,dict(state='configured',**guard_config))
         selected={key:limits[key] for key in ('memory_max_bytes','memory_swap_max_bytes','cpu_quota_percent','tasks_max','stop_grace_seconds')}
         environment=dict(CODEX_HOME=str(home),PYTHONPATH=str(Path(__file__).resolve().parents[1]))
@@ -193,6 +220,18 @@ def stop_execution(root,objective_id,reason='operator_stop'):
         return binding
 
 
+def reconcile_execution(root,objective_id):
+    from .strict_final_usage import reconcile_final_usage
+    directory=location(root,objective_id)
+    with _lock(directory):
+        binding=read_execution(root,objective_id)
+        if not binding:return dict(state='unsupported',reason='strict_execution_not_enrolled')
+        result=reconcile_final_usage(root,binding)
+        binding['final_usage']=result
+        _save(directory/'binding.json',binding)
+        return binding
+
+
 def execution_command(args,root):
     from .lifecycle_configuration import effective_configuration
     from .lifecycle_budget import objective_identity
@@ -202,10 +241,12 @@ def execution_command(args,root):
         effective=effective_configuration(config,args.thread_id,args.profile)
         if not effective.get('strict_execution'):raise WakeError('strict execution not configured')
         objective=objective_identity(config['continuations'][args.thread_id])
-        observed=stop_execution(root,objective) if args.stop else read_execution(root,objective)
+        observed=(reconcile_execution(root,objective) if args.reconcile else
+            stop_execution(root,objective) if args.stop else read_execution(root,objective))
         value=dict(objective_id=objective,execution=observed,policy=effective['strict_execution'])
         emit(value,args.as_json)
-        return 5 if observed and observed['state']=='uncertain' else 0
+        return 5 if observed and (observed['state']=='uncertain' or
+            (args.reconcile and observed.get('final_usage',{}).get('state')!='settled')) else 0
     except (OSError,ValueError,KeyError,RuntimeError,WakeError) as exc:
         emit(dict(error=dict(code='execution_unavailable',message=str(exc))),args.as_json)
         return 2
