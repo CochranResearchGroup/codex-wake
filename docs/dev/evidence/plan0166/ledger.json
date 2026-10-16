@@ -6,16 +6,26 @@
   "checkpoint_by": "2026-10-16T22:31:00Z",
   "tickets": {
     "275": {
-      "state": "integrated",
+      "state": "validated",
       "blocked_by": [],
-      "remaining_validation": [
-        "frozen integration regression gate"
-      ]
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/public-containment-stop.json",
+        "native-probe/native-token-exhaustion.json",
+        "refusal-public.log",
+        "full-isolated-final.log",
+        "installed-strict-host-corrected.log"
+      ],
+      "qualification": "Validated contained launch/cleanup slice on branch, not shipped or tracker-closed. Full regression production-source snapshot18dbfec plus focused later exact-identity stop changes."
     },
     "276": {
-      "state": "pending",
+      "state": "running",
       "blocked_by": [
         275
+      ],
+      "remaining_validation": [
+        "public/native blocked-tool deadline and TERM-resistant-child qualification",
+        "documented restart/suspend timing qualification"
       ]
     },
     "277": {
@@ -147,9 +157,37 @@
       "skips": 0,
       "artifact": "installed-strict-host-corrected.log",
       "qualification": "First observation-race failure retained; exact-invocation same-deadline polling repair."
+    },
+    {
+      "kind": "full isolated source regression",
+      "result": "PASS",
+      "artifact": "full-isolated-final.log",
+      "sha256": "22a6392d0d524d38a564d30df3fba1128fb68a290e2e279061c37971ce8e1ea6",
+      "qualification": "Production source held unchanged for full run. Opt-in host case separately35checksPASS; bounded live-test observation correction plus lost-stop new test need focused follow-up."
+    },
+    {
+      "kind": "public operator lost launch reconciliation",
+      "result": "PASS",
+      "artifact": "lost-launch-public-host.json",
+      "qualification": "Real systemd invocation + public stopCLI; generic sleep/injected time and ledger, no native/provider. Replacement invocation rejection focused test passes."
+    },
+    {
+      "kind": "reconciliation critical regression",
+      "result": "PASS",
+      "tests": 37,
+      "live_tests": "lost-launch-green.log",
+      "final_generation_cases": "reconcile-focused-final.log",
+      "qualification": "Final focused selection1 opt-in skip; actual live host selection37 passed separately."
+    },
+    {
+      "kind": "independent guard host acceptance after metadata changes",
+      "result": "PASS",
+      "cases": 4,
+      "artifact": "guard-host-reconciliation.json",
+      "qualification": "Injected telemetry; actual guard/systemd/TERM-resistant child; identity metadata matches independent manager invocation in each case. No native/provider proof."
     }
   ],
-  "integration_tip": "87532d0",
+  "integration_tip": "18dbfec",
   "resource_accounting": {
     "root_goal_checkpoint_tokens": 700000,
     "native_observed_tokens": 69585,

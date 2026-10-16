@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_operator_stop_recovers_only_guard_proven_launch_generation (test_strict_execution.StrictLaunchReconciliationTests.test_operator_stop_recovers_only_guard_proven_launch_generation) (correct=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_execution.py", line 161, in test_operator_stop_recovers_only_guard_proven_launch_generation
+    self.assertEqual(result['state'],'stopped' if correct else 'uncertain')
+AssertionError: 'uncertain' != 'stopped'
+- uncertain
++ stopped
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.056s
+
+FAILED (failures=1)

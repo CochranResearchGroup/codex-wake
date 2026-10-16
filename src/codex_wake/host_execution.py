@@ -113,7 +113,8 @@ class SystemdExecution:
 
     def stop(self, identity):
         before = self.inspect(identity)  # identity must match immediately before effects
-        if before['identity_retired']:
+        if before['identity_retired'] or (before['state'] in {'inactive', 'failed'}
+                and not before['populated'] and not before['members']):
             return before
         result = self._run(['systemctl', '--user', 'stop', identity['unit']])
         if result.returncode:

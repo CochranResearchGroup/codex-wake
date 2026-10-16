@@ -165,7 +165,23 @@ def stop_execution(root,objective_id,reason='operator_stop'):
         binding=read_execution(root,objective_id)
         if not binding:return dict(state='unsupported',reason='strict_execution_not_enrolled')
         if not binding.get('identity'):
-            return dict(state='uncertain',reason='executor_launch_unverified',unit=binding['unit'])
+            # A lost launch response may leave an owned guard running. Its
+            # private generation and live process proof must agree with current
+            # manager invocation/cgroup membership before any stop effect.
+            from .process import process_identity
+            guard=binding.get('guard',{});candidate=guard.get('service_identity')
+            try:
+                if (not candidate or candidate['unit']!=binding['unit']
+                        or candidate['main_pid']!=guard['pid']
+                        or process_identity(guard['pid'])!=guard['identity']):
+                    raise ValueError('guard launch identity unavailable')
+                host=SystemdExecution().inspect(candidate)
+                if guard['pid'] not in host['members']:
+                    raise ValueError('guard is outside recorded invocation')
+            except (OSError,ValueError,KeyError,TypeError,RuntimeError):
+                return dict(state='uncertain',reason='executor_launch_unverified',unit=binding['unit'])
+            binding.update(identity=candidate,state='running',reason='launch_identity_reconciled')
+            _save(directory/'binding.json',binding)
         binding.update(state='stopping',reason=reason)
         _save(directory/'binding.json',binding)
         try:

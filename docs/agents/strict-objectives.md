@@ -81,8 +81,11 @@ when killed before publication; last sampled usage is not final-cost proof.
 Stopped/exhausted generations remain fenced. A new configuration revision alone
 cannot replenish the ledger: explicit operator renewal must retain historical
 consumption/authorization and settle the previous execution. Ambiguous launch or
-stop effects remain uncertain and require exact identity reconciliation; never
-retry a unit name blindly or terminate a replacement invocation.
+stop effects remain uncertain and require exact identity reconciliation. Operator
+stop can recover a missing launch identity only when the private generation, live
+guard process identity, current systemd InvocationID and cgroup membership agree.
+An already empty original invocation settles without issuing another stop; a
+replacement invocation is preserved. Never retry a unit name blindly.
 
 Current evidence and unproven acceptance gates are in Plan0166 and
 `docs/dev/evidence/plan0166/ledger.json`. Injected telemetry OS tests are labelled

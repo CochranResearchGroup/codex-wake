@@ -66,6 +66,21 @@ class HostExecutionTests(unittest.TestCase):
         self.assertEqual(result['members'], [])
         self.assertFalse(any('stop' in command for command in runner.calls))
 
+    def test_lost_stop_response_reconciles_empty_original_invocation_without_second_stop(self):
+        calls=[]
+        def runner(argv,**kwargs):
+            calls.append(argv)
+            if 'show' not in argv:
+                raise AssertionError('must reconcile completed stop without repeating its effect')
+            return subprocess.CompletedProcess(argv,0,'LoadState=loaded\nActiveState=failed\n'
+                'SubState=failed\nInvocationID=original\nControlGroup=\nMainPID=0\n','')
+        identity=dict(unit='codex-wake-objective-test.service',invocation_id='original',
+            control_group='/codex-wake-objective-absent-'+uuid.uuid4().hex)
+        result=SystemdExecution(runner=runner).stop(identity)
+        self.assertFalse(result['populated'])
+        self.assertEqual(result['members'],[])
+        self.assertTrue(all('show' in call for call in calls))
+
     @unittest.skipUnless(os.environ.get('CODEX_WAKE_HOST_EXECUTION_LIVE') == '1', 'opt-in disposable systemd test')
     def test_live_deadline_stops_service_without_controller(self):
         adapter = SystemdExecution()

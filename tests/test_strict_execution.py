@@ -134,3 +134,38 @@ class StrictLaunchRefusalTests(unittest.TestCase):
                 view=ObjectiveLedger(wake,'goal').inspect(now=101)
                 self.assertEqual(len(view['actors']),1)
                 self.assertEqual(view['tokens_used'],0)
+
+
+class StrictLaunchReconciliationTests(unittest.TestCase):
+    def test_operator_stop_recovers_only_guard_proven_launch_generation(self):
+        from unittest.mock import patch
+        from codex_wake.strict_runtime import location,stop_execution
+        from codex_wake.process import process_identity
+        import os
+        for case in ('owned','wrong-generation','replacement-invocation'):
+            correct=case=='owned'
+            with self.subTest(case=case),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp);directory=location(root,'owned');directory.mkdir(parents=True,mode=0o700)
+                identity=dict(unit='codex-wake-objective-owned.service',invocation_id='original',
+                    control_group='/fixture',main_pid=os.getpid())
+                binding=dict(state='uncertain',objective_id='owned',generation='owned',identity=None,
+                    unit=identity['unit'],reason='executor_launch_unverified')
+                status=dict(state='running',generation='replacement' if case=='wrong-generation' else 'owned',
+                    pid=os.getpid(),identity=process_identity(os.getpid()),service_identity=identity)
+                for name,value in (('binding.json',binding),('status.json',status)):
+                    path=directory/name;path.write_text(json.dumps(value));path.chmod(0o600)
+                with patch('codex_wake.strict_runtime.SystemdExecution.inspect',return_value=dict(
+                        state='active',members=[os.getpid()],populated=True),
+                        side_effect=RuntimeError('executor identity changed') if case=='replacement-invocation' else None) as inspect, \
+                        patch('codex_wake.strict_runtime.SystemdExecution.stop',return_value=dict(
+                        state='inactive',members=[],populated=False)) as stop:
+                    result=stop_execution(root,'owned')
+                    self.assertEqual(result['state'],'stopped' if correct else 'uncertain')
+                    if correct:
+                        inspect.assert_called_once_with(identity);stop.assert_called_once_with(identity)
+                        saved=json.loads((directory/'binding.json').read_text())
+                        self.assertEqual(saved['identity'],identity)
+                    else:
+                        stop.assert_not_called()
+                        if case=='wrong-generation':inspect.assert_not_called()
+                        else:inspect.assert_called_once_with(identity)

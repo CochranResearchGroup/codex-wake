@@ -237,6 +237,15 @@ class Guard:
 
 
 def _status(config, state, reason=None, child_pid=None):
+    service_identity = None
+    invocation = os.environ.get('INVOCATION_ID')
+    if invocation:
+        for line in Path('/proc/self/cgroup').read_text().splitlines():
+            if line.startswith('0::'):
+                group = line[3:]
+                service_identity = dict(unit=Path(group).name, invocation_id=invocation,
+                    control_group=group, main_pid=os.getpid())
+                break
     destination = Path(config['status_path'])
     destination.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
     descriptor, temporary = tempfile.mkstemp(dir=destination.parent)
@@ -245,6 +254,7 @@ def _status(config, state, reason=None, child_pid=None):
             json.dump(dict(state=state, reason=reason, generation=config['generation'],
                 pid=os.getpid(), identity=process_identity(os.getpid()), child_pid=child_pid,
                 endpoint=config['endpoint'], objective_id=config['objective_id'],
+                service_identity=service_identity,
                 observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
                 accounting_error=config.get('accounting_error')), stream, sort_keys=True)
             stream.flush()

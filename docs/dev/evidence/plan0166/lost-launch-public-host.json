@@ -1,0 +1,204 @@
+{
+  "qualification": "real systemd/public operator CLI; injected time/ledger and generic sleep, no native Codex/provider",
+  "launch_response": "intentionally lost after actual systemd-run response",
+  "guard_identity": {
+    "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service",
+    "invocation_id": "2d16e2dcb53b40399e20f25a6af987a1",
+    "main_pid": 8317,
+    "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+  },
+  "before": {
+    "state": "active",
+    "substate": "running",
+    "populated": true,
+    "members": [
+      8317,
+      8364
+    ],
+    "identity_retired": false,
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "configured_limits": {
+      "MemoryMax": "134217728",
+      "MemorySwapMax": "0",
+      "CPUQuotaPerSecUSec": "500ms",
+      "TasksMax": "32"
+    }
+  },
+  "public_stop_code": 0,
+  "public_stop": {
+    "execution": {
+      "configuration_revision": "381e1469a04d69712e48daaa8ef8e9610f28ca5b16422f96e93db6fed27614a3",
+      "generation": "7dfe4bac7e8741be9db550eb7eab405b",
+      "guard": {
+        "accounting_error": null,
+        "child_pid": 8364,
+        "endpoint": "unix:///tmp/cw166-launch-recovery-8srnz9yv/strict-execution/c1cda26362828b6926651205/app-server.sock",
+        "generation": "7dfe4bac7e8741be9db550eb7eab405b",
+        "identity": {
+          "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+          "start_time_ticks": 23174288
+        },
+        "objective_id": "proof",
+        "observed_boottime": 231743.03639191,
+        "pid": 8317,
+        "reason": null,
+        "service_identity": {
+          "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service",
+          "invocation_id": "2d16e2dcb53b40399e20f25a6af987a1",
+          "main_pid": 8317,
+          "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+        },
+        "state": "running"
+      },
+      "history": [
+        {
+          "effect": null,
+          "reason": "launch_identity_reconciled",
+          "state": "running"
+        },
+        {
+          "effect": null,
+          "reason": "operator_stop",
+          "state": "stopping"
+        },
+        {
+          "effect": null,
+          "reason": "operator_stop",
+          "state": "stopped"
+        }
+      ],
+      "host": {
+        "configured_limits": {
+          "CPUQuotaPerSecUSec": "infinity",
+          "MemoryMax": "infinity",
+          "MemorySwapMax": "infinity",
+          "TasksMax": "14999"
+        },
+        "identity_retired": true,
+        "kernel_limits": {},
+        "members": [],
+        "populated": false,
+        "state": "inactive",
+        "substate": "dead"
+      },
+      "identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service",
+        "invocation_id": "2d16e2dcb53b40399e20f25a6af987a1",
+        "main_pid": 8317,
+        "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+      },
+      "objective_id": "proof",
+      "reason": "operator_stop",
+      "state": "stopped",
+      "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+    },
+    "objective_id": "proof",
+    "policy": {
+      "coverage": "dedicated_local_executor_and_descendants",
+      "exclusions": [
+        "shared_services",
+        "external_provider_execution",
+        "same_user_ipc_escape"
+      ],
+      "limits": {
+        "accounting_max_age_seconds": 10,
+        "checkpoint_grace_seconds": 1,
+        "cpu_quota_percent": 50,
+        "memory_max_bytes": 134217728,
+        "memory_swap_max_bytes": 0,
+        "poll_seconds": 0.2,
+        "stop_grace_seconds": 1,
+        "tasks_max": 32
+      },
+      "maximum_token_overshoot": null,
+      "token_enforcement": "sampled_stop"
+    }
+  },
+  "binding": {
+    "configuration_revision": "381e1469a04d69712e48daaa8ef8e9610f28ca5b16422f96e93db6fed27614a3",
+    "generation": "7dfe4bac7e8741be9db550eb7eab405b",
+    "guard": {
+      "accounting_error": null,
+      "child_pid": 8364,
+      "endpoint": "unix:///tmp/cw166-launch-recovery-8srnz9yv/strict-execution/c1cda26362828b6926651205/app-server.sock",
+      "generation": "7dfe4bac7e8741be9db550eb7eab405b",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23174288
+      },
+      "objective_id": "proof",
+      "observed_boottime": 231743.03639191,
+      "pid": 8317,
+      "reason": null,
+      "service_identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service",
+        "invocation_id": "2d16e2dcb53b40399e20f25a6af987a1",
+        "main_pid": 8317,
+        "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+      },
+      "state": "running"
+    },
+    "history": [
+      {
+        "effect": null,
+        "reason": "launch_identity_reconciled",
+        "state": "running"
+      },
+      {
+        "effect": null,
+        "reason": "operator_stop",
+        "state": "stopping"
+      },
+      {
+        "effect": null,
+        "reason": "operator_stop",
+        "state": "stopped"
+      }
+    ],
+    "host": {
+      "configured_limits": {
+        "CPUQuotaPerSecUSec": "infinity",
+        "MemoryMax": "infinity",
+        "MemorySwapMax": "infinity",
+        "TasksMax": "14999"
+      },
+      "identity_retired": true,
+      "kernel_limits": {},
+      "members": [],
+      "populated": false,
+      "state": "inactive",
+      "substate": "dead"
+    },
+    "identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service",
+      "invocation_id": "2d16e2dcb53b40399e20f25a6af987a1",
+      "main_pid": 8317,
+      "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+    },
+    "objective_id": "proof",
+    "reason": "operator_stop",
+    "state": "stopped",
+    "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+  },
+  "after": {
+    "state": "inactive",
+    "substate": "dead",
+    "populated": false,
+    "members": [],
+    "identity_retired": true,
+    "kernel_limits": {},
+    "configured_limits": {
+      "MemoryMax": "infinity",
+      "MemorySwapMax": "infinity",
+      "CPUQuotaPerSecUSec": "infinity",
+      "TasksMax": "14999"
+    }
+  },
+  "sentinel_survived": true,
+  "state": "passed"
+}
