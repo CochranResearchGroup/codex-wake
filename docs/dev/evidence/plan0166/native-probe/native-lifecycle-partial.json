@@ -1,0 +1,103 @@
+{
+  "source_commit": "beeacfa",
+  "root": "/tmp/cw166-q",
+  "issue": 278,
+  "result": "partial_acceptance_successor_continuation_unproven",
+  "paid_user_turns": 4,
+  "tokens": {
+    "metric": "sum_of_distinct_native_rollout_cumulative_maxima_including_cached_input",
+    "observed_terminal": 266117,
+    "accounting_known": true,
+    "unknown": [],
+    "reserved": 0,
+    "actors": {
+      "handoff:79c9ab29693168c88fef4b1e9fcd4299afcf1935464007e318b1c254627683ac": {
+        "used": 54539,
+        "known": true,
+        "settled": true,
+        "session_deadline": 1792185460.028579
+      },
+      "spawn:10b66f145c97302ce3cea22e39277c51917e7a042b90234f15a1da5912d39a52": {
+        "used": 47671,
+        "known": true,
+        "settled": true,
+        "session_deadline": 1792185460.1168616
+      },
+      "spawn:7086f7ac966586154238dd7e57a73c3d8f42ee805d431db6abdadcd71e996f06": {
+        "used": 47810,
+        "known": true,
+        "settled": true,
+        "session_deadline": 1792185145.2905743
+      },
+      "spawn:c31ba0aabd6830e22dceec2427ae97b00cffe5f80fd82db7276afaac006c3814": {
+        "used": 116097,
+        "known": true,
+        "settled": true,
+        "session_deadline": 1792185125.4162958
+      }
+    }
+  },
+  "qualified": [
+    "two concurrent genuine actors with aggregate reservation600000",
+    "public third admission denied without thread/submission",
+    "actual native failed atomic checkpoint replacement preserves verified artifact",
+    "public explicit time renewal retains historical usage/start/originaldeadline",
+    "fresh paused native goal auto-bound to same source actor with preflight offset",
+    "public isolated-registry refresh preserves thread/goal/counters"
+  ],
+  "failed_preflight": {
+    "native_tokens": 54539,
+    "reason": "native-authored review was flat; pinned verifier required nested work_review and raised KeyError('work_review')",
+    "artifact_preserved": "workspace/work-review.json",
+    "normalization_performed": false,
+    "continuation_executed": false
+  },
+  "deadline": {
+    "guard_reason": "session_deadline_reached",
+    "source_C_session_deadline_epoch": 1792185460.1168616,
+    "original_objective_deadline": "2026-10-16T21:13:02+00:00",
+    "renewed_objective_deadline": "2026-10-16T21:21:02+00:00",
+    "started_at": "2026-10-16T21:06:02.684569+00:00",
+    "authorization_history_count": 2
+  },
+  "cleanup": {
+    "owned_unit": "codex-wake-objective-1533211d95594b1ea779e3ac02f8997b.service",
+    "unit_final": "MainPID=0\nControlGroup=\nActiveState=failed\n",
+    "cgroup_directory_exists": false,
+    "remaining_home_processes": [],
+    "monitor_pid": 17580,
+    "monitor_expected_identity": {
+      "start_time_ticks": 23420090,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+    },
+    "monitor_before_identity": {
+      "start_time_ticks": 23420090,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+    },
+    "monitor_after_identity": null,
+    "private_tmux_stop_exit": 0,
+    "sentinel_present": false,
+    "sentinel_limitation": "Original sentinel was already absent after first nondurable launcher; no final survival claim."
+  },
+  "receipt_sha256": {
+    "configuration-concurrent.json": "1adee71a3e824cbe47c16e627fdfc9f1d49a8ad5018479dc40d786394b3aebb7",
+    "denied-third.json": "072b0f92997d1fd53b420323b6c425950d91a510a5f30d77b4683c529e143fec",
+    "configuration-settled.json": "d3471bca14d882925474951f8374ec95de0b4d7ce21f9474eee6ad34016ae10f",
+    "recovery-reconciled.json": "56d76777cafbae936c75ce45007927072039e49d7e1da95111911b91babccd9a",
+    "recovery-authorized.json": "ce07cc385d2d108160bd924557795a1ef8d5fcf8f36e37ba3c4ea778198be113",
+    "refresh-global-block-rollback.json": "88599da12b32be714d46a5d3096c07cfae35c2b54d93fee36beb2102ac7bf2fa",
+    "refresh-latest.json": "bb697d5c348c9b735b0ed5f6e974cb04bbf7bf3eff066bf95375ddcd5cd265cc",
+    "handoff-latest.json": "069962f42a0ded2cbab45f0f7e3b5bde339672537ef6a445d5fee28b81e10c8a",
+    "preflight-error-summary.json": "d35106920a8f4d556d3d5b1f7fec7707d15d952c77d32bdbab695b950cdbda20",
+    "final-public-reconcile.json": "e51c9e62938e9c9680e0a9c000f7a4c81d9ca9b7bb3efe84b7ef0d3700b9dbe6",
+    "final-cleanup.json": "edfbf44100e242297fbb721dd19b77746eeab9d2db743d15247002af9bf87c18",
+    "workspace/work-review.json": "1283b6c90b259c7bdd3052b6cedbc1af783edc4cb5e0c86faf2b7ff43338e5b8",
+    "workspace/successor-handoff.md": "ecdd85655338167e376dd4b3302eee6397c9135ad5c432c88e667149b2eace9d",
+    "workspace/checkpoint-source-A.json": "b628618685aaa5a9d9b9174551680c9bb19404f99e648b2fa0cd8fd67e0bce26",
+    "workspace/failed-checkpoint.json": "f6815fffc647beb8395441c8937d0eba6ba5fa50081bd541559f5bc2b22e507e"
+  },
+  "memory_disposition": {
+    "disposition": "forbidden",
+    "reason": "Bounded lane permits /tmp evidence only; no external memory writes."
+  }
+}

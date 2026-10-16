@@ -56,10 +56,7 @@
         277
       ],
       "remaining_validation": [
-        "public native concurrent actor/reviewer/delegate aggregate admission",
-        "native successor/refresh/restart cumulative continuity",
-        "failedcheckpoint/lastartifact and bounded termination",
-        "explicit operator renewal history/consumption"
+        "successful actual native public successor semantic preflight and bounded goal continuation"
       ]
     }
   },
@@ -292,15 +289,45 @@
       "tests": 7,
       "skips": 0,
       "artifact": "wheel-beeacfa-host-live.log"
+    },
+    {
+      "kind": "278 public explicit renewal and genuine new writer",
+      "result": "PASS",
+      "new_writer_tokens": 47671,
+      "campaign_tokens": 211578,
+      "receipt": "/tmp/cw166-q/recovery-state.json",
+      "qualification": "Historicalstart/originaldeadline/spend retained; newrevision extends currentdeadline; durablemonitor verified after shell return. Final successor proof stillpending."
+    },
+    {
+      "kind": "278 actual refresh/fresh owned goal binding",
+      "result": "PASS",
+      "qualification": "Supported privateXDGregistry includesownedroot; prior defaultregistry pendingwork interlock refusal retained."
+    },
+    {
+      "kind": "278 actual native successor preflight",
+      "result": "FAIL_HARNESS_SCHEMA",
+      "observed_tokens": 54539,
+      "continuation_started": false,
+      "qualification": "Nativeauthoredflat workreview; pinnedverifier requiresnestedwork_review. No normalization or fabricatedverdict. Inheritedsessiondeadline independentlystopped executor."
+    },
+    {
+      "kind": "278 final public reconciliation and cleanup",
+      "result": "PASS",
+      "native_tokens": 266117,
+      "accounting_known": true,
+      "unknown": [],
+      "reservations": 0,
+      "receipt": "native-probe/native-lifecycle-partial.json",
+      "qualification": "Partial acceptance only; failedpreflight and unprovencontinuation retained. Sentinel already lost in first launcher; no finalsentinelsurvivalclaim."
     }
   ],
-  "integration_tip": "beeacfa",
+  "integration_tip": "8de38d5",
   "resource_accounting": {
-    "root_goal_checkpoint_tokens": 1204809,
-    "native_observed_tokens": 325079,
+    "root_goal_checkpoint_tokens": 1356795,
+    "native_observed_tokens": 427289,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
-    "further_native_turns_authorized": true,
+    "further_native_turns_authorized": false,
     "final_native_packet": {
       "max_turns": 1,
       "turns_used": 1,
@@ -309,12 +336,12 @@
       "no_further_calls": true
     },
     "cumulative_token_ceiling": 2000000,
-    "external_native_observed_tokens": 325079,
+    "external_native_observed_tokens": 427289,
     "external_native_unknown_reserved_tokens": 200000,
     "current_packet": {
       "ticket": 278,
       "source": "beeacfa",
-      "state": "phaseA passed; phaseB zero-paid-call harness failure; public renewal recovery",
+      "state": "checkpoint: preflight harness schema failed; no continuation",
       "authorized_now_turns": 2,
       "campaign_max_turns": 5,
       "campaign_estimate_tokens": 350000,
@@ -323,22 +350,26 @@
       "phaseA_tokens": 163907,
       "phaseA_turns": 2,
       "campaign_remaining_estimate_tokens": 186093,
-      "optional_fifth_turn": "HOLD"
+      "optional_fifth_turn": "HOLD",
+      "turns_used": 4,
+      "observed_tokens": 266117,
+      "remaining_estimate_tokens": 138422,
+      "max_additional_turns": 0
     },
     "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
   "checkpoint": {
     "state_transition": "active_to_resource_checkpoint",
-    "acceptance_state": "incomplete",
+    "acceptance_state": "275\u2013277validated;278incomplete",
     "progress_classification": "outcome_progress",
-    "root_tokens_at_check": 539553,
-    "native_observed_tokens": 46711,
-    "native_unknown_turns": 2,
-    "conservative_unknown_reservations": 200000,
-    "stop_reason": "User requests checkpoint before 1MM tokens or3h; unknown native usage makes further complete native acceptance unsafe to budget in this window.",
-    "next_action": "Resume from checkpoint.md; first finish275 validation without paid effects, then independently qualify276 before277/278.",
-    "resumed": true,
-    "resume_reason": "User resumed active goal; continue safe work under original cumulative bounds."
+    "root_tokens_at_check": 1356795,
+    "external_native_observed_tokens": 427289,
+    "unknown_historical_reserve": 200000,
+    "nominal_accounted_total": 1984084,
+    "qualification": "Observed counters are floors; reserves are estimates, not exact charge bounds. Missing final accounting stays unknown.",
+    "stop_reason": "Nominal cumulative1984084 leaves15916; insufficient remaining acceptance and mandatedreview. User resource checkpoint binding.",
+    "next_action": "Recover from checkpoint-20261016-2118.md; qualify failed harness correction before any new native campaign. No further paid turns in this allocation.",
+    "final_campaign_accounting": "266117 known settled; zero reservations/unknown; historical unknown reserve unchanged"
   },
   "renewals": [
     {

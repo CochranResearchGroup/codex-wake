@@ -20,19 +20,17 @@ At most3 active agents total. No nested workers.
 
 ## Current State
 
-275–277 validated on the integration branch;278running. Public native deadline,
-observerdeath, sampled exhaustion and containment receipts are in
-`docs/dev/evidence/plan0166/ledger.json`. Sourcebeeacfa adds final usage fencing,
-public offline reconciliation, exact owned paused-goal binding and renewal
-historical cohorts.61 focused tests pass; current full isolated1325testsPASS/1opt-in skip; separate installed livehost7PASS.
-Earlier1303 fulltest pass is a prior snapshot, not currenttip proof.
+275–277 validated;278incomplete at resource checkpoint. Sourcebeeacfa full1325
+PASS/1optionalhostskip, installed53PASS/1skip plus7livehostPASS. Actualnative
+concurrency, failedcheckpointreplacement preservation, publicrefresh/freshownedgoal
+binding and explicitrenewal passed. Successorpreflight failed harnessreviewshape;
+no continuationstarted. Preserve failures and do not mark278validated.
 
-278 phaseA: actual concurrent checkpoint writer and failed replacement worker,
-aggregate thirdadmission denial, then terminal usage settlement. Remaining:
-public refresh/successor/preflight continuity, failed checkpoint artifact/deadline,
-operator renewal proof. One broad review after all tickets validated, one bounded
-remediation and focused verification remain. No production install/deployment,
-merge or trackerclosure. Isolated wheel qualification is separate from release.
+Current restart authority is evidence/plan0166/checkpoint-20261016-2118.md and
+ledger.json. Nominal1919972 includingunknownreserves leavesinsufficientcomplete
+proof+reviewheadroom under2MM. No furtherpaidturns inthisallocation. One broad
+review remains unused until allticketsvalidated; oneboundedremediation follows.
+No production install/deployment/merge/trackerclosure. Plan remainsOPEN.
 
 ## Historical authority and evidence
 
