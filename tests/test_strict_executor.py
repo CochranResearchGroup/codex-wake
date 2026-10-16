@@ -154,3 +154,12 @@ class StrictExecutorTests(unittest.TestCase):
             changed=guard.config['configuration'] | {'revision': 2, 'objective_token_limit': 200}
             ledger.extend(changed, 'operator-renewal', now=101)
             self.assertEqual(guard.check(boottime=11), 'configuration_changed')
+
+    def test_fresh_heartbeat_with_later_trusted_upper_is_not_a_dead_controller(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard, _, _ = self.fixture(root)
+            heartbeat=Path(root)/'lifecycle/supervision.json'
+            value=json.loads(heartbeat.read_text());value['observed_at']=120;heartbeat.write_text(json.dumps(value))
+            self.assertIsNone(guard.check(boottime=11))
+            self.assertEqual(guard.check(boottime=17), 'controller_unavailable')
