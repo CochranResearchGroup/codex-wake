@@ -6872,3 +6872,21 @@ User renewed allocation at20:33:11Z, editedgoal to2MMtokens/4h. Preserve root689
 native69,585observed and200kreservedunknown at renewal. Conservative deadline
 23:41:41Z from originalstart; no budget reset. Native276 packet and separate
 hostcontinuity tests resumed under bounded scope. Sourceab7bf49; no deployment.
+
+## Turn 334 | 2026-10-16 UTC | Deadline, accounting and lifecycle acceptance
+
+Outcome_progress:275–277 validated on integration branch;278running. Actual
+native blockedtool/TERM-resistant child with unavailableRPC stopped3.425seconds
+before originaldeadline. Actual observerdeath detected22ms, empty1.351seconds;
+publicationdelay/maximumovershoot remain unknown. Restart/changedboot executable
+checks and injectedBOOTTIME jump supplement actualnative evidence, not host suspend.
+
+Sourcebeeacfa adds finalusage fencing/reconciliation, late observed floors kept
+unknown, freshpaused ownedgoal binding and explicitrenewal historicalcohorts.
+61focused testsPASS; native offline publicreconciliation settles completed45830
+and retains interrupted unknownfloors22889/22874. Fullisolated regression running.
+Remote branch verified beeacfa. PhaseA278 dispatched exactly2native turns, then
+costreadback required before successorphase. Rootcounter1013786 plus external
+161172observed and200kunknownreserve retained; reserves are not hardcharge bounds.
+Original conservative23:41:41Z harddeadline and23:31:41Z checkpoint retained.
+One broadreview remains unused until all ticketsvalidated. No productiondeployment.

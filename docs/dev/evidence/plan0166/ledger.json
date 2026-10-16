@@ -59,8 +59,7 @@
         "public native concurrent actor/reviewer/delegate aggregate admission",
         "native successor/refresh/restart cumulative continuity",
         "failedcheckpoint/lastartifact and bounded termination",
-        "explicit operator renewal history/consumption",
-        "wholebranch review after all ticketsvalidated"
+        "explicit operator renewal history/consumption"
       ]
     }
   },
@@ -251,15 +250,26 @@
       "result": "PASS",
       "artifact": "accounting-focused-corrected.log",
       "qualification": "Initial selection named absentmodule; retained accounting-focused-final.log as runnererror, not productfailure."
+    },
+    {
+      "kind": "final usage and owned goal/historical renewal",
+      "result": "PASS",
+      "tests": 61,
+      "artifact": "late-usage-floor-green.log",
+      "native_reconciliation": {
+        "o": "settled45830",
+        "p": "unknown floor22889",
+        "m": "unknown floor22874"
+      }
     }
   ],
-  "integration_tip": "ff7d57d",
+  "integration_tip": "beeacfa",
   "resource_accounting": {
-    "root_goal_checkpoint_tokens": null,
+    "root_goal_checkpoint_tokens": 1013786,
     "native_observed_tokens": 161172,
     "native_unknown_turns": 2,
     "native_reserved_unknown_tokens": 200000,
-    "further_native_turns_authorized": false,
+    "further_native_turns_authorized": true,
     "final_native_packet": {
       "max_turns": 1,
       "turns_used": 1,
@@ -270,7 +280,16 @@
     "cumulative_token_ceiling": 2000000,
     "external_native_observed_tokens": 161172,
     "external_native_unknown_reserved_tokens": 200000,
-    "current_packet": null,
+    "current_packet": {
+      "ticket": 278,
+      "source": "beeacfa",
+      "state": "phaseA dispatched",
+      "authorized_now_turns": 2,
+      "campaign_max_turns": 5,
+      "campaign_estimate_tokens": 350000,
+      "remaining_phases": "HOLD for actual cost readback",
+      "uncertainty": "200k historical missing-counter reserve is not a guaranteed cap; later interrupted counters are observed floors without terminal final billing proof"
+    },
     "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
   },
   "checkpoint": {
@@ -320,5 +339,11 @@
       "result": "native-probe/native-deadline.json",
       "followup_result": "native-probe/native-observer-death.json"
     }
+  ],
+  "goal_level_remaining": [
+    "all278nativeacceptance",
+    "one whole-branch review after all tickets validated",
+    "one bounded remediation and focused verification",
+    "current full isolated regression"
   ]
 }

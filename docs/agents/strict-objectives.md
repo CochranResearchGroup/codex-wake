@@ -30,6 +30,7 @@ coverage/exclusions and current execution identity:
 codex-wake --wake-root ROOT sessions configuration --profiles PROFILES --profile PROFILE --thread-id OBJECTIVE_REF --json
 codex-wake --wake-root ROOT sessions execution --profiles PROFILES --profile PROFILE --thread-id OBJECTIVE_REF --json
 codex-wake --wake-root ROOT sessions execution --profiles PROFILES --profile PROFILE --thread-id OBJECTIVE_REF --stop --json
+codex-wake --wake-root ROOT sessions execution --profiles PROFILES --profile PROFILE --thread-id OBJECTIVE_REF --reconcile --json
 ```
 
 Existing MCP configuration and spawn operations use the same policy; execution
@@ -87,6 +88,18 @@ with stop_grace_seconds before KILL. This retains existing persisted artifacts;
 it does not generate a new model-authored semantic checkpoint. Failed persistence
 cannot postpone forced termination. A final provider charge may remain unknown
 when killed before publication; last sampled usage is not final-cost proof.
+
+After exact local termination, `--reconcile` checks owned native rollout counters
+and terminal markers without a model call. A completed proof settles cumulative
+usage. Missing terminal evidence keeps accounting unknown and retains any later
+sampled floor; termination alone cannot prove final cost or permit renewal.
+
+A fresh paused native goal can reuse its unique owned settled actor only when
+its initial counters are zero and its allowance exactly equals that actor's
+remaining tokens. Progressed or ambiguous goals are refused rather than deriving
+an offset from native display counters. Explicit renewal preserves settled
+historical actors and original deadlines in the ledger; it does not reapply an
+expired historical actor's session allowance to new work.
 
 Stopped/exhausted generations remain fenced. A new configuration revision alone
 cannot replenish the ledger: explicit operator renewal must retain historical

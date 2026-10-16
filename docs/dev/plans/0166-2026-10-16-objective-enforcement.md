@@ -2,7 +2,7 @@
 
 State: OPEN. Owner: ecochran76 / primary. Spec#274; tickets#275–278.
 Integration branch: feat/objective-enforcement. Base:0a5c8d1.
-User ceiling: stop/checkpoint before1,000,000 tokens or3h from2026-10-16T19:41:41Z; hard checkpoint by22:31Z (10min reserve). Track native goal counters and UTC.
+Current user ceiling: checkpoint before2,000,000 cumulative tokens or4h. Preserve original start2026-10-16T19:41:41Z and historical consumption; conservative hardstop23:41:41Z/checkpoint23:31:41Z. Earlier1MM/3h authority is historical and superseded. Track root plus external native costs and uncertainty.
 
 ## Acceptance / non-goals
 Implement full published#274 contract and each#275–278 acceptance criterion, using public lifecycle operations, native execution containment and independent OS readback. No deployment/fleet changes, shared-session termination, provider cancellation or exact token ceiling claims. Unsupported guarantees reject before task effects.
@@ -15,12 +15,26 @@ TDD at public configuration/lifecycle seam; host adapter protocol fixtures plus 
 ## Workers / owned paths
 Primary owns lifecycle/configuration/monitor/CLI integration, ledger, plan and evidence.
 Host worker owns new host_execution module and its tests only, independent branch/worktree.
-Native probe owns temporary acceptance harness/evidence only. Initial20k packet exceeded (46,711 observed); its second turn and the new packet first turn have unknown costs, conservatively100k each. No further paid turns authorized in the active packet. Root counter checkpoint600k leaves reserve below the user1MM ceiling. Each native turn bounded120s; this is elapsed containment, not an exact token bound.
+Native probe owns temporary acceptance harness/evidence only. PhaseA of278 now authorizes two native turns against frozenbeeacfa, then HOLD for actual cost readback. Full campaign envelope atmost5turns/350k observed plus reserved estimate, not a guaranteed charge ceiling. Historic external observed161172 plus two missing-counter100k reserves retained. Later interrupted counters remain observed floors without proven final billing; do not treat reserves as exact upper bounds.
 At most3 active agents total. No nested workers.
 
-## Ledger
+## Current State
 
-Current public containment/stop proof: evidence/plan0166/native-probe/public-containment-stop.json. Ticket275 integrated, not yet validated; downstream tickets remain pending. Full development suite failed; handoff failure counts reproduced on unchanged base (49tests,50failures,1error); default user clock config contaminated a separate clock selection (cleared-config10tests pass). No broad final review, installation, deployment, or tracker closure performed.
+275–277 validated on the integration branch;278running. Public native deadline,
+observerdeath, sampled exhaustion and containment receipts are in
+`docs/dev/evidence/plan0166/ledger.json`. Sourcebeeacfa adds final usage fencing,
+public offline reconciliation, exact owned paused-goal binding and renewal
+historical cohorts.61 focused tests pass; current full isolated suite running.
+Earlier1303 fulltest pass is a prior snapshot, not currenttip proof.
+
+278 phaseA: actual concurrent checkpoint writer and failed replacement worker,
+aggregate thirdadmission denial, then terminal usage settlement. Remaining:
+public refresh/successor/preflight continuity, failed checkpoint artifact/deadline,
+operator renewal proof. One broad review after all tickets validated, one bounded
+remediation and focused verification remain. No production install/deployment,
+merge or trackerclosure. Isolated wheel qualification is separate from release.
+
+## Historical authority and evidence
 
 ## Renewed authority | 2026-10-16T20:33:11Z
 
@@ -28,6 +42,6 @@ User resumed and renewed allocation, then edited stable goal ceiling to2MMtokens
 
 275 validated on contained launch/cleanup slice: native Codex/code-mode/shell/child and setup/build/test, effective kernel controls, public stop, sentinel, public unsupported/shared refusals. Full isolated1303testsPASS/1opt-in skip; installed35checks including livehostPASS. Sourcefrozen full run precedes ab7bf49 exactidentity-stop fix; focused37 and four actualOS/injectedtelemetry cases cover that change. The initial live-test cgroup-removal race remains retained as firstfailure, with exact-invocation same-deadline polling repair.
 
-276 nowrunning: public lostlaunchresponse recovery proved on actualsystemd/guard/CLI with generic sleep+injectedaccounting; no native/provider substitution. Replacement invocation and wronggeneration remain unadopted. Native worker owns one actualblockedtool/TERMresistant-child/deadline/transportloss proof; host worker owns separate restart/BOOTTIME continuity tests only. Both fromab7bf49; primary retains production-source ownership. Native deadline packet: max1paidturn/75kestimated/120sec; unknownfinalusage reserves100k. One authoritativezero-effect startupretry only. No host suspend/reboot or shared-session/service effects.
+Historical276 packet: public lostlaunchresponse recovery proved on actualsystemd/guard/CLI with generic sleep+injectedaccounting; no native/provider substitution. Replacement invocation and wronggeneration remain unadopted. Native worker owns one actualblockedtool/TERMresistant-child/deadline/transportloss proof; host worker owns separate restart/BOOTTIME continuity tests only. Both fromab7bf49; primary retains production-source ownership. Native deadline packet: max1paidturn/75kestimated/120sec; unknownfinalusage reserves100k. One authoritativezero-effect startupretry only. No host suspend/reboot or shared-session/service effects.
 
-277 pending (blocked276), supporting actual native sampledcap evidence already retained:22,874totalincluding12,160cachedinput againstcap1;22,873observedovershoot. Not a maximumovershoot bound. 278 pending. One wholebranchreview remains unused and occurs onlyafterallticketsvalidated. No deployment/merge/trackerclosure.
+Historical277 preparation, supporting actual native sampledcap evidence already retained:22,874totalincluding12,160cachedinput againstcap1;22,873observedovershoot. Not a maximumovershoot bound. At this earlier checkpoint278 was pending. One wholebranchreview remains unused and occurs onlyafterallticketsvalidated. No deployment/merge/trackerclosure.
