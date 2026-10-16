@@ -26,3 +26,12 @@ accounting including cached input and all actors/attempts; stop on stale/missing
 accounting with explicit renewal after exhaustion. Captured in the2026-10-16
 implementation brief and domain glossary. Research remains CLOSED; this records
 design preparation, not an implementation/deployment claim.
+
+## Specification and ticket proposal |2026-10-16
+
+Published successor implementation spec#274, enhancement/ready-for-agent, after
+readback of current main0a5c8d1 and released emergency-controls evidence. Original
+research issue270 remains unchanged. Four vertical implementation slices proposed
+in2026-10-16-objective-enforcement-ticket-proposal.md; publication awaits the
+to-tickets granularity/dependency review. Public lifecycle operations plus OS
+readback remain the primary validation seam. No implementation or activation.
