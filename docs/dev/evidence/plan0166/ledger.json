@@ -6,8 +6,13 @@
   "checkpoint_by": "2026-10-16T22:31:00Z",
   "tickets": {
     "275": {
-      "state": "running",
-      "blocked_by": []
+      "state": "integrated",
+      "blocked_by": [],
+      "remaining_validation": [
+        "unsupported/shared refusal coverage",
+        "setup/build/test descendant qualification",
+        "frozen integration regression gate"
+      ]
     },
     "276": {
       "state": "pending",
@@ -51,7 +56,48 @@
       "result": "FAIL_BEFORE_MODEL",
       "reason": "independent UTC upper bounds compared as elapsed heartbeat freshness",
       "paid_turns": 0
+    },
+    {
+      "kind": "public native containment and operator stop",
+      "result": "PASS",
+      "artifact": "native-probe/public-containment-stop.json",
+      "tokens": "unknown;100000 conservatively reserved"
+    },
+    {
+      "kind": "guard first snapshot lease",
+      "result": "PASS",
+      "count": 23,
+      "artifact": "first-usage-final.log"
+    },
+    {
+      "kind": "full suite development snapshot",
+      "result": "FAIL",
+      "tests": 1294,
+      "failures": 76,
+      "errors": 4,
+      "skips": 1,
+      "artifact": "full-suite.log"
+    },
+    {
+      "kind": "baseline comparison",
+      "selection": "handoff preflight",
+      "baseline": "0a5c8d1",
+      "result": "SAME_FAILURE_COUNTS",
+      "tests": 49,
+      "failures": 50,
+      "errors": 1,
+      "artifacts": [
+        "baseline-handoff.log",
+        "handoff-hermetic.log"
+      ]
     }
   ],
-  "integration_tip": "4e1bae9"
+  "integration_tip": "9c34f17 plus first-native-usage lease repair pending commit",
+  "resource_accounting": {
+    "root_goal_checkpoint_tokens": 600000,
+    "native_observed_tokens": 46711,
+    "native_unknown_turns": 2,
+    "native_reserved_unknown_tokens": 200000,
+    "further_native_turns_authorized": false
+  }
 }

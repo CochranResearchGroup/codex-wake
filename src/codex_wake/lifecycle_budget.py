@@ -144,8 +144,10 @@ def observe_spawn(root,receipt,native,profile,settled=False):
     ledger=configured_ledger(root,receipt)
     inherited=bool(receipt['intent'].get('budget_inherited'))
     turn_id=receipt.get('execution',{}).get('turn_id') or receipt.get('supervisor_owned_turn_id')
-    view=ledger.record(receipt['budget_actor'],native_usage(native,profile,
-                       settled_turn_id=turn_id if settled and not inherited else None),
+    usage=native_usage(native,profile,settled_turn_id=turn_id if settled and not inherited else None)
+    if usage is not None and native.get('turns'):
+        receipt['native_usage_observed']=True
+    view=ledger.record(receipt['budget_actor'],usage,
                        settled=settled and not inherited,now=trusted_upper())
     receipt['objective_budget']=view
     return view

@@ -94,9 +94,8 @@ class Guard:
             # admission becomes visible, even before a native thread is bound.
             if self.actor_admissions is None:
                 self.actor_admissions = {actor_id: 0 for actor_id in view['actors']}
-            else:
-                for actor_id in view['actors']:
-                    self.actor_admissions.setdefault(actor_id, elapsed)
+            for actor_id in view['actors']:
+                self.actor_admissions.setdefault(actor_id, elapsed)
             owned = {}
             for path in (Path(self.config['wake_root']) / 'lifecycle').glob('*.json'):
                 if path.name == 'supervision.json' or path.name.startswith('owner-'):
@@ -161,7 +160,10 @@ class Guard:
                 for row in rows:
                     payload = row.get('payload', {})
                     if row.get('type') == 'event_msg' and payload.get('type') == 'token_count':
-                        info = payload.get('info') or {}
+                        info = payload.get('info')
+                        if info is None or (isinstance(info,dict) and not info.get('total_token_usage')):
+                            continue  # Native startup/rate events carry no usage observation.
+                        if not isinstance(info,dict):return 'accounting_invalid'
                         value = (info.get('total_token_usage') or {}).get('total_tokens')
                         if type(value) is not int or value < 0 or (usage is not None and value < usage):
                             return 'accounting_invalid'
@@ -170,6 +172,7 @@ class Guard:
                             return 'accounting_invalid'
                         usage, observed = value, stamp
                 snapshots[actor] = usage, observed
+            pending_initial=set()
             for actor_id in view['actors']:
                 actor = view['actors'][actor_id]
                 usage, observed = snapshots.get(actor_id, (None, None))
@@ -182,6 +185,7 @@ class Guard:
                 if usage is None:
                     if actor_id in self.seen_usage or actor['used'] > 0 or elapsed - self.actor_admissions[actor_id] >= self.limits['accounting_max_age_seconds']:
                         return 'accounting_missing'
+                    pending_initial.add(actor_id)
                     continue
                 # Native wall time is not an elapsed-time authority. Lease the
                 # immutable native observation against this guard's BOOTTIME
@@ -208,7 +212,8 @@ class Guard:
                     return 'session_tokens_exhausted'
                 if upper >= actor['session_deadline'] - self.limits['stop_grace_seconds'] - self.limits['checkpoint_grace_seconds']:
                     return 'session_deadline_reached'
-            if not view['accounting_known']:
+            unknown={key for key,actor in view['actors'].items() if not actor['known']}
+            if unknown-pending_initial:
                 return 'objective_accounting_unknown'
             if view['tokens_used'] >= view['objective_token_limit']:
                 return 'objective_tokens_exhausted'

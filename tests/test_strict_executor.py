@@ -292,3 +292,43 @@ class StrictExecutorTests(unittest.TestCase):
             self.assertTrue(ledger.reserve('unbound-worker',100,40,now=145)['admitted'])
             self.assertIsNone(check(45))
             self.assertEqual(check(51),'accounting_missing')
+
+    def test_first_native_null_counter_gets_only_the_reserved_startup_grace(self):
+        import json
+        with tempfile.TemporaryDirectory() as root:
+            guard,ledger,rollout=self.fixture(root)
+            rows=rollout.read_text().splitlines();row=json.loads(rows[1]);row['payload']['info']=None
+            rollout.write_text(rows[0]+'\n'+json.dumps(row)+'\n')
+            ledger.record('worker',None,now=100)
+            self.assertIsNone(guard.check(boottime=11))
+            self.assertFalse(ledger.inspect(now=101)['accounting_known'])
+            heartbeat=Path(root)/'lifecycle/supervision.json';value=json.loads(heartbeat.read_text())
+            value['observed_boottime']=16;heartbeat.write_text(json.dumps(value))
+            self.assertEqual(guard.check(boottime=16),'accounting_missing')
+
+    def test_resident_monitor_does_not_interrupt_strict_reservation_before_first_usage(self):
+        import json
+        from unittest.mock import patch
+        from codex_wake.lifecycle_supervision import poll_spawns
+        with tempfile.TemporaryDirectory() as root:
+            guard,ledger,rollout=self.fixture(root)
+            rows=rollout.read_text().splitlines();row=json.loads(rows[1]);row['payload']['info']=None
+            rollout.write_text(rows[0]+'\n'+json.dumps(row)+'\n')
+            path=Path(root)/'lifecycle/spawn.json';receipt=json.loads(path.read_text())
+            receipt.update(submission_id='assignment',objective_budget={'accounting_known':True})
+            receipt['intent'].update(objective_ref='bootstrap')
+            receipt['intent']['continuation'].update(approval='operator')
+            receipt['intent']['launch'].update(codex_path='/bin/true',timeout=1)
+            path.write_text(json.dumps(receipt));interrupts=[]
+            native=dict(id='owned-thread',path=str(rollout),turns=[dict(id='turn',status='inProgress',
+                items=[dict(type='userMessage',clientId='assignment')])])
+            def request(endpoint,codex,method,params,timeout):
+                if method=='thread/read':return {'thread':native}
+                if method=='turn/interrupt':interrupts.append(params);return {}
+                raise AssertionError(method)
+            with patch('codex_wake.native_protocol.native_request',side_effect=request),patch(
+                    'codex_wake.lifecycle_budget.trusted_upper',return_value=101),patch(
+                    'codex_wake.lifecycle_supervision.trusted_upper',return_value=101):
+                poll_spawns(root)
+            self.assertEqual(interrupts,[],path.read_text())
+            self.assertFalse(ledger.inspect(now=101)['accounting_known'])

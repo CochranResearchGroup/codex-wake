@@ -96,6 +96,8 @@ def poll_spawns(root,stop_reason=None):
                 if any(t.get('status')=='inProgress' and t['id']!=turn['id'] for t in native.get('turns',[])):
                     receipt.update(state='blocked',reason='foreign_turn_preserved');save(path,receipt);continue
                 previous=receipt.get('objective_budget',{}).get('accounting_known')
+                if receipt['intent'].get('configuration',{}).get('strict_execution'):
+                    previous=receipt.get('native_usage_observed',False)
                 terminal=turn['status'] in ('completed','failed','interrupted')
                 view=None
                 try:

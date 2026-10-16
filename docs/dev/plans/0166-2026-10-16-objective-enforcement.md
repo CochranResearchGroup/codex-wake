@@ -15,7 +15,9 @@ TDD at public configuration/lifecycle seam; host adapter protocol fixtures plus 
 ## Workers / owned paths
 Primary owns lifecycle/configuration/monitor/CLI integration, ledger, plan and evidence.
 Host worker owns new host_execution module and its tests only, independent branch/worktree.
-Native probe owns temporary acceptance harness/evidence only; max2 native turns/20k tokens/120s each.
+Native probe owns temporary acceptance harness/evidence only. Initial20k packet exceeded (46,711 observed); its second turn and the new packet first turn have unknown costs, conservatively100k each. No further paid turns authorized in the active packet. Root counter checkpoint600k leaves reserve below the user1MM ceiling. Each native turn bounded120s; this is elapsed containment, not an exact token bound.
 At most3 active agents total. No nested workers.
 
 ## Ledger
+
+Current public containment/stop proof: evidence/plan0166/native-probe/public-containment-stop.json. Ticket275 integrated, not yet validated; downstream tickets remain pending. Full development suite failed; handoff failure counts reproduced on unchanged base (49tests,50failures,1error); default user clock config contaminated a separate clock selection (cleared-config10tests pass). No broad final review, installation, deployment, or tracker closure performed.

@@ -84,5 +84,23 @@
       "state": "stopped"
     },
     "unit_final": null
+  },
+  {
+    "root": "/tmp/cw166-i",
+    "raw_sha256": "03c2d0bc39e93f125b805b250cb5cd3ebf2feff65aa7e8c3fa9060eb5b0db653",
+    "state": "failed",
+    "error": "RuntimeError: spawn rejected ",
+    "native_turns": 0,
+    "native_usage_known": null,
+    "conservative_usage_reservation": 0
+  },
+  {
+    "root": "/tmp/cw166-j",
+    "raw_sha256": "202f2685a686970b088891e936bef17110220720eb2be1170ecdd756a6f70b27",
+    "state": "failed",
+    "error": "Guard stopped objective_accounting_unknown during first-usage grace; provider turn accepted but no cumulative usage snapshot published. Harness collector info=None defect corrected after cleanup.",
+    "native_turns": 1,
+    "native_usage_known": false,
+    "conservative_usage_reservation": 100000
   }
 ]

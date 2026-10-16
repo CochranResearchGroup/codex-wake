@@ -1,0 +1,20 @@
+F
+======================================================================
+FAIL: test_resident_monitor_does_not_interrupt_strict_reservation_before_first_usage (test_strict_executor.StrictExecutorTests.test_resident_monitor_does_not_interrupt_strict_reservation_before_first_usage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 332, in test_resident_monitor_does_not_interrupt_strict_reservation_before_first_usage
+    self.assertEqual(interrupts,[],path.read_text())
+AssertionError: Lists differ: [{'threadId': 'owned-thread', 'turnId': 'turn'}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'threadId': 'owned-thread', 'turnId': 'turn'}
+
+- [{'threadId': 'owned-thread', 'turnId': 'turn'}]
++ [] : {"budget_actor": "worker", "history": [{"effect": null, "reason": "objective_budget_exhausted", "state": "blocked"}], "intent": {"configuration": {"max_correction_cycles": 2, "objective_deadline": 200, "objective_time_limit_seconds": 100, "objective_token_limit": 150, "revision": 1, "session_time_limit_seconds": 80, "session_token_limit": 100, "started_at": 100, "strict_execution": {"accounting_max_age_seconds": 5, "checkpoint_grace_seconds": 1, "poll_seconds": 0.2, "stop_grace_seconds": 2}}, "continuation": {"approval": "operator", "objective_id": "goal"}, "launch": {"app_server": "unix:///tmp/owned.sock", "codex_home": "/tmp/tmpdvpc9plb", "codex_path": "/bin/true", "timeout": 1}, "objective_ref": "bootstrap", "operation": "spawn"}, "objective_budget": {"accounting_known": false, "actors": {"worker": {"known": false, "reservation": 100, "session_deadline": 180, "settled": false, "terms": [100, 80], "tokens_remaining": 100, "used": 0}}, "authorization_history": [{"action": "initial", "approval": "operator", "at": 100, "configuration": {"max_correction_cycles": 2, "objective_deadline": 200, "objective_time_limit_seconds": 100, "objective_token_limit": 150, "revision": 1, "session_time_limit_seconds": 80, "session_token_limit": 100, "started_at": 100, "strict_execution": {"accounting_max_age_seconds": 5, "checkpoint_grace_seconds": 1, "poll_seconds": 0.2, "stop_grace_seconds": 2}}}], "correction_cycles": 0, "exhausted": false, "goal_aliases": {}, "max_correction_cycles": 2, "objective_deadline": 200, "objective_id": "goal", "objective_time_limit_seconds": 100, "objective_token_limit": 150, "original_deadline": 200, "ready": false, "remaining_seconds": 99, "remaining_tokens": 50, "revision": 1, "session_time_limit_seconds": 80, "session_token_limit": 100, "started_at": 100, "state": "accounting_unknown", "strict_execution": {"accounting_max_age_seconds": 5, "checkpoint_grace_seconds": 1, "poll_seconds": 0.2, "stop_grace_seconds": 2}, "tokens_reserved": 100, "tokens_used": 0}, "reason": "objective_budget_exhausted", "state": "blocked", "submission_id": "assignment", "supervisor_owned_turn_id": "turn", "thread_id": "owned-thread"}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.543s
+
+FAILED (failures=1)
