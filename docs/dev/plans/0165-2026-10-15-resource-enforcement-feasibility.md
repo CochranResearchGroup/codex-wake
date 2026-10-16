@@ -35,3 +35,11 @@ research issue270 remains unchanged. Four vertical implementation slices propose
 in2026-10-16-objective-enforcement-ticket-proposal.md; publication awaits the
 to-tickets granularity/dependency review. Public lifecycle operations plus OS
 readback remain the primary validation seam. No implementation or activation.
+
+## Ticket publication |2026-10-16
+
+Operator approved the four-slice breakdown. Created#275–278 as sub-issues of#274
+with enhancement/ready-for-agent labels and verified native dependencies:
+275→276;275+276→277;277→278. First implementation frontier:#275.
+Receipts: docs/dev/evidence/issue0270/tickets/. No implementation, release,
+deployment or change to parent/research issue bodies or labels.

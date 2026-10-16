@@ -1,0 +1,84 @@
+[
+  {
+    "number": 275,
+    "id": 5889883773,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/275",
+    "marker": "codex-wake-objective-enforcement-ticket-1-20261016",
+    "actor": "ecochran76",
+    "host": "github.com",
+    "repository": "CochranResearchGroup/codex-wake",
+    "action": "create",
+    "recorded_at": "2026-10-16T19:19:33.608944+00:00",
+    "labels": [
+      "enhancement",
+      "ready-for-agent"
+    ],
+    "blocked_by": [],
+    "verified_blocked_by": []
+  },
+  {
+    "number": 276,
+    "id": 5889884497,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/276",
+    "marker": "codex-wake-objective-enforcement-ticket-2-20261016",
+    "actor": "ecochran76",
+    "host": "github.com",
+    "repository": "CochranResearchGroup/codex-wake",
+    "action": "create",
+    "recorded_at": "2026-10-16T19:19:37.381057+00:00",
+    "labels": [
+      "enhancement",
+      "ready-for-agent"
+    ],
+    "blocked_by": [
+      275
+    ],
+    "verified_blocked_by": [
+      275
+    ]
+  },
+  {
+    "number": 277,
+    "id": 5889885503,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/277",
+    "marker": "codex-wake-objective-enforcement-ticket-3-20261016",
+    "actor": "ecochran76",
+    "host": "github.com",
+    "repository": "CochranResearchGroup/codex-wake",
+    "action": "create",
+    "recorded_at": "2026-10-16T19:19:42.485707+00:00",
+    "labels": [
+      "enhancement",
+      "ready-for-agent"
+    ],
+    "blocked_by": [
+      275,
+      276
+    ],
+    "verified_blocked_by": [
+      275,
+      276
+    ]
+  },
+  {
+    "number": 278,
+    "id": 5889886770,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/278",
+    "marker": "codex-wake-objective-enforcement-ticket-4-20261016",
+    "actor": "ecochran76",
+    "host": "github.com",
+    "repository": "CochranResearchGroup/codex-wake",
+    "action": "create",
+    "recorded_at": "2026-10-16T19:19:48.926003+00:00",
+    "labels": [
+      "enhancement",
+      "ready-for-agent"
+    ],
+    "blocked_by": [
+      277
+    ],
+    "verified_blocked_by": [
+      277
+    ]
+  }
+]
