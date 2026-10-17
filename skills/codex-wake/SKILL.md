@@ -1,6 +1,6 @@
 ---
 name: codex-wake
-description: Use Codex Wake when a user gives /goal resource limits (tokens, time, memory, swap, CPU, tasks): enforce work in dedicated host-approved executors with sampled token stops. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake when a user gives /goal resource limits (tokens, time, memory, swap, CPU, tasks): register token/time limits for the existing native goal through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
@@ -9,15 +9,20 @@ Use `codex-wake` when work should resume after a defined trigger instead of rely
 
 ## When the user gives resource limits
 
-For "use at most 2M tokens", "stop after four hours", or explicit memory/CPU/task
-limits, read [resource-limit enforcement](references/resource-limits.md) before
-work. Discover `wake_sessions_configuration`; inspect the approved limits,
-original deadline, ledger and actual executor. Route heavy work into the approved
-strict executor. Work in your current TUI is not automatically contained.
-A new ordinary caller cannot self-bootstrap strict execution through MCP today;
-request operator setup instead of bypassing caller grants through CLI. Missing
-controls or coverage mean report a blocker, not fall back to reminders while
-claiming enforcement. Token stops are sampled, with unknown maximum overshoot.
+For "use at most 2M tokens" or "stop after four hours", read the
+[existing-session workflow](references/existing-goal-limits.md) before work.
+Use `wake_goal_limits_set` with your actual caller UUID and the user's allocation;
+verify qualified accounting and a fresh independent watcher in the returned
+state. `wake_goal_limits_show` reconciles status. A configured policy alone is
+insufficient. Limits persist across replacement goals and resume; only an
+explicit user reset recorded by the host can reset counters/allocation. Missing
+setup, unknown accounting and unverified stops mean hold and report the reason.
+Token stops are sampled, with unknown maximum overshoot.
+
+For explicit memory, swap, CPU or task controls, use the separate
+[dedicated executor workflow](references/resource-limits.md). Native supervision
+preserves the shared Codex server and does not promise termination of arbitrary
+tool processes. Dedicated strict first-launch MCP bootstrap remains operator-only.
 
 ## Wake controls
 

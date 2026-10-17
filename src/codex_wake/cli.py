@@ -108,6 +108,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_a2a_parser(subparsers)
     from .messages_cli import add_messages_parser
     add_messages_parser(subparsers)
+    from .goal_limits_cli import add_goal_limits_parser
+    add_goal_limits_parser(subparsers)
 
     after = subparsers.add_parser("after", help="create a wake after a duration such as 45m or 1h30m")
     after.add_argument("duration")
@@ -2739,6 +2741,9 @@ def run(argv: list[str] | None = None) -> int:
         from .time_inspection import time_command
         return time_command(args)
     root = resolve_root(args)
+    if args.command == 'goal-limits':
+        from .goal_limits_cli import goal_limits_command
+        return goal_limits_command(args, root)
     if (args.command in ('pause','resume','pause-status','interrupt')
             or args.command == 'cancel' and (args.all or args.all_roots or args.as_json or args.authorized_root)
             or args.command == 'list' and (args.all_roots or args.authorized_root)):

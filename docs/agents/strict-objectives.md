@@ -4,6 +4,11 @@ Implementation of spec #274 is validated on feat/objective-enforcement.
 Agent first-launch onboarding has a separate release-readiness gap below.
 This document does not announce an installed release or fleet rollout.
 
+For existing dev-session token/time supervision, use the separate
+[agent guide](../../skills/codex-wake/references/existing-goal-limits.md). That
+workflow does not require dedicated executor bootstrap and has native stop
+semantics. The first-launch gap below applies to dedicated strict containment.
+
 ## Agent discovery and first-use readiness
 
 Agents should load the shipped [resource-limit workflow](../../skills/codex-wake/references/resource-limits.md)

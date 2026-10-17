@@ -1,7 +1,9 @@
-# When a user gives resource limits
+# Dedicated executor resource limits
 
-Use this workflow for requests such as "work within 2M tokens or four hours" or
-"keep builds under the approved memory/CPU limits". Codex Wake strict execution
+For token/time limits in the existing dev tab, start with
+[existing-session goal supervision](existing-goal-limits.md). Use this separate
+workflow for dedicated containment such as "keep builds under the approved
+memory/CPU limits". Codex Wake strict execution
 is opt-in containment of a dedicated objective executor on qualified Linux/WSL
 systemd/cgroup hosts. It is not a reminder, a timer wake, or an exact token ceiling.
 

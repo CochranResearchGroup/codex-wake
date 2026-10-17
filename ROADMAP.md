@@ -1254,11 +1254,14 @@ and live-host selection passed all 69 checks. Sampled token limits, unknown over
 and the failed local provider-turn count axis remain explicit. Tracker issues remain
 OPEN and main is unchanged. Merge, release and production deployment are separate.
 
-## P167 | Resource enforcement discoverability and first use
+## P167 | Resource enforcement discoverability and existing-session supervision
 
 State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
 [Plan0167](docs/dev/plans/0167-2026-10-17-resource-enforcement-discoverability.md),
-linked work items #274/#278. Skill/MCP discovery and portable guidance improved.
-Release blocker: ordinary agent first launch needs a supported caller-authorized
-bootstrap/control route and cold agent acceptance. Operator bootstrap proof is
-separate; no production skill synchronization or release in this audit.
+work item #279; related #274/#278. Agent discovery audit completed at49a5260.
+User clarified the default token/time workflow: MCP enrollment in the existing
+dev session, independent checkpoint request then native pause/exact-turn stop.
+Limits persist across replacement goals until explicit user reset. Three bounded
+implementation lanes share the frozen Plan0167 interface; public/native proof
+and one bounded review remain. Strict executor bootstrap is a separate retained
+limitation, not the primary route for this requested workflow.

@@ -6967,3 +6967,22 @@ Injected public CLI ordering reproduction retained in plan0167, not described as
 native acceptance. Strict-home MCP setup also cannot be assumed. Plan remains
 OPEN for an authorized first-use design and actual agent-surface proof. No claim
 that documentation alone delivers self-service current-TUI enforcement.
+
+
+## 2026-10-17 | Plan0167 confirmed existing-session enforcement
+
+User confirmed same dev tab, independent checkpoint then native goal pause and
+exact active-turn interrupt. Defaults5%token/60secondreserve consume original
+caps; cumulative goal-start accounting includes cached and delegated tokens.
+Unknown accounting holds. Limits persist across goal replacement until explicit
+user reset; host allocation generation records that authority. Created and read
+back #279; design checkpoint7e3873c. No production runtime/client changes.
+
+Bounded lanes: /root owns MCP/CLI/docs integration;
+/root/host_execution_adapter owns core controller in codex-wake-goal-controller;
+/root/native_containment_probe owns response-based accounting in
+codex-wake-goal-usage. Both worktrees branch from7e3873c; disjoint write sets.
+MCP public stdio red observed missing host option; green now proves discovery,
+host argument forwarding and rejection of endpoint/root/peer/reset overrides.
+Native fork/accounting facts retained in plan0167/native-accounting-findings.md;
+source-derived delegate rules are not live descendant acceptance.

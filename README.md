@@ -6,13 +6,18 @@ messages, turns and task status. Use native messaging directly for an immediate
 agent exchange; use Wake when a follow-up must survive the initiating turn or
 when you explicitly need a tracked exchange.
 
-When a user gives agents token/time or host resource limits, Codex Wake can
-contain **dedicated, operator-approved executors**. Start with the
-[agent resource-limit workflow](skills/codex-wake/references/resource-limits.md)
-and [operator controls](docs/agents/strict-objectives.md). Token stops are sampled;
-this does not apply limits to an existing arbitrary TUI in place. First-launch
-MCP bootstrap from an ordinary caller remains a release-readiness gap documented
-in the operator guide.
+When a user gives an existing Codex agent token/time limits, the development
+branch provides MCP enrollment and an independent watcher: request checkpoint,
+then pause the current native goal and interrupt its exact active turn. Limits
+persist across replacement goals until an explicit user reset. Start with the
+[existing-session workflow](skills/codex-wake/references/existing-goal-limits.md).
+Host setup and qualified accounting are required; polling and publication make
+token stops sampled, with unknown maximum overshoot. This is not an installed
+release or an OS process-termination guarantee.
+
+For memory, swap, CPU and task controls, use separate
+[dedicated executor containment](docs/agents/strict-objectives.md). Its ordinary
+caller first-launch MCP bootstrap remains a separate documented limitation.
 
 The package provides:
 
@@ -22,7 +27,7 @@ The package provides:
 - `sessions configuration|spawn|refresh|handoff` for approved worker tasks, resource reloads and fresh-context continuation.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
 - Tracked requests and correlated replies, work claims, completion receipts and generation-safe recovery.
-- Optional `codex-wake-mcp`: 25 tools for wake controls, session discovery, host-approved spawn, refresh and handoff, and authorized agent exchanges.
+- Optional `codex-wake-mcp`: 27 tools for existing-session resource limits, wake controls, session discovery, host-approved spawn, refresh and handoff, and authorized agent exchanges.
 - Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
 
 Native queue acceptance is separate from execution and acknowledgment. Busy or

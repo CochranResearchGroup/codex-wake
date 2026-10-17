@@ -1,0 +1,6 @@
+test_limits_are_discoverable_and_caller_cannot_select_host_scope (test_goal_limits_mcp.GoalLimitsMCPTests.test_limits_are_discoverable_and_caller_cannot_select_host_scope) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.950s
+
+OK
