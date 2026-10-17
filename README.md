@@ -6,6 +6,14 @@ messages, turns and task status. Use native messaging directly for an immediate
 agent exchange; use Wake when a follow-up must survive the initiating turn or
 when you explicitly need a tracked exchange.
 
+When a user gives agents token/time or host resource limits, Codex Wake can
+contain **dedicated, operator-approved executors**. Start with the
+[agent resource-limit workflow](skills/codex-wake/references/resource-limits.md)
+and [operator controls](docs/agents/strict-objectives.md). Token stops are sampled;
+this does not apply limits to an existing arbitrary TUI in place. First-launch
+MCP bootstrap from an ordinary caller remains a release-readiness gap documented
+in the operator guide.
+
 The package provides:
 
 - `native after|at|file` for an exact thread, with expiry and explicit same-thread resume.
@@ -190,7 +198,9 @@ codex-wake sessions close thread:THREAD_UUID
 | Continue an objective in a fresh conversation | `sessions handoff` | `wake_sessions_handoff` |
 
 Start with the [lifecycle quickstart](docs/agent-lifecycle.md#quickstart).
-Development branch: [strict objective execution controls and limits](docs/agents/strict-objectives.md).
+Pre-release: [strict objective execution controls and limits](docs/agents/strict-objectives.md).
+For a user-supplied resource budget, read the packaged
+[resource-limit workflow](skills/codex-wake/references/resource-limits.md).
 An operator configures the approved host profile and caller access first.
 Refresh and handoff require a checkpoint; handoff supports a new tab or the same
 pane. Receipts distinguish readiness, task admission and completed work.

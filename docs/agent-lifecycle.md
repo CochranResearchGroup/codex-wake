@@ -1,5 +1,15 @@
 # Agent lifecycle
 
+## Resource-limited objectives
+
+For a user-supplied token/time or host resource budget, start with the packaged
+[agent workflow](../skills/codex-wake/references/resource-limits.md) and
+[operator setup](agents/strict-objectives.md). Strict containment requires an
+approved dedicated executor; it is not enabled by ordinary spawn, an expiry,
+a native goal token display or an existing TUI. The first launch from an ordinary
+MCP caller currently requires operator bootstrap. Do not use CLI to bypass that
+caller's authority boundary.
+
 ## Quickstart
 
 Choose **spawn** for a separate worker assignment, **refresh** to reload named

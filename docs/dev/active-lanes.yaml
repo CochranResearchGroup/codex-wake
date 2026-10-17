@@ -1,6 +1,21 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P167
+    owner: primary / ecochran76
+    objective: Make resource enforcement discoverable and qualify agent first use
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/274, https://github.com/CochranResearchGroup/codex-wake/issues/278]
+    plan: docs/dev/plans/0167-2026-10-17-resource-enforcement-discoverability.md
+    plan_ref: feat/objective-enforcement
+    branch: feat/objective-enforcement
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 7dfb868
+    dependencies: [P166]
+    overlaps: []
+    updated_at: 2026-10-17
+    disposition: Discovery guidance corrected; first agent bootstrap remains a release blocker
   - id: P166
     owner: primary / ecochran76
     objective: Implement strict objective execution resource enforcement

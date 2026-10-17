@@ -1,7 +1,53 @@
 # Strict objective execution (development branch)
 
-Implementation of spec#274 is under acceptance on feat/objective-enforcement.
+Implementation of spec #274 is validated on feat/objective-enforcement.
+Agent first-launch onboarding has a separate release-readiness gap below.
 This document does not announce an installed release or fleet rollout.
+
+## Agent discovery and first-use readiness
+
+Agents should load the shipped [resource-limit workflow](../../skills/codex-wake/references/resource-limits.md)
+when the user supplies token/time or host limits. The skill description and MCP
+configuration/spawn descriptions expose that trigger. Readback must distinguish
+configured limits from a running, proven `objective_execution`.
+
+**Release blocker for self-service MCP onboarding:** first launch from an ordinary
+caller is not demonstrated or supported by the current path. MCP uses the caller
+UUID as its objective reference; admission reads its native goal before the new
+private executor is created. Proven native acceptance used operator CLI bootstrap
+references. See `docs/dev/evidence/plan0167/bootstrap-order.json` for an injected,
+zero-model-call reproduction of the ordering. Existing lifecycle acceptance does
+not establish agent first-launch usability.
+
+The strict private-home configuration also refuses unqualified `mcp_servers` and
+hooks. Do not add Wake MCP there as an undocumented workaround or assume the
+outer TUI's MCP tools are inherited by a strict worker. A supported agent bootstrap
+and any in-executor control route need explicit host authority and acceptance.
+Do not loosen caller identity, grants, owned endpoint checks or accounting to make
+an onboarding example pass. This guide documents the operator path until then.
+
+### Release verification checklist
+
+- Resolve the first-launch gap with a caller-authorized public workflow. From a
+  normal agent given only a resource-limited task and its approved profile, prove
+  first launch, actual containment/readback, counted work, stop and unrelated
+  process preservation. Missing controls must give an actionable refusal.
+- Publish the **whole** `skills/codex-wake/` directory, including the new
+  `references/resource-limits.md`, to each supported agent skill root using the
+  existing deployment procedure. Compare installed file hashes. The wheel's
+  package-data currently does not include this skill directory; wheel installation
+  alone is insufficient. Do not update production skills during this audit.
+- Reload/restart MCP clients and refresh the host's skill catalog. Verify the
+  installed skill description contains resource-limit terms, every relative
+  reference resolves, and `tools/list` exposes the new configuration/spawn guidance.
+- Run a cold agent walkthrough for "2M tokens or four hours": inspect configured
+  caps/remaining history, reject absent setup, enter the proven dedicated boundary
+  before heavy work, and state sampled-token and outer-session exclusions.
+- Retain explicit limits and setup authority. Time/token-only requests do not
+  authorize inventing memory, swap, CPU, task, polling or grace settings. Updating
+  prompts or skills cannot enforce an arbitrary already-running TUI in place.
+
+## Controls and operator path
 
 A launch profile opts in using `strict_execution`. Ordinary lifecycle profiles
 retain their existing cooperative behavior. Strict launch requires an approved

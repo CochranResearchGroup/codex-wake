@@ -1,11 +1,23 @@
 ---
 name: codex-wake
-description: Use Codex Wake for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake when a user gives /goal resource limits (tokens, time, memory, swap, CPU, tasks): enforce work in dedicated host-approved executors with sampled token stops. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
 
 Use `codex-wake` when work should resume after a defined trigger instead of relying on model memory or a foreground sleep.
+
+## When the user gives resource limits
+
+For "use at most 2M tokens", "stop after four hours", or explicit memory/CPU/task
+limits, read [resource-limit enforcement](references/resource-limits.md) before
+work. Discover `wake_sessions_configuration`; inspect the approved limits,
+original deadline, ledger and actual executor. Route heavy work into the approved
+strict executor. Work in your current TUI is not automatically contained.
+A new ordinary caller cannot self-bootstrap strict execution through MCP today;
+request operator setup instead of bypassing caller grants through CLI. Missing
+controls or coverage mean report a blocker, not fall back to reminders while
+claiming enforcement. Token stops are sampled, with unknown maximum overshoot.
 
 ## Wake controls
 

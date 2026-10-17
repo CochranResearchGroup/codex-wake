@@ -6951,3 +6951,19 @@ closure occurred. Final source is4ce6ae5; the closeout commit carries the receip
 Root1,652,641 + external618,851 + estimated historical reserve200,000 gives
 approximately2,471,492 cumulative tokens, approximately480k in the renewed window.
 These observations and reserves are not an exact billing bound.
+
+## Turn 339 | 2026-10-17 UTC | Agent resource-limit discoverability audit
+
+User requested a first-use review before PR/release. Plan0167 references274/278,
+separate from completed Plan0166 implementation. Found missing resource terms in
+shipped skill/MCP metadata and missing portable agent workflow. Added those entry
+points and an explicit operator release checklist; existing installed skill roots
+and MCP clients remain unchanged. Three public MCP lifecycle tests pass after a
+retained failing catalog test. No model, executor or service effects in the audit.
+
+Found a release blocker: caller-UUID admission reads native goal before strict
+executor creation; prior native acceptance used operator bootstrap references.
+Injected public CLI ordering reproduction retained in plan0167, not described as
+native acceptance. Strict-home MCP setup also cannot be assumed. Plan remains
+OPEN for an authorized first-use design and actual agent-surface proof. No claim
+that documentation alone delivers self-service current-TUI enforcement.

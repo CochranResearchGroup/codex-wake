@@ -1253,3 +1253,12 @@ The final full suite passed 1,326 tests with one optional host skip; installed-p
 and live-host selection passed all 69 checks. Sampled token limits, unknown overshoot
 and the failed local provider-turn count axis remain explicit. Tracker issues remain
 OPEN and main is unchanged. Merge, release and production deployment are separate.
+
+## P167 | Resource enforcement discoverability and first use
+
+State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
+[Plan0167](docs/dev/plans/0167-2026-10-17-resource-enforcement-discoverability.md),
+linked work items #274/#278. Skill/MCP discovery and portable guidance improved.
+Release blocker: ordinary agent first launch needs a supported caller-authorized
+bootstrap/control route and cold agent acceptance. Operator bootstrap proof is
+separate; no production skill synchronization or release in this audit.

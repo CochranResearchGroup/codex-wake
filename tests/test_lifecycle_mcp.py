@@ -25,6 +25,13 @@ class LifecycleMCPTests(unittest.IsolatedAsyncioTestCase):
                 env=dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / 'src')))
             async with Client(parameters, mode='legacy') as client:
                 tools = {t.name: t for t in (await client.list_tools()).tools}
+                configuration_help = tools['wake_sessions_configuration'].description
+                spawn_help = tools['wake_sessions_spawn'].description
+                self.assertIn('resource limits', configuration_help)
+                self.assertIn('strict_execution', configuration_help)
+                self.assertIn('operator bootstrap', spawn_help)
+                self.assertIn('sampled', spawn_help)
+                self.assertIn('existing TUI', spawn_help)
                 schema = tools['wake_sessions_spawn'].input_schema
                 self.assertNotIn('profiles', schema['properties'])
                 self.assertNotIn('wake_root', schema['properties'])
