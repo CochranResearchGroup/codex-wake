@@ -40,3 +40,21 @@ effects or other source edits were performed.
 
 Memory disposition: forbidden; this bounded lane authorizes source/tests/evidence
 only and no external memory writes.
+
+## Metadata-first refinement
+
+Unrelated rollout history is no longer parsed. Inventory reads at most the first
+64KiB metadata line per regular nonsymlink JSONL file, discovers root ancestry,
+then loads root/descendant history only. Missing root/claimed child metadata
+still holds; unrelated malformed body history does not invalidate a known graph.
+Hard scan bounds:4096 directories/files,4MiB total metadata,32MiB relevant history,
+2seconds monotonic cooperative processing budget. Exceeding a bound returns
+unknown rather than guessing or allocating unbounded history. Synchronous local
+filesystem calls cannot be preempted by this cooperative deadline; no hard wall
+clock promise is made. Referenced-history support remains deliberately absent.
+
+Regression red: unrelated ~20MB corrupt history previously produced unknown.
+Green: excluded body leaves exact root40 tokens. Converted existing tests (not
+duplicated) to unittest.TestCase/TemporaryDirectory so repository CI discovers
+all11 tests. Validation: `PYTHONPATH=src /tmp/cw167-tools/bin/python -m unittest
+discover -s tests -p test_goal_usage.py -v` =>11 passed. No provider/native effects.
