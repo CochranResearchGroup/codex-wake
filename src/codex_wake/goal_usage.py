@@ -6,6 +6,14 @@ from datetime import datetime
 from pathlib import Path
 import json
 import hashlib
+import time
+import os
+
+MAX_FILES = 4096
+MAX_METADATA_BYTES = 4 * 1024 * 1024
+MAX_HISTORY_BYTES = 32 * 1024 * 1024
+MAX_SCAN_SECONDS = 2.0
+
 
 
 def _epoch(value):
@@ -15,18 +23,84 @@ def _epoch(value):
 def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
     """Observe original-goal response spending, or an explicitly authorized anchor."""
     try:
-        paths = sorted((Path(codex_home) / 'sessions').rglob('*.jsonl'))
+        deadline = time.monotonic() + MAX_SCAN_SECONDS
+        inventory = {}
+        metadata_bytes = 0
+        metadata_errors = False
+        def check_time():
+            if time.monotonic() > deadline:
+                raise ValueError('usage_scan_time_limit')
+        def rollout_paths():
+            for directory_count, (directory, _, names) in enumerate(
+                    os.walk(Path(codex_home) / 'sessions', followlinks=False), 1):
+                check_time()
+                if directory_count > MAX_FILES:
+                    raise ValueError('usage_inventory_directory_limit')
+                for name in names:
+                    if name.endswith('.jsonl'):
+                        yield Path(directory) / name
+        for count, path in enumerate(rollout_paths(), 1):
+            check_time()
+            if count > MAX_FILES:
+                raise ValueError('usage_inventory_file_limit')
+            try:
+                if path.is_symlink() or not path.is_file():
+                    raise ValueError('non_regular_rollout')
+                with path.open('rb') as stream:
+                    first = stream.readline(65537)
+                metadata_bytes += len(first)
+                if metadata_bytes > MAX_METADATA_BYTES:
+                    raise ValueError('usage_inventory_byte_limit')
+                if len(first) > 65536:
+                    raise ValueError('metadata_line_limit')
+                row = json.loads(first)
+                if row.get('type') != 'session_meta':
+                    raise ValueError('missing_session_metadata')
+                meta = row['payload']
+                inventory.setdefault(meta['id'], []).append((meta, path))
+            except (ValueError, KeyError, TypeError, OSError):
+                if metadata_bytes > MAX_METADATA_BYTES:
+                    raise ValueError('usage_inventory_byte_limit')
+                metadata_errors = True
+        if thread_id not in inventory:
+            raise ValueError('root_rollout_missing_or_metadata_invalid' if metadata_errors
+                             else 'root_rollout_missing')
+        owned = {thread_id}
+        changed = True
+        while changed:
+            check_time()
+            changed = False
+            for identity, candidates in inventory.items():
+                for meta, _ in candidates:
+                    parent = meta.get('parent_thread_id')
+                    source = meta.get('source', {})
+                    if isinstance(source, dict):
+                        subagent = source.get('subagent', {})
+                        spawn = subagent.get('thread_spawn', {}) if isinstance(subagent, dict) else {}
+                        if isinstance(spawn, dict):
+                            parent = parent or spawn.get('parent_thread_id')
+                    if parent in owned and identity not in owned:
+                        owned.add(identity); changed = True
         sessions = {}
-        for path in paths:
-            rows = [json.loads(line) for line in path.read_text().splitlines()]
-            if not rows or rows[0].get('type') != 'session_meta':
-                raise ValueError('missing_session_metadata')
-            meta = rows[0]['payload']
-            if meta['id'] in sessions:
+        history_bytes = 0
+        for identity in owned:
+            check_time()
+            candidates = inventory[identity]
+            if len(candidates) != 1:
                 raise ValueError('ambiguous_rollout_identity')
-            sessions[meta['id']] = (meta, rows[1:])
-        if thread_id not in sessions:
-            raise ValueError('root_rollout_missing')
+            meta, path = candidates[0]
+            with path.open('rb') as stream:
+                data = stream.read(MAX_HISTORY_BYTES - history_bytes + 1)
+            history_bytes += len(data)
+            if history_bytes > MAX_HISTORY_BYTES:
+                raise ValueError('usage_history_byte_limit')
+            rows = []
+            for line in data.splitlines():
+                check_time()
+                rows.append(json.loads(line))
+            if not rows or rows[0].get('payload') != meta:
+                raise ValueError('rollout_metadata_changed')
+            sessions[identity] = (meta, rows[1:])
         rows = sessions[thread_id][1]
         boundaries = [i for i, r in enumerate(rows)
             if r.get('type') == 'event_msg'
@@ -54,24 +128,17 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
             raise ValueError('goal_start_during_active_turn')
         turns = {r['payload']['turn_id'] for r in rows[boundary+1:]
             if r.get('type') == 'event_msg' and r['payload'].get('type') == 'task_started'}
-        owned = {thread_id}
-        changed = True
-        while changed:
-            changed = False
-            for identity, (meta, _) in sessions.items():
-                parent = meta.get('parent_thread_id')
-                source = meta.get('source', {})
-                if isinstance(source, dict):
-                    subagent = source.get('subagent', {})
-                    spawn = subagent.get('thread_spawn', {}) if isinstance(subagent, dict) else {}
-                    if not isinstance(spawn, dict):
-                        raise ValueError('malformed_parent_identity')
-                    source_parent = spawn.get('parent_thread_id')
-                    if parent and source_parent and parent != source_parent:
-                        raise ValueError('conflicting_parent_identity')
-                    parent = parent or source_parent
-                if parent in owned and identity not in owned:
-                    owned.add(identity); changed = True
+        for identity, (meta, _) in sessions.items():
+            parent = meta.get('parent_thread_id')
+            source = meta.get('source', {})
+            if isinstance(source, dict):
+                subagent = source.get('subagent', {})
+                spawn = subagent.get('thread_spawn', {}) if isinstance(subagent, dict) else {}
+                if not isinstance(spawn, dict):
+                    raise ValueError('malformed_parent_identity')
+                source_parent = spawn.get('parent_thread_id')
+                if parent and source_parent and parent != source_parent:
+                    raise ValueError('conflicting_parent_identity')
         records = {}
         charged = set()
         for identity in owned:
@@ -125,10 +192,12 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
                 raise ValueError('descendant_spawn_incomplete')
         if turns and not charged:
             raise ValueError('first_usage_unavailable')
+        check_time()
         anchor = dict(version=1, thread_id=thread_id, goal_created_at=goal_created_at,
             boundary=creation['timestamp'], response_ids=[list(k) for k in sorted(records)],
             response_hashes={json.dumps(k): hashlib.sha256(json.dumps(v, sort_keys=True).encode()).hexdigest()
                              for k, v in records.items()})
+        check_time()
         excluded = set()
         if reset_anchor is not None:
             if any(reset_anchor.get(k) != anchor[k] for k in
@@ -140,6 +209,7 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
             if any(reset_anchor['response_hashes'].get(json.dumps(k)) !=
                    anchor['response_hashes'][json.dumps(k)] for k in excluded):
                 raise ValueError('reset_anchor_history_changed')
+        check_time()
         return dict(state='qualified', used_tokens=sum(records[k]['usage']['total_tokens']
             for k in charged - excluded), anchor=anchor, reason=None, sampled=True)
     except (ValueError, KeyError, TypeError, OSError, OverflowError) as exc:
