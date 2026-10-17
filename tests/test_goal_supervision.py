@@ -17,6 +17,24 @@ NOW=1893456000
 
 
 class GoalSupervisionTests(unittest.TestCase):
+    def test_resume_after_partially_verified_stop_gets_a_new_pause(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,request=self.fixture(directory)
+            with patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                enroll(root,policy,THREAD,40,120)
+                native['lose']='turn/interrupt'
+                first=poll(root)[0]
+                self.assertEqual(first['state'],'stop_unverified')
+                self.assertEqual(native['goal']['status'],'paused')
+                native['active']=[]
+                native['goal']['status']='active'
+                native.pop('lose')
+                second=poll(root)[0]
+                self.assertEqual(second['state'],'stopped')
+                self.assertEqual(native['goal']['status'],'paused')
+                self.assertEqual(sum(method=='thread/goal/set' for method,_ in native['calls']),2)
+                self.assertTrue(any(effect['state']=='uncertain' for effect in second['effects'].values()))
+
     def fixture(self,directory):
         root=Path(directory)/'wake';root.mkdir(mode=0o700)
         home=Path(directory)/'home';home.mkdir(mode=0o700);(home/'sessions').mkdir(mode=0o700)

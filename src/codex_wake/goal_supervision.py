@@ -226,16 +226,23 @@ def _stop(path,receipt,reason,goal=None,active=None):
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
     try:
         if active is None:goal,active=_native(receipt['grant'],receipt['thread_id'])
+        if receipt.get('pause_observed') and goal and goal.get('status')!='paused':
+            # Observed paused -> active is a new enforcement event, even if a
+            # previous interrupt was unverified. Retain the old effect ledger.
+            receipt['pause_epoch']=receipt.get('pause_epoch',0)+1
+            receipt['pause_observed']=False
         if receipt.get('stop_proof') and ((goal and goal.get('status')!='paused') or active):
-            receipt['effects']={};receipt['stop_proof']=False
+            receipt['stop_proof']=False
         thread=receipt['thread_id']
         if goal and goal.get('status')!='paused':
-            _effect(path,receipt,'pause:'+str(goal['createdAt']),'thread/goal/set',dict(threadId=thread,status='paused',origin='automatic'))
+            _effect(path,receipt,'pause:'+str(goal['createdAt'])+':'+str(receipt.get('pause_epoch',0)),
+                'thread/goal/set',dict(threadId=thread,status='paused',origin='automatic'))
         for turn in active:
             _effect(path,receipt,'interrupt:'+turn,'turn/interrupt',dict(threadId=thread,turnId=turn))
         final_goal,final_active=_native(receipt['grant'],thread)
         proven=(not final_goal or final_goal.get('status')=='paused') and not final_active
-        receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven)
+        receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven,
+            pause_observed=not final_goal or final_goal.get('status')=='paused')
     except Exception as exc:receipt['control_error']=type(exc).__name__
     _save(path,receipt)
     return receipt
