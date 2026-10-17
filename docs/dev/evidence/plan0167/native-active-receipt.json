@@ -1,0 +1,236 @@
+{
+  "verdict": "PASS_NATIVE_ACTIVE_INJECTED_PROVIDER",
+  "usage_provenance": "injected localhost SSE; not billing",
+  "external_provider_calls": 0,
+  "thread_id": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+  "goal_before": {
+    "threadId": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+    "objective": "Local active supervision fixture; wait for controller checkpoint and stop",
+    "status": "blocked",
+    "tokenBudget": 1,
+    "tokensUsed": 0,
+    "timeUsedSeconds": 0,
+    "createdAt": 1792281208,
+    "updatedAt": 1792281208
+  },
+  "goal_after": {
+    "threadId": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+    "objective": "Local active supervision fixture; wait for controller checkpoint and stop",
+    "status": "paused",
+    "tokenBudget": 1,
+    "tokensUsed": 0,
+    "timeUsedSeconds": 30,
+    "createdAt": 1792281208,
+    "updatedAt": 1792281236
+  },
+  "enrollment": {
+    "thread_id": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+    "generation": "f236464c0460486e941ec96627f5e505",
+    "allocation_id": "local-active-fixture",
+    "goal_created_at": 1792281208,
+    "used_tokens": 20,
+    "started_upper": 1792281209.3485477,
+    "started_boottime": 338040.447843792,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "time_origin": 1792281208,
+    "effects": {},
+    "checkpoint": null,
+    "token_limit": 1000,
+    "time_limit_seconds": 30,
+    "checkpoint_token_percent": 5,
+    "checkpoint_seconds": 60,
+    "deadline": 1792281238,
+    "accounting": {
+      "state": "qualified",
+      "used_tokens": 20,
+      "anchor": {
+        "version": 1,
+        "thread_id": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+        "goal_created_at": 1792281208,
+        "boundary": "2026-10-17T23:53:28.814Z",
+        "response_ids": [
+          [
+            "01a14c48-e5b2-7ec0-a979-da1de231117f",
+            "local-response-1"
+          ]
+        ],
+        "response_hashes": {
+          "[\"01a14c48-e5b2-7ec0-a979-da1de231117f\", \"local-response-1\"]": "a47a6eafac55de9968b051122b495608c790b6d1953cccb22c375b640987401c"
+        }
+      },
+      "reason": null,
+      "sampled": true
+    },
+    "state": "armed",
+    "reason": null,
+    "controller_generation": "85445eccdac44e5aaf44c5dd0b242e00",
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "85445eccdac44e5aaf44c5dd0b242e00",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33803860
+      },
+      "interval": 0.1,
+      "observed_boottime": 338040.402573458,
+      "pid": 62849,
+      "fresh": true,
+      "age_seconds": 0.04804729501483962
+    },
+    "sampled": true,
+    "maximum_token_overshoot": null
+  },
+  "final_controller": {
+    "accounting": {
+      "anchor": {
+        "boundary": "2026-10-17T23:53:28.814Z",
+        "goal_created_at": 1792281208,
+        "response_hashes": {
+          "[\"01a14c48-e5b2-7ec0-a979-da1de231117f\", \"local-response-1\"]": "a47a6eafac55de9968b051122b495608c790b6d1953cccb22c375b640987401c"
+        },
+        "response_ids": [
+          [
+            "01a14c48-e5b2-7ec0-a979-da1de231117f",
+            "local-response-1"
+          ]
+        ],
+        "thread_id": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+        "version": 1
+      },
+      "reason": null,
+      "sampled": true,
+      "state": "qualified",
+      "used_tokens": 20
+    },
+    "allocation_id": "local-active-fixture",
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "checkpoint": {
+      "message": "Stop work and write a restart-safe checkpoint now. The original resource allowance remains in force.",
+      "state": "acknowledged"
+    },
+    "checkpoint_seconds": 60,
+    "checkpoint_token_percent": 5,
+    "controller_generation": "85445eccdac44e5aaf44c5dd0b242e00",
+    "deadline": 1792281238,
+    "effects": {
+      "checkpoint:01a14c48-ea1d-7e71-ad4b-0420df1ce921": {
+        "method": "turn/steer",
+        "params": {
+          "expectedTurnId": "01a14c48-ea1d-7e71-ad4b-0420df1ce921",
+          "input": [
+            {
+              "text": "Stop work and write a restart-safe checkpoint now. The original resource allowance remains in force.",
+              "type": "text"
+            }
+          ],
+          "threadId": "01a14c48-e5b2-7ec0-a979-da1de231117f"
+        },
+        "state": "acknowledged"
+      },
+      "interrupt:01a14c48-ea1d-7e71-ad4b-0420df1ce921": {
+        "method": "turn/interrupt",
+        "params": {
+          "threadId": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+          "turnId": "01a14c48-ea1d-7e71-ad4b-0420df1ce921"
+        },
+        "state": "acknowledged"
+      },
+      "pause:1792281208:0": {
+        "method": "thread/goal/set",
+        "params": {
+          "origin": "automatic",
+          "status": "paused",
+          "threadId": "01a14c48-e5b2-7ec0-a979-da1de231117f"
+        },
+        "state": "acknowledged"
+      }
+    },
+    "generation": "f236464c0460486e941ec96627f5e505",
+    "goal_created_at": 1792281208,
+    "observed_boottime": 338069.128424671,
+    "pause_observed": true,
+    "reason": "allocation_exhausted",
+    "started_boottime": 338040.447843792,
+    "started_upper": 1792281209.3485477,
+    "state": "stopped",
+    "stop_latched": true,
+    "stop_proof": true,
+    "thread_id": "01a14c48-e5b2-7ec0-a979-da1de231117f",
+    "time_limit_seconds": 30,
+    "time_origin": 1792281208,
+    "token_limit": 1000,
+    "used_tokens": 20,
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "85445eccdac44e5aaf44c5dd0b242e00",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33803860
+      },
+      "interval": 0.1,
+      "observed_boottime": 338069.091666666,
+      "pid": 62849,
+      "fresh": true,
+      "age_seconds": 0.1653532330528833
+    },
+    "sampled": true,
+    "maximum_token_overshoot": null
+  },
+  "first_native_turns": [
+    {
+      "id": "01a14c48-e7f9-7d02-a2db-aa833684be03",
+      "status": "completed"
+    }
+  ],
+  "final_native_turns": [
+    {
+      "id": "01a14c48-e7f9-7d02-a2db-aa833684be03",
+      "status": "completed"
+    },
+    {
+      "id": "01a14c48-ea1d-7e71-ad4b-0420df1ce921",
+      "status": "interrupted"
+    }
+  ],
+  "http_calls": [
+    {
+      "number": 1,
+      "path": "/v1/responses",
+      "body_sha256": "acaf1e73e67ded8beb8529c3e69efad3380a7ed751496185dd86c1a1d8be177c"
+    },
+    {
+      "number": 2,
+      "path": "/v1/responses",
+      "body_sha256": "89359d51d7e8944cd26a15782034085d9ecdeba0ebf7759bf035e29f0deaadad"
+    },
+    {
+      "number": 3,
+      "path": "/v1/responses",
+      "body_sha256": "cc9cd42275061d173a1efb31773f282345a564dc5247d72c0781cdd14ee76edb"
+    }
+  ],
+  "elapsed_seconds": 32.625629934016615,
+  "native_exit": 0,
+  "watcher_exit": 0,
+  "native_after_identity": null,
+  "watcher_after_identity": null,
+  "stream_disconnected": true,
+  "script_sha256": "0299bf951e5b489a14c4b5365ad7de74bb74becf01b69b11ad5b74b845ba41a2",
+  "candidate_python": "/tmp/cw167-installed/bin/python",
+  "core_source": "6b4b233",
+  "cleanup": {
+    "remaining_owned_home_processes": [],
+    "alias_exists": false,
+    "physical_socket_exists": false,
+    "native_after_identity": null,
+    "watcher_after_identity": null
+  },
+  "limitations": [
+    "SSE usage20cached10 is injected, not billing.",
+    "Acknowledged nativecheckpointrequest is not a generated checkpoint artifact.",
+    "No realprovider or delegatedaccounting acceptance.",
+    "Firstpacket failedclock/enrollment beforedeadline; preserved unchanged."
+  ]
+}
