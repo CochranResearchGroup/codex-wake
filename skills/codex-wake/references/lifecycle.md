@@ -113,6 +113,7 @@ Host setup uses private owned registry/journal paths and an independent managed
 process, separate from the goal-limit enforcer:
 
 ```sh
+install -d -m 700 PRIVATE_LIFECYCLE_ROOT
 codex-wake --wake-root PRIVATE_LIFECYCLE_ROOT sessions refresh-watch --interval 1
 codex-wake-mcp --lifecycle-root PRIVATE_LIFECYCLE_ROOT --lifecycle-profiles PRIVATE_REGISTRY
 ```

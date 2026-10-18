@@ -74,6 +74,7 @@ class SharedRefreshTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
             runtime = base/'runtime'
+            runtime.mkdir(mode=0o700)
             skill = base/'SKILL.md'; skill.write_text('new skill')
             checkpoint = base/'checkpoint.json'
             checkpoint.write_text(json.dumps(dict(source_thread_id=THREAD,

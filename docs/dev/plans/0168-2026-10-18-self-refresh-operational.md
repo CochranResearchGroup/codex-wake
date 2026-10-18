@@ -122,3 +122,19 @@ uncertainty).10focusedpubliccasesPASS. Native valid-profile behavior is unchange
 Documentation now exposes self-refresh near skill entry, states the shared scope,
 queued/completed distinction and native idle-race limit, and gives managed setup.
 Production install/queue and exact-main delivery remain open gates.
+
+## Presubmit environment correction
+
+The first hosted run failed8shared fixtures under default umask022: the fixture
+had not pre-created the required private runtime root. Its early guarded request
+could create a nonprivate parent before monitor startup. The actual native
+fixture already created that root0700. A deterministic umask022 public reproduction
+failed; fixture setup now creates0700 explicitly.10publicchecks pass under022;
+privacy checks remain unchanged. Early warm/slow-start probes under local077
+passed and remain retained. The source setup guide now includes install -d -m700.
+
+The initial local full run1360cases failed6refresh checks and one mailbox outbox
+observation while source/tests changed during the run. It is retained, not a final
+frozen-build acceptance claim. The mailbox case passes its direct rerun. Final
+frozen hosted CI and installed selection own the release gate;57 installed focused
+checks and110-source parity/MCP27-tool controls pass on e4d6f12.
