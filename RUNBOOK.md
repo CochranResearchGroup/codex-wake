@@ -7034,3 +7034,18 @@ older wake daemon process images remain until normal restart. Plan0167 closes;
 Plan0166 source acceptance now has exact-main delivery. Acceptance and deployment
 receipts in docs/dev/evidence/plan0167. Native root stop does not prove separately
 running descendant termination; sampled overshoot remains unknown.
+
+## Turn 341 | 2026-10-18 UTC | Self-refresh operational diagnosis
+
+User requested completion of self-refresh after the v0.17.0 deployment gap.
+Public production-host configuration reproduction returns lifecycle_host_scope_unavailable.
+Plan0168/work item282 track repair on fix/self-refresh-operational. Native0.163
+schema and two owned zero-model fixtures establish that config/mcpServer/reload
+reconnects BOTH loaded conversations. Resume and unsubscribe/resume remain stale.
+Same IDs/paused goals retained; all owned PIDs absent at cleanup. Current shared
+server has62loaded conversations (49idle/13active); current thread retains25Wake
+tools, missing new goal tools. No production reload was performed. User scope
+choice is pending because native reload has no thread selector and peer MCP
+connections would reconnect. Optional lifecycle-root source isolation is ready
+at1078c84,3focused MCP checks pass; not deployed or called operational refresh.
+No native goal, allocation, counters, user client or shared server was changed.
