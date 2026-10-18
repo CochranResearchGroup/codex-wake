@@ -116,6 +116,9 @@ class AgentRefreshTests(unittest.TestCase):
     def test_independent_client_refresh_waits_for_source_without_shared_reload(self):
         self.refresh_scenario(draft=False, original_status='active', client_idle=True)
 
+    def test_themed_empty_composer_allows_single_client_refresh(self):
+        self.refresh_scenario(draft=False,original_status='active',client_idle=True,managed_default=True,background=True)
+
     def test_managed_default_resume_verifies_actual_mcp_catalog(self):
         self.refresh_scenario(draft=False, original_status='active', client_idle=True, managed_default=True)
 
@@ -151,7 +154,7 @@ class AgentRefreshTests(unittest.TestCase):
     def test_handoff_preserves_unsubmitted_source_draft(self):
         self.refresh_scenario(draft=True,operation='handoff')
 
-    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False, original_status='paused', resume_readback_loss=False, client_idle=False, client_idle_stop=0, managed_default=False, stale_catalog=False, managed_guard=''):
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False, original_status='paused', resume_readback_loss=False, client_idle=False, client_idle_stop=0, managed_default=False, stale_catalog=False, managed_guard='', background=False):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -226,6 +229,7 @@ class AgentRefreshTests(unittest.TestCase):
                 elif 'capture-pane' in argv:
                     text = 'UNSUBMITTED_DRAFT_158' if draft else '\x1b[2mAsk Codex to do anything\x1b[0m'
                     value = '\n\n\x1b[1m›\x1b[0m ' + text + '\n'
+                    if background:value=value.replace('\x1b[0m','\x1b[0m\x1b[48;2;41;41;41m')
                 elif 'display-message' in argv: value = '23,2' if draft else '2,2'
                 elif 'kill-pane' in argv:
                     if original_status == 'active':

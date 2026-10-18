@@ -1,0 +1,30 @@
+{
+  "state": "SOURCE_QUALIFIED_NOT_DEPLOYED",
+  "source_version": "0.18.2",
+  "base_main": "30a29c6dd7c2e3f06e413b951cbf74bf14ef87de",
+  "work_item": 289,
+  "live_intent": "issue289-client-0181-30a29c6",
+  "first_failure": "local_composer_not_proven_empty",
+  "client_effects_before_failure": false,
+  "cause": "standalone ANSI background paint in otherwise exact dim empty placeholder",
+  "public_regression_red": "/tmp/cw289-theme-red.log",
+  "focused": {
+    "tests": 45,
+    "seconds": 18.28,
+    "state": "PASS",
+    "log": "/tmp/cw289-theme-focused.log"
+  },
+  "captured_line_acceptance": true,
+  "retained_guards": [
+    "exact bold prompt",
+    "exact dim placeholder",
+    "cursor x2",
+    "same attachment and idle checks",
+    "typed drafts and other terminal controls reject"
+  ],
+  "delivery_scope": "refresh monitor only; stable MCP/commands remain0.18.1 to preserve frozen profile",
+  "reconciliation": "same pre-effect intent only; preserve fingerprint, profile, history, original20:29:29Zexpiry, operational pause and original-active provenance",
+  "renewal_deadline": "2026-10-18T21:39:29.531693Z",
+  "review": "Standards bounded review no concrete critical finding",
+  "live_acceptance_pending": true
+}

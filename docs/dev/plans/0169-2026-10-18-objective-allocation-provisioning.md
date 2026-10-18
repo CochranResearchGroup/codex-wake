@@ -2,13 +2,34 @@
 
 State: OPEN
 Owner: primary / ecochran76.
-Branch: fix/289-refresh-pause-restore. Base: 9c245a5. Target: origin/main.
+Branch: fix/289-themed-refresh-composer. Base: 30a29c6. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 11; targeted pause/quit/resume refresh and campaign-stop separation.
+Plan version: 12; targeted pause/quit/resume refresh and campaign-stop separation.
 
 ## Current State
+
+2026-10-18 runtime continuation: PR291 merged30a29c6 after CI39161534163
+both matrices PASS. Published/installed0.18.1,112modules matching, both skills
+and Wake controllers adopted; shared daemon9802/start10894 unchanged. Exact
+false-stop generation reconciled once with full before-images/history, no reset;
+public allowance armed/qualified, used1006497 at repair, original deadline. The
+private recovery script initially refused the true shutdown reason controller_stopped
+versus its watcher_stopped typo; two-string correction independently reviewed,
+eight refusal cases pass. Original refused preview retained.
+
+Single-client intent issue289-client-0181-30a29c6 captured original active state
+and acknowledged pause, then held before any client replacement with
+local_composer_not_proven_empty. Captured exact dim placeholder has standalone
+background SGR paint. Public regression reproduces red; correction ignores only
+background paint, retaining exact bold/dim placeholder, cursor and draft guards.
+Next bounded delivery is0.18.2 refresh-monitor only: stable commands/MCP remain
+0.18.1 to satisfy the unchanged frozen profile. Reconcile this same proven
+pre-effect intent once, preserving history/fingerprint/profile/original expiry;
+no new intent, broad retry, idle bypass or shared restart. Actual MCP catalog
+and conditional originally-active restoration remain live acceptance gates.
+
 
 PR290 merged9c245a5 after required Python3.11/3.12 CI; exact-main0.18.0
 published/installed with110source modules matching. Both legacy grants retained.
