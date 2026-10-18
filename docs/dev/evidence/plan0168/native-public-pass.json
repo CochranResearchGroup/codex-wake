@@ -1,0 +1,2417 @@
+{
+  "after": {
+    "01a14c88-ea3d-7c21-9df9-e063f370e180": {
+      "behavior": {
+        "content": [
+          {
+            "text": "v2",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "catalog": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "owned-shared-refresh-toy",
+              "title": null,
+              "version": "v2",
+              "websiteUrl": null
+            },
+            "tools": {
+              "extra_v2": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "extra_v2 v2",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "extra_v2"
+              },
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v2",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      },
+      "goal": {
+        "createdAt": 1792285404,
+        "objective": "Owned zero-turn shared refresh acceptance",
+        "status": "paused",
+        "threadId": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792285404
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792285403,
+        "cwd": "/tmp/cw168-native-public-02/workspace",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-native-public-02/workspace",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-native-public-02/workspace"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+        "model": "gpt-5.4",
+        "modelProvider": "owned_no_provider",
+        "name": null,
+        "originator": "codex_wake_lifecycle",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-native-public-02/home/sessions/2026/10/17/rollout-2026-10-17T20-03-23-01a14c88-ea3d-7c21-9df9-e063f370e180.jsonl",
+        "preview": "Owned zero-turn shared refresh acceptance",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792285403,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792285404
+      }
+    },
+    "01a14c88-eb5f-7233-9328-71830948bd7b": {
+      "behavior": {
+        "content": [
+          {
+            "text": "v2",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "catalog": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "owned-shared-refresh-toy",
+              "title": null,
+              "version": "v2",
+              "websiteUrl": null
+            },
+            "tools": {
+              "extra_v2": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "extra_v2 v2",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "extra_v2"
+              },
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v2",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      },
+      "goal": {
+        "createdAt": 1792285404,
+        "objective": "Owned zero-turn shared refresh acceptance",
+        "status": "paused",
+        "threadId": "01a14c88-eb5f-7233-9328-71830948bd7b",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792285404
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792285404,
+        "cwd": "/tmp/cw168-native-public-02/workspace",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-native-public-02/workspace",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-native-public-02/workspace"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c88-eb5f-7233-9328-71830948bd7b",
+        "model": "gpt-5.4",
+        "modelProvider": "owned_no_provider",
+        "name": null,
+        "originator": "codex_wake_lifecycle",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-native-public-02/home/sessions/2026/10/17/rollout-2026-10-17T20-03-24-01a14c88-eb5f-7233-9328-71830948bd7b.jsonl",
+        "preview": "Owned zero-turn shared refresh acceptance",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792285404,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c88-eb5f-7233-9328-71830948bd7b",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792285404
+      }
+    }
+  },
+  "authority": "Plan0168 disposable two-thread shared idle reload acceptance",
+  "before": {
+    "01a14c88-ea3d-7c21-9df9-e063f370e180": {
+      "behavior": {
+        "content": [
+          {
+            "text": "v1",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "catalog": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "owned-shared-refresh-toy",
+              "title": null,
+              "version": "v1",
+              "websiteUrl": null
+            },
+            "tools": {
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v1",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      },
+      "goal": {
+        "createdAt": 1792285404,
+        "objective": "Owned zero-turn shared refresh acceptance",
+        "status": "paused",
+        "threadId": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792285404
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792285403,
+        "cwd": "/tmp/cw168-native-public-02/workspace",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-native-public-02/workspace",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-native-public-02/workspace"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+        "model": "gpt-5.4",
+        "modelProvider": "owned_no_provider",
+        "name": null,
+        "originator": "codex_wake_lifecycle",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-native-public-02/home/sessions/2026/10/17/rollout-2026-10-17T20-03-23-01a14c88-ea3d-7c21-9df9-e063f370e180.jsonl",
+        "preview": "Owned zero-turn shared refresh acceptance",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792285403,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792285404
+      }
+    },
+    "01a14c88-eb5f-7233-9328-71830948bd7b": {
+      "behavior": {
+        "content": [
+          {
+            "text": "v1",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "catalog": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "owned-shared-refresh-toy",
+              "title": null,
+              "version": "v1",
+              "websiteUrl": null
+            },
+            "tools": {
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v1",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      },
+      "goal": {
+        "createdAt": 1792285404,
+        "objective": "Owned zero-turn shared refresh acceptance",
+        "status": "paused",
+        "threadId": "01a14c88-eb5f-7233-9328-71830948bd7b",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792285404
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792285404,
+        "cwd": "/tmp/cw168-native-public-02/workspace",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-native-public-02/workspace",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-native-public-02/workspace"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c88-eb5f-7233-9328-71830948bd7b",
+        "model": "gpt-5.4",
+        "modelProvider": "owned_no_provider",
+        "name": null,
+        "originator": "codex_wake_lifecycle",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-native-public-02/home/sessions/2026/10/17/rollout-2026-10-17T20-03-24-01a14c88-eb5f-7233-9328-71830948bd7b.jsonl",
+        "preview": "Owned zero-turn shared refresh acceptance",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792285404,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c88-eb5f-7233-9328-71830948bd7b",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792285404
+      }
+    }
+  },
+  "cleanup": {
+    "denied_environment_pids": [
+      646,
+      3798,
+      27169,
+      39727,
+      58695,
+      68403
+    ],
+    "private_home_processes": [],
+    "server_exit": 0,
+    "watcher_exit": 0
+  },
+  "codex": "/home/ecochran76/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/bin/codex",
+  "elapsed_seconds": 3.8821388370124623,
+  "endpoint": "unix:///tmp/codex-daemon-1000/495dd49b023fc9b771894e55899d8189d7d4264f03d27df5839fd63f3ea74613",
+  "goals_unchanged": true,
+  "initial_refresh": {
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "checkpoint_sha256": "548291f218ca11bfce360f727aa012bf61d38b05257f10f4db1dd7687aca5cbb",
+    "deadline": 1792285479.0,
+    "expires_at": "2026-10-18T01:04:39.080468+00:00",
+    "fingerprint": "fb959935b0609efe6ef4e6f129a9e503d819cd0c99f572c2730b8c717fc4b579",
+    "intent_key": "owned-shared-idle-refresh",
+    "profile_name": "owned",
+    "reason": "waiting_for_idle",
+    "refresh_scope": "shared_server_mcp",
+    "resources": [
+      "skill",
+      "mcp"
+    ],
+    "started_boottime": 342655.663504208,
+    "started_upper": 1792285404.8650146,
+    "state": "queued",
+    "thread_id": "01a14c88-ea3d-7c21-9df9-e063f370e180"
+  },
+  "model_turn_limit": 0,
+  "model_turns": 0,
+  "new_catalog_both": true,
+  "prefix": "/tmp/cw168-installed",
+  "public_mcp_result": {
+    "content": [
+      {
+        "text": "{\"boot_id\": \"25c7e692-175a-4375-ac75-306f6f00c3d5\", \"checkpoint_sha256\": \"548291f218ca11bfce360f727aa012bf61d38b05257f10f4db1dd7687aca5cbb\", \"deadline\": 1792285479.0, \"expires_at\": \"2026-10-18T01:04:39.080468+00:00\", \"fingerprint\": \"fb959935b0609efe6ef4e6f129a9e503d819cd0c99f572c2730b8c717fc4b579\", \"intent_key\": \"owned-shared-idle-refresh\", \"profile_name\": \"owned\", \"reason\": \"waiting_for_idle\", \"refresh_scope\": \"shared_server_mcp\", \"resources\": [\"skill\", \"mcp\"], \"started_boottime\": 342655.663504208, \"started_upper\": 1792285404.8650146, \"state\": \"queued\", \"thread_id\": \"01a14c88-ea3d-7c21-9df9-e063f370e180\"}",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  },
+  "refresh": {
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "busy_count": 0,
+    "checkpoint_sha256": "548291f218ca11bfce360f727aa012bf61d38b05257f10f4db1dd7687aca5cbb",
+    "deadline": 1792285479.0,
+    "expires_at": "2026-10-18T01:04:39.080468+00:00",
+    "fingerprint": "fb959935b0609efe6ef4e6f129a9e503d819cd0c99f572c2730b8c717fc4b579",
+    "goal_after": {
+      "createdAt": 1792285404,
+      "objective": "Owned zero-turn shared refresh acceptance",
+      "status": "paused",
+      "threadId": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1792285404
+    },
+    "goal_before": {
+      "createdAt": 1792285404,
+      "objective": "Owned zero-turn shared refresh acceptance",
+      "status": "paused",
+      "threadId": "01a14c88-ea3d-7c21-9df9-e063f370e180",
+      "timeUsedSeconds": 0,
+      "tokenBudget": 1000,
+      "tokensUsed": 0,
+      "updatedAt": 1792285404
+    },
+    "goal_continuity_verified": true,
+    "intent_key": "owned-shared-idle-refresh",
+    "loaded_count": 2,
+    "profile_name": "owned",
+    "reason": null,
+    "refresh_scope": "shared_server_mcp",
+    "reload_acknowledged": true,
+    "reload_attempted": true,
+    "resource_status": {
+      "mcp": {
+        "kind": "mcp",
+        "state": "ready"
+      },
+      "skill": {
+        "kind": "skill",
+        "state": "ready"
+      }
+    },
+    "resources": [
+      "skill",
+      "mcp"
+    ],
+    "started_boottime": 342655.663504208,
+    "started_upper": 1792285404.8650146,
+    "state": "completed",
+    "thread_id": "01a14c88-ea3d-7c21-9df9-e063f370e180"
+  },
+  "root": "/tmp/cw168-native-public-02",
+  "same_threads": true,
+  "server_pid": 26550,
+  "skills_before": {
+    "data": [
+      {
+        "cwd": "/tmp/cw168-native-public-02/workspace",
+        "errors": [],
+        "skills": [
+          {
+            "description": "Owned shared refresh marker v1",
+            "enabled": true,
+            "name": "shared-refresh-marker",
+            "path": "/tmp/cw168-native-public-02/workspace/.agents/skills/shared-refresh-marker/SKILL.md",
+            "pluginId": null,
+            "scope": "repo"
+          },
+          {
+            "description": "Browser task workflows through the Agent Browser MCP, with CLI fallback for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to \"open a website\", \"fill out a form\", \"click a button\", \"take a screenshot\", \"scrape data from a page\", \"test this web app\", \"login to a site\", \"automate browser actions\", or any task requiring programmatic web interaction.",
+            "enabled": true,
+            "name": "agent-browser",
+            "path": "/home/ecochran76/.agents/skills/agent-browser/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Designs agent-native applications where agents are first-class citizens with full tool parity, atomic primitives, and explicit completion signals. Covers tool design, context injection, agent-to-UI communication, and mobile checkpoint/resume patterns. Use when architecting an agentic system, designing tool surfaces, building agent-aware UI, implementing context.md patterns, or asking \"how do I make my app agent-native.\"",
+            "enabled": true,
+            "name": "agent-native",
+            "path": "/home/ecochran76/.agents/skills/agent-native/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "MUST USE when user wants to \u8c03\u7814/research/\u641c\u7d22/search/\u67e5/\u627e/look up anything on the internet \u2014 e.g. \u5168\u7f51\u8c03\u7814 X / \u5e2e\u6211\u8c03\u7814\u4e00\u4e0b X / \u67e5\u4e00\u4e0b X / \u641c\u641c X / \u770b\u770b\u5927\u5bb6\u600e\u4e48\u8bc4\u4ef7 X / X \u4e0a\u6709\u4ec0\u4e48\u8ba8\u8bba / research this topic\u3002 Also MUST USE when user mentions any platform or shares any URL/\u94fe\u63a5: \u5c0f\u7ea2\u4e66/xiaohongshu/xhs, Twitter/\u63a8\u7279/X, B\u7ad9/bilibili, Reddit, Facebook, Instagram, V2EX, LinkedIn/\u9886\u82f1/\u62db\u8058/\u6c42\u804c/jobs, YouTube, GitHub code search, \u5c0f\u5b87\u5b99\u64ad\u5ba2, \u96ea\u7403/\u80a1\u7968\u884c\u60c5, RSS feeds, or any web URL. 15 platforms, multi-backend routing (OpenCLI / per-platform CLIs / APIs). Zero config for 6 channels. Run `agent-reach doctor --json` to see which backend serves each platform right now. NOT for: \u5199\u62a5\u544a/\u6570\u636e\u5206\u6790/\u7ffb\u8bd1\u7b49\u5185\u5bb9\u52a0\u5de5\uff08\u672c skill \u53ea\u8d1f\u8d23\u4ece\u4e92\u8054\u7f51\u83b7\u53d6\u5185\u5bb9\uff09\uff1b \u53d1\u5e16/\u8bc4\u8bba/\u70b9\u8d5e\u7b49\u5199\u64cd\u4f5c\uff1b\u5df2\u6709\u4e13\u95e8 skill \u7684\u5e73\u53f0\uff08\u5148\u7528\u4e13\u95e8 skill\uff09\u3002 \u3010\u8def\u7531\u65b9\u5f0f\u3011SKILL.md \u5305\u542b\u8def\u7531\u8868\u548c\u5e38\u7528\u547d\u4ee4\uff0c\u590d\u6742\u573a\u666f\u9700\u6309\u9700\u9605\u8bfb\u5bf9\u5e94\u5206\u7c7b\u7684 references/*.md\u3002 \u5206\u7c7b\uff1asearch / social (\u5c0f\u7ea2\u4e66/\u63a8\u7279/B\u7ad9/V2EX/Reddit/Facebook/Instagram) / career(LinkedIn) / dev(github) / web(\u7f51\u9875/\u6587\u7ae0/RSS) / video(YouTube/B\u7ad9/\u64ad\u5ba2)\u3002",
+            "enabled": true,
+            "name": "agent-reach",
+            "path": "/home/ecochran76/.agents/skills/agent-reach/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Guides creation of best-practice agent skills following the open format specification. Covers frontmatter, directory structure, progressive disclosure, reference files, rules folders, and validation. Use when creating a new skill, authoring SKILL.md, setting up a rules-based audit skill, structuring a skill bundle, or asking \"how to write a skill.\"",
+            "enabled": true,
+            "name": "agent-skills-creator",
+            "path": "/home/ecochran76/.agents/skills/agent-skills-creator/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Audits and writes AGENTS.md files using execution-first standards. Checks commands, gotchas, and signal-to-noise ratio. Use when asked to audit, review, score, refactor, or improve agent instruction files, fix stale commands, reduce bloat, or asking \"my AGENTS.md is bad\", \"help me write a CLAUDE.md\", or \"improve my agent instructions\".",
+            "enabled": true,
+            "name": "agents-md",
+            "path": "/home/ecochran76/.agents/skills/agents-md/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Automates npm release workflows using changesets. Creates a changeset (default patch), writes a changelog entry, fixes lint/test/typecheck/format issues, commits and pushes, monitors CI via scheduled tasks, finds and merges the Version Packages PR, and watches the npm-publish workflow to completion. Use when the user asks to ship, release, publish, autoship, or cut a release for an npm package.",
+            "enabled": true,
+            "name": "autoship",
+            "path": "/home/ecochran76/.agents/skills/autoship/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Monitors PR health on a recurring schedule \u2014 merge conflicts, CI/CD failures across GitHub Actions, Buildkite, Vercel, and Fly.io, review comment triage and resolution, and merge readiness notifications. Also runs as one-shot comment triage. Use when asked to babysit a PR, watch a PR, monitor CI, fix PR comments, resolve review feedback, triage review threads, keep a PR green, handle merge conflicts, or poll PR status",
+            "enabled": true,
+            "name": "babysit-pr",
+            "path": "/home/ecochran76/.agents/skills/babysit-pr/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Generates engaging blog posts from source materials or topic briefs. Supports listicles, tutorials, how-to guides, narrative essays, and thought leadership. Handles research, outlining, drafting, SEO optimization, and polishing. Use when writing a blog post, creating a listicle, turning research into an article, writing a tutorial, or asking \"write a blog post about this.\"",
+            "enabled": true,
+            "name": "blog-post",
+            "path": "/home/ecochran76/.agents/skills/blog-post/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use when working inside a repository that has CodeGraph installed or a .codegraph index, when the user asks to use CodeGraph, or when investigating, reviewing, refactoring, or planning code changes with codegraph_* MCP tools or the codegraph CLI available. Guides agents to use codegraph_explore as the primary Read-equivalent structural tool, handle index staleness, and use current CLI syntax.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $codegraph-workspace and start with one focused codegraph_explore call before reading indexed source.",
+              "displayName": "CodeGraph Workspace",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Use CodeGraph indexes while coding"
+            },
+            "name": "codegraph-workspace",
+            "path": "/home/ecochran76/.agents/skills/codegraph-workspace/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use Codex Wake when a user gives /goal resource limits (tokens, time, memory, swap, CPU, tasks): register token/time limits for the existing native goal through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $codex-wake for tracked agent communication or a durable follow-up. Choose the reply route explicitly; a TUI answer alone does not deliver an A2A reply.",
+              "displayName": "Codex Wake",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Tracked A2A requests, replies and wake cycles"
+            },
+            "name": "codex-wake",
+            "path": "/home/ecochran76/.agents/skills/codex-wake/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Writes and edits product and marketing copy using persuasion frameworks, and removes AI writing patterns. Writing mode gathers context, locks a brief, discovers brand voice, selects a framework, and outputs 2-3 alternatives. Editing mode audits against persuasion frameworks, strips AI-isms, runs seven sweeps, and outputs a before/after diff. Use when writing landing pages, hero copy, CTAs, product descriptions, onboarding strings, or email subjects. Also use when reviewing copy, \"this is a bad sell\", \"write copy for\", \"rewrite from first principles\", \"use Simon Sinek\", \"show don't tell\", \"make this shorter\", \"fix the copy\", \"write a headline\", \"improve the CTA\", \"edit existing copy\", \"remove AI-isms\", \"clean up AI writing\", \"make this sound less like AI\", \"flag AI patterns\", or \"scan for AI tells\".",
+            "enabled": true,
+            "name": "copywriting",
+            "path": "/home/ecochran76/.agents/skills/copywriting/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Generates folder structures, module contracts, middleware pipelines, and frontend/backend boundaries for TypeScript full-stack applications. Use when starting a project, setting up project structure, organizing a monorepo, configuring middleware, defining folder layout, designing backend modules, establishing team conventions, or asking \"how should I structure this app\", \"design the folder structure\", or \"set up the architecture\".",
+            "enabled": true,
+            "name": "define-architecture",
+            "path": "/home/ecochran76/.agents/skills/define-architecture/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use for browser-only tasks on this machine: navigating sites, clicking UI, filling forms, taking screenshots, scraping rendered pages, or testing web-app flows in a real browser. Trigger when the user explicitly wants website interaction or browser automation. Do not use for general shell automation, API-only work, or local file manipulation.",
+            "enabled": true,
+            "name": "dev-browser",
+            "path": "/home/ecochran76/.agents/skills/dev-browser/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Writes and audits technical documentation using Diataxis, Stripe-style clarity, and the Eight Rules. 52 rules across 9 categories covering voice, structure, clarity, code examples, formatting, navigation, scanability, content hygiene, and review. Use when writing docs, creating READMEs, documenting APIs, writing tutorials, building a docs site, auditing documentation quality, or asking \"review my docs\", \"improve this documentation\", or \"write docs for this\".",
+            "enabled": true,
+            "name": "docs-writing",
+            "path": "/home/ecochran76/.agents/skills/docs-writing/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+            "enabled": true,
+            "name": "find-skills",
+            "path": "/home/ecochran76/.agents/skills/find-skills/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Discover and record durable local Graphiti memory without blocking ordinary closeout on asynchronous extraction. Use when starting repo work, recovering prior decisions, querying Graphiti, routing through memory_atlas_main, bootstrapping repo memory, or recording a source-backed closeout outcome with graphiti-runtime remember.",
+            "enabled": true,
+            "name": "graphiti-discovery",
+            "path": "/home/ecochran76/.agents/skills/graphiti-discovery/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workspace Admin SDK: Audit logs and usage reports.",
+            "enabled": true,
+            "name": "gws-admin-reports",
+            "path": "/home/ecochran76/.agents/skills/gws-admin-reports/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Calendar: Manage calendars and events.",
+            "enabled": true,
+            "name": "gws-calendar",
+            "path": "/home/ecochran76/.agents/skills/gws-calendar/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Calendar: Show upcoming events across all calendars.",
+            "enabled": true,
+            "name": "gws-calendar-agenda",
+            "path": "/home/ecochran76/.agents/skills/gws-calendar-agenda/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Calendar: Create a new event.",
+            "enabled": true,
+            "name": "gws-calendar-insert",
+            "path": "/home/ecochran76/.agents/skills/gws-calendar-insert/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Chat: Manage Chat spaces and messages.",
+            "enabled": true,
+            "name": "gws-chat",
+            "path": "/home/ecochran76/.agents/skills/gws-chat/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Chat: Send a message to a space.",
+            "enabled": true,
+            "name": "gws-chat-send",
+            "path": "/home/ecochran76/.agents/skills/gws-chat-send/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Classroom: Manage classes, rosters, and coursework.",
+            "enabled": true,
+            "name": "gws-classroom",
+            "path": "/home/ecochran76/.agents/skills/gws-classroom/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Read and write Google Docs.",
+            "enabled": true,
+            "name": "gws-docs",
+            "path": "/home/ecochran76/.agents/skills/gws-docs/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Docs: Append text to a document.",
+            "enabled": true,
+            "name": "gws-docs-write",
+            "path": "/home/ecochran76/.agents/skills/gws-docs-write/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Drive: Manage files, folders, and shared drives.",
+            "enabled": true,
+            "name": "gws-drive",
+            "path": "/home/ecochran76/.agents/skills/gws-drive/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Drive: Upload a file with automatic metadata.",
+            "enabled": true,
+            "name": "gws-drive-upload",
+            "path": "/home/ecochran76/.agents/skills/gws-drive-upload/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Subscribe to Google Workspace events.",
+            "enabled": true,
+            "name": "gws-events",
+            "path": "/home/ecochran76/.agents/skills/gws-events/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workspace Events: Renew/reactivate Workspace Events subscriptions.",
+            "enabled": true,
+            "name": "gws-events-renew",
+            "path": "/home/ecochran76/.agents/skills/gws-events-renew/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workspace Events: Subscribe to Workspace events and stream them as NDJSON.",
+            "enabled": true,
+            "name": "gws-events-subscribe",
+            "path": "/home/ecochran76/.agents/skills/gws-events-subscribe/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Read and write Google Forms.",
+            "enabled": true,
+            "name": "gws-forms",
+            "path": "/home/ecochran76/.agents/skills/gws-forms/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Gmail: Send, read, and manage email.",
+            "enabled": true,
+            "name": "gws-gmail",
+            "path": "/home/ecochran76/.agents/skills/gws-gmail/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Gmail: Send an email.",
+            "enabled": true,
+            "name": "gws-gmail-send",
+            "path": "/home/ecochran76/.agents/skills/gws-gmail-send/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Gmail: Show unread inbox summary (sender, subject, date).",
+            "enabled": true,
+            "name": "gws-gmail-triage",
+            "path": "/home/ecochran76/.agents/skills/gws-gmail-triage/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Gmail: Watch for new emails and stream them as NDJSON.",
+            "enabled": true,
+            "name": "gws-gmail-watch",
+            "path": "/home/ecochran76/.agents/skills/gws-gmail-watch/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Manage Google Keep notes.",
+            "enabled": true,
+            "name": "gws-keep",
+            "path": "/home/ecochran76/.agents/skills/gws-keep/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Manage Google Meet conferences.",
+            "enabled": true,
+            "name": "gws-meet",
+            "path": "/home/ecochran76/.agents/skills/gws-meet/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Model Armor: Filter user-generated content for safety.",
+            "enabled": true,
+            "name": "gws-modelarmor",
+            "path": "/home/ecochran76/.agents/skills/gws-modelarmor/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Model Armor: Create a new Model Armor template.",
+            "enabled": true,
+            "name": "gws-modelarmor-create-template",
+            "path": "/home/ecochran76/.agents/skills/gws-modelarmor-create-template/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Model Armor: Sanitize a user prompt through a Model Armor template.",
+            "enabled": true,
+            "name": "gws-modelarmor-sanitize-prompt",
+            "path": "/home/ecochran76/.agents/skills/gws-modelarmor-sanitize-prompt/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Model Armor: Sanitize a model response through a Model Armor template.",
+            "enabled": true,
+            "name": "gws-modelarmor-sanitize-response",
+            "path": "/home/ecochran76/.agents/skills/gws-modelarmor-sanitize-response/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google People: Manage contacts and profiles.",
+            "enabled": true,
+            "name": "gws-people",
+            "path": "/home/ecochran76/.agents/skills/gws-people/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "gws CLI: Shared patterns for authentication, global flags, and output formatting.",
+            "enabled": true,
+            "name": "gws-shared",
+            "path": "/home/ecochran76/.agents/skills/gws-shared/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Sheets: Read and write spreadsheets.",
+            "enabled": true,
+            "name": "gws-sheets",
+            "path": "/home/ecochran76/.agents/skills/gws-sheets/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Sheets: Append a row to a spreadsheet.",
+            "enabled": true,
+            "name": "gws-sheets-append",
+            "path": "/home/ecochran76/.agents/skills/gws-sheets-append/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Sheets: Read values from a spreadsheet.",
+            "enabled": true,
+            "name": "gws-sheets-read",
+            "path": "/home/ecochran76/.agents/skills/gws-sheets-read/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Slides: Read and write presentations.",
+            "enabled": true,
+            "name": "gws-slides",
+            "path": "/home/ecochran76/.agents/skills/gws-slides/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Tasks: Manage task lists and tasks.",
+            "enabled": true,
+            "name": "gws-tasks",
+            "path": "/home/ecochran76/.agents/skills/gws-tasks/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workflow: Cross-service productivity workflows.",
+            "enabled": true,
+            "name": "gws-workflow",
+            "path": "/home/ecochran76/.agents/skills/gws-workflow/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workflow: Convert a Gmail message into a Google Tasks entry.",
+            "enabled": true,
+            "name": "gws-workflow-email-to-task",
+            "path": "/home/ecochran76/.agents/skills/gws-workflow-email-to-task/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workflow: Announce a Drive file in a Chat space.",
+            "enabled": true,
+            "name": "gws-workflow-file-announce",
+            "path": "/home/ecochran76/.agents/skills/gws-workflow-file-announce/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workflow: Prepare for your next meeting: agenda, attendees, and linked docs.",
+            "enabled": true,
+            "name": "gws-workflow-meeting-prep",
+            "path": "/home/ecochran76/.agents/skills/gws-workflow-meeting-prep/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workflow: Today's meetings + open tasks as a standup summary.",
+            "enabled": true,
+            "name": "gws-workflow-standup-report",
+            "path": "/home/ecochran76/.agents/skills/gws-workflow-standup-report/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Google Workflow: Weekly summary: this week's meetings + unread email count.",
+            "enabled": true,
+            "name": "gws-workflow-weekly-digest",
+            "path": "/home/ecochran76/.agents/skills/gws-workflow-weekly-digest/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Configure, inspect, and smoke-test im-receipts as a service-backed MCP surface for local agents. Use when installing im-receipts MCP, configuring Codex or OpenClaw, checking whether im-receipts MCP is robust for parallel agents, smoke testing MCP tools, explaining what the MCP is for, or diagnosing service-backed MCP readiness.",
+            "enabled": true,
+            "name": "im-receipts-mcp",
+            "path": "/home/ecochran76/.agents/skills/im-receipts-mcp/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Operate the installed im-receipts local messaging service and managed-live accounts. Use when checking im-receipts status, restarting im-receipts, recovering Google Messages, recovering WhatsApp, enabling or disabling managed live, investigating degraded sync, checking service health, or verifying Google Messages and WhatsApp are actively tracking chats.",
+            "enabled": true,
+            "name": "im-receipts-ops",
+            "path": "/home/ecochran76/.agents/skills/im-receipts-ops/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Search and follow up across the im-receipts shared messaging corpus. Use when searching texts, finding Google Messages or WhatsApp messages, searching conversations, finding attachment text, searching OCR text, interpreting search results, or deciding whether to use lexical, semantic, hybrid, canonical, service-native, or derived-text search.",
+            "enabled": true,
+            "name": "im-receipts-search",
+            "path": "/home/ecochran76/.agents/skills/im-receipts-search/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Compatibility wrapper for im-receipts-mcp. Use only when an existing prompt or installed agent still names imcli MCP; prefer im-receipts-mcp for new work.",
+            "enabled": true,
+            "name": "imcli-mcp",
+            "path": "/home/ecochran76/.agents/skills/imcli-mcp/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Compatibility wrapper for im-receipts-ops. Use only when an existing prompt or installed agent still names imcli ops; prefer im-receipts-ops for new work.",
+            "enabled": true,
+            "name": "imcli-ops",
+            "path": "/home/ecochran76/.agents/skills/imcli-ops/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Compatibility wrapper for im-receipts-search. Use only when an existing prompt or installed agent still names imcli search; prefer im-receipts-search for new work.",
+            "enabled": true,
+            "name": "imcli-search",
+            "path": "/home/ecochran76/.agents/skills/imcli-search/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Query the last30days Intelligence Service for current, temporal, and evidence-backed research across supported sources.",
+            "enabled": true,
+            "name": "last30days",
+            "path": "/home/ecochran76/.agents/skills/last30days/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Creates a git worktree from main for a Linear issue. Use when the user pastes a Linear URL (https://linear.app/.../issue/ABC-58/...), a Linear \"copy as prompt\" string, or just an issue ID like \"ABC-58\". Handles URL parsing, branch name derivation, and worktree creation as a sibling directory. Also use when asked to \"make a worktree for ABC-58\", \"set up a branch for this issue\", or \"create a worktree\".",
+            "enabled": true,
+            "name": "linear-worktree",
+            "path": "/home/ecochran76/.agents/skills/linear-worktree/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Ask which skill or flow fits your situation. A router over the skills in this repo.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Ask Matt",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Find the right skill or workflow"
+            },
+            "name": "mattpocock-skills:ask-matt",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/ask-matt/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Review changes since a fixed point along separate Standards and Spec axes, then adjudicate evidence-shaped findings. Use for branches, PRs, work-in-progress changes, or requests to review since a named ref.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Code Review",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Review a diff on standards and spec"
+            },
+            "name": "mattpocock-skills:code-review",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/code-review/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or AI-navigable, or when another skill needs the deep-module vocabulary.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Codebase Design",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Vocabulary for deep-module design"
+            },
+            "name": "mattpocock-skills:codebase-design",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/codebase-design/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Diagnosis loop for hard bugs and performance regressions. Use when the user says \"diagnose\"/\"debug this\", or reports something broken/throwing/failing/slow.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Diagnosing Bugs",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Diagnose hard bugs and regressions"
+            },
+            "name": "mattpocock-skills:diagnosing-bugs",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/diagnosing-bugs/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a GLOSSARY.md, or recording or editing an ADR.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Domain Modeling",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Build and sharpen a domain model"
+            },
+            "name": "mattpocock-skills:domain-modeling",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/domain-modeling/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "A relentless interview to sharpen a plan or design.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Grill Me",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Sharpen a plan through interview"
+            },
+            "name": "mattpocock-skills:grill-me",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/productivity/grill-me/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Grill with Docs",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Grill a design and write its docs"
+            },
+            "name": "mattpocock-skills:grill-with-docs",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/grill-with-docs/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Grilling",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Stress-test thinking a round of questions at a time"
+            },
+            "name": "mattpocock-skills:grilling",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/productivity/grilling/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Compact the current conversation into a handoff document for another agent to pick up.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Handoff",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Compact a conversation into a handoff"
+            },
+            "name": "mattpocock-skills:handoff",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/productivity/handoff/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Implement a spec and dependent tickets on one validated integration branch, using bounded parallel workers when useful.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Implement Spec",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Coordinate tickets into a validated branch"
+            },
+            "name": "mattpocock-skills:implement-spec",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/implement-spec/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Improve Codebase Architecture",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Find and grill architecture improvements"
+            },
+            "name": "mattpocock-skills:improve-codebase-architecture",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/improve-codebase-architecture/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use when writing a PR body.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Pull Request",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Write a concise evidence-backed PR body"
+            },
+            "name": "mattpocock-skills:pr",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/pr/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Prototype",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Prototype to answer a design question"
+            },
+            "name": "mattpocock-skills:prototype",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/prototype/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Research",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Research from high-trust sources"
+            },
+            "name": "mattpocock-skills:research",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/research/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use when you need to resolve an in-progress git merge/rebase conflict.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Resolving Merge Conflicts",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Resolve merge and rebase conflicts"
+            },
+            "name": "mattpocock-skills:resolving-merge-conflicts",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/resolving-merge-conflicts/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Conduct a retrospective on a coding session.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Retrospective",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Improve the environment from session evidence"
+            },
+            "name": "mattpocock-skills:retro",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/retro/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Setup Matt Pocock Skills",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Configure a repo for the skills"
+            },
+            "name": "mattpocock-skills:setup-matt-pocock-skills",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/setup-matt-pocock-skills/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions \"red-green-refactor\", or wants integration tests.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "TDD",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Test-driven red-green-refactor"
+            },
+            "name": "mattpocock-skills:tdd",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/tdd/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Teach the user a new skill or concept, within this workspace.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Teach",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Learn a concept in a guided workspace"
+            },
+            "name": "mattpocock-skills:teach",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/productivity/teach/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Turn a decision you can't fully answer into a questionnaire for someone else to fill in.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "To Questionnaire",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Front-load questions into a doc for someone to answer"
+            },
+            "name": "mattpocock-skills:to-questionnaire",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/productivity/to-questionnaire/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "To Spec",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Turn a conversation into a spec"
+            },
+            "name": "mattpocock-skills:to-spec",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/to-spec/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker: edges as text in one file per ticket locally, or native blocking links on a real tracker.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "To Tickets",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Split a plan into tracer-bullet tickets"
+            },
+            "name": "mattpocock-skills:to-tickets",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/to-tickets/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Move issues and external PRs through a state machine of triage roles: categorise, verify, grill if needed, and write agent-ready briefs.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Triage",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Move issues through triage roles"
+            },
+            "name": "mattpocock-skills:triage",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/triage/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Stop. That last message did not land: re-pitch it.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Wait What",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Re-pitch that: simpler, with the context I'm missing"
+            },
+            "name": "mattpocock-skills:wait-what",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/productivity/wait-what/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Plan a huge chunk of work (more than one agent session can hold) as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Wayfinder",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Map a large effort as decision tickets"
+            },
+            "name": "mattpocock-skills:wayfinder",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/wayfinder/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover. Don't invoke this for steps the agent can perform itself.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Wizard",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Generate an interactive setup wizard"
+            },
+            "name": "mattpocock-skills:wizard",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/engineering/wizard/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Writing for Agents",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Write documents agents consume"
+            },
+            "name": "mattpocock-skills:writing-for-agents",
+            "path": "/home/ecochran76/workspace.local/mapocock.skills/skills/productivity/writing-for-agents/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Generates Mermaid mindmap diagrams from codebases, topics, files, or conversations. Visually summarizes source material as branching diagrams. Use when asked to create a Mermaid mind map, visualize a topic, map out a codebase, summarize a file as a diagram, generate a concept map, or create a visual overview.",
+            "enabled": true,
+            "name": "mermaid-mind-map",
+            "path": "/home/ecochran76/.agents/skills/mermaid-mind-map/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Provides architecture guidance for multi-tenant SaaS platforms on Cloudflare or Vercel. Use when defining domain strategy, tenant identification, isolation, subdomain routing, custom domains, white-label setup, tenant separation, plan/limit mapping, building a multi-tenant application, or asking \"how do I support multiple tenants\" or \"build a white-label platform\".",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $multi-tenant-architecture to design a multi-tenant platform, including domains, routing, tenant isolation, and limits-to-pricing mapping.",
+              "displayName": "Multi-tenant Platform Architecture",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Plan Cloudflare or Vercel tenant architecture"
+            },
+            "name": "multi-tenant-architecture",
+            "path": "/home/ecochran76/.agents/skills/multi-tenant-architecture/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use when preparing, validating, applying, or reconciling an explicitly authorized Google Ads API mutation through Odollo, including paused Search campaign creation, paused Performance Max cloning, conversion-goal updates, assets, sitelinks, targeting, or budget settings. Do not use for ordinary reporting or for activation and spend without separate exact authority.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $odollo-google-ads-controlled-mutation to prepare and execute this exact Google Ads change with approval and readback.",
+              "displayName": "Odollo Google Ads Controlled Mutation",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Safely validate and apply Ads changes"
+            },
+            "name": "odollo-google-ads-controlled-mutation",
+            "path": "/home/ecochran76/workspace.local/odollo/skills/odollo-google-ads-controlled-mutation/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use when designing, cloning, reviewing, or improving a Google Performance Max campaign through Odollo, including independent asset-group copies, asset stacks, search themes, sitelinks, destinations, conversion goals, automation settings, audience signals, and preparation of a paused PMax treatment. Do not use to activate, fund, or mutate a campaign without the controlled-mutation skill and exact approval.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $odollo-google-ads-pmax-campaign-development to prepare an independent paused Performance Max treatment without changing the control campaign or activating spend.",
+              "displayName": "Odollo Google Ads PMax Development",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Design independent reviewed PMax treatments"
+            },
+            "name": "odollo-google-ads-pmax-campaign-development",
+            "path": "/home/ecochran76/workspace.local/odollo/skills/odollo-google-ads-pmax-campaign-development/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use when inspecting Google Ads through Odollo without changing provider state, including readiness, accounts, campaign hierarchy, performance, recommendations, change history, conversion goals, assets, policy state, and narrowly scoped GAQL evidence. Never use for campaign, budget, bid, goal, asset, or recommendation mutations.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $odollo-google-ads-readonly-inspection to inspect this Google Ads account without changing provider state.",
+              "displayName": "Odollo Google Ads Read-Only Inspection",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Inspect Google Ads safely through Odollo"
+            },
+            "name": "odollo-google-ads-readonly-inspection",
+            "path": "/home/ecochran76/workspace.local/odollo/skills/odollo-google-ads-readonly-inspection/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Use when researching, designing, reviewing, or improving a Google Search campaign through Odollo, including Keyword Planner ideas, ad-group structure, positive and negative keyword proposals, match types, responsive-ad copy, destinations, attribution, conversion readiness, and preparation of a paused campaign manifest. Do not use to activate or mutate a campaign without the controlled-mutation skill and exact approval.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $odollo-google-ads-search-campaign-development to research and prepare this Search campaign for human review without activating or spending.",
+              "displayName": "Odollo Google Ads Search Development",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Research and design reviewed Search campaigns"
+            },
+            "name": "odollo-google-ads-search-campaign-development",
+            "path": "/home/ecochran76/workspace.local/odollo/skills/odollo-google-ads-search-campaign-development/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Reconcile Odoo CRM leads, partners, sale orders, and sale order lines against QuickBooks Online invoice/payment evidence in the local books-receipts mirror. Use when a user asks whether an Odoo opportunity/order reflects a paid sale, why a sale does not appear in CRM, whether a quote should become a confirmed order, or how to match QBO invoices/payments to Odoo records for an Odollo tenant.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $odoo-qbo-match-invoices to reconcile a suspected paid sale between Odoo CRM/sales orders and QuickBooks invoice/payment evidence.",
+              "displayName": "Odoo QBO Matching",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Match Odoo sales to QBO invoices and payments"
+            },
+            "name": "odoo-qbo-match-invoices",
+            "path": "/home/ecochran76/.agents/skills/odoo-qbo-match-invoices/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Optimises SEO for Next.js App Router apps including sitemaps, meta tags, structured data, canonical URLs, Core Web Vitals, and programmatic SEO. Use when asked to improve SEO, add sitemap.xml, fix meta tags, add structured data, set canonical URLs, improve Core Web Vitals, audit SEO, or build SEO pages at scale. Performs no visual redesigns.",
+            "enabled": true,
+            "name": "optimise-seo",
+            "path": "/home/ecochran76/.agents/skills/optimise-seo/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create, organize, and distribute content across Workspace.",
+            "enabled": true,
+            "name": "persona-content-creator",
+            "path": "/home/ecochran76/.agents/skills/persona-content-creator/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Manage customer support \u2014 track tickets, respond, escalate issues.",
+            "enabled": true,
+            "name": "persona-customer-support",
+            "path": "/home/ecochran76/.agents/skills/persona-customer-support/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Plan and manage events \u2014 scheduling, invitations, and logistics.",
+            "enabled": true,
+            "name": "persona-event-coordinator",
+            "path": "/home/ecochran76/.agents/skills/persona-event-coordinator/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Manage an executive's schedule, inbox, and communications.",
+            "enabled": true,
+            "name": "persona-exec-assistant",
+            "path": "/home/ecochran76/.agents/skills/persona-exec-assistant/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Handle HR workflows \u2014 onboarding, announcements, and employee comms.",
+            "enabled": true,
+            "name": "persona-hr-coordinator",
+            "path": "/home/ecochran76/.agents/skills/persona-hr-coordinator/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Administer IT \u2014 monitor security and configure Workspace.",
+            "enabled": true,
+            "name": "persona-it-admin",
+            "path": "/home/ecochran76/.agents/skills/persona-it-admin/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Coordinate projects \u2014 track tasks, schedule meetings, and share docs.",
+            "enabled": true,
+            "name": "persona-project-manager",
+            "path": "/home/ecochran76/.agents/skills/persona-project-manager/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Organize research \u2014 manage references, notes, and collaboration.",
+            "enabled": true,
+            "name": "persona-researcher",
+            "path": "/home/ecochran76/.agents/skills/persona-researcher/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Manage sales workflows \u2014 track deals, schedule calls, client comms.",
+            "enabled": true,
+            "name": "persona-sales-ops",
+            "path": "/home/ecochran76/.agents/skills/persona-sales-ops/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Lead a team \u2014 run standups, coordinate tasks, and communicate.",
+            "enabled": true,
+            "name": "persona-team-lead",
+            "path": "/home/ecochran76/.agents/skills/persona-team-lead/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Creates bold, minimal, dark-first presentations with structured narrative arcs, punchy slide copy, high-contrast visual design, and conversational speaker notes. Adapts for live talks or async investor pitch decks. Use when creating a presentation, structuring a deck, writing slides, asking \"outline a presentation about...\", \"write slides for...\", \"design a deck for...\", or building a pitch deck for investors.",
+            "enabled": true,
+            "name": "presentation-creator",
+            "path": "/home/ecochran76/.agents/skills/presentation-creator/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Publish local artifacts, directories, URLs, and text snippets to the Previews service so the user can view them in a browser and leave approval feedback. Use this for artifact review, approval gates, preview URLs, local source code/HTML/PDF/Office/image/Markdown outputs, session feedback, share links, and cleanup of preview sessions.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $previews to publish local artifacts with MCP-first workflow, return one review URL, and check approval feedback before continuing.",
+              "displayName": "Previews",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Publish browser previews and approval links"
+            },
+            "name": "previews",
+            "path": "/home/ecochran76/workspace.local/previews/skills/previews/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Writes or rewrites README.md files tailored to the project type (CLI, library, app, framework, monorepo, or skill bundle). Discovers project context, selects the right structure, writes section by section, and validates against quality checks. Use when creating a README, writing a README from scratch, rewriting a bad README, bootstrapping project documentation, or asking \"write a README for this project.\"",
+            "enabled": true,
+            "name": "readme-creator",
+            "path": "/home/ecochran76/.agents/skills/readme-creator/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Export a Google Sheets spreadsheet as a CSV file for local backup or processing.",
+            "enabled": true,
+            "name": "recipe-backup-sheet-as-csv",
+            "path": "/home/ecochran76/.agents/skills/recipe-backup-sheet-as-csv/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Add a list of attendees to an existing Google Calendar event and send notifications.",
+            "enabled": true,
+            "name": "recipe-batch-invite-to-event",
+            "path": "/home/ecochran76/.agents/skills/recipe-batch-invite-to-event/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create recurring focus time blocks on Google Calendar to protect deep work hours.",
+            "enabled": true,
+            "name": "recipe-block-focus-time",
+            "path": "/home/ecochran76/.agents/skills/recipe-block-focus-time/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "List and download all files from a Google Drive folder.",
+            "enabled": true,
+            "name": "recipe-bulk-download-folder",
+            "path": "/home/ecochran76/.agents/skills/recipe-bulk-download-folder/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Retrieve and review responses from a Google Form.",
+            "enabled": true,
+            "name": "recipe-collect-form-responses",
+            "path": "/home/ecochran76/.agents/skills/recipe-collect-form-responses/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Read data from two tabs in a Google Sheet to compare and identify differences.",
+            "enabled": true,
+            "name": "recipe-compare-sheet-tabs",
+            "path": "/home/ecochran76/.agents/skills/recipe-compare-sheet-tabs/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Duplicate a Google Sheets template tab for a new month of tracking.",
+            "enabled": true,
+            "name": "recipe-copy-sheet-for-new-month",
+            "path": "/home/ecochran76/.agents/skills/recipe-copy-sheet-for-new-month/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a Google Classroom course and invite students.",
+            "enabled": true,
+            "name": "recipe-create-classroom-course",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-classroom-course/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Copy a Google Docs template, fill in content, and share with collaborators.",
+            "enabled": true,
+            "name": "recipe-create-doc-from-template",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-doc-from-template/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Read event data from a Google Sheets spreadsheet and create Google Calendar entries for each row.",
+            "enabled": true,
+            "name": "recipe-create-events-from-sheet",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-events-from-sheet/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Set up a Google Sheets spreadsheet for tracking expenses with headers and initial entries.",
+            "enabled": true,
+            "name": "recipe-create-expense-tracker",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-expense-tracker/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a Google Form for feedback and share it via Gmail.",
+            "enabled": true,
+            "name": "recipe-create-feedback-form",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-feedback-form/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a Gmail filter to automatically label, star, or categorize incoming messages.",
+            "enabled": true,
+            "name": "recipe-create-gmail-filter",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-gmail-filter/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a Google Meet meeting space and share the join link.",
+            "enabled": true,
+            "name": "recipe-create-meet-space",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-meet-space/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a new Google Slides presentation and add initial slides.",
+            "enabled": true,
+            "name": "recipe-create-presentation",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-presentation/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a Google Shared Drive and add members with appropriate roles.",
+            "enabled": true,
+            "name": "recipe-create-shared-drive",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-shared-drive/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Set up a new Google Tasks list with initial tasks.",
+            "enabled": true,
+            "name": "recipe-create-task-list",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-task-list/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Enable a Gmail out-of-office auto-reply with a custom message and date range.",
+            "enabled": true,
+            "name": "recipe-create-vacation-responder",
+            "path": "/home/ecochran76/.agents/skills/recipe-create-vacation-responder/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Read content from a Google Doc and use it as the body of a Gmail message.",
+            "enabled": true,
+            "name": "recipe-draft-email-from-doc",
+            "path": "/home/ecochran76/.agents/skills/recipe-draft-email-from-doc/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Share a Google Drive file and email the link with a message to recipients.",
+            "enabled": true,
+            "name": "recipe-email-drive-link",
+            "path": "/home/ecochran76/.agents/skills/recipe-email-drive-link/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Query Google Calendar free/busy status for multiple users to find a meeting slot.",
+            "enabled": true,
+            "name": "recipe-find-free-time",
+            "path": "/home/ecochran76/.agents/skills/recipe-find-free-time/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Identify large Google Drive files consuming storage quota.",
+            "enabled": true,
+            "name": "recipe-find-large-files",
+            "path": "/home/ecochran76/.agents/skills/recipe-find-large-files/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Find Gmail messages with a specific label and forward them to another address.",
+            "enabled": true,
+            "name": "recipe-forward-labeled-emails",
+            "path": "/home/ecochran76/.agents/skills/recipe-forward-labeled-emails/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Read data from a Google Sheet and create a formatted Google Docs report.",
+            "enabled": true,
+            "name": "recipe-generate-report-from-sheet",
+            "path": "/home/ecochran76/.agents/skills/recipe-generate-report-from-sheet/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Apply Gmail labels to matching messages and archive them to keep your inbox clean.",
+            "enabled": true,
+            "name": "recipe-label-and-archive-emails",
+            "path": "/home/ecochran76/.agents/skills/recipe-label-and-archive-emails/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Append a deal status update to a Google Sheets sales tracking spreadsheet.",
+            "enabled": true,
+            "name": "recipe-log-deal-update",
+            "path": "/home/ecochran76/.agents/skills/recipe-log-deal-update/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a Google Drive folder structure and move files into the right locations.",
+            "enabled": true,
+            "name": "recipe-organize-drive-folder",
+            "path": "/home/ecochran76/.agents/skills/recipe-organize-drive-folder/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Review your Google Calendar week, identify gaps, and add events to fill them.",
+            "enabled": true,
+            "name": "recipe-plan-weekly-schedule",
+            "path": "/home/ecochran76/.agents/skills/recipe-plan-weekly-schedule/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a Google Docs post-mortem, schedule a Google Calendar review, and notify via Chat.",
+            "enabled": true,
+            "name": "recipe-post-mortem-setup",
+            "path": "/home/ecochran76/.agents/skills/recipe-post-mortem-setup/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Move a Google Calendar event to a new time and automatically notify all attendees.",
+            "enabled": true,
+            "name": "recipe-reschedule-meeting",
+            "path": "/home/ecochran76/.agents/skills/recipe-reschedule-meeting/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Review who attended a Google Meet conference and for how long.",
+            "enabled": true,
+            "name": "recipe-review-meet-participants",
+            "path": "/home/ecochran76/.agents/skills/recipe-review-meet-participants/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Find Google Tasks that are past due and need attention.",
+            "enabled": true,
+            "name": "recipe-review-overdue-tasks",
+            "path": "/home/ecochran76/.agents/skills/recipe-review-overdue-tasks/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Find Gmail messages with attachments and save them to a Google Drive folder.",
+            "enabled": true,
+            "name": "recipe-save-email-attachments",
+            "path": "/home/ecochran76/.agents/skills/recipe-save-email-attachments/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Save a Gmail message body into a Google Doc for archival or reference.",
+            "enabled": true,
+            "name": "recipe-save-email-to-doc",
+            "path": "/home/ecochran76/.agents/skills/recipe-save-email-to-doc/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create a recurring Google Calendar event with attendees.",
+            "enabled": true,
+            "name": "recipe-schedule-recurring-event",
+            "path": "/home/ecochran76/.agents/skills/recipe-schedule-recurring-event/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Send a team announcement via both Gmail and a Google Chat space.",
+            "enabled": true,
+            "name": "recipe-send-team-announcement",
+            "path": "/home/ecochran76/.agents/skills/recipe-send-team-announcement/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Share a Google Docs document with edit access and email collaborators the link.",
+            "enabled": true,
+            "name": "recipe-share-doc-and-notify",
+            "path": "/home/ecochran76/.agents/skills/recipe-share-doc-and-notify/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Share Google Drive files with all attendees of a Google Calendar event.",
+            "enabled": true,
+            "name": "recipe-share-event-materials",
+            "path": "/home/ecochran76/.agents/skills/recipe-share-event-materials/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Share a Google Drive folder and all its contents with a list of collaborators.",
+            "enabled": true,
+            "name": "recipe-share-folder-with-team",
+            "path": "/home/ecochran76/.agents/skills/recipe-share-folder-with-team/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Export Google Contacts directory to a Google Sheets spreadsheet.",
+            "enabled": true,
+            "name": "recipe-sync-contacts-to-sheet",
+            "path": "/home/ecochran76/.agents/skills/recipe-sync-contacts-to-sheet/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Subscribe to change notifications on a Google Drive file or folder.",
+            "enabled": true,
+            "name": "recipe-watch-drive-changes",
+            "path": "/home/ecochran76/.agents/skills/recipe-watch-drive-changes/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "choose and adapt the right reusable agent-policy modules for a target repository by inspecting repo signals such as AGENTS.md, docs/dev/policies, roadmap/runbook files, repo shape, and workflow complexity, then recommend a policy profile from this policy library and draft the local policy patch.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $repo-policy-selector to inspect this repo and recommend the right shared policy profile and module mix.",
+              "displayName": "Repo Policy Selector",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Choose policy bundles for repos"
+            },
+            "name": "repo-policy-selector",
+            "path": "/home/ecochran76/.agents/skills/repo-policy-selector/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Reviews the current local diff or branch at the end of a coding session for high-confidence bugs and repository instruction-file compliance. Use when asked to run `/review-pr` before commit, before push, or before handing changes off for PR creation or update, and when only certain, actionable findings should be reported while style feedback is ignored.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $review-pr to review my current local diff at the end of a coding session. Check for high-confidence bugs, missing validation/tests, and repository instruction-file compliance, then return a local review report before commit, push, or handoff. Keep the default path local-first.",
+              "displayName": "Local Review",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "End-of-session review before commit, push, or handoff"
+            },
+            "name": "review-pr",
+            "path": "/home/ecochran76/.agents/skills/review-pr/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Scaffolds a production-ready TypeScript CLI project with ESM, tsdown, vitest, oxlint, oxfmt, changesets, GitHub Actions, and an agent skill definition. Use when creating a new CLI tool, bootstrapping a TypeScript project, scaffolding a node CLI, starting a new npm package, or asking \"scaffold a CLI project.\"",
+            "enabled": true,
+            "name": "scaffold-cli",
+            "path": "/home/ecochran76/.agents/skills/scaffold-cli/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Scaffolds a production-ready Next.js turborepo with TypeScript, Tailwind CSS, the shadcn/ui CLI, Blode UI components from the ui.blode.co registry, blode-icons-react, Oxlint, Oxfmt, Ultracite, and Vercel deployment. Use when creating a new Next.js app, bootstrapping a turborepo, scaffolding a web project, starting a new website, or asking \"create a Next.js project.\"",
+            "enabled": true,
+            "name": "scaffold-nextjs",
+            "path": "/home/ecochran76/.agents/skills/scaffold-nextjs/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Route every Slack request through Slack Receipts by default. Use for checking Slack, unread or recent messages, searching conversations, resolving permalinks or threads, sending messages or replies, adding reactions, creating channels, exporting content, syncing data, and Slack runtime health. Select the most specific slack-receipts-* skill; do not open Slack in a browser unless Slack Receipts lacks the required capability and the user explicitly needs that unsupported UI-only operation.",
+            "enabled": true,
+            "name": "slack",
+            "path": "/home/ecochran76/.agents/skills/slack/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Create or reuse Slack channels through Slack Receipts MCP/API, including tenant routing, public/private selection, invitee resolution, and bot-vs-user auth mode. Use for requests like \"create a private channel on SoyLei called project-alpha and invite Baker and Michael\" or \"make a Slack channel for this from the app\".",
+            "enabled": true,
+            "name": "slack-receipts-channel-management",
+            "path": "/home/ecochran76/.agents/skills/slack-receipts-channel-management/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Export Slack Receipts conversations to HTML/JSON/PDF, including per-day channel exports, thread-aware formatting, attachment thumbnails/links, embedded PDF attachments, and semantic-hit daypack bundles. Use for requests like \"export day/channel to PDF\", \"combine days into one PDF\", and \"generate one-shot search-term daypack\".",
+            "enabled": true,
+            "name": "slack-receipts-export",
+            "path": "/home/ecochran76/.agents/skills/slack-receipts-export/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Hydrate/backfill Slack Receipts workspaces (messages, files, canvases), handle auth-mode/token mismatches, and recover from stalled ingest runs. Use for requests like \"hydrate second DB\", \"backfill files/canvases\", \"why did backfill stall\", or \"re-run safely in bounded mode\".",
+            "enabled": true,
+            "name": "slack-receipts-ingest",
+            "path": "/home/ecochran76/.agents/skills/slack-receipts-ingest/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Operate Slack Receipts in always-on mode (systemd/tmux), including single or multi-workspace service layout, webhook health, queue health, and indexing freshness verification. Use for requests like \"start live sync\", \"both workspaces active?\", \"status\", \"set up dual workspace services\".",
+            "enabled": true,
+            "name": "slack-receipts-live-ops",
+            "path": "/home/ecochran76/.agents/skills/slack-receipts-live-ops/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Default router for all Slack requests through Slack Receipts, including unread or recent messages, conversation search, permalinks and threads, sends and replies, reactions, channel management, export, ingest, and live operations. Use for any Slack request when a more specific slack-receipts-* skill has not already been selected; never start with browser Slack.",
+            "enabled": true,
+            "name": "slack-receipts-orchestrator",
+            "path": "/home/ecochran76/.agents/skills/slack-receipts-orchestrator/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Run and interpret Slack Receipts keyword/semantic/hybrid search with workspace/channel/date/person scoping, conversation discovery, context expansion, and relevance cross-checks. Use for requests like \"What did Baker say about amazon today?\", \"find X in workspace Y\", \"semantic search for terms\", \"search seems noisy\", and \"confirm indexing freshness via query behavior\".",
+            "enabled": true,
+            "name": "slack-receipts-search",
+            "path": "/home/ecochran76/.agents/skills/slack-receipts-search/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Send Slack messages, thread replies, or reaction status signals through Slack Receipts MCP/API outbound tools, including DM-style user targets, tenant/workspace routing, bot-vs-user auth mode, idempotency keys, and safe real-write preflight. Use for requests like \"Send Michael a note about this on the SoyLei tenant from my user account\", \"DM Eric from the app\", \"reply in this Slack thread\", or \"mark this approval reply as received with eyes\".",
+            "enabled": true,
+            "name": "slack-receipts-send",
+            "path": "/home/ecochran76/.agents/skills/slack-receipts-send/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Audits web typography for punctuation, font selection, sizing, spacing, OpenType features, hierarchy, layout, typeface pairing, brand identity, and display type. Use when writing CSS/HTML for text, selecting or pairing typefaces, reviewing typography in web designs, configuring font-feature-settings, building a type system, or auditing typographic quality. Triggers on tasks involving font-family, font-size, line-height, letter-spacing, @font-face, font pairing, or typographic correctness.",
+            "enabled": true,
+            "name": "typography-audit",
+            "path": "/home/ecochran76/.agents/skills/typography-audit/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Creates, reviews, and debugs UI motion and animation implementations. Covers springs, gestures, drag interactions, clip-path reveals, easing, timing, and animation review. Use when designing, implementing, or reviewing motion, CSS transitions, keyframes, framer-motion, spring animations, asking \"add animations to\", \"make this feel smooth\", \"review my animations\", \"should this animate\", or \"add a swipe gesture\"",
+            "enabled": true,
+            "name": "ui-animation",
+            "path": "/home/ecochran76/.agents/skills/ui-animation/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Audits web UI quality across accessibility, interaction, forms, typography, navigation, layout, performance, motion, and microcopy. Use when reviewing or refining frontend UI before merge or release, asking \"check my UI\", \"is this accessible\", \"polish this page\", or when the user asks for a UI, UX, or accessibility audit.",
+            "enabled": true,
+            "name": "ui-audit",
+            "path": "/home/ecochran76/.agents/skills/ui-audit/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Defines visual systems, colour palettes, typography scales, and layout patterns for web UI. Produces design tokens and component styling for product dashboards (SaaS/admin/data-heavy) or marketing/brand landing pages. Use when choosing visual direction, designing a landing page, building a hero section, selecting colour palettes and fonts, establishing layout patterns, starting a new UI design system, theming a web application, or asking \"make this look good\", \"make this look premium\", \"design the UI for\", \"full-bleed hero\", or \"pick a visual style\".",
+            "enabled": true,
+            "name": "ui-design",
+            "path": "/home/ecochran76/.agents/skills/ui-design/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements). Use this skill whenever the user wants to add page transitions, animate route changes, create shared element animations, animate enter/exit of components, animate list reorder, implement directional (forward/back) navigation animations, or integrate view transitions in Next.js. Also use when the user mentions view transitions, `startViewTransition`, `ViewTransition`, transition types, or asks about animating between UI states in React without third-party animation libraries.",
+            "enabled": true,
+            "name": "vercel-react-view-transitions",
+            "path": "/home/ecochran76/.agents/skills/vercel-react-view-transitions/SKILL.md",
+            "pluginId": null,
+            "scope": "user"
+          },
+          {
+            "description": "Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $imagegen to make or edit an image for this project.",
+              "displayName": "Image Gen",
+              "iconLarge": "/tmp/cw168-native-public-02/home/skills/.system/imagegen/assets/imagegen.png",
+              "iconLargeUrl": null,
+              "iconSmall": "/tmp/cw168-native-public-02/home/skills/.system/imagegen/assets/imagegen-small.svg",
+              "iconSmallUrl": null,
+              "shortDescription": "Generate or edit images for websites, games, and more"
+            },
+            "name": "imagegen",
+            "path": "/tmp/cw168-native-public-02/home/skills/.system/imagegen/SKILL.md",
+            "pluginId": null,
+            "scope": "system"
+          },
+          {
+            "description": "Use for Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, customization, automations, and self-knowledge\u2014including 'you,' 'your,' 'this app,' or 'this coding agent' when they refer to Codex\u2014and for OpenAI APIs/products and ChatGPT Work. Also use for model choice/migration, prompting, SDKs, Responses, Realtime, agents, evals, and Chat/Work/Codex comparisons. Do not use for generic app/software tasks that merely mention Codex.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use OpenAI Docs for official docs lookup, questions about Codex itself or Codex surfaces, model selection, model migration, and prompt-upgrade work.",
+              "displayName": "OpenAI Docs",
+              "iconLarge": "/tmp/cw168-native-public-02/home/skills/.system/openai-docs/assets/openai.png",
+              "iconLargeUrl": null,
+              "iconSmall": "/tmp/cw168-native-public-02/home/skills/.system/openai-docs/assets/openai-small.svg",
+              "iconSmallUrl": null,
+              "shortDescription": "OpenAI and Codex docs for models, skills, tasks, and setup"
+            },
+            "name": "openai-docs",
+            "path": "/tmp/cw168-native-public-02/home/skills/.system/openai-docs/SKILL.md",
+            "pluginId": null,
+            "scope": "system",
+            "shortDescription": "Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, and self-knowledge; OpenAI APIs and ChatGPT Work. 'You'/'this app' means Codex only."
+          },
+          {
+            "description": "Perform a read-only, defect-first review of a specified code change and return every actionable finding. Use when another agent delegates review of uncommitted changes, a base-branch diff, a commit, or custom review instructions.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": "Use $review-agent to review the requested code changes and return actionable findings.",
+              "displayName": "Review Agent",
+              "iconLarge": null,
+              "iconLargeUrl": null,
+              "iconSmall": null,
+              "iconSmallUrl": null,
+              "shortDescription": "Find actionable bugs in code changes"
+            },
+            "name": "review-agent",
+            "path": "/tmp/cw168-native-public-02/home/skills/.system/review-agent/SKILL.md",
+            "pluginId": null,
+            "scope": "system"
+          },
+          {
+            "description": "Create or update a Codex skill with appropriately scoped instructions and any needed supporting resources.",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Skill Creator",
+              "iconLarge": "/tmp/cw168-native-public-02/home/skills/.system/skill-creator/assets/skill-creator.png",
+              "iconLargeUrl": null,
+              "iconSmall": "/tmp/cw168-native-public-02/home/skills/.system/skill-creator/assets/skill-creator-small.svg",
+              "iconSmallUrl": null,
+              "shortDescription": "Create or update a skill"
+            },
+            "name": "skill-creator",
+            "path": "/tmp/cw168-native-public-02/home/skills/.system/skill-creator/SKILL.md",
+            "pluginId": null,
+            "scope": "system",
+            "shortDescription": "Create or update a skill"
+          },
+          {
+            "description": "Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).",
+            "enabled": true,
+            "interface": {
+              "brandColor": null,
+              "defaultPrompt": null,
+              "displayName": "Skill Installer",
+              "iconLarge": "/tmp/cw168-native-public-02/home/skills/.system/skill-installer/assets/skill-installer.png",
+              "iconLargeUrl": null,
+              "iconSmall": "/tmp/cw168-native-public-02/home/skills/.system/skill-installer/assets/skill-installer-small.svg",
+              "iconSmallUrl": null,
+              "shortDescription": "Install curated skills from openai/skills or other repos"
+            },
+            "name": "skill-installer",
+            "path": "/tmp/cw168-native-public-02/home/skills/.system/skill-installer/SKILL.md",
+            "pluginId": null,
+            "scope": "system",
+            "shortDescription": "Install curated skills from openai/skills or other repos"
+          }
+        ]
+      }
+    ]
+  },
+  "state": "passed",
+  "threads": [
+    "01a14c88-ea3d-7c21-9df9-e063f370e180",
+    "01a14c88-eb5f-7233-9328-71830948bd7b"
+  ],
+  "toy_processes": [
+    {
+      "pid": 26901,
+      "version": "v1"
+    },
+    {
+      "pid": 26968,
+      "version": "v1"
+    },
+    {
+      "pid": 27444,
+      "version": "v2"
+    },
+    {
+      "pid": 27447,
+      "version": "v2"
+    }
+  ],
+  "toy_v2_both": true,
+  "watcher_pid": 27244
+}

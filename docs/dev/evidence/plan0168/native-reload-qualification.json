@@ -1,0 +1,61 @@
+{
+  "codex": "0.163.0",
+  "attempts": 2,
+  "global_reload_refreshes_both_loaded_threads": true,
+  "resume_alone_refreshes": false,
+  "unsubscribe_status": "unsubscribed",
+  "unsubscribe_unloads_thread": false,
+  "unsubscribe_then_resume_refreshes": false,
+  "actual_tui_restart_not_repeated": true,
+  "fixtures": [
+    {
+      "artifact": "/tmp/cw168-reload-fixture/receipt.json",
+      "state": "passed",
+      "model_turns": 0,
+      "same_threads": true,
+      "goals_unchanged": true,
+      "fresh_owned_pid_existence": {
+        "1853": false,
+        "2202": false,
+        "2293": false,
+        "2421": false,
+        "2422": false
+      },
+      "cleanup": {
+        "denied_pids": [
+          646,
+          3798,
+          39727,
+          58695,
+          68403
+        ],
+        "private_home_processes": [],
+        "server_exit": 0
+      }
+    },
+    {
+      "artifact": "/tmp/cw168-unsubscribe-fixture/receipt.json",
+      "state": "passed",
+      "model_turns": 0,
+      "same_threads": true,
+      "goals_unchanged": true,
+      "fresh_owned_pid_existence": {
+        "7214": false,
+        "7389": false,
+        "7424": false
+      },
+      "cleanup": {
+        "denied_pids": [
+          646,
+          3798,
+          7576,
+          39727,
+          58695,
+          68403
+        ],
+        "private_home_processes": [],
+        "server_exit": 0
+      }
+    }
+  ]
+}

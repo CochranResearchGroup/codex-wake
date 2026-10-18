@@ -1,0 +1,14 @@
+======================================================================
+FAIL: test_peer_that_becomes_active_during_preflight_prevents_reload (test_shared_refresh.SharedRefreshTests.test_peer_that_becomes_active_during_preflight_prevents_reload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 50, in test_peer_that_becomes_active_during_preflight_prevents_reload
+    self.shared_scenario(racing_peer=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 135, in shared_scenario
+    self.assertNotIn('config/mcpServer/reload',requests)
+AssertionError: 'config/mcpServer/reload' unexpectedly found in ['initialize', 'initialized', 'thread/loaded/list', 'initialize', 'initialized', 'thread/read', 'initialize', 'initialized', 'thread/read', 'initialize', 'initialized', 'thread/loaded/list', 'initialize', 'initialized', 'thread/read', 'initialize', 'initialized', 'thread/read', 'initialize', 'initialized', 'thread/goal/get', 'initialize', 'initialized', 'thread/goal/get', 'initialize', 'initialized', 'config/mcpServer/reload']
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.744s
+
+FAILED (failures=1)

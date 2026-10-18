@@ -6,7 +6,7 @@ messages, turns and task status. Use native messaging directly for an immediate
 agent exchange; use Wake when a follow-up must survive the initiating turn or
 when you explicitly need a tracked exchange.
 
-When a user gives an existing Codex agent token/time limits, Codex Wake0.17.0
+When a user gives an existing Codex agent token/time limits, Codex Wake0.17.1
 provides MCP enrollment and an independent watcher: request checkpoint,
 then pause the current native goal and interrupt its exact active turn. Limits
 persist across replacement goals until an explicit user reset. Start with the
@@ -1102,3 +1102,9 @@ Netnod and PTB remain disabled pending scale qualification.
 Mailbox activation is an explicit operator schema migration, never a reset of
 an anomalous legacy checkpoint. See the [0.8.0 instructions](docs/dev/release-notes/0.8.0-network-time.md)
 for commands, compatibility, migration, rollback and acceptance limits.
+
+Same-conversation self-refresh can use an explicitly approved shared MCP profile.
+The MCP request is durable while the agent is active; an independent monitor
+waits for all loaded conversations to be observed idle, then reconnects MCP
+servers and verifies unchanged goal authority/counters plus selected resources.
+Queued is not completed. See the portable [refresh workflow](skills/codex-wake/references/lifecycle.md#shared-mcp-refresh).

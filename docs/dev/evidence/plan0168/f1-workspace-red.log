@@ -1,0 +1,14 @@
+======================================================================
+FAIL: test_source_workspace_mismatch_blocks_before_shared_reload (test_shared_refresh.SharedRefreshTests.test_source_workspace_mismatch_blocks_before_shared_reload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 62, in test_source_workspace_mismatch_blocks_before_shared_reload
+    self.shared_scenario(cwd_mismatch=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 166, in shared_scenario
+    self.assertEqual(code,5,receipt)
+AssertionError: 0 != 5 : {'boot_id': '25c7e692-175a-4375-ac75-306f6f00c3d5', 'busy_count': 0, 'checkpoint_sha256': '20de5321110bf3f90325978f4fcf89238642892d3baaee1d1ea7f9883f7701a6', 'deadline': 1893456000.0, 'expires_at': '2030-01-01T00:00:00Z', 'fingerprint': '67de425a9fb6bf56a9612e61c92b34665020bb5fa7efdc8b21a9323c384a36b0', 'goal_after': {'createdAt': 1, 'objective': 'Retain work', 'status': 'paused', 'threadId': '00000000-0000-7000-8000-000000000168', 'timeUsedSeconds': 20, 'tokenBudget': 100, 'tokensUsed': 40, 'updatedAt': 1}, 'goal_before': {'createdAt': 1, 'objective': 'Retain work', 'status': 'paused', 'threadId': '00000000-0000-7000-8000-000000000168', 'timeUsedSeconds': 20, 'tokenBudget': 100, 'tokensUsed': 40, 'updatedAt': 1}, 'goal_continuity_verified': True, 'intent_key': 'self-refresh', 'loaded_count': 2, 'profile_name': 'self', 'reason': None, 'refresh_scope': 'shared_server_mcp', 'reload_acknowledged': True, 'reload_attempted': True, 'resource_status': {'mcp': {'kind': 'mcp', 'state': 'ready'}, 'skill': {'kind': 'skill', 'state': 'ready'}}, 'resources': ['skill', 'mcp'], 'started_boottime': 342425.545493217, 'started_upper': 1792285197.5691493, 'state': 'completed', 'thread_id': '00000000-0000-7000-8000-000000000168'}
+
+----------------------------------------------------------------------
+Ran 9 tests in 8.266s
+
+FAILED (failures=1)

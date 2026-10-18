@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_active_self_request_waits_then_reloads_once_with_same_goals (test_shared_refresh.SharedRefreshTests.test_active_self_request_waits_then_reloads_once_with_same_goals)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 41, in test_active_self_request_waits_then_reloads_once_with_same_goals
+    self.shared_scenario()
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 145, in shared_scenario
+    if time.monotonic()>=deadline:self.fail(receipt)
+                                  ^^^^^^^^^^^^^^^^^^
+AssertionError: {'error': {'code': 'shared_refresh_unavailable', 'message': 'Private host policy and checkpoint prerequisites are unavailable.'}}
+
+----------------------------------------------------------------------
+Ran 1 test in 5.106s
+
+FAILED (failures=1)

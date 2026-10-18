@@ -1,0 +1,167 @@
+/home/ecochran76/workspace.local/codex-wake-self-refresh/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+======================================================================
+FAIL: test_actual_updated_mcp_behavior_establishes_requested_readiness (test_agent_refresh.AgentRefreshTests.test_actual_updated_mcp_behavior_establishes_requested_readiness)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 105, in test_actual_updated_mcp_behavior_establishes_requested_readiness
+    self.refresh_scenario(draft=False,mcp_ready=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 270, in refresh_scenario
+    with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 5 != 0 : {"fingerprint": "086663d41425e9726961f3207a136cf4b84bca04bca9150f4a525213cf76a96e", "goal_before": {"createdAt": 100, "objective": "Finish fixture", "status": "paused", "timeUsedSeconds": 12, "tokenBudget": 1000, "tokensUsed": 50, "updatedAt": 100}, "history": [{"effect": null, "reason": null, "state": "prepared"}, {"effect": "tmux/kill-pane", "reason": null, "state": "stopping"}, {"effect": null, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked"}], "intent": {"checkpoint": "/tmp/tmp9cj54r3g/checkpoint.json", "checkpoint_sha256": "071998cdbcb21a89479e3961bee35f624135dfd9f8e0264b41a8ca5cfbd37a72", "expires_at": "2030-01-01T00:00:00Z", "launch": {"app_server": "unix:///tmp/tmp9cj54r3g/native.sock", "codex_path": "/tmp/tmp9cj54r3g/codex", "cwd": "/tmp/tmp9cj54r3g", "resources": {"updated-skill": {"arguments": {}, "expected_content": [{"text": "new-version", "type": "text"}], "kind": "mcp", "read_only": true, "server": "fixture", "tool": "version"}}, "timeout": 1, "tmux_session": "owned"}, "operation": "refresh", "resources": ["updated-skill"], "source_thread_id": "00000000-0000-7000-8000-000000000158"}, "intent_key": "refresh-1", "old_attachment": {"client_pid": 18006, "client_start_time_ticks": 34208789, "evidence": "metadata_matched", "pane_current_path": "/tmp/tmp9cj54r3g", "pane_id": "%158", "pane_index": "0", "pane_title": "owned-worker", "pane_tty": "/dev/pts/2", "session_id": "$1", "session_name": "owned", "socket": "/tmp/tmux-1000/default", "window_id": "@158", "window_index": "1", "window_name": "worker"}, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked", "thread_id": "00000000-0000-7000-8000-000000000158", "thread_name": "owned-worker", "version": 1}
+
+
+======================================================================
+FAIL: test_configured_refresh_twice_charges_same_goal_once (test_agent_refresh.AgentRefreshTests.test_configured_refresh_twice_charges_same_goal_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 70, in test_configured_refresh_twice_charges_same_goal_once
+    self.refresh_scenario(draft=False, budget=True, twice=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 270, in refresh_scenario
+    with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 5 != 0 : {"assignment_deadline": 2000.0, "fingerprint": "d33793552e92a3692baf117f6bf84ef7d237e91d9584526dc27e612f7ad77239", "goal_before": {"createdAt": 100, "objective": "Finish fixture", "status": "paused", "threadId": "00000000-0000-7000-8000-000000000158", "timeUsedSeconds": 12, "tokenBudget": 1000, "tokensUsed": 50, "updatedAt": 100}, "history": [{"effect": null, "reason": null, "state": "prepared"}, {"effect": "tmux/kill-pane", "reason": null, "state": "stopping"}, {"effect": null, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked"}], "intent": {"checkpoint": "/tmp/tmpkvwpe1b6/checkpoint.json", "checkpoint_sha256": "071998cdbcb21a89479e3961bee35f624135dfd9f8e0264b41a8ca5cfbd37a72", "configuration": {"handoff_writer": {"instructions": "---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n", "name": "fixture", "path": "/tmp/tmpkvwpe1b6/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}, "max_correction_cycles": 1, "objective": "Finish fixture", "objective_deadline": "1970-01-01T01:06:40+00:00", "objective_time_limit_seconds": 4000, "objective_token_limit": 2000, "preflight_reviewer": {"instructions": "---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n", "name": "fixture", "path": "/tmp/tmpkvwpe1b6/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}, "profile": "worker", "revision": "dd8d86b7a1dae3871be1116d6a56e3faf5734f38a518533695c66fe64cfb0670", "session_time_limit_seconds": 2000, "session_token_limit": 1000, "source_thread_id": "00000000-0000-7000-8000-000000000158", "started_at": "1970-01-01T00:00:00Z"}, "continuation": {"approval": "operator fixture", "objective": "Finish fixture", "started_at": "1970-01-01T00:00:00Z", "tokens_before_source": 20}, "expires_at": "2030-01-01T00:00:00Z", "launch": {"app_server": "unix:///tmp/tmpkvwpe1b6/native.sock", "codex_path": "/tmp/tmpkvwpe1b6/codex", "cwd": "/tmp/tmpkvwpe1b6", "resources": {"updated-skill": {"description": "Updated fixture", "kind": "skill", "path": "/tmp/tmpkvwpe1b6/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}}, "timeout": 1, "tmux_session": "owned"}, "objective_ref": "00000000-0000-7000-8000-000000000158", "operation": "refresh", "resources": ["updated-skill"], "source_thread_id": "00000000-0000-7000-8000-000000000158"}, "intent_key": "refresh-1", "objective_budget": {"accounting_known": true, "actors": {"goal:00000000-0000-7000-8000-000000000158:100": {"known": true, "reservation": 0, "session_deadline": null, "settled": true, "terms": null, "tokens_remaining": 0, "used": 50}}, "authorization_history": [{"action": "initial", "approval": "operator fixture", "at": 1001, "configuration": {"handoff_writer": {"instructions": "---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n", "name": "fixture", "path": "/tmp/tmpkvwpe1b6/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}, "max_correction_cycles": 1, "objective": "Finish fixture", "objective_deadline": "1970-01-01T01:06:40+00:00", "objective_time_limit_seconds": 4000, "objective_token_limit": 2000, "preflight_reviewer": {"instructions": "---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n", "name": "fixture", "path": "/tmp/tmpkvwpe1b6/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}, "revision": "dd8d86b7a1dae3871be1116d6a56e3faf5734f38a518533695c66fe64cfb0670", "session_time_limit_seconds": 2000, "session_token_limit": 1000, "started_at": "1970-01-01T00:00:00Z"}}], "correction_cycles": 0, "exhausted": false, "goal_aliases": {}, "handoff_writer": {"instructions": "---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n", "name": "fixture", "path": "/tmp/tmpkvwpe1b6/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}, "max_correction_cycles": 1, "objective": "Finish fixture", "objective_deadline": "1970-01-01T01:06:40+00:00", "objective_id": "d33206e1be9f216e04e786389a166e313bf8760adb568b1c2e4ea419f6e73e49", "objective_time_limit_seconds": 4000, "objective_token_limit": 2000, "original_deadline": "1970-01-01T01:06:40+00:00", "preflight_reviewer": {"instructions": "---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n", "name": "fixture", "path": "/tmp/tmpkvwpe1b6/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}, "ready": true, "remaining_seconds": 2999.0, "remaining_tokens": 1930, "revision": "dd8d86b7a1dae3871be1116d6a56e3faf5734f38a518533695c66fe64cfb0670", "session_time_limit_seconds": 2000, "session_token_limit": 1000, "started_at": "1970-01-01T00:00:00Z", "state": "ready", "tokens_reserved": 0, "tokens_used": 70}, "old_attachment": {"client_pid": 18196, "client_start_time_ticks": 34208852, "evidence": "metadata_matched", "pane_current_path": "/tmp/tmpkvwpe1b6", "pane_id": "%158", "pane_index": "0", "pane_title": "owned-worker", "pane_tty": "/dev/pts/2", "session_id": "$1", "session_name": "owned", "socket": "/tmp/tmux-1000/default", "window_id": "@158", "window_index": "1", "window_name": "worker"}, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked", "thread_id": "00000000-0000-7000-8000-000000000158", "thread_name": "owned-worker", "version": 1}
+
+
+======================================================================
+FAIL: test_fixed_expiry_after_stop_prevents_replacement_without_reset (test_agent_refresh.AgentRefreshTests.test_fixed_expiry_after_stop_prevents_replacement_without_reset)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 88, in test_fixed_expiry_after_stop_prevents_replacement_without_reset
+    self.refresh_scenario(draft=False, expire_after_stop=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 286, in refresh_scenario
+    self.assertEqual(receipt['state'],'expired')
+AssertionError: 'blocked' != 'expired'
+- blocked
++ expired
+
+
+======================================================================
+FAIL: test_goal_budget_change_or_counter_reset_holds_without_mutating_goal (test_agent_refresh.AgentRefreshTests.test_goal_budget_change_or_counter_reset_holds_without_mutating_goal) (change='budget')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 102, in test_goal_budget_change_or_counter_reset_holds_without_mutating_goal
+    with self.subTest(change=change):self.refresh_scenario(draft=False,goal_change=change)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 299, in refresh_scenario
+    self.assertEqual(receipt['reason'],'goal_changed_during_refresh')
+AssertionError: 'tab has active/unknown work or pending wakes; explicit --force required' != 'goal_changed_during_refresh'
+- tab has active/unknown work or pending wakes; explicit --force required
++ goal_changed_during_refresh
+
+
+======================================================================
+FAIL: test_goal_budget_change_or_counter_reset_holds_without_mutating_goal (test_agent_refresh.AgentRefreshTests.test_goal_budget_change_or_counter_reset_holds_without_mutating_goal) (change='reset')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 102, in test_goal_budget_change_or_counter_reset_holds_without_mutating_goal
+    with self.subTest(change=change):self.refresh_scenario(draft=False,goal_change=change)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 299, in refresh_scenario
+    self.assertEqual(receipt['reason'],'goal_changed_during_refresh')
+AssertionError: 'tab has active/unknown work or pending wakes; explicit --force required' != 'goal_changed_during_refresh'
+- tab has active/unknown work or pending wakes; explicit --force required
++ goal_changed_during_refresh
+
+
+======================================================================
+FAIL: test_handoff_preserves_unsubmitted_source_draft (test_agent_refresh.AgentRefreshTests.test_handoff_preserves_unsubmitted_source_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 117, in test_handoff_preserves_unsubmitted_source_draft
+    self.refresh_scenario(draft=True,operation='handoff')
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 294, in refresh_scenario
+    self.assertEqual(receipt['reason'],'local_composer_not_proven_empty')
+AssertionError: 'pending_thread_work' != 'local_composer_not_proven_empty'
+- pending_thread_work
++ local_composer_not_proven_empty
+
+
+======================================================================
+FAIL: test_lost_new_tab_response_reconciles_existing_refresh_without_replacement (test_agent_refresh.AgentRefreshTests.test_lost_new_tab_response_reconciles_existing_refresh_without_replacement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 82, in test_lost_new_tab_response_reconciles_existing_refresh_without_replacement
+    self.refresh_scenario(draft=False, loss='new-window')
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 256, in refresh_scenario
+    self.assertEqual(held['state'],'uncertain')
+AssertionError: 'blocked' != 'uncertain'
+- blocked
++ uncertain
+
+
+======================================================================
+FAIL: test_lost_stop_response_observes_old_exit_without_stopping_twice (test_agent_refresh.AgentRefreshTests.test_lost_stop_response_observes_old_exit_without_stopping_twice)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 85, in test_lost_stop_response_observes_old_exit_without_stopping_twice
+    self.refresh_scenario(draft=False, loss='kill-pane')
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 256, in refresh_scenario
+    self.assertEqual(held['state'],'uncertain')
+AssertionError: 'blocked' != 'uncertain'
+- blocked
++ uncertain
+
+
+======================================================================
+FAIL: test_new_client_with_old_mcp_behavior_blocks_full_refresh (test_agent_refresh.AgentRefreshTests.test_new_client_with_old_mcp_behavior_blocks_full_refresh)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 79, in test_new_client_with_old_mcp_behavior_blocks_full_refresh
+    self.refresh_scenario(draft=False, stale_mcp=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 303, in refresh_scenario
+    self.assertNotEqual(client.pid,original_pid)
+AssertionError: 18661 == 18661
+
+======================================================================
+FAIL: test_refresh_preserves_native_goal_authority_with_monotonic_usage (test_agent_refresh.AgentRefreshTests.test_refresh_preserves_native_goal_authority_with_monotonic_usage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 94, in test_refresh_preserves_native_goal_authority_with_monotonic_usage
+    self.refresh_scenario(draft=False, advancing_usage=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 270, in refresh_scenario
+    with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 5 != 0 : {"fingerprint": "338879991c196785334f45dbd2a24d4da5b80be6c1ab7fb72e43ef12fdec1f49", "goal_before": {"createdAt": 100, "objective": "Finish fixture", "status": "paused", "timeUsedSeconds": 12, "tokenBudget": 1000, "tokensUsed": 50, "updatedAt": 100}, "history": [{"effect": null, "reason": null, "state": "prepared"}, {"effect": "tmux/kill-pane", "reason": null, "state": "stopping"}, {"effect": null, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked"}], "intent": {"checkpoint": "/tmp/tmpwyig9xwg/checkpoint.json", "checkpoint_sha256": "071998cdbcb21a89479e3961bee35f624135dfd9f8e0264b41a8ca5cfbd37a72", "expires_at": "2030-01-01T00:00:00Z", "launch": {"app_server": "unix:///tmp/tmpwyig9xwg/native.sock", "codex_path": "/tmp/tmpwyig9xwg/codex", "cwd": "/tmp/tmpwyig9xwg", "resources": {"updated-skill": {"description": "Updated fixture", "kind": "skill", "path": "/tmp/tmpwyig9xwg/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}}, "timeout": 1, "tmux_session": "owned"}, "operation": "refresh", "resources": ["updated-skill"], "source_thread_id": "00000000-0000-7000-8000-000000000158"}, "intent_key": "refresh-1", "old_attachment": {"client_pid": 18703, "client_start_time_ticks": 34209111, "evidence": "metadata_matched", "pane_current_path": "/tmp/tmpwyig9xwg", "pane_id": "%158", "pane_index": "0", "pane_title": "owned-worker", "pane_tty": "/dev/pts/2", "session_id": "$1", "session_name": "owned", "socket": "/tmp/tmux-1000/default", "window_id": "@158", "window_index": "1", "window_name": "worker"}, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked", "thread_id": "00000000-0000-7000-8000-000000000158", "thread_name": "owned-worker", "version": 1}
+
+
+======================================================================
+FAIL: test_refresh_resumes_same_thread_and_proves_changed_skill_catalog (test_agent_refresh.AgentRefreshTests.test_refresh_resumes_same_thread_and_proves_changed_skill_catalog)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 76, in test_refresh_resumes_same_thread_and_proves_changed_skill_catalog
+    self.refresh_scenario(draft=False)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 270, in refresh_scenario
+    with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 5 != 0 : {"fingerprint": "a038557bd248e32983455a8ab65d4266914dbbb4193406967809719ea1fd1196", "goal_before": {"createdAt": 100, "objective": "Finish fixture", "status": "paused", "timeUsedSeconds": 12, "tokenBudget": 1000, "tokensUsed": 50, "updatedAt": 100}, "history": [{"effect": null, "reason": null, "state": "prepared"}, {"effect": "tmux/kill-pane", "reason": null, "state": "stopping"}, {"effect": null, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked"}], "intent": {"checkpoint": "/tmp/tmpqep8nlh4/checkpoint.json", "checkpoint_sha256": "071998cdbcb21a89479e3961bee35f624135dfd9f8e0264b41a8ca5cfbd37a72", "expires_at": "2030-01-01T00:00:00Z", "launch": {"app_server": "unix:///tmp/tmpqep8nlh4/native.sock", "codex_path": "/tmp/tmpqep8nlh4/codex", "cwd": "/tmp/tmpqep8nlh4", "resources": {"updated-skill": {"description": "Updated fixture", "kind": "skill", "path": "/tmp/tmpqep8nlh4/skill.md", "sha256": "fae02fb42c8bbd1e72cf3d75e3459cb1f901cbf3736768992f1af8fd0be0160f"}}, "timeout": 1, "tmux_session": "owned"}, "operation": "refresh", "resources": ["updated-skill"], "source_thread_id": "00000000-0000-7000-8000-000000000158"}, "intent_key": "refresh-1", "old_attachment": {"client_pid": 18782, "client_start_time_ticks": 34209140, "evidence": "metadata_matched", "pane_current_path": "/tmp/tmpqep8nlh4", "pane_id": "%158", "pane_index": "0", "pane_title": "owned-worker", "pane_tty": "/dev/pts/2", "session_id": "$1", "session_name": "owned", "socket": "/tmp/tmux-1000/default", "window_id": "@158", "window_index": "1", "window_name": "worker"}, "reason": "tab has active/unknown work or pending wakes; explicit --force required", "state": "blocked", "thread_id": "00000000-0000-7000-8000-000000000158", "thread_name": "owned-worker", "version": 1}
+
+
+======================================================================
+FAIL: test_rollback_reattaches_after_proven_owned_tab_absence (test_agent_refresh.AgentRefreshTests.test_rollback_reattaches_after_proven_owned_tab_absence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 111, in test_rollback_reattaches_after_proven_owned_tab_absence
+    self.refresh_scenario(draft=False,loss='new-window',rollback_absence=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 256, in refresh_scenario
+    self.assertEqual(held['state'],'uncertain')
+AssertionError: 'blocked' != 'uncertain'
+- blocked
++ uncertain
+
+
+======================================================================
+FAIL: test_rollback_reuses_original_conversation_without_goal_or_client_duplication (test_agent_refresh.AgentRefreshTests.test_rollback_reuses_original_conversation_without_goal_or_client_duplication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 108, in test_rollback_reuses_original_conversation_without_goal_or_client_duplication
+    self.refresh_scenario(draft=False,stale_mcp=True,rollback_requested=True)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_agent_refresh.py", line 303, in refresh_scenario
+    self.assertNotEqual(client.pid,original_pid)
+AssertionError: 18846 == 18846
+
+----------------------------------------------------------------------
+Ran 24 tests in 8.991s
+
+FAILED (failures=13)

@@ -205,3 +205,16 @@ as a new host allocation generation can do that. Native controls preserve shared
 servers and do not promise arbitrary tool-process termination or exact token
 ceilings. Installation must sync the whole skill directory and refresh clients;
 a wheel install alone does not update the agent skill catalog.
+
+## Operational self-refresh (0.17.1)
+
+`wake_sessions_configuration` exposes a host-approved `shared_mcp_idle` profile's
+scope/version/resources without allocating an objective. `wake_sessions_refresh`
+then queues a checkpoint-bound, fixed-expiry request. An independent
+`sessions refresh-watch` process waits for all loaded conversations to be observed
+idle, records the reload intent, reconnects shared MCP servers once and verifies
+all native goals/counters plus selected real skill/MCP behavior. A queued result
+is not completion. The native API has no atomic idle CAS or thread-only reload.
+Shared scope requires host approval; legacy client replacement remains available.
+Use host `--lifecycle-root` to preserve other tools' roots. See the portable
+[shared refresh setup](../skills/codex-wake/references/lifecycle.md#shared-mcp-refresh).

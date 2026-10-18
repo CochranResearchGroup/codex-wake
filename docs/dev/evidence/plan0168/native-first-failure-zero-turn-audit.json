@@ -1,0 +1,10 @@
+{
+  "before_native_turns": {
+    "01a14c87-7799-71a2-91e6-a8b1663b92f8": 0,
+    "01a14c87-7918-76a0-b81e-0b191408a977": 0
+  },
+  "raw_task_started": 0,
+  "raw_task_complete": 0,
+  "raw_token_count": 0,
+  "provider_warmup_401_attempt_observed": true
+}

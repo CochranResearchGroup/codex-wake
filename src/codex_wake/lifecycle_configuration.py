@@ -62,6 +62,12 @@ def configuration_command(args, root):
     from .sessions_cli import emit
     try:
         config = json.loads(Path(args.profiles).read_text())
+        if config.get('profiles', {}).get(args.profile, {}).get('refresh_mode') == 'shared_mcp_idle':
+            from .shared_refresh import configuration
+            if args.apply_budget_authorization:
+                raise WakeError('shared refresh never authorizes a budget reset or extension')
+            emit(configuration(config, args.profile, args.thread_id, args.caller_thread_id), args.as_json)
+            return 0
         effective = effective_configuration(config, args.thread_id, args.profile, args.caller_thread_id)
         from .lifecycle_budget import objective_identity, trusted_upper
         from .objective_ledger import ObjectiveLedger

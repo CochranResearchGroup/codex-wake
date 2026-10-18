@@ -1265,3 +1265,11 @@ and accounting acceptance passed; final CI1,351tests on both Python versions.
 Host history-index blocker F2 resolved. Production controller heartbeat is fresh,
 no goal enrolled/reset; existing clients need MCP refresh. Native stop scope is
 the registered session only. Strict bootstrap remains separately operator-owned.
+
+## P168 | Operational self-refresh
+
+State: OPEN. Owner: primary / ecochran76. Work item #282,
+[Plan0168](docs/dev/plans/0168-2026-10-18-self-refresh-operational.md).
+Repair the gap between shipped refresh discovery and actual host/client readiness.
+Native resource reload, idle self-call deferral and exact caller scope are
+qualification gates. No counter reset or shared-server restart.

@@ -58,7 +58,8 @@ class LifecycleMCPTests(unittest.IsolatedAsyncioTestCase):
                 'print(json.dumps({"argv":sys.argv[1:]}))\n')
             cli.chmod(0o700)
             args = ['-m','codex_wake.mcp_server','--cli',str(cli),
-                '--lifecycle-profiles',str(root/'host.json'),'--wake-root',str(root/'journal')]
+                '--lifecycle-profiles',str(root/'host.json'),'--lifecycle-root',str(root/'journal'),
+                '--wake-root',str(root/'legacy')]
             parameters = StdioServerParameters(command=sys.executable,args=args,
                 env=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[1]/'src')))
             async with Client(parameters,mode='legacy') as client:
@@ -80,6 +81,11 @@ class LifecycleMCPTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn('--app-server',command)
                 self.assertEqual(command.count('--resource'),2)
                 self.assertIn('--caller-thread-id',command)
+
+                legacy=await client.call_tool('wake_sessions_target',dict(selector='tab 18',caller_thread_id=body['caller_thread_id']))
+                self.assertFalse(legacy.is_error)
+                legacy_command=json.loads(legacy.content[0].text)['argv']
+                self.assertEqual(legacy_command[:2],['--wake-root',str(root/'legacy')])
 
     async def test_handoff_exposes_checkpoint_and_mode_without_peer_budget_or_probe_overrides(self):
         with tempfile.TemporaryDirectory() as tmp:

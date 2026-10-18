@@ -1,0 +1,66 @@
+{
+  "state": "passed_second_attempt",
+  "attempts": 2,
+  "candidate_prefix": "/tmp/cw168-installed",
+  "candidate_source": "944572f",
+  "first_failure": {
+    "receipt": "/tmp/cw168-native-public-01/receipt.json",
+    "reason": "fixture codex_home field rejected; empty CLI stdout became invalid_cli_response",
+    "provider_boundary": "background responses websocket warmup attempted external endpoint and received401; not a model turn",
+    "zero_turn_audit": "/tmp/cw168-native-public-01/zero-turn-audit.json"
+  },
+  "public_surface": "native mcpServer/tool/call -> wake_sessions_refresh",
+  "initial_state": "queued",
+  "final_state": "completed",
+  "separate_watcher": "sessions refresh-watch",
+  "loaded_count": 2,
+  "fixed_deadline_preserved": true,
+  "reload_acknowledged": true,
+  "both_catalogs_v2": true,
+  "both_behaviors_v2": true,
+  "skills_proof": "ready",
+  "same_threads": true,
+  "goals_unchanged": true,
+  "model_turns": 0,
+  "provider_scope": "private no-auth provider configured solely127.0.0.1:1; websocket support disabled; no external provider error observed",
+  "toy_generations": [
+    {
+      "pid": 26901,
+      "version": "v1"
+    },
+    {
+      "pid": 26968,
+      "version": "v1"
+    },
+    {
+      "pid": 27444,
+      "version": "v2"
+    },
+    {
+      "pid": 27447,
+      "version": "v2"
+    }
+  ],
+  "cleanup": {
+    "denied_environment_pids": [
+      646,
+      3798,
+      27169,
+      39727,
+      58695,
+      68403
+    ],
+    "private_home_processes": [],
+    "server_exit": 0,
+    "watcher_exit": 0
+  },
+  "fresh_owned_pid_existence": {
+    "26550": false,
+    "27244": false,
+    "26901": false,
+    "26968": false,
+    "27444": false,
+    "27447": false
+  },
+  "elapsed_seconds": 3.8821388370124623
+}

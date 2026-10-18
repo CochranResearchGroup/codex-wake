@@ -1,0 +1,19 @@
+connection handler failed
+Traceback (most recent call last):
+  File "/tmp/cw167-tools/lib/python3.12/site-packages/websockets/sync/server.py", line 781, in sock_handler
+    handler(connection)
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 102, in serve
+    ws.send(json.dumps(dict(id=r['id'],result=result)))
+  File "/tmp/cw167-tools/lib/python3.12/site-packages/websockets/sync/connection.py", line 477, in send
+    with self.send_context():
+         ^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "/tmp/cw167-tools/lib/python3.12/site-packages/websockets/sync/connection.py", line 1068, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error); then sent 1011 (internal error)
+----------------------------------------------------------------------
+Ran 7 tests in 5.452s
+
+OK

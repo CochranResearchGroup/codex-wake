@@ -1,0 +1,24 @@
+======================================================================
+ERROR: test_missing_independent_monitor_returns_a_structured_setup_refusal (test_shared_refresh.SharedRefreshTests.test_missing_independent_monitor_returns_a_structured_setup_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 208, in test_missing_independent_monitor_returns_a_structured_setup_refusal
+    code=run(['--wake-root',tmp,'sessions','refresh','--profiles',str(policy),
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/src/codex_wake/cli.py", line 2778, in run
+    return refresh_command(args, root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/src/codex_wake/wake_control.py", line 126, in guarded
+    return function(args, root)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/src/codex_wake/agent_refresh.py", line 34, in refresh_command
+    return command(args, root, config, profile, checkpoint, content)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/src/codex_wake/shared_refresh.py", line 111, in command
+    raise WakeError('independent sessions refresh-watch controller required')
+codex_wake.records.WakeError: independent sessions refresh-watch controller required
+
+----------------------------------------------------------------------
+Ran 10 tests in 7.927s
+
+FAILED (errors=1)

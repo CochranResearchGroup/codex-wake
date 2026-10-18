@@ -1,0 +1,696 @@
+{
+  "after_reload": {
+    "01a14c71-4263-7092-9ab2-5b5a79c25f51": {
+      "call": {
+        "content": [
+          {
+            "text": "v1:7389",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "goal": {
+        "createdAt": 1792283853,
+        "objective": "Owned zero-turn MCP reload fixture",
+        "status": "paused",
+        "threadId": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792283853
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792283853,
+        "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-unsubscribe-fixture/work"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+        "model": "gpt-5.4",
+        "modelProvider": "openai",
+        "name": null,
+        "originator": "owned-reload-probe",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-unsubscribe-fixture/home/sessions/2026/10/17/rollout-2026-10-17T19-37-33-01a14c71-4263-7092-9ab2-5b5a79c25f51.jsonl",
+        "preview": "Owned zero-turn MCP reload fixture",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792283853,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792283853
+      },
+      "status": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "fixture-toy",
+              "title": null,
+              "version": "v1",
+              "websiteUrl": null
+            },
+            "tools": {
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v1",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      }
+    },
+    "01a14c71-435e-7922-a605-f8d94060b9a5": {
+      "call": {
+        "content": [
+          {
+            "text": "v1:7424",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "goal": {
+        "createdAt": 1792283854,
+        "objective": "Owned zero-turn MCP reload fixture",
+        "status": "paused",
+        "threadId": "01a14c71-435e-7922-a605-f8d94060b9a5",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792283854
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792283853,
+        "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-unsubscribe-fixture/work"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c71-435e-7922-a605-f8d94060b9a5",
+        "model": "gpt-5.4",
+        "modelProvider": "openai",
+        "name": null,
+        "originator": "owned-reload-probe",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-unsubscribe-fixture/home/sessions/2026/10/17/rollout-2026-10-17T19-37-33-01a14c71-435e-7922-a605-f8d94060b9a5.jsonl",
+        "preview": "Owned zero-turn MCP reload fixture",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792283853,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c71-435e-7922-a605-f8d94060b9a5",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792283854
+      },
+      "status": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "fixture-toy",
+              "title": null,
+              "version": "v1",
+              "websiteUrl": null
+            },
+            "tools": {
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v1",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      }
+    }
+  },
+  "cleanup": {
+    "denied_pids": [
+      646,
+      3798,
+      7576,
+      39727,
+      58695,
+      68403
+    ],
+    "private_home_processes": [],
+    "server_exit": 0
+  },
+  "codex": "/home/ecochran76/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/bin/codex",
+  "endpoint": "unix:///tmp/codex-daemon-1000/5da0d7fcaf5afd37167d5a94077afe6f0694922dbf99bf8179378eb3b6e1c343",
+  "goals_unchanged": true,
+  "loaded_after_unsubscribe": {
+    "data": [
+      "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+      "01a14c71-435e-7922-a605-f8d94060b9a5"
+    ],
+    "nextCursor": null
+  },
+  "loaded_before_unsubscribe": {
+    "data": [
+      "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+      "01a14c71-435e-7922-a605-f8d94060b9a5"
+    ],
+    "nextCursor": null
+  },
+  "model_turn_limit": 0,
+  "model_turns": 0,
+  "resume": {
+    "01a14c71-4263-7092-9ab2-5b5a79c25f51": {
+      "snapshot": {
+        "call": {
+          "content": [
+            {
+              "text": "v1:7389",
+              "type": "text"
+            }
+          ],
+          "isError": false
+        },
+        "goal": {
+          "createdAt": 1792283853,
+          "objective": "Owned zero-turn MCP reload fixture",
+          "status": "paused",
+          "threadId": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+          "timeUsedSeconds": 0,
+          "tokenBudget": 1000,
+          "tokensUsed": 0,
+          "updatedAt": 1792283853
+        },
+        "native": {
+          "agentNickname": null,
+          "agentRole": null,
+          "canAcceptDirectInput": true,
+          "cliVersion": "0.163.0",
+          "createdAt": 1792283853,
+          "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+          "daybreakEnabled": null,
+          "environments": [
+            {
+              "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+              "environmentId": "local",
+              "runtimeWorkspaceRoots": [
+                "/tmp/cw168-unsubscribe-fixture/work"
+              ]
+            }
+          ],
+          "ephemeral": false,
+          "extra": null,
+          "forkedFromId": null,
+          "gitInfo": null,
+          "historyMode": "paginated",
+          "id": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+          "model": "gpt-5.4",
+          "modelProvider": "openai",
+          "name": null,
+          "originator": "owned-reload-probe",
+          "parentThreadId": null,
+          "path": "/tmp/cw168-unsubscribe-fixture/home/sessions/2026/10/17/rollout-2026-10-17T19-37-33-01a14c71-4263-7092-9ab2-5b5a79c25f51.jsonl",
+          "preview": "Owned zero-turn MCP reload fixture",
+          "projectId": null,
+          "reasoningEffort": null,
+          "recencyAt": 1792283853,
+          "section": null,
+          "sectionEnteredAt": null,
+          "sessionId": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+          "source": "vscode",
+          "status": {
+            "type": "idle"
+          },
+          "threadSource": null,
+          "turns": [],
+          "updatedAt": 1792283853
+        },
+        "status": {
+          "data": [
+            {
+              "authStatus": "unsupported",
+              "httpOrigin": null,
+              "name": "toy",
+              "pluginId": null,
+              "resourceTemplates": [],
+              "resources": [],
+              "runtimeStatus": "connected",
+              "serverCapabilities": {
+                "tools": {}
+              },
+              "serverInfo": {
+                "description": null,
+                "icons": null,
+                "name": "fixture-toy",
+                "title": null,
+                "version": "v1",
+                "websiteUrl": null
+              },
+              "tools": {
+                "version": {
+                  "annotations": {
+                    "readOnlyHint": true
+                  },
+                  "description": "version v1",
+                  "inputSchema": {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  "name": "version"
+                }
+              },
+              "toolsError": null
+            }
+          ],
+          "nextCursor": null
+        }
+      },
+      "thread_id": "01a14c71-4263-7092-9ab2-5b5a79c25f51"
+    },
+    "01a14c71-435e-7922-a605-f8d94060b9a5": {
+      "snapshot": {
+        "call": {
+          "content": [
+            {
+              "text": "v1:7424",
+              "type": "text"
+            }
+          ],
+          "isError": false
+        },
+        "goal": {
+          "createdAt": 1792283854,
+          "objective": "Owned zero-turn MCP reload fixture",
+          "status": "paused",
+          "threadId": "01a14c71-435e-7922-a605-f8d94060b9a5",
+          "timeUsedSeconds": 0,
+          "tokenBudget": 1000,
+          "tokensUsed": 0,
+          "updatedAt": 1792283854
+        },
+        "native": {
+          "agentNickname": null,
+          "agentRole": null,
+          "canAcceptDirectInput": true,
+          "cliVersion": "0.163.0",
+          "createdAt": 1792283853,
+          "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+          "daybreakEnabled": null,
+          "environments": [
+            {
+              "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+              "environmentId": "local",
+              "runtimeWorkspaceRoots": [
+                "/tmp/cw168-unsubscribe-fixture/work"
+              ]
+            }
+          ],
+          "ephemeral": false,
+          "extra": null,
+          "forkedFromId": null,
+          "gitInfo": null,
+          "historyMode": "paginated",
+          "id": "01a14c71-435e-7922-a605-f8d94060b9a5",
+          "model": "gpt-5.4",
+          "modelProvider": "openai",
+          "name": null,
+          "originator": "owned-reload-probe",
+          "parentThreadId": null,
+          "path": "/tmp/cw168-unsubscribe-fixture/home/sessions/2026/10/17/rollout-2026-10-17T19-37-33-01a14c71-435e-7922-a605-f8d94060b9a5.jsonl",
+          "preview": "Owned zero-turn MCP reload fixture",
+          "projectId": null,
+          "reasoningEffort": null,
+          "recencyAt": 1792283853,
+          "section": null,
+          "sectionEnteredAt": null,
+          "sessionId": "01a14c71-435e-7922-a605-f8d94060b9a5",
+          "source": "vscode",
+          "status": {
+            "type": "idle"
+          },
+          "threadSource": null,
+          "turns": [],
+          "updatedAt": 1792283854
+        },
+        "status": {
+          "data": [
+            {
+              "authStatus": "unsupported",
+              "httpOrigin": null,
+              "name": "toy",
+              "pluginId": null,
+              "resourceTemplates": [],
+              "resources": [],
+              "runtimeStatus": "connected",
+              "serverCapabilities": {
+                "tools": {}
+              },
+              "serverInfo": {
+                "description": null,
+                "icons": null,
+                "name": "fixture-toy",
+                "title": null,
+                "version": "v1",
+                "websiteUrl": null
+              },
+              "tools": {
+                "version": {
+                  "annotations": {
+                    "readOnlyHint": true
+                  },
+                  "description": "version v1",
+                  "inputSchema": {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  "name": "version"
+                }
+              },
+              "toolsError": null
+            }
+          ],
+          "nextCursor": null
+        }
+      },
+      "thread_id": "01a14c71-435e-7922-a605-f8d94060b9a5"
+    }
+  },
+  "resumed_thread_id": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+  "same_threads": true,
+  "server_pid": 7214,
+  "state": "passed",
+  "threads": [
+    "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+    "01a14c71-435e-7922-a605-f8d94060b9a5"
+  ],
+  "toy_processes": [
+    {
+      "pid": 7389,
+      "version": "v1"
+    },
+    {
+      "pid": 7424,
+      "version": "v1"
+    }
+  ],
+  "unsubscribe_response": {
+    "status": "unsubscribed"
+  },
+  "v1": {
+    "01a14c71-4263-7092-9ab2-5b5a79c25f51": {
+      "call": {
+        "content": [
+          {
+            "text": "v1:7389",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "goal": {
+        "createdAt": 1792283853,
+        "objective": "Owned zero-turn MCP reload fixture",
+        "status": "paused",
+        "threadId": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792283853
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792283853,
+        "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-unsubscribe-fixture/work"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+        "model": "gpt-5.4",
+        "modelProvider": "openai",
+        "name": null,
+        "originator": "owned-reload-probe",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-unsubscribe-fixture/home/sessions/2026/10/17/rollout-2026-10-17T19-37-33-01a14c71-4263-7092-9ab2-5b5a79c25f51.jsonl",
+        "preview": "Owned zero-turn MCP reload fixture",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792283853,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c71-4263-7092-9ab2-5b5a79c25f51",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792283853
+      },
+      "status": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "fixture-toy",
+              "title": null,
+              "version": "v1",
+              "websiteUrl": null
+            },
+            "tools": {
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v1",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      }
+    },
+    "01a14c71-435e-7922-a605-f8d94060b9a5": {
+      "call": {
+        "content": [
+          {
+            "text": "v1:7424",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      },
+      "goal": {
+        "createdAt": 1792283854,
+        "objective": "Owned zero-turn MCP reload fixture",
+        "status": "paused",
+        "threadId": "01a14c71-435e-7922-a605-f8d94060b9a5",
+        "timeUsedSeconds": 0,
+        "tokenBudget": 1000,
+        "tokensUsed": 0,
+        "updatedAt": 1792283854
+      },
+      "native": {
+        "agentNickname": null,
+        "agentRole": null,
+        "canAcceptDirectInput": true,
+        "cliVersion": "0.163.0",
+        "createdAt": 1792283853,
+        "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+        "daybreakEnabled": null,
+        "environments": [
+          {
+            "cwd": "/tmp/cw168-unsubscribe-fixture/work",
+            "environmentId": "local",
+            "runtimeWorkspaceRoots": [
+              "/tmp/cw168-unsubscribe-fixture/work"
+            ]
+          }
+        ],
+        "ephemeral": false,
+        "extra": null,
+        "forkedFromId": null,
+        "gitInfo": null,
+        "historyMode": "paginated",
+        "id": "01a14c71-435e-7922-a605-f8d94060b9a5",
+        "model": "gpt-5.4",
+        "modelProvider": "openai",
+        "name": null,
+        "originator": "owned-reload-probe",
+        "parentThreadId": null,
+        "path": "/tmp/cw168-unsubscribe-fixture/home/sessions/2026/10/17/rollout-2026-10-17T19-37-33-01a14c71-435e-7922-a605-f8d94060b9a5.jsonl",
+        "preview": "Owned zero-turn MCP reload fixture",
+        "projectId": null,
+        "reasoningEffort": null,
+        "recencyAt": 1792283853,
+        "section": null,
+        "sectionEnteredAt": null,
+        "sessionId": "01a14c71-435e-7922-a605-f8d94060b9a5",
+        "source": "vscode",
+        "status": {
+          "type": "idle"
+        },
+        "threadSource": null,
+        "turns": [],
+        "updatedAt": 1792283854
+      },
+      "status": {
+        "data": [
+          {
+            "authStatus": "unsupported",
+            "httpOrigin": null,
+            "name": "toy",
+            "pluginId": null,
+            "resourceTemplates": [],
+            "resources": [],
+            "runtimeStatus": "connected",
+            "serverCapabilities": {
+              "tools": {}
+            },
+            "serverInfo": {
+              "description": null,
+              "icons": null,
+              "name": "fixture-toy",
+              "title": null,
+              "version": "v1",
+              "websiteUrl": null
+            },
+            "tools": {
+              "version": {
+                "annotations": {
+                  "readOnlyHint": true
+                },
+                "description": "version v1",
+                "inputSchema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object"
+                },
+                "name": "version"
+              }
+            },
+            "toolsError": null
+          }
+        ],
+        "nextCursor": null
+      }
+    }
+  }
+}

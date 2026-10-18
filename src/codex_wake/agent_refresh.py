@@ -29,6 +29,18 @@ def refresh_command(args, root):
         raise WakeError('approved profile and workspace checkpoint are required') from None
     if hashlib.sha256(content).hexdigest() != args.checkpoint_sha256:
         raise WakeError('checkpoint hash changed; original checkpoint must be preserved')
+    if profile.get('refresh_mode') == 'shared_mcp_idle':
+        from .shared_refresh import command
+        from .sessions_cli import emit
+        try:
+            return command(args, root, config, profile, checkpoint, content)
+        except WakeError as exc:
+            emit({'error': {'code': 'shared_refresh_unavailable', 'message': str(exc)}}, args.as_json)
+            return 2
+        except (OSError, ValueError, TypeError, KeyError):
+            emit({'error': {'code': 'shared_refresh_unavailable',
+                           'message': 'Private host policy and checkpoint prerequisites are unavailable.'}}, args.as_json)
+            return 2
     resources = profile.get('resources', {})
     if not resources or any(name not in resources for name in args.resource):
         raise WakeError('requested resources require host-approved proof checks')

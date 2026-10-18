@@ -1,0 +1,7 @@
+{
+  "tools": 25,
+  "new_goal_tools_present": false,
+  "self_refresh_present": true,
+  "source": "read-only native mcpServerStatus/list filtered to current thread and codex-wake",
+  "native_mutations": 0
+}

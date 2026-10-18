@@ -46,6 +46,8 @@ def add_sessions_parser(subparsers):
     spawn.add_argument('--caller-thread-id')
     spawn.add_argument('--objective-ref', help='operator-selected objective registry key; agents inherit their own caller objective')
     spawn.add_argument('--json', dest='as_json', action='store_true')
+    refresh_watch = commands.add_parser('refresh-watch', help='independently monitor approved shared MCP refresh intents')
+    refresh_watch.add_argument('--interval', type=float, default=1)
     refresh = commands.add_parser('refresh', help='refresh selected resources in the exact owned thread')
     for option in ('profiles', 'profile', 'intent', 'thread-id', 'checkpoint',
                    'checkpoint-sha256', 'expires-at'):
