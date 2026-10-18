@@ -1,0 +1,18 @@
+{
+  "artifact_path": "/home/ecochran76/workspace.local/codex-wake-refresh-timeout/docs/dev/evidence/plan0168/terminal-memory-disposition.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": null,
+  "reason": "Qualified terminal reconciliation and timeout regression retained in Plan0168; no reviewed Codex Wake Graphiti cloud route available.",
+  "recorded_at": "2026-10-18T02:05:29.747192+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "/home/ecochran76/workspace.local/codex-wake-refresh-timeout/docs/dev/evidence/plan0168/production-terminal-readback.json",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}

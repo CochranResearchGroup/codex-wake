@@ -40,6 +40,9 @@ class SharedRefreshTests(unittest.TestCase):
     def test_active_self_request_waits_then_reloads_once_with_same_goals(self):
         self.shared_scenario()
 
+    def test_native_observation_timeout_preserves_queued_intent_until_its_deadline(self):
+        self.shared_scenario(observation_timeout=True)
+
     def test_lost_reload_response_is_verified_without_replaying_the_reload(self):
         self.shared_scenario(lost_reload=True)
 
@@ -63,7 +66,7 @@ class SharedRefreshTests(unittest.TestCase):
 
     def shared_scenario(self, lost_reload=False, peer_busy=False, racing_peer=False,
                         stale_mcp=False, reset_counter=False, stop_during_preflight=False,
-                        cwd_mismatch=False):
+                        cwd_mismatch=False, observation_timeout=False):
         import hashlib
         import subprocess
         import sys
@@ -91,8 +94,12 @@ class SharedRefreshTests(unittest.TestCase):
                     if 'id' not in r:continue
                     if method=='initialize':result={}
                     elif method=='thread/loaded/list':result=dict(data=[THREAD,peer],nextCursor=None)
-                    elif method=='thread/read':result=dict(thread=dict(id=params['threadId'],cwd='/' if cwd_mismatch and params['threadId']==THREAD else tmp,
-                        status=dict(type='active' if native['active' if params['threadId']==THREAD else 'peer_active'] else 'idle',activeFlags=[])))
+                    elif method=='thread/read':
+                        if observation_timeout and not native.get('timeout_observed'):
+                            native['timeout_observed']=True
+                            time.sleep(1.2)  # Exceed the1s RPC cap, well before the2030 intent deadline.
+                        result=dict(thread=dict(id=params['threadId'],cwd='/' if cwd_mismatch and params['threadId']==THREAD else tmp,
+                            status=dict(type='active' if native['active' if params['threadId']==THREAD else 'peer_active'] else 'idle',activeFlags=[])))
                     elif method=='thread/goal/get':
                         if stop_during_preflight and not native.get('stop_sent'):
                             native['stop_sent']=True;watcher.terminate()
@@ -181,6 +188,7 @@ class SharedRefreshTests(unittest.TestCase):
                     return
                 self.assertEqual(code,0,receipt)
                 self.assertEqual(receipt['state'],'completed')
+                self.assertEqual(receipt['expires_at'],expiry)
                 self.assertEqual(receipt['refresh_scope'],'shared_server_mcp')
                 self.assertEqual(requests.count('config/mcpServer/reload'),1)
                 self.assertEqual(receipt['goal_before'],goal)

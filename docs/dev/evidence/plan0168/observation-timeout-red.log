@@ -1,0 +1,16 @@
+test_native_observation_timeout_preserves_queued_intent_until_its_deadline (test_shared_refresh.SharedRefreshTests.test_native_observation_timeout_preserves_queued_intent_until_its_deadline) ... FAIL
+
+======================================================================
+FAIL: test_native_observation_timeout_preserves_queued_intent_until_its_deadline (test_shared_refresh.SharedRefreshTests.test_native_observation_timeout_preserves_queued_intent_until_its_deadline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-refresh-timeout/tests/test_shared_refresh.py", line 44, in test_native_observation_timeout_preserves_queued_intent_until_its_deadline
+    self.shared_scenario(observation_timeout=True)
+  File "/home/ecochran76/workspace.local/codex-wake-refresh-timeout/tests/test_shared_refresh.py", line 189, in shared_scenario
+    self.assertEqual(code,0,receipt)
+AssertionError: 5 != 0 : {'boot_id': '25c7e692-175a-4375-ac75-306f6f00c3d5', 'checkpoint_sha256': '20de5321110bf3f90325978f4fcf89238642892d3baaee1d1ea7f9883f7701a6', 'deadline': 1893456000.0, 'expires_at': '2030-01-01T00:00:00Z', 'fingerprint': '86de339ed5d30c5ccf86177100f65a5b3abd8b4221e58dd2dffd249196c826a7', 'intent_key': 'self-refresh', 'profile_name': 'self', 'reason': 'expiry_reached', 'refresh_scope': 'shared_server_mcp', 'resources': ['skill', 'mcp'], 'started_boottime': 346684.717296313, 'started_upper': 1792289069.2520244, 'state': 'expired', 'thread_id': '00000000-0000-7000-8000-000000000168'}
+
+----------------------------------------------------------------------
+Ran 1 test in 1.728s
+
+FAILED (failures=1)

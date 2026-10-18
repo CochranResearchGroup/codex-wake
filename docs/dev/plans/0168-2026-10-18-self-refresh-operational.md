@@ -5,11 +5,15 @@ Branch: fix/self-refresh-operational. Base: 27330f6. Target: origin/main.
 
 ## Current State
 
-v0.17.1 is released/installed from exact main2e3e931. Host profile and independent
-monitor are active. Production refresh is QUEUED waiting for all62loaded
-conversations to be idle; no reload attempted. A persistent terminal-file wake
-and bounded marker helper will return to this conversation for reconciliation.
-Plan/issue remain OPEN until completed actual production proof.
+v0.17.1 is released/installed from exact main2e3e931. The production intent is
+terminal EXPIRED without a reload. Wake reconciliation at02:03:47Z found its
+02:19:21Z deadline still in the future; independent monotonic check at02:04:04Z
+showed649.8seconds remaining. A public regression confirms an RPC timeout is
+incorrectly classified as intent expiry. Minimal correction for v0.17.2 keeps
+observation failures recoverable until the original deadline. Old receipt is
+preserved, never revived/requeued. Plan/issue remain OPEN for actual production
+proof; a new attempt requires explicit new expiry authority and an idle window.
+Branch: fix/shared-refresh-rpc-timeout; base979f61f.
 
 ## Original diagnostic baseline
 
@@ -176,3 +180,25 @@ no native effects. Wake continues the same thread to reconcile; never requeue,
 extend expiry, reopen goal, reset counters or force idle.
 
 Actual production completion remains OPEN; queued admission is not readiness.
+
+## Terminal wake reconciliation and timeout repair
+
+Wake635ecf6b was submitted as a2542654-9265-4585-89a9-60ba6425a26c. Terminal
+marker is true: expired/expiry_reached. No reload_attempted marker exists. Actual
+source catalog remains25tools and lacks goal tools; original complete goal and
+all its counters are unchanged. Last observed busy thread01a1178a maps to
+im-receipts and is still active at readback; this is an observation, not proof
+that it caused the timeout. Runtime journal did not retain the timeout exception,
+so the precise production request which timed out is unproven.
+
+Public CLI plus independent watcher regression: injected native thread/read
+exceeds the1s RPC cap while intent expires in2030. Before correction it becomes
+expired (red1case1.728s). Remove the unconditional TimeoutError expiry branch;
+use the existing guarded observation failure/deadline handling. Same intent
+then completes once with original expiry, same goals and no goal writes/turn
+starts.11shared checks PASS8.289s, including real expiry/lost-response continuity.
+Source fix does not revive historical terminal receipts or renew any allocation.
+
+Current gate: exact-main v0.17.2 patch delivery and installed proof; production
+retry requires explicit user approval of a new fixed expiry. No global restart,
+peer interrupt or force-idle action is authorized.
