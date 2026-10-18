@@ -58,8 +58,12 @@ class SharedRefreshTests(unittest.TestCase):
     def test_controller_shutdown_during_preflight_never_starts_reload(self):
         self.shared_scenario(stop_during_preflight=True)
 
+    def test_source_workspace_mismatch_blocks_before_shared_reload(self):
+        self.shared_scenario(cwd_mismatch=True)
+
     def shared_scenario(self, lost_reload=False, peer_busy=False, racing_peer=False,
-                        stale_mcp=False, reset_counter=False, stop_during_preflight=False):
+                        stale_mcp=False, reset_counter=False, stop_during_preflight=False,
+                        cwd_mismatch=False):
         import hashlib
         import subprocess
         import sys
@@ -86,7 +90,7 @@ class SharedRefreshTests(unittest.TestCase):
                     if 'id' not in r:continue
                     if method=='initialize':result={}
                     elif method=='thread/loaded/list':result=dict(data=[THREAD,peer],nextCursor=None)
-                    elif method=='thread/read':result=dict(thread=dict(id=params['threadId'],cwd=tmp,
+                    elif method=='thread/read':result=dict(thread=dict(id=params['threadId'],cwd='/' if cwd_mismatch and params['threadId']==THREAD else tmp,
                         status=dict(type='active' if native['active' if params['threadId']==THREAD else 'peer_active'] else 'idle',activeFlags=[])))
                     elif method=='thread/goal/get':
                         if stop_during_preflight and not native.get('stop_sent'):
@@ -158,6 +162,12 @@ class SharedRefreshTests(unittest.TestCase):
                     code,receipt=invoke()
                     if receipt['state'] in ('completed','expired','blocked'):break
                     time.sleep(.05)
+                if cwd_mismatch:
+                    self.assertEqual(code,5,receipt)
+                    self.assertEqual(receipt['state'],'blocked')
+                    self.assertEqual(receipt['reason'],'source_workspace_mismatch')
+                    self.assertNotIn('config/mcpServer/reload',requests)
+                    return
                 if stale_mcp or reset_counter:
                     self.assertEqual(code,5,receipt)
                     self.assertEqual(receipt['state'],'expired' if stale_mcp else 'blocked')

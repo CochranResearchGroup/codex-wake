@@ -1,0 +1,16 @@
+{
+  "target": "332c035",
+  "discovery_passes": 1,
+  "remediation_passes": 1,
+  "findings": [
+    {
+      "id": "F1",
+      "disposition": "blocking",
+      "criterion": "native source and host profile workspace binding",
+      "finding": "Source cwd was ignored before global reload and selected skill proof",
+      "remediation": "canonical source/profile cwd check in both idle observations and before readiness",
+      "regression": "f1-workspace-red.log then f1-workspace-green.log",
+      "verification": "pending closed-world"
+    }
+  ]
+}

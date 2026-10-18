@@ -155,9 +155,22 @@ def _continuity(before, after):
                     and after[key] >= before[key] for key in counters))
 
 
+def _source_workspace(receipt, value):
+    try:
+        cwd = value.get('cwd')
+        return (value.get('id') == receipt['thread_id'] and isinstance(cwd, str)
+                and Path(cwd).is_absolute()
+                and Path(cwd).resolve(strict=True) == Path(receipt['profile']['cwd']).resolve(strict=True))
+    except (OSError, ValueError, TypeError):
+        return False
+
+
 def _resources(receipt):
     import hashlib
     profile = receipt['profile']
+    source = _request(receipt, 'thread/read', dict(threadId=receipt['thread_id'], includeTurns=False))['thread']
+    if not _source_workspace(receipt, source):
+        return None
     checks = {}
     catalog = None
     for name in receipt['resources']:
@@ -215,6 +228,9 @@ def _poll_one(path, receipt):
         order = list(dict.fromkeys([receipt['thread_id'], receipt.get('last_busy_thread'), *loaded]))
         for thread in (thread for thread in order if thread in loaded):
             value = _request(receipt, 'thread/read', dict(threadId=thread, includeTurns=False))['thread']
+            if thread == receipt['thread_id'] and not _source_workspace(receipt, value):
+                receipt.update(state='blocked', reason='source_workspace_mismatch')
+                return
             if value['id'] != thread or value['status']['type'] not in ('idle', 'active'):
                 raise WakeError('conversation state is unknown')
             if value['status']['type'] != 'idle' or value['status'].get('activeFlags'):
@@ -240,6 +256,9 @@ def _poll_one(path, receipt):
             return
         for thread in loaded:
             value = _request(receipt, 'thread/read', dict(threadId=thread, includeTurns=False))['thread']
+            if thread == receipt['thread_id'] and not _source_workspace(receipt, value):
+                receipt.update(state='blocked', reason='source_workspace_mismatch')
+                return
             if value['id'] != thread or value['status']['type'] != 'idle' or value['status'].get('activeFlags'):
                 receipt.update(reason='waiting_for_idle', last_busy_thread=thread, busy_count=1)
                 return
@@ -262,7 +281,11 @@ def _poll_one(path, receipt):
             receipt.update(state='blocked', reason='goal_continuity_unverified')
             return
         receipt.update(goal_after=after[receipt['thread_id']], goal_continuity_verified=True)
-        receipt['resource_status'] = _resources(receipt)
+        checks = _resources(receipt)
+        if checks is None:
+            receipt.update(state='blocked', reason='source_workspace_mismatch')
+            return
+        receipt['resource_status'] = checks
         if all(value['state'] == 'ready' for value in receipt['resource_status'].values()):
             receipt.update(state='completed', reason=None)
         elif receipt['state'] != 'uncertain':
