@@ -6,9 +6,18 @@ Branch: fix/289-allocation-campaign-control. Base: 89e3eb8. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 2; includes operator clarification on campaign-scoped graceful shutdown.
+Plan version: 3; fresh-token default and campaign-scoped graceful shutdown.
 
 ## Current State
+
+Current source checkpoint f1223ad repairs default fresh-token accounting and
+campaign-scoped winddown/stops; production installation is unchanged. Public
+installed fixtures and an isolated real Codex0.163process now prove later operator
+replies survive pause and complete. Real native delegation with injected local
+usage qualifies45fresh versus90inclusive tokens. Automatic provisioning and full
+objective continuity remain incomplete, pending the operator's choice about
+host-delegated authorization. Prior v2/v3 checkpoint history is retained below.
+
 
 2026-10-18 v2: the user explicitly requires graceful campaign winddown, followed
 by goal pause and bounded interruption after the checkpoint grace/reserve, while
@@ -386,3 +395,44 @@ regressions and the isolated installed scenarios pass; source repair is reviewed
 and preserved, production remains unchanged. Native actual-client acceptance and
 self-provisioning remain open. Pending operator decision is unchanged and is not
 inferred from silence. No production resource policy or counters were modified.
+
+
+## Native acceptance checkpoint — operator reply and delegated fresh accounting
+
+Previous turn was outcome_progress. Current turn advances real-client acceptance,
+not a status-only wait. Both native runs used owned private homes/sockets, validated
+SO_PEERCRED against exact spawned processes, and injected localhost Responses;
+zero external provider calls and no production session/config/grant changes.
+Old main's controller acknowledged interruption of the exact later operator reply
+(`native-operator-red2.json`), while the installed candidate kept that turn active
+through repeated independent watcher polls, then completed it with the expected
+assistant reply text retained in the native rollout. Goal remained paused. Both
+owned native/controller processes exited and exact PID readbacks show absence.
+
+The first red harness was invalidated: it assumed request3 was the operator, but
+checkpoint steering restarted the campaign stream. No symptom claim relies on
+that run. The corrected fixture recognizes operator input explicitly and bounds
+requests to5; both valid baseline and candidate used4. This is a harness correction,
+not passing-on-retry erasure. Candidate result is native-operator-green.json.
+Native delegation qualification: actual owned root/child metadata and response
+records charge45fresh and90inclusive exactly once; receipt native-delegate-fresh.json.
+No production allowance or cumulative counters were reset to obtain these results.
+
+Validation environment finding: installed StableTime configuration auto-selection
+polluted fixture time in the earlier full runs. Setting only the supported process
+variable CODEX_WAKE_STABLE_TIME_CONFIG='' makes all23 selected time/migration tests
+pass in0.723s. Full candidate unit suite under that fixture-isolation setting is
+running; retain both original failed logs and baseline comparison. README now
+shows the isolated unit command; opt-in native qualification keeps trusted clock.
+Current read-only budget sample367,086fresh tokens, original deadline unchanged.
+Authorization choice remains pending; elapsed time or automatic continuation is
+not approval for host-delegated enrollment. Goal remains incomplete.
+
+
+Fixture-isolated full-unit result:1369tests in134.071s,63failures/1error/1skip,
+exit1. These64identifiers are a strict subset of the unchanged-main failure set;
+the StableTime opt-out removed16clock-related failures but did not repair all
+pre-existing lifecycle-fixture failures. No full-suite green claim. Preserve
+isolated-presubmit.json and original failures; stop this broader baseline probe
+rather than widen repair scope. Product modules remain at reviewed f1223ad;
+new native acceptance scripts/receipts strengthen proof, not implementation scope.

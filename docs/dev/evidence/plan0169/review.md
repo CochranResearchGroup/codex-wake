@@ -20,3 +20,12 @@ bounds. Missing grant is no-effect and explicitly permits operator interaction.
 Full issue289 provisioning/continuity remains incomplete and was not treated as
 a newly discovered regression in this repair review. Installed isolated fixture
 receipts are separate evidence. No native production or provider effects ran.
+
+
+Closed-world native acceptance verification by the same reviewer handle found
+no critical evidence regressions. Valid red2 and candidate share corrected fixture
+hash,4requests within5cap. Candidate exact operator turn is active after watcher
+heartbeat advancement, has no interrupt effect, then completes with expected
+assistant output in native rollout lines36/39 bound to the same turn. Delegation
+45fresh/90inclusive and absent exact owned PIDs verified from retained evidence.
+This is verification of new acceptance evidence, not a second broad review.

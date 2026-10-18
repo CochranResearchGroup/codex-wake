@@ -1,0 +1,13 @@
+{
+  "command": "CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p 'test_*.py'",
+  "test_count": 1369,
+  "seconds": 134.071,
+  "exit_code": 1,
+  "failures": 63,
+  "errors": 1,
+  "skipped": 1,
+  "new_failed_identifiers": [],
+  "removed_failure_identifiers": 16,
+  "log": "/tmp/cw289-presubmit-20261018/isolated-all.log",
+  "scope": "process environment only; production clock configuration untouched"
+}

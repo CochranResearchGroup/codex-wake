@@ -26,7 +26,7 @@ from codex_wake.process import process_identity
 def qualify(base,codex):
     base.mkdir(parents=True,mode=0o700,exist_ok=False);home=base/'home';home.mkdir(mode=0o700)
     calls=[];root_identity=[None];child_done=threading.Event();lock=threading.Lock();expiry=time.monotonic()+90
-    result=dict(verdict='INCOMPLETE',external_provider_calls=0,usage_provenance='injected localhost SSE, not real billing',expected_tokens=90)
+    result=dict(verdict='INCOMPLETE',external_provider_calls=0,usage_provenance='injected localhost SSE, not real billing',expected_tokens=45)
     class Handler(BaseHTTPRequestHandler):
         protocol_version='HTTP/1.1'
         def log_message(self,*args):pass
@@ -105,7 +105,10 @@ def qualify(base,codex):
         assert any(m['parent_thread_id']==root for m in inventories),'no actual child metadata'
         assert len(calls)<=5
         if result['accounting']['state']=='qualified':
-            assert result['accounting']['used_tokens']==90,result['accounting']
+            assert result['accounting']['used_tokens']==45,result['accounting']
+            inclusive=observe_usage(home,root,goal['createdAt'],token_accounting='cache_inclusive')
+            assert inclusive['state']=='qualified' and inclusive['used_tokens']==90,inclusive
+            result['cache_inclusive_accounting']=inclusive
             result['verdict']='PASS_NATIVE_DELEGATE_INJECTED_ACCOUNTING'
         else:result['verdict']='NATIVE_DELEGATE_ACCOUNTING_UNKNOWN'
     except BaseException as exc:result.update(verdict='FAILED_PACKET',error=type(exc).__name__+': '+str(exc))

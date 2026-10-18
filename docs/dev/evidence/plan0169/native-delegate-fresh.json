@@ -1,0 +1,27 @@
+{
+  "verdict": "PASS_NATIVE_DELEGATE_INJECTED_ACCOUNTING",
+  "error": null,
+  "external_provider_calls": 0,
+  "usage_provenance": "injected localhost SSE, not real billing",
+  "http_request_cap": null,
+  "elapsed_seconds": 1.194270174999474,
+  "native_exit": 0,
+  "watcher_exit": null,
+  "operator_turn_id": null,
+  "operator_reply_status": null,
+  "operator_reply_preserved": null,
+  "operator_goal_status": null,
+  "native_version": "codex-cli 0.163.0",
+  "source_result": "/tmp/cw289-native-delegate-fresh-20261018/result.json",
+  "fixture_script": "scripts/goal_supervision_native_delegate_qualification.py",
+  "fixture_script_sha256": "f975bde9749d9728ee5829cd5c7e2c229cc57c4f3d3bd0e224f036f582a38c2b",
+  "fresh_process_readback": {
+    "native": {
+      "pid": 20457,
+      "present": false
+    }
+  },
+  "http_calls": 3,
+  "fresh_tokens": 45,
+  "cache_inclusive_tokens": 90
+}

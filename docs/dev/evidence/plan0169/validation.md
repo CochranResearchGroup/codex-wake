@@ -35,3 +35,12 @@ ran1363tests in124.088s and failed76 plus4errors,1skipped, exit1. Candidate adds
 all80 failure/error identifiers match baseline exactly, no candidate-only failure.
 Comparison receipt: presubmit-comparison.json. This distinguishes existing local
 suite failures from this repair; it does not waive CI or establish a clean suite.
+
+
+Fixture-isolated full-unit result:1369tests in134.071s,63failures/1error/1skip,
+exit1. These64identifiers are a strict subset of the unchanged-main failure set;
+the StableTime opt-out removed16clock-related failures but did not repair all
+pre-existing lifecycle-fixture failures. No full-suite green claim. Preserve
+isolated-presubmit.json and original failures; stop this broader baseline probe
+rather than widen repair scope. Product modules remain at reviewed f1223ad;
+new native acceptance scripts/receipts strengthen proof, not implementation scope.

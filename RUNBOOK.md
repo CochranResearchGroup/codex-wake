@@ -7194,3 +7194,33 @@ pass;0169metadataformat repaired, older0166-0168auditfindings preserved. Source
 checkpoint will retain the tested patch while host-delegated self-enrollment
 awaits operator decision. Wider289notcomplete, no release/install. Automatic
 grants remain unimplemented under current ADR0002 operator-origin requirement.
+
+
+## Turn351 | 2026-10-18 UTC | Real native operator reply and delegated fresh proof
+
+State transition: control repair validated -> native acceptance proven for the
+bounded repair. Outcome_progress. Isolated Codex0.163with localhost response fixture:
+old controller interrupts exact operator reply, candidate permits it to stay active
+and finish after goal pause. Native assistant reply text is retained in rollout;
+no external provider calls. One initial harness run was invalidated because steer
+restarts HTTP stream; corrected input-correlated baseline/candidate use4requests
+within5cap. Actual root/child delegation charges45fresh versus90inclusive once.
+Exact owned PIDs absent after exit; shared services/sessions untouched. Receipts
+under docs/dev/evidence/plan0169/native-*.json. Self-provisioning decision still pending.
+
+Diagnosed local presubmit configuration contamination: installed StableTime default
+supersedes fixture clock. Supported per-process CODEX_WAKE_STABLE_TIME_CONFIG=''
+restores23selected tests toPASS; full suite isolated run is pending. Production
+clock configuration unchanged. README records unit command and distinction from
+native qualification, which retains configured trusted time. Budget367,086fresh,
+well under2M; no renewal or pause implied. Next: reconcile exact unit-run handle,
+preserve native evidence and wait for material authorization decision.
+
+
+Fixture-isolated full-unit result:1369tests in134.071s,63failures/1error/1skip,
+exit1. These64identifiers are a strict subset of the unchanged-main failure set;
+the StableTime opt-out removed16clock-related failures but did not repair all
+pre-existing lifecycle-fixture failures. No full-suite green claim. Preserve
+isolated-presubmit.json and original failures; stop this broader baseline probe
+rather than widen repair scope. Product modules remain at reviewed f1223ad;
+new native acceptance scripts/receipts strengthen proof, not implementation scope.
