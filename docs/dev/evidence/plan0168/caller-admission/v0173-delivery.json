@@ -1,0 +1,27 @@
+{
+  "reference_time": "2026-10-18T02:41:26.015678+00:00",
+  "version": "0.17.3",
+  "source_commit": "fc4524d01b8a607d02fa20bab722332a6ec720fd",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.17.3-fc4524d",
+  "release_assets": {
+    "codex_wake-0.17.3-py3-none-any.whl": "291424188090b53b5c53d10bbb3fec7dac44455bc15df04f50e1130adcf091e8",
+    "codex_wake-0.17.3.tar.gz": "c032f5f0e409ad567319d456fd665cfed843013fdfb4ad66ec8bbf4f9bf6ec86"
+  },
+  "download_hash_parity": true,
+  "installed_tests": "14focusedPASS5.684s",
+  "python_files_matched": 110,
+  "mcp_tools": 27,
+  "skill_directories": "both complete directories synced; all file bytes match source;10relative links valid",
+  "refresh_monitor_pid": 10896,
+  "preserved_goal_monitor_pid": 42551,
+  "preserved_supervisor_pid": 60043,
+  "production_goal_policy_sha256_unchanged": "41c16fbee2e82da46cb47a6dfcee659b8a85582b1ef231a8713fc2a4f6fe77bc",
+  "original_refresh_receipt_sha256_unchanged": "714e0504d0e2c5086422be1bff15683490644acd0f0e8705a8d133b4f86f5fe4",
+  "production_grants_created": 0,
+  "enrollments_created": 0,
+  "goals_resumed": 0,
+  "counter_resets": 0,
+  "shared_mcp_reloads": 0,
+  "original_refresh_state": "expired",
+  "remaining_gate": "New conversation has no grant/enrollment; automatic bootstrap requires a separate authority/accounting design. Existing cached MCP schema may remain old. No new refresh intent or expiry approved."
+}

@@ -1,0 +1,9 @@
+{
+  "tools": 27,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"idle_required\": true, \"operations\": [\"configuration\", \"refresh\"], \"profile\": \"self-refresh\", \"refresh_scope\": \"shared_server_mcp\", \"resources\": [\"codex-wake-mcp\", \"codex-wake-skill\"], \"thread_id\": \"01a13b4b-1f4a-7fd3-9d41-3bafa9710762\", \"version\": \"0.17.3\"}"
+    }
+  ]
+}

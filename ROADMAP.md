@@ -1276,3 +1276,5 @@ qualification gates. No counter reset or shared-server restart.
 v0.17.2 timeout repair released/installed from cdb499e; production intent remains
 terminal without reload. A new attempt needs explicit new-expiry authority and
 an idle window; actual native resource proof remains OPEN.
+v0.17.3 additionally repairs fractional reserve input and clarifies exact newcaller
+grants; no automatic grant inheritance or resource renewal is implemented.

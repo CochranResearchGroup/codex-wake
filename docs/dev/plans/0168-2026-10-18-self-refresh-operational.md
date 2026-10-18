@@ -5,17 +5,21 @@ Branch: fix/self-refresh-operational. Base: 27330f6. Target: origin/main.
 
 ## Current State
 
-v0.17.2 is released/installed from exact maincdb499e (PR285). Independent
-refresh service runs the patch with a fresh heartbeat. Installed11public checks,
-110-source parity and27-tool controls pass. Published assets hash-match download.
-Private mailbox smoke refused a clock anomaly first; one fresh recheck passes.
-Retain this flaky local clock-dependent qualification, not a clean-first-run claim.
+v0.17.3 is released/installed from exact mainfc4524d (PR287), correcting
+fractional checkpoint percentages in MCP and CLI. Installed14focused tests,
+110-source parity and27-tool controls pass; both whole skill dirs are synced.
+Original fractional payload now reaches genuine host admission in private replay.
+The new remote-view caller still has no production grant/enrollment. No host
+resource grant, native goal, counter or allocation changed. Automatic new-session
+bootstrap needs separate authorization/accounting design; source patch does not
+claim to solve that setup hold.
 
-Production refresh remains terminal EXPIRED without reload. The original receipt
-hash, complete goal and counters are unchanged. Actual native cache remains25
-tools. No new refresh intent or expiry was created. Plan/issue remain OPEN: a
-new production attempt requires explicit new-expiry authority and shared idle
-condition. Current branch: docs/self-refresh-v0172-delivery; basecdb499e.
+Original production refresh remains terminal EXPIRED without reload, with receipt
+hash unchanged. Plan/issue remain OPEN for production resource proof. No new
+refresh intent or expiry was created; explicit new-expiry approval and shared idle
+condition remain required. Current branch: docs/fractional-reserve-delivery;
+basefc4524d. Earlier clock-dependent mailbox flake remains retained under v0.17.2;
+no unrelated mailbox rerun was needed for this input-type correction.
 
 ## Original diagnostic baseline
 
@@ -246,3 +250,27 @@ fixed,14focused checks pass. v0.17.3 patch delivery tracked on
 fix/fractional-checkpoint-reserve, base8318923. Evidence in caller-admission/.
 No automatic grant inheritance, enrollment, counter reset or native goal change
 is part of this correction. Original production refresh remains terminal.
+
+## v0.17.3 fractional reserve delivery
+
+PR287/headdb3ea76 passed hosted run39090662722:1363tests each on3.11/3.12
+(1skip), installed gates PASS. Exact mergedmainfc4524d01b8a607d02fa20bab722332a6ec720fd
+owns v0.17.3 release; wheel/sdist download hashes match. Versioned installed prefix
+/home/ecochran76/.local/share/codex-wake/releases/0.17.3-fc4524d passes110Python
+source parity,14installed MCP/CLI/supervision tests5.684s and27-tool controls.
+Copied qualification harness runs outside source so child imports are installed.
+
+Original actual caller/2M/6h/17.5percent/900seconds payload replay against a copy
+of host policy and private root now reaches goal_limits_unavailable/held from
+the missing grant, with zero enrollment receipts. MCP schema is numeric and
+actual CLI accepts fractions. The missing grant is deliberately preserved, not
+relabelled as enforcement success. Source/backend range/finite checks remain.
+
+Five stable entrypoints and independent shared-refresh monitorPID10896 now use
+release prefix. Both full skill directories synced with backup and byte parity;
+10relative links valid. Fresh standalone configuration is0.17.3/27tools. Goal
+watcher42551 and supervisor60043 preserved. Production goal-policy hash and old
+expired refresh receipt hash are unchanged. No production grant, enrollment,
+goal resume, counter reset, shared reload or refreshed expiry. Actual existing
+MCP connections may retain old schema until refresh; no new refresh authority
+is inferred. caller-admission/v0173-delivery.json owns runtime locators.
