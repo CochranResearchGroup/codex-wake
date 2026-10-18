@@ -1,0 +1,247 @@
+{
+  "verdict": "PASS_NATIVE_PUBLIC_SELF_ENROLLMENT_AND_CONTINUATION",
+  "source_receipt": "/tmp/cw289-native-public-final-20261018/result.json",
+  "source_receipt_sha256": "c61f4ea8bdfc008be8b995f295bb68a8d2cf8a3348ae7060ccbbafa8fafbecca",
+  "candidate_prefix": "/tmp/cw289-v4-installed",
+  "script": "scripts/goal_supervision_native_enrollment_qualification.py",
+  "script_sha256": "c4ee22d2d361ab8657515e6aef1e7c44557639c53354926f42c7e63e3860bcc9",
+  "module_hashes": {
+    "goal_supervision.py": {
+      "source_sha256": "32ce99fc4cdf1243e9d2084344e0288edabf485a1726192372f73eccad0ba0d1",
+      "installed_sha256": "32ce99fc4cdf1243e9d2084344e0288edabf485a1726192372f73eccad0ba0d1",
+      "match": true
+    },
+    "goal_usage.py": {
+      "source_sha256": "90ed92f18f19ace4110d197a2b00bbcccc7244429a7cf0b46884822007b08b87",
+      "installed_sha256": "90ed92f18f19ace4110d197a2b00bbcccc7244429a7cf0b46884822007b08b87",
+      "match": true
+    },
+    "goal_limits_cli.py": {
+      "source_sha256": "4b69628b6cc47cb8189df0132b17cdc159ab5ac35b1dfc38133a11b5a2d39f7e",
+      "installed_sha256": "4b69628b6cc47cb8189df0132b17cdc159ab5ac35b1dfc38133a11b5a2d39f7e",
+      "match": true
+    },
+    "mcp_server.py": {
+      "source_sha256": "50a03ea1d8c34a84b018cfebed5c07a00c753c5eeb62771ae252c78ee02eed3b",
+      "installed_sha256": "50a03ea1d8c34a84b018cfebed5c07a00c753c5eeb62771ae252c78ee02eed3b",
+      "match": true
+    },
+    "native_protocol.py": {
+      "source_sha256": "a4c42df51f16dbc29937237bc4d31649fbe2a10039fef54bbfc019a169ee10ec",
+      "installed_sha256": "a4c42df51f16dbc29937237bc4d31649fbe2a10039fef54bbfc019a169ee10ec",
+      "match": true
+    }
+  },
+  "participants": [
+    {
+      "thread_id": "01a14fa0-3ef7-7df1-825d-00bdb59b02b0",
+      "goal_before": {
+        "threadId": "01a14fa0-3ef7-7df1-825d-00bdb59b02b0",
+        "objective": "Owned public MCP resource continuation fixture",
+        "status": "blocked",
+        "tokenBudget": 1000000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1792337264,
+        "updatedAt": 1792337264
+      },
+      "native_tool_call": {
+        "type": "mcpToolCall",
+        "id": "owned-native-enrollment-1",
+        "server": "wake",
+        "tool": "wake_goal_limits_set",
+        "status": "completed",
+        "arguments": {
+          "caller_thread_id": "01a14fa0-3ef7-7df1-825d-00bdb59b02b0",
+          "token_limit": 1000,
+          "time_limit_seconds": 120,
+          "checkpoint_token_percent": 0,
+          "checkpoint_seconds": 0
+        },
+        "appContext": null,
+        "mcpAppUi": null,
+        "pluginId": null,
+        "readOnlyHint": false,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"thread_id\": \"01a14fa0-3ef7-7df1-825d-00bdb59b02b0\", \"generation\": \"f2af11c82c80431b97c19f58db15c452\", \"allocation_id\": \"owned-objective\", \"goal_created_at\": 1792337264, \"used_tokens\": 20, \"started_upper\": 1792337265.6222422, \"started_boottime\": 13070.864325653, \"boot_id\": \"5601d440-a997-4a6c-806a-d8bc392f38cc\", \"time_origin\": 1792337264, \"effects\": {}, \"checkpoint\": null, \"caller_binding\": {\"thread_id\": \"01a14fa0-3ef7-7df1-825d-00bdb59b02b0\", \"turn_id\": \"01a14fa0-4526-7782-90ec-928724b31090\", \"call_id\": \"owned-native-enrollment-1\"}, \"token_limit\": 1000, \"time_limit_seconds\": 120, \"checkpoint_token_percent\": 0, \"checkpoint_seconds\": 0, \"token_accounting\": \"fresh\", \"deadline\": 1792337384, \"allocation_path\": \"/tmp/cw289-native-public-final-20261018/runtime/goal-supervision/allocations/4f9a73df34478560c4d0238b5944055764946db1df9b366320bd2d3ab76b636b.json\", \"accounting\": {\"state\": \"qualified\", \"used_tokens\": 20, \"token_accounting\": \"fresh\", \"member_thread_ids\": [\"01a14fa0-3ef7-7df1-825d-00bdb59b02b0\"], \"sampled\": true, \"reason\": null}, \"state\": \"armed\", \"reason\": null, \"controller_generation\": \"3447188f42fa44e09e2413d0a8687d9b\", \"stop_scope\": \"registered_goal_campaign\", \"descendant_stop_verified\": false, \"controller\": {\"active\": true, \"boot_id\": \"5601d440-a997-4a6c-806a-d8bc392f38cc\", \"generation\": \"3447188f42fa44e09e2413d0a8687d9b\", \"identity\": {\"boot_id\": \"5601d440-a997-4a6c-806a-d8bc392f38cc\", \"start_time_ticks\": 1306876}, \"interval\": 0.1, \"observed_boottime\": 13070.779722368, \"pid\": 70590, \"fresh\": true, \"age_seconds\": 0.0981614289994468}, \"sampled\": true, \"maximum_token_overshoot\": null}"
+            }
+          ],
+          "structuredContent": null,
+          "_meta": null
+        },
+        "error": null,
+        "durationMs": 488
+      },
+      "public_status": {
+        "accounting": {
+          "member_thread_ids": [
+            "01a14fa0-3ef7-7df1-825d-00bdb59b02b0"
+          ],
+          "reason": null,
+          "sampled": true,
+          "state": "qualified",
+          "token_accounting": "fresh",
+          "used_tokens": 20
+        },
+        "allocation_id": "owned-objective",
+        "allocation_path": "/tmp/cw289-native-public-final-20261018/runtime/goal-supervision/allocations/4f9a73df34478560c4d0238b5944055764946db1df9b366320bd2d3ab76b636b.json",
+        "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc",
+        "caller_binding": {
+          "call_id": "owned-native-enrollment-1",
+          "thread_id": "01a14fa0-3ef7-7df1-825d-00bdb59b02b0",
+          "turn_id": "01a14fa0-4526-7782-90ec-928724b31090"
+        },
+        "checkpoint": null,
+        "checkpoint_seconds": 0,
+        "checkpoint_token_percent": 0,
+        "controller_generation": "3447188f42fa44e09e2413d0a8687d9b",
+        "deadline": 1792337384,
+        "effects": {},
+        "generation": "f2af11c82c80431b97c19f58db15c452",
+        "goal_created_at": 1792337264,
+        "observed_boottime": 13070.942965103,
+        "reason": null,
+        "started_boottime": 13070.864325653,
+        "started_upper": 1792337265.6222422,
+        "state": "armed",
+        "thread_id": "01a14fa0-3ef7-7df1-825d-00bdb59b02b0",
+        "time_limit_seconds": 120,
+        "time_origin": 1792337264,
+        "token_accounting": "fresh",
+        "token_limit": 1000,
+        "used_tokens": 20,
+        "controller": {
+          "active": true,
+          "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc",
+          "generation": "3447188f42fa44e09e2413d0a8687d9b",
+          "identity": {
+            "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc",
+            "start_time_ticks": 1306876
+          },
+          "interval": 0.1,
+          "observed_boottime": 13071.046145106,
+          "pid": 70590,
+          "fresh": true,
+          "age_seconds": 0.007822760999260936
+        },
+        "sampled": true,
+        "maximum_token_overshoot": null,
+        "stop_scope": "registered_goal_campaign",
+        "descendant_stop_verified": false
+      }
+    },
+    {
+      "thread_id": "01a14fa0-481e-73d2-944e-d00d2196c83d",
+      "goal_before": {
+        "threadId": "01a14fa0-481e-73d2-944e-d00d2196c83d",
+        "objective": "Owned public MCP resource continuation fixture",
+        "status": "blocked",
+        "tokenBudget": 1000000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1792337266,
+        "updatedAt": 1792337266
+      },
+      "native_tool_call": {
+        "type": "mcpToolCall",
+        "id": "owned-native-enrollment-2",
+        "server": "wake",
+        "tool": "wake_goal_limits_set",
+        "status": "completed",
+        "arguments": {
+          "caller_thread_id": "01a14fa0-481e-73d2-944e-d00d2196c83d",
+          "token_limit": 1000,
+          "time_limit_seconds": 120,
+          "checkpoint_token_percent": 0,
+          "checkpoint_seconds": 0
+        },
+        "appContext": null,
+        "mcpAppUi": null,
+        "pluginId": null,
+        "readOnlyHint": false,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"thread_id\": \"01a14fa0-481e-73d2-944e-d00d2196c83d\", \"generation\": \"9f0d2d57a01f42ada646400a688d7e77\", \"allocation_id\": \"owned-objective\", \"goal_created_at\": 1792337266, \"used_tokens\": 40, \"started_upper\": 1792337267.0605314, \"started_boottime\": 13072.392579189, \"boot_id\": \"5601d440-a997-4a6c-806a-d8bc392f38cc\", \"time_origin\": 1792337264, \"effects\": {}, \"checkpoint\": null, \"caller_binding\": {\"thread_id\": \"01a14fa0-481e-73d2-944e-d00d2196c83d\", \"turn_id\": \"01a14fa0-4b80-75f0-8b99-ccbfb811d503\", \"call_id\": \"owned-native-enrollment-2\"}, \"token_limit\": 1000, \"time_limit_seconds\": 120, \"checkpoint_token_percent\": 0, \"checkpoint_seconds\": 0, \"token_accounting\": \"fresh\", \"deadline\": 1792337384, \"allocation_path\": \"/tmp/cw289-native-public-final-20261018/runtime/goal-supervision/allocations/4f9a73df34478560c4d0238b5944055764946db1df9b366320bd2d3ab76b636b.json\", \"accounting\": {\"state\": \"qualified\", \"used_tokens\": 40, \"token_accounting\": \"fresh\", \"member_thread_ids\": [\"01a14fa0-3ef7-7df1-825d-00bdb59b02b0\", \"01a14fa0-481e-73d2-944e-d00d2196c83d\"], \"sampled\": true, \"reason\": null}, \"state\": \"armed\", \"reason\": null, \"controller_generation\": \"3447188f42fa44e09e2413d0a8687d9b\", \"stop_scope\": \"registered_goal_campaign\", \"descendant_stop_verified\": false, \"controller\": {\"active\": true, \"boot_id\": \"5601d440-a997-4a6c-806a-d8bc392f38cc\", \"generation\": \"3447188f42fa44e09e2413d0a8687d9b\", \"identity\": {\"boot_id\": \"5601d440-a997-4a6c-806a-d8bc392f38cc\", \"start_time_ticks\": 1306876}, \"interval\": 0.1, \"observed_boottime\": 13072.369742175, \"pid\": 70590, \"fresh\": true, \"age_seconds\": 0.044537539999510045}, \"sampled\": true, \"maximum_token_overshoot\": null}"
+            }
+          ],
+          "structuredContent": null,
+          "_meta": null
+        },
+        "error": null,
+        "durationMs": 399
+      },
+      "public_status": {
+        "accounting": {
+          "member_thread_ids": [
+            "01a14fa0-3ef7-7df1-825d-00bdb59b02b0",
+            "01a14fa0-481e-73d2-944e-d00d2196c83d"
+          ],
+          "reason": null,
+          "sampled": true,
+          "state": "qualified",
+          "token_accounting": "fresh",
+          "used_tokens": 40
+        },
+        "allocation_id": "owned-objective",
+        "allocation_path": "/tmp/cw289-native-public-final-20261018/runtime/goal-supervision/allocations/4f9a73df34478560c4d0238b5944055764946db1df9b366320bd2d3ab76b636b.json",
+        "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc",
+        "caller_binding": {
+          "call_id": "owned-native-enrollment-2",
+          "thread_id": "01a14fa0-481e-73d2-944e-d00d2196c83d",
+          "turn_id": "01a14fa0-4b80-75f0-8b99-ccbfb811d503"
+        },
+        "checkpoint": null,
+        "checkpoint_seconds": 0,
+        "checkpoint_token_percent": 0,
+        "controller_generation": "3447188f42fa44e09e2413d0a8687d9b",
+        "deadline": 1792337384,
+        "effects": {},
+        "generation": "9f0d2d57a01f42ada646400a688d7e77",
+        "goal_created_at": 1792337266,
+        "observed_boottime": 13072.561183283,
+        "reason": null,
+        "started_boottime": 13072.392579189,
+        "started_upper": 1792337267.0605314,
+        "state": "armed",
+        "thread_id": "01a14fa0-481e-73d2-944e-d00d2196c83d",
+        "time_limit_seconds": 120,
+        "time_origin": 1792337264,
+        "token_accounting": "fresh",
+        "token_limit": 1000,
+        "used_tokens": 40,
+        "controller": {
+          "active": true,
+          "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc",
+          "generation": "3447188f42fa44e09e2413d0a8687d9b",
+          "identity": {
+            "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc",
+            "start_time_ticks": 1306876
+          },
+          "interval": 0.1,
+          "observed_boottime": 13072.502797335,
+          "pid": 70590,
+          "fresh": true,
+          "age_seconds": 0.0968541339989315
+        },
+        "sampled": true,
+        "maximum_token_overshoot": null,
+        "stop_scope": "registered_goal_campaign",
+        "descendant_stop_verified": false
+      }
+    }
+  ],
+  "http_requests": 6,
+  "external_provider_calls": 0,
+  "unrelated_control_unchanged": true,
+  "remaining_owned_processes": [],
+  "original_deadline_preserved": true,
+  "cumulative_tokens": 40,
+  "policy_unchanged": true,
+  "config_unchanged": true,
+  "limits": "Injected local Responses transport proof; no real provider billing or production install"
+}

@@ -13,6 +13,7 @@ def add_goal_limits_parser(subparsers):
         command = commands.add_parser(name, help='enroll limits' if name == 'set' else 'read enforcement evidence')
         command.add_argument('--policy', type=Path, required=True, help='private host-approved caller allocations')
         command.add_argument('--caller-thread-id', required=True)
+        command.add_argument('--allocation-id', help='existing host objective allocation')
         command.add_argument('--json', action='store_true', dest='as_json')
         if name == 'set':
             command.add_argument('--token-limit', type=int, required=True)
@@ -36,12 +37,12 @@ def goal_limits_command(args, root):
     try:
         from .goal_supervision import enroll, show
         if args.goal_limits_command == 'show':
-            result = show(root, args.policy, args.caller_thread_id)
+            result = show(root, args.policy, args.caller_thread_id,args.allocation_id)
         else:
             result = enroll(root, args.policy, args.caller_thread_id,
                 args.token_limit, args.time_limit_seconds,
                 checkpoint_token_percent=args.checkpoint_token_percent,
-                checkpoint_seconds=args.checkpoint_seconds,token_accounting=args.token_accounting)
+                checkpoint_seconds=args.checkpoint_seconds,token_accounting=args.token_accounting,allocation_id=args.allocation_id)
     except Exception as exc:
         from .records import WakeError
         message = str(exc) if isinstance(exc, (ValueError, WakeError)) else 'Host filesystem, socket or controller unavailable; inspect operator setup.'

@@ -19,6 +19,140 @@ NOW=1893456000
 
 
 class GoalSupervisionTests(unittest.TestCase):
+    def test_host_delegated_caller_enrolls_without_uuid_grant(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            old=json.loads(policy.read_text())['callers'][THREAD]
+            policy.write_text(json.dumps(dict(version=2, default_allocation='allocation-1',
+                allocations={'allocation-1':old}, native_caller_binding=True)))
+            context=dict(threadId=THREAD, sessionId=THREAD, callId='native-call',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root), patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                with self.assertRaisesRegex(ValueError,'native caller'):
+                    enroll(root,policy,THREAD,100,120)
+                from codex_wake.mcp_server import CommandRunner
+                runner=CommandRunner(goal_limits_policy=policy,goal_limits_root=root)
+                arguments=dict(caller_thread_id=THREAD,token_limit=100,time_limit_seconds=120)
+                denied,failed=runner.call('wake_goal_limits_set',arguments)
+                self.assertTrue(failed)
+                self.assertEqual(denied['state'],'held')
+                forged=dict(context,threadId='00000000-0000-7000-8000-000000000290')
+                self.assertTrue(runner.call('wake_goal_limits_set',arguments,native_context=forged)[1])
+                receipt,failed=runner.call('wake_goal_limits_set',arguments,native_context=context)
+                self.assertFalse(failed,receipt)
+                self.assertEqual(receipt['state'],'armed')
+                self.assertEqual(receipt['allocation_id'],'allocation-1')
+                self.assertEqual(receipt['used_tokens'],40)
+                self.assertEqual(receipt['deadline'],NOW+120)
+                self.assertEqual(json.loads(policy.read_text())['allocations']['allocation-1'],old)
+                self.assertNotIn('callers',json.loads(policy.read_text()))
+
+    def test_successor_shares_spend_deadline_and_cannot_mint_another_allowance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            policy.write_text(json.dumps(dict(version=2, default_allocation='allocation-1',
+                allocations={'allocation-1':grant},native_caller_binding=True)))
+            def context(thread):
+                return dict(threadId=thread,sessionId=thread,callId='call-'+thread,
+                    **{'x-codex-turn-metadata':dict(thread_id=thread,session_id=thread,turn_id='work')})
+            successor='00000000-0000-7000-8000-000000000290'
+            rows=[json.loads(line) for line in log.read_text().splitlines()]
+            rows=json.loads(json.dumps(rows).replace(THREAD,successor))
+            rows[1]['payload']['goal']['createdAt']=NOW+10
+            rows[1]['timestamp']='2030-01-01T00:00:10Z'
+            rows[2]['timestamp']='2030-01-01T00:00:10Z'
+            rows[3]['timestamp']='2030-01-01T00:00:10Z'
+            (log.parent/'successor.jsonl').write_text(''.join(json.dumps(row)+'\n' for row in rows))
+            native['siblings']={successor:dict(goal=dict(threadId=successor,createdAt=NOW+10,status='active'),active=['work'],calls=[])}
+            with self.controller(root), patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+10):
+                first=enroll(root,policy,THREAD,100,120,native_context=context(THREAD))
+                second=enroll(root,policy,successor,100,120,native_context=context(successor))
+                self.assertEqual(second['used_tokens'],80)
+                self.assertEqual(second['deadline'],NOW+120)
+                self.assertEqual(second['time_origin'],NOW)
+                repeated=enroll(root,policy,successor,100,120,native_context=context(successor))
+                self.assertEqual(repeated['used_tokens'],80)
+                self.assertEqual(repeated['deadline'],first['deadline'])
+                with self.assertRaisesRegex(ValueError,'allocation'):
+                    enroll(root,policy,successor,101,120,native_context=context(successor))
+                control='00000000-0000-7000-8000-000000000292'
+                control_policy=json.loads(policy.read_text())
+                control_policy['allocations']['other-objective']=grant
+                policy.write_text(json.dumps(control_policy))
+                (log.parent/'control.jsonl').write_text(''.join(json.dumps(row).replace(successor,control)+'\n' for row in rows))
+                native['siblings'][control]=dict(goal=dict(threadId=control,createdAt=NOW+10,status='active'),active=['work'],calls=[])
+                unrelated=enroll(root,policy,control,100,120,native_context=context(control),allocation_id='other-objective')
+                self.assertEqual(unrelated['used_tokens'],40)
+                self.assertEqual(unrelated['deadline'],NOW+130)
+                original=log.read_text()
+                log.write_text(original+'{"type":')
+                winding=poll(root)
+                grace=min(value['winddown_deadline'] for value in winding if 'winddown_deadline' in value)
+                self.assertEqual(next(value for value in winding if value['thread_id']==control)['state'],'armed')
+                self.assertEqual(native['siblings'][control]['goal']['status'],'active')
+                log.write_text(original)
+                third='00000000-0000-7000-8000-000000000291'
+                rows[3]['payload']['usage']=dict(input_tokens=0,cached_input_tokens=0,output_tokens=0,total_tokens=0)
+                (log.parent/'third.jsonl').write_text(''.join(json.dumps(row).replace(successor,third)+'\n' for row in rows))
+                native['siblings'][third]=dict(goal=dict(threadId=third,createdAt=NOW+10,status='active'),active=['work'],calls=[])
+                held=enroll(root,policy,third,100,120,native_context=context(third))
+                self.assertEqual(held['state'],'held')
+                self.assertTrue(held['stop_latched'])
+                self.assertEqual(held['allocation_winddown_deadline'],grace)
+
+
+    def test_only_explicit_host_renewal_changes_allowance_and_preserves_prior_ledger(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            config=dict(version=2,default_allocation='allocation-1',native_caller_binding=True,
+                allocations={'allocation-1':grant,'renewed':grant})
+            policy.write_text(json.dumps(config))
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='native-call',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120,native_context=context)
+                other='00000000-0000-7000-8000-000000000293'
+                (log.parent/'old-member.jsonl').write_text(log.read_text().replace(THREAD,other))
+                native['siblings']={other:dict(goal=dict(threadId=other,createdAt=NOW,status='active'),active=['work'],calls=[])}
+                other_context=dict(context,threadId=other,sessionId=other,
+                    **{'x-codex-turn-metadata':dict(thread_id=other,session_id=other,turn_id='work')})
+                enroll(root,policy,other,100,120,native_context=other_context)
+                with self.assertRaisesRegex(ValueError,'explicit host renewal'):
+                    enroll(root,policy,THREAD,200,120,native_context=context,allocation_id='renewed')
+                config['allocations']['renewed']=dict(grant,renews_allocation='allocation-1')
+                policy.write_text(json.dumps(config))
+                with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+10):
+                    renewed=enroll(root,policy,THREAD,200,120,native_context=context,allocation_id='renewed')
+                self.assertEqual(renewed['used_tokens'],0)
+                self.assertEqual(renewed['time_origin'],NOW+10)
+                self.assertEqual(renewed['deadline'],NOW+130)
+                self.assertNotEqual(renewed['generation'],first['generation'])
+                self.assertEqual(json.loads(Path(first['allocation_path']).read_text())['used_tokens'],80)
+                row=json.loads(log.read_text().splitlines()[-1])
+                row['payload']['response_id']='renewed-response'
+                row['payload']['usage']=dict(input_tokens=28,cached_input_tokens=0,output_tokens=2,total_tokens=30)
+                with log.open('a') as stream:stream.write(json.dumps(row)+'\n')
+                results={value['thread_id']:value for value in poll(root)}
+                self.assertEqual(results[THREAD]['used_tokens'],30)
+                self.assertEqual(results[other]['used_tokens'],80)
+                self.assertEqual(results[other]['state'],'armed')
+                # Restart at the durable boundary after target admission but
+                # before old-member finalization, with later usage now present.
+                previous_path=Path(first['allocation_path'])
+                previous=json.loads(previous_path.read_text())
+                member=previous['members'][THREAD]
+                for key in ('finalized_charges','final_anchor','renewed_into'):member.pop(key)
+                previous_path.write_text(json.dumps(previous))
+                receipt_path=next(path for path in (root/'goal-supervision').glob('*.json')
+                    if path.name!='controller.json' and json.loads(path.read_text())['thread_id']==THREAD)
+                pending=json.loads(receipt_path.read_text())['prior_allocation']
+                receipt_path.write_text(json.dumps(pending))
+                with self.assertRaisesRegex(ValueError,'renewal boundary'):
+                    enroll(root,policy,THREAD,200,120,native_context=context,allocation_id='renewed')
+
+
     def test_resume_after_partially_verified_stop_gets_a_new_pause(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory)
@@ -134,16 +268,17 @@ class GoalSupervisionTests(unittest.TestCase):
         log.write_text(''.join(json.dumps(dict(timestamp='2030-01-01T00:00:00Z',**row))+'\n' for row in rows))
         native=dict(goal=dict(threadId=THREAD,createdAt=NOW,status='active'),active=['work'],calls=[])
         def request(endpoint,executable,method,params,timeout):
-            self.assertEqual(params['threadId'],THREAD)
-            native['calls'].append((method,params))
-            if method=='thread/goal/get':return {'goal':dict(native['goal'])}
-            if method=='thread/read':return {'thread':dict(id=THREAD,turns=[dict(id=t,status='inProgress') for t in native['active']])}
+            selected=native if params['threadId']==THREAD else native['siblings'][params['threadId']]
+            selected['calls'].append((method,params))
+            if method=='thread/goal/get':return {'goal':dict(selected['goal'])}
+            if method=='thread/read':return {'thread':dict(id=params['threadId'],turns=[dict(id=t,status='inProgress') for t in selected['active']])}
             receipts=list((root/'goal-supervision').glob('*.json'))
-            saved=[json.loads(p.read_text()) for p in receipts if p.name!='controller.json'][0]
+            saved=next(value for p in receipts if p.name!='controller.json'
+                for value in [json.loads(p.read_text())] if value['thread_id']==params['threadId'])
             self.assertTrue(any(effect['state']=='intended' and effect['method']==method for effect in saved['effects'].values()))
-            if native.get('lose')==method:raise TimeoutError('lost response')
-            if method=='thread/goal/set':native['goal']['status']='paused'
-            if method=='turn/interrupt':native['active'].remove(params['turnId'])
+            if selected.get('lose')==method:raise TimeoutError('lost response')
+            if method=='thread/goal/set':selected['goal']['status']='paused'
+            if method=='turn/interrupt':selected['active'].remove(params['turnId'])
             if method=='turn/steer':self.assertEqual(params['expectedTurnId'],'work')
             return {}
         def handler(ws):

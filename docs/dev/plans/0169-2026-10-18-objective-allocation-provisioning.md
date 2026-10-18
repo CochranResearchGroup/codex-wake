@@ -1,22 +1,27 @@
 # Plan0169 — Automatic caller provisioning with allocation continuity
 
-State: BLOCKED
+State: OPEN
 Owner: primary / ecochran76.
 Branch: fix/289-allocation-campaign-control. Base: 89e3eb8. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 3; fresh-token default and campaign-scoped graceful shutdown.
+Plan version: 4; fresh-token default and campaign-scoped graceful shutdown.
 
 ## Current State
 
-Current source checkpoint f1223ad repairs default fresh-token accounting and
-campaign-scoped winddown/stops; production installation is unchanged. Public
-installed fixtures and an isolated real Codex0.163process now prove later operator
-replies survive pause and complete. Real native delegation with injected local
-usage qualifies45fresh versus90inclusive tokens. Automatic provisioning and full
-objective continuity remain incomplete, pending the operator's choice about
-host-delegated authorization. Prior v2/v3 checkpoint history is retained below.
+Host-delegated self-enrollment and objective continuity are implemented and
+qualified in the isolated installed candidate /tmp/cw289-v4-installed. Two actual
+native conversations enroll through public Wake MCP without UUID grants; spend
+is20then40fresh, deadline unchanged, unrelated control unchanged. Final source
+and installed hashes match in native-public-final.json.33focused tests pass,
+including scoped renewal and conservative interrupted-renewal recovery. Bounded
+review findings were reproduced and repaired. Main/production remain unchanged.
+Delivery remains open: broad suite is not green (baseline lifecycle failures plus
+one intermittent mailbox-disposition failure); no release-gate waiver, PR, merge
+or installed production provisioning is claimed. Current native goal status is
+the historical blocked checkpoint; live read-only fresh accounting is used for
+the original2M/6h bound, never the cache-inclusive total.
 
 
 2026-10-18 v2: the user explicitly requires graceful campaign winddown, followed
@@ -471,3 +476,81 @@ installed module hashes match current source. Native operator/delegation proof
 remains valid; full-suite baseline failures remain disclosed. Goal is incomplete.
 Next action is operator contract disposition, then one newly bounded caller-hook
 trust qualification and the original remaining implementation/acceptance packets.
+
+## Checkpoint v4a — self-enrollment authority accepted
+
+State transition: blocked -> active. Progress: blocker_reduction. The user
+approved private host delegation; no further approval is needed for this design.
+Primary owns allocation schema/accounting and integration. Existing bounded worker
+/root/native_authority_capability owns only native caller-hook trust qualification
+(max two corrected owned fixtures, local Responses, no production changes).
+Evidence: operator message in current conversation, clean a9881c6, native get_goal
+460295 tokens used, current time15:12Z, original deadline20:05:10Z.
+Next packet ends at caller-binding verdict and a concrete host delegation schema;
+then implement and test continuity within the remaining cumulative allowance.
+Prior failed fixture receipts and review bounds remain in force.
+
+## v4b — delegated allocation implementation packet
+
+Host policy version2 contains native_caller_binding:true, allocations keyed by
+fixed objective ID, and optional default_allocation. Allocation entries contain
+the approved exact native endpoint/home/executable and resource ceilings. They
+do not enumerate callers. The host owns the private native stdio connection;
+server Context.meta carries caller/thread/turn/call independently of model args.
+The public MCP adapter verifies those fields and admits into the configured
+allocation. Direct legacy CLI enrollment remains supported under version1;
+version2 direct CLI cannot substitute an unbound caller claim for native context.
+This assumes the trusted local host/native gateway, not hostile same-UID code or
+a public HTTP transport. No hook mutation or per-session operator setup needed.
+
+First admission fixes limits, basis, time origin and deadline in a private
+allocation ledger. Successors can tighten limits, never enlarge them. All member
+histories are requalified; response identities and hashes deduplicate delegated
+work. Missing/changed history holds instead of forgetting spend. The cumulative
+stop latch survives successors. Ledger caps32members bound resampling cost.
+Explicit operator policy renewal is separate; self enrollment cannot perform it.
+
+Red/green through public enroll seam: original source rejects version2; after
+admission support new caller succeeds without modifying host policy. Successor
+regression initially charges40instead of80; ledger repair charges80, preserves
+original120second deadline, rejects101token raise against100token allocation.
+Focused32tests pass in5.378seconds; log /tmp/cw289-v4-focused.log.
+Native metadata evidence is native-caller-metadata.json; actual native-to-public
+Wake MCP enrollment still pending and required before completion claims.
+
+## Checkpoint v4c — source/installed acceptance and delivery boundary
+
+State transition: active -> source-qualified, delivery-open. Progress:
+outcome_progress. Source implements native Context.meta admission, fixed shared
+allocation ledger, unique-response deduplication, immutable deadline, allocation
+stop/grace inheritance, independent unrelated allocations, and explicit host
+renewal with retained finalized prior charges. It does not require per-session
+operator grants. Current authority is the user's explicit host-delegation approval.
+
+Review: /root/control_repair_review performed closed-world verification of the
+new accepted criteria; no second broad discovery pass. Three precise introduced
+findings were accepted: successor bypass during grace; post-renewal double charge
+to old members; moved retry boundary after interrupted renewal. Public regressions
+went red before fixes and green afterward. Final exact guard verification resolved
+the last finding. Review/rework bounds consumed for this renewal unit; no further
+hardening/discovery loop. Native capability worker qualified real metadata and
+initial/successor public enrollment; primary reran the final installed snapshot.
+
+Final native receipt: native-public-final.json.6localhost Responses requests,
+zero external calls, two actual native callers20->40fresh, same deadline,
+unrelated blocked goal unchanged, no caller grants, policy/config unchanged,
+owned process census empty. Five installed module hashes equal frozen source.
+Focused33tests PASS5.618s; compileall/policy wiring/diff check PASS.
+
+Broad run1372tests/141.507s:64failures/1error/1skip.64identifiers were already in
+prior isolated baseline; one additional declined-disposition subtest failed with
+8instead of10. Exact selected test passes candidate and unchanged main without
+source changes; retain full failure as intermittent, not erased by retry. Full
+run started before final retry guard/test extension; that delta has separate
+focused red/green and exact review. See delegation-validation.json. No full-green
+or release-readiness claim. No unrelated lifecycle/mailbox repair added.
+
+Production remains unchanged. Plan0168 refresh is separate and expired; no
+requeue/reload/restart authority inferred. Next bounded packet is release-gate
+triage/integration on this exact branch, preserving failed receipts and source
+scope; do not repeat native proof or renew budgets merely to keep working.

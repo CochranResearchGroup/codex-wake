@@ -1,8 +1,9 @@
 # Token and time limits in the existing dev session
 
 Codex Wake supervises the current native `/goal` without
-moving to another tab or agent. Installation, host grants and a running controller
-are required. Check the installed version and controller receipt before claiming enforcement.
+moving to another tab or agent. Installation, host delegation and a running controller
+are required. Host policy version2 lets native callers self-enroll without
+per-session UUID grants. Check the installed version and controller receipt before claiming enforcement.
 
 ## Agent workflow
 
@@ -26,7 +27,13 @@ error holds autonomous campaign work. It does not prohibit operator replies,
 status inspection, bounded setup diagnosis, or checkpoint writing. Report the
 reason and next action; do not repeatedly attempt enrollment or resume a held goal. Use `wake_goal_limits_show` with your actual caller ID to
 reconcile a timeout or inspect enforcement. Do not retry with a different ID,
-use a peer ID, or bypass missing host grants through the CLI.
+use a peer ID, or substitute CLI identity claims for native caller metadata.
+With host delegation, enrollment binds the actual native thread/turn/call from
+the private MCP connection. Optional `allocation_id` selects an existing host
+objective; it cannot create another allowance. Successors use the same ID and
+retain cumulative spend, original deadline and any stopping decision. An
+ambiguous/missing allocation needs a concrete selection or host setup correction,
+not a new per-session UUID grant.
 
 The controller requests “stop work and write a restart-safe checkpoint” when
 either 5% of tokens or 60 seconds remain. Optional `checkpoint_token_percent`
@@ -88,8 +95,40 @@ Shared servers and unrelated sessions remain outside this controller's authority
 
 ## Operator setup
 
-Configure a private owned policy file and runtime root. The exact caller grant
-uses an existing absolute owned Unix endpoint and Codex home:
+Configure one private owned host policy and runtime root. For native callers,
+prefer version2 host delegation. Each named allocation is one objective allowance;
+its first enrollment fixes limits, accounting basis, time origin and deadline.
+Subsequent callers share the ledger and may only tighten limits. Do not use one
+default allocation for unrelated objectives. When multiple objectives exist,
+provide explicit allocation_id or choose an intentional default. For example:
+
+```json
+{
+  "version": 2,
+  "native_caller_binding": true,
+  "default_allocation": "objective-289",
+  "allocations": {
+    "objective-289": {
+      "app_server": "unix:///absolute/existing/codex.sock",
+      "codex_path": "/absolute/path/to/codex",
+      "codex_home": "/absolute/private/codex/home",
+      "max_tokens": 2000000,
+      "max_seconds": 21600
+    }
+  }
+}
+```
+
+The host launches Wake MCP on its private native stdio connection with
+`--goal-limits-policy POLICY --goal-limits-root ROOT`; the independent watcher
+uses that root. Native Codex0.163supplies per-request metadata outside model
+arguments. The adapter checks exact thread/session/turn/call identity before
+admission. This trusts the host-owned local gateway; it does not authenticate
+arbitrary public HTTP clients or isolate hostile code running as the same UID.
+Do not expose this delegation adapter over an unqualified transport.
+
+Version1 explicit caller policies remain compatible. Their caller grant uses
+an existing absolute owned Unix endpoint and Codex home:
 
 ```json
 {
@@ -154,3 +193,20 @@ The MCP host, not its caller, owns these scope arguments.
 Use `--goal-limits-root` for a separate private controller root when adding these
 tools to an existing MCP configuration. This leaves other tools on their existing
 wake root. Without this option, goal tools use the host `--wake-root`.
+
+Delegated allocation ledgers live in `goal-supervision/allocations/` under the
+private runtime root. Preserve them across restarts and handoffs. All enrolled
+member histories are requalified, up to32members; unique native response IDs and
+hashes prevent double charging delegated overlap. Missing or changed history
+holds the objective. Stop latches and the first winddown deadline apply to every
+successor while captured turn ownership stays per conversation. Self-enrollment
+cannot renew an allocation or change its accounting basis; an explicit host
+renewal is separate and must preserve prior history.
+
+To authorize a scoped renewal, the host explicitly creates a distinct allocation
+entry with `renews_allocation` naming the prior allocation. Changing IDs alone
+does not authorize resetting the same caller. The renewed ledger starts at a
+qualified response anchor and retains the previous ledger and finalized member
+charges; later work is charged only to the renewed allowance. A boundary changed
+after interrupted enrollment holds for reconciliation; do not retry with another
+ID, alter the saved anchor, delete the ledger or invent another renewal.

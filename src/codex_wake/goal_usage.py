@@ -372,6 +372,9 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
         return dict(state='qualified', used_tokens=inclusive - cached if token_accounting == 'fresh' else inclusive,
             fresh_tokens=inclusive - cached, cached_input_tokens=cached,
             cache_inclusive_tokens=inclusive, token_accounting=token_accounting,
+            charges={json.dumps(k):dict(
+                tokens=records[k]['usage']['total_tokens']-(records[k]['usage']['cached_input_tokens'] if token_accounting=='fresh' else 0),
+                response_hash=anchor['response_hashes'][json.dumps(k)]) for k in charged-excluded},
             anchor=anchor, reason=None, sampled=True)
     except (ValueError, KeyError, TypeError, OSError, OverflowError) as exc:
         return dict(state='unknown', used_tokens=None, anchor=None,

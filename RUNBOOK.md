@@ -7243,3 +7243,26 @@ not complete or resource-exhausted. Operator chat remains usable. Plan0169 and
 lane projection now BLOCKED, clean source checkpoints retained locally. No
 host-delegated enrollment permission inferred from auto continuation. On answer,
 reconcile native hook trust as well as allocation authority before effects.
+
+
+## Turn353 | 2026-10-18 UTC | Host-delegated self-enrollment qualified
+
+User explicitly approved self-enrollment; authorization gate resolved. Revised
+ADR0002/Plan0169v4; preserved original2Mfresh/6h bounds and all prior evidence.
+Private native Context.meta proves caller outside model arguments; hook-based
+updatedInput was unnecessary and did not work for MCP in this native build.
+Version2 host allocations avoid per-session grants, preserve shared spend and
+deadline, inherit stop/grace, and support explicit scoped host renewals without
+charging later renewed work back to old members. Three bounded review findings
+reproduced and fixed; final33focused tests pass.
+
+Final installed candidate /tmp/cw289-v4-installed native public acceptance: two
+actual conversations20->40fresh, same deadline, unrelated control unchanged,
+6localhost fixture requests/zero external providers; empty owned cleanup census.
+Five module hashes match frozen source. Policy wiring/compile/diff checks pass.
+Broader1372test run stays red (64failures/1error/1skip): prior64failed identifiers
+plus one intermittent declined-disposition subtest; exact selected candidate and
+main replay both pass. Failed receipt retained; no clean CI claim or waiver.
+No production grant/install/reload/restart, remote push, PR, merge or release.
+Plan0168 remains separate. Next: bounded release-gate triage/integration; durable
+handoff in docs/dev/evidence/plan0169/handoff.md.

@@ -692,3 +692,13 @@ openclaw message read --channel slack --account default --target channel:<channe
 Report the wake id, trigger evidence, ack/submitted status, tmux visibility classification when present, OpenClaw/app-server dispatch evidence when present, Slack readback evidence when used, and any remaining active wake count.
 
 If ack exists but no new turn is visible, read `references/use-cases.md#ack-but-no-visible-turn`.
+
+### Host-delegated goal enrollment
+
+Host policy version2 supports native MCP self-enrollment into fixed objective
+allocations without per-session UUID grants. Use actual caller identity and the
+same allocation_id for successors; native transport metadata binds the caller.
+Enrollment preserves cumulative fresh usage, original deadline, and shared stop
+state. It cannot mint or renew allowance. See
+[existing goal limits](references/existing-goal-limits.md) for host installation,
+legacy compatibility and the private local transport boundary.

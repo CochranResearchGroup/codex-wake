@@ -73,12 +73,14 @@ SPECS['wake_goal_limits_set'] = (
     'configured limits alone are not armed enforcement. Limits and counters persist across replacement goals '
     'and resume; only an explicit user reset approved by the host allocation can reset them. '
     'Native stop is not an OS process-termination guarantee. Supply actual native caller_thread_id; '
-    'the claim alone grants no permission. Missing host setup requires the operator.',
+    'the claim alone grants no permission. Host-delegated allocations use native request metadata '
+    'for self-enrollment without per-session grants. Select an existing allocation_id when required.',
     {'caller_thread_id': CALLER, 'token_limit': {'type': 'integer', 'minimum': 1},
      'time_limit_seconds': {'type': 'integer', 'minimum': 1},
      'checkpoint_token_percent': {'type': 'number', 'minimum': 0, 'maximum': 100},
      'checkpoint_seconds': {'type': 'integer', 'minimum': 0},
-     'token_accounting': {'type': 'string', 'enum': ['fresh', 'cache_inclusive']}},
+     'token_accounting': {'type': 'string', 'enum': ['fresh', 'cache_inclusive']},
+     'allocation_id': TEXT},
     ['caller_thread_id', 'token_limit', 'time_limit_seconds'], False)
 SPECS['wake_goal_limits_show'] = (
     'goal-limits', 'show',
@@ -86,7 +88,7 @@ SPECS['wake_goal_limits_show'] = (
     'native pause/interrupt evidence. Check watcher readiness and accounting qualification before work. '
     'Reading does not reset or renew any allocation; missing/stale proof is not active enforcement. '
     'Supply actual native caller_thread_id; host grants still apply.',
-    {'caller_thread_id': CALLER}, ['caller_thread_id'], True)
+    {'caller_thread_id': CALLER,'allocation_id':TEXT}, ['caller_thread_id'], True)
 for _name, _spec in list(SPECS.items()):
     if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff", "configuration", "target"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
@@ -175,7 +177,7 @@ class CommandRunner:
                 command.append('--all')
         return command
 
-    def call(self, name, arguments):
+    def call(self, name, arguments, native_context=None):
         from jsonschema import Draft202012Validator
         if name not in SPECS:
             return {"error": {"code": "unknown_tool", "message": "Unknown tool."}}, True
@@ -200,6 +202,30 @@ class CommandRunner:
             goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
             if self.goal_limits_policy is None or goal_root is None:
                 return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
+            # Native owns the stdio connection and request _meta. Model tool
+            # arguments cannot select a host policy, transport or caller binding.
+            try:
+                from .goal_supervision import _grant, verified_native_caller, enroll, show
+                grant=_grant(self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id'))
+                if grant.get('host_delegated'):
+                    verified_native_caller(native_context,arguments['caller_thread_id'])
+                    if verb=='set':
+                        value=enroll(goal_root,self.goal_limits_policy,native_context=native_context,**arguments)
+                    else:
+                        value=show(goal_root,self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id'))
+                    return value, verb=='set' and value.get('state') not in ('armed','checkpoint_requested')
+            except Exception as exc:
+                # Legacy admission keeps its public CLI diagnostics. Delegated
+                # callers must never fall back to an unbound claimed identity.
+                try:
+                    from .goal_supervision import _load_grant
+                    delegated=_load_grant(self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id')).get('host_delegated')
+                except Exception:
+                    delegated=False
+                if delegated:
+                    return dict(state='held',armed=False,reason='native_caller_or_allocation_unavailable',
+                        error=dict(code='goal_limits_unavailable',message=str(exc)),
+                        operator_interaction='available',campaign_continuation='held'),True
             command = [*self.cli, '--wake-root', str(goal_root), group, verb,
                        '--policy', str(self.goal_limits_policy), '--json']
             for key, value in arguments.items():
@@ -304,7 +330,10 @@ def create_server(runner):
 
     async def call_tool(_context, params):
         async with gate:
-            work = asyncio.create_task(asyncio.to_thread(runner.call, params.name, params.arguments or {}))
+            metadata=_context.meta
+            if metadata is not None and not isinstance(metadata,dict):metadata=metadata.model_dump(by_alias=True)
+            work = asyncio.create_task(asyncio.to_thread(runner.call, params.name, params.arguments or {},
+                native_context=metadata))
             try:
                 value, failed = await asyncio.shield(work)
             except asyncio.CancelledError:
