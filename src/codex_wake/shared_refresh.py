@@ -5,14 +5,43 @@ from uuid import UUID
 from .records import WakeError
 
 MODE = 'shared_mcp_idle'
+CLIENT_MODE = 'client_idle'
 _stopping = False
+
+
+def _effect_guard():
+    if _stopping:
+        raise WakeError('refresh controller is stopping')
+
+
+def _managed_binding(profile):
+    import os,socket,struct
+    from websockets.sync.client import unix_connect
+    from .shared_app_server import locate_shared_endpoint
+    from .process import process_identity
+    endpoint=locate_shared_endpoint(timeout=profile['timeout'],codex_cmd=profile['codex_path'],codex_home=profile['codex_home'])
+    if endpoint!='unix://'+str(Path(profile['app_server'][7:]).resolve(strict=True)):
+        raise WakeError('managed default daemon differs from approved endpoint')
+    with unix_connect(endpoint[7:],open_timeout=profile['timeout'],close_timeout=1) as peer:
+        pid,uid,_=struct.unpack('3i',peer.socket.getsockopt(socket.SOL_SOCKET,socket.SO_PEERCRED,12))
+    if uid!=os.geteuid() or not process_identity(pid):
+        raise WakeError('managed daemon peer unavailable')
+    return dict(endpoint=endpoint,pid=pid,identity=process_identity(pid))
+
+
+def _client_effect_guard(receipt):
+    _effect_guard()
+    if receipt['profile'].get('client_connection')=='managed_default':
+        if _managed_binding(receipt['profile'])!=receipt.get('managed_client_binding'):
+            raise WakeError('managed daemon generation changed')
+    _effect_guard()
 
 
 def configuration(config, profile_name, thread_id, caller_thread_id):
     from . import __version__
     try:
         profile = config['profiles'][profile_name]
-        if (config['version'] != 1 or profile['refresh_mode'] != MODE
+        if (config['version'] != 1 or profile['refresh_mode'] not in (MODE, CLIENT_MODE)
                 or not profile['scope_approval'] or str(UUID(thread_id)) != thread_id
                 or caller_thread_id != thread_id
                 or profile_name not in config['callers'][caller_thread_id]
@@ -21,7 +50,7 @@ def configuration(config, profile_name, thread_id, caller_thread_id):
     except (KeyError, TypeError, ValueError, AttributeError):
         raise WakeError('shared refresh requires exact host caller and explicit scope approval') from None
     return dict(version=__version__, profile=profile_name, thread_id=thread_id,
-                refresh_scope='shared_server_mcp', idle_required=True,
+                refresh_scope='single_client' if profile['refresh_mode']==CLIENT_MODE else 'shared_server_mcp', idle_required=True,
                 resources=sorted(profile['resources']), operations=['configuration', 'refresh'])
 
 
@@ -46,20 +75,35 @@ def _public(receipt):
 def _validate_profile(profile):
     import math
     try:
-        if (set(profile) != {'refresh_mode', 'scope_approval', 'cwd', 'app_server',
-                            'codex_path', 'timeout', 'resources'}
-                or profile['refresh_mode'] != MODE or not isinstance(profile['scope_approval'], str)
+        required={'refresh_mode', 'scope_approval', 'cwd', 'app_server', 'codex_path', 'timeout', 'resources'}
+        client=profile.get('refresh_mode')==CLIENT_MODE
+        if client:required.add('tmux_session')
+        optional={'tmux_socket','codex_home','goal_supervision','client_connection'} if client else set()
+        if (not required <= set(profile) or set(profile)-required-optional
+                or profile['refresh_mode'] not in (MODE,CLIENT_MODE) or not isinstance(profile['scope_approval'], str)
                 or not profile['scope_approval'].strip()
                 or not Path(profile['cwd']).is_absolute() or not Path(profile['cwd']).is_dir()
                 or not Path(profile['codex_path']).is_absolute() or not Path(profile['codex_path']).is_file()
                 or not profile['app_server'].startswith('unix:///')
                 or type(profile['timeout']) not in (int, float)
-                or not math.isfinite(profile['timeout']) or not 0 < profile['timeout'] <= 5):
+                or not math.isfinite(profile['timeout']) or not 0 < profile['timeout'] <= 5
+                or (client and (not isinstance(profile['tmux_session'],str) or not profile['tmux_session']))):
+            raise ValueError
+        if client and (profile.get('client_connection','existing_endpoint') not in ('managed_default','existing_endpoint')
+                or (profile.get('client_connection')=='managed_default' and
+                    (not Path(profile.get('codex_home','')).is_absolute() or not Path(profile['codex_home']).is_dir()))):
             raise ValueError
         for check in profile['resources'].values():
-            fields = ({'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
+            fields = ({'kind','server','version','tools'} if check['kind']=='mcp_catalog' else
+                      {'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
                       {'kind', 'server', 'tool', 'arguments', 'read_only', 'expected_content'})
-            if set(check) != fields or check['kind'] not in ('skill', 'mcp'):
+            if set(check) != fields or check['kind'] not in ('skill', 'mcp','mcp_catalog'):
+                raise ValueError
+            if check['kind']=='mcp_catalog' and (not isinstance(check['version'],str)
+                    or not check['version'] or not isinstance(check['tools'],dict)
+                    or not check['tools'] or len(check['tools'])>32
+                    or any(not isinstance(name,str) or not isinstance(names,list) or len(names)>64
+                           or any(not isinstance(field,str) for field in names) for name,names in check['tools'].items())):
                 raise ValueError
             if check['kind'] == 'mcp' and check['read_only'] is not True:
                 raise ValueError
@@ -92,11 +136,18 @@ def command(args, root, config, profile, checkpoint, content):
         raise WakeError('shared refresh requires a bounded stable intent and unique resources')
     if not args.resource or any(name not in profile['resources'] for name in args.resource):
         raise WakeError('requested resources require host-approved proof checks')
+    if profile.get('client_connection')=='managed_default':
+        catalogs={name for name,check in profile['resources'].items() if check['kind']=='mcp_catalog'}
+        if not catalogs or not catalogs<=set(args.resource):
+            raise WakeError('managed client refresh requires its actual MCP catalog checks')
     directory = _directory(root)
     intent = dict(thread_id=args.thread_id, profile_name=args.profile, profile=profile,
                   policy_path=str(policy), checkpoint_path=str(checkpoint),
                   checkpoint_sha256=args.checkpoint_sha256, resources=args.resource,
                   expires_at=args.expires_at)
+    if profile['refresh_mode']==CLIENT_MODE:
+        from .lifecycle_budget import operation_binding
+        intent['client_binding']=operation_binding(config,args,source_ref=args.thread_id)
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     name = hashlib.sha256(args.intent.encode()).hexdigest()
     path = directory/(name+'.json')
@@ -114,12 +165,35 @@ def command(args, root, config, profile, checkpoint, content):
             if deadline <= upper:
                 raise WakeError('shared refresh expiry reached')
             receipt = dict(intent, fingerprint=fingerprint, intent_key=args.intent,
-                           refresh_scope='shared_server_mcp', state='queued', reason='waiting_for_idle',
+                           refresh_scope='single_client' if profile['refresh_mode']==CLIENT_MODE else 'shared_server_mcp', state='queued', reason='waiting_for_idle',
                            started_upper=upper, started_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
                            boot_id=boot_id_value(), deadline=deadline)
+            if profile['refresh_mode']==CLIENT_MODE:
+                from .lifecycle_budget import operation_binding
+                receipt['intent']=dict(operation='refresh',source_thread_id=args.thread_id,
+                    launch=profile,checkpoint=str(checkpoint),checkpoint_sha256=args.checkpoint_sha256,
+                    resources=args.resource,expires_at=args.expires_at)
+                binding=intent['client_binding']
+                if binding:receipt['intent'].update(binding)
+                if profile.get('client_connection')=='managed_default':
+                    receipt['managed_client_binding']=_managed_binding(profile)
             _save(path, receipt)
+            if profile['refresh_mode']==CLIENT_MODE:
+                from .refresh_goal import pause
+                def request(method,params):
+                    _client_effect_guard(receipt)
+                    return _request(receipt,method,params)
+                value=request('thread/read',dict(threadId=args.thread_id,includeTurns=False))['thread']
+                if not _source_workspace(receipt,value):
+                    receipt.update(state='blocked',reason='source_workspace_mismatch')
+                else:
+                    goal=request('thread/goal/get',dict(threadId=args.thread_id))['goal']
+                    receipt['goal_before']=goal
+                    if pause(path,receipt,profile,goal,request):
+                        receipt.update(state='queued',reason='waiting_for_source_idle')
+                _save(path,receipt)
         emit(_public(receipt), args.as_json)
-        return 0 if receipt['state'] in ('queued', 'verifying', 'completed') else 5
+        return 0 if receipt['state'] in ('queued','prepared','stopping','starting','awaiting_preflight','restoring_goal','verifying','completed') else 5
 
 
 def _remaining(receipt):
@@ -182,6 +256,9 @@ def _resources(receipt):
                         for skill in row['skills'] if skill['path'] == check['path'] and skill['enabled']]
             ready = (len(selected) == 1 and selected[0]['description'] == check['description']
                      and hashlib.sha256(Path(check['path']).read_bytes()).hexdigest() == check['sha256'])
+        elif check['kind']=='mcp_catalog':
+            from .refresh_resources import catalog_ready
+            ready=catalog_ready(check,lambda method,params:_request(receipt,method,params),receipt['thread_id'])
         else:
             result = _request(receipt, 'mcpServer/tool/call', dict(threadId=receipt['thread_id'],
                 server=check['server'], tool=check['tool'], arguments=check['arguments']))
@@ -210,6 +287,33 @@ def _poll_one(path, receipt):
         return
     if hashlib.sha256(Path(receipt['checkpoint_path']).read_bytes()).hexdigest() != receipt['checkpoint_sha256']:
         receipt.update(state='blocked', reason='source_checkpoint_changed')
+        return
+    if receipt['profile'].get('refresh_mode')==CLIENT_MODE:
+        from .agent_refresh import preflight, advance_refresh
+        from .lifecycle_budget import operation_binding
+        from types import SimpleNamespace
+        current_binding=operation_binding(config,SimpleNamespace(profile=receipt['profile_name'],
+            caller_thread_id=receipt['thread_id']),source_ref=receipt['thread_id'])
+        if current_binding!=receipt.get('client_binding'):
+            receipt.update(state='blocked',reason='host_budget_policy_changed');return
+        if receipt['state']=='pausing_goal':
+            from .refresh_goal import continuous
+            transition=receipt['operational_goal_pause']
+            goal=_request(receipt,'thread/goal/get',dict(threadId=receipt['thread_id']))['goal']
+            if not continuous(transition['original'],goal,'paused'):
+                receipt.update(state='blocked',reason='refresh_goal_pause_unverified');return
+            transition.update(state='acknowledged',paused=goal)
+            receipt.update(state='prepared',goal_before=goal)
+        if receipt['state'] in ('queued','prepared'):
+            value=_request(receipt,'thread/read',dict(threadId=receipt['thread_id'],includeTurns=False))['thread']
+            if not _source_workspace(receipt,value):
+                receipt.update(state='blocked',reason='source_workspace_mismatch');return
+            if value['status']['type']!='idle' or value['status'].get('activeFlags'):
+                receipt.update(reason='waiting_for_source_idle',busy_count=1);return
+            receipt.update(state='prepared',busy_count=0,reason=None)
+            preflight(path,receipt,receipt['profile'],effect_guard=lambda:_client_effect_guard(receipt))
+        if receipt['state'] in ('stopping','starting','awaiting_preflight','restoring_goal','uncertain'):
+            advance_refresh(path,receipt,receipt['profile'],effect_guard=lambda:_client_effect_guard(receipt))
         return
     if receipt['state'] == 'queued':
         loaded = []
@@ -301,7 +405,7 @@ def poll(root):
         with _lock(directory, path.stem):
             _private(path)
             receipt = json.loads(path.read_text())
-            if receipt['state'] not in ('queued', 'reloading', 'verifying', 'uncertain'):continue
+            if receipt['state'] not in ('queued','prepared','pausing_goal','stopping','starting','awaiting_preflight','restoring_goal','reloading','verifying','uncertain'):continue
             try:
                 _poll_one(path, receipt)
             except Exception as exc:

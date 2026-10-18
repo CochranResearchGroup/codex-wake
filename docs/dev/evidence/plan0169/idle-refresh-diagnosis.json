@@ -1,0 +1,16 @@
+{
+  "verdict": "SOURCE_IDLE_CONFIRMED_OTHER_CONVERSATION_BLOCKS_SHARED_REFRESH",
+  "source_idle_samples": 12,
+  "source_nonterminal_turns_during_samples": 0,
+  "blocking_thread": "01a13fff-c84a-7773-bdaa-18a8bc4a74bf",
+  "blocking_workspace": "/home/ecochran76/workspace.local/auracall",
+  "blocking_status": "active",
+  "blocking_nonterminal_turns": 2,
+  "reload_attempted": false,
+  "scope": "All loaded conversations on shared native executor must be idle; source-only idle is insufficient.",
+  "limitation": "Current readback does not establish whether peer work is progressing or stalled; no peer interruption authorized.",
+  "correction": "Earlier source-busy explanation described observation during operator turn, not the intervening idle interval.",
+  "raw_evidence": "/tmp/cw289-rollout-preview/idle-samples.json",
+  "resource_deadline": "2026-10-18T21:39:29.531693Z",
+  "refresh_expiry": "2026-10-18T20:39:29Z"
+}

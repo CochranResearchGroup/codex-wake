@@ -14,6 +14,14 @@ Use `wake_sessions_configuration` with your actual caller UUID, the same
 whether refresh reconnects MCP servers across the shared server. That scope
 requires explicit host approval; a missing grant is a setup refusal.
 
+For a `single_client` profile (`client_idle`), preserve the checkpoint and queue
+refresh with the same fixed intent. End this turn so the independent watcher can
+observe the source idle. Other conversations may remain active. The controller
+pauses a previously active goal before replacing the client, handles only the
+recognized paused-goal modal, and restores active status only after resource and
+readiness checks. Previously inactive goals stay inactive. Resource-stop latches
+are never cleared by refresh; an uncertain activation is reconciled without replay.
+
 For a `shared_server_mcp` profile, preserve your workspace checkpoint and call
 `wake_sessions_refresh` with its exact hash, a stable intent, fixed expiry and
 selected resource names. A `queued` receipt is admission: an independent monitor

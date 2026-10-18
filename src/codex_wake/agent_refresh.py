@@ -29,7 +29,7 @@ def refresh_command(args, root):
         raise WakeError('approved profile and workspace checkpoint are required') from None
     if hashlib.sha256(content).hexdigest() != args.checkpoint_sha256:
         raise WakeError('checkpoint hash changed; original checkpoint must be preserved')
-    if profile.get('refresh_mode') == 'shared_mcp_idle':
+    if profile.get('refresh_mode') in ('shared_mcp_idle', 'client_idle'):
         from .shared_refresh import command
         from .sessions_cli import emit
         try:
@@ -46,9 +46,10 @@ def refresh_command(args, root):
         raise WakeError('requested resources require host-approved proof checks')
     for name in args.resource:
         check = resources[name]
-        if not isinstance(check, dict) or check.get('kind') not in ('skill', 'mcp'):
+        if not isinstance(check, dict) or check.get('kind') not in ('skill', 'mcp','mcp_catalog'):
             raise WakeError('requested resource proof kind is unsupported')
-        required = ({'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
+        required = ({'kind','server','version','tools'} if check['kind']=='mcp_catalog' else
+                    {'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
                     {'kind', 'server', 'tool', 'arguments', 'read_only', 'expected_content'})
         if set(check) != required:
             raise WakeError('requested resource proof is incomplete or contains unsupported fields')
@@ -100,7 +101,7 @@ def refresh_command(args, root):
             rollback(path, receipt, profile)
         elif receipt['state'] == 'prepared' and before_effect(path, receipt):
             preflight(path, receipt, profile)
-        if not args.rollback and receipt['state'] in ('stopping', 'starting', 'awaiting_preflight', 'uncertain'):
+        if not args.rollback and receipt['state'] in ('stopping', 'starting', 'awaiting_preflight', 'restoring_goal', 'uncertain'):
             advance_refresh(path, receipt, profile)
         from .sessions_cli import emit
         emit(receipt, args.as_json)
@@ -152,10 +153,10 @@ def rollback(path, receipt, profile):
     save(path, receipt)
 
 
-def preflight(path, receipt, profile):
+def preflight(path, receipt, profile, effect_guard=None):
     from .sessions import observe, revalidate_attachment
     from .session_lifecycle import tmux_command
-    runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile))
+    runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile), effect_guard=effect_guard)
     snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket,
                        timeout=runtime.timeout)
     rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']]
@@ -197,8 +198,15 @@ def preflight(path, receipt, profile):
             return
     if not before_effect(path, receipt):
         return
+    from .refresh_goal import pause
+    receipt['goal_before'] = goal
+    def request(method, params):
+        if effect_guard:effect_guard()
+        return native_request(runtime.app_server,runtime.codex,method,params,runtime.timeout)
+    if not pause(path, receipt, profile, goal, request):
+        return
     receipt.update(state='stopping', uncertain_effect='tmux/kill-pane',
-                   old_attachment=pane, goal_before=goal, thread_name=rows[0]['name'])
+                   old_attachment=pane, thread_name=rows[0]['name'])
     save(path, receipt)
     runtime.selector = 'thread:' + receipt['thread_id']
     runtime.force = False
@@ -216,16 +224,24 @@ def preflight(path, receipt, profile):
         save(path, receipt)
 
 
-def advance_refresh(path, receipt, profile):
+def advance_refresh(path, receipt, profile, effect_guard=None):
     from .app_server import resolve_codex_cmd
     from .native_protocol import native_request
     from .sessions import observe, revalidate_attachment
     from .session_lifecycle import tmux_command
     runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile),
+                              effect_guard=effect_guard,
                               codex=resolve_codex_cmd(profile['codex_path'], required=True))
     def request(method, params):
+        if effect_guard:effect_guard()
         return native_request(runtime.app_server, runtime.codex, method, params, runtime.timeout)
     try:
+        if receipt['state'] == 'restoring_goal' or receipt.get('uncertain_effect') == 'native/goal_resume':
+            from .refresh_goal import restore
+            if restore(path, receipt, profile, request):
+                receipt.update(state='completed', reason=None)
+            save(path, receipt)
+            return
         if receipt.get('uncertain_effect') == 'tmux/new-window':
             snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket,
                                timeout=runtime.timeout)
@@ -263,9 +279,10 @@ def advance_refresh(path, receipt, profile):
             removed = ['CODEX_THREAD_ID', 'TMUX_PANE', 'CODEX_WAKE_A2A_CAPABILITY',
                        'CODEX_WAKE_A2A_BUS_ROOT', 'CODEX_WAKE_SENDER_RECEIPT_AUTHORITY']
             home = ['CODEX_HOME=' + profile['codex_home']] if 'codex_home' in profile else []
+            connection=[] if profile.get('client_connection')=='managed_default' else ['--remote',runtime.app_server]
             command = shlex.join(['env', *[v for k in removed for v in ('-u', k)], *home,
                                   runtime.codex, 'resume', '--no-alt-screen', '-C', runtime.cwd,
-                                  receipt['thread_id'], '--remote', runtime.app_server])
+                                  receipt['thread_id'], *connection])
             receipt.update(state='starting', uncertain_effect='tmux/new-window',
                            tab_name=old['window_name'] + '-refresh-' + receipt['fingerprint'][:12])
             save(path, receipt)
@@ -289,6 +306,9 @@ def advance_refresh(path, receipt, profile):
                 save(path, receipt)
                 return
             receipt['attachment'] = panes[0]
+            from .refresh_goal import settle_ui
+            if not settle_ui(path, receipt, profile, panes[0], request, effect_guard=effect_guard):
+                return
             receipt['goal_after'] = request('thread/goal/get', {'threadId': receipt['thread_id']})['goal']
             before, after = receipt['goal_before'], receipt['goal_after']
             changed = before != after
@@ -328,12 +348,21 @@ def advance_refresh(path, receipt, profile):
                     checks[name] = dict(state='ready' if ready else 'blocked',
                                         server=check['server'], tool=check['tool'],
                                         observed_content=result['content'], is_error=result.get('isError'))
+                elif check['kind']=='mcp_catalog':
+                    from .refresh_resources import catalog_ready
+                    ready=catalog_ready(check,request,receipt['thread_id'])
+                    checks[name]=dict(state='ready' if ready else 'blocked',server=check['server'],kind='mcp_catalog')
                 else:
                     checks[name] = dict(state='blocked', reason='resource_proof_unavailable')
-            receipt.update(resources=checks, state='completed' if all(
+            receipt.update(resources=checks, state='restoring_goal' if all(
                 c['state'] == 'ready' for c in checks.values()) else 'blocked')
-            if receipt['state'] == 'completed':
+            if receipt['state'] == 'restoring_goal':
                 receipt.pop('reason', None)
+                if not before_effect(path, receipt):
+                    return
+                from .refresh_goal import restore
+                if restore(path, receipt, profile, request):
+                    receipt['state'] = 'completed'
             else:
                 receipt['reason'] = 'requested_resources_not_ready'
             save(path, receipt)

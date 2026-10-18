@@ -195,11 +195,12 @@ class SharedAppServerReader:
         self.close()
 
 
-def locate_shared_endpoint(*, timeout: float = 10.0, codex_cmd: str = "codex") -> str:
+def locate_shared_endpoint(*, timeout: float = 10.0, codex_cmd: str = "codex", codex_home: str | None = None) -> str:
     """Use the installed CLI's read-only locator; never bootstrap a daemon."""
     try:
         result = subprocess.run([codex_cmd, "app-server", "daemon", "version"],
-                                capture_output=True, text=True, timeout=timeout, check=True)
+                                capture_output=True, text=True, timeout=timeout, check=True,
+                                **({'env':dict(os.environ,CODEX_HOME=codex_home)} if codex_home else {}))
         metadata = json.loads(result.stdout)
         if metadata.get("status") != "running":
             raise SharedSourceError("shared daemon is not running")

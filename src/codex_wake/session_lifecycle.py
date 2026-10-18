@@ -14,6 +14,9 @@ from .sessions import observe, resolve, revalidate_attachment
 
 
 def tmux_command(args, *command, preserve_output=False):
+    effect_guard = getattr(args, 'effect_guard', None)
+    if effect_guard:
+        effect_guard()
     socket = ['-S', args.tmux_socket] if args.tmux_socket else []
     try:
         output = subprocess.run(['tmux', *socket, *command], check=True, text=True,
