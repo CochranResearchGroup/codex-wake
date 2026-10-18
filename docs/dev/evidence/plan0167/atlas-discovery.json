@@ -1,0 +1,30 @@
+{
+  "atlas_group_id": "memory_atlas_main",
+  "candidate_count": 0,
+  "candidates": [],
+  "command": "atlas-discover",
+  "fact_count": 3,
+  "limits": {
+    "max_candidates": 2,
+    "max_facts": 3
+  },
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "message": "Atlas facts found, but no memory cloud manifests were parsed",
+  "query": "Codex Wake strict resource limits agent onboarding bootstrap",
+  "started_at_epoch": 1792245280.9536881,
+  "status": {
+    "message": "Graphiti MCP server is running and connected to falkordb database",
+    "reranker": {
+      "enabled": false,
+      "model": null,
+      "provider": "disabled"
+    },
+    "status": "ok"
+  },
+  "timings_seconds": {
+    "discover_memory_clouds": 0.499,
+    "get_status": 3.177,
+    "initialize": 18.72
+  },
+  "warnings": []
+}

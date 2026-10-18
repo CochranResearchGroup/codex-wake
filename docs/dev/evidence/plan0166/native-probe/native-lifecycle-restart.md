@@ -1,0 +1,21 @@
+# Issue278 bounded native packet checkpoint
+
+STOP: no further provider turns authorized in this lane. Source beeacfa; no product source changes here. Raw fixture evidence is private under /tmp/cw166-q. acceptance-summary.json and final-public-reconcile.json are authoritative closeout locators.
+
+Four genuine user turns consumed 266117 native cumulative tokens, now all known/settled by public execution --reconcile; reserved0 and unknown[]. This replaces the earlier provisional floor. Review turn54539 failed its actual pinned command. Never normalize its flat authored work-review.json or describe it as a passed review. No continuation ran.
+
+Passed: concurrent A/B reservations and no-effect third denial; real writer and failed atomic replacement preserving artifact; explicit public revision renewal preserving historical cost/start/deadline; fresh paused goal product autobinding to same actor; public refresh under supported isolated registry. PhaseA monitor lacked start_new_session and disappeared; independent controller fence behaved correctly. Later monitor was detached and identity verified after launcher returned. Current runtime expired at inherited session deadline; cleanup exact-owned only, receipt final-cleanup.json.
+
+Missing semantic proof is genuine successful preflight + one continuation (2 paid turns). Runnable fresh proof likely requires THREE turns: a new genuine source checkpoint writer, preflight, continuation, because C's original session deadline 2026-10-16T21:17:40UTC has expired. Do not reset that actor deadline or invent a ledger binding. Any alternative transfer must first qualify via public API without paid effects. New budget/authority required before spending.
+
+Restart effect-free prerequisites: load current source/policies and inspect existing receipts; preserve old failed artifact. Fix harness schema contract and validate locally before spending. Create new private root/home/workspace with real Git commit and trusted project config before TUI startup. Set XDG_CONFIG_HOME and XDG_STATE_HOME from the START; enroll only owned fixture root in isolated roots.d, retaining checks of own pending work. Keep explicit dedicated CODEX_HOME. Start monitor using subprocess.Popen(..., start_new_session=True, stdin=DEVNULL, stdout=private_log, stderr=private_log), capture boot_id/start_time_ticks, and verify exact identity after launcher returns. Use real qualified UTC for admission, BOOTTIME heartbeat, sufficient ORIGINAL source session duration for writer+refresh+preflight+continuation; no time fabrication. All public calls need persisted same-intent reconciliation after ambiguous effects. On TUI paused-goal modal select Leave paused and verify goal authority before further calls.
+
+Only a fresh native goal PAUSED with tokensUsed0/timeUsedSeconds0 and tokenBudget exactly existing actor.tokens_remaining qualifies autobinding. Use public lifecycle operations; no direct ledger mutation/settlement/aliases. Reconcile final native counters via public sessions execution --reconcile. Count max cumulative per distinct rollout, reserve unknown costs explicitly. One-shot continuation must pause/stop without autonomous loop. Preserve source checkpoint hashes and selected actual instructions.
+
+Correct semantic artifact MUST be explicitly specified to native reviewer with nested schema:
+```json
+{"source_thread_id":"...","successor_thread_id":"...","checkpoint_sha256":"...","intent_fingerprint":"...","configuration_revision":"...","work_review":{"verdict":"accept|correct|blocked","selected_review":"...","changes":[],"acceptance_progress":[{"criterion":"exact approved criterion","change":"...","evidence":[{"path":"...","sha256":"..."}]}],"scope_deviations":[],"unsupported_claims":[],"unfinished_work":[],"next_packet":"exact checkpoint next_packet"}}
+```
+Native reviewer authors semantics; pinned verifier validates hash-bound evidence and assembles proof.work_review from the nested native object. Validate exact currently required runtime schema before dispatch; this example is a checkpoint, not API authority. Do not wrap old flat artifact retrospectively.
+
+Memory disposition: forbidden (this lane authorizes /tmp evidence only, no external memory writes).

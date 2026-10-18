@@ -711,6 +711,10 @@ def advance_handoff(path,receipt,profile,policy,args,root):
 
 
 def before_handoff_effect(path,receipt):
+    from .strict_runtime import guard_execution
+    if not guard_execution(path.parent.parent,receipt):
+        save(path,receipt)
+        return False
     from .native_clock import snapshot
     bounds=snapshot().get('utc')
     if not bounds or bounds['upper']>=receipt['continuation_deadline']:

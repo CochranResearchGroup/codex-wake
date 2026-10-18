@@ -1,0 +1,18 @@
+............................/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+...................E
+======================================================================
+ERROR: test_lifecycle_supervision (unittest.loader._FailedTest.test_lifecycle_supervision)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_lifecycle_supervision
+Traceback (most recent call last):
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'test_lifecycle_supervision'
+
+
+----------------------------------------------------------------------
+Ran 48 tests in 3.222s
+
+FAILED (errors=1)

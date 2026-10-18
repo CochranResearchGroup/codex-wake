@@ -1,0 +1,401 @@
+................................................................................................................................................................................./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+.../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+..../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+.../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+...................................................................................................................................................................................................................................................................................................s......................................Executing <Task pending name='Task-16' coro=<LifecycleMCPTests.test_handoff_exposes_checkpoint_and_mode_without_peer_budget_or_probe_overrides() running at /home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_lifecycle_mcp.py:87> cb=[_run_until_complete_cb() at /home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:181] created at /home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:100> took 0.317 seconds
+...........................................................................................................................................................................................................{"native_delivery": {"next_reconciliation_at": "2026-10-16T22:22:18Z", "reconciliation": {"checked_at": "2026-10-16T22:22:13Z", "reason": "multiple_native_submissions", "state": "unresolved"}, "state": "uncertain"}, "result": "skipped", "status": "firing", "wake_id": "wake_20261016_222213_1da0"}
+wake_20261009_000001_6633 /tmp/tmpukagp3xf/wakes/pending/wake_20261009_000001_6633.json
+wake_20261009_000001_a6dd /tmp/tmp2ou3s2d_/wake/pending/wake_20261009_000001_a6dd.json
+{"native_delivery": {"acknowledgment": "not_observed", "evidence": {"client_message_id": "client-exact", "execution": "turn_completed", "source": "native_turn", "turn_id": "turn-exact", "user_message_id": "message-exact"}, "execution": "turn_completed", "reconciled": true, "reconciliation": {"checked_at": "2026-10-16T22:22:14Z", "state": "resolved"}, "state": "accepted"}, "result": "submitted", "status": "submitted", "wake_id": "wake_20261016_222214_3ffc"}
+..........................................................................................................................usage: codex-wake sessions open [-h] [--json] [--app-server APP_SERVER]
+                                [--tmux-socket TMUX_SOCKET]
+                                [--tmux-session TMUX_SESSION]
+                                [--timeout TIMEOUT] (--new | --resume RESUME)
+                                [--cwd CWD] --name NAME
+                                [--codex-path CODEX_PATH] [--extra-attachment]
+codex-wake sessions open: error: one of the arguments --new --resume is required
+...................................................................................................................................../home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+.........................................................................................................................................................................................................................codex-wake: webhook listener configuration is invalid
+....................................................
+----------------------------------------------------------------------
+Ran 1326 tests in 726.676s
+
+OK (skipped=1)
+{"cleanup": {"safe": true, "temporary_roots_removed": true}, "overall": "accepted", "phase": "cleaned"}
+{"cleanup": {"recovery_root": "/tmp/tmpxobqg0v9/p53-c5-ingress-fixture", "safe": false}, "overall": "failed", "phase": "cleanup_uncertain"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 1, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-16T22:24:45.499118+00:00", "deadline": "2026-10-16T22:39:45.499118+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "COMMITTED", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": "METHOD", "leak_free": true, "status": 405}, "wrong_path": {"code": "ROUTE", "leak_free": true, "status": 404}}, "request_sha256": "f1f7dd8be4ed0f88d3305d5d38762d68472f6e29602e2951731c9e86e7f234e1", "security_header_fingerprint": "76ce92303976df064083504fb86402c470a42ec63959c4fe7a0f41f0c9d2e120", "signed_delivery_id": "ab8aa1a4-283d-4e71-9d6f-2e970e0770ff", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://127.0.0.1:8820"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 2, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-16T22:24:45.499118+00:00", "deadline": "2026-10-16T22:39:45.499118+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "f1f7dd8be4ed0f88d3305d5d38762d68472f6e29602e2951731c9e86e7f234e1", "security_header_fingerprint": "76ce92303976df064083504fb86402c470a42ec63959c4fe7a0f41f0c9d2e120", "signed_delivery_id": "ab8aa1a4-283d-4e71-9d6f-2e970e0770ff", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://codex-wake.localhost"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 3, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-16T22:24:45.499118+00:00", "deadline": "2026-10-16T22:39:45.499118+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": "codex-wake.ecochran.dyndns.org", "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "f1f7dd8be4ed0f88d3305d5d38762d68472f6e29602e2951731c9e86e7f234e1", "security_header_fingerprint": "76ce92303976df064083504fb86402c470a42ec63959c4fe7a0f41f0c9d2e120", "signed_delivery_id": "ab8aa1a4-283d-4e71-9d6f-2e970e0770ff", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://192.168.50.108"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 4, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-16T22:24:45.499118+00:00", "deadline": "2026-10-16T22:39:45.499118+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "DUPLICATE", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": null, "leak_free": true, "status": 404}, "wrong_path": {"code": null, "leak_free": true, "status": 404}}, "request_sha256": "f1f7dd8be4ed0f88d3305d5d38762d68472f6e29602e2951731c9e86e7f234e1", "security_header_fingerprint": "76ce92303976df064083504fb86402c470a42ec63959c4fe7a0f41f0c9d2e120", "signed_delivery_id": "ab8aa1a4-283d-4e71-9d6f-2e970e0770ff", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "https://codex-wake.ecochran.dyndns.org"}
+{"accepted": true, "dispatch": "absent", "effect_counters": {"authoritative_attempt_reads": 1, "dispatch_calls": 0, "production_provider_factory_calls": 0}, "evidence_window": {"created_at": "2026-10-16T22:24:45.540703+00:00", "deadline": "2026-10-16T22:39:45.540703+00:00", "remaining_seconds": 899}, "external_provider_access": "absent_by_fixture_bootstrap", "host_header": null, "observations": {"signed_exact": {"code": "COMMITTED", "leak_free": true, "status": 200}, "unsigned_exact": {"code": "SIGNATURE_INVALID", "leak_free": true, "status": 401}, "wrong_method": {"code": "METHOD", "leak_free": true, "status": 405}, "wrong_path": {"code": "ROUTE", "leak_free": true, "status": 404}}, "request_sha256": "fe3f0d4e7f8dcc43dd3614e85d315f6ef6e9223cb03636d85a5099644494b008", "security_header_fingerprint": "ce51ea2a1deb4b1cd22609ad7fcda0cb3cdc0e8a31fabe177fa8066f39e01e5e", "signed_delivery_id": "29b631bf-8fd1-4fb0-89b4-ff73e0835a2a", "stage": "checked", "state": {"failed": 0, "firing": 0, "matches": 0, "pending": 1, "receipts": 1, "submitted": 0}, "url_origin": "http://127.0.0.1:8820"}
+source=github-webhook
+enabled=true
+config=/tmp/tmp3t1gscah/wake/github/webhook-listeners.json
+{"address": "127.0.0.1", "allow_non_loopback": false, "current_generation": 1, "enabled": true, "max_body_bytes": 262144, "max_connections": 8, "operation_timeout_seconds": 8.0, "path": "/github/webhook", "port": 8820, "previous_generation": null, "previous_secret_ref": null, "request_timeout_seconds": 15.0, "secret_ref": "CODEX_WAKE_WEBHOOK_SECRET", "shutdown_timeout_seconds": 10.0, "source_instance": "github-webhook"}
+source=public-webhook
+enabled=true
+config=/tmp/tmp3t1gscah/wake/github/webhook-listeners.json
+{"counters": {"create": 0, "delete": 0, "dispatch": 0, "redelivery": 0, "trigger": 0}, "dispatch": "disabled", "identity": {"actor": "ecochran76", "callback_url": "https://codex-wake.ecochran.dyndns.org/github/webhook", "conclusion": "success", "github_host": "github.com", "listener": "127.0.0.1:8820", "ref": "refs/heads/main", "repository": "CochranResearchGroup/codex-wake", "repository_id": 1242753508, "secret_ref": "CODEX_WAKE_P53_C6_WEBHOOK_SECRET", "source_instance": "p53-c6-live-github", "token_ref": "CODEX_WAKE_P53_C6_GITHUB_TOKEN", "unit": "codex-wake-github-webhook-p53-c6-live-github.service", "workflow_id": 279450573, "workflow_path": ".github/workflows/ci.yml"}, "network": "absent", "phase": "read_only_preflight", "provider_transport": "absent", "runtime_counters": {"cleanup": 0, "establish": 0, "observation": 0, "secret_provision": 0, "secret_retirement": 0}}

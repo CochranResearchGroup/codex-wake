@@ -37,6 +37,8 @@ def _private(path, directory=False):
 
 
 class ObjectiveLedger:
+    _lock_flags = fcntl.LOCK_EX
+
     def __init__(self, root, objective_id):
         if not isinstance(objective_id, str) or not objective_id.strip():
             raise ValueError('objective identity required')
@@ -59,7 +61,7 @@ class ObjectiveLedger:
         fd = os.open(self.lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, 'a+') as lock:
             _private(self.lock_path)
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            fcntl.flock(lock, self._lock_flags)
             if self.path.exists() or self.path.is_symlink():
                 _private(self.path)
                 data_fd = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW)
@@ -188,6 +190,18 @@ class ObjectiveLedger:
 
     def record(self, actor_id, cumulative_tokens, settled=False, *, now):
         return self._record(actor_id, cumulative_tokens, settled=settled, now=now)
+
+    def record_sampled_floor(self, actor_id, cumulative_tokens, *, now):
+        """Retain a later observed floor without asserting final accounting."""
+        _count(cumulative_tokens)
+        with self._transaction() as state:
+            self._observe(state,now)
+            self._view(state,now)
+            if actor_id not in state['actors']:
+                raise ValueError('sampled floor requires an enrolled actor')
+            actor=state['actors'][actor_id]
+            actor.update(used=max(actor['used'],cumulative_tokens),known=False,settled=False)
+            return self._view(state,now)
 
     def record_goal(self, goal_id, cumulative_tokens, settled=False, *, now):
         return self._record(goal_id, cumulative_tokens, settled=settled, goal=True, now=now)

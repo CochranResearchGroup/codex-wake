@@ -1,0 +1,477 @@
+{
+  "spec": 274,
+  "branch": "feat/objective-enforcement",
+  "base": "0a5c8d1",
+  "started_at": "2026-10-16T19:41:41Z",
+  "checkpoint_by": "2026-10-16T23:31:41Z",
+  "tickets": {
+    "275": {
+      "state": "validated",
+      "blocked_by": [],
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/public-containment-stop.json",
+        "native-probe/native-token-exhaustion.json",
+        "refusal-public.log",
+        "full-isolated-final.log",
+        "installed-strict-host-corrected.log"
+      ],
+      "qualification": "Validated contained launch/cleanup slice on branch, not shipped or tracker-closed. Full regression production-source snapshot18dbfec plus focused later exact-identity stop changes."
+    },
+    "276": {
+      "state": "validated",
+      "blocked_by": [
+        275
+      ],
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/native-deadline.json",
+        "native-probe/native-deadline-external-live.json",
+        "deadline-continuity-integrated.log",
+        "lost-launch-public-host.json",
+        "lost-stop-green.log",
+        "docs/agents/strict-objectives.md"
+      ],
+      "qualification": "Actual native blockedtool/TERMresistance/RPCunavailable/deadline/empty/sentinel. Restart proof realguardexecutables; suspend contract+injection, no host suspend. Exact descendant termination signal not isolated."
+    },
+    "277": {
+      "state": "validated",
+      "blocked_by": [
+        275,
+        276
+      ],
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/native-token-exhaustion.json",
+        "native-probe/native-observer-death.json",
+        "native-probe/native-deadline.json",
+        "accounting-focused-corrected.log",
+        "guard-host-accounting.json"
+      ],
+      "qualification": "Native sampled exhaustion and actual observerdeath/RPCunavailability proved. Freshness/malformed/decreasing/preflight/failedwork fixtures and independentOS/injected cases supplement, not substitute. Publicationdelay explicitly unmeasured; no maximumovershootbound."
+    },
+    "278": {
+      "state": "validated",
+      "blocked_by": [
+        277
+      ],
+      "remaining_validation": [],
+      "evidence": [
+        "native-probe/native-lifecycle-partial.json",
+        "native-probe/native-successor-summary.json",
+        "native-probe/native-successor-handoff-public.json",
+        "native-probe/native-successor-final-reconcile.json",
+        "native-probe/native-successor-sentinel.json"
+      ],
+      "qualification": "Functional spec criteria validated across q/r native packets: concurrency, failedreplacement/deadline, renewal, refresh, semanticreview/successor, exactcleanup. Localproviderturn-count axis FAILED4vs3, extraautomaticDONE hadno command; all191562chargedonce. This failure has no causal path to identity/deadline/accounting/one-command proof and is retained, not waived."
+    }
+  },
+  "workers": {
+    "host": "/root/host_execution_adapter",
+    "native": "/root/native_containment_probe"
+  },
+  "validations": [
+    {
+      "kind": "focused",
+      "selection": "legacy spawn",
+      "result": "PASS",
+      "count": 27
+    },
+    {
+      "kind": "focused",
+      "selection": "emergency interruption",
+      "result": "PASS",
+      "count": 15
+    },
+    {
+      "kind": "native public launch",
+      "result": "FAIL_BEFORE_MODEL",
+      "reason": "independent UTC upper bounds compared as elapsed heartbeat freshness",
+      "paid_turns": 0
+    },
+    {
+      "kind": "public native containment and operator stop",
+      "result": "PASS",
+      "artifact": "native-probe/public-containment-stop.json",
+      "tokens": "unknown;100000 conservatively reserved"
+    },
+    {
+      "kind": "guard first snapshot lease",
+      "result": "PASS",
+      "count": 23,
+      "artifact": "first-usage-final.log"
+    },
+    {
+      "kind": "full suite development snapshot",
+      "result": "FAIL",
+      "tests": 1294,
+      "failures": 76,
+      "errors": 4,
+      "skips": 1,
+      "artifact": "full-suite.log"
+    },
+    {
+      "kind": "baseline comparison",
+      "selection": "handoff preflight",
+      "baseline": "0a5c8d1",
+      "result": "SAME_FAILURE_COUNTS",
+      "tests": 49,
+      "failures": 50,
+      "errors": 1,
+      "artifacts": [
+        "baseline-handoff.log",
+        "handoff-hermetic.log"
+      ]
+    },
+    {
+      "kind": "frozen checkpoint focused regression",
+      "result": "PASS",
+      "tests": 97,
+      "skipped": 1,
+      "artifact": "checkpoint-focused.log",
+      "qualification": "One opt-in host test skipped here; earlier independent live host evidence retained."
+    },
+    {
+      "kind": "public refusal",
+      "result": "PASS",
+      "artifact": "refusal-public.log"
+    },
+    {
+      "kind": "actual native build/test and token exhaustion",
+      "result": "PASS",
+      "artifact": "native-probe/native-token-exhaustion.json",
+      "native_tokens": 22874,
+      "overshoot": 22873,
+      "qualification": "Not publication-to-stop timing; whole packet20.124sec. Does not validate other277 criteria or unlock dependencies."
+    },
+    {
+      "kind": "settled cap fence",
+      "result": "PASS",
+      "tests": 24,
+      "red": "settled-cap-red.log",
+      "green": "settled-cap-green.log"
+    },
+    {
+      "kind": "full branch comparison",
+      "result": "SAME_FAILURE_IDENTITIES",
+      "baseline_tests": 1268,
+      "candidate_tests": 1302,
+      "failures": 63,
+      "errors": 1,
+      "artifact": "full-comparison.json"
+    },
+    {
+      "kind": "wheel",
+      "result": "BUILD_AND_ISOLATED_INSTALL_PASS",
+      "wheel_sha256": "8450d0024ccaf0e3a78a72fb4406f352f16333eaed7a39002f1e495120bbeaed",
+      "prefix": "/tmp/cw166-wheel-installed",
+      "interpreter": "/home/ecochran76/.local/share/codex-wake/releases/0.16.0-d3ea192/bin/python",
+      "qualification": "Disposable qualification install only; production prefix unchanged."
+    },
+    {
+      "kind": "installed live host regression",
+      "result": "FIRST_ATTEMPT_ERROR",
+      "reason": "manager/kernel cgroup-removal observation race in opt-in test; exact-invocation bounded re-observation added",
+      "artifact": "installed-strict-host.log"
+    },
+    {
+      "kind": "installed live host corrected regression",
+      "result": "PASS",
+      "tests": 35,
+      "skips": 0,
+      "artifact": "installed-strict-host-corrected.log",
+      "qualification": "First observation-race failure retained; exact-invocation same-deadline polling repair."
+    },
+    {
+      "kind": "full isolated source regression",
+      "result": "PASS",
+      "artifact": "full-isolated-final.log",
+      "sha256": "22a6392d0d524d38a564d30df3fba1128fb68a290e2e279061c37971ce8e1ea6",
+      "qualification": "Production source held unchanged for full run. Opt-in host case separately35checksPASS; bounded live-test observation correction plus lost-stop new test need focused follow-up."
+    },
+    {
+      "kind": "public operator lost launch reconciliation",
+      "result": "PASS",
+      "artifact": "lost-launch-public-host.json",
+      "qualification": "Real systemd invocation + public stopCLI; generic sleep/injected time and ledger, no native/provider. Replacement invocation rejection focused test passes."
+    },
+    {
+      "kind": "reconciliation critical regression",
+      "result": "PASS",
+      "tests": 37,
+      "live_tests": "lost-launch-green.log",
+      "final_generation_cases": "reconcile-focused-final.log",
+      "qualification": "Final focused selection1 opt-in skip; actual live host selection37 passed separately."
+    },
+    {
+      "kind": "independent guard host acceptance after metadata changes",
+      "result": "PASS",
+      "cases": 4,
+      "artifact": "guard-host-reconciliation.json",
+      "qualification": "Injected telemetry; actual guard/systemd/TERM-resistant child; identity metadata matches independent manager invocation in each case. No native/provider proof."
+    },
+    {
+      "kind": "original deadline continuity",
+      "result": "PASS",
+      "tests": 3,
+      "artifact": "deadline-continuity-integrated.log",
+      "qualification": "Real executable restart and changedboot fences; injectedBOOTTIMEjump, not actualhost suspend."
+    },
+    {
+      "kind": "actual native independent deadline",
+      "result": "PASS",
+      "artifact": "native-probe/native-deadline.json",
+      "native_tokens": 45830,
+      "seconds_before_original_deadline": 3.425,
+      "qualification": "Actual native execution; does not claim managerSIGKILL killed each particular descendant."
+    },
+    {
+      "kind": "actual native observer death",
+      "result": "PASS",
+      "artifact": "native-probe/native-observer-death.json",
+      "native_tokens": 22889,
+      "controller_loss_detection_seconds": 0.022,
+      "controller_loss_to_empty_seconds": 1.351,
+      "qualification": "Actual native tool; preserved hostfixture artifact, not a model-authored checkpoint."
+    },
+    {
+      "kind": "accounting executable readback",
+      "result": "PASS",
+      "red": "accounting-readback-red.log",
+      "green": "accounting-readback-green.log",
+      "qualification": "Ledgerpoll and actual native usage observation separately visible; nativepublicationdelayunknown."
+    },
+    {
+      "kind": "bounded aggregate accounting scan",
+      "result": "PASS",
+      "red": "accounting-capacity-red.log",
+      "green": "accounting-capacity-green.log",
+      "qualification": "32MiBaggregate/512files, growth-bounded nonblockingregularreads."
+    },
+    {
+      "kind": "final accounting selection",
+      "result": "PASS",
+      "artifact": "accounting-focused-corrected.log",
+      "qualification": "Initial selection named absentmodule; retained accounting-focused-final.log as runnererror, not productfailure."
+    },
+    {
+      "kind": "final usage and owned goal/historical renewal",
+      "result": "PASS",
+      "tests": 61,
+      "artifact": "late-usage-floor-green.log",
+      "native_reconciliation": {
+        "o": "settled45830",
+        "p": "unknown floor22889",
+        "m": "unknown floor22874"
+      }
+    },
+    {
+      "kind": "278 actual native concurrent admission and failed checkpoint replacement",
+      "result": "PASS",
+      "native_turns": 2,
+      "native_tokens": 163907,
+      "receipt": "/tmp/cw166-q/state.json",
+      "qualification": "Both actors known settled; actual third admission denied before thread/submission; fixture checkpoint retained. Successor/refresh/renewal not yet validated."
+    },
+    {
+      "kind": "full isolated frozen source beeacfa",
+      "result": "PASS",
+      "tests": 1325,
+      "skips": 1,
+      "seconds": 297.419,
+      "artifact": "full-beeacfa-isolated.log"
+    },
+    {
+      "kind": "installed wheel beeacfa",
+      "result": "PASS",
+      "tests": 53,
+      "skips": 1,
+      "artifact": "wheel-beeacfa-strict.log",
+      "wheel_sha256": "b53c1f58d2e3d753388052e27dea61f8290ed067dee0933fb8639bc02fba8079"
+    },
+    {
+      "kind": "installed wheel actual systemd",
+      "result": "PASS",
+      "tests": 7,
+      "skips": 0,
+      "artifact": "wheel-beeacfa-host-live.log"
+    },
+    {
+      "kind": "278 public explicit renewal and genuine new writer",
+      "result": "PASS",
+      "new_writer_tokens": 47671,
+      "campaign_tokens": 211578,
+      "receipt": "/tmp/cw166-q/recovery-state.json",
+      "qualification": "Historicalstart/originaldeadline/spend retained; newrevision extends currentdeadline; durablemonitor verified after shell return. Final successor proof stillpending."
+    },
+    {
+      "kind": "278 actual refresh/fresh owned goal binding",
+      "result": "PASS",
+      "qualification": "Supported privateXDGregistry includesownedroot; prior defaultregistry pendingwork interlock refusal retained."
+    },
+    {
+      "kind": "278 actual native successor preflight",
+      "result": "FAIL_HARNESS_SCHEMA",
+      "observed_tokens": 54539,
+      "continuation_started": false,
+      "qualification": "Nativeauthoredflat workreview; pinnedverifier requiresnestedwork_review. No normalization or fabricatedverdict. Inheritedsessiondeadline independentlystopped executor."
+    },
+    {
+      "kind": "278 final public reconciliation and cleanup",
+      "result": "PASS",
+      "native_tokens": 266117,
+      "accounting_known": true,
+      "unknown": [],
+      "reservations": 0,
+      "receipt": "native-probe/native-lifecycle-partial.json",
+      "qualification": "Partial acceptance only; failedpreflight and unprovencontinuation retained. Sentinel already lost in first launcher; no finalsentinelsurvivalclaim."
+    },
+    {
+      "kind": "review durability regression",
+      "result": "PASS",
+      "tests": 62,
+      "red": "review-durability-red.log",
+      "green": "review-durability-green.log"
+    },
+    {
+      "kind": "final full source4ce6ae5",
+      "result": "PASS",
+      "tests": 1326,
+      "skips": 1,
+      "seconds": 726.676,
+      "artifact": "full-review-remediation.log",
+      "qualification": "Longer runtime than prior297.419s; observed filesystemI/O and journalwaits, no retry."
+    },
+    {
+      "kind": "final installed package plusactualhost",
+      "result": "PASS",
+      "tests": 69,
+      "skips": 0,
+      "artifact": "wheel-final-strict-host.log",
+      "parity": "installed-final-parity.json"
+    }
+  ],
+  "integration_tip": "4ce6ae5",
+  "resource_accounting": {
+    "root_goal_checkpoint_tokens": 1652641,
+    "native_observed_tokens": 618851,
+    "native_unknown_turns": 2,
+    "native_reserved_unknown_tokens": 200000,
+    "further_native_turns_authorized": false,
+    "final_native_packet": {
+      "max_turns": 1,
+      "turns_used": 1,
+      "observed_tokens": 22874,
+      "failed_effect_free_startups": 1,
+      "no_further_calls": true
+    },
+    "cumulative_token_ceiling": 2000000,
+    "external_native_observed_tokens": 618851,
+    "external_native_unknown_reserved_tokens": 200000,
+    "current_packet": {
+      "state": "functional proof validated; localturncount axis failed; runtimecleaned",
+      "max_turns": 3,
+      "estimate_tokens": 350000,
+      "initial_authorized_turns": 1,
+      "remaining_two": "HOLDforwriterreadback",
+      "source": "ce700d7",
+      "turns_used": 1,
+      "observed_tokens": 191562,
+      "remaining_estimate_tokens": 304090,
+      "authorized_remaining_turns": 2,
+      "root": "/tmp/cw166-r",
+      "actual_provider_turns": 4,
+      "planned_provider_turns": 3,
+      "unknown_tokens": 0
+    },
+    "calculation": "Root native goal counter plus external paid-native observed tokens and explicitly reserved unknown turns; preserve historical allocations."
+  },
+  "checkpoint": {
+    "state_transition": "active_to_complete_validated_branch",
+    "acceptance_state": "all275\u2013278validated;reviewcomplete",
+    "progress_classification": "outcome_progress",
+    "root_tokens_at_check": 1652641,
+    "external_native_observed_tokens": 618851,
+    "unknown_historical_reserve": 200000,
+    "nominal_accounted_total": 2471492,
+    "qualification": "Observed counters are floors; reserves are estimates, not exact charge bounds. Missing final accounting stays unknown.",
+    "stop_reason": "Approvedimplementation scope complete; no merge/release/deployment.",
+    "next_action": "Recover from checkpoint-20261016-2118.md; qualify failed harness correction before any new native campaign. No further paid turns in this allocation.",
+    "final_campaign_accounting": "266117 known settled; zero reservations/unknown; historical unknown reserve unchanged",
+    "resumed": true,
+    "resume_reason": "Explicit new2MM/4h allocation; preserve priorcosts"
+  },
+  "renewals": [
+    {
+      "authority": "User: continue with renewed allocation of1MMtoken/4h; latest edited objective: stop/checkpoint before2MMtokens/4h",
+      "at": "2026-10-16T20:33:11Z",
+      "root_goal_counter": 689337,
+      "external_native_observed_tokens": 69585,
+      "external_native_unknown_reserved_tokens": 200000,
+      "cumulative_token_ceiling": 2000000,
+      "hard_time_ceiling": "2026-10-16T23:41:41Z",
+      "time_qualification": "Conservative4h from original goal start19:41:41Z, not a reset of historical consumption."
+    },
+    {
+      "authority": "User explicitly renewed2MMtokens/4h and resumedactive",
+      "at": "2026-10-16T22:01:51Z",
+      "root_baseline": 1364205,
+      "external_native_observed_baseline": 427289,
+      "historical_unknown_reserve": 200000,
+      "new_window_tokens": 2000000,
+      "nominal_cumulative_ceiling": 3991494,
+      "hard_time_ceiling": "2026-10-17T02:01:51Z",
+      "checkpoint_by": "2026-10-17T01:51:51Z"
+    }
+  ],
+  "worker_results": [
+    {
+      "handle": "/root/host_execution_adapter",
+      "scope": "restart/BOOTTIME continuity test-only",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-deadline-continuity",
+      "branch": "test/deadline-continuity",
+      "base": "ab7bf49",
+      "result": "69b3d29",
+      "integrated": "ff7d57d",
+      "state": "validated",
+      "evidence": "deadline-continuity-integrated.log"
+    },
+    {
+      "handle": "/root/native_containment_probe",
+      "scope": "actual native blocked-tool original deadline acceptance",
+      "base": "ab7bf49",
+      "state": "validated",
+      "failed_attempt": "native-probe/deadline-harness-failed.json",
+      "current_root": "/tmp/cw166-o",
+      "result": "native-probe/native-deadline.json",
+      "followup_result": "native-probe/native-observer-death.json"
+    }
+  ],
+  "goal_level_remaining": [],
+  "review": {
+    "state": "complete",
+    "broad_passes_used": 1,
+    "base": "0a5c8d1",
+    "frozen_source": "beeacfa",
+    "axes": [
+      "standards",
+      "spec"
+    ],
+    "frozen_tip": "1b0848a",
+    "standards_reviewer": "/root/review_standards",
+    "spec_reviewer": "/root/review_spec",
+    "remediation_passes_used": 1,
+    "accepted_blockers": [
+      "S1"
+    ],
+    "unresolved_blockers": [],
+    "fix_commit": "4ce6ae5"
+  },
+  "tracker_state": {
+    "278": "OPEN",
+    "277": "OPEN",
+    "276": "OPEN",
+    "275": "OPEN",
+    "274": "OPEN"
+  }
+}

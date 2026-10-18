@@ -1,0 +1,14 @@
+E
+======================================================================
+ERROR: test_effective_policy_requires_all_controls_and_reports_sampled_token_semantics (test_strict_execution.StrictConfigurationTests.test_effective_policy_requires_all_controls_and_reports_sampled_token_semantics)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_execution.py", line 30, in test_effective_policy_requires_all_controls_and_reports_sampled_token_semantics
+    self.assertEqual(value['strict_execution']['token_enforcement'],'sampled_stop')
+                     ~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'strict_execution'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.078s
+
+FAILED (errors=1)

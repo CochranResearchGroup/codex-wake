@@ -44,6 +44,12 @@ class SharedAppServerReader:
     def __enter__(self) -> SharedAppServerReader:
         self.deadline = time.monotonic() + self.timeout
         try:
+            if self.path.is_symlink():
+                from .strict_runtime import resolve_executor_endpoint
+                try:
+                    self.path=Path(resolve_executor_endpoint('unix://'+str(self.path))[7:])
+                except WakeError as exc:
+                    raise SharedSourceError(str(exc)) from exc
             info = self.path.lstat()
             if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.geteuid():
                 raise SharedSourceError("shared endpoint must be an owned Unix socket")

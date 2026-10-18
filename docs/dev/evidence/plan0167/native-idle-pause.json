@@ -1,0 +1,57 @@
+{
+  "native_pid": 77516,
+  "model_calls": 0,
+  "physical_endpoint": "unix:///tmp/codex-daemon-1000/438ff5f519164eb1692b4861b366a9eebcbfe01e98cbf5e903f3eb1fa324b051",
+  "thread_id": "01a14c43-7422-7e22-8022-86c1868b43dd",
+  "goal_before": {
+    "threadId": "01a14c43-7422-7e22-8022-86c1868b43dd",
+    "objective": "Disposable zero-model native pause qualification",
+    "status": "blocked",
+    "tokenBudget": 100,
+    "tokensUsed": 0,
+    "timeUsedSeconds": 0,
+    "createdAt": 1792280851,
+    "updatedAt": 1792280851
+  },
+  "usage": {
+    "state": "qualified",
+    "used_tokens": 0,
+    "anchor": {
+      "version": 1,
+      "thread_id": "01a14c43-7422-7e22-8022-86c1868b43dd",
+      "goal_created_at": 1792280851,
+      "boundary": "2026-10-17T23:47:31.954Z",
+      "response_ids": [],
+      "response_hashes": {}
+    },
+    "reason": null,
+    "sampled": true
+  },
+  "pause": {
+    "goal": {
+      "threadId": "01a14c43-7422-7e22-8022-86c1868b43dd",
+      "objective": "Disposable zero-model native pause qualification",
+      "status": "paused",
+      "tokenBudget": 100,
+      "tokensUsed": 0,
+      "timeUsedSeconds": 0,
+      "createdAt": 1792280851,
+      "updatedAt": 1792280851
+    }
+  },
+  "readback": {
+    "goal": {
+      "threadId": "01a14c43-7422-7e22-8022-86c1868b43dd",
+      "objective": "Disposable zero-model native pause qualification",
+      "status": "paused",
+      "tokenBudget": 100,
+      "tokensUsed": 0,
+      "timeUsedSeconds": 0,
+      "createdAt": 1792280851,
+      "updatedAt": 1792280851
+    }
+  },
+  "verdict": "PASS_NATIVE_IDLE_PAUSE_ONLY",
+  "native_exit": 0,
+  "process_present": false
+}

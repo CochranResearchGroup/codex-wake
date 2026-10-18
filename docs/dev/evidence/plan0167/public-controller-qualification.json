@@ -1,0 +1,378 @@
+{
+  "verdict": "PASS",
+  "native_controls": "injected_unix_protocol",
+  "clock": "configured_trusted_clock",
+  "model_calls": 0,
+  "python": "/tmp/cw167-tools/bin/python",
+  "watcher_pid": 95655,
+  "enrolled": {
+    "thread_id": "00000000-0000-7000-8000-000000000279",
+    "generation": "d8c33fee4aeb4188b57cea44bb6fd96f",
+    "allocation_id": "user-approved-original",
+    "goal_created_at": 1792280471,
+    "used_tokens": 40,
+    "started_upper": 1792280475.121811,
+    "started_boottime": 337232.836683788,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "time_origin": 1792280471,
+    "effects": {},
+    "checkpoint": null,
+    "token_limit": 100,
+    "time_limit_seconds": 300,
+    "checkpoint_token_percent": 5,
+    "checkpoint_seconds": 299,
+    "deadline": 1792280771,
+    "accounting": {
+      "state": "qualified",
+      "used_tokens": 40,
+      "anchor": {
+        "version": 1,
+        "thread_id": "00000000-0000-7000-8000-000000000279",
+        "goal_created_at": 1792280471,
+        "boundary": "2026-10-17T23:41:11+00:00",
+        "response_ids": [
+          [
+            "00000000-0000-7000-8000-000000000279",
+            "first"
+          ]
+        ],
+        "response_hashes": {
+          "[\"00000000-0000-7000-8000-000000000279\", \"first\"]": "6b348ea4d52a61c7a60f4585696324163438dde6cdc0978182aa3ace0aeeeeef"
+        }
+      },
+      "reason": null,
+      "sampled": true
+    },
+    "state": "armed",
+    "reason": null,
+    "controller_generation": "73f357922fbb41e2b78490d81af16034",
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "73f357922fbb41e2b78490d81af16034",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33723182
+      },
+      "interval": 0.1,
+      "observed_boottime": 337232.75734562,
+      "pid": 95655,
+      "fresh": true,
+      "age_seconds": 0.08065064495895058
+    },
+    "sampled": true,
+    "maximum_token_overshoot": null
+  },
+  "checkpoint": {
+    "accounting": {
+      "anchor": {
+        "boundary": "2026-10-17T23:41:11+00:00",
+        "goal_created_at": 1792280471,
+        "response_hashes": {
+          "[\"00000000-0000-7000-8000-000000000279\", \"first\"]": "6b348ea4d52a61c7a60f4585696324163438dde6cdc0978182aa3ace0aeeeeef"
+        },
+        "response_ids": [
+          [
+            "00000000-0000-7000-8000-000000000279",
+            "first"
+          ]
+        ],
+        "thread_id": "00000000-0000-7000-8000-000000000279",
+        "version": 1
+      },
+      "reason": null,
+      "sampled": true,
+      "state": "qualified",
+      "used_tokens": 40
+    },
+    "allocation_id": "user-approved-original",
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "checkpoint": {
+      "message": "Stop work and write a restart-safe checkpoint now. The original resource allowance remains in force.",
+      "state": "acknowledged"
+    },
+    "checkpoint_seconds": 299,
+    "checkpoint_token_percent": 5,
+    "controller_generation": "73f357922fbb41e2b78490d81af16034",
+    "deadline": 1792280771,
+    "effects": {
+      "checkpoint:owned-turn": {
+        "method": "turn/steer",
+        "params": {
+          "expectedTurnId": "owned-turn",
+          "input": [
+            {
+              "text": "Stop work and write a restart-safe checkpoint now. The original resource allowance remains in force.",
+              "type": "text"
+            }
+          ],
+          "threadId": "00000000-0000-7000-8000-000000000279"
+        },
+        "state": "acknowledged"
+      }
+    },
+    "generation": "d8c33fee4aeb4188b57cea44bb6fd96f",
+    "goal_created_at": 1792280471,
+    "observed_boottime": 337233.132035117,
+    "reason": "checkpoint_reserve",
+    "started_boottime": 337232.836683788,
+    "started_upper": 1792280475.121811,
+    "state": "checkpoint_requested",
+    "thread_id": "00000000-0000-7000-8000-000000000279",
+    "time_limit_seconds": 300,
+    "time_origin": 1792280471,
+    "token_limit": 100,
+    "used_tokens": 40,
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "73f357922fbb41e2b78490d81af16034",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33723182
+      },
+      "interval": 0.1,
+      "observed_boottime": 337233.104017946,
+      "pid": 95655,
+      "fresh": true,
+      "age_seconds": 0.0383796559763141
+    },
+    "sampled": true,
+    "maximum_token_overshoot": null
+  },
+  "stopped": {
+    "accounting": {
+      "anchor": {
+        "boundary": "2026-10-17T23:41:11+00:00",
+        "goal_created_at": 1792280471,
+        "response_hashes": {
+          "[\"00000000-0000-7000-8000-000000000279\", \"first\"]": "6b348ea4d52a61c7a60f4585696324163438dde6cdc0978182aa3ace0aeeeeef",
+          "[\"00000000-0000-7000-8000-000000000279\", \"second\"]": "3bbd22a4a2407a76ec9edfbdc7ac4f29610c1f03a55110c144deeea00d97e668"
+        },
+        "response_ids": [
+          [
+            "00000000-0000-7000-8000-000000000279",
+            "first"
+          ],
+          [
+            "00000000-0000-7000-8000-000000000279",
+            "second"
+          ]
+        ],
+        "thread_id": "00000000-0000-7000-8000-000000000279",
+        "version": 1
+      },
+      "reason": null,
+      "sampled": true,
+      "state": "qualified",
+      "used_tokens": 110
+    },
+    "allocation_id": "user-approved-original",
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "checkpoint": {
+      "message": "Stop work and write a restart-safe checkpoint now. The original resource allowance remains in force.",
+      "state": "acknowledged"
+    },
+    "checkpoint_seconds": 299,
+    "checkpoint_token_percent": 5,
+    "controller_generation": "73f357922fbb41e2b78490d81af16034",
+    "deadline": 1792280771,
+    "effects": {
+      "checkpoint:owned-turn": {
+        "method": "turn/steer",
+        "params": {
+          "expectedTurnId": "owned-turn",
+          "input": [
+            {
+              "text": "Stop work and write a restart-safe checkpoint now. The original resource allowance remains in force.",
+              "type": "text"
+            }
+          ],
+          "threadId": "00000000-0000-7000-8000-000000000279"
+        },
+        "state": "acknowledged"
+      },
+      "interrupt:owned-turn": {
+        "method": "turn/interrupt",
+        "params": {
+          "threadId": "00000000-0000-7000-8000-000000000279",
+          "turnId": "owned-turn"
+        },
+        "state": "acknowledged"
+      },
+      "pause:1792280472": {
+        "method": "thread/goal/set",
+        "params": {
+          "origin": "automatic",
+          "status": "paused",
+          "threadId": "00000000-0000-7000-8000-000000000279"
+        },
+        "state": "acknowledged"
+      }
+    },
+    "generation": "d8c33fee4aeb4188b57cea44bb6fd96f",
+    "goal_created_at": 1792280471,
+    "observed_boottime": 337234.117836712,
+    "reason": "allocation_exhausted",
+    "started_boottime": 337232.836683788,
+    "started_upper": 1792280475.121811,
+    "state": "stopped",
+    "stop_latched": true,
+    "stop_proof": true,
+    "thread_id": "00000000-0000-7000-8000-000000000279",
+    "time_limit_seconds": 300,
+    "time_origin": 1792280471,
+    "token_limit": 100,
+    "used_tokens": 110,
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "73f357922fbb41e2b78490d81af16034",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33723182
+      },
+      "interval": 0.1,
+      "observed_boottime": 337234.089733638,
+      "pid": 95655,
+      "fresh": true,
+      "age_seconds": 0.16446288401493803
+    },
+    "sampled": true,
+    "maximum_token_overshoot": null
+  },
+  "requests": [
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    },
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    },
+    {
+      "method": "turn/steer",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "expectedTurnId": "owned-turn",
+        "input": [
+          {
+            "type": "text",
+            "text": "Stop work and write a restart-safe checkpoint now. The original resource allowance remains in force."
+          }
+        ]
+      }
+    },
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    },
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    },
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    },
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    },
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    },
+    {
+      "method": "thread/goal/set",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "status": "paused",
+        "origin": "automatic"
+      }
+    },
+    {
+      "method": "turn/interrupt",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "turnId": "owned-turn"
+      }
+    },
+    {
+      "method": "thread/goal/get",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279"
+      }
+    },
+    {
+      "method": "thread/read",
+      "params": {
+        "threadId": "00000000-0000-7000-8000-000000000279",
+        "includeTurns": true
+      }
+    }
+  ]
+}

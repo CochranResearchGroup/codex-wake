@@ -1,5 +1,9 @@
 # Agent lifecycle requests
 
+When the request includes token, time, memory, CPU, swap or task limits, read
+[resource-limit enforcement](resource-limits.md) first. The templates below do
+not opt a legacy profile into containment or bootstrap an ordinary caller.
+
 Use the same operation choice through MCP. These are argument templates, not
 requests to execute; replace placeholders with your actual identity, approved
 profile, checkpoint hash and expiry. Host registry and wake-root paths are

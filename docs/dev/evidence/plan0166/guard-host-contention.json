@@ -1,0 +1,198 @@
+[
+  {
+    "case": "deadline",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-bac10042f4564a97a6eff14182b8f2b2.service",
+      "invocation_id": "eff0a5d52706490185b078224c696f76",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-bac10042f4564a97a6eff14182b8f2b2.service",
+      "main_pid": 82740
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting_error": null,
+      "child_pid": 82816,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-bac10042f4564a97a6eff14182b8f2b2.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23018337
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230185.63740357,
+      "pid": 82740,
+      "reason": "deadline_reached",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 3.0798723220068496,
+    "trigger_to_empty_seconds": 2.1622828250110615,
+    "sentinel_survived": true
+  },
+  {
+    "case": "controller_death",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-631d7ed7600d4f58b923ac8ad515a535.service",
+      "invocation_id": "4c021e2e1dc145ea82ff0961b66c75fa",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-631d7ed7600d4f58b923ac8ad515a535.service",
+      "main_pid": 83702
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting_error": null,
+      "child_pid": 83718,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-631d7ed7600d4f58b923ac8ad515a535.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23018680
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230187.376847752,
+      "pid": 83702,
+      "reason": "controller_unavailable",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 1.1718691969872452,
+    "trigger_to_empty_seconds": 0.6070892210118473,
+    "sentinel_survived": true
+  },
+  {
+    "case": "accounting_loss",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-c1bc54dfd9514108bbd8683727ba78b4.service",
+      "invocation_id": "2409bf7f5ec54f2e988050548d4fd8a4",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c1bc54dfd9514108bbd8683727ba78b4.service",
+      "main_pid": 83974
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting_error": "JSONDecodeError",
+      "child_pid": 83987,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-c1bc54dfd9514108bbd8683727ba78b4.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23018836
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230188.931007661,
+      "pid": 83974,
+      "reason": "accounting_unavailable",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 1.1545425860094838,
+    "trigger_to_empty_seconds": 0.598342268000124,
+    "sentinel_survived": true
+  },
+  {
+    "case": "injected_token_exhaustion",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-9dc9eeea18ce49ef96961d42bece2974.service",
+      "invocation_id": "678e2f72f933448698bb3cd2aebe01eb",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-9dc9eeea18ce49ef96961d42bece2974.service",
+      "main_pid": 84466
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting_error": null,
+      "child_pid": 84572,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-9dc9eeea18ce49ef96961d42bece2974.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23018982
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230190.368961634,
+      "pid": 84466,
+      "reason": "session_tokens_exhausted",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 1.1017989690008108,
+    "trigger_to_empty_seconds": 0.6821813520218711,
+    "sentinel_survived": true
+  }
+]

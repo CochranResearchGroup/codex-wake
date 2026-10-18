@@ -1,0 +1,9 @@
+{
+  "surface": "public CLI arguments emitted by MCP spawn",
+  "result": "bootstrap gap reproduced",
+  "native_request_method": "thread/goal/get",
+  "executor_creation_calls": 0,
+  "exception": "injected not-yet-created dedicated endpoint",
+  "qualification": "Injected endpoint unavailability and monitor readiness; no native calls, services or model turns. Demonstrates ordering, not a native acceptance test.",
+  "runtime_effects": 0
+}

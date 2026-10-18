@@ -1,0 +1,14 @@
+F
+======================================================================
+FAIL: test_fresh_paused_goal_adopts_proven_spawn_actor_without_double_charging (test_strict_executor.StrictExecutorTests.test_fresh_paused_goal_adopts_proven_spawn_actor_without_double_charging)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 123, in test_fresh_paused_goal_adopts_proven_spawn_actor_without_double_charging
+    self.assertEqual(set(view['actors']),{'worker'})
+AssertionError: Items in the first set but not the second:
+'goal:owned-thread:101'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.068s
+
+FAILED (failures=1)

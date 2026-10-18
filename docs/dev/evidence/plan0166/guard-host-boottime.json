@@ -1,0 +1,198 @@
+[
+  {
+    "case": "deadline",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-a0d50046b4224f738211facf8cbb0cfc.service",
+      "invocation_id": "cee78dccd32f487cbb9c21da88a46a97",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-a0d50046b4224f738211facf8cbb0cfc.service",
+      "main_pid": 63199
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 63203,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-a0d50046b4224f738211facf8cbb0cfc.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23008545
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230087.810327761,
+      "pid": 63199,
+      "reason": "deadline_reached",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 3.158880690985825,
+    "trigger_to_empty_seconds": 2.343019882973749,
+    "sentinel_survived": true
+  },
+  {
+    "case": "controller_death",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-b2f9cde1ae68406e9500abdc2aebed78.service",
+      "invocation_id": "f5cff499209548d7a76f8c664b7a2c4b",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-b2f9cde1ae68406e9500abdc2aebed78.service",
+      "main_pid": 63653
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 63659,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-b2f9cde1ae68406e9500abdc2aebed78.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23008927
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230089.86382903,
+      "pid": 63653,
+      "reason": "controller_unavailable",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [
+      "active executor cgroup unavailable"
+    ],
+    "elapsed_seconds": 1.2622384779970162,
+    "trigger_to_empty_seconds": 0.6117555270029698,
+    "sentinel_survived": true
+  },
+  {
+    "case": "accounting_loss",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-5d9b3dd3d17c4da3a4a8a61eb8c876d0.service",
+      "invocation_id": "4b9b65ff7c0c47fc83d25b9e989ffba2",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-5d9b3dd3d17c4da3a4a8a61eb8c876d0.service",
+      "main_pid": 64225
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 64256,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-5d9b3dd3d17c4da3a4a8a61eb8c876d0.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23009087
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230091.49428087,
+      "pid": 64225,
+      "reason": "accounting_unavailable",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 1.2507577369979117,
+    "trigger_to_empty_seconds": 0.6176052269875072,
+    "sentinel_survived": true
+  },
+  {
+    "case": "injected_token_exhaustion",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-8072d6a34f2d4be7aacbeccc053e8361.service",
+      "invocation_id": "005b95ca2dfe43aeb4354707b591f69c",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-8072d6a34f2d4be7aacbeccc053e8361.service",
+      "main_pid": 64566
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "child_pid": 64580,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-8072d6a34f2d4be7aacbeccc053e8361.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23009260
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 230093.156738394,
+      "pid": 64566,
+      "reason": "session_tokens_exhausted",
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [
+      "active executor cgroup unavailable"
+    ],
+    "elapsed_seconds": 1.24701742400066,
+    "trigger_to_empty_seconds": 0.641184156993404,
+    "sentinel_survived": true
+  }
+]

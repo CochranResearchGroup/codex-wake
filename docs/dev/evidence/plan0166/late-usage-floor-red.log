@@ -1,0 +1,38 @@
+EFFF
+======================================================================
+ERROR: test_late_sampled_floor_remains_unknown_atomically_and_cannot_readmit (test_objective_ledger.ObjectiveLedgerTests.test_late_sampled_floor_remains_unknown_atomically_and_cannot_readmit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_objective_ledger.py", line 18, in test_late_sampled_floor_remains_unknown_atomically_and_cannot_readmit
+    view=ledger.record_sampled_floor('a',35,now=102)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ObjectiveLedger' object has no attribute 'record_sampled_floor'
+
+======================================================================
+FAIL: test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown (test_strict_final_usage.StrictFinalUsageTests.test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown) (variant='missing_terminal')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_final_usage.py", line 100, in test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown
+    self.assertEqual(actor['used'],20 if variant=='decreased' else 27)
+AssertionError: 20 != 27
+
+======================================================================
+FAIL: test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown (test_strict_final_usage.StrictFinalUsageTests.test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown) (variant='later_inprogress')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_final_usage.py", line 100, in test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown
+    self.assertEqual(actor['used'],20 if variant=='decreased' else 27)
+AssertionError: 20 != 27
+
+======================================================================
+FAIL: test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown (test_strict_final_usage.StrictFinalUsageTests.test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown) (variant='counter_after_terminal')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_final_usage.py", line 100, in test_missing_terminal_or_later_inprogress_keeps_sampled_floor_unknown
+    self.assertEqual(actor['used'],20 if variant=='decreased' else 27)
+AssertionError: 20 != 27
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.734s
+
+FAILED (failures=3, errors=1)

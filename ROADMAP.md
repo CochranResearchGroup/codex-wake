@@ -1241,3 +1241,27 @@ P164 delivery: PR272 merged d3ea192, v0.16.0 published/installed; final hosted
 1268 tests and all release gates pass. Global inventory now13 service-owned roots,
 9 upgraded existing readers, no duplicate supervisor monitoring. Exact source,
 release/install/census and preservation receipts in Plan0164 final acceptance.
+
+## P166 | Strict objective execution enforcement
+
+State: CLOSED. Owner: primary / ecochran76. Workflow: DONE (validated branch).
+Spec #274, tickets #275–278 / [Plan0166](docs/dev/plans/0166-2026-10-16-objective-enforcement.md).
+Final source `4ce6ae5` on `feat/objective-enforcement`; all four tickets are validated.
+One whole-branch review and bounded remediation are complete. Native containment,
+deadline, accounting, concurrency, refresh, renewal and successor evidence is retained.
+The final full suite passed 1,326 tests with one optional host skip; installed-package
+and live-host selection passed all 69 checks. Sampled token limits, unknown overshoot
+and the failed local provider-turn count axis remain explicit. Tracker issues remain
+OPEN and main is unchanged. Merge, release and production deployment are separate.
+
+## P167 | Resource enforcement discoverability and existing-session supervision
+
+State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
+[Plan0167](docs/dev/plans/0167-2026-10-17-resource-enforcement-discoverability.md),
+work item #279; related #274/#278. Agent discovery audit completed at49a5260.
+User clarified the default token/time workflow: MCP enrollment in the existing
+dev session, independent checkpoint request then native pause/exact-turn stop.
+Limits persist across replacement goals until explicit user reset. Three bounded
+implementation lanes share the frozen Plan0167 interface; public/native proof
+and one bounded review remain. Strict executor bootstrap is a separate retained
+limitation, not the primary route for this requested workflow.

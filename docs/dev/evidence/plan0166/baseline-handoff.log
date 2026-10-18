@@ -1,0 +1,769 @@
+/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F./home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+E/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:87: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F
+======================================================================
+ERROR: test_preflight_references_exact_instruction_files_and_requires_native_read (test_agent_handoff_preflight.HandoffPreflightTests.test_preflight_references_exact_instruction_files_and_requires_native_read)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 26, in test_preflight_references_exact_instruction_files_and_requires_native_read
+    self.scenario(reference_contract=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 416, in scenario
+    contract=json.loads(receipt['preflight_task'].split('PREFLIGHT_CONTRACT=',1)[1].split('\n',1)[0])
+                        ~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'preflight_task'
+
+======================================================================
+FAIL: test_accept_assertion_cannot_replace_criterion_evidence (test_agent_handoff_preflight.HandoffPreflightTests.test_accept_assertion_cannot_replace_criterion_evidence) (defect='scope_drift')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 31, in test_accept_assertion_cannot_replace_criterion_evidence
+    self.scenario(bad_review=defect)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 489, in scenario
+    self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+AssertionError: 'pending_thread_work' != 'substantive_work_review_unverified'
+- pending_thread_work
++ substantive_work_review_unverified
+
+
+======================================================================
+FAIL: test_accept_assertion_cannot_replace_criterion_evidence (test_agent_handoff_preflight.HandoffPreflightTests.test_accept_assertion_cannot_replace_criterion_evidence) (defect='test_count_only')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 31, in test_accept_assertion_cannot_replace_criterion_evidence
+    self.scenario(bad_review=defect)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 489, in scenario
+    self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+AssertionError: 'pending_thread_work' != 'substantive_work_review_unverified'
+- pending_thread_work
++ substantive_work_review_unverified
+
+
+======================================================================
+FAIL: test_accept_assertion_cannot_replace_criterion_evidence (test_agent_handoff_preflight.HandoffPreflightTests.test_accept_assertion_cannot_replace_criterion_evidence) (defect='changed_evidence')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 31, in test_accept_assertion_cannot_replace_criterion_evidence
+    self.scenario(bad_review=defect)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 489, in scenario
+    self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+AssertionError: 'pending_thread_work' != 'substantive_work_review_unverified'
+- pending_thread_work
++ substantive_work_review_unverified
+
+
+======================================================================
+FAIL: test_accept_assertion_cannot_replace_criterion_evidence (test_agent_handoff_preflight.HandoffPreflightTests.test_accept_assertion_cannot_replace_criterion_evidence) (defect='unknown_criterion')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 31, in test_accept_assertion_cannot_replace_criterion_evidence
+    self.scenario(bad_review=defect)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 489, in scenario
+    self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+AssertionError: 'pending_thread_work' != 'substantive_work_review_unverified'
+- pending_thread_work
++ substantive_work_review_unverified
+
+
+======================================================================
+FAIL: test_another_live_monitor_generation_cannot_be_taken_over_or_stopped (test_agent_handoff_preflight.HandoffPreflightTests.test_another_live_monitor_generation_cannot_be_taken_over_or_stopped)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 109, in test_another_live_monitor_generation_cannot_be_taken_over_or_stopped
+    self.scenario(activate=True,foreign_monitor=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_bounded_correction_runs_owned_packet_then_accepts_actual_repair (test_agent_handoff_preflight.HandoffPreflightTests.test_bounded_correction_runs_owned_packet_then_accepts_actual_repair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 46, in test_bounded_correction_runs_owned_packet_then_accepts_actual_repair
+    self.scenario(correction='accept')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 455, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation')
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+
+
+======================================================================
+FAIL: test_cached_rollback_budget_charges_late_receiver_usage_once (test_agent_handoff_preflight.HandoffPreflightTests.test_cached_rollback_budget_charges_late_receiver_usage_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 169, in test_cached_rollback_budget_charges_late_receiver_usage_once
+    self.scenario(rollback=True,lost_rollback=True,late_usage=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_continuous_monitor_activates_one_owner_with_remaining_allowance (test_agent_handoff_preflight.HandoffPreflightTests.test_continuous_monitor_activates_one_owner_with_remaining_allowance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 76, in test_continuous_monitor_activates_one_owner_with_remaining_allowance
+    self.scenario(activate=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_correction_cannot_widen_host_approved_scope (test_agent_handoff_preflight.HandoffPreflightTests.test_correction_cannot_widen_host_approved_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 49, in test_correction_cannot_widen_host_approved_scope
+    self.scenario(correction='drift')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 437, in scenario
+    self.assertEqual(receipt['reason'],'work_review_correct')
+AssertionError: 'pending_thread_work' != 'work_review_correct'
+- pending_thread_work
++ work_review_correct
+
+
+======================================================================
+FAIL: test_daemon_expires_prepared_continuation_at_original_deadline (test_agent_handoff_preflight.HandoffPreflightTests.test_daemon_expires_prepared_continuation_at_original_deadline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 73, in test_daemon_expires_prepared_continuation_at_original_deadline
+    self.scenario(monitor_expiry=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_defaults_cannot_silently_rewrite_an_existing_assignment (test_agent_handoff_preflight.HandoffPreflightTests.test_defaults_cannot_silently_rewrite_an_existing_assignment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 40, in test_defaults_cannot_silently_rewrite_an_existing_assignment
+    self.scenario(changed_defaults=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_explicit_rollback_reuses_source_and_deducts_successor_spending_once (test_agent_handoff_preflight.HandoffPreflightTests.test_explicit_rollback_reuses_source_and_deducts_successor_spending_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 112, in test_explicit_rollback_reuses_source_and_deducts_successor_spending_once
+    self.scenario(rollback=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_late_source_accounting_cannot_activate_prepared_successor (test_agent_handoff_preflight.HandoffPreflightTests.test_late_source_accounting_cannot_activate_prepared_successor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 100, in test_late_source_accounting_cannot_activate_prepared_successor
+    self.scenario(activate=True,before_source=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_late_source_accounting_fences_active_successor (test_agent_handoff_preflight.HandoffPreflightTests.test_late_source_accounting_fences_active_successor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 94, in test_late_source_accounting_fences_active_successor
+    self.scenario(activate=True,late_source=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_late_source_time_fences_active_successor (test_agent_handoff_preflight.HandoffPreflightTests.test_late_source_time_fences_active_successor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 97, in test_late_source_time_fences_active_successor
+    self.scenario(activate=True,late_source='time')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_lost_activation_response_reconciles_original_goal_without_reactivation (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_activation_response_reconciles_original_goal_without_reactivation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 91, in test_lost_activation_response_reconciles_original_goal_without_reactivation
+    self.scenario(activate=True,lost_activate=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_lost_active_rollback_pause_response_reconciles_without_repause (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_active_rollback_pause_response_reconciles_without_repause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 148, in test_lost_active_rollback_pause_response_reconciles_without_repause
+    self.scenario(rollback=True,active_rollback=True,lost_rollback_pause=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_lost_deadline_pause_response_reconciles_without_repeating_pause (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_deadline_pause_response_reconciles_without_repeating_pause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 88, in test_lost_deadline_pause_response_reconciles_without_repeating_pause
+    self.scenario(activate=True,enforce_deadline=True,lost_pause=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_lost_goal_creation_response_never_repeats_unobserved_creation (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_goal_creation_response_never_repeats_unobserved_creation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 64, in test_lost_goal_creation_response_never_repeats_unobserved_creation
+    self.scenario(lost_goal=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 499, in scenario
+    self.assertEqual(receipt['state'],'uncertain')
+AssertionError: 'blocked' != 'uncertain'
+- blocked
++ uncertain
+
+
+======================================================================
+FAIL: test_lost_leave_paused_response_observes_composer_without_second_key (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_leave_paused_response_observes_composer_without_second_key)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 160, in test_lost_leave_paused_response_observes_composer_without_second_key
+    self.scenario(same_tab=True,rollback=True,resume_modal=True,lost_modal=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_lost_preflight_interrupt_response_reconciles_without_reinterrupt (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_preflight_interrupt_response_reconciles_without_reinterrupt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 127, in test_lost_preflight_interrupt_response_reconciles_without_reinterrupt
+    self.scenario(running_overspend=True,lost_preflight_interrupt=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 472, in scenario
+    self.assertEqual(receipt['state'],'uncertain' if lost_preflight_interrupt and _==0 else 'blocked')
+AssertionError: 'blocked' != 'uncertain'
+- blocked
++ uncertain
+
+
+======================================================================
+FAIL: test_lost_rollback_budget_response_reconciles_without_second_debit (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_rollback_budget_response_reconciles_without_second_debit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 115, in test_lost_rollback_budget_response_reconciles_without_second_debit
+    self.scenario(rollback=True,lost_rollback=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_lost_source_restore_response_observes_existing_generation_without_respawn (test_agent_handoff_preflight.HandoffPreflightTests.test_lost_source_restore_response_observes_existing_generation_without_respawn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 166, in test_lost_source_restore_response_observes_existing_generation_without_respawn
+    self.scenario(rollback=True,missing_source=True,lost_restore=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_missing_first_usage_snapshot_observes_existing_turn_without_new_admission (test_agent_handoff_preflight.HandoffPreflightTests.test_missing_first_usage_snapshot_observes_existing_turn_without_new_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 121, in test_missing_first_usage_snapshot_observes_existing_turn_without_new_admission
+    self.scenario(pending_usage=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 427, in scenario
+    self.assertEqual(receipt['state'],'awaiting_preflight')
+AssertionError: 'blocked' != 'awaiting_preflight'
+- blocked
++ awaiting_preflight
+
+
+======================================================================
+FAIL: test_monitor_charges_cached_rollout_tokens_instead_of_discounted_goal_counter (test_agent_handoff_preflight.HandoffPreflightTests.test_monitor_charges_cached_rollout_tokens_instead_of_discounted_goal_counter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 79, in test_monitor_charges_cached_rollout_tokens_instead_of_discounted_goal_counter
+    self.scenario(activate=True,session_cap=100,cached_goal=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_monitor_pauses_and_interrupts_owned_turn_before_original_deadline (test_agent_handoff_preflight.HandoffPreflightTests.test_monitor_pauses_and_interrupts_owned_turn_before_original_deadline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 85, in test_monitor_pauses_and_interrupts_owned_turn_before_original_deadline
+    self.scenario(activate=True,enforce_deadline=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_monitor_shutdown_pauses_owned_goal_and_preserves_allowance (test_agent_handoff_preflight.HandoffPreflightTests.test_monitor_shutdown_pauses_owned_goal_and_preserves_allowance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 103, in test_monitor_shutdown_pauses_owned_goal_and_preserves_allowance
+    self.scenario(activate=True,shutdown=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_non_github_review_accepts_evidence_without_changing_native_guards (test_agent_handoff_preflight.HandoffPreflightTests.test_non_github_review_accepts_evidence_without_changing_native_guards)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 23, in test_non_github_review_accepts_evidence_without_changing_native_guards
+    self.scenario(workflow='local-review')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_one_successor_runs_preflight_without_two_active_goals_or_duplicate_assignment (test_agent_handoff_preflight.HandoffPreflightTests.test_one_successor_runs_preflight_without_two_active_goals_or_duplicate_assignment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 58, in test_one_successor_runs_preflight_without_two_active_goals_or_duplicate_assignment
+    self.scenario()
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_preflight_allowance_must_fit_before_creating_a_successor (test_agent_handoff_preflight.HandoffPreflightTests.test_preflight_allowance_must_fit_before_creating_a_successor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 61, in test_preflight_allowance_must_fit_before_creating_a_successor
+    self.scenario(source_budget=60)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 494, in scenario
+    self.assertEqual(receipt['reason'],'preflight_allowance_insufficient')
+AssertionError: 'pending_thread_work' != 'preflight_allowance_insufficient'
+- pending_thread_work
++ preflight_allowance_insufficient
+
+
+======================================================================
+FAIL: test_preflight_crossing_original_deadline_cannot_prepare_a_goal (test_agent_handoff_preflight.HandoffPreflightTests.test_preflight_crossing_original_deadline_cannot_prepare_a_goal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 70, in test_preflight_crossing_original_deadline_cannot_prepare_a_goal
+    self.scenario(expire_preflight=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 482, in scenario
+    self.assertEqual(receipt['state'],'expired')
+AssertionError: 'blocked' != 'expired'
+- blocked
++ expired
+
+
+======================================================================
+FAIL: test_ready_runtime_with_unsupported_completion_cannot_prepare_a_goal (test_agent_handoff_preflight.HandoffPreflightTests.test_ready_runtime_with_unsupported_completion_cannot_prepare_a_goal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 55, in test_ready_runtime_with_unsupported_completion_cannot_prepare_a_goal
+    self.scenario(work_verdict='correct')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 503, in scenario
+    self.assertEqual(receipt['reason'], 'work_review_correct')
+AssertionError: 'pending_thread_work' != 'work_review_correct'
+- pending_thread_work
++ work_review_correct
+
+
+======================================================================
+FAIL: test_repeated_rejection_stops_after_two_owned_correction_cycles (test_agent_handoff_preflight.HandoffPreflightTests.test_repeated_rejection_stops_after_two_owned_correction_cycles)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 52, in test_repeated_rejection_stops_after_two_owned_correction_cycles
+    self.scenario(correction='reject')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 446, in scenario
+    self.assertEqual(receipt['reason'],'correction_cycles_exhausted')
+AssertionError: 'pending_thread_work' != 'correction_cycles_exhausted'
+- pending_thread_work
++ correction_cycles_exhausted
+
+
+======================================================================
+FAIL: test_replacement_context_preserves_existing_session_deadline_through_goal_alias (test_agent_handoff_preflight.HandoffPreflightTests.test_replacement_context_preserves_existing_session_deadline_through_goal_alias)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 37, in test_replacement_context_preserves_existing_session_deadline_through_goal_alias
+    self.scenario(inherited_deadline=1020)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_restored_unknown_dialog_never_receives_an_automatic_key (test_agent_handoff_preflight.HandoffPreflightTests.test_restored_unknown_dialog_never_receives_an_automatic_key)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 163, in test_restored_unknown_dialog_never_receives_an_automatic_key
+    self.scenario(same_tab=True,rollback=True,resume_modal="other")
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_rollback_cannot_debit_source_after_another_transition_takes_ownership (test_agent_handoff_preflight.HandoffPreflightTests.test_rollback_cannot_debit_source_after_another_transition_takes_ownership)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 118, in test_rollback_cannot_debit_source_after_another_transition_takes_ownership
+    self.scenario(rollback=True,owner_conflict=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_rollback_pauses_owned_active_successor_before_restoring_source (test_agent_handoff_preflight.HandoffPreflightTests.test_rollback_pauses_owned_active_successor_before_restoring_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 145, in test_rollback_pauses_owned_active_successor_before_restoring_source
+    self.scenario(rollback=True,active_rollback=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_rollback_restores_missing_source_in_the_owned_successor_pane (test_agent_handoff_preflight.HandoffPreflightTests.test_rollback_restores_missing_source_in_the_owned_successor_pane)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 151, in test_rollback_restores_missing_source_in_the_owned_successor_pane
+    self.scenario(rollback=True,missing_source=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_running_preflight_over_allowance_interrupts_exact_assignment_once (test_agent_handoff_preflight.HandoffPreflightTests.test_running_preflight_over_allowance_interrupts_exact_assignment_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 124, in test_running_preflight_over_allowance_interrupts_exact_assignment_once
+    self.scenario(running_overspend=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 474, in scenario
+    self.assertEqual(receipt['reason'],'preflight_allowance_exhausted')
+AssertionError: 'pending_thread_work' != 'preflight_allowance_exhausted'
+- pending_thread_work
++ preflight_allowance_exhausted
+
+
+======================================================================
+FAIL: test_same_intent_cli_readback_preserves_active_monitor_ownership (test_agent_handoff_preflight.HandoffPreflightTests.test_same_intent_cli_readback_preserves_active_monitor_ownership)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 106, in test_same_intent_cli_readback_preserves_active_monitor_ownership
+    self.scenario(activate=True,readback=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_same_tab_lost_respawn_response_reconciles_new_generation_without_respawn (test_agent_handoff_preflight.HandoffPreflightTests.test_same_tab_lost_respawn_response_reconciles_new_generation_without_respawn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 139, in test_same_tab_lost_respawn_response_reconciles_new_generation_without_respawn
+    self.scenario(same_tab=True,lost_respawn=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 468, in scenario
+    self.assertEqual(receipt['state'],'uncertain')
+AssertionError: 'blocked' != 'uncertain'
+- blocked
++ uncertain
+
+
+======================================================================
+FAIL: test_same_tab_observes_owned_successor_after_detached_source_unloads (test_agent_handoff_preflight.HandoffPreflightTests.test_same_tab_observes_owned_successor_after_detached_source_unloads)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 133, in test_same_tab_observes_owned_successor_after_detached_source_unloads
+    self.scenario(same_tab=True,unloaded_source=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_same_tab_rollback_leaves_resumed_goal_paused_before_composer_check (test_agent_handoff_preflight.HandoffPreflightTests.test_same_tab_rollback_leaves_resumed_goal_paused_before_composer_check)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 157, in test_same_tab_rollback_leaves_resumed_goal_paused_before_composer_check
+    self.scenario(same_tab=True,rollback=True,resume_modal=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_same_tab_rollback_restores_original_paused_conversation (test_agent_handoff_preflight.HandoffPreflightTests.test_same_tab_rollback_restores_original_paused_conversation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 154, in test_same_tab_rollback_restores_original_paused_conversation
+    self.scenario(same_tab=True,rollback=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_same_tab_stale_title_cannot_replace_pinned_source_generation (test_agent_handoff_preflight.HandoffPreflightTests.test_same_tab_stale_title_cannot_replace_pinned_source_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 142, in test_same_tab_stale_title_cannot_replace_pinned_source_generation
+    self.scenario(same_tab=True,stale_title=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 462, in scenario
+    if _==0:self.assertEqual(receipt['state'],'awaiting_preflight')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'blocked' != 'awaiting_preflight'
+- blocked
++ awaiting_preflight
+
+
+======================================================================
+FAIL: test_same_tab_uses_fresh_identity_in_original_owned_pane_once (test_agent_handoff_preflight.HandoffPreflightTests.test_same_tab_uses_fresh_identity_in_original_owned_pane_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 130, in test_same_tab_uses_fresh_identity_in_original_owned_pane_once
+    self.scenario(same_tab=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_successor_goal_is_bounded_by_session_and_shared_objective_allowance (test_agent_handoff_preflight.HandoffPreflightTests.test_successor_goal_is_bounded_by_session_and_shared_objective_allowance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 34, in test_successor_goal_is_bounded_by_session_and_shared_objective_allowance
+    self.scenario(session_cap=100)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_unknown_clock_still_fences_active_owned_work (test_agent_handoff_preflight.HandoffPreflightTests.test_unknown_clock_still_fences_active_owned_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 82, in test_unknown_clock_still_fences_active_owned_work
+    self.scenario(activate=True,enforce_deadline='unknown')
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+======================================================================
+FAIL: test_unloaded_same_tab_source_with_active_native_turn_still_holds (test_agent_handoff_preflight.HandoffPreflightTests.test_unloaded_same_tab_source_with_active_native_turn_still_holds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 136, in test_unloaded_same_tab_source_with_active_native_turn_still_holds
+    self.scenario(same_tab=True,unloaded_source=True,unloaded_active=True)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 509, in scenario
+    self.assertEqual(receipt['reason'],'detached_source_retirement_unverified')
+AssertionError: 'pending_thread_work' != 'detached_source_retirement_unverified'
+- pending_thread_work
++ detached_source_retirement_unverified
+
+
+======================================================================
+FAIL: test_usage_spent_while_pausing_is_deducted_before_successor_preparation (test_agent_handoff_preflight.HandoffPreflightTests.test_usage_spent_while_pausing_is_deducted_before_successor_preparation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 67, in test_usage_spent_while_pausing_is_deducted_before_successor_preparation
+    self.scenario(pause_used=53)
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_agent_handoff_preflight.py", line 512, in scenario
+    self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+AssertionError: 'blocked' != 'awaiting_activation'
+- blocked
++ awaiting_activation
+ : {'history': None, 'respawns': 0}
+
+----------------------------------------------------------------------
+Ran 49 tests in 9.049s
+
+FAILED (failures=50, errors=1)

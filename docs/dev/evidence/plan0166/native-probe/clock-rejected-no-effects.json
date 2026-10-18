@@ -1,0 +1,8 @@
+{
+  "state": "failed",
+  "error": "ValueError: admissible time unavailable",
+  "root": "/tmp/cw166-l",
+  "raw_sha256": "653f7f7efc3943cf78b987b1ccd84c4a2ab6b0a48d27b87d7b0514236ae996db",
+  "native_turns": 0,
+  "qualification": "No binding/service/thread; no paid turn. One bounded recovery rootm succeeded."
+}

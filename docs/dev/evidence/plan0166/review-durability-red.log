@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_guard_accounting_persists_directory_update (test_strict_executor.StrictExecutorTests.test_guard_accounting_persists_directory_update)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 22, in test_guard_accounting_persists_directory_update
+    self.assertIn(str(ledger.directory), synced_directories)
+AssertionError: '/tmp/tmpc3656xy1/objective-ledgers' not found in []
+
+----------------------------------------------------------------------
+Ran 1 test in 0.139s
+
+FAILED (failures=1)

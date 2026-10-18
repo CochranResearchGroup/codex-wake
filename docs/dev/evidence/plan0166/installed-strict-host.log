@@ -1,0 +1,18 @@
+./tmp/cw166-wheel-installed/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+...............................E..
+======================================================================
+ERROR: test_live_deadline_stops_service_without_controller (test_host_execution.HostExecutionTests.test_live_deadline_stops_service_without_controller)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_host_execution.py", line 82, in test_live_deadline_stops_service_without_controller
+    state = adapter.inspect(identity)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/cw166-wheel-installed/codex_wake/host_execution.py", line 107, in inspect
+    raise RuntimeError('active executor cgroup unavailable')
+RuntimeError: active executor cgroup unavailable
+
+----------------------------------------------------------------------
+Ran 35 tests in 2.948s
+
+FAILED (errors=1)

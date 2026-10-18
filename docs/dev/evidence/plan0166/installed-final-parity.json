@@ -1,0 +1,8 @@
+{
+  "source_commit": "4ce6ae5",
+  "installed_target": "/tmp/cw166-4ce6ae5-installed",
+  "interpreter": "/home/ecochran76/.local/share/codex-wake/releases/0.16.0-d3ea192/bin/python",
+  "source_python_files_matched": 106,
+  "wheel_sha256": "3f52e329da3271887ed9de51df01dd42ffed0d4a86240e1dccfab47df052cb79",
+  "qualification": "Disposable installed-package qualification, not production rollout; source files unchanged during final full run."
+}

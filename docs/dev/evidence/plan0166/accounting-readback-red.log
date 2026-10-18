@@ -1,0 +1,14 @@
+E
+======================================================================
+ERROR: test_guard_executable_readback_separates_ledger_poll_from_native_usage_observation (test_strict_executor.StrictExecutorTests.test_guard_executable_readback_separates_ledger_poll_from_native_usage_observation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 125, in test_guard_executable_readback_separates_ledger_poll_from_native_usage_observation
+    accounting=status['accounting'];actor=accounting['actors']['worker']
+               ~~~~~~^^^^^^^^^^^^^^
+KeyError: 'accounting'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.744s
+
+FAILED (errors=1)

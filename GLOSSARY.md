@@ -77,6 +77,10 @@ The user-authorized cumulative token and elapsed-time limits for an objective,
 including successors, reviewers, delegated work, retries and failed attempts.
 Changing conversation does not replenish this budget.
 
+**Goal supervision**:
+Observing an existing goal's authorized resource usage, requesting a checkpoint
+before its limits, and pausing continuation when its stopping condition is reached.
+
 **Handoff preflight**:
 The successor's verification of runtime readiness and assessment of whether the
 outgoing work advanced the approved objective with adequate evidence and scope

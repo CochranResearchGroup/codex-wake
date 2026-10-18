@@ -1,0 +1,20 @@
+...................F...
+======================================================================
+FAIL: test_resident_monitor_does_not_interrupt_strict_reservation_before_first_usage (test_strict_executor.StrictExecutorTests.test_resident_monitor_does_not_interrupt_strict_reservation_before_first_usage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 332, in test_resident_monitor_does_not_interrupt_strict_reservation_before_first_usage
+    self.assertEqual(interrupts,[])
+AssertionError: Lists differ: [{'threadId': 'owned-thread', 'turnId': 'turn'}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'threadId': 'owned-thread', 'turnId': 'turn'}
+
+- [{'threadId': 'owned-thread', 'turnId': 'turn'}]
++ []
+
+----------------------------------------------------------------------
+Ran 23 tests in 1.564s
+
+FAILED (failures=1)
