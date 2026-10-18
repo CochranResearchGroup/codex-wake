@@ -1,0 +1,20 @@
+................................................................................................................................................................................./home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F
+======================================================================
+FAIL: test_accept_assertion_cannot_replace_criterion_evidence (test_agent_handoff_preflight.HandoffPreflightTests.test_accept_assertion_cannot_replace_criterion_evidence) (defect='scope_drift')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_agent_handoff_preflight.py", line 31, in test_accept_assertion_cannot_replace_criterion_evidence
+    self.scenario(bad_review=defect)
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_agent_handoff_preflight.py", line 489, in scenario
+    self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+AssertionError: 'pending_thread_work' != 'substantive_work_review_unverified'
+- pending_thread_work
++ substantive_work_review_unverified
+
+
+----------------------------------------------------------------------
+Ran 178 tests in 67.696s
+
+FAILED (failures=1)

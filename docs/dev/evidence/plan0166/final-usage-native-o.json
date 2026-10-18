@@ -1,0 +1,227 @@
+{
+  "code": 0,
+  "stderr": "",
+  "readback": {
+    "execution": {
+      "configuration_revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+      "coverage": "dedicated_local_executor_and_descendants",
+      "exclusions": [
+        "shared_services",
+        "external_provider_execution",
+        "same_user_ipc_escape"
+      ],
+      "final_usage": {
+        "objective_budget": {
+          "accounting_known": true,
+          "actors": {
+            "spawn:15752962cb4e02b51af8624b5caf786ab83e25b9ce3edf77f8d9c11dbd8fbcd1": {
+              "known": true,
+              "reservation": 100000,
+              "session_deadline": 1792183039.072469,
+              "settled": true,
+              "terms": [
+                100000,
+                54
+              ],
+              "tokens_remaining": 54170,
+              "used": 45830
+            }
+          },
+          "authorization_history": [
+            {
+              "action": "initial",
+              "approval": "operator acceptance",
+              "at": 1792182980.0994432,
+              "configuration": {
+                "handoff_writer": {
+                  "instructions": "Preserve exact checkpoint evidence.",
+                  "name": "writer",
+                  "path": "/tmp/cw166-o/writer.md",
+                  "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+                },
+                "max_correction_cycles": 0,
+                "objective": "Disposable strict execution acceptance",
+                "objective_deadline": "2026-10-16T20:37:20+00:00",
+                "objective_time_limit_seconds": 60,
+                "objective_token_limit": 150000,
+                "preflight_reviewer": {
+                  "instructions": "Review owned acceptance evidence only.",
+                  "name": "reviewer",
+                  "path": "/tmp/cw166-o/reviewer.md",
+                  "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+                },
+                "revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+                "session_time_limit_seconds": 60,
+                "session_token_limit": 100000,
+                "started_at": "2026-10-16T20:36:20.099443+00:00",
+                "strict_execution": {
+                  "coverage": "dedicated_local_executor_and_descendants",
+                  "exclusions": [
+                    "shared_services",
+                    "external_provider_execution",
+                    "same_user_ipc_escape"
+                  ],
+                  "limits": {
+                    "accounting_max_age_seconds": 90,
+                    "checkpoint_grace_seconds": 1,
+                    "cpu_quota_percent": 50,
+                    "memory_max_bytes": 2147483648,
+                    "memory_swap_max_bytes": 0,
+                    "poll_seconds": 0.2,
+                    "stop_grace_seconds": 2,
+                    "tasks_max": 128
+                  },
+                  "maximum_token_overshoot": null,
+                  "token_enforcement": "sampled_stop"
+                }
+              }
+            }
+          ],
+          "correction_cycles": 0,
+          "exhausted": true,
+          "goal_aliases": {},
+          "handoff_writer": {
+            "instructions": "Preserve exact checkpoint evidence.",
+            "name": "writer",
+            "path": "/tmp/cw166-o/writer.md",
+            "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+          },
+          "max_correction_cycles": 0,
+          "objective": "Disposable strict execution acceptance",
+          "objective_deadline": "2026-10-16T20:37:20+00:00",
+          "objective_id": "acceptance",
+          "objective_time_limit_seconds": 60,
+          "objective_token_limit": 150000,
+          "original_deadline": "2026-10-16T20:37:20+00:00",
+          "preflight_reviewer": {
+            "instructions": "Review owned acceptance evidence only.",
+            "name": "reviewer",
+            "path": "/tmp/cw166-o/reviewer.md",
+            "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+          },
+          "ready": false,
+          "remaining_seconds": 0,
+          "remaining_tokens": 104170,
+          "revision": "f50b089fbbfef8c53345d9914f5be1ce5138cb088b3a9e7755c595a7d50a6f66",
+          "session_time_limit_seconds": 60,
+          "session_token_limit": 100000,
+          "started_at": "2026-10-16T20:36:20.099443+00:00",
+          "state": "exhausted",
+          "strict_execution": {
+            "coverage": "dedicated_local_executor_and_descendants",
+            "exclusions": [
+              "shared_services",
+              "external_provider_execution",
+              "same_user_ipc_escape"
+            ],
+            "limits": {
+              "accounting_max_age_seconds": 90,
+              "checkpoint_grace_seconds": 1,
+              "cpu_quota_percent": 50,
+              "memory_max_bytes": 2147483648,
+              "memory_swap_max_bytes": 0,
+              "poll_seconds": 0.2,
+              "stop_grace_seconds": 2,
+              "tasks_max": 128
+            },
+            "maximum_token_overshoot": null,
+            "token_enforcement": "sampled_stop"
+          },
+          "tokens_reserved": 0,
+          "tokens_used": 45830
+        },
+        "objective_id": "acceptance",
+        "settled": [
+          "spawn:15752962cb4e02b51af8624b5caf786ab83e25b9ce3edf77f8d9c11dbd8fbcd1"
+        ],
+        "state": "settled",
+        "unknown": []
+      },
+      "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+      "guard": {
+        "accounting_error": null,
+        "child_pid": 69558,
+        "endpoint": "unix:///tmp/cw166-o/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+        "generation": "23967a0e599a41aba3cacf7fb5f334cf",
+        "identity": {
+          "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+          "start_time_ticks": 23207733
+        },
+        "objective_id": "acceptance",
+        "observed_boottime": 232132.243795158,
+        "pid": 69465,
+        "reason": "session_deadline_reached",
+        "service_identity": {
+          "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+          "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+          "main_pid": 69465,
+          "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+        },
+        "state": "stopped"
+      },
+      "history": [
+        {
+          "effect": null,
+          "reason": null,
+          "state": "preparing"
+        },
+        {
+          "effect": null,
+          "reason": null,
+          "state": "running"
+        },
+        {
+          "effect": null,
+          "reason": "session_deadline_reached",
+          "state": "stopped"
+        }
+      ],
+      "host": {
+        "configured_limits": {
+          "CPUQuotaPerSecUSec": "500ms",
+          "MemoryMax": "2147483648",
+          "MemorySwapMax": "0",
+          "TasksMax": "128"
+        },
+        "identity_retired": false,
+        "kernel_limits": {},
+        "members": [],
+        "populated": false,
+        "state": "failed",
+        "substate": "failed"
+      },
+      "identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service",
+        "invocation_id": "ad4d09e2482b42168bb839d2876eeafd",
+        "main_pid": 69465,
+        "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+      },
+      "objective_id": "acceptance",
+      "prior_execution": null,
+      "reason": "session_deadline_reached",
+      "state": "stopped",
+      "unit": "codex-wake-objective-23967a0e599a41aba3cacf7fb5f334cf.service"
+    },
+    "objective_id": "acceptance",
+    "policy": {
+      "coverage": "dedicated_local_executor_and_descendants",
+      "exclusions": [
+        "shared_services",
+        "external_provider_execution",
+        "same_user_ipc_escape"
+      ],
+      "limits": {
+        "accounting_max_age_seconds": 90,
+        "checkpoint_grace_seconds": 1,
+        "cpu_quota_percent": 50,
+        "memory_max_bytes": 2147483648,
+        "memory_swap_max_bytes": 0,
+        "poll_seconds": 0.2,
+        "stop_grace_seconds": 2,
+        "tasks_max": 128
+      },
+      "maximum_token_overshoot": null,
+      "token_enforcement": "sampled_stop"
+    }
+  }
+}

@@ -1,12 +1,13 @@
 """Owned resident lifecycle supervision; a one-shot poll cannot admit model work."""
 import json
 import os
+import time
 import fcntl
 from pathlib import Path
 
 from .agent_lifecycle import save
 from .lifecycle_budget import trusted_upper
-from .process import process_exists,process_identity
+from .process import process_exists,process_identity,boot_id_value
 
 
 def publish_supervision(root,interval,active=True):
@@ -15,7 +16,8 @@ def publish_supervision(root,interval,active=True):
     try:observed_at=trusted_upper() if active else None
     except ValueError:observed_at=None
     current=dict(state='active' if active else 'stopped',pid=os.getpid(),identity=process_identity(os.getpid()),interval=interval,
-                 active=active,observed_at=observed_at)
+                 active=active,observed_at=observed_at,
+                 observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),boot_id=boot_id_value())
     if not current['identity']:raise ValueError('supervisor process generation unavailable')
     with path.with_suffix('.lock').open('a') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
@@ -94,6 +96,8 @@ def poll_spawns(root,stop_reason=None):
                 if any(t.get('status')=='inProgress' and t['id']!=turn['id'] for t in native.get('turns',[])):
                     receipt.update(state='blocked',reason='foreign_turn_preserved');save(path,receipt);continue
                 previous=receipt.get('objective_budget',{}).get('accounting_known')
+                if receipt['intent'].get('configuration',{}).get('strict_execution'):
+                    previous=receipt.get('native_usage_observed',False)
                 terminal=turn['status'] in ('completed','failed','interrupted')
                 view=None
                 try:

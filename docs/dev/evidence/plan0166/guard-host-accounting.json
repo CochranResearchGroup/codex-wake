@@ -1,0 +1,323 @@
+[
+  {
+    "case": "deadline",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-421fe66d8aad4e139a64762eb38726c8.service",
+      "invocation_id": "b4ee6c2cbafc4fd090418d5b8cdb35f9",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-421fe66d8aad4e139a64762eb38726c8.service",
+      "main_pid": 39003
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting": {
+        "accounting_known": true,
+        "actors": {
+          "worker": {
+            "first_observed_boottime": 232415.002944358,
+            "known": true,
+            "last_observed_boottime": 232415.002944358,
+            "lease_age_seconds": 2.7344376149994787,
+            "lease_started_boottime": 232414.678673631,
+            "native_published_epoch": 1792183317.0,
+            "native_total_tokens": 20,
+            "settled": false
+          }
+        },
+        "detection_interval_seconds": 0.05,
+        "enforcement": "sampled_stop",
+        "last_verified_boottime": 232417.146538632,
+        "maximum_token_overshoot": null,
+        "metric": "native_cumulative_total_tokens_including_cached_input",
+        "observation_lease_seconds": 8,
+        "publication_delay_seconds": null,
+        "publication_delay_status": "unmeasured_independent_clock",
+        "tokens_used": 20
+      },
+      "accounting_error": null,
+      "child_pid": 39020,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-421fe66d8aad4e139a64762eb38726c8.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23241490
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 232417.413473132,
+      "pid": 39003,
+      "reason": "deadline_reached",
+      "service_identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-421fe66d8aad4e139a64762eb38726c8.service",
+        "invocation_id": "b4ee6c2cbafc4fd090418d5b8cdb35f9",
+        "main_pid": 39003,
+        "unit": "codex-wake-objective-421fe66d8aad4e139a64762eb38726c8.service"
+      },
+      "state": "stopped"
+    },
+    "after": {
+      "state": "deactivating",
+      "substate": "stop-sigterm",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {
+        "memory.max": "134217728",
+        "memory.swap.max": "0",
+        "cpu.max": "50000 100000",
+        "pids.max": "32"
+      },
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 3.081101399002364,
+    "trigger_to_empty_seconds": 2.613756652979646,
+    "sentinel_survived": true
+  },
+  {
+    "case": "controller_death",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-ca5381d6fc934d04ad6ccef4fd768790.service",
+      "invocation_id": "189f8a9d48394a3b8398a02b15d3a01b",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-ca5381d6fc934d04ad6ccef4fd768790.service",
+      "main_pid": 39459
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting": {
+        "accounting_known": true,
+        "actors": {
+          "worker": {
+            "first_observed_boottime": 232418.127437614,
+            "known": true,
+            "last_observed_boottime": 232418.127437614,
+            "lease_age_seconds": 0.5373013770149555,
+            "lease_started_boottime": 232417.922926387,
+            "native_published_epoch": 1792183320.0,
+            "native_total_tokens": 20,
+            "settled": false
+          }
+        },
+        "detection_interval_seconds": 0.05,
+        "enforcement": "sampled_stop",
+        "last_verified_boottime": 232418.191962057,
+        "maximum_token_overshoot": null,
+        "metric": "native_cumulative_total_tokens_including_cached_input",
+        "observation_lease_seconds": 8,
+        "publication_delay_seconds": null,
+        "publication_delay_status": "unmeasured_independent_clock",
+        "tokens_used": 20
+      },
+      "accounting_error": null,
+      "child_pid": 39464,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-ca5381d6fc934d04ad6ccef4fd768790.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23241804
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 232418.460634769,
+      "pid": 39459,
+      "reason": "controller_unavailable",
+      "service_identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-ca5381d6fc934d04ad6ccef4fd768790.service",
+        "invocation_id": "189f8a9d48394a3b8398a02b15d3a01b",
+        "main_pid": 39459,
+        "unit": "codex-wake-objective-ca5381d6fc934d04ad6ccef4fd768790.service"
+      },
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 0.9243038879940286,
+    "trigger_to_empty_seconds": 0.6344031949993223,
+    "sentinel_survived": true
+  },
+  {
+    "case": "accounting_loss",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-b5af7850c72a46839c08dc9be405c76c.service",
+      "invocation_id": "4458e46337e2432aa4750cd4edc56cc0",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-b5af7850c72a46839c08dc9be405c76c.service",
+      "main_pid": 39668
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting": {
+        "accounting_known": true,
+        "actors": {
+          "worker": {
+            "first_observed_boottime": 232419.14274629,
+            "known": true,
+            "last_observed_boottime": 232419.14274629,
+            "lease_age_seconds": 0.5726857469999231,
+            "lease_started_boottime": 232418.957724608,
+            "native_published_epoch": 1792183321.0,
+            "native_total_tokens": 20,
+            "settled": false
+          }
+        },
+        "detection_interval_seconds": 0.05,
+        "enforcement": "sampled_stop",
+        "last_verified_boottime": 232419.262647708,
+        "maximum_token_overshoot": null,
+        "metric": "native_cumulative_total_tokens_including_cached_input",
+        "observation_lease_seconds": 8,
+        "publication_delay_seconds": null,
+        "publication_delay_status": "unmeasured_independent_clock",
+        "tokens_used": 20
+      },
+      "accounting_error": "JSONDecodeError",
+      "child_pid": 39674,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-b5af7850c72a46839c08dc9be405c76c.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23241904
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 232419.530908389,
+      "pid": 39668,
+      "reason": "accounting_unavailable",
+      "service_identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-b5af7850c72a46839c08dc9be405c76c.service",
+        "invocation_id": "4458e46337e2432aa4750cd4edc56cc0",
+        "main_pid": 39668,
+        "unit": "codex-wake-objective-b5af7850c72a46839c08dc9be405c76c.service"
+      },
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 0.9833480429952033,
+    "trigger_to_empty_seconds": 0.6632165150076617,
+    "sentinel_survived": true
+  },
+  {
+    "case": "injected_token_exhaustion",
+    "telemetry": "injected_fixture",
+    "identity": {
+      "unit": "codex-wake-objective-22ec0cdd0c944a669e0ae32d1ffee1d3.service",
+      "invocation_id": "b8af4f4e8a494b20a66d31a51ffbaa31",
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-22ec0cdd0c944a669e0ae32d1ffee1d3.service",
+      "main_pid": 40045
+    },
+    "kernel_limits": {
+      "memory.max": "134217728",
+      "memory.swap.max": "0",
+      "cpu.max": "50000 100000",
+      "pids.max": "32"
+    },
+    "status": {
+      "accounting": {
+        "accounting_known": true,
+        "actors": {
+          "worker": {
+            "first_observed_boottime": 232420.525636103,
+            "known": true,
+            "last_observed_boottime": 232420.757589301,
+            "lease_age_seconds": 0.21224958598031662,
+            "lease_started_boottime": 232420.757589301,
+            "native_published_epoch": 1792183323.0,
+            "native_total_tokens": 101,
+            "settled": false
+          }
+        },
+        "detection_interval_seconds": 0.05,
+        "enforcement": "sampled_stop",
+        "last_verified_boottime": 232420.698758745,
+        "maximum_token_overshoot": null,
+        "metric": "native_cumulative_total_tokens_including_cached_input",
+        "observation_lease_seconds": 8,
+        "publication_delay_seconds": null,
+        "publication_delay_status": "unmeasured_independent_clock",
+        "tokens_used": 101
+      },
+      "accounting_error": null,
+      "child_pid": 40086,
+      "endpoint": "unix:///fixture.sock",
+      "generation": "codex-wake-objective-22ec0cdd0c944a669e0ae32d1ffee1d3.service",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23242043
+      },
+      "objective_id": "fixture",
+      "observed_boottime": 232420.970509084,
+      "pid": 40045,
+      "reason": "session_tokens_exhausted",
+      "service_identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-22ec0cdd0c944a669e0ae32d1ffee1d3.service",
+        "invocation_id": "b8af4f4e8a494b20a66d31a51ffbaa31",
+        "main_pid": 40045,
+        "unit": "codex-wake-objective-22ec0cdd0c944a669e0ae32d1ffee1d3.service"
+      },
+      "state": "stopped"
+    },
+    "after": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "134217728",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "32"
+      }
+    },
+    "observation_errors": [],
+    "elapsed_seconds": 1.2917621769884136,
+    "trigger_to_empty_seconds": 0.6933529890084174,
+    "sentinel_survived": true
+  }
+]

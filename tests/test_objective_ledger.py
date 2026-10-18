@@ -11,6 +11,19 @@ def config(revision=1, limit=100, deadline=200):
 
 
 class ObjectiveLedgerTests(unittest.TestCase):
+    def test_late_sampled_floor_remains_unknown_atomically_and_cannot_readmit(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger=ObjectiveLedger(root,'objective');ledger.configure(config(),'operator',now=100)
+            ledger.reserve('a',60,40,now=100);ledger.record('a',20,now=101)
+            view=ledger.record_sampled_floor('a',35,now=102)
+            self.assertEqual(view['tokens_used'],35)
+            self.assertFalse(view['accounting_known'])
+            self.assertFalse(view['actors']['a']['settled'])
+            self.assertFalse(ledger.reserve('b',10,10,now=102)['admitted'])
+            replay=ObjectiveLedger(root,'objective').record_sampled_floor('a',30,now=103)
+            self.assertEqual(replay['tokens_used'],35)
+            self.assertFalse(replay['accounting_known'])
+
     def test_correction_limit_survives_successor_replacement_and_controller_restart(self):
         with tempfile.TemporaryDirectory() as root:
             ledger=ObjectiveLedger(root,'objective')

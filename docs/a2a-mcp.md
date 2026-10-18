@@ -185,3 +185,23 @@ before tracked delivery; preparation never enrolls it automatically.
 The CLI offers identical preparation via `sessions target DESCRIPTOR` and matching
 options on `messages send`; agents with this MCP should use the MCP interface.
 This feature's installed acceptance/release status is tracked in Plan0162.
+
+
+## Existing-session goal resource limits (0.17.0)
+
+For a user-supplied `/goal` token/time allocation, discover
+`wake_goal_limits_set` and `wake_goal_limits_show`. Read the portable
+[agent workflow](../skills/codex-wake/references/existing-goal-limits.md).
+The host supplies `--goal-limits-root` and `--goal-limits-policy`; these are not caller
+arguments. Run `codex-wake --wake-root PRIVATE_ROOT goal-limits watch --interval 1`
+as an independent managed process. The agent enrolls only its actual native
+caller UUID and authorized limits; returned controller readiness/accounting,
+not tool availability alone, determines whether enforcement is armed.
+
+The controller requests a checkpoint inside the original caps, then pauses the
+current native goal and interrupts its exact active turn. Replacing/resuming a
+goal cannot reset counters or allocation. Only an explicit user reset recorded
+as a new host allocation generation can do that. Native controls preserve shared
+servers and do not promise arbitrary tool-process termination or exact token
+ceilings. Installation must sync the whole skill directory and refresh clients;
+a wheel install alone does not update the agent skill catalog.

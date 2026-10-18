@@ -1,0 +1,71 @@
+[
+  {
+    "source": "native-probe/public-containment-stop.json",
+    "identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-45c09f98c7c84fa6a293fc5aa8f2a00a.service",
+      "invocation_id": "8f00b22ed2ab48f19e933c18b22daf57",
+      "main_pid": 65075,
+      "unit": "codex-wake-objective-45c09f98c7c84fa6a293fc5aa8f2a00a.service"
+    },
+    "current": {
+      "state": "inactive",
+      "substate": "dead",
+      "populated": false,
+      "members": [],
+      "identity_retired": true,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "infinity",
+        "MemorySwapMax": "infinity",
+        "CPUQuotaPerSecUSec": "infinity",
+        "TasksMax": "14999"
+      }
+    }
+  },
+  {
+    "source": "native-probe/native-token-exhaustion.json",
+    "identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-78addca675d54ec6bccf065ab79ea885.service",
+      "invocation_id": "cbbf481122f14fac8819d76cfe2338b7",
+      "main_pid": 69560,
+      "unit": "codex-wake-objective-78addca675d54ec6bccf065ab79ea885.service"
+    },
+    "current": {
+      "state": "failed",
+      "substate": "failed",
+      "populated": false,
+      "members": [],
+      "identity_retired": false,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "2147483648",
+        "MemorySwapMax": "0",
+        "CPUQuotaPerSecUSec": "500ms",
+        "TasksMax": "128"
+      }
+    }
+  },
+  {
+    "source": "lost-launch-public-host.json",
+    "identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service",
+      "invocation_id": "2d16e2dcb53b40399e20f25a6af987a1",
+      "main_pid": 8317,
+      "unit": "codex-wake-objective-7dfe4bac7e8741be9db550eb7eab405b.service"
+    },
+    "current": {
+      "state": "inactive",
+      "substate": "dead",
+      "populated": false,
+      "members": [],
+      "identity_retired": true,
+      "kernel_limits": {},
+      "configured_limits": {
+        "MemoryMax": "infinity",
+        "MemorySwapMax": "infinity",
+        "CPUQuotaPerSecUSec": "infinity",
+        "TasksMax": "14999"
+      }
+    }
+  }
+]

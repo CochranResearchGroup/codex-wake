@@ -1,0 +1,466 @@
+{
+  "state": "passed",
+  "source": "/home/ecochran76/workspace.local/codex-wake-objective-enforcement",
+  "root": "/tmp/cw166-p",
+  "native_turn_limit": 1,
+  "previous_native_tokens": 46711,
+  "cumulative_native_allowance": 150000,
+  "clock": {
+    "utc": {
+      "status": "network",
+      "sources": [
+        "stable-time:cloudflare",
+        "stable-time:netnod"
+      ],
+      "lower": 1792183152.7126489,
+      "upper": 1792183153.3489907,
+      "reason": ""
+    },
+    "counter": {
+      "epoch": "bce18f02-753a-42bd-be7e-9bc653523b91",
+      "counter": 2199378088382,
+      "frequency": 10000000,
+      "rate_ppm": 5000
+    },
+    "reason": "authenticated_utc"
+  },
+  "sentinel_pid": 9456,
+  "socket_proof": {
+    "alias": "/tmp/cw166-p/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "is_symlink": true,
+    "alias_uid": 1000,
+    "resolved": "/tmp/codex-daemon-1000/21b19a7aa25d747cfa49b1a1c1b213916637fa11b2c9769dc03c30e6c6952c83",
+    "target_uid": 1000
+  },
+  "resolved_endpoint": "unix:///tmp/codex-daemon-1000/21b19a7aa25d747cfa49b1a1c1b213916637fa11b2c9769dc03c30e6c6952c83",
+  "effect_free_thread_list": {
+    "data": [],
+    "readStates": {},
+    "nextCursor": null,
+    "backwardsCursor": null
+  },
+  "prepaid_guard": {
+    "accounting_error": null,
+    "child_pid": 9586,
+    "endpoint": "unix:///tmp/cw166-p/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "generation": "c7d0b5439f7c4c36917ba5ddcfa817e8",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23225101
+    },
+    "objective_id": "acceptance",
+    "observed_boottime": 232251.110150124,
+    "pid": 9578,
+    "reason": null,
+    "service_identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+      "invocation_id": "4164f9cd94c24f71a98a0a3bbbe84891",
+      "main_pid": 9578,
+      "unit": "codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service"
+    },
+    "state": "running"
+  },
+  "artifact_before_sha256": "4d9fa964d2f255c92e505f75623bd837d7af644f370e40f3204240d735392ff0",
+  "execution_receipt": {
+    "configuration_revision": "b77c1e0fad7b347d66fe3ee6c41d488a462d69e15d2b70f47506633334acc4da",
+    "coverage": "dedicated_local_executor_and_descendants",
+    "exclusions": [
+      "shared_services",
+      "external_provider_execution",
+      "same_user_ipc_escape"
+    ],
+    "generation": "c7d0b5439f7c4c36917ba5ddcfa817e8",
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "preparing"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "running"
+      }
+    ],
+    "identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+      "invocation_id": "4164f9cd94c24f71a98a0a3bbbe84891",
+      "main_pid": 9578,
+      "unit": "codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service"
+    },
+    "objective_id": "acceptance",
+    "prior_execution": null,
+    "state": "running",
+    "unit": "codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service"
+  },
+  "containment": {
+    "child": {
+      "pid": 12431,
+      "ppid": 12416,
+      "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service\n"
+    },
+    "unit": {
+      "properties": {
+        "RuntimeMaxUSec": "1min 56.512772s",
+        "MainPID": "9578",
+        "Result": "success",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+        "CPUQuotaPerSecUSec": "500ms",
+        "MemoryMax": "2147483648",
+        "MemorySwapMax": "0",
+        "TasksMax": "128",
+        "KillMode": "control-group",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "processes": {
+        "9578": {
+          "comm": "python",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+          "state": "S",
+          "ppid": "612"
+        },
+        "9586": {
+          "comm": "codex",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+          "state": "S",
+          "ppid": "9578"
+        },
+        "12347": {
+          "comm": "codex-code-mode",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+          "state": "S",
+          "ppid": "9586"
+        },
+        "12416": {
+          "comm": "zsh",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+          "state": "S",
+          "ppid": "9586"
+        },
+        "12431": {
+          "comm": "python3.12",
+          "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+          "state": "S",
+          "ppid": "12416"
+        }
+      }
+    }
+  },
+  "host_before_observer_death": {
+    "properties": {
+      "RuntimeMaxUSec": "1min 56.512772s",
+      "MainPID": "9578",
+      "Result": "success",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+      "CPUQuotaPerSecUSec": "500ms",
+      "MemoryMax": "2147483648",
+      "MemorySwapMax": "0",
+      "TasksMax": "128",
+      "KillMode": "control-group",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "processes": {
+      "9578": {
+        "comm": "python",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+        "state": "S",
+        "ppid": "612"
+      },
+      "9586": {
+        "comm": "codex",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+        "state": "S",
+        "ppid": "9578"
+      },
+      "12347": {
+        "comm": "codex-code-mode",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+        "state": "S",
+        "ppid": "9586"
+      },
+      "12416": {
+        "comm": "zsh",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+        "state": "S",
+        "ppid": "9586"
+      },
+      "12431": {
+        "comm": "python3.12",
+        "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+        "state": "S",
+        "ppid": "12416"
+      }
+    }
+  },
+  "guard_configuration_bounds": {
+    "started_upper": 1792183154.4872274,
+    "started_boottime": 232250.821438913,
+    "deadline": 1792183273.0,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+  },
+  "ledger_before_observer_death": {
+    "handoff_writer": {
+      "instructions": "Preserve exact checkpoint evidence.",
+      "name": "writer",
+      "path": "/tmp/cw166-p/writer.md",
+      "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+    },
+    "max_correction_cycles": 0,
+    "objective": "Disposable strict execution acceptance",
+    "objective_deadline": "2026-10-16T20:41:13+00:00",
+    "objective_time_limit_seconds": 120,
+    "objective_token_limit": 150000,
+    "preflight_reviewer": {
+      "instructions": "Review owned acceptance evidence only.",
+      "name": "reviewer",
+      "path": "/tmp/cw166-p/reviewer.md",
+      "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+    },
+    "revision": "b77c1e0fad7b347d66fe3ee6c41d488a462d69e15d2b70f47506633334acc4da",
+    "session_time_limit_seconds": 120,
+    "session_token_limit": 100000,
+    "started_at": "2026-10-16T20:39:13.348991+00:00",
+    "strict_execution": {
+      "coverage": "dedicated_local_executor_and_descendants",
+      "exclusions": [
+        "shared_services",
+        "external_provider_execution",
+        "same_user_ipc_escape"
+      ],
+      "limits": {
+        "accounting_max_age_seconds": 45,
+        "checkpoint_grace_seconds": 1,
+        "cpu_quota_percent": 50,
+        "memory_max_bytes": 2147483648,
+        "memory_swap_max_bytes": 0,
+        "poll_seconds": 0.2,
+        "stop_grace_seconds": 2,
+        "tasks_max": 128
+      },
+      "maximum_token_overshoot": null,
+      "token_enforcement": "sampled_stop"
+    },
+    "objective_id": "acceptance",
+    "tokens_used": 22889,
+    "tokens_reserved": 77111,
+    "remaining_tokens": 50000,
+    "accounting_known": true,
+    "state": "ready",
+    "ready": true,
+    "exhausted": false,
+    "original_deadline": "2026-10-16T20:41:13+00:00",
+    "correction_cycles": 0,
+    "goal_aliases": {},
+    "authorization_history": [
+      {
+        "action": "initial",
+        "approval": "operator acceptance",
+        "at": 1792183153.3489907,
+        "configuration": {
+          "handoff_writer": {
+            "instructions": "Preserve exact checkpoint evidence.",
+            "name": "writer",
+            "path": "/tmp/cw166-p/writer.md",
+            "sha256": "bf91540c1fff30aef0a9abaa08fde3ae290a1d84d3a28a236966fbe406d62bfd"
+          },
+          "max_correction_cycles": 0,
+          "objective": "Disposable strict execution acceptance",
+          "objective_deadline": "2026-10-16T20:41:13+00:00",
+          "objective_time_limit_seconds": 120,
+          "objective_token_limit": 150000,
+          "preflight_reviewer": {
+            "instructions": "Review owned acceptance evidence only.",
+            "name": "reviewer",
+            "path": "/tmp/cw166-p/reviewer.md",
+            "sha256": "8744d221fb750ef8071bd61ef44961adeb871418328657c8672de7744c48b07a"
+          },
+          "revision": "b77c1e0fad7b347d66fe3ee6c41d488a462d69e15d2b70f47506633334acc4da",
+          "session_time_limit_seconds": 120,
+          "session_token_limit": 100000,
+          "started_at": "2026-10-16T20:39:13.348991+00:00",
+          "strict_execution": {
+            "coverage": "dedicated_local_executor_and_descendants",
+            "exclusions": [
+              "shared_services",
+              "external_provider_execution",
+              "same_user_ipc_escape"
+            ],
+            "limits": {
+              "accounting_max_age_seconds": 45,
+              "checkpoint_grace_seconds": 1,
+              "cpu_quota_percent": 50,
+              "memory_max_bytes": 2147483648,
+              "memory_swap_max_bytes": 0,
+              "poll_seconds": 0.2,
+              "stop_grace_seconds": 2,
+              "tasks_max": 128
+            },
+            "maximum_token_overshoot": null,
+            "token_enforcement": "sampled_stop"
+          }
+        }
+      }
+    ],
+    "remaining_seconds": 103.48394513130188,
+    "actors": {
+      "spawn:fd122752a050f3dd96dd6091de0147ee04786ed0fa133725eb8d130ff3ca1007": {
+        "known": true,
+        "reservation": 100000,
+        "session_deadline": 1792183272.6794367,
+        "settled": false,
+        "terms": [
+          100000,
+          115
+        ],
+        "used": 22889,
+        "tokens_remaining": 77111
+      }
+    }
+  },
+  "observer_before_death": {
+    "active": true,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "active"
+      }
+    ],
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23224979
+    },
+    "interval": 0.2,
+    "observed_at": 1792183167.9181638,
+    "observed_boottime": 232264.148592166,
+    "pid": 9469,
+    "state": "active"
+  },
+  "observer_kill_boottime": 232265.851161952,
+  "observer_returncode": -9,
+  "observer_identity_after_death": null,
+  "first_fence": {
+    "state": {
+      "accounting_error": null,
+      "child_pid": 9586,
+      "endpoint": "unix:///tmp/cw166-p/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+      "generation": "c7d0b5439f7c4c36917ba5ddcfa817e8",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 23225101
+      },
+      "objective_id": "acceptance",
+      "observed_boottime": 232265.873063572,
+      "pid": 9578,
+      "reason": "controller_unavailable",
+      "service_identity": {
+        "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+        "invocation_id": "4164f9cd94c24f71a98a0a3bbbe84891",
+        "main_pid": 9578,
+        "unit": "codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service"
+      },
+      "state": "stopping"
+    },
+    "observed_boottime": 232265.881839672
+  },
+  "empty_observed_boottime": 232267.201715193,
+  "final_guard": {
+    "accounting_error": null,
+    "child_pid": 9586,
+    "endpoint": "unix:///tmp/cw166-p/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "generation": "c7d0b5439f7c4c36917ba5ddcfa817e8",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23225101
+    },
+    "objective_id": "acceptance",
+    "observed_boottime": 232266.882394819,
+    "pid": 9578,
+    "reason": "controller_unavailable",
+    "service_identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+      "invocation_id": "4164f9cd94c24f71a98a0a3bbbe84891",
+      "main_pid": 9578,
+      "unit": "codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service"
+    },
+    "state": "stopped"
+  },
+  "remaining_live_owned_pids": [],
+  "sentinel_survived": true,
+  "unit_after_observer_death": {
+    "properties": {
+      "RuntimeMaxUSec": "1min 56.512772s",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+      "CPUQuotaPerSecUSec": "500ms",
+      "MemoryMax": "2147483648",
+      "MemorySwapMax": "0",
+      "TasksMax": "128",
+      "KillMode": "control-group",
+      "ActiveState": "deactivating",
+      "SubState": "stop-sigterm"
+    },
+    "processes": {}
+  },
+  "artifact_after_sha256": "4d9fa964d2f255c92e505f75623bd837d7af644f370e40f3204240d735392ff0",
+  "artifact_retained": true,
+  "upper_at_empty": 1792183170.8675036,
+  "before_original_deadline": true,
+  "observer_to_empty_seconds": 1.3505532409762964,
+  "native_usage_snapshots": [
+    {
+      "source": "/tmp/cw166-p/w/strict-execution/c1514c6cdad166c18aa557dc/home/sessions/2026/10/16/rollout-2026-10-16T15-39-18-01a14670-c5f5-7390-97d6-a09456c8db5f.jsonl",
+      "usage": {
+        "input_tokens": 22851,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 38,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 22889
+      }
+    }
+  ],
+  "fresh_unit_state": "MainPID=0\nControlGroup=\nActiveState=failed\n",
+  "fresh_cgroup_exists": false,
+  "fresh_remaining_home_processes": [],
+  "source_revision": "ab7bf493b5ae9288fb70ca061d7728395b6338d0",
+  "native_turns": 1,
+  "native_usage_known": true,
+  "observed_total_tokens": 22889,
+  "conservative_unknown_reservation": null,
+  "fixture_artifact_note": "Host-created preverified fixture checkpoint retained byte-for-byte; no native checkpoint generation or provider cancellation claim.",
+  "final_guard_status": {
+    "accounting_error": null,
+    "child_pid": 9586,
+    "endpoint": "unix:///tmp/cw166-p/w/strict-execution/c1514c6cdad166c18aa557dc/app-server.sock",
+    "generation": "c7d0b5439f7c4c36917ba5ddcfa817e8",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 23225101
+    },
+    "objective_id": "acceptance",
+    "observed_boottime": 232266.882394819,
+    "pid": 9578,
+    "reason": "controller_unavailable",
+    "service_identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service",
+      "invocation_id": "4164f9cd94c24f71a98a0a3bbbe84891",
+      "main_pid": 9578,
+      "unit": "codex-wake-objective-c7d0b5439f7c4c36917ba5ddcfa817e8.service"
+    },
+    "state": "stopped"
+  },
+  "lease_and_deadline_note": "Original source configuration deadline and guard admission BOOTTIME anchor retained; observer death triggered stop before accounting freshness expiry and original deadline.",
+  "source_hashes": {
+    "src/codex_wake/strict_executor.py": "662f978f69ea892e6fce15ca4823f1377a8473ebcc218fe54c61c8582346520c",
+    "src/codex_wake/strict_runtime.py": "84f71b0902775463d27766a42fa742e1783507f16e2d743ae654be3a80bd2ebd",
+    "src/codex_wake/lifecycle_supervision.py": "42cc8d7a0fb576b46c7f9c02363219771b55aa0e2854c28c46c233bed02b70f2",
+    "src/codex_wake/lifecycle_budget.py": "bbad0f0e564ba70611caecb4a5718bef2740a8838199e9b01c76b5ce184df03e",
+    "src/codex_wake/agent_lifecycle.py": "80b7b62b40693d9ac2becf86fbe17c23e00c8a0f5910e18b067f043be3edefab"
+  },
+  "raw_sha256": "364af8150c7ed5e51293ce97ee78224440d0bb4172cad2ef77f26ade87cc5814"
+}

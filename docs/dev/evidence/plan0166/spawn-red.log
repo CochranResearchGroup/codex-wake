@@ -1,0 +1,18 @@
+.F
+======================================================================
+FAIL: test_strict_spawn_without_budget_is_rejected_before_runtime_effects (test_strict_execution.StrictConfigurationTests.test_strict_spawn_without_budget_is_rejected_before_runtime_effects)
+----------------------------------------------------------------------
+codex_wake.records.WakeError: approved launch profile is incomplete
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_execution.py", line 45, in test_strict_spawn_without_budget_is_rejected_before_runtime_effects
+    with redirect_stdout(StringIO()),self.assertRaisesRegex(WakeError,'strict execution requires an approved objective'):
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "strict execution requires an approved objective" does not match "approved launch profile is incomplete"
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.217s
+
+FAILED (failures=1)

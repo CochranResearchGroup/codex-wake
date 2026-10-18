@@ -1,0 +1,106 @@
+{
+  "unit": "cw-native-probe-20261016.service",
+  "root": "/tmp/cw-native-probe-20261016",
+  "codex": "/home/ecochran76/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/bin/codex",
+  "model": {
+    "model": "gpt-6.1-sol",
+    "model_reasoning_effort": "low"
+  },
+  "max_native_turns": 1,
+  "max_runtime_seconds": 120,
+  "sentinel_pid": 22299,
+  "launch_argv": [
+    "systemd-run",
+    "--user",
+    "--unit=cw-native-probe-20261016.service",
+    "--service-type=exec",
+    "--property=KillMode=control-group",
+    "--property=RuntimeMaxSec=120",
+    "--property=TimeoutStopSec=2",
+    "--property=SendSIGKILL=yes",
+    "--property=Restart=no",
+    "--property=MemoryMax=2G",
+    "--property=TasksMax=128",
+    "--working-directory=/tmp/cw-native-probe-20261016/workspace",
+    "--setenv=CODEX_HOME=/tmp/cw-native-probe-20261016/home",
+    "/home/ecochran76/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/bin/codex",
+    "app-server",
+    "--listen",
+    "unix:///tmp/cw-native-probe-20261016/native.sock"
+  ],
+  "thread_id": "01a1463d-435a-72e0-b922-1c9d521888f3",
+  "turn_id": "01a1463d-4994-79f2-9f74-02f8dfb19ef9",
+  "native_turns": 1,
+  "notification_methods": [
+    "thread/status/changed",
+    "turn/started",
+    "mcpServer/startupStatus/updated",
+    "item/started",
+    "item/completed",
+    "turn/moderationMetadata",
+    "item/started"
+  ],
+  "child": {
+    "pid": 23534,
+    "ppid": 23527,
+    "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw-native-probe-20261016.service\n"
+  },
+  "unit_before_stop": "RuntimeMaxUSec=2min\nMainPID=22318\nControlGroup=/user.slice/user-1000.slice/user@1000.service/app.slice/cw-native-probe-20261016.service\nMemoryMax=2147483648\nTasksMax=128\nKillMode=control-group\n",
+  "cgroup_procs": [
+    22318,
+    23481,
+    23527,
+    23534
+  ],
+  "processes": {
+    "22318": {
+      "comm": "codex",
+      "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw-native-probe-20261016.service",
+      "ppid": "612"
+    },
+    "23481": {
+      "comm": "codex-code-mode",
+      "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw-native-probe-20261016.service",
+      "ppid": "22318"
+    },
+    "23527": {
+      "comm": "zsh",
+      "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw-native-probe-20261016.service",
+      "ppid": "22318"
+    },
+    "23534": {
+      "comm": "python3.12",
+      "cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/cw-native-probe-20261016.service",
+      "ppid": "23527"
+    }
+  },
+  "native_child_inside_unit": true,
+  "state": "passed",
+  "stop_seconds": 1.8428837719839066,
+  "unit_after_stop": "MainPID=0\nResult=success\nActiveState=inactive\nSubState=dead\n",
+  "sentinel_survived": true,
+  "remaining_live_owned_pids": [],
+  "native_usage_snapshots": [
+    {
+      "input_tokens": 23304,
+      "cached_input_tokens": 12288,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 31,
+      "reasoning_output_tokens": 0,
+      "total_tokens": 23335
+    },
+    {
+      "input_tokens": 46663,
+      "cached_input_tokens": 35456,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 48,
+      "reasoning_output_tokens": 0,
+      "total_tokens": 46711
+    }
+  ],
+  "assigned_native_budget": 20000,
+  "assigned_budget_exceeded": true,
+  "budget_limitation": "One tiny provider turn exceeded assigned aggregate allowance before observable enforcement; no further paid turns permitted under original lane budget.",
+  "fresh_unit_state": "MainPID=0\nControlGroup=\nActiveState=inactive\n",
+  "fresh_cgroup_exists": false
+}

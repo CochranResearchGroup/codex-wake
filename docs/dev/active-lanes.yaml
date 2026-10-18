@@ -1,6 +1,36 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P167
+    owner: primary / ecochran76
+    objective: Discover and supervise persistent resource limits in the existing dev session
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/279]
+    plan: docs/dev/plans/0167-2026-10-17-resource-enforcement-discoverability.md
+    plan_ref: feat/objective-enforcement
+    branch: feat/objective-enforcement
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 7e3873c
+    dependencies: [P166]
+    overlaps: []
+    updated_at: 2026-10-17
+    disposition: Confirmed same-session authority; bounded controller, accounting and MCP integration underway
+  - id: P166
+    owner: primary / ecochran76
+    objective: Implement strict objective execution resource enforcement
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/275, https://github.com/CochranResearchGroup/codex-wake/issues/276, https://github.com/CochranResearchGroup/codex-wake/issues/277, https://github.com/CochranResearchGroup/codex-wake/issues/278]
+    plan: docs/dev/plans/0166-2026-10-16-objective-enforcement.md
+    plan_ref: feat/objective-enforcement
+    branch: feat/objective-enforcement
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    checkpoint: 4ce6ae5
+    dependencies: [P164]
+    overlaps: []
+    updated_at: 2026-10-16
+    disposition: Validated branch; all four tickets and single review/remediation complete; tracker open, no deployment
   - id: P164
     owner: primary / ecochran76
     objective: Scoped wake listing cancellation and emergency controls

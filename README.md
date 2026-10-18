@@ -6,6 +6,19 @@ messages, turns and task status. Use native messaging directly for an immediate
 agent exchange; use Wake when a follow-up must survive the initiating turn or
 when you explicitly need a tracked exchange.
 
+When a user gives an existing Codex agent token/time limits, Codex Wake0.17.0
+provides MCP enrollment and an independent watcher: request checkpoint,
+then pause the current native goal and interrupt its exact active turn. Limits
+persist across replacement goals until an explicit user reset. Start with the
+[existing-session workflow](skills/codex-wake/references/existing-goal-limits.md).
+Host setup and qualified accounting are required; polling and publication make
+token stops sampled, with unknown maximum overshoot. Installation alone does not enroll a session or provide an OS process-termination
+guarantee.
+
+For memory, swap, CPU and task controls, use separate
+[dedicated executor containment](docs/agents/strict-objectives.md). Its ordinary
+caller first-launch MCP bootstrap remains a separate documented limitation.
+
 The package provides:
 
 - `native after|at|file` for an exact thread, with expiry and explicit same-thread resume.
@@ -14,7 +27,7 @@ The package provides:
 - `sessions configuration|spawn|refresh|handoff` for approved worker tasks, resource reloads and fresh-context continuation.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
 - Tracked requests and correlated replies, work claims, completion receipts and generation-safe recovery.
-- Optional `codex-wake-mcp`: 25 tools for wake controls, session discovery, host-approved spawn, refresh and handoff, and authorized agent exchanges.
+- Optional `codex-wake-mcp`: 27 tools for existing-session resource limits, wake controls, session discovery, host-approved spawn, refresh and handoff, and authorized agent exchanges.
 - Explicit legacy tmux and app-server delivery, advanced signals and tracked mailboxes.
 
 Native queue acceptance is separate from execution and acknowledgment. Busy or
@@ -190,6 +203,9 @@ codex-wake sessions close thread:THREAD_UUID
 | Continue an objective in a fresh conversation | `sessions handoff` | `wake_sessions_handoff` |
 
 Start with the [lifecycle quickstart](docs/agent-lifecycle.md#quickstart).
+Pre-release: [strict objective execution controls and limits](docs/agents/strict-objectives.md).
+For a user-supplied resource budget, read the packaged
+[resource-limit workflow](skills/codex-wake/references/resource-limits.md).
 An operator configures the approved host profile and caller access first.
 Refresh and handoff require a checkpoint; handoff supports a new tab or the same
 pane. Receipts distinguish readiness, task admission and completed work.

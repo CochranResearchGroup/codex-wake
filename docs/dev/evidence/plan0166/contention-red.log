@@ -1,0 +1,13 @@
+..F................
+======================================================================
+FAIL: test_controller_holding_ledger_lock_cannot_block_independent_guard (test_strict_executor.StrictExecutorTests.test_controller_holding_ledger_lock_cannot_block_independent_guard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 148, in test_controller_holding_ledger_lock_cannot_block_independent_guard
+    self.assertIsNone(guard.check(boottime=11))
+AssertionError: 'accounting_unavailable' is not None
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.781s
+
+FAILED (failures=1)

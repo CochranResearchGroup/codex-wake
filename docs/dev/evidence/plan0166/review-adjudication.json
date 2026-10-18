@@ -1,0 +1,41 @@
+{
+  "base": "0a5c8d1",
+  "frozen_tip": "1b0848a",
+  "broad_passes_used": 1,
+  "remediation_passes_used": 1,
+  "standards": {
+    "reviewer": "/root/review_standards",
+    "findings": [
+      {
+        "id": "S1",
+        "classification": "blocking",
+        "priority": "P2",
+        "problem": "Guard duplicated ledger transaction omitted directory fsync after atomic replacement, weakening crash durability.",
+        "sources": [
+          "docs/dev/policies/0003-runtime-state-and-wake-semantics.md",
+          "docs/dev/policies/0014-architecture-guardrails.md"
+        ],
+        "adjudication": "Confirmed directly against both persistence implementations. Shared ledger transaction now retains file and directory fsync with configurable lock flags; guard retains nonblocking acquisition.",
+        "fix_commit": "4ce6ae5",
+        "red": "review-durability-red.log",
+        "green": "review-durability-green.log",
+        "verification": "FIXED: red detects missingdirectorysync;62focusedPASS;finalfull1326PASS/1optionalhostskip;installed69includinglivehostPASS"
+      }
+    ],
+    "nonblocking_judgment": "Actor-binding parsing duplication has intentionally different live/offline proof requirements. No extraction required by this bounded slice."
+  },
+  "spec": {
+    "reviewer": "/root/review_spec",
+    "findings": [],
+    "conclusion": "No substantiated missing requirement, scope creep or incorrect behavior found in bounded review of #274 and #275\u2013278.",
+    "qualifications": [
+      "Publication delay explicitly unmeasured",
+      "Maximum token overshoot unknown",
+      "BOOTTIME suspend contract and injection, not actual host suspend",
+      "Four-versus-three provider-turn axis failed; all native usage charged and one command executed"
+    ]
+  },
+  "verification_mode": "closed_world: S1 durability plus locking/accounting/deadline/lifecycle critical regressions; no second broad review",
+  "state": "complete",
+  "accepted_unresolved_blockers": []
+}

@@ -30,7 +30,7 @@ TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
 SPECS = {
     "wake_sessions_target": ("sessions", "target", "Resolve an informal Byobu descriptor (tab 18, 18:policies, typo). Return canonical identity or structured missing/inactive/ambiguous conditions. Default policies error; explicitly select tab_only, fresh or CWD-scoped resume with approved profile, stable intent and expiry. Starting is not readiness or delivery. Reuse the same intent to inspect startup; never enumerate tabs or repair spelling in the caller.",
         {"selector": TEXT, **TARGET}, ["selector"], False),
-    "wake_sessions_configuration": ("sessions", "configuration", "Read effective host-approved instruction selection and lifecycle limits before admission. Defaults and objective overrides do not renew active resource authority.",
+    "wake_sessions_configuration": ("sessions", "configuration", "For existing-session token/time resource limits use wake_goal_limits_set and wake_goal_limits_show. For dedicated containment, inspect host-approved limits before work. strict_execution identifies dedicated executor containment for time, memory, swap, CPU and tasks, with sampled cumulative token stops. Compare effective caps, original deadline, objective_budget and objective_execution with the request; configured limits alone do not prove running enforcement. Missing setup requires the operator; defaults do not renew authority.",
         {"profile": MESSAGE, "thread_id": TEXT}, ["profile", "thread_id"], True),
     "wake_sessions_handoff": ("sessions", "handoff", "Prepare an explicitly approved fresh-context continuation from the source agent's verified checkpoint. Preserve cumulative allowance and original deadline; activation requires the owned continuous monitor. No inherited claims or automatic A2A enrollment.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
@@ -44,7 +44,7 @@ SPECS = {
          "resources": {"type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": True,
                        "items": MESSAGE}, "expires_at": TEXT},
         ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "resources", "expires_at"], False),
-    "wake_sessions_spawn": ("sessions", "spawn", "Spawn one worker through a host-approved launch profile. Stable intent and exact readiness precede task admission; uncertain effects require reconciliation without replacement.",
+    "wake_sessions_spawn": ("sessions", "spawn", "Spawn one worker through a host-approved launch profile. For resource limits require strict_execution: dedicated containment and sampled token stops, not an exact token ceiling. A first strict launch from an ordinary caller needs operator bootstrap; this cannot contain the existing TUI in place. Never bypass caller grants through operator CLI. Stable intent and exact readiness precede task admission; reconcile uncertain effects without replacement.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "name": {**TEXT, "maxLength": 200},
          "task": BODY, "expires_at": TEXT}, ["profile", "intent", "name", "task", "expires_at"], False),
     "wake_sessions_list": ("sessions", "list", "Discover existing Codex threads and Byobu tabs. Partial inventory does not prove absence or uniqueness.", {"limit": PAGE["limit"]}, [], True),
@@ -63,6 +63,28 @@ SPECS = {
     "wake_messages_arm_reply": ("messages", "arm-reply", "Register an exact correlated reply wake with a fixed timezone-aware expiry and stable arm key, then end the originating turn. Requires operator-delegated sender authority and an active native worker; registration is not reply completion.", {"message_id": MESSAGE, "idempotency_key": INTENT, "expires_at": TEXT}, ["message_id", "idempotency_key", "expires_at"], False),
 }
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
+SPECS['wake_goal_limits_set'] = (
+    'goal-limits', 'set',
+    'When a user gives /goal resource limits, enroll this existing dev session before continuing work. '
+    'An independent host watcher requests stop and checkpoint, then native goal pause and exact-turn interrupt. '
+    'Uses sampled cumulative tokens including cached input and delegated work; unknown accounting holds. '
+    'Default reserve is 5% tokens or 60 seconds inside the original caps. Inspect the returned state: '
+    'configured limits alone are not armed enforcement. Limits and counters persist across replacement goals '
+    'and resume; only an explicit user reset approved by the host allocation can reset them. '
+    'Native stop is not an OS process-termination guarantee. Supply actual native caller_thread_id; '
+    'the claim alone grants no permission. Missing host setup requires the operator.',
+    {'caller_thread_id': CALLER, 'token_limit': {'type': 'integer', 'minimum': 1},
+     'time_limit_seconds': {'type': 'integer', 'minimum': 1},
+     'checkpoint_token_percent': {'type': 'integer', 'minimum': 0, 'maximum': 100},
+     'checkpoint_seconds': {'type': 'integer', 'minimum': 0}},
+    ['caller_thread_id', 'token_limit', 'time_limit_seconds'], False)
+SPECS['wake_goal_limits_show'] = (
+    'goal-limits', 'show',
+    'Read this session resource allowance, original deadline, cumulative usage, checkpoint delivery and '
+    'native pause/interrupt evidence. Check watcher readiness and accounting qualification before work. '
+    'Reading does not reset or renew any allocation; missing/stale proof is not active enforcement. '
+    'Supply actual native caller_thread_id; host grants still apply.',
+    {'caller_thread_id': CALLER}, ['caller_thread_id'], True)
 for _name, _spec in list(SPECS.items()):
     if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff", "configuration", "target"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
@@ -83,7 +105,8 @@ for _action in WAKE_ACTIONS:
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
-                 call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None):
+                 call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
+                 goal_limits_policy=None, goal_limits_root=None):
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
         self.app_server = app_server
@@ -93,6 +116,8 @@ class CommandRunner:
         self.lifecycle_profiles = lifecycle_profiles
         self.wake_control_config = wake_control_config
         self.wake_registry = wake_registry
+        self.goal_limits_policy = goal_limits_policy
+        self.goal_limits_root = goal_limits_root
 
     def _wake_control_command(self, action, arguments):
         import re
@@ -167,6 +192,15 @@ class CommandRunner:
                 command = self._wake_control_command(verb, arguments)
             except (ValueError, OSError, TypeError, KeyError, ImportError):
                 return {"error": {"code": "policy_denied", "message": "Host wake-control root and action grants are required for the entire selected scope."}}, True
+            return self._execute(command, arguments, readonly)
+        if group == 'goal-limits':
+            goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
+            if self.goal_limits_policy is None or goal_root is None:
+                return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
+            command = [*self.cli, '--wake-root', str(goal_root), group, verb,
+                       '--policy', str(self.goal_limits_policy), '--json']
+            for key, value in arguments.items():
+                command += ['--' + key.replace('_', '-'), str(value)]
             return self._execute(command, arguments, readonly)
         body = arguments.get("body")
         if body is not None:
@@ -301,6 +335,9 @@ def main(argv=None):
     parser.add_argument('--lifecycle-profiles', type=Path, help='host-approved lifecycle launch registry')
     parser.add_argument('--wake-control-config', type=Path, help='host-approved caller root/action grants')
     parser.add_argument('--wake-registry', type=Path, help='host-owned registered wake-root directory')
+    parser.add_argument('--goal-limits-policy', type=Path, help='host-approved existing-session resource allocations')
+    parser.add_argument('--goal-limits-root', type=Path,
+                        help='private goal-controller root; falls back to --wake-root without changing other tool scope')
     args = parser.parse_args(argv)
     if not 0 < args.call_timeout <= 90:
         parser.error("--call-timeout must be positive and at most 90 seconds")

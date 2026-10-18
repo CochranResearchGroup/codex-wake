@@ -1,0 +1,22 @@
+F
+======================================================================
+FAIL: test_lost_stop_response_reconciles_empty_original_invocation_without_second_stop (test_host_execution.HostExecutionTests.test_lost_stop_response_reconciles_empty_original_invocation_without_second_stop)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_host_execution.py", line 79, in test_lost_stop_response_reconciles_empty_original_invocation_without_second_stop
+    result=SystemdExecution(runner=runner).stop(identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/host_execution.py", line 118, in stop
+    result = self._run(['systemctl', '--user', 'stop', identity['unit']])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/src/codex_wake/host_execution.py", line 20, in _run
+    return self.runner(argv, capture_output=True, text=True, timeout=15, check=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_host_execution.py", line 74, in runner
+    raise AssertionError('must reconcile completed stop without repeating its effect')
+AssertionError: must reconcile completed stop without repeating its effect
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)

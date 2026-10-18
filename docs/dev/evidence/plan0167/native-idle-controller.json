@@ -1,0 +1,149 @@
+{
+  "native_pid": 87905,
+  "model_calls": 0,
+  "verdict": "PASS_NATIVE_IDLE_CONTROLLER_STOP",
+  "python": "/tmp/cw167-installed/bin/python",
+  "thread_id": "01a14c44-6a2c-7422-bc82-61a1ee02fd32",
+  "goal_before": {
+    "threadId": "01a14c44-6a2c-7422-bc82-61a1ee02fd32",
+    "objective": "Disposable idle goal resource stop qualification",
+    "status": "blocked",
+    "tokenBudget": 100,
+    "tokensUsed": 0,
+    "timeUsedSeconds": 0,
+    "createdAt": 1792280914,
+    "updatedAt": 1792280914
+  },
+  "goal_after": {
+    "threadId": "01a14c44-6a2c-7422-bc82-61a1ee02fd32",
+    "objective": "Disposable idle goal resource stop qualification",
+    "status": "paused",
+    "tokenBudget": 100,
+    "tokensUsed": 0,
+    "timeUsedSeconds": 0,
+    "createdAt": 1792280914,
+    "updatedAt": 1792280916
+  },
+  "enrollment": {
+    "thread_id": "01a14c44-6a2c-7422-bc82-61a1ee02fd32",
+    "generation": "73d9659b3d044355ab58d385155c58e8",
+    "allocation_id": "explicit-disposable-qualification",
+    "goal_created_at": 1792280914,
+    "used_tokens": 0,
+    "started_upper": 1792280914.9058647,
+    "started_boottime": 337716.354366727,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "time_origin": 1792280914,
+    "effects": {},
+    "checkpoint": null,
+    "token_limit": 100,
+    "time_limit_seconds": 1,
+    "checkpoint_token_percent": 5,
+    "checkpoint_seconds": 60,
+    "deadline": 1792280915,
+    "accounting": {
+      "state": "qualified",
+      "used_tokens": 0,
+      "anchor": {
+        "version": 1,
+        "thread_id": "01a14c44-6a2c-7422-bc82-61a1ee02fd32",
+        "goal_created_at": 1792280914,
+        "boundary": "2026-10-17T23:48:34.845Z",
+        "response_ids": [],
+        "response_hashes": {}
+      },
+      "reason": null,
+      "sampled": true
+    },
+    "state": "held",
+    "reason": "native_goal_state_unknown",
+    "controller_generation": "eabf5128fb834868a0d9ce502690e4f9",
+    "stop_latched": true,
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "eabf5128fb834868a0d9ce502690e4f9",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33771443
+      },
+      "interval": 0.1,
+      "observed_boottime": 337716.324514736,
+      "pid": 88378,
+      "fresh": true,
+      "age_seconds": 0.031540435971692204
+    },
+    "sampled": true,
+    "maximum_token_overshoot": null
+  },
+  "stopped": {
+    "accounting": {
+      "anchor": {
+        "boundary": "2026-10-17T23:48:34.845Z",
+        "goal_created_at": 1792280914,
+        "response_hashes": {},
+        "response_ids": [],
+        "thread_id": "01a14c44-6a2c-7422-bc82-61a1ee02fd32",
+        "version": 1
+      },
+      "reason": null,
+      "sampled": true,
+      "state": "qualified",
+      "used_tokens": 0
+    },
+    "allocation_id": "explicit-disposable-qualification",
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "checkpoint": null,
+    "checkpoint_seconds": 60,
+    "checkpoint_token_percent": 5,
+    "controller_generation": "eabf5128fb834868a0d9ce502690e4f9",
+    "deadline": 1792280915,
+    "effects": {
+      "pause:1792280914:0": {
+        "method": "thread/goal/set",
+        "params": {
+          "origin": "automatic",
+          "status": "paused",
+          "threadId": "01a14c44-6a2c-7422-bc82-61a1ee02fd32"
+        },
+        "state": "acknowledged"
+      }
+    },
+    "generation": "73d9659b3d044355ab58d385155c58e8",
+    "goal_created_at": 1792280914,
+    "observed_boottime": 337716.502423929,
+    "pause_observed": true,
+    "reason": "allocation_exhausted",
+    "started_boottime": 337716.354366727,
+    "started_upper": 1792280914.9058647,
+    "state": "stopped",
+    "stop_latched": true,
+    "stop_proof": true,
+    "thread_id": "01a14c44-6a2c-7422-bc82-61a1ee02fd32",
+    "time_limit_seconds": 1,
+    "time_origin": 1792280914,
+    "token_limit": 100,
+    "used_tokens": 0,
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "eabf5128fb834868a0d9ce502690e4f9",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33771443
+      },
+      "interval": 0.1,
+      "observed_boottime": 337716.441214253,
+      "pid": 88378,
+      "fresh": true,
+      "age_seconds": 0.1267242319881916
+    },
+    "sampled": true,
+    "maximum_token_overshoot": null
+  },
+  "physical_endpoint": "unix:///tmp/codex-daemon-1000/e195afc6e0da022b39fa9136586349d0943240a5fab36ca953faa3df38186dc0",
+  "watcher_pid": 88378,
+  "native_exit": 0,
+  "native_process_present": false,
+  "watcher_process_present": false
+}

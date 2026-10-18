@@ -1,0 +1,264 @@
+{
+  "verdict": "PASS_NATIVE_DELEGATE_INJECTED_ACCOUNTING",
+  "external_provider_calls": 0,
+  "usage_provenance": "injected localhost SSE, not real billing",
+  "expected_tokens": 90,
+  "root_thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+  "goal": {
+    "threadId": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+    "objective": "Bounded local native delegated accounting fixture",
+    "status": "blocked",
+    "tokenBudget": 1000,
+    "tokensUsed": 0,
+    "timeUsedSeconds": 0,
+    "createdAt": 1792281347,
+    "updatedAt": 1792281347
+  },
+  "root_native_turns": [
+    {
+      "id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "status": "completed"
+    }
+  ],
+  "metadata": [
+    {
+      "id": "01a14c4b-046e-79d2-a3a7-eecc28540f89",
+      "session_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "parent_thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "source": {
+        "subagent": {
+          "thread_spawn": {
+            "parent_thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+            "depth": 1,
+            "agent_path": null,
+            "agent_nickname": "Dewey",
+            "agent_role": null
+          }
+        }
+      },
+      "history_mode": "legacy",
+      "history_base": null,
+      "subagent_history_start_ordinal": null
+    },
+    {
+      "id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "session_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "parent_thread_id": null,
+      "source": "vscode",
+      "history_mode": "legacy",
+      "history_base": null,
+      "subagent_history_start_ordinal": null
+    }
+  ],
+  "native_response_records": [
+    {
+      "thread_id": "01a14c4b-046e-79d2-a3a7-eecc28540f89",
+      "turn_id": "01a14c4b-0497-7be3-abdd-2bfb7b079500",
+      "session_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "root_turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "response_id": "local-delegate-3",
+      "usage": {
+        "input_tokens": 30,
+        "cached_input_tokens": 15,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 30
+      },
+      "turn_token_usage": {
+        "input_tokens": 30,
+        "cached_input_tokens": 15,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 30
+      },
+      "thread_token_usage": {
+        "input_tokens": 30,
+        "cached_input_tokens": 15,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 30
+      }
+    },
+    {
+      "thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "session_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "root_turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "response_id": "local-delegate-1",
+      "usage": {
+        "input_tokens": 20,
+        "cached_input_tokens": 10,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 20
+      },
+      "turn_token_usage": {
+        "input_tokens": 20,
+        "cached_input_tokens": 10,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 20
+      },
+      "thread_token_usage": {
+        "input_tokens": 20,
+        "cached_input_tokens": 10,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 20
+      }
+    },
+    {
+      "thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "session_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "root_turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "response_id": "local-delegate-2",
+      "usage": {
+        "input_tokens": 40,
+        "cached_input_tokens": 20,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 40
+      },
+      "turn_token_usage": {
+        "input_tokens": 60,
+        "cached_input_tokens": 30,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 60
+      },
+      "thread_token_usage": {
+        "input_tokens": 60,
+        "cached_input_tokens": 30,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 60
+      }
+    }
+  ],
+  "accounting": {
+    "state": "qualified",
+    "used_tokens": 90,
+    "anchor": {
+      "version": 1,
+      "thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "goal_created_at": 1792281347,
+      "boundary": "2026-10-17T23:55:47.107Z",
+      "response_ids": [
+        [
+          "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+          "local-delegate-1"
+        ],
+        [
+          "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+          "local-delegate-2"
+        ],
+        [
+          "01a14c4b-046e-79d2-a3a7-eecc28540f89",
+          "local-delegate-3"
+        ]
+      ],
+      "response_hashes": {
+        "[\"01a14c4b-046e-79d2-a3a7-eecc28540f89\", \"local-delegate-3\"]": "a05894f336d577f6c394d9b2c590d4d3d21a6f27d256c053cf1a4f80eb2c165b",
+        "[\"01a14c4b-026a-7042-9d2d-7d7175a82bd2\", \"local-delegate-1\"]": "cc471c959fdb2046a23173bcf3497a253fcc86151d00b0ca7547b7ec825fd285",
+        "[\"01a14c4b-026a-7042-9d2d-7d7175a82bd2\", \"local-delegate-2\"]": "c740ff5e9ebcaff8bc130802011504e431e838928e4015217fe9e9cbc1c29751"
+      }
+    },
+    "reason": null,
+    "sampled": true
+  },
+  "http_calls": [
+    {
+      "number": 1,
+      "path": "/v1/responses",
+      "thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "root": true,
+      "root_turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "tool_names": [
+        "exec_command",
+        "write_stdin",
+        "request_user_input",
+        "view_image",
+        "multi_agent_v1",
+        "get_goal",
+        "create_goal",
+        "update_goal",
+        null
+      ],
+      "body_sha256": "4f6ec8b945a42def418aaecc9e081f6a1f99b17b042ee129b68d8af884a8199d",
+      "response_id": "local-delegate-1",
+      "injected_total_tokens": 20
+    },
+    {
+      "number": 2,
+      "path": "/v1/responses",
+      "thread_id": "01a14c4b-026a-7042-9d2d-7d7175a82bd2",
+      "root": true,
+      "root_turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "tool_names": [
+        "exec_command",
+        "write_stdin",
+        "request_user_input",
+        "view_image",
+        "multi_agent_v1",
+        "get_goal",
+        "create_goal",
+        "update_goal",
+        null
+      ],
+      "body_sha256": "8cb4e0226f959db4923f7b863543932c6062eac3a0cc4f5656081e728a1341bb",
+      "response_id": "local-delegate-2",
+      "injected_total_tokens": 40
+    },
+    {
+      "number": 3,
+      "path": "/v1/responses",
+      "thread_id": "01a14c4b-046e-79d2-a3a7-eecc28540f89",
+      "root": false,
+      "root_turn_id": "01a14c4b-042b-7a91-8f05-c1732fe5f7ad",
+      "tool_names": [
+        "exec_command",
+        "write_stdin",
+        "request_user_input",
+        "view_image",
+        "get_goal",
+        "create_goal",
+        "update_goal",
+        null
+      ],
+      "body_sha256": "c6d74f298c32d7072e4b6968bee6af0242bf65ed39e92b6e4ad01304a7fee3db",
+      "response_id": "local-delegate-3",
+      "injected_total_tokens": 30
+    }
+  ],
+  "elapsed_seconds": 1.4970295120147057,
+  "native_exit": 0,
+  "native_after_identity": null,
+  "cleanup": {
+    "native_pid": 87696,
+    "native_identity_before": {
+      "start_time_ticks": 33818953,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5"
+    },
+    "native_after_identity": null,
+    "native_exit": 0,
+    "remaining_owned_home_processes": [],
+    "alias_present": false
+  },
+  "script_sha256": "8f7880b3c1289b59243c767a3efa0c4a3467a0683285742ab3a2aa80b422d383",
+  "limitations": [
+    "Injected localhost Responses token values, not real billing.",
+    "Legacy child snapshot did not contain inherited parent usage records; live inherited-baseline duplicate path not exercised.",
+    "Root interrupt cancellation of active descendants not live-qualified; source cancel path is per-session and not a descendant-stop proof.",
+    "No paginated/history_base qualification."
+  ]
+}

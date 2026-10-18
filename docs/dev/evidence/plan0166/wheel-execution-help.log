@@ -1,0 +1,11 @@
+usage: codex-wake sessions execution [-h] --profiles PROFILES --profile
+                                     PROFILE --thread-id THREAD_ID [--stop]
+                                     [--json]
+
+options:
+  -h, --help            show this help message and exit
+  --profiles PROFILES
+  --profile PROFILE
+  --thread-id THREAD_ID
+  --stop
+  --json

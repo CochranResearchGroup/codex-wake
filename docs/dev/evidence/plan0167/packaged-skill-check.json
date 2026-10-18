@@ -1,0 +1,21 @@
+{
+  "mode": "isolated full skill-directory copy; no installed roots modified",
+  "relative_links_checked": 6,
+  "links": [
+    "SKILL.md:references/resource-limits.md",
+    "SKILL.md:references/wake-controls.md",
+    "SKILL.md:references/a2a-responses.md",
+    "SKILL.md:references/lifecycle.md",
+    "references/use-cases.md:a2a-responses.md",
+    "references/lifecycle.md:resource-limits.md"
+  ],
+  "files": {
+    "SKILL.md": "5765f30a277db07c2724716b92b34d0d73c05ba955efe72a0bc6e52b4db88476",
+    "references/use-cases.md": "e84e476315b49f841b5037c949e22c7a9a986881b9f02f7c5387f2287beaa5b3",
+    "references/a2a-responses.md": "15c6cd49c268c70f52f3d9211b4611ca9c700a48e2872303bc68499b3109891b",
+    "references/wake-controls.md": "d5f8926489ec2199a21bbf80cc745aa0adc125a65fab62ec31fb672a703c7823",
+    "references/lifecycle.md": "419551e80eb7ec317fa68f5a7a5717d6516e5aa021eaf839b9bd7f0956a1580d",
+    "references/resource-limits.md": "27ed05cb4fdf538929ac6c96ce2d90531e60519f2f3e43156ee6df7814e4fbb2",
+    "agents/openai.yaml": "50143aea5f0adfed65aa52326862f7a9f80d6fb62609da55df4b01a273a010c7"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "state": "failed",
+  "error": "AssertionError: no actual tool shell",
+  "root": "/tmp/cw166-n",
+  "native_usage_snapshots": [
+    {
+      "source": "/tmp/cw166-n/w/strict-execution/c1514c6cdad166c18aa557dc/home/sessions/2026/10/16/rollout-2026-10-16T15-34-50-01a1466c-af32-7222-93b4-cdb0445bafbf.jsonl",
+      "usage": {
+        "input_tokens": 22836,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 32,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 22868
+      }
+    }
+  ],
+  "execution_receipt": {
+    "configuration_revision": "b03e12f89154f96d38f8383f5de720e0d53aadf453efcfa17f21dcafab355b90",
+    "coverage": "dedicated_local_executor_and_descendants",
+    "exclusions": [
+      "shared_services",
+      "external_provider_execution",
+      "same_user_ipc_escape"
+    ],
+    "generation": "f5a9f157b402406a824b805f197804fe",
+    "history": [
+      {
+        "effect": null,
+        "reason": null,
+        "state": "preparing"
+      },
+      {
+        "effect": null,
+        "reason": null,
+        "state": "running"
+      }
+    ],
+    "identity": {
+      "control_group": "/user.slice/user-1000.slice/user@1000.service/app.slice/codex-wake-objective-f5a9f157b402406a824b805f197804fe.service",
+      "invocation_id": "05b78d0bd0b24881b10377ea995b0ff6",
+      "main_pid": 49411,
+      "unit": "codex-wake-objective-f5a9f157b402406a824b805f197804fe.service"
+    },
+    "objective_id": "acceptance",
+    "prior_execution": null,
+    "state": "running",
+    "unit": "codex-wake-objective-f5a9f157b402406a824b805f197804fe.service"
+  },
+  "containment": null,
+  "remaining_live_owned_pids": null,
+  "fresh_unit_state": null,
+  "fresh_cgroup_exists": false,
+  "fresh_remaining_home_processes": null,
+  "raw_sha256": "a85c915148cd88104ef1de7cea09447e378c3e96459630d2ffb22b32bc9ab5d3",
+  "classification": "HARNESS_ASSERTION_FAILED_NOT_DEADLINE_PROOF",
+  "native_observed_tokens": 22868,
+  "qualification": "Shell exec optimization replaced shell with actual Python toolchild; harness prematurely stopped ownedservice. TERM/RPC/deadline assertions not executed."
+}

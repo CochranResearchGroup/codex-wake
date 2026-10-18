@@ -1,0 +1,16 @@
+{
+  "files": {
+    "SKILL.md": "e43502092a344f4674700bf419d78e4eabdd4e9c4b9bf02e22dd5cfb18a09ef3",
+    "references/use-cases.md": "e84e476315b49f841b5037c949e22c7a9a986881b9f02f7c5387f2287beaa5b3",
+    "references/existing-goal-limits.md": "70f99e73e3bc7ac383f7cf03b2c468143ce107f3d4be64f29328f72e1e6a8574",
+    "references/a2a-responses.md": "15c6cd49c268c70f52f3d9211b4611ca9c700a48e2872303bc68499b3109891b",
+    "references/wake-controls.md": "d5f8926489ec2199a21bbf80cc745aa0adc125a65fab62ec31fb672a703c7823",
+    "references/lifecycle.md": "419551e80eb7ec317fa68f5a7a5717d6516e5aa021eaf839b9bd7f0956a1580d",
+    "references/resource-limits.md": "03409a099fc8dddb76cce6fabd93378f8a2432c25bd3a7192e58b21269eb8f2e",
+    "agents/openai.yaml": "50143aea5f0adfed65aa52326862f7a9f80d6fb62609da55df4b01a273a010c7"
+  },
+  "relative_links_checked": 9,
+  "missing": [],
+  "isolated_destination": "/tmp/cw167-skills-v017/codex-wake",
+  "production_skills_changed": false
+}

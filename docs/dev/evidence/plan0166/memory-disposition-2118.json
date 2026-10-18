@@ -1,0 +1,18 @@
+{
+  "artifact_path": "docs/dev/evidence/plan0166/memory-disposition-2118.json",
+  "command": "remember",
+  "disposition": "unavailable",
+  "graphiti_writes_attempted": 0,
+  "group_id": null,
+  "mcp_url": "http://127.0.0.1:8817/mcp",
+  "name": null,
+  "reason": "Atlas discovery has no reviewed Codex Wake repository memory group; preserve repository checkpoint without an unqualified group write.",
+  "recorded_at": "2026-10-16T21:19:08.461781+00:00",
+  "reference_time": null,
+  "schema_version": "graphiti_closeout_memory_receipt.v1",
+  "source_artifact": "docs/dev/evidence/plan0166/checkpoint-20261016-2118.md",
+  "source_description": null,
+  "status": "recorded_no_write",
+  "timeout_seconds": null,
+  "warnings": []
+}

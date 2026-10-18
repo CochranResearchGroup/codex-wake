@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_settlement_at_session_cap_does_not_remove_exhaustion_fence (test_strict_executor.StrictExecutorTests.test_settlement_at_session_cap_does_not_remove_exhaustion_fence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-objective-enforcement/tests/test_strict_executor.py", line 91, in test_settlement_at_session_cap_does_not_remove_exhaustion_fence
+    self.assertEqual(guard.check(boottime=11),'session_tokens_exhausted')
+AssertionError: None != 'session_tokens_exhausted'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.050s
+
+FAILED (failures=1)

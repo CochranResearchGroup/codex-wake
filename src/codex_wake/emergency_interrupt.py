@@ -143,6 +143,14 @@ def interrupt_owned(root: Path) -> list[dict]:
         except Exception as exc:
             result.update(state='held', reason=str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
         results.append(result)
+    from .strict_runtime import stop_execution
+    for binding_path in (root/'strict-execution').glob('*/binding.json'):
+        try:
+            binding=json.loads(binding_path.read_text())
+            result=stop_execution(root,binding['objective_id'],'operator_emergency_interrupt')
+            results.append(dict(actor=binding['objective_id'],state=result['state'],reason=result.get('reason')))
+        except Exception as exc:
+            results.append(dict(actor=str(binding_path),state='uncertain',reason=type(exc).__name__))
     return results
 
 
