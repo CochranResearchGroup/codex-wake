@@ -5,6 +5,14 @@ Branch: fix/self-refresh-operational. Base: 27330f6. Target: origin/main.
 
 ## Current State
 
+v0.17.1 is released/installed from exact main2e3e931. Host profile and independent
+monitor are active. Production refresh is QUEUED waiting for all62loaded
+conversations to be idle; no reload attempted. A persistent terminal-file wake
+and bounded marker helper will return to this conversation for reconciliation.
+Plan/issue remain OPEN until completed actual production proof.
+
+## Original diagnostic baseline
+
 v0.17.0 ships tool/skill discovery but global MCP lacks lifecycle scope.
 Public installed reproduction returns lifecycle_host_scope_unavailable.
 Source refresh requires exact idle ownership and does not defer an active self-call.
@@ -138,3 +146,33 @@ observation while source/tests changed during the run. It is retained, not a fin
 frozen-build acceptance claim. The mailbox case passes its direct rerun. Final
 frozen hosted CI and installed selection own the release gate;57 installed focused
 checks and110-source parity/MCP27-tool controls pass on e4d6f12.
+
+## Exact-main delivery and deferred production proof
+
+PR283 merged2e3e931 after hosted run39085689031 passed1361tests (1skip) on
+Python3.11 and3.12 plus installed release gates. Published v0.17.1 wheel/sdist
+were downloaded and hash-matched. Installed exact-main prefix
+/home/ecochran76/.local/share/codex-wake/releases/0.17.1-2e3e931 passes110Python
+source parity,27-tool controls and actual mailbox smoke. Five stable entrypoints
+and both complete skill directories updated with backups. Native skills/list
+sees the new enabled descriptions and exact paths.
+
+Global MCP preserves goal flags and adds separate lifecycle root/registry. One
+exact caller owns self-refresh configuration/refresh only; native workspace,
+endpoint, explicit shared-idle approval, skill digest and actual MCP read-only
+configuration response are bound. Separate refresh servicePID42165 active.
+Unenrolled goal watcher updated to same releasePID42551; no enrollments reset.
+Unrelated supervisorPID60043 preserved. Original native goal remains complete
+with tokens1668856,time7567,createdAt1792179701,updatedAt1792189697; no goal write.
+
+Public production MCP admits plan0168-production-self-refresh-v0171 as queued
+through2026-10-18T02:19:21Z. Monitor observes62loaded, at least1busy; no reload
+attempt. The current active turn itself prevents reload. Checkpoint/receipt and
+verified persistent continuation are located in deployment-queued.json. Native
+file wake initially retained pending_time, then supervisor recovered bounded UTC
+and reports pending/not_due because terminal marker does not exist. Helper only
+writes that marker on completed/blocked/expired or bounded timeout; it performs
+no native effects. Wake continues the same thread to reconcile; never requeue,
+extend expiry, reopen goal, reset counters or force idle.
+
+Actual production completion remains OPEN; queued admission is not readiness.

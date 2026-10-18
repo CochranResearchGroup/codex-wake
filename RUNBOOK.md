@@ -7049,3 +7049,18 @@ choice is pending because native reload has no thread selector and peer MCP
 connections would reconnect. Optional lifecycle-root source isolation is ready
 at1078c84,3focused MCP checks pass; not deployed or called operational refresh.
 No native goal, allocation, counters, user client or shared server was changed.
+
+## Turn342 | 2026-10-18 UTC | v0.17.1 delivered; self-refresh queued
+
+PR283 merged2e3e931 after Python3.11/3.12 CI1361tests each PASS. Exact-main
+v0.17.1 release assets hash-readback match; installed110sources/27tools and
+mailbox smoke PASS. Stable entrypoints and both full skills synchronized.
+Private caller-only lifecycle host setup and independent refresh watcher active;
+un-enrolled resource watcher moved to new prefix, supervisorPID60043 preserved.
+Public same-thread refresh queued with fixed expiry02:19:21Z, awaiting all62
+loaded conversations idle; no reload attempted. Original complete goal/counters
+unchanged. Terminal marker helper and persistent nativefile wake
+wake_intent_635ecf6bbf2c4d0380072ced76e7ecde armed; monitor recovered scheduling
+time and reports pending/not_due. Plan0168/issue282 remain OPEN for actual
+production completion and native resource proof. deployment-queued.json owns
+locators; source/review/native fixture failures remain retained.

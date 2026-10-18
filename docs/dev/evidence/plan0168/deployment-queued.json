@@ -1,0 +1,55 @@
+{
+  "reference_time": "2026-10-18T01:20:50.345410+00:00",
+  "source_commit": "2e3e931b49572fa561ae69067475a0898905d6c5",
+  "release": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.17.1",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.17.1-2e3e931",
+  "ci": {
+    "run": 39085689031,
+    "python": [
+      "3.11",
+      "3.12"
+    ],
+    "tests_each": 1361,
+    "skipped_each": 1,
+    "status": "PASS"
+  },
+  "release_assets": {
+    "codex_wake-0.17.1.tar.gz": "1ba90bb8523d73795129bcd611ccb36a4998a2e538658a190175bf2088dbeb77",
+    "codex_wake-0.17.1-py3-none-any.whl": "a97fa591b19dd69f5934c76cb41223c4363e365a2c75527148fc836f86516f68"
+  },
+  "refresh": {
+    "state": "queued",
+    "reason": "waiting_for_idle",
+    "intent_key": "plan0168-production-self-refresh-v0171",
+    "expires_at": "2026-10-18T02:19:21Z",
+    "loaded_count": 62,
+    "busy_count": 1,
+    "reload_attempted": null
+  },
+  "receipt_path": "/home/ecochran76/.local/state/codex-wake/lifecycle/shared-refresh/ef7953a8dd3bc35f0fc25c092b4615165139abe9f913dab4ecd62e7da364302e.json",
+  "checkpoint": "/home/ecochran76/workspace.local/codex-wake/.codex/wake/checkpoints/self-refresh-0168.json",
+  "continuation": {
+    "id": "wake_intent_635ecf6bbf2c4d0380072ced76e7ecde",
+    "status": "pending",
+    "time_recovery": {
+      "alert": null,
+      "dispatch_window_seconds": 4452.2693700790405,
+      "expires": 1792290941.2959466,
+      "lower": 1792286447.0012467,
+      "mode": "bounded_utc",
+      "reason": "not_due",
+      "state": "pending",
+      "upper": 1792286447.73063
+    },
+    "terminal_marker": "/home/ecochran76/.local/state/codex-wake/lifecycle/plan0168-terminal.json",
+    "monitor_pid": 60043,
+    "helper_unit": "codex-wake-plan0168-notify.service"
+  },
+  "services": {
+    "shared_refresh_pid": 42165,
+    "goal_limits_pid": 42551,
+    "preserved_supervisor_pid": 60043
+  },
+  "scope": "One exact caller/self-refresh grant; configuration and refresh only. All loaded conversations must be observed idle. No production reload yet.",
+  "remaining": "Actual completed native same-conversation resource proof; then close Plan0168/issue282 and reconcile docs."
+}

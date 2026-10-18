@@ -1,0 +1,12 @@
+{
+  "goal": {
+    "threadId": "01a13b4b-1f4a-7fd3-9d41-3bafa9710762",
+    "objective": "$mattpocock-skills:implement-spec #275-278 following the ask Matt process. renew resouce allowances to 2 MM tokens or 4 h. No implementation theater.",
+    "status": "complete",
+    "tokenBudget": null,
+    "tokensUsed": 1668856,
+    "timeUsedSeconds": 7567,
+    "createdAt": 1792179701,
+    "updatedAt": 1792189697
+  }
+}
