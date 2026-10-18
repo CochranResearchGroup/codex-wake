@@ -53,3 +53,32 @@ retry. See canonical Plan0169v4d/RUNBOOK Turn354 for latest status.
 
 Memory disposition: forbidden; no reviewed destination routing for a Graphiti
 write, machine non-write receipt in /tmp/cw289-self-enrollment-memory-disposition-20261018.json.
+
+## Prepared0.18.0successor packet (Plan0169v6)
+
+Latest committed checkpoint remains447359e. Working tree now contains the
+uncommitted0.18.0metadata, host-only initial boundary import, hybrid v2legacy
+policy preservation, focused regressions and release/rollout artifacts. This is
+intentional pending operator delivery authorization; do not assume a clean tree
+or discard it. Candidate /tmp/cw289-v0180-ready matches all six source modules.
+Final exact-source unit run1375PASS/1skip/162.520s. Focused36PASS7.104s; native
+public imported boundary10->30fresh, unchanged deadline/control, six local calls,
+zero external providers, empty process census. See release-candidate-0.18.0.json.
+
+Prepared private policy:/tmp/cw289-rollout-preview/policy-proposed.json. Preserves
+both current legacy grants exactly, adds only this renewed allocation with its
+original15:39:29.531693Z/801245response boundary, no default allocation. Live
+public endpoint still0.17.3held/unarmed; no policy/controller/runtime changes.
+
+Next decision is rollout-proposal.md, not another self-enrollment contract
+approval. It names commit/push/PR/remoteCI/merge, exact-main release/install and
+a new authorized idle-only MCP activation with scoped pause/resume and rollback.
+The existing shared-reload non-goal and provider/commit rules require operator
+approval. Automatic goal continuation and resource renewal are not that answer.
+This is the first turn encountering this delivery gate; goal remains active.
+
+Latest state: BLOCKED after three consecutive unanswered delivery-gate goal
+turns. Candidate hashes unchanged,1375tests still qualified. Pending action is
+operator rollout approval; no implicit approval from automatic continuation.
+Preserve all dirty0.18.0work and private proposal. No resource exhaustion or
+completion claimed. /tmp/cw289-rollout-preview/approval-audit.json records count3.

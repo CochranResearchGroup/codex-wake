@@ -6,24 +6,21 @@ Branch: fix/289-allocation-campaign-control. Base: 89e3eb8. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 5; fresh-token default and campaign-scoped graceful shutdown.
+Plan version: 6; fresh-token default and campaign-scoped graceful shutdown.
 
 ## Current State
 
-Host-delegated self-enrollment and objective continuity are implemented and
-qualified in the isolated installed candidate /tmp/cw289-v4-installed. Two actual
-native conversations enroll through public Wake MCP without UUID grants; spend
-is20then40fresh, deadline unchanged, unrelated control unchanged. Final source
-and installed hashes match in native-public-final.json.33focused tests pass,
-including scoped renewal and conservative interrupted-renewal recovery. Bounded
-review findings were reproduced and repaired. Main/production remain unchanged.
-Delivery remains open: final hermetic Python suite1372tests PASS183.474s,1skip;
-plugin12PASS, build/compile/policy/diff checks PASS. Earlier red broad runs were
-contaminated by real host registry/mailbox discovery; isolated XDG state/config
-plus StableTime opt-out resolve the failure family without product changes.
-The source is qualified, not published or installed into production. Current
-native goal status is the historical blocked checkpoint; use live fresh accounting
-for the renewed v5 allocation below, never the cache-inclusive total.
+The operator approved proceeding with final review and the prepared rollout
+("OK go") after the explicit review -> PR/delivery recommendation and linked
+rollout proposal. The publication/install/idle-refresh gate is resolved.
+Candidate0.18.0passes1375tests/1skip,36focused tests, and actual native imported
+boundary/continuation10->30fresh with fixed deadline and unchanged control.
+Final source hashes match /tmp/cw289-v0180-ready. Existing grants are preserved;
+initial_boundary imports the approved renewal without replenishment.
+Current packet: commit/freeze final delta against447359e, closed-world Standards
+and Spec review, PR/required matrix CI/merge, exact-main release/install and new
+idle-only MCP activation. Preserve shared executor and unrelated conversations.
+Renewed2Mfresh/6h deadline remains2026-10-18T21:39:29.531693Z.
 
 
 2026-10-18 v2: the user explicitly requires graceful campaign winddown, followed
@@ -603,3 +600,88 @@ an armed controller receipt. No host grant/controller/installation was changed
 to manufacture enforcement. User activation permits continued operator dialogue
 and bounded setup/integration; do not turn the missing monitor into a chat lock.
 Resource renewal does not reset review/discovery bounds or widen release scope.
+
+## Checkpoint v6 — prepared0.18.0delivery and boundary import
+
+Previous turn: outcome_progress by explicit resource renewal. This turn:
+outcome_progress/blocker_reduction. Branch447359eclean on entry; fetched
+origin/main89e3eb8,0behind/8ahead, no matching PR. Issue289OPEN still contains
+original superseded cached-input/operator-origin wording; do not treat that as
+current product authority. ADR0002/user correction remain authoritative.
+
+Prepared uncommitted0.18.0package metadata/release notes and rollout proposal.
+Installed version remains0.17.3. Live read-only goal-limit inventory has one
+stop-latched legacy receipt; private host policy has two explicit caller grants.
+Observed approved physical native endpoint peer9802/uid1000serves this same active
+thread. No production changes or external tracker mutations performed.
+
+Deployment qualification exposed two bounded missing invariants: preserve the
+already authorized renewal boundary when first enrolling after installation,
+and retain legacy explicit grants while enabling v2delegation. Public tests went
+red70vs30fresh, then passed with a requalified host-only initial_boundary that
+seeds the boundary owner even when a successor enrolls first. Future/changed
+history is refused before admission. Version2legacy callers keep their exact
+grant/receipt; explicit selection of another allocation holds for migration,
+rather than silently returning the old one. Final focused36tests PASS7.104s.
+
+Real native installed import/continuation proof passes with6localhost responses,
+10then30fresh after the imported boundary, original deadline unchanged, unrelated
+control unchanged and empty cleanup census. Product smoke exits0with isolated
+provider-free fixture lifecycles; live provider/tmux/monitor acceptance is not
+claimed. One broad run was invalidated by reinstalling its environment during
+collection (websockets temporarily unavailable); preserved log
+/tmp/cw289-v0180-boundary-full.log. Final environment is separate/immutable.
+
+Review/discovery bounds carry forward; no new broad review pass. Only the named
+rollout gaps received primary public-seam verification. Prepared patch is dirty
+under this exact worktree and will be committed only with operator authority.
+Next gate is the concrete delivery sequence in rollout-proposal.md: commit/push,
+PR/remote CI/merge, exact-main0.18.0release/install, private policy adoption and
+a newly authorized idle-only MCP refresh (with scoped pause/resume if needed).
+Plan0169explicitly excludes shared reload; resource renewal/automatic continuation
+does not approve this material scope change. No repeated self-enrollment product
+approval is requested. Current goal remains active/incomplete.
+
+Final v6validation:1375tests PASS162.520s,1skip,exit0in the fully installed
+immutable /tmp/cw289-v0180-ready environment with XDGfixture isolation and
+StableTime opt-out. Exact final source/modules remained frozen. Final native
+imported-boundary/continuation fixture PASS10->30fresh, six localhost requests,
+zero external providers; six installed module hashes equal source. Product smoke
+is provider-free; no live provider/monitor/tmux or production activation claimed.
+Artifacts:release-candidate-0.18.0.json, release-notes-0.18.0.md,
+pr-body-0.18.0.md, rollout-proposal.md.
+
+Delivery gate first encounter: operator approval of the named concrete sequence
+is required. Do not mark blocked on this first encounter, treat automatic
+continuation as approval, repeat passed checks, or reopen the resolved
+host-delegation decision. No new broad review/discovery is authorized.
+
+## v6delivery gate — third-turn blocked audit
+
+The prepared delivery decision remains unanswered across three consecutive goal
+turns: release preparation/question; unchanged checkpoint verification; current
+verification. Automatic goal continuation supplies no approval for the expressly
+excluded shared reload or provider mutations. No meaningful safe dependent action
+remains: the patch is qualified, proposal/rollback prepared, remote CI needs a
+push/PR, and live usability needs installation/policy/controller/MCPactivation.
+No failed checks are being used as a reason to stop; no repeated hardening added.
+
+Transition active -> blocked, not complete or resource-exhausted.1375test pass
+and candidate hashes remain current. HEAD447359ewith the named prepared dirty
+packet retained. No new commits/publication/runtime mutations. The pending
+question remains rollout-proposal.md; do not ask again for the already approved
+self-enrollment contract. Renewal deadline21:39:29.531693Z and resource history
+remain unchanged. On approval, resume with a fresh blocked audit and execute the
+authorized named sequence without repeating this approval gate.
+
+## v6rollout approval and execution
+
+User "OK go" authorizes the prepared named delivery sequence, final bounded
+review, and scoped rollback. No further approval is needed for these actions
+unless new evidence requires a materially different effect. Shared executor
+restart remains forbidden; fresh idle-only MCP activation may temporarily pause
+and resume this campaign as specified. Freeze final uncommitted delta in one
+commit against447359e. Standards/Spec reviewers remain closed-world on the two
+rollout gaps (initial boundary import and legacy-grant preservation), accepted
+findings and critical regressions. No new broad discovery pass. Primary retains
+authority/adjudication. Goal blocked UI is historical; user has resumed work.

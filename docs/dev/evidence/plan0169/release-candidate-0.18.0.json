@@ -1,0 +1,59 @@
+{
+  "verdict": "PASS_NATIVE_PUBLIC_IMPORTED_BOUNDARY_AND_CONTINUATION",
+  "candidate_version": "0.18.0",
+  "prepared_not_published": true,
+  "base_commit": "447359e",
+  "source_module_hashes": {
+    "goal_supervision.py": "65c1aa35a53dabd4d534bba15eb876ca44860108642bcf0b2262d9d73ca20b86",
+    "goal_usage.py": "90ed92f18f19ace4110d197a2b00bbcccc7244429a7cf0b46884822007b08b87",
+    "goal_limits_cli.py": "4b69628b6cc47cb8189df0132b17cdc159ab5ac35b1dfc38133a11b5a2d39f7e",
+    "mcp_server.py": "50a03ea1d8c34a84b018cfebed5c07a00c753c5eeb62771ae252c78ee02eed3b",
+    "native_protocol.py": "a4c42df51f16dbc29937237bc4d31649fbe2a10039fef54bbfc019a169ee10ec",
+    "__init__.py": "f1781681cb212b599601e9098603b77a462aea1f647ce1e2d4f46bf3245f81f4"
+  },
+  "installed_match": true,
+  "wheel": "/tmp/cw289-v0180-ready-wheel/codex_wake-0.18.0-py3-none-any.whl",
+  "wheel_sha256": "521c28a7d9dddfb152cf9aa2e00e9e2e8d6c800d573f64b52244a834a30900d4",
+  "receipt": "/tmp/cw289-native-import-ready-20261018/result.json",
+  "receipt_sha256": "0ac0d5d5460b4c3ffddefd91c227872d30b05afcfee2f714492a9dddd2361317",
+  "imported_boundary": {
+    "started_at": 1792338820.4165425,
+    "prior_fresh_tokens": 10
+  },
+  "charged_after_boundary": [
+    10,
+    30
+  ],
+  "original_deadline_preserved": true,
+  "unrelated_control_unchanged": true,
+  "remaining_owned_processes": [],
+  "http_requests": 6,
+  "external_provider_calls": 0,
+  "focused_tests": "36PASS7.104seconds",
+  "negative_cases": [
+    "future boundary",
+    "changed history",
+    "wrong legacy allocation selection"
+  ],
+  "product_smoke": "Final candidate provider-free isolated product smoke exits0; live provider/monitor/tmux not exercised",
+  "product_smoke_log": "/tmp/cw289-v0180-ready-product-smoke.json",
+  "full_suite": {
+    "result": "PASS",
+    "tests": 1375,
+    "skipped": 1,
+    "seconds": 162.52,
+    "exit_code": 0,
+    "log": "/tmp/cw289-v0180-ready-full.log",
+    "log_sha256": "3f6a4da2fcac1f97a024d6338f7c0500f5d8857e60bbcda614f9052d3e48a715",
+    "immutable_environment": true,
+    "final_source_frozen": true
+  },
+  "product_smoke_sha256": "864ad881aa665f224113a4d66b85c0c8e8a2a60c5d8ac87c3816132ee9c8f104",
+  "fresh_cleanup_census": {
+    "owned_groups": [
+      "88213",
+      "88478"
+    ],
+    "remaining_members": []
+  }
+}

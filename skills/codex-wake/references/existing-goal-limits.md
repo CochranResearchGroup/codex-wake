@@ -210,3 +210,15 @@ qualified response anchor and retains the previous ledger and finalized member
 charges; later work is charged only to the renewed allowance. A boundary changed
 after interrupted enrollment holds for reconciliation; do not retry with another
 ID, alter the saved anchor, delete the ledger or invent another renewal.
+
+For a first installation that must honor an already authorized renewal, the host
+may set `initial_boundary` on its named allocation: `started_at` is the approved
+UTC epoch, `token_accounting` is the explicit basis, and `reset_anchor` is the
+qualified native response anchor recorded at that renewal. This field belongs
+only to the private host policy; model tool arguments cannot provide it. The
+controller requalifies original history, registers the boundary owner even if a
+successor enrolls first, and charges post-boundary work without starting another
+time window. Future/changed/unqualified boundaries hold before admission.
+Version2policies may preserve a `callers` map for legacy explicit grants; those
+callers retain their prior exact allocation and receipts. A requested different
+allocation holds for qualified migration instead of silently using another one.

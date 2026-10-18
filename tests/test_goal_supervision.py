@@ -19,6 +19,82 @@ NOW=1893456000
 
 
 class GoalSupervisionTests(unittest.TestCase):
+    def test_first_enrollment_imports_host_renewal_boundary_without_replenishing_resources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            from codex_wake.goal_usage import observe_usage
+            original=observe_usage(log.parent.parent,THREAD,NOW)
+            self.assertEqual(original['used_tokens'],40)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            grant['initial_boundary']=dict(started_at=NOW+10,token_accounting='fresh',reset_anchor=original['anchor'])
+            config=dict(version=2,native_caller_binding=True,default_allocation='renewal',allocations={'renewal':grant})
+            policy.write_text(json.dumps(config))
+            row=json.loads(log.read_text().splitlines()[-1]);row['payload']['response_id']='after-renewal'
+            row['payload']['usage']=dict(input_tokens=28,cached_input_tokens=0,output_tokens=2,total_tokens=30)
+            with log.open('a') as stream:stream.write(json.dumps(row)+'\n')
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='native-import',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            successor='00000000-0000-7000-8000-000000000294'
+            rows=[json.loads(line) for line in log.read_text().splitlines()[:4]]
+            rows=json.loads(json.dumps(rows).replace(THREAD,successor))
+            rows[1]['payload']['goal']['createdAt']=NOW+15
+            for event in rows[1:]:event['timestamp']='2030-01-01T00:00:15Z'
+            rows[3]['payload']['usage']=dict(input_tokens=4,cached_input_tokens=0,output_tokens=1,total_tokens=5)
+            (log.parent/'first-successor.jsonl').write_text(''.join(json.dumps(event)+'\n' for event in rows))
+            native['siblings']={successor:dict(goal=dict(threadId=successor,createdAt=NOW+15,status='active'),active=['work'],calls=[])}
+            successor_context=dict(threadId=successor,sessionId=successor,callId='native-successor-import',
+                **{'x-codex-turn-metadata':dict(thread_id=successor,session_id=successor,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+20):
+                first=enroll(root,policy,successor,100,120,native_context=successor_context)
+                self.assertEqual(first['used_tokens'],35)
+                self.assertEqual(first['deadline'],NOW+130)
+                receipt=enroll(root,policy,THREAD,100,120,native_context=context)
+                self.assertEqual(receipt['state'],'armed')
+                self.assertEqual(receipt['used_tokens'],35)
+                self.assertEqual(receipt['time_origin'],NOW+10)
+                self.assertEqual(receipt['deadline'],NOW+130)
+                again=enroll(root,policy,THREAD,100,120,native_context=context)
+                self.assertEqual(again['used_tokens'],35)
+                self.assertEqual(again['deadline'],NOW+130)
+
+    def test_host_boundary_rejects_changed_history_and_future_time_before_admission(self):
+        for defect in ('changed-history','future-time'):
+            with self.subTest(defect=defect),tempfile.TemporaryDirectory() as directory:
+                root,policy,log,_,_=self.fixture(directory)
+                from codex_wake.goal_usage import observe_usage
+                anchor=observe_usage(log.parent.parent,THREAD,NOW)['anchor']
+                if defect=='changed-history':anchor['response_hashes']={key:'0'*64 for key in anchor['response_hashes']}
+                grant=json.loads(policy.read_text())['callers'][THREAD]
+                grant['initial_boundary']=dict(started_at=NOW+100 if defect=='future-time' else NOW,
+                    token_accounting='fresh',reset_anchor=anchor)
+                policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,
+                    default_allocation='import',allocations={'import':grant})))
+                context=dict(threadId=THREAD,sessionId=THREAD,callId='native-import',
+                    **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+                with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+20):
+                    with self.assertRaisesRegex(ValueError,'boundary'):
+                        enroll(root,policy,THREAD,100,120,native_context=context)
+                self.assertFalse(list((root/'goal-supervision/allocations').glob('*.json')))
+
+    def test_host_delegation_policy_preserves_existing_explicit_grants_and_receipts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            legacy=json.loads(policy.read_text())
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120)
+                upgraded=dict(version=2,native_caller_binding=True,callers=legacy['callers'],
+                    allocations={'other':dict(legacy['callers'][THREAD],allocation_id='other')})
+                policy.write_text(json.dumps(upgraded))
+                again=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(again['state'],'armed')
+                self.assertEqual(again['allocation_id'],first['allocation_id'])
+                self.assertEqual(again['deadline'],first['deadline'])
+                self.assertEqual(again['used_tokens'],40)
+                self.assertEqual(poll(root)[0]['state'],'armed')
+                self.assertEqual(native['goal']['status'],'active')
+                with self.assertRaisesRegex(ValueError,'selected allocation'):
+                    enroll(root,policy,THREAD,100,120,allocation_id='other')
+
     def test_host_delegated_caller_enrolls_without_uuid_grant(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,_=self.fixture(directory)

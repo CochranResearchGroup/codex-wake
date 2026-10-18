@@ -21,7 +21,7 @@ from codex_wake.native_protocol import native_request
 from codex_wake.process import process_identity
 
 
-def qualify(base, codex):
+def qualify(base, codex, import_boundary=False):
     base.mkdir(mode=0o700, parents=True, exist_ok=False)
     home=base/'home';home.mkdir(mode=0o700)
     root=base/'runtime';policy=base/'policy.json'
@@ -117,6 +117,15 @@ def qualify(base, codex):
             while trusted_upper()<goal['createdAt']:
                 if time.monotonic()>end:raise RuntimeError('qualified clock unavailable')
                 time.sleep(.1)
+            if import_boundary and index==0:
+                from codex_wake.goal_usage import observe_usage
+                observed=observe_usage(home,thread,goal['createdAt'],token_accounting='fresh')
+                assert observed['state']=='qualified',observed
+                boundary=dict(started_at=trusted_upper(),token_accounting='fresh',reset_anchor=observed['anchor'])
+                host_policy=json.loads(policy.read_text())
+                host_policy['allocations']['owned-objective']['initial_boundary']=boundary
+                save('policy.json',host_policy);policy_hash=hashlib.sha256(policy.read_bytes()).hexdigest()
+                result['imported_boundary']=dict(started_at=boundary['started_at'],prior_fresh_tokens=observed['used_tokens'])
             rpc('thread/goal/set',dict(threadId=thread,status='active',origin='user',tokenBudget=1000000))
             if not ready.wait(min(20,max(0,expiry-time.monotonic()))):raise RuntimeError('public tool result not observed')
             read=rpc('thread/read',dict(threadId=thread,includeTurns=True))['thread'];save('native-tool-readback-'+str(index+1)+'.json',read)
@@ -127,7 +136,8 @@ def qualify(base, codex):
             assert state['state']=='armed',json.dumps(state)
             assert state['controller']['fresh'] is True
             assert state['allocation_id']=='owned-objective' and state['token_accounting']=='fresh'
-            assert state['used_tokens']==20*(index+1),json.dumps(state)
+            assert state['used_tokens']==20*(index+1)-(10 if import_boundary else 0),json.dumps(state)
+            if import_boundary:assert state['time_origin']==result['imported_boundary']['started_at']
             if first_state is None:first_state=state
             assert state['deadline']==first_state['deadline'] and state['time_origin']==first_state['time_origin']
             assert state['deadline']==state['time_origin']+120
@@ -140,8 +150,8 @@ def qualify(base, codex):
         result['unrelated_control']['goal_after']=rpc('thread/goal/get',dict(threadId=unrelated))['goal']
         assert result['unrelated_control']['goal_after']==unrelated_before,'unrelated control goal changed'
         result.update(policy_unchanged=True,config_unchanged=True,no_per_caller_grants=True,
-            original_deadline_preserved=True,cumulative_tokens=40,unrelated_control_unchanged=True)
-        result['verdict']='PASS_NATIVE_PUBLIC_SELF_ENROLLMENT_AND_CONTINUATION'
+            original_deadline_preserved=True,cumulative_tokens=30 if import_boundary else 40,unrelated_control_unchanged=True)
+        result['verdict']='PASS_NATIVE_PUBLIC_IMPORTED_BOUNDARY_AND_CONTINUATION' if import_boundary else 'PASS_NATIVE_PUBLIC_SELF_ENROLLMENT_AND_CONTINUATION'
     except BaseException as exc:result.update(verdict='FAILED_PACKET',error=type(exc).__name__+': '+str(exc))
     finally:
         finish.set()
@@ -163,4 +173,5 @@ def qualify(base, codex):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True);parser.add_argument('--codex',type=Path,required=True)
-    args=parser.parse_args();qualify(args.output.resolve(),args.codex.absolute())
+    parser.add_argument('--import-boundary',action='store_true',help='prove initial host renewal anchor/time import before admission')
+    args=parser.parse_args();qualify(args.output.resolve(),args.codex.absolute(),args.import_boundary)

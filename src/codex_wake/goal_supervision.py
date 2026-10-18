@@ -78,11 +78,13 @@ def _load_grant(policy_path,thread,allocation_id=None):
     policy=json.loads(path.read_text(),object_pairs_hook=unique)
     version=policy.get('version')
     if type(version) is not int or version not in (1,2):raise ValueError('unsupported goal limits policy')
-    if version==1:
-        callers=policy['callers']
-        if not isinstance(callers,dict):raise ValueError('host callers must be an object')
+    callers=policy['callers'] if version==1 else policy.get('callers',{})
+    if not isinstance(callers,dict):raise ValueError('host callers must be an object')
+    if version==1 or thread in callers:
         if thread not in callers:raise CallerGrantMissing('host caller grant unavailable or malformed')
         grant=callers[thread]
+        if allocation_id is not None and allocation_id!=grant.get('allocation_id'):
+            raise ValueError('explicit caller grant cannot select the requested allocation; qualified migration required for the selected allocation')
     else:
         if policy.get('native_caller_binding') is not True:
             raise ValueError('host must require native caller binding')
@@ -178,10 +180,32 @@ def _allocation_admit(directory,receipt,old):
             if receipt['token_accounting']!=allocation['token_accounting']:
                 raise ValueError('allocation accounting basis cannot change during self enrollment')
         else:
+            initial=receipt['grant'].get('initial_boundary')
+            members={};origin=receipt['time_origin']
+            if initial is not None:
+                if not isinstance(initial,dict) or initial.get('token_accounting')!=receipt['token_accounting']:
+                    raise ValueError('host initial boundary accounting basis unavailable')
+                origin=initial.get('started_at');initial_anchor=initial.get('reset_anchor')
+                if (type(origin) not in (int,float) or not math.isfinite(origin)
+                        or not isinstance(initial_anchor,dict)):
+                    raise ValueError('host initial boundary unavailable')
+                root_thread=initial_anchor.get('thread_id');_name(root_thread)
+                created=initial_anchor.get('goal_created_at')
+                if (type(created) not in (int,float) or not math.isfinite(created)
+                        or not created<=origin<=receipt['started_upper']):
+                    raise ValueError('host initial boundary time is unqualified')
+                from .goal_usage import observe_usage
+                qualified=observe_usage(receipt['grant']['codex_home'],root_thread,created,
+                    reset_anchor=initial_anchor,token_accounting=receipt['token_accounting'])
+                if qualified.get('state')!='qualified':
+                    raise ValueError('host initial boundary requires qualified original history')
+                # Register the boundary owner even if a successor enrolls first;
+                # otherwise spending between renewal and enrollment disappears.
+                members[root_thread]=dict(goal_created_at=created,reset_anchor=initial_anchor)
             allocation=dict(version=1,allocation_id=receipt['allocation_id'],grant=receipt['grant'],
                 token_limit=receipt['token_limit'],time_limit_seconds=receipt['time_limit_seconds'],
-                token_accounting=receipt['token_accounting'],time_origin=receipt['time_origin'],
-                deadline=receipt['deadline'],members={},charges={},used_tokens=0,stop_latched=False,boot_id=boot_id_value())
+                token_accounting=receipt['token_accounting'],time_origin=origin,
+                deadline=origin+receipt['time_limit_seconds'],members=members,charges={},used_tokens=0,stop_latched=False,boot_id=boot_id_value())
         if receipt['thread_id'] not in allocation['members'] and len(allocation['members'])>=32:
             raise ValueError('allocation member limit reached')
         allocation['token_limit']=min(receipt['token_limit'],allocation['token_limit'])
