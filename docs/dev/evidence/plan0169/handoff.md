@@ -23,11 +23,13 @@ requests, no external calls. Final exact process groups70439/70590have no member
 33focused tests pass; policy wiring/compile/diff checks pass. Review findings were
 reproduced/repaired; see review.md. No further broad discovery pass.
 
-Delivery gate: full suite not green. delegation-validation.json preserves1372tests
-with64failures/1error/1skip. Prior64identifiers remain, plus one intermittent
-mailbox disposition subtest (exact isolated candidate/main both pass). Full run
-began before final renewal recovery guard; final focused test and exact review
-cover that delta. Do not erase failures or claim release readiness.
+Validation checkpoint: final frozen02c7893full run PASS1372tests/183.474s,1skip,
+exit0with isolated XDG_CONFIG_HOME/XDG_STATE_HOME and StableTime opt-out. The
+prior64baseline identifiers were host registry/mailbox fixture contamination;
+20selected tests prove isolation fixes the family without product edits. Earlier
+failed logs and one intermittent disposition mismatch remain retained. Plugin12
+PASS, compile/policy/diff/build PASS. README and CI now isolate unit process
+state. See delegation-validation.json. This is local, not remote matrix CI.
 
 Resource bound: original goal01a14f45-25a2-7ef1-bcce-1205f176cc73 created1792332310,
 deadline1792353910 (2026-10-18T20:05:10Z),2Mfresh tokens. Current read-only qualified
@@ -35,8 +37,13 @@ usage745150fresh; native goal remains historical blocked with stale counters.
 Use source observe_usage for actual cumulative spend; never count cache toward
 the fresh ceiling or reset counters/time. Stop/checkpoint before original limits.
 
-Next bounded packet: triage release-gate failures against unchanged baseline,
-starting with the repeated pending_thread_work fixture family. Separate evidence
-from implementation scope and preserve unrelated work. Max2hypothesis attempts,
-focused reproduction first; do not repeat passed native acceptance or silently
-waive CI. Plan0168 refresh remains separate/expired and supplies no runtime retry.
+Next bounded packet: integrate this qualified branch through the repository's
+GitHub/CI workflow, then perform separately authorized exact-main release/install
+qualification. No per-session grants or operator-origin approval question remains.
+Preserve prior failed receipts and unrelated sessions/services. No repeated broad
+review or native qualification needed unless the code changes or new evidence
+warrants it. Plan0168 refresh remains separate/expired and supplies no runtime
+retry. See canonical Plan0169v4d/RUNBOOK Turn354 for latest status.
+
+Memory disposition: forbidden; no reviewed destination routing for a Graphiti
+write, machine non-write receipt in /tmp/cw289-self-enrollment-memory-disposition-20261018.json.

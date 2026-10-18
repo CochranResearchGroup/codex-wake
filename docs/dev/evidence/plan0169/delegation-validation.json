@@ -91,5 +91,28 @@
     "candidate_selected": "PASS /tmp/cw289-v4-disposition-candidate.log",
     "unchanged_main_selected": "PASS /tmp/cw289-v4-disposition-baseline.log",
     "no_source_repair_or_quarantine": true
+  },
+  "final_hermetic_run": {
+    "summary": "1372 tests PASS in183.474s;1skip;exit0",
+    "log": "/tmp/cw289-v4-hermetic-full.log",
+    "log_sha256": "f13d698708e33f8355223ea720d627d817efab098ae1a7490c480a41618e75fb",
+    "environment": {
+      "XDG_CONFIG_HOME": "/tmp/cw289-final-test-config",
+      "XDG_STATE_HOME": "/tmp/cw289-final-test-state",
+      "CODEX_WAKE_STABLE_TIME_CONFIG": "",
+      "PYTHONPATH": "src"
+    },
+    "source_commit": "02c7893",
+    "source_frozen_for_run": true,
+    "diagnostic_selected": "20tests PASS6.511s /tmp/cw289-v4-hermetic-probe.log",
+    "cause": "Installed host Wake registry/mailbox discovery contaminated lifecycle fixtures; isolated XDG roots resolve the repeated family without product changes",
+    "retry_history": "Original failed logs and intermittent declined disposition remain retained; no test removed/quarantined or gate waived",
+    "additional_checks": {
+      "plugin_tests": "12PASS",
+      "compileall": "PASS",
+      "policy_wiring": "PASS",
+      "diff_check": "PASS",
+      "build_and_installed_native": "PASS"
+    }
   }
 }

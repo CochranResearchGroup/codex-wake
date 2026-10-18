@@ -791,11 +791,15 @@ pending or firing wakes; cancel those wakes first.
 Run the unit test suite:
 
 ```bash
-CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
+cw_test_root=$(mktemp -d)
+XDG_CONFIG_HOME="$cw_test_root/config" XDG_STATE_HOME="$cw_test_root/state" \
+  CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src \
+  python -m unittest discover -s tests -p 'test_*.py'
 ```
 
-The unit-test command disables automatic use of a user-installed StableTime client
-configuration so the installed service does not override fixture time. Keep the configured trusted
+The unit-test command isolates Wake registry/mailbox discovery from installed user
+state and disables automatic use of a user-installed StableTime client
+configuration so host services do not override fixture time or pending-work inventory. Keep the configured trusted
 clock enabled for opt-in installed/native qualification scripts.
 
 Run the CLIs from source:

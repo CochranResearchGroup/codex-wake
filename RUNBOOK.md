@@ -7266,3 +7266,19 @@ main replay both pass. Failed receipt retained; no clean CI claim or waiver.
 No production grant/install/reload/restart, remote push, PR, merge or release.
 Plan0168 remains separate. Next: bounded release-gate triage/integration; durable
 handoff in docs/dev/evidence/plan0169/handoff.md.
+
+
+## Turn354 | 2026-10-18 UTC | Resolve unit fixture contamination
+
+Source checkpoint02c7893retained. Repeated baseline handoff/refresh failures read
+the installed host Wake registry/message inventory. One isolated XDG hypothesis
+probe20tests passes6.511s; final frozen-source hermetic suite1372tests passes
+183.474s,1skip,exit0. README and the CI unit step now isolate XDGconfig/state and
+disable automatic host StableTime for fixture tests. Earlier failed runs remain
+in evidence; no product workaround, test removal, quarantine or waiver. Plugin12
+PASS; compile/policy/diff/build and final installed native proof PASS.
+
+Progress blocker_reduction; integration remains open. No remote push/PR/merge,
+release, production install, grants or shared runtime changes. Existing resource
+limits are unchanged. Memory forbidden (destination routing unqualified),0writes,
+receipt /tmp/cw289-self-enrollment-memory-disposition-20261018.json.

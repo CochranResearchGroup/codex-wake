@@ -11,11 +11,11 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: a9881c6
+    checkpoint: 02c7893
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-18
-    disposition: Host-delegated self-enrollment and native successor continuity qualified; production unchanged; broad release gate remains red
+    disposition: Host-delegated self-enrollment/native continuity qualified; hermetic1372tests and plugin12 pass; integration open, production unchanged
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational

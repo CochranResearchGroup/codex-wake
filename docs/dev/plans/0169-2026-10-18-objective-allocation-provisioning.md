@@ -17,11 +17,13 @@ is20then40fresh, deadline unchanged, unrelated control unchanged. Final source
 and installed hashes match in native-public-final.json.33focused tests pass,
 including scoped renewal and conservative interrupted-renewal recovery. Bounded
 review findings were reproduced and repaired. Main/production remain unchanged.
-Delivery remains open: broad suite is not green (baseline lifecycle failures plus
-one intermittent mailbox-disposition failure); no release-gate waiver, PR, merge
-or installed production provisioning is claimed. Current native goal status is
-the historical blocked checkpoint; live read-only fresh accounting is used for
-the original2M/6h bound, never the cache-inclusive total.
+Delivery remains open: final hermetic Python suite1372tests PASS183.474s,1skip;
+plugin12PASS, build/compile/policy/diff checks PASS. Earlier red broad runs were
+contaminated by real host registry/mailbox discovery; isolated XDG state/config
+plus StableTime opt-out resolve the failure family without product changes.
+The source is qualified, not published or installed into production. Current
+native goal status is the historical blocked checkpoint; use live fresh accounting
+for the original2M/6h bound, never the cache-inclusive total.
 
 
 2026-10-18 v2: the user explicitly requires graceful campaign winddown, followed
@@ -554,3 +556,24 @@ Production remains unchanged. Plan0168 refresh is separate and expired; no
 requeue/reload/restart authority inferred. Next bounded packet is release-gate
 triage/integration on this exact branch, preserving failed receipts and source
 scope; do not repeat native proof or renew budgets merely to keep working.
+
+## Checkpoint v4d — hermetic release-gate validation
+
+State transition: source-qualified/delivery-gate-red -> validated/integration-open.
+Progress: blocker_reduction. Bounded hypothesis probe traced repeated
+pending_thread_work failures to fixture discovery of installed host registry and
+mailbox state. With isolated XDG_CONFIG_HOME/XDG_STATE_HOME and the already
+qualified clock opt-out,20selected tests pass6.511s. Final full run against frozen
+02c7893passes1372tests/183.474s with1skip and exit0. No product change, omitted
+test, quarantine or waiver obtained that pass. README and unit CI step now name
+the process-local isolation. Preserve all earlier failed logs, including the
+intermittent declined-disposition mismatch; the clean full run includes that test.
+
+Other checks: plugin12PASS, entrypoint syntax PASS, compileall/policy wiring/diff
+PASS, wheel build/isolated install PASS, final native public proof PASS. This is
+local qualification, not remote Python3.11/3.12 CI or an exact-main release.
+No production install/grant/reload/restart or remote publication occurred.
+Next concrete integration packet uses this branch and qualified evidence; no
+repeat investigation or approval for self-enrollment is needed. Memory disposition
+forbidden: no reviewed Graphiti destination routing was established; non-write
+receipt /tmp/cw289-self-enrollment-memory-disposition-20261018.json,0writes.
