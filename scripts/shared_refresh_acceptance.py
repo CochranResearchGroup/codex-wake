@@ -105,10 +105,10 @@ for line in sys.stdin:
         body=dict(profile='owned',intent='owned-shared-idle-refresh',thread_id=threads[0],caller_thread_id=threads[0],
             checkpoint='checkpoint.json',checkpoint_sha256=hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
             resources=['skill','mcp'],expires_at=datetime.fromtimestamp(upper+75,UTC).isoformat())
-        watcher=subprocess.Popen([str(cli),'--wake-root',str(wake_root),'goal-limits','watch','--interval','.1'],
+        watcher=subprocess.Popen([str(cli),'--wake-root',str(wake_root),'sessions','refresh-watch','--interval','.1'],
             env=env,stdout=watch_log,stderr=watch_log,start_new_session=True)
         receipt['watcher_pid']=watcher.pid
-        heartbeat=wake_root/'goal-supervision/controller.json'
+        heartbeat=wake_root/'shared-refresh/controller.json'
         until=time.monotonic()+8
         while not heartbeat.exists() and watcher.poll() is None and time.monotonic()<until:time.sleep(.05)
         if not heartbeat.exists():raise RuntimeError('independent watcher heartbeat unavailable')
