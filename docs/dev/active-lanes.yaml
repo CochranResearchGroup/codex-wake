@@ -11,11 +11,11 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 9c245a5
+    checkpoint: 28e670b
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-18
-    disposition: 0.18.0 delivered; targeted quit/resume verified; pause and conditional restore regression repair in progress
+    disposition: PR291 source frozen; 62 focused and owned native candidate pass; final CI and guarded false-stop recovery pending
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational

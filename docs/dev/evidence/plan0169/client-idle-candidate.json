@@ -1,7 +1,7 @@
 {
   "state": "SOURCE_AND_OWNED_NATIVE_ACCEPTED_NOT_DEPLOYED",
   "version": "0.18.1",
-  "prefix": "/tmp/cw289-client-final-candidate",
+  "prefix": "/tmp/cw289-v0181-ready",
   "source_modules_match": 111,
   "source_hashes": {
     "src/codex_wake/github_webhook_admin.py": "32a4b4443b2aeac6e6defbada979a15296ed20055437d6279dfdd90b43784ae7",
@@ -26,7 +26,7 @@
     "src/codex_wake/managed_webhook_runtime.py": "ccbf8ab1b090b92656b260e3a73f80113beb91c8fad72cac54f3fc7af4b061f4",
     "src/codex_wake/lifecycle_supervision.py": "42cc8d7a0fb576b46c7f9c02363219771b55aa0e2854c28c46c233bed02b70f2",
     "src/codex_wake/a2a_backup.py": "0e2572de654dffede49f7fb9c5565f5719523175b59b7349456b526ea9ffe608",
-    "src/codex_wake/goal_supervision.py": "65c1aa35a53dabd4d534bba15eb876ca44860108642bcf0b2262d9d73ca20b86",
+    "src/codex_wake/goal_supervision.py": "12d6b56c911a7c27bd2decffcff0dcfa28a804da8e12615ab50d9a1ac64dfd57",
     "src/codex_wake/strict_final_usage.py": "590f81f50d4c6944ea2d0f8e69cc269a21c725196db2077507113968290d0119",
     "src/codex_wake/a2a_sender_receipts.py": "29621c35ab4258d57b8dae31955bffaeccc16d0c0b97f169a9ca8dd1d757815b",
     "src/codex_wake/a2a_delivery.py": "f2cfcc9ab07da38c21b9390aa10a24ad99fd357b84ce98898b605c34f9a8e75c",
@@ -84,7 +84,7 @@
     "src/codex_wake/github_webhook_runtime.py": "b26867836c7f6f62ba6547ce6f7193f6e3a869337952d31599a92d44c33933ae",
     "src/codex_wake/time_inspection.py": "99158fec218141024242a8704e190a3526c0270195a758a3f2b829adf2603b02",
     "src/codex_wake/managed_webhook_health_evidence.py": "dda2b075873c1a88ac5c5fc194c00680081aa5da4dc3087d894e563ec3457a1f",
-    "src/codex_wake/shared_refresh.py": "44c997a0ab123fd2f3f2f4d5892a3f3467fd5a0c32bdc9aa59598a0bf28ac1db",
+    "src/codex_wake/shared_refresh.py": "b34a80414b548d4a44649bee6459bbac3bcd957252620a01fca20142bdae1676",
     "src/codex_wake/a2a_recovery_disposition.py": "6d8416224ee72aaa219ee80f76f8d2ec7bdf01099dfe6a9b1a5d694eee591149",
     "src/codex_wake/shared_app_server.py": "1f5a45c11b65eda5fa3b172d8009665114afa16383edd95cdecdb649c4865e19",
     "src/codex_wake/systemd_source_config.py": "26ce977fb546bd6f9a72d43939e2dea3670764588e8edb418b8ff577a347b32f",
@@ -117,10 +117,10 @@
     "src/codex_wake/native_protocol.py": "a4c42df51f16dbc29937237bc4d31649fbe2a10039fef54bbfc019a169ee10ec"
   },
   "focused": {
-    "count": 39,
-    "seconds": 16.799,
+    "count": 62,
+    "seconds": 18.759,
     "result": "PASS",
-    "log": "/tmp/cw289-client-final-focused.log"
+    "log": "/tmp/cw289-admission-focused.log"
   },
   "full": {
     "state": "FAIL_ONE_ERROR",
@@ -154,13 +154,12 @@
         1596,
         6447,
         7516,
-        11130,
         94767
       ],
       "private_readable_environment_matches": []
     },
     "server_exit": 0,
-    "raw": "/tmp/cw289-client-final-native-0181/state.json"
+    "raw": "/tmp/cw289-v0181-ready-native/state.json"
   },
   "review": {
     "Standards": {
@@ -184,7 +183,7 @@
   "known_limits": [
     "Actual native run uses an originally paused goal; active restoration is covered at public fixture seam.",
     "Three host pending unknown records contaminated original native probes; failed records retained; final probe isolates XDG config.",
-    "Current production goal-supervision false stop latch and known-state admission handling remain unresolved; no ledger reset or deployment performed."
+    "Current production false stop remains latched; exact recovery is prepared, not applied. No ledger reset or deployment performed."
   ],
   "known_state_correction": {
     "red": "/tmp/cw289-known-state-red.log",
@@ -197,5 +196,22 @@
     },
     "old_latches": "retained, not migrated",
     "review": "Spec accepted; no unresolved classification finding"
+  },
+  "source_revision": "28e670b9a29c6fe56dd320dc3b880119cd2f11c5",
+  "remote_ci": {
+    "preceding_head": "5474c72a8e1ad029d323bf78bead75996c1d7f55",
+    "run": 39160284577,
+    "python311": "PASS",
+    "python312": "PASS",
+    "final_code_head": "28e670b9a29c6fe56dd320dc3b880119cd2f11c5",
+    "run_pending": 39160628734
+  },
+  "false_stop_recovery": {
+    "state": "QUALIFIED_PREVIEW_NOT_APPLIED",
+    "generation": "c90708f44a85437f90a4d7d2bc342e4a",
+    "fresh_tokens_at_preview": 650022,
+    "guards": "success plus eight refusal cases pass; independent bounded review no blocker",
+    "scope": "retract only known-state error after exact-main install, preserve historical receipts/counters/grants/limits/deadline",
+    "private_proposal": "/home/ecochran76/.local/state/codex-wake/rollout-backups/issue289-0181/reconciliation-proposal.json"
   }
 }
