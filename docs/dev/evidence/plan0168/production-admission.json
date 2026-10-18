@@ -1,0 +1,19 @@
+{
+  "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+  "checkpoint_sha256": "83758e81ed94cc032c54ae22c2401b5818c75a209278aff93e9e799b47239000",
+  "deadline": 1792289961.0,
+  "expires_at": "2026-10-18T02:19:21Z",
+  "fingerprint": "93657fdc4aa8c6f69e104c7eab29ce3c5913fe45618c33263e141cfefe4128a8",
+  "intent_key": "plan0168-production-self-refresh-v0171",
+  "profile_name": "self-refresh",
+  "reason": "waiting_for_idle",
+  "refresh_scope": "shared_server_mcp",
+  "resources": [
+    "codex-wake-skill",
+    "codex-wake-mcp"
+  ],
+  "started_boottime": 343708.546628004,
+  "started_upper": 1792286362.1727827,
+  "state": "queued",
+  "thread_id": "01a13b4b-1f4a-7fd3-9d41-3bafa9710762"
+}
