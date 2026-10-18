@@ -43,3 +43,31 @@ finding on the examined criteria. No second broad discovery pass performed.
 Focused33tests PASS5.618s; exact source/native proof is native-public-final.json.
 Full-suite red results and an intermittent unrelated disposition failure remain
 disclosed in delegation-validation.json. No release gate waiver.
+
+## Final0.18.0delta review —447359e...d88da16
+
+Operator-approved frozen comparison:git diff447359e...d88da16; one commit,
+d88da16 Prepare0.18.0rollout with preserved renewal boundaries. Closed-world
+review scope: initial host renewal boundary import, v2legacy grant preservation,
+wrong-allocation refusal, and introduced critical regressions. No second broad
+discovery pass or unbounded hardening.
+
+### Standards
+
+Reviewer:/root/control_repair_review. No blocking/nonblocking candidates under
+AGENTS, codex-stack/discovery guidance, policies0005/0006/0009/0013/0016/0021and
+the full judgement-call smell baseline. Primary adjudication:0accepted findings.
+Versioning/compatibility, public seam tests and delivery gates are preserved.
+
+### Spec
+
+Reviewer:/root/native_authority_capability. No missing/partial named requirement,
+scope creep or introduced critical regression found. Source preserves imported
+start/anchor, seeds boundary owner before successor admission, requalifies
+history, rejects future/changed boundaries, retains exact legacy caller grants
+and holds conflicting allocation selection. Native import is root-first10->30;
+successor-first35and negative cases have explicit public-controller assertions.
+Primary adjudication:0accepted findings.
+
+Summary:Standards0accepted, highest severity none; Spec0accepted, highest
+severity none. This is source review, not production acceptance proof.
