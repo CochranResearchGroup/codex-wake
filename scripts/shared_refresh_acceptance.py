@@ -47,7 +47,8 @@ for line in sys.stdin:
     def skill_version(version):
         skill.write_text('---\nname: shared-refresh-marker\ndescription: Owned shared refresh marker '+version+'\n---\nMarker '+version+'.\n')
     def config(version):
-        (home/'config.toml').write_text('model = "gpt-5.4"\napproval_policy = "never"\n'+
+        (home/'config.toml').write_text('model = "gpt-5.4"\nmodel_provider = "owned_no_provider"\napproval_policy = "never"\n'+
+            '[model_providers.owned_no_provider]\nname = "Owned no-provider fixture"\nbase_url = "http://127.0.0.1:1/v1"\nwire_api = "responses"\nrequires_openai_auth = false\nsupports_websockets = false\nrequest_max_retries = 0\nstream_max_retries = 0\n'+
             '[projects.'+json.dumps(str(workspace))+']\ntrust_level = "trusted"\n'+
             '[mcp_servers.toy]\ncommand = '+json.dumps(str(python))+'\nargs = '+json.dumps([str(toy),version,str(toy_pids)])+'\n'+
             '[mcp_servers.wake_lifecycle]\ncommand = '+json.dumps(str(mcp))+'\nargs = '+json.dumps([
@@ -55,7 +56,8 @@ for line in sys.stdin:
     config('v1');skill_version('v1')
     env=dict(os.environ,CODEX_HOME=str(home),XDG_STATE_HOME=str(root/'state'))
     for key in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY','CODEX_WAKE_A2A_BUS_ROOT',
-                'CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):
+                'CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH','OPENAI_API_KEY','OPENAI_BASE_URL',
+                'CODEX_API_KEY','AZURE_OPENAI_API_KEY'):
         env.pop(key,None)
     receipt=dict(state='preparing',root=str(root),prefix=str(prefix),codex=str(codex),model_turn_limit=0,
         authority='Plan0168 disposable two-thread shared idle reload acceptance')
@@ -88,7 +90,7 @@ for line in sys.stdin:
             raise RuntimeError('startup toy v1 proof failed')
         skill_version('v2');config('v2')
         # Host-authorized resources select read-only, exact output evidence.
-        profile=dict(cwd=str(workspace),codex_home=str(home),codex_path=str(codex),app_server=endpoint,timeout=5,
+        profile=dict(cwd=str(workspace),codex_path=str(codex),app_server=endpoint,timeout=5,
             refresh_mode='shared_mcp_idle',scope_approval='Plan0168 owned fixture; both loaded conversations idle; shared reload approved',
             resources=dict(skill=dict(kind='skill',path=str(skill),description='Owned shared refresh marker v2',
                 sha256=hashlib.sha256(skill.read_bytes()).hexdigest()),
