@@ -1,0 +1,20 @@
+{
+  "source_commit": "3cdc03706ba5ea8457ee2795b5ff74eb2fc11649",
+  "version": "0.17.0",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.17.0-3cdc037",
+  "backup": "/home/ecochran76/.local/state/codex-wake/deployment-backups/v0.17.0-3cdc037",
+  "entrypoints": {
+    "/home/ecochran76/.local/bin/codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.17.0-3cdc037/bin/codex-wake-github-webhook",
+    "/home/ecochran76/.local/bin/codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.17.0-3cdc037/bin/codex-wake",
+    "/home/ecochran76/.local/bin/codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.17.0-3cdc037/bin/codex-wake-mcp",
+    "/home/ecochran76/.local/bin/codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.17.0-3cdc037/bin/codex-wake-hook",
+    "/home/ecochran76/.local/bin/codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.17.0-3cdc037/bin/codex-waked"
+  },
+  "whole_skills_synced": true,
+  "goal_enrollments": 0,
+  "counters_reset": false,
+  "existing_native_sessions_restarted": 0,
+  "existing_wake_services_restarted": 0,
+  "scope": "current caller grant only; ceilings provisioned, no enrollment or renewal",
+  "mcp_existing_clients_require_refresh": true
+}

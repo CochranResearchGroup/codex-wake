@@ -9,13 +9,13 @@ lanes:
     plan_ref: feat/objective-enforcement
     branch: feat/objective-enforcement
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 7e3873c
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 3cdc037
     dependencies: [P166]
     overlaps: []
-    updated_at: 2026-10-17
-    disposition: Confirmed same-session authority; bounded controller, accounting and MCP integration underway
+    updated_at: 2026-10-18
+    disposition: PR280 merged; v0.17.0 released and installed; fresh independent controller; existing clients need MCP refresh
   - id: P166
     owner: primary / ecochran76
     objective: Implement strict objective execution resource enforcement

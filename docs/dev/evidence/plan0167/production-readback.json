@@ -1,0 +1,25 @@
+{
+  "tools": 27,
+  "public_show": {
+    "state": "held",
+    "reason": "not_enrolled",
+    "thread_id": "01a13b4b-1f4a-7fd3-9d41-3bafa9710762",
+    "controller": {
+      "active": true,
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "generation": "146963add68041ce961fc6e75dfbc877",
+      "identity": {
+        "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+        "start_time_ticks": 33941613
+      },
+      "interval": 1.0,
+      "observed_boottime": 339431.41469355,
+      "pid": 86795,
+      "fresh": true,
+      "age_seconds": 0.3382616380113177
+    }
+  },
+  "goal_mutations": 0,
+  "counters_reset": false,
+  "existing_clients_refreshed": false
+}

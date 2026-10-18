@@ -6,7 +6,7 @@
   "specification": [
     {
       "id": "F1",
-      "disposition": "blocking",
+      "disposition": "resolved",
       "criterion": "limits persist across native resume",
       "finding": "partially verified stop suppressed a later pause after resume",
       "fix": "6b4b233",
@@ -14,7 +14,7 @@
     }
   ],
   "standards": [],
-  "live_acceptance": "separate unresolved gate",
+  "live_acceptance": "PASS native idle/active and delegated accounting; coverage limitations in acceptance-summary.md",
   "delivery_reframe": {
     "id": "F2",
     "disposition": "resolved",

@@ -1,0 +1,11 @@
+{
+  "state": "qualified",
+  "reason": null,
+  "used_tokens": 201841434,
+  "sampled": true,
+  "elapsed_seconds": 0.3622846629587002,
+  "read_only": true,
+  "native_goal_mutations": 0,
+  "counters_reset": false,
+  "context": "current completed original goal; no enrollment"
+}

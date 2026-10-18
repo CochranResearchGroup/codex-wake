@@ -1,0 +1,24 @@
+{
+  "version": "0.17.0",
+  "source_commit": "3cdc03706ba5ea8457ee2795b5ff74eb2fc11649",
+  "python_files_matched": 109,
+  "cli_pause_blocks_actual_daemon": true,
+  "cross_root_cancellation": true,
+  "explicit_resume": true,
+  "mcp": {
+    "tools": 27,
+    "calls": [
+      "wake_list",
+      "wake_pause",
+      "wake_pause_status",
+      "wake_interrupt",
+      "wake_cancel",
+      "wake_resume"
+    ],
+    "ungranted_root_denied": true
+  },
+  "native_model_turns": 0,
+  "operator_wakes_changed": 0,
+  "service_restarts": 0,
+  "temporary_roots_removed": "context-managed"
+}

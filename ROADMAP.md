@@ -1244,24 +1244,24 @@ release/install/census and preservation receipts in Plan0164 final acceptance.
 
 ## P166 | Strict objective execution enforcement
 
-State: CLOSED. Owner: primary / ecochran76. Workflow: DONE (validated branch).
+State: CLOSED. Owner: primary / ecochran76. Workflow: DONE (released v0.17.0).
 Spec #274, tickets #275–278 / [Plan0166](docs/dev/plans/0166-2026-10-16-objective-enforcement.md).
 Final source `4ce6ae5` on `feat/objective-enforcement`; all four tickets are validated.
 One whole-branch review and bounded remediation are complete. Native containment,
 deadline, accounting, concurrency, refresh, renewal and successor evidence is retained.
 The final full suite passed 1,326 tests with one optional host skip; installed-package
 and live-host selection passed all 69 checks. Sampled token limits, unknown overshoot
-and the failed local provider-turn count axis remain explicit. Tracker issues remain
-OPEN and main is unchanged. Merge, release and production deployment are separate.
+and the failed local provider-turn count axis remain explicit. PR280 merged3cdc037; v0.17.0 released and installed. Strict first bootstrap
+remains operator-provisioned.
 
 ## P167 | Resource enforcement discoverability and existing-session supervision
 
-State: OPEN. Owner: primary / ecochran76. Workflow: IN_PROGRESS.
+State: CLOSED. Owner: primary / ecochran76. Workflow: DONE.
 [Plan0167](docs/dev/plans/0167-2026-10-17-resource-enforcement-discoverability.md),
-work item #279; related #274/#278. Agent discovery audit completed at49a5260.
-User clarified the default token/time workflow: MCP enrollment in the existing
-dev session, independent checkpoint request then native pause/exact-turn stop.
-Limits persist across replacement goals until explicit user reset. Three bounded
-implementation lanes share the frozen Plan0167 interface; public/native proof
-and one bounded review remain. Strict executor bootstrap is a separate retained
-limitation, not the primary route for this requested workflow.
+work item #279; PR280 merged3cdc037 and released/installed v0.17.0. Existing dev
+sessions use MCP enrollment, independent checkpoint then native goal pause and
+exact-turn interrupt. Limits persist until explicit user reset. Native/control
+and accounting acceptance passed; final CI1,351tests on both Python versions.
+Host history-index blocker F2 resolved. Production controller heartbeat is fresh,
+no goal enrolled/reset; existing clients need MCP refresh. Native stop scope is
+the registered session only. Strict bootstrap remains separately operator-owned.

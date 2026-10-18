@@ -1,6 +1,6 @@
 # Plan0167 — Resource enforcement discoverability and first use
 
-State: OPEN. Owner: primary / ecochran76. Work item: #279; related #274, #278.
+State: CLOSED. Owner: primary / ecochran76. Work item: #279; related #274, #278.
 Branch: feat/objective-enforcement. Base:7dfb868.
 
 ## Original audit scope and acceptance (completed)
@@ -204,3 +204,13 @@ holds unknown. Independent closed-world source verification resolved F2; all25
 focused public tests pass. The real-home read-only performance probe reaches
 original-boundary validation in0.9783s; this is not live enrollment acceptance.
 A separate host-only MCP goal root preserves existing legacy tool scope.
+
+## Delivery closeout | 2026-10-18 UTC
+
+PR280 merged3cdc037; v0.17.0 released and installed from that exact main commit.
+Final hosted CI passes1,351 tests with one optional host skip on both Python
+versions. Published asset download hashes match. Installed109sources,27MCPtools,
+whole skill copies and fresh independent service heartbeat qualify delivery.
+Existing clients need MCP refresh; no current goal enrollment, counter reset,
+shared-server restart or unrelated service restart occurred. Limits carry forward
+until an explicit user reset. Full receipts: evidence/plan0167/acceptance-summary.md.
