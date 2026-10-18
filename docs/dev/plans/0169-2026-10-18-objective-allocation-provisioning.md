@@ -2,8 +2,9 @@
 
 State: PLANNED. Owner: primary / ecochran76.
 Branch: docs/goal-allocation-provisioning. Base: 89e3eb8. Target: origin/main.
-Work item: P169 (repo-local draft; GitHub publication pending testing-seam confirmation).
-Product contract: confirmed by user; ADR0002. Implementation: not started.
+Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
+Product contract and testing seam: confirmed by user; ADR0002.
+Tracker state: READY (ready-for-agent). Implementation: not started.
 
 ## Current State
 
@@ -130,7 +131,7 @@ Blocking acceptance scenarios:
 - Concurrent original/successor enrollments and renewal races retain one budget;
   crash/restart before or after grant persistence reconcile without duplicate
   authority. Unknown effects never authorize a new identity or allocation.
-- A17.5percent reserve reaches the correct checkpoint threshold; checkpoint time
+- A 17.5% reserve reaches the correct checkpoint threshold; checkpoint time
   consumes the existing allowance. Exhaustion pauses the verified registered
   goal(s) and interrupts exact active turns; unrelated conversation untouched.
 - Legacy grants continue working; unqualified legacy migration holds.
@@ -141,7 +142,8 @@ owned test conversations and explicit test-user authority. Demonstrate original
 and successor continuity with an unrelated control, without model/provider work
 or production session changes. Prove cleanup with a fresh process census.
 
-Testing-seam confirmation remains required before GitHub ready-for-agent posting.
+Testing seam confirmed by the user on2026-10-18: public MCP original/successor
+allocation continuity with an unrelated conversation as a control.
 No acceptance execution or native effects are authorized by this document alone.
 
 ## Execution Packets

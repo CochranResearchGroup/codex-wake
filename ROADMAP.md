@@ -1282,10 +1282,10 @@ grants; no automatic grant inheritance or resource renewal is implemented.
 
 ## P169 | Verified resource allocation provisioning
 
-State: PLANNED. Owner: primary / ecochran76.
+State: PLANNED. Owner: primary / ecochran76. Work item #289 (ready-for-agent).
 [Plan0169](docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md).
 Confirmed product contract: automatically provision verified user authority,
 retain allocation continuity across successor conversations and hold ambiguous
-links with actionable recovery. Draft testing seam awaits user confirmation;
+links with actionable recovery. User confirmed the original/successor/unrelated-control testing seam;
 trusted native request/caller evidence is the first implementation gate. No
 runtime grant or allocation changes in this planning slice.

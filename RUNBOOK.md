@@ -7123,3 +7123,13 @@ proposed acceptance seam; confirmation precedes GitHub ready-for-agent posting.
 Trusted native caller/request provenance remains an explicit qualification gate,
 not an assumed capability. No implementation, host grant, enrollment, goal,
 counter, monitor or refresh change was made.
+
+## Turn348 | 2026-10-18 UTC | Plan0169 spec published
+
+User confirmed the public MCP original/successor allocation-continuity test with
+an unrelated conversation control. Published full specification as issue289,
+enhancement/ready-for-agent; exact-marker duplicate search and provider readback
+verified. Plan0169 remains PLANNED, with implementation not started. Native
+caller/user-request evidence qualification is the first blocking packet; no
+implicit caller trust or grant inheritance is authorized. No live grants, goals,
+enrollments, counters, monitors or shared MCP caches were changed.
