@@ -1,0 +1,39 @@
+{
+  "state": "SOURCE_FOCUSED_ACCEPTED_NOT_DEPLOYED",
+  "source_version": "0.18.3",
+  "base_main": "eb37b8ce5544fbd31ef45b0f1646fa57c0d66598",
+  "cause": "unpublished tmux targets lacked native thread_id and were treated as global unknowns",
+  "source_pane": "%18",
+  "other_pane": "%28",
+  "source_client_pid": 23317,
+  "source_client_start_ticks": 2759648,
+  "daemon_pid": 9802,
+  "daemon_start_ticks": 10894,
+  "affected_peer_records_modified": false,
+  "public_red": "/tmp/cw289-target-red.log",
+  "focused": {
+    "tests": 54,
+    "seconds": 20.105,
+    "result": "PASS",
+    "log": "/tmp/cw289-target-final-focused.log"
+  },
+  "negative_cases": [
+    "same pane",
+    "relative socket",
+    "different unknown socket",
+    "damaged records",
+    "pending mailbox work"
+  ],
+  "review": "bounded Standards review no concrete critical finding",
+  "live_intent": "issue289-client-0181-30a29c6",
+  "live_state": "blocked before pane close; original expiry20:29:29Zpassed",
+  "live_rearm_permitted": false,
+  "actual_catalog_adoption_and_active_restore": "UNVERIFIED",
+  "resources": {
+    "used_tokens_at_preparation": 1570562,
+    "token_accounting": "fresh",
+    "token_limit": 2000000,
+    "deadline": "2026-10-18T21:39:29.531693Z",
+    "checkpoint_before": "2026-10-18T21:24:29Z"
+  }
+}

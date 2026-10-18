@@ -7418,3 +7418,18 @@ dim placeholder. Public regression red retained; correction removes only
 background paint and retains formatting/cursor/draft proof. Standards bounded
 review finds no critical defect. Planv12 scopes monitor-only0.18.2 and exact
 intent reconciliation without resetting fingerprint, expiry or resource budget.
+
+
+## Turn369 | 2026-10-18 UTC | Other-pane signal attribution and expired live intent
+
+PR292 mergedeb37b8c, CI39162320206 both PASS;0.18.2 monitor only installed,
+112modules match; stable commands/MCP and goal controller remain0.18.1. One
+reviewed causal reconciliation preserved the same intent/profile/expiry/history.
+Composer proof passed; close guard refused before tmux effect. Exact blockers
+are three AuraCall preparing journal targets tmux%28 on source socket, while
+source client remains%18/PID23317. No peer records changed. Public regression
+reproduces native-ID-only attribution's false global hold. Source patch recognizes
+only valid other-pane targets on the same verified canonical socket; exact and
+ambiguous targets still hold. Live intent expired20:29:29Z; no further rearm or
+force. Live catalog/active-restore proof remains open. Planv13 checkpoints source
+and runtime separately; original2M/21:39:29.531693Zdeadline unchanged.
