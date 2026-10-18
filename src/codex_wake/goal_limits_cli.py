@@ -17,7 +17,7 @@ def add_goal_limits_parser(subparsers):
         if name == 'set':
             command.add_argument('--token-limit', type=int, required=True)
             command.add_argument('--time-limit-seconds', type=int, required=True)
-            command.add_argument('--checkpoint-token-percent', type=int, default=5)
+            command.add_argument('--checkpoint-token-percent', type=float, default=5)
             command.add_argument('--checkpoint-seconds', type=int, default=60)
     watcher = commands.add_parser('watch', help='run the independent resource-limit controller; keep alive as a service')
     watcher.add_argument('--interval', type=float, default=1)

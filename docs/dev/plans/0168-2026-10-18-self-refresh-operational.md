@@ -231,3 +231,18 @@ supervisor60043 is preserved. Historical expired receipt SHA256 unchanged,
 no new intent/reload/goalwrite/counter reset. Actual cache25tools confirms no
 production resource proof. User-approved new expiry plus idle condition is the
 remaining gate. Plan0168 and work item282 remain OPEN.
+
+## New-caller resource admission diagnosis | fractional reserve correction
+
+User invoked diagnosing-bugs for repeated remote-view host refusal. Exact
+read-only installed MCP reproduces newUUID missing host grant; a same-process
+private-policy differential isolates that key as the cause. It is a new
+conversation, not resume of the previously granted UUID. No live grant changed.
+
+Separate actual captured set call uses17.5percent for350k-token reserve. MCP
+schema and CLI parser wrongly reject fractions already supported by backend.
+Public stdio regression is red twice (schema then CLIparse); both input types
+fixed,14focused checks pass. v0.17.3 patch delivery tracked on
+fix/fractional-checkpoint-reserve, base8318923. Evidence in caller-admission/.
+No automatic grant inheritance, enrollment, counter reset or native goal change
+is part of this correction. Original production refresh remains terminal.

@@ -1,0 +1,8 @@
+[
+  {
+    "timestamp": "2026-10-18T02:04:18.065Z",
+    "selected_call_lines": [
+      "text(await tools.mcp__codex_wake__wake_goal_limits_set({caller_thread_id:\"01a14cc0-1379-78a3-8f23-8446ea24d1ca\",token_limit:2000000,time_limit_seconds:21600,checkpoint_token_percent:17.5,checkpoint_seconds:900}));"
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "symptom": {
+    "error": {
+      "code": "goal_limits_unavailable",
+      "reason": "ValueError",
+      "message": "host caller grant unavailable or malformed"
+    },
+    "state": "held",
+    "armed": false
+  },
+  "set_schema": {
+    "properties": {
+      "caller_thread_id": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      },
+      "token_limit": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "time_limit_seconds": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "checkpoint_token_percent": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "checkpoint_seconds": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "required": [
+      "caller_thread_id",
+      "token_limit",
+      "time_limit_seconds"
+    ],
+    "type": "object",
+    "additionalProperties": false
+  },
+  "read_only": true
+}

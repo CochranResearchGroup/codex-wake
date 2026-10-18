@@ -50,6 +50,28 @@ class GoalLimitsMCPTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse(shown.is_error)
                 self.assertEqual(json.loads(shown.content[0].text)['argv'][2:4], ['goal-limits', 'show'])
 
+    async def test_fractional_checkpoint_reserve_reaches_host_admission_without_a_grant(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            policy = root / 'host.json'
+            policy.write_text(json.dumps(dict(version=1, callers={})))
+            policy.chmod(0o600)
+            parameters = StdioServerParameters(command=sys.executable,
+                args=['-m', 'codex_wake.mcp_server', '--goal-limits-policy', str(policy),
+                      '--goal-limits-root', str(root / 'journal')],
+                env=dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / 'src')))
+            async with Client(parameters, mode='legacy') as client:
+                result = await client.call_tool('wake_goal_limits_set', dict(
+                    caller_thread_id='00000000-0000-7000-8000-000000000279',
+                    token_limit=2000000, time_limit_seconds=21600,
+                    checkpoint_token_percent=17.5, checkpoint_seconds=900))
+                self.assertTrue(result.is_error)
+                output = json.loads(result.content[0].text)
+                self.assertEqual(output['error']['code'], 'goal_limits_unavailable', output)
+                self.assertEqual(output['error']['message'], 'host caller grant unavailable or malformed')
+                self.assertEqual(output['state'], 'held')
+                self.assertFalse(list((root / 'journal').rglob('*.json')))
+
 
 if __name__ == '__main__':
     unittest.main()

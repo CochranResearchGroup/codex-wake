@@ -1,0 +1,32 @@
+{
+  "missing": {
+    "error": {
+      "code": "goal_limits_unavailable",
+      "reason": "ValueError",
+      "message": "host caller grant unavailable or malformed"
+    },
+    "state": "held",
+    "armed": false
+  },
+  "grant_added": {
+    "state": "held",
+    "reason": "not_enrolled",
+    "thread_id": "01a14cc0-1379-78a3-8f23-8446ea24d1ca",
+    "controller": {
+      "fresh": false,
+      "reason": "controller_unavailable"
+    }
+  },
+  "grant_removed": {
+    "error": {
+      "code": "goal_limits_unavailable",
+      "reason": "ValueError",
+      "message": "host caller grant unavailable or malformed"
+    },
+    "state": "held",
+    "armed": false
+  },
+  "production_policy_modified": false,
+  "enrollment_receipts_created": 0,
+  "same_mcp_process": true
+}

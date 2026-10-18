@@ -29,7 +29,9 @@ use a peer ID, or bypass missing host grants through the CLI.
 The controller requests “stop work and write a restart-safe checkpoint” when
 either 5% of tokens or 60 seconds remain. Optional `checkpoint_token_percent`
 and `checkpoint_seconds` make explicit overrides; the receipt displays them.
-Checkpointing consumes the original allocation. If the session is idle, the
+Fractional `checkpoint_token_percent` values are supported, for example17.5
+for a350k-token reserve in a2M-token allocation. Checkpointing consumes the
+original allocation. If the session is idle, the
 request remains pending until an exact active turn can receive it; it does not
 launch a new model turn merely to checkpoint. At exhaustion the controller pauses
 the session's current native goal and interrupts its exact active turn.
@@ -90,6 +92,13 @@ Codex 0.163 publishes its `--listen` path as a rendezvous symlink. Provision
 the physical owned Unix socket after verifying the private socket directory and
 owned native process; an advertised alias is not an accepted endpoint for this
 mode. Do not use strict-executor binding files to bypass that check.
+
+Grants name an exact conversation UUID. A new conversation in the same tab or
+CWD does not inherit a prior conversation's grant or allocation. Missing caller
+grants require operator provisioning; `not_enrolled` means a grant was accepted
+but the calling session has not yet registered limits. Neither condition is an
+armed controller. Verify a renewal or continuation against its original authority
+and accounting before provisioning; never copy an old UUID as the new caller.
 
 The caller UUID, limits and paths must be real approved values. Policy file mode
 must be `0600`, and the runtime directory private (`0700`). Keep credentials and

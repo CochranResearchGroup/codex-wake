@@ -7088,3 +7088,13 @@ Fresh standalone MCP sees27tools and version0.17.2 scope; actual source cache
 remains25tools. Original terminal refresh receipt hash and complete goal/counters
 unchanged. No refresh retry/new expiry/reload; Plan0168/issue282 OPEN awaiting
 explicit new-expiry authority and idle window. v0172-delivery.json owns receipts.
+
+## Turn345 | 2026-10-18 UTC | New caller refusal and fractional reserve diagnosis
+
+Fresh installed MCP confirms remote-view newUUID has no host grant. Same-process
+private-policy differential proves missing exact caller, not stale wiring or
+malformed existinggrant. Captured actual set17.5percent exposes schema and CLI
+integer-only input defects; backend already accepts fractions. Public regression
+red→schemafix→CLIred→bothfixesgreen;14focused checksPASS. Preparing v0.17.3
+without production policy/enrollment/goal/counter changes. New-session bootstrap
+is a separate authorization/accounting workflow, not implicit tab/CWD inheritance.

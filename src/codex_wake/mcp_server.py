@@ -75,7 +75,7 @@ SPECS['wake_goal_limits_set'] = (
     'the claim alone grants no permission. Missing host setup requires the operator.',
     {'caller_thread_id': CALLER, 'token_limit': {'type': 'integer', 'minimum': 1},
      'time_limit_seconds': {'type': 'integer', 'minimum': 1},
-     'checkpoint_token_percent': {'type': 'integer', 'minimum': 0, 'maximum': 100},
+     'checkpoint_token_percent': {'type': 'number', 'minimum': 0, 'maximum': 100},
      'checkpoint_seconds': {'type': 'integer', 'minimum': 0}},
     ['caller_thread_id', 'token_limit', 'time_limit_seconds'], False)
 SPECS['wake_goal_limits_show'] = (
