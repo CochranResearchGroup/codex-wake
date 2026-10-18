@@ -51,8 +51,10 @@ and requires fresh grants before new work; original history stays fenced.
 Starting a separate agent conversation with an explicit assignment and scope.
 
 **Agent refresh**:
-Reopening the same conversation to refresh selected runtime resources while
-preserving its identity and unfinished work.
+Reloading selected runtime resources while preserving the conversation identity
+and unfinished work. Legacy profiles reopen its client; approved shared MCP
+refresh keeps clients and reconnects the shared server's MCP connections after
+idle observations. Neither path renews counters or resource allocation.
 
 **Agent handoff**:
 Passing an unfinished objective and its checkpoint to a different conversation,

@@ -97,3 +97,28 @@ Primary owns source. Worker /root/host_execution_adapter owns only the two-threa
 native acceptance script (4855bdf,1b6acee). One independent bounded new-source review
 is assigned to /root/goal_supervision_review after the source freeze. No broad
 historical feature review is reopened. Deployment still follows exact-main CI.
+
+## Source/native acceptance checkpoint
+
+Frozen source332c035 received one independent Spec/Standards pass. Sole accepted
+F1 was native source/profile workspace binding;944572f fixes it before effects
+and proof. Independent closed-world verification:9publictestsPASS7.400s, no
+introduced regression. Discovery/remediation counts remain1/1.
+
+Actual native public MCP acceptance on candidate944572f passes in3.882s: queued
+admission, separate refresh-watch process, one acknowledged shared reload, selected
+skill and actual MCP v2 behavior on both loaded conversations. Same native IDs,
+exact paused goals/counters and fixed expiry retained;0modelturns. All owned
+processes exited and fresh census is clean. First fixture failed before admission
+because of an unsupported legacy codex_home field. That first fixture also made
+an unexpected provider warmup connection which received HTTP401; zero turns were
+separately audited. Second fixture is configured exclusively for a loopback-only
+no-auth provider with websocket warmup disabled. Both allowed attempts consumed;
+raw/curated first failure and successful readbacks retained. No production reload.
+
+A public setup-refusal test then exposed empty CLI stdout on missing monitor;
+shared mode now returns structured shared_refresh_unavailable (no false effect
+uncertainty).10focusedpubliccasesPASS. Native valid-profile behavior is unchanged.
+Documentation now exposes self-refresh near skill entry, states the shared scope,
+queued/completed distinction and native idle-race limit, and gives managed setup.
+Production install/queue and exact-main delivery remain open gates.

@@ -139,7 +139,11 @@ class SharedRefreshTests(unittest.TestCase):
             try:
                 deadline=time.monotonic()+5
                 while True:
-                    try:code,receipt=invoke();break
+                    try:
+                        code,receipt=invoke()
+                        if code != 2:break
+                        if time.monotonic()>=deadline:self.fail(receipt)
+                        time.sleep(.05)
                     except Exception as exc:
                         if time.monotonic()>=deadline:raise
                         time.sleep(.05)
@@ -189,3 +193,29 @@ class SharedRefreshTests(unittest.TestCase):
                 watcher.terminate();watcher.wait(timeout=5)
                 if watcher.stderr:watcher.stderr.close()
                 server.shutdown()
+
+    def test_missing_independent_monitor_returns_a_structured_setup_refusal(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp)
+            checkpoint=base/'checkpoint.json'
+            checkpoint.write_text(json.dumps(dict(source_thread_id=THREAD,objective='Keep work',
+                authority='user approval',next_packet='Refresh',pending_obligations=[])))
+            policy=base/'profiles.json'
+            policy.write_text(json.dumps(dict(version=1,callers={THREAD:['self']},profiles={'self':dict(
+                refresh_mode='shared_mcp_idle',scope_approval='user explicit approval',cwd=tmp,
+                app_server='unix:///missing.sock',codex_path='/bin/true',timeout=1,
+                resources={'skill':dict(kind='skill',path=str(checkpoint),description='Skill',sha256='a'*64)})})))
+            policy.chmod(0o600)
+            output=StringIO()
+            with redirect_stdout(output):
+                code=run(['--wake-root',tmp,'sessions','refresh','--profiles',str(policy),
+                    '--profile','self','--intent','missing-watch','--thread-id',THREAD,
+                    '--caller-thread-id',THREAD,'--checkpoint','checkpoint.json','--checkpoint-sha256',
+                    hashlib.sha256(checkpoint.read_bytes()).hexdigest(),'--resource','skill',
+                    '--expires-at','2030-01-01T00:00:00Z','--json'])
+            self.assertEqual(code,2)
+            value=json.loads(output.getvalue())
+            self.assertEqual(value['error']['code'],'shared_refresh_unavailable')
+            self.assertIn('independent',value['error']['message'])
+            self.assertNotIn('reconciliation_required',value)

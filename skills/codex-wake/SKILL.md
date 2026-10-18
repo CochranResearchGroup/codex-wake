@@ -1,11 +1,29 @@
 ---
 name: codex-wake
-description: Use Codex Wake when a user gives /goal resource limits (tokens, time, memory, swap, CPU, tasks): register token/time limits for the existing native goal through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, same-thread skill/MCP refresh, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake when a user gives /goal resource limits (tokens, time, memory, swap, CPU, tasks): register token/time limits for the existing native goal through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, self-refresh of skill/MCP resources with approved shared reload after idle checks, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
 
 Use `codex-wake` when work should resume after a defined trigger instead of relying on model memory or a foreground sleep.
+
+## Refresh this agent after an update
+
+Use `wake_sessions_configuration` with your actual caller UUID, the same
+`thread_id`, and the host's `self-refresh` profile. Its `refresh_scope` tells you
+whether refresh reconnects MCP servers across the shared server. That scope
+requires explicit host approval; a missing grant is a setup refusal.
+
+For a `shared_server_mcp` profile, preserve your workspace checkpoint and call
+`wake_sessions_refresh` with its exact hash, a stable intent, fixed expiry and
+selected resource names. A `queued` receipt is admission: an independent monitor
+waits for all affected conversations to be observed idle. End your active turn
+so you do not block that condition. Reuse the same request to inspect completion;
+do not create another intent to bypass waiting or uncertainty. Completion requires
+unchanged goal authority, nondecreasing counters, and verified skill/MCP behavior.
+No TUI replacement or resource-counter reset is needed. The native API has no
+atomic idle check; a conversation can become active after the last observation.
+See [lifecycle requests and setup](references/lifecycle.md#shared-mcp-refresh).
 
 ## When the user gives resource limits
 
