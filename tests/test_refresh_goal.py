@@ -9,6 +9,13 @@ from codex_wake.refresh_goal import pause, restore, settle_ui
 
 
 class RefreshGoalTests(unittest.TestCase):
+    def test_themed_placeholder_is_empty_but_typed_text_and_other_controls_hold(self):
+        from codex_wake.refresh_goal import empty_composer_line
+        plain='\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m'
+        self.assertTrue(empty_composer_line(plain.replace('\x1b[0m','\x1b[0m\x1b[48;2;41;41;41m')))
+        for line in (plain.replace('\x1b[2m',''),plain+'draft',plain+'\x1b[2K'):
+            self.assertFalse(empty_composer_line(line))
+
     def test_shutdown_during_managed_binding_read_still_fences_next_effect(self):
         from codex_wake import shared_refresh
         from codex_wake.records import WakeError

@@ -2,6 +2,13 @@
 from .agent_lifecycle import save
 
 
+def empty_composer_line(line):
+    """Ignore background paint only; retain the exact dim placeholder proof."""
+    import re
+    line = re.sub(r'\x1b\[(?:4[0-7]|10[0-7]|49|48;(?:5;[0-9]{1,3}|2;[0-9]{1,3};[0-9]{1,3};[0-9]{1,3}))m', '', line)
+    return line == '\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m'
+
+
 def settle_ui(path, receipt, profile, pane, request, effect_guard=None):
     """Dismiss only the exact paused-goal prompt, never a draft or unknown dialog."""
     from types import SimpleNamespace
@@ -12,7 +19,7 @@ def settle_ui(path, receipt, profile, pane, request, effect_guard=None):
     cursor = tmux_command(runtime, 'display-message', '-p', '-t', pane['pane_id'], '#{cursor_x},#{cursor_y}')
     x, y = map(int, cursor.split(','))
     lines = frame.splitlines()
-    if x == 2 and 0 <= y < len(lines) and lines[y] == '\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m':
+    if x == 2 and 0 <= y < len(lines) and empty_composer_line(lines[y]):
         return True
     markers = ('\x1b[1mResume paused goal?\x1b[0m', '\x1b[1;7m› 1. Resume goal',
                'Mark it active and continue when idle', '2. Leave paused',

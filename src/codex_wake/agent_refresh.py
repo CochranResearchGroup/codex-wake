@@ -178,8 +178,8 @@ def preflight(path, receipt, profile, effect_guard=None):
     try:
         x, y = map(int, cursor.split(','))
         lines = frame.splitlines()
-        empty = (x == 2 and 0 <= y < len(lines) and lines[y] ==
-                 '\x1b[1m›\x1b[0m \x1b[2mAsk Codex to do anything\x1b[0m')
+        from .refresh_goal import empty_composer_line
+        empty = x == 2 and 0 <= y < len(lines) and empty_composer_line(lines[y])
     except ValueError:
         empty = False
     if not empty:

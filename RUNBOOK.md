@@ -7401,3 +7401,20 @@ returns failed because immediate cleanup sees PID52059; later independent /proc
 census shows it exited, no readable private-home matches and shared9802alive.
 Original failure retained with cleanup-readback.json; no blind rerun. This probe
 uses existing_endpoint/dynamic behavior and does not prove managed catalog restart.
+
+
+## Turn368 | 2026-10-18 UTC | Installed rollout and exact themed-composer stop
+
+PR291 merged30a29c6, CI39161534163 both PASS;0.18.1 release assets hashes and
+112installed module equality retained in exact-main0181-build.json. Both skill
+directories, five links and goal/refresh units adopted; shared9802/start10894
+preserved. False stop retracted once at1006497fresh, same2M/deadline/charges,
+full before-images retained. Initial shutdown-reason refusal and corrected eight
+guards retained; public allowance armed. Original shared intent/wake/helper
+superseded exactly. Same-client intent queued with original-active operational
+pause; continuation wake fires blocked local_composer_not_proven_empty before
+any client effect. Private pane capture shows backgroundSGR inserted into exact
+dim placeholder. Public regression red retained; correction removes only
+background paint and retains formatting/cursor/draft proof. Standards bounded
+review finds no critical defect. Planv12 scopes monitor-only0.18.2 and exact
+intent reconciliation without resetting fingerprint, expiry or resource budget.
