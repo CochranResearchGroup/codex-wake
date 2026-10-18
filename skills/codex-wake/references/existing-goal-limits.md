@@ -100,7 +100,7 @@ Run an independent managed process, then configure MCP:
 
 ```sh
 codex-wake --wake-root PRIVATE_ROOT goal-limits watch --interval 1
-codex-wake-mcp --wake-root PRIVATE_ROOT --goal-limits-policy PRIVATE_POLICY
+codex-wake-mcp --goal-limits-root PRIVATE_ROOT --goal-limits-policy PRIVATE_POLICY
 ```
 
 The watcher must survive the calling agent's turn. An ordinary wake daemon or a
@@ -116,3 +116,7 @@ Changing endpoint/home is not a session reset or migration mechanism.
 For CLI inspection use `goal-limits show --policy PRIVATE_POLICY
 --caller-thread-id ACTUAL_CALLER_UUID --json` under the same `--wake-root`.
 The MCP host, not its caller, owns these scope arguments.
+
+Use `--goal-limits-root` for a separate private controller root when adding these
+tools to an existing MCP configuration. This leaves other tools on their existing
+wake root. Without this option, goal tools use the host `--wake-root`.

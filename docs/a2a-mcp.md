@@ -192,7 +192,7 @@ This feature's installed acceptance/release status is tracked in Plan0162.
 For a user-supplied `/goal` token/time allocation, discover
 `wake_goal_limits_set` and `wake_goal_limits_show`. Read the portable
 [agent workflow](../skills/codex-wake/references/existing-goal-limits.md).
-The host supplies `--wake-root` and `--goal-limits-policy`; these are not caller
+The host supplies `--goal-limits-root` and `--goal-limits-policy`; these are not caller
 arguments. Run `codex-wake --wake-root PRIVATE_ROOT goal-limits watch --interval 1`
 as an independent managed process. The agent enrolls only its actual native
 caller UUID and authorized limits; returned controller readiness/accounting,

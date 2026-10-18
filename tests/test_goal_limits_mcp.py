@@ -22,7 +22,7 @@ class GoalLimitsMCPTests(unittest.IsolatedAsyncioTestCase):
             parameters = StdioServerParameters(command=sys.executable,
                 args=['-m', 'codex_wake.mcp_server', '--cli', str(cli),
                       '--goal-limits-policy', str(root / 'host.json'),
-                      '--wake-root', str(root / 'journal')],
+                      '--wake-root', str(root / 'legacy'), '--goal-limits-root', str(root / 'journal')],
                 env=dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / 'src')))
             async with Client(parameters, mode='legacy') as client:
                 tools = {t.name: t for t in (await client.list_tools()).tools}
@@ -43,6 +43,9 @@ class GoalLimitsMCPTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(command[command.index('--policy') + 1], str(root / 'host.json'))
                 self.assertEqual(command[command.index('--caller-thread-id') + 1], caller)
                 self.assertEqual(output['caller'], caller)
+                legacy = await client.call_tool('wake_sessions_target', {'caller_thread_id': caller, 'selector': 'tab 18'})
+                self.assertFalse(legacy.is_error)
+                self.assertEqual(json.loads(legacy.content[0].text)['argv'][:4], ['--wake-root', str(root / 'legacy'), 'sessions', 'target'])
                 shown = await client.call_tool('wake_goal_limits_show', {'caller_thread_id': caller})
                 self.assertFalse(shown.is_error)
                 self.assertEqual(json.loads(shown.content[0].text)['argv'][2:4], ['goal-limits', 'show'])

@@ -194,3 +194,13 @@ Remaining delivery unit: publish the final coherent source, protected-main PR/CI
 then exact-main release/install plus whole-skill/client synchronization under the
 user's standing install/deploy/reconcile instruction. Preserve all unrelated
 sessions and services. Do not call source acceptance a production rollout.
+
+## Delivery qualification repair | 2026-10-17
+
+F2 found that the actual host history exceeded the bounded directory scan.
+Commit90de1ac uses the native SQLite thread index read-only, then revalidates
+canonical rollout metadata and spawn coverage. Missing/conflicting history still
+holds unknown. Independent closed-world source verification resolved F2; all25
+focused public tests pass. The real-home read-only performance probe reaches
+original-boundary validation in0.9783s; this is not live enrollment acceptance.
+A separate host-only MCP goal root preserves existing legacy tool scope.

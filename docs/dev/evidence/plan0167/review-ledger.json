@@ -14,5 +14,15 @@
     }
   ],
   "standards": [],
-  "live_acceptance": "separate unresolved gate"
+  "live_acceptance": "separate unresolved gate",
+  "delivery_reframe": {
+    "id": "F2",
+    "disposition": "resolved",
+    "criterion": "ordinary existing-session admission on the actual host",
+    "evidence": "4748+rollouts exceed4096 scan bound; larger temporary bound hits2secondlimit",
+    "bounded_repair": "native readonlyindex locates only canonicalroot/children; unchangedhistorybounds",
+    "worker_commit": "1ad673f",
+    "attempts": 1,
+    "verification": "independent closed-world source PASS at90de1ac; integrated25publictests PASS"
+  }
 }

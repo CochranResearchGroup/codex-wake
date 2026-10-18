@@ -1,0 +1,387 @@
+Release gates (3.11)	Smoke installed wheel	﻿2026-10-18T00:03:09.4300499Z ##[group]Run python -m venv /tmp/codex-wake-ci
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4301024Z [36;1mpython -m venv /tmp/codex-wake-ci[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4301423Z [36;1m/tmp/codex-wake-ci/bin/python -m pip install --upgrade pip[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4301786Z [36;1mwake_wheels=(dist/*.whl)[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4302146Z [36;1m/tmp/codex-wake-ci/bin/python -m pip install "${wake_wheels[0]}[mcp]"[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4302515Z [36;1m[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4302815Z [36;1m/tmp/codex-wake-ci/bin/python scripts/source_registry_smoke.py --json[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4303416Z [36;1m/tmp/codex-wake-ci/bin/python scripts/session_discovery_smoke.py --cli /tmp/codex-wake-ci/bin/codex-wake[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4304170Z [36;1m/tmp/codex-wake-ci/bin/python scripts/a2a_mailbox_smoke.py --scheduler --operations --cli /tmp/codex-wake-ci/bin/codex-wake[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4305247Z [36;1mtimeout 60s /tmp/codex-wake-ci/bin/python scripts/a2a_mcp_smoke.py --cli /tmp/codex-wake-ci/bin/codex-wake --mcp /tmp/codex-wake-ci/bin/codex-wake-mcp[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4306234Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/wake_control_qualification.py --prefix /tmp/codex-wake-ci --output /tmp/codex-wake-controls-ci.json[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4306975Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_resource_qualification.py[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4307776Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_recovery_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake --legacy-python /tmp/codex-wake-legacy-ci/bin/python[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4308707Z [36;1mtimeout 30s /tmp/codex-wake-ci/bin/python scripts/a2a_backup_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake --restore[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4309495Z [36;1mtimeout 30s /tmp/codex-wake-ci/bin/python scripts/a2a_rollback_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4310510Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_retention_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake --legacy-python /tmp/codex-wake-legacy-ci/bin/python[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4311545Z [36;1mPYTHONPATH=tests CODEX_WAKE_RECEIPT_CLI=/tmp/codex-wake-ci/bin/codex-wake /tmp/codex-wake-ci/bin/python -m unittest test_a2a_projection_ack -q[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4312127Z [36;1m[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4312360Z [36;1mpython scripts/product_smoke.py \[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4312704Z [36;1m  --codex-wake-bin /tmp/codex-wake-ci/bin/codex-wake \[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4313106Z [36;1m  --codex-waked-bin /tmp/codex-wake-ci/bin/codex-waked \[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4313487Z [36;1m  --artifact-dir /tmp/codex-wake-ci-artifacts \[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4313827Z [36;1m  --upgrade-wheel dist/*.whl \[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4314082Z [36;1m  --json[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4314282Z [36;1m[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4314780Z [36;1m/tmp/codex-wake-ci/bin/codex-waked --once --no-dispatch --wake-root /tmp/codex-wake-ci-empty[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4315315Z [36;1m[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4315691Z [36;1mhook_output="$(printf '{"prompt":"hello","cwd":"%s"}' "$PWD" | /tmp/codex-wake-ci/bin/codex-wake-hook)"[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4316136Z [36;1mtest -z "$hook_output"[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4316375Z [36;1m[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4316734Z [36;1m/tmp/codex-wake-ci/bin/codex-wake --wake-root /tmp/codex-wake-ci-runtime \[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4317233Z [36;1m  after --app-server-thread-id thread_ci_smoke 1m -- "CI smoke wake"[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4317716Z [36;1m/tmp/codex-wake-ci/bin/codex-wake --wake-root /tmp/codex-wake-ci-runtime list[0m
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4356849Z shell: /usr/bin/bash -e {0}
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4357135Z env:
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4357412Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4357827Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4358241Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4358596Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4359120Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4359468Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:09.4359773Z ##[endgroup]
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.5834458Z Requirement already satisfied: pip in /tmp/codex-wake-ci/lib/python3.11/site-packages (24.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.6982910Z Collecting pip
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.6996641Z   Using cached pip-26.2.1-py3-none-any.whl.metadata (4.6 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.7026105Z Using cached pip-26.2.1-py3-none-any.whl (1.8 MB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.7443027Z Installing collected packages: pip
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.7443830Z   Attempting uninstall: pip
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.7458497Z     Found existing installation: pip 24.0
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.7698700Z     Uninstalling pip-24.0:
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:12.7740535Z       Successfully uninstalled pip-24.0
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.3962659Z Successfully installed pip-26.2.1
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.8285566Z Processing ./dist/codex_wake-0.17.0-py3-none-any.whl (from codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.8394957Z Collecting dbus-next<0.3,>=0.2.3 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.8409977Z   Using cached dbus_next-0.2.3-py3-none-any.whl.metadata (7.0 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9327642Z Collecting websockets<18,>=17 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9341769Z   Using cached websockets-17.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9425838Z Collecting mcp<2.3,>=2.2 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9439333Z   Using cached mcp-2.2.0-py3-none-any.whl.metadata (7.8 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9554159Z Collecting jsonschema<5,>=4.26 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9566192Z   Using cached jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9637755Z Collecting attrs>=22.2.0 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9650055Z   Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9700187Z Collecting jsonschema-specifications>=2023.03.6 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9712461Z   Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9812275Z Collecting referencing>=0.28.4 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:13.9824458Z   Using cached referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1702246Z Collecting rpds-py>=0.25.0 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1715604Z   Using cached rpds_py-2026.9.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1804210Z Collecting anyio>=4.9 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1817254Z   Using cached anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1863820Z Collecting httpx2>=2.5.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1877737Z   Using cached httpx2-2.13.1-py3-none-any.whl.metadata (9.8 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1936380Z Collecting mcp-types==2.2.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.1948480Z   Using cached mcp_types-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.2033845Z Collecting opentelemetry-api>=1.28.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.2046534Z   Using cached opentelemetry_api-1.45.1-py3-none-any.whl.metadata (1.4 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.2862741Z Collecting pydantic>=2.12.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.2875054Z   Using cached pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.2982018Z Collecting pyjwt>=2.10.1 (from pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.2994470Z   Using cached pyjwt-2.15.1-py3-none-any.whl.metadata (3.5 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3051398Z Collecting python-multipart>=0.0.9 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3064466Z   Using cached python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3147135Z Collecting sse-starlette>=3.0.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3160431Z   Using cached sse_starlette-3.5.0-py3-none-any.whl.metadata (15 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3308534Z Collecting starlette>=0.27 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3319385Z   Using cached starlette-1.8.0-py3-none-any.whl.metadata (6.6 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3391344Z Collecting typing-extensions>=4.13.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3404988Z   Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3439758Z Collecting typing-inspection>=0.4.1 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3451881Z   Using cached typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3579771Z Collecting uvicorn>=0.31.1 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3590872Z   Using cached uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3665253Z Collecting idna>=2.8 (from anyio>=4.9->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3677201Z   Using cached idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3742866Z Collecting httpcore2==2.13.1 (from httpx2>=2.5.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3755033Z   Using cached httpcore2-2.13.1-py3-none-any.whl.metadata (26 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3815893Z Collecting truststore>=0.10 (from httpx2>=2.5.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3827984Z   Using cached truststore-0.10.5-py3-none-any.whl.metadata (4.5 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3875629Z Collecting h11>=0.16 (from httpcore2==2.13.1->httpx2>=2.5.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3887943Z   Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3953086Z Collecting annotated-types>=0.6.0 (from pydantic>=2.12.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.3965368Z   Using cached annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.9026820Z Collecting pydantic-core==2.50.1 (from pydantic>=2.12.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:14.9041932Z   Using cached pydantic_core-2.50.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.0546750Z Collecting cryptography>=3.4.0 (from pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.0559769Z   Using cached cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.4 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1265393Z Collecting cffi>=2.0.0 (from cryptography>=3.4.0->pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1277888Z   Using cached cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1323972Z Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.0->pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1336053Z   Using cached pycparser-3.11-py3-none-any.whl.metadata (8.2 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1504932Z Collecting click>=7.0 (from uvicorn>=0.31.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1515882Z   Using cached click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1552811Z Using cached dbus_next-0.2.3-py3-none-any.whl (57 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1565068Z Using cached jsonschema-4.26.0-py3-none-any.whl (90 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1577563Z Using cached mcp-2.2.0-py3-none-any.whl (365 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1591660Z Using cached mcp_types-2.2.0-py3-none-any.whl (69 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1604501Z Using cached websockets-17.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (225 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1617387Z Using cached anyio-4.15.1-py3-none-any.whl (132 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1629422Z Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1641284Z Using cached httpx2-2.13.1-py3-none-any.whl (95 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1653185Z Using cached httpcore2-2.13.1-py3-none-any.whl (83 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1664892Z Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1676688Z Using cached idna-3.20-py3-none-any.whl (69 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1688558Z Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1700015Z Using cached opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1711524Z Using cached pydantic-2.14.1-py3-none-any.whl (488 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1726172Z Using cached pydantic_core-2.50.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1745793Z Using cached annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1757294Z Using cached pyjwt-2.15.1-py3-none-any.whl (33 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1768950Z Using cached cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1798915Z Using cached cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (217 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1811742Z Using cached python_multipart-0.0.32-py3-none-any.whl (30 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1823303Z Using cached referencing-0.37.0-py3-none-any.whl (26 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1835027Z Using cached rpds_py-2026.9.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (375 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1848775Z Using cached sse_starlette-3.5.0-py3-none-any.whl (17 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1860346Z Using cached starlette-1.8.0-py3-none-any.whl (79 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1872072Z Using cached truststore-0.10.5-py3-none-any.whl (19 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1883725Z Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1895632Z Using cached typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1907450Z Using cached uvicorn-0.54.0-py3-none-any.whl (87 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1919512Z Using cached click-8.5.0-py3-none-any.whl (125 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.1931736Z Using cached pycparser-3.11-py3-none-any.whl (51 kB)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:15.2922584Z Installing collected packages: websockets, typing-extensions, truststore, rpds-py, python-multipart, pyjwt, pycparser, idna, h11, dbus-next, click, attrs, annotated-types, uvicorn, typing-inspection, referencing, pydantic-core, opentelemetry-api, httpcore2, codex-wake, cffi, anyio, starlette, pydantic, jsonschema-specifications, httpx2, cryptography, sse-starlette, mcp-types, jsonschema, mcp
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:16.9756487Z 
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:16.9772959Z Successfully installed annotated-types-0.8.0 anyio-4.15.1 attrs-26.1.0 cffi-2.1.1 click-8.5.0 codex-wake-0.17.0 cryptography-50.0.2 dbus-next-0.2.3 h11-0.16.0 httpcore2-2.13.1 httpx2-2.13.1 idna-3.20 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 mcp-2.2.0 mcp-types-2.2.0 opentelemetry-api-1.45.1 pycparser-3.11 pydantic-2.14.1 pydantic-core-2.50.1 pyjwt-2.15.1 python-multipart-0.0.32 referencing-0.37.0 rpds-py-2026.9.1 sse-starlette-3.5.0 starlette-1.8.0 truststore-0.10.5 typing-extensions-4.16.0 typing-inspection-0.4.4 uvicorn-0.54.0 websockets-17.2
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:17.1760553Z {"fixture_factory_calls": 1, "fixture_runner_count": 1, "inventory_ids": ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci", "http-json-completion"], "journal_exists": false, "ownership_pairs": 7, "readiness_status": "ready", "support_bytes": 2548, "support_sha256": "5078976ea287a2b2f4f1507380b0c40aeb08f78cc457b85523fa8418d453760d", "temporary_root_removed": true, "wake_root_created": false}
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:19.6633963Z {"connections_closed": 18, "descriptors_after": 4, "descriptors_before": 4, "installed_cli": "/tmp/codex-wake-ci/bin/codex-wake", "method_counts": {"initialize": 18, "initialized": 18, "thread/loaded/list": 18, "thread/read": 36}, "no_lifecycle_methods": true, "no_transcript_output": true, "schema_version": 1, "status": "accepted", "threads_after": 1, "threads_before": 1}
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:24.7191813Z {"children_after": 0, "children_before": 0, "cleanup": "temporary_bus_and_roots_removed", "connections_closed": 22, "cross_root_policy": "explicit", "explicit_completion_claim": true, "mode": "inbox_and_projection", "operator_operations": true, "received_receipts": 2, "replies": 1, "requests": 2, "runtime_effect_methods": 0, "scheduler_dispatches": 0, "scheduler_projections": 1, "schema_version": 1, "status": "accepted_provider_free", "wrong_actor_denied": true}
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:29.9409798Z {"status": "PASS", "tools": ["wake_sessions_target", "wake_sessions_configuration", "wake_sessions_handoff", "wake_sessions_refresh", "wake_sessions_spawn", "wake_sessions_list", "wake_sessions_resolve", "wake_sessions_show", "wake_sessions_current", "wake_messages_send", "wake_messages_inbox", "wake_messages_outbox", "wake_messages_show", "wake_messages_read", "wake_messages_ack", "wake_messages_reply", "wake_messages_reconcile", "wake_messages_cancel", "wake_messages_arm_reply", "wake_goal_limits_set", "wake_goal_limits_show", "wake_list", "wake_cancel", "wake_pause", "wake_resume", "wake_pause_status", "wake_interrupt"], "calls": [{"tool": "wake_goal_limits_set", "is_error": true}, {"tool": "wake_sessions_current", "is_error": false}, {"tool": "wake_messages_send", "is_error": false}, {"tool": "wake_messages_send", "is_error": false}, {"tool": "wake_messages_read", "is_error": true, "shared_connection_child_claim": true}, {"tool": "wake_messages_read", "is_error": true}, {"tool": "wake_messages_read", "is_error": false}, {"tool": "wake_messages_ack", "is_error": false}, {"tool": "wake_messages_ack", "is_error": false}, {"tool": "wake_messages_reply", "is_error": false}, {"tool": "wake_messages_read", "is_error": false}, {"tool": "wake_messages_reconcile", "is_error": false}], "elapsed_seconds": 4.666516434000016, "runtime_methods": ["initialize", "initialized", "thread/loaded/list", "thread/read"], "owned_fixture_removed": true, "children_after": 0, "native_turns": 0, "notifications": 0}
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6590575Z   + Exception Group Traceback (most recent call last):
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6591386Z   |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 60, in <module>
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6591885Z   |     mcp_result=asyncio.run(qualify())
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6592156Z   |                ^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6595851Z   |   File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/asyncio/runners.py", line 190, in run
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6596421Z   |     return runner.run(main)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6596821Z   |            ^^^^^^^^^^^^^^^^
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6597357Z   |   File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/asyncio/runners.py", line 118, in run
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6597967Z   |     return self._loop.run_until_complete(task)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6598378Z   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6599103Z   |   File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6599814Z   |     return future.result()
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6600129Z   |            ^^^^^^^^^^^^^^^
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6600779Z   |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 45, in qualify
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6601509Z   |     async with stdio_client(params) as streams:
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6602183Z   |   File "/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/contextlib.py", line 231, in __aexit__
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6602889Z   |     await self.gen.athrow(typ, value, traceback)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6603586Z   |   File "/tmp/codex-wake-ci/lib/python3.11/site-packages/mcp/client/stdio.py", line 200, in stdio_client
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6604592Z   |     async with anyio.create_task_group() as tg:
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6607675Z   |   File "/tmp/codex-wake-ci/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6608144Z   |     raise BaseExceptionGroup(
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6608480Z   | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6608835Z   +-+---------------- 1 ----------------
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6609134Z     | Exception Group Traceback (most recent call last):
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6609604Z     |   File "/tmp/codex-wake-ci/lib/python3.11/site-packages/mcp/client/stdio.py", line 204, in stdio_client
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6610033Z     |     yield read_stream, write_stream
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6610491Z     |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 46, in qualify
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6610975Z     |     async with ClientSession(*streams) as session:
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6611421Z     |   File "/tmp/codex-wake-ci/lib/python3.11/site-packages/mcp/client/session.py", line 514, in __aexit__
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6611927Z     |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6615596Z     |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6616333Z     |   File "/tmp/codex-wake-ci/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6617054Z     |     raise BaseExceptionGroup(
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6617560Z     | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6618073Z     +-+---------------- 1 ----------------
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6618413Z       | Traceback (most recent call last):
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6618860Z       |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 47, in qualify
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6619620Z       |     await session.initialize();catalog=await session.list_tools();assert len(catalog.tools)==25
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6620095Z       |                                                                          ^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6620400Z       | AssertionError
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.6620631Z       +------------------------------------
+Release gates (3.11)	Smoke installed wheel	2026-10-18T00:03:31.7488193Z ##[error]Process completed with exit code 1.
+Release gates (3.12)	Smoke installed wheel	﻿2026-10-18T00:02:58.6078937Z ##[group]Run python -m venv /tmp/codex-wake-ci
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6079343Z [36;1mpython -m venv /tmp/codex-wake-ci[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6079708Z [36;1m/tmp/codex-wake-ci/bin/python -m pip install --upgrade pip[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6080064Z [36;1mwake_wheels=(dist/*.whl)[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6080433Z [36;1m/tmp/codex-wake-ci/bin/python -m pip install "${wake_wheels[0]}[mcp]"[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6080802Z [36;1m[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6081100Z [36;1m/tmp/codex-wake-ci/bin/python scripts/source_registry_smoke.py --json[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6081721Z [36;1m/tmp/codex-wake-ci/bin/python scripts/session_discovery_smoke.py --cli /tmp/codex-wake-ci/bin/codex-wake[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6082551Z [36;1m/tmp/codex-wake-ci/bin/python scripts/a2a_mailbox_smoke.py --scheduler --operations --cli /tmp/codex-wake-ci/bin/codex-wake[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6083438Z [36;1mtimeout 60s /tmp/codex-wake-ci/bin/python scripts/a2a_mcp_smoke.py --cli /tmp/codex-wake-ci/bin/codex-wake --mcp /tmp/codex-wake-ci/bin/codex-wake-mcp[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6084658Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/wake_control_qualification.py --prefix /tmp/codex-wake-ci --output /tmp/codex-wake-controls-ci.json[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6085421Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_resource_qualification.py[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6086248Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_recovery_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake --legacy-python /tmp/codex-wake-legacy-ci/bin/python[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6087236Z [36;1mtimeout 30s /tmp/codex-wake-ci/bin/python scripts/a2a_backup_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake --restore[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6088051Z [36;1mtimeout 30s /tmp/codex-wake-ci/bin/python scripts/a2a_rollback_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6088993Z [36;1mtimeout 40s /tmp/codex-wake-ci/bin/python scripts/a2a_retention_qualification.py --cli /tmp/codex-wake-ci/bin/codex-wake --legacy-python /tmp/codex-wake-legacy-ci/bin/python[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6090142Z [36;1mPYTHONPATH=tests CODEX_WAKE_RECEIPT_CLI=/tmp/codex-wake-ci/bin/codex-wake /tmp/codex-wake-ci/bin/python -m unittest test_a2a_projection_ack -q[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6090725Z [36;1m[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6090941Z [36;1mpython scripts/product_smoke.py \[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6091299Z [36;1m  --codex-wake-bin /tmp/codex-wake-ci/bin/codex-wake \[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6091719Z [36;1m  --codex-waked-bin /tmp/codex-wake-ci/bin/codex-waked \[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6092094Z [36;1m  --artifact-dir /tmp/codex-wake-ci-artifacts \[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6092423Z [36;1m  --upgrade-wheel dist/*.whl \[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6092685Z [36;1m  --json[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6092880Z [36;1m[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6093253Z [36;1m/tmp/codex-wake-ci/bin/codex-waked --once --no-dispatch --wake-root /tmp/codex-wake-ci-empty[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6093688Z [36;1m[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6094059Z [36;1mhook_output="$(printf '{"prompt":"hello","cwd":"%s"}' "$PWD" | /tmp/codex-wake-ci/bin/codex-wake-hook)"[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6094685Z [36;1mtest -z "$hook_output"[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6094927Z [36;1m[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6095243Z [36;1m/tmp/codex-wake-ci/bin/codex-wake --wake-root /tmp/codex-wake-ci-runtime \[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6095739Z [36;1m  after --app-server-thread-id thread_ci_smoke 1m -- "CI smoke wake"[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6096243Z [36;1m/tmp/codex-wake-ci/bin/codex-wake --wake-root /tmp/codex-wake-ci-runtime list[0m
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6132832Z shell: /usr/bin/bash -e {0}
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6133106Z env:
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6133376Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6133800Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6134213Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6134797Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6135354Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6135726Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:02:58.6136039Z ##[endgroup]
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.2099835Z Requirement already satisfied: pip in /tmp/codex-wake-ci/lib/python3.12/site-packages (25.0.1)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.2856237Z Collecting pip
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.2869926Z   Using cached pip-26.2.1-py3-none-any.whl.metadata (4.6 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.2901896Z Using cached pip-26.2.1-py3-none-any.whl (1.8 MB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.3057039Z Installing collected packages: pip
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.3058534Z   Attempting uninstall: pip
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.3077722Z     Found existing installation: pip 25.0.1
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.3325705Z     Uninstalling pip-25.0.1:
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:01.3369357Z       Successfully uninstalled pip-25.0.1
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.0992405Z Successfully installed pip-26.2.1
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.5320002Z Processing ./dist/codex_wake-0.17.0-py3-none-any.whl (from codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.5441816Z Collecting dbus-next<0.3,>=0.2.3 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.5455592Z   Using cached dbus_next-0.2.3-py3-none-any.whl.metadata (7.0 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6352223Z Collecting websockets<18,>=17 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6365995Z   Using cached websockets-17.2-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6463311Z Collecting mcp<2.3,>=2.2 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6476169Z   Using cached mcp-2.2.0-py3-none-any.whl.metadata (7.8 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6750418Z Collecting jsonschema<5,>=4.26 (from codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6762755Z   Using cached jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6848370Z Collecting attrs>=22.2.0 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6860583Z   Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6919252Z Collecting jsonschema-specifications>=2023.03.6 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.6931066Z   Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.7041679Z Collecting referencing>=0.28.4 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.7053762Z   Using cached referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9145555Z Collecting rpds-py>=0.25.0 (from jsonschema<5,>=4.26->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9158572Z   Using cached rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9258980Z Collecting anyio>=4.9 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9271802Z   Using cached anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9325295Z Collecting httpx2>=2.5.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9337815Z   Using cached httpx2-2.13.1-py3-none-any.whl.metadata (9.8 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9408496Z Collecting mcp-types==2.2.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9420189Z   Using cached mcp_types-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9521815Z Collecting opentelemetry-api>=1.28.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:02.9536763Z   Using cached opentelemetry_api-1.45.1-py3-none-any.whl.metadata (1.4 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0312141Z Collecting pydantic>=2.12.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0325202Z   Using cached pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0454663Z Collecting pyjwt>=2.10.1 (from pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0466889Z   Using cached pyjwt-2.15.1-py3-none-any.whl.metadata (3.5 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0534862Z Collecting python-multipart>=0.0.9 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0547855Z   Using cached python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0637223Z Collecting sse-starlette>=3.0.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0650675Z   Using cached sse_starlette-3.5.0-py3-none-any.whl.metadata (15 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0824700Z Collecting starlette>=0.27 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0836342Z   Using cached starlette-1.8.0-py3-none-any.whl.metadata (6.6 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0931468Z Collecting typing-extensions>=4.13.0 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0947190Z   Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0986460Z Collecting typing-inspection>=0.4.1 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.0998145Z   Using cached typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1138478Z Collecting uvicorn>=0.31.1 (from mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1151057Z   Using cached uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1239485Z Collecting idna>=2.8 (from anyio>=4.9->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1251477Z   Using cached idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1330514Z Collecting httpcore2==2.13.1 (from httpx2>=2.5.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1342009Z   Using cached httpcore2-2.13.1-py3-none-any.whl.metadata (26 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1414347Z Collecting truststore>=0.10 (from httpx2>=2.5.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1426226Z   Using cached truststore-0.10.5-py3-none-any.whl.metadata (4.5 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1479964Z Collecting h11>=0.16 (from httpcore2==2.13.1->httpx2>=2.5.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1490974Z   Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1565344Z Collecting annotated-types>=0.6.0 (from pydantic>=2.12.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.1576652Z   Using cached annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.7302060Z Collecting pydantic-core==2.50.1 (from pydantic>=2.12.0->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.7315257Z   Using cached pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.9147346Z Collecting cryptography>=3.4.0 (from pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.9158209Z   Using cached cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.4 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.9970969Z Collecting cffi>=2.0.0 (from cryptography>=3.4.0->pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:03.9983907Z   Using cached cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0038287Z Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.0->pyjwt[crypto]>=2.10.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0049596Z   Using cached pycparser-3.11-py3-none-any.whl.metadata (8.2 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0249622Z Collecting click>=7.0 (from uvicorn>=0.31.1->mcp<2.3,>=2.2->codex-wake==0.17.0->codex-wake==0.17.0)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0259890Z   Using cached click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0302212Z Using cached dbus_next-0.2.3-py3-none-any.whl (57 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0313575Z Using cached jsonschema-4.26.0-py3-none-any.whl (90 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0324415Z Using cached mcp-2.2.0-py3-none-any.whl (365 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0336971Z Using cached mcp_types-2.2.0-py3-none-any.whl (69 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0348299Z Using cached websockets-17.2-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (225 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0359669Z Using cached anyio-4.15.1-py3-none-any.whl (132 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0370798Z Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0381320Z Using cached httpx2-2.13.1-py3-none-any.whl (95 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0391759Z Using cached httpcore2-2.13.1-py3-none-any.whl (83 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0402160Z Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0412489Z Using cached idna-3.20-py3-none-any.whl (69 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0423320Z Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0433567Z Using cached opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0443470Z Using cached pydantic-2.14.1-py3-none-any.whl (488 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0456989Z Using cached pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0475847Z Using cached annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0486315Z Using cached pyjwt-2.15.1-py3-none-any.whl (33 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0496825Z Using cached cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0526832Z Using cached cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0538115Z Using cached python_multipart-0.0.32-py3-none-any.whl (30 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0548479Z Using cached referencing-0.37.0-py3-none-any.whl (26 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0558779Z Using cached rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (371 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0570512Z Using cached sse_starlette-3.5.0-py3-none-any.whl (17 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0580624Z Using cached starlette-1.8.0-py3-none-any.whl (79 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0590972Z Using cached truststore-0.10.5-py3-none-any.whl (19 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0601251Z Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0613016Z Using cached typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0624171Z Using cached uvicorn-0.54.0-py3-none-any.whl (87 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0635250Z Using cached click-8.5.0-py3-none-any.whl (125 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.0645862Z Using cached pycparser-3.11-py3-none-any.whl (51 kB)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:04.1856057Z Installing collected packages: websockets, typing-extensions, truststore, rpds-py, python-multipart, pyjwt, pycparser, idna, h11, dbus-next, click, attrs, annotated-types, uvicorn, typing-inspection, referencing, pydantic-core, opentelemetry-api, httpcore2, codex-wake, cffi, anyio, starlette, pydantic, jsonschema-specifications, httpx2, cryptography, sse-starlette, mcp-types, jsonschema, mcp
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:06.2773986Z 
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:06.2803114Z Successfully installed annotated-types-0.8.0 anyio-4.15.1 attrs-26.1.0 cffi-2.1.1 click-8.5.0 codex-wake-0.17.0 cryptography-50.0.2 dbus-next-0.2.3 h11-0.16.0 httpcore2-2.13.1 httpx2-2.13.1 idna-3.20 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 mcp-2.2.0 mcp-types-2.2.0 opentelemetry-api-1.45.1 pycparser-3.11 pydantic-2.14.1 pydantic-core-2.50.1 pyjwt-2.15.1 python-multipart-0.0.32 referencing-0.37.0 rpds-py-2026.9.1 sse-starlette-3.5.0 starlette-1.8.0 truststore-0.10.5 typing-extensions-4.16.0 typing-inspection-0.4.4 uvicorn-0.54.0 websockets-17.2
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:06.5515154Z {"fixture_factory_calls": 1, "fixture_runner_count": 1, "inventory_ids": ["local-filesystem", "local-process-exit", "local-user-systemd", "github-ci", "http-json-completion"], "journal_exists": false, "ownership_pairs": 7, "readiness_status": "ready", "support_bytes": 2548, "support_sha256": "9cecfc6728e88d373095e030dae91a8f0d82249beb26c2b1bd2677e501d98f7d", "temporary_root_removed": true, "wake_root_created": false}
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:09.3138177Z {"connections_closed": 18, "descriptors_after": 4, "descriptors_before": 4, "installed_cli": "/tmp/codex-wake-ci/bin/codex-wake", "method_counts": {"initialize": 18, "initialized": 18, "thread/loaded/list": 18, "thread/read": 36}, "no_lifecycle_methods": true, "no_transcript_output": true, "schema_version": 1, "status": "accepted", "threads_after": 1, "threads_before": 1}
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:15.1799293Z {"children_after": 0, "children_before": 0, "cleanup": "temporary_bus_and_roots_removed", "connections_closed": 22, "cross_root_policy": "explicit", "explicit_completion_claim": true, "mode": "inbox_and_projection", "operator_operations": true, "received_receipts": 2, "replies": 1, "requests": 2, "runtime_effect_methods": 0, "scheduler_dispatches": 0, "scheduler_projections": 1, "schema_version": 1, "status": "accepted_provider_free", "wrong_actor_denied": true}
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:21.4528176Z {"status": "PASS", "tools": ["wake_sessions_target", "wake_sessions_configuration", "wake_sessions_handoff", "wake_sessions_refresh", "wake_sessions_spawn", "wake_sessions_list", "wake_sessions_resolve", "wake_sessions_show", "wake_sessions_current", "wake_messages_send", "wake_messages_inbox", "wake_messages_outbox", "wake_messages_show", "wake_messages_read", "wake_messages_ack", "wake_messages_reply", "wake_messages_reconcile", "wake_messages_cancel", "wake_messages_arm_reply", "wake_goal_limits_set", "wake_goal_limits_show", "wake_list", "wake_cancel", "wake_pause", "wake_resume", "wake_pause_status", "wake_interrupt"], "calls": [{"tool": "wake_goal_limits_set", "is_error": true}, {"tool": "wake_sessions_current", "is_error": false}, {"tool": "wake_messages_send", "is_error": false}, {"tool": "wake_messages_send", "is_error": false}, {"tool": "wake_messages_read", "is_error": true, "shared_connection_child_claim": true}, {"tool": "wake_messages_read", "is_error": true}, {"tool": "wake_messages_read", "is_error": false}, {"tool": "wake_messages_ack", "is_error": false}, {"tool": "wake_messages_ack", "is_error": false}, {"tool": "wake_messages_reply", "is_error": false}, {"tool": "wake_messages_read", "is_error": false}, {"tool": "wake_messages_reconcile", "is_error": false}], "elapsed_seconds": 5.601278903999997, "runtime_methods": ["initialize", "initialized", "thread/loaded/list", "thread/read"], "owned_fixture_removed": true, "children_after": 0, "native_turns": 0, "notifications": 0}
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5566952Z   + Exception Group Traceback (most recent call last):
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5568068Z   |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 60, in <module>
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5568999Z   |     mcp_result=asyncio.run(qualify())
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5569463Z   |                ^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5570236Z   |   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/asyncio/runners.py", line 195, in run
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5571041Z   |     return runner.run(main)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5571428Z   |            ^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5572143Z   |   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/asyncio/runners.py", line 118, in run
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5572990Z   |     return self._loop.run_until_complete(task)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5573489Z   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5574063Z   |   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5574865Z   |     return future.result()
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5575263Z   |            ^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5576074Z   |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 45, in qualify
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5576955Z   |     async with stdio_client(params) as streams:
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5577249Z   |                ^^^^^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5577875Z   |   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/contextlib.py", line 231, in __aexit__
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5578631Z   |     await self.gen.athrow(value)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5579107Z   |   File "/tmp/codex-wake-ci/lib/python3.12/site-packages/mcp/client/stdio.py", line 200, in stdio_client
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5580356Z   |     async with anyio.create_task_group() as tg:
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5580885Z   |                ^^^^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5581358Z   |   File "/tmp/codex-wake-ci/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5581841Z   |     raise BaseExceptionGroup(
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5582197Z   | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5582558Z   +-+---------------- 1 ----------------
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5582861Z     | Exception Group Traceback (most recent call last):
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5583380Z     |   File "/tmp/codex-wake-ci/lib/python3.12/site-packages/mcp/client/stdio.py", line 204, in stdio_client
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5583855Z     |     yield read_stream, write_stream
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5584317Z     |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 46, in qualify
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5585110Z     |     async with ClientSession(*streams) as session:
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5585414Z     |                ^^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5585851Z     |   File "/tmp/codex-wake-ci/lib/python3.12/site-packages/mcp/client/session.py", line 514, in __aexit__
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5586413Z     |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5586806Z     |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5587313Z     |   File "/tmp/codex-wake-ci/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5587790Z     |     raise BaseExceptionGroup(
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5588139Z     | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5588506Z     +-+---------------- 1 ----------------
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5588937Z       | Traceback (most recent call last):
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5589413Z       |   File "/home/runner/work/codex-wake/codex-wake/scripts/wake_control_qualification.py", line 47, in qualify
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5590062Z       |     await session.initialize();catalog=await session.list_tools();assert len(catalog.tools)==25
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5590561Z       |                                                                          ^^^^^^^^^^^^^^^^^^^^^^
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5590900Z       | AssertionError
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.5591145Z       +------------------------------------
+Release gates (3.12)	Smoke installed wheel	2026-10-18T00:03:23.6890409Z ##[error]Process completed with exit code 1.

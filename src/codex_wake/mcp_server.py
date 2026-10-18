@@ -106,7 +106,7 @@ class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
-                 goal_limits_policy=None):
+                 goal_limits_policy=None, goal_limits_root=None):
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
         self.app_server = app_server
@@ -117,6 +117,7 @@ class CommandRunner:
         self.wake_control_config = wake_control_config
         self.wake_registry = wake_registry
         self.goal_limits_policy = goal_limits_policy
+        self.goal_limits_root = goal_limits_root
 
     def _wake_control_command(self, action, arguments):
         import re
@@ -193,9 +194,10 @@ class CommandRunner:
                 return {"error": {"code": "policy_denied", "message": "Host wake-control root and action grants are required for the entire selected scope."}}, True
             return self._execute(command, arguments, readonly)
         if group == 'goal-limits':
-            if self.goal_limits_policy is None or self.wake_root is None:
+            goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
+            if self.goal_limits_policy is None or goal_root is None:
                 return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
-            command = [*self.cli, '--wake-root', str(self.wake_root), group, verb,
+            command = [*self.cli, '--wake-root', str(goal_root), group, verb,
                        '--policy', str(self.goal_limits_policy), '--json']
             for key, value in arguments.items():
                 command += ['--' + key.replace('_', '-'), str(value)]
@@ -334,6 +336,8 @@ def main(argv=None):
     parser.add_argument('--wake-control-config', type=Path, help='host-approved caller root/action grants')
     parser.add_argument('--wake-registry', type=Path, help='host-owned registered wake-root directory')
     parser.add_argument('--goal-limits-policy', type=Path, help='host-approved existing-session resource allocations')
+    parser.add_argument('--goal-limits-root', type=Path,
+                        help='private goal-controller root; falls back to --wake-root without changing other tool scope')
     args = parser.parse_args(argv)
     if not 0 < args.call_timeout <= 90:
         parser.error("--call-timeout must be positive and at most 90 seconds")
