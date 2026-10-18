@@ -238,6 +238,21 @@ calls the shared MCP reload API. The private profile/checkpoint and any configur
 budget binding are revalidated before advancement. Watcher shutdown fences new
 native and tmux effects; an acknowledged operational pause survives restart.
 
+An explicit `client_connection: "managed_default"` launches `codex resume`
+without `--remote`, so the managed client can establish fresh MCP connections.
+It requires an absolute existing `codex_home`. Before admission and each effect,
+the read-only daemon locator must resolve to the approved `app_server`, with
+the same Unix peer PID, owner and OS process generation. A changed daemon holds
+the refresh; this mode does not authorize starting or restarting it. The default
+`existing_endpoint` connection retains the explicit `--remote` behavior.
+
+Managed-default profiles must contain and select actual MCP catalog checks:
+`{"kind":"mcp_catalog","server":"codex-wake","version":"0.18.1",
+"tools":{"wake_goal_limits_set":["allocation_id","token_accounting"]}}`.
+The native `mcpServerStatus/list` result must report the exact server version
+and required input schema fields before restoration. Changed tool behavior or
+a new client PID alone does not satisfy this proof.
+
 Automatic goal restoration requires the configured lifecycle budget or an
 explicit host-profile `goal_supervision` binding containing `root`, `policy` and
 `allocation_id`. The existing controller must report armed, qualified accounting,

@@ -46,9 +46,10 @@ def refresh_command(args, root):
         raise WakeError('requested resources require host-approved proof checks')
     for name in args.resource:
         check = resources[name]
-        if not isinstance(check, dict) or check.get('kind') not in ('skill', 'mcp'):
+        if not isinstance(check, dict) or check.get('kind') not in ('skill', 'mcp','mcp_catalog'):
             raise WakeError('requested resource proof kind is unsupported')
-        required = ({'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
+        required = ({'kind','server','version','tools'} if check['kind']=='mcp_catalog' else
+                    {'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
                     {'kind', 'server', 'tool', 'arguments', 'read_only', 'expected_content'})
         if set(check) != required:
             raise WakeError('requested resource proof is incomplete or contains unsupported fields')
@@ -278,9 +279,10 @@ def advance_refresh(path, receipt, profile, effect_guard=None):
             removed = ['CODEX_THREAD_ID', 'TMUX_PANE', 'CODEX_WAKE_A2A_CAPABILITY',
                        'CODEX_WAKE_A2A_BUS_ROOT', 'CODEX_WAKE_SENDER_RECEIPT_AUTHORITY']
             home = ['CODEX_HOME=' + profile['codex_home']] if 'codex_home' in profile else []
+            connection=[] if profile.get('client_connection')=='managed_default' else ['--remote',runtime.app_server]
             command = shlex.join(['env', *[v for k in removed for v in ('-u', k)], *home,
                                   runtime.codex, 'resume', '--no-alt-screen', '-C', runtime.cwd,
-                                  receipt['thread_id'], '--remote', runtime.app_server])
+                                  receipt['thread_id'], *connection])
             receipt.update(state='starting', uncertain_effect='tmux/new-window',
                            tab_name=old['window_name'] + '-refresh-' + receipt['fingerprint'][:12])
             save(path, receipt)
@@ -346,6 +348,10 @@ def advance_refresh(path, receipt, profile, effect_guard=None):
                     checks[name] = dict(state='ready' if ready else 'blocked',
                                         server=check['server'], tool=check['tool'],
                                         observed_content=result['content'], is_error=result.get('isError'))
+                elif check['kind']=='mcp_catalog':
+                    from .refresh_resources import catalog_ready
+                    ready=catalog_ready(check,request,receipt['thread_id'])
+                    checks[name]=dict(state='ready' if ready else 'blocked',server=check['server'],kind='mcp_catalog')
                 else:
                     checks[name] = dict(state='blocked', reason='resource_proof_unavailable')
             receipt.update(resources=checks, state='restoring_goal' if all(

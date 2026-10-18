@@ -116,6 +116,19 @@ class AgentRefreshTests(unittest.TestCase):
     def test_independent_client_refresh_waits_for_source_without_shared_reload(self):
         self.refresh_scenario(draft=False, original_status='active', client_idle=True)
 
+    def test_managed_default_resume_verifies_actual_mcp_catalog(self):
+        self.refresh_scenario(draft=False, original_status='active', client_idle=True, managed_default=True)
+
+    def test_new_behavior_with_stale_mcp_catalog_cannot_resume_goal(self):
+        self.refresh_scenario(draft=False, original_status='active', client_idle=True, managed_default=True,
+                              mcp_ready=True,stale_catalog=True)
+
+    def test_managed_default_refuses_missing_catalog_or_wrong_daemon_before_pause(self):
+        for guard in ('missing-catalog','wrong-endpoint'):
+            with self.subTest(guard=guard):
+                self.refresh_scenario(draft=False,original_status='active',client_idle=True,
+                                      managed_default=True,managed_guard=guard)
+
     def test_refresh_watcher_shutdown_fences_goal_and_pane_effects(self):
         for boundary in (3,5):
             with self.subTest(goal_read=boundary):
@@ -138,7 +151,7 @@ class AgentRefreshTests(unittest.TestCase):
     def test_handoff_preserves_unsubmitted_source_draft(self):
         self.refresh_scenario(draft=True,operation='handoff')
 
-    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False, original_status='paused', resume_readback_loss=False, client_idle=False, client_idle_stop=0):
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False, original_status='paused', resume_readback_loss=False, client_idle=False, client_idle_stop=0, managed_default=False, stale_catalog=False, managed_guard=''):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -192,6 +205,9 @@ class AgentRefreshTests(unittest.TestCase):
                         value={'goal':observed}
                     elif method == 'mcpServer/tool/call':
                         value = {'content':[{'type':'text','text':'new-version' if mcp_ready else 'old-version'}],'isError':False}
+                    elif method == 'mcpServerStatus/list':
+                        value=dict(data=[dict(name='fixture',serverInfo=dict(version='v1' if stale_catalog else 'v2'),
+                            tools={'version':dict(inputSchema=dict(properties={}))})])
                     elif method == 'thread/goal/set':
                         self.assertEqual(request['params']['threadId'],thread_id)
                         goal['status'] = request['params']['status']
@@ -218,6 +234,7 @@ class AgentRefreshTests(unittest.TestCase):
                     if loss == 'kill-pane':raise subprocess.TimeoutExpired(argv,1)
                 elif 'new-window' in argv:
                     effects.append(argv)
+                    if managed_default:self.assertNotIn('--remote',argv[-1])
                     tab['name']=argv[argv.index('-n')+1];tab['absent']=False
                     client=subprocess.Popen(['sh','-c','exec '+argv[-1]],stdin=slave,stdout=subprocess.PIPE)
                     self.assertEqual(client.stdout.readline(),b'ready\n');value='@158\t%158'
@@ -242,6 +259,11 @@ class AgentRefreshTests(unittest.TestCase):
                 registry['profiles']['worker'].update(refresh_mode='client_idle',scope_approval='operator approved exact client')
                 registry['callers']={thread_id:['worker']}
                 profiles.write_text(json.dumps(registry));profiles.chmod(0o600)
+            if managed_default:
+                registry=json.loads(profiles.read_text());profile=registry['profiles']['worker']
+                profile.update(client_connection='managed_default',codex_home=tmp)
+                profile['resources']['catalog']=dict(kind='mcp_catalog',server='fixture',version='v2',tools={'version':[]})
+                profiles.write_text(json.dumps(registry))
             if budget:
                 registry=json.loads(profiles.read_text())
                 registry['continuations']={thread_id:dict(objective='Finish fixture',approval='operator fixture',
@@ -282,11 +304,12 @@ class AgentRefreshTests(unittest.TestCase):
                 argv[argv.index('refresh')]='handoff';index=argv.index('--resource');del argv[index:index+2]
                 argv+=['--mode','new-tab']
             if client_idle:argv+=['--caller-thread-id',thread_id]
+            if managed_default and managed_guard!='missing-catalog':argv+=['--resource','catalog']
             try:
                 with unix_serve(handler,str(endpoint)) as server:
                     worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
                     try:
-                        with patch('codex_wake.goal_supervision._heartbeat',return_value=dict(fresh=True)),patch('codex_wake.goal_supervision.show',return_value=dict(state='armed',stop_latched=False,
+                        with patch('codex_wake.shared_app_server.locate_shared_endpoint',return_value='unix:///wrong.sock' if managed_guard=='wrong-endpoint' else 'unix://'+str(endpoint)),patch('codex_wake.goal_supervision._heartbeat',return_value=dict(fresh=True)),patch('codex_wake.goal_supervision.show',return_value=dict(state='armed',stop_latched=False,
                                 controller=dict(fresh=True),accounting=dict(state='qualified'),used_tokens=50,
                                 token_limit=1000,deadline=10000)), patch('subprocess.run',side_effect=command), patch(
                                 'codex_wake.native_clock.snapshot',side_effect=lambda: {'utc':{'upper':
@@ -325,6 +348,13 @@ class AgentRefreshTests(unittest.TestCase):
                             if client_idle:
                                 from codex_wake.shared_refresh import poll
                                 queued=StringIO()
+                                if managed_guard:
+                                    with redirect_stdout(queued):self.assertEqual(run(argv),2)
+                                    self.assertIn('managed',json.loads(queued.getvalue())['error']['message'])
+                                    self.assertEqual(effects,[])
+                                    self.assertNotIn('thread/goal/set',methods)
+                                    self.assertEqual(goal['status'],'active')
+                                    return
                                 with redirect_stdout(queued):self.assertEqual(run(argv),0)
                                 self.assertEqual(json.loads(queued.getvalue())['state'],'queued')
                                 self.assertEqual(effects,[])
@@ -341,7 +371,7 @@ class AgentRefreshTests(unittest.TestCase):
                                     self.assertEqual(methods.count('thread/goal/set'),1)
                                     return
                             output=StringIO()
-                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
+                            with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or stale_catalog or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
                             receipt=json.loads(output.getvalue())
                             if budget and session_limit<=1001:
                                 self.assertEqual(receipt['state'],'blocked')
@@ -372,10 +402,11 @@ class AgentRefreshTests(unittest.TestCase):
                                 self.assertEqual(receipt['state'],'blocked')
                                 self.assertEqual(receipt['reason'],'goal_changed_during_refresh')
                                 self.assertEqual(receipt['goal_before'],dict(goal,status='paused') if original_status=='active' else goal)
-                            elif stale_mcp:
+                            elif stale_mcp or stale_catalog:
                                 self.assertEqual(receipt['state'],'blocked')
                                 self.assertNotEqual(client.pid,original_pid)
-                                self.assertEqual(receipt['resources']['updated-skill']['observed_content'],
+                                if stale_catalog:self.assertEqual(receipt['resources']['catalog']['state'],'blocked')
+                                else:self.assertEqual(receipt['resources']['updated-skill']['observed_content'],
                                     [{'type':'text','text':'old-version'}])
                                 self.assertEqual(methods.count('mcpServer/tool/call'),1)
                                 self.assertEqual(receipt['goal_after'],goal)
@@ -418,7 +449,7 @@ class AgentRefreshTests(unittest.TestCase):
                             self.assertFalse(any(x in methods for x in ('thread/start','turn/start')))
                             self.assertNotIn('config/mcpServer/reload',methods)
                             self.assertEqual(methods.count('thread/goal/set'),
-                                (1 if stale_mcp else 2) if original_status=='active' else 0)
+                                (1 if stale_mcp or stale_catalog else 2) if original_status=='active' else 0)
                     finally:server.shutdown();worker.join(timeout=2)
             finally:
                 if client_idle_stop:

@@ -6,7 +6,7 @@ Branch: fix/289-refresh-pause-restore. Base: 9c245a5. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 10; targeted pause/quit/resume refresh and campaign-stop separation.
+Plan version: 11; targeted pause/quit/resume refresh and campaign-stop separation.
 
 ## Current State
 
@@ -40,6 +40,13 @@ were contaminated by three unknown host Wake records, fixed by isolated fixture
 XDG configuration without weakening guards. Source review also identified and
 repaired a watcher-shutdown fence; final frozen validation remains pending.
 Known-state enrollment is now corrected with a red-five-state regression and explicit preservation of old stop latches. Existing live stop reconciliation is still incomplete.
+Managed-default client replacement now follows the successful actual host resume path
+without `--remote`, with pinned endpoint/peer-generation guards. Mandatory native MCP
+catalog checks verify exact version and schema before goal restoration.76focused
+tests pass; managed-default installed acceptance remains open. The normal Codex
+default launch is not an atomic existing-daemon-only primitive: if the daemon dies
+between guard and attachment, Codex may bootstrap it; no deliberate restart or
+restart fallback is implemented, and changed identity prevents further effects.
 Next packet: freeze watcher correction, required CI, exact-source installed proof,
 then deliver and verify live adoption without resetting allowance or stop history.
 

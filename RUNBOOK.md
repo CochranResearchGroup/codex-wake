@@ -7379,3 +7379,18 @@ Public registration regression fails for all five known inactive statuses, then 
 ## Turn366 | 2026-10-18 UTC | Pause at admission to close automatic-goal race
 
 client_idle admission now snapshots/acknowledges an active goal pause while its requesting turn may still run; only client replacement waits for idle. This prevents automatic goal continuation winning the idle window. Same intent never repeats admission effects. Public busy-source fixture asserts immediate paused state; final62focused PASS18.759s. Shutdown tests inject stop after admission pause before pane close and before activation; no later mutations. Spec bounded recheck finds no critical regression. Required CI39160284577 passes both matrices for5474c72 before this final ordering change; final head will rerun required gates. Exact-generation false-stop recovery proposal is prepared privately under rollout-backups/issue289-0181, not applied; preserves all counters/history/deadline.
+
+
+## Turn367 | 2026-10-18 UTC | Managed default and actual MCP catalog gate
+
+Successful host quit/resume used the managed default connection, whereas the old
+replacement path pinned --remote. Added explicit managed_default profile mode,
+read-only endpoint/Unix peer generation guards, and mandatory selected actual MCP
+catalog version/schema proof before restoration. Dynamic toy behavior alone is
+not catalog restart proof.76focused tests PASS19.172s; compile/policy wiring/diff
+checks pass. Standards bounded review finds no concrete critical defect. Spec
+review flags the native launch race: Codex could bootstrap if its daemon dies
+after the identity guard; no atomic existing-only native primitive is established.
+No deliberate shared restart/fallback is added. Required CI39160812086 passes
+both matrices for preceding a3b22e5; this delta needs fresh CI. Production and
+false-stop ledger remain unchanged.

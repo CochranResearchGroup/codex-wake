@@ -9,6 +9,17 @@ from codex_wake.refresh_goal import pause, restore, settle_ui
 
 
 class RefreshGoalTests(unittest.TestCase):
+    def test_shutdown_during_managed_binding_read_still_fences_next_effect(self):
+        from codex_wake import shared_refresh
+        from codex_wake.records import WakeError
+        binding=dict(pid=123)
+        def observed(profile):
+            shared_refresh._stopping=True
+            return binding
+        with patch.object(shared_refresh,'_stopping',False),patch.object(shared_refresh,'_managed_binding',side_effect=observed):
+            with self.assertRaises(WakeError):
+                shared_refresh._client_effect_guard(dict(profile=dict(client_connection='managed_default'),managed_client_binding=binding))
+
     def test_resource_stop_after_operational_pause_prevents_activation(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'receipt.json'
