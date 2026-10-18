@@ -1,0 +1,52 @@
+{
+  "reference_time": "2026-10-18T02:11:08.122400+00:00",
+  "version": "0.17.2",
+  "source_commit": "cdb499e2aca5a9bf7169cbe0e69009b9fb8bcbb8",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.17.2-cdb499e",
+  "release_assets": {
+    "codex_wake-0.17.2-py3-none-any.whl": "f5617550b8c6719c212e228a909aefe810539960a7c8b8b16cd550061ecd8397",
+    "codex_wake-0.17.2.tar.gz": "d877f555dd89199744e61d1bdc0f4fe8400e05c85e13a00ead3e182fadc74a5c"
+  },
+  "release_download_hash_parity": true,
+  "entrypoints": {
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.17.2-cdb499e/bin/codex-wake-github-webhook",
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.17.2-cdb499e/bin/codex-wake",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.17.2-cdb499e/bin/codex-wake-mcp",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.17.2-cdb499e/bin/codex-wake-hook",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.17.2-cdb499e/bin/codex-waked"
+  },
+  "whole_skill_directories": "byte-identical to exact-release source in both roots; no skill change since0.17.1",
+  "refresh_controller": {
+    "active": true,
+    "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+    "generation": "f5026e4abfd0495ca153217c5a1b261c",
+    "identity": {
+      "boot_id": "25c7e692-175a-4375-ac75-306f6f00c3d5",
+      "start_time_ticks": 34709677
+    },
+    "interval": 1.0,
+    "observed_boottime": 347124.374088951,
+    "pid": 20264,
+    "fresh": true,
+    "age_seconds": 0.1464954210096039
+  },
+  "preserved_resource_watcher_pid": 42551,
+  "preserved_supervisor_pid": 60043,
+  "terminal_receipt_sha256_unchanged": "714e0504d0e2c5086422be1bff15683490644acd0f0e8705a8d133b4f86f5fe4",
+  "terminal_state": "expired",
+  "reload_attempted": false,
+  "new_refresh_intents": 0,
+  "actual_source_cached_tools": 25,
+  "goal_limit_tools_in_actual_cached_catalog": false,
+  "source_goal": {
+    "status": "complete",
+    "tokensUsed": 1668856,
+    "timeUsedSeconds": 7567,
+    "createdAt": 1792179701,
+    "updatedAt": 1792189697
+  },
+  "native_goal_writes": 0,
+  "resource_counter_resets": 0,
+  "remaining_gate": "Production refresh not performed. New intent/fixed expiry requires explicit user approval plus shared idle condition.",
+  "qualification": "Installed11publicrefreshchecksPASS8.839s;110sourceparity/control27toolsPASS; private-bus smoke first clock_anomaly failure retained, one fresh diagnostic recheckPASS5.920s (flaky local clock-dependent qualification); hosted3.11/3.12 full1362tests eachPASS1skip."
+}

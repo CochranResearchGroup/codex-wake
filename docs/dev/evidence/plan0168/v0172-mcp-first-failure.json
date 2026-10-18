@@ -1,0 +1,9 @@
+{
+  "stage": "installed private-bus MCP smoke",
+  "tool": "wake_messages_reply",
+  "error_code": "clock_anomaly",
+  "message": "clock continuity is uncertain; no effect authorized",
+  "reconciliation_required": false,
+  "source": "initial tool output retained in session",
+  "disposition": "Clock guard refused isolated fixture effect; no product code changed. One fresh private-fixture diagnostic recheck permitted; first failure retained."
+}

@@ -7075,3 +7075,16 @@ RPC-timeout regression reproduces premature expiry before correction. Minimal
 fix preserves observation failures until the original deadline;11checks pass.
 Historical receipt stays terminal. v0.17.2 source repair is on
 fix/shared-refresh-rpc-timeout; no production retry or deadline extension.
+
+## Turn344 | 2026-10-18 UTC | Timeout patch delivered without production retry
+
+CI39088839465 passes1362tests each3.11/3.12; PR285 mergedcdb499e. Exact-main
+v0.17.2 release download hashes match; installed110sources/11public refresh
+checks/27tool controls pass. Mailbox smoke first clock anomaly retained; one
+fresh isolated recheckPASS, local clock-dependent qualification remains flaky.
+Five stable commands and shared-refresh servicePID20264 select patch; both
+whole skill dirs already match. Goal watcher42551 and supervisor60043 preserved.
+Fresh standalone MCP sees27tools and version0.17.2 scope; actual source cache
+remains25tools. Original terminal refresh receipt hash and complete goal/counters
+unchanged. No refresh retry/new expiry/reload; Plan0168/issue282 OPEN awaiting
+explicit new-expiry authority and idle window. v0172-delivery.json owns receipts.
