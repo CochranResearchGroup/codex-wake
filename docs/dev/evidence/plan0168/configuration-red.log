@@ -1,0 +1,13 @@
+======================================================================
+FAIL: test_refresh_configuration_does_not_require_or_create_an_objective_allocation (test_shared_refresh.SharedRefreshTests.test_refresh_configuration_does_not_require_or_create_an_objective_allocation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 32, in test_refresh_configuration_does_not_require_or_create_an_objective_allocation
+    self.assertEqual(code, 0, output.getvalue())
+AssertionError: 2 != 0 : {"error": {"code": "configuration_unavailable", "message": "lifecycle configuration or selected instructions unavailable; no substitution permitted"}}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.096s
+
+FAILED (failures=1)

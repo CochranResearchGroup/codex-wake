@@ -69,3 +69,31 @@ journal separate from legacy wake-tool roots. Existing MCP public test augmented
 for both scopes: red unknown flag; first green run exposed fixture caller missing
 on the legacy probe; corrected fixture then3testsPASS. Legacy fallback preserved.
 This checkpoint does not establish operational refresh or native MCP readiness.
+
+## Approved shared scope and frozen implementation | 2026-10-18 UTC
+
+User explicitly answered yes to enabling shared MCP reload after an all-idle
+check. New refresh_mode shared_mcp_idle is a host-only, refresh-only profile.
+It queues during the caller's active turn; an independent sessions refresh-watch
+controller performs complete bounded inventory, checks all loaded conversations
+idle again after goal snapshots, persists intent then calls the single native
+reload. No TUI/client replacement, goal/turn mutation, budget allocation or reset.
+A fixed expiry uses trusted initial UTC and same-boot CLOCK_BOOTTIME. Lost reload
+responses reconcile only by read-only observation; the effect is not blindly
+replayed. All observed native goals must preserve authority and nondecreasing
+counters. Native skill catalog/hash and actual read-only MCP behavior must match
+selected host proofs before completion. Shared reload has no atomic idle CAS;
+racing starts after the final observation remain an explicit native limitation.
+
+Controller runs independently of the resource enforcer so large shared reloads
+cannot block enforcement polling. Controller shutdown fences later requests.
+Legacy client refresh remains unchanged; optional lifecycle-root isolates journals.
+Public CLI tests cover active source, active peer, racing peer, lost response,
+stale resource expiry, counter reset rejection and controller shutdown. Existing
+legacy tests require the documented private XDG/empty Stable Time environment;
+initial inherited-host failures remain retained and isolated selection passes.
+
+Primary owns source. Worker /root/host_execution_adapter owns only the two-thread
+native acceptance script (4855bdf,1b6acee). One independent bounded new-source review
+is assigned to /root/goal_supervision_review after the source freeze. No broad
+historical feature review is reopened. Deployment still follows exact-main CI.

@@ -37,7 +37,7 @@ SPECS = {
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
          "mode": {"enum": ["new-tab", "same-tab"]}, "expires_at": TEXT, "rollback": {"type": "boolean"}},
         ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "mode", "expires_at"], False),
-    "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources in the exact source thread. Requires its preserved checkpoint; unsafe stop or stale resource proof holds without fresh-thread or shared-daemon fallback.",
+    "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources while preserving the source conversation. A shared_mcp_idle profile queues an independent shared-server MCP reload after all loaded conversations are observed idle; explicit host scope approval is required. Reuse the same intent to read completion. Preserved checkpoint, fixed expiry and actual resource proof are required; queued is not completed. Legacy profiles retain guarded client replacement; no fresh-thread or shared-daemon restart fallback.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
          "rollback": {"type": "boolean"},

@@ -1,0 +1,15 @@
+======================================================================
+FAIL: test_active_self_request_waits_then_reloads_once_with_same_goals (test_shared_refresh.SharedRefreshTests.test_active_self_request_waits_then_reloads_once_with_same_goals)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_shared_refresh.py", line 118, in test_active_self_request_waits_then_reloads_once_with_same_goals
+    self.assertEqual(receipt['state'],'completed')
+AssertionError: 'queued' != 'completed'
+- queued
++ completed
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 6.201s
+
+FAILED (failures=1)

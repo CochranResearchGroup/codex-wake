@@ -2769,6 +2769,10 @@ def run(argv: list[str] | None = None) -> int:
         if args.sessions_command == 'handoff':
             from .agent_handoff import handoff_command
             return handoff_command(args, root)
+        if args.sessions_command == 'refresh-watch':
+            from .shared_refresh import watch
+            watch(root, args.interval)
+            return 0
         if args.sessions_command == 'refresh':
             from .agent_refresh import refresh_command
             return refresh_command(args, root)
