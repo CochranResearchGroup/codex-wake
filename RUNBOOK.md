@@ -7098,3 +7098,17 @@ integer-only input defects; backend already accepts fractions. Public regression
 red→schemafix→CLIred→bothfixesgreen;14focused checksPASS. Preparing v0.17.3
 without production policy/enrollment/goal/counter changes. New-session bootstrap
 is a separate authorization/accounting workflow, not implicit tab/CWD inheritance.
+
+## Turn346 | 2026-10-18 UTC | Fractional reserve fix delivered
+
+PR287 mergedfc4524d after run39090662722 passes1363tests each3.11/3.12.
+v0.17.3 exact-main release assets match download; installed110sources/14focused
+checks5.684s/27-tool controls pass. Original17.5percent payload reaches genuine
+missinggrant refusal in private full-policy replay, creating no enrollment.
+Five stable commands, separate refresh monitor10896 and both whole skill dirs
+updated;10relative links valid. Resource watcher42551/supervisor60043 preserved.
+Host goal-policy and historical expiredrefresh receipt hashes unchanged. No
+production grant/enrollment/goalresume/counterreset/sharedreload/newexpiry.
+Newcaller provisioning remains a separate real setup boundary; Plan0168/issue282
+OPEN for productionproof and safe session bootstrap. Runtime evidence under
+caller-admission/v0173-delivery.json.

@@ -1,0 +1,23 @@
+{
+  "reference_time": "2026-10-18T02:41:24.297789+00:00",
+  "tools": 27,
+  "checkpoint_percentage_schema": "number",
+  "original_arguments": {
+    "caller_thread_id": "01a14cc0-1379-78a3-8f23-8446ea24d1ca",
+    "token_limit": 2000000,
+    "time_limit_seconds": 21600,
+    "checkpoint_token_percent": 17.5,
+    "checkpoint_seconds": 900
+  },
+  "result": {
+    "error": {
+      "code": "goal_limits_unavailable",
+      "reason": "ValueError",
+      "message": "host caller grant unavailable or malformed"
+    },
+    "state": "held",
+    "armed": false
+  },
+  "scope": "Original payload replay against copied host policy and private root; no production enrollment/native effects",
+  "enrollment_receipts_created": 0
+}

@@ -6,16 +6,16 @@ lanes:
     objective: Make shipped same-conversation self-refresh operational
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/282]
     plan: docs/dev/plans/0168-2026-10-18-self-refresh-operational.md
-    plan_ref: fix/fractional-checkpoint-reserve
-    branch: fix/fractional-checkpoint-reserve
+    plan_ref: docs/fractional-reserve-delivery
+    branch: docs/fractional-reserve-delivery
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 8318923
+    checkpoint: fc4524d
     dependencies: [P167]
     overlaps: []
     updated_at: 2026-10-18
-    disposition: New-caller refusal diagnosed; fractional reserve input patch under validation; no new grant or refresh authority
+    disposition: v0.17.3 installed; missing newcaller grant and production refresh remain unmodified boundaries
   - id: P167
     owner: primary / ecochran76
     objective: Discover and supervise persistent resource limits in the existing dev session
