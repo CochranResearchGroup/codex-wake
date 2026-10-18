@@ -34,7 +34,11 @@ verify qualified accounting and a fresh independent watcher in the returned
 state. `wake_goal_limits_show` reconciles status. A configured policy alone is
 insufficient. Limits persist across replacement goals and resume; only an
 explicit user reset recorded by the host can reset counters/allocation. Missing
-setup, unknown accounting and unverified stops mean hold and report the reason.
+setup, unknown accounting and unverified stops hold autonomous campaign work;
+report the reason and next action. Operator replies, status checks, bounded setup
+diagnosis and checkpoint writing remain available. A halted goal is not a disabled
+chat. New enrollments count fresh input plus output by default; cache-inclusive
+accounting requires explicit selection. Re-enrollment preserves its existing basis.
 Token stops are sampled, with unknown maximum overshoot.
 
 For explicit memory, swap, CPU or task controls, use the separate

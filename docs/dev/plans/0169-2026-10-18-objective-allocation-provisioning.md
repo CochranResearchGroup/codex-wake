@@ -1,12 +1,51 @@
 # Plan0169 — Automatic caller provisioning with allocation continuity
 
-State: PLANNED. Owner: primary / ecochran76.
-Branch: docs/goal-allocation-provisioning. Base: 89e3eb8. Target: origin/main.
+State: OPEN
+Owner: primary / ecochran76.
+Branch: fix/289-allocation-campaign-control. Base: 89e3eb8. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
-Tracker state: READY (ready-for-agent). Implementation: not started.
+Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
+Plan version: 2; includes operator clarification on campaign-scoped graceful shutdown.
 
 ## Current State
+
+2026-10-18 v2: the user explicitly requires graceful campaign winddown, followed
+by goal pause and bounded interruption after the checkpoint grace/reserve, while
+the halted conversation remains idle and able to answer the operator. The old
+controller interrupts every later active turn, including operator replies after
+pause. Public regression reproduced that failure. Current caller enrollment also
+reproduces missing host grant (`held`, `armed:false`); no host policy was changed.
+
+Integration checkout: `/home/ecochran76/workspace.local/codex-wake-allocation-control`,
+base `dbd37ca09f9a13f4ae54b98f8f8ea4b0888a86c5` (spec over main89e3eb8).
+Owner: primary. Serial path: control regression -> bounded grace -> native
+provisioning capability -> authority/accounting -> integrated validation/review.
+One read-only independent native capability investigator is allowed by policy0021;
+its runtime handle is `/root/native_authority_capability`. No other workers.
+
+### Execution ledger
+
+- Campaign stop ownership: running; red public controller test caught interruption
+  of `operator-reply` after verified pause. Local fix scopes interruptions to
+  persisted stop turns; 11 existing/new controller tests now pass.
+- Graceful failure winddown: pending; preserve hard deadlines, queue a checkpoint,
+  pause campaign continuation and interrupt only observed campaign turns at grace.
+- Provisioning trust capability: running; no automatic grant effects before proof.
+- Allocation continuity / accounting: pending behind trusted admission; long-history
+  accounting failure is separate from grant absence and remains unqualified.
+- Public MCP / installed qualification / review: pending.
+
+Bounds: primary stop/checkpoint before2Mtokens or6h from native goal creation
+1792332310; hard deadline1792353910 (2026-10-18T20:05:10Z). Requested reserve10%
+and900seconds; MCP enrollment failed, so no armed external enforcement claim.
+Reconcile `get_goal` after material packets and retain a bounded read-only/source
+repair loop; do not mint a production grant to avoid that error. Max2 attempts
+per unresolved probe,1 broad review plus1 remediation, checkpoint at each material
+transition. Current discovery bound:6 focused graph calls and35KiB focused source
+per unresolved question before reassessment. Initial source discovery exceeded
+that source target through capped tool output; subsequent reads are narrowed.
+
 
 v0.17.3 corrects fractional checkpoint percentages. Existing MCP goal-limit
 admission requires an exact caller grant; a new conversation does not inherit
@@ -48,7 +87,7 @@ hold and recovery action; repeated calls never create another allowance.
 8. As an agent, I want to distinguish missing authority, not enrolled, unknown accounting and watcher failure.
 9. As an operator, I want a caller's claim checked against trusted native identity and user request evidence.
 10. As an operator, I want quoted instructions, peer messages and checkpoints to be insufficient to mint resource authority.
-11. As a user, I want cached input and attributable delegated/retried work charged once to the applicable allocation.
+11. As a user, I want fresh input plus output and attributable delegated/retried work charged once; cached input is excluded unless explicitly selected.
 12. As an agent, I want replay, restart, goal replacement and context changes to preserve the same allocation.
 13. As an operator, I want concurrent requests and successor races unable to multiply the allowance.
 14. As an agent, I want fractional checkpoint reserves such as17.5percent to remain supported.
@@ -84,8 +123,9 @@ hold and recovery action; repeated calls never create another allowance.
   counter/time-origin reset must be explicit in that user instruction; an
   ambiguous increase/renewal/reset holds for clarification. Preserve previous
   generations and cumulative history; never overwrite old receipts as a reset.
-- Charge attributable responses once across original and successor sessions,
-  including cached input and delegated work. Missing histories, uncertain final
+- Charge attributable fresh input plus output once across original and successor
+  sessions, excluding cached input by default and including delegated work.
+  Cache-inclusive accounting requires explicit selection; persist that basis. Missing histories, uncertain final
   accounting or unverifiable lineage hold admission rather than assigning zero
   prior spend. Bound scans and retain authoritative accounting anchors.
 - Persist admission idempotently and fence concurrent participant/renewal updates
@@ -166,6 +206,24 @@ Owner: primary. Critical path is serial: evidence qualification → authority le
 fixture preparation can be split later only when repository rules permit it;
 no worker or parallel runtime authority is granted here.
 
+## Additional v2 acceptance: campaign control
+
+- A reserve request steers only the observed campaign turn to checkpoint; consumes
+  the original allowance and never launches another model turn.
+- Missing accounting/controller qualification holds product continuation but permits
+  bounded setup diagnosis, checkpoint writing and operator replies. Installed agent
+  instructions must distinguish these from resuming autonomous campaign work.
+- A loss of qualification with an active campaign starts one persisted bounded
+  winddown window, capped by the original time deadline. Repeated polls, process
+  reconstruction and enrollment cannot restart it. Exact grace is exposed in status.
+- At grace expiry or allocation exhaustion, pause the campaign and interrupt only
+  its captured exact turns. Once paused, operator reply turns are left alone,
+  including after controller reconstruction, boot mismatch or revoked grants.
+- Re-activating the campaign without renewed authority remains held and paused;
+  acknowledging an operator message does not reset or resume the allowance.
+- Preserve uncertain native effects and verified stop ownership; no broad session,
+  shared server or descendant process termination.
+
 ## Out of Scope
 
 Shared Codex restart/reload, arbitrary caller-selected host paths, tab/CWD-based
@@ -190,3 +248,141 @@ continuation holds; cumulative usage/deadline preserved without explicit renewal
 renewal limited to its named objective/continuation. This product contract does
 not establish that native APIs already expose the needed trusted evidence.
 The old Plan0168 production refresh remains expired with no new retry authority.
+
+
+## Checkpoint v2 — resource stop, 2026-10-18
+
+State transition: active -> paused at explicit user token stop. Source changes
+are uncommitted on fix/289-allocation-campaign-control (base dbd37ca). User's
+2M-token limit was exceeded: repaired read-only `observe_usage` qualifies
+6,040,982 cached-inclusive tokens for goal1792332310. Native `get_goal` earlier
+reported156,997 tokens; that display was not a substitute for the accounting
+contract. Primary checked the qualified cumulative total too late. No fresh
+allocation or counter reset is authorized. Stop source work; retain chat for
+operator replies. No release/install or native production changes performed.
+
+Acceptance evidence: 29 focused tests pass in3.524s (goal_limits_mcp,
+goal_supervision,goal_usage); original operator-reply failure and accounting
+payload failure were observed red before green. Source old-session accounting
+now qualifies1,034,781 tokens in0.226s instead of usage_history_byte_limit; this
+was read-only and does not repair its production receipt. Integration,
+installed/native acceptance, broad presubmit and review remain pending.
+
+Changes: persisted campaign stop-turn ownership, recovery using legacy effect
+turns, operator replies preserved after pause, accounting-loss winddown bounded
+by60seconds/configured reserve/original deadline, repeat enrollment cannot renew
+grace, explicit campaign resume is paused again, streaming accounting retains
+usage events separately from bounded scanned payload volume, missing-grant MCP
+error reports exact no-effect host prerequisites and permits operator interaction.
+Installed skill text is unchanged and must be updated to distinguish campaign
+holds from operator replies before delivery. No automatic provisioning effect
+has been implemented. Main and specification checkouts remain untouched.
+
+Read-only investigator /root/native_authority_capability established that stock
+shared MCP has no qualified authenticated caller/operator request bridge.
+Native dynamic-tool requests include threadId/turnId/callId separately from model
+arguments; persisted userMessage lacks authenticated origin and injection APIs
+exist. NEW UNQUALIFIED LEAD: installed0.163 hooks expose userPromptSubmit and
+preToolUse handlers, including command/MCP handler variants and trusted metadata.
+UserPromptSubmit can also fire for automated Wake submissions. Next investigation
+must qualify actual provenance, not assume hook event name proves human origin.
+Generated schemas: /tmp/issue289-native-schemas. Investigator asked to stop at
+this checkpoint. Do not discard this hooks lead or claim provisioning impossible.
+
+Progress classification: outcome_progress for source controller/accounting repairs;
+resource compliance regression for checking cached-inclusive spend too late.
+Next action: operator disposition of exhausted allocation, then complete trusted
+hook bridge qualification, remaining admission/continuity packets, skill updates,
+installed public qualification and bounded review. No automatic goal resume.
+
+
+## Checkpoint v3 — user corrected accounting and resumed
+
+The user explicitly clarified that cache-inclusive accounting is the wrong
+default and continued the goal. The prior v2 exhaustion conclusion is withdrawn:
+6,040,982 was a cache-inclusive diagnostic total, not the requested fresh-token
+allowance. No fresh allocation or time-origin reset is implied. Source read-only
+qualified accounting reports230,812 fresh tokens at2026-10-18T14:31:32Z, original
+time deadline2026-10-18T20:05:10Z. Native goal status activation remains host-owned;
+this agent has no update_goal resume operation. The user sent explicit active
+status. Continue under the unchanged2M fresh-token /6h limits.
+
+New enrollment defaults to fresh tokens; cache-inclusive is explicit opt-in.
+Persist basis on the supervision receipt; preserve legacy basis unless explicitly
+changed. A qualified basis change re-evaluates the same original history and
+retains prior accounting, original deadline, generation and stop latch. Never
+silently compare counters in different units or infer a reset/resume.
+
+Validation:30 focused controller/accounting/MCP tests pass in3.969s. The fresh
+accounting test failed before the source change. Additional public packaged
+qualification and one bounded Standards/Spec review remain pending.
+
+Native investigator completed two bounded reads; source-backed capability report
+is `/tmp/issue289-native-schemas/authority-capability-report.json`. Hooks provide
+native caller/tool IDs and updatedInput, but UserPromptSubmit lacks authenticated
+operator origin and also fires on automated Wake submissions. Goal-set origin is
+caller supplied and absent from goal readback. Automatic grant creation remains
+blocked on an authenticated operator-ingress receipt; no grant effects attempted.
+Next safe units: packaged shutdown/accounting qualification, skill correction,
+bounded review and recoverable source checkpoint. Wider289 remains incomplete.
+
+
+## Pending authorization-contract decision
+
+The primary asked the operator whether to allow private host-delegated enrollment
+within fixed resource ceilings, instead of requiring per-session grants backed
+by authenticated prompt-origin evidence unavailable on stock0.163. No answer has
+been assumed. Current ADR0002 operator-origin requirement remains in force.
+
+Concrete proposed boundary: an operator-owned policy delegates enrollment into
+one named objective allocation with fixed limits/deadline and host endpoint/home;
+a trusted native hook binds the actual caller/tool invocation to the request.
+It permits participant enrollment, not minting another allowance or extending the
+original one. Successors use the allocation reference; ambiguous links hold.
+Private host policy is the authority, not unsigned prompt text. Other objectives
+and old grants are unchanged. The reviewable effect would be a caller enrollment
+receipt under that delegated allocation; no production mutation before this
+contract change is accepted and the public negative cases pass.
+
+Until that decision, continue only the independent reviewed control/accounting
+repair. One Standards/Spec review (/root/control_repair_review) found no candidates
+in that bounded surface. Two isolated installed MCP/controller scenarios passed
+with fresh accounting and surviving operator turns; test watchers exited0 and
+fresh /proc readback confirms both exact PIDs absent. Receipts are under
+`docs/dev/evidence/plan0169/`. Production installation remains unchanged.
+
+
+### Validation checkpoint v3a
+
+Public installed candidate: `/tmp/cw289-installed`, wheel SHA/source hashes bound
+in evidence/plan0169/installed-{fresh,grace}.json. Both scenarios PASS: an
+independent watcher observes checkpoint then pause/exact-turn interruption;
+operator reply remains active under repeated polling with paused goal. Fresh
+scenario includes5000cachedinput per response and charges40then110 fresh tokens.
+Accounting-loss scenario observes winding_down before stop; original deadline
+not extended. Both watchers exited0; fresh exact-PID census confirms absence.
+Production installation was not modified. The two initial script invocations
+against the old editable main environment failed (charged5040 at enrollment),
+which is retained red evidence; the qualification intentionally drops PYTHONPATH
+and must use the candidate's installed interpreter.
+
+Presubmit:1369 tests ran in127.152s;76 failures,4 errors,1 skipped.23 unchanged-main
+time/migration tests reproduce11 failures and3 errors. Full main baseline is now
+running to classify the entire failure set; no full-suite PASS claim. Policy
+wiring and compileall pass. Planning audit no longer flags0169; remaining0166,
+0167,0168 deterministic-state findings are untouched older metadata. The first
+unowned detached unittest launcher produced no result and its PID is absent;
+only owned exec-session92559 is the completed candidate presubmit evidence.
+Read-only current accounting at latest check312,644 fresh tokens, below2M.
+
+
+### Validated bounded repair checkpoint
+
+Full unchanged-main baseline completed1363tests/124.088s with the same76failures,
+4errors,1skip. All80 failure/error identifiers exactly match candidate1369tests;
+no new failed identifier. No full-suite pass or release gate waiver is claimed.
+Compact comparison is evidence/plan0169/presubmit-comparison.json. Six additional
+regressions and the isolated installed scenarios pass; source repair is reviewed
+and preserved, production remains unchanged. Native actual-client acceptance and
+self-provisioning remain open. Pending operator decision is unchanged and is not
+inferred from silence. No production resource policy or counters were modified.

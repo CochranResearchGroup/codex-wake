@@ -67,7 +67,8 @@ SPECS['wake_goal_limits_set'] = (
     'goal-limits', 'set',
     'When a user gives /goal resource limits, enroll this existing dev session before continuing work. '
     'An independent host watcher requests stop and checkpoint, then native goal pause and exact-turn interrupt. '
-    'Uses sampled cumulative tokens including cached input and delegated work; unknown accounting holds. '
+    'Uses sampled cumulative fresh input plus output tokens, excluding cached input by default, including delegated work. '
+    'Cache-inclusive accounting is explicit opt-in; unknown accounting holds campaign continuation, not operator replies. '
     'Default reserve is 5% tokens or 60 seconds inside the original caps. Inspect the returned state: '
     'configured limits alone are not armed enforcement. Limits and counters persist across replacement goals '
     'and resume; only an explicit user reset approved by the host allocation can reset them. '
@@ -76,7 +77,8 @@ SPECS['wake_goal_limits_set'] = (
     {'caller_thread_id': CALLER, 'token_limit': {'type': 'integer', 'minimum': 1},
      'time_limit_seconds': {'type': 'integer', 'minimum': 1},
      'checkpoint_token_percent': {'type': 'number', 'minimum': 0, 'maximum': 100},
-     'checkpoint_seconds': {'type': 'integer', 'minimum': 0}},
+     'checkpoint_seconds': {'type': 'integer', 'minimum': 0},
+     'token_accounting': {'type': 'string', 'enum': ['fresh', 'cache_inclusive']}},
     ['caller_thread_id', 'token_limit', 'time_limit_seconds'], False)
 SPECS['wake_goal_limits_show'] = (
     'goal-limits', 'show',

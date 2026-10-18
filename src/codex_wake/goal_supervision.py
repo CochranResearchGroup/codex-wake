@@ -62,6 +62,10 @@ def _name(thread):
     return hashlib.sha256(thread.encode()).hexdigest()
 
 
+class CallerGrantMissing(ValueError):
+    """The host policy has no authority for this caller; no effect was attempted."""
+
+
 def _load_grant(policy_path,thread):
     path=Path(policy_path).absolute();_private(path)
     if path!=path.resolve():raise ValueError('policy cannot traverse symlinks')
@@ -73,7 +77,10 @@ def _load_grant(policy_path,thread):
         return result
     policy=json.loads(path.read_text(),object_pairs_hook=unique)
     if type(policy.get('version')) is not int or policy.get('version')!=1:raise ValueError('unsupported goal limits policy')
-    grant=policy['callers'][thread]
+    callers=policy['callers']
+    if not isinstance(callers,dict):raise ValueError('host callers must be an object')
+    if thread not in callers:raise CallerGrantMissing('host caller grant unavailable or malformed')
+    grant=callers[thread]
     for key in ('max_tokens','max_seconds'):
         if type(grant[key]) is not int or grant[key]<=0:raise ValueError('invalid host allocation cap')
     if not isinstance(grant['allocation_id'],str) or not grant['allocation_id']:raise ValueError('allocation identity unavailable')
@@ -96,7 +103,7 @@ def _grant(policy_path,thread):
 
 def _public(receipt):
     return dict({key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')},
-        stop_scope='registered_native_session',descendant_stop_verified=False)
+        stop_scope='registered_goal_campaign',descendant_stop_verified=False)
 
 
 def _request(grant,method,params):
@@ -117,7 +124,7 @@ def _native(grant,thread):
 def _usage(receipt):
     from .goal_usage import observe_usage
     return observe_usage(receipt['grant']['codex_home'],receipt['thread_id'],receipt['goal_created_at'],
-        reset_anchor=receipt.get('reset_anchor'))
+        reset_anchor=receipt.get('reset_anchor'),token_accounting=receipt.get('token_accounting','cache_inclusive'))
 
 
 def _heartbeat(directory):
@@ -149,7 +156,7 @@ def show(root,policy_path,caller_thread_id):
 
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
-           checkpoint_token_percent=5,checkpoint_seconds=60):
+           checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None):
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id)
     for key,value,maximum in [('tokens',token_limit,grant['max_tokens']),('seconds',time_limit_seconds,grant['max_seconds'])]:
         if type(value) is not int or not 0<value<=maximum:raise ValueError('requested '+key+' exceed host allocation')
@@ -161,6 +168,10 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
         same=bool(old and old['allocation_id']==grant['allocation_id'])
+        previous_basis=old.get('token_accounting','cache_inclusive') if old else None
+        basis=token_accounting or (previous_basis if same else 'fresh')
+        if basis not in ('fresh','cache_inclusive'):raise ValueError('unsupported token accounting')
+        basis_changed=bool(same and previous_basis!=basis)
         if old and any(old['grant'][key]!=grant[key] for key in ('app_server','codex_home')):
             raise ValueError('cross-native session migration is unsupported')
         if same and (token_limit>old['token_limit'] or time_limit_seconds>old['time_limit_seconds']):
@@ -180,15 +191,21 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         receipt.update(grant=grant,policy_path=str(Path(policy_path).absolute()),token_limit=token_limit,
             time_limit_seconds=time_limit_seconds,checkpoint_token_percent=checkpoint_token_percent,
             checkpoint_seconds=checkpoint_seconds)
+        if basis_changed:
+            receipt.setdefault('accounting_basis_history',[]).append(dict(
+                token_accounting=previous_basis,used_tokens=old['used_tokens'],accounting=old.get('accounting')))
+        receipt['token_accounting']=basis
         receipt['deadline']=receipt['time_origin']+time_limit_seconds
         observation=_usage(receipt)
+        if basis_changed and observation.get('state')!='qualified':
+            raise ValueError('accounting basis change requires qualified original history')
         if old and not same:
             if observation.get('state')!='qualified' or not observation.get('anchor'):
                 raise ValueError('explicit reset requires qualified response history')
             receipt['reset_anchor']=observation['anchor']
             observation=_usage(receipt)
         if observation.get('state')=='qualified' and type(observation.get('used_tokens')) is int:
-            if observation['used_tokens']<receipt['used_tokens']:
+            if not basis_changed and observation['used_tokens']<receipt['used_tokens']:
                 receipt.update(state='held',reason='accounting_decreased',stop_latched=True)
             else:
                 receipt.update(used_tokens=observation['used_tokens'],accounting=observation,state='armed',reason=None)
@@ -227,6 +244,14 @@ def _stop(path,receipt,reason,goal=None,active=None):
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
     try:
         if active is None:goal,active=_native(receipt['grant'],receipt['thread_id'])
+        # Enforcement owns the campaign turn observed at stop, not every later
+        # operator turn in this conversation. Persist before native effects.
+        if 'stop_turns' not in receipt or (receipt.get('pause_observed') and goal and goal.get('status')=='active'):
+            legacy_turns = {effect.get('params', {}).get('turnId') or
+                effect.get('params', {}).get('expectedTurnId') for effect in receipt.get('effects', {}).values()
+                if effect.get('method') in ('turn/interrupt', 'turn/steer')}
+            receipt['stop_turns']=list(active) if goal and goal.get('status')=='active' else sorted(legacy_turns - {None})
+            _save(path,receipt)
         if receipt.get('pause_observed') and goal and goal.get('status')!='paused':
             # Observed paused -> active is a new enforcement event, even if a
             # previous interrupt was unverified. Retain the old effect ledger.
@@ -239,13 +264,55 @@ def _stop(path,receipt,reason,goal=None,active=None):
             _effect(path,receipt,'pause:'+str(goal['createdAt'])+':'+str(receipt.get('pause_epoch',0)),
                 'thread/goal/set',dict(threadId=thread,status='paused',origin='automatic'))
         for turn in active:
+            if turn not in receipt['stop_turns']:continue
             _effect(path,receipt,'interrupt:'+turn,'turn/interrupt',dict(threadId=thread,turnId=turn))
         final_goal,final_active=_native(receipt['grant'],thread)
-        proven=(not final_goal or final_goal.get('status')=='paused') and not final_active
+        proven=(not final_goal or final_goal.get('status')=='paused') and not set(final_active).intersection(receipt['stop_turns'])
         receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven,
             pause_observed=not final_goal or final_goal.get('status')=='paused')
     except Exception as exc:receipt['control_error']=type(exc).__name__
     _save(path,receipt)
+    return receipt
+
+
+def _wind_down(path, receipt, reason, goal, active, upper):
+    """Pause autonomous continuation, allow a bounded checkpoint, then stop work.
+
+    Qualification loss cannot authorize more product work. The reserve permits
+    only winddown, never extends the original deadline, and survives retries.
+    """
+    if 'winddown_deadline' not in receipt:
+        receipt['winddown_deadline'] = min(receipt['deadline'], upper + min(60, receipt['checkpoint_seconds']))
+        receipt['stop_turns'] = list(active) if goal and goal.get('status') == 'active' else []
+        receipt['winddown_reason'] = reason
+        _save(path, receipt)
+    owned = set(active).intersection(receipt['stop_turns'])
+    if upper >= receipt['winddown_deadline'] or not owned:
+        return _stop(path, receipt, reason, goal, active)
+    receipt.update(state='winding_down', reason=reason, stop_latched=True)
+    if not receipt.get('checkpoint'):
+        receipt['checkpoint'] = dict(state='queued', message=
+            'Campaign enforcement cannot qualify continuation. Stop product work and write a '
+            'restart-safe checkpoint within the remaining grace period. The goal is paused; '
+            'operator messages remain available. Do not reset or resume the allocation.')
+        _save(path, receipt)
+    if goal and goal.get('status') == 'active':
+        if receipt.get('pause_observed'):
+            receipt['pause_epoch'] = receipt.get('pause_epoch', 0) + 1
+            receipt['pause_observed'] = False
+            _save(path, receipt)
+        _effect(path, receipt, 'pause:' + str(goal['createdAt']) + ':' + str(receipt.get('pause_epoch', 0)),
+            'thread/goal/set', dict(threadId=receipt['thread_id'], status='paused', origin='automatic'))
+        observed, _ = _native(receipt['grant'], receipt['thread_id'])
+        receipt['pause_observed'] = not observed or observed.get('status') == 'paused'
+        _save(path, receipt)
+    if receipt['checkpoint']['state'] == 'queued':
+        turn = next(turn for turn in active if turn in owned)
+        delivered = _effect(path, receipt, 'checkpoint:' + turn, 'turn/steer',
+            dict(threadId=receipt['thread_id'], expectedTurnId=turn,
+                 input=[dict(type='text', text=receipt['checkpoint']['message'])]))
+        receipt['checkpoint']['state'] = 'acknowledged' if delivered else 'uncertain'
+    _save(path, receipt)
     return receipt
 
 
@@ -266,10 +333,12 @@ def poll(root):
                     results.append(_stop(path,receipt,'elapsed_time_invalid'));continue
                 upper=receipt['started_upper']+elapsed
                 goal,active=_native(grant,receipt['thread_id'])
+                if 'winddown_deadline' in receipt:
+                    results.append(_wind_down(path,receipt,receipt['winddown_reason'],goal,active,upper));continue
                 observation=_usage(receipt);receipt['accounting']=observation
                 used=observation.get('used_tokens')
                 if observation.get('state')!='qualified' or type(used) is not int or used<receipt['used_tokens']:
-                    results.append(_stop(path,receipt,'accounting_unknown',goal,active));continue
+                    results.append(_wind_down(path,receipt,'accounting_unknown',goal,active,upper));continue
                 receipt['used_tokens']=used;receipt['observed_boottime']=time.clock_gettime(time.CLOCK_BOOTTIME)
                 if used>=receipt['token_limit'] or upper>=receipt['deadline']:
                     results.append(_stop(path,receipt,'allocation_exhausted',goal,active));continue

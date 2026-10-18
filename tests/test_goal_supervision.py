@@ -37,7 +37,86 @@ class GoalSupervisionTests(unittest.TestCase):
                 self.assertEqual(sum(method=='thread/goal/set' for method,_ in native['calls']),2)
                 self.assertTrue(any(effect['state']=='uncertain' for effect in second['effects'].values()))
 
-    def fixture(self,directory):
+    def test_paused_campaign_allows_operator_reply_on_later_polls(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                enroll(root,policy,THREAD,40,120)
+                self.assertEqual(poll(root)[0]['state'],'stopped')
+                native['active']=['operator-reply']
+                poll(root)
+                poll(root)
+                self.assertEqual(native['goal']['status'],'paused')
+                self.assertEqual(native['active'],['operator-reply'])
+                self.assertNotIn(('turn/interrupt',dict(threadId=THREAD,turnId='operator-reply')),native['calls'])
+
+    def test_unknown_accounting_pauses_campaign_but_allows_bounded_checkpoint_grace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            with log.open('a') as stream:stream.write('{"type":')
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                receipt=enroll(root,policy,THREAD,100,120,checkpoint_seconds=30)
+                first=poll(root)[0]
+                self.assertEqual(first['state'],'winding_down')
+                self.assertEqual(native['goal']['status'],'paused')
+                self.assertEqual(native['active'],['work'])
+                self.assertEqual(first['checkpoint']['state'],'acknowledged')
+                limit=first['winddown_deadline']
+                again=poll(root)[0]
+                self.assertEqual(again['winddown_deadline'],limit)
+                self.assertEqual(sum(m=='turn/steer' for m,_ in native['calls']),1)
+                with patch('codex_wake.goal_supervision.time.clock_gettime',return_value=receipt['started_boottime']+31):
+                    final=poll(root)[0]
+                self.assertEqual(final['state'],'stopped',final)
+                native['active']=['operator-reply']
+                poll(root)
+                self.assertEqual(native['active'],['operator-reply'])
+
+    def test_winddown_grace_never_extends_original_deadline_or_restarts_on_enrollment(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            with log.open('a') as stream:stream.write('{"type":')
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                receipt=enroll(root,policy,THREAD,100,20,checkpoint_seconds=60)
+                first=poll(root)[0]
+                self.assertEqual(first['winddown_deadline'],NOW+20)
+                repeated=enroll(root,policy,THREAD,100,20,checkpoint_seconds=60)
+                self.assertEqual(repeated['winddown_deadline'],first['winddown_deadline'])
+                with patch('codex_wake.goal_supervision.time.clock_gettime',return_value=receipt['started_boottime']+21):
+                    self.assertEqual(poll(root)[0]['state'],'stopped')
+                self.assertEqual(native['active'],[])
+
+    def test_explicit_resume_during_winddown_is_paused_again_without_renewing_grace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            with log.open('a') as stream:stream.write('{"type":')
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                enroll(root,policy,THREAD,100,120,checkpoint_seconds=30)
+                first=poll(root)[0]
+                native['goal']['status']='active'
+                second=poll(root)[0]
+                self.assertEqual(second['winddown_deadline'],first['winddown_deadline'])
+                self.assertEqual(native['goal']['status'],'paused')
+                self.assertEqual(sum(m=='thread/goal/set' for m,_ in native['calls']),2)
+
+    def test_new_enrollment_uses_fresh_tokens_and_preserves_basis_on_reenrollment(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory,cached=37)
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(first['used_tokens'],3)
+                self.assertEqual(first['token_accounting'],'fresh')
+                second=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(second['used_tokens'],3)
+                inclusive=enroll(root,policy,THREAD,100,120,token_accounting='cache_inclusive')
+                self.assertEqual(inclusive['used_tokens'],40)
+                self.assertEqual(inclusive['deadline'],first['deadline'])
+                self.assertEqual(inclusive['generation'],first['generation'])
+                again=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(again['token_accounting'],'cache_inclusive')
+                self.assertEqual(again['used_tokens'],40)
+
+    def fixture(self,directory,cached=0):
         root=Path(directory)/'wake';root.mkdir(mode=0o700)
         home=Path(directory)/'home';home.mkdir(mode=0o700);(home/'sessions').mkdir(mode=0o700)
         policy=Path(directory)/'policy.json'
@@ -49,7 +128,7 @@ class GoalSupervisionTests(unittest.TestCase):
                 goal=dict(threadId=THREAD,createdAt=NOW,status='active'))),
             dict(type='event_msg',payload=dict(type='task_started',turn_id='work')),
             dict(type='token_usage_record',payload=dict(thread_id=THREAD,turn_id='work',session_id=THREAD,root_turn_id='work',
-                response_id='response-1',usage=dict(input_tokens=38,cached_input_tokens=37,output_tokens=2,total_tokens=40),
+                response_id='response-1',usage=dict(input_tokens=38,cached_input_tokens=cached,output_tokens=2,total_tokens=40),
                 turn_token_usage={},thread_token_usage={}))]
         log=home/'sessions/owned.jsonl'
         log.write_text(''.join(json.dumps(dict(timestamp='2030-01-01T00:00:00Z',**row))+'\n' for row in rows))

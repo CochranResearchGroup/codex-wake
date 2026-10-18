@@ -1,0 +1,17 @@
+{
+  "candidate_tests": 1369,
+  "candidate_seconds": 127.152,
+  "baseline_tests": 1363,
+  "baseline_seconds": 124.088,
+  "failures": 76,
+  "errors": 4,
+  "skipped": 1,
+  "candidate_exit": 1,
+  "baseline_exit": 1,
+  "candidate_only_failures": [],
+  "baseline_only_failures": [],
+  "common_failure_identifiers": 80,
+  "baseline_sha": "89e3eb81a63ff26589860e58e6526c0462107dc7",
+  "candidate_log": "/tmp/cw289-presubmit-20261018/unittest-owned.log",
+  "baseline_log": "/tmp/cw289-presubmit-20261018/baseline-all.log"
+}

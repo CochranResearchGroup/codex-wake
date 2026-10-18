@@ -1,4 +1,4 @@
-"""Cached-inclusive sampled usage from native 0.163 response identities.
+"""Fresh-token sampled usage from native 0.163 response identities.
 
 No native RPC or display counters. Unsupported/incomplete history is unknown.
 """
@@ -12,7 +12,13 @@ import sqlite3
 
 MAX_FILES = 4096
 MAX_METADATA_BYTES = 4 * 1024 * 1024
+# Evidence retention and total input scanning have distinct bounds. Tool output
+# volume is not accounting evidence, but still consumes the scan/time budget.
 MAX_HISTORY_BYTES = 32 * 1024 * 1024
+MAX_SCAN_BYTES = 256 * 1024 * 1024
+MAX_LINE_BYTES = 32 * 1024 * 1024
+ACCOUNTING_EVENTS = frozenset(('thread_goal_updated', 'task_started', 'task_complete',
+    'turn_aborted', 'collab_agent_spawn_begin', 'collab_agent_spawn_end', 'raw_response_completed'))
 MAX_SCAN_SECONDS = 2.0
 
 
@@ -145,9 +151,11 @@ def _index_timed_out(check_time):
         return 1
 
 
-def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
+def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, token_accounting="fresh"):
     """Observe original-goal response spending, or an explicitly authorized anchor."""
     try:
+        if token_accounting not in ("fresh", "cache_inclusive"):
+            raise ValueError("unsupported_token_accounting")
         deadline = time.monotonic() + MAX_SCAN_SECONDS
         inventory = {}
         metadata_bytes = 0
@@ -212,21 +220,34 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
                         owned.add(identity); changed = True
         sessions = {}
         history_bytes = 0
+        scanned_bytes = 0
         for identity in owned:
             check_time()
             candidates = inventory[identity]
             if len(candidates) != 1:
                 raise ValueError('ambiguous_rollout_identity')
             meta, path = candidates[0]
-            with path.open('rb') as stream:
-                data = stream.read(MAX_HISTORY_BYTES - history_bytes + 1)
-            history_bytes += len(data)
-            if history_bytes > MAX_HISTORY_BYTES:
-                raise ValueError('usage_history_byte_limit')
             rows = []
-            for line in data.splitlines():
-                check_time()
-                rows.append(json.loads(line))
+            with path.open('rb') as stream:
+                while True:
+                    check_time()
+                    line = stream.readline(min(MAX_LINE_BYTES, MAX_SCAN_BYTES - scanned_bytes) + 1)
+                    if not line:
+                        break
+                    scanned_bytes += len(line)
+                    if scanned_bytes > MAX_SCAN_BYTES:
+                        raise ValueError('usage_scan_byte_limit')
+                    if len(line) > MAX_LINE_BYTES:
+                        raise ValueError('usage_line_byte_limit')
+                    value = json.loads(line)
+                    kind = value.get('type')
+                    relevant = (kind in ('session_meta', 'token_usage_record') or
+                        kind == 'event_msg' and value.get('payload', {}).get('type') in ACCOUNTING_EVENTS)
+                    if relevant:
+                        history_bytes += len(line)
+                        if history_bytes > MAX_HISTORY_BYTES:
+                            raise ValueError('usage_history_byte_limit')
+                        rows.append(value)
             if not rows or rows[0].get('payload') != meta:
                 raise ValueError('rollout_metadata_changed')
             sessions[identity] = (meta, rows[1:])
@@ -286,8 +307,14 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
                     continue
                 key = (p['thread_id'], p['response_id'])
                 total = p['usage']['total_tokens']
-                if type(total) is not int or total < 0:
+                usage = p['usage']
+                components = [usage.get(key) for key in
+                    ('input_tokens', 'cached_input_tokens', 'output_tokens', 'total_tokens')]
+                if any(type(v) is not int or v < 0 for v in components):
                     raise ValueError('malformed_usage')
+                inputs, cached, outputs, total = components
+                if cached > inputs or total != inputs + outputs:
+                    raise ValueError('inconsistent_usage_components')
                 if p['thread_id'] not in owned:
                     raise ValueError('inherited_record_owner_missing')
                 if key in records and records[key] != p:
@@ -339,8 +366,13 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
                    anchor['response_hashes'][json.dumps(k)] for k in excluded):
                 raise ValueError('reset_anchor_history_changed')
         check_time()
-        return dict(state='qualified', used_tokens=sum(records[k]['usage']['total_tokens']
-            for k in charged - excluded), anchor=anchor, reason=None, sampled=True)
+        selected = [records[k]['usage'] for k in charged - excluded]
+        inclusive = sum(v['total_tokens'] for v in selected)
+        cached = sum(v['cached_input_tokens'] for v in selected)
+        return dict(state='qualified', used_tokens=inclusive - cached if token_accounting == 'fresh' else inclusive,
+            fresh_tokens=inclusive - cached, cached_input_tokens=cached,
+            cache_inclusive_tokens=inclusive, token_accounting=token_accounting,
+            anchor=anchor, reason=None, sampled=True)
     except (ValueError, KeyError, TypeError, OSError, OverflowError) as exc:
         return dict(state='unknown', used_tokens=None, anchor=None,
                     reason=str(exc), sampled=True)

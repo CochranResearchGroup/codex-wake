@@ -20,7 +20,7 @@ from websockets.sync.server import unix_serve
 from codex_wake.lifecycle_budget import trusted_upper
 
 
-async def qualify(directory):
+async def qualify(directory, unknown_accounting=False):
     directory.mkdir(mode=0o700, parents=True, exist_ok=False)
     root = directory / 'runtime'
     home = directory / 'home'
@@ -36,11 +36,11 @@ async def qualify(directory):
     def row(kind, payload):
         return dict(type=kind, timestamp=timestamp, payload=payload)
 
-    def usage(response_id, tokens):
+    def usage(response_id, tokens, cached=5000):
         return row('token_usage_record', dict(thread_id=thread, turn_id='owned-turn',
             root_turn_id='owned-turn', session_id=thread, response_id=response_id,
-            usage=dict(input_tokens=tokens-2, cached_input_tokens=tokens-3,
-                       output_tokens=2, total_tokens=tokens), turn_token_usage={}, thread_token_usage={}))
+            usage=dict(input_tokens=tokens-2+cached, cached_input_tokens=cached,
+                       output_tokens=2, total_tokens=tokens+cached), turn_token_usage={}, thread_token_usage={}))
 
     rollout = home / 'sessions' / 'rollout.jsonl'
     rows = [row('session_meta', dict(id=thread, session_id=thread, source='cli')),
@@ -113,27 +113,48 @@ async def qualify(directory):
 
                 await until(lambda v: v.get('controller', {}).get('fresh'))
                 enrolled, failed = await call('wake_goal_limits_set', dict(
-                    token_limit=100, time_limit_seconds=300, checkpoint_seconds=299))
+                    token_limit=100, time_limit_seconds=300, checkpoint_token_percent=60,
+                    checkpoint_seconds=1 if unknown_accounting else 299))
                 assert not failed and enrolled['state'] == 'armed', enrolled
+                assert enrolled['token_accounting'] == 'fresh' and enrolled['used_tokens'] == 40, enrolled
                 checkpoint = await until(lambda v: v['state'] == 'checkpoint_requested')
                 with mutex:
                     assert sum(r['method'] == 'turn/steer' for r in requests) == 1
                     goal.update(createdAt=created+1, objective='Replacement same-session goal')
                 repeated, failed = await call('wake_goal_limits_set', dict(
-                    token_limit=100, time_limit_seconds=300, checkpoint_seconds=299))
+                    token_limit=100, time_limit_seconds=300, checkpoint_token_percent=60,
+                    checkpoint_seconds=1 if unknown_accounting else 299))
                 assert not failed and repeated['deadline'] == enrolled['deadline'], repeated
+                winding = None
                 with rollout.open('a') as stream:
-                    stream.write(json.dumps(usage('second', 70)) + '\n')
+                    stream.write('{"type":' if unknown_accounting else json.dumps(usage('second', 70)) + '\n')
+                if unknown_accounting:
+                    winding = await until(lambda v: v['state'] == 'winding_down')
+                    with mutex:
+                        assert goal['status'] == 'paused'
+                        assert native['thread']['turns'][0]['status'] == 'inProgress'
+                    assert winding['winddown_deadline'] <= enrolled['deadline'], winding
                 stopped = await until(lambda v: v['state'] == 'stopped')
-                assert stopped['used_tokens'] == 110 and stopped['stop_proof'] is True, stopped
+                assert stopped['used_tokens'] == (40 if unknown_accounting else 110) and stopped['stop_proof'] is True, stopped
                 with mutex:
                     methods = [r['method'] for r in requests]
                     assert methods.index('turn/steer') < methods.index('thread/goal/set') < methods.index('turn/interrupt')
                     assert goal['status'] == 'paused'
+                with mutex:
+                    native['thread']['turns'] = [dict(id='operator-reply', status='inProgress', items=[])]
+                    reads_before = sum(r['method'] == 'thread/read' for r in requests)
+                operator = await until(lambda v: v['state'] == 'stopped' and
+                    sum(r['method'] == 'thread/read' for r in requests) >= reads_before + 4)
+                with mutex:
+                    assert native['thread']['turns'][0]['status'] == 'inProgress'
+                    assert goal['status'] == 'paused'
+                    assert not any(r['method'] == 'turn/interrupt' and
+                        r['params']['turnId'] == 'operator-reply' for r in requests)
                 receipt = dict(verdict='PASS', native_controls='injected_unix_protocol',
                     clock='configured_trusted_clock', model_calls=0, python=sys.executable,
                     watcher_pid=watcher.pid, enrolled=enrolled, checkpoint=checkpoint,
-                    stopped=stopped, requests=requests)
+                    stopped=stopped, winding_down=winding, operator_reply_preserved=True,
+                    token_accounting="fresh", requests=requests)
                 (directory / 'result.json').write_text(json.dumps(receipt, indent=2))
         finally:
             if watcher is not None and watcher.poll() is None:
@@ -151,4 +172,6 @@ async def qualify(directory):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    asyncio.run(qualify(parser.parse_args().output.resolve()))
+    parser.add_argument('--unknown-accounting', action='store_true')
+    options = parser.parse_args()
+    asyncio.run(qualify(options.output.resolve(), options.unknown_accounting))

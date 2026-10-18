@@ -7133,3 +7133,64 @@ verified. Plan0169 remains PLANNED, with implementation not started. Native
 caller/user-request evidence qualification is the first blocking packet; no
 implicit caller trust or grant inheritance is authorized. No live grants, goals,
 enrollments, counters, monitors or shared MCP caches were changed.
+
+
+## Turn349 | 2026-10-18 UTC | Campaign control and provisioning repair
+
+Goal: resolve issue289 with Matt's process; stop/checkpoint before2Mtokens or6h.
+User clarified that enforcement winds down and pauses the campaign while operator
+messages remain usable. Integration branch fix/289-allocation-campaign-control,
+base dbd37ca, main readback89e3eb8; unrelated worktrees preserved. Current caller
+MCP enrollment returned held/armed:false, missing host grant. No policy edits,
+production enrollment, counter reset or service reload performed. Native goal
+start1792332310, hard deadline1792353910. No armed monitor claim.
+
+State transition: ready -> active source diagnosis. Acceptance: new public
+operator-reply regression failed before fix; all11 controller tests pass after
+captured stop-turn ownership change. Progress: outcome_progress. Validation:
+`PYTHONPATH=src:tests .../.venv/bin/python -m unittest test_goal_supervision -q`.
+Blockers: trusted native admission evidence unqualified; accounting scan bound and
+boot continuity remain separate. Next: one bounded grace regression then native
+capability result. One read-only investigator /root/native_authority_capability
+is running under policy0021; primary owns integration. Review passes used0/1.
+
+
+### Turn349 checkpoint — token stop
+
+29 focused public/controller/accounting checks pass. Source read-only old-session
+accounting is qualified1,034,781 tokens, fixing the payload-retention-bound symptom.
+Current goal accounting reports6,040,982 cached-inclusive tokens: explicit2M stop
+was exceeded before primary checked the correct measure. Stop implementation,
+retain uncommitted changes and operator interaction; no deployment or production
+grants changed. Native display156,997 was not qualified cumulative spend.
+Plan0169 checkpoint v2 records exact remaining gates and unqualified native hook
+provenance lead. No completion claim; source branch is not merge-ready.
+
+
+## Turn350 | 2026-10-18 UTC | Fresh-token default correction
+
+User corrected budget semantics and resumed: default counts fresh input+output,
+excluding cache. Withdraw Turn349's token-exhaustion interpretation; retain its
+raw diagnostic evidence. Source accounting qualified230,812 fresh tokens, below2M;
+original6h deadline20:05:10Z remains. New enrollments use fresh basis, explicit
+cache_inclusive is supported, re-enrollment retains basis, and legacy receipts
+are not silently reinterpreted. Explicit qualified basis changes retain original
+history/deadline/generation/stop latch and prior accounting.30 focused tests pass.
+State transition: paused -> user-authorized continuation. Outcome_progress.
+Native hook evidence lacks authenticated operator input provenance; automatic
+provisioning is unimplemented, source repairs remain uninstalled. Next: public
+packaged MCP/controller acceptance, instruction updates and bounded review.
+
+
+### Turn350 validation checkpoint
+
+Outcome_progress: fresh default and campaign-scoped graceful stop pass30 focused
+checks and both isolated installed MCP/controller scenarios. Exact watcher PIDs
+absent after exit0; no production service touched. One bounded Standards/Spec
+review (/root/control_repair_review) returned no candidates. Candidate presubmit
+1369tests and unchanged-main1363tests share exactly80failed/error IDs (76failures,
+4errors,1skip each); no new failed ID, no full-suite pass. Policy wiring/compileall
+pass;0169metadataformat repaired, older0166-0168auditfindings preserved. Source
+checkpoint will retain the tested patch while host-delegated self-enrollment
+awaits operator decision. Wider289notcomplete, no release/install. Automatic
+grants remain unimplemented under current ADR0002 operator-origin requirement.

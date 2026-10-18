@@ -11,3 +11,10 @@ native stop authority remains exact to verified registered conversations and
 does not authorize adopting or restarting the shared executor. We choose this
 over tab/CWD-based inheritance because conversation location is neither user
 resource authority nor proof of allocation continuity.
+
+
+2026-10-18 clarification: the enforcement subject is the goal campaign, not all
+future conversation turns. Reserve/grace requests allow checkpoint winddown;
+then pause the goal and stop its observed exact turns. Subsequent operator
+messages remain usable while campaign continuation stays held. Persist stop-turn
+ownership so controller reconstruction cannot adopt an operator reply as work.

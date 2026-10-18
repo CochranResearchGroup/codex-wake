@@ -1,6 +1,21 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P169
+    owner: primary / ecochran76
+    objective: Verified allocation provisioning and graceful campaign controls
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/289]
+    plan: docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md
+    plan_ref: fix/289-allocation-campaign-control
+    branch: fix/289-allocation-campaign-control
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: dbd37ca09f9a13f4ae54b98f8f8ea4b0888a86c5
+    dependencies: []
+    overlaps: [P168]
+    updated_at: 2026-10-18
+    disposition: Source repair; no production grant or shared MCP reload
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational
