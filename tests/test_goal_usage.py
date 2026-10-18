@@ -1,6 +1,7 @@
 """Public accounting contract using sanitized 0.163 rollout shapes."""
 import json
 import tempfile
+import sqlite3
 import unittest
 from pathlib import Path
 
@@ -155,3 +156,35 @@ class GoalUsageTests(unittest.TestCase):
         with unrelated.open('a') as stream:
             stream.write('not-json-unrelated-history\n' * 800000)
         assert observe_usage(tmp_path,'root',CREATED)['used_tokens']==40
+
+
+    def test_indexed_shared_home_excludes_thousands_of_unrelated_rollouts(self):
+        root=rollout(self.home,'root',[goal(),event('task_started',turn_id='work'),
+            event('collab_agent_spawn_end',new_thread_id='child'),response('root','work','parent',40)])
+        child=rollout(self.home,'child',[response('child','child-work','child-response',20,'work')],
+                      parent_thread_id='root')
+        connection=sqlite3.connect(self.home/'state_5.sqlite')
+        self.addCleanup(connection.close)
+        connection.execute('PRAGMA journal_mode=WAL')
+        connection.execute('CREATE TABLE threads (id TEXT PRIMARY KEY, rollout_path TEXT, source TEXT)')
+        connection.execute('CREATE TABLE thread_spawn_edges(parent_thread_id TEXT,child_thread_id TEXT,status TEXT)')
+        connection.executemany('INSERT INTO threads VALUES(?,?,?)',[
+            ('root',str(root),'cli'),('child',str(child),json.dumps({'subagent':{'thread_spawn':{'parent_thread_id':'root'}}}))])
+        # Match the native indexed source exactly in canonical child metadata.
+        rows=child.read_text().splitlines();meta=json.loads(rows[0]);meta['payload']['source']={'subagent':{'thread_spawn':{'parent_thread_id':'root'}}};rows[0]=json.dumps(meta);child.write_text('\n'.join(rows)+'\n')
+        for index in range(4100):
+            path=self.home/'sessions'/f'unrelated-{index}.jsonl'
+            path.write_text(json.dumps(row('session_meta',dict(id=f'unrelated-{index}',source='cli',session_id='other')))+'\ncorrupt unrelated body\n')
+            connection.execute('INSERT INTO threads VALUES(?,?,?)',(f'unrelated-{index}',str(path),'cli'))
+        connection.commit()
+        # Leave committed rows in a live WAL; immutable=1 would miss this index.
+        result=observe_usage(self.home,'root',CREATED)
+        self.assertEqual(result['state'],'qualified',result)
+        self.assertEqual(result['used_tokens'],60)
+        connection.execute("DELETE FROM threads WHERE id='child'")
+        connection.commit()
+        self.assertEqual(observe_usage(self.home,'root',CREATED)['state'],'unknown')
+        outside=self.home/'outside.jsonl';outside.write_bytes(root.read_bytes())
+        connection.execute("UPDATE threads SET rollout_path=? WHERE id='root'",(str(outside),))
+        connection.commit()
+        self.assertEqual(observe_usage(self.home,'root',CREATED)['state'],'unknown')

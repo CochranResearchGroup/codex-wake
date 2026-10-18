@@ -8,6 +8,7 @@ import json
 import hashlib
 import time
 import os
+import sqlite3
 
 MAX_FILES = 4096
 MAX_METADATA_BYTES = 4 * 1024 * 1024
@@ -20,6 +21,130 @@ def _epoch(value):
     return datetime.fromisoformat(value.replace('Z', '+00:00')).timestamp()
 
 
+MAX_INDEX_ROWS = 65536
+MAX_INDEX_BYTES = 64 * 1024 * 1024
+
+
+def _indexed_inventory(home, thread_id, check_time):
+    """Use native metadata only as a locator; canonical rollout metadata wins."""
+    index = home / 'state_5.sqlite'
+    if not index.exists():
+        return None
+    index = index.resolve(strict=True)
+    allowed = {home.resolve(), (home / 'sessions').resolve().parent}
+    if (not index.is_file() or index.parent not in allowed
+            or index.stat().st_uid != os.geteuid()):
+        raise ValueError('usage_index_not_regular')
+    connection = None
+    try:
+        connection = sqlite3.connect(index.absolute().as_uri() + '?mode=ro',
+                                     uri=True, timeout=.2)
+        connection.execute('PRAGMA query_only=ON')
+        # mode=ro intentionally retains normal WAL visibility; not immutable=1.
+        connection.set_progress_handler(lambda: _index_timed_out(check_time), 1000)
+        columns = {r[1] for r in connection.execute('PRAGMA table_info(threads)')}
+        if not {'id', 'rollout_path', 'source'}.issubset(columns):
+            return None
+        rows = {}; parents = {}; children = {}; size = 0
+        for count, row in enumerate(connection.execute(
+                'SELECT id, rollout_path, source FROM threads LIMIT ?',
+                (MAX_INDEX_ROWS + 1,)), 1):
+            check_time()
+            if count > MAX_INDEX_ROWS:
+                raise ValueError('usage_index_row_limit')
+            identity, rollout, source = row
+            if not all(isinstance(v, str) for v in row):
+                raise ValueError('usage_index_metadata_invalid')
+            size += sum(len(v.encode()) for v in row)
+            if size > MAX_INDEX_BYTES:
+                raise ValueError('usage_index_byte_limit')
+            decoded = json.loads(source) if source.startswith(('{', '[', '"')) else source
+            parent = None
+            if isinstance(decoded, dict):
+                subagent = decoded.get('subagent', {})
+                spawn = subagent.get('thread_spawn', {}) if isinstance(subagent, dict) else {}
+                if not isinstance(spawn, dict):
+                    raise ValueError('usage_index_parent_invalid')
+                parent = spawn.get('parent_thread_id')
+            if identity in rows:
+                raise ValueError('usage_index_duplicate_identity')
+            rows[identity] = (Path(rollout), decoded)
+            if parent:
+                parents[identity] = parent
+                children.setdefault(parent, set()).add(identity)
+        edge_columns = {r[1] for r in connection.execute('PRAGMA table_info(thread_spawn_edges)')}
+        if edge_columns:
+            if not {'parent_thread_id', 'child_thread_id'}.issubset(edge_columns):
+                return None
+            for count, (parent, child) in enumerate(connection.execute(
+                    'SELECT parent_thread_id, child_thread_id FROM thread_spawn_edges LIMIT ?',
+                    (MAX_INDEX_ROWS + 1,)), 1):
+                check_time()
+                if count > MAX_INDEX_ROWS:
+                    raise ValueError('usage_index_edge_limit')
+                if child in parents and parents[child] != parent:
+                    raise ValueError('usage_index_parent_conflict')
+                parents[child] = parent
+                children.setdefault(parent, set()).add(child)
+        owned = {thread_id}; pending = [thread_id]
+        while pending:
+            check_time()
+            for child in children.get(pending.pop(), ()):
+                if child not in owned:
+                    owned.add(child); pending.append(child)
+                    if len(owned) > MAX_FILES:
+                        raise ValueError('usage_index_descendant_limit')
+        sessions_root = (home / 'sessions').resolve(strict=True)
+        inventory = {}
+        canonical_metadata_bytes = 0
+        for identity in owned:
+            check_time()
+            if identity not in rows:
+                raise ValueError('usage_index_root_or_child_missing')
+            path, source = rows[identity]
+            if not path.is_absolute() or path.is_symlink() or not path.is_file():
+                raise ValueError('usage_index_rollout_unavailable')
+            path = path.resolve(strict=True)
+            path.relative_to(sessions_root)
+            with path.open('rb') as stream:
+                first = stream.readline(65537)
+            canonical_metadata_bytes += len(first)
+            if canonical_metadata_bytes > MAX_METADATA_BYTES:
+                raise ValueError('usage_inventory_byte_limit')
+            if len(first) > 65536:
+                raise ValueError('metadata_line_limit')
+            row = json.loads(first); meta = row['payload']
+            if row.get('type') != 'session_meta' or meta.get('id') != identity:
+                raise ValueError('usage_index_identity_mismatch')
+            if meta.get('source') != source:
+                raise ValueError('usage_index_source_mismatch')
+            native_parent = meta.get('parent_thread_id')
+            if isinstance(source, dict):
+                subagent = source.get('subagent', {})
+                spawn = subagent.get('thread_spawn', {}) if isinstance(subagent, dict) else {}
+                source_parent = spawn.get('parent_thread_id')
+                if native_parent and source_parent and native_parent != source_parent:
+                    raise ValueError('usage_index_parent_mismatch')
+                native_parent = native_parent or source_parent
+            if identity != thread_id and native_parent != parents.get(identity):
+                raise ValueError('usage_index_parent_mismatch')
+            inventory[identity] = [(meta, path)]
+        return inventory
+    except sqlite3.Error as exc:
+        raise ValueError('usage_index_unavailable_or_corrupt') from exc
+    finally:
+        if connection is not None:
+            connection.close()
+
+
+def _index_timed_out(check_time):
+    try:
+        check_time()
+        return 0
+    except ValueError:
+        return 1
+
+
 def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
     """Observe original-goal response spending, or an explicitly authorized anchor."""
     try:
@@ -30,38 +155,42 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None):
         def check_time():
             if time.monotonic() > deadline:
                 raise ValueError('usage_scan_time_limit')
-        def rollout_paths():
-            for directory_count, (directory, _, names) in enumerate(
-                    os.walk(Path(codex_home) / 'sessions', followlinks=False), 1):
+        indexed = _indexed_inventory(Path(codex_home), thread_id, check_time)
+        if indexed is not None:
+            inventory = indexed
+        else:
+            def rollout_paths():
+                for directory_count, (directory, _, names) in enumerate(
+                        os.walk(Path(codex_home) / 'sessions', followlinks=False), 1):
+                    check_time()
+                    if directory_count > MAX_FILES:
+                        raise ValueError('usage_inventory_directory_limit')
+                    for name in names:
+                        if name.endswith('.jsonl'):
+                            yield Path(directory) / name
+            for count, path in enumerate(rollout_paths(), 1):
                 check_time()
-                if directory_count > MAX_FILES:
-                    raise ValueError('usage_inventory_directory_limit')
-                for name in names:
-                    if name.endswith('.jsonl'):
-                        yield Path(directory) / name
-        for count, path in enumerate(rollout_paths(), 1):
-            check_time()
-            if count > MAX_FILES:
-                raise ValueError('usage_inventory_file_limit')
-            try:
-                if path.is_symlink() or not path.is_file():
-                    raise ValueError('non_regular_rollout')
-                with path.open('rb') as stream:
-                    first = stream.readline(65537)
-                metadata_bytes += len(first)
-                if metadata_bytes > MAX_METADATA_BYTES:
-                    raise ValueError('usage_inventory_byte_limit')
-                if len(first) > 65536:
-                    raise ValueError('metadata_line_limit')
-                row = json.loads(first)
-                if row.get('type') != 'session_meta':
-                    raise ValueError('missing_session_metadata')
-                meta = row['payload']
-                inventory.setdefault(meta['id'], []).append((meta, path))
-            except (ValueError, KeyError, TypeError, OSError):
-                if metadata_bytes > MAX_METADATA_BYTES:
-                    raise ValueError('usage_inventory_byte_limit')
-                metadata_errors = True
+                if count > MAX_FILES:
+                    raise ValueError('usage_inventory_file_limit')
+                try:
+                    if path.is_symlink() or not path.is_file():
+                        raise ValueError('non_regular_rollout')
+                    with path.open('rb') as stream:
+                        first = stream.readline(65537)
+                    metadata_bytes += len(first)
+                    if metadata_bytes > MAX_METADATA_BYTES:
+                        raise ValueError('usage_inventory_byte_limit')
+                    if len(first) > 65536:
+                        raise ValueError('metadata_line_limit')
+                    row = json.loads(first)
+                    if row.get('type') != 'session_meta':
+                        raise ValueError('missing_session_metadata')
+                    meta = row['payload']
+                    inventory.setdefault(meta['id'], []).append((meta, path))
+                except (ValueError, KeyError, TypeError, OSError):
+                    if metadata_bytes > MAX_METADATA_BYTES:
+                        raise ValueError('usage_inventory_byte_limit')
+                    metadata_errors = True
         if thread_id not in inventory:
             raise ValueError('root_rollout_missing_or_metadata_invalid' if metadata_errors
                              else 'root_rollout_missing')
