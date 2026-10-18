@@ -104,6 +104,20 @@ class AgentRefreshTests(unittest.TestCase):
     def test_actual_updated_mcp_behavior_establishes_requested_readiness(self):
         self.refresh_scenario(draft=False,mcp_ready=True)
 
+    def test_active_goal_is_paused_before_client_stop_and_restored_after_readiness(self):
+        self.refresh_scenario(draft=False, original_status='active')
+
+    def test_active_goal_stays_paused_when_replacement_mcp_is_stale(self):
+        self.refresh_scenario(draft=False, original_status='active', stale_mcp=True)
+
+    def test_lost_activation_readback_reconciles_without_activating_twice(self):
+        self.refresh_scenario(draft=False, original_status='active', resume_readback_loss=True)
+
+    def test_inactive_goals_are_not_activated_by_refresh(self):
+        for status in ('blocked', 'complete', 'paused'):
+            with self.subTest(status=status):
+                self.refresh_scenario(draft=False, original_status=status)
+
     def test_rollback_reuses_original_conversation_without_goal_or_client_duplication(self):
         self.refresh_scenario(draft=False,stale_mcp=True,rollback_requested=True)
 
@@ -116,7 +130,7 @@ class AgentRefreshTests(unittest.TestCase):
     def test_handoff_preserves_unsubmitted_source_draft(self):
         self.refresh_scenario(draft=True,operation='handoff')
 
-    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False):
+    def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False, original_status='paused', resume_readback_loss=False):
         thread_id = '00000000-0000-7000-8000-000000000158'
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -133,9 +147,10 @@ class AgentRefreshTests(unittest.TestCase):
             methods, effects = [], []
             original_pid = client.pid
             tab = {'name':'worker'}
+            lost_resume = []
             skill = root / 'skill.md'
             skill.write_text('---\nname: updated-skill\ndescription: Updated fixture\n---\nChanged instructions.\n')
-            goal = dict(objective='Finish fixture', status='paused', tokenBudget=1000,
+            goal = dict(objective='Finish fixture', status=original_status, tokenBudget=1000,
                         tokensUsed=50, timeUsedSeconds=12, createdAt=100, updatedAt=100)
             if operation=='handoff' or budget:goal['threadId']=thread_id
             def handler(ws):
@@ -153,6 +168,8 @@ class AgentRefreshTests(unittest.TestCase):
                         value = dict(thread=dict(id=thread_id, name='owned-worker', cwd=tmp,
                             status={'type':recipient_guard if recipient_guard in ('active','unknown') else 'idle'}, canAcceptDirectInput=True, turns=turns))
                     elif method == 'thread/goal/get':
+                        if resume_readback_loss and methods.count('thread/goal/set')==2 and not lost_resume:
+                            lost_resume.append(True);ws.close();break
                         observed=dict(goal)
                         if advancing_usage and methods.count(method)>1:
                             observed.update(tokensUsed=51,timeUsedSeconds=13,updatedAt=101)
@@ -161,6 +178,9 @@ class AgentRefreshTests(unittest.TestCase):
                         value={'goal':observed}
                     elif method == 'mcpServer/tool/call':
                         value = {'content':[{'type':'text','text':'new-version' if mcp_ready else 'old-version'}],'isError':False}
+                    elif method == 'thread/goal/set':
+                        goal['status'] = request['params']['status']
+                        value = {'goal':dict(goal)}
                     elif method == 'skills/list': value = {'data': [dict(cwd=tmp, errors=[], skills=[
                         dict(name='updated-skill',path=str(skill),description='Updated fixture',enabled=True)])]}
                     else: value = {}
@@ -177,6 +197,8 @@ class AgentRefreshTests(unittest.TestCase):
                     value = '\n\n\x1b[1m›\x1b[0m ' + text + '\n'
                 elif 'display-message' in argv: value = '23,2' if draft else '2,2'
                 elif 'kill-pane' in argv:
+                    if original_status == 'active':
+                        self.assertEqual(goal['status'], 'paused')
                     effects.append(argv); client.terminate();client.wait(timeout=2);client.stdout.close();value=''
                     if loss == 'kill-pane':raise subprocess.TimeoutExpired(argv,1)
                 elif 'new-window' in argv:
@@ -196,6 +218,10 @@ class AgentRefreshTests(unittest.TestCase):
                 app_server='unix://'+str(endpoint),codex_path=str(client_script),tmux_session='owned',
                 timeout=1,resources={'updated-skill':dict(kind='skill',path=str(skill),
                     description='Updated fixture',sha256=hashlib.sha256(skill.read_bytes()).hexdigest())})}}))
+            if original_status == 'active':
+                registry=json.loads(profiles.read_text())
+                registry['profiles']['worker']['goal_supervision']=dict(root=tmp,policy=str(profiles),allocation_id='fixture')
+                profiles.write_text(json.dumps(registry))
             if budget:
                 registry=json.loads(profiles.read_text())
                 registry['continuations']={thread_id:dict(objective='Finish fixture',approval='operator fixture',
@@ -239,7 +265,9 @@ class AgentRefreshTests(unittest.TestCase):
                 with unix_serve(handler,str(endpoint)) as server:
                     worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
                     try:
-                        with patch('subprocess.run',side_effect=command), patch(
+                        with patch('codex_wake.goal_supervision.show',return_value=dict(state='armed',stop_latched=False,
+                                controller=dict(fresh=True),accounting=dict(state='qualified'),used_tokens=50,
+                                token_limit=1000,deadline=10000)), patch('subprocess.run',side_effect=command), patch(
                                 'codex_wake.native_clock.snapshot',side_effect=lambda: {'utc':{'upper':
                                     1893456001 if expire_after_stop and client.poll() is not None else 1001}}):
                             if unapproved_probe:
@@ -266,6 +294,13 @@ class AgentRefreshTests(unittest.TestCase):
                                     self.assertEqual(sum('kill-pane' in x for x in effects),1)
                                     self.assertIsNone(client.poll())
                                     return
+                            if resume_readback_loss:
+                                uncertain=StringIO()
+                                with redirect_stdout(uncertain):self.assertEqual(run(argv),5)
+                                held=json.loads(uncertain.getvalue())
+                                self.assertEqual(held['state'],'uncertain')
+                                self.assertEqual(held['uncertain_effect'],'native/goal_resume')
+                                self.assertEqual(goal['status'],'active')
                             output=StringIO()
                             with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
                             receipt=json.loads(output.getvalue())
@@ -297,7 +332,7 @@ class AgentRefreshTests(unittest.TestCase):
                             elif goal_change:
                                 self.assertEqual(receipt['state'],'blocked')
                                 self.assertEqual(receipt['reason'],'goal_changed_during_refresh')
-                                self.assertEqual(receipt['goal_before'],goal)
+                                self.assertEqual(receipt['goal_before'],dict(goal,status='paused') if original_status=='active' else goal)
                             elif stale_mcp:
                                 self.assertEqual(receipt['state'],'blocked')
                                 self.assertNotEqual(client.pid,original_pid)
@@ -319,7 +354,7 @@ class AgentRefreshTests(unittest.TestCase):
                                 self.assertEqual(sum('kill-pane' in x for x in effects),1)
                                 self.assertEqual(receipt['thread_id'],thread_id)
                                 self.assertNotEqual(client.pid,original_pid)
-                                self.assertEqual(receipt['goal_before'],goal)
+                                self.assertEqual(receipt['goal_before'],dict(goal,status='paused') if original_status=='active' else goal)
                                 self.assertEqual(receipt['goal_after'],dict(goal,tokensUsed=51,timeUsedSeconds=13,updatedAt=101) if advancing_usage else goal)
                                 self.assertEqual(receipt['resources']['updated-skill']['state'],'ready')
                                 if mcp_ready:self.assertEqual(methods.count('mcpServer/tool/call'),1)
@@ -341,7 +376,9 @@ class AgentRefreshTests(unittest.TestCase):
                                         self.assertEqual(sum('kill-pane' in x for x in effects),2)
                                 else:
                                     self.assertNotIn('objective_budget',receipt)
-                            self.assertFalse(any(x in methods for x in ('thread/start','turn/start','thread/goal/set')))
+                            self.assertFalse(any(x in methods for x in ('thread/start','turn/start')))
+                            self.assertEqual(methods.count('thread/goal/set'),
+                                (1 if stale_mcp else 2) if original_status=='active' else 0)
                     finally:server.shutdown();worker.join(timeout=2)
             finally:
                 client.terminate();client.wait(timeout=2);client.stdout.close()

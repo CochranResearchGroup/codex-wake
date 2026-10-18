@@ -1,0 +1,26 @@
+{
+  "state": "INSTALLED_REFRESH_QUEUED_NOT_ENROLLED",
+  "merge_commit": "9c245a52a8227e2dcbf3ce6a0499660a8077c6bc",
+  "pr": "https://github.com/CochranResearchGroup/codex-wake/pull/290",
+  "ci_run": 39154781651,
+  "ci": {
+    "3.11": "PASS",
+    "3.12": "PASS"
+  },
+  "release": "https://github.com/CochranResearchGroup/codex-wake/releases/tag/v0.18.0",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.18.0-9c245a5",
+  "source_modules_equal": 110,
+  "release_assets_download_hashes_equal": true,
+  "goal_controller_pid": 43767,
+  "preserved_native_executor_pid": 9802,
+  "refresh_intent": "issue289-approved-rollout-0180-9c245a5",
+  "refresh_receipt": "/home/ecochran76/.local/state/codex-wake/lifecycle/shared-refresh/2add5524af7cbdfb1847665fd17f30140d2faf141e3c3e9616409bf2b5e963d3.json",
+  "refresh_expires_at": "2026-10-18T20:39:29Z",
+  "continuation_wake": "wake_intent_431d4eb27c3d41e3bb89e7e528bb2705",
+  "wake_root": "/home/ecochran76/workspace.local/codex-wake/.codex/wake",
+  "wake_state": "pending; monitor recovered scheduling UTC; not_due",
+  "resource_deadline": "2026-10-18T21:39:29.531693Z",
+  "backup": "/home/ecochran76/.local/state/codex-wake/rollout-backups/issue289-0180",
+  "remaining": "End source turn for idle-only reload; reconcile exact intent then public enrollment and live acceptance; do not reset budget/deadline.",
+  "memory_disposition": "forbidden; no reviewed destination routing"
+}

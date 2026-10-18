@@ -1,0 +1,27 @@
+{
+  "verdict": "PASS_TARGETED_QUIT_RESUME_REFRESH",
+  "attempts": 3,
+  "first_attempt": "quit draft not submitted",
+  "second_attempt": "guard rejected multiline draft before effect",
+  "third_attempt": "same conversation resumed with new client",
+  "thread_id": "01a14f45-25a2-7ef1-bcce-1205f176cc73",
+  "old_client_pid": 26476,
+  "new_client_pid": 23317,
+  "mcp_before": "0.17.3",
+  "mcp_after": "0.18.0",
+  "allocation_id_in_schema": true,
+  "token_accounting_in_schema": true,
+  "goal_exactly_unchanged": true,
+  "shared_executor_preserved": true,
+  "shared_reload_attempted": false,
+  "resource_deadline": "2026-10-18T21:39:29.531693Z",
+  "enrollment": {
+    "state": "held",
+    "reason": "native_goal_state_unknown",
+    "native_goal_status": "blocked",
+    "accounting": "qualified",
+    "fresh_used_tokens": 355845,
+    "stop_latched": true
+  },
+  "remaining": "Controller rejects known native blocked status and latches stop; no latch clearing, renewal reset, native resume or repeated enrollment performed."
+}

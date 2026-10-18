@@ -100,7 +100,7 @@ def refresh_command(args, root):
             rollback(path, receipt, profile)
         elif receipt['state'] == 'prepared' and before_effect(path, receipt):
             preflight(path, receipt, profile)
-        if not args.rollback and receipt['state'] in ('stopping', 'starting', 'awaiting_preflight', 'uncertain'):
+        if not args.rollback and receipt['state'] in ('stopping', 'starting', 'awaiting_preflight', 'restoring_goal', 'uncertain'):
             advance_refresh(path, receipt, profile)
         from .sessions_cli import emit
         emit(receipt, args.as_json)
@@ -197,8 +197,13 @@ def preflight(path, receipt, profile):
             return
     if not before_effect(path, receipt):
         return
+    from .refresh_goal import pause
+    receipt['goal_before'] = goal
+    if not pause(path, receipt, profile, goal, lambda method, params: native_request(
+            runtime.app_server, runtime.codex, method, params, runtime.timeout)):
+        return
     receipt.update(state='stopping', uncertain_effect='tmux/kill-pane',
-                   old_attachment=pane, goal_before=goal, thread_name=rows[0]['name'])
+                   old_attachment=pane, thread_name=rows[0]['name'])
     save(path, receipt)
     runtime.selector = 'thread:' + receipt['thread_id']
     runtime.force = False
@@ -226,6 +231,12 @@ def advance_refresh(path, receipt, profile):
     def request(method, params):
         return native_request(runtime.app_server, runtime.codex, method, params, runtime.timeout)
     try:
+        if receipt['state'] == 'restoring_goal' or receipt.get('uncertain_effect') == 'native/goal_resume':
+            from .refresh_goal import restore
+            if restore(path, receipt, profile, request):
+                receipt.update(state='completed', reason=None)
+            save(path, receipt)
+            return
         if receipt.get('uncertain_effect') == 'tmux/new-window':
             snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket,
                                timeout=runtime.timeout)
@@ -289,6 +300,9 @@ def advance_refresh(path, receipt, profile):
                 save(path, receipt)
                 return
             receipt['attachment'] = panes[0]
+            from .refresh_goal import settle_ui
+            if not settle_ui(path, receipt, profile, panes[0], request):
+                return
             receipt['goal_after'] = request('thread/goal/get', {'threadId': receipt['thread_id']})['goal']
             before, after = receipt['goal_before'], receipt['goal_after']
             changed = before != after
@@ -330,10 +344,15 @@ def advance_refresh(path, receipt, profile):
                                         observed_content=result['content'], is_error=result.get('isError'))
                 else:
                     checks[name] = dict(state='blocked', reason='resource_proof_unavailable')
-            receipt.update(resources=checks, state='completed' if all(
+            receipt.update(resources=checks, state='restoring_goal' if all(
                 c['state'] == 'ready' for c in checks.values()) else 'blocked')
-            if receipt['state'] == 'completed':
+            if receipt['state'] == 'restoring_goal':
                 receipt.pop('reason', None)
+                if not before_effect(path, receipt):
+                    return
+                from .refresh_goal import restore
+                if restore(path, receipt, profile, request):
+                    receipt['state'] = 'completed'
             else:
                 receipt['reason'] = 'requested_resources_not_ready'
             save(path, receipt)

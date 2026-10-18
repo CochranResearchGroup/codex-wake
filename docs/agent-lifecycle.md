@@ -220,6 +220,22 @@ intent to observe/reconcile; do not replace an uncertain stop or launch. Source
 expiry guards prevent a late replacement and never renew the deadline. Draft,
 active/unknown work and pending obligations hold without a force option.
 
+For client replacement, refresh records the original goal state and pauses an
+active goal before closing the client. It restores active status only after
+same-thread continuity, an empty composer, resource readiness and the original
+expiry are verified. Goals that were already paused, blocked or complete remain
+inactive. Only the exact recognized "Resume paused goal?" prompt is dismissed
+with Escape; an unknown dialog or draft holds the operation. Dismissal is recorded
+before sending its one-shot key, and the composer must subsequently be observed.
+
+Automatic goal restoration requires the configured lifecycle budget or an
+explicit host-profile `goal_supervision` binding containing `root`, `policy` and
+`allocation_id`. The existing controller must report armed, qualified accounting,
+a fresh heartbeat, remaining tokens/time and no stop latch. This binding selects
+an existing allowance; it cannot enroll, renew, clear a stop or reset counters.
+An unqualified allowance leaves the goal paused. Shared-server idle reload is a
+separate profile mode and does not acquire permission to resume any goal.
+
 Explicit `--rollback` (MCP `rollback: true`) observes the original conversation.
 It reuses a uniquely observed attachment with matching goal evidence. It may
 reattach only after complete absence of the owned replacement tab and observed

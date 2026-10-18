@@ -1,0 +1,49 @@
+{
+  "state": "SOURCE_CANDIDATE_NOT_INSTALLED",
+  "baseline": "9c245a52a8227e2dcbf3ce6a0499660a8077c6bc",
+  "source_hashes": {
+    "src/codex_wake/agent_refresh.py": "11d42a3f3a91214d3e687b6b3271e2bc7683037aeeaf00d121f0436d57b3b4e1",
+    "src/codex_wake/refresh_goal.py": "6a9a96025dbb0baaa4d92258b4d81b5bd94098f5a56a7b55f6e2fceaf27fc91a",
+    "tests/test_agent_refresh.py": "621fc04b788b47b003c23ac5b704f9a8e9589160280936f6b09886fd07bc76d8",
+    "tests/test_refresh_goal.py": "c84f330fb8c2a578ad54de37e639e8b9459f66e9f2310a200d36b82dd450bd48"
+  },
+  "red": {
+    "log": "/tmp/cw289-refresh-pause-red.log",
+    "symptom": "client stop observed active goal rather than paused"
+  },
+  "validation": {
+    "prior_full": "1380 pass / 1 skip, 222.415 sec; predates final review corrections",
+    "final_focused": "26 pass, 8.119 sec",
+    "final_full": {
+      "session": 52632,
+      "pid": 72514,
+      "log": "/tmp/cw289-refresh-pause-final-full.log",
+      "state": "running"
+    }
+  },
+  "review": {
+    "Standards": {
+      "accepted": 1,
+      "severity": "P1",
+      "finding": "Activation uncertainty",
+      "disposition": "resolved; public lost-readback reconciliation regression"
+    },
+    "Spec": {
+      "accepted": 1,
+      "severity": "P1",
+      "finding": "Configured ledger bypasses supervision stop",
+      "disposition": "resolved; both authorities checked"
+    }
+  },
+  "limits": {
+    "deadline": "2026-10-18T21:39:29.531693Z",
+    "stop_latch": "preserved"
+  },
+  "remaining": [
+    "Exact frozen full suite",
+    "Installed owned native modal qualification",
+    "Independent per-client refresh admission/monitor routing",
+    "Existing malformed known-state stop reconciliation without granting fresh resources",
+    "PR/CI/exact-main delivery and live proof"
+  ]
+}

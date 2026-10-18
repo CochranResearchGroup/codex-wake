@@ -2,24 +2,43 @@
 
 State: OPEN
 Owner: primary / ecochran76.
-Branch: fix/289-allocation-campaign-control. Base: 89e3eb8. Target: origin/main.
+Branch: fix/289-refresh-pause-restore. Base: 9c245a5. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 6; fresh-token default and campaign-scoped graceful shutdown.
+Plan version: 7; targeted pause/quit/resume refresh and campaign-stop separation.
 
 ## Current State
 
-The operator approved proceeding with final review and the prepared rollout
-("OK go") after the explicit review -> PR/delivery recommendation and linked
-rollout proposal. The publication/install/idle-refresh gate is resolved.
-Candidate0.18.0passes1375tests/1skip,36focused tests, and actual native imported
-boundary/continuation10->30fresh with fixed deadline and unchanged control.
-Final source hashes match /tmp/cw289-v0180-ready. Existing grants are preserved;
-initial_boundary imports the approved renewal without replenishment.
-Current packet: commit/freeze final delta against447359e, closed-world Standards
-and Spec review, PR/required matrix CI/merge, exact-main release/install and new
-idle-only MCP activation. Preserve shared executor and unrelated conversations.
+PR290 merged9c245a5 after required Python3.11/3.12 CI; exact-main0.18.0
+published/installed with110source modules matching. Both legacy grants retained.
+Targeted /quit -> codex resume was verified on the actual client:26476 exited,
+23317 resumed the same thread in pane%18; MCP0.17.3 ->0.18.0, same exact goal
+and native daemon9802. Shared reload was never attempted. The all-idle shared
+refresh remains queued and is not the required path for this client.
+
+User correction: `/goal pause` must precede `/quit` so the resume-goal modal
+cannot block unattended restoration. Treat this as a planned operational pause,
+not a resource exhaustion decision, and do not silently resume autonomous work.
+A recognized paused-goal modal requires exact-client handling before empty
+composer/readiness proof. Unknown dialogs hold. Preserve objective, cumulative
+usage, allocation, original deadline and unrelated conversations throughout.
+
+Public enrollment qualified355845fresh tokens, but rejected native `blocked`
+status as `native_goal_state_unknown` and latched stop. The user subsequently
+reactivated the native goal; this does not itself clear the persisted resource
+stop. Do not edit live ledgers or mint a new allocation to escape that decision.
+Next bounded packet: reproduce planned pause/quit/resume at the public refresh
+seam; implement explicit pause provenance and modal handling; distinguish known
+inactive native statuses from unknown control/accounting; prove no hard-stop
+latch can be cleared by operational resume. Then fixed-scope review, CI and
+installed qualification before further live adoption.
+
+Acceptance: native pause acknowledgement precedes client quit; exact same-thread
+resume reaches a usable composer; actual skill/MCP version is verified; active
+work restores only under existing explicit operator authority with qualified
+remaining resources; every failure preserves the pause/history/stop decision;
+resource-exhausted campaigns remain stopped while operator chat stays usable.
 Renewed2Mfresh/6h deadline remains2026-10-18T21:39:29.531693Z.
 
 

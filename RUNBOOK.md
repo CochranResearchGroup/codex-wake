@@ -7339,3 +7339,28 @@ initial-boundary/legacy-compatibility changes, preserving broad-review limits.
 Then PR/required CI/merge, exact-main release/install and fresh idle-only MCP
 activation with scoped pause/resume/rollback. No shared executor restart or
 resource renewal. Production remains unchanged at this entry.
+
+
+## Turn359 | 2026-10-18 UTC | Approved 0.18.0 delivery; idle activation queued
+
+PR290 merged9c245a5 after both required release gates39154781651 PASS. Exact-main v0.18.0 assets published/download hashes match; installed110source modules match. Five entrypoints and both Wake skill directories updated with exact private backups. Goal controller43767 adopts version2 policy with both legacy grants retained and no default allocation. Native peer9802 preserved; legacy enrolled thread notLoaded/no active turns. Issue289 accepted contract updated; remains OPEN. Fresh public refresh intent issue289-approved-rollout-0180-9c245a5 queued, expires20:39:29Z, no reload attempted; latest inventory32loaded and source sole observed busy. Durable file wake431d4eb27c3d41e3bb89e7e528bb2705 recovered qualified time and waits on terminal marker, owned notify service active. End source turn for idle. Reconcile exact intent/public schema and enroll same root before claiming armed; fixed renewal deadline21:39:29.531693Z unchanged. production-rollout-queued.json owns locators. Memory disposition forbidden: reviewed cloud routing unavailable.
+
+
+## Turn360 | 2026-10-18 UTC | Idle refresh blocker diagnosed
+
+Diagnostic file wake67ed828a40ba4e97a3efb12086d8dd53 fired. Twelve external samples prove source idle/no unfinished turns after reply; refresh identified another active conversation01a13fff-c84a-7773-bdaa-18a8bc4a74bf in auracall. Fresh readback shows active plus two inProgress turns. This does not establish whether that work is progressing or stalled. Shared idle guard therefore prevents reload; no reload attempted, no peer interruption or bypass. Earlier source-busy explanation was incomplete. Original refresh intent/expiry and renewal deadline unchanged; terminal continuation remains pending. Curated idle-refresh-diagnosis.json retains finding.
+
+
+## Turn361 | 2026-10-18 UTC | Targeted quit/resume passes; blocked-goal enrollment defect
+
+Operator authorized /quit and exact codex resume experiment. First Enter left owned draft; second guard stopped before effect; third reconciled exact multiline draft and completed. Client26476 exited;23317 attached same conversation/pane. Public MCP0.17.3 ->0.18.0 with allocation/accounting fields. Native daemon9802 and exact goal unchanged; shared reload never attempted. Prior blanket claim that client resume could not refresh is disproven on this host. Public native-bound enrollment selects approved renewal and qualifies355845fresh, preserves deadline21:39:29.531693Z, but known native goal blocked is rejected as native_goal_state_unknown and latches stop. Enforcement not armed. No latch reset/retry/goalresume. targeted-quit-resume.json retains proof and separate defect. Original queued shared refresh remains unchanged pending disposition.
+
+
+## Turn362 | 2026-10-18 UTC | User corrects refresh goal-pause ordering
+
+Operator identifies resume-goal modal as the blocker and requires /goal pause before quitting. Plan0169v7 records pause acknowledgement -> quit -> exact resume -> recognized modal/composer -> resource proof; operational pause must remain distinct from resource-stop latch. Live stop latch retained; native user activation does not reset resource allowance or authorize ledger editing. Next public-seam regression must cover both paused modal and refusal to clear actual exhaustion.
+
+
+## Turn363 | 2026-10-18 UTC | Pause and conditional restore source candidate
+
+Operator approved restore only if originally active. New fix/289-refresh-pause-restore starts merged9c245a5; preserves preexisting delivery notes. Public CLI regression red proves client stop before native pause. Candidate0.18.1 journals/acknowledges operational pause before replacement; verifies exact modal/composer/resources before restoring only prior-active goal. Inactive goals unchanged. Accepted review P1 activation uncertainty repaired with no-replay readback reconciliation; accepted Spec P1 configured-ledger bypass repaired by composing both authorities. Final26focused PASS8.119s; priorfull1380PASS/1skip222.415s predates final corrections; exact frozenfull session52632 underway. Owned no-model modal candidate probe session38792 underway. Current public profile still shared-idle; independent per-client admission remains a separate incomplete step. Live installation/ledger/stop latch untouched. Candidate receipt retains source hashes and gates.
