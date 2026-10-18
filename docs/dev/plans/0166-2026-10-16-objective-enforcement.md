@@ -41,9 +41,11 @@ host skip in 726.676 seconds; the isolated installed-package selection passed al
 policy wiring and plugin checks pass. No accepted blocker remains. See
 `evidence/plan0166/acceptance-audit.md` and `review-adjudication.json`.
 
-Tracker issues #274–278 remain OPEN. `origin/main` remains `0a5c8d1`. The validated
-branch and worker worktrees are retained; merge, release and production deployment
-were outside this specification. Earlier failures and checkpoints remain historical.
+Delivery supersedes the earlier source-only boundary: PR280 merged3cdc037 and
+v0.17.0 is released/installed under the standing install/deploy/reconcile request.
+Tracker reconciliation follows the delivered acceptance evidence in Plan0167.
+Earlier failures and checkpoints remain historical. Operator-provisioned strict
+bootstrap remains the documented supported route, not automatic first spawn.
 
 The latest renewal preserved root baseline 1,364,205, external observations 427,289
 and a 200,000 historical unknown-cost reserve. At closeout these were 1,652,641,

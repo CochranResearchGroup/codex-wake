@@ -7016,3 +7016,21 @@ fields and guide say so. Dedicated OS containment remains a separate guarantee.
 Source acceptance moves to protected-main PR/CI and exact-main delivery under the
 standing install/deploy/reconcile instruction. Retain stable installed0.16.0 until
 that gate passes; no unrelated wake/service/session changes are authorized.
+
+## Turn 340 | 2026-10-18 UTC | Resource supervision release and reconciliation
+
+User confirmed counters/allocation persist unless explicitly reset. F2 actual-host
+history blocker repaired with the read-only native index and independently
+verified; final25focused checks pass. PR280 self-check bound base/head, accepted
+review findings and native acceptance; both hosted gates pass1,351tests with one
+optional host skip. Squash merge3cdc037 entered origin/main. v0.17.0 built from
+that exact commit, published assets downloaded with identical hashes and
+installed in the versioned prefix. Installed109sources match; five stable
+entrypoints and both complete skill directories updated with private backups.
+New goal-limit systemd controller active, production MCP27tools and public fresh
+heartbeat verified. No native enrollment/reset, existing client/shared-server
+restart or unrelated service restart. Existing clients require MCP refresh;
+older wake daemon process images remain until normal restart. Plan0167 closes;
+Plan0166 source acceptance now has exact-main delivery. Acceptance and deployment
+receipts in docs/dev/evidence/plan0167. Native root stop does not prove separately
+running descendant termination; sampled overshoot remains unknown.
