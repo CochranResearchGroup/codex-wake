@@ -9,13 +9,13 @@ lanes:
     plan_ref: fix/289-allocation-campaign-control
     branch: fix/289-allocation-campaign-control
     target: origin/main
-    plan_state: OPEN
+    plan_state: BLOCKED
     custody_state: ACTIVE_WORKTREE
-    checkpoint: dbd37ca09f9a13f4ae54b98f8f8ea4b0888a86c5
+    checkpoint: d0b086d
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-18
-    disposition: Source repair; no production grant or shared MCP reload
+    disposition: Control repair native-qualified; awaiting authorization contract decision and caller-hook trust qualification
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational

@@ -7224,3 +7224,22 @@ pre-existing lifecycle-fixture failures. No full-suite green claim. Preserve
 isolated-presubmit.json and original failures; stop this broader baseline probe
 rather than widen repair scope. Product modules remain at reviewed f1223ad;
 new native acceptance scripts/receipts strengthen proof, not implementation scope.
+
+
+## Turn352 | 2026-10-18 UTC | Caller-hook proof and blocked audit
+
+Previous turn: outcome_progress(native acceptance). Current turn: blocker_reduction
+via real caller-hook probe, then genuine authorization gate. Native MCP capture
+invoked successfully after correcting obsolete fixture name to advertised namespace;
+PreToolUse hook did not run or replace arguments. hooks/list enabled/untrusted;
+no caller attestation claim. Initial delegated probes failed dependency/routing;
+primary reassessed and allowed one deterministic wire correction. Three artifacts
+retained; zero external provider/grant effects and empty owned process census.
+Four installed changed modules match source hashes. No further probe loop.
+
+Same operator authorization decision persists for third consecutive goal turn;
+independent safe repair/acceptance work is complete. Transition goal to blocked,
+not complete or resource-exhausted. Operator chat remains usable. Plan0169 and
+lane projection now BLOCKED, clean source checkpoints retained locally. No
+host-delegated enrollment permission inferred from auto continuation. On answer,
+reconcile native hook trust as well as allocation authority before effects.

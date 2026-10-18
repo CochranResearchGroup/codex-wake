@@ -1,6 +1,6 @@
 # Plan0169 — Automatic caller provisioning with allocation continuity
 
-State: OPEN
+State: BLOCKED
 Owner: primary / ecochran76.
 Branch: fix/289-allocation-campaign-control. Base: 89e3eb8. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
@@ -436,3 +436,38 @@ pre-existing lifecycle-fixture failures. No full-suite green claim. Preserve
 isolated-presubmit.json and original failures; stop this broader baseline probe
 rather than widen repair scope. Product modules remain at reviewed f1223ad;
 new native acceptance scripts/receipts strengthen proof, not implementation scope.
+
+
+## Checkpoint v3b — genuine authorization gate
+
+State transition: active -> blocked after the same pending authorization decision
+remained across three consecutive goal turns (initial fresh/default repair;
+native operator acceptance; native hook-binding prerequisite). Those turns made
+outcome_progress/blocker_reduction on independent work; at this checkpoint no
+meaningful safe dependent provisioning action remains. Do not count completed
+acceptance as permission or rerun it merely to keep the goal active.
+
+Current caller-binding probe: real native MCP server initialized and invoked
+capture with original model arguments; PreToolUse emitted no event, applied no
+updatedInput, and hooks/list showed enabled but untrusted. Caller-binding remains
+UNQUALIFIED, not proven unsupported. Native version0.163, two localhost responses,
+zero external provider calls, owned process group census empty. Report is
+`docs/dev/evidence/plan0169/native-hook-binding.json`. Two delegated probes stopped
+on dependency and obsolete-name fixture errors; primary reassessed the bound and
+ran one deterministic wire-format correction from the actual advertised namespace.
+All failed evidence retained. No additional retries authorized by this checkpoint.
+
+Blocking decision is unchanged: may a private host policy delegate enrollment
+into one fixed objective allocation instead of requiring authenticated operator
+prompt-origin evidence unavailable on inspected stock surfaces? The user has not
+answered. Current ADR0002 remains in force; automatic goal continuation is not an
+answer. No production grants, service reloads, counter resets or new allowances.
+Proposed follow-up requires both accepted authorization contract and qualified
+native caller binding, including hook trust/setup; no claim that approval alone
+makes the unqualified hook ready. Preserve goal objective and2Mfresh/6h ceiling.
+
+Source controls/accounting repair remains committed and tested. Four changed
+installed module hashes match current source. Native operator/delegation proof
+remains valid; full-suite baseline failures remain disclosed. Goal is incomplete.
+Next action is operator contract disposition, then one newly bounded caller-hook
+trust qualification and the original remaining implementation/acceptance packets.
