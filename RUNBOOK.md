@@ -7394,3 +7394,10 @@ after the identity guard; no atomic existing-only native primitive is establishe
 No deliberate shared restart/fallback is added. Required CI39160812086 passes
 both matrices for preceding a3b22e5; this delta needs fresh CI. Production and
 false-stop ledger remain unchanged.
+
+Final bdccad0 candidate has112modules matching installed source. Owned native
+refresh completes, exact paused goal preserved, zero model turns. Harness first
+returns failed because immediate cleanup sees PID52059; later independent /proc
+census shows it exited, no readable private-home matches and shared9802alive.
+Original failure retained with cleanup-readback.json; no blind rerun. This probe
+uses existing_endpoint/dynamic behavior and does not prove managed catalog restart.

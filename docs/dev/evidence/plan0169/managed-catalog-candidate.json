@@ -1,5 +1,5 @@
 {
-  "state": "FOCUSED_ACCEPTED_INSTALLED_MODULES_MATCH_NATIVE_PENDING",
+  "state": "FOCUSED_AND_INSTALLED_SOURCE_ACCEPTED_RUNTIME_CLEANUP_RECONCILED",
   "version": "0.18.1",
   "prefix": "/tmp/cw289-managed-candidate",
   "modules": 112,
@@ -129,5 +129,39 @@
   },
   "native": "/tmp/cw289-managed-final-native/state.json",
   "production": "0.18.0; no live reconciliation applied",
-  "deadline": "2026-10-18T21:39:29.531693Z"
+  "deadline": "2026-10-18T21:39:29.531693Z",
+  "native_result": {
+    "first_result": "failed",
+    "refresh_state": "completed",
+    "model_turns": 0,
+    "goal_unchanged": true,
+    "first_cleanup": {
+      "denied_environment_pids": [
+        1571,
+        1596,
+        6447,
+        7516,
+        11130,
+        94767
+      ],
+      "private_readable_environment_matches": [
+        52059
+      ]
+    },
+    "later_cleanup": {
+      "observed_at": 1792353764.8343873,
+      "readable_environment_matches": [],
+      "denied_environment_pids": [
+        1571,
+        1596,
+        6447,
+        7516,
+        94767
+      ],
+      "original_failure_retained": true,
+      "interpretation": "original cleanup census raced process exit; independent later census",
+      "shared_executor_pid9802_exists": true
+    },
+    "proof_scope": "existing-endpoint zero-model modal/skill/behavior path; managed-default catalog restart remains production gate"
+  }
 }
