@@ -1278,3 +1278,14 @@ terminal without reload. A new attempt needs explicit new-expiry authority and
 an idle window; actual native resource proof remains OPEN.
 v0.17.3 additionally repairs fractional reserve input and clarifies exact newcaller
 grants; no automatic grant inheritance or resource renewal is implemented.
+
+
+## P169 | Verified resource allocation provisioning
+
+State: PLANNED. Owner: primary / ecochran76.
+[Plan0169](docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md).
+Confirmed product contract: automatically provision verified user authority,
+retain allocation continuity across successor conversations and hold ambiguous
+links with actionable recovery. Draft testing seam awaits user confirmation;
+trusted native request/caller evidence is the first implementation gate. No
+runtime grant or allocation changes in this planning slice.

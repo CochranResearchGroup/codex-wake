@@ -7112,3 +7112,14 @@ production grant/enrollment/goalresume/counterreset/sharedreload/newexpiry.
 Newcaller provisioning remains a separate real setup boundary; Plan0168/issue282
 OPEN for productionproof and safe session bootstrap. Runtime evidence under
 caller-admission/v0173-delivery.json.
+
+## Turn347 | 2026-10-18 UTC | Confirmed automatic allocation provisioning contract
+
+User confirmed automatic verified-caller provisioning, preserved cumulative
+usage/deadline, actionable ambiguous-link holds and renewal scoped to its named
+objective. Added domain terms and ADR0002, plus bounded draft Plan0169. Public
+MCP across original/successor conversations with an unrelated control is the
+proposed acceptance seam; confirmation precedes GitHub ready-for-agent posting.
+Trusted native caller/request provenance remains an explicit qualification gate,
+not an assumed capability. No implementation, host grant, enrollment, goal,
+counter, monitor or refresh change was made.
