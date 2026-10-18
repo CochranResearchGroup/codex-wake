@@ -95,7 +95,8 @@ def _grant(policy_path,thread):
 
 
 def _public(receipt):
-    return {key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')}
+    return dict({key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')},
+        stop_scope='registered_native_session',descendant_stop_verified=False)
 
 
 def _request(grant,method,params):

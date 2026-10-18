@@ -6986,3 +6986,33 @@ MCP public stdio red observed missing host option; green now proves discovery,
 host argument forwarding and rejection of endpoint/root/peer/reset overrides.
 Native fork/accounting facts retained in plan0167/native-accounting-findings.md;
 source-derived delegate rules are not live descendant acceptance.
+
+
+## 2026-10-17 | Plan0167 source/native acceptance and release preparation
+
+User confirmed same-session limits persist until explicit user counter/allocation
+reset. Implemented MCPset/show, host-scopedCLI and independentwatcher, qualified
+cached-inclusive response accounting, durable checkpoint and pause/interrupt.
+One fresh review acceptedF1 (resume after partialstop);6b4b233 fixes and independent
+closed-world verification passes. No further broad review is required.
+
+Full documented-isolation source regression1349PASS/1optionalhostskip327.697s.
+Earlier inherited-host runs failed known StableTime/registry fixture boundary;
+all logs retained. Corrected new controller test fixture so its independent
+process uses the same local Unix native protocol server instead of a parent-only
+RPC mock;21installed checks pass. Final goal-focused24PASS after actionable
+refusal messages. Packaged109sourcefiles matched6b4b233 before release-only
+version/coverage metadata changes. Version0.17.0 prepared; production unchanged.
+
+Actual Codex0.163 idle and active controls passed under own fixtures; active
+checkpointACK then original30second pause+exactturninterrupt,3localhostResponses
+calls/externalprovider0. Native delegated accounting qualified90 injected tokens
+once (root20+40,child30), cached-inclusive; no live copied-parent record in that
+sample. Rawfirstfailednativepacket retained. All owned native/watch processes and
+sockets cleaned; checkpoint delivery is not an authored checkpoint artifact.
+Root-only native stop proof excludes separately running children; public coverage
+fields and guide say so. Dedicated OS containment remains a separate guarantee.
+
+Source acceptance moves to protected-main PR/CI and exact-main delivery under the
+standing install/deploy/reconcile instruction. Retain stable installed0.16.0 until
+that gate passes; no unrelated wake/service/session changes are authorized.

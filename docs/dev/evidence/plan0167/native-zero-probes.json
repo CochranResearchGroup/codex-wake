@@ -1,0 +1,29 @@
+{
+  "verdict": "UNAVAILABLE_NATIVE_ALIAS_ROUTE",
+  "model_calls": 0,
+  "thread_start_requests_sent": 0,
+  "attempts": [
+    {
+      "native_pid": 50870,
+      "model_calls": 0,
+      "native_exit": 0,
+      "process_present": false
+    },
+    {
+      "native_pid": 54846,
+      "model_calls": 0,
+      "native_exit": 0,
+      "process_present": false
+    }
+  ],
+  "diagnostic": {
+    "pid": 62494,
+    "euid": 1000,
+    "uid": 1000,
+    "mode": "0o120777",
+    "socket": false,
+    "symlink": true,
+    "process_present": false
+  },
+  "reason": "Codex listen path is a symlink; current native adapter requires an exact owned socket or separately proven strict executor alias. Did not weaken alias checks."
+}

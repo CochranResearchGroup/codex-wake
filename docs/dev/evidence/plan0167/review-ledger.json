@@ -1,0 +1,18 @@
+{
+  "target": "3a1c2d5",
+  "scope": "new issue279 feature only",
+  "discovery_passes": 1,
+  "remediation_passes": 1,
+  "specification": [
+    {
+      "id": "F1",
+      "disposition": "blocking",
+      "criterion": "limits persist across native resume",
+      "finding": "partially verified stop suppressed a later pause after resume",
+      "fix": "6b4b233",
+      "verification": "independent closed-world PASS"
+    }
+  ],
+  "standards": [],
+  "live_acceptance": "separate unresolved gate"
+}

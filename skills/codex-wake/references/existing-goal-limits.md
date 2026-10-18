@@ -1,8 +1,8 @@
 # Token and time limits in the existing dev session
 
-This development-branch workflow supervises the current native `/goal` without
+Codex Wake0.17.0 supervises the current native `/goal` without
 moving to another tab or agent. Installation, host grants and a running controller
-are required. Source capability is separate from an installed release.
+are required. Check the installed version and controller receipt before claiming enforcement.
 
 ## Agent workflow
 
@@ -48,7 +48,9 @@ generation, can reset counters/allocation. Do not invent a reset to escape a hol
 - `checkpoint_requested`: the reserve has been reached. Inspect the checkpoint
   delivery state; queued, acknowledged and uncertain are different outcomes.
 - `stopped`: native readback proves the goal is paused/absent and no active turn
-  was observed. Arbitrary tool processes and external services may still exist.
+  was observed in the registered session. Separately running delegated sessions,
+  arbitrary tool processes and external services are outside this stop proof.
+  Delegated usage is counted; `descendant_stop_verified` remains false.
 - `held` or `stop_unverified`: continuation is not authorized by this receipt.
   Preserve the original allowance and report missing evidence or uncertain stop.
 
@@ -83,6 +85,11 @@ uses an existing absolute owned Unix endpoint and Codex home:
   }
 }
 ```
+
+Codex 0.163 publishes its `--listen` path as a rendezvous symlink. Provision
+the physical owned Unix socket after verifying the private socket directory and
+owned native process; an advertised alias is not an accepted endpoint for this
+mode. Do not use strict-executor binding files to bypass that check.
 
 The caller UUID, limits and paths must be real approved values. Policy file mode
 must be `0600`, and the runtime directory private (`0700`). Keep credentials and

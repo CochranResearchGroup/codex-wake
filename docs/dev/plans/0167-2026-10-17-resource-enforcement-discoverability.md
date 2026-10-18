@@ -3,7 +3,7 @@
 State: OPEN. Owner: primary / ecochran76. Work item: #279; related #274, #278.
 Branch: feat/objective-enforcement. Base:7dfb868.
 
-## Scope and acceptance
+## Original audit scope and acceptance (completed)
 
 Audit how an agent discovers resource enforcement from a user-supplied budget.
 Improve shipped skill triggers, packaged instructions, MCP tool descriptions and
@@ -12,7 +12,7 @@ Do not change authority or containment semantics, install production skills,
 restart user clients, merge or release. This is a requested onboarding audit, not
 a second broad review of Plan0166.
 
-## Current State
+## Audit findings at49a5260 (historical)
 
 Discoverability gaps confirmed: resource enforcement absent from skill metadata
 and MCP descriptions; detailed controls guide lacked a portable agent workflow.
@@ -47,9 +47,8 @@ a separate guarantee from dedicated OS execution containment. No session
 migration or separate worker/tab management is assumed for this requested path.
 
 The prior strict-MCP bootstrap gap remains factual, but fixing it alone would
-not deliver this clarified existing-goal workflow. Interview remains open on
-stop guarantees, checkpoint reserve, accounting scope/start and renewals. No
-runtime implementation starts until the user confirms the resulting contract.
+not deliver this clarified existing-goal workflow. At this interview checkpoint those decisions remained open; the final confirmed
+contract below supersedes it and authorizes implementation.
 
 ## Settled decisions | interview round two
 
@@ -59,9 +58,8 @@ control response remains an explicitly unverified stop. User also accepted a
 checkpoint reserve inside the original budget: the original limit still pauses
 the goal if checkpointing is ignored or unfinished. ADR0001 records this boundary.
 
-Pending product choices: standard checkpoint trigger (recommended5%token/60s
-time reserve), and cumulative goal-start accounting versus the native displayed
-counter. Read-only owned-fixture investigation confirmed thread_goal_updated
+The next interview round considered the5%token/60s checkpoint trigger and
+cumulative goal-start accounting; both were subsequently confirmed below. Read-only owned-fixture investigation confirmed thread_goal_updated
 history can anchor some settled goal boundaries:55175→145652 cumulative gives
 90477 while native goal display gives1869. General active-goal baselines and
 delegated aggregation are not yet implemented or qualified; no assumption that
@@ -69,7 +67,7 @@ parent totals can safely be added to child totals is permitted.
 
 Prior domain rules continue to apply unless explicitly changed: historical
 consumption survives resumption, and only explicit user renewal increases
-authority. Runtime implementation still waits for a confirmed complete contract.
+authority. The final confirmation below closes that interview gate.
 
 ## Confirmed implementation scope | existing session supervision
 
@@ -162,3 +160,37 @@ Primary owns MCP/CLI wiring, shared docs and integration. Bounded disjoint lanes
 core controller and accounting each in their own worktree; public-seam tests
 belong to each lane. One red-green behavior at a time, two attempts per slice;
 one fresh review then at most one remediation pass for this feature.
+
+## Implementation and acceptance checkpoint | 2026-10-17
+
+Implementation is complete for the frozen native-session contract. Work item279
+covers the public MCP/CLI controller, cached-inclusive accounting and discovery.
+Limits persist across replacement goals and resume; host allocation generation
+is the explicit user-reset boundary. Source checkpoints6b4b233 (reviewed core),
+977664a (actual active controls) andb6fd05c (actual native delegated accounting)
+retain evidence. Version0.17.0 is prepared for release; production remains0.16.0
+until protected-main integration and exact-prefix rollout succeed.
+
+- Full documented-isolation regression:1349 tests PASS, one optional host skip,
+  327.697s. Initial host-configured runs fail the documented existing Stable Time/
+  registry fixture boundary; retained, not erased. Later final CLI refusal and
+  cross-process fixture changes pass24focusedtests. Installed core/accounting21
+  pass after fixing the fixture's parent-only native RPC mock race using a real
+  local Unix protocol server shared with the watcher.
+- Candidate wheel109Python sources match; installed public MCP→CLI→watcher
+  protocol qualification passes. Portable whole-skill copy resolves all links.
+- Actual Codex0.163 idle controller stop and active-turn checkpoint/pause/interrupt
+  pass with no external provider calls. Local Responses data is injected, not
+  billing. Checkpoint acknowledgement is delivery, not an authored artifact.
+- Actual native delegation publishes90 injected cached-inclusive tokens exactly
+  once (20+40root,30child). This native fork did not copy prior parent counters;
+  inherited-record dedup remains fixture-qualified. Root-native stop does not
+  establish separately running child-session termination; public readback and
+  guide state this explicit scope. Dedicated containment remains separate.
+- One independent drift review found F1, accepted blocking and fixed by observed
+  pause epochs. Closed-world independent verification passed; no new broad pass.
+
+Remaining delivery unit: publish the final coherent source, protected-main PR/CI,
+then exact-main release/install plus whole-skill/client synchronization under the
+user's standing install/deploy/reconcile instruction. Preserve all unrelated
+sessions and services. Do not call source acceptance a production rollout.

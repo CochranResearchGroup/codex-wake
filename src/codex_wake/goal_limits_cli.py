@@ -41,7 +41,9 @@ def goal_limits_command(args, root):
                 checkpoint_token_percent=args.checkpoint_token_percent,
                 checkpoint_seconds=args.checkpoint_seconds)
     except Exception as exc:
-        result = {'error': {'code': 'goal_limits_unavailable', 'reason': type(exc).__name__},
+        from .records import WakeError
+        message = str(exc) if isinstance(exc, (ValueError, WakeError)) else 'Host filesystem, socket or controller unavailable; inspect operator setup.'
+        result = {'error': {'code': 'goal_limits_unavailable', 'reason': type(exc).__name__, 'message': message},
                   'state': 'held', 'armed': False}
         print(json.dumps(result))
         return 2

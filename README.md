@@ -6,14 +6,14 @@ messages, turns and task status. Use native messaging directly for an immediate
 agent exchange; use Wake when a follow-up must survive the initiating turn or
 when you explicitly need a tracked exchange.
 
-When a user gives an existing Codex agent token/time limits, the development
-branch provides MCP enrollment and an independent watcher: request checkpoint,
+When a user gives an existing Codex agent token/time limits, Codex Wake0.17.0
+provides MCP enrollment and an independent watcher: request checkpoint,
 then pause the current native goal and interrupt its exact active turn. Limits
 persist across replacement goals until an explicit user reset. Start with the
 [existing-session workflow](skills/codex-wake/references/existing-goal-limits.md).
 Host setup and qualified accounting are required; polling and publication make
-token stops sampled, with unknown maximum overshoot. This is not an installed
-release or an OS process-termination guarantee.
+token stops sampled, with unknown maximum overshoot. Installation alone does not enroll a session or provide an OS process-termination
+guarantee.
 
 For memory, swap, CPU and task controls, use separate
 [dedicated executor containment](docs/agents/strict-objectives.md). Its ordinary

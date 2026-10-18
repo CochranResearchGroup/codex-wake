@@ -7,8 +7,10 @@ import subprocess
 import sys
 import tempfile
 import time
+import threading
 import unittest
 from unittest.mock import patch
+from websockets.sync.server import unix_serve
 
 from codex_wake.goal_supervision import enroll,show,poll
 
@@ -20,7 +22,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_resume_after_partially_verified_stop_gets_a_new_pause(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory)
-            with patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 enroll(root,policy,THREAD,40,120)
                 native['lose']='turn/interrupt'
                 first=poll(root)[0]
@@ -65,6 +67,21 @@ class GoalSupervisionTests(unittest.TestCase):
             if method=='turn/interrupt':native['active'].remove(params['turnId'])
             if method=='turn/steer':self.assertEqual(params['expectedTurnId'],'work')
             return {}
+        def handler(ws):
+            for raw in ws:
+                message=json.loads(raw)
+                if 'id' not in message:continue
+                if message['method']=='initialize':result={}
+                else:
+                    try:result=request(None,None,message['method'],message['params'],None)
+                    except TimeoutError:
+                        ws.close();return
+                ws.send(json.dumps(dict(id=message['id'],result=result)))
+        server=unix_serve(handler,str(Path(directory)/'unused.sock'))
+        worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+        def close_server():
+            server.shutdown();worker.join(timeout=2)
+        self.addCleanup(close_server)
         return root,policy,log,native,request
 
     @contextmanager
@@ -85,7 +102,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_same_allocation_preserves_original_limits_across_replacement_native_goal(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory)
-            with patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 first=enroll(root,policy,THREAD,100,120)
                 self.assertEqual(first['state'],'held')
                 self.assertEqual(first['used_tokens'],40)
@@ -101,7 +118,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_checkpoint_then_original_token_limit_pause_and_interrupt_exact_thread(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory)
-            with self.controller(root),patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 result=enroll(root,policy,THREAD,100,120,checkpoint_token_percent=60,checkpoint_seconds=0)
                 self.assertEqual(result['state'],'armed')
                 result=poll(root)[0]
@@ -117,7 +134,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_lost_checkpoint_response_is_not_replayed_and_does_not_delay_stop(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory);native['lose']='turn/steer'
-            with self.controller(root),patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 enroll(root,policy,THREAD,100,120,checkpoint_token_percent=60,checkpoint_seconds=0)
                 self.assertEqual(poll(root)[0]['checkpoint']['state'],'uncertain')
                 poll(root)
@@ -128,7 +145,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_explicit_host_allocation_reset_is_only_way_to_reset_spend(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,_,request=self.fixture(directory)
-            with patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 first=enroll(root,policy,THREAD,100,120)
                 value=json.loads(policy.read_text());value['callers'][THREAD]['allocation_id']='operator-reset-2'
                 policy.write_text(json.dumps(value))
@@ -141,7 +158,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_unknown_stop_response_and_same_generation_enrollment_cannot_replay_or_rearm(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory);native['lose']='thread/goal/set'
-            with self.controller(root),patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 enroll(root,policy,THREAD,40,120)
                 self.assertEqual(poll(root)[0]['state'],'stop_unverified')
                 enrollment=enroll(root,policy,THREAD,40,120)
@@ -153,7 +170,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_default_checkpoint_and_original_elapsed_deadline_survive_controller_reconstruction(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory)
-            with self.controller(root),patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 receipt=enroll(root,policy,THREAD,42,120)
                 self.assertEqual(poll(root)[0]['state'],'checkpoint_requested')
                 with patch('codex_wake.goal_supervision.time.clock_gettime',return_value=receipt['started_boottime']+121):
@@ -163,7 +180,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_revoked_host_grant_stops_only_persisted_exact_thread(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory)
-            with self.controller(root),patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 enroll(root,policy,THREAD,100,120)
                 value=json.loads(policy.read_text());value['callers']={};policy.write_text(json.dumps(value))
                 result=poll(root)[0]
@@ -174,7 +191,7 @@ class GoalSupervisionTests(unittest.TestCase):
     def test_stale_or_dead_independent_controller_is_never_displayed_as_armed(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,_,request=self.fixture(directory)
-            with patch('codex_wake.goal_supervision.native_request',side_effect=request),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 with self.controller(root):
                     self.assertEqual(enroll(root,policy,THREAD,100,120)['state'],'armed')
                 status=show(root,policy,THREAD)
