@@ -6,7 +6,7 @@ Branch: fix/289-allocation-campaign-control. Base: 89e3eb8. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 4; fresh-token default and campaign-scoped graceful shutdown.
+Plan version: 5; fresh-token default and campaign-scoped graceful shutdown.
 
 ## Current State
 
@@ -23,7 +23,7 @@ contaminated by real host registry/mailbox discovery; isolated XDG state/config
 plus StableTime opt-out resolve the failure family without product changes.
 The source is qualified, not published or installed into production. Current
 native goal status is the historical blocked checkpoint; use live fresh accounting
-for the original2M/6h bound, never the cache-inclusive total.
+for the renewed v5 allocation below, never the cache-inclusive total.
 
 
 2026-10-18 v2: the user explicitly requires graceful campaign winddown, followed
@@ -577,3 +577,29 @@ Next concrete integration packet uses this branch and qualified evidence; no
 repeat investigation or approval for self-enrollment is needed. Memory disposition
 forbidden: no reviewed Graphiti destination routing was established; non-write
 receipt /tmp/cw289-self-enrollment-memory-disposition-20261018.json,0writes.
+
+## Checkpoint v5 — explicit operator resource renewal
+
+The operator requested a new2Mfresh-token/6h allocation and set the existing
+native goal active. This is explicit renewal authority, not inferred from a
+continuation or a new plan version. Allocation
+issue289-renewal-de360e1d0be04564bb7c947f996807d3 starts
+2026-10-18T15:39:29.531693Z and ends2026-10-18T21:39:29.531693Z.
+It permits2,000,000additional fresh input+output tokens, excluding cache, from
+the qualified native response anchor at801245cumulative fresh tokens. Preserve
+the prior allowance/history; its original deadline no longer governs new work.
+Checkpoint before either renewed ceiling; retain the200k-token/900second reserve.
+
+Private durable authority/accounting receipt:
+/home/ecochran76/.local/state/codex-wake/goal-limits/operator-allocations/issue289-renewal-de360e1d0be04564bb7c947f996807d3.json.
+Read it and use observe_usage with its reset_anchor to measure renewed usage;
+never zero native cumulative history or subtract unverified display counters.
+The existing native goal was not replaced or falsely completed.
+
+Enforcement readback remains held/armed:false: installed public Wake still lacks
+the caller grant and exposes cache-inclusive enrollment only. This receipt is
+operator-authorized resource authority and a qualified measurement boundary, not
+an armed controller receipt. No host grant/controller/installation was changed
+to manufacture enforcement. User activation permits continued operator dialogue
+and bounded setup/integration; do not turn the missing monitor into a chat lock.
+Resource renewal does not reset review/discovery bounds or widen release scope.

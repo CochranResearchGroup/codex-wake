@@ -31,11 +31,17 @@ failed logs and one intermittent disposition mismatch remain retained. Plugin12
 PASS, compile/policy/diff/build PASS. README and CI now isolate unit process
 state. See delegation-validation.json. This is local, not remote matrix CI.
 
-Resource bound: original goal01a14f45-25a2-7ef1-bcce-1205f176cc73 created1792332310,
-deadline1792353910 (2026-10-18T20:05:10Z),2Mfresh tokens. Current read-only qualified
-usage745150fresh; native goal remains historical blocked with stale counters.
-Use source observe_usage for actual cumulative spend; never count cache toward
-the fresh ceiling or reset counters/time. Stop/checkpoint before original limits.
+Resource bound — renewed explicitly by operator after this checkpoint:
+allocation issue289-renewal-de360e1d0be04564bb7c947f996807d3.
+New allowance2Madditional fresh tokens/6hours, start2026-10-18T15:39:29.531693Z,
+deadline2026-10-18T21:39:29.531693Z. Original history is preserved; fresh baseline
+801245plus qualified reset_anchor in the private operator-allocations JSON under
+/home/ecochran76/.local/state/codex-wake/goal-limits/. Use observe_usage with
+that anchor, excluding cached input. Native goal01a14f45-25a2-7ef1-bcce-1205f176cc73
+is active by user action; no native counter reset/replacement goal occurred.
+Installed external enforcement remains held/armed:false. This is renewed operator
+authority, not claimed armed enforcement. Preserve200k-token/900second checkpoint
+reserve. Resource renewal does not reset review or discovery bounds.
 
 Next bounded packet: integrate this qualified branch through the repository's
 GitHub/CI workflow, then perform separately authorized exact-main release/install
