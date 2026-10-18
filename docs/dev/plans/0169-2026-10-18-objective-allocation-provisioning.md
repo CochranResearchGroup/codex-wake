@@ -6,7 +6,7 @@ Branch: fix/289-refresh-pause-restore. Base: 9c245a5. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 7; targeted pause/quit/resume refresh and campaign-stop separation.
+Plan version: 8; targeted pause/quit/resume refresh and campaign-stop separation.
 
 ## Current State
 
@@ -28,11 +28,19 @@ Public enrollment qualified355845fresh tokens, but rejected native `blocked`
 status as `native_goal_state_unknown` and latched stop. The user subsequently
 reactivated the native goal; this does not itself clear the persisted resource
 stop. Do not edit live ledgers or mint a new allocation to escape that decision.
-Next bounded packet: reproduce planned pause/quit/resume at the public refresh
-seam; implement explicit pause provenance and modal handling; distinguish known
-inactive native statuses from unknown control/accounting; prove no hard-stop
-latch can be cleared by operational resume. Then fixed-scope review, CI and
-installed qualification before further live adoption.
+Source candidate0.18.1 now provides explicit operational pause provenance,
+recognized modal handling and conditional active restoration. Independent
+`client_idle` admission queues the existing watcher and requires only source idle;
+busy peer fixture remains untouched and shared reload is never called. All
+configured resource authorities must permit restoration. Activation uncertainty
+reconciles by readback, never replay. The installed owned paused-goal native probe
+passes with zero model turns and cleaned owned processes; its first failures
+were contaminated by three unknown host Wake records, fixed by isolated fixture
+XDG configuration without weakening guards. Source review also identified and
+repaired a watcher-shutdown fence; final frozen validation remains pending.
+Known-state enrollment/old stop reconciliation is still separate and incomplete.
+Next packet: freeze watcher correction, required CI, exact-source installed proof,
+then deliver and verify live adoption without resetting allowance or stop history.
 
 Acceptance: native pause acknowledgement precedes client quit; exact same-thread
 resume reaches a usable composer; actual skill/MCP version is verified; active

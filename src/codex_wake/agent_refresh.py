@@ -29,7 +29,7 @@ def refresh_command(args, root):
         raise WakeError('approved profile and workspace checkpoint are required') from None
     if hashlib.sha256(content).hexdigest() != args.checkpoint_sha256:
         raise WakeError('checkpoint hash changed; original checkpoint must be preserved')
-    if profile.get('refresh_mode') == 'shared_mcp_idle':
+    if profile.get('refresh_mode') in ('shared_mcp_idle', 'client_idle'):
         from .shared_refresh import command
         from .sessions_cli import emit
         try:
@@ -152,10 +152,10 @@ def rollback(path, receipt, profile):
     save(path, receipt)
 
 
-def preflight(path, receipt, profile):
+def preflight(path, receipt, profile, effect_guard=None):
     from .sessions import observe, revalidate_attachment
     from .session_lifecycle import tmux_command
-    runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile))
+    runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile), effect_guard=effect_guard)
     snapshot = observe(endpoint=runtime.app_server, socket_path=runtime.tmux_socket,
                        timeout=runtime.timeout)
     rows = [r for r in snapshot['sessions'] if r['thread_id'] == receipt['thread_id']]
@@ -199,8 +199,10 @@ def preflight(path, receipt, profile):
         return
     from .refresh_goal import pause
     receipt['goal_before'] = goal
-    if not pause(path, receipt, profile, goal, lambda method, params: native_request(
-            runtime.app_server, runtime.codex, method, params, runtime.timeout)):
+    def request(method, params):
+        if effect_guard:effect_guard()
+        return native_request(runtime.app_server,runtime.codex,method,params,runtime.timeout)
+    if not pause(path, receipt, profile, goal, request):
         return
     receipt.update(state='stopping', uncertain_effect='tmux/kill-pane',
                    old_attachment=pane, thread_name=rows[0]['name'])
@@ -221,14 +223,16 @@ def preflight(path, receipt, profile):
         save(path, receipt)
 
 
-def advance_refresh(path, receipt, profile):
+def advance_refresh(path, receipt, profile, effect_guard=None):
     from .app_server import resolve_codex_cmd
     from .native_protocol import native_request
     from .sessions import observe, revalidate_attachment
     from .session_lifecycle import tmux_command
     runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile),
+                              effect_guard=effect_guard,
                               codex=resolve_codex_cmd(profile['codex_path'], required=True))
     def request(method, params):
+        if effect_guard:effect_guard()
         return native_request(runtime.app_server, runtime.codex, method, params, runtime.timeout)
     try:
         if receipt['state'] == 'restoring_goal' or receipt.get('uncertain_effect') == 'native/goal_resume':
@@ -301,7 +305,7 @@ def advance_refresh(path, receipt, profile):
                 return
             receipt['attachment'] = panes[0]
             from .refresh_goal import settle_ui
-            if not settle_ui(path, receipt, profile, panes[0], request):
+            if not settle_ui(path, receipt, profile, panes[0], request, effect_guard=effect_guard):
                 return
             receipt['goal_after'] = request('thread/goal/get', {'threadId': receipt['thread_id']})['goal']
             before, after = receipt['goal_before'], receipt['goal_after']

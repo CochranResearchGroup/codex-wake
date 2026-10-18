@@ -20,7 +20,7 @@ def write(path, value):
     path.chmod(0o600)
 
 
-def execute(root, prefix, paused_goal=False, rollback=False, dynamic_mcp=False):
+def execute(root, prefix, paused_goal=False, rollback=False, dynamic_mcp=False, client_idle=False):
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     workspace, home = root / 'workspace', root / 'codex-home'
     workspace.mkdir(); home.mkdir(mode=0o700)
@@ -59,12 +59,13 @@ for line in sys.stdin:
     def skill_version(marker):
         skill.write_text('---\nname: refresh-marker\ndescription: Refresh marker '+marker+'\n---\nMarker '+marker+'.\n')
     skill_version('v1')
-    env = dict(os.environ, CODEX_HOME=str(home), XDG_STATE_HOME=str(root/'state'))
+    env = dict(os.environ, CODEX_HOME=str(home), XDG_STATE_HOME=str(root/'state'),
+               XDG_CONFIG_HOME=str(root/'config'))
     for key in ('CODEX_THREAD_ID','TMUX','TMUX_PANE','CODEX_WAKE_A2A_CAPABILITY',
                 'CODEX_WAKE_A2A_BUS_ROOT','CODEX_WAKE_SENDER_RECEIPT_AUTHORITY','PYTHONPATH'):
         env.pop(key,None)
     endpoint = root/'native.sock'; socket = root/'tmux.sock'; session = 'owned-refresh'
-    log = (root/'server.log').open('w'); server = None; created = False
+    log = (root/'server.log').open('w'); server = None; watcher = None; created = False
     receipt = dict(state='preparing',root=str(root),prefix=str(prefix),model_turn_limit=0,
         authority='execute Plan0156; disposable no-model resource refresh proof',codex=str(codex))
     write(root/'state.json',receipt)
@@ -116,7 +117,16 @@ for line in sys.stdin:
                 sha256=hashlib.sha256(skill.read_bytes()).hexdigest()),
                 'mcp':dict(kind='mcp',server='toy',tool='version',arguments={},read_only=True,
                     expected_content=[{'type':'text','text':'v2'}])})
+        if client_idle:
+            profile.update(refresh_mode='client_idle',scope_approval='Owned zero-model single-client qualification',timeout=5)
         write(profiles,dict(version=1,profiles={'worker':profile},callers={thread:['worker']}))
+        if client_idle:
+            watcher=subprocess.Popen([str(prefix/'bin/codex-wake'),'--wake-root',str(root/'wake'),
+                'sessions','refresh-watch','--interval','.1'],env=env,stdout=log,stderr=log,start_new_session=True)
+            heartbeat=root/'wake/shared-refresh/controller.json'
+            ready_deadline=time.monotonic()+10
+            while not heartbeat.exists() and watcher.poll() is None and time.monotonic()<ready_deadline:time.sleep(.05)
+            if not heartbeat.exists():raise RuntimeError('independent client refresh watcher unavailable')
         checkpoint=workspace/'checkpoint.json'
         write(checkpoint,dict(source_thread_id=thread,objective='Qualify owned refresh',
             authority='operator execute Plan0156; no autonomous work',next_packet='Check changed resources',
@@ -133,7 +143,14 @@ for line in sys.stdin:
         lifecycle=json.loads(result['content'][0]['text']);receipt['mcp_refresh']=lifecycle
         # Startup is observed through the same intent; never start a replacement.
         deadline=time.monotonic()+30
-        while lifecycle['state']=='awaiting_preflight' and time.monotonic()<deadline:
+        while lifecycle['state'] in ('queued','prepared','pausing_goal','stopping','starting','awaiting_preflight','restoring_goal') and time.monotonic()<deadline:
+            if client_idle:
+                # Observe the durable receipt without repeatedly making the
+                # source busy through native MCP calls while its watcher runs.
+                time.sleep(.2)
+                lifecycle=json.loads((root/'wake/shared-refresh'/
+                    (hashlib.sha256(body['intent'].encode()).hexdigest()+'.json')).read_text())
+                continue
             result=request('mcpServer/tool/call',{'threadId':thread,'server':'wake_lifecycle',
                 'tool':'wake_sessions_refresh','arguments':body})
             lifecycle=json.loads(result['content'][0]['text']);time.sleep(.2)
@@ -165,6 +182,10 @@ for line in sys.stdin:
         receipt.update(state='passed',model_turns=0)
     except Exception as exc:receipt.update(state='failed',error=str(exc))
     finally:
+        if watcher is not None:
+            watcher.terminate()
+            try:watcher.wait(timeout=10)
+            except subprocess.TimeoutExpired:receipt['watcher_shutdown']='timed_out'
         if created:subprocess.run(['tmux','-S',str(socket),'kill-session','-t',session],env=env,capture_output=True,timeout=10)
         if server is not None and server.poll() is None:
             os.killpg(server.pid,signal.SIGTERM)
@@ -194,5 +215,6 @@ if __name__=='__main__':
     parser.add_argument('--paused-goal',action='store_true')
     parser.add_argument('--rollback',action='store_true')
     parser.add_argument('--dynamic-mcp',action='store_true')
+    parser.add_argument('--client-idle',action='store_true')
     args=parser.parse_args()
-    raise SystemExit(execute(args.root.resolve(),args.prefix.resolve(),args.paused_goal,args.rollback,args.dynamic_mcp))
+    raise SystemExit(execute(args.root.resolve(),args.prefix.resolve(),args.paused_goal,args.rollback,args.dynamic_mcp,args.client_idle))

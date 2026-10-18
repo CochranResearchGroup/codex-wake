@@ -2,12 +2,12 @@
 from .agent_lifecycle import save
 
 
-def settle_ui(path, receipt, profile, pane, request):
+def settle_ui(path, receipt, profile, pane, request, effect_guard=None):
     """Dismiss only the exact paused-goal prompt, never a draft or unknown dialog."""
     from types import SimpleNamespace
     from .session_lifecycle import tmux_command
     from .sessions import revalidate_attachment
-    runtime = SimpleNamespace(tmux_socket=profile.get('tmux_socket'), timeout=profile['timeout'])
+    runtime = SimpleNamespace(tmux_socket=profile.get('tmux_socket'), timeout=profile['timeout'], effect_guard=effect_guard)
     frame = tmux_command(runtime, 'capture-pane', '-e', '-p', '-t', pane['pane_id'], preserve_output=True)
     cursor = tmux_command(runtime, 'display-message', '-p', '-t', pane['pane_id'], '#{cursor_x},#{cursor_y}')
     x, y = map(int, cursor.split(','))
@@ -67,6 +67,13 @@ def resource_ready(root, receipt, profile, goal):
 
 
 def pause(path, receipt, profile, goal, request):
+    existing = receipt.get('operational_goal_pause')
+    if existing:
+        if existing.get('state') == 'acknowledged' and continuous(existing['paused'], goal, 'paused'):
+            return True
+        receipt.update(state='blocked', reason='refresh_goal_pause_continuity_unverified')
+        save(path, receipt)
+        return False
     if not goal or goal.get('status') != 'active':
         return True
     if not resource_ready(path.parent.parent, receipt, profile, goal):
