@@ -79,6 +79,22 @@ The user-authorized cumulative token and elapsed-time limits for an objective,
 including successors, reviewers, delegated work, retries and failed attempts.
 Changing conversation does not replenish this budget.
 
+**Resource allocation**:
+The resources a user authorizes for a named objective and its continuations.
+Conversation identity does not determine or replenish that authority.
+
+**Allocation renewal**:
+An explicit user change to a named objective's resource allocation. It does not
+change unrelated allocations or erase their usage history.
+
+**Allocation continuity**:
+The verified relationship that charges a successor's work to the same objective's
+existing allocation, preserving cumulative usage and its original deadline.
+
+**Caller provisioning**:
+Binding a verified conversation to the resource authority it may exercise.
+Provisioning alone is not proof of accounting or running enforcement.
+
 **Goal supervision**:
 Observing an existing goal's authorized resource usage, requesting a checkpoint
 before its limits, and pausing continuation when its stopping condition is reached.

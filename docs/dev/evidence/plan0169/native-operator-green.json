@@ -1,0 +1,31 @@
+{
+  "verdict": "PASS_NATIVE_ACTIVE_AND_OPERATOR_REPLY_LOCAL_FIXTURE",
+  "error": null,
+  "external_provider_calls": 0,
+  "usage_provenance": "injected localhost SSE; not billing",
+  "http_request_cap": 5,
+  "elapsed_seconds": 31.857615245999114,
+  "native_exit": 0,
+  "watcher_exit": 0,
+  "operator_turn_id": "01a14f79-363e-76f3-859d-83482db312de",
+  "operator_reply_status": "completed",
+  "operator_reply_preserved": true,
+  "operator_goal_status": "paused",
+  "native_version": "codex-cli 0.163.0",
+  "source_result": "/tmp/cw289-native-operator-green-20261018/result.json",
+  "fixture_script": "scripts/goal_supervision_native_active_qualification.py",
+  "fixture_script_sha256": "2ef1a141bf92f237cbbcc011d50449ae8a544c559458188a2b2a541d51601f62",
+  "fresh_process_readback": {
+    "native": {
+      "pid": 26016,
+      "present": false
+    },
+    "watcher": {
+      "pid": 26207,
+      "present": false
+    }
+  },
+  "http_calls": 4,
+  "operator_assistant_reply_observed": true,
+  "operator_assistant_reply": "OPERATOR REPLY AFTER PAUSE"
+}

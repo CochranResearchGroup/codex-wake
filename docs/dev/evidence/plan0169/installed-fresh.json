@@ -1,0 +1,21 @@
+{
+  "verdict": "PASS",
+  "native_controls": "injected_unix_protocol",
+  "clock": "configured_trusted_clock",
+  "model_calls": 0,
+  "python": "/tmp/cw289-installed/bin/python",
+  "token_accounting": "fresh",
+  "operator_reply_preserved": true,
+  "watcher_exit": 0,
+  "source_result": "/tmp/cw289-installed-fresh-20261018/result.json",
+  "state": "stopped",
+  "stop_proof": true,
+  "used_tokens": 110,
+  "wheel_sha256": "b9653c2c950e1b34133b63f86aa27bd5ca7a0fe87c4d3d6fbdce04a4840ad4f8",
+  "source_hashes": {
+    "src/codex_wake/goal_usage.py": "0ba7b5e3d6d38944e4d4cfaa05cacc853fcc68bdb0d0149d600e3c39ae1d9380",
+    "src/codex_wake/goal_supervision.py": "d6cd90d2db69874f34a56dd6c91059a36ce9b73d108b5f430e5dc67b56661f3a",
+    "src/codex_wake/goal_limits_cli.py": "a5923bb44009843381d2561ce123e9c360c66c30fe154d74ac9f5389c0100bde",
+    "src/codex_wake/mcp_server.py": "cbb7c2123a7ced96126f64790383f5b5a1c2268ea1d96eb33eed23367206c57c"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "qualification": "PASS_CAPTURED_NATIVE_METADATA_AND_SDK_CONTEXT_REPLAY",
+  "native_version": "0.163.0",
+  "sdk_version": "mcp 2.2",
+  "scope": "Caller attribution for explicitly host-delegated fixed objective allocation; no operator-origin proof or grant effect",
+  "native_evidence": {
+    "thread_id": "01a14f92-ddb0-7ea2-8b5b-61eec5efcf36",
+    "turn_id": "01a14f92-de59-7173-b8ad-f55c26fd8718",
+    "call_id": "owned-capture-call",
+    "owned_native_pid": 4125,
+    "socket_peer": {
+      "pid": 4125,
+      "uid": 1000
+    },
+    "mcp_tool_name": "mcp__fixture__capture",
+    "host_meta_fields": [
+      "threadId",
+      "sessionId",
+      "callId",
+      "itemId",
+      "x-codex-turn-metadata.thread_id",
+      "x-codex-turn-metadata.turn_id"
+    ],
+    "downstream_model_arguments": {
+      "marker": "model-original"
+    },
+    "hook_updated_input_applied": false,
+    "http_requests": 2,
+    "external_provider_calls": 0,
+    "remaining_owned_processes": []
+  },
+  "sdk_replay_evidence": {
+    "context_type": "ServerRequestContext",
+    "context_meta_type": "dict",
+    "exact_native_thread_turn_call_match": true,
+    "spoofed_argument_caller": "forged-caller",
+    "spoofed_argument_meta_thread": "forged-thread",
+    "context_unchanged_by_argument_claims": true,
+    "is_error": false,
+    "new_native_or_model_calls": 0
+  },
+  "transport_boundary": "Trust depends on the host-owned local native Codex gateway and its private stdio MCP connection. Context metadata is transport context, not model arguments. This is not a cryptographic attestation against arbitrary same-UID processes or a remotely supplied tools/call request. Delegated admission must reject missing/conflicting context and remain bounded by operator-controlled fixed allocations.",
+  "hook_trust_observation": "Thread/start config bypass_hook_trust=true executed the owned PreToolUse hook; global CLI bypass alone did not. No production trust configuration changed. Metadata path does not require a hook.",
+  "failed_second_native_attempt": {
+    "receipt": "/tmp/cw289-hook-binding-trust-attempt2/result.json",
+    "cause": "Fixture file mcp.py shadowed installed mcp package, so SDK server failed import; no MCP call or hook occurred",
+    "http_requests": 1,
+    "external_provider_calls": 0,
+    "remaining_owned_processes": []
+  },
+  "remaining_gate": "Actual native-to-public-Wake-MCP delegated admission using Context.meta, including model caller spoof rejection, readiness/accounting and unchanged legacy CLI behavior. SDK replay is not end-to-end native acceptance.",
+  "artifacts": [
+    {
+      "path": "/tmp/cw289-hook-binding-trust-attempt1/result.json",
+      "sha256": "11926df9755e38a783d46e7a9a93c4c541b08be0111528a48341c8dc487e6dbc"
+    },
+    {
+      "path": "/tmp/cw289-hook-binding-trust-attempt2/result.json",
+      "sha256": "8d7f86bcd1663872ba40c80190653209cae571da2dbedfda9608aa449b6bec54"
+    },
+    {
+      "path": "/tmp/cw289-hook-binding-trust-attempt2/sdk-replay/result-sequential.json",
+      "sha256": "260060e44ef822d593626b7012ecabb5edbfa6f023c7c89d534839cab5f36d72"
+    },
+    {
+      "path": "/tmp/cw289-hook-binding-native-meta-qualified.py",
+      "sha256": "46d631a20e7b4af3534a9790597ac0cf2259743b297f8953dc2d060f48cfc726"
+    },
+    {
+      "path": "/tmp/cw289-hook-binding-trust-attempt2/sdk-replay/server_fixture.py",
+      "sha256": "a916357e596eb1e428b465c68c408d0b7d81f7ff3edf21b107d33fdf0261b779"
+    }
+  ]
+}

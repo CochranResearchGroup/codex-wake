@@ -1,0 +1,70 @@
+{
+  "capability": "Native caller attribution hook available; authenticated operator allocation ingress unqualified",
+  "native_version": "codex-cli 0.163.0",
+  "supported_hook_fields": {
+    "pre-tool-use.command.input.json": {
+      "properties": [
+        "agent_id",
+        "agent_type",
+        "cwd",
+        "hook_event_name",
+        "model",
+        "permission_mode",
+        "session_id",
+        "tool_input",
+        "tool_name",
+        "tool_use_id",
+        "transcript_path",
+        "turn_id"
+      ],
+      "additionalProperties": false,
+      "sha256": "d5cb38c98a7d931907aa96614c4c52a5bc0c37d61b3f897837e32331842d3100"
+    },
+    "session-start.command.input.json": {
+      "properties": [
+        "cwd",
+        "hook_event_name",
+        "model",
+        "permission_mode",
+        "session_id",
+        "source",
+        "transcript_path"
+      ],
+      "additionalProperties": false,
+      "sha256": "f7299ffcc96c8ad0ab51df77743632f8374390329b14bef87c4e0d00b2caa4a2"
+    },
+    "user-prompt-submit.command.input.json": {
+      "properties": [
+        "agent_id",
+        "agent_type",
+        "cwd",
+        "hook_event_name",
+        "model",
+        "permission_mode",
+        "prompt",
+        "session_id",
+        "transcript_path",
+        "turn_id"
+      ],
+      "additionalProperties": false,
+      "sha256": "31d3d5e094ae9baa9478bc8e3d09f689de5a74228a404d2dffe60fc8fa89e3a0"
+    }
+  },
+  "goal_origin": {
+    "schema": "v2/ThreadGoalSetParams.json",
+    "input_enum": [
+      "user",
+      "automatic"
+    ],
+    "description": "Missing provenance does not supply user authorization.",
+    "persisted_readback_origin": false
+  },
+  "not_proven": [
+    "Hook execution on installed client for resource enrollment",
+    "Operator versus automated/API/tmux input distinction",
+    "Trusted receipt channel immune to direct caller invocation",
+    "Installed MCP hook updatedInput behavior"
+  ],
+  "external_change_required": "Trusted ingress integration must attest operator action and native IDs, e.g. client capture or authenticated launcher/proxy that owns operator input. An unsigned event-name/prompt/session tuple is insufficient.",
+  "runtime_effects": "none; no native turns started, no grants/config/controller changes"
+}

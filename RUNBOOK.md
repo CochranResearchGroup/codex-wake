@@ -7112,3 +7112,230 @@ production grant/enrollment/goalresume/counterreset/sharedreload/newexpiry.
 Newcaller provisioning remains a separate real setup boundary; Plan0168/issue282
 OPEN for productionproof and safe session bootstrap. Runtime evidence under
 caller-admission/v0173-delivery.json.
+
+## Turn347 | 2026-10-18 UTC | Confirmed automatic allocation provisioning contract
+
+User confirmed automatic verified-caller provisioning, preserved cumulative
+usage/deadline, actionable ambiguous-link holds and renewal scoped to its named
+objective. Added domain terms and ADR0002, plus bounded draft Plan0169. Public
+MCP across original/successor conversations with an unrelated control is the
+proposed acceptance seam; confirmation precedes GitHub ready-for-agent posting.
+Trusted native caller/request provenance remains an explicit qualification gate,
+not an assumed capability. No implementation, host grant, enrollment, goal,
+counter, monitor or refresh change was made.
+
+## Turn348 | 2026-10-18 UTC | Plan0169 spec published
+
+User confirmed the public MCP original/successor allocation-continuity test with
+an unrelated conversation control. Published full specification as issue289,
+enhancement/ready-for-agent; exact-marker duplicate search and provider readback
+verified. Plan0169 remains PLANNED, with implementation not started. Native
+caller/user-request evidence qualification is the first blocking packet; no
+implicit caller trust or grant inheritance is authorized. No live grants, goals,
+enrollments, counters, monitors or shared MCP caches were changed.
+
+
+## Turn349 | 2026-10-18 UTC | Campaign control and provisioning repair
+
+Goal: resolve issue289 with Matt's process; stop/checkpoint before2Mtokens or6h.
+User clarified that enforcement winds down and pauses the campaign while operator
+messages remain usable. Integration branch fix/289-allocation-campaign-control,
+base dbd37ca, main readback89e3eb8; unrelated worktrees preserved. Current caller
+MCP enrollment returned held/armed:false, missing host grant. No policy edits,
+production enrollment, counter reset or service reload performed. Native goal
+start1792332310, hard deadline1792353910. No armed monitor claim.
+
+State transition: ready -> active source diagnosis. Acceptance: new public
+operator-reply regression failed before fix; all11 controller tests pass after
+captured stop-turn ownership change. Progress: outcome_progress. Validation:
+`PYTHONPATH=src:tests .../.venv/bin/python -m unittest test_goal_supervision -q`.
+Blockers: trusted native admission evidence unqualified; accounting scan bound and
+boot continuity remain separate. Next: one bounded grace regression then native
+capability result. One read-only investigator /root/native_authority_capability
+is running under policy0021; primary owns integration. Review passes used0/1.
+
+
+### Turn349 checkpoint — token stop
+
+29 focused public/controller/accounting checks pass. Source read-only old-session
+accounting is qualified1,034,781 tokens, fixing the payload-retention-bound symptom.
+Current goal accounting reports6,040,982 cached-inclusive tokens: explicit2M stop
+was exceeded before primary checked the correct measure. Stop implementation,
+retain uncommitted changes and operator interaction; no deployment or production
+grants changed. Native display156,997 was not qualified cumulative spend.
+Plan0169 checkpoint v2 records exact remaining gates and unqualified native hook
+provenance lead. No completion claim; source branch is not merge-ready.
+
+
+## Turn350 | 2026-10-18 UTC | Fresh-token default correction
+
+User corrected budget semantics and resumed: default counts fresh input+output,
+excluding cache. Withdraw Turn349's token-exhaustion interpretation; retain its
+raw diagnostic evidence. Source accounting qualified230,812 fresh tokens, below2M;
+original6h deadline20:05:10Z remains. New enrollments use fresh basis, explicit
+cache_inclusive is supported, re-enrollment retains basis, and legacy receipts
+are not silently reinterpreted. Explicit qualified basis changes retain original
+history/deadline/generation/stop latch and prior accounting.30 focused tests pass.
+State transition: paused -> user-authorized continuation. Outcome_progress.
+Native hook evidence lacks authenticated operator input provenance; automatic
+provisioning is unimplemented, source repairs remain uninstalled. Next: public
+packaged MCP/controller acceptance, instruction updates and bounded review.
+
+
+### Turn350 validation checkpoint
+
+Outcome_progress: fresh default and campaign-scoped graceful stop pass30 focused
+checks and both isolated installed MCP/controller scenarios. Exact watcher PIDs
+absent after exit0; no production service touched. One bounded Standards/Spec
+review (/root/control_repair_review) returned no candidates. Candidate presubmit
+1369tests and unchanged-main1363tests share exactly80failed/error IDs (76failures,
+4errors,1skip each); no new failed ID, no full-suite pass. Policy wiring/compileall
+pass;0169metadataformat repaired, older0166-0168auditfindings preserved. Source
+checkpoint will retain the tested patch while host-delegated self-enrollment
+awaits operator decision. Wider289notcomplete, no release/install. Automatic
+grants remain unimplemented under current ADR0002 operator-origin requirement.
+
+
+## Turn351 | 2026-10-18 UTC | Real native operator reply and delegated fresh proof
+
+State transition: control repair validated -> native acceptance proven for the
+bounded repair. Outcome_progress. Isolated Codex0.163with localhost response fixture:
+old controller interrupts exact operator reply, candidate permits it to stay active
+and finish after goal pause. Native assistant reply text is retained in rollout;
+no external provider calls. One initial harness run was invalidated because steer
+restarts HTTP stream; corrected input-correlated baseline/candidate use4requests
+within5cap. Actual root/child delegation charges45fresh versus90inclusive once.
+Exact owned PIDs absent after exit; shared services/sessions untouched. Receipts
+under docs/dev/evidence/plan0169/native-*.json. Self-provisioning decision still pending.
+
+Diagnosed local presubmit configuration contamination: installed StableTime default
+supersedes fixture clock. Supported per-process CODEX_WAKE_STABLE_TIME_CONFIG=''
+restores23selected tests toPASS; full suite isolated run is pending. Production
+clock configuration unchanged. README records unit command and distinction from
+native qualification, which retains configured trusted time. Budget367,086fresh,
+well under2M; no renewal or pause implied. Next: reconcile exact unit-run handle,
+preserve native evidence and wait for material authorization decision.
+
+
+Fixture-isolated full-unit result:1369tests in134.071s,63failures/1error/1skip,
+exit1. These64identifiers are a strict subset of the unchanged-main failure set;
+the StableTime opt-out removed16clock-related failures but did not repair all
+pre-existing lifecycle-fixture failures. No full-suite green claim. Preserve
+isolated-presubmit.json and original failures; stop this broader baseline probe
+rather than widen repair scope. Product modules remain at reviewed f1223ad;
+new native acceptance scripts/receipts strengthen proof, not implementation scope.
+
+
+## Turn352 | 2026-10-18 UTC | Caller-hook proof and blocked audit
+
+Previous turn: outcome_progress(native acceptance). Current turn: blocker_reduction
+via real caller-hook probe, then genuine authorization gate. Native MCP capture
+invoked successfully after correcting obsolete fixture name to advertised namespace;
+PreToolUse hook did not run or replace arguments. hooks/list enabled/untrusted;
+no caller attestation claim. Initial delegated probes failed dependency/routing;
+primary reassessed and allowed one deterministic wire correction. Three artifacts
+retained; zero external provider/grant effects and empty owned process census.
+Four installed changed modules match source hashes. No further probe loop.
+
+Same operator authorization decision persists for third consecutive goal turn;
+independent safe repair/acceptance work is complete. Transition goal to blocked,
+not complete or resource-exhausted. Operator chat remains usable. Plan0169 and
+lane projection now BLOCKED, clean source checkpoints retained locally. No
+host-delegated enrollment permission inferred from auto continuation. On answer,
+reconcile native hook trust as well as allocation authority before effects.
+
+
+## Turn353 | 2026-10-18 UTC | Host-delegated self-enrollment qualified
+
+User explicitly approved self-enrollment; authorization gate resolved. Revised
+ADR0002/Plan0169v4; preserved original2Mfresh/6h bounds and all prior evidence.
+Private native Context.meta proves caller outside model arguments; hook-based
+updatedInput was unnecessary and did not work for MCP in this native build.
+Version2 host allocations avoid per-session grants, preserve shared spend and
+deadline, inherit stop/grace, and support explicit scoped host renewals without
+charging later renewed work back to old members. Three bounded review findings
+reproduced and fixed; final33focused tests pass.
+
+Final installed candidate /tmp/cw289-v4-installed native public acceptance: two
+actual conversations20->40fresh, same deadline, unrelated control unchanged,
+6localhost fixture requests/zero external providers; empty owned cleanup census.
+Five module hashes match frozen source. Policy wiring/compile/diff checks pass.
+Broader1372test run stays red (64failures/1error/1skip): prior64failed identifiers
+plus one intermittent declined-disposition subtest; exact selected candidate and
+main replay both pass. Failed receipt retained; no clean CI claim or waiver.
+No production grant/install/reload/restart, remote push, PR, merge or release.
+Plan0168 remains separate. Next: bounded release-gate triage/integration; durable
+handoff in docs/dev/evidence/plan0169/handoff.md.
+
+
+## Turn354 | 2026-10-18 UTC | Resolve unit fixture contamination
+
+Source checkpoint02c7893retained. Repeated baseline handoff/refresh failures read
+the installed host Wake registry/message inventory. One isolated XDG hypothesis
+probe20tests passes6.511s; final frozen-source hermetic suite1372tests passes
+183.474s,1skip,exit0. README and the CI unit step now isolate XDGconfig/state and
+disable automatic host StableTime for fixture tests. Earlier failed runs remain
+in evidence; no product workaround, test removal, quarantine or waiver. Plugin12
+PASS; compile/policy/diff/build and final installed native proof PASS.
+
+Progress blocker_reduction; integration remains open. No remote push/PR/merge,
+release, production install, grants or shared runtime changes. Existing resource
+limits are unchanged. Memory forbidden (destination routing unqualified),0writes,
+receipt /tmp/cw289-self-enrollment-memory-disposition-20261018.json.
+
+
+## Turn355 | 2026-10-18 UTC | Explicit2Mfresh/6h renewal
+
+Operator renewed the same objective with2Madditional fresh tokens and6hours,
+and activated the existing native goal. Private allocation receipt
+issue289-renewal-de360e1d0be04564bb7c947f996807d3 records a qualified response
+anchor at801245cumulative fresh tokens, start15:39:29.531693Z,
+deadline21:39:29.531693Z. Prior history and allowance are preserved. No false
+goal completion, native display-counter reset, host grant, controller or package
+change. Installed public enforcement remains held/armed:false; renewed operator
+authority is distinct from enforcement. Plan0169v5/handoff carry the latest limits.
+
+
+## Turn356 | 2026-10-18 UTC | Prepare0.18.0delivery without renewing resources
+
+Reconciled clean447359eand unchanged origin/main89e3eb8. No PR exists; issue289
+remainsOPEN with original superseded contract. Read-only live policy has two
+legacy grants and one stop-latched receipt; current thread is ungranted.
+Prepared0.18.0candidate and private rollout policy, preserving both old grants
+and importing the exact15:39:29.531693Z/801245fresh response boundary. New tests
+prove successor-first import charges prior post-boundary work and preserves
+deadline, refuses future/changed history, and retains legacy scope.
+Focused36PASS; native public imported-boundary/continuation fixture PASS6local
+responses/zero external; provider-free product smoke exits0. Full final immutable
+environment run pending; invalid collection/reinstallation race retained.
+No commit/push/provider/runtime effect of this packet: concrete proposal needs
+operator approval under explicit shared-reload non-goal and provider/commit rules.
+Resource allocation/deadline/review bounds unchanged; goal remains incomplete.
+
+
+Final Turn356readback: frozen0.18.0candidate1375unit tests PASS162.520s,1skip;
+native imported-boundary10->30fresh PASS with source/hash match and empty owned
+cleanup census. The provider-free product surface is qualified separately from
+production readiness. Public PR body, release notes and exact rollout/rollback
+proposal are prepared, not published. Await first operator delivery decision;
+goal active/incomplete, no resource renewal or controller/host effects.
+
+
+## Turn357 | 2026-10-18 UTC | Third-turn rollout approval audit
+
+Previous goal turn no_progress; current recheck shows unchanged candidate hashes,
+HEAD447359eand the same unanswered explicit delivery gate for the third consecutive
+goal turn. All safe independent preparation is complete. Transition goal toblocked
+so it stops automatic retries; preserve dirty prepared0.18.0packet,1375test
+evidence, original operator renewal and fixed deadline. No new provider/runtime
+effects, budget reset or completion claim. Resume on actual rollout disposition.
+
+
+## Turn358 | 2026-10-18 UTC | Approved delivery begins
+
+Operator "OK go" resumes the named final review and prepared rollout. Freeze
+0.18.0delta against447359e; use closed-world Standards/Spec review of the final
+initial-boundary/legacy-compatibility changes, preserving broad-review limits.
+Then PR/required CI/merge, exact-main release/install and fresh idle-only MCP
+activation with scoped pause/resume/rollback. No shared executor restart or
+resource renewal. Production remains unchanged at this entry.

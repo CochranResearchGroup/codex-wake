@@ -1,0 +1,12 @@
+{
+  "observed_at": "2026-10-18T14:51:20.131277+00:00",
+  "owned_process_group_ids": [
+    20457,
+    25676,
+    25989,
+    26016,
+    26207
+  ],
+  "remaining_owned_group_members": [],
+  "scope": "isolated native operator red2/green and delegation fixtures; no shared services changed"
+}

@@ -13,12 +13,15 @@ def add_goal_limits_parser(subparsers):
         command = commands.add_parser(name, help='enroll limits' if name == 'set' else 'read enforcement evidence')
         command.add_argument('--policy', type=Path, required=True, help='private host-approved caller allocations')
         command.add_argument('--caller-thread-id', required=True)
+        command.add_argument('--allocation-id', help='existing host objective allocation')
         command.add_argument('--json', action='store_true', dest='as_json')
         if name == 'set':
             command.add_argument('--token-limit', type=int, required=True)
             command.add_argument('--time-limit-seconds', type=int, required=True)
             command.add_argument('--checkpoint-token-percent', type=float, default=5)
             command.add_argument('--checkpoint-seconds', type=int, default=60)
+            command.add_argument('--token-accounting', choices=('fresh','cache_inclusive'),
+                                 help='new enrollments default to fresh input plus output, excluding cache')
     watcher = commands.add_parser('watch', help='run the independent resource-limit controller; keep alive as a service')
     watcher.add_argument('--interval', type=float, default=1)
 
@@ -34,17 +37,27 @@ def goal_limits_command(args, root):
     try:
         from .goal_supervision import enroll, show
         if args.goal_limits_command == 'show':
-            result = show(root, args.policy, args.caller_thread_id)
+            result = show(root, args.policy, args.caller_thread_id,args.allocation_id)
         else:
             result = enroll(root, args.policy, args.caller_thread_id,
                 args.token_limit, args.time_limit_seconds,
                 checkpoint_token_percent=args.checkpoint_token_percent,
-                checkpoint_seconds=args.checkpoint_seconds)
+                checkpoint_seconds=args.checkpoint_seconds,token_accounting=args.token_accounting,allocation_id=args.allocation_id)
     except Exception as exc:
         from .records import WakeError
         message = str(exc) if isinstance(exc, (ValueError, WakeError)) else 'Host filesystem, socket or controller unavailable; inspect operator setup.'
         result = {'error': {'code': 'goal_limits_unavailable', 'reason': type(exc).__name__, 'message': message},
                   'state': 'held', 'armed': False}
+        from .goal_supervision import CallerGrantMissing
+        if isinstance(exc, CallerGrantMissing):
+            result.update(reason='caller_grant_missing', effect_attempted=False,
+                caller_thread_id=args.caller_thread_id,
+                missing_evidence=['caller_identity', 'operator_allocation_authority'],
+                operator_interaction='available', campaign_continuation='held',
+                next_action='The host must bind trusted caller identity and operator allocation '
+                    'authority before provisioning. Agents cannot issue their own grants. '
+                    'Preserve the allocation; setup diagnosis, checkpointing and operator replies '
+                    'remain available. Do not retry with another caller or copy a grant.')
         print(json.dumps(result))
         return 2
     print(json.dumps(result))

@@ -1,0 +1,20 @@
+{
+  "host": "github.com",
+  "repository": "CochranResearchGroup/codex-wake",
+  "actor": "ecochran76",
+  "action": "create",
+  "idempotency_key": "cw-objective-allocation-provisioning-v1",
+  "timestamp": "2026-10-18T10:57:32Z",
+  "url": "https://github.com/CochranResearchGroup/codex-wake/issues/289",
+  "before": "not present in exact-marker duplicate search",
+  "after": {
+    "number": 289,
+    "state": "OPEN",
+    "labels": [
+      "enhancement",
+      "ready-for-agent"
+    ],
+    "body_sha256": "6641e058707a2954c861793da379ff3f4f8fbc472b3e7ebe3ec4b366cee7a748"
+  },
+  "readback_verified": true
+}

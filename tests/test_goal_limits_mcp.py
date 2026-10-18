@@ -70,6 +70,11 @@ class GoalLimitsMCPTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(output['error']['code'], 'goal_limits_unavailable', output)
                 self.assertEqual(output['error']['message'], 'host caller grant unavailable or malformed')
                 self.assertEqual(output['state'], 'held')
+                self.assertEqual(output['reason'], 'caller_grant_missing')
+                self.assertFalse(output['effect_attempted'])
+                self.assertEqual(output['operator_interaction'], 'available')
+                self.assertIn('host', output['next_action'])
+                self.assertIn('caller_identity', output['missing_evidence'])
                 self.assertFalse(list((root / 'journal').rglob('*.json')))
 
 

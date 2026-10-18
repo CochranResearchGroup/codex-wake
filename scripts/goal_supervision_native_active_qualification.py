@@ -1,6 +1,6 @@
 """Opt-in native active-turn controls using only an injected localhost Responses fixture.
 
-No provider credentials, real billing or delegated accounting proof. Max3 HTTP
+No provider credentials, real billing or delegated accounting proof. Max5 HTTP
 requests,90seconds; physical Unix socket is validated against exact owned peer.
 SSE shapes follow openai/codex rust-v0.163.0 core/tests/common/responses.rs.
 """
@@ -28,8 +28,8 @@ def qualify(base, codex):
     home=base/'home';home.mkdir(mode=0o700)
     expiry=time.monotonic()+90
     result=dict(verdict='INCOMPLETE',usage_provenance='injected localhost SSE; not billing',
-                external_provider_calls=0,http_request_cap=3)
-    lock=threading.Lock();calls=[];stream_open=threading.Event();stream_disconnected=threading.Event();finish=threading.Event()
+                external_provider_calls=0,http_request_cap=5)
+    lock=threading.Lock();calls=[];stream_open=threading.Event();stream_disconnected=threading.Event();finish=threading.Event();operator_open=threading.Event();operator_release=threading.Event()
     class Handler(BaseHTTPRequestHandler):
         protocol_version='HTTP/1.1'
         def log_message(self,*args):pass
@@ -42,7 +42,7 @@ def qualify(base, codex):
             with lock:
                 calls.append(dict(number=len(calls)+1,path=self.path,body_sha256=hashlib.sha256(body).hexdigest()))
                 number=len(calls)
-            if number>3:self.send_error(429);return
+            if number>5:self.send_error(429);return
             self.send_response(200);self.send_header('Content-Type','text/event-stream');self.send_header('Connection','close');self.end_headers()
             def emit(value):
                 self.wfile.write(('event: '+value['type']+'\ndata: '+json.dumps(value)+'\n\n').encode());self.wfile.flush()
@@ -51,6 +51,15 @@ def qualify(base, codex):
                 if number==1:
                     emit(dict(type='response.output_item.done',item=dict(type='message',role='assistant',id='local-message',content=[dict(type='output_text',text='LOCAL FIXTURE READY')])) )
                     emit(dict(type='response.completed',response=dict(id='local-response-1',usage=dict(input_tokens=20,input_tokens_details=dict(cached_tokens=10),output_tokens=0,output_tokens_details=None,total_tokens=20))))
+                elif b'Operator status question while the campaign stays paused.' in body:
+                    operator_open.set()
+                    while not operator_release.wait(.1) and not finish.is_set() and time.monotonic()<expiry:
+                        self.wfile.write(b': operator reply pending\n\n');self.wfile.flush()
+                    emit(dict(type='response.output_item.done',item=dict(type='message',role='assistant',
+                        id='operator-message',content=[dict(type='output_text',text='OPERATOR REPLY AFTER PAUSE')])) )
+                    emit(dict(type='response.completed',response=dict(id='local-response-3',usage=dict(
+                        input_tokens=20,input_tokens_details=dict(cached_tokens=10),output_tokens=0,
+                        output_tokens_details=None,total_tokens=20))))
                 else:
                     stream_open.set()
                     while not finish.wait(.2) and time.monotonic()<expiry:
@@ -84,7 +93,7 @@ def qualify(base, codex):
         endpoint='unix://'+str(physical)
         def rpc(method,params):return native_request(endpoint,str(codex),method,params,3)
         thread=rpc('thread/start',dict(cwd=str(base),historyMode='legacy',experimentalRawEvents=True))['thread']['id']
-        goal=rpc('thread/goal/set',dict(threadId=thread,objective='Local active supervision fixture; wait for controller checkpoint and stop',status='blocked',origin='user',tokenBudget=1))['goal']
+        goal=rpc('thread/goal/set',dict(threadId=thread,objective='Local active supervision fixture; wait for controller checkpoint and stop',status='blocked',origin='user',tokenBudget=1000000))['goal']
         result.update(thread_id=thread,goal_before=goal,physical_endpoint=endpoint)
         first=rpc('turn/start',dict(threadId=thread,input=[dict(type='text',text='Local transport fixture: respond READY only.')]))
         end=min(expiry,time.monotonic()+15)
@@ -107,7 +116,7 @@ def qualify(base, codex):
         while not cli('show').get('controller',{}).get('fresh'):
             if time.monotonic()>end:raise RuntimeError('watcher unavailable')
             time.sleep(.1)
-        result['goal_active']=rpc('thread/goal/set',dict(threadId=thread,status='active',origin='user',tokenBudget=1))['goal']
+        result['goal_active']=rpc('thread/goal/set',dict(threadId=thread,status='active',origin='user',tokenBudget=1000000))['goal']
         if not stream_open.wait(8):raise RuntimeError('active local stream not observed')
         result['active_turns_before_enrollment']=[dict(id=t['id'],status=t['status']) for t in rpc('thread/read',dict(threadId=thread,includeTurns=True))['thread']['turns']]
         from codex_wake.lifecycle_budget import trusted_upper
@@ -137,8 +146,38 @@ def qualify(base, codex):
         assert any(v['method']=='turn/interrupt' and v['state']=='acknowledged' for v in effects.values())
         assert any(t['status']=='interrupted' for t in final['turns'])
         assert state['reason']=='allocation_exhausted'
-        assert len(calls)<=3
-        result['verdict']='PASS_NATIVE_ACTIVE_INJECTED_PROVIDER'
+        assert len(calls)<=5
+        operator=rpc('turn/start',dict(threadId=thread,input=[dict(type='text',text='Operator status question while the campaign stays paused.')]))
+        operator_turn=operator['turn']['id']
+        result['operator_turn_id']=operator_turn
+        if not operator_open.wait(8):raise RuntimeError('operator reply stream not observed')
+        first_heartbeat=cli('show')['controller']['observed_boottime']
+        end=min(expiry,time.monotonic()+8)
+        while True:
+            observed=cli('show')
+            if observed['controller']['observed_boottime']>=first_heartbeat+.4:break
+            if time.monotonic()>end:raise RuntimeError('independent operator observation unavailable')
+            time.sleep(.05)
+        operator_read=rpc('thread/read',dict(threadId=thread,includeTurns=True))['thread']
+        result['operator_turns_before_release']=[dict(id=t['id'],status=t['status']) for t in operator_read['turns']]
+        result['operator_observed_effects']=observed['effects']
+        assert not any(v.get('method')=='turn/interrupt' and v.get('params',{}).get('turnId')==operator_turn
+            for v in observed['effects'].values()), 'controller interrupted exact operator reply turn'
+        assert any(t['id']==operator_turn and t['status']=='inProgress' for t in operator_read['turns']), 'operator turn not active before fixture release'
+        assert rpc('thread/goal/get',dict(threadId=thread))['goal']['status']=='paused'
+        operator_release.set()
+        while time.monotonic()<end:
+            operator_read=rpc('thread/read',dict(threadId=thread,includeTurns=True))['thread']
+            current=next(t for t in operator_read['turns'] if t['id']==operator_turn)
+            if current['status']=='completed':break
+            if current['status']!='inProgress':raise RuntimeError('operator reply did not complete')
+            time.sleep(.05)
+        else:raise RuntimeError('operator reply completion unavailable')
+        after=cli('show')
+        assert not any(v.get('params',{}).get('turnId')==operator_turn for v in after['effects'].values())
+        result.update(operator_turn_id=operator_turn,operator_reply_status=current['status'],
+            operator_reply_preserved=True,operator_goal_status=rpc('thread/goal/get',dict(threadId=thread))['goal']['status'])
+        result['verdict']='PASS_NATIVE_ACTIVE_AND_OPERATOR_REPLY_LOCAL_FIXTURE'
     except BaseException as exc:
         result.update(verdict='FAILED_PACKET',error=type(exc).__name__+': '+str(exc))
     finally:

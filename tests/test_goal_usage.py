@@ -3,6 +3,7 @@ import json
 import tempfile
 import sqlite3
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from codex_wake.goal_usage import observe_usage
@@ -19,10 +20,10 @@ def event(kind, **payload):
     return row('event_msg', dict(type=kind, **payload))
 
 
-def response(thread, turn, response_id, total, root_turn=None):
+def response(thread, turn, response_id, total, root_turn=None, cached=0):
     return row('token_usage_record', dict(thread_id=thread, turn_id=turn,
         session_id='root', root_turn_id=root_turn or turn, response_id=response_id,
-        usage=dict(input_tokens=total-2, cached_input_tokens=total-3,
+        usage=dict(input_tokens=total-2, cached_input_tokens=cached,
                    output_tokens=2, total_tokens=total),
         turn_token_usage={}, thread_token_usage={}))
 
@@ -46,14 +47,25 @@ class GoalUsageTests(unittest.TestCase):
         self.addCleanup(scratch.cleanup)
         self.home = Path(scratch.name)
 
-    def test_goal_start_counts_response_usage_including_cache(self):
+    def test_tool_payload_volume_does_not_exhaust_accounting_evidence_budget(self):
+        rollout(self.home,'root',[goal(),event('task_started',turn_id='work'),
+            row('response_item',dict(type='message',content='x'*12000)),
+            response('root','work','new',40),event('task_complete',turn_id='work')])
+        with patch('codex_wake.goal_usage.MAX_HISTORY_BYTES',4096):
+            result=observe_usage(self.home,'root',CREATED)
+        self.assertEqual(result['state'],'qualified',result)
+        self.assertEqual(result['used_tokens'],40)
+
+    def test_goal_start_counts_fresh_input_and_output_by_default(self):
         tmp_path = self.home
         rollout(tmp_path,'root',[response('root','before','old',100),goal(),
-            event('task_started',turn_id='work'),response('root','work','new',40),
+            event('task_started',turn_id='work'),response('root','work','new',40,cached=37),
             event('task_complete',turn_id='work')])
         result=observe_usage(tmp_path,'root',CREATED)
         assert result['state']=='qualified'
-        assert result['used_tokens']==40
+        assert result['used_tokens']==3
+        assert result['token_accounting']=='fresh'
+        assert observe_usage(tmp_path,'root',CREATED,token_accounting='cache_inclusive')['used_tokens']==40
         assert result['sampled'] is True
 
 

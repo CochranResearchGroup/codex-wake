@@ -36,6 +36,10 @@ jobs:
         run: python -m pip install '.[mcp]'
 
       - name: Run unit tests
+        env:
+          XDG_CONFIG_HOME: ${{ runner.temp }}/codex-wake-test-config
+          XDG_STATE_HOME: ${{ runner.temp }}/codex-wake-test-state
+          CODEX_WAKE_STABLE_TIME_CONFIG: ""
         run: PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Run OpenClaw plugin tests

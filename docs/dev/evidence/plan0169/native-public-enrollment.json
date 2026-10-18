@@ -1,0 +1,170 @@
+{
+  "verdict": "PASS_NATIVE_PUBLIC_SELF_ENROLLMENT_AND_CONTINUATION",
+  "scope": "Two owned native conversations enroll through installed public MCP into one fixed host allocation; unrelated blocked native goal control unchanged",
+  "source_receipt": "/tmp/cw289-native-public-continuation-attempt1/result.json",
+  "source_receipt_sha256": "85ee6255b7c16473b489de50ef1e827c1e6a407f851e743464a37a6338f6d415",
+  "script": "scripts/goal_supervision_native_enrollment_qualification.py",
+  "script_sha256": "c4ee22d2d361ab8657515e6aef1e7c44557639c53354926f42c7e63e3860bcc9",
+  "installed_prefix": "/tmp/cw289-v4-installed",
+  "native_version": "0.163.0",
+  "participants": [
+    {
+      "thread_id": "01a14f9a-9179-77e3-89e1-e8072010c982",
+      "state": "armed",
+      "allocation_id": "owned-objective",
+      "caller_binding": {
+        "call_id": "owned-native-enrollment-1",
+        "thread_id": "01a14f9a-9179-77e3-89e1-e8072010c982",
+        "turn_id": "01a14f9a-97c9-7353-83db-e2c3302e99ee"
+      },
+      "used_tokens": 20,
+      "token_accounting": "fresh",
+      "time_origin": 1792336892,
+      "deadline": 1792337012,
+      "controller_fresh": true
+    },
+    {
+      "thread_id": "01a14f9a-9afa-73a1-a9f9-92864983627d",
+      "state": "armed",
+      "allocation_id": "owned-objective",
+      "caller_binding": {
+        "call_id": "owned-native-enrollment-2",
+        "thread_id": "01a14f9a-9afa-73a1-a9f9-92864983627d",
+        "turn_id": "01a14f9a-9e48-7b41-8ea8-0a32d2c865c7"
+      },
+      "used_tokens": 40,
+      "token_accounting": "fresh",
+      "time_origin": 1792336892,
+      "deadline": 1792337012,
+      "controller_fresh": true
+    }
+  ],
+  "original_deadline_preserved": true,
+  "cumulative_tokens": 40,
+  "injected_usage": "Each conversation completes two input20,cached10,output0 fixture responses:20fresh each; shared total40",
+  "no_per_caller_grants": true,
+  "policy_unchanged": true,
+  "config_unchanged": true,
+  "unrelated_control": {
+    "thread_id": "01a14f9a-8ff2-7a20-b7ff-8b471e0b31f6",
+    "goal_before": {
+      "threadId": "01a14f9a-8ff2-7a20-b7ff-8b471e0b31f6",
+      "objective": "Unrelated owned control; no model work",
+      "status": "blocked",
+      "tokenBudget": 1000000,
+      "tokensUsed": 0,
+      "timeUsedSeconds": 0,
+      "createdAt": 1792336892,
+      "updatedAt": 1792336892
+    },
+    "goal_after": {
+      "threadId": "01a14f9a-8ff2-7a20-b7ff-8b471e0b31f6",
+      "objective": "Unrelated owned control; no model work",
+      "status": "blocked",
+      "tokenBudget": 1000000,
+      "tokensUsed": 0,
+      "timeUsedSeconds": 0,
+      "createdAt": 1792336892,
+      "updatedAt": 1792336892
+    }
+  },
+  "unrelated_control_unchanged": true,
+  "http_requests": 6,
+  "external_provider_calls": 0,
+  "owned_native_socket_peer": {
+    "pid": 99274,
+    "uid": 1000
+  },
+  "remaining_owned_processes": [],
+  "elapsed_seconds": 5.708649641001102,
+  "attempts": 1,
+  "installed_module_sha256_snapshot": {
+    "mcp_server.py": {
+      "sha256": "50a03ea1d8c34a84b018cfebed5c07a00c753c5eeb62771ae252c78ee02eed3b",
+      "matches_source_at_acceptance": true
+    },
+    "goal_supervision.py": {
+      "sha256": "6a5d9f313f6ecf10ba897d871dc9d97cb4ae1bf9f4132714572dcc0b484fb719",
+      "matches_source_at_acceptance": true
+    },
+    "goal_usage.py": {
+      "sha256": "90ed92f18f19ace4110d197a2b00bbcccc7244429a7cf0b46884822007b08b87",
+      "matches_source_at_acceptance": true
+    },
+    "native_protocol.py": {
+      "sha256": "a4c42df51f16dbc29937237bc4d31649fbe2a10039fef54bbfc019a169ee10ec",
+      "matches_source_at_acceptance": true
+    }
+  },
+  "limitations": [
+    "Unrelated control has blocked goal and no provider/model turns; unrelated allocation enrollment covered separately",
+    "Synthetic local Responses transport/accounting proof, not real provider billing",
+    "Host-owned native gateway/private stdio trust; no cryptographic same-UID isolation claimed",
+    "Outgoing conversations paused/interrupted manually; allocation winddown/stop latch verified separately"
+  ],
+  "prior_initial_caller_acceptance": {
+    "verdict": "PASS_NATIVE_PUBLIC_SELF_ENROLLMENT",
+    "scope": "Owned initial caller native-to-installed-public-MCP enrollment under explicit fixed host delegation; no production effects or real billing proof",
+    "source_receipt": "/tmp/cw289-native-public-enrollment-attempt1/result.json",
+    "source_receipt_sha256": "c07394590d5049cfb31da63899e5a54712d22b53f087c5209199163a90abb697",
+    "script": "scripts/goal_supervision_native_enrollment_qualification.py",
+    "script_sha256": "6b662b8064a44caefaa76a38f83e5f8fd9a7a2a51dbaf58317e88e019aad0eaf",
+    "installed_prefix": "/tmp/cw289-v4-installed",
+    "native_version": "0.163.0",
+    "thread_id": "01a14f98-bd22-7330-aa06-2846777bfd70",
+    "caller_binding": {
+      "call_id": "owned-native-enrollment",
+      "thread_id": "01a14f98-bd22-7330-aa06-2846777bfd70",
+      "turn_id": "01a14f98-c391-73c1-b928-8aca99652f08"
+    },
+    "allocation_id": "owned-objective",
+    "state": "armed",
+    "controller_fresh": true,
+    "used_tokens": 20,
+    "token_accounting": "fresh",
+    "injected_usage": "Two completed responses each input20,cached10,output0; fresh total20",
+    "time_origin": 1792336772,
+    "deadline": 1792336892,
+    "limits": {
+      "tokens": 1000,
+      "seconds": 120
+    },
+    "no_per_caller_grants": true,
+    "policy_unchanged": true,
+    "config_unchanged": true,
+    "http_requests": 3,
+    "external_provider_calls": 0,
+    "owned_native_socket_peer": {
+      "pid": 77526,
+      "uid": 1000
+    },
+    "remaining_owned_processes": [],
+    "elapsed_seconds": 2.813787028000661,
+    "attempts": 1,
+    "limitations": [
+      "Initial caller only; successor continuity is separate acceptance",
+      "Local synthetic Responses fixture is transport/control proof, not real provider billing",
+      "Trust is host-owned native gateway/private stdio; no cryptographic same-UID isolation claimed",
+      "Paused and interrupted only the owned fixture campaign during cleanup"
+    ],
+    "installed_module_sha256_snapshot": {
+      "mcp_server.py": {
+        "sha256": "50a03ea1d8c34a84b018cfebed5c07a00c753c5eeb62771ae252c78ee02eed3b",
+        "matches_source": true
+      },
+      "goal_supervision.py": {
+        "sha256": "f65241004f713e03e23492549296e7429ee1ab68cfd63ab9f0ee45697c83e327",
+        "matches_source": true
+      },
+      "goal_usage.py": {
+        "sha256": "90ed92f18f19ace4110d197a2b00bbcccc7244429a7cf0b46884822007b08b87",
+        "matches_source": true
+      },
+      "native_protocol.py": {
+        "sha256": "a4c42df51f16dbc29937237bc4d31649fbe2a10039fef54bbfc019a169ee10ec",
+        "matches_source": true
+      }
+    },
+    "hash_interpretation": "Historical acceptance snapshot for initial candidate; not a claim of equality to later source revisions"
+  }
+}
