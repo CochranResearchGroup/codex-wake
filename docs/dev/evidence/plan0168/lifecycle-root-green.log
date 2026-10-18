@@ -1,0 +1,52 @@
+======================================================================
+ERROR: test_refresh_uses_host_scope_and_only_named_resource_checks (test_lifecycle_mcp.LifecycleMCPTests.test_refresh_uses_host_scope_and_only_named_resource_checks)
+----------------------------------------------------------------------
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+  |     return future.result()
+  |            ^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_lifecycle_mcp.py", line 65, in test_refresh_uses_host_scope_and_only_named_resource_checks
+  |     async with Client(parameters,mode='legacy') as client:
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/tmp/cw167-tools/lib/python3.12/site-packages/mcp/client/client.py", line 475, in __aexit__
+  |     await self._exit_stack.__aexit__(exc_type, exc_val, exc_tb)
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 754, in __aexit__
+  |     raise exc_details[1]
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 737, in __aexit__
+  |     cb_suppress = await cb(*exc_details)
+  |                   ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 231, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "/tmp/cw167-tools/lib/python3.12/site-packages/mcp/client/stdio.py", line 200, in stdio_client
+  |     async with anyio.create_task_group() as tg:
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/tmp/cw167-tools/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "/tmp/cw167-tools/lib/python3.12/site-packages/mcp/client/stdio.py", line 204, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 737, in __aexit__
+    |     cb_suppress = await cb(*exc_details)
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/tmp/cw167-tools/lib/python3.12/site-packages/mcp/client/session.py", line 514, in __aexit__
+    |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/tmp/cw167-tools/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+    |     raise BaseExceptionGroup(
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "/home/ecochran76/workspace.local/codex-wake-self-refresh/tests/test_lifecycle_mcp.py", line 86, in test_refresh_uses_host_scope_and_only_named_resource_checks
+      |     self.assertFalse(legacy.is_error)
+      | AssertionError: True is not false
+      +------------------------------------
+
+----------------------------------------------------------------------
+Ran 3 tests in 3.292s
+
+FAILED (errors=1)

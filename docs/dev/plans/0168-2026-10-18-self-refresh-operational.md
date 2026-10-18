@@ -47,3 +47,25 @@ named contract question, not permission to restart the shared server.
 Installed public readiness and completed same-conversation resource proof with
 unchanged counters/deadline; repo/tracker reconciliation and exact runtime identity.
 Any uncovered native capability is reported as a precise remaining boundary.
+
+## Qualification decision frontier | 2026-10-18 UTC
+
+Bounded native worker completed both owned-fixture attempts. Global
+config/mcpServer/reload refreshes BOTH loaded conversations' MCP processes and
+catalogs. thread/resume alone remains stale. thread/unsubscribe reports success
+but does not unload; subsequent resume remains stale. Same IDs/paused goals and
+zero model turns were verified; owned servers exited and all eight recorded PIDs
+are gone. No production reload or session/goal mutations occurred.
+
+Current production read-only inventory:62 loaded,49idle and13active. Exact native
+API has no thread selector; a conversation-only refresh remains unsupported.
+User is asked to choose shared reload scope (after idle check, with active peers,
+or keep conversation-only unavailable). This is an explicit peer-effect boundary,
+not a generic deployment permission request. No dependent effects before answer.
+Idle checks cannot provide an atomic native CAS against a racing new turn.
+
+Independent source repair: optional host --lifecycle-root keeps new lifecycle
+journal separate from legacy wake-tool roots. Existing MCP public test augmented
+for both scopes: red unknown flag; first green run exposed fixture caller missing
+on the legacy probe; corrected fixture then3testsPASS. Legacy fallback preserved.
+This checkpoint does not establish operational refresh or native MCP readiness.

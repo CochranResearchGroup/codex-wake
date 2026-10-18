@@ -1,0 +1,10 @@
+{
+  "loaded_count": 62,
+  "inventory_complete": true,
+  "statuses_complete": true,
+  "status_counts": {
+    "idle": 49,
+    "active": 13
+  },
+  "mutation_performed": false
+}

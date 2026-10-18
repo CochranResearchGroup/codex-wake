@@ -106,7 +106,7 @@ class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
-                 goal_limits_policy=None, goal_limits_root=None):
+                 goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None):
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
         self.app_server = app_server
@@ -114,6 +114,7 @@ class CommandRunner:
         self.wake_root, self.sender_authority = wake_root, sender_authority
         self.call_timeout = call_timeout
         self.lifecycle_profiles = lifecycle_profiles
+        self.lifecycle_root = lifecycle_root
         self.wake_control_config = wake_control_config
         self.wake_registry = wake_registry
         self.goal_limits_policy = goal_limits_policy
@@ -211,9 +212,10 @@ class CommandRunner:
                 return {"error": {"code": "invalid_argument", "message": "Body must be valid UTF-8."}}, True
         # Host launch context owns endpoint/capability/root/identity; tools cannot override them.
         if verb in ('spawn', 'refresh', 'handoff', 'configuration'):
-            if self.lifecycle_profiles is None or self.wake_root is None:
+            lifecycle_root = self.lifecycle_root if self.lifecycle_root is not None else self.wake_root
+            if self.lifecycle_profiles is None or lifecycle_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
-            command = [*self.cli, '--wake-root', str(self.wake_root), group, verb,
+            command = [*self.cli, '--wake-root', str(lifecycle_root), group, verb,
                        '--profiles', str(self.lifecycle_profiles)]
         else:
             command = [*self.cli, group, verb]
@@ -333,6 +335,8 @@ def main(argv=None):
     parser.add_argument("--wake-root", type=Path, default=os.environ.get("CODEX_WAKE_WAKE_ROOT"))
     parser.add_argument("--sender-authority", type=Path, default=os.environ.get("CODEX_WAKE_SENDER_RECEIPT_AUTHORITY"))
     parser.add_argument('--lifecycle-profiles', type=Path, help='host-approved lifecycle launch registry')
+    parser.add_argument('--lifecycle-root', type=Path,
+                        help='private lifecycle journal; falls back to --wake-root without changing other tool scope')
     parser.add_argument('--wake-control-config', type=Path, help='host-approved caller root/action grants')
     parser.add_argument('--wake-registry', type=Path, help='host-owned registered wake-root directory')
     parser.add_argument('--goal-limits-policy', type=Path, help='host-approved existing-session resource allocations')
