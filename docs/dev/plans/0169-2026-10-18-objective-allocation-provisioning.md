@@ -6,7 +6,7 @@ Branch: fix/289-refresh-pause-restore. Base: 9c245a5. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 9; targeted pause/quit/resume refresh and campaign-stop separation.
+Plan version: 10; targeted pause/quit/resume refresh and campaign-stop separation.
 
 ## Current State
 
@@ -30,7 +30,8 @@ reactivated the native goal; this does not itself clear the persisted resource
 stop. Do not edit live ledgers or mint a new allocation to escape that decision.
 Source candidate0.18.1 now provides explicit operational pause provenance,
 recognized modal handling and conditional active restoration. Independent
-`client_idle` admission queues the existing watcher and requires only source idle;
+`client_idle` admission acknowledges the original active goal pause before queuing
+the existing watcher, which requires only source idle for client replacement;
 busy peer fixture remains untouched and shared reload is never called. All
 configured resource authorities must permit restoration. Activation uncertainty
 reconciles by readback, never replay. The installed owned paused-goal native probe

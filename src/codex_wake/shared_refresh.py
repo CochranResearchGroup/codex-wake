@@ -138,6 +138,17 @@ def command(args, root, config, profile, checkpoint, content):
                 binding=intent['client_binding']
                 if binding:receipt['intent'].update(binding)
             _save(path, receipt)
+            if profile['refresh_mode']==CLIENT_MODE:
+                from .refresh_goal import pause
+                value=_request(receipt,'thread/read',dict(threadId=args.thread_id,includeTurns=False))['thread']
+                if not _source_workspace(receipt,value):
+                    receipt.update(state='blocked',reason='source_workspace_mismatch')
+                else:
+                    goal=_request(receipt,'thread/goal/get',dict(threadId=args.thread_id))['goal']
+                    receipt['goal_before']=goal
+                    if pause(path,receipt,profile,goal,lambda method,params:_request(receipt,method,params)):
+                        receipt.update(state='queued',reason='waiting_for_source_idle')
+                _save(path,receipt)
         emit(_public(receipt), args.as_json)
         return 0 if receipt['state'] in ('queued','prepared','stopping','starting','awaiting_preflight','restoring_goal','verifying','completed') else 5
 

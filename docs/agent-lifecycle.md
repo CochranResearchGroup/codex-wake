@@ -231,8 +231,8 @@ before sending its one-shot key, and the composer must subsequently be observed.
 For unattended single-client refresh, the host profile selects
 `refresh_mode: "client_idle"`, names the exact `tmux_session` (and optional
 `tmux_socket`/`codex_home`), and records `scope_approval`. The existing independent
-`sessions refresh-watch` controller owns execution. Admission returns `queued`;
-end the source turn and observe the same durable intent afterward. It waits only
+`sessions refresh-watch` controller owns execution. Admission snapshots the goal and acknowledges pause of a previously active
+goal before returning `queued`; end the source turn and observe the same durable intent afterward. It waits only
 for the source conversation, preserving other active conversations; it never
 calls the shared MCP reload API. The private profile/checkpoint and any configured
 budget binding are revalidated before advancement. Watcher shutdown fences new

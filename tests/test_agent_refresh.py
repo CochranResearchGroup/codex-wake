@@ -117,7 +117,7 @@ class AgentRefreshTests(unittest.TestCase):
         self.refresh_scenario(draft=False, original_status='active', client_idle=True)
 
     def test_refresh_watcher_shutdown_fences_goal_and_pane_effects(self):
-        for boundary in (1,2):
+        for boundary in (3,5):
             with self.subTest(goal_read=boundary):
                 self.refresh_scenario(draft=False, original_status='active', client_idle=True, client_idle_stop=boundary)
 
@@ -181,6 +181,7 @@ class AgentRefreshTests(unittest.TestCase):
                         if client_idle_stop and methods.count(method)==client_idle_stop:
                             from codex_wake import shared_refresh
                             shared_refresh._stopping=True
+                            tab['effects_at_shutdown']=len(effects)
                         if resume_readback_loss and methods.count('thread/goal/set')==2 and not lost_resume:
                             lost_resume.append(True);ws.close();break
                         observed=dict(goal)
@@ -327,6 +328,7 @@ class AgentRefreshTests(unittest.TestCase):
                                 with redirect_stdout(queued):self.assertEqual(run(argv),0)
                                 self.assertEqual(json.loads(queued.getvalue())['state'],'queued')
                                 self.assertEqual(effects,[])
+                                self.assertEqual(goal['status'],'paused')
                                 poll(root)
                                 self.assertEqual(effects,[])
                                 tab['source_busy']=False
@@ -334,9 +336,9 @@ class AgentRefreshTests(unittest.TestCase):
                                 if client_idle_stop:
                                     from codex_wake import shared_refresh
                                     shared_refresh._stopping=False
-                                    self.assertEqual(effects,[])
+                                    self.assertEqual(len(effects),tab['effects_at_shutdown'])
                                     self.assertIsNone(client.poll())
-                                    self.assertEqual(methods.count('thread/goal/set'),client_idle_stop-1)
+                                    self.assertEqual(methods.count('thread/goal/set'),1)
                                     return
                             output=StringIO()
                             with redirect_stdout(output): self.assertEqual(run(argv),5 if draft or stale_mcp or expire_after_stop or recipient_guard or goal_change or (budget and session_limit<=1001) else 0,output.getvalue())
