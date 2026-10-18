@@ -19,6 +19,8 @@ from uuid import UUID, uuid4
 from .native_protocol import native_request
 from .process import boot_id_value, process_exists, process_identity
 
+NATIVE_GOAL_STATUSES={'active','paused','blocked','complete','budgetLimited','usageLimited'}
+
 
 def _private(path, directory=False):
     info=path.lstat()
@@ -373,9 +375,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             receipt.update(state='held',reason='continuation_held',stop_latched=True)
         if receipt['boot_id']!=boot_id_value():
             receipt.update(state='held',reason='boot_identity_changed',stop_latched=True)
-        if goal.get('status')=='paused':
-            receipt.update(state='held' if active else 'stopped',reason='native_goal_paused',stop_latched=True,stop_proof=not active)
-        elif goal.get('status')!='active':
+        receipt['native_goal_status']=goal.get('status')
+        if goal.get('status') not in NATIVE_GOAL_STATUSES:
             receipt.update(state='held',reason='native_goal_state_unknown',stop_latched=True)
         _save(path,receipt)
         return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None)
@@ -504,6 +505,7 @@ def poll(root):
                     results.append(_stop(path,receipt,'elapsed_time_invalid'));continue
                 upper=receipt['started_upper']+elapsed
                 goal,active=_native(grant,receipt['thread_id'])
+                receipt['native_goal_status']=goal.get('status') if goal else None
                 if 'winddown_deadline' in receipt:
                     results.append(_wind_down(path,receipt,receipt['winddown_reason'],goal,active,upper));continue
                 observation=_usage(receipt);receipt['accounting']=observation

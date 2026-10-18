@@ -6,7 +6,7 @@ Branch: fix/289-refresh-pause-restore. Base: 9c245a5. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 8; targeted pause/quit/resume refresh and campaign-stop separation.
+Plan version: 9; targeted pause/quit/resume refresh and campaign-stop separation.
 
 ## Current State
 
@@ -38,7 +38,7 @@ passes with zero model turns and cleaned owned processes; its first failures
 were contaminated by three unknown host Wake records, fixed by isolated fixture
 XDG configuration without weakening guards. Source review also identified and
 repaired a watcher-shutdown fence; final frozen validation remains pending.
-Known-state enrollment/old stop reconciliation is still separate and incomplete.
+Known-state enrollment is now corrected with a red-five-state regression and explicit preservation of old stop latches. Existing live stop reconciliation is still incomplete.
 Next packet: freeze watcher correction, required CI, exact-source installed proof,
 then deliver and verify live adoption without resetting allowance or stop history.
 

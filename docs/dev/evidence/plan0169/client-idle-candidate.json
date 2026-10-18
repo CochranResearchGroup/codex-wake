@@ -123,9 +123,18 @@
     "log": "/tmp/cw289-client-final-focused.log"
   },
   "full": {
-    "state": "running",
-    "session": 75699,
-    "log": "/tmp/cw289-client-final-full.log"
+    "state": "FAIL_ONE_ERROR",
+    "count": 1384,
+    "skips": 1,
+    "seconds": 187.607,
+    "log": "/tmp/cw289-client-final-full.log",
+    "error": "test_messages_cli.test_full_inbox_read_ack_reply_wait_and_outbox_workflow: KeyError claimed",
+    "diagnostic": {
+      "result": "PASS_ONE_ISOLATED_RUN",
+      "log": "/tmp/cw289-client-mailbox-diagnostic.log",
+      "seconds": 0.325
+    },
+    "disposition": "Retain first failure; unqualified full local lane, no waiver or quarantine; required CI pending."
   },
   "native": {
     "state": "passed",
@@ -176,5 +185,17 @@
     "Actual native run uses an originally paused goal; active restoration is covered at public fixture seam.",
     "Three host pending unknown records contaminated original native probes; failed records retained; final probe isolates XDG config.",
     "Current production goal-supervision false stop latch and known-state admission handling remain unresolved; no ledger reset or deployment performed."
-  ]
+  ],
+  "known_state_correction": {
+    "red": "/tmp/cw289-known-state-red.log",
+    "red_failed_states": 5,
+    "focused": {
+      "count": 62,
+      "seconds": 19.559,
+      "result": "PASS",
+      "log": "/tmp/cw289-known-final-focused.log"
+    },
+    "old_latches": "retained, not migrated",
+    "review": "Spec accepted; no unresolved classification finding"
+  }
 }

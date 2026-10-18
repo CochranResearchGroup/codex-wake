@@ -89,6 +89,13 @@ referenced history, absent descendants, conflicting response identities, scan
 bounds and unqualified time/accounting hold continuation. Never replace those
 facts with discounted native goal display counters or zero prior spend.
 
+Resource readiness is separate from native goal state. Receipts expose
+`native_goal_status`; known paused, blocked, complete or native-limited goals can
+have armed resource supervision without being resumed. Enrollment does not turn
+an inactive goal active and does not turn a planned goal pause into resource
+exhaustion. Existing resource stop latches remain in force, including legacy
+unknown-state holds; recognizing a known state never clears a prior stop.
+
 These are session-native controls. For kernel memory, swap, CPU and task limits,
 use the separately approved [dedicated executor workflow](resource-limits.md).
 Shared servers and unrelated sessions remain outside this controller's authority.

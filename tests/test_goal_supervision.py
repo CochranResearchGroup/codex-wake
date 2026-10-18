@@ -19,6 +19,38 @@ NOW=1893456000
 
 
 class GoalSupervisionTests(unittest.TestCase):
+    def test_recognizing_native_state_never_clears_an_existing_stop_latch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            native['goal']['status']='futureUnknownState';native['active']=[]
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120)
+                self.assertTrue(first['stop_latched'])
+                native['goal']['status']='paused'
+                later=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(later['state'],'held')
+                self.assertTrue(later['stop_latched'])
+                for key in ('generation','deadline','used_tokens'):
+                    self.assertEqual(later[key],first[key])
+
+    def test_known_inactive_goal_states_do_not_latch_a_resource_stop(self):
+        for status in ('paused','blocked','complete','budgetLimited','usageLimited'):
+            with self.subTest(status=status),tempfile.TemporaryDirectory() as directory:
+                root,policy,_,native,_=self.fixture(directory)
+                native['goal']['status']=status;native['active']=[]
+                with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                    first=enroll(root,policy,THREAD,100,120)
+                    self.assertEqual(first['state'],'armed')
+                    self.assertFalse(first.get('stop_latched',False))
+                    self.assertEqual(native['goal']['status'],status)
+                    self.assertEqual(poll(root)[0]['state'],'armed')
+                    self.assertFalse(any(m=='thread/goal/set' for m,_ in native['calls']))
+                    native['goal']['status']='active'
+                    later=poll(root)[0]
+                    self.assertEqual(later['generation'],first['generation'])
+                    self.assertEqual(later['deadline'],first['deadline'])
+                    self.assertEqual(later['used_tokens'],first['used_tokens'])
+
     def test_first_enrollment_imports_host_renewal_boundary_without_replenishing_resources(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,log,native,_=self.fixture(directory)
