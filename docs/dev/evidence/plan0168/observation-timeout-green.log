@@ -1,0 +1,16 @@
+test_active_self_request_waits_then_reloads_once_with_same_goals (test_shared_refresh.SharedRefreshTests.test_active_self_request_waits_then_reloads_once_with_same_goals) ... ok
+test_controller_shutdown_during_preflight_never_starts_reload (test_shared_refresh.SharedRefreshTests.test_controller_shutdown_during_preflight_never_starts_reload) ... ok
+test_counter_reset_after_reload_holds_completion (test_shared_refresh.SharedRefreshTests.test_counter_reset_after_reload_holds_completion) ... ok
+test_lost_reload_response_is_verified_without_replaying_the_reload (test_shared_refresh.SharedRefreshTests.test_lost_reload_response_is_verified_without_replaying_the_reload) ... ok
+test_missing_independent_monitor_returns_a_structured_setup_refusal (test_shared_refresh.SharedRefreshTests.test_missing_independent_monitor_returns_a_structured_setup_refusal) ... ok
+test_native_observation_timeout_preserves_queued_intent_until_its_deadline (test_shared_refresh.SharedRefreshTests.test_native_observation_timeout_preserves_queued_intent_until_its_deadline) ... ok
+test_peer_activity_also_prevents_shared_reload (test_shared_refresh.SharedRefreshTests.test_peer_activity_also_prevents_shared_reload) ... ok
+test_peer_that_becomes_active_during_preflight_prevents_reload (test_shared_refresh.SharedRefreshTests.test_peer_that_becomes_active_during_preflight_prevents_reload) ... ok
+test_refresh_configuration_does_not_require_or_create_an_objective_allocation (test_shared_refresh.SharedRefreshTests.test_refresh_configuration_does_not_require_or_create_an_objective_allocation) ... ok
+test_source_workspace_mismatch_blocks_before_shared_reload (test_shared_refresh.SharedRefreshTests.test_source_workspace_mismatch_blocks_before_shared_reload) ... ok
+test_stale_resource_expires_without_retrying_reload (test_shared_refresh.SharedRefreshTests.test_stale_resource_expires_without_retrying_reload) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 8.289s
+
+OK

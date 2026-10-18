@@ -7064,3 +7064,14 @@ wake_intent_635ecf6bbf2c4d0380072ced76e7ecde armed; monitor recovered scheduling
 time and reports pending/not_due. Plan0168/issue282 remain OPEN for actual
 production completion and native resource proof. deployment-queued.json owns
 locators; source/review/native fixture failures remain retained.
+
+## Turn343 | 2026-10-18 UTC | Premature refresh expiry reconciled
+
+Terminal-file wake635ecf6b delivered submissiona2542654. Existing production
+intent is expired without any reload; cached tools remain25 and source goal
+complete/counters unchanged. Deadline still had649.8seconds remaining at fresh
+monotonic readback. Exact production timeout request is not logged; public
+RPC-timeout regression reproduces premature expiry before correction. Minimal
+fix preserves observation failures until the original deadline;11checks pass.
+Historical receipt stays terminal. v0.17.2 source repair is on
+fix/shared-refresh-rpc-timeout; no production retry or deadline extension.

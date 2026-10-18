@@ -304,8 +304,6 @@ def poll(root):
             if receipt['state'] not in ('queued', 'reloading', 'verifying', 'uncertain'):continue
             try:
                 _poll_one(path, receipt)
-            except TimeoutError:
-                receipt.update(state='expired', reason='expiry_reached')
             except Exception as exc:
                 receipt.update(reason='observation_unavailable', observation_error=type(exc).__name__)
                 try:

@@ -1,0 +1,31 @@
+{
+  "reference_time": "2026-10-18T02:03:47.183826+00:00",
+  "state": "expired",
+  "reason": "expiry_reached",
+  "expires_at": "2026-10-18T02:19:21Z",
+  "loaded_count": 62,
+  "last_observed_busy_thread": "01a1178a-82fa-7960-9ffa-df64afa62688",
+  "reload_attempted": false,
+  "actual_cached_tools": 25,
+  "goal_limit_tools_present": false,
+  "source_goal": {
+    "threadId": "01a13b4b-1f4a-7fd3-9d41-3bafa9710762",
+    "objective": "$mattpocock-skills:implement-spec #275-278 following the ask Matt process. renew resouce allowances to 2 MM tokens or 4 h. No implementation theater.",
+    "status": "complete",
+    "tokenBudget": null,
+    "tokensUsed": 1668856,
+    "timeUsedSeconds": 7567,
+    "createdAt": 1792179701,
+    "updatedAt": 1792189697
+  },
+  "last_busy_current_readback": {
+    "id": "01a1178a-82fa-7960-9ffa-df64afa62688",
+    "name": "Expose im-receipts as OAuth MCP",
+    "cwd": "/home/ecochran76/workspace.local/im-receipts",
+    "status": {
+      "type": "active",
+      "activeFlags": []
+    }
+  },
+  "next_gate": "New queue expiry requires explicit user authority; no automatic retry, reload or allocation renewal."
+}

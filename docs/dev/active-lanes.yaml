@@ -6,16 +6,16 @@ lanes:
     objective: Make shipped same-conversation self-refresh operational
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/282]
     plan: docs/dev/plans/0168-2026-10-18-self-refresh-operational.md
-    plan_ref: fix/self-refresh-operational
-    branch: fix/self-refresh-operational
+    plan_ref: fix/shared-refresh-rpc-timeout
+    branch: fix/shared-refresh-rpc-timeout
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 27330f6
+    checkpoint: 979f61f
     dependencies: [P167]
     overlaps: []
     updated_at: 2026-10-18
-    disposition: Public missing-host refusal reproduced; native reload and deferred self-call prerequisites under qualification
+    disposition: Production intent terminal without reload; RPC timeout expiry repair under validation; no requeue authority
   - id: P167
     owner: primary / ecochran76
     objective: Discover and supervise persistent resource limits in the existing dev session
