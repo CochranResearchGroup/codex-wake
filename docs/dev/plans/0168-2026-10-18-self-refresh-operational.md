@@ -5,15 +5,17 @@ Branch: fix/self-refresh-operational. Base: 27330f6. Target: origin/main.
 
 ## Current State
 
-v0.17.1 is released/installed from exact main2e3e931. The production intent is
-terminal EXPIRED without a reload. Wake reconciliation at02:03:47Z found its
-02:19:21Z deadline still in the future; independent monotonic check at02:04:04Z
-showed649.8seconds remaining. A public regression confirms an RPC timeout is
-incorrectly classified as intent expiry. Minimal correction for v0.17.2 keeps
-observation failures recoverable until the original deadline. Old receipt is
-preserved, never revived/requeued. Plan/issue remain OPEN for actual production
-proof; a new attempt requires explicit new expiry authority and an idle window.
-Branch: fix/shared-refresh-rpc-timeout; base979f61f.
+v0.17.2 is released/installed from exact maincdb499e (PR285). Independent
+refresh service runs the patch with a fresh heartbeat. Installed11public checks,
+110-source parity and27-tool controls pass. Published assets hash-match download.
+Private mailbox smoke refused a clock anomaly first; one fresh recheck passes.
+Retain this flaky local clock-dependent qualification, not a clean-first-run claim.
+
+Production refresh remains terminal EXPIRED without reload. The original receipt
+hash, complete goal and counters are unchanged. Actual native cache remains25
+tools. No new refresh intent or expiry was created. Plan/issue remain OPEN: a
+new production attempt requires explicit new-expiry authority and shared idle
+condition. Current branch: docs/self-refresh-v0172-delivery; basecdb499e.
 
 ## Original diagnostic baseline
 
@@ -202,3 +204,30 @@ Source fix does not revive historical terminal receipts or renew any allocation.
 Current gate: exact-main v0.17.2 patch delivery and installed proof; production
 retry requires explicit user approval of a new fixed expiry. No global restart,
 peer interrupt or force-idle action is authorized.
+
+## v0.17.2 exact-main delivery
+
+PR285/head900ae29 passed hosted run39088839465:1362tests (1skip) each on3.11
+and3.12, installed gates PASS. Merged exactmaincdb499e2aca5a9bf7169cbe0e69009b9fb8bcbb8
+owns releasev0.17.2 wheel/sdist; downloaded bytes match both local artifacts.
+Prefix /home/ecochran76/.local/share/codex-wake/releases/0.17.2-cdb499e has110
+Python source matches. Installed public shared11testsPASS8.839s, using a copied
+test harness outside source so both CLI parent and separate watcher import the
+installed package. Controls/MCP27tools PASS. Both full skill directories remain
+byte-identical to release source; no skill rewrite was necessary.
+
+Broader private-bus installed MCP smoke initially refused wake_messages_reply
+with clock_anomaly/clock continuity uncertain, reconciliation_required=false.
+Failure retained in v0172-mcp-first-failure.json; no production effect. One
+fresh private-fixture diagnostic recheck passes5.920s,0native turns/notifications,
+0remaining children and fixture removed. Clock-dependent flake remains disclosed;
+mailbox/clock code unchanged. No broader probe or retry was performed.
+
+All5stable entrypoints now select0.17.2. Independent shared-refresh service
+PID20264 runs exactnewprefix after verifying every intent terminal. Host
+self-refresh proof expects actual0.17.2 configuration response, with caller/
+workspace/scope grants unchanged. Resource watcher42551 stays on0.17.1 and
+supervisor60043 is preserved. Historical expired receipt SHA256 unchanged,
+no new intent/reload/goalwrite/counter reset. Actual cache25tools confirms no
+production resource proof. User-approved new expiry plus idle condition is the
+remaining gate. Plan0168 and work item282 remain OPEN.

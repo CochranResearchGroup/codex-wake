@@ -1273,5 +1273,6 @@ State: OPEN. Owner: primary / ecochran76. Work item #282,
 Repair the gap between shipped refresh discovery and actual host/client readiness.
 Native resource reload, idle self-call deferral and exact caller scope are
 qualification gates. No counter reset or shared-server restart.
-Production intent terminal without reload; v0.17.2 fixes premature RPC-timeout
-expiry. A new production attempt needs explicit new-expiry authority.
+v0.17.2 timeout repair released/installed from cdb499e; production intent remains
+terminal without reload. A new attempt needs explicit new-expiry authority and
+an idle window; actual native resource proof remains OPEN.
