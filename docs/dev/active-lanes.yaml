@@ -6,16 +6,16 @@ lanes:
     objective: Verified allocation provisioning and graceful campaign controls
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/289]
     plan: docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md
-    plan_ref: fix/289-attribute-tmux-wake-targets
-    branch: fix/289-attribute-tmux-wake-targets
+    plan_ref: fix/289-native-first-enrollment
+    branch: fix/289-native-first-enrollment
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: eb37b8c
+    checkpoint: b69d966
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-18
-    disposition: PR292 monitor-only patch installed; live intent stopped before close by other-pane unpublished wakes and is now expired; bounded attribution repair checkpoint
+    disposition: PR293 merged; native12000fresh/180s demo reproduced missing-allocation hold; first-enrollment envelope correction in progress
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational

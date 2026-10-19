@@ -43,3 +43,18 @@ binding; model-provided UUIDs and copied checkpoints are not that binding.
 Provisioning must work through the public agent-facing path. Missing host-wide
 installation setup must produce an actionable diagnostic while preserving
 operator replies; it must not require operators to provision each session.
+
+## Accepted clarification — first native enrollment (2026-10-19)
+
+The observed independent /tmp demo rejected a normal small /goal because no
+named allocation or default existed. The user requires this path to work without
+per-session provisioning. A private host-wide `self_enrollment` envelope therefore
+delegates a first allocation to a verified native caller within fixed token/time
+ceilings. Its identity is deterministic for the conversation and survives goal
+replacement; enrollment cannot mint a second allowance for that conversation.
+Explicit host renewal remains separate. Existing caller grants and named
+allocations keep their precedence and ledgers. Successors carry their existing
+allocation ID; attributable child sessions cannot omit it to mint a fresh budget.
+Unknown accounting or caller evidence holds before allocation creation.
+This is a local host delegation contract, not authentication of arbitrary model
+requests or hostile same-UID clients. Model tools never rewrite host policy.

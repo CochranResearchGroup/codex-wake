@@ -127,6 +127,85 @@ class GoalSupervisionTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'selected allocation'):
                     enroll(root,policy,THREAD,100,120,allocation_id='other')
 
+    def test_native_first_enrollment_needs_no_named_allocation_or_default(self):
+        from codex_wake.mcp_server import CommandRunner
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            template=json.loads(policy.read_text())['callers'][THREAD]
+            template.pop('allocation_id')
+            template.update(max_tokens=100,max_seconds=120)
+            config=dict(version=2,native_caller_binding=True,allocations={},self_enrollment=template)
+            policy.write_text(json.dumps(config));before=policy.read_bytes()
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='first-native-goal',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            runner=CommandRunner(goal_limits_policy=policy,goal_limits_root=root)
+            args=dict(caller_thread_id=THREAD,token_limit=100,time_limit_seconds=120)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                for invalid,metadata in ((dict(args,token_limit=101),context),(args,None),
+                        (args,dict(context,threadId='00000000-0000-7000-8000-000000000290')),
+                        (dict(args,allocation_id='native-00000000-0000-7000-8000-000000000290'),context)):
+                    denied,failed=runner.call('wake_goal_limits_set',invalid,native_context=metadata)
+                    self.assertTrue(failed,denied)
+                first,failed=runner.call('wake_goal_limits_set',args,native_context=context)
+                self.assertFalse(failed,first)
+                self.assertEqual(first['state'],'armed')
+                self.assertEqual(first['used_tokens'],40)
+                self.assertEqual(first['deadline'],NOW+120)
+                again,failed=runner.call('wake_goal_limits_set',args,native_context=context)
+                self.assertFalse(failed,again)
+                for key in ('allocation_id','generation','deadline','used_tokens'):
+                    self.assertEqual(again[key],first[key])
+                shown,failed=runner.call('wake_goal_limits_show',dict(caller_thread_id=THREAD),native_context=context)
+                self.assertFalse(failed,shown)
+                self.assertEqual(shown['allocation_id'],first['allocation_id'])
+                native['goal']['createdAt']=NOW+1
+                continued,failed=runner.call('wake_goal_limits_set',args,native_context=context)
+                self.assertFalse(failed,continued)
+                for key in ('allocation_id','generation','deadline','used_tokens'):
+                    self.assertEqual(continued[key],first[key])
+                self.assertEqual(policy.read_bytes(),before)
+
+    def test_native_successor_cannot_omit_existing_allocation_to_get_fresh_budget(self):
+        from codex_wake.mcp_server import CommandRunner
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,_,_=self.fixture(directory)
+            template=json.loads(policy.read_text())['callers'][THREAD];template.pop('allocation_id')
+            policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,allocations={},self_enrollment=template)))
+            rows=[json.loads(line) for line in log.read_text().splitlines()]
+            rows[0]['payload']['parent_thread_id']='00000000-0000-7000-8000-000000000290'
+            log.write_text(''.join(json.dumps(row)+'\n' for row in rows))
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='successor',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                result,failed=CommandRunner(goal_limits_policy=policy,goal_limits_root=root).call(
+                    'wake_goal_limits_set',dict(caller_thread_id=THREAD,token_limit=100,time_limit_seconds=120),native_context=context)
+                self.assertTrue(failed,result)
+                self.assertIn('successor',result['error']['message'])
+
+    def test_public_successor_joins_automatically_created_allocation(self):
+        from codex_wake.mcp_server import CommandRunner
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            template=json.loads(policy.read_text())['callers'][THREAD];template.pop('allocation_id')
+            policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,allocations={},self_enrollment=template)))
+            successor='00000000-0000-7000-8000-000000000290'
+            rows=json.loads(json.dumps([json.loads(line) for line in log.read_text().splitlines()]).replace(THREAD,successor))
+            rows[1]['payload']['goal']['createdAt']=NOW+10
+            for row in rows[1:]:row['timestamp']='2030-01-01T00:00:10Z'
+            (log.parent/'successor.jsonl').write_text(''.join(json.dumps(row)+'\n' for row in rows))
+            native['siblings']={successor:dict(goal=dict(threadId=successor,createdAt=NOW+10,status='active'),active=['work'],calls=[])}
+            context=lambda thread:dict(threadId=thread,sessionId=thread,callId='call-'+thread,
+                **{'x-codex-turn-metadata':dict(thread_id=thread,session_id=thread,turn_id='work')})
+            runner=CommandRunner(goal_limits_policy=policy,goal_limits_root=root)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+10):
+                first,failed=runner.call('wake_goal_limits_set',dict(caller_thread_id=THREAD,token_limit=100,time_limit_seconds=120),native_context=context(THREAD))
+                self.assertFalse(failed,first)
+                second,failed=runner.call('wake_goal_limits_set',dict(caller_thread_id=successor,token_limit=100,time_limit_seconds=120,allocation_id=first['allocation_id']),native_context=context(successor))
+                self.assertFalse(failed,second)
+                self.assertEqual(second['allocation_id'],first['allocation_id'])
+                self.assertEqual(second['deadline'],first['deadline'])
+                self.assertEqual(second['used_tokens'],80)
+
     def test_host_delegated_caller_enrolls_without_uuid_grant(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,_=self.fixture(directory)

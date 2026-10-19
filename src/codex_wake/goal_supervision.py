@@ -68,7 +68,45 @@ class CallerGrantMissing(ValueError):
     """The host policy has no authority for this caller; no effect was attempted."""
 
 
-def _load_grant(policy_path,thread,allocation_id=None):
+def _delegated_grant(policy,thread,allocation_id,root):
+    allocations=policy['allocations']
+    if not isinstance(allocations,dict):raise ValueError('host allocations must be an object')
+    template=policy.get('self_enrollment')
+    selected=allocation_id
+    directory=None
+    if root is not None:
+        base=Path(root).absolute()
+        if base!=base.resolve():raise ValueError('supervision root cannot traverse symlinks')
+        directory=base/'goal-supervision'
+        receipt=directory/(_name(thread)+'.json')
+        if selected is None and template is not None and receipt.exists():
+            _private(receipt);current=json.loads(receipt.read_text())
+            if current['thread_id']!=thread:raise ValueError('stored caller identity changed')
+            selected=current['allocation_id']
+    selected=selected or policy.get('default_allocation')
+    if selected in allocations:
+        return dict(allocations[selected],allocation_id=selected,host_delegated=True)
+    if template is None:raise ValueError('select an existing host objective allocation')
+    fields={'app_server','codex_path','codex_home','max_tokens','max_seconds','rpc_timeout'}
+    if not isinstance(template,dict) or set(template)-fields or not fields-{'rpc_timeout'}<=set(template):
+        raise ValueError('host self-enrollment envelope is invalid')
+    own='native-'+thread
+    selected=selected or own
+    if not isinstance(selected,str) or not selected.startswith('native-'):
+        raise ValueError('select an existing host objective allocation')
+    _name(selected[len('native-'):])
+    grant=dict(template,allocation_id=selected,host_delegated=True,auto_enrolled=True)
+    if selected!=own:
+        if directory is None:raise ValueError('existing objective ledger required')
+        path=directory/'allocations'/(hashlib.sha256(selected.encode()).hexdigest()+'.json')
+        _private(path);existing=json.loads(path.read_text())
+        if (existing['allocation_id']!=selected or
+                existing['grant']!=dict(grant,rpc_timeout=grant.get('rpc_timeout',5))):
+            raise ValueError('existing objective envelope changed')
+    return grant
+
+
+def _load_grant(policy_path,thread,allocation_id=None,root=None):
     path=Path(policy_path).absolute();_private(path)
     if path!=path.resolve():raise ValueError('policy cannot traverse symlinks')
     def unique(pairs):
@@ -90,11 +128,7 @@ def _load_grant(policy_path,thread,allocation_id=None):
     else:
         if policy.get('native_caller_binding') is not True:
             raise ValueError('host must require native caller binding')
-        selected=allocation_id or policy.get('default_allocation')
-        allocations=policy['allocations']
-        if not isinstance(allocations,dict) or selected not in allocations:
-            raise ValueError('select an existing host objective allocation')
-        grant=dict(allocations[selected],allocation_id=selected,host_delegated=True)
+        grant=_delegated_grant(policy,thread,allocation_id,root)
     for key in ('max_tokens','max_seconds'):
         if type(grant[key]) is not int or grant[key]<=0:raise ValueError('invalid host allocation cap')
     if not isinstance(grant['allocation_id'],str) or not grant['allocation_id']:raise ValueError('allocation identity unavailable')
@@ -110,8 +144,8 @@ def _load_grant(policy_path,thread,allocation_id=None):
     return dict(grant,rpc_timeout=timeout)
 
 
-def _grant(policy_path,thread,allocation_id=None):
-    try:return _load_grant(policy_path,thread,allocation_id)
+def _grant(policy_path,thread,allocation_id=None,root=None):
+    try:return _load_grant(policy_path,thread,allocation_id,root)
     except (KeyError,TypeError,AttributeError) as exc:raise ValueError('host caller grant unavailable or malformed') from exc
 
 
@@ -295,7 +329,7 @@ def _heartbeat(directory):
 
 
 def show(root,policy_path,caller_thread_id,allocation_id=None):
-    name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id)
+    name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
     directory=_directory(root);path=directory/(name+'.json')
     if not path.exists():return dict(state='held',reason='not_enrolled',thread_id=caller_thread_id,controller=_heartbeat(directory))
     with _lock(directory,name):
@@ -312,7 +346,7 @@ def show(root,policy_path,caller_thread_id,allocation_id=None):
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
            allocation_id=None,native_context=None):
-    name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id)
+    name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
     binding=verified_native_caller(native_context,caller_thread_id) if grant.get('host_delegated') else None
     for key,value,maximum in [('tokens',token_limit,grant['max_tokens']),('seconds',time_limit_seconds,grant['max_seconds'])]:
         if type(value) is not int or not 0<value<=maximum:raise ValueError('requested '+key+' exceed host allocation')
@@ -352,6 +386,11 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 token_accounting=previous_basis,used_tokens=old['used_tokens'],accounting=old.get('accounting')))
         receipt['token_accounting']=basis
         receipt['deadline']=receipt['time_origin']+time_limit_seconds
+        if grant.get('auto_enrolled') and grant['allocation_id']=='native-'+caller_thread_id and not old:
+            from .goal_usage import observe_usage
+            first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis)
+            if first.get('state')!='qualified':raise ValueError('first enrollment requires qualified original history')
+            if first.get('parent_thread_id'):raise ValueError('successor must select its existing objective allocation')
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old)
         observation=_usage(receipt)
         if basis_changed and observation.get('state')!='qualified':
@@ -495,7 +534,7 @@ def poll(root):
         with _lock(directory,path.stem):
             _private(path);receipt=json.loads(path.read_text())
             try:
-                grant=_grant(receipt['policy_path'],receipt['thread_id'],receipt['allocation_id'])
+                grant=_grant(receipt['policy_path'],receipt['thread_id'],receipt['allocation_id'],root)
                 if grant!=receipt['grant']:
                     results.append(_stop(path,receipt,'host_policy_changed'));continue
                 if boot_id_value()!=receipt['boot_id']:

@@ -33,7 +33,12 @@ the private MCP connection. Optional `allocation_id` selects an existing host
 objective; it cannot create another allowance. Successors use the same ID and
 retain cumulative spend, original deadline and any stopping decision. An
 ambiguous/missing allocation needs a concrete selection or host setup correction,
-not a new per-session UUID grant.
+not a new per-session UUID grant. With a host-wide `self_enrollment` envelope, a
+verified independent native session may omit `allocation_id`: its first allowance
+is created within the envelope ceilings. The returned ID remains stable across
+goal replacement. Successors must carry the existing ID; an attributable child
+cannot omit it to obtain a new allowance. Re-enrollment and goal replacement do
+not replenish tokens or time. Legacy exact grants remain unchanged.
 
 The controller requests “stop work and write a restart-safe checkpoint” when
 either 5% of tokens or 60 seconds remain. Optional `checkpoint_token_percent`
@@ -66,6 +71,19 @@ is not a reset or automatic resume. Replacing `/goal`, resuming, re-registering,
 controller or changing context does not reset them. Re-registration may tighten
 limits. Only an explicit user reset, recorded in a new host-approved allocation
 generation, can reset counters/allocation. Do not invent a reset to escape a hold.
+
+## Host-wide first-enrollment envelope
+
+Configure `self_enrollment` once in a version2 policy with native caller binding.
+It contains `app_server`, `codex_path`, `codex_home`, `max_tokens`, `max_seconds`
+and optional `rpc_timeout`, using the same trusted host paths as named grants.
+For example, ceilings of2000000tokens/21600seconds permit a new independent
+session to request12000tokens/180seconds without a named allocation or default.
+The requested limits become the fixed ledger limits, not the envelope ceilings.
+Agents cannot change the envelope or use it to renew an existing conversation.
+Existing named allocation selection and private runtime ledgers remain supported.
+This capability requires a compatible installed MCP and controller; an old client
+may retain its MCP connection until it is refreshed.
 
 ## Meaning and limits of the receipt
 

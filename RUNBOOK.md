@@ -7433,3 +7433,27 @@ only valid other-pane targets on the same verified canonical socket; exact and
 ambiguous targets still hold. Live intent expired20:29:29Z; no further rearm or
 force. Live catalog/active-restore proof remains open. Planv13 checkpoints source
 and runtime separately; original2M/21:39:29.531693Zdeadline unchanged.
+
+
+## Turn370 | 2026-10-19 UTC | Native first enrollment and successor dispatch
+
+The independent real native demo reproduced missing named allocation on MCP0.18.1:
+12000fresh/180seconds held, actual goal blocked, operator reply still available.
+Evidence: /tmp/codex-wake-goal-demo-aq6fhshs/observer-summary.json. No quota
+enforcement success is inferred from this failed admission. Current authorized
+renewal5a0f1b65a081423fa6cbd3fa3c5a3981 is armed,2Mfresh, fixed deadline
+2026-10-20T03:55:35.869783Z; native campaign goal remains paused.
+
+Candidate0.18.4 adds a private host-wide self_enrollment ceiling, stable native
+allocation identity, existing ledger continuity and a descendant omission guard.
+Public regressions observed red before green. Independent Standards and Spec
+reviewers both identified omitted runtime-root propagation in public dispatcher
+grant lookups. Accepted as blocking, fixed both lookups, and observed the public
+successor regression green with shared80token spend and unchanged deadline.
+Both bounded rechecks find no remaining critical correction defect. Focused
+41tests PASS10.274s; compile, policy wiring and diff checks pass. Earlier full
+run intentionally terminated for this accepted correction; it is not a pass.
+Final CI, exact-main install and original native demo acceptance remain pending.
+No live self_enrollment policy enabled yet; no shared daemon restart. Renewal
+snapshot race and independent early-stop accounting audit remain separate open
+axes under issue289; this slice does not close the issue.
