@@ -206,7 +206,7 @@ class CommandRunner:
             # arguments cannot select a host policy, transport or caller binding.
             try:
                 from .goal_supervision import _grant, verified_native_caller, enroll, show
-                grant=_grant(self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id'))
+                grant=_grant(self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id'),root=goal_root)
                 if grant.get('host_delegated'):
                     verified_native_caller(native_context,arguments['caller_thread_id'])
                     if verb=='set':
@@ -219,7 +219,7 @@ class CommandRunner:
                 # callers must never fall back to an unbound claimed identity.
                 try:
                     from .goal_supervision import _load_grant
-                    delegated=_load_grant(self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id')).get('host_delegated')
+                    delegated=_load_grant(self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id'),root=goal_root).get('host_delegated')
                 except Exception:
                     delegated=False
                 if delegated:

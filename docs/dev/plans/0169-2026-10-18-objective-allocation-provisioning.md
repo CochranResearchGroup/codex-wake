@@ -2,13 +2,42 @@
 
 State: OPEN
 Owner: primary / ecochran76.
-Branch: fix/289-attribute-tmux-wake-targets. Base: eb37b8c. Target: origin/main.
+Branch: fix/289-native-first-enrollment. Base: b69d966. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 13; targeted pause/quit/resume refresh and campaign-stop separation.
+Plan version: 15; native first enrollment within a private host-wide ceiling.
 
 ## Current State
+
+2026-10-19 renewal and faithful independent demo: user renewed2Mfresh/6h;
+current allocation5a0f1b65a081423fa6cbd3fa3c5a3981deadline2026-10-20T03:55:35.869783Z.
+Public renewal initially failed between snapshots after persisting target boundary;
+qualified extension was reconciled once against frozen808responses, preserving
+before-images, partitioned charges and deadline. Public native rebind now armed.
+No campaign work relied on an intermediate receipt. Native goal remains paused.
+PR293 mergedb69d966 with both required CI jobs green; source includes exact tmux
+attribution correction. No expired refresh intent was retried.
+
+Real independent client in /tmp/codex-wake-goal-demo-aq6fhshs, MCP0.18.1,
+requested12000fresh/180seconds. Enrollment held on missing named objective; with
+an actual native goal the agent repeated status checks, then blocked. No exercise
+ran. Operator DEMO_CHAT_OK completed while goal remained blocked. Private client
+closed after idle; shared9802/start10894 preserved. This is enrollment failure,
+not successful stop enforcement. Captured observer-summary.json owns raw proof.
+
+Current source packet: host-wide first-enrollment envelope under ADR0002clarification;
+public CommandRunner regression red on exact selection error, then green; forged
+identity/cap escape/arbitrary allocation/goal replacement and successor continuity
+are covered by41focused passing tests. Both review axes accepted the dispatcher
+root omission; corrected public successor regression is green, and bounded
+rechecks identify no critical regression. Final CI remains pending.
+Install exact merged source and configure envelope once;
+rerun original native demo to prove armed admission, checkpoint/stop and operator
+reply. No default may silently attach unrelated sessions to this campaign's budget.
+Remaining axes: independent early-stop accounting replay and renewal snapshot race
+regression remain open; no aggregate completion claim from enrollment alone.
+
 
 2026-10-18 final bounded checkpoint: PR292 mergedeb37b8c after both required
 CI39162320206 jobs pass;0.18.2 published and installed only for refresh monitor.

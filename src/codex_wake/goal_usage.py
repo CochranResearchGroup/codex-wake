@@ -366,10 +366,17 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
                    anchor['response_hashes'][json.dumps(k)] for k in excluded):
                 raise ValueError('reset_anchor_history_changed')
         check_time()
+        root_meta=sessions[thread_id][0]
+        parent_thread_id=root_meta.get('parent_thread_id')
+        source=root_meta.get('source',{})
+        if isinstance(source,dict):
+            subagent=source.get('subagent',{})
+            spawn=subagent.get('thread_spawn',{}) if isinstance(subagent,dict) else {}
+            if isinstance(spawn,dict):parent_thread_id=parent_thread_id or spawn.get('parent_thread_id')
         selected = [records[k]['usage'] for k in charged - excluded]
         inclusive = sum(v['total_tokens'] for v in selected)
         cached = sum(v['cached_input_tokens'] for v in selected)
-        return dict(state='qualified', used_tokens=inclusive - cached if token_accounting == 'fresh' else inclusive,
+        return dict(state='qualified', parent_thread_id=parent_thread_id, used_tokens=inclusive - cached if token_accounting == 'fresh' else inclusive,
             fresh_tokens=inclusive - cached, cached_input_tokens=cached,
             cache_inclusive_tokens=inclusive, token_accounting=token_accounting,
             charges={json.dumps(k):dict(
