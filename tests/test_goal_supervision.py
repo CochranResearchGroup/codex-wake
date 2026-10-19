@@ -468,6 +468,74 @@ class GoalSupervisionTests(unittest.TestCase):
                 self.assertEqual(native['active'],['operator-reply'])
                 self.assertNotIn(('turn/interrupt',dict(threadId=THREAD,turnId='operator-reply')),native['calls'])
 
+    def test_poll_avoids_full_history_timeout_when_bounded_native_observation_is_available(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,request=self.fixture(directory)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120)
+                def bounded_read(endpoint,executable,method,params,timeout):
+                    if method=='thread/read' and params.get('includeTurns'):
+                        raise TimeoutError('full history hydration timed out')
+                    if method=='thread/turns/list':
+                        self.assertEqual(params['itemsView'],'notLoaded')
+                        return dict(data=[dict(id=t,status='inProgress') for t in native['active']],nextCursor=None)
+                    return request(endpoint,executable,method,params,timeout)
+                with patch('codex_wake.goal_supervision.native_request',side_effect=bounded_read):
+                    after=poll(root)[0]
+                self.assertEqual(after['state'],'armed')
+                self.assertFalse(after.get('stop_latched',False))
+                self.assertEqual(after['deadline'],first['deadline'])
+                self.assertEqual(native['active'],['work'])
+
+    def test_native_turn_pagination_finds_active_turn_beyond_first_page(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,request=self.fixture(directory)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                enroll(root,policy,THREAD,100,120)
+                row=json.loads(log.read_text().splitlines()[-1]);row['payload']['response_id']='exhausted'
+                row['payload']['usage']=dict(input_tokens=60,cached_input_tokens=0,output_tokens=1,total_tokens=61)
+                with log.open('a') as stream:stream.write(json.dumps(row)+'\n')
+                def pages(endpoint,executable,method,params,timeout):
+                    if method=='thread/turns/list':
+                        if 'cursor' not in params:
+                            return dict(data=[dict(id='newer-terminal',status='completed')],nextCursor='older')
+                        self.assertEqual(params['cursor'],'older')
+                        return dict(data=[dict(id='work',status='inProgress' if 'work' in native['active'] else 'interrupted')],nextCursor=None)
+                    return request(endpoint,executable,method,params,timeout)
+                with patch('codex_wake.goal_supervision.native_request',side_effect=pages):
+                    final=poll(root)[0]
+                self.assertEqual(final['state'],'stopped')
+                self.assertEqual(final['stop_turns'],['work'])
+                self.assertEqual(native['active'],[])
+
+    def test_native_observation_failure_or_ambiguous_pagination_never_proves_idle(self):
+        for failure in ('endpoint-timeout','repeated-cursor','unknown-status','two-active','page-bound'):
+            with self.subTest(failure=failure),tempfile.TemporaryDirectory() as directory:
+                root,policy,_,native,request=self.fixture(directory)
+                with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                    enroll(root,policy,THREAD,100,120)
+                    page_count=0
+                    def unavailable(endpoint,executable,method,params,timeout):
+                        nonlocal page_count
+                        if method=='thread/turns/list':
+                            page_count+=1
+                            if failure=='endpoint-timeout':raise TimeoutError('endpoint stalled')
+                            if failure=='repeated-cursor':return dict(data=[],nextCursor='same')
+                            if failure=='unknown-status':return dict(data=[dict(id='work',status='futureState')])
+                            if failure=='two-active':return dict(data=[dict(id=t,status='inProgress') for t in ['work','other']])
+                            return dict(data=[],nextCursor='page-'+str(page_count))
+                        return request(endpoint,executable,method,params,timeout)
+                    with patch('codex_wake.goal_supervision.native_request',side_effect=unavailable):
+                        held=poll(root)[0]
+                    self.assertEqual(held['state'],'stop_unverified')
+                    self.assertEqual(held['reason'],'observation_unavailable')
+                    self.assertTrue(held['stop_latched'])
+                    self.assertEqual(native['active'],['work'])
+                    if failure=='endpoint-timeout':
+                        self.assertEqual(held['observation_error'],'TimeoutError')
+                        self.assertEqual(held['observation_method'],'thread/turns/list')
+                    self.assertLessEqual(page_count,64)  # observation plus stop verification
+
     def test_unknown_accounting_pauses_campaign_but_allows_bounded_checkpoint_grace(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,log,native,_=self.fixture(directory)
@@ -556,6 +624,7 @@ class GoalSupervisionTests(unittest.TestCase):
             selected['calls'].append((method,params))
             if method=='thread/goal/get':return {'goal':dict(selected['goal'])}
             if method=='thread/read':return {'thread':dict(id=params['threadId'],turns=[dict(id=t,status='inProgress') for t in selected['active']])}
+            if method=='thread/turns/list':return dict(data=[dict(id=t,status='inProgress') for t in selected['active']],nextCursor=None)
             receipts=list((root/'goal-supervision').glob('*.json'))
             saved=next(value for p in receipts if p.name!='controller.json'
                 for value in [json.loads(p.read_text())] if value['thread_id']==params['threadId'])
