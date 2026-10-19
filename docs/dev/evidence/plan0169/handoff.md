@@ -1,84 +1,78 @@
 # Issue289 restart-safe handoff
 
-Authority: user-approved goal and explicit host-delegated self-enrollment decision;
-ADR0002, Plan0169v4, RUNBOOK Turn353. The old operator-origin approval question
-is resolved. Do not ask for it again or restore per-session UUID provisioning.
+Current checkpoint: 2026-10-19, Plan0169v18. This replaces the obsolete startup
+instructions preserved in Git at a710405. Issue289 remains OPEN.
 
-Custody: /home/ecochran76/workspace.local/codex-wake-allocation-control, branch
-fix/289-allocation-campaign-control. Read current git HEAD/status; this checkpoint
-extends a9881c6. Main checkout89e3eb8 and spec checkoutdbd37ca were preserved.
-No remote push, PR, merge, release, production install/grant, shared MCP reload,
-service restart, counter reset or allowance renewal occurred.
+## Start here
 
-Implemented: v2 host allocation delegation; native MCP Context.meta caller binding;
-shared cumulative response ledger/dedup; original deadline; inherited stop/grace;
-explicit host renewal with finalized old charges and exact response anchors.
-Legacy v1 remains. Fresh input+output excludes cache by default. Goal pause stops
-owned campaign turns while later operator messages remain usable.
+1. Read Plan0169 Current State, ADR0002 and RUNBOOK Turn373. Inspect
+   `installed-native-controls-0.18.6.json` beside this handoff.
+2. Check Git status/HEAD in the allocation-control worktree and fetch origin.
+   Reconcile the documentation PR before editing. Preserve the separate main
+   checkout and unrelated work. Source release is main a710405107feb0baeeec978d78ac6c8b9d7d90ec.
+3. Read current private controller, parent receipt and allocation; compare their
+   identities, latch, deadline and cumulative fresh charges with the evidence.
+   MCP calls use the actual invoking UUID, never a claimed parent identity.
+4. Continue only authorized operator diagnosis. The user explicitly requires
+   the parent timeout latch retained. Campaign remains paused; source delivery
+   and successful tests do not authorize clearing it or renewing resources.
 
-Evidence: native-public-final.json binds five final source/installed module hashes,
-/tmp/cw289-v4-installed candidate, actual two-conversation public enrollment20->40
-fresh with unchanged deadline, unrelated control unchanged, six localhost Responses
-requests, no external calls. Final exact process groups70439/70590have no members.
-33focused tests pass; policy wiring/compile/diff checks pass. Review findings were
-reproduced/repaired; see review.md. No further broad discovery pass.
+## Authority and resource state
 
-Validation checkpoint: final frozen02c7893full run PASS1372tests/183.474s,1skip,
-exit0with isolated XDG_CONFIG_HOME/XDG_STATE_HOME and StableTime opt-out. The
-prior64baseline identifiers were host registry/mailbox fixture contamination;
-20selected tests prove isolation fixes the family without product edits. Earlier
-failed logs and one intermittent disposition mismatch remain retained. Plugin12
-PASS, compile/policy/diff/build PASS. README and CI now isolate unit process
-state. See delegation-validation.json. This is local, not remote matrix CI.
+The parent native thread is 01a14f45-25a2-7ef1-bcce-1205f176cc73. Its allocation
+is issue289-renewal-5a0f1b65a081423fa6cbd3fa3c5a3981: 2M fresh input+output,
+cache excluded, immutable deadline 2026-10-20T03:55:35.869783Z. At installed
+readback it used 755,885 fresh; refresh that value. Native goal remains paused.
+Stop reason observation_unavailable/TimeoutError is a qualification failure,
+not quota exhaustion. Preserve its latch, generation, response history and clock.
 
-Resource bound — renewed explicitly by operator after this checkpoint:
-allocation issue289-renewal-de360e1d0be04564bb7c947f996807d3.
-New allowance2Madditional fresh tokens/6hours, start2026-10-18T15:39:29.531693Z,
-deadline2026-10-18T21:39:29.531693Z. Original history is preserved; fresh baseline
-801245plus qualified reset_anchor in the private operator-allocations JSON under
-/home/ecochran76/.local/state/codex-wake/goal-limits/. Use observe_usage with
-that anchor, excluding cached input. Native goal01a14f45-25a2-7ef1-bcce-1205f176cc73
-is active by user action; no native counter reset/replacement goal occurred.
-Installed external enforcement remains held/armed:false. This is renewed operator
-authority, not claimed armed enforcement. Preserve200k-token/900second checkpoint
-reserve. Resource renewal does not reset review or discovery bounds.
+Private policy: ~/.config/codex-wake/goal-limits.json. Private state root:
+~/.local/state/codex-wake/goal-limits. Parent receipt basename:
+2b7b05f803a4519e764916ab6e93f3003389faa62df0db3892c57aadf848561c.json.
+Parent allocation basename:f7f183830d2363232e4b4da3925cfaa13ea5c5c4f7ae40f52841e5d3146bf5f5.json.
+Host-wide self_enrollment ceiling is enabled; named/legacy grants remain,
+with no default allocation attaching unrelated conversations to this campaign.
 
-Next bounded packet: integrate this qualified branch through the repository's
-GitHub/CI workflow, then perform separately authorized exact-main release/install
-qualification. No per-session grants or operator-origin approval question remains.
-Preserve prior failed receipts and unrelated sessions/services. No repeated broad
-review or native qualification needed unless the code changes or new evidence
-warrants it. Plan0168 refresh remains separate/expired and supplies no runtime
-retry. See canonical Plan0169v4d/RUNBOOK Turn354 for latest status.
+## Delivered and verified
 
-Memory disposition: forbidden; no reviewed destination routing for a Graphiti
-write, machine non-write receipt in /tmp/cw289-self-enrollment-memory-disposition-20261018.json.
+PR294 first native allocation creation, PR295 immutable renewal partition and
+transfer-aware peers, PR296 bounded native observation are merged. Required
+Python 3.11 / 3.12 CI passed their exact PR heads. 0.18.6 release includes all fixes.
+Installed prefix: ~/.local/share/codex-wake/releases/0.18.6-a710405.112modules
+match source; five stable links and both real skill directories adopted.
+Goal controller PID 91299 was fresh at readback. Re-observe current PID/prefix.
+Shared native daemon 9802/start 10894 was preserved throughout; it must remain.
+New isolated stdio initialization verifies MCP 0.18.6. Existing native client
+connections were not refreshed by this evidence.
 
-## Prepared0.18.0successor packet (Plan0169v6)
+The one permitted native-control fixture passed in 31.853 seconds with 4 localhost
+Responses requests, 0 external provider calls. Actual native checkpoint steer,
+quota interrupt/pause and an operator turn completing while paused are proven.
+Usage was injected, so this is control evidence, not billing evidence. Owned
+native 94844 and watcher 95019 exited; fresh process census found no remaining
+owned matches. Full receipts: /tmp/cw289-native0186-control-fixture/result.json
+and cleanup-readback.json. No rerun is needed for this source.
 
-Latest committed checkpoint remains447359e. Working tree now contains the
-uncommitted0.18.0metadata, host-only initial boundary import, hybrid v2legacy
-policy preservation, focused regressions and release/rollout artifacts. This is
-intentional pending operator delivery authorization; do not assume a clean tree
-or discard it. Candidate /tmp/cw289-v0180-ready matches all six source modules.
-Final exact-source unit run1375PASS/1skip/162.520s. Focused36PASS7.104s; native
-public imported boundary10->30fresh, unchanged deadline/control, six local calls,
-zero external providers, empty process census. See release-candidate-0.18.0.json.
+Original real demo at /tmp/codex-wake-native-0184-demo-26srmszp created a stable
+allocation without per-session provisioning, but setup had already consumed
+39,194 fresh against 12,000. Admission held; quota pause/operator reply proven.
+Raw dedup 41,754 fresh matches Wake. Its exhausted latch remains; its client exited.
+This does not prove below-cap armed admission or an agent-written checkpoint.
 
-Prepared private policy:/tmp/cw289-rollout-preview/policy-proposed.json. Preserves
-both current legacy grants exactly, adds only this renewed allocation with its
-original15:39:29.531693Z/801245response boundary, no default allocation. Live
-public endpoint still0.17.3held/unarmed; no policy/controller/runtime changes.
+## Remaining gates and next bounded packet
 
-Next decision is rollout-proposal.md, not another self-enrollment contract
-approval. It names commit/push/PR/remoteCI/merge, exact-main release/install and
-a new authorized idle-only MCP activation with scoped pause/resume and rollback.
-The existing shared-reload non-goal and provider/commit rules require operator
-approval. Automatic goal continuation and resource renewal are not that answer.
-This is the first turn encountering this delivery gate; goal remains active.
+Preserve both live latches and the fixed deadline. A new real acceptance campaign
+requires an explicitly qualified allowance; keep it distinct from resetting the
+exhausted demo. Original early-stop accounting replay remains open. The exact
+historical native timeout RPC is unknown; future failures now retain method/cause.
+Do not infer that avoiding 4.9 MB history hydration eliminates all timeout causes.
 
-Latest state: BLOCKED after three consecutive unanswered delivery-gate goal
-turns. Candidate hashes unchanged,1375tests still qualified. Pending action is
-operator rollout approval; no implicit approval from automatic continuation.
-Preserve all dirty0.18.0work and private proposal. No resource exhaustion or
-completion claimed. /tmp/cw289-rollout-preview/approval-audit.json records count3.
+Current bounded packet ends with installed native-control acceptance and this
+handoff. Further campaign activation is outside the explicit latch-preservation
+instruction. Existing expired shared-refresh intents remain expired. The owned
+qualification completion wake was cancelled after its result was inspected;
+no campaign continuation is armed. Documentation-only CI may finish publishing
+this checkpoint.
+
+Memory disposition: forbidden, no reviewed destination routing. Private no-write
+receipt and operational checkpoint: /tmp/cw289-native0186-control-run/.

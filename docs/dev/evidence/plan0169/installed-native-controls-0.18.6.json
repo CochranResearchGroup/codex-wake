@@ -1,0 +1,43 @@
+{
+  "source": "a710405107feb0baeeec978d78ac6c8b9d7d90ec",
+  "version": "0.18.6",
+  "pull_request": 296,
+  "ci": {
+    "run": 39335260835,
+    "head": "5307c1306dedac5d242e86633250fbd396b02052",
+    "python_311": "PASS",
+    "python_312": "PASS"
+  },
+  "installed_modules_equal": 112,
+  "stable_links": 5,
+  "skill_directories": 2,
+  "policy_unchanged": true,
+  "live_latches_preserved": true,
+  "shared_native_preserved": true,
+  "native_control_fixture": {
+    "verdict": "PASS_NATIVE_ACTIVE_AND_OPERATOR_REPLY_LOCAL_FIXTURE",
+    "elapsed_seconds": 31.852637512987712,
+    "http_calls": 4,
+    "external_provider_calls": 0,
+    "usage_provenance": "injected localhost SSE; not billing",
+    "checkpoint_acknowledged": true,
+    "quota_halt_proven": true,
+    "operator_reply_completed_while_paused": true,
+    "private_process_cleanup_verified": true
+  },
+  "parent": {
+    "state": "stopped",
+    "reason": "observation_unavailable",
+    "latch_cleared": false,
+    "resource_reset": false,
+    "token_limit": 2000000,
+    "accounting": "fresh",
+    "deadline": "2026-10-20T03:55:35.869783Z"
+  },
+  "limitations": [
+    "Historical timeout RPC not attributed",
+    "Real below-cap agent enrollment and agent-written graceful checkpoint unproven",
+    "New stdio MCP identity is not proof existing native connections refreshed",
+    "Original early-stop accounting replay remains open"
+  ]
+}
