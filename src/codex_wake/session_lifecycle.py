@@ -87,6 +87,29 @@ def open_session(args):
                 pane_id=pane_id, message='tab created; startup not yet verified; inspect before retry')
 
 
+def wake_target_relation(target, row):
+    """Attribute known targets; ambiguous socket/pane identities still hold."""
+    import re
+    if not isinstance(target, dict):
+        return 'unknown'
+    identity=target.get('thread_id')
+    if identity:
+        return 'exact' if identity==row['thread_id'] else 'other'
+    pane=target.get('pane');socket=target.get('tmux_socket')
+    attachments=row.get('attachments',[])
+    if (target.get('transport')!='tmux' or not isinstance(pane,str)
+            or not re.fullmatch(r'%[0-9]+',pane) or not isinstance(socket,str)
+            or not Path(socket).is_absolute() or not attachments):
+        return 'unknown'
+    for attachment in attachments:
+        own=attachment.get('socket');own_pane=attachment.get('pane_id')
+        if (not isinstance(own,str) or not Path(own).is_absolute()
+                or not isinstance(own_pane,str) or not re.fullmatch(r'%[0-9]+',own_pane)
+                or Path(own).resolve()!=Path(socket).resolve()):
+            return 'unknown'
+    return 'exact' if any(p['pane_id']==pane for p in attachments) else 'other'
+
+
 def pending_thread_work(row, wake_root, bus_roots=()):
     """Read the same attributable wake/mailbox inventory for close and handoff."""
     bus_roots_requested = bus_roots
@@ -112,26 +135,26 @@ def pending_thread_work(row, wake_root, bus_roots=()):
                                 publication_state='unknown')]
         for work in signal_work:
             target = work['target']
-            identity = target.get('thread_id') if isinstance(target, dict) else None
-            if identity == row['thread_id'] or not identity:
+            relation = wake_target_relation(target,row)
+            if relation != 'other':
                 if not any(item['wake_id'] == work['wake_id'] and item['root'] == str(root)
                            for item in pending):
                     pending.append(dict(wake_id=work['wake_id'], root=str(root),
-                                        attribution='exact' if identity else 'unknown',
+                                        attribution=relation,
                                         publication_state=work['publication_state']))
         for state in ('pending', 'firing'):
             for path in (root / state).glob('*.json'):
                 try:
                     record = json.loads(path.read_text())
-                    known = (classify_record(record) != 'hold'
-                             and isinstance(record.get('target'), dict)
-                             and bool(record['target'].get('thread_id')))
+                    relation = (wake_target_relation(record.get('target'),row)
+                                if classify_record(record) != 'hold' else 'unknown')
+                    known = relation != 'unknown'
                 except (OSError, UnicodeError, json.JSONDecodeError):
                     known = False
                 if not known:
                     pending.append(dict(wake_id=path.stem, root=str(root),
                                         attribution='unknown', path=str(path)))
-                elif record['status'] in ('pending', 'firing') and record['target']['thread_id'] == row['thread_id']:
+                elif record['status'] in ('pending', 'firing') and relation == 'exact':
                     if not any(item['wake_id'] == record['id'] and item['root'] == str(root)
                                for item in pending):
                         pending.append(dict(wake_id=record['id'], root=str(root)))

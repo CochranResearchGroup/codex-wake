@@ -2,13 +2,36 @@
 
 State: OPEN
 Owner: primary / ecochran76.
-Branch: fix/289-themed-refresh-composer. Base: 30a29c6. Target: origin/main.
+Branch: fix/289-attribute-tmux-wake-targets. Base: eb37b8c. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 12; targeted pause/quit/resume refresh and campaign-stop separation.
+Plan version: 13; targeted pause/quit/resume refresh and campaign-stop separation.
 
 ## Current State
+
+2026-10-18 final bounded checkpoint: PR292 mergedeb37b8c after both required
+CI39162320206 jobs pass;0.18.2 published and installed only for refresh monitor.
+Stable commands/MCP/skills and goal controller remain0.18.1-30a29c6.112modules
+match exact merged source. The same pre-effect intent was reconciled once with
+before-image/history; fingerprint/profile/expiry/resources unchanged. It passed
+composer proof, then close refused pending work before issuing kill-pane. The
+history's stopping/tmux-kill-pane entry is an intent, not an executed effect;
+client23317 and daemon9802/start10894 remain intact. Goal remains paused.
+
+Exact blockers: three unpublished preparing signal registrations in the
+AuraCall wake root, all explicitly targeting tmux%28 on the same socket; source
+client is%18. Close attribution previously recognized only native thread IDs,
+so these targets were treated as global unknowns. Public close regression
+reproduces the refusal. Bounded patch recognizes another valid pane only when
+all observed attachment socket identities match the absolute canonical target
+socket; same-pane and ambiguous targets still hold. No AuraCall record changed.
+The20:29:29Zrefresh intent has expired; no further rearm/new intent/forced close
+or shared restart is permitted in this packet. Live MCP adoption and conditional
+active restoration are UNVERIFIED. Issue289/Plan0169 remain OPEN.
+Resource readback at checkpoint preparation:1570562fresh used, same2M allowance
+and original21:39:29.531693Zdeadline. Stop/checkpoint before1.8Mfresh or21:24:29Z.
+
 
 2026-10-18 runtime continuation: PR291 merged30a29c6 after CI39161534163
 both matrices PASS. Published/installed0.18.1,112modules matching, both skills

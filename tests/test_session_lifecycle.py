@@ -101,6 +101,35 @@ class SessionLifecycleTests(unittest.TestCase):
                 with self.assertRaisesRegex(WakeError, 'pending wakes'):
                     run(['--wake-root', tmp, 'sessions', 'close', 'window:@3'])
 
+    def test_other_pane_unpublished_tmux_wake_does_not_block_this_close(self):
+        from dataclasses import replace
+        from codex_wake.signal_store import SQLiteSignalModule
+        from codex_wake.signal_records import signal_journal_path
+        from codex_wake.event_wake import EventWake
+        from codex_wake.signals import Resume
+        from tests.test_signals import make_adapter, make_intent, NOW
+        for target_pane,target_socket,allowed in (('%28','/tmp/fixture.sock',True),('%18','/tmp/fixture.sock',False),('%28','relative.sock',False),('%28','/tmp/unknown.sock',False)):
+            with tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp)
+                target={'transport':'tmux','pane':target_pane,'tmux_socket':target_socket}
+                intent=replace(make_intent(),resume=Resume('follow up',root,target))
+                EventWake(SQLiteSignalModule(signal_journal_path(root)),adapters=(make_adapter(),),clock=lambda:NOW,
+                          id_factory=lambda:'wake_other_pane').register(intent,idempotency_key='other-pane')
+                row=dict(thread_id='01a123a8-5782-7d43-a214-55b293bbd65f',cwd=tmp,runtime_state='idle',
+                         attachments=[dict(pane_id='%18',window_id='@18',socket='/tmp/fixture.sock')])
+                with patch('codex_wake.session_lifecycle.observe',return_value={'complete':True}),patch(
+                        'codex_wake.session_lifecycle.resolve',return_value=row),patch(
+                        'codex_wake.session_lifecycle.revalidate_attachment',return_value=True),patch(
+                        'codex_wake.supervisor.default_registry_dir',return_value=root/'registry'),patch(
+                        'codex_wake.session_lifecycle.tmux_command',return_value='%18') as command:
+                    if allowed:
+                        self.assertEqual(run(['--wake-root',tmp,'sessions','close','window:@18']),0)
+                    else:
+                        from codex_wake.records import WakeError
+                        with self.assertRaisesRegex(WakeError,'pending wakes'):
+                            run(['--wake-root',tmp,'sessions','close','window:@18'])
+                self.assertEqual(any('kill-pane' in call.args for call in command.call_args_list),allowed)
+
     def test_pending_mailbox_work_prevents_ordinary_close(self):
         from codex_wake.records import WakeError
         from tests.test_a2a_mailbox import MailboxTests
