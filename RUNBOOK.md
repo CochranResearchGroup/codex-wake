@@ -7501,3 +7501,22 @@ Candidate0.18.6 final CI/install/native-control qualification pending.
 Native-observation fixed-base4d9ddc6 review: Standards and Spec independently
 find no critical defect in frozen39e9542 source/test packet; primary accepts
 this bounded verdict. Installed proof remains separate and pending.
+
+
+## Turn373 | 2026-10-19 UTC | Exact-main install and isolated native controls
+
+PR296 merged a710405 after CI39335260835 both PASS. Released/installed0.18.6;
+112modules equal,5links2skill dirs adopted. Goal91299 fresh, all existing latches,
+generations/deadlines/charges retained; policy unchanged. Shared9802/start10894
+preserved. Fresh stdio MCP0.18.6 verified after observer SDK field-name correction;
+first read-only observer failure retained. Existing client catalogs not refreshed.
+
+ONE isolated native fixture PASS31.853seconds,4injectedlocalhost Responses,
+0externalproviders. Native steer/interrupt/pause and operator reply while paused
+qualified. Owned native94844/watcher95019 exited, fresh process census clean.
+Completion wake cancelled after inspection; no campaign follow-up armed. Artifact
+installed-native-controls-0.18.6.json and rewritten restart-safe handoff own the
+current proof. Parent timeout latch remains by instruction; no resource reset or
+campaign activation. Broader issue289 remains OPEN; real below-cap agent proof,
+historical timeout attribution and original early-stop accounting remain gaps.
+Progress: outcome_progress, installed native controls accepted within this packet.

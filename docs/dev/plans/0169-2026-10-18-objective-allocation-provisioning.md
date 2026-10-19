@@ -2,13 +2,33 @@
 
 State: OPEN
 Owner: primary / ecochran76.
-Branch: fix/289-native-observation. Base: 4d9ddc6. Target: origin/main.
+Branch: docs/289-installed-native-controls. Base: a710405. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 17; bounded native observation and retained timeout-stop evidence.
+Plan version: 18; installed native controls qualified, live timeout latch preserved.
 
 ## Current State
+
+2026-10-19 installed acceptance: PR296 merged a710405 after required
+CI39335260835 both matrices PASS. Released/installed0.18.6 from exact main;
+112modules equal,5links2skills adopted. Goal controller91299 fresh, policy
+unchanged, every existing latch/deadline/generation and ledger charge preserved,
+parent755885fresh at readback. Shared native9802/start10894 unchanged.
+New isolated stdio confirms MCP0.18.6; existing native connections not refreshed.
+
+The ONE existing localhost qualification PASS_NATIVE_ACTIVE_AND_OPERATOR_REPLY_LOCAL_FIXTURE:
+31.853seconds,4injected HTTP responses,0external provider calls. Native checkpoint
+steer, quota halt, and operator reply completion while paused proven. Native94844
+and watcher95019 exited, fresh process census clean. This proves actual controls
+with injected usage, not real billing or an agent-written graceful checkpoint.
+Owned completion wake cancelled after inspection; no campaign follow-up armed.
+Evidence: docs/dev/evidence/plan0169/installed-native-controls-0.18.6.json.
+Restart steps and remaining authority: docs/dev/evidence/plan0169/handoff.md.
+Parent timeout latch remains by explicit instruction, deadline unchanged. Issue289
+stays OPEN; real below-cap acceptance and original early-stop audit remain open.
+Progress classification: outcome_progress; source/install/native control criterion
+advanced, autonomous campaign activation remains outside this packet.
 
 2026-10-19 timeout observation packet: PR295 merged4d9ddc6 after both
 CI39334241523 matrices PASS. Renewal source qualified; live installation remains
