@@ -2,13 +2,44 @@
 
 State: OPEN
 Owner: primary / ecochran76.
-Branch: fix/289-renewal-snapshot. Base: a739e22. Target: origin/main.
+Branch: fix/289-native-observation. Base: 4d9ddc6. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 16; immutable renewal boundary and transfer-aware peer accounting.
+Plan version: 17; bounded native observation and retained timeout-stop evidence.
 
 ## Current State
+
+2026-10-19 timeout observation packet: PR295 merged4d9ddc6 after both
+CI39334241523 matrices PASS. Renewal source qualified; live installation remains
+0.18.4 pending the combined native-observation correction. Parent allowance is
+latched stopped/observation_unavailable, TimeoutError, at about627465fresh,
+not quota/time exhaustion. Receipt and ledger retained privately under
+/tmp/cw289-parent-observation-timeout. Goal remains paused, deadline unchanged,
+controller66899 and sharednative9802/start10894 preserved. User requires all
+existing latches retained; no clearing, renewal or blind restart is authorized
+by this packet. Work here is bounded operator setup diagnosis and repair.
+
+Exact historical failing RPC is unknown. Current full thread read includes4.9MB
+of turn items; native0.163 protocol deprecates full-history hydration and supports
+thread/turns/list with itemsView=notLoaded. Real paginated observation was13KB;
+source candidate identified current paused goal/operator turn in0.065seconds.
+The deterministic full-history-only timeout poll repro redstop_unverified then
+green armed when bounded reads remain available. This proves the amplification
+path, not the historical timeout's sole cause or elimination of all timeouts.
+
+Candidate0.18.6 observes goal, metadata-only identity and every paginated turn
+within one original RPC timeout and at most32pages of128requested turns. Unknown
+statuses, duplicate turns/cursors, multiple active turns, time/page exhaustion
+hold instead of proving idle. Native RPC failures retain method and cause.
+46focused tests PASS8.350s; first pagination-test failure was a fixture that kept
+an interrupted turn active, corrected with original failure retained. No existing
+latch, allocation, counter or deadline is changed by this source packet. Final
+CI and installed qualification remain pending. After exact-main install run the
+existing private localhost active-control qualification once (max5injected HTTP
+responses,90seconds, no provider billing/shared-daemon effect). Label injected
+usage separately from native control proof. Original real-demo below-cap arming
+and graceful checkpoint remain unproven; do not reset its exhausted allowance.
 
 2026-10-19 installed first-enrollment readback: PR294 merged a739e22,
 required CI39332810418 passed both matrices; v0.18.4 assets match local hashes.
@@ -824,3 +855,7 @@ commit against447359e. Standards/Spec reviewers remain closed-world on the two
 rollout gaps (initial boundary import and legacy-grant preservation), accepted
 findings and critical regressions. No new broad discovery pass. Primary retains
 authority/adjudication. Goal blocked UI is historical; user has resumed work.
+
+Native-observation fixed-base4d9ddc6 review: Standards and Spec independently
+find no critical defect in frozen39e9542 source/test packet; primary accepts
+this bounded verdict. Installed proof remains separate and pending.

@@ -7479,3 +7479,25 @@ regression red winding_down; persisted transfer provenance and gross comparison
 then green. Previous failed correction retained.43focused tests PASS8.267s;
 both bounded reviewer rechecks clear critical findings. Version0.18.5 candidate,
 final CI and installation pending. No live renewal/reset. Issue289 remains OPEN.
+
+
+## Turn372 | 2026-10-19 UTC | Timeout evidence and bounded native reads
+
+CI39334241523 both PASS ondf90c4f; PR295 merged4d9ddc6. Parent remains
+latched observation_unavailable/TimeoutError around627465fresh, qualified
+accounting, fixed2M/03:55:35.869783Zdeadline. Private before-images retained;
+no resource reset or latch clearing. Operator setup diagnosis continues; no
+autonomous campaign reactivation. Shared9802/start10894 preserved.
+
+Full native thread hydration currently4.9MB; local0.163schema supports item-free
+pagination, sampled13KB. Candidate read sameparent.065sec, no effects. Public
+poll repro red when full-history hydration times out but bounded reads work;
+new path green. One overallRPCtimeout,32page bound, ambiguity failsclosed; RPC
+method/cause retained.46focused tests PASS8.350s. One first pagination test
+misreported interrupted native state; fixture corrected, failure retained. Exact
+historical timeout origin remains unknown; no claim all timeouts are fixed.
+Candidate0.18.6 final CI/install/native-control qualification pending.
+
+Native-observation fixed-base4d9ddc6 review: Standards and Spec independently
+find no critical defect in frozen39e9542 source/test packet; primary accepts
+this bounded verdict. Installed proof remains separate and pending.

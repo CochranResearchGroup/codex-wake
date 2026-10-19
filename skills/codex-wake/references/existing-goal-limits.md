@@ -247,3 +247,15 @@ time window. Future/changed/unqualified boundaries hold before admission.
 Version2policies may preserve a `callers` map for legacy explicit grants; those
 callers retain their prior exact allocation and receipts. A requested different
 allocation holds for qualified migration instead of silently using another one.
+
+### Native observation bounds
+
+The native0.163 protocol supports metadata-only `thread/read` and paginated
+`thread/turns/list` with `itemsView=notLoaded`. The controller scans all returned
+pages within one configured RPC timeout and a32page ceiling, requesting128turns
+per page. It does not load every turn's item bodies on every poll. Ambiguous or
+incomplete pagination holds continuation; it never proves idle by inspecting
+only the latest turn. RPC failures record the method and exception class.
+An observation failure is distinct from token/time exhaustion. Existing stop
+latches remain authoritative after the transport recovers; this change does not
+clear them, renew resources, or restart the shared native daemon.

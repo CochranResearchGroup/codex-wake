@@ -6,16 +6,16 @@ lanes:
     objective: Verified allocation provisioning and graceful campaign controls
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/289]
     plan: docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md
-    plan_ref: fix/289-renewal-snapshot
-    branch: fix/289-renewal-snapshot
+    plan_ref: fix/289-native-observation
+    branch: fix/289-native-observation
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: a739e22
+    checkpoint: 4d9ddc6
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-18
-    disposition: PR294 installed0.18.4; automatic allocation created but demo over cap at admission; renewal snapshot race correction in review
+    disposition: PR295 renewal fix merged; parent timeout stop retained; bounded native observation correction in progress
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational

@@ -177,15 +177,46 @@ def _request(grant,method,params):
     return native_request(grant['app_server'],grant['codex_path'],method,params,grant['rpc_timeout'])
 
 
+class NativeObservationUnavailable(ValueError):
+    def __init__(self,method,cause):
+        super().__init__(method+': '+cause)
+        self.method=method
+        self.cause=cause
+
+
 def _native(grant,thread):
-    goal=_request(grant,'thread/goal/get',dict(threadId=thread))['goal']
-    native=_request(grant,'thread/read',dict(threadId=thread,includeTurns=True))['thread']
+    deadline=time.monotonic()+grant['rpc_timeout']
+    def observe(method,params):
+        remaining=deadline-time.monotonic()
+        try:
+            if remaining<=0:raise TimeoutError('native observation budget exhausted')
+            return _request(dict(grant,rpc_timeout=remaining),method,params)
+        except Exception as exc:
+            raise NativeObservationUnavailable(method,type(exc).__name__) from exc
+    goal=observe('thread/goal/get',dict(threadId=thread))['goal']
+    native=observe('thread/read',dict(threadId=thread,includeTurns=False))['thread']
     if native.get('id')!=thread or (goal and goal.get('threadId')!=thread):raise ValueError('native thread identity changed')
-    turns=native.get('turns')
-    if not isinstance(turns,list):raise ValueError('native turn state unavailable')
-    active=[turn['id'] for turn in turns if turn.get('status')=='inProgress']
-    if len(active)>1:raise ValueError('native active turn ambiguous')
-    return goal,active
+    cursor=None;seen_cursors=set();seen_turns=set();active=[]
+    for _ in range(32):
+        params=dict(threadId=thread,limit=128,sortDirection='desc',itemsView='notLoaded')
+        if cursor is not None:params['cursor']=cursor
+        page=observe('thread/turns/list',params)
+        turns=page.get('data')
+        if not isinstance(turns,list):raise ValueError('native turn state unavailable')
+        for turn in turns:
+            identity=turn.get('id');status=turn.get('status')
+            if (not isinstance(identity,str) or not identity or identity in seen_turns
+                    or status not in ('completed','interrupted','failed','inProgress')):
+                raise ValueError('native turn state ambiguous')
+            seen_turns.add(identity)
+            if status=='inProgress':active.append(identity)
+        if len(active)>1:raise ValueError('native active turn ambiguous')
+        cursor=page.get('nextCursor')
+        if cursor is None:return goal,active
+        if not isinstance(cursor,str) or not cursor or cursor in seen_cursors:
+            raise ValueError('native turn cursor ambiguous')
+        seen_cursors.add(cursor)
+    raise ValueError('native turn observation page limit exceeded')
 
 
 def _allocation_path(directory,allocation_id):
@@ -601,7 +632,8 @@ def poll(root):
                 else:receipt.update(state='armed',reason=None)
                 _save(path,receipt);results.append(receipt)
             except Exception as exc:
-                receipt['observation_error']=type(exc).__name__
+                receipt['observation_error']=exc.cause if isinstance(exc,NativeObservationUnavailable) else type(exc).__name__
+                if isinstance(exc,NativeObservationUnavailable):receipt['observation_method']=exc.method
                 results.append(_stop(path,receipt,'observation_unavailable'))
     return results
 
