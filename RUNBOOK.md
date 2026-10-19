@@ -7457,3 +7457,25 @@ Final CI, exact-main install and original native demo acceptance remain pending.
 No live self_enrollment policy enabled yet; no shared daemon restart. Renewal
 snapshot race and independent early-stop accounting audit remain separate open
 axes under issue289; this slice does not close the issue.
+
+
+## Turn371 | 2026-10-19 UTC | Installed first enrollment and renewal race
+
+PR294 mergeda739e22 after CI39332810418 both PASS. Released/installed0.18.4,
+112source modules equal,5links and2skill dirs. New goal66899/refresh66856
+prefixes verified, sharednative9802/start10894 preserved. Reviewed exactcontroller
+replacement used existing systemd failure restart to avoid shutdown latch writes;
+no latch clearing or allowance reset. Host-wide self_enrollment enabled once.
+Native demo26srmszp first hit harness approval rejection; same-client correction
+then created its stable allocation without per-session provisioning. Setup usage
+39194 already exceeded12000; held admission, controller pause/exhaustion and
+operator reply proven. Independent raw audit41754fresh matches receipt; below-cap
+arming/graceful checkpoint not proven. Owned client70454 exited after idle.
+
+Renewal race reproduced with deterministic response append between two reads.
+Initial correction validated hash prefix and partitioned charges; both reviewers
+identified false decrease for surviving peer. Expanded public enroll/poll
+regression red winding_down; persisted transfer provenance and gross comparison
+then green. Previous failed correction retained.43focused tests PASS8.267s;
+both bounded reviewer rechecks clear critical findings. Version0.18.5 candidate,
+final CI and installation pending. No live renewal/reset. Issue289 remains OPEN.

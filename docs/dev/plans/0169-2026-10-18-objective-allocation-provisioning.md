@@ -2,13 +2,44 @@
 
 State: OPEN
 Owner: primary / ecochran76.
-Branch: fix/289-native-first-enrollment. Base: b69d966. Target: origin/main.
+Branch: fix/289-renewal-snapshot. Base: a739e22. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
 Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 15; native first enrollment within a private host-wide ceiling.
+Plan version: 16; immutable renewal boundary and transfer-aware peer accounting.
 
 ## Current State
+
+2026-10-19 installed first-enrollment readback: PR294 merged a739e22,
+required CI39332810418 passed both matrices; v0.18.4 assets match local hashes.
+All112installed modules match exact main, five stable links and both skill dirs
+adopted. Controller66899 and refresh66856 use the new prefix; shared native
+9802/start10894 unchanged. Reviewed controller replacement avoided its latch-
+writing shutdown handler; no receipt/ledger latch was cleared, no counter or
+deadline reset. Host-wide self_enrollment ceiling2M/21600 enabled once; legacy
+and named grants preserved, no default campaign allocation.
+
+Real same-client demo /tmp/codex-wake-native-0184-demo-26srmszp reports actual
+MCP0.18.4. Harness workspace-write/never first rejected MCP before admission;
+that failure was retained. Correcting permissions in the same client allowed
+Wake to create native-01a1563a-b286-7602-b5db-c62677297d9a automatically.
+Admission held because setup had already consumed39194fresh against12000;
+controller proved paused/exhausted and operator DEMO_CHAT_OK completed. Independent
+raw response dedup:626714total-584960cached=41754fresh, matching the stopped
+receipt. Client70454 exited after idle; native daemon preserved. No prime exercise
+ran. Below-cap armed admission and graceful checkpoint remain UNVERIFIED; do not
+reset this exhausted demo or describe it as passing that acceptance gate.
+
+Bounded renewal packet0.18.5: deterministic public enrollment repro adds one
+response between history snapshots and reproduces the real boundary-change error.
+Fix validates the frozen immutable prefix and partitions old/new charges. Both
+reviewers found peer high-water false-stop; regression reproduced winding_down,
+then durable renewed_out_charges and transfer-aware gross comparisons corrected
+it. Peer deadline stays fixed, repeated polls remain armed, changed pre-boundary
+history is rejected.43focused tests PASS8.267s; both bounded review rechecks clear
+critical findings. Partial crash/retry continues to hold for explicit reconciliation.
+Final-head CI/install pending; no live renewal/reset was performed for this fix.
+Independent original early-stop audit and graceful live acceptance remain open.
 
 2026-10-19 renewal and faithful independent demo: user renewed2Mfresh/6h;
 current allocation5a0f1b65a081423fa6cbd3fa3c5a3981deadline2026-10-20T03:55:35.869783Z.
