@@ -58,3 +58,15 @@ allocation ID; attributable child sessions cannot omit it to mint a fresh budget
 Unknown accounting or caller evidence holds before allocation creation.
 This is a local host delegation contract, not authentication of arbitrary model
 requests or hostile same-UID clients. Model tools never rewrite host policy.
+
+### Renewal snapshot qualification and transfer accounting
+
+A response arriving after an admitted renewal boundary does not invalidate that
+boundary. Qualify the unchanged response hashes at the frozen prefix; charge
+that prefix to the departing member and later responses to the renewed allowance.
+Retain renewed-out response charges on the previous allocation as provenance.
+Surviving member receipts compare net spending plus cumulative transferred
+tokens, so authorized transfers do not trigger false accounting-decrease stops.
+Missing transfer fields in older state mean zero; existing latches and deadlines
+remain authoritative. Changed history still holds. A partially committed renewal
+continues to require explicit reconciliation; retry must not move its boundary.

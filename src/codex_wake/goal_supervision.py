@@ -272,9 +272,24 @@ def _allocation_admit(directory,receipt,old):
                 from .goal_usage import observe_usage
                 final=observe_usage(old['grant']['codex_home'],receipt['thread_id'],member['goal_created_at'],
                     token_accounting=prior['token_accounting'],reset_anchor=member.get('reset_anchor'))
-                if final.get('state')!='qualified' or final['anchor']!=anchor:
+                if final.get('state')!='qualified' or any(
+                        final['anchor'].get(key)!=anchor[key] for key in
+                        ('version','thread_id','goal_created_at','boundary')) or any(
+                        final['anchor']['response_hashes'].get(key)!=value
+                        for key,value in anchor['response_hashes'].items()):
                     raise ValueError('renewal boundary changed; reconcile before continuing')
-                member.update(finalized_charges=final['charges'],final_anchor=anchor,
+                # History can grow after target admission. Freeze old charges
+                # at that admitted boundary; later responses belong to the new
+                # allowance, even if another watcher sampled them in the old one.
+                frozen={key:value for key,value in final['charges'].items()
+                        if key in anchor['response_hashes']}
+                transferred=set(final['charges'])-set(frozen)
+                prior.setdefault('renewed_out_charges',{}).update(
+                    {key:final['charges'][key] for key in transferred})
+                prior['charges']={key:value for key,value in prior['charges'].items()
+                                  if key not in transferred}
+                prior['used_tokens']=sum(value['tokens'] for value in prior['charges'].values())
+                member.update(finalized_charges=frozen,final_anchor=anchor,
                     renewed_into=receipt['allocation_id'])
                 _save(previous,prior)
 
@@ -312,7 +327,19 @@ def _usage(receipt):
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
         return dict(state='qualified',used_tokens=used,token_accounting=allocation['token_accounting'],
+            renewed_out_tokens=sum(value['tokens'] for value in allocation.get('renewed_out_charges',{}).values()),
             member_thread_ids=sorted(allocation['members']),sampled=True,reason=None)
+
+
+def _accounting_decreased(receipt,observation):
+    # Net spending can fall only when explicit host renewal transfers response
+    # charges out. Compare gross spending so each receipt consumes that durable
+    # transfer once, without hiding an unexplained loss of accounting history.
+    prior=receipt.get('accounting',{}).get('renewed_out_tokens',0)
+    current=observation.get('renewed_out_tokens',0)
+    if type(prior) is not int or type(current) is not int or not 0<=prior<=current:
+        return True
+    return observation['used_tokens']+current<receipt['used_tokens']+prior
 
 
 def _heartbeat(directory):
@@ -401,7 +428,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             receipt['reset_anchor']=observation['anchor']
             observation=_usage(receipt)
         if observation.get('state')=='qualified' and type(observation.get('used_tokens')) is int:
-            if not basis_changed and observation['used_tokens']<receipt['used_tokens']:
+            if not basis_changed and _accounting_decreased(receipt,observation):
                 receipt.update(state='held',reason='accounting_decreased',stop_latched=True)
             else:
                 receipt.update(used_tokens=observation['used_tokens'],accounting=observation,state='armed',reason=None)
@@ -547,9 +574,12 @@ def poll(root):
                 receipt['native_goal_status']=goal.get('status') if goal else None
                 if 'winddown_deadline' in receipt:
                     results.append(_wind_down(path,receipt,receipt['winddown_reason'],goal,active,upper));continue
-                observation=_usage(receipt);receipt['accounting']=observation
+                observation=_usage(receipt)
                 used=observation.get('used_tokens')
-                if observation.get('state')!='qualified' or type(used) is not int or used<receipt['used_tokens']:
+                invalid=(observation.get('state')!='qualified' or type(used) is not int
+                    or _accounting_decreased(receipt,observation))
+                receipt['accounting']=observation
+                if invalid:
                     results.append(_wind_down(path,receipt,'accounting_unknown',goal,active,upper));continue
                 receipt['used_tokens']=used;receipt['observed_boottime']=time.clock_gettime(time.CLOCK_BOOTTIME)
                 if used>=receipt['token_limit'] or upper>=receipt['deadline']:

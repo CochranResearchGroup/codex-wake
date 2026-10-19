@@ -289,6 +289,103 @@ class GoalSupervisionTests(unittest.TestCase):
                 self.assertEqual(held['allocation_winddown_deadline'],grace)
 
 
+    def test_renewal_freezes_one_boundary_when_history_grows_between_reads(self):
+        from codex_wake.goal_usage import observe_usage
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,_=self.fixture(directory)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            config=dict(version=2,native_caller_binding=True,default_allocation='original',
+                allocations={'original':grant,'renewed':dict(grant,renews_allocation='original')})
+            policy.write_text(json.dumps(config))
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='native-call',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120,native_context=context)
+                peer='00000000-0000-7000-8000-000000000293'
+                (log.parent/'peer.jsonl').write_text(log.read_text().replace(THREAD,peer))
+                native['siblings']={peer:dict(goal=dict(threadId=peer,createdAt=NOW,status='active'),active=['work'],calls=[])}
+                peer_context=dict(context,threadId=peer,sessionId=peer,
+                    **{'x-codex-turn-metadata':dict(thread_id=peer,session_id=peer,turn_id='work')})
+                peer_first=enroll(root,policy,peer,100,120,native_context=peer_context)
+                peer_path=next(p for p in (root/'goal-supervision').glob('*.json')
+                    if json.loads(p.read_text()).get('thread_id')==peer)
+                reads=0
+                def growing_history(*args,**kwargs):
+                    nonlocal reads
+                    reads+=1
+                    if reads==2:
+                        row=json.loads(log.read_text().splitlines()[-1])
+                        row['payload']['response_id']='after-frozen-boundary'
+                        row['payload']['usage']=dict(input_tokens=5,cached_input_tokens=0,output_tokens=2,total_tokens=7)
+                        with log.open('a') as stream:stream.write(json.dumps(row)+'\n')
+                        # A peer's watcher may have sampled the departing
+                        # member before finalization acquired the old ledger.
+                        sampled=observe_usage(*args,**kwargs)
+                        old_path=Path(first['allocation_path'])
+                        old=json.loads(old_path.read_text())
+                        peer_usage=observe_usage(grant['codex_home'],peer,NOW)
+                        charges=dict(sampled['charges'],**peer_usage['charges'])
+                        used=sum(v['tokens'] for v in charges.values())
+                        old.update(charges=charges,used_tokens=used)
+                        old_path.write_text(json.dumps(old))
+                        cached=json.loads(peer_path.read_text())
+                        cached['used_tokens']=used;cached['accounting']['used_tokens']=used
+                        peer_path.write_text(json.dumps(cached))
+                    return observe_usage(*args,**kwargs)
+                with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+10), \
+                        patch('codex_wake.goal_usage.observe_usage',side_effect=growing_history):
+                    renewed=enroll(root,policy,THREAD,200,120,native_context=context,allocation_id='renewed')
+                self.assertEqual(renewed['state'],'armed')
+                self.assertEqual(renewed['used_tokens'],7)
+                self.assertEqual(renewed['deadline'],NOW+130)
+                old=json.loads(Path(first['allocation_path']).read_text())
+                target=json.loads(Path(renewed['allocation_path']).read_text())
+                frozen=old['members'][THREAD]['finalized_charges']
+                self.assertEqual(sum(v['tokens'] for v in frozen.values()),40)
+                self.assertEqual(old['used_tokens'],80)
+                self.assertTrue(set(frozen).isdisjoint(target['charges']))
+                self.assertEqual(sum(v['tokens'] for v in frozen.values())+target['used_tokens'],47)
+                after={r['thread_id']:r for r in poll(root)}[peer]
+                self.assertEqual(after['state'],'armed')
+                self.assertEqual(after['used_tokens'],80)
+                self.assertEqual(after['deadline'],peer_first['deadline'])
+                self.assertFalse(after.get('stop_latched',False))
+                self.assertEqual(after['accounting']['renewed_out_tokens'],7)
+                again={r['thread_id']:r for r in poll(root)}[peer]
+                self.assertEqual(again['state'],'armed')
+                self.assertEqual(again['used_tokens'],80)
+
+
+    def test_renewal_rejects_changed_response_before_frozen_boundary(self):
+        from codex_wake.goal_usage import observe_usage
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,_,_=self.fixture(directory)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,
+                default_allocation='original',allocations={'original':grant,
+                    'renewed':dict(grant,renews_allocation='original')})))
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='native-call',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120,native_context=context)
+                reads=0
+                def changed_history(*args,**kwargs):
+                    nonlocal reads
+                    reads+=1
+                    if reads==2:
+                        rows=log.read_text().splitlines();row=json.loads(rows[-1])
+                        row['payload']['usage']['input_tokens']+=1
+                        row['payload']['usage']['total_tokens']+=1
+                        rows[-1]=json.dumps(row);log.write_text('\n'.join(rows)+'\n')
+                    return observe_usage(*args,**kwargs)
+                with patch('codex_wake.goal_usage.observe_usage',side_effect=changed_history):
+                    with self.assertRaisesRegex(ValueError,'renewal boundary changed'):
+                        enroll(root,policy,THREAD,200,120,native_context=context,allocation_id='renewed')
+                prior=json.loads(Path(first['allocation_path']).read_text())
+                self.assertNotIn('finalized_charges',prior['members'][THREAD])
+                self.assertEqual(prior['used_tokens'],40)
+
+
     def test_only_explicit_host_renewal_changes_allowance_and_preserves_prior_ledger(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,log,native,_=self.fixture(directory)
