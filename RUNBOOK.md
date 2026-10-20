@@ -7572,3 +7572,23 @@ Review then minimized a persistent-fault recovery case: a ledger-first crash
 before receipt rename could synthesize a second diagnostic before qualified
 usage recovery. The new regression failed red; exact-generation ledger evidence
 is now recovered at first-stop entry even while native reads continue failing.
+
+
+## Turn376 | 2026-10-20 | Issue299 exact-main delivery and acceptance
+
+PR300 exacthead0b53d20 passedCI39365148248 both release gates,1418tests each;
+squash merged56cf6eb. Released/tagged0.19.0 on exactmain and rebuilt wheel/sdist.
+Installed0.19.0-56cf6eb:113module parity,5command links2skill roots. One-time
+old-controller migration used only verified ownedPID91299 and existing systemd
+Restartonfailure; newPID89042 fresh. Sharednative9802/start10894 unchanged.
+Every receipt/ledger authority/latch/deadline/basis/cap preserved, charges/counters
+monotonic, privatepolicySHA unchanged. Parent remains paused/timeout-latched.
+Installed17testsPASS36.462s; realcontroller/CLI maintenance against isolated native
+fixture, zero-provider launcher and conservative CI selector. Fresh stdio MCP
+reports0.19.0/goaltool schemas; first readback helper used old SDK camelCase names,
+corrected to actual snake_case fields after inspecting installed model metadata.
+No global native refresh or paid demo repeated. New handover's writer-version
+precondition documented; existing connection refresh remainsP168/#282.
+Plan0170 closed, portable acceptance/handoff retained, issue299 closes only after
+this documentation PR passes required gates. Memoryforbidden machine receipt:
+no reviewed destination routing, zero Graphiti writes. Progress: outcome_progress.

@@ -1,0 +1,71 @@
+{
+  "work_item": 299,
+  "implementation_pr": 300,
+  "source_commit": "56cf6eb6c7807cb12c4ed0dcc729df06b1e4bae8",
+  "ci": {
+    "run_id": 39365148248,
+    "head": "0b53d20307a224b14830a2c1c338089ce387063a",
+    "tree_matches_main": true,
+    "required": {
+      "Release gates (3.11)": "success",
+      "Release gates (3.12)": "success"
+    },
+    "tests_each": 1418
+  },
+  "release": {
+    "tag": "v0.19.0",
+    "tag_target": "56cf6eb6c7807cb12c4ed0dcc729df06b1e4bae8",
+    "prefix": "~/.local/share/codex-wake/releases/0.19.0-56cf6eb",
+    "version": "0.19.0"
+  },
+  "installed": {
+    "source_modules": 113,
+    "module_parity": true,
+    "stable_command_links": 5,
+    "skill_roots": 2,
+    "independent_controller_fresh": true,
+    "policy_unchanged": true,
+    "all_prior_authority_and_latches_preserved": true,
+    "counters_monotonic": true,
+    "shared_native_process_identity_preserved": true
+  },
+  "qualification": {
+    "installed_test_count": 17,
+    "result": "PASS",
+    "seconds": 36.462,
+    "native_boundary": "isolated localhost fixture for maintenance; real installed CLI/controller processes",
+    "fresh_stdio_mcp_version": "0.19.0",
+    "goal_tool_schemas_verified": true,
+    "paid_demo_rerun": false,
+    "existing_native_mcp_connections_refreshed": false
+  },
+  "first_fault": {
+    "immutable": true,
+    "ledger_before_receipt": true,
+    "crash_recovery_tested": true,
+    "persistent_native_fault_recovery_tested": true,
+    "legacy_provenance": "existing_latch_observed; historical first fault not fabricated"
+  },
+  "preserved": {
+    "parent_timeout_latch": true,
+    "older_latches": true,
+    "renewal_fresh_token_limit": 2000000,
+    "renewal_deadline": "2026-10-20T03:55:35.869783Z",
+    "campaign_resumed": false
+  },
+  "limitations": [
+    "Existing-connection MCP refresh remains Plan0168/issue282.",
+    "New launcher has provider-free fixture qualification; accepted real-agent0.18.6 proof was not repeated.",
+    "Production maintenance requires all enrollment writers to run the new protocol; old MCP processes retain their interpreter/CLI until approved refresh.",
+    "Controller downtime cannot enforce active work; all unlatched campaigns must remain inactive."
+  ],
+  "retained_local_failure": {
+    "tests": 1414,
+    "failures": 0,
+    "errors": 1,
+    "skipped": 1,
+    "cause": "New test wait7s did not cover fixture interval5s plus bounded native finalizer calls; changed test wait12s. Final exact-head CI passes."
+  },
+  "private_evidence": "~/.local/state/codex-wake/acceptance/issue299-0190",
+  "memory_disposition": "forbidden: no reviewed Graphiti destination routing; no write attempted"
+}

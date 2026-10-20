@@ -1290,8 +1290,9 @@ is unrecoverable; existing-connection refresh remains P168/#282.
 
 ## P170 | Retrospective runtime and workflow safeguards
 
-State: OPEN. Owner: primary / ecochran76. Issue #299.
+State: CLOSED. Owner: primary / ecochran76. Issue #299.
 [Plan0170](docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md).
 Bounded controller maintenance, immutable first-stop evidence, reusable real-agent
 acceptance preflight, static undefined-name gate, conservative evidence-only CI
-and a short skill router. Preserve all existing allowances/latches and shared daemon.
+and a short skill router. PR300 merged56cf6eb;0.19.0 installed,17installed checks
+and fresh MCP identity passed. Existing allowances/latches and shared daemon preserved.
