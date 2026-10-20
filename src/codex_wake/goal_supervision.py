@@ -461,23 +461,27 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 raise ValueError('explicit reset requires qualified response history')
             receipt['reset_anchor']=observation['anchor']
             observation=_usage(receipt)
+        def hold(reason):
+            _first_stop(path,receipt,reason)
+            receipt.update(state='held',reason=reason,stop_latched=True)
         if observation.get('state')=='qualified' and type(observation.get('used_tokens')) is int:
             if not basis_changed and _accounting_decreased(receipt,observation):
-                receipt.update(state='held',reason='accounting_decreased',stop_latched=True)
+                receipt['accounting']=observation;hold('accounting_decreased')
             else:
                 receipt.update(used_tokens=observation['used_tokens'],accounting=observation,state='armed',reason=None)
-        else:receipt.update(state='held',reason='accounting_unknown',accounting=observation,stop_latched=True)
+        else:
+            receipt['accounting']=observation;hold('accounting_unknown')
         controller=_heartbeat(directory);receipt['controller_generation']=controller.get('generation')
         if not controller['fresh']:receipt.update(state='held',reason='controller_unavailable')
         if receipt.get('used_tokens',0)>=token_limit or now>=receipt['deadline']:
-            receipt.update(state='held',reason='allocation_exhausted',stop_latched=True)
+            hold('allocation_exhausted')
         if receipt.get('stop_latched') or (same and old['state'] in ('stopped','stop_unverified')):
-            receipt.update(state='held',reason='continuation_held',stop_latched=True)
+            hold('continuation_held')
         if receipt['boot_id']!=boot_id_value():
-            receipt.update(state='held',reason='boot_identity_changed',stop_latched=True)
+            hold('boot_identity_changed')
         receipt['native_goal_status']=goal.get('status')
         if goal.get('status') not in NATIVE_GOAL_STATUSES:
-            receipt.update(state='held',reason='native_goal_state_unknown',stop_latched=True)
+            hold('native_goal_state_unknown')
         _save(path,receipt)
         return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None)
 
@@ -540,6 +544,7 @@ def _first_stop(path,receipt,reason):
         native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
         cause=receipt.get('observation_error') if reason=='observation_unavailable' else None,
         observation_duration_seconds=receipt.get('observation_duration_seconds') if reason=='observation_unavailable' else None)
+    receipt['stop_latched']=True
     _save(path,receipt)
 
 

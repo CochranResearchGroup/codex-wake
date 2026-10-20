@@ -172,3 +172,39 @@ class GoalMaintenanceTests(unittest.TestCase):
                         self.assertEqual(ledger,original)
                         self.assertEqual(after['generation'],before['generation'])
                         self.assertFalse(after.get('stop_latched',False))
+
+    def test_enrollment_stop_retains_original_diagnostic_before_reenrollment(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            native['goal']['status']='futureUnknownState';native['active']=[]
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(first['first_stop']['reason'],'native_goal_state_unknown')
+                self.assertEqual(first['first_stop']['provenance'],'stop_decision')
+                self.assertTrue(first['stop_latched'])
+                native['goal']['status']='paused'
+                later=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(later['first_stop'],first['first_stop'])
+                self.assertTrue(later['stop_latched'])
+
+    def test_crash_after_first_fault_persistence_cannot_rearm_campaign(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,_,request=self.fixture(directory)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                enroll(root,policy,THREAD,100,120)
+                calls=0
+                def fault_then_crash(endpoint,executable,method,params,limit):
+                    nonlocal calls
+                    if method=='thread/read':
+                        calls+=1
+                        if calls==1:raise TimeoutError('first observation failed')
+                        raise KeyboardInterrupt('controller exits after persisting stop diagnostic')
+                    return request(endpoint,executable,method,params,limit)
+                with patch('codex_wake.goal_supervision.native_request',side_effect=fault_then_crash):
+                    with self.assertRaises(KeyboardInterrupt):poll(root)
+                retained=show(root,policy,THREAD)
+                self.assertTrue(retained['stop_latched'])
+                self.assertEqual(retained['first_stop']['reason'],'observation_unavailable')
+                recovered=poll(root)[0]
+                self.assertEqual(recovered['state'],'stopped')
+                self.assertEqual(recovered['first_stop'],retained['first_stop'])
