@@ -7549,3 +7549,8 @@ Worker public Git classifier/static-name regression and zero-provider launcher
 preflight/full-flow fixture tests pass. Existing latches, renewed2Mfresh fixed
 deadline2026-10-20T03:55:35.869783Z, and shared native daemon remain unchanged.
 Source validation/integration/runtime delivery are still pending at this entry.
+
+Frozen Spec review found release/runtime identity mismatch (pyproject0.19.0 versus
+__version__0.18.6); aligned before delivery. Standards review accepts the additive
+private maintenance seam, public-boundary tests, preserved evidence and unchanged
+authority boundaries. No other blocking finding in the frozen scope.
