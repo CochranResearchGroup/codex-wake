@@ -22,6 +22,10 @@ def add_goal_limits_parser(subparsers):
             command.add_argument('--checkpoint-seconds', type=int, default=60)
             command.add_argument('--token-accounting', choices=('fresh','cache_inclusive'),
                                  help='new enrollments default to fresh input plus output, excluding cache')
+    maintenance = commands.add_parser('prepare-maintenance', help='host-only bounded graceful controller handover; never renews resources')
+    maintenance.add_argument('--policy', type=Path, required=True, help='private operator maintenance authorization, separate from allocation policy')
+    maintenance.add_argument('--seconds', type=int, required=True)
+    maintenance.add_argument('--json', action='store_true', dest='as_json')
     watcher = commands.add_parser('watch', help='run the independent resource-limit controller; keep alive as a service')
     watcher.add_argument('--interval', type=float, default=1)
 
@@ -36,7 +40,10 @@ def goal_limits_command(args, root):
         return 0
     try:
         from .goal_supervision import enroll, show
-        if args.goal_limits_command == 'show':
+        if args.goal_limits_command == 'prepare-maintenance':
+            from .goal_maintenance import prepare
+            result = prepare(root,args.policy,args.seconds)
+        elif args.goal_limits_command == 'show':
             result = show(root, args.policy, args.caller_thread_id,args.allocation_id)
         else:
             result = enroll(root, args.policy, args.caller_thread_id,
@@ -61,4 +68,4 @@ def goal_limits_command(args, root):
         print(json.dumps(result))
         return 2
     print(json.dumps(result))
-    return 0 if args.goal_limits_command == 'show' or result.get('state') in ('armed', 'checkpoint_requested') else 2
+    return 0 if args.goal_limits_command == 'show' or result.get('state') in ('armed', 'checkpoint_requested', 'prepared') else 2

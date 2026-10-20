@@ -5,6 +5,9 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 8 * * 1"
 
 jobs:
   release-gates:
@@ -20,22 +23,53 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Select conservative changed-surface lane
+        id: scope
+        env:
+          CI_EVENT: ${{ github.event_name }}
+          CI_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python scripts/check_ci_scope.py --event "$CI_EVENT" --base "$CI_BASE" --head "$CI_HEAD" > "$RUNNER_TEMP/ci-scope.json"
+          cat "$RUNNER_TEMP/ci-scope.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = json.loads((Path(os.environ['RUNNER_TEMP']) / 'ci-scope.json').read_text())
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('lane=' + result['scope'] + '\n')
+          PY
+
+      - name: Install pinned development checker
+        run: python -m pip install '.[dev]'
+
+      - name: Check undefined Python names
+        run: python -m ruff check --select F821,F822,F823 src scripts tests .codex/hooks
+
+      - name: Verify CI scope classifier
+        run: python -m unittest discover -s tests -p test_ci_scope.py
+
       - name: Compile sources
+        if: steps.scope.outputs.lane != 'docs'
         run: python -m compileall -q src tests .codex/hooks
 
       - name: Check canonical policy wiring and pilot hashes
         run: python scripts/check_policy_wiring.py
 
       - name: Install declared dependencies for protocol tests
+        if: steps.scope.outputs.lane != 'docs'
         run: python -m pip install '.[mcp]'
 
       - name: Run unit tests
+        if: steps.scope.outputs.lane != 'docs'
         env:
           XDG_CONFIG_HOME: ${{ runner.temp }}/codex-wake-test-config
           XDG_STATE_HOME: ${{ runner.temp }}/codex-wake-test-state
@@ -43,20 +77,24 @@ jobs:
         run: PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Run OpenClaw plugin tests
+        if: steps.scope.outputs.lane != 'docs'
         run: npm --prefix plugins/openclaw-codex-wake test
 
       - name: Check OpenClaw plugin entrypoints
+        if: steps.scope.outputs.lane != 'docs'
         run: |
           node --check plugins/openclaw-codex-wake/index.js
           node --check plugins/openclaw-codex-wake/lib/scheduler.js
 
       - name: Build package
+        if: steps.scope.outputs.lane != 'docs'
         run: |
           python -m venv /tmp/codex-wake-build
           /tmp/codex-wake-build/bin/python -m pip install --upgrade pip build
           /tmp/codex-wake-build/bin/python -m build
 
       - name: Install pinned schema-one compatibility package
+        if: steps.scope.outputs.lane != 'docs'
         run: |
           git fetch --depth=1 origin 94e17a68e655d9e54ead6001704dc0ef453eb933
           mkdir /tmp/codex-wake-legacy-source
@@ -65,6 +103,7 @@ jobs:
           /tmp/codex-wake-legacy-ci/bin/python -m pip install /tmp/codex-wake-legacy-source
 
       - name: Smoke installed wheel
+        if: steps.scope.outputs.lane != 'docs'
         run: |
           python -m venv /tmp/codex-wake-ci
           /tmp/codex-wake-ci/bin/python -m pip install --upgrade pip

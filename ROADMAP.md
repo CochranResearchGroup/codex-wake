@@ -1282,10 +1282,16 @@ grants; no automatic grant inheritance or resource renewal is implemented.
 
 ## P169 | Verified resource allocation provisioning
 
-State: PLANNED. Owner: primary / ecochran76. Work item #289 (ready-for-agent).
-[Plan0169](docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md).
-Confirmed product contract: automatically provision verified user authority,
-retain allocation continuity across successor conversations and hold ambiguous
-links with actionable recovery. User confirmed the original/successor/unrelated-control testing seam;
-trusted native request/caller evidence is the first implementation gate. No
-runtime grant or allocation changes in this planning slice.
+State: COMPLETE. Owner: primary / ecochran76. Issue #289 CLOSED after PR298
+75e7d9f and both required CI gates. Installed0.18.6, real-agent checkpoint/pause
+and independent historical accounting acceptance passed. Historical timeout RPC
+is unrecoverable; existing-connection refresh remains P168/#282.
+[Current checkpoint](docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md).
+
+## P170 | Retrospective runtime and workflow safeguards
+
+State: OPEN. Owner: primary / ecochran76. Issue #299.
+[Plan0170](docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md).
+Bounded controller maintenance, immutable first-stop evidence, reusable real-agent
+acceptance preflight, static undefined-name gate, conservative evidence-only CI
+and a short skill router. Preserve all existing allowances/latches and shared daemon.

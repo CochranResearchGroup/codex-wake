@@ -7535,3 +7535,40 @@ proven by installed local fixture; exact historical timeout method remains unkno
 existingconnectionrefresh staysP168/#282. Durableprivate evidence and portable
 evidence-gap-closure.json recorded. Planv19 product acceptance complete, closeout
 CI/merge and issueclosure readback pending. No live allowance reset or recovery.
+
+
+## Turn375 | 2026-10-20 | Issue299 retrospective safeguards
+
+User authorized fixing the six retrospective findings. Three disjoint branches
+started from75e7d9f; primary integrates worker CI commitd8c9556 and acceptance
+commit41d0234. Public maintenance CLI regression red confirms missing command;
+first-stop regression confirms missing retained evidence. Six focused lifecycle
+and diagnostic tests pass after implementation and independent review corrections:
+aborted preparation expires, and changed boot never fabricates qualified time.
+Worker public Git classifier/static-name regression and zero-provider launcher
+preflight/full-flow fixture tests pass. Existing latches, renewed2Mfresh fixed
+deadline2026-10-20T03:55:35.869783Z, and shared native daemon remain unchanged.
+Source validation/integration/runtime delivery are still pending at this entry.
+
+Frozen Spec review found release/runtime identity mismatch (pyproject0.19.0 versus
+__version__0.18.6); aligned before delivery. Standards review accepts the additive
+private maintenance seam, public-boundary tests, preserved evidence and unchanged
+authority boundaries. No other blocking finding in the frozen scope.
+Final fault-path review added atomic first-stop/latch persistence and enrollment
+first-stop capture. Two public regressions fail against the first installed
+candidate (missing latch/first_stop), then pass against corrected source. A crash
+after diagnostic persistence therefore cannot rearm a transiently failing goal.
+The shared-ledger crash regression also failed red: a receipt rename could leave
+the objective ledger unlatched. First-stop now commits the shared ledger latch
+before caller receipt persistence; original first-stop can be recovered from the
+ledger after a partial write. Public filesystem-boundary crash regression passes.
+
+Local full-suite first run with declared dependencies completed1414 tests with
+one maintenance-test timeout: its7second subprocess wait did not cover the
+fixture watcher's5second sleep plus bounded native finalizer calls. Increased
+that test observation deadline to12seconds; no product limit/deadline changed.
+Retained failure /tmp/cw299-full-declared.log; required exact-head CI remains gate.
+Review then minimized a persistent-fault recovery case: a ledger-first crash
+before receipt rename could synthesize a second diagnostic before qualified
+usage recovery. The new regression failed red; exact-generation ledger evidence
+is now recovered at first-stop entry even while native reads continue failing.
