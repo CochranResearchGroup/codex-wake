@@ -1,12 +1,13 @@
 # Issue289 restart-safe handoff
 
-Current checkpoint: 2026-10-19, Plan0169v18. This replaces the obsolete startup
-instructions preserved in Git at a710405. Issue289 remains OPEN.
+Current checkpoint: gap closure, Plan0169v19. Product acceptance is complete;
+verify the closeout PR/issue readback before reporting tracker closure.
+Earlier installed-control evidence is supplemented by evidence-gap-closure.json.
 
 ## Start here
 
-1. Read Plan0169 Current State, ADR0002 and RUNBOOK Turn373. Inspect
-   `installed-native-controls-0.18.6.json` beside this handoff.
+1. Read Plan0169 Current State, ADR0002 and RUNBOOK Turn374. Inspect
+   `evidence-gap-closure.json` and `installed-native-controls-0.18.6.json` beside this handoff.
 2. Check Git status/HEAD in the allocation-control worktree and fetch origin.
    Reconcile the documentation PR before editing. Preserve the separate main
    checkout and unrelated work. Source release is main a710405107feb0baeeec978d78ac6c8b9d7d90ec.
@@ -59,20 +60,42 @@ allocation without per-session provisioning, but setup had already consumed
 Raw dedup 41,754 fresh matches Wake. Its exhausted latch remains; its client exited.
 This does not prove below-cap armed admission or an agent-written checkpoint.
 
-## Remaining gates and next bounded packet
+## Acceptance gaps closed
 
-Preserve both live latches and the fixed deadline. A new real acceptance campaign
-requires an explicitly qualified allowance; keep it distinct from resetting the
-exhausted demo. Original early-stop accounting replay remains open. The exact
-historical native timeout RPC is unknown; future failures now retain method/cause.
-Do not infer that avoiding 4.9 MB history hydration eliminates all timeout causes.
+One fresh real native agent enrolled100000fresh/180seconds without a per-session
+grant. Actual native MCP0.18.6 reported armed33579fresh and a fresh watcher.
+At49443fresh the watcher delivered the checkpoint steer; the agent stopped
+verification, wrote checkpoint.md and paused its goal. REAL_DEMO_CHAT_OK completed
+while paused. Final independent raw replay53313fresh matches Wake. Deadline and
+generation stayed unchanged; client16792 exited. The separate installed localhost
+fixture proves forced interruption; this real run proves cooperative winddown.
 
-Current bounded packet ends with installed native-control acceptance and this
-handoff. Further campaign activation is outside the explicit latch-preservation
-instruction. Existing expired shared-refresh intents remain expired. The owned
-qualification completion wake was cancelled after its result was inspected;
-no campaign continuation is armed. Documentation-only CI may finish publishing
-this checkpoint.
+Historical replay independently validates raw usage arithmetic and payload hashes
+for245charged responses at the false stop and345at repair. The retained stopped snapshot was608090fresh
+with1391910tokens and6638.823seconds remaining; repair was1006497fresh. The cause
+was native blocked-state misclassification in0.18.0, fixed by explicit known-state
+classification. Cache was excluded in both snapshots. No live repair was repeated.
 
-Memory disposition: forbidden, no reviewed destination routing. Private no-write
-receipt and operational checkpoint: /tmp/cw289-native0186-control-run/.
+Both independent review axes accept closure of these evidence gaps. Durable private
+raw evidence is under ~/.local/state/codex-wake/acceptance/issue289-0186-gap-closure;
+the public curated artifact is evidence-gap-closure.json. Earlier /tmp locators are
+retained as history, with this durable copy available after restart.
+
+## Retained boundaries
+
+Parent and exhausted-demo latches remain set. The parent allowance's fixed deadline
+is unchanged. Product acceptance does not authorize campaign reactivation or reset.
+
+The historical timeout's exact RPC is unrecoverable: the old receipt recorded only
+TimeoutError and the retained native log has no correlated method. This remains an
+explicit forensic limit. Current bounded reads and method/cause diagnostics are
+verified; retrospective certainty is not claimed.
+
+A fresh real native catalog proves installed activation. Existing connection refresh
+and global reload behavior remain Plan0168/issue282 scope; this closeout does not
+claim they completed. The expired refresh intents remain expired.
+
+After closeout documentation merges and issue289 closure is read back, this lane is
+complete. Future work follows a new explicit task; no campaign continuation is armed.
+Memory disposition: forbidden, no reviewed destination routing. Private receipt is
+under the acceptance evidence directory.

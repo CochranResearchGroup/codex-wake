@@ -7520,3 +7520,18 @@ current proof. Parent timeout latch remains by instruction; no resource reset or
 campaign activation. Broader issue289 remains OPEN; real below-cap agent proof,
 historical timeout attribution and original early-stop accounting remain gaps.
 Progress: outcome_progress, installed native controls accepted within this packet.
+
+
+## Turn374 | Gap closure | Real agent checkpoint and historical replay
+
+User requested closing gaps. One new100kfresh/180second native test armed33579
+with actualMCP0.18.6/fresh watcher; checkpoint steer acknowledged49443, agent wrote
+checkpoint and paused; operatorREAL_DEMO_CHAT_OKcompleted. Final rawreplay53313
+matches. Client16792 exited, sharednative and old latches unchanged. Independent
+245/345response hash/arithmetic replay proves608090stop/1006497repairfresh; retained stopped snapshot
+had1.391Mtokens111minutes left dueblocked-state misclassification, alreadyfixed.
+Both reviewaxes accept evidencegapclosure. Forced interruption remains separately
+proven by installed local fixture; exact historical timeout method remains unknown,
+existingconnectionrefresh staysP168/#282. Durableprivate evidence and portable
+evidence-gap-closure.json recorded. Planv19 product acceptance complete, closeout
+CI/merge and issueclosure readback pending. No live allowance reset or recovery.
