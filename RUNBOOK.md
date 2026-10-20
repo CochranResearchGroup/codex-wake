@@ -7535,3 +7535,17 @@ proven by installed local fixture; exact historical timeout method remains unkno
 existingconnectionrefresh staysP168/#282. Durableprivate evidence and portable
 evidence-gap-closure.json recorded. Planv19 product acceptance complete, closeout
 CI/merge and issueclosure readback pending. No live allowance reset or recovery.
+
+
+## Turn375 | 2026-10-20 | Issue299 retrospective safeguards
+
+User authorized fixing the six retrospective findings. Three disjoint branches
+started from75e7d9f; primary integrates worker CI commitd8c9556 and acceptance
+commit41d0234. Public maintenance CLI regression red confirms missing command;
+first-stop regression confirms missing retained evidence. Six focused lifecycle
+and diagnostic tests pass after implementation and independent review corrections:
+aborted preparation expires, and changed boot never fabricates qualified time.
+Worker public Git classifier/static-name regression and zero-provider launcher
+preflight/full-flow fixture tests pass. Existing latches, renewed2Mfresh fixed
+deadline2026-10-20T03:55:35.869783Z, and shared native daemon remain unchanged.
+Source validation/integration/runtime delivery are still pending at this entry.

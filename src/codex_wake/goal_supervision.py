@@ -178,21 +178,22 @@ def _request(grant,method,params):
 
 
 class NativeObservationUnavailable(ValueError):
-    def __init__(self,method,cause):
+    def __init__(self,method,cause,duration=None):
         super().__init__(method+': '+cause)
         self.method=method
         self.cause=cause
+        self.duration=duration
 
 
 def _native(grant,thread):
-    deadline=time.monotonic()+grant['rpc_timeout']
+    started=time.monotonic();deadline=started+grant['rpc_timeout']
     def observe(method,params):
         remaining=deadline-time.monotonic()
         try:
             if remaining<=0:raise TimeoutError('native observation budget exhausted')
             return _request(dict(grant,rpc_timeout=remaining),method,params)
         except Exception as exc:
-            raise NativeObservationUnavailable(method,type(exc).__name__) from exc
+            raise NativeObservationUnavailable(method,type(exc).__name__,time.monotonic()-started) from exc
     goal=observe('thread/goal/get',dict(threadId=thread))['goal']
     native=observe('thread/read',dict(threadId=thread,includeTurns=False))['thread']
     if native.get('id')!=thread or (goal and goal.get('threadId')!=thread):raise ValueError('native thread identity changed')
@@ -412,7 +413,9 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         raise ValueError('invalid checkpoint token reserve')
     if type(checkpoint_seconds) not in (int,float) or not math.isfinite(checkpoint_seconds) or checkpoint_seconds<0:raise ValueError('invalid checkpoint time reserve')
     directory=_directory(root);path=directory/(name+'.json')
-    with _lock(directory,name):
+    with _lock(directory,'maintenance'), _lock(directory,name):
+        from .goal_maintenance import admission_guard
+        admission_guard(directory)
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
         same=bool(old and old['allocation_id']==grant['allocation_id'])
@@ -498,6 +501,8 @@ def _allocation_latch(receipt,reason,deadline=None):
     path=Path(receipt['allocation_path']);_private(path)
     with _lock(path.parent,path.stem):
         allocation=json.loads(path.read_text())
+        if receipt.get('first_stop'):
+            allocation.setdefault('first_stop',receipt['first_stop'])
         allocation.update(stop_latched=True,stop_reason=reason)
         if deadline is not None:
             deadline=min(deadline,allocation.get('winddown_deadline',deadline))
@@ -507,7 +512,39 @@ def _allocation_latch(receipt,reason,deadline=None):
     return deadline
 
 
+def _first_stop(path,receipt,reason):
+    if 'first_stop' in receipt:return
+    now=time.clock_gettime(time.CLOCK_BOOTTIME)
+    elapsed=now-receipt['started_boottime']
+    qualified=receipt['boot_id']==boot_id_value() and elapsed>=0
+    try:
+        controller_path=path.parent/'controller.json';_private(controller_path)
+        controller=json.loads(controller_path.read_text())
+    except (OSError,ValueError):controller={}
+    # Old latches cannot reveal their original fault retrospectively. Label the
+    # first retained diagnostic explicitly instead of inventing that history.
+    receipt['first_stop']=dict(version=1,reason=reason,
+        provenance='existing_latch_observed' if receipt.get('stop_latched') else 'stop_decision',
+        observed_boottime=now,boot_id=boot_id_value(),
+        observed_upper=receipt['started_upper']+elapsed if qualified else None,
+        clock_qualified=qualified,clock_reason='same_boot_elapsed' if qualified else
+            ('boot_identity_changed' if receipt['boot_id']!=boot_id_value() else 'elapsed_time_invalid'),
+        last_usage_observed_boottime=receipt.get('observed_boottime'),
+        controller_observed_boottime=controller.get('observed_boottime'),
+        controller_generation=controller.get('generation',receipt.get('controller_generation')),
+        controller_pid=controller.get('pid'),controller_identity=controller.get('identity'),
+        receipt_generation=receipt['generation'],allocation_id=receipt['allocation_id'],
+        used_tokens=receipt.get('used_tokens'),token_limit=receipt['token_limit'],
+        deadline=receipt['deadline'],token_accounting=receipt.get('token_accounting'),
+        accounting_state=receipt.get('accounting',{}).get('state'),
+        native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
+        cause=receipt.get('observation_error') if reason=='observation_unavailable' else None,
+        observation_duration_seconds=receipt.get('observation_duration_seconds') if reason=='observation_unavailable' else None)
+    _save(path,receipt)
+
+
 def _stop(path,receipt,reason,goal=None,active=None):
+    _first_stop(path,receipt,reason)
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
     _allocation_latch(receipt,reason)
     try:
@@ -550,6 +587,7 @@ def _wind_down(path, receipt, reason, goal, active, upper):
     only winddown, never extends the original deadline, and survives retries.
     """
     if 'winddown_deadline' not in receipt:
+        _first_stop(path,receipt,reason)
         deadline=min(receipt['deadline'],upper+min(60,receipt['checkpoint_seconds']))
         receipt['winddown_deadline']=_allocation_latch(receipt,reason,deadline)
         receipt['stop_turns'] = list(active) if goal and goal.get('status') == 'active' else []
@@ -633,7 +671,8 @@ def poll(root):
                 _save(path,receipt);results.append(receipt)
             except Exception as exc:
                 receipt['observation_error']=exc.cause if isinstance(exc,NativeObservationUnavailable) else type(exc).__name__
-                if isinstance(exc,NativeObservationUnavailable):receipt['observation_method']=exc.method
+                receipt['observation_method']=exc.method if isinstance(exc,NativeObservationUnavailable) else None
+                receipt['observation_duration_seconds']=exc.duration if isinstance(exc,NativeObservationUnavailable) else None
                 results.append(_stop(path,receipt,'observation_unavailable'))
     return results
 
@@ -654,11 +693,18 @@ def watch(root,interval=1):
         try:
             while running:
                 _save(directory/'controller.json',dict(heartbeat,active=True,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
-                poll(root);time.sleep(interval)
+                poll(root)
+                from .goal_maintenance import replacement_observed
+                replacement_observed(directory,heartbeat)
+                time.sleep(interval)
         finally:
-            for path in directory.glob('*.json'):
-                if path.name=='controller.json':continue
-                with _lock(directory,path.stem):
-                    _private(path);receipt=json.loads(path.read_text());_stop(path,receipt,'controller_stopped')
+            from .goal_maintenance import authorize_exit
+            with _lock(directory,'maintenance'):
+                maintained=not running and authorize_exit(directory,heartbeat)
+                if not maintained:
+                    for path in directory.glob('*.json'):
+                        if path.name=='controller.json':continue
+                        with _lock(directory,path.stem):
+                            _private(path);receipt=json.loads(path.read_text());_stop(path,receipt,'controller_stopped')
             _save(directory/'controller.json',dict(heartbeat,active=False,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
             for sig,handler in prior.items():signal.signal(sig,handler)

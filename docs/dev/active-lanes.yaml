@@ -1,21 +1,66 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P170-runtime
+    owner: primary / ecochran76
+    objective: Bounded controller maintenance and immutable first-stop evidence
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/299]
+    plan: docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md
+    plan_ref: fix/289-retro-runtime
+    branch: fix/289-retro-runtime
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 75e7d9f
+    dependencies: []
+    overlaps: [P170]
+    updated_at: 2026-10-20
+    disposition: Disjoint implementation under fixed existing allowance
+  - id: P170-ci
+    owner: primary / ecochran76
+    objective: Conservative documentation lane and undefined-name qualification
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/299]
+    plan: docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md
+    plan_ref: fix/289-retro-runtime
+    branch: fix/289-retro-ci
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 75e7d9f
+    dependencies: []
+    overlaps: [P170]
+    updated_at: 2026-10-20
+    disposition: Disjoint implementation under fixed existing allowance
+  - id: P170-acceptance
+    owner: primary / ecochran76
+    objective: Reusable real-agent acceptance preflight and launcher
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/299]
+    plan: docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md
+    plan_ref: fix/289-retro-runtime
+    branch: fix/289-retro-acceptance
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: 75e7d9f
+    dependencies: []
+    overlaps: [P170]
+    updated_at: 2026-10-20
+    disposition: Disjoint implementation under fixed existing allowance
   - id: P169
     owner: primary / ecochran76
     objective: Verified allocation provisioning and graceful campaign controls
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/289]
     plan: docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md
-    plan_ref: docs/289-close-evidence-gaps
+    plan_ref: origin/main
     branch: docs/289-close-evidence-gaps
     target: origin/main
     plan_state: COMPLETE
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 5e533e8
+    custody_state: INTEGRATED
+    checkpoint: 75e7d9f
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-18
-    disposition: Product acceptance complete; real-agent checkpoint and independent historical replay passed; closeout integration pending, live latches preserved
+    disposition: PR298 integrated; issue289 closed; installed0.18.6 and acceptance evidence retained; latches preserved
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational
