@@ -26,6 +26,7 @@ codex-wake-mcp = "codex_wake.mcp_server:main"
 
 [project.optional-dependencies]
 mcp = ["mcp>=2.2,<2.3", "jsonschema>=4.26,<5"]
+dev = ["ruff==0.14.2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
