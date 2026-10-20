@@ -355,6 +355,9 @@ def _usage(receipt):
         allocation.update(charges=charges,used_tokens=used)
         _save(path,allocation)
         receipt.update(token_limit=allocation['token_limit'],deadline=allocation['deadline'])
+        if allocation.get('first_stop'):
+            key='first_stop' if allocation['first_stop'].get('receipt_generation')==receipt['generation'] else 'allocation_first_stop'
+            receipt.setdefault(key,allocation['first_stop'])
         if allocation['stop_latched']:receipt['stop_latched']=True
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
@@ -545,6 +548,9 @@ def _first_stop(path,receipt,reason):
         cause=receipt.get('observation_error') if reason=='observation_unavailable' else None,
         observation_duration_seconds=receipt.get('observation_duration_seconds') if reason=='observation_unavailable' else None)
     receipt.update(stop_latched=True,state='stop_unverified',reason=reason)
+    # The shared ledger is the authority for successor admission. Commit its
+    # latch first, so a crash during the caller receipt write cannot reopen it.
+    _allocation_latch(receipt,reason)
     _save(path,receipt)
 
 

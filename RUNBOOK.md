@@ -7558,3 +7558,7 @@ Final fault-path review added atomic first-stop/latch persistence and enrollment
 first-stop capture. Two public regressions fail against the first installed
 candidate (missing latch/first_stop), then pass against corrected source. A crash
 after diagnostic persistence therefore cannot rearm a transiently failing goal.
+The shared-ledger crash regression also failed red: a receipt rename could leave
+the objective ledger unlatched. First-stop now commits the shared ledger latch
+before caller receipt persistence; original first-stop can be recovered from the
+ledger after a partial write. Public filesystem-boundary crash regression passes.

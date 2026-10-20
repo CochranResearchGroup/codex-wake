@@ -209,3 +209,28 @@ class GoalMaintenanceTests(unittest.TestCase):
                 recovered=poll(root)[0]
                 self.assertEqual(recovered['state'],'stopped')
                 self.assertEqual(recovered['first_stop'],retained['first_stop'])
+
+    def test_first_fault_crash_cannot_leave_the_shared_allocation_unlatched(self):
+        import os
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,_,request=self.fixture(directory)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,
+                default_allocation='allocation-1',allocations={'allocation-1':grant})))
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='crash-test',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                enroll(root,policy,THREAD,100,120,native_context=context)
+                real_replace=os.replace
+                def crash_after_receipt_replace(source,destination):
+                    real_replace(source,destination)
+                    if Path(destination).parent==root/'goal-supervision' and Path(destination).name!='controller.json':
+                        raise KeyboardInterrupt('process exits after receipt replace')
+                def timeout(endpoint,executable,method,params,limit):
+                    if method=='thread/read':raise TimeoutError('observation failed')
+                    return request(endpoint,executable,method,params,limit)
+                with patch('codex_wake.goal_supervision.native_request',side_effect=timeout),patch('os.replace',side_effect=crash_after_receipt_replace):
+                    with self.assertRaises(KeyboardInterrupt):poll(root)
+                ledger=json.loads(next((root/'goal-supervision/allocations').glob('*.json')).read_text())
+                self.assertTrue(ledger['stop_latched'])
+                self.assertEqual(ledger['first_stop']['reason'],'observation_unavailable')
