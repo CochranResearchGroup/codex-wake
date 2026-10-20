@@ -544,7 +544,7 @@ def _first_stop(path,receipt,reason):
         native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
         cause=receipt.get('observation_error') if reason=='observation_unavailable' else None,
         observation_duration_seconds=receipt.get('observation_duration_seconds') if reason=='observation_unavailable' else None)
-    receipt['stop_latched']=True
+    receipt.update(stop_latched=True,state='stop_unverified',reason=reason)
     _save(path,receipt)
 
 

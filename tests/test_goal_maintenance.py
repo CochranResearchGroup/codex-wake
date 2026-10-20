@@ -204,6 +204,7 @@ class GoalMaintenanceTests(unittest.TestCase):
                     with self.assertRaises(KeyboardInterrupt):poll(root)
                 retained=show(root,policy,THREAD)
                 self.assertTrue(retained['stop_latched'])
+                self.assertEqual(retained['state'],'stop_unverified')
                 self.assertEqual(retained['first_stop']['reason'],'observation_unavailable')
                 recovered=poll(root)[0]
                 self.assertEqual(recovered['state'],'stopped')
