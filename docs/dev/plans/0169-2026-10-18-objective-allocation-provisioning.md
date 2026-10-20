@@ -1,14 +1,38 @@
 # Plan0169 — Automatic caller provisioning with allocation continuity
 
-State: OPEN
+State: COMPLETE
 Owner: primary / ecochran76.
-Branch: docs/289-installed-native-controls. Base: a710405. Target: origin/main.
+Branch: docs/289-close-evidence-gaps. Base: 5e533e8. Target: origin/main.
 Work item: #289, https://github.com/CochranResearchGroup/codex-wake/issues/289.
 Product contract and testing seam: confirmed by user; ADR0002.
-Tracker state: OPEN (ready-for-agent). Implementation: in progress; controller regression reproduced.
-Plan version: 18; installed native controls qualified, live timeout latch preserved.
+Tracker state: verify issue289 closeout readback. Implementation and product acceptance: COMPLETE.
+Plan version: 19; real-agent and historical accounting acceptance gaps closed.
 
 ## Current State
+
+Gap closure under the user instruction "close the gaps": one new real
+native100000fresh/180seconds acceptance run enrolled armed33579fresh with actual
+MCP0.18.6 and a fresh watcher. Checkpoint acknowledged at49443fresh, agent-written
+checkpoint and native pause verified, REAL_DEMO_CHAT_OK completed, raw usage replay
+matches53313fresh. Original deadline/generation preserved. Owned client16792 exited;
+shared9802/start10894 and both existing latches preserved. Separate installed fixture
+retains the actual forced-interrupt proof; the real run proves cooperative winddown.
+
+Independent historical replay validates every raw payload hash and fresh-token
+component for245stop/345repair charges:608090/1006497fresh. At the retained stopped snapshot,
+1391910tokens and6638.823seconds remained. Native blocked-state misclassification,
+not cache/token/time exhaustion, caused it; the source correction is already installed.
+Both independent review axes accept these acceptance gaps closed, without a new
+code audit or any repeated live repair. Curated evidence: evidence-gap-closure.json.
+
+The old timeout method is explicitly unrecoverable from retained records, rather
+than falsely attributed. Current bounded reads/method diagnostics are verified.
+Existing-connection refresh remains P168/issue282; actual fresh native0.18.6 public
+activation is proven here. Parent campaign stays paused/latched under instruction.
+These bounded nonclaims do not block issue289 product acceptance. Durable private
+raw proof lives in ~/.local/state/codex-wake/acceptance/issue289-0186-gap-closure.
+Closeout docs must pass required CI and merge before issue closure is read back.
+Progress: outcome_progress; all issue289 product acceptance criteria qualified.
 
 2026-10-19 installed acceptance: PR296 merged a710405 after required
 CI39335260835 both matrices PASS. Released/installed0.18.6 from exact main;

@@ -6,16 +6,16 @@ lanes:
     objective: Verified allocation provisioning and graceful campaign controls
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/289]
     plan: docs/dev/plans/0169-2026-10-18-objective-allocation-provisioning.md
-    plan_ref: docs/289-installed-native-controls
-    branch: docs/289-installed-native-controls
+    plan_ref: docs/289-close-evidence-gaps
+    branch: docs/289-close-evidence-gaps
     target: origin/main
-    plan_state: OPEN
+    plan_state: COMPLETE
     custody_state: ACTIVE_WORKTREE
-    checkpoint: a710405
+    checkpoint: 5e533e8
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-18
-    disposition: 0.18.6 installed; native controls and operator reply qualified with injected usage; live timeout latch preserved, broader acceptance open
+    disposition: Product acceptance complete; real-agent checkpoint and independent historical replay passed; closeout integration pending, live latches preserved
   - id: P168
     owner: primary / ecochran76
     objective: Make shipped same-conversation self-refresh operational

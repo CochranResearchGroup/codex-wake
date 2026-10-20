@@ -1,0 +1,87 @@
+{
+  "user_request": "close the gaps",
+  "release": "0.18.6",
+  "source": "a710405107feb0baeeec978d78ac6c8b9d7d90ec",
+  "real_native_acceptance": {
+    "verdict": "PASS_REAL_NATIVE_AGENT_ACCEPTANCE",
+    "thread_id": "01a156b4-cb18-72a0-85d4-3652b3b00837",
+    "allocation_id": "native-01a156b4-cb18-72a0-85d4-3652b3b00837",
+    "mcp_version": "0.18.6",
+    "token_limit": 100000,
+    "time_limit_seconds": 180,
+    "enrollment_used_fresh": 33579,
+    "final_used_fresh": 53313,
+    "deadline": 1792456241,
+    "deadline_unchanged": true,
+    "generation_unchanged": true,
+    "watcher_fresh_at_enrollment": true,
+    "checkpoint_acknowledged": true,
+    "agent_written_checkpoint_sha256": "e58f3be07286585ad9e2ccfd8ce68cff8c9bf8d37353e44779845a1902e319a7",
+    "goal_status": "paused",
+    "operator_reply": "REAL_DEMO_CHAT_OK",
+    "operator_reply_completed": true,
+    "real_provider_usage": true,
+    "raw_usage_replay_matches": true,
+    "existing_latches_preserved": true,
+    "client_pid": 16792,
+    "client_identity": {
+      "start_time_ticks": 14316364,
+      "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc"
+    },
+    "shared_native_identity": {
+      "start_time_ticks": 10894,
+      "boot_id": "5601d440-a997-4a6c-806a-d8bc392f38cc"
+    },
+    "receipt_state": "stopped",
+    "receipt_reason": "allocation_exhausted"
+  },
+  "historical_accounting_replay": {
+    "verdict": "PASS_HISTORICAL_ACCOUNTING_REPLAY",
+    "method": "Independent raw usage arithmetic and SHA256 payload validation for every frozen snapshot charge; no goal_usage import",
+    "snapshots": {
+      "stopped": {
+        "input_tokens": 41287017,
+        "cached_input_tokens": 40831616,
+        "output_tokens": 152689,
+        "total_tokens": 41439706,
+        "fresh_tokens": 608090,
+        "responses": 245
+      },
+      "before_repair": {
+        "input_tokens": 54818573,
+        "cached_input_tokens": 54027776,
+        "output_tokens": 215700,
+        "total_tokens": 55034273,
+        "fresh_tokens": 1006497,
+        "responses": 345
+      }
+    },
+    "original_stop_reason": "native_goal_state_unknown",
+    "native_goal_status": "blocked",
+    "token_limit": 2000000,
+    "unused_tokens_at_stop": 1391910,
+    "unused_tokens_at_repair": 993503,
+    "cause": "Known blocked goal state misclassified by0.18.0; not token or deadline exhaustion",
+    "cache_excluded": true,
+    "live_mutations": false,
+    "seconds_remaining_at_retained_stopped_snapshot": 6638.823182106018,
+    "snapshot_time_basis": "Receipt started_upper plus observed CLOCK_BOOTTIME delta; not a claim of exact first-fault timestamp"
+  },
+  "coverage": {
+    "cooperative_checkpoint": "Real provider-backed native agent wrote checkpoint and paused on Wake request",
+    "forced_interrupt": "Separate installed native-control fixture,4injected Responses requests, actual exact-turn interruption verified; installed-native-controls-0.18.6.json",
+    "native_catalog": "Actual fresh native-thread MCP0.18.6 verified; no assertion existing connections refreshed"
+  },
+  "retained_nonclaims": {
+    "historical_timeout_method": "Not recoverable: legacy receipt records only TimeoutError; native daemon retained log window has no attributable RPC. Future failures retain method/cause; no retrospective attribution claimed.",
+    "existing_connection_refresh": "Separate Plan0168/issue282 lifecycle scope; installed activation proved in a fresh real native client, existing connections retained.",
+    "parent_campaign_activation": "Parent timeout latch deliberately preserved under explicit instruction; recovery/reset outside this product acceptance."
+  },
+  "old_latches_cleared": false,
+  "shared_native_restarted": false,
+  "independent_review": {
+    "standards": "No critical contradiction; cooperative real pause distinguished from separate forced-interrupt fixture",
+    "spec": "Real-agent and accounting acceptance gaps closed; remaining bounded nonclaims do not block issue289"
+  },
+  "durable_private_evidence": "~/.local/state/codex-wake/acceptance/issue289-0186-gap-closure"
+}

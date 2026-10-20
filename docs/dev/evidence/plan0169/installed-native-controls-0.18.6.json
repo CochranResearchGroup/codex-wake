@@ -39,5 +39,6 @@
     "Real below-cap agent enrollment and agent-written graceful checkpoint unproven",
     "New stdio MCP identity is not proof existing native connections refreshed",
     "Original early-stop accounting replay remains open"
-  ]
+  ],
+  "subsequent_acceptance": "evidence-gap-closure.json closes the real-agent and original accounting replay gaps; retain these limitations as historical snapshot facts"
 }
