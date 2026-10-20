@@ -7562,3 +7562,13 @@ The shared-ledger crash regression also failed red: a receipt rename could leave
 the objective ledger unlatched. First-stop now commits the shared ledger latch
 before caller receipt persistence; original first-stop can be recovered from the
 ledger after a partial write. Public filesystem-boundary crash regression passes.
+
+Local full-suite first run with declared dependencies completed1414 tests with
+one maintenance-test timeout: its7second subprocess wait did not cover the
+fixture watcher's5second sleep plus bounded native finalizer calls. Increased
+that test observation deadline to12seconds; no product limit/deadline changed.
+Retained failure /tmp/cw299-full-declared.log; required exact-head CI remains gate.
+Review then minimized a persistent-fault recovery case: a ledger-first crash
+before receipt rename could synthesize a second diagnostic before qualified
+usage recovery. The new regression failed red; exact-generation ledger evidence
+is now recovered at first-stop entry even while native reads continue failing.

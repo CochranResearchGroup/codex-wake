@@ -521,6 +521,13 @@ def _allocation_latch(receipt,reason,deadline=None):
 
 def _first_stop(path,receipt,reason):
     if 'first_stop' in receipt:return
+    original=None
+    if receipt.get('allocation_path'):
+        allocation_path=Path(receipt['allocation_path']);_private(allocation_path)
+        with _lock(allocation_path.parent,allocation_path.stem):
+            retained=json.loads(allocation_path.read_text()).get('first_stop')
+            if retained and retained.get('receipt_generation')==receipt['generation']:
+                original=retained
     now=time.clock_gettime(time.CLOCK_BOOTTIME)
     elapsed=now-receipt['started_boottime']
     qualified=receipt['boot_id']==boot_id_value() and elapsed>=0
@@ -530,7 +537,7 @@ def _first_stop(path,receipt,reason):
     except (OSError,ValueError):controller={}
     # Old latches cannot reveal their original fault retrospectively. Label the
     # first retained diagnostic explicitly instead of inventing that history.
-    receipt['first_stop']=dict(version=1,reason=reason,
+    receipt['first_stop']=original or dict(version=1,reason=reason,
         provenance='existing_latch_observed' if receipt.get('stop_latched') else 'stop_decision',
         observed_boottime=now,boot_id=boot_id_value(),
         observed_upper=receipt['started_upper']+elapsed if qualified else None,

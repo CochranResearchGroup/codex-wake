@@ -14,6 +14,8 @@ from codex_wake.goal_supervision import enroll, poll, show
 
 class GoalMaintenanceTests(unittest.TestCase):
     fixture = fixtures.GoalSupervisionTests.fixture
+    # Fixture watcher sleeps up to5s; native finalizer observations/effects each
+    # have their own1s RPC budget. Allow the complete bounded shutdown, not7s.
     controller = fixtures.GoalSupervisionTests.controller
 
     def policy(self, directory, root, seconds=20):
@@ -42,7 +44,7 @@ class GoalMaintenanceTests(unittest.TestCase):
                     self.assertEqual(result.returncode,0,result.stderr+result.stdout)
                     with self.assertRaisesRegex(ValueError,'maintenance'):
                         enroll(root,policy,THREAD,100,120)
-                    process.terminate();process.wait(timeout=7)
+                    process.terminate();process.wait(timeout=12)
                     after=json.loads(path.read_text())
                     for key in ('generation','deadline','token_limit','time_limit_seconds','used_tokens','stop_latched','reason'):
                         self.assertEqual(after.get(key),before.get(key),key)
@@ -84,7 +86,7 @@ class GoalMaintenanceTests(unittest.TestCase):
                     self.assertEqual(result.returncode,0,result.stderr+result.stdout)
                     if defect=='expired':time.sleep(1.1)
                     else:permission.write_text('{}')
-                    process.terminate();process.wait(timeout=7)
+                    process.terminate();process.wait(timeout=12)
                     value=show(root,policy,THREAD)
                     self.assertTrue(value['stop_latched'])
                     self.assertEqual(value['reason'],'controller_stopped')
@@ -161,7 +163,7 @@ class GoalMaintenanceTests(unittest.TestCase):
                     if changed:
                         value=dict(original,deadline=original['deadline']-1)
                         allocation_path.write_text(json.dumps(value))
-                    process.terminate();process.wait(timeout=7)
+                    process.terminate();process.wait(timeout=12)
                     after=show(root,policy,THREAD)
                     ledger=json.loads(allocation_path.read_text())
                     if changed:
@@ -234,3 +236,27 @@ class GoalMaintenanceTests(unittest.TestCase):
                 ledger=json.loads(next((root/'goal-supervision/allocations').glob('*.json')).read_text())
                 self.assertTrue(ledger['stop_latched'])
                 self.assertEqual(ledger['first_stop']['reason'],'observation_unavailable')
+
+    def test_persisting_native_fault_recovers_original_ledger_diagnostic_after_crash(self):
+        import os
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,_,_=self.fixture(directory)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,
+                default_allocation='allocation-1',allocations={'allocation-1':grant})))
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='recovery-test',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                enroll(root,policy,THREAD,100,120,native_context=context)
+                real_replace=os.replace
+                def crash_before_receipt_replace(source,destination):
+                    if Path(destination).parent==root/'goal-supervision' and Path(destination).name!='controller.json':
+                        raise KeyboardInterrupt('process exits before receipt replace')
+                    real_replace(source,destination)
+                with patch('codex_wake.goal_supervision.native_request',side_effect=TimeoutError('original')),patch('os.replace',side_effect=crash_before_receipt_replace):
+                    with self.assertRaises(KeyboardInterrupt):poll(root)
+                ledger=json.loads(next((root/'goal-supervision/allocations').glob('*.json')).read_text())
+                with patch('codex_wake.goal_supervision.native_request',side_effect=OSError('persistent fault')):
+                    recovered=poll(root)[0]
+                self.assertEqual(recovered['first_stop'],ledger['first_stop'])
+                self.assertEqual(recovered['first_stop']['cause'],'TimeoutError')
