@@ -5,7 +5,11 @@ all existing stop latches, allocation IDs, counters, accounting basis, generatio
 and deadlines. Keep the shared native daemon running. Maintenance requires all
 unlatched campaigns inactive with no active turns; pause them through their
 normal authorized control before preparing. Already latched campaigns stay held.
-Operator chat remains available.
+Operator chat remains available. Before production handover, verify every
+enrollment writer runs version0.19.0 or later. Existing MCP processes retain their
+interpreter/CLI until an approved refresh and cannot honor the new admission gate;
+a fresh stdio catalog does not prove those connections changed. Keep this version
+check separate from Plan0168's shared refresh authority.
 
 ## Bounded graceful controller handover
 

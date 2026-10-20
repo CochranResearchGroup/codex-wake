@@ -6,46 +6,46 @@ lanes:
     objective: Bounded controller maintenance and immutable first-stop evidence
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/299]
     plan: docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md
-    plan_ref: fix/289-retro-runtime
+    plan_ref: origin/main
     branch: fix/289-retro-runtime
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 75e7d9f
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 56cf6eb
     dependencies: []
     overlaps: [P170]
     updated_at: 2026-10-20
-    disposition: Disjoint implementation under fixed existing allowance
+    disposition: PR300 integrated;0.19.0 installed; source/runtime gates qualified; latches preserved
   - id: P170-ci
     owner: primary / ecochran76
     objective: Conservative documentation lane and undefined-name qualification
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/299]
     plan: docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md
-    plan_ref: fix/289-retro-runtime
+    plan_ref: origin/main
     branch: fix/289-retro-ci
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 75e7d9f
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 56cf6eb
     dependencies: []
     overlaps: [P170]
     updated_at: 2026-10-20
-    disposition: Disjoint implementation under fixed existing allowance
+    disposition: PR300 integrated;0.19.0 installed; source/runtime gates qualified; latches preserved
   - id: P170-acceptance
     owner: primary / ecochran76
     objective: Reusable real-agent acceptance preflight and launcher
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/299]
     plan: docs/dev/plans/0170-2026-10-20-retrospective-safeguards.md
-    plan_ref: fix/289-retro-runtime
+    plan_ref: origin/main
     branch: fix/289-retro-acceptance
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: 75e7d9f
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    checkpoint: 56cf6eb
     dependencies: []
     overlaps: [P170]
     updated_at: 2026-10-20
-    disposition: Disjoint implementation under fixed existing allowance
+    disposition: PR300 integrated;0.19.0 installed; source/runtime gates qualified; latches preserved
   - id: P169
     owner: primary / ecochran76
     objective: Verified allocation provisioning and graceful campaign controls
