@@ -81,6 +81,20 @@ def _cleanup(request, thread):
     return proof
 
 
+def _qualified_receipt(proof, options, first=None):
+    exhausted=(proof.get('state')=='stopped' and proof.get('reason')=='allocation_exhausted'
+        and proof.get('stop_proof') is True)
+    normal=(proof.get('state') in ('armed','checkpoint_requested')
+        and not proof.get('stop_latched') and proof.get('reason') in (None,'checkpoint_reserve'))
+    _require((normal or exhausted) and proof.get('controller',{}).get('fresh') is True
+        and proof.get('accounting',{}).get('state')=='qualified','resource_receipt_unqualified')
+    _require(proof.get('token_accounting')=='fresh' and proof.get('token_limit')==options.token_limit
+        and proof.get('time_limit_seconds')==options.seconds,'enrollment_caps_or_basis_changed')
+    if first is not None:
+        _require(all(proof.get(k)==first[k] for k in ('allocation_id','generation','deadline')),
+            'allowance_identity_or_deadline_changed')
+
+
 def run(options, request, read_status=None, *, sleep=time.sleep, observe_raw=None):
     """Public orchestration seam; native RPC and public status are I/O boundaries."""
     output=options.output.absolute();output.mkdir(mode=0o700,parents=True,exist_ok=False)
@@ -146,10 +160,10 @@ def run(options, request, read_status=None, *, sleep=time.sleep, observe_raw=Non
                     and proof.get('time_limit_seconds')==options.seconds,'enrollment_caps_or_basis_changed')
                 first=proof;result.update(allocation_id=proof['allocation_id'],generation=proof['generation'],deadline=proof['deadline'])
                 _save(output,'enrollment.json',proof);result['failure_stage']='enforcement'
-            _require(all(proof.get(k)==first[k] for k in ('allocation_id','generation','deadline')),'allowance_identity_or_deadline_changed')
+            _qualified_receipt(proof,options,first)
             _require(type(proof.get('used_tokens')) is int and proof['used_tokens']>=last_used,'accounting_decreased')
             last_used=proof['used_tokens']
-            checkpoint=checkpoint or proof.get('checkpoint',{}).get('state')=='acknowledged'
+            checkpoint=checkpoint or (proof.get('checkpoint') or {}).get('state')=='acknowledged'
             goal=request('thread/goal/get',dict(threadId=thread))['goal']
             native=request('thread/read',dict(threadId=thread,includeTurns=True))['thread']
             _save(output,'native-final.json',native)
@@ -167,11 +181,13 @@ def run(options, request, read_status=None, *, sleep=time.sleep, observe_raw=Non
                         _require(request('thread/goal/get',dict(threadId=thread))['goal']['status']=='paused','operator_reply_resumed_goal')
                         _save(output,'operator-reply.json',current)
                         final_status=read_status(thread)
+                        _qualified_receipt(final_status,options,first)
                         result['raw_usage_replay_verified']=False
                         if observe_raw is not None:
                             audit_end=min(end,time.monotonic()+5)
                             while time.monotonic()<audit_end:
                                 replay=observe_raw(thread,actual['createdAt']);final_status=read_status(thread)
+                                _qualified_receipt(final_status,options,first)
                                 if replay.get('state')=='qualified' and replay['used_tokens']==final_status.get('used_tokens'):
                                     _save(output,'raw-usage-replay.json',replay)
                                     result['raw_usage_replay_verified']=True
