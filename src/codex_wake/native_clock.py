@@ -1,7 +1,6 @@
 """Acquire UTC bounds and authenticated host elapsed evidence without guest UTC."""
 from __future__ import annotations
 
-import base64
 from dataclasses import asdict
 from datetime import datetime
 from decimal import Decimal
@@ -60,10 +59,8 @@ def snapshot():
         if len(body) > 1048576:
             raise ValueError("clock_response_too_large")
         response = json.loads(body)
-        script = '[Console]::WriteLine("{0},{1}",[Diagnostics.Stopwatch]::GetTimestamp(),[Diagnostics.Stopwatch]::Frequency)'
-        encoded = base64.b64encode(script.encode("utf-16le")).decode()
-        host = subprocess.run(["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded], capture_output=True, text=True, timeout=5, check=True)
-        counter, frequency = map(int, host.stdout.strip().split(","))
+        from .host_counter import read_counter
+        counter, frequency = read_counter()
         return from_response(response, counter=counter, frequency=frequency)
     except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError, subprocess.SubprocessError):
         return {"utc": None, "counter": None, "reason": "clock_unavailable_or_invalid"}

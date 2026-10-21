@@ -1118,3 +1118,10 @@ The MCP request is durable while the agent is active; an independent monitor
 waits for all loaded conversations to be observed idle, then reconnects MCP
 servers and verifies unchanged goal authority/counters plus selected resources.
 Queued is not completed. See the portable [refresh workflow](skills/codex-wake/references/lifecycle.md#shared-mcp-refresh).
+
+
+Stable-time clock reads automatically reuse one user-owned native counter bridge
+at `~/.local/state/codex-wake/host-counter`. Its Unix socket is private; it reads
+fresh Windows QPC values and expires after60seconds idle. It needs no additional
+configuration. Cold launch failures or malformed/late replies hold clock authority;
+it never substitutes guest time or caches an earlier counter as a new sample.

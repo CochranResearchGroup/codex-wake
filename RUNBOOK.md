@@ -7592,3 +7592,15 @@ precondition documented; existing connection refresh remainsP168/#282.
 Plan0170 closed, portable acceptance/handoff retained, issue299 closes only after
 this documentation PR passes required gates. Memoryforbidden machine receipt:
 no reviewed destination routing, zero Graphiti writes. Progress: outcome_progress.
+
+
+## Turn377 | 2026-10-20 | Native counter bridge diagnosis and source acceptance
+
+Issue302 reproduced Windows executable startup timeouts, including direct counter
+helper and tasklist; stdin and relay route changes fail to explain/repair it.
+Paired persistent/new-process probe supports reusing a counter process. Private
+bridge preserves fresh nonce-correlated QPC and original service guards, retires
+on late/malformed reply or60s idle. Focused15checks pass; source native idle/busy
+2/2pass/no skips47.14s;12adapter reads all network/max8.93ms. Full regression,
+required CI, merged release and installed qualification pending. No live messaging
+provisioning or controller/host-clock mutation. Plan0171 owns remaining work.

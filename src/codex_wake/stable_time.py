@@ -1,5 +1,4 @@
 """Authenticated StableTime adapter; no guest-clock extrapolation or fallback."""
-import base64
 from datetime import datetime
 from decimal import Decimal
 import ipaddress
@@ -102,12 +101,8 @@ def service_time_result(config_path):
             'operators', 'authentication', 'time_scale') if key in response}
         if response.get('status') in ('unavailable', 'unbounded'):
             return TimeDecision('uncertain', reason='stable_time_unavailable'), observation
-        script = '[Console]::WriteLine("{0},{1}",[Diagnostics.Stopwatch]::GetTimestamp(),[Diagnostics.Stopwatch]::Frequency)'
-        encoded = base64.b64encode(script.encode('utf-16le')).decode()
-        result = subprocess.run(['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
-                                 '-NoProfile', '-NonInteractive', '-EncodedCommand', encoded],
-                                capture_output=True, text=True, timeout=5, check=True)
-        counter, frequency = map(int, result.stdout.strip().split(','))
+        from .host_counter import read_counter
+        counter, frequency = read_counter()
         return decision_from_response(response, counter=counter, frequency=frequency), observation
     except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError, subprocess.SubprocessError):
         # Never include transport errors containing credentials or substitute guest time.
