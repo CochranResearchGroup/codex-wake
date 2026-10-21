@@ -1296,3 +1296,12 @@ Bounded controller maintenance, immutable first-stop evidence, reusable real-age
 acceptance preflight, static undefined-name gate, conservative evidence-only CI
 and a short skill router. PR300 merged56cf6eb;0.19.0 installed,17installed checks
 and fresh MCP identity passed. Existing allowances/latches and shared daemon preserved.
+
+
+## P171 | Stable-time native counter handoff
+
+State: OPEN
+
+Current State: source native idle/busy exchange qualified with a private auto-start
+counter bridge; required CI and installed exact-main qualification pending.
+Plan: [Plan0171](docs/dev/plans/0171-2026-10-20-native-counter-handoff.md).
