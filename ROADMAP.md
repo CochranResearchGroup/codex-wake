@@ -1300,8 +1300,8 @@ and fresh MCP identity passed. Existing allowances/latches and shared daemon pre
 
 ## P171 | Stable-time native counter handoff
 
-State: OPEN
+State: CLOSED
 
-Current State: source native idle/busy exchange qualified with a private auto-start
-counter bridge; required CI and installed exact-main qualification pending.
+Current State: PR303 merged, v0.19.1 released and installed; required CI/local
+regression and original installed idle/busy native exchanges pass.
 Plan: [Plan0171](docs/dev/plans/0171-2026-10-20-native-counter-handoff.md).

@@ -1,6 +1,6 @@
 # Reliable stable-time native counter handoff
 
-State: OPEN
+State: CLOSED
 Owner: ecochran76
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/302
 Branch: fix/302-native-counter
@@ -66,3 +66,33 @@ installed dependency-complete interpreter and CI environment: empty explicit
 stable-time configuration plus isolated XDG_CONFIG_HOME/XDG_STATE_HOME. Focused
 15checks pass on that interpreter. Pinned Ruff undefined-name and policy wiring
 checks are separate gates. No production source/state edited by these fixtures.
+
+
+## Installed acceptance and closeout
+
+PR303 mergedc8d5f88b5b26766575bd121c0e3021cca68ce522 after required CI run
+39525610296 passed both Python3.11/3.12 gates. Isolated dependency-complete local
+full run1422tests/0fail/0error/1skip363.92s. Published v0.19.1 wheel/sdist/SHA256SUMS
+at exact merge; download hashes match. An unintended build .gitignore asset was
+removed before final release verification. All114installed Python modules match
+exact merged source; five stable command links now select0.19.1-c8d5f88. Existing
+controllers, campaigns, grants, latches, counters and services were not restarted.
+
+Actual installed Bots src/public68files match main. Current test harness against
+installed app/provider29browser/service/control/queue checks passed; initial two
+native pre-execution errors came from omitted skill directory. Linking installed
+skills exposed strict advertised locator mismatch from harness cwd: original
+request read/claim succeeded, but furnished helper equality correctly refused
+alias. Preserve both failed harness runs. Run native harness from actual installed
+app cwd (no installed file edits):2passed/0failed/0skipped49.62s. Both schema3
+accepted receipts have zero surviving owned process generations; busy deferral,
+exact thread and originating browser reply asserted. No diagnostic queue/start.
+Installed twelve time reads all network/max11.49ms; broker module path is installed
+0.19.1 release. Cold startup may still withhold authority; no claim of universal
+Windows launch reliability or repaired host UTC. Original host failures retained.
+
+Standards/Spec serial author review against242bdb7 at e9be210 found no blocking
+issue; published diff, finite IPC/ownership and unchanged authoritative validators
+checked. Provider #302 outcome qualified and resolved; Bots114's final criteria
+reconciliation remains separate. No live bus migration or production messages.
+Memory disposition forbidden: reviewed atlas returned no project cloud route.
