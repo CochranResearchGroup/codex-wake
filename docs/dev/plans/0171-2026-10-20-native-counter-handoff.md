@@ -32,8 +32,8 @@ adapter20pass and four-caller32pass did not erase actual native failures. Native
 instrumentation reproduces5s timeout before any counter output; tasklist also
 times out. Alternate WSL relay routes both time out. Tiny direct Windows counter
 executable and PowerShell each time out3times in paired45s probe. Persistent
-counter/new-process paired probe: persistent155pass while new-process85pass/1
- timeout at observation; final counts retained privately. This supports avoiding
+counter/new-process paired probe: persistent220pass while new-process129pass/1
+timeout over the same45s; final counts retained privately. This supports avoiding
 repeated Windows launch, not a claim about Windows internals or host UTC repair.
 
 New host_counter.read_counter returns only freshly correlated QPC/frequency via
@@ -54,3 +54,15 @@ checks2pass/0fail/0skip47.14s;12adapter reads network/max8.93ms. Retain all earl
 failed native receipts and diagnostic probes outside Git. Full regression and
 exact-main installed qualification remain gates. No production mailbox migration,
 clock/service change or runtime-controller restart.
+
+
+## Regression environment correction
+
+Initial comprehensive invocation used bare Python without declared MCP extras and
+inherited the real stable-time client:1265tests,13failures/48errors/3skips207.51s.
+Errors include missing jsonschema; native legacy fixtures observe real configured
+network mode. Retain this run; it is not a clean regression result. Repeat with
+installed dependency-complete interpreter and CI environment: empty explicit
+stable-time configuration plus isolated XDG_CONFIG_HOME/XDG_STATE_HOME. Focused
+15checks pass on that interpreter. Pinned Ruff undefined-name and policy wiring
+checks are separate gates. No production source/state edited by these fixtures.
