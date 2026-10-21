@@ -6,15 +6,15 @@ lanes:
     objective: Reuse a private native counter bridge for stable-time consumers
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/302]
     plan: docs/dev/plans/0171-2026-10-20-native-counter-handoff.md
-    plan_ref: fix/302-native-counter
+    plan_ref: origin/main
     branch: fix/302-native-counter
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: []
     updated_at: 2026-10-20
-    disposition: Scoped provider fix; source native acceptance passed; release qualification ongoing
+    disposition: PR303 mergedc8d5f88;0.19.1 released/installed;114modules and installed native exchanges qualified
   - id: P170-runtime
     owner: primary / ecochran76
     objective: Bounded controller maintenance and immutable first-stop evidence

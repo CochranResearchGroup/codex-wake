@@ -7604,3 +7604,16 @@ on late/malformed reply or60s idle. Focused15checks pass; source native idle/bus
 2/2pass/no skips47.14s;12adapter reads all network/max8.93ms. Full regression,
 required CI, merged release and installed qualification pending. No live messaging
 provisioning or controller/host-clock mutation. Plan0171 owns remaining work.
+
+
+## Turn378 | 2026-10-20 | Counter bridge released and installed
+
+PR303c8d5f88 passed both CI gates; correct isolated local run1422testsPASS/1skip.
+v0.19.1 exact-main wheel/sdist/SHA hashes read back;114modules/five stable links
+match. Installed Bots runtime68files match source;29service/browser/control/queue
+checks pass. Preserve two harness setup failures (missing skill, then alias
+locator); actual installed cwd native idle/busy2/2PASS49.62s, schema3/clean owned
+process receipts.12time reads network/max11.49ms. Existing controllers/counters/
+policies/live messaging untouched; pure counter bridge idles out automatically.
+Plan0171CLOSED;302resolved. Broader Bots114 reconciliation remains separate.
+Memory disposition forbidden: no reviewed project cloud route.

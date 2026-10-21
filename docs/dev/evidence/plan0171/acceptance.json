@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "issue": 302,
+  "source": "c8d5f88b5b26766575bd121c0e3021cca68ce522",
+  "version": "0.19.1",
+  "ci_run": 39525610296,
+  "required_ci": [
+    "Release gates (3.11)",
+    "Release gates (3.12)"
+  ],
+  "local_full": {
+    "tests": 1422,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "seconds": 363.915
+  },
+  "installed_modules_matched": 114,
+  "stable_commands": 5,
+  "bots_runtime_files_matched": 68,
+  "installed_browser_service_control_queue": {
+    "passed": 29
+  },
+  "installed_native": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 49.618,
+    "schema": 3,
+    "owned_survivors": 0
+  },
+  "live_migration": false,
+  "host_clock_repair": false,
+  "controller_restart": false,
+  "limitations": [
+    "Cold bridge launch can safely withhold authority",
+    "Controlled loopback model; not external account acceptance",
+    "Historical setup/clock failures retained privately"
+  ]
+}
