@@ -12,7 +12,7 @@ tracker publication. A draft's readiness is separate from live-effect authority.
 | --- | --- | --- | --- |
 | MR-01 | [Qualify exact open Grok delivery](0001-2026-10-22-qualify-grok.md) | None | DONE — managed-launch terminal observation |
 | MR-02 | [Preserve Codex through the runtime seam](0002-2026-10-22-codex-runtime-seam.md) | MR-01 satisfied | DONE — source and isolated wheel |
-| MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 satisfied | READY |
+| MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 satisfied | IN_PROGRESS — source candidate; live gate open |
 | MR-04 | [Cross-runtime request and reply](0004-2026-10-22-cross-runtime-a2a.md) | MR-03 | PLANNED |
 | MR-05 | [Busy policies and terminal fallback](0005-2026-10-22-busy-and-fallback.md) | MR-03 | PLANNED |
 | MR-06 | [Installed acceptance](0006-2026-10-22-installed-acceptance.md) | MR-04, MR-05 | PLANNED |
@@ -38,3 +38,9 @@ MR-02 wave: primary owned the only ready ticket; zero subagents. Source and
 isolated wheel controls pass through the version1 runtime seam. MR-02 DONE;
 MR-03 READY from the retained source checkpoint. Main integration, release and
 production installation remain separate. [Verification](../../verification/0172-2026-10-22-mr02-runtime-seam.md).
+
+MR-03 wave: primary owns the only ready ticket; zero subagents. The source
+candidate adds schema7, host-approved Grok bindings and weak terminal evidence.
+Two setup probes sent zero conversation prompts and cleaned up, but saw no
+active session. Live acceptance remains open; an additional bounded probe needs
+the requested extension. MR-04/MR-05 stay blocked. [Verification](../../verification/0172-2026-10-22-mr03-grok-wake.md).

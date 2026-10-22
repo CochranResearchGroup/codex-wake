@@ -14,14 +14,19 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
-Latest: MR-02 source slice is complete. The version1 runtime seam preserves
-Codex native wakes; scheduling, trusted time and durable attempts stay in the
-core. Final full suite 1428 tests (1 skipped) and isolated wheel94 tests
-pass. MR-02 DONE; MR-03 READY from this source checkpoint. Main integration,
-release, production installation and live Grok durable acceptance remain open.
-Only MR-02 was ready in this wave; no independent nonblocked ticket and no
-subagents. [MR-02 evidence](../verification/0172-2026-10-22-mr02-runtime-seam.md)
-and [version1 contract](0172-multi-runtime/runtime-delivery-contract.md).
+Latest: MR-03 is IN_PROGRESS. The source candidate adds schema7/runtime-envelope1,
+host-approved managed-launch Grok bindings, shared clock eligibility and weak
+terminal evidence. Source/isolated-wheel validation is being reconciled. Two
+setup probes sent zero conversation prompts and cleaned up; both lacked a usable
+active session when queried. The live acceptance gate remains open. The requested
+one-recipient/five-minute/one-prompt extension requires its user response before
+another dependent live launch. MR-04/MR-05 remain blocked on MR-03.
+Only MR-03 was ready in this wave; no independent nonblocked ticket or subagent.
+[MR-03 evidence](../verification/0172-2026-10-22-mr03-grok-wake.md).
+
+MR-02 remains DONE for source and isolated artifact. Its final full suite1428
+(1 skipped) and isolated wheel94 tests passed. Main integration/release/production
+installation remain separate. [MR-02 evidence](../verification/0172-2026-10-22-mr02-runtime-seam.md).
 
 MR-01 remains DONE for a managed-launch terminal route for Grok1.0.40/minimal UI.
 Native live control and authenticated receiver/A2A receipts remain unqualified.

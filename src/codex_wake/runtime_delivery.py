@@ -57,6 +57,7 @@ class RuntimeSubmission:
     reason: str | None = None
     failure: dict | None = None
     exception_type: str | None = None
+    evidence: dict | None = None
 
 
 @dataclass(frozen=True)

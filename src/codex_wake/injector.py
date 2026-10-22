@@ -351,6 +351,9 @@ def dispatch_firing_record(
     classification = classify_record(record)
     if classification == 'hold':
         return DispatchResult('skipped','unrecognized record; no dispatch authorized')
+    if classification == 'runtime_intent_v7':
+        from .runtime_wakes import dispatch
+        return dispatch(root, found, time_provider=time_provider)
     if classification == 'native_intent_v6':
         from .native_intents import dispatch
         provider = None

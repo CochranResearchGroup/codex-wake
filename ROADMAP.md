@@ -1326,7 +1326,11 @@ qualified by that first run.
 Authenticated rerun now qualifies one managed-launch terminal-observed route
 with same-session response and fresh cleanup. MR-01 DONE. MR-02 now DONE for
 the version1 Codex runtime seam, with full-suite and isolated-wheel controls.
-MR-03 READY from that source checkpoint. Main integration/release/production
+MR-03 IN_PROGRESS: schema7/Grok source candidate; two startup probes sent zero
+conversation prompts and cleaned up, but did not establish active-session/live
+delivery acceptance. Extra bounded probing awaits the requested extension;
+MR-04/MR-05 remain blocked. [MR-03 evidence](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+Main integration/release/production
 installation remain separate; native Grok control/A2A receipts stay unqualified.
 [MR-02 verification](docs/dev/verification/0172-2026-10-22-mr02-runtime-seam.md).
 Preserve P168/#282 and existing controllers.

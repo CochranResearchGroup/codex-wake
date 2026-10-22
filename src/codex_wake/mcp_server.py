@@ -106,6 +106,19 @@ for _action in WAKE_ACTIONS:
         _props, ['caller_thread_id'], _action in ('list', 'pause-status'))
 
 
+SPECS['wake_grok_sessions'] = ('grok','sessions',
+    'Inspect host-approved managed-launch Grok bindings and current capability/readiness. No enrollment, input or provider call.',
+    {},[],True)
+SPECS['wake_grok_show'] = ('grok','show','Inspect original runtime intent, selected method, readiness and actual delivery evidence without prompt bodies or new input.',
+    {'wake_id':{'type':'string','pattern':'^wake_intent_[0-9a-f]{32}$'}},['wake_id'],True)
+for _verb in ('after','at','file'):
+    SPECS['wake_grok_'+_verb] = ('grok',_verb,
+        'Retain a durable wake for a host-approved exact open Grok binding. Default wait; terminal observation is not execution or acknowledgment. Stable intent key and compatible monitor required. No arbitrary socket/executable or binding enrollment.',
+        {'binding_id':{'type':'string','pattern':'^grok_[0-9a-f]{32}$'},
+         'trigger':TEXT,'prompt':BODY,'idempotency_key':{**INTENT,'maxLength':200},'ttl':TEXT},
+        ['binding_id','trigger','prompt','idempotency_key'],False)
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
@@ -231,6 +244,17 @@ class CommandRunner:
             for key, value in arguments.items():
                 command += ['--' + key.replace('_', '-'), str(value)]
             return self._execute(command, arguments, readonly)
+        if group == 'grok':
+            if self.wake_root is None or not Path(self.wake_root).is_absolute():
+                return {'error':{'code':'runtime_host_scope_unavailable'}}, True
+            command=[*self.cli,'--wake-root',str(self.wake_root),'grok',verb,'--json']
+            if verb == 'show':
+                command += [arguments['wake_id']]
+            elif verb != 'sessions':
+                command += ['--require-monitor','--idempotency-key',arguments['idempotency_key'],
+                            '--ttl',arguments.get('ttl','24h'),arguments['binding_id'],
+                            arguments['trigger'],'--',arguments['prompt']]
+            return self._execute(command,arguments,readonly)
         body = arguments.get("body")
         if body is not None:
             try:

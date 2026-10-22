@@ -104,6 +104,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_sessions_parser(subparsers)
     from .native_delivery import add_native_parser
     add_native_parser(subparsers)
+    from .runtime_wakes import add_grok_parser
+    add_grok_parser(subparsers)
     from .a2a_cli import add_a2a_parser
     add_a2a_parser(subparsers)
     from .messages_cli import add_messages_parser
@@ -2784,6 +2786,9 @@ def run(argv: list[str] | None = None) -> int:
             return lifecycle_command(args, root)
         from .sessions_cli import sessions_command
         return sessions_command(args)
+    if args.command == 'grok':
+        from .runtime_wakes import command
+        return command(args, root)
     if args.command == "native":
         if args.native_command == 'migrate':
             from .native_delivery import migrate_command

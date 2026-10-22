@@ -151,20 +151,28 @@ def valid_counter(value):
 
 
 def valid_record(record):
+    return valid_scheduling_record(record, 6, _valid_native_target)
+
+
+def _valid_native_target(target):
+    return (target['transport'] == 'native' and str(UUID(target['thread_id'])) == target['thread_id']
+            and target['endpoint'].startswith('unix://') and Path(target['codex_cmd']).is_absolute())
+
+
+def valid_scheduling_record(record, version, target_validator):
     from .network_wakes import precise_deadline
     try:
         intent = record["scheduling_intent"]
         schedule = intent["schedule"]
         target = record["target"]
-        if (record.get("schema_version") != 6 or record["status"] not in {"pending", "firing", "submitted", "failed", "cancelled", "expired", "archived"}
+        if (record.get("schema_version") != version or record["status"] not in {"pending", "firing", "submitted", "failed", "cancelled", "expired", "archived"}
                 or not isinstance(record["id"], str) or not re.fullmatch(r'wake_intent_[0-9a-f]{32}', record['id'])
                 or not isinstance(record.get('events'), list) or any(not isinstance(event, dict) for event in record['events'])
                 or not isinstance(intent.get('fingerprint'), str) or not re.fullmatch(r'[0-9a-f]{64}', intent['fingerprint'])
                 or intent.get('origin_state') not in {'at_request', 'awaiting_qualified_clock'}
                 or type(record["attempts"]) is not int or record["attempts"] < 0
                 or not isinstance(record["prompt"], str) or not record["prompt"].strip()
-                or target["transport"] != "native" or str(UUID(target["thread_id"])) != target["thread_id"]
-                or not target["endpoint"].startswith("unix://") or not Path(target["codex_cmd"]).is_absolute()
+                or not target_validator(target)
                 or not Path(intent["canonical_root"]).is_absolute()
                 or type(intent["ttl_seconds"]) not in (int, float) or not math.isfinite(intent["ttl_seconds"]) or intent["ttl_seconds"] <= 0
                 or type(intent["tolerance_seconds"]) not in (int, float) or not 0 < intent["tolerance_seconds"] <= 300
@@ -176,7 +184,7 @@ def valid_record(record):
             return False
         if intent.get("stop_at") is not None:
             precise_deadline(intent["stop_at"])
-        delivery = record.get('native_delivery')
+        delivery = record.get('native_delivery' if version == 6 else 'runtime_delivery')
         if delivery is not None:
             if not isinstance(delivery, dict) or delivery.get('state') not in {'uncertain', 'accepted'}:
                 return False
@@ -257,12 +265,12 @@ def eligibility(record, clock):
     return dict(base, state="due", reason="not_before_and_expiry_established")
 
 
-def evaluate(root, identifier, clock):
+def evaluate(root, identifier, clock, *, record_validator=None):
     from .records import find_record, replace_record
     with WakeLifecycleLock(root, identifier):
         found = find_record(root, identifier)
         record = dict(found.record)
-        if not valid_record(record) or record["status"] != "pending" or record["scheduling_intent"]["canonical_root"] != str(Path(root).resolve()):
+        if not (record_validator or valid_record)(record) or record["status"] != "pending" or record["scheduling_intent"]["canonical_root"] != str(Path(root).resolve()):
             return "pending"
         verdict = eligibility(record, clock)
         previous = record["time_recovery"]

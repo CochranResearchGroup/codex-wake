@@ -7689,3 +7689,31 @@ planning/lane audits retain4/51 inherited findings, respectively.
 MR-02 DONE for source/isolated artifact, MR-03 READY. No provider submission,
 production install, service change, main integration or release.
 [Verification](docs/dev/verification/0172-2026-10-22-mr02-runtime-seam.md).
+
+## Turn383 | 2026-10-22 | MR-03 source candidate and open live gate
+
+CW-MR-172/MR-03, feat/mr03-grok-wake frome435175. Primary owns the only ready
+ticket; zero independent nonblocked tickets or subagents. Source adds schema7/
+runtime-envelope1, operator-pinned managed-launch Grok bindings, CLI/MCP
+scheduling/discovery/evidence, shared trusted-clock eligibility and conservative
+terminal submission/reconciliation. Single atomic authority and synchronized
+writes preserve uncertainty across crashes; cancellation uses the lifecycle
+lock. No execution/receiver/A2A acknowledgment is inferred from terminal output.
+
+Failure-driven controls cover drafts/dialogs/startup, changed generation/session,
+fresh local identity, deadlines, profile scope, lost responses and no replay.
+An existing owned-counter socket readiness race was exposed by full validation,
+reproduced at its public seam and repaired in separate commit0e5d5c9. The old
+monitor schema-list expectation is updated for7. Both intermediate full failures
+and a non-reproduced message-cancel failure are retained; final frozen-source
+validation is pending, not silently a pass. Isolated installed wheel118 controls
+pass and package-module bytes match current source.
+
+Two live setup launches (11.286s/11.000s) sent zero conversation prompts, returned
+no active session and cleaned up all introduced application processes. Exact
+sessions have no persisted usage. This is not live delivery or an auth diagnosis.
+The two-recipient probe limit is reached; an asynchronous question requests one
+additional5m/one-recipient/one-prompt probe with startup checked before querying.
+No extra live launch without the response. MR-03 stays IN_PROGRESS; MR-04/MR-05
+remain blocked. No production installation, service/grant change or main merge.
+[Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
