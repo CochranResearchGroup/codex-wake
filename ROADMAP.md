@@ -1305,3 +1305,19 @@ State: CLOSED
 Current State: PR303 merged, v0.19.1 released and installed; required CI/local
 regression and original installed idle/busy native exchanges pass.
 Plan: [Plan0171](docs/dev/plans/0171-2026-10-20-native-counter-handoff.md).
+
+## P172 | Multi-runtime wakes and agent exchanges
+
+State: PLANNED
+
+Owner: ecochran76. Local intake CW-MR-172; no GitHub issue posted.
+Plan: [Plan0172](docs/dev/plans/0172-2026-10-22-multi-runtime-wake.md).
+The user-approved direction adds exact open-Grok TUI wakes and bidirectional
+Codex/Grok A2A through a shared runtime delivery seam. Default wait, explicit
+queue/interrupt modes and separately qualified terminal fallback preserve exact
+recipient identity, deadlines and evidence strength. Same-host first release;
+broader lifecycle/resource support and other runtimes follow.
+Current packet is a specification and six dependency-aware local ticket drafts.
+MR-01 qualifies Grok's exact live-session route before adapter implementation.
+No implementation lane, live dispatch, deployment or runtime-support claim is
+opened by this planning checkpoint. Preserve P168/#282 and existing controllers.

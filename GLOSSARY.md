@@ -116,3 +116,19 @@ It cannot retract work already submitted to a recipient.
 **Owned-turn interruption**:
 Stopping a running turn only when durable assignment evidence identifies it as
 Wake-owned. It is separate from pausing future deliveries and cancelling wakes.
+
+**Recipient binding**:
+The verified relationship between one conversation and the live client that
+currently owns its input. A tab label or working directory alone is not a binding.
+
+**Observed delivery**:
+Inspection evidence that a wake prompt was accepted in the bound recipient's
+interface. It does not establish a receiver acknowledgment or a work claim.
+
+**Receiver acknowledgment**:
+An attributable receipt from the exact recipient confirming a specified delivery
+outcome. Its meaning is limited to that outcome; it does not imply completed work.
+
+**Busy delivery policy**:
+The selected behavior when an exact recipient is already working: wait, verified
+queueing or explicitly authorized interruption, within the original deadline.

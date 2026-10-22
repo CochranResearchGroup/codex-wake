@@ -7617,3 +7617,20 @@ process receipts.12time reads network/max11.49ms. Existing controllers/counters/
 policies/live messaging untouched; pure counter bridge idles out automatically.
 Plan0171CLOSED;302resolved. Broader Bots114 reconciliation remains separate.
 Memory disposition forbidden: no reviewed project cloud route.
+
+## Turn379 | 2026-10-22 | Multi-runtime specification and local tickets
+
+User approved the Q1–Q12 consolidated brief. Fresh origin/main fcc996a is the
+planning base; isolated docs/multiruntime-spec leaves the original main checkout
+and its two policy commits intact. No matching open issue/PR found. Local intake
+CW-MR-172, [Plan0172](docs/dev/plans/0172-2026-10-22-multi-runtime-wake.md)
+and six local ticket drafts retain accepted scope and blocking edges; no remote
+tracker publication. Existing tmux A2A binding is inspected/native-queue delivery,
+not generic keystroke automation. Preserve legacy Codex identities, native caller
+admission, trusted time, uncertain-attempt holds and separate work claims.
+Added glossary terms for binding, observed delivery, receiver acknowledgment and
+busy policy. No implementation execution lane opened.
+Documentation validation and inherited audit findings are recorded in
+[verification](docs/dev/verification/0172-2026-10-22-multi-runtime-spec.md).
+Grok live-session qualification remains MR-01; no provider prompts, production
+session/grant/service changes, release or installation performed.
