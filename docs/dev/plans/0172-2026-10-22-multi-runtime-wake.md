@@ -14,12 +14,18 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
-Latest: MR-01 authenticated rerun qualifies a managed-launch terminal route
-for Grok1.0.40/minimal UI. One prompt, standalone response, same displayed UUID
-and process generation before/after, protected-composer/negative-ID controls,
-249.221s and fresh cleanup pass. MR-01 DONE, MR-02 READY; no later ticket started.
+Latest: MR-02 source slice is complete. The version1 runtime seam preserves
+Codex native wakes; scheduling, trusted time and durable attempts stay in the
+core. Final full suite 1428 tests (1 skipped) and isolated wheel94 tests
+pass. MR-02 DONE; MR-03 READY from this source checkpoint. Main integration,
+release, production installation and live Grok durable acceptance remain open.
+Only MR-02 was ready in this wave; no independent nonblocked ticket and no
+subagents. [MR-02 evidence](../verification/0172-2026-10-22-mr02-runtime-seam.md)
+and [version1 contract](0172-multi-runtime/runtime-delivery-contract.md).
+
+MR-01 remains DONE for a managed-launch terminal route for Grok1.0.40/minimal UI.
 Native live control and authenticated receiver/A2A receipts remain unqualified.
-[Current MR-01 evidence](../verification/0172-2026-10-22-mr01-terminal-qualification.md).
+[MR-01 evidence](../verification/0172-2026-10-22-mr01-terminal-qualification.md).
 
 The user approved the consolidated design brief on 2026-10-22 after resolving
 Q1–Q12. This specification and its local ticket drafts are the repository-native

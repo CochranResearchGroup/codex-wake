@@ -7668,3 +7668,24 @@ finds zero introduced application processes. Earlier auth-gated receipt retained
 MR-01 DONE for scoped terminal observation; MR-02 READY. Native live control,
 active busy modes, unmanaged adoption and receiver/A2A receipts remain unqualified.
 No other ticket/subagent started. [Evidence](docs/dev/verification/0172-2026-10-22-mr01-terminal-qualification.md).
+
+## Turn382 | 2026-10-22 | MR-02 runtime seam source qualified
+
+CW-MR-172/MR-02, feat/mr02-runtime-seam from9618a58. Primary owned the only
+ready ticket; zero subagents and no later ticket started. Version1 runtime
+recipient/observation/submission/reconciliation contract plus substantive Codex
+adapter now serve the existing public dispatcher. The core retains locks,
+trusted time, expiry and durable uncertainty before the effect. Busy, unknown
+version/identity and observation outage hold safely; terminal evidence cannot
+be promoted to native acceptance. No persisted schema bump.
+
+Failure-driven checks retained, including the intermediate full-run legacy
+context regression (61 failures/3 errors). The compatibility fix preserves
+historical evidence callers without transport fields. Final full suite:
+1428 tests in293.051s, 1 skipped, PASS. Isolated non-editable wheel:
+94 tests PASS, exact changed-source byte match; CLI/empty no-dispatch daemon
+smoke PASS. Undefined names, compile, policy wiring and whitespace pass;
+planning/lane audits retain4/51 inherited findings, respectively.
+MR-02 DONE for source/isolated artifact, MR-03 READY. No provider submission,
+production install, service change, main integration or release.
+[Verification](docs/dev/verification/0172-2026-10-22-mr02-runtime-seam.md).

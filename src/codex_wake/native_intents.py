@@ -279,7 +279,7 @@ def evaluate(root, identifier, clock):
         return record["status"]
 
 
-def dispatch(root, found, clock_provider=None):
+def dispatch(root, found, clock_provider=None, *, runtime_adapter=None):
     from .records import find_record
     from .native_delivery import dispatch_native, reconcile_native
     from .native_clock import snapshot
@@ -292,8 +292,8 @@ def dispatch(root, found, clock_provider=None):
                 or record["scheduling_intent"]["canonical_root"] != str(Path(root).resolve())):
             return DispatchResult("skipped", "native intent changed or root does not match")
         if record.get("native_delivery", {}).get("state") == "uncertain":
-            return reconcile_native(root, active, None)
-        return dispatch_native(root, active, None, clock_provider=provider)
+            return reconcile_native(root, active, None, runtime_adapter=runtime_adapter)
+        return dispatch_native(root, active, None, clock_provider=provider, runtime_adapter=runtime_adapter)
 
 
 def dispatch_gate(record, clock):

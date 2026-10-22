@@ -7,12 +7,12 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import re
 import subprocess
-import time
 from uuid import UUID, uuid4
 
 from .native_protocol import native_request
+from .codex_runtime import CodexRuntimeAdapter, read_codex_thread, submission_failure
+from .runtime_delivery import RuntimeAdapter, RuntimeReconciliation, RuntimeSubmission, RuntimeTargetError
 from .records import WakeError, append_event, format_utc, parse_duration, parse_timestamp, replace_record, utc_now
 
 
@@ -94,12 +94,8 @@ def create_native(args, root):
 
 
 def read_native_thread(target):
-    from .shared_app_server import SharedAppServerReader, locate_shared_endpoint
-    endpoint = target['endpoint']
-    if endpoint == 'unix://':
-        endpoint = locate_shared_endpoint(codex_cmd=target['codex_cmd'])
-    with SharedAppServerReader(endpoint) as reader:
-        return reader.read_thread(target['thread_id'])
+    """Compatibility entrypoint; the adapter owns Codex protocol access."""
+    return read_codex_thread(target)
 
 
 def expire_native(root, found, now):
@@ -117,42 +113,20 @@ def expire_native(root, found, now):
     return True
 
 
-def submission_failure(reason, result, error):
-    """Project subprocess evidence without retaining arbitrary output or argv."""
-    def output_summary(value, *, inspect=False):
-        value = value if isinstance(value, (str, bytes)) else ''
-        sample = value[:4096]
-        if isinstance(sample, bytes):
-            sample = sample.decode('utf-8', errors='replace')
-        hints = []
-        if inspect:
-            lowered = sample.lower()
-            for phrase, hint in (
-                ('thread not found', 'thread_not_found'),
-                ('connection refused', 'connection_refused'),
-                ('permission denied', 'permission_denied'),
-                ('unauthorized', 'unauthorized'),
-                ('unexpected argument', 'cli_usage_error'),
-                ('timed out', 'timed_out'),
-            ):
-                if phrase in lowered:
-                    hints.append(hint)
-        return dict(length=len(value), length_unit='bytes' if isinstance(value, bytes) else 'characters',
-                    truncated=len(value) > 4096, hints=hints, raw_output='withheld')
-    source = result if result is not None else error
-    return dict(version=1, reason=reason, exception_type=type(error).__name__,
-                returncode=result.returncode if result is not None else None,
-                stdout=output_summary(getattr(source, 'stdout', None)),
-                stderr=output_summary(getattr(source, 'stderr', None), inspect=True))
+def _codex_adapter():
+    return CodexRuntimeAdapter(
+        read_thread=read_native_thread, request=native_request,
+        run=subprocess.run, project_failure=submission_failure,
+    )
 
 
-def dispatch_native(root, found, now, *, clock_provider=None):
+def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: RuntimeAdapter | None = None):
     from .injector import DispatchResult
     record = dict(found.record)
     target = record['target']
     existing = record.get('native_delivery', {})
     if existing.get('state') == 'uncertain':
-        return reconcile_native(root, found, now)
+        return reconcile_native(root, found, now, runtime_adapter=runtime_adapter)
     from .network_wakes import precise_deadline
     intent = record.get('schema_version') == 6
     if intent:
@@ -172,21 +146,28 @@ def dispatch_native(root, found, now, *, clock_provider=None):
         record = append_event(record, 'expired', 'native recipient deadline elapsed', now)
         replace_record(root, found, record)
         return DispatchResult('failed', 'native recipient deadline elapsed')
+    adapter = runtime_adapter if runtime_adapter is not None else _codex_adapter()
     try:
-        thread = read_native_thread(target)
-        if (thread.get('id') == target['thread_id']
-                and thread.get('status', {}).get('type') == 'notLoaded'
-                and target.get('resume_policy') == 'same_thread'):
-            resumed = native_request(target['endpoint'], target['codex_cmd'], 'thread/resume',
-                                     {'threadId': target['thread_id']}, 10)
-            if resumed.get('thread', {}).get('id') != target['thread_id']:
-                raise WakeError('native resume returned a different thread')
+        recipient = adapter.resolve(target)
+        if recipient.version != 1:
+            raise RuntimeTargetError('unsupported', 'unsupported_runtime_envelope_version')
+        if recipient.runtime != 'codex' or recipient.session_id != target['thread_id']:
+            raise RuntimeTargetError('unavailable', 'resolved_recipient_changed')
+        observation = adapter.observe(recipient)
+        record['runtime_observation'] = observation.summary(recipient)
+        ready = observation.state == 'ready'
+        if observation.resumed:
             record = append_event(record, 'native_same_thread_resumed',
                                   'explicit workflow policy resumed its exact saved thread', now)
-            thread = read_native_thread(target)
-        ready = thread.get('id') == target['thread_id'] and thread.get('status', {}).get('type') == 'idle'
-    except Exception:
+    except Exception as exc:
+        if not isinstance(exc, RuntimeTargetError):
+            exc = RuntimeTargetError('unavailable', 'runtime_observation_unavailable')
         ready = False
+        record['runtime_observation'] = dict(
+            version=1, runtime=target.get('runtime', 'codex'),
+            session_id=target.get('thread_id'), state=exc.state, reason=exc.reason,
+            capabilities={},
+        )
     if not ready:
         record['status'] = 'pending'
         if intent:
@@ -218,33 +199,29 @@ def dispatch_native(root, found, now, *, clock_provider=None):
     record['attempts'] += 1
     record = append_event(record, 'native_submission_started', 'native queue submission started', now)
     replace_record(root, found, record)
-    env = dict(os.environ)
-    for key in ('CODEX_THREAD_ID', 'TMUX', 'TMUX_PANE'):
-        env.pop(key, None)
-    result = None
-    failure_reason = 'queue_command_exception'
     try:
-        remote = ['--remote', target['endpoint']] if target['endpoint'] != 'unix://' else []
-        result = subprocess.run([target['codex_cmd'], 'queue', *remote, '--thread', target['thread_id'],
-                                 '--message', prompt], env=env, capture_output=True, text=True, timeout=30)
-        match = re.fullmatch(r'Queued message ([0-9a-f-]{36}) for thread '+re.escape(target['thread_id'])+r'\.\s*', result.stdout)
-        if result.returncode or match is None:
-            failure_reason = 'queue_exit_nonzero' if result.returncode else 'queue_acceptance_unconfirmed'
-            raise WakeError('native queue did not confirm exact acceptance')
-        failure_reason = 'queue_acceptance_unconfirmed'
-        UUID(match[1])
+        submitted = adapter.submit(recipient, prompt)
+        if not isinstance(submitted, RuntimeSubmission):
+            raise WakeError('invalid runtime submission outcome')
+        if submitted.state == 'accepted':
+            if submitted.evidence_kind != 'native_queue_acceptance':
+                raise WakeError('runtime evidence does not confirm native queue acceptance')
+            UUID(submitted.receipt_id)
     except Exception as exc:
-        if isinstance(exc, subprocess.TimeoutExpired):
-            failure_reason = 'queue_timeout'
-        elif isinstance(exc, OSError):
-            failure_reason = 'queue_os_error'
-        record['native_delivery']['submission_failure'] = submission_failure(failure_reason, result, exc)
-        record['last_error'] = 'uncertain native submission: ' + type(exc).__name__
+        submitted = RuntimeSubmission(
+            'uncertain', reason='runtime_adapter_exception', exception_type=type(exc).__name__,
+            failure=submission_failure('runtime_adapter_exception', None, exc),
+        )
+    if submitted.state != 'accepted':
+        record['native_delivery']['submission_failure'] = submitted.failure or {
+            'reason': submitted.reason or 'runtime_submission_unconfirmed',
+        }
+        record['last_error'] = 'uncertain native submission: ' + (submitted.exception_type or 'RuntimeSubmission')
         record = append_event(record, 'native_uncertain', record['last_error'], now)
         replace_record(root, found, record)
         return DispatchResult('skipped', record['last_error'])
     record['status'] = 'submitted'
-    record['native_delivery'].update(state='accepted', queue_id=match[1], accepted_at=None if intent else format_utc(now))
+    record['native_delivery'].update(state='accepted', queue_id=submitted.receipt_id, accepted_at=None if intent else format_utc(now))
     record = append_event(record, 'native_accepted', 'native queue accepted; execution not yet observed', now)
     replace_record(root, found, record)
     return DispatchResult('submitted', 'native queue accepted')
@@ -259,52 +236,13 @@ def native_prompt(root, record):
 
 
 def native_evidence(target, prompt):
-    """Observe only the selected thread; return identities, never conversation bodies."""
-    deadline = time.monotonic() + 10
-    def request(method, params):
-        remaining = deadline - time.monotonic()
-        if remaining <= 0:
-            raise WakeError('native reconciliation observation timed out')
-        return native_request(target['endpoint'], target['codex_cmd'], method, params, remaining)
-    def exact(items):
-        return (isinstance(items, list) and len(items) == 1
-                and items[0].get('type') == 'text' and items[0].get('text') == prompt)
-    evidence = {}
-    cursor = None
-    for _ in range(10):
-        page = request('thread/queue/list', dict(threadId=target['thread_id'], limit=100, cursor=cursor))
-        for queued in page['data']:
-            if exact(queued['input']):
-                identity = queued['clientUserMessageId']
-                if identity in evidence and evidence[identity].get('queue_id') != queued['id']:
-                    return None, 'multiple_native_submissions'
-                evidence[identity] = dict(source='native_queue', queue_id=queued['id'],
-                                          client_message_id=identity, execution='not_observed')
-        cursor = page.get('nextCursor')
-        if not cursor:
-            break
-    else:
-        raise WakeError('native queue observation exceeded its page bound')
-    thread = request('thread/read', dict(threadId=target['thread_id'], includeTurns=True))['thread']
-    if thread['id'] != target['thread_id']:
-        raise WakeError('native evidence returned a different thread')
-    for turn in thread['turns']:
-        for item in turn['items']:
-            if item.get('type') == 'userMessage' and exact(item.get('content')):
-                identity = item.get('clientId') or item['id']
-                previous = evidence.get(identity, {})
-                if previous.get('source') == 'native_turn' and (
-                        previous['turn_id'] != turn['id'] or previous['user_message_id'] != item['id']):
-                    return None, 'multiple_native_submissions'
-                evidence[identity] = dict(previous, source='native_turn', turn_id=turn['id'],
-                    user_message_id=item['id'], client_message_id=identity,
-                    execution='turn_' + turn['status'])
-    if len(evidence) != 1:
-        return None, 'no_exact_native_evidence' if not evidence else 'multiple_native_submissions'
-    return next(iter(evidence.values())), None
+    """Compatibility entrypoint for exact native evidence inspection."""
+    adapter = _codex_adapter()
+    observed = adapter.reconcile(adapter.resolve(dict(target, transport='native')), prompt)
+    return observed.evidence, observed.reason
 
 
-def reconcile_native(root, found, now, *, force=False):
+def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeAdapter | None = None):
     from .injector import DispatchResult
     record = dict(found.record)
     delivery = dict(record.get('native_delivery', {}))
@@ -316,7 +254,25 @@ def reconcile_native(root, found, now, *, force=False):
     try:
         if delivery.get('prompt_sha256') and delivery['prompt_sha256'] != hashlib.sha256(prompt.encode()).hexdigest():
             raise WakeError('native submission payload changed')
-        evidence, reason = native_evidence(record['target'], prompt)
+        if runtime_adapter is None:
+            evidence, reason = native_evidence(record['target'], prompt)
+        else:
+            recipient = runtime_adapter.resolve(record['target'])
+            if (recipient.version != 1 or recipient.runtime != 'codex'
+                    or recipient.session_id != record['target']['thread_id']):
+                raise WakeError('reconciliation recipient changed')
+            observed = runtime_adapter.reconcile(recipient, prompt)
+            if not isinstance(observed, RuntimeReconciliation):
+                raise WakeError('invalid runtime reconciliation outcome')
+            evidence, reason = observed.evidence, observed.reason
+        if evidence is not None:
+            if not isinstance(evidence, dict) or evidence.get('source') not in ('native_queue', 'native_turn'):
+                raise WakeError('runtime evidence does not confirm native acceptance')
+            required = ('client_message_id', 'execution') + (
+                ('queue_id',) if evidence['source'] == 'native_queue' else ('turn_id', 'user_message_id')
+            )
+            if not all(isinstance(evidence.get(key), str) and evidence[key] for key in required):
+                raise WakeError('incomplete native acceptance evidence')
     except Exception as exc:
         evidence, reason = None, 'native_evidence_unavailable:' + type(exc).__name__
     if evidence is None:

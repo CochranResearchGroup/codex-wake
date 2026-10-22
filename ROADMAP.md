@@ -1324,6 +1324,9 @@ submissions and no subagents (all other tickets blocked). Both required Grok
 sign-in. Native protocol availability is observed; no live delivery route is
 qualified by that first run.
 Authenticated rerun now qualifies one managed-launch terminal-observed route
-with same-session response and fresh cleanup. MR-01 DONE; MR-02 READY.
-Native live control/A2A receipts remain unqualified; no later ticket started.
+with same-session response and fresh cleanup. MR-01 DONE. MR-02 now DONE for
+the version1 Codex runtime seam, with full-suite and isolated-wheel controls.
+MR-03 READY from that source checkpoint. Main integration/release/production
+installation remain separate; native Grok control/A2A receipts stay unqualified.
+[MR-02 verification](docs/dev/verification/0172-2026-10-22-mr02-runtime-seam.md).
 Preserve P168/#282 and existing controllers.

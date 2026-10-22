@@ -11,8 +11,8 @@ tracker publication. A draft's readiness is separate from live-effect authority.
 | ID | Ticket | Blocked by | State |
 | --- | --- | --- | --- |
 | MR-01 | [Qualify exact open Grok delivery](0001-2026-10-22-qualify-grok.md) | None | DONE — managed-launch terminal observation |
-| MR-02 | [Preserve Codex through the runtime seam](0002-2026-10-22-codex-runtime-seam.md) | MR-01 satisfied | READY |
-| MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 | PLANNED |
+| MR-02 | [Preserve Codex through the runtime seam](0002-2026-10-22-codex-runtime-seam.md) | MR-01 satisfied | DONE — source and isolated wheel |
+| MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 satisfied | READY |
 | MR-04 | [Cross-runtime request and reply](0004-2026-10-22-cross-runtime-a2a.md) | MR-03 | PLANNED |
 | MR-05 | [Busy policies and terminal fallback](0005-2026-10-22-busy-and-fallback.md) | MR-03 | PLANNED |
 | MR-06 | [Installed acceptance](0006-2026-10-22-installed-acceptance.md) | MR-04, MR-05 | PLANNED |
@@ -33,3 +33,8 @@ marker response; session UUID and process generation match before/after.
 MR-01 DONE with managed-launch terminal observation; MR-02 READY. Native control
 and authenticated receipts remain unqualified. No MR-02 work or subagent began
 during the rerun; the next ticket wave starts from this frontier.
+
+MR-02 wave: primary owned the only ready ticket; zero subagents. Source and
+isolated wheel controls pass through the version1 runtime seam. MR-02 DONE;
+MR-03 READY from the retained source checkpoint. Main integration, release and
+production installation remain separate. [Verification](../../verification/0172-2026-10-22-mr02-runtime-seam.md).
