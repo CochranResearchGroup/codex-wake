@@ -86,3 +86,30 @@ class HostCounterTests(unittest.TestCase):
                 with self.assertRaises(ValueError):read_counter(root,start=False)
             finally:
                 if process.is_alive():process.terminate();process.join()
+
+    def test_owned_bound_socket_can_become_ready_without_starting_or_replaying_a_bridge(self):
+        import threading
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)/'counter';root.mkdir(mode=0o700)
+            with socket.socket(socket.AF_UNIX) as server:
+                server.bind(str(root/'counter.sock'));(root/'counter.sock').chmod(0o600)
+                started=threading.Event();finished=threading.Event();values=[];errors=[]
+                def read():
+                    started.set()
+                    try:values.append(read_counter(root,start=False))
+                    except Exception as exc:errors.append(type(exc).__name__)
+                    finally:finished.set()
+                client=threading.Thread(target=read)
+                client.start()
+                try:
+                    self.assertTrue(started.wait(1))
+                    self.assertFalse(finished.wait(.2),'owned socket is bound but not listening yet')
+                    server.listen(1);server.settimeout(2)
+                    with server.accept()[0] as connection:
+                        request=connection.recv(100).decode().strip()
+                        connection.sendall((json.dumps(dict(id=request,status='ok',counter=123,frequency=10000000))+'\n').encode())
+                    self.assertTrue(finished.wait(2))
+                    self.assertEqual(values,[(123,10000000)])
+                    self.assertEqual(errors,[])
+                finally:
+                    client.join(6)
