@@ -7652,3 +7652,19 @@ existing process generations and finds zero introduced Grok/tmux processes.
 MR-01 verdict NOT_QUALIFIED_AUTH_REQUIRED. MR-01/MR-02 and P172 BLOCKED pending
 authenticated qualification; no adapter or later ticket started.
 [Evidence](docs/dev/verification/0172-2026-10-22-mr01-grok-qualification.md).
+
+## Turn381 | 2026-10-22 | MR-01 authenticated terminal route qualified
+
+User restored Grok login. One isolated managed-launch1.0.40/minimal TUI opens
+normally. Private standalone native initialize/list work, but list is empty;
+do not infer shared open-TUI control or invoke native load/prompt.
+Launch PID/startticks/argv and displayed session-info UUID establish binding.
+Helper refuses mismatched expectedUUID and protects an owned unsent draft.
+One literal tmux paste+Enter receives standalone marker response. Session-info
+sameUUID Turn0→1 and sameprocessgeneration; persisted usage onecall/oneturn,
+27805input/100output/27905total(native fields).249.221s, one launch/one prompt.
+Private test pane/leader retired; fresh OS census preserves prior generations,
+finds zero introduced application processes. Earlier auth-gated receipt retained.
+MR-01 DONE for scoped terminal observation; MR-02 READY. Native live control,
+active busy modes, unmanaged adoption and receiver/A2A receipts remain unqualified.
+No other ticket/subagent started. [Evidence](docs/dev/verification/0172-2026-10-22-mr01-terminal-qualification.md).

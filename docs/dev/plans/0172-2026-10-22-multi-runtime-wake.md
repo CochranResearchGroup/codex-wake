@@ -1,6 +1,6 @@
 # Multi-runtime wakes and agent exchanges
 
-State: BLOCKED
+State: OPEN
 Owner: ecochran76
 Work item: CW-MR-172 (local intake in this plan; not posted to GitHub)
 Lane: P172
@@ -14,6 +14,13 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
+Latest: MR-01 authenticated rerun qualifies a managed-launch terminal route
+for Grok1.0.40/minimal UI. One prompt, standalone response, same displayed UUID
+and process generation before/after, protected-composer/negative-ID controls,
+249.221s and fresh cleanup pass. MR-01 DONE, MR-02 READY; no later ticket started.
+Native live control and authenticated receiver/A2A receipts remain unqualified.
+[Current MR-01 evidence](../verification/0172-2026-10-22-mr01-terminal-qualification.md).
+
 The user approved the consolidated design brief on 2026-10-22 after resolving
 Q1–Q12. This specification and its local ticket drafts are the repository-native
 continuation. Product decisions are settled; Grok live-session behavior remains
@@ -26,11 +33,11 @@ ownership and primary reconciliation; shared journal/authority edits retain one
 integration owner. This explicit direction supersedes the original serial WIP
 preference without bypassing blocking edges.
 
-Wave 1 result: MR-01's two disposable TUI launches both required interactive
+Historical wave 1 result: MR-01's two disposable TUI launches both required interactive
 sign-in. Native initialize/session-list worked, but no conversation was
 available. Zero conversation submissions and fresh owned-process cleanup within
-the five-minute probe bound. MR-01/MR-02 remain BLOCKED on authenticated live
-qualification; no subsequent ticket was started.
+the five-minute probe bound. MR-01/MR-02 were BLOCKED at that checkpoint; this
+readiness is superseded only by the authenticated result above.
 [MR-01 evidence](../verification/0172-2026-10-22-mr01-grok-qualification.md).
 
 GitHub Issues remains the canonical coordination ledger. A bounded read found no

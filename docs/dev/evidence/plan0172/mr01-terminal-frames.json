@@ -1,0 +1,64 @@
+{
+  "scope": "synthetic disposable session only; selected exact lines, not complete screen or production parser qualification",
+  "frames": {
+    "screen-session-info.txt": {
+      "full_capture_sha256": "4d4685aad4d956e564b3768433353429d1b810b31810262f01edc5168af91065",
+      "selected_exact_lines": [
+        "  Shell version: 1.0.40 [stable]",
+        "  Auth method: OAuth",
+        "  Session ID: fce842bc-e502-40ba-a892-6d7778283ef1",
+        "  Working directory: /tmp/cw-mr01-ok-_aj2go7o/workspace",
+        "  Model: Grok 4.7",
+        "  API Backend: Responses",
+        "  Turn: 0",
+        "  Context: 2199 / 256000 tokens (1%)",
+        "minimal · /help",
+        "❯",
+        "Grok 4.7 (high) · 2.2K / 256K (1%) · ctrl+o transcript"
+      ]
+    },
+    "screen-protected-composer.txt": {
+      "full_capture_sha256": "8c4f3beb39cb323fb40075f76e83787255bc3e5964f35084f35872569d63809d",
+      "selected_exact_lines": [
+        "  Shell version: 1.0.40 [stable]",
+        "  Auth method: OAuth",
+        "  Session ID: fce842bc-e502-40ba-a892-6d7778283ef1",
+        "  Working directory: /tmp/cw-mr01-ok-_aj2go7o/workspace",
+        "  Model: Grok 4.7",
+        "  API Backend: Responses",
+        "  Turn: 0",
+        "  Context: 2199 / 256000 tokens (1%)",
+        "minimal · /help",
+        "❯ MR01_UNSUBMITTED_DRAFT",
+        "Grok 4.7 (high) · 2.2K / 256K (1%) · ctrl+o transcript"
+      ]
+    },
+    "screen-final.txt": {
+      "full_capture_sha256": "6e223b1d78e69d4b41a0803d09947ef3663cc30152f7d8e1ad43cdb12b745458",
+      "selected_exact_lines": [
+        "  Shell version: 1.0.40 [stable]",
+        "  Auth method: OAuth",
+        "  Session ID: fce842bc-e502-40ba-a892-6d7778283ef1",
+        "  Working directory: /tmp/cw-mr01-ok-_aj2go7o/workspace",
+        "  Model: Grok 4.7",
+        "  API Backend: Responses",
+        "  Turn: 0",
+        "  Context: 2199 / 256000 tokens (1%)",
+        "Reply exactly CW_MR01_ACK_2ff83efe58 with no other words. Do not use tools.",
+        "CW_MR01_ACK_2ff83efe58",
+        "Worked for 3.1s",
+        "  Shell version: 1.0.40 [stable]",
+        "  Auth method: OAuth",
+        "  Session ID: fce842bc-e502-40ba-a892-6d7778283ef1",
+        "  Working directory: /tmp/cw-mr01-ok-_aj2go7o/workspace",
+        "  Model: Grok 4.7",
+        "  API Backend: Responses",
+        "  Turn: 1",
+        "  Context: 27912 / 256000 tokens (11%)",
+        "minimal · /help",
+        "❯",
+        "Grok 4.7 (high) · 27K / 256K (11%) · ctrl+o transcript"
+      ]
+    }
+  }
+}

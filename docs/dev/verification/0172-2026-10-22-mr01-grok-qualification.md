@@ -7,6 +7,9 @@ Branch: test/mr01-grok-qualification
 Base: a2ef06c
 Owner: primary agent / ecochran76
 
+Historical first-run report. Preserve this result; current readiness is recorded
+in the [authenticated rerun](0172-2026-10-22-mr01-terminal-qualification.md).
+
 ## Frontier and Authority
 
 The user requested one primary ticket and one independent subagent per other
