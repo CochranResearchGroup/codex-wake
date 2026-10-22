@@ -1,6 +1,6 @@
 # Multi-runtime wakes and agent exchanges
 
-State: PLANNED
+State: BLOCKED
 Owner: ecochran76
 Work item: CW-MR-172 (local intake in this plan; not posted to GitHub)
 Lane: P172
@@ -10,15 +10,28 @@ Target: origin/main
 Integration: squash_pr
 Priority: Approved next design slice; preserve existing lane priorities
 Dependencies: None for specification; execution dependencies below
-WIP limit: One substantive implementation slice at a time
+WIP limit: One primary ticket plus one independent subagent per other ready ticket, within available runtime capacity
 
 ## Current State
 
 The user approved the consolidated design brief on 2026-10-22 after resolving
 Q1–Q12. This specification and its local ticket drafts are the repository-native
 continuation. Product decisions are settled; Grok live-session behavior remains
-unqualified. No production adapters, provider prompts, sessions, installations,
-grants or services are changed by this planning slice.
+unqualified. The initial planning slice changed no runtime or installed state.
+
+Execution update: the user's “next ticket” directive assigns MR-01 to the primary.
+MR-02–MR-06 remain dependency-blocked, so this wave has no subagents. Subsequent
+waves assign one other ready ticket per independent agent, with disjoint write
+ownership and primary reconciliation; shared journal/authority edits retain one
+integration owner. This explicit direction supersedes the original serial WIP
+preference without bypassing blocking edges.
+
+Wave 1 result: MR-01's two disposable TUI launches both required interactive
+sign-in. Native initialize/session-list worked, but no conversation was
+available. Zero conversation submissions and fresh owned-process cleanup within
+the five-minute probe bound. MR-01/MR-02 remain BLOCKED on authenticated live
+qualification; no subsequent ticket was started.
+[MR-01 evidence](../verification/0172-2026-10-22-mr01-grok-qualification.md).
 
 GitHub Issues remains the canonical coordination ledger. A bounded read found no
 matching open issue or PR. CW-MR-172 is the local intake fallback under the
@@ -292,10 +305,11 @@ slice. No external issue has been created or changed.
 | MR-05 | Selectable busy modes and qualified terminal fallback across the two runtimes | MR-03 |
 | MR-06 | Installed first-release acceptance and capability/support matrix | MR-04, MR-05 |
 
-MR-04 and MR-05 are dependency-independent after MR-03, but both touch delivery
-journals/grants. Serialize those edits under the primary integration owner.
-Pure documentation or isolated fixture review may proceed separately once its
-contract is frozen; no subagents are planned for this spec slice.
+MR-04 and MR-05 are dependency-independent after MR-03. Under the user's parallel
+wave directive they may run in independent agents with disjoint write ownership.
+The primary freezes shared contracts, owns journal/grant integration and
+reconciles both results. At the first wave only MR-01 was ready, so no subagents
+ran; do not bypass prerequisites merely to create parallel work.
 
 Future lifecycle/resource and additional-runtime slices are not preallocated
 implementation tickets. Derive them from the accepted delivery seam and measured

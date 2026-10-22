@@ -1308,7 +1308,7 @@ Plan: [Plan0171](docs/dev/plans/0171-2026-10-20-native-counter-handoff.md).
 
 ## P172 | Multi-runtime wakes and agent exchanges
 
-State: PLANNED
+State: BLOCKED
 
 Owner: ecochran76. Local intake CW-MR-172; no GitHub issue posted.
 Plan: [Plan0172](docs/dev/plans/0172-2026-10-22-multi-runtime-wake.md).
@@ -1319,5 +1319,8 @@ recipient identity, deadlines and evidence strength. Same-host first release;
 broader lifecycle/resource support and other runtimes follow.
 Current packet is a specification and six dependency-aware local ticket drafts.
 MR-01 qualifies Grok's exact live-session route before adapter implementation.
-No implementation lane, live dispatch, deployment or runtime-support claim is
-opened by this planning checkpoint. Preserve P168/#282 and existing controllers.
+The first MR-01 wave used two disposable TUI launches, zero conversation
+submissions and no subagents (all other tickets blocked). Both required Grok
+sign-in. Native protocol availability is observed; no live delivery route is
+qualified. Restore interactive Grok authentication and rerun MR-01 before MR-02.
+Preserve P168/#282 and existing controllers.

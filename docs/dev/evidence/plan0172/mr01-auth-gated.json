@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "ticket": "CW-MR-172/MR-01",
+  "verdict": "NOT_QUALIFIED_AUTH_REQUIRED",
+  "source_base": "a2ef06c",
+  "runtime": {
+    "name": "grok",
+    "version": "1.0.40",
+    "build": "eb1a2256660d",
+    "channel": "stable"
+  },
+  "scope": {
+    "terminal_host": "tmux, private socket",
+    "leader": "private socket; no shared leader restart",
+    "workspace": "new private empty directory",
+    "hooks": 0,
+    "plugins": 0,
+    "mcp_servers": 0,
+    "lsp_servers": 0,
+    "project_instructions": 0,
+    "tools": "empty built-in allowlist",
+    "permission_mode": "dontAsk",
+    "subagents": false,
+    "web_search": false,
+    "auto_updater": false
+  },
+  "samples": [
+    {
+      "id": "sandboxed_tui",
+      "requested_session_id": "b42c882b-336e-414f-bd71-7fa45bdf1b51",
+      "sandbox": "read-only",
+      "terminal_state": "sign_in",
+      "conversation_identity_established": false,
+      "provider_prompt_submitted": false
+    },
+    {
+      "id": "unsandboxed_tui",
+      "requested_session_id": "f7fd3820-78c4-4580-a152-4f1e69e84aff",
+      "sandbox": "default",
+      "terminal_state": "sign_in",
+      "conversation_identity_established": false,
+      "provider_prompt_submitted": false
+    }
+  ],
+  "native_observation": {
+    "initialize_responses": 2,
+    "protocol_version": 1,
+    "advertised": {
+      "loadSession": true,
+      "session_list": true,
+      "session_resume": true,
+      "session_close": true
+    },
+    "session_list": {
+      "cwd_scope": "private workspace",
+      "sessions": 0,
+      "partial": false
+    },
+    "delivery_qualification": "not_run"
+  },
+  "guards": {
+    "terminal_input_actions": 0,
+    "native_effectful_requests": 0,
+    "sign_in_input": "withheld",
+    "negative_identity_case": "not_run_no_authenticated_session",
+    "production_guard_qualification": "not_tested"
+  },
+  "budget": {
+    "max_tui_launches": 2,
+    "tui_launches": 2,
+    "max_conversation_submissions": 6,
+    "conversation_submissions": 0,
+    "max_live_seconds": 300,
+    "live_seconds": 190.854
+  },
+  "cleanup": {
+    "method": "terminate exact test tmux session and generation-checked private leader socket peer",
+    "fresh_os_process_readback": true,
+    "existing_process_generations_preserved": true,
+    "new_grok_or_tmux_processes_remaining": 0,
+    "transient_post_teardown_process": "disappeared before fresh final census; not assumed safe to kill"
+  },
+  "selected_route": null,
+  "remaining_gate": "Restore Grok interactive authentication, then rerun the bounded exact-open-session qualification before MR-02.",
+  "evidence_limits": [
+    "ACP capability advertisement and empty listing are not live TUI delivery proof.",
+    "Requested UUIDs are not established conversation identities.",
+    "Neither busy behavior nor a negative live recipient identity case was exercised.",
+    "No receiver acknowledgment, model execution, work claim or reply was observed."
+  ]
+}

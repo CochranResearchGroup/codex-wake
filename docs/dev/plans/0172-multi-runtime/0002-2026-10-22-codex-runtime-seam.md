@@ -1,10 +1,11 @@
 # MR-02: Preserve Codex wakes through the runtime interface
 
-State: PLANNED
+State: BLOCKED
 Owner: ecochran76
 Work item: CW-MR-172/MR-02 (local draft; not posted)
 Priority: First-release dependency order
 Blocked by: MR-01
+Readiness gate: MR-01 returned NOT_QUALIFIED_AUTH_REQUIRED; a feasible qualified Grok route remains required
 Specification: [Plan0172](../0172-2026-10-22-multi-runtime-wake.md)
 
 ## Outcome

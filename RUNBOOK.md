@@ -7634,3 +7634,21 @@ Documentation validation and inherited audit findings are recorded in
 [verification](docs/dev/verification/0172-2026-10-22-multi-runtime-spec.md).
 Grok live-session qualification remains MR-01; no provider prompts, production
 session/grant/service changes, release or installation performed.
+
+## Turn380 | 2026-10-22 | MR-01 bounded Grok qualification
+
+User adopts parallel ready-ticket waves: primary takes one ticket, independent
+subagents take other non-blocked tickets, primary reconciles. Only MR-01 ready;
+primary owns it, zero subagents and no forced unblocking. Branch
+test/mr01-grok-qualification stacks on a2ef06c; origin/main remains fcc996a.
+Installed Grok1.0.40/eb1a2256660d: empty private workspace, no discovered
+hooks/plugins/MCP/LSP/project instructions. Two private-socket TUI launches
+(read-only sandbox, then default) both stop at sign-in. Input withheld.
+Two ACP initialize responses advertise session controls; exact-workspace
+session/list is empty/complete. Zero conversation submissions/terminal input,
+190.854s under300s; no live delivery, busy behavior or negative recipient proof.
+Exact test tmux session/private leader retired; fresh OS census preserves
+existing process generations and finds zero introduced Grok/tmux processes.
+MR-01 verdict NOT_QUALIFIED_AUTH_REQUIRED. MR-01/MR-02 and P172 BLOCKED pending
+authenticated qualification; no adapter or later ticket started.
+[Evidence](docs/dev/verification/0172-2026-10-22-mr01-grok-qualification.md).
