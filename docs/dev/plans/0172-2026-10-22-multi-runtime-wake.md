@@ -18,10 +18,11 @@ Latest: MR-03 is IN_PROGRESS. The source candidate adds schema7/runtime-envelope
 host-approved managed-launch Grok bindings, shared clock eligibility and weak
 terminal evidence. Isolated-wheel118 controls pass; the frozen full1438-test run has2 failures and1
 error (backup, webhook and messaging), retained as an open validation gate. Two
-setup probes sent zero conversation prompts and cleaned up; both lacked a usable
-active session when queried. The live acceptance gate remains open. The requested
-one-recipient/five-minute/one-prompt extension requires its user response before
-another dependent live launch. MR-04/MR-05 remain blocked on MR-03.
+setup probes sent zero conversation prompts and cleaned up. The user then approved
+one additional recipient, five minutes, one synthetic prompt. That probe PASSED
+in13.996s: exact session binding, separate registration/daemon processes, one
+attempt, standalone reply and no replay. Cleanup preserved pre-existing processes.
+The live gate is satisfied; full-suite QA remains open. MR-04/MR-05 remain blocked.
 Only MR-03 was ready in this wave; no independent nonblocked ticket or subagent.
 [MR-03 evidence](../verification/0172-2026-10-22-mr03-grok-wake.md).
 

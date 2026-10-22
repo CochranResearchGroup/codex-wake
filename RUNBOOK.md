@@ -7720,3 +7720,18 @@ additional5m/one-recipient/one-prompt probe with startup checked before querying
 No extra live launch without the response. MR-03 stays IN_PROGRESS; MR-04/MR-05
 remain blocked. No production installation, service/grant change or main merge.
 [Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+
+
+## Turn384 | 2026-10-22 | MR-03 approved live extension passes; QA open
+
+User approved one additional disposable recipient, five minutes, one prompt.
+One probe consumed that authority in13.996s. Stable startup and local session-info
+preceded exact binding. Separate installed registration/daemon processes delivered
+one original file-triggered wake; same-session standalone synthetic reply observed,
+repeat daemon did not replay, generation unchanged. Fresh cleanup census: zero
+introduced Grok/tmux processes, all pre-existing generations preserved. Frozen
+source/wheel digests still match. Method terminal_observation; execution and
+receiver acknowledgment remain not_observed. Previous failures remain retained.
+MR-03 IN_PROGRESS on full-suite QA; MR-04/MR-05 blocked. No further live probe
+authorized by this consumed extension. No production install, main merge or release.
+[Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).

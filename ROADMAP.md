@@ -1328,8 +1328,8 @@ with same-session response and fresh cleanup. MR-01 DONE. MR-02 now DONE for
 the version1 Codex runtime seam, with full-suite and isolated-wheel controls.
 MR-03 IN_PROGRESS: schema7/Grok source candidate; isolated-wheel118 controls pass,
 but full1438-test validation retains2 failures/1 error. Two startup probes sent zero
-conversation prompts and cleaned up, but did not establish active-session/live
-delivery acceptance. Extra bounded probing awaits the requested extension;
+conversation prompts and cleaned up. User-approved extra probe PASSED in13.996s:
+one prompt, exact recipient/reply, no replay, clean teardown. Full-suite QA stays open;
 MR-04/MR-05 remain blocked. [MR-03 evidence](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
 Main integration/release/production
 installation remain separate; native Grok control/A2A receipts stay unqualified.

@@ -2,7 +2,7 @@
   "work_item": "CW-MR-172/MR-03",
   "source_base": "e435175",
   "counter_support_commit": "0e5d5c9",
-  "verdict": "SOURCE_CANDIDATE_LIVE_ACCEPTANCE_OPEN",
+  "verdict": "LIVE_TERMINAL_ACCEPTANCE_PASS_QA_OPEN",
   "schema_version": 7,
   "runtime_envelope_version": 1,
   "selected_method": "terminal_observation",
@@ -96,11 +96,44 @@
         "introduced_remaining": [],
         "preexisting_changed": []
       }
+    },
+    {
+      "source_base": "e435175",
+      "session_id": "89c7ac66-6d4a-43ea-9b0c-7aef6ce797e6",
+      "work": "/tmp/cw-mr03-2m5d7xyx",
+      "method": "terminal_observation",
+      "conversation_submissions": 1,
+      "marker": "CW_MR03_ACK_01954ce98f",
+      "phases": [
+        "operator_bound_exact_open_recipient",
+        "registered_in_separate_process",
+        "terminal_acceptance_observed"
+      ],
+      "local_identity_checks": 1,
+      "binding_id": "grok_ec411cdcd67c4ae2a8cf81349c0203c2",
+      "pid": 2495221,
+      "wake_id": "wake_intent_6673cea7fdc84df9a0dc6ea054f731bc",
+      "older_reader": "hold",
+      "verdict": "PASS",
+      "attempts": 1,
+      "selected_method": "terminal_observation",
+      "execution": "not_observed",
+      "acknowledgment": "not_observed",
+      "screen_before_sha256": "284c33c58467205d7dd2546c78f9d94bfeaa4508713c2d753b39d41b0a1ea0f3",
+      "screen_after_sha256": "0ce92b80ae109e2d38f3657afeee41cbcb1335f599d4e03be7e9605c79805fc9",
+      "standalone_reply_observed": true,
+      "elapsed_seconds": 13.996,
+      "cleanup": {
+        "introduced_remaining": [],
+        "preexisting_changed": []
+      },
+      "approval": "user yes after explicit one-recipient, five-minute, one-prompt extension request",
+      "candidate_source": "b5a75cf2d9a1d9c45aa96563a1595d1c9cdc686a"
     }
   ],
-  "total_conversation_prompts": 0,
-  "persisted_grok_usage": "none_recorded_for_either_exact_session",
-  "extra_probe_authority": "requested_not_received",
+  "total_conversation_prompts": 1,
+  "persisted_grok_usage": "none_recorded_for_first_two_sessions; third session has separately observed synthetic reply",
+  "extra_probe_authority": "approved_by_user_yes_and_consumed",
   "subagents": 0,
   "production_install_changed": false,
   "production_services_changed": false,
@@ -140,5 +173,6 @@
     "seconds": 4.583,
     "result": "PASS",
     "scope": "five ordered wait/cancel pairs; does not establish cause or clear candidate failures"
-  }
+  },
+  "live_gate": "PASS: exact recipient, cross-process persistence, one attempt, standalone synthetic reply, no replay, clean teardown"
 }
