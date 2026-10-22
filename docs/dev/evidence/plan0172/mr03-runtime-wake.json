@@ -60,8 +60,19 @@
     "not_erasure": true
   },
   "final_frozen_full_run": {
-    "result": "RUNNING",
-    "log": "frozen-full-tests.log"
+    "tests": 1438,
+    "seconds": 379.838,
+    "skipped": 1,
+    "failures": 2,
+    "errors": 1,
+    "result": "FAIL",
+    "source_and_tests_unchanged": true,
+    "failures_and_errors": [
+      "test_a2a_backup.BackupTests.test_wal_snapshot_preserves_message_receipt_and_uncertain_notification",
+      "test_github_webhook_runtime.GitHubWebhookRuntimeTests.test_provider_timeout_runs_on_main_thread_and_fails_closed",
+      "test_messages_cli.MessageCLITests.test_full_inbox_read_ack_reply_wait_and_outbox_workflow"
+    ],
+    "log_sha256": "ebe823e3250ff56c2c50db201dcc9a117def1a2844acb1cb824b8dbb54ba7d08"
   },
   "live_attempts": [
     {
@@ -93,5 +104,41 @@
   "subagents": 0,
   "production_install_changed": false,
   "production_services_changed": false,
-  "main_integration": false
+  "main_integration": false,
+  "implementation_commit": "b5a75cf2d9a1d9c45aa96563a1595d1c9cdc686a",
+  "message_order_diagnostic": {
+    "tests": 10,
+    "seconds": 5.546,
+    "failures": 1,
+    "result": "FAIL",
+    "observed_error": "clock_anomaly: clock continuity is uncertain; no effect authorized",
+    "production_guard_changed": false
+  },
+  "qa_gate": "OPEN: classify and resolve frozen full-suite failures before integration; no quarantine, exclusions, or guard relaxation",
+  "compatibility": {
+    "current_reader": "runtime_intent_v7",
+    "older_reader": "hold",
+    "unknown_envelope": "hold",
+    "unknown_runtime": "hold",
+    "unsupported_policy": "hold",
+    "private_fixture_cleanup": "cancelled_and_archived_without_fabricated_utc"
+  },
+  "audits": {
+    "planning": {
+      "inherited_findings": 4,
+      "added": 0
+    },
+    "catalog_only_lanes": {
+      "inherited_findings": 51,
+      "added": 0
+    }
+  },
+  "private_evidence_directory": "/home/ecochran76/.local/state/codex-wake/design/grok-multi-runtime-20261021/mr03",
+  "unchanged_base_diagnostic": {
+    "base_implementation": "MR-02/e435175 isolated installed wheel",
+    "tests": 10,
+    "seconds": 4.583,
+    "result": "PASS",
+    "scope": "five ordered wait/cancel pairs; does not establish cause or clear candidate failures"
+  }
 }

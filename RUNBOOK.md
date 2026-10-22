@@ -7706,7 +7706,10 @@ An existing owned-counter socket readiness race was exposed by full validation,
 reproduced at its public seam and repaired in separate commit0e5d5c9. The old
 monitor schema-list expectation is updated for7. Both intermediate full failures
 and a non-reproduced message-cancel failure are retained; final frozen-source
-validation is pending, not silently a pass. Isolated installed wheel118 controls
+validation FAILED:1438 tests/379.838s,1 skip,2 failures/1 error in backup,
+webhook and messaging. Ordered wait/cancel diagnostic10 tests/5.546s reproduces
+clock_anomaly refusal. No guard relaxation, quarantine or further blind retry;
+full qualification stays open. Isolated installed wheel118 controls
 pass and package-module bytes match current source.
 
 Two live setup launches (11.286s/11.000s) sent zero conversation prompts, returned

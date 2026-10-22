@@ -16,7 +16,8 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 Latest: MR-03 is IN_PROGRESS. The source candidate adds schema7/runtime-envelope1,
 host-approved managed-launch Grok bindings, shared clock eligibility and weak
-terminal evidence. Source/isolated-wheel validation is being reconciled. Two
+terminal evidence. Isolated-wheel118 controls pass; the frozen full1438-test run has2 failures and1
+error (backup, webhook and messaging), retained as an open validation gate. Two
 setup probes sent zero conversation prompts and cleaned up; both lacked a usable
 active session when queried. The live acceptance gate remains open. The requested
 one-recipient/five-minute/one-prompt extension requires its user response before
