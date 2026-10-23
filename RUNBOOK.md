@@ -7897,3 +7897,21 @@ Focused signal-support15 PASS0.889s. Independent injected actual pid999 disclosu
 still fails the repaired assertion in0.074s; no production source changed.
 Original CI failure, deterministic red, green and injected-leak red retained.
 No quarantine or blind retry; new CI must qualify the corrected exact head.
+
+
+## Turn393 | 2026-10-23 | Startup fixture contract stabilization
+
+Post-merge main CI40015523144 Python3.12 failed startup-retention fixture because
+tmux pane_dead_status was empty despite dead pane and retained diagnostic. Initial
+real-tmux probe reproduced1/100; direct bootstrap experiment still4/400 and was
+reverted. Metadata1|||PID has neither exit status nor signal; a3s wait still fails,
+so no reliable exit-status guarantee is claimed. A gated ready/exit fixture keeps
+its intended diagnostic/dead-pane contract without treating omitted tmux metadata
+as product failure. No runtime harness/package source change remains. Revised
+real-tmux fixture400 PASS28.875s; mutations disabling retention or removing the
+original diagnostic both still fail. Startup-before-PTY and exact tmux exit-status
+behavior remain outside this controlled-child proof; no unsupported guarantee
+is silently promoted. Raw failed probes/experiments retained privately, all debug
+instrumentation removed. PR307 previously repaired privacy assertion passed both
+CI axes on53e1639; final combined fixture head still requires its own CI matrix.
+No provider prompts, production changes, quarantine or blind CI rerun.

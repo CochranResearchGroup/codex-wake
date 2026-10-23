@@ -34,5 +34,27 @@
     "focused_verdict": "PASS",
     "mutation": "Injected actual pid999 into latest_reconcile; repaired assertion failed as required; no production source mutation",
     "next_gate": "Required matrix CI on repaired follow-up PR head"
+  },
+  "main_ci_followup": {
+    "run": 40015523144,
+    "verdict": "FAIL retained",
+    "failure": "Python3.12 startup fixture expected tmux pane_dead_status7 but field was empty despite dead pane and retained error",
+    "source_runtime_changed": false,
+    "original_reproduction": "1/100 real-tmux starts omitted status; subsequent provider-free probes reproduced missing status beyond3 seconds",
+    "rejected_experiments": "Direct bootstrap still4/400 status failures; reverted. Waiting3s still fails; no retry promoted those samples.",
+    "supported_test_boundary": "Retain dead pane and original diagnostic, matching actual harness consumers; tmux exit-status metadata not qualified",
+    "repair": "Controlled ready/exit fixture, preserved pane-death and original-diagnostic checks; no unsupported exit-status assertion",
+    "stress": {
+      "runs": 400,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 28.875,
+      "provider_calls": 0
+    },
+    "mutations_caught": [
+      "disable remain-on-exit retention",
+      "remove original diagnostic"
+    ],
+    "next_gate": "Required CI on final follow-up PR head; provider/package runtime unchanged"
   }
 }
