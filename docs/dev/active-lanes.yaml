@@ -1,6 +1,23 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P172-MR06
+    owner: primary / ecochran76
+    objective: Qualify installed Codex and Grok visible TUI exchanges
+    work_items: [CW-MR-172/MR-06]
+    plan: docs/dev/plans/0172-multi-runtime/0006-2026-10-22-installed-acceptance.md
+    plan_ref: docs/multiruntime-spec
+    branch: test/mr06-installed-acceptance
+    target: origin/main
+    integration: squash_pr
+    remote_ref: origin/test/mr06-installed-acceptance
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    satisfied_dependency: MR-04 and MR-05 source and isolated artifact gates
+    overlaps: []
+    updated_at: 2026-10-22
+    disposition: Setup failed before prompts; corrected harness prepared; further live envelope pending
   - id: P171
     owner: primary / ecochran76
     objective: Reuse a private native counter bridge for stable-time consumers
