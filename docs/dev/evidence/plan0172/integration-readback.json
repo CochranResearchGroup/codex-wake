@@ -1,0 +1,25 @@
+{
+  "work_item": "https://github.com/CochranResearchGroup/codex-wake/issues/305",
+  "issue_state": "CLOSED completed",
+  "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/306",
+  "pr_state": "MERGED",
+  "merge_method": "squash",
+  "merged_at": "2026-10-23T19:57:55Z",
+  "merged_main_sha": "dbc2dff75737d30395c513f0c16f66279b9dfbe6",
+  "checked_pr_head": "7c02df681bd56e00dcca506f1d01c16db3c6d17d",
+  "main_tree_sha": "9be9fe587adb35cf89ced7b2f6460aec9bbcc409",
+  "checked_head_tree_matches_main": true,
+  "ci_run": "https://github.com/CochranResearchGroup/codex-wake/actions/runs/40014889364",
+  "ci_matrix": {
+    "3.11": "SUCCESS",
+    "3.12": "SUCCESS"
+  },
+  "initial_failed_ci": "https://github.com/CochranResearchGroup/codex-wake/actions/runs/40014196358",
+  "initial_failure_retained": true,
+  "smoke_repair": "Exact32-tool catalog plus five named Grok tools in installed MCP and wake-control scripts; no package source change",
+  "production_install_changed": false,
+  "release": false,
+  "provider_prompts_this_continuation": 0,
+  "original_main_checkout": "preserved with unrelated local policy commits",
+  "program_boundary": "First-release candidate integrated. Production release/install and further runtime/lifecycle/resource qualifications remain separate."
+}

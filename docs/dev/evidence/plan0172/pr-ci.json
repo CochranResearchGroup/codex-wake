@@ -131,5 +131,12 @@
     "temporary_roots_removed": "context-managed"
   },
   "package_source_changed_by_ci_repair": false,
-  "next_gate": "Required matrix CI on repaired PR head; no merge/release/production effect claimed"
+  "next_gate": "Required matrix CI passed; PR306 squash merged; release/production separate",
+  "final_ci_run": 40014889364,
+  "final_ci_head": "7c02df681bd56e00dcca506f1d01c16db3c6d17d",
+  "final_ci_matrix": {
+    "3.11": "SUCCESS",
+    "3.12": "SUCCESS"
+  },
+  "merge_sha": "dbc2dff75737d30395c513f0c16f66279b9dfbe6"
 }

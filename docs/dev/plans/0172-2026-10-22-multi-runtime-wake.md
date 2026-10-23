@@ -14,17 +14,16 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
-Integration continuation: issue [#305](https://github.com/CochranResearchGroup/codex-wake/issues/305)
-is OPEN for [PR306](https://github.com/CochranResearchGroup/codex-wake/pull/306)
-review, required Python3.11/3.12 CI and canonical-main readback. The six local tickets remain candidate-qualified; publication of this
-integration issue does not retroactively turn those drafts into GitHub issues.
-Current accepted coordinator source is fa94fc8; main remains fcc996a. No existing
-open duplicate issue/PR was found. Policy wiring and undefined-name lint pass. Initial CI40014196358 passed
-unit suites but failed stale27-tool installed smoke expectations; repaired to
-explicitly check32 tools and the five Grok names. Real installed mailbox/MCP
-smoke and wake-control qualification now pass; fresh matrix CI remains required.
-The original main checkout and its unrelated local policy commits are excluded.
-
+Integration complete: [PR306](https://github.com/CochranResearchGroup/codex-wake/pull/306)
+squash merged at dbc2dff75737d30395c513f0c16f66279b9dfbe6; issue
+[#305](https://github.com/CochranResearchGroup/codex-wake/issues/305) is CLOSED.
+Required Python3.11/3.12 release-gates CI40014889364 passed on exact head7c02df6;
+the checked head tree equals canonical main's merged tree. Initial CI40014196358
+failed stale27-tool smoke expectations; both scripts now explicitly require32
+tools and the five Grok names. Original failures remain retained. No package
+source changed in that repair and no new provider prompts were sent.
+[Integration readback](../evidence/plan0172/integration-readback.json).
+The original main checkout and its unrelated local policy commits are preserved.
 
 Latest: MR-06 DONE for the installed first-release candidate. Real Codex0.164.0
 and Grok1.0.40 bidirectional scoped claims/replies and two visible responses in
@@ -38,10 +37,10 @@ clock anomaly and uncertain notifications remain retained; no uncertain-work rep
 [MR-06 evidence](../verification/0172-2026-10-22-mr06-installed-acceptance.md).
 
 MR-01–MR-06 first-release candidate gates are qualified for the declared modes.
-The broader program remains OPEN: main integration/CI, release and production
-rollout are separate, and native Grok attestation, lifecycle/resource guarantees,
+The broader program remains OPEN: main integration/CI is complete; release and
+production rollout remain separate, and native Grok attestation, lifecycle/resource guarantees,
 Claude Code and other TUIs remain explicitly unqualified. No production
-installation/grant/service change, main merge or release occurred.
+installation/grant/service change or release occurred; main merged through PR306.
 
 MR-02 remains DONE for source and isolated artifact. Its final full suite1428
 (1 skipped) and isolated wheel94 tests passed. Main integration/release/production

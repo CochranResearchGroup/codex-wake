@@ -69,3 +69,10 @@ claims/correlated replies in both directions. Full1455 tests PASS310.046s, one
 expected opt-in skip; installed61 PASS9.249s. Historical failures retained.
 MR-01–MR-06 candidate gates complete; broader program/main/CI/release/production
 and additional runtime qualification remain separate.
+
+
+Integration readback: PR306 squash merged at dbc2dff; integration issue305 CLOSED.
+Both required Python3.11/3.12 release gates passed CI40014889364 on head7c02df6,
+whose tree equals canonical main. Initial stale-catalog smoke failure retained;
+installed smoke contracts now explicitly require32 tools and five named Grok tools.
+Release/production and additional runtime capabilities remain separate.

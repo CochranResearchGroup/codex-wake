@@ -7864,3 +7864,22 @@ No package source changes; prior live candidate/full-suite evidence remains boun
 to unchanged package bytes. Original CI/local red retained; no tests weakened or
 failed run relabeled. Next: required matrix CI on repaired exact PR head.
 [Receipt](docs/dev/evidence/plan0172/pr-ci.json).
+
+
+## Turn391 | 2026-10-23 | PR306 integrated with exact-head CI
+
+Repaired head7c02df6 passed both required Python3.11/3.12 release gates in
+CI40014889364, including installed-wheel smokes. PR readback CLEAN/MERGEABLE,
+base fcc996a unchanged. Primary reviewed combined identity/authority, schema,
+shared pane locks, original deadlines, uncertain-work retention and scope.
+Squash merge required expected head7c02df6; PR306 merged dbc2dff at19:57:55UTC.
+Fresh origin/main and PR readback confirm dbc2dff; checked head and merged main
+Git trees match exactly. Issue305 closed by merge and its acceptance/readback
+updated without altering labels/assignment. Original CI40014196358 and local
+smoke red remain retained; no failed sample reclassified. MR-01–MR-06 first-release
+candidate integrated. No new provider prompts, production grants/services/install,
+release or deployment. Original main checkout and unrelated policy commits remain
+untouched. Broader Plan0172 stays OPEN for separately scoped release/rollout and
+other runtime/lifecycle/resource qualifications. This docs-only follow-up records
+the concrete integration readback without changing the qualified runtime source.
+[Receipt](docs/dev/evidence/plan0172/integration-readback.json).

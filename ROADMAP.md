@@ -1333,7 +1333,8 @@ all119 production modules match the frozen live-qualified wheel. Earlier failure
 remain retained. MR-04/MR-05 subsequently DONE for source/isolated artifact after parallel
 implementation and primary reconciliation. Frozen1451 PASS341.346s/one expected
 skip, unchanged source/tests; final installed changed-axis15 PASS. MR-06 DONE for installed candidate: real bidirectional TUI acceptance PASS;
-full1455/one expected skip and installed61 PASS. Main/CI/release/production separate.
+full1455/one expected skip and installed61 PASS. PR306 integrated at dbc2dff;
+Python3.11/3.12 release gates PASS. Release/production remain separate.
 for real TUI/bidirectional live acceptance. Native Grok caller attestation, Codex
 terminal fallback and strict queue/interruption remain unqualified/refused.
 [MR-03 evidence](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
