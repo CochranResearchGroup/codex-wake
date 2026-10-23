@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+from functools import partial
 
 from codex_wake.cli import main
 from codex_wake.a2a_bus import BusStore
@@ -27,6 +28,14 @@ class MessageCLITests(unittest.TestCase):
             self.capabilities.append(capability)
             self.actors.append(self.bus.authenticate(capability,identity,invoking_cwd=self.repo))
         Mailbox.migrate(self.bus,self.operator)
+        # Workflow assertions use a qualified fixture clock. Real host clock
+        # discontinuities are covered at the mailbox's explicit clock seam.
+        self.mail_clock = 1_800_000_000.0
+        mailbox_factory = partial(Mailbox, clock=lambda: self.mail_clock,
+                                  monotonic=lambda: self.mail_clock)
+        clock_patch = patch('codex_wake.messages_cli.Mailbox', mailbox_factory)
+        clock_patch.start()
+        self.addCleanup(clock_patch.stop)
 
     def invoke(self, arguments, actor=0):
         with patch('codex_wake.messages_cli.invoking_actor',return_value=self.actors[actor]), patch('codex_wake.messages_cli.resolve_identity',return_value=self.identities[1]), patch('sys.stdout',new_callable=io.StringIO) as out:

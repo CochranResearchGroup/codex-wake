@@ -53,7 +53,8 @@ class BackupTests(unittest.TestCase):
         for identity in identities:
             capability, _ = self.bus.issue_actor(identity, repo, self.operator)
             actors.append(self.bus.authenticate(capability, identity, invoking_cwd=repo))
-        mailbox = Mailbox(self.bus)
+        mailbox = Mailbox(self.bus, clock=lambda: 1_800_000_000.0,
+                          monotonic=lambda: 100.0)
         identifier = mailbox.send(actors[0], identities[1], body='Private WAL backup fixture.', idempotency_key='snapshot', delivery='inbox')['message']['message_id']
         acknowledgement = mailbox.ack(actors[1], identifier, outcome='declined')
         # Retain a live connection so committed WAL has not been checkpointed away.
@@ -283,7 +284,8 @@ class BackupTests(unittest.TestCase):
         for identity in identities:
             capability, _ = self.bus.issue_actor(identity, repo, self.operator)
             actors.append(self.bus.authenticate(capability, identity, invoking_cwd=repo))
-        mailbox = Mailbox(self.bus)
+        mailbox = Mailbox(self.bus, clock=lambda: 1_800_000_000.0,
+                          monotonic=lambda: 100.0)
         identifier = mailbox.send(actors[0], identities[1], body='Restore receipt fixture.', idempotency_key='receipt', delivery='inbox')['message']['message_id']
         backup = MailBackup(self.bus, self.operator)
         backup.create(self.root / 'snapshot')

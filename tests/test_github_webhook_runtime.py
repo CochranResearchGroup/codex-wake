@@ -197,18 +197,21 @@ class GitHubWebhookRuntimeTests(unittest.TestCase):
             previous_handler = signal.getsignal(signal.SIGALRM)
             class SlowClient:
                 def get_run_attempt(self, *args):
-                    time.sleep(10)
+                    # Deliver the actual armed signal deterministically. Other
+                    # client deadline tests cover elapsed-time expiration; this
+                    # test covers fail-closed recovery and timer ownership.
+                    signal.raise_signal(signal.SIGALRM)
                     slow_returned.append(True)
             def attempt_client(deadline):
                 factory_threads.append(threading.current_thread())
                 factory_timers.append(signal.getitimer(signal.ITIMER_REAL))
                 return SlowClient() if len(factory_threads) == 1 else FixtureClient([run()])
             runtime = GitHubWebhookRuntime(
-                WebhookHTTPConfig(request_timeout=3, shutdown_timeout=2), adapter=adapter,
+                WebhookHTTPConfig(request_timeout=4, shutdown_timeout=3), adapter=adapter,
                 module=module, checkpoints=module, anchor=armed.anchor,
                 webhook_config=WebhookConfig(secret_refs=("current",)),
                 resolve_secret=lambda ref: SECRET, attempt_client_factory=attempt_client,
-                operation_timeout=1, now=lambda: NOW + timedelta(seconds=2),
+                operation_timeout=2, now=lambda: NOW + timedelta(seconds=2),
             )
             body, signature = signed_body()
             result = []
@@ -229,7 +232,7 @@ class GitHubWebhookRuntimeTests(unittest.TestCase):
             self.assertEqual(factory_threads, [threading.main_thread(), threading.main_thread()])
             self.assertEqual(slow_returned, [])
             self.assertEqual(len(factory_timers), 2)
-            self.assertTrue(all(0 < remaining <= 1 and interval == 0
+            self.assertTrue(all(0 < remaining <= 2 and interval == 0
                                 for remaining, interval in factory_timers))
             self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0, 0))
             self.assertEqual(signal.getsignal(signal.SIGALRM), previous_handler)
