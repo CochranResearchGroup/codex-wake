@@ -1,10 +1,11 @@
 # MR-06: Qualify the installed Codex and Grok workflow
 
 State: PLANNED
+Ticket state: READY
 Owner: ecochran76
 Work item: CW-MR-172/MR-06 (local draft; not posted)
 Priority: First-release dependency order
-Blocked by: MR-04, MR-05
+Blocked by: MR-04 and MR-05 source/isolated-artifact gates satisfied
 Specification: [Plan0172](../0172-2026-10-22-multi-runtime-wake.md)
 
 ## Outcome

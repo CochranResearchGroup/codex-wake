@@ -445,7 +445,8 @@ its below100ms qualification. No relative origin is created after an outage.
 
 Schema7 adds a separately versioned `target` with `transport: runtime`,
 `version: 1`, `runtime: grok`, opaque `session_id`, `binding_id`, pinned
-`binding_sha256`, `method: terminal_observation`, and `policy: wait`. No schema1–6
+`binding_sha256`, `method: terminal_observation` or host-approved
+`native_preferred`, and `policy: wait`. No schema1–6
 transport or actor identity is reinterpreted. Older readers hold schema7;
 unknown runtime/envelope/method/policy combinations are held by current readers.
 Schema7 is allocated against MR-02/e435175, whose highest read version is6.
@@ -477,3 +478,35 @@ Managed workers advertise read version7 through the existing health contract.
 Agent-facing registration requires an active compatible worker; a registration
 failure after persistence retains its original intent and reports the worker gap.
 This source slice does not upgrade a production worker or create a grant.
+
+
+### Runtime policy and mailbox binding extensions (MR-04/MR-05)
+
+Queue/interrupt selections are public choices but refuse before retention or input
+until their guarantees qualify. Wait remains default. Native Codex wake CLI and
+Grok CLI/MCP expose explicit busy-policy selection. No strict dequeue expiry or
+owned-turn interruption is inferred from native queue admission.
+
+An operator may add `allow_terminal_fallback: true` to a newly enrolled Grok host
+binding through the explicit bind option. Its hash stays frozen in each original
+intent. Only definitive `not_sent` + `pre_io=true` + `native_unavailable` evidence
+permits that profile's terminal fallback. Uncertain/accepted/missing evidence
+never switches methods. The actually selected delivery method and terminal
+observation remain inspectable. An older schema7 reader that does not recognize
+`native_preferred` holds the record; old direct terminal bindings keep their meaning.
+
+Mailbox actor capabilities and Codex actor namespaces retain their formats.
+Grok actor context is a private operator-issued sidecar under `runtime-actors/`,
+keyed by the issued actor ID and freezing the binding digest. Capabilities remain
+independent authority. Caller validation checks process ancestry and generation,
+runtime-inherited session claim, host-bound session context and enrollment root.
+Native Grok caller attestation remains not qualified.
+
+The mailbox bindings file recognizes `grok_terminal_notification_v1` alongside
+existing owning-client/tmux transports. Old readers refuse the unfamiliar binding
+transport. Grok notifications use the same user-scoped pane lock as durable wakes,
+then revalidate journal authority and the original expiry/lease window. A terminal
+frame hash receipt is transport observation, never an authenticated work receipt.
+The existing mailbox claim/receipt protocol may subsequently strengthen that same
+message with a real credentialed work claim. Unknown outcomes remain uncertain
+and are never retried as if no bytes were sent. No bus schema migration is required.

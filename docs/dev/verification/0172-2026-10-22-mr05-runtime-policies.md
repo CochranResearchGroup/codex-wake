@@ -69,3 +69,27 @@ acceptance gate.
 Memory disposition: `not_durable` for this intermediate delegated handoff; primary
 must qualify and record the reconciled outcome once rather than persisting a
 worker's unaccepted implementation as a project decision.
+
+
+## Primary reconciliation (pending comprehensive result)
+
+Worker dd2ca6d was integrated as1cf56a7. Primary wired native CLI and Grok MCP
+busy-policy selection through require_wait_policy / explicit structured refusal;
+model arguments cannot enroll fallback profiles. Integrated source controls73
+PASS19.190s, subsequent policy/adapter controls35 PASS3.034s. Fresh non-editable
+wheel controls75 PASS19.324s; a later MCP authority correction invalidated that
+file's frozen identity, so final installed changed-axis controls15 PASS5.140s
+recheck it. Undefined-name lint passes. Full source/test inventory and final wheel
+are frozen for the comprehensive run. First comprehensive run was superseded for
+the concrete MCP correction and retained; no retry erases it. No live/provider or
+production effects occurred. Primary owns the final result and ticket disposition.
+
+
+## Final primary acceptance
+
+Reconciled sourceef8b5b4 / final wheel: frozen1451 tests PASS341.346s, one expected
+opt-in host-execution skip, zero failures/errors, source/tests unchanged. Installed
+changed-axis15 PASS5.140s, undefined-name lint PASS. MR-05 DONE for source and
+isolated artifact; MR-06 READY for actual TUI acceptance. Prior native environment
+failures, base reproduction and superseded full run remain retained. No live or
+production effect is inferred. See combined mr04-mr05-runtime-wave.json receipt.

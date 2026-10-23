@@ -7754,3 +7754,29 @@ and isolated artifact, with prior live proof retained. MR-04/MR-05 READY next wa
 MR-06 blocked. Primary owned only ready MR-03; zero subagents. No extra provider
 probe, production installation, main integration, release or grant change.
 [Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+
+
+## Turn386 | 2026-10-22 | MR-04/MR-05 parallel source wave reconciled
+
+Base36412c4; primary MR-04 feat/mr04-cross-runtime-a2a packet37f935f, independent
+/root/mr05 packetdd2ca6d. Serial coordinator integrations4407630/1cf56a7; shared
+CLI/MCP4ee9c01; native-only Grok grant refusalef8b5b4. No nested workers.
+Bus authority remains independent capabilities, host-pinned context, generation,
+ancestry and enrolled root. Native Grok caller attestation is not qualified.
+Notifications carry bounded pointers and terminal evidence; actual work claims
+remain credentialed mailbox acknowledgments. Unknown responses never replay.
+Worker review found missing shared pane lock: primary accepted, repaired, mutation
+red/restored green; worker closed-world verified. Primary found native-tool grant
+forwarding: valid-input red/green after retained non-qualifying first reproducer.
+Unsupported queue/interrupt refuse before effects; Grok fallback requires explicit
+host profile and definitive native-unavailable pre-I/O proof. Codex terminal unqualified.
+Worker initial native15 had two environment failures reproducing at base; exact
+isolated config/state controls yield15 PASS, no test/guard weakening. Integrated
+installed75 PASS19.324s predates final MCP guard; final installed changed-axis15
+PASS5.140s covers corrected axis. Superseded full run retained for authority repair.
+Final sourceef8b5b4/full1451 PASS341.346s, one expected opt-in skip, zero failures
+or errors, unchanged source/tests; final wheel modules match; F821/F822/F823 PASS.
+MR-04/MR-05 DONE source/isolated artifact; MR-06 READY for real TUI/bidirectional
+acceptance. Zero new provider prompts, production grant/bus/service/installation,
+main integration or release. Original main checkout preserved.
+[Receipt](docs/dev/evidence/plan0172/mr04-mr05-runtime-wave.json).

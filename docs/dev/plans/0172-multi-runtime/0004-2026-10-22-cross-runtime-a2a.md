@@ -1,12 +1,18 @@
 # MR-04: Exchange correlated work between Codex and Grok
 
-State: PLANNED
-Ticket state: READY
+State: CLOSED
+Ticket state: DONE
 Owner: ecochran76
 Work item: CW-MR-172/MR-04 (local draft; not posted)
 Priority: First-release dependency order
 Blocked by: MR-03 satisfied
 Specification: [Plan0172](../0172-2026-10-22-multi-runtime-wake.md)
+
+Lane: P172-MR04
+Branch: feat/mr04-cross-runtime-a2a
+Base: 36412c4
+Target: origin/main
+Integration: squash_pr
 
 ## Outcome
 
@@ -22,11 +28,11 @@ Do not transfer another actor's grant, treat UI observation as a work receipt, g
 
 ## Acceptance Evidence
 
-- [ ] AC2: both directions prove exact recipient authentication, claim-before-work and correlated replies.
-- [ ] AC5: duplicate notifications, restart, stale generation and uncertain delivery do not create duplicate work.
-- [ ] AC6: current Codex mailbox actor keys and caller/receipt controls retain their meaning.
-- [ ] AC7: unavailable runtime attestation is explicit; a claimed caller ID does not bypass grants.
-- [ ] Demonstrate terminal-observed delivery can later gain a genuine authenticated work receipt without fabricating one.
+- [x] AC2: both directions prove exact recipient authentication, claim-before-work and correlated replies.
+- [x] AC5: duplicate notifications, restart, stale generation and uncertain delivery do not create duplicate work.
+- [x] AC6: current Codex mailbox actor keys and caller/receipt controls retain their meaning.
+- [x] AC7: unavailable runtime attestation is explicit; a claimed caller ID does not bypass grants.
+- [x] Demonstrate terminal-observed delivery can later gain a genuine authenticated work receipt without fabricating one.
 
 ## Repository Surface and Risks
 
@@ -36,3 +42,14 @@ Shares journal/identity writes with MR-05; serialize integration. Receiving a no
 
 A complete slice requires its stated evidence. Source completion, integration,
 installed acceptance and external publication remain separate states.
+
+
+## Reconciled acceptance
+
+Primary coordinator sourceef8b5b4 qualifies this slice for source and isolated
+artifact: frozen1451 tests PASS341.346s/one expected skip, unchanged source/tests,
+final installed changed-axis15 PASS5.140s and lint PASS. Independent source packet
+is retained, with shared CLI/MCP and authority corrections owned by the primary.
+No packet ref alone is a merge-ready claim. MR-06 is READY for real visible TUI and
+bidirectional live acceptance; native Grok caller attestation remains unqualified.
+Production installation, main integration and release remain separate.

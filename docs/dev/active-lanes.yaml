@@ -590,13 +590,17 @@ lanes:
     plan: docs/dev/plans/0172-multi-runtime/0004-2026-10-22-cross-runtime-a2a.md
     plan_ref: docs/multiruntime-spec
     branch: feat/mr04-cross-runtime-a2a
+    checkpoint: 37f935fa820e186e5073e6bb22e371ba92afdb84
+    reconciled_source: docs/multiruntime-spec@ef8b5b4
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
+    integration: squash_pr
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
     dependencies: [MR-03 satisfied]
     overlaps: [P172-MR05]
+    reconciled_overlaps: [P172-MR05]
     updated_at: 2026-10-22
-    disposition: stacked on36412c4; primary owns a2a and shared CLI/MCP integration
+    disposition: source packet retained; corrections and accepted artifact are on coordinator ef8b5b4; not a merge-ready packet ref
   - id: P172-MR05
     owner: subagent /root/mr05 / ecochran76
     objective: Explicit busy policy and qualified fallback selection
@@ -604,10 +608,14 @@ lanes:
     plan: docs/dev/plans/0172-multi-runtime/0005-2026-10-22-busy-and-fallback.md
     plan_ref: docs/multiruntime-spec
     branch: feat/mr05-runtime-policies
+    checkpoint: dd2ca6de45dbaae5683a1b39748524a04d1e1b7b
+    reconciled_source: docs/multiruntime-spec@ef8b5b4
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
+    integration: squash_pr
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
     dependencies: [MR-03 satisfied]
     overlaps: [P172-MR04]
+    reconciled_overlaps: [P172-MR04]
     updated_at: 2026-10-22
-    disposition: stacked on36412c4; worker owns runtime policies and adapters; serial primary integration
+    disposition: worker packet retained; primary CLI/MCP integration and accepted artifact are on coordinator ef8b5b4; not a merge-ready packet ref

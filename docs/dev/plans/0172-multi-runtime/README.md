@@ -13,9 +13,9 @@ tracker publication. A draft's readiness is separate from live-effect authority.
 | MR-01 | [Qualify exact open Grok delivery](0001-2026-10-22-qualify-grok.md) | None | DONE — managed-launch terminal observation |
 | MR-02 | [Preserve Codex through the runtime seam](0002-2026-10-22-codex-runtime-seam.md) | MR-01 satisfied | DONE — source and isolated wheel |
 | MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 satisfied | DONE — source, isolated artifact and live terminal acceptance |
-| MR-04 | [Cross-runtime request and reply](0004-2026-10-22-cross-runtime-a2a.md) | MR-03 satisfied | READY |
-| MR-05 | [Busy policies and terminal fallback](0005-2026-10-22-busy-and-fallback.md) | MR-03 satisfied | READY |
-| MR-06 | [Installed acceptance](0006-2026-10-22-installed-acceptance.md) | MR-04, MR-05 | PLANNED |
+| MR-04 | [Cross-runtime request and reply](0004-2026-10-22-cross-runtime-a2a.md) | MR-03 satisfied | DONE — source and isolated artifact |
+| MR-05 | [Busy policies and terminal fallback](0005-2026-10-22-busy-and-fallback.md) | MR-03 satisfied | DONE — source and isolated artifact |
+| MR-06 | [Installed acceptance](0006-2026-10-22-installed-acceptance.md) | MR-04/MR-05 source gates satisfied | READY — real TUI acceptance pending |
 
 On “next ticket”, the primary owns one ready ticket and delegates one other ready
 ticket per independent subagent, within runtime capacity. MR-04/MR-05 can run
@@ -50,3 +50,10 @@ source/tests unchanged; all119 production modules match the live-qualified wheel
 Test-only repair9fd40a0 preserves guards. Prior failures remain retained, including
 the unclassified historical backup-create error. MR-03 DONE; MR-04/MR-05 READY
 for the next parallel wave. MR-06 remains blocked. Main/release/production separate.
+
+MR-04/MR-05 parallel wave reconciled: primary MR-04, independent `/root/mr05`
+MR-05; separate worktrees, serial integration, one repaired lock finding verified.
+Sourceef8b5b4/final wheel:1451 full PASS341.346s/one expected skip, unchanged
+source/tests; final installed changed-axis15 PASS. Both source slices DONE;
+MR-06 READY for real TUI/bidirectional live evidence. No production effects.
+[Combined receipt](../../evidence/plan0172/mr04-mr05-runtime-wave.json).

@@ -14,18 +14,17 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
-Latest: MR-03 is DONE for source and isolated artifact. Schema7/runtime-envelope1,
-host-approved Grok bindings, shared clock eligibility and terminal evidence are
-qualified. Isolated-wheel118 controls pass. Test-only repair9fd40a0 stabilizes
-workflow clocks and timeout recovery; final frozen1438-test suite PASS in462.612s,
-one expected skip, zero failures/errors. All119 production modules still match
-the frozen wheel. Historical failures remain retained; the exact original backup
-create exception is unclassified and did not recur in the controlled stress/full run.
-The user-approved extra live probe PASSED in13.996s: exact session, one original
-wake/attempt/reply, no replay, clean teardown. MR-04/MR-05 are independently READY;
-MR-06 remains blocked on both. Main/release/production remain separate.
-Only MR-03 was ready at this wave's start; primary owned it with zero subagents.
-[MR-03 evidence](../verification/0172-2026-10-22-mr03-grok-wake.md).
+Latest: MR-04 and MR-05 are DONE for source and isolated artifact, reconciled on
+coordinator sourceef8b5b4. Primary owned MR-04; independent `/root/mr05` supplied
+MR-05 source/focused evidence. Shared pane-lock review finding and native-only
+MCP grant forwarding finding were repaired; original failures are retained.
+Frozen1451 tests PASS341.346s, one expected skip, unchanged source/tests; final
+installed changed-axis15 PASS5.140s and lint PASS. MR-06 is READY for actual
+visible Codex/Grok TUI and bidirectional live acceptance. No provider input,
+production installation/grant/service change, main merge or release occurred.
+MR-03 remains qualified by its source/artifact/live-terminal evidence; the new
+wave does not extend that proof to real cross-runtime claims or fallback profiles.
+[Combined evidence](../evidence/plan0172/mr04-mr05-runtime-wave.json).
 
 MR-02 remains DONE for source and isolated artifact. Its final full suite1428
 (1 skipped) and isolated wheel94 tests passed. Main integration/release/production
