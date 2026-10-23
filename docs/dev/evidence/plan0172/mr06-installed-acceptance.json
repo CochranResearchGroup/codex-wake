@@ -1,0 +1,65 @@
+{
+  "verdict": "LIVE_SETUP_FAIL_NOT_ACCEPTED",
+  "work": "/tmp/cw-mr06-81c3rv3w",
+  "grok_session": "3fd09f1e-2e5a-45f5-9fea-872b2e902223",
+  "prompt_limit": 6,
+  "wall_limit_seconds": 300,
+  "prompts_submitted": 0,
+  "phases": [
+    "two_owned_tuis_started"
+  ],
+  "runtime_versions": {
+    "codex": "codex-cli 0.163.0",
+    "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+    "wake": "codex-wake 0.19.1"
+  },
+  "source_commit": "651d493",
+  "codex_thread": "01a166c3-ae11-7f93-a57e-26d571b6a73f",
+  "grok_pid": 1373191,
+  "reason": "command_refused:tmux:can't find pane: %0\n",
+  "elapsed_seconds": 6.338,
+  "cleanup": {
+    "introduced_remaining": [
+      1373703
+    ],
+    "preexisting_changed": []
+  },
+  "cleanup_incomplete": true,
+  "work_item": "CW-MR-172/MR-06",
+  "original_live_verdict": "FAIL",
+  "wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+  "unchanged_installed_package_modules": 121,
+  "bus_created": false,
+  "actor_grants_created": false,
+  "wake_intents_created": false,
+  "later_cleanup_readback": {
+    "introduced_remaining": [],
+    "preexisting_changed": [
+      1367443
+    ],
+    "prior_residual_pid": 1373703,
+    "disposition": "original immediate cleanup failure retained; later fresh OS readback recorded separately"
+  },
+  "initial_launcher_source_snapshot": "not retained at runtime; do not infer corrected source equals original",
+  "corrected_launcher_sha256": "822ed1e2cd4e43f30e5434c17c5344c33274634e3f15add981cced5011fe2e31",
+  "provider_free_regression": {
+    "tests": 1,
+    "result": "PASS",
+    "seconds": 0.084,
+    "real_tmux": true,
+    "models": 0
+  },
+  "extra_live_authority": "pending explicit extension; one additional pair, six synthetic prompts, 300 seconds including cleanup, no replay; do not launch",
+  "production_install_changed": false,
+  "main_integration": false,
+  "private_evidence_directory": "/home/ecochran76/.local/state/codex-wake/design/grok-multi-runtime-20261021/mr06",
+  "criteria_live": {
+    "AC1": "NOT_QUALIFIED",
+    "AC2": "NOT_QUALIFIED",
+    "AC3": "NOT_QUALIFIED",
+    "AC4": "NOT_QUALIFIED",
+    "AC5": "NOT_QUALIFIED",
+    "AC6": "NOT_QUALIFIED",
+    "AC7": "NOT_QUALIFIED"
+  }
+}

@@ -7780,3 +7780,20 @@ MR-04/MR-05 DONE source/isolated artifact; MR-06 READY for real TUI/bidirectiona
 acceptance. Zero new provider prompts, production grant/bus/service/installation,
 main integration or release. Original main checkout preserved.
 [Receipt](docs/dev/evidence/plan0172/mr04-mr05-runtime-wave.json).
+
+## Turn387 | 2026-10-22 | MR-06 setup failure retained
+
+Primary took sole ready MR-06; no independent ready ticket to delegate.
+One disposable Codex/Grok pair failed in6.338s before conversation input; zero
+prompts, bus/grants/bindings/wakes. Codex pane disappeared; cause unknown.
+Initial cleanup failure remains retained; later fresh census found zero
+introduced residuals and one pre-existing PID absent with cause unattributed.
+Provider-free real-tmux startup regression1 PASS0.084s; corrected opt-in
+launcher retains dead panes, snapshots source/module identity, requires visible
+TUI completion and conservative input/process accounting. No second live run.
+MR-06 remains IN_PROGRESS pending explicit extension of the consumed
+one-recipient-per-runtime envelope: one additional pair, six synthetic prompts,
+300 seconds including cleanup, no replay. Package bytes unchanged; prior full
+1451/one expected skip and installed15 evidence retained for that package only.
+No main integration, release or production installation change.
+[Verification](docs/dev/verification/0172-2026-10-22-mr06-installed-acceptance.md).

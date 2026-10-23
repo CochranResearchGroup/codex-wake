@@ -19,8 +19,11 @@ coordinator sourceef8b5b4. Primary owned MR-04; independent `/root/mr05` supplie
 MR-05 source/focused evidence. Shared pane-lock review finding and native-only
 MCP grant forwarding finding were repaired; original failures are retained.
 Frozen1451 tests PASS341.346s, one expected skip, unchanged source/tests; final
-installed changed-axis15 PASS5.140s and lint PASS. MR-06 is READY for actual
-visible Codex/Grok TUI and bidirectional live acceptance. No provider input,
+installed changed-axis15 PASS5.140s and lint PASS. MR-06 is IN_PROGRESS: one
+live startup sample failed before conversation input; zero prompts submitted.
+The repaired opt-in harness retains startup errors; its real-tmux regression
+passes. The recorded one-recipient-per-runtime envelope is consumed; another
+pair needs an explicit extension before launch. No
 production installation/grant/service change, main merge or release occurred.
 MR-03 remains qualified by its source/artifact/live-terminal evidence; the new
 wave does not extend that proof to real cross-runtime claims or fallback profiles.
