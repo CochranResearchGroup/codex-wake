@@ -15,11 +15,14 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 ## Current State
 
 Integration continuation: issue [#305](https://github.com/CochranResearchGroup/codex-wake/issues/305)
-is OPEN for combined PR review, required Python3.11/3.12 CI and canonical-main
-readback. The six local tickets remain candidate-qualified; publication of this
+is OPEN for [PR306](https://github.com/CochranResearchGroup/codex-wake/pull/306)
+review, required Python3.11/3.12 CI and canonical-main readback. The six local tickets remain candidate-qualified; publication of this
 integration issue does not retroactively turn those drafts into GitHub issues.
 Current accepted coordinator source is fa94fc8; main remains fcc996a. No existing
-open duplicate issue/PR was found. Policy wiring and undefined-name lint pass.
+open duplicate issue/PR was found. Policy wiring and undefined-name lint pass. Initial CI40014196358 passed
+unit suites but failed stale27-tool installed smoke expectations; repaired to
+explicitly check32 tools and the five Grok names. Real installed mailbox/MCP
+smoke and wake-control qualification now pass; fresh matrix CI remains required.
 The original main checkout and its unrelated local policy commits are excluded.
 
 

@@ -7846,3 +7846,21 @@ state; broader program OPEN. Policy wiring PASS and full undefined-name lint PAS
 Combined diff64 files is scoped to runtime wakes/A2A, tests, qualification harness
 and canonical planning/evidence. No production changes or extra live input.
 Next: publish reviewable PR, inspect its exact head/diff and required CI matrix.
+
+
+## Turn390 | 2026-10-23 | PR306 installed smoke contract repair
+
+PR306 publishes head edab49f against main fcc996a, mergeable; issue305 remains
+OPEN. CI40014196358 failed installed smoke after passing unit suites. Exact
+local installed command reproduces len(discovered)==27 assertion; five new Grok
+tools expand the public catalog to32. Both a2a_mcp_smoke and wake_control_qualification
+contained stale27-tool assumptions. Repaired both to require32 and the exact five
+new Grok tool names; retained existing identity, denial, claim/reply, cancellation,
+pause/resume and ungranted-root assertions. Installed MCP smoke PASS7.231s,32 tools,
+no native turns/notifications, temporary fixtures/children clean. Installed wake
+controls PASS,121 source/installed files match, six real MCP control calls and
+ungranted-root denial retained, zero native turns/service restarts/operator wakes.
+No package source changes; prior live candidate/full-suite evidence remains bound
+to unchanged package bytes. Original CI/local red retained; no tests weakened or
+failed run relabeled. Next: required matrix CI on repaired exact PR head.
+[Receipt](docs/dev/evidence/plan0172/pr-ci.json).

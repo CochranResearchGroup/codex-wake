@@ -44,7 +44,8 @@ with tempfile.TemporaryDirectory(prefix='codex-wake-p164-qualification-') as tmp
   params=StdioServerParameters(command=mcp,args=['--wake-root',str(a),'--wake-control-config',str(grants),'--wake-registry',str(registry)],env=env)
   async with stdio_client(params) as streams:
    async with ClientSession(*streams) as session:
-    await session.initialize();catalog=await session.list_tools();assert len(catalog.tools)==27
+    await session.initialize();catalog=await session.list_tools();assert len(catalog.tools)==32
+    assert {'wake_grok_sessions','wake_grok_show','wake_grok_after','wake_grok_at','wake_grok_file'} <= {tool.name for tool in catalog.tools}
     for name in ['wake_list','wake_pause','wake_pause_status','wake_interrupt','wake_cancel','wake_resume']:
      args=dict(caller_thread_id=caller,all_roots=True)
      if name=='wake_cancel':args['all']=True
@@ -56,7 +57,7 @@ with tempfile.TemporaryDirectory(prefix='codex-wake-p164-qualification-') as tmp
     denied=await session.call_tool('wake_pause',dict(caller_thread_id=caller,all_roots=True))
     assert denied.is_error
     assert json.loads(denied.content[0].text)['error']['code']=='policy_denied'
-  return dict(tools=27,calls=calls,ungranted_root_denied=True)
+  return dict(tools=len(catalog.tools),calls=calls,ungranted_root_denied=True)
  mcp_result=asyncio.run(qualify())
  assert len(list((a/'cancelled').glob('*.json')))==1
  assert len(list((b/'cancelled').glob('*.json')))==1
