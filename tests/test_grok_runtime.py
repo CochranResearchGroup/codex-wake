@@ -232,3 +232,27 @@ class GrokMonitorReceiptTests(unittest.TestCase):
             self.assertEqual(ids[0],ids[1])
             self.assertEqual(len(all_records(root)),1)
             self.assertEqual(all_records(root)[0].record['attempts'],0)
+
+
+class GrokDelayedPaintTests(unittest.TestCase):
+    def test_submission_waits_for_original_marker_without_second_paste(self):
+        from codex_wake.grok_runtime import GrokRuntimeAdapter
+        class Host:
+            prompt=None
+            paints=0
+            inputs=[]
+            def refresh_identity(self,binding):pass
+            def snapshot(self,binding):
+                if self.prompt is not None:self.paints+=1
+                frame=FRAME
+                if self.paints>=2:frame=frame.replace('minimal · /help',self.prompt+'\nminimal · /help')
+                return dict(binding,frame=frame)
+            def paste(self,binding,prompt,*,deadline=None):
+                self.inputs.append(prompt);self.prompt=prompt
+        host=Host()
+        binding=dict(start_ticks=42,boot_id='boot',pid=123,session_id=SESSION,executable_sha256='a'*64)
+        recipient=RuntimeRecipient('grok',SESSION,binding)
+        prompt='WAKE_RUNTIME_SUBMISSION_ID=01234567-89ab-cdef-0123-456789abcdef\nSynthetic task'
+        result=GrokRuntimeAdapter(host).submit(recipient,prompt)
+        self.assertEqual(result.state,'accepted')
+        self.assertEqual(host.inputs,[prompt])

@@ -100,9 +100,17 @@ class GrokRuntimeAdapter:
             if self.deadline is not None and self.deadline-time.monotonic() <= 12:
                 return RuntimeSubmission('not_sent', reason='original_deadline_reached')
             self.host.paste(recipient.binding, prompt, deadline=self.deadline)
-            observed = self.reconcile(recipient, prompt)
-            if observed.evidence:
-                return RuntimeSubmission('accepted', evidence_kind='terminal_observation', evidence=observed.evidence)
+            # Enter returns before the TUI necessarily repaints. Observe only
+            # this original marker, within both a short bound and its deadline.
+            until = min(time.monotonic() + 1, self.deadline if self.deadline is not None else float('inf'))
+            while True:
+                observed = self.reconcile(recipient, prompt)
+                if observed.evidence:
+                    return RuntimeSubmission('accepted', evidence_kind='terminal_observation', evidence=observed.evidence)
+                remaining = until - time.monotonic()
+                if remaining <= 0:
+                    break
+                time.sleep(min(.05, remaining))
         except Exception:
             pass
         return RuntimeSubmission('uncertain', reason='terminal_acceptance_unconfirmed')
