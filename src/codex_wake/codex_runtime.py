@@ -53,7 +53,8 @@ def submission_failure(reason, result, error):
                 stderr=output_summary(getattr(source, 'stderr', None), inspect=True))
 
 class CodexRuntimeAdapter:
-    def __init__(self, *, read_thread, request, run, project_failure, monotonic=None):
+    def __init__(self, *, read_thread, request, run, project_failure, monotonic=None, busy_policy="wait"):
+        self.busy_policy = busy_policy
         self._read_thread = read_thread
         self._request = request
         self._run = run
@@ -105,6 +106,8 @@ class CodexRuntimeAdapter:
             return RuntimeObservation("unavailable", "runtime_observation_unavailable", capabilities, resumed)
 
     def submit(self, recipient: RuntimeRecipient, prompt: str) -> RuntimeSubmission:
+        if self.busy_policy != "wait":
+            return RuntimeSubmission("not_sent", reason="busy_policy_unsupported", pre_io=True)
         target = recipient.binding
         env = dict(os.environ)
         for key in ("CODEX_THREAD_ID", "TMUX", "TMUX_PANE"):

@@ -1,12 +1,22 @@
 # MR-05: Apply explicit busy policies and qualified terminal fallback
 
-State: PLANNED
-Ticket state: READY
+State: OPEN
+Ticket state: IN_PROGRESS
 Owner: ecochran76
 Work item: CW-MR-172/MR-05 (local draft; not posted)
 Priority: First-release dependency order
 Blocked by: MR-03 satisfied
 Specification: [Plan0172](../0172-2026-10-22-multi-runtime-wake.md)
+
+## Current State
+
+Worker source packet is prepared on `feat/mr05-runtime-policies`, base36412c4.
+Wait defaults and unsupported queue/interrupt refusals are implemented for both
+adapter seams. Host-approved Grok native-unavailable pre-I/O fallback is explicit;
+Codex terminal remains unqualified. Policy7/Grok9/native15 isolated focused tests
+pass. Primary owns shared CLI/MCP integration, full validation and reconciliation.
+No live/provider effects or installed acceptance were exercised.
+[Source evidence](../../verification/0172-2026-10-22-mr05-runtime-policies.md).
 
 ## Outcome
 

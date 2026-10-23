@@ -58,6 +58,8 @@ class RuntimeSubmission:
     failure: dict | None = None
     exception_type: str | None = None
     evidence: dict | None = None
+    # True only when the adapter proves no submission I/O was attempted.
+    pre_io: bool = False
 
 
 @dataclass(frozen=True)
