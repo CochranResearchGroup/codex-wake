@@ -1,0 +1,60 @@
+{
+  "work_item": "https://github.com/CochranResearchGroup/codex-wake/issues/305",
+  "issue_state": "CLOSED completed",
+  "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/306",
+  "pr_state": "MERGED",
+  "merge_method": "squash",
+  "merged_at": "2026-10-23T19:57:55Z",
+  "merged_main_sha": "dbc2dff75737d30395c513f0c16f66279b9dfbe6",
+  "checked_pr_head": "7c02df681bd56e00dcca506f1d01c16db3c6d17d",
+  "main_tree_sha": "9be9fe587adb35cf89ced7b2f6460aec9bbcc409",
+  "checked_head_tree_matches_main": true,
+  "ci_run": "https://github.com/CochranResearchGroup/codex-wake/actions/runs/40014889364",
+  "ci_matrix": {
+    "3.11": "SUCCESS",
+    "3.12": "SUCCESS"
+  },
+  "initial_failed_ci": "https://github.com/CochranResearchGroup/codex-wake/actions/runs/40014196358",
+  "initial_failure_retained": true,
+  "smoke_repair": "Exact32-tool catalog plus five named Grok tools in installed MCP and wake-control scripts; no package source change",
+  "production_install_changed": false,
+  "release": false,
+  "provider_prompts_this_continuation": 0,
+  "original_main_checkout": "preserved with unrelated local policy commits",
+  "program_boundary": "First-release candidate integrated. Production release/install and further runtime/lifecycle/resource qualifications remain separate.",
+  "readback_followup_ci": {
+    "run": 40015729572,
+    "verdict": "FAIL retained",
+    "python_311": "1 failure in test_signal_support due random /tmp/tmp999u9320 path matching whole-output999 privacy assertion",
+    "package_source_changed": false,
+    "fixture_red": "Force temp prefix signal-support-999-; original assertion fails deterministically",
+    "repair": "Check absence of pid field in readiness JSON and999 value in source-health projection, leaving allowed journal path intact",
+    "focused_tests": 15,
+    "focused_seconds": 0.889,
+    "focused_verdict": "PASS",
+    "mutation": "Injected actual pid999 into latest_reconcile; repaired assertion failed as required; no production source mutation",
+    "next_gate": "Required matrix CI on repaired follow-up PR head"
+  },
+  "main_ci_followup": {
+    "run": 40015523144,
+    "verdict": "FAIL retained",
+    "failure": "Python3.12 startup fixture expected tmux pane_dead_status7 but field was empty despite dead pane and retained error",
+    "source_runtime_changed": false,
+    "original_reproduction": "1/100 real-tmux starts omitted status; subsequent provider-free probes reproduced missing status beyond3 seconds",
+    "rejected_experiments": "Direct bootstrap still4/400 status failures; reverted. Waiting3s still fails; no retry promoted those samples.",
+    "supported_test_boundary": "Retain dead pane and original diagnostic, matching actual harness consumers; tmux exit-status metadata not qualified",
+    "repair": "Controlled ready/exit fixture, preserved pane-death and original-diagnostic checks; no unsupported exit-status assertion",
+    "stress": {
+      "runs": 400,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 28.875,
+      "provider_calls": 0
+    },
+    "mutations_caught": [
+      "disable remain-on-exit retention",
+      "remove original diagnostic"
+    ],
+    "next_gate": "Required CI on final follow-up PR head; provider/package runtime unchanged"
+  }
+}

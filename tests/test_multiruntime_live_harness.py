@@ -9,14 +9,23 @@ from scripts.multiruntime_live_qualification import prepare_tmux
 
 @unittest.skipUnless(shutil.which("tmux"), "tmux required for terminal startup evidence")
 class StartupEvidenceTests(unittest.TestCase):
-    def test_immediate_tui_exit_keeps_pane_and_original_error_without_model_calls(self):
+    def test_exited_fixture_keeps_pane_and_original_error_without_model_calls(self):
         with tempfile.TemporaryDirectory(prefix='cw-mr06-harness-') as tmp:
             root=Path(tmp);socket=root/'tmux.sock'
             def tmux(*args):
                 return subprocess.run(['tmux','-S',str(socket),*map(str,args)],capture_output=True,
                                       text=True,check=True,timeout=3).stdout
             try:
-                pane=prepare_tmux(tmux,root,['sh','-c','echo CW_STARTUP_FAILURE; exit 7'])
+                # Start a controlled child, then release its failure only after
+                # the PTY has carried its ready marker. Shell startup timing is
+                # separate from retaining a real child's diagnostic and status.
+                pane=prepare_tmux(tmux,root,['sh','-c',
+                    'echo CW_FIXTURE_READY; read fixture_gate; echo CW_STARTUP_FAILURE; exit 7'])
+                deadline=time.monotonic()+3
+                while 'CW_FIXTURE_READY' not in tmux('capture-pane','-p','-S','-2000','-t',pane):
+                    if time.monotonic()>deadline:self.fail('fixture did not reach terminal readiness')
+                    time.sleep(.02)
+                tmux('send-keys','-t',pane,'release','Enter')
                 deadline=time.monotonic()+3
                 while tmux('display-message','-p','-t',pane,'#{pane_dead}').strip()!='1':
                     if time.monotonic()>deadline:self.fail('fixture command did not exit')
@@ -27,9 +36,13 @@ class StartupEvidenceTests(unittest.TestCase):
                     if time.monotonic()>deadline:self.fail('startup error was not retained: '+captured)
                     time.sleep(.02)
                 self.assertIn('CW_STARTUP_FAILURE',captured)
-                self.assertEqual(tmux('display-message','-p','-t',pane,'#{pane_dead_status}').strip(),'7')
+                # The harness uses pane death and captured diagnostics. tmux
+                # can omit exit-status metadata for short-lived children.
+                self.assertEqual(tmux('display-message','-p','-t',pane,'#{pane_dead}').strip(),'1')
+
             finally:
                 subprocess.run(['tmux','-S',str(socket),'kill-server'],capture_output=True,timeout=3)
+
 
 class ActorHelperEvidenceTests(unittest.TestCase):
     def test_receive_prints_verified_claim_for_the_calling_tui(self):

@@ -2,7 +2,8 @@
 
 This is candidate guidance. MR-06 has real installed bidirectional TUI evidence
 for Codex0.164.0 and Grok1.0.40, with full local compatibility checks passed.
-Production installation, CI and release are separate gates. The supported Grok terminal route is
+PR306 integrated the candidate with passing Python3.11/3.12 release gates.
+Production installation and release remain separate gates. The supported Grok terminal route is
 managed-launch Grok1.0.40, minimal UI, an exact private tmux pane and a pinned
 executable/process/session binding. Native Grok caller attestation, Codex terminal
 fallback, queue dequeue expiry and owned-turn interruption are not qualified.

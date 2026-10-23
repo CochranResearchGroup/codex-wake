@@ -53,7 +53,7 @@ class SignalSupportTests(unittest.TestCase):
             )
 
     def test_runtime_and_systemd_readiness_requires_fresh_exact_health(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(prefix="signal-support-999-") as tmp:
             root = Path(tmp) / "wake"
             process_instance = "runtime-" + ("a" * 64)
             self._insert_active_source(root, "runtime", process_instance)
@@ -94,7 +94,10 @@ class SignalSupportTests(unittest.TestCase):
                 {"status": "blocked", "code": "SYSTEMD_AUTHORIZATION_DENIED"},
             )
             self.assertNotIn("private.service", json.dumps(readiness))
-            self.assertNotIn("999", json.dumps(readiness))
+            # The journal path may legitimately contain these digits. Check the
+            # health projection and field disclosure, not a random temp name.
+            self.assertNotIn('"pid":', json.dumps(readiness))
+            self.assertNotIn("999", json.dumps(readiness["sources"]))
 
             unavailable = signal_readiness(root, health={
                 "checked_at": NOW.isoformat(),

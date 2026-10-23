@@ -7864,3 +7864,54 @@ No package source changes; prior live candidate/full-suite evidence remains boun
 to unchanged package bytes. Original CI/local red retained; no tests weakened or
 failed run relabeled. Next: required matrix CI on repaired exact PR head.
 [Receipt](docs/dev/evidence/plan0172/pr-ci.json).
+
+
+## Turn391 | 2026-10-23 | PR306 integrated with exact-head CI
+
+Repaired head7c02df6 passed both required Python3.11/3.12 release gates in
+CI40014889364, including installed-wheel smokes. PR readback CLEAN/MERGEABLE,
+base fcc996a unchanged. Primary reviewed combined identity/authority, schema,
+shared pane locks, original deadlines, uncertain-work retention and scope.
+Squash merge required expected head7c02df6; PR306 merged dbc2dff at19:57:55UTC.
+Fresh origin/main and PR readback confirm dbc2dff; checked head and merged main
+Git trees match exactly. Issue305 closed by merge and its acceptance/readback
+updated without altering labels/assignment. Original CI40014196358 and local
+smoke red remain retained; no failed sample reclassified. MR-01–MR-06 first-release
+candidate integrated. No new provider prompts, production grants/services/install,
+release or deployment. Original main checkout and unrelated policy commits remain
+untouched. Broader Plan0172 stays OPEN for separately scoped release/rollout and
+other runtime/lifecycle/resource qualifications. This docs-only follow-up records
+the concrete integration readback without changing the qualified runtime source.
+[Receipt](docs/dev/evidence/plan0172/integration-readback.json).
+
+
+## Turn392 | 2026-10-23 | Deterministic readiness privacy assertion
+
+PR307 readback-only head937a064 triggered conservative full CI40015729572.
+Python3.11 failed one unrelated pre-existing assertion: raw999 searched throughout
+readiness JSON matched random /tmp/tmp999u9320 journal path. Forced temp prefix
+signal-support-999- reproduces exact failure in0.158s. Test now always uses that
+prefix and checks absence of pid field globally plus999 value in source-health
+projection, preserving allowed journal-path reporting and private.service check.
+Focused signal-support15 PASS0.889s. Independent injected actual pid999 disclosure
+still fails the repaired assertion in0.074s; no production source changed.
+Original CI failure, deterministic red, green and injected-leak red retained.
+No quarantine or blind retry; new CI must qualify the corrected exact head.
+
+
+## Turn393 | 2026-10-23 | Startup fixture contract stabilization
+
+Post-merge main CI40015523144 Python3.12 failed startup-retention fixture because
+tmux pane_dead_status was empty despite dead pane and retained diagnostic. Initial
+real-tmux probe reproduced1/100; direct bootstrap experiment still4/400 and was
+reverted. Metadata1|||PID has neither exit status nor signal; a3s wait still fails,
+so no reliable exit-status guarantee is claimed. A gated ready/exit fixture keeps
+its intended diagnostic/dead-pane contract without treating omitted tmux metadata
+as product failure. No runtime harness/package source change remains. Revised
+real-tmux fixture400 PASS28.875s; mutations disabling retention or removing the
+original diagnostic both still fail. Startup-before-PTY and exact tmux exit-status
+behavior remain outside this controlled-child proof; no unsupported guarantee
+is silently promoted. Raw failed probes/experiments retained privately, all debug
+instrumentation removed. PR307 previously repaired privacy assertion passed both
+CI axes on53e1639; final combined fixture head still requires its own CI matrix.
+No provider prompts, production changes, quarantine or blind CI rerun.
