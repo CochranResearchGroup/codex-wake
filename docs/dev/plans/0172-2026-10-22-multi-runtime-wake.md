@@ -353,3 +353,34 @@ Approval provenance: Previews session 3c4638767588; brief artifact 705b7ef7fa0d;
 Q4–Q9 response 3d1680afa12e4b83959f36a5c0f2277d; subsequent Q10–Q12 acceptance
 and explicit brief approval in the user conversation. No tokens or raw private
 questionnaire export are copied into Git.
+
+## MR-04/MR-05 parallel wave
+
+Base36412c4 includes qualified MR-03; freshly fetched origin/main remains separate.
+Primary owns MR-04 (feat/mr04-cross-runtime-a2a); independent `/root/mr05` owns
+MR-05 (feat/mr05-runtime-policies), separate worktrees, concurrency2, no nested
+workers. CW-MR-172 remains governed local intake; fresh open issue/PR read found
+no matching item, and no tracker publication is claimed.
+
+Primary owns a2a identity/mailbox notification integration, CLI/MCP, records,
+shared glossary and canonical planning/evidence. Worker owns runtime policy,
+adapter/profile implementation and its tests/evidence. Existing RuntimeAdapter
+resolve/observe/submit/reconcile stays compatible; changes crossing ownership
+are requested and integrated by primary. Serial cherry-pick reconciliation after
+focused checks; one integrated frozen full-suite lane follows source convergence.
+
+MR-04 seams: public operator enrollment, actor-scoped message commands and durable
+notification dispatcher. Bus capabilities remain authority; runtime/terminal
+identity is context, never a work claim or automatic permission. Grok host context
+must be operator-bound to exact generation and checked independently of model
+caller claims; unavailable qualification refuses. Both-direction claim/reply,
+duplicate notification, stale generation and restart are public fixture controls.
+MR-05 seams: public policy selection, adapter outcomes and host-approved fallback;
+unsupported queue/interruption refuse before effects, uncertainty prohibits switching.
+
+No live/provider probe, installation, grant/service mutation or main merge is in
+this wave's initial source/fixture scope. The prior probe extension is consumed.
+Workers return a bounded source result, validation and remaining qualification
+gates; they cannot self-extend into live qualification. Primary adjudicates each
+result, fixes one bounded round of concrete integration defects, and records any
+remaining gate instead of silently broadening guarantees.

@@ -582,3 +582,32 @@ lanes:
     overlaps: []
     updated_at: 2026-10-10
     disposition: Plan0151 DONE; v0.13.0 released/installed; 14 MCP tools registered and qualified, docs and two installed skills match; no service restart or production messages; gov_policy evaluation deferred. Corrects initial P73 label without changing Plan0146 lane.
+
+  - id: P172-MR04
+    owner: primary / ecochran76
+    objective: Correlated cross-runtime mailbox request and reply
+    work_items: [CW-MR-172/MR-04]
+    plan: docs/dev/plans/0172-multi-runtime/0004-2026-10-22-cross-runtime-a2a.md
+    plan_ref: docs/multiruntime-spec
+    branch: feat/mr04-cross-runtime-a2a
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    dependencies: [MR-03 satisfied]
+    overlaps: [P172-MR05]
+    updated_at: 2026-10-22
+    disposition: stacked on36412c4; primary owns a2a and shared CLI/MCP integration
+  - id: P172-MR05
+    owner: subagent /root/mr05 / ecochran76
+    objective: Explicit busy policy and qualified fallback selection
+    work_items: [CW-MR-172/MR-05]
+    plan: docs/dev/plans/0172-multi-runtime/0005-2026-10-22-busy-and-fallback.md
+    plan_ref: docs/multiruntime-spec
+    branch: feat/mr05-runtime-policies
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    dependencies: [MR-03 satisfied]
+    overlaps: [P172-MR04]
+    updated_at: 2026-10-22
+    disposition: stacked on36412c4; worker owns runtime policies and adapters; serial primary integration
