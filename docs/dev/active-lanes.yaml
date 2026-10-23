@@ -8,6 +8,7 @@ lanes:
     plan: docs/dev/plans/0172-multi-runtime/0006-2026-10-22-installed-acceptance.md
     plan_ref: docs/multiruntime-spec
     branch: test/mr06-installed-acceptance
+    checkpoint: 6bcc91de90c8a705b26023524e546dbe1c98e52e
     target: origin/main
     integration: squash_pr
     remote_ref: origin/test/mr06-installed-acceptance
