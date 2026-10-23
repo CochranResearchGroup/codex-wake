@@ -159,3 +159,14 @@ class RuntimeA2ATests(unittest.TestCase):
         self.assertTrue(value['actor_receipt_id'].startswith('receipt_'))
         self.assertEqual(value['native_caller_attestation'],'not_qualified')
         self.assertEqual(Path(value['actor_capability_file']).stat().st_mode&0o777,0o600)
+
+    def test_grok_host_cannot_reuse_native_lifecycle_caller_grants(self):
+        from codex_wake.mcp_server import CommandRunner
+        calls=[]
+        runner=CommandRunner(actor_runtime='grok',lifecycle_profiles=self.root/'profiles',wake_root=self.root/'wake')
+        runner._execute=lambda *args:(calls.append(args) or ({'executed':True},False))
+        value,failed=runner.call('wake_sessions_spawn',dict(profile='native-profile',intent='same-intent',name='worker',
+            task='Synthetic',expires_at='2027-01-01T00:00:00Z',caller_thread_id=SESSION))
+        self.assertTrue(failed)
+        self.assertEqual(value['error']['code'],'native_caller_attestation_unavailable')
+        self.assertEqual(calls,[])
