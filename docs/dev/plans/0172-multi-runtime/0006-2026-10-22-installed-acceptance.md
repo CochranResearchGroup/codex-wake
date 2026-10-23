@@ -1,7 +1,7 @@
 # MR-06: Qualify the installed Codex and Grok workflow
 
-State: OPEN
-Ticket state: IN_PROGRESS
+State: CLOSED
+Ticket state: DONE
 Owner: ecochran76
 Work item: CW-MR-172/MR-06 (local draft; not posted)
 Priority: First-release dependency order
@@ -16,20 +16,20 @@ Integration: squash_pr
 
 ## Current execution
 
-The user's “ok go” after the MR-06 ready closeout authorizes this bounded live
-acceptance. Primary owns the only ready ticket; no independent nonblocked ticket
-exists to delegate. The accepted121 modules, wheel and non-editable installation
-match exactly; prior1451-test qualification remains source-bound and retained.
+The user explicitly approved Codex/Grok interop reruns to solve the bug and close
+this ticket on2026-10-23. This supersedes the earlier one-launch-only gate for
+bounded diagnostic tests. Each run remains at most six original synthetic prompts
+and300 seconds including cleanup; new sessions/bus/intents, no uncertain-work
+replay or production mutations. Primary owns the sole ready ticket; no subagents.
 
-Live envelope: one disposable private Codex app-server/TUI and one Grok TUI,
-at most six original synthetic prompts,300 seconds including cleanup, one owner,
-no replay or extra launch. Default auth coordination is reused without copying
-secrets or changing production config; native configured MCPs are disabled for
-the private server. Only new private sessions, bus, actor capabilities and runtime
-bindings are created. Grok's Bash tool is limited to the exact probe/work helper
-commands; inherited session context and ancestry are observed, never synthesized.
-A refusal/uncertainty stops the path with retained evidence; source fixes or further
-live qualification are not inferred from a failed sample.
+Real installed sample8 PASS33.623s: four prompt attempts, two visible responses
+in each TUI, authenticated claims and correlated replies in both directions,
+zero introduced/unattributed runtime processes and no changed pre-existing
+runtime generations. Codex0.164.0 / Grok1.0.40. Rebuilt candidate digest and
+all original failures are retained in the verification and machine receipt.
+Full local1455 tests PASS310.046s, zero failures/errors, one expected opt-in
+systemd skip; frozen source/tests unchanged. Installed changed-axis61 PASS9.249s.
+The omitted-isolation first full run remains retained as non-qualifying.
 
 ## Outcome
 
@@ -45,11 +45,11 @@ Do not publish a release, deploy into the user tool prefix, mutate production gr
 
 ## Acceptance Evidence
 
-- [ ] AC1–AC7: each criterion has an independent pass/fail/not-qualified verdict tied to exact versions and method.
-- [ ] Exercise both real visible TUIs and bidirectional A2A; fixtures/queue acceptance alone cannot pass live criteria.
-- [ ] Run required changed-surface/compatibility checks with declared environment and record exclusions.
-- [ ] Retain source/installed identity, run scope, original failures and owned-process cleanup readback.
-- [ ] Publish user-facing capability/support/recovery documentation, with any production rollout left as an explicit separate action.
+- [x] AC1–AC7: each criterion has an independent pass/fail/not-qualified verdict tied to exact versions and method.
+- [x] Exercise both real visible TUIs and bidirectional A2A; fixtures/queue acceptance alone cannot pass live criteria.
+- [x] Run required changed-surface/compatibility checks with declared environment and record exclusions.
+- [x] Retain source/installed identity, run scope, original failures and owned-process cleanup readback.
+- [x] Publish user-facing capability/support/recovery documentation, with any production rollout left as an explicit separate action.
 
 ## Repository Surface and Risks
 
@@ -61,17 +61,17 @@ A complete slice requires its stated evidence. Source completion, integration,
 installed acceptance and external publication remain separate states.
 
 
-## Retained sample and current gate
+## Retained failures and closeout
 
-One Codex and one Grok launch stopped in6.338s: Codex pane exited before capture,
-zero conversation prompts and no bus/grants/bindings/wakes. Original immediate
-cleanup retained one introduced process; later OS readback finds it gone, preserved
-as a separate observation. The exact Codex exit cause remains unconfirmed.
-
-Provider-free launcher repair retains dead panes/errors, explicitly scopes resume
-flags, verifies wheel/module identity and snapshots launcher source before input.
-One real tmux startup-evidence regression passes; no second live launch occurred.
-The recorded recipient envelope is consumed. A proposed extension is one additional
-Codex+Grok pair, at most six synthetic prompts and five minutes including cleanup,
-no replay. This needs its response before launch. MR-06 remains IN_PROGRESS.
+Remote resume rejects per-client permission overrides and empty threads lack
+persisted rollout history. The fresh remote TUI now creates its own verified
+thread. Guest wall regression is handled by explicitly selecting the existing
+network-first policy on a new private bus, preserving the failed old checkpoint.
+Helper claim output and CLI dispatch-envelope parsing were corrected with red/
+green tests. Terminal acceptance now permits one second of read-only observation
+for the original marker; it never pastes twice or changes the original deadline.
+Sample8 passes the original interop scenario; samples1–7 retain original verdicts.
+Source checkpoint759d700, full suite and installed controls qualify the candidate.
+Support/recovery matrix is published. Main integration, CI, release and production
+installation remain separate; no external GitHub issue was posted or closed.
 [Verification](../../verification/0172-2026-10-22-mr06-installed-acceptance.md).

@@ -1,92 +1,122 @@
-# MR-06 installed acceptance: retained setup failure
+# MR-06 installed Codex/Grok qualification
 
 Work item CW-MR-172/MR-06. Primary owns the only ready ticket; no independent
-nonblocked ticket exists to delegate. Candidate base651d493, package sourceef8b5b4,
-unreleased0.19.1 wheel SHA256
-`c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34`.
-State: IN_PROGRESS — live acceptance not qualified; corrected launcher prepared.
+nonblocked ticket exists to delegate. State: DONE for installed candidate acceptance. [Machine receipt](../evidence/plan0172/mr06-interop-qualification.json).
 
-## Current evidence and limits
+## Accepted live sample
 
-Before live effects, all121 package modules matched the accepted wheel and the
-non-editable installed prefix byte for byte. Prior frozen1451 PASS/one opt-in skip
-and final installed15 PASS remain valid for those unchanged package bytes. They
-are not a full-suite qualification of the new opt-in launcher. The new provider-free
-launcher regression passes1 test in0.084s; compile, F821/F822/F823 and whitespace pass.
+Sample8 passed in33.623s with four original synthetic prompt attempts, below the
+per-run six-prompt/300-second limit. Real Codex0.164.0 and Grok1.0.40
+(eb1a2256660d stable, minimal UI, Grok4.7) each showed two completion responses.
+Three durable intents each submitted once; one mailbox notification submitted
+once. Codex sent a request to Grok; Grok authenticated, read, newly claimed and
+replied, then sent a reverse request. Codex authenticated, read, newly claimed
+and replied. Grok observed the correlated reverse reply. Both helpers observed
+the actual inherited session IDs; no session context was inserted by the harness.
 
-The user said “ok go” after MR-06 was declared ready for actual visible TUI and
-bidirectional acceptance. The recorded live envelope was one disposable recipient
-per runtime, six original synthetic prompts,300 seconds including cleanup, no
-extra launch/replay. One launch of each runtime consumed that recipient envelope.
-The sample stopped in6.338s before any conversation prompt, bus, actor grant,
-binding or wake registration. No live first-release criterion is promoted to pass.
+Grok uses native_preferred with an explicitly approved terminal-observation
+fallback after definite pre-I/O native-unavailable evidence. Its terminal marker
+is delivery evidence, not a work acknowledgment. The subsequent independent
+mailbox capabilities, managed generation/ancestry/root checks and claimed=true
+receipts authorize the work. Native Grok caller attestation remains NOT_QUALIFIED.
+Codex uses the private native app-server and the thread created by its real TUI.
 
-Codex0.163.0 / Grok1.0.40 eb1a2256660d stable / Wake0.19.1. Owned Codex thread
-`01a166c3-ae11-7f93-a57e-26d571b6a73f`; Grok session
-`3fd09f1e-2e5a-45f5-9fea-872b2e902223`. Both launch paths were entered. Grok
-reached a matching local session-info response, but the Codex pane disappeared
-before capture. Exact stop: `command_refused:tmux:can't find pane: %0`.
-The Codex exit cause is unconfirmed because the original pane was not retained.
-A bounded file-searcher lookup found no matching owned-session startup error in
-the returned log candidates; cached/partial lookup is not proof no other log exists.
+The final OS census found zero introduced residuals, zero unattributed new runtime
+processes and no changed pre-existing Codex/Grok/tmux generations. No existing PID
+was targeted. This is a bounded census, not indefinite global process-health proof.
 
-Initial cleanup readback retained one introduced process1373703 and no changed
-pre-existing generations, so the original sample remains FAIL/cleanup_incomplete.
-A later fresh OS readback found that process already gone; no remedial signal was
-sent. Another later census has zero introduced residuals and one pre-existing
-process1367443 later absent, with cause unattributed. No pre-existing
-PID was targeted. These observations stay separate; later cleanup does not rewrite
-the failed sample or prove global process stability indefinitely.
+Candidate: unreleased0.19.1, rebuilt wheel SHA256
+`5e0f2125313d6a086ebc584a68f9344ec64e5f5c7f54182411f8e288e7025c43`.
+All121 installed modules matched that wheel before launch. The exact launcher
+snapshot/hash and module inventory were retained before effects. The source ref
+in the run records identifies a dirty checkpoint; the wheel and launcher hashes
+bind its exact bytes, subsequently committed as759d700 for review. The previous wheel
+`c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34`
+and its prior1451-test result are historical evidence, not qualification of the
+new adapter. The temporary candidate prefix was reinstalled; production was not.
 
-Raw evidence is private at
+## Diagnosis and retained failures
+
+The user explicitly approved interop reruns to solve the bug and close the ticket
+on2026-10-23. Each test uses new private sessions, bus, grants, nonce and intents;
+no uncertain original work is replayed. Runs stop on refusal or uncertainty.
+
+| Sample | Result | Prompt attempts | Disposition |
+| --- | --- | --- | --- |
+| 1 | FAIL6.338s, Codex pane disappeared | 0 | Original startup error unavailable; initial cleanup failure retained; later residual gone |
+| 2 | FAIL6.424s, explicit remote-resume permission refusal | 0 | Retained error; clean runtime census |
+| 3 | FAIL29.984s, legacy mailbox clock anomaly | 4 | Guest clock regression measured independently; failed bus preserved |
+| 4 | INCOMPLETE83.674s, operator stopped | 4 | Claims/replies passed; helper omitted printed claimed=true, so Codex correctly refused final completion |
+| 5 | INCOMPLETE72.431s, operator stopped | 4 | Actual helpers/visible responses passed; harness parsed dispatch envelope at wrong depth |
+| 6 | FAIL20.289s, terminal acceptance unconfirmed | 3 | Original notification uncertain; no replay, clean census |
+| 7 | FAIL20.088s, terminal acceptance unconfirmed | 3 | Same failure retained; no replay, clean census |
+| 8 | PASS33.623s | 4 | Corrected adapter/wheel; full bidirectional/visible evidence; clean census |
+
+Sample1 remains historical FAIL/cleanup_incomplete. Its initial introduced
+PID1373703 was later already gone; no remedial signal was sent. A subsequent
+census found pre-existing PID1367443 absent, cause unattributed. Missing original
+Codex captures/empty native log cannot prove its exit cause or native turn count.
+The original launcher was not snapshotted; later corrected source is not its hash.
+
+The exact current startup reproducer used a private app-server, a new empty thread
+and `codex resume --remote ENDPOINT -a never -s danger-full-access THREAD`.
+`startup_probe.py both` reproduced the permission error in2.808s, zero prompts.
+Either permission flag alone reproduced it. Removing both exposed an independent
+empty-thread/no-rollout resume error. Starting a fresh TUI against the private
+server succeeded. The launcher now configures permissions on that server and
+binds the unique thread created by the TUI. Codex auto-updated from0.163.0 to
+0.164.0 between samples1/2; sample1's exact historical cause remains unproven.
+
+A six-second independent guest-clock sampler detected wall regression >1s and
+11.434275s wall/monotonic offset variation. No host-clock configuration or clock
+guard changed. Fresh acceptance buses explicitly opt into the existing
+network-first plain-NTP policy; this is not authenticated UTC. Old anomalous
+checkpoints are preserved, never reset or migrated to mask the failure.
+
+The helper now prints the actual verified claim result. Its provider-free test
+failed with None instead of True, then passed after the fix. The notification
+parser now consumes the real CLI `dispatch.results` envelope; its fixture failed
+before the fix and passed after it. Each dispatch response gets its own artifact.
+
+Samples6/7 isolated asynchronous terminal painting: Enter completed before the
+first capture showed the exact marker; later retained frames contained it. A
+single-call adapter fixture with one stale post-paste frame reproduced uncertain
+instead of accepted. The repaired adapter observes only the original marker for
+at most one second within the original deadline. There is exactly one paste;
+missing evidence or changed generation/session remains uncertain. Rebuilt sample8
+reran the original visible interop scenario successfully. Failed samples are not
+reclassified as clean; terminal delivery can still be uncertain and forbids replay.
+
+## Checks and independent criteria
+
+Focused source adapter/harness selection:13 PASS1.334s, no skip. This includes
+real tmux startup retention, actual helper stdout, CLI receipt parsing and the
+new delayed-paint regression. Installed candidate changed-axis61 PASS9.249s under isolated time/XDG config
+and PYTHONPATH=.:tests. The initial selected-module command omitted the tests
+import directory and produced three fixture-import errors; retained, then
+corrected without changing tests. Full local suite1455 tests, zero failures/errors, one expected opt-in systemd
+skip, PASS310.046s; frozen source/tests unchanged. No release/CI claim.
+The first full command omitted the previously established stable-time/XDG
+isolation, reproduced known native scheduling-time failures, and was aborted as
+non-qualifying with output retained. The corrected full command uses empty
+CODEX_WAKE_STABLE_TIME_CONFIG, private XDG_CONFIG_HOME/XDG_STATE_HOME,
+PYTHONPATH=src:. and the frozen manifest runner.
+Compile, F821/F822/F823 and whitespace checks pass. No debug log prefixes were
+introduced. Temporary diagnostic source, red failures, probes, logs and raw TUI
+captures are retained privately outside Git at
 `~/.local/state/codex-wake/design/grok-multi-runtime-20261021/mr06/`.
-The original launcher's exact source was not snapshotted at run time; its command,
-result and installed identity are retained. The corrected launcher now snapshots
-its own source/hash and installed module inventory before any runtime launch.
 
-## Provider-free repair and concrete next run
+| Criterion | Evidence and qualified boundary |
+| --- | --- |
+| AC1 | Sample8: installed durable exact Codex and Grok wakes, real visible completions, original typed records |
+| AC2 | Sample8: both scoped directions, inherited identities, independent actor checks, claimed=true and correlated replies |
+| AC3 | Prior installed policy controls: default wait; queue/interrupt explicitly unsupported and refused before effects |
+| AC4 | Sample8 native_preferred/approved terminal fallback; prior binding/composer/profile controls; samples6/7 uncertain/no replay; delayed-paint red/green |
+| AC5 | Existing isolated expiry/cancel/crash/restart/generation/uncertainty controls; originals retained; full1455-test compatibility rerun PASS |
+| AC6 | Real0.164.0 Codex native wake and actor calls in sample8; full1455-test source compatibility suite PASS |
+| AC7 | Versioned CLI/MCP capability controls and published support matrix; host delegation is explicit, native Grok attestation/resource guarantees unqualified |
 
-The original tmux pattern is red-capable without models: start a shell that emits
-CW_STARTUP_FAILURE then exits7; tmux removes its pane, and capture fails. The new
-prepare_tmux seam first creates an owned inert pane, enables remain-on-exit, then
-respawns the requested command. A real tmux regression proves the dead pane,
-original exit7 and original error remain accessible in scrollback. An intermediate
-viewport-only check failed and is retained; the actual launcher already reads
-scrollback. This is startup-evidence repair, not a passing Codex startup proof.
-
-Connection/security flags are now placed explicitly on `codex resume`; CLI help
-confirms that option location. This removes an ambiguity but is not a confirmed
-root-cause fix. The corrected launcher waits on bounded fresh process readbacks
-instead of assuming shutdown completes after0.4s, retains unattributed new processes,
-never kills a pre-existing PID, and refuses acceptance on unresolved residuals.
-
-The concrete opt-in launcher is
-`scripts/multiruntime_live_qualification.py`. Before runtime launch it requires
-an installed prefix, qualified wheel and exact wheel digest; every installed
-module must match. It snapshots its source. Grok permits only the exact Bash probe
-and work helper commands, not arbitrary command rules. Inherited runtime session
-context is observed, never inserted by the harness. Failure/refusal/uncertainty
-stops the path. No production grants, buses, services or installation are changed.
-
-A further live run needs an explicit recipient-envelope extension: at most one
-additional disposable Codex TUI and one Grok TUI, six synthetic prompts total,
-five minutes including cleanup, no replay. The prepared first three durable
-intents plus at most one A2A notification fit within that ceiling. The previous
-sample submitted zero prompts; no pending request or work claim exists to replay.
-Until that extension is received, do not launch the corrected harness.
-
-## Independent criterion verdicts
-
-| Criterion | Source/isolated package evidence | Current live evidence |
-| --- | --- | --- |
-| AC1 exact durable Codex/Grok wake | Prior installed controls pass | NOT QUALIFIED: setup stopped before registration |
-| AC2 both directions, authentication, claim/reply | Frozen bus/actor/notification controls pass | NOT RUN: no bus or actor created |
-| AC3 wait / unsupported queue and interrupt | Installed refusal controls pass; no new guarantee | NOT RUN in this sample |
-| AC4 approved fallback and protected composer | Installed profile/fault controls pass | NOT RUN: no binding created |
-| AC5 original expiry, cancellation, restart, uncertainty | Frozen fault controls pass | NOT RUN: no intent created |
-| AC6 Codex identity/reader compatibility | Prior frozen1451 and installed15 pass, unchanged package | Real Codex TUI startup FAIL/unknown cause |
-| AC7 truthful capabilities/agent interface | Installed CLI/MCP controls pass; unqualified modes explicit | Native Grok caller attestation remains NOT QUALIFIED |
-
-MR-06 stays IN_PROGRESS. MR-01–MR-05 source/isolated evidence remains retained;
-none of it substitutes for the missing actual TUI and bidirectional first-release
-acceptance. Main integration, release and production rollout remain separate.
+These source/installed control proofs are distinct from the bounded real-TUI
+positive path; not every fault was injected into a live provider conversation.
+[Support and recovery](../multi-runtime-mailbox.md) states the qualified modes.
+Main integration, CI matrix, release and production rollout remain separate.
