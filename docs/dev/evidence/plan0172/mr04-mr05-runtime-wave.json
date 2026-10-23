@@ -71,5 +71,15 @@
   "verdict": "MR04_MR05_SOURCE_AND_ISOLATED_ARTIFACT_ACCEPTED",
   "next_ticket": "MR-06 READY; real TUI/bidirectional live acceptance not run",
   "frozen_source_commit": "ef8b5b4",
-  "source_modules": 121
+  "source_modules": 121,
+  "audits": {
+    "active_planning": {
+      "inherited_findings": 4,
+      "added": 0
+    },
+    "catalog_lanes": {
+      "inherited_findings": 51,
+      "added": 0
+    }
+  }
 }
