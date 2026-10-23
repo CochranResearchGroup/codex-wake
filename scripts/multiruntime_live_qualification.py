@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Opt-in isolated installed Codex/Grok TUI acceptance. No production grant changes.
 
-One owner, one recipient per runtime, <=6 original synthetic prompts, <=300s.
+Per run: one owner, one recipient per runtime, <=6 original synthetic prompts, <=300s.
 A refusal or uncertain outcome stops the run; no replay, draft clearing or retry.
 Run only with explicit current authority for this bounded live acceptance.
+Each diagnostic rerun uses new sessions and intents; uncertain work is never replayed.
 """
 from __future__ import annotations
 import argparse
@@ -43,6 +44,13 @@ def prepare_tmux(tmux,workspace,codex_argv):
     tmux('set-option','-g','remain-on-exit','on')
     tmux('respawn-pane','-k','-t','mr06:codex','-c',workspace,'exec '+shlex.join(codex_argv))
     return tmux('display-message','-p','-t','mr06:codex','#{pane_id}').strip()
+
+
+def notification_outcome(receipt):
+    rows=receipt['dispatch']['results']
+    return (any(row.get('attempt_id') for row in rows),
+            any(row.get('status')=='submitted' for row in rows),
+            any(row.get('status')=='uncertain' for row in rows))
 
 
 HELPER=r'''
@@ -91,6 +99,7 @@ try:
   invoke('read',first)
   claim=invoke('ack',first,'--outcome','accepted')
   if claim.get('claimed') is not True:raise RuntimeError('not_a_new_work_claim')
+  result['claimed']=claim['claimed']
   reply=invoke('reply',first,'--body-file',str(root/'result.txt'),
       '--idempotency-key',cfg['nonce']+'-forward-reply','--delivery','inbox','--outcome','completed','--evidence',str(root/'result.txt'))
   reverse=invoke('send','--to','thread:'+cfg['codex_thread'],'--app-server',cfg['endpoint'],
@@ -105,6 +114,7 @@ try:
   invoke('read',first)
   claim=invoke('ack',first,'--outcome','accepted')
   if claim.get('claimed') is not True:raise RuntimeError('not_a_new_work_claim')
+  result['claimed']=claim['claimed']
   reply=invoke('reply',first,'--body-file',str(root/'result.txt'),
       '--idempotency-key',cfg['nonce']+'-reverse-reply','--delivery','inbox','--outcome','completed','--evidence',str(root/'result.txt'))
   result.update(message_id=first,reply_id=reply['message']['message_id'])
@@ -170,6 +180,7 @@ def qualify(args):
         for name in config.get('mcp_servers',{}):
             if not all(c.isalnum() or c in '_-' for c in name):raise RuntimeError('unsupported_mcp_config_key')
             overrides+=['-c','mcp_servers.'+name+'.enabled=false']
+        overrides+=['-c','approval_policy="never"','-c','sandbox_mode="danger-full-access"']
         overrides+=['-c','projects.'+json.dumps(str(workspace))+'.trust_level="trusted"']
         log=(work/'codex-native.log').open('w')
         native=subprocess.Popen([args.codex,'app-server',*overrides,'--listen','unix://'+str(alias)],
@@ -182,11 +193,21 @@ def qualify(args):
         endpoint='unix://'+str(alias.resolve(strict=True))
         from codex_wake.native_protocol import native_request
         def rpc(method,params):return native_request(endpoint,args.codex,method,params,4)
-        thread=rpc('thread/start',dict(cwd=str(workspace),historyMode='legacy',experimentalRawEvents=True))['thread']['id']
-        result['codex_thread']=thread
-        codex_argv=[args.codex,'resume','--remote',endpoint,'--no-alt-screen',
-                    '-a','never','-s','danger-full-access',thread]
+        # Remote resume rejects permission overrides; a new empty RPC thread has
+        # no persisted rollout to resume. Let the real TUI create its thread.
+        codex_argv=[args.codex,'--remote',endpoint,'--no-alt-screen']
         codex_pane=prepare_tmux(tmux,workspace,codex_argv)
+        until=min(deadline-80,time.monotonic()+20)
+        while time.monotonic()<until:
+            loaded=rpc('thread/loaded/list',{})['data']
+            if len(loaded)==1 and 'Ask Codex to do anything' in frame(codex_pane):
+                thread=loaded[0];break
+            if tmux('display-message','-p','-t',codex_pane,'#{pane_dead}').strip()=='1':
+                save('codex-before.txt',frame(codex_pane))
+                raise RuntimeError('codex_tui_exited_before_admission')
+            time.sleep(.1)
+        else:raise RuntimeError('unique_owned_codex_tui_thread_not_ready')
+        result['codex_thread']=thread
         rules=('Disposable synthetic acceptance. Never spawn agents, search, edit files or run other commands. '
                'On the first wake run exactly '+str(prefix/'bin/python')+' '+str(workspace/'actor_step.py')+' grok probe. '
                'On a mailbox notification run exactly '+str(prefix/'bin/python')+' '+str(workspace/'actor_step.py')+' grok work. '
@@ -226,6 +247,8 @@ def qualify(args):
         result['binding_id']=binding['binding_id'];save('grok-binding-receipt.json',binding)
         def operator(*parts):return json.loads(run([cli,'a2a',*parts,'--bus-root',bus,'--json'],cwd=workspace))
         configured=operator('configure');op=configured['operator_capability_file']
+        save('network-time-policy.json',operator('network-time','--accept-unauthenticated-ntp','--operator-capability',op))
+        result['mailbox_time_policy']='network-first-v1; plain NTP explicitly opted in for isolated test bus'
         codex_actor=operator('enroll',workspace,'--thread','thread:'+thread,'--app-server',endpoint,'--tmux-socket',socket,'--operator-capability',op,'--notify')
         grok_actor=operator('enroll',workspace,'--thread','grok:'+binding['binding_id'],'--runtime-root',wake,'--operator-capability',op,'--notify')
         operator('bind-grok','--runtime-root',wake,'--binding-id',binding['binding_id'],'--bindings-file',bindings,'--operator-capability',op)
@@ -246,7 +269,7 @@ def qualify(args):
         reverse=arm('native','codex-reverse',workspace/'reverse.ready',
                   'Synthetic acceptance. Run only '+helper+' codex receive. Require claimed=true before returning the fixture result. No other tools/commands, edits or retry. Then reply CW_MR06_DONE.')
         (workspace/'begin.ready').touch();result['phases'].append('installed_durable_intents_registered')
-        notification_attempted=False;notification_submitted=False
+        notification_attempted=False;notification_submitted=False;dispatch_count=0
         while time.monotonic()<deadline:
             save('daemon-last.txt',run([daemon,'--once','--wake-root',wake],cwd=workspace))
             from codex_wake.records import all_records
@@ -270,10 +293,9 @@ def qualify(args):
                     method='terminal_observation',session_id=session,binding_id=binding['binding_id'],binding_sha256=binding['binding_sha256']))
                 if adapter.observe(recipient).state=='ready':
                     notification=operator('dispatch','--bindings-file',bindings,'--operator-capability',op)
-                    save('notification-dispatch.json',notification)
-                    notification_submitted=any(row.get('status')=='submitted' for row in notification.get('results',[]))
-                    if any(row.get('attempt_id') for row in notification.get('results',[])):notification_attempted=True
-                    if any(row.get('status')=='uncertain' for row in notification.get('results',[])):raise RuntimeError('notification_uncertain_no_replay')
+                    dispatch_count+=1;save('notification-dispatch-'+str(dispatch_count)+'.json',notification)
+                    notification_attempted,notification_submitted,uncertain=notification_outcome(notification)
+                    if uncertain:raise RuntimeError('notification_uncertain_no_replay')
             if (len(steps)==4 and all(v['status']=='passed' for v in steps.values())
                     and len(records)==3 and all(r.get('status')=='submitted' for r in records)
                     and notification_submitted):
