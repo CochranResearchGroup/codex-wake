@@ -7832,3 +7832,17 @@ No test, identity, claim, deadline, clock or uncertainty guard weakened.
 MR-06 local ticket DONE; no external GitHub issue posted/closed. Plan0172 broader
 program OPEN for main/CI/release/production and other runtime capabilities.
 Original main checkout preserved. [Receipt](docs/dev/evidence/plan0172/mr06-interop-qualification.json).
+
+
+## Turn389 | 2026-10-23 | Plan0172 integration preparation
+
+Fresh origin/main fcc996a and coordinator fa94fc8; clean coordinator worktree.
+No matching open issue/PR. Actor ecochran76 has current admin/push capability;
+allowlisted owned GitHub target permits issue creation. No contribution/security/
+issue/PR template files found. Created and read back integration issue305 with
+stable marker, exact existing enhancement label, local CW-MR-172 continuity and
+separate review/CI/main acceptance criteria. MR-01–MR-06 retain candidate-qualified
+state; broader program OPEN. Policy wiring PASS and full undefined-name lint PASS.
+Combined diff64 files is scoped to runtime wakes/A2A, tests, qualification harness
+and canonical planning/evidence. No production changes or extra live input.
+Next: publish reviewable PR, inspect its exact head/diff and required CI matrix.

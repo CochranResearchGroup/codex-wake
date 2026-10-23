@@ -2,7 +2,7 @@
 
 State: OPEN
 Owner: ecochran76
-Work item: CW-MR-172 (local intake in this plan; not posted to GitHub)
+Work item: https://github.com/CochranResearchGroup/codex-wake/issues/305 (integration; local intake CW-MR-172)
 Lane: P172
 Branch: docs/multiruntime-spec
 Base: fcc996a
@@ -13,6 +13,15 @@ Dependencies: None for specification; execution dependencies below
 WIP limit: One primary ticket plus one independent subagent per other ready ticket, within available runtime capacity
 
 ## Current State
+
+Integration continuation: issue [#305](https://github.com/CochranResearchGroup/codex-wake/issues/305)
+is OPEN for combined PR review, required Python3.11/3.12 CI and canonical-main
+readback. The six local tickets remain candidate-qualified; publication of this
+integration issue does not retroactively turn those drafts into GitHub issues.
+Current accepted coordinator source is fa94fc8; main remains fcc996a. No existing
+open duplicate issue/PR was found. Policy wiring and undefined-name lint pass.
+The original main checkout and its unrelated local policy commits are excluded.
+
 
 Latest: MR-06 DONE for the installed first-release candidate. Real Codex0.164.0
 and Grok1.0.40 bidirectional scoped claims/replies and two visible responses in
@@ -58,7 +67,7 @@ the five-minute probe bound. MR-01/MR-02 were BLOCKED at that checkpoint; this
 readiness is superseded only by the authenticated result above.
 [MR-01 evidence](../verification/0172-2026-10-22-mr01-grok-qualification.md).
 
-GitHub Issues remains the canonical coordination ledger. A bounded read found no
+Historical intake: GitHub Issues remains the canonical coordination ledger. A bounded read found no
 matching open issue or PR. CW-MR-172 is the local intake fallback under the
 work-item policy; neither this plan nor its child drafts claim remote publication,
 assignment or ready-for-agent labels. A future authorized tracker publication
