@@ -21,5 +21,18 @@
   "release": false,
   "provider_prompts_this_continuation": 0,
   "original_main_checkout": "preserved with unrelated local policy commits",
-  "program_boundary": "First-release candidate integrated. Production release/install and further runtime/lifecycle/resource qualifications remain separate."
+  "program_boundary": "First-release candidate integrated. Production release/install and further runtime/lifecycle/resource qualifications remain separate.",
+  "readback_followup_ci": {
+    "run": 40015729572,
+    "verdict": "FAIL retained",
+    "python_311": "1 failure in test_signal_support due random /tmp/tmp999u9320 path matching whole-output999 privacy assertion",
+    "package_source_changed": false,
+    "fixture_red": "Force temp prefix signal-support-999-; original assertion fails deterministically",
+    "repair": "Check absence of pid field in readiness JSON and999 value in source-health projection, leaving allowed journal path intact",
+    "focused_tests": 15,
+    "focused_seconds": 0.889,
+    "focused_verdict": "PASS",
+    "mutation": "Injected actual pid999 into latest_reconcile; repaired assertion failed as required; no production source mutation",
+    "next_gate": "Required matrix CI on repaired follow-up PR head"
+  }
 }

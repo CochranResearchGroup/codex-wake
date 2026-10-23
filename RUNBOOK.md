@@ -7883,3 +7883,17 @@ untouched. Broader Plan0172 stays OPEN for separately scoped release/rollout and
 other runtime/lifecycle/resource qualifications. This docs-only follow-up records
 the concrete integration readback without changing the qualified runtime source.
 [Receipt](docs/dev/evidence/plan0172/integration-readback.json).
+
+
+## Turn392 | 2026-10-23 | Deterministic readiness privacy assertion
+
+PR307 readback-only head937a064 triggered conservative full CI40015729572.
+Python3.11 failed one unrelated pre-existing assertion: raw999 searched throughout
+readiness JSON matched random /tmp/tmp999u9320 journal path. Forced temp prefix
+signal-support-999- reproduces exact failure in0.158s. Test now always uses that
+prefix and checks absence of pid field globally plus999 value in source-health
+projection, preserving allowed journal-path reporting and private.service check.
+Focused signal-support15 PASS0.889s. Independent injected actual pid999 disclosure
+still fails the repaired assertion in0.074s; no production source changed.
+Original CI failure, deterministic red, green and injected-leak red retained.
+No quarantine or blind retry; new CI must qualify the corrected exact head.
