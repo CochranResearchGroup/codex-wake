@@ -1332,7 +1332,8 @@ suite PASS/one expected skip in462.612s. Test-only repair9fd40a0 preserves guard
 all119 production modules match the frozen live-qualified wheel. Earlier failures
 remain retained. MR-04/MR-05 subsequently DONE for source/isolated artifact after parallel
 implementation and primary reconciliation. Frozen1451 PASS341.346s/one expected
-skip, unchanged source/tests; final installed changed-axis15 PASS. MR-06 IN_PROGRESS: live setup failed before prompts; corrected harness prepared.
+skip, unchanged source/tests; final installed changed-axis15 PASS. MR-06 DONE for installed candidate: real bidirectional TUI acceptance PASS;
+full1455/one expected skip and installed61 PASS. Main/CI/release/production separate.
 for real TUI/bidirectional live acceptance. Native Grok caller attestation, Codex
 terminal fallback and strict queue/interruption remain unqualified/refused.
 [MR-03 evidence](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).

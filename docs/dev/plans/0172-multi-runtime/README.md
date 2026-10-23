@@ -15,7 +15,7 @@ tracker publication. A draft's readiness is separate from live-effect authority.
 | MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 satisfied | DONE — source, isolated artifact and live terminal acceptance |
 | MR-04 | [Cross-runtime request and reply](0004-2026-10-22-cross-runtime-a2a.md) | MR-03 satisfied | DONE — source and isolated artifact |
 | MR-05 | [Busy policies and terminal fallback](0005-2026-10-22-busy-and-fallback.md) | MR-03 satisfied | DONE — source and isolated artifact |
-| MR-06 | [Installed acceptance](0006-2026-10-22-installed-acceptance.md) | MR-04/MR-05 source gates satisfied | IN_PROGRESS — setup failed; additional live envelope pending |
+| MR-06 | [Installed acceptance](0006-2026-10-22-installed-acceptance.md) | MR-04/MR-05 source gates satisfied | DONE — installed candidate and real bidirectional TUI path qualified |
 
 On “next ticket”, the primary owns one ready ticket and delegates one other ready
 ticket per independent subagent, within runtime capacity. MR-04/MR-05 can run
@@ -61,3 +61,11 @@ MR-06 READY for real TUI/bidirectional live evidence. No production effects.
 MR-06 update: one live pair failed during setup in6.338s, zero conversation
 prompts, no bus/grants/wakes. Corrected harness startup regression1 PASS.
 [Retained failure and next envelope](../../verification/0172-2026-10-22-mr06-installed-acceptance.md).
+
+
+MR-06 final: source759d700, installed candidate live sample8 PASS33.623s with
+four original prompt attempts, two responses per real TUI and authenticated
+claims/correlated replies in both directions. Full1455 tests PASS310.046s, one
+expected opt-in skip; installed61 PASS9.249s. Historical failures retained.
+MR-01–MR-06 candidate gates complete; broader program/main/CI/release/production
+and additional runtime qualification remain separate.

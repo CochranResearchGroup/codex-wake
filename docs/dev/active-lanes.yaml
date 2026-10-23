@@ -8,17 +8,17 @@ lanes:
     plan: docs/dev/plans/0172-multi-runtime/0006-2026-10-22-installed-acceptance.md
     plan_ref: docs/multiruntime-spec
     branch: test/mr06-installed-acceptance
-    checkpoint: 6bcc91de90c8a705b26023524e546dbe1c98e52e
+    checkpoint: 1432a3c88974edde8c5b9314eaa4ca4be279f698
     target: origin/main
     integration: squash_pr
     remote_ref: origin/test/mr06-installed-acceptance
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
     dependencies: []
     satisfied_dependency: MR-04 and MR-05 source and isolated artifact gates
     overlaps: []
-    updated_at: 2026-10-22
-    disposition: Setup failed before prompts; corrected harness prepared; further live envelope pending
+    updated_at: 2026-10-23
+    disposition: installed candidate and real bidirectional TUI qualified; full1455 and installed61 pass; source packet retained; main integration separate
   - id: P171
     owner: primary / ecochran76
     objective: Reuse a private native counter bridge for stable-time consumers

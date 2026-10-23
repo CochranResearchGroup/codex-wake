@@ -7797,3 +7797,38 @@ one-recipient-per-runtime envelope: one additional pair, six synthetic prompts,
 1451/one expected skip and installed15 evidence retained for that package only.
 No main integration, release or production installation change.
 [Verification](docs/dev/verification/0172-2026-10-22-mr06-installed-acceptance.md).
+
+
+## Turn388 | 2026-10-23 | MR-06 diagnosed and installed candidate accepted
+
+User explicitly approved bounded interop reruns to fix startup and close ticket.
+Primary owned sole ready MR-06; no new subagents. Remote Codex resume rejects
+permission overrides; removing them reveals missing rollout for an empty thread.
+Fresh remote TUI creates its own unique verified thread. Codex auto-updated from
+0.163.0 to0.164.0; sample1 historical cause remains unknown. Measured guest wall
+regression11.434275s; fresh private buses explicitly opt into existing network-first
+plain NTP, old checkpoints preserved and no production clock guard altered.
+Helper stdout now includes actual verified claimed=true; CLI dispatch parser uses
+the dispatch.results envelope. Both regressions observed red then green. Two
+uncertain terminal samples exposed asynchronous repaint; delayed-marker adapter
+regression red/green. Read-only reconciliation waits up to one second within its
+original deadline, one paste only, uncertainty retained if evidence is absent.
+Eight full live samples retained separately,22 possible prompt attempts total;
+startup-only diagnostic probes sent none. New sessions/buses/intents per sample,
+no uncertain-work replay. Samples4/5 operator-stopped, not passing retries.
+Rebuilt sample8 PASS33.623s/four attempts: both real TUIs, two visible completions
+each, bidirectional authenticated claims and correlated replies, three durable
+original intents submitted once plus one notification. Fresh census zero new
+runtime residuals/unattributed processes and unchanged pre-existing generations.
+Source packet759d700; rebuilt candidate0.19.1 wheel SHA256
+5e0f2125313d6a086ebc584a68f9344ec64e5f5c7f54182411f8e288e7025c43;
+all121 source/installed modules match. Full1455 tests PASS310.046s, zero failures/
+errors, one expected opt-in systemd skip, source/tests unchanged. Installed61
+PASS9.249s; focused13 PASS1.334s; F821/F822/F823, compile and whitespace PASS.
+First full command omitted recorded time/XDG isolation and was aborted as
+non-qualifying; original output retained. First installed module selection lacked
+tests import path, three fixture-import errors retained; corrected command passes.
+No test, identity, claim, deadline, clock or uncertainty guard weakened.
+MR-06 local ticket DONE; no external GitHub issue posted/closed. Plan0172 broader
+program OPEN for main/CI/release/production and other runtime capabilities.
+Original main checkout preserved. [Receipt](docs/dev/evidence/plan0172/mr06-interop-qualification.json).

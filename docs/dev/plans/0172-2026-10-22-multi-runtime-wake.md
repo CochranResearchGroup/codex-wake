@@ -14,20 +14,22 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
-Latest: MR-04 and MR-05 are DONE for source and isolated artifact, reconciled on
-coordinator sourceef8b5b4. Primary owned MR-04; independent `/root/mr05` supplied
-MR-05 source/focused evidence. Shared pane-lock review finding and native-only
-MCP grant forwarding finding were repaired; original failures are retained.
-Frozen1451 tests PASS341.346s, one expected skip, unchanged source/tests; final
-installed changed-axis15 PASS5.140s and lint PASS. MR-06 is IN_PROGRESS: one
-live startup sample failed before conversation input; zero prompts submitted.
-The repaired opt-in harness retains startup errors; its real-tmux regression
-passes. The recorded one-recipient-per-runtime envelope is consumed; another
-pair needs an explicit extension before launch. No
-production installation/grant/service change, main merge or release occurred.
-MR-03 remains qualified by its source/artifact/live-terminal evidence; the new
-wave does not extend that proof to real cross-runtime claims or fallback profiles.
-[Combined evidence](../evidence/plan0172/mr04-mr05-runtime-wave.json).
+Latest: MR-06 DONE for the installed first-release candidate. Real Codex0.164.0
+and Grok1.0.40 bidirectional scoped claims/replies and two visible responses in
+each TUI PASS33.623s, four prompt attempts, clean owned-runtime census. Source
+packet759d700 repairs asynchronous terminal repaint with bounded read-only
+observation, fresh remote Codex startup and harness claim/dispatch reporting.
+Full1455 tests PASS310.046s, one expected opt-in systemd skip, zero failures/errors,
+source/tests unchanged; installed changed-axis61 PASS9.249s. All121 source modules
+match the rebuilt non-editable candidate wheel. Original failures, stopped runs,
+clock anomaly and uncertain notifications remain retained; no uncertain-work replay.
+[MR-06 evidence](../verification/0172-2026-10-22-mr06-installed-acceptance.md).
+
+MR-01–MR-06 first-release candidate gates are qualified for the declared modes.
+The broader program remains OPEN: main integration/CI, release and production
+rollout are separate, and native Grok attestation, lifecycle/resource guarantees,
+Claude Code and other TUIs remain explicitly unqualified. No production
+installation/grant/service change, main merge or release occurred.
 
 MR-02 remains DONE for source and isolated artifact. Its final full suite1428
 (1 skipped) and isolated wheel94 tests passed. Main integration/release/production
