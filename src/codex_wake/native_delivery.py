@@ -33,6 +33,7 @@ def add_native_parser(subparsers):
         command.add_argument('--time-tolerance', help='maximum admitted clock interval, at most 5m')
         command.add_argument('--stop-at', help='absolute UTC stop; requires qualified UTC before any dispatch')
         command.add_argument('--json', dest='as_json', action='store_true', help='structured native intent receipt')
+        command.add_argument('--busy-policy',choices=['wait','queue','interrupt'],default='wait')
         command.add_argument('--require-monitor', action='store_true', help='require an active worker compatible with this record')
         command.add_argument('--resume-missing', action='store_true',
                              help='explicitly resume the same saved thread when it is not loaded')
@@ -42,6 +43,8 @@ def add_native_parser(subparsers):
 
 
 def create_native(args, root):
+    from .runtime_policies import require_wait_policy
+    require_wait_policy(getattr(args,"busy_policy","wait"))
     from .app_server import resolve_codex_cmd
     from .cli import create_record
     try:

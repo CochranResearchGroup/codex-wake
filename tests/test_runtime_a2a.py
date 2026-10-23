@@ -14,8 +14,9 @@ BINDING='grok_'+'a'*32
 
 class Host:
     changed=False
+    expected_digest="f"*64
     def load_binding(self, binding_id, expected_sha256=None):
-        if binding_id!=BINDING or expected_sha256 not in (None,'f'*64):raise ValueError('binding changed')
+        if binding_id!=BINDING or expected_sha256 not in (None,self.expected_digest):raise ValueError('binding changed')
         return dict(pid=123,start_ticks=42,boot_id='boot',session_id=SESSION,
                     executable='/opt/grok',executable_sha256='a'*64)
     def snapshot(self,binding):
@@ -140,3 +141,21 @@ class RuntimeA2ATests(unittest.TestCase):
         for injected in ('actor_runtime','runtime_root','capability'):
             self.assertTrue(runner.call('wake_messages_inbox',{**args,injected:'spoof'})[1])
         self.assertEqual(len(calls),1)
+
+    def test_operator_cli_issues_separate_grok_actor_with_real_audit_receipt(self):
+        from unittest.mock import patch
+        import io,hashlib
+        from codex_wake.cli import main
+        directory=self.runtime.root/'runtime-bindings';directory.mkdir(parents=True,mode=0o700)
+        file=directory/(BINDING+'.json');file.write_text('{}');file.chmod(0o600)
+        self.host.expected_digest=hashlib.sha256(file.read_bytes()).hexdigest()
+        with patch('codex_wake.runtime_a2a.GrokMailboxRuntime',return_value=self.runtime),patch('sys.stdout',new_callable=io.StringIO) as out:
+            code=main(['a2a','enroll',str(self.repo),'--thread','grok:'+BINDING,
+                '--runtime-root',str(self.runtime.root),'--bus-root',str(self.bus.root),
+                '--operator-capability',str(self.operator),'--notify','--json'])
+        self.assertEqual(code,0,out.getvalue())
+        value=json.loads(out.getvalue())
+        self.assertTrue(value['namespace'].startswith('grok:'))
+        self.assertTrue(value['actor_receipt_id'].startswith('receipt_'))
+        self.assertEqual(value['native_caller_attestation'],'not_qualified')
+        self.assertEqual(Path(value['actor_capability_file']).stat().st_mode&0o777,0o600)

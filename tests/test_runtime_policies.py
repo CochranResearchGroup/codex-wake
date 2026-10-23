@@ -174,3 +174,23 @@ class FallbackProtectionTests(unittest.TestCase):
                 outcome = GrokRuntimeAdapter(Host(),preferred_method='native_preferred').submit(
                     RuntimeRecipient('grok',SESSION,binding),'Synthetic')
                 self.assertEqual(outcome.state,'not_sent')
+
+class IntegratedPolicySelectionTests(unittest.TestCase):
+    def test_native_cli_and_grok_mcp_refuse_unqualified_policy_before_effects(self):
+        import tempfile
+        from pathlib import Path
+        from codex_wake.cli import run
+        from codex_wake.records import WakeError
+        from codex_wake.mcp_server import CommandRunner
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)/'wake'
+            for policy in ('queue','interrupt'):
+                with self.assertRaisesRegex(WakeError,'busy_policy_unsupported'):
+                    run(['--wake-root',str(root),'native','after','--busy-policy',policy,
+                         '--codex-path','/not-an-executable','exact-thread','1m','--','Synthetic'])
+                runner=CommandRunner(wake_root=root)
+                value,failed=runner.call('wake_grok_after',dict(binding_id='grok_'+'a'*32,
+                    trigger='1m',prompt='Synthetic',idempotency_key='original',busy_policy=policy))
+                self.assertTrue(failed)
+                self.assertEqual(value['error']['code'],'busy_policy_unsupported')
+            self.assertFalse(root.exists())

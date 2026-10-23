@@ -115,7 +115,8 @@ for _verb in ('after','at','file'):
     SPECS['wake_grok_'+_verb] = ('grok',_verb,
         'Retain a durable wake for a host-approved exact open Grok binding. Default wait; terminal observation is not execution or acknowledgment. Stable intent key and compatible monitor required. No arbitrary socket/executable or binding enrollment.',
         {'binding_id':{'type':'string','pattern':'^grok_[0-9a-f]{32}$'},
-         'trigger':TEXT,'prompt':BODY,'idempotency_key':{**INTENT,'maxLength':200},'ttl':TEXT},
+         'trigger':TEXT,'prompt':BODY,'idempotency_key':{**INTENT,'maxLength':200},'ttl':TEXT,
+         'busy_policy':{'enum':['wait','queue','interrupt'],'default':'wait'}},
         ['binding_id','trigger','prompt','idempotency_key'],False)
 
 
@@ -247,13 +248,16 @@ class CommandRunner:
                 command += ['--' + key.replace('_', '-'), str(value)]
             return self._execute(command, arguments, readonly)
         if group == 'grok':
+            if arguments.get('busy_policy','wait') != 'wait':
+                return {'error':{'code':'busy_policy_unsupported'}}, True
             if self.wake_root is None or not Path(self.wake_root).is_absolute():
                 return {'error':{'code':'runtime_host_scope_unavailable'}}, True
             command=[*self.cli,'--wake-root',str(self.wake_root),'grok',verb,'--json']
             if verb == 'show':
                 command += [arguments['wake_id']]
             elif verb != 'sessions':
-                command += ['--require-monitor','--idempotency-key',arguments['idempotency_key'],
+                command += ['--require-monitor','--busy-policy',arguments.get('busy_policy','wait'),
+                            '--idempotency-key',arguments['idempotency_key'],
                             '--ttl',arguments.get('ttl','24h'),arguments['binding_id'],
                             arguments['trigger'],'--',arguments['prompt']]
             return self._execute(command,arguments,readonly)
