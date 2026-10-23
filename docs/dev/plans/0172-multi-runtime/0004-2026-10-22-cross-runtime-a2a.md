@@ -1,10 +1,11 @@
 # MR-04: Exchange correlated work between Codex and Grok
 
 State: PLANNED
+Ticket state: READY
 Owner: ecochran76
 Work item: CW-MR-172/MR-04 (local draft; not posted)
 Priority: First-release dependency order
-Blocked by: MR-03
+Blocked by: MR-03 satisfied
 Specification: [Plan0172](../0172-2026-10-22-multi-runtime-wake.md)
 
 ## Outcome

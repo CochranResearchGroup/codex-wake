@@ -12,9 +12,9 @@ tracker publication. A draft's readiness is separate from live-effect authority.
 | --- | --- | --- | --- |
 | MR-01 | [Qualify exact open Grok delivery](0001-2026-10-22-qualify-grok.md) | None | DONE — managed-launch terminal observation |
 | MR-02 | [Preserve Codex through the runtime seam](0002-2026-10-22-codex-runtime-seam.md) | MR-01 satisfied | DONE — source and isolated wheel |
-| MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 satisfied | IN_PROGRESS — live gate passes; full-suite QA open |
-| MR-04 | [Cross-runtime request and reply](0004-2026-10-22-cross-runtime-a2a.md) | MR-03 | PLANNED |
-| MR-05 | [Busy policies and terminal fallback](0005-2026-10-22-busy-and-fallback.md) | MR-03 | PLANNED |
+| MR-03 | [Deliver a durable open-Grok wake](0003-2026-10-22-grok-wake.md) | MR-02 satisfied | DONE — source, isolated artifact and live terminal acceptance |
+| MR-04 | [Cross-runtime request and reply](0004-2026-10-22-cross-runtime-a2a.md) | MR-03 satisfied | READY |
+| MR-05 | [Busy policies and terminal fallback](0005-2026-10-22-busy-and-fallback.md) | MR-03 satisfied | READY |
 | MR-06 | [Installed acceptance](0006-2026-10-22-installed-acceptance.md) | MR-04, MR-05 | PLANNED |
 
 On “next ticket”, the primary owns one ready ticket and delegates one other ready
@@ -44,3 +44,9 @@ candidate adds schema7, host-approved Grok bindings and weak terminal evidence.
 Two setup probes sent zero conversation prompts and cleaned up, but saw no
 active session. The user-approved extra probe PASSED: one prompt, exact bound
 recipient and reply, no replay, clean teardown in13.996s. Full-suite QA stays open. MR-04/MR-05 stay blocked. [Verification](../../verification/0172-2026-10-22-mr03-grok-wake.md).
+
+MR-03 final reconciliation: frozen full1438 PASS/one expected skip in462.612s,
+source/tests unchanged; all119 production modules match the live-qualified wheel.
+Test-only repair9fd40a0 preserves guards. Prior failures remain retained, including
+the unclassified historical backup-create error. MR-03 DONE; MR-04/MR-05 READY
+for the next parallel wave. MR-06 remains blocked. Main/release/production separate.

@@ -7735,3 +7735,22 @@ receiver acknowledgment remain not_observed. Previous failures remain retained.
 MR-03 IN_PROGRESS on full-suite QA; MR-04/MR-05 blocked. No further live probe
 authorized by this consumed extension. No production install, main merge or release.
 [Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+
+
+## Turn385 | 2026-10-22 | MR-03 QA repaired and reconciled
+
+Test-only commit9fd40a0: independent sampler/targeted trace confirm wall regressions
+of approximately10.58s while monotonic advances normally. Workflow mailbox clocks
+are now explicit fixtures; production anomaly guards unchanged. Modeled1.05s ingest
+stall reproduces old webhook503 COMMIT_FAILED; repaired armed-signal timeout and
+recovery control passes. Backup controlled stress30 PASS17.540s; mailbox/CLI27
+PASS12.877s; webhook/client23 PASS4.555s. Wrong-interpreter broad run aborted and
+retained; final isolated candidate interpreter includes MCP/private config/state.
+Frozen full1438 PASS462.612s, one expected opt-in skip, zero errors/failures;
+source/tests unchanged throughout. All119 production modules match the wheel.
+Original backup-create error remains unclassified historical evidence; no recurrence
+in stress or final full run, no backup implementation change. MR-03 DONE for source
+and isolated artifact, with prior live proof retained. MR-04/MR-05 READY next wave;
+MR-06 blocked. Primary owned only ready MR-03; zero subagents. No extra provider
+probe, production installation, main integration, release or grant change.
+[Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).

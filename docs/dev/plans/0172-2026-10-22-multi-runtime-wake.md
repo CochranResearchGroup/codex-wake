@@ -14,16 +14,17 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
-Latest: MR-03 is IN_PROGRESS. The source candidate adds schema7/runtime-envelope1,
-host-approved managed-launch Grok bindings, shared clock eligibility and weak
-terminal evidence. Isolated-wheel118 controls pass; the frozen full1438-test run has2 failures and1
-error (backup, webhook and messaging), retained as an open validation gate. Two
-setup probes sent zero conversation prompts and cleaned up. The user then approved
-one additional recipient, five minutes, one synthetic prompt. That probe PASSED
-in13.996s: exact session binding, separate registration/daemon processes, one
-attempt, standalone reply and no replay. Cleanup preserved pre-existing processes.
-The live gate is satisfied; full-suite QA remains open. MR-04/MR-05 remain blocked.
-Only MR-03 was ready in this wave; no independent nonblocked ticket or subagent.
+Latest: MR-03 is DONE for source and isolated artifact. Schema7/runtime-envelope1,
+host-approved Grok bindings, shared clock eligibility and terminal evidence are
+qualified. Isolated-wheel118 controls pass. Test-only repair9fd40a0 stabilizes
+workflow clocks and timeout recovery; final frozen1438-test suite PASS in462.612s,
+one expected skip, zero failures/errors. All119 production modules still match
+the frozen wheel. Historical failures remain retained; the exact original backup
+create exception is unclassified and did not recur in the controlled stress/full run.
+The user-approved extra live probe PASSED in13.996s: exact session, one original
+wake/attempt/reply, no replay, clean teardown. MR-04/MR-05 are independently READY;
+MR-06 remains blocked on both. Main/release/production remain separate.
+Only MR-03 was ready at this wave's start; primary owned it with zero subagents.
 [MR-03 evidence](../verification/0172-2026-10-22-mr03-grok-wake.md).
 
 MR-02 remains DONE for source and isolated artifact. Its final full suite1428
