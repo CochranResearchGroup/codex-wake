@@ -1,0 +1,380 @@
+{
+  "work_item": "CW-MR-172/MR-06",
+  "verdict": "MR06_INSTALLED_CANDIDATE_ACCEPTED",
+  "authority": "User explicitly approved Codex/Grok interop reruns to solve bug and close ticket on 2026-10-23; each run <=6 original synthetic prompts and <=300s; no uncertain-work replay",
+  "attempts": [
+    {
+      "verdict": "FAIL",
+      "work": "/tmp/cw-mr06-81c3rv3w",
+      "grok_session": "3fd09f1e-2e5a-45f5-9fea-872b2e902223",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 0,
+      "phases": [
+        "two_owned_tuis_started"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.163.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "651d493",
+      "codex_thread": "01a166c3-ae11-7f93-a57e-26d571b6a73f",
+      "grok_pid": 1373191,
+      "reason": "command_refused:tmux:can't find pane: %0\n",
+      "elapsed_seconds": 6.338,
+      "cleanup": {
+        "introduced_remaining": [
+          1373703
+        ],
+        "preexisting_changed": []
+      },
+      "cleanup_incomplete": true,
+      "sample": 1
+    },
+    {
+      "verdict": "FAIL",
+      "work": "/tmp/cw-mr06-i6cj5eiw",
+      "grok_session": "edf7a6e8-6fa7-47a4-acc7-f6d2841bf85e",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 0,
+      "phases": [
+        "two_owned_tuis_started"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.164.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "6bcc91d",
+      "wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+      "installed_module_count": 121,
+      "launcher_sha256": "822ed1e2cd4e43f30e5434c17c5344c33274634e3f15add981cced5011fe2e31",
+      "native_pid": 882673,
+      "codex_thread": "01a16862-11d2-7ba3-b442-a6a337d3bbc4",
+      "grok_pid": 882889,
+      "reason": "codex_tui_exited_before_admission; retained codex-before.txt",
+      "possible_prompt_attempts": 0,
+      "elapsed_seconds": 6.424,
+      "cleanup": {
+        "introduced_remaining": [],
+        "unattributed_new_processes": [],
+        "preexisting_changed": [],
+        "preexisting_changes_attribution": "unattributed; no pre-existing PID was targeted"
+      },
+      "sample": 2
+    },
+    {
+      "verdict": "FAIL",
+      "work": "/tmp/cw-mr06-80lslncm",
+      "grok_session": "2e66ba66-e46a-49e4-bd06-bde0cb739d81",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 4,
+      "phases": [
+        "two_owned_tuis_started",
+        "installed_durable_intents_registered"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.164.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "6bcc91d+startup-fix",
+      "wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+      "installed_module_count": 121,
+      "launcher_sha256": "6d8e6c98d0f4c2ed68de7d1600d61e6d24d5c5f442938f2870ef3e1479ccaf7f",
+      "native_pid": 903407,
+      "codex_thread": "01a16863-fccb-7072-8318-ea8224121c39",
+      "grok_pid": 904087,
+      "binding_id": "grok_96769f92e75644d2a3f7e4cf65e8a12f",
+      "actor_steps": {
+        "codex-send": "passed",
+        "grok-probe": "passed",
+        "grok-work": "started",
+        "codex-receive": "started"
+      },
+      "reason": "grok-work:actor_cli_refused:clock_anomaly",
+      "possible_prompt_attempts": 4,
+      "elapsed_seconds": 29.984,
+      "cleanup": {
+        "introduced_remaining": [],
+        "unattributed_new_processes": [],
+        "preexisting_changed": [],
+        "preexisting_changes_attribution": "unattributed; no pre-existing PID was targeted"
+      },
+      "sample": 3
+    },
+    {
+      "verdict": "INCOMPLETE",
+      "work": "/tmp/cw-mr06-ng9gy_pv",
+      "grok_session": "76379e5a-03ee-4e7c-8ddb-6af27b036506",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 4,
+      "phases": [
+        "two_owned_tuis_started",
+        "installed_durable_intents_registered"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.164.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "6bcc91d+startup-clock-policy",
+      "wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+      "installed_module_count": 121,
+      "launcher_sha256": "d130f810a3d3b11bea2712326ff40cf8d04c5af0f83863aaae575a534e9c89ee",
+      "native_pid": 921499,
+      "codex_thread": "01a16865-751c-7960-814d-49a7ca138b5f",
+      "grok_pid": 922096,
+      "binding_id": "grok_74e8d0c24fd94c3ea639f8250ce4c0e7",
+      "mailbox_time_policy": "network-first-v1; plain NTP explicitly opted in for isolated test bus",
+      "actor_steps": {
+        "codex-send": "passed",
+        "grok-probe": "passed",
+        "grok-work": "passed",
+        "codex-receive": "passed"
+      },
+      "possible_prompt_attempts": 4,
+      "elapsed_seconds": 83.674,
+      "cleanup": {
+        "introduced_remaining": [],
+        "unattributed_new_processes": [],
+        "preexisting_changed": [],
+        "preexisting_changes_attribution": "unattributed; no pre-existing PID was targeted"
+      },
+      "sample": 4
+    },
+    {
+      "verdict": "INCOMPLETE",
+      "work": "/tmp/cw-mr06-7m4i3ibj",
+      "grok_session": "c947d52e-3019-45a0-80cf-250db58fd834",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 4,
+      "phases": [
+        "two_owned_tuis_started",
+        "installed_durable_intents_registered"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.164.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "6bcc91d+startup-clock-claim-fix",
+      "wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+      "installed_module_count": 121,
+      "launcher_sha256": "5c650012c6b1f9f1cc8bf128d1444425701562ae4da7133dafcfa29cce5d6e8f",
+      "native_pid": 942072,
+      "codex_thread": "01a16867-1b71-7702-86e0-44b7dadfcbda",
+      "grok_pid": 942412,
+      "binding_id": "grok_fb75389f5b054190b3a106ce8cd0946b",
+      "mailbox_time_policy": "network-first-v1; plain NTP explicitly opted in for isolated test bus",
+      "actor_steps": {
+        "codex-send": "passed",
+        "grok-probe": "passed",
+        "grok-work": "passed",
+        "codex-receive": "passed"
+      },
+      "possible_prompt_attempts": 4,
+      "elapsed_seconds": 72.431,
+      "cleanup": {
+        "introduced_remaining": [],
+        "unattributed_new_processes": [],
+        "preexisting_changed": [],
+        "preexisting_changes_attribution": "unattributed; no pre-existing PID was targeted"
+      },
+      "sample": 5
+    },
+    {
+      "verdict": "FAIL",
+      "work": "/tmp/cw-mr06-po1408ek",
+      "grok_session": "bddad671-3812-4265-a970-24c95ed707d9",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 3,
+      "phases": [
+        "two_owned_tuis_started",
+        "installed_durable_intents_registered"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.164.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "6bcc91d+mr06-final-fixes",
+      "wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+      "installed_module_count": 121,
+      "launcher_sha256": "fa05e2e99f12fa2ff40c3fdea4aac43ea0c20cd167dcb71bc242b4aaed00aeb9",
+      "native_pid": 960080,
+      "codex_thread": "01a16868-9da0-7143-8836-cba70dd8503d",
+      "grok_pid": 960678,
+      "binding_id": "grok_2820afdff6144775bbdc3b335ce2edeb",
+      "mailbox_time_policy": "network-first-v1; plain NTP explicitly opted in for isolated test bus",
+      "actor_steps": {
+        "codex-send": "passed",
+        "grok-probe": "passed"
+      },
+      "reason": "notification_uncertain_no_replay",
+      "possible_prompt_attempts": 3,
+      "elapsed_seconds": 20.289,
+      "cleanup": {
+        "introduced_remaining": [],
+        "unattributed_new_processes": [],
+        "preexisting_changed": [],
+        "preexisting_changes_attribution": "unattributed; no pre-existing PID was targeted"
+      },
+      "sample": 6
+    },
+    {
+      "verdict": "FAIL",
+      "work": "/tmp/cw-mr06-mbym9ev_",
+      "grok_session": "267c6ede-9079-4177-b89b-de75ecd44791",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 3,
+      "phases": [
+        "two_owned_tuis_started",
+        "installed_durable_intents_registered"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.164.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "6bcc91d+mr06-final-fixes",
+      "wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+      "installed_module_count": 121,
+      "launcher_sha256": "fa05e2e99f12fa2ff40c3fdea4aac43ea0c20cd167dcb71bc242b4aaed00aeb9",
+      "native_pid": 969984,
+      "codex_thread": "01a16869-58ac-7391-a252-80970d79fec9",
+      "grok_pid": 970545,
+      "binding_id": "grok_ccb9bbbcecd0476383d884c5138ac6e1",
+      "mailbox_time_policy": "network-first-v1; plain NTP explicitly opted in for isolated test bus",
+      "actor_steps": {
+        "codex-send": "passed",
+        "grok-probe": "passed"
+      },
+      "reason": "notification_uncertain_no_replay",
+      "possible_prompt_attempts": 3,
+      "elapsed_seconds": 20.088,
+      "cleanup": {
+        "introduced_remaining": [],
+        "unattributed_new_processes": [],
+        "preexisting_changed": [],
+        "preexisting_changes_attribution": "unattributed; no pre-existing PID was targeted"
+      },
+      "sample": 7
+    },
+    {
+      "verdict": "PASS",
+      "work": "/tmp/cw-mr06-3wheeems",
+      "grok_session": "44497b4d-9076-418b-b10a-096683cf8791",
+      "prompt_limit": 6,
+      "wall_limit_seconds": 300,
+      "prompts_submitted": 4,
+      "phases": [
+        "two_owned_tuis_started",
+        "installed_durable_intents_registered",
+        "both_directions_credentialed_claim_and_correlated_reply"
+      ],
+      "runtime_versions": {
+        "codex": "codex-cli 0.164.0",
+        "grok": "grok 1.0.40 (eb1a2256660d) [stable]",
+        "wake": "codex-wake 0.19.1"
+      },
+      "source_commit": "6bcc91d+mr06-repaint-fix",
+      "wheel_sha256": "5e0f2125313d6a086ebc584a68f9344ec64e5f5c7f54182411f8e288e7025c43",
+      "installed_module_count": 121,
+      "launcher_sha256": "e0819f825b4f739fa0083b746ff78565591da290b9cd9359b9d2eb14306036c5",
+      "native_pid": 991700,
+      "codex_thread": "01a1686a-c176-7f31-8cfc-445bef55dd45",
+      "grok_pid": 992238,
+      "binding_id": "grok_f4d3bc9dfe7d4b30a5e92598b118caaa",
+      "mailbox_time_policy": "network-first-v1; plain NTP explicitly opted in for isolated test bus",
+      "actor_steps": {
+        "codex-send": "passed",
+        "grok-probe": "passed",
+        "grok-work": "passed",
+        "codex-receive": "passed"
+      },
+      "visible_synthetic_responses": {
+        "codex": 2,
+        "grok": 2
+      },
+      "possible_prompt_attempts": 4,
+      "elapsed_seconds": 33.623,
+      "cleanup": {
+        "introduced_remaining": [],
+        "unattributed_new_processes": [],
+        "preexisting_changed": [],
+        "preexisting_changes_attribution": "unattributed; no pre-existing PID was targeted"
+      },
+      "sample": 8
+    }
+  ],
+  "conversation_prompt_attempts_all_live_samples": 22,
+  "startup_only_probes": "five real private-server probes plus one nonexistent-endpoint minimization; zero prompts; retained separately",
+  "accepted_sample": 8,
+  "accepted_wheel_sha256": "5e0f2125313d6a086ebc584a68f9344ec64e5f5c7f54182411f8e288e7025c43",
+  "source_modules": 121,
+  "selected_method": "native_preferred with approved terminal_observation fallback for Grok; native Codex",
+  "native_grok_caller_attestation": "NOT_QUALIFIED; independent host delegation only",
+  "production_install_changed": false,
+  "main_integration": false,
+  "release": false,
+  "focused": {
+    "tests": 13,
+    "seconds": 1.334,
+    "verdict": "PASS"
+  },
+  "full_suite": {
+    "exit_code": 0,
+    "tests": 1455,
+    "failures": 0,
+    "errors": 0,
+    "skipped": [
+      [
+        "test_live_deadline_stops_service_without_controller (test_host_execution.HostExecutionTests.test_live_deadline_stops_service_without_controller)",
+        "opt-in disposable systemd test"
+      ]
+    ],
+    "seconds": 310.046,
+    "source_unchanged": true,
+    "log_sha256": "43656d6ee7974ef7c7e513ab56087e8984371ba3f538f3beb890ffa73660e153"
+  },
+  "original_unknown_cause": "Sample1 Codex0.163.0 lacks retained startup error; identical harness flags reproduce permission refusal on0.164.0; do not assert historical cause proven",
+  "uncertainty_disposition": "Samples6/7 retained FAIL; no replay. Delayed-paint fixture red/green and rebuilt sample8 pass support bounded read-only observation repair; original samples are not reclassified.",
+  "private_evidence_directory": "/home/ecochran76/.local/state/codex-wake/design/grok-multi-runtime-20261021/mr06",
+  "source_commit": "759d700950224dfc073dc5454c644aa2ccd13b6c",
+  "installed_focused": {
+    "tests": 61,
+    "seconds": 9.249,
+    "verdict": "PASS",
+    "environment": "CODEX_WAKE_STABLE_TIME_CONFIG empty; private XDG config/state; PYTHONPATH=.:tests; package imported from non-editable installed prefix",
+    "superseded": "First installed selection omitted tests directory from import path; three fixture-import errors retained; no test changes to conceal them"
+  },
+  "full_suite_environment": {
+    "CODEX_WAKE_STABLE_TIME_CONFIG": "",
+    "XDG_CONFIG_HOME": "/tmp/cw-mr06-validation/full-state/config",
+    "XDG_STATE_HOME": "/tmp/cw-mr06-validation/full-state/state",
+    "PYTHONPATH": "src:.",
+    "command": "python /tmp/cw-mr06-validation/full_runner.py",
+    "tier": "comprehensive",
+    "superseded": "First full command omitted established time/XDG isolation; aborted with non-qualifying receipt and original output retained"
+  },
+  "ticket_state": "DONE",
+  "criteria": {
+    "AC1": "PASS live sample8",
+    "AC2": "PASS live sample8",
+    "AC3": "PASS installed default-wait and unsupported queue/interrupt refusal controls",
+    "AC4": "PASS live approved fallback sample8; isolated profile/composer guards; retained uncertain no-replay samples; delayed repaint regression",
+    "AC5": "PASS isolated original-intent expiry/cancel/crash/restart/stale-generation/uncertainty controls and comprehensive suite",
+    "AC6": "PASS real Codex0.164.0 wake/A2A plus full compatibility suite",
+    "AC7": "PASS installed versioned capability/refusal controls and published support/recovery matrix; native Grok attestation remains unqualified"
+  },
+  "lint": "F821,F822,F823 PASS",
+  "qualification_boundary": "Accepted unreleased installed candidate and selected real open-TUI path; no live MCP-host launch qualification, native Grok attestation, other TUI support, CI matrix, main integration, release or production rollout"
+}
