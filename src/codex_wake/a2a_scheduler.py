@@ -188,6 +188,10 @@ class MailScheduler:
             actor = database.execute('SELECT actor_id,generation,root FROM actors WHERE namespace=? AND thread_id=?',
                                      (namespace, thread_id)).fetchone()
             envelope['current_recipient_authority'] = dict(actor)
+            upper=self.mailbox._time_upper(database,now)
+            window=row['expires']-upper
+            if attempt_id is not None:window=min(window,intent['lease_until']-upper)
+            envelope['dispatch_window_seconds']=max(0,window)
             database.execute('COMMIT')
             return envelope
 
@@ -235,7 +239,7 @@ class MailScheduler:
     def finish(self, dispatcher, recipient_lease, attempt_id, *, outcome, evidence):
         if outcome not in ('submitted','unsent','uncertain') or not isinstance(evidence, dict) or len(encoded(evidence).encode()) > 4096:
             raise BusError('invalid_argument', 'bounded typed transport outcome required')
-        if any(key not in {'transport','receipt_id','reason','exact_thread_id','daemon_generation'} or not isinstance(value, (str, int, bool)) or len(str(value)) > 1024 for key, value in evidence.items()):
+        if any(key not in {'transport','receipt_id','reason','exact_thread_id','daemon_generation','evidence_kind','execution','acknowledgment'} or not isinstance(value, (str, int, bool)) or len(str(value)) > 1024 for key, value in evidence.items()):
             raise BusError('invalid_argument', 'transport evidence contains unsupported fields')
         with self.mailbox.transaction() as database:
             self._operator(database)

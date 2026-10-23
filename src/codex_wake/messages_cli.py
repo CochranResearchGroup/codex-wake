@@ -26,6 +26,9 @@ def add_messages_parser(subparsers):
         command.add_argument('--bus-id', default='local')
         command.add_argument('--capability', type=Path, default=os.environ.get('CODEX_WAKE_A2A_CAPABILITY'))
         command.add_argument('--app-server', default='unix://')
+        command.add_argument('--actor-runtime', choices=['codex','grok'], default='codex')
+        command.add_argument('--caller-session-id')
+        command.add_argument('--runtime-root', type=Path)
         command.add_argument('--json', action='store_true', dest='as_json')
         if verb in ('show','read','reconcile'):
             command.add_argument('--as-operator', action='store_true')
@@ -149,20 +152,31 @@ def messages_command(args):
         capability = args.capability or (Path(os.environ['CODEX_WAKE_A2A_CAPABILITY']) if os.environ.get('CODEX_WAKE_A2A_CAPABILITY') else None)
         if capability is None:
             raise BusError('authorization_denied', 'explicit issued actor capability is required')
-        actor = invoking_actor(bus, capability, endpoint=args.app_server)
+        if args.actor_runtime == 'grok':
+            from .runtime_a2a import GrokMailboxRuntime
+            actor = GrokMailboxRuntime.from_actor(bus, capability).authenticate(
+                bus, capability, claimed_session=args.caller_session_id)
+        else:
+            actor = invoking_actor(bus, capability, endpoint=args.app_server)
         if verb == 'arm-reply':
             from .a2a_reply_wake import arm_reply
             value = arm_reply(actor, args.message_id, args.wake_root,
                               args.sender_receipt_authority, args.idempotency_key, args.expires_at)
         elif verb == 'send':
-            if not args.to.startswith('thread:'):
+            if not args.to.startswith(('thread:','grok:')):
                 from .tab_routing import routed_send
                 value, success = routed_send(args, bus, mailbox, actor, body_input(args.body_file),
                                               intent_key, resolve_identity)
                 result(value, success=success)
                 return 0 if success else 5
-            recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket,
-                                         session=args.tmux_session, allow_offline=True)
+            if args.to.startswith('grok:'):
+                from .runtime_a2a import GrokMailboxRuntime
+                if args.runtime_root is None:
+                    raise BusError('identity_unavailable','host runtime root is required')
+                recipient,_ = GrokMailboxRuntime(args.runtime_root).resolve(args.to[5:])
+            else:
+                recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket,
+                                             session=args.tmux_session, allow_offline=True)
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                  subject=args.subject, selector=dict(selector=args.to, identity=recipient.thread_id),

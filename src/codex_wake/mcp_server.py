@@ -123,9 +123,11 @@ class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
-                 goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None):
+                 goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None,
+                 actor_runtime="codex", runtime_root=None):
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
+        self.actor_runtime,self.runtime_root=actor_runtime,runtime_root
         self.app_server = app_server
         self.tmux_socket, self.tmux_session = tmux_socket, tmux_session
         self.wake_root, self.sender_authority = wake_root, sender_authority
@@ -283,6 +285,10 @@ class CommandRunner:
         if verb not in ('spawn', 'refresh', 'handoff', 'configuration'):
             command += ["--app-server", self.app_server]
         if group == "messages":
+            if self.actor_runtime == 'grok':
+                command += ['--actor-runtime','grok','--caller-session-id',arguments['caller_thread_id']]
+            if self.runtime_root is not None:
+                command += ['--runtime-root',str(self.runtime_root)]
             for flag, value in (("--bus-root", self.bus_root), ("--capability", self.capability)):
                 if value is not None:
                     command += [flag, str(value)]
@@ -385,6 +391,8 @@ def main(argv=None):
     parser.add_argument("--bus-root", type=Path, default=os.environ.get("CODEX_WAKE_A2A_BUS_ROOT"))
     parser.add_argument("--capability", type=Path, default=os.environ.get("CODEX_WAKE_A2A_CAPABILITY"))
     parser.add_argument("--app-server", default="unix://")
+    parser.add_argument("--actor-runtime", choices=["codex","grok"], default="codex")
+    parser.add_argument("--runtime-root",type=Path,help="host-approved Grok binding root; never a tool argument")
     parser.add_argument("--tmux-socket")
     parser.add_argument("--tmux-session")
     parser.add_argument("--wake-root", type=Path, default=os.environ.get("CODEX_WAKE_WAKE_ROOT"))

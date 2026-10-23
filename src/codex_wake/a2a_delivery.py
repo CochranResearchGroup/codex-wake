@@ -154,12 +154,16 @@ def load_bindings(path):
             if transport == 'tmux_notification_v1':
                 from .a2a_tmux_delivery import TmuxBinding
                 bindings.append(TmuxBinding(**row))
+            elif transport == 'grok_terminal_notification_v1':
+                from .runtime_a2a import GrokNotificationBinding
+                bindings.append(GrokNotificationBinding(**row))
             elif transport == 'owning_client_v1':
                 bindings.append(ClientBinding(**row))
             else:
                 raise ValueError('unsupported binding transport')
         keys = [row.key for row in bindings]
-        sockets = [getattr(row, "socket_path", None) or (row.tmux_socket, row.pid, row.process_start_ticks) for row in bindings]
+        sockets = [row.endpoint_key if hasattr(row,"endpoint_key") else
+                   getattr(row,"socket_path",None) or (row.tmux_socket,row.pid,row.process_start_ticks) for row in bindings]
         if len(set(keys)) != len(keys) or len(set(sockets)) != len(sockets):
             raise ValueError('ambiguous binding')
         return {row.key: row for row in bindings}
@@ -282,7 +286,8 @@ class NotificationDispatcher:
                             results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
                             continue
                         from .a2a_tmux_delivery import TmuxBinding
-                        if isinstance(binding, TmuxBinding):
+                        from .runtime_a2a import GrokNotificationBinding
+                        if isinstance(binding, (TmuxBinding,GrokNotificationBinding)):
                             result = binding.deliver(claim, job, scheduler.mailbox.bus.root, scheduler=scheduler)
                         else:
                             result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
@@ -291,6 +296,8 @@ class NotificationDispatcher:
                                         daemon_generation=binding.generation)
                         if outcome == 'submitted':
                             evidence['receipt_id'] = result['receipt_id']
+                            for key in ('evidence_kind','execution','acknowledgment'):
+                                if key in result:evidence[key]=result[key]
                         elif outcome == 'unsent':
                             evidence['reason'] = 'pre_io_failure' if result.get('reason') == 'pre_io_failure' else 'explicit_not_sent'
                         else:
