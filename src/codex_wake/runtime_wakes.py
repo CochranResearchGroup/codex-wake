@@ -24,7 +24,7 @@ def event(record, kind, message, now=None):
 
 def valid_target(target):
     return (type(target.get('version')) is int and target.get('version') == 1 and target.get('policy') == 'wait' and target.get('transport') == 'runtime'
-            and target.get('runtime') == 'grok' and target.get('method') == 'terminal_observation'
+            and target.get('runtime') == 'grok' and target.get('method') in ('terminal_observation', 'native_preferred')
             and isinstance(target.get('session_id'),str) and 0 < len(target['session_id']) <= 200
             and re.fullmatch(r'grok_[0-9a-f]{32}', target.get('binding_id','')) is not None
             and re.fullmatch(r'[0-9a-f]{64}', target.get('binding_sha256','')) is not None)
@@ -44,6 +44,8 @@ def retain(args, root):
     from .cli import normalize_prompt
     from .native_clock import snapshot
     from .network_wakes import precise_deadline
+    from .runtime_policies import require_wait_policy
+    require_wait_policy(getattr(args, "busy_policy", "wait"))
     root = Path(root).resolve()
     approved_digest = binding_digest(root,args.binding_id)
     binding = GrokTerminalHost(root).load_binding(args.binding_id,approved_digest)
@@ -52,7 +54,7 @@ def retain(args, root):
                 {'kind':'at','due_at':precise_deadline(args.trigger).isoformat()} if args.grok_command == 'at' else
                 {'kind':'file','path':str(Path(args.trigger).resolve())})
     target = dict(transport='runtime', version=1, runtime='grok', session_id=binding['session_id'],
-                  method='terminal_observation', binding_id=args.binding_id,
+                  method='native_preferred' if binding.get('allow_terminal_fallback') is True else 'terminal_observation', binding_id=args.binding_id,
                   binding_sha256=approved_digest, policy='wait')
     ttl = parse_duration(args.ttl).total_seconds()
     prompt = normalize_prompt(args.prompt)
@@ -102,7 +104,7 @@ def dispatch(root, found, *, time_provider=None):
         if (not valid_record(record) or record['status']!='firing' or record!=found.record
                 or record['scheduling_intent']['canonical_root']!=str(Path(root).resolve())):
             return DispatchResult('skipped','runtime intent changed')
-        adapter=GrokRuntimeAdapter(GrokTerminalHost(root))
+        adapter=GrokRuntimeAdapter(GrokTerminalHost(root), preferred_method=record['target']['method'])
         delivery=record.get('runtime_delivery',{})
         uncertain=delivery.get('state')=='uncertain'
         try:
@@ -145,7 +147,7 @@ def dispatch(root, found, *, time_provider=None):
                     record=event(record,'runtime_submission_started','Durable intent before terminal input',None)
                     replace_record(root,current,record)
                     try:
-                        submitted=GrokRuntimeAdapter(adapter.host,deadline=time.monotonic()+verdict['dispatch_window_seconds']).submit(recipient,runtime_prompt(record))
+                        submitted=GrokRuntimeAdapter(adapter.host,deadline=time.monotonic()+verdict['dispatch_window_seconds'], preferred_method=record['target']['method']).submit(recipient,runtime_prompt(record))
                     except Exception:
                         return DispatchResult('skipped','runtime submission uncertain; no resend')
                     if submitted.state!='accepted' or submitted.evidence_kind!='terminal_observation':
@@ -173,6 +175,8 @@ def add_grok_parser(subparsers):
         bind.add_argument('--'+key,required=True)
     bind.add_argument('--pid',type=int,required=True)
     bind.add_argument('--allow-terminal-input',action='store_true')
+    bind.add_argument('--allow-terminal-fallback',action='store_true',
+                      help='host approval for native-unavailable pre-I/O terminal fallback')
     bind.add_argument('--json',action='store_true')
     show=commands.add_parser('show')
     show.add_argument('wake_id')
@@ -181,6 +185,7 @@ def add_grok_parser(subparsers):
     sessions.add_argument('--json',action='store_true')
     for verb in ('after','at','file'):
         cmd=commands.add_parser(verb)
+        cmd.add_argument('--busy-policy', choices=('wait','queue','interrupt'), default='wait')
         cmd.add_argument('--ttl',default='24h')
         cmd.add_argument('--idempotency-key',required=True)
         cmd.add_argument('--require-monitor',action='store_true')
@@ -194,7 +199,8 @@ def command(args,root):
     host=GrokTerminalHost(root)
     if args.grok_command=='bind':
         value=host.enroll(socket=args.socket,pane=args.pane,pid=args.pid,session_id=args.session_id,
-                          executable=args.executable,allow_terminal_input=args.allow_terminal_input)
+                          executable=args.executable,allow_terminal_input=args.allow_terminal_input,
+                          allow_terminal_fallback=args.allow_terminal_fallback)
     elif args.grok_command=='show':
         record=find_record(root,args.wake_id).record
         if not valid_record(record):
@@ -205,7 +211,7 @@ def command(args,root):
         for path in sorted((Path(root)/'runtime-bindings').glob('grok_*.json'))[:100]:
             try:
                 binding=host.load_binding(path.stem)
-                target=dict(transport='runtime',version=1,runtime='grok',method='terminal_observation',
+                target=dict(transport='runtime',version=1,runtime='grok',method='native_preferred' if binding.get('allow_terminal_fallback') is True else 'terminal_observation',
                             session_id=binding['session_id'],binding_id=path.stem,binding_sha256=digest(path.read_bytes()))
                 adapter=GrokRuntimeAdapter(host)
                 recipient=adapter.resolve(target)

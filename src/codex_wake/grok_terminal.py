@@ -77,7 +77,7 @@ class GrokTerminalHost:
             raise WakeError('terminal_input_not_authorized')
         return binding
 
-    def enroll(self, *, socket, pane, pid, session_id, executable, allow_terminal_input):
+    def enroll(self, *, socket, pane, pid, session_id, executable, allow_terminal_input, allow_terminal_fallback=False):
         if not allow_terminal_input:
             raise WakeError('explicit_terminal_input_approval_required')
         if not session_id or len(session_id) > 200 or any(ord(c)<32 for c in session_id):
@@ -88,7 +88,7 @@ class GrokTerminalHost:
             raise WakeError('unqualified_grok_executable_version')
         binding = dict(version=1, runtime='grok', socket=str(Path(socket).absolute()), pane=pane,
                        pid=pid, session_id=session_id, executable=str(binary),
-                       allow_terminal_input=True)
+                       allow_terminal_input=True, allow_terminal_fallback=bool(allow_terminal_fallback))
         observed = self.snapshot(binding)
         binding.update({key:value for key,value in observed.items() if key != 'frame'})
         from .grok_runtime import GrokRuntimeAdapter
@@ -106,7 +106,8 @@ class GrokTerminalHost:
             stream.flush()
             os.fsync(stream.fileno())
         return dict(binding_id=binding_id, session_id=session_id, binding_sha256=digest(data),
-                    method='terminal_observation', receiver_acknowledgment='not_qualified')
+                    method='native_preferred' if allow_terminal_fallback else 'terminal_observation',
+                    receiver_acknowledgment='not_qualified')
 
     def refresh_identity(self,binding):
         previous=self.snapshot(binding)['frame'].count('  Session ID: ')
