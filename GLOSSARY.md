@@ -116,3 +116,31 @@ It cannot retract work already submitted to a recipient.
 **Owned-turn interruption**:
 Stopping a running turn only when durable assignment evidence identifies it as
 Wake-owned. It is separate from pausing future deliveries and cancelling wakes.
+
+**Recipient binding**:
+The verified relationship between one conversation and the live client that
+currently owns its input. A tab label or working directory alone is not a binding.
+
+**Observed delivery**:
+Inspection evidence that a wake prompt was accepted in the bound recipient's
+interface. It does not establish a receiver acknowledgment or a work claim.
+
+**Receiver acknowledgment**:
+An attributable receipt from the exact recipient confirming a specified delivery
+outcome. Its meaning is limited to that outcome; it does not imply completed work.
+
+**Busy delivery policy**:
+The selected behavior when an exact recipient is already working: wait, verified
+queueing or explicitly authorized interruption, within the original deadline.
+
+
+**Host-bound runtime actor context**:
+An operator-issued mailbox actor capability paired with a private frozen runtime
+binding. Grok invocation checks the managed process generation, inherited session
+claim, caller ancestry and enrolled root. This is host delegation, not native Grok
+caller attestation; terminal text and claimed IDs alone grant no work authority.
+
+**Definitive pre-I/O non-submission**:
+Positive adapter evidence that a selected method was unavailable before any
+submission bytes. An absent response, missing marker or timeout is insufficient.
+Only a host-approved fallback profile may switch methods on this evidence.

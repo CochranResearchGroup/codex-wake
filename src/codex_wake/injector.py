@@ -344,19 +344,23 @@ def dispatch_firing_record(
     thread_identity_resolver: Callable[[str], dict[str, str]] | None = None,
     app_server_client: Any | None = None,
     time_provider=None,
+    runtime_adapter=None,
 ) -> DispatchResult:
     record = found.record
     from .records import classify_record
     classification = classify_record(record)
     if classification == 'hold':
         return DispatchResult('skipped','unrecognized record; no dispatch authorized')
+    if classification == 'runtime_intent_v7':
+        from .runtime_wakes import dispatch
+        return dispatch(root, found, time_provider=time_provider)
     if classification == 'native_intent_v6':
         from .native_intents import dispatch
         provider = None
         if time_provider is not None:
             from dataclasses import asdict
             provider = lambda: {'utc': asdict(time_provider()), 'counter': None}
-        return dispatch(root, found, provider)
+        return dispatch(root, found, provider, runtime_adapter=runtime_adapter)
     network_current = None
     if classification == 'native_network_v5':
         from .network_wakes import read_time, evaluation_time, precise_deadline
@@ -384,7 +388,7 @@ def dispatch_firing_record(
                         return DispatchResult('skipped', 'native record no longer active')
                     if active.record != record or active.record['status'] != 'firing':
                         return DispatchResult('skipped', 'native record changed during acquisition')
-                    return reconcile_native(root, active, None)
+                    return reconcile_native(root, active, None, runtime_adapter=runtime_adapter)
             return DispatchResult('skipped', 'network time uncertain; no native submission authorized')
     if classification == 'network_v3':
         from .network_wakes import read_time, evaluation_time, creation_time, precise_deadline
@@ -409,6 +413,7 @@ def dispatch_firing_record(
             signal_authorizer=signal_authorizer,
             thread_identity_resolver=thread_identity_resolver,
             app_server_client=app_server_client,
+            runtime_adapter=runtime_adapter,
         )
     with WakeLifecycleLock(root, wake_id):
         try:
@@ -434,6 +439,7 @@ def dispatch_firing_record(
             signal_authorizer=signal_authorizer,
             thread_identity_resolver=thread_identity_resolver,
             app_server_client=app_server_client,
+            runtime_adapter=runtime_adapter,
         )
 
 
@@ -448,6 +454,7 @@ def _dispatch_firing_record_unlocked(
     signal_authorizer: Callable[[dict[str, Any]], bool] | None = None,
     thread_identity_resolver: Callable[[str], dict[str, str]] | None = None,
     app_server_client: Any | None = None,
+    runtime_adapter=None,
 ) -> DispatchResult:
     current = now or utc_now()
     record = dict(found.record)
@@ -480,7 +487,7 @@ def _dispatch_firing_record_unlocked(
     target = record.get("target")
     if isinstance(target, dict) and target.get('transport') == 'native':
         from .native_delivery import dispatch_native
-        return dispatch_native(root, found, current)
+        return dispatch_native(root, found, current, runtime_adapter=runtime_adapter)
     if isinstance(target, dict) and target.get("transport") == "app-server":
         from .app_server import dispatch_app_server_record
 

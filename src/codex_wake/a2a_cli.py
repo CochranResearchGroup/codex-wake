@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'dispatch', 'worker', 'delegate-receipts', 'network-time', 'recovery-status', 'dispose-recovery', 'release-recovery']:
+    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'bind-grok', 'dispatch', 'worker', 'delegate-receipts', 'network-time', 'recovery-status', 'dispose-recovery', 'release-recovery']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -44,8 +44,12 @@ def add_a2a_parser(subparsers):
             command.add_argument('--apply', action='store_true', required=True)
         if verb == 'tick':
             command.add_argument('--projection-root', type=Path, required=True)
-        if verb in ('bind-client', 'bind-tmux', 'dispatch', 'worker'):
+        if verb in ('bind-client', 'bind-tmux', 'bind-grok', 'dispatch', 'worker'):
             command.add_argument('--bindings-file', type=Path, required=True)
+        if verb in ('enroll','bind-grok'):
+            command.add_argument('--runtime-root', type=Path)
+        if verb == 'bind-grok':
+            command.add_argument('--binding-id', required=True)
         if verb == 'bind-client':
             command.add_argument('--thread', required=True)
             command.add_argument('--client-socket', type=Path, required=True)
@@ -194,6 +198,12 @@ def a2a_command(args):
                 actor = Actor(store.bus_id, row['namespace'], row['thread_id'], row['root'], row['generation'], row['actor_id'])
             authority = SenderReceiptAuthority(args.sender_receipt_authority, args.wake_root)
             result(dict(delegation=authority.delegate(store, args.operator_capability, actor)))
+        elif args.a2a_command == 'bind-grok':
+            from .runtime_a2a import bind_grok
+            if args.runtime_root is None:
+                raise BusError('identity_unavailable','host runtime root is required')
+            result(dict(binding=bind_grok(store,args.operator_capability,args.bindings_file,
+                                         args.runtime_root,args.binding_id)))
         elif args.a2a_command in ('bind-client', 'bind-tmux'):
             from .a2a_delivery import bind_client
             identity = resolve_identity('thread:' + args.thread)
@@ -261,8 +271,17 @@ def a2a_command(args):
                         time.sleep(min(args.interval, max(0, deadline-time.monotonic())))
                 result(dict(worker=dict(status='finished', submitted=submitted, ticks=ticks)))
         elif args.a2a_command == 'enroll':
-            identity = resolve_identity(args.thread, endpoint=args.app_server, socket_path=args.tmux_socket,
-                                        session=args.tmux_session) if args.thread else None
+            grok = bool(args.thread and args.thread.startswith('grok:'))
+            runtime = None
+            if grok:
+                from .runtime_a2a import GrokMailboxRuntime
+                if args.runtime_root is None:
+                    raise BusError('identity_unavailable','host runtime root is required')
+                runtime = GrokMailboxRuntime(args.runtime_root)
+                identity,_ = runtime.resolve(args.thread[5:])
+            else:
+                identity = resolve_identity(args.thread, endpoint=args.app_server, socket_path=args.tmux_socket,
+                                            session=args.tmux_session) if args.thread else None
             if identity is not None and not Path(identity.cwd).is_relative_to(args.root.resolve()):
                 raise BusError('authorization_denied', 'thread is outside the selected enrollment root')
             receipt = store.enroll(args.root, args.operator_capability,
@@ -271,7 +290,11 @@ def a2a_command(args):
             value = dict(bus_id=store.bus_id, receipt_id=receipt, actor_capability_file=None,
                          notification_capability='unqualified')
             if identity is not None:
-                capability, issuance = store.issue_actor(identity, args.root, args.operator_capability)
+                if runtime is not None:
+                    capability,identity,issuance = runtime.issue_actor(store,args.operator_capability,args.root,args.thread[5:])
+                    value.update(caller_attestation='host_bound_process', native_caller_attestation='not_qualified')
+                else:
+                    capability, issuance = store.issue_actor(identity, args.root, args.operator_capability)
                 value.update(actor_capability_file=str(capability), actor_receipt_id=issuance,
                              namespace=identity.namespace, thread_id=identity.thread_id)
             result(value)

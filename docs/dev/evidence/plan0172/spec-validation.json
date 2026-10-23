@@ -1,0 +1,65 @@
+{
+  "planning": {
+    "exit_code": 1,
+    "baseline_count": 4,
+    "current_count": 4,
+    "added": [],
+    "removed": [],
+    "new_plan": [
+      {
+        "current_state_ok": true,
+        "file": "0172-2026-10-22-multi-runtime-wake.md",
+        "filename_ok": true,
+        "lane_id": "P172",
+        "lane_ok": true,
+        "state": "PLANNED",
+        "state_ok": true,
+        "wired_in_roadmap": true,
+        "wired_in_runbook": true
+      }
+    ],
+    "baseline_findings_sha256": "ea0609b3ea1629184f2c009a8c561600c4c43b5f98d5e0471846f988a91bb367"
+  },
+  "lanes": {
+    "exit_code": 1,
+    "baseline_count": 51,
+    "current_count": 51,
+    "added": [],
+    "removed": [],
+    "baseline_findings_sha256": "278058b245e15a70066765ae2fec093b0a895f2f1f777f3ed404eb769522815d"
+  },
+  "links": {
+    "checked": 23,
+    "errors": []
+  },
+  "tickets": {
+    "count": 6,
+    "blocking_edges": {
+      "MR-01": [],
+      "MR-02": [
+        "MR-01"
+      ],
+      "MR-03": [
+        "MR-02"
+      ],
+      "MR-04": [
+        "MR-03"
+      ],
+      "MR-05": [
+        "MR-03"
+      ],
+      "MR-06": [
+        "MR-04",
+        "MR-05"
+      ]
+    },
+    "acyclic": true
+  },
+  "glossary": {
+    "duplicate_terms": []
+  },
+  "passed": true,
+  "scope": "specification_integrity_and_audit_differential_only",
+  "base": "fcc996a",
+  "runtime_acceptance": "not_run"
+}

@@ -392,7 +392,7 @@ def poll_once(
         if classification == "hold":
             pending += 1
             continue
-        if classification == 'native_intent_v6':
+        if classification in {'native_intent_v6', 'runtime_intent_v7'}:
             from .native_intents import evaluate
             from .native_clock import snapshot
             if intent_clock is None:
@@ -401,7 +401,11 @@ def poll_once(
                 else:
                     from dataclasses import asdict
                     intent_clock = {'utc': asdict(time_provider()), 'counter': None}
-            state = evaluate(root, item.record['id'], intent_clock)
+            if classification == 'runtime_intent_v7':
+                from .runtime_wakes import valid_record
+                state = evaluate(root, item.record['id'], intent_clock, record_validator=valid_record)
+            else:
+                state = evaluate(root, item.record['id'], intent_clock)
             fired += int(state == 'firing')
             failed += int(state == 'failed')
             pending += int(state == 'pending')
@@ -546,7 +550,7 @@ def poll_once(
                 now=dispatch_current,
                 ack_timeout_override=ack_timeout_override,
                 app_server_codex_cmd=app_server_codex_cmd,
-                **(dict(time_provider=time_provider) if classify_record(item.record) in {"network_v3", "native_network_v5", "native_intent_v6"} else {}),
+                **(dict(time_provider=time_provider) if classify_record(item.record) in {"network_v3", "native_network_v5", "native_intent_v6", "runtime_intent_v7"} else {}),
                 signal_authorizer=(
                     signal_runtime.authorize_firing_record
                     if signal_runtime is not None

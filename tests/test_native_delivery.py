@@ -51,6 +51,218 @@ class NativeDeliveryTests(unittest.TestCase):
             self.assertNotIn('native_delivery', all_records(root)[0].record)
             self.assertEqual(all_records(root)[0].record['attempts'], 0)
 
+    def test_busy_recipient_reports_runtime_readiness_without_consuming_an_attempt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.native_record(root, root / 'must-not-run')
+            with patch('codex_wake.native_delivery.read_native_thread',
+                       return_value={'id': '01a1227e-a041-7b72-9c36-18349e7dd22c',
+                                     'status': {'type': 'active'}}):
+                result = poll_once(root, datetime(2026, 10, 9, tzinfo=UTC))
+            record = all_records(root)[0].record
+            self.assertEqual(result.requeued, 1)
+            self.assertEqual(record['attempts'], 0)
+            observation = record['runtime_observation']
+            self.assertEqual(observation['version'], 1)
+            self.assertEqual(observation['runtime'], 'codex')
+            self.assertEqual(observation['session_id'], record['target']['thread_id'])
+            self.assertEqual(observation['state'], 'busy')
+            self.assertEqual(observation['capabilities']['submit']['state'], 'supported')
+            self.assertEqual(observation['capabilities']['busy_queue']['state'], 'not_qualified')
+            self.assertEqual(observation['capabilities']['interrupt']['state'], 'unsupported')
+
+    def test_dispatcher_uses_runtime_interface_for_submission(self):
+        from codex_wake.injector import dispatch_firing_record
+        from codex_wake.records import replace_record
+        from codex_wake.runtime_delivery import (
+            RuntimeObservation, RuntimeRecipient, RuntimeSubmission,
+        )
+        receipt = '01a12280-80ef-7772-a00a-c68bd32ecbba'
+        delivered = []
+
+        class Runtime:
+            def resolve(self, target):
+                return RuntimeRecipient('codex', target['thread_id'], {})
+
+            def observe(self, recipient):
+                return RuntimeObservation('ready', 'fixture_recipient_idle', {})
+
+            def submit(self, recipient, prompt):
+                delivered.append((recipient.session_id, prompt))
+                return RuntimeSubmission('accepted', receipt_id=receipt,
+                                         evidence_kind='native_queue_acceptance')
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.native_record(root, root / 'must-not-run')
+            found = all_records(root)[0]
+            record = dict(found.record, status='firing')
+            replace_record(root, found, record)
+            with patch('codex_wake.native_delivery.read_native_thread',
+                       side_effect=AssertionError('Codex I/O bypassed the runtime seam')), patch(
+                       'codex_wake.native_delivery.subprocess.run',
+                       side_effect=AssertionError('submission bypassed the runtime seam')):
+                result = dispatch_firing_record(
+                    root, all_records(root)[0], now=datetime(2026, 10, 9, tzinfo=UTC),
+                    runtime_adapter=Runtime(),
+                )
+            saved = all_records(root)[0].record
+            self.assertEqual(result.status, 'submitted')
+            self.assertEqual(saved['native_delivery']['queue_id'], receipt)
+            self.assertEqual(saved['attempts'], 1)
+            self.assertEqual(len(delivered), 1)
+            self.assertEqual(delivered[0][0], saved['target']['thread_id'])
+            self.assertIn('WAKE_NATIVE_SUBMISSION_ID=', delivered[0][1])
+            self.assertEqual(saved['native_delivery']['acknowledgment'], 'not_observed')
+
+    def test_dispatcher_reconciles_runtime_acceptance_without_replaying_lost_response(self):
+        from codex_wake.injector import dispatch_firing_record
+        from codex_wake.records import replace_record
+        from codex_wake.runtime_delivery import (
+            RuntimeObservation, RuntimeRecipient, RuntimeReconciliation,
+        )
+        deliveries = []
+
+        class Runtime:
+            def resolve(self, target):
+                return RuntimeRecipient('codex', target['thread_id'], {})
+
+            def observe(self, recipient):
+                return RuntimeObservation('ready', 'fixture_recipient_idle', {})
+
+            def submit(self, recipient, prompt):
+                deliveries.append(prompt)
+                raise OSError('accepted but response lost: PRIVATE_TRANSPORT_DETAIL')
+
+            def reconcile(self, recipient, prompt):
+                if deliveries != [prompt]:
+                    raise AssertionError('reconciliation changed the original submission')
+                return RuntimeReconciliation({
+                    'source': 'native_turn', 'turn_id': 'turn-exact',
+                    'user_message_id': 'message-exact', 'client_message_id': 'client-exact',
+                    'execution': 'turn_completed',
+                })
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.native_record(root, root / 'must-not-run')
+            found = all_records(root)[0]
+            replace_record(root, found, dict(found.record, status='firing'))
+            runtime = Runtime()
+            with patch('codex_wake.native_delivery.native_request',
+                       side_effect=AssertionError('reconciliation bypassed runtime interface')), patch(
+                       'codex_wake.native_delivery.subprocess.run',
+                       side_effect=AssertionError('submission bypassed runtime interface')):
+                first = dispatch_firing_record(
+                    root, all_records(root)[0], now=datetime(2026, 10, 9, tzinfo=UTC),
+                    runtime_adapter=runtime,
+                )
+                self.assertEqual(first.status, 'skipped')
+                self.assertEqual(all_records(root)[0].record['native_delivery']['state'], 'uncertain')
+                second = dispatch_firing_record(
+                    root, all_records(root)[0], now=datetime(2026, 10, 9, 0, 1, tzinfo=UTC),
+                    runtime_adapter=runtime,
+                )
+            import json
+            saved = all_records(root)[0].record
+            self.assertEqual(second.status, 'submitted')
+            self.assertEqual(len(deliveries), 1)
+            self.assertEqual(saved['attempts'], 1)
+            self.assertEqual(saved['native_delivery']['execution'], 'turn_completed')
+            self.assertEqual(saved['native_delivery']['acknowledgment'], 'not_observed')
+            self.assertNotIn('PRIVATE_TRANSPORT_DETAIL', json.dumps(saved))
+
+    def test_runtime_observation_failure_holds_without_attempt_or_private_detail(self):
+        from codex_wake.injector import dispatch_firing_record
+        from codex_wake.records import replace_record
+        from codex_wake.runtime_delivery import RuntimeRecipient
+
+        class Runtime:
+            def resolve(self, target):
+                return RuntimeRecipient('codex', target['thread_id'], {})
+
+            def observe(self, recipient):
+                raise OSError('PRIVATE_RUNTIME_ENDPOINT')
+
+            def submit(self, recipient, prompt):
+                raise AssertionError('must not submit without readiness')
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.native_record(root, root / 'must-not-run')
+            found = all_records(root)[0]
+            replace_record(root, found, dict(found.record, status='firing'))
+            result = dispatch_firing_record(
+                root, all_records(root)[0], now=datetime(2026, 10, 9, tzinfo=UTC),
+                runtime_adapter=Runtime(),
+            )
+            saved = all_records(root)[0].record
+            self.assertEqual(result.status, 'requeued')
+            self.assertEqual(saved['attempts'], 0)
+            self.assertEqual(saved['runtime_observation']['state'], 'unavailable')
+            self.assertNotIn('PRIVATE_RUNTIME_ENDPOINT', str(saved))
+
+    def test_unknown_runtime_envelope_and_changed_identity_hold_before_observation(self):
+        from unittest.mock import Mock
+        from codex_wake.injector import dispatch_firing_record
+        from codex_wake.records import replace_record
+        from codex_wake.runtime_delivery import RuntimeRecipient
+        for runtime, identity, version, state in (
+            ('codex', None, 2, 'unsupported'),
+            ('grok', None, 1, 'unavailable'),
+            ('codex', 'different-thread', 1, 'unavailable'),
+        ):
+            with self.subTest(runtime=runtime, identity=identity, version=version), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                self.native_record(root, root / 'must-not-run')
+                found = all_records(root)[0]
+                replace_record(root, found, dict(found.record, status='firing'))
+                adapter = Mock()
+                adapter.resolve.return_value = RuntimeRecipient(
+                    runtime, identity or found.record['target']['thread_id'], {}, version,
+                )
+                result = dispatch_firing_record(
+                    root, all_records(root)[0], now=datetime(2026, 10, 9, tzinfo=UTC),
+                    runtime_adapter=adapter,
+                )
+                saved = all_records(root)[0].record
+                self.assertEqual(result.status, 'requeued')
+                self.assertEqual(saved['attempts'], 0)
+                self.assertEqual(saved['runtime_observation']['state'], state)
+                adapter.observe.assert_not_called()
+                adapter.submit.assert_not_called()
+
+    def test_terminal_observation_cannot_confirm_native_acceptance_or_reconciliation(self):
+        from unittest.mock import Mock
+        from codex_wake.injector import dispatch_firing_record
+        from codex_wake.records import replace_record
+        from codex_wake.runtime_delivery import (
+            RuntimeRecipient, RuntimeObservation, RuntimeSubmission, RuntimeReconciliation,
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.native_record(root, root / 'must-not-run')
+            found = all_records(root)[0]
+            replace_record(root, found, dict(found.record, status='firing'))
+            adapter = Mock()
+            adapter.resolve.return_value = RuntimeRecipient('codex', found.record['target']['thread_id'], {})
+            adapter.observe.return_value = RuntimeObservation('ready', 'idle', {})
+            adapter.submit.return_value = RuntimeSubmission(
+                'accepted', '01a12280-80ef-7772-a00a-c68bd32ecbba', 'terminal_observation',
+            )
+            adapter.reconcile.return_value = RuntimeReconciliation(
+                {'source': 'terminal_observation', 'execution': 'turn_completed'},
+            )
+            for minute in (0, 1):
+                result = dispatch_firing_record(
+                    root, all_records(root)[0], now=datetime(2026, 10, 9, 0, minute, tzinfo=UTC),
+                    runtime_adapter=adapter,
+                )
+                self.assertEqual(result.status, 'skipped')
+                self.assertEqual(all_records(root)[0].record['native_delivery']['state'], 'uncertain')
+            self.assertEqual(all_records(root)[0].record['attempts'], 1)
+            adapter.submit.assert_called_once()
+
     def test_uncertain_acceptance_is_not_resubmitted_on_another_poll(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

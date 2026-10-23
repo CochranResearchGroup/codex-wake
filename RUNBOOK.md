@@ -7617,3 +7617,250 @@ process receipts.12time reads network/max11.49ms. Existing controllers/counters/
 policies/live messaging untouched; pure counter bridge idles out automatically.
 Plan0171CLOSED;302resolved. Broader Bots114 reconciliation remains separate.
 Memory disposition forbidden: no reviewed project cloud route.
+
+## Turn379 | 2026-10-22 | Multi-runtime specification and local tickets
+
+User approved the Q1–Q12 consolidated brief. Fresh origin/main fcc996a is the
+planning base; isolated docs/multiruntime-spec leaves the original main checkout
+and its two policy commits intact. No matching open issue/PR found. Local intake
+CW-MR-172, [Plan0172](docs/dev/plans/0172-2026-10-22-multi-runtime-wake.md)
+and six local ticket drafts retain accepted scope and blocking edges; no remote
+tracker publication. Existing tmux A2A binding is inspected/native-queue delivery,
+not generic keystroke automation. Preserve legacy Codex identities, native caller
+admission, trusted time, uncertain-attempt holds and separate work claims.
+Added glossary terms for binding, observed delivery, receiver acknowledgment and
+busy policy. No implementation execution lane opened.
+Documentation validation and inherited audit findings are recorded in
+[verification](docs/dev/verification/0172-2026-10-22-multi-runtime-spec.md).
+Grok live-session qualification remains MR-01; no provider prompts, production
+session/grant/service changes, release or installation performed.
+
+## Turn380 | 2026-10-22 | MR-01 bounded Grok qualification
+
+User adopts parallel ready-ticket waves: primary takes one ticket, independent
+subagents take other non-blocked tickets, primary reconciles. Only MR-01 ready;
+primary owns it, zero subagents and no forced unblocking. Branch
+test/mr01-grok-qualification stacks on a2ef06c; origin/main remains fcc996a.
+Installed Grok1.0.40/eb1a2256660d: empty private workspace, no discovered
+hooks/plugins/MCP/LSP/project instructions. Two private-socket TUI launches
+(read-only sandbox, then default) both stop at sign-in. Input withheld.
+Two ACP initialize responses advertise session controls; exact-workspace
+session/list is empty/complete. Zero conversation submissions/terminal input,
+190.854s under300s; no live delivery, busy behavior or negative recipient proof.
+Exact test tmux session/private leader retired; fresh OS census preserves
+existing process generations and finds zero introduced Grok/tmux processes.
+MR-01 verdict NOT_QUALIFIED_AUTH_REQUIRED. MR-01/MR-02 and P172 BLOCKED pending
+authenticated qualification; no adapter or later ticket started.
+[Evidence](docs/dev/verification/0172-2026-10-22-mr01-grok-qualification.md).
+
+## Turn381 | 2026-10-22 | MR-01 authenticated terminal route qualified
+
+User restored Grok login. One isolated managed-launch1.0.40/minimal TUI opens
+normally. Private standalone native initialize/list work, but list is empty;
+do not infer shared open-TUI control or invoke native load/prompt.
+Launch PID/startticks/argv and displayed session-info UUID establish binding.
+Helper refuses mismatched expectedUUID and protects an owned unsent draft.
+One literal tmux paste+Enter receives standalone marker response. Session-info
+sameUUID Turn0→1 and sameprocessgeneration; persisted usage onecall/oneturn,
+27805input/100output/27905total(native fields).249.221s, one launch/one prompt.
+Private test pane/leader retired; fresh OS census preserves prior generations,
+finds zero introduced application processes. Earlier auth-gated receipt retained.
+MR-01 DONE for scoped terminal observation; MR-02 READY. Native live control,
+active busy modes, unmanaged adoption and receiver/A2A receipts remain unqualified.
+No other ticket/subagent started. [Evidence](docs/dev/verification/0172-2026-10-22-mr01-terminal-qualification.md).
+
+## Turn382 | 2026-10-22 | MR-02 runtime seam source qualified
+
+CW-MR-172/MR-02, feat/mr02-runtime-seam from9618a58. Primary owned the only
+ready ticket; zero subagents and no later ticket started. Version1 runtime
+recipient/observation/submission/reconciliation contract plus substantive Codex
+adapter now serve the existing public dispatcher. The core retains locks,
+trusted time, expiry and durable uncertainty before the effect. Busy, unknown
+version/identity and observation outage hold safely; terminal evidence cannot
+be promoted to native acceptance. No persisted schema bump.
+
+Failure-driven checks retained, including the intermediate full-run legacy
+context regression (61 failures/3 errors). The compatibility fix preserves
+historical evidence callers without transport fields. Final full suite:
+1428 tests in293.051s, 1 skipped, PASS. Isolated non-editable wheel:
+94 tests PASS, exact changed-source byte match; CLI/empty no-dispatch daemon
+smoke PASS. Undefined names, compile, policy wiring and whitespace pass;
+planning/lane audits retain4/51 inherited findings, respectively.
+MR-02 DONE for source/isolated artifact, MR-03 READY. No provider submission,
+production install, service change, main integration or release.
+[Verification](docs/dev/verification/0172-2026-10-22-mr02-runtime-seam.md).
+
+## Turn383 | 2026-10-22 | MR-03 source candidate and open live gate
+
+CW-MR-172/MR-03, feat/mr03-grok-wake frome435175. Primary owns the only ready
+ticket; zero independent nonblocked tickets or subagents. Source adds schema7/
+runtime-envelope1, operator-pinned managed-launch Grok bindings, CLI/MCP
+scheduling/discovery/evidence, shared trusted-clock eligibility and conservative
+terminal submission/reconciliation. Single atomic authority and synchronized
+writes preserve uncertainty across crashes; cancellation uses the lifecycle
+lock. No execution/receiver/A2A acknowledgment is inferred from terminal output.
+
+Failure-driven controls cover drafts/dialogs/startup, changed generation/session,
+fresh local identity, deadlines, profile scope, lost responses and no replay.
+An existing owned-counter socket readiness race was exposed by full validation,
+reproduced at its public seam and repaired in separate commit0e5d5c9. The old
+monitor schema-list expectation is updated for7. Both intermediate full failures
+and a non-reproduced message-cancel failure are retained; final frozen-source
+validation FAILED:1438 tests/379.838s,1 skip,2 failures/1 error in backup,
+webhook and messaging. Ordered wait/cancel diagnostic10 tests/5.546s reproduces
+clock_anomaly refusal. No guard relaxation, quarantine or further blind retry;
+full qualification stays open. Isolated installed wheel118 controls
+pass and package-module bytes match current source.
+
+Two live setup launches (11.286s/11.000s) sent zero conversation prompts, returned
+no active session and cleaned up all introduced application processes. Exact
+sessions have no persisted usage. This is not live delivery or an auth diagnosis.
+The two-recipient probe limit is reached; an asynchronous question requests one
+additional5m/one-recipient/one-prompt probe with startup checked before querying.
+No extra live launch without the response. MR-03 stays IN_PROGRESS; MR-04/MR-05
+remain blocked. No production installation, service/grant change or main merge.
+[Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+
+
+## Turn384 | 2026-10-22 | MR-03 approved live extension passes; QA open
+
+User approved one additional disposable recipient, five minutes, one prompt.
+One probe consumed that authority in13.996s. Stable startup and local session-info
+preceded exact binding. Separate installed registration/daemon processes delivered
+one original file-triggered wake; same-session standalone synthetic reply observed,
+repeat daemon did not replay, generation unchanged. Fresh cleanup census: zero
+introduced Grok/tmux processes, all pre-existing generations preserved. Frozen
+source/wheel digests still match. Method terminal_observation; execution and
+receiver acknowledgment remain not_observed. Previous failures remain retained.
+MR-03 IN_PROGRESS on full-suite QA; MR-04/MR-05 blocked. No further live probe
+authorized by this consumed extension. No production install, main merge or release.
+[Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+
+
+## Turn385 | 2026-10-22 | MR-03 QA repaired and reconciled
+
+Test-only commit9fd40a0: independent sampler/targeted trace confirm wall regressions
+of approximately10.58s while monotonic advances normally. Workflow mailbox clocks
+are now explicit fixtures; production anomaly guards unchanged. Modeled1.05s ingest
+stall reproduces old webhook503 COMMIT_FAILED; repaired armed-signal timeout and
+recovery control passes. Backup controlled stress30 PASS17.540s; mailbox/CLI27
+PASS12.877s; webhook/client23 PASS4.555s. Wrong-interpreter broad run aborted and
+retained; final isolated candidate interpreter includes MCP/private config/state.
+Frozen full1438 PASS462.612s, one expected opt-in skip, zero errors/failures;
+source/tests unchanged throughout. All119 production modules match the wheel.
+Original backup-create error remains unclassified historical evidence; no recurrence
+in stress or final full run, no backup implementation change. MR-03 DONE for source
+and isolated artifact, with prior live proof retained. MR-04/MR-05 READY next wave;
+MR-06 blocked. Primary owned only ready MR-03; zero subagents. No extra provider
+probe, production installation, main integration, release or grant change.
+[Verification](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+
+
+## Turn386 | 2026-10-22 | MR-04/MR-05 parallel source wave reconciled
+
+Base36412c4; primary MR-04 feat/mr04-cross-runtime-a2a packet37f935f, independent
+/root/mr05 packetdd2ca6d. Serial coordinator integrations4407630/1cf56a7; shared
+CLI/MCP4ee9c01; native-only Grok grant refusalef8b5b4. No nested workers.
+Bus authority remains independent capabilities, host-pinned context, generation,
+ancestry and enrolled root. Native Grok caller attestation is not qualified.
+Notifications carry bounded pointers and terminal evidence; actual work claims
+remain credentialed mailbox acknowledgments. Unknown responses never replay.
+Worker review found missing shared pane lock: primary accepted, repaired, mutation
+red/restored green; worker closed-world verified. Primary found native-tool grant
+forwarding: valid-input red/green after retained non-qualifying first reproducer.
+Unsupported queue/interrupt refuse before effects; Grok fallback requires explicit
+host profile and definitive native-unavailable pre-I/O proof. Codex terminal unqualified.
+Worker initial native15 had two environment failures reproducing at base; exact
+isolated config/state controls yield15 PASS, no test/guard weakening. Integrated
+installed75 PASS19.324s predates final MCP guard; final installed changed-axis15
+PASS5.140s covers corrected axis. Superseded full run retained for authority repair.
+Final sourceef8b5b4/full1451 PASS341.346s, one expected opt-in skip, zero failures
+or errors, unchanged source/tests; final wheel modules match; F821/F822/F823 PASS.
+MR-04/MR-05 DONE source/isolated artifact; MR-06 READY for real TUI/bidirectional
+acceptance. Zero new provider prompts, production grant/bus/service/installation,
+main integration or release. Original main checkout preserved.
+[Receipt](docs/dev/evidence/plan0172/mr04-mr05-runtime-wave.json).
+
+## Turn387 | 2026-10-22 | MR-06 setup failure retained
+
+Primary took sole ready MR-06; no independent ready ticket to delegate.
+One disposable Codex/Grok pair failed in6.338s before conversation input; zero
+prompts, bus/grants/bindings/wakes. Codex pane disappeared; cause unknown.
+Initial cleanup failure remains retained; later fresh census found zero
+introduced residuals and one pre-existing PID absent with cause unattributed.
+Provider-free real-tmux startup regression1 PASS0.084s; corrected opt-in
+launcher retains dead panes, snapshots source/module identity, requires visible
+TUI completion and conservative input/process accounting. No second live run.
+MR-06 remains IN_PROGRESS pending explicit extension of the consumed
+one-recipient-per-runtime envelope: one additional pair, six synthetic prompts,
+300 seconds including cleanup, no replay. Package bytes unchanged; prior full
+1451/one expected skip and installed15 evidence retained for that package only.
+No main integration, release or production installation change.
+[Verification](docs/dev/verification/0172-2026-10-22-mr06-installed-acceptance.md).
+
+
+## Turn388 | 2026-10-23 | MR-06 diagnosed and installed candidate accepted
+
+User explicitly approved bounded interop reruns to fix startup and close ticket.
+Primary owned sole ready MR-06; no new subagents. Remote Codex resume rejects
+permission overrides; removing them reveals missing rollout for an empty thread.
+Fresh remote TUI creates its own unique verified thread. Codex auto-updated from
+0.163.0 to0.164.0; sample1 historical cause remains unknown. Measured guest wall
+regression11.434275s; fresh private buses explicitly opt into existing network-first
+plain NTP, old checkpoints preserved and no production clock guard altered.
+Helper stdout now includes actual verified claimed=true; CLI dispatch parser uses
+the dispatch.results envelope. Both regressions observed red then green. Two
+uncertain terminal samples exposed asynchronous repaint; delayed-marker adapter
+regression red/green. Read-only reconciliation waits up to one second within its
+original deadline, one paste only, uncertainty retained if evidence is absent.
+Eight full live samples retained separately,22 possible prompt attempts total;
+startup-only diagnostic probes sent none. New sessions/buses/intents per sample,
+no uncertain-work replay. Samples4/5 operator-stopped, not passing retries.
+Rebuilt sample8 PASS33.623s/four attempts: both real TUIs, two visible completions
+each, bidirectional authenticated claims and correlated replies, three durable
+original intents submitted once plus one notification. Fresh census zero new
+runtime residuals/unattributed processes and unchanged pre-existing generations.
+Source packet759d700; rebuilt candidate0.19.1 wheel SHA256
+5e0f2125313d6a086ebc584a68f9344ec64e5f5c7f54182411f8e288e7025c43;
+all121 source/installed modules match. Full1455 tests PASS310.046s, zero failures/
+errors, one expected opt-in systemd skip, source/tests unchanged. Installed61
+PASS9.249s; focused13 PASS1.334s; F821/F822/F823, compile and whitespace PASS.
+First full command omitted recorded time/XDG isolation and was aborted as
+non-qualifying; original output retained. First installed module selection lacked
+tests import path, three fixture-import errors retained; corrected command passes.
+No test, identity, claim, deadline, clock or uncertainty guard weakened.
+MR-06 local ticket DONE; no external GitHub issue posted/closed. Plan0172 broader
+program OPEN for main/CI/release/production and other runtime capabilities.
+Original main checkout preserved. [Receipt](docs/dev/evidence/plan0172/mr06-interop-qualification.json).
+
+
+## Turn389 | 2026-10-23 | Plan0172 integration preparation
+
+Fresh origin/main fcc996a and coordinator fa94fc8; clean coordinator worktree.
+No matching open issue/PR. Actor ecochran76 has current admin/push capability;
+allowlisted owned GitHub target permits issue creation. No contribution/security/
+issue/PR template files found. Created and read back integration issue305 with
+stable marker, exact existing enhancement label, local CW-MR-172 continuity and
+separate review/CI/main acceptance criteria. MR-01–MR-06 retain candidate-qualified
+state; broader program OPEN. Policy wiring PASS and full undefined-name lint PASS.
+Combined diff64 files is scoped to runtime wakes/A2A, tests, qualification harness
+and canonical planning/evidence. No production changes or extra live input.
+Next: publish reviewable PR, inspect its exact head/diff and required CI matrix.
+
+
+## Turn390 | 2026-10-23 | PR306 installed smoke contract repair
+
+PR306 publishes head edab49f against main fcc996a, mergeable; issue305 remains
+OPEN. CI40014196358 failed installed smoke after passing unit suites. Exact
+local installed command reproduces len(discovered)==27 assertion; five new Grok
+tools expand the public catalog to32. Both a2a_mcp_smoke and wake_control_qualification
+contained stale27-tool assumptions. Repaired both to require32 and the exact five
+new Grok tool names; retained existing identity, denial, claim/reply, cancellation,
+pause/resume and ungranted-root assertions. Installed MCP smoke PASS7.231s,32 tools,
+no native turns/notifications, temporary fixtures/children clean. Installed wake
+controls PASS,121 source/installed files match, six real MCP control calls and
+ungranted-root denial retained, zero native turns/service restarts/operator wakes.
+No package source changes; prior live candidate/full-suite evidence remains bound
+to unchanged package bytes. Original CI/local red retained; no tests weakened or
+failed run relabeled. Next: required matrix CI on repaired exact PR head.
+[Receipt](docs/dev/evidence/plan0172/pr-ci.json).

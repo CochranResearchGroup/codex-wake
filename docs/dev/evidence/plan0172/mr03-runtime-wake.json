@@ -1,0 +1,229 @@
+{
+  "work_item": "CW-MR-172/MR-03",
+  "source_base": "e435175",
+  "counter_support_commit": "0e5d5c9",
+  "verdict": "MR03_SOURCE_AND_ISOLATED_ARTIFACT_ACCEPTED",
+  "schema_version": 7,
+  "runtime_envelope_version": 1,
+  "selected_method": "terminal_observation",
+  "provider_execution_qualified": false,
+  "receiver_acknowledgment_qualified": false,
+  "source_sha256": {
+    "src/codex_wake/cli.py": "487ffc78acba1491b82fd74668cb7f492a6c84ecd18eea6825ea5d2f69c21061",
+    "src/codex_wake/daemon.py": "4c62ce533121276042cdff53ab744d1162524f952a9c2963ad4dd5eb09ebf8b4",
+    "src/codex_wake/grok_runtime.py": "0c0bdbfaa3847a1ed8415a58f6e119094f77610cd185187867a0c5b821ece4cf",
+    "src/codex_wake/grok_terminal.py": "682629d2522556de9e59f37854f69b3ef480575c0f8974ffdc12f2d95b94818e",
+    "src/codex_wake/host_counter.py": "2338d9665c5672a18f6460750b2f4ec3d617b1dbb72e822f4322a26832e36481",
+    "src/codex_wake/injector.py": "41c3189164058fd5ef5ce8b3432076891ab37cd7ed5ba1856b937ec1a43b1b37",
+    "src/codex_wake/mcp_server.py": "9ed26cd9baebad394abf3a97c39de184623c19b8889ab0c4a6d81c824a4a6621",
+    "src/codex_wake/native_intents.py": "b47161108dfa26aa766be8157742cc6a40947eab444b2df92321dc248f517f95",
+    "src/codex_wake/records.py": "f1633c6ba95efbd8cd08625d2326b7391c635ace1fe2e66ab4d36fd6a5d8be94",
+    "src/codex_wake/runtime_delivery.py": "31b2f77006612580bb533f7f745a86889fafbe3e9b8e797b49e46bada1066e4e",
+    "src/codex_wake/runtime_wakes.py": "1f3cc877ca0df1496eabe175a6bfbd11b31a3cff62f7d303d9a4b966e2db0218"
+  },
+  "wheel_sha256": "ba3e451e130e7a6647a434823638bbcad020df939bcafe0f2eceda66398a876c",
+  "wheel_matches_source": true,
+  "isolated_installed_controls": {
+    "tests": 118,
+    "seconds": 29.336,
+    "result": "PASS",
+    "editable": false
+  },
+  "focused_atomic_controls": {
+    "tests": 42,
+    "seconds": 2.22,
+    "result": "PASS"
+  },
+  "first_full_run": {
+    "tests": 1436,
+    "seconds": 376.546,
+    "failures": 1,
+    "errors": 1,
+    "skipped": 1,
+    "result": "FAIL",
+    "disposition": "read-version expectation updated; counter socket-readiness race repaired with red-green public regression"
+  },
+  "intermediate_full_run": {
+    "tests": 1438,
+    "seconds": 389.615,
+    "failures": 1,
+    "skipped": 1,
+    "result": "FAIL",
+    "failure": "test_messages_cli.MessageCLITests.test_cancelled_message_stays_inspectable",
+    "disposition": "unclassified non-reproduced failure retained; focused five-run diagnostic passes; no messaging implementation or acceptance weakened"
+  },
+  "message_cancel_diagnostic": {
+    "runs": 5,
+    "tests": 5,
+    "seconds": 2.435,
+    "result": "PASS",
+    "not_erasure": true
+  },
+  "final_frozen_full_run": {
+    "tests": 1438,
+    "seconds": 379.838,
+    "skipped": 1,
+    "failures": 2,
+    "errors": 1,
+    "result": "FAIL",
+    "source_and_tests_unchanged": true,
+    "failures_and_errors": [
+      "test_a2a_backup.BackupTests.test_wal_snapshot_preserves_message_receipt_and_uncertain_notification",
+      "test_github_webhook_runtime.GitHubWebhookRuntimeTests.test_provider_timeout_runs_on_main_thread_and_fails_closed",
+      "test_messages_cli.MessageCLITests.test_full_inbox_read_ack_reply_wait_and_outbox_workflow"
+    ],
+    "log_sha256": "ebe823e3250ff56c2c50db201dcc9a117def1a2844acb1cb824b8dbb54ba7d08"
+  },
+  "live_attempts": [
+    {
+      "session_id": "2a432381-86d4-4a47-be27-09d64a4d8980",
+      "conversation_submissions": 0,
+      "verdict": "FAIL",
+      "reason": "initial_session_info_missing",
+      "elapsed_seconds": 11.286,
+      "cleanup": {
+        "introduced_remaining": [],
+        "preexisting_changed": []
+      }
+    },
+    {
+      "session_id": "7c94afe4-df5c-4099-93a3-3455c3cbe76e",
+      "conversation_submissions": 0,
+      "verdict": "FAIL",
+      "reason": "initial_session_info_missing",
+      "elapsed_seconds": 11.0,
+      "cleanup": {
+        "introduced_remaining": [],
+        "preexisting_changed": []
+      }
+    },
+    {
+      "source_base": "e435175",
+      "session_id": "89c7ac66-6d4a-43ea-9b0c-7aef6ce797e6",
+      "work": "/tmp/cw-mr03-2m5d7xyx",
+      "method": "terminal_observation",
+      "conversation_submissions": 1,
+      "marker": "CW_MR03_ACK_01954ce98f",
+      "phases": [
+        "operator_bound_exact_open_recipient",
+        "registered_in_separate_process",
+        "terminal_acceptance_observed"
+      ],
+      "local_identity_checks": 1,
+      "binding_id": "grok_ec411cdcd67c4ae2a8cf81349c0203c2",
+      "pid": 2495221,
+      "wake_id": "wake_intent_6673cea7fdc84df9a0dc6ea054f731bc",
+      "older_reader": "hold",
+      "verdict": "PASS",
+      "attempts": 1,
+      "selected_method": "terminal_observation",
+      "execution": "not_observed",
+      "acknowledgment": "not_observed",
+      "screen_before_sha256": "284c33c58467205d7dd2546c78f9d94bfeaa4508713c2d753b39d41b0a1ea0f3",
+      "screen_after_sha256": "0ce92b80ae109e2d38f3657afeee41cbcb1335f599d4e03be7e9605c79805fc9",
+      "standalone_reply_observed": true,
+      "elapsed_seconds": 13.996,
+      "cleanup": {
+        "introduced_remaining": [],
+        "preexisting_changed": []
+      },
+      "approval": "user yes after explicit one-recipient, five-minute, one-prompt extension request",
+      "candidate_source": "b5a75cf2d9a1d9c45aa96563a1595d1c9cdc686a"
+    }
+  ],
+  "total_conversation_prompts": 1,
+  "persisted_grok_usage": "none_recorded_for_first_two_sessions; third session has separately observed synthetic reply",
+  "extra_probe_authority": "approved_by_user_yes_and_consumed",
+  "subagents": 0,
+  "production_install_changed": false,
+  "production_services_changed": false,
+  "main_integration": false,
+  "implementation_commit": "b5a75cf2d9a1d9c45aa96563a1595d1c9cdc686a",
+  "message_order_diagnostic": {
+    "tests": 10,
+    "seconds": 5.546,
+    "failures": 1,
+    "result": "FAIL",
+    "observed_error": "clock_anomaly: clock continuity is uncertain; no effect authorized",
+    "production_guard_changed": false
+  },
+  "qa_gate": "PASS: later frozen 1438-test suite, zero failures/errors, one expected skip; historical failures retained",
+  "compatibility": {
+    "current_reader": "runtime_intent_v7",
+    "older_reader": "hold",
+    "unknown_envelope": "hold",
+    "unknown_runtime": "hold",
+    "unsupported_policy": "hold",
+    "private_fixture_cleanup": "cancelled_and_archived_without_fabricated_utc"
+  },
+  "audits": {
+    "planning": {
+      "inherited_findings": 4,
+      "added": 0
+    },
+    "catalog_only_lanes": {
+      "inherited_findings": 51,
+      "added": 0
+    }
+  },
+  "private_evidence_directory": "/home/ecochran76/.local/state/codex-wake/design/grok-multi-runtime-20261021/mr03",
+  "unchanged_base_diagnostic": {
+    "base_implementation": "MR-02/e435175 isolated installed wheel",
+    "tests": 10,
+    "seconds": 4.583,
+    "result": "PASS",
+    "scope": "five ordered wait/cancel pairs; does not establish cause or clear candidate failures"
+  },
+  "live_gate": "PASS: exact recipient, cross-process persistence, one attempt, standalone synthetic reply, no replay, clean teardown",
+  "qa_repair": {
+    "production_source_changed": false,
+    "test_files": [
+      "tests/test_messages_cli.py",
+      "tests/test_a2a_backup.py",
+      "tests/test_github_webhook_runtime.py"
+    ],
+    "host_wall_discontinuity_seconds": 10.58,
+    "clock_guards_preserved": true,
+    "mail_controls": {
+      "tests": 27,
+      "seconds": 12.877,
+      "result": "PASS"
+    },
+    "backup_repetitions": {
+      "tests": 30,
+      "seconds": 17.54,
+      "result": "PASS"
+    },
+    "webhook_client_controls": {
+      "tests": 23,
+      "seconds": 4.555,
+      "result": "PASS"
+    },
+    "webhook_latency_diagnostic": {
+      "original": "FAIL:503 COMMIT_FAILED",
+      "repaired": "PASS",
+      "injected_ingest_stall_seconds": 1.05
+    },
+    "historical_backup_create_failure": "unclassified historical exception retained; controlled-clock stress30 and later full suite pass, no backup source changes",
+    "full_run": {
+      "exit_code": 0,
+      "source_unchanged": true,
+      "tests": 1438,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 462.612,
+      "result": "PASS",
+      "interpreter": "isolated non-editable candidate Python with MCP; source via PYTHONPATH",
+      "log_sha256": "74b94983e0070a1866ba6c150a65daf7051672ba7d8fc6649f6d9c82e1ac4848",
+      "manifest_sha256": "9f7a9a95fb3e9b9007948121582d2b7cb872759547b1857b9eb27f293fc8f5f9"
+    },
+    "test_repair_commit": "9fd40a0"
+  },
+  "production_modules_matching_frozen_wheel": 119,
+  "ticket_state": "DONE",
+  "next_ready_tickets": [
+    "MR-04",
+    "MR-05"
+  ]
+}

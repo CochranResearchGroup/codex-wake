@@ -1305,3 +1305,39 @@ State: CLOSED
 Current State: PR303 merged, v0.19.1 released and installed; required CI/local
 regression and original installed idle/busy native exchanges pass.
 Plan: [Plan0171](docs/dev/plans/0171-2026-10-20-native-counter-handoff.md).
+
+## P172 | Multi-runtime wakes and agent exchanges
+
+State: OPEN
+
+Owner: ecochran76. Local intake CW-MR-172; no GitHub issue posted.
+Plan: [Plan0172](docs/dev/plans/0172-2026-10-22-multi-runtime-wake.md).
+The user-approved direction adds exact open-Grok TUI wakes and bidirectional
+Codex/Grok A2A through a shared runtime delivery seam. Default wait, explicit
+queue/interrupt modes and separately qualified terminal fallback preserve exact
+recipient identity, deadlines and evidence strength. Same-host first release;
+broader lifecycle/resource support and other runtimes follow.
+Current packet is a specification and six dependency-aware local ticket drafts.
+MR-01 qualifies Grok's exact live-session route before adapter implementation.
+The first MR-01 wave used two disposable TUI launches, zero conversation
+submissions and no subagents (all other tickets blocked). Both required Grok
+sign-in. Native protocol availability is observed; no live delivery route is
+qualified by that first run.
+Authenticated rerun now qualifies one managed-launch terminal-observed route
+with same-session response and fresh cleanup. MR-01 DONE. MR-02 now DONE for
+the version1 Codex runtime seam, with full-suite and isolated-wheel controls.
+MR-03 DONE for source/isolated artifact: isolated-wheel118 controls, live exact
+Grok wake/reply with one attempt/no replay/clean teardown, and final frozen1438
+suite PASS/one expected skip in462.612s. Test-only repair9fd40a0 preserves guards;
+all119 production modules match the frozen live-qualified wheel. Earlier failures
+remain retained. MR-04/MR-05 subsequently DONE for source/isolated artifact after parallel
+implementation and primary reconciliation. Frozen1451 PASS341.346s/one expected
+skip, unchanged source/tests; final installed changed-axis15 PASS. MR-06 DONE for installed candidate: real bidirectional TUI acceptance PASS;
+full1455/one expected skip and installed61 PASS. Main/CI/release/production separate.
+for real TUI/bidirectional live acceptance. Native Grok caller attestation, Codex
+terminal fallback and strict queue/interruption remain unqualified/refused.
+[MR-03 evidence](docs/dev/verification/0172-2026-10-22-mr03-grok-wake.md).
+Main integration/release/production
+installation remain separate; native Grok control/A2A receipts stay unqualified.
+[MR-02 verification](docs/dev/verification/0172-2026-10-22-mr02-runtime-seam.md).
+Preserve P168/#282 and existing controllers.

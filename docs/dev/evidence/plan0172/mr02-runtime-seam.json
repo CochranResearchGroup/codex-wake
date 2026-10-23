@@ -1,0 +1,79 @@
+{
+  "source_base": "9618a58",
+  "branch": "feat/mr02-runtime-seam",
+  "scope": "MR-02 source and isolated installed artifact only",
+  "source_sha256": {
+    "src/codex_wake/runtime_delivery.py": "5b9911b86883ae22613269d9f6d0079ee65ead5dcbe09c99f75a7c45170b40a6",
+    "src/codex_wake/codex_runtime.py": "cc66e453a0c557b4ca48a701e31efdb75565f0462fed0d80f06441c848990ce7",
+    "src/codex_wake/native_delivery.py": "ee523097ab26d70e49f510f4161f0c3fc6ca363aec427a9172715dc39a8397d6",
+    "src/codex_wake/native_intents.py": "2e60424822b7324f1d4b97f0b7e68b087597bc8fd2475ead8b3936f22b2e1464",
+    "src/codex_wake/injector.py": "dd92f2d1c83536aaef3f440a8238c484b5543e53b80a297d1e179b89254f38b5"
+  },
+  "wheel_sha256": "74f9b7d49bcf9a8a33699ce7316bd20f446aeef2703090dbaf1304f913852619",
+  "wheel_matches_changed_source": true,
+  "source_focused": {
+    "tests": 16,
+    "result": "PASS"
+  },
+  "installed_focused": {
+    "tests": 94,
+    "seconds": 19.232,
+    "result": "PASS",
+    "python": "3.12.13",
+    "editable": false
+  },
+  "undefined_names": "PASS",
+  "compile": "PASS",
+  "policy_wiring": "PASS",
+  "persisted_schema_change": false,
+  "subagents": 0,
+  "production_install_changed": false,
+  "provider_submissions": 0,
+  "planning_audit": {
+    "result": "BASELINE_FAILURE",
+    "inherited_count": 4,
+    "added": 0
+  },
+  "lane_audit": {
+    "result": "BASELINE_FAILURE",
+    "inherited_count": 51,
+    "added": 0
+  },
+  "intermediate_full_run": {
+    "tests": 1425,
+    "seconds": 429.045,
+    "failures": 61,
+    "errors": 3,
+    "skipped": 1,
+    "result": "FAIL",
+    "cause": "Legacy evidence callers omit transport; intermediate adapter wrapper rejected them. Final wrapper supplies native transport.",
+    "log_sha256": "4501db3d7f0a1e5b5d393be53db4fbc9afe391315005c80e82a0221ed0c19f6d"
+  },
+  "legacy_callers_after_fix": {
+    "tests": 2,
+    "seconds": 1.121,
+    "result": "PASS"
+  },
+  "isolated_entrypoint_smoke": {
+    "cli_version": "0.19.1",
+    "daemon_no_dispatch": {
+      "checked": 0,
+      "fired": 0,
+      "failed": 0,
+      "pending": 0,
+      "dispatched": 0,
+      "submitted": 0,
+      "requeued": 0
+    },
+    "result": "PASS"
+  },
+  "final_full_run": {
+    "tests": 1428,
+    "seconds": 293.051,
+    "skipped": 1,
+    "result": "PASS",
+    "log_sha256": "d3aac9453fb6b07f70bf23e7d1533af3c147d745a9297b08bbe90d1d6b0c5635",
+    "source_matches_qualified_wheel": true
+  },
+  "verdict": "SOURCE_AND_ISOLATED_WHEEL_QUALIFIED"
+}

@@ -1,0 +1,135 @@
+{
+  "issue": 305,
+  "pull_request": 306,
+  "head_before_smoke_repair": "edab49fdbd4d8f4f2c8a7c9842dd9dbf9aad9648",
+  "initial_run": 40014196358,
+  "initial_run_url": "https://github.com/CochranResearchGroup/codex-wake/actions/runs/40014196358",
+  "initial_verdict": "FAIL retained; installed smoke expected stale27-tool catalog",
+  "local_red": "Installed a2a_mcp_smoke.py reproduces exact len(discovered)==27 failure",
+  "repair": "Both installed smoke scripts explicitly require32 tools including exact five public Grok names; existing auth/claim/denial/wake-control assertions retained",
+  "installed_mailbox_mcp": {
+    "status": "PASS",
+    "tools": [
+      "wake_sessions_target",
+      "wake_sessions_configuration",
+      "wake_sessions_handoff",
+      "wake_sessions_refresh",
+      "wake_sessions_spawn",
+      "wake_sessions_list",
+      "wake_sessions_resolve",
+      "wake_sessions_show",
+      "wake_sessions_current",
+      "wake_messages_send",
+      "wake_messages_inbox",
+      "wake_messages_outbox",
+      "wake_messages_show",
+      "wake_messages_read",
+      "wake_messages_ack",
+      "wake_messages_reply",
+      "wake_messages_reconcile",
+      "wake_messages_cancel",
+      "wake_messages_arm_reply",
+      "wake_goal_limits_set",
+      "wake_goal_limits_show",
+      "wake_list",
+      "wake_cancel",
+      "wake_pause",
+      "wake_resume",
+      "wake_pause_status",
+      "wake_interrupt",
+      "wake_grok_sessions",
+      "wake_grok_show",
+      "wake_grok_after",
+      "wake_grok_at",
+      "wake_grok_file"
+    ],
+    "calls": [
+      {
+        "tool": "wake_goal_limits_set",
+        "is_error": true
+      },
+      {
+        "tool": "wake_sessions_current",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_send",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_send",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_read",
+        "is_error": true,
+        "shared_connection_child_claim": true
+      },
+      {
+        "tool": "wake_messages_read",
+        "is_error": true
+      },
+      {
+        "tool": "wake_messages_read",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_ack",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_ack",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_reply",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_read",
+        "is_error": false
+      },
+      {
+        "tool": "wake_messages_reconcile",
+        "is_error": false
+      }
+    ],
+    "elapsed_seconds": 7.230878593996749,
+    "runtime_methods": [
+      "initialize",
+      "initialized",
+      "thread/loaded/list",
+      "thread/read"
+    ],
+    "owned_fixture_removed": true,
+    "children_after": 0,
+    "native_turns": 0,
+    "notifications": 0
+  },
+  "installed_wake_controls": {
+    "version": "0.19.1",
+    "source_commit": "edab49fdbd4d8f4f2c8a7c9842dd9dbf9aad9648",
+    "python_files_matched": 121,
+    "cli_pause_blocks_actual_daemon": true,
+    "cross_root_cancellation": true,
+    "explicit_resume": true,
+    "mcp": {
+      "tools": 32,
+      "calls": [
+        "wake_list",
+        "wake_pause",
+        "wake_pause_status",
+        "wake_interrupt",
+        "wake_cancel",
+        "wake_resume"
+      ],
+      "ungranted_root_denied": true
+    },
+    "native_model_turns": 0,
+    "operator_wakes_changed": 0,
+    "service_restarts": 0,
+    "temporary_roots_removed": "context-managed"
+  },
+  "package_source_changed_by_ci_repair": false,
+  "next_gate": "Required matrix CI on repaired PR head; no merge/release/production effect claimed"
+}

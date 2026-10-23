@@ -70,6 +70,12 @@ class WakeLifecycleLock:
 def classify_record(record: object) -> str:
     """Pure multi-version classification; unrecognized records are held."""
 
+    if (isinstance(record, dict) and isinstance(record.get('target'), dict)
+            and record['target'].get('transport') == 'runtime' and record.get('schema_version') != 7):
+        return 'hold'
+    if isinstance(record, dict) and record.get('schema_version') == 7:
+        from .runtime_wakes import valid_record
+        return 'runtime_intent_v7' if valid_record(record) else 'hold'
     if isinstance(record, dict) and record.get('schema_version') == 6:
         from .native_intents import valid_record
         return 'native_intent_v6' if valid_record(record) else 'hold'
@@ -328,7 +334,7 @@ def append_event(
     **extra: Any,
 ) -> dict[str, Any]:
     updated = dict(record)
-    event = dict(at=None, type=event_type, message=message) if record.get("schema_version") == 6 and now is None else make_event(event_type, message, now)
+    event = dict(at=None, type=event_type, message=message) if record.get("schema_version") in (6, 7) and now is None else make_event(event_type, message, now)
     event.update(extra)
     events = list(updated.get("events") or [])
     events.append(event)
@@ -368,7 +374,8 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "read_versions": [1, 2, 3, 4, 5, 6],
+        "read_versions": [1, 2, 3, 4, 5, 6, 7],
+        "runtime_intent_write_version": 7,
         "native_intent_write_version": 6,
         "native_network_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
         "native_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
@@ -433,16 +440,16 @@ def write_record(root: Path, record: dict[str, Any]) -> Path:
         raise WakeError(f"invalid wake status: {status}")
     if not isinstance(wake_id, str) or not wake_id:
         raise WakeError("wake record missing id")
-    # Schema6 keeps one atomic authority file across all active/terminal states.
+    # Schema6/7 keep one atomic authority file across all active/terminal states.
     # Status is in the record, not inferred from its directory. This prevents a
     # crash between status-directory writes from reviving a pre-submission copy.
-    target_dir = root / ("pending" if record.get('schema_version') == 6 else status)
+    target_dir = root / ("pending" if record.get('schema_version') in (6, 7) else status)
     target_dir.mkdir(parents=True, exist_ok=True)
     final_path = target_dir / f"{wake_id}.json"
     temp_path = final_path.with_suffix(".json.tmp")
     temp_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     temp_path.replace(final_path)
-    if record.get('schema_version') == 6:
+    if record.get('schema_version') in (6, 7):
         with final_path.open('rb') as stream:
             os.fsync(stream.fileno())
         for directory in (target_dir, root, root.parent):
@@ -484,7 +491,7 @@ def iter_archived_records(root: Path) -> list[WakePath]:
         if not isinstance(record, dict):
             continue
         results.append(WakePath(path=path, record=record))
-    return sorted(results, key=lambda item: (item.record.get("archived_at", ""), item.record.get("id", "")))
+    return sorted(results, key=lambda item: (item.record.get("archived_at") or "", item.record.get("id", "")))
 
 
 def find_record(root: Path, wake_id: str) -> WakePath:
@@ -517,7 +524,7 @@ def status_summary(root: Path) -> dict[str, Any]:
         record = item.record
         status = record.get("status")
         recovery = record.get('time_recovery')
-        if record.get('schema_version') == 6 and isinstance(recovery, dict):
+        if record.get('schema_version') in (6, 7) and isinstance(recovery, dict):
             state = recovery.get('state')
             if isinstance(state, str):
                 time_recovery_counts[state] = time_recovery_counts.get(state, 0) + 1
@@ -576,7 +583,7 @@ def cancel_record(
     checkpoint: Callable[[str], None] | None = None,
 ) -> Path:
     found = find_record(root, wake_id)
-    if decode_signal_record(found.record) is not None or classify_record(found.record) in {"network_v3", "native_network_v5", "native_intent_v6"}:
+    if decode_signal_record(found.record) is not None or classify_record(found.record) in {"network_v3", "native_network_v5", "native_intent_v6", "runtime_intent_v7"}:
         with WakeLifecycleLock(root, wake_id):
             if checkpoint is not None:
                 checkpoint("after_cancel_lock")
@@ -594,7 +601,7 @@ def _cancel_found(
     status = record.get("status")
     if status in {"submitted", "failed", "cancelled", "expired", "archived"}:
         raise WakeError(f"cannot cancel wake in status {status}")
-    network = classify_record(record) in {'network_v3', 'native_network_v5', 'native_intent_v6'}
+    network = classify_record(record) in {'network_v3', 'native_network_v5', 'native_intent_v6', 'runtime_intent_v7'}
     current = None if network else now or utc_now()
     record["status"] = "cancelled"
     record["updated_at"] = None if network else format_utc(current)
@@ -656,7 +663,7 @@ def archive_record(
     status = record.get("status")
     if status not in TERMINAL_STATUSES:
         raise WakeError(f"cannot archive wake in status {status}")
-    if record.get('schema_version') == 6:
+    if record.get('schema_version') in (6, 7):
         # Archival is an operator action, not evidence of UTC acquisition.
         current = None
     elif record.get("schema_version") == 3:

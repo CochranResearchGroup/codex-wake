@@ -1,6 +1,24 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P172-MR06
+    owner: primary / ecochran76
+    objective: Qualify installed Codex and Grok visible TUI exchanges
+    work_items: [CW-MR-172/MR-06]
+    plan: docs/dev/plans/0172-multi-runtime/0006-2026-10-22-installed-acceptance.md
+    plan_ref: docs/multiruntime-spec
+    branch: test/mr06-installed-acceptance
+    checkpoint: 1432a3c88974edde8c5b9314eaa4ca4be279f698
+    target: origin/main
+    integration: squash_pr
+    remote_ref: origin/test/mr06-installed-acceptance
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
+    dependencies: []
+    satisfied_dependency: MR-04 and MR-05 source and isolated artifact gates
+    overlaps: []
+    updated_at: 2026-10-23
+    disposition: installed candidate and real bidirectional TUI qualified; full1455 and installed61 pass; source packet retained; main integration separate
   - id: P171
     owner: primary / ecochran76
     objective: Reuse a private native counter bridge for stable-time consumers
@@ -582,3 +600,44 @@ lanes:
     overlaps: []
     updated_at: 2026-10-10
     disposition: Plan0151 DONE; v0.13.0 released/installed; 14 MCP tools registered and qualified, docs and two installed skills match; no service restart or production messages; gov_policy evaluation deferred. Corrects initial P73 label without changing Plan0146 lane.
+
+  - id: P172-MR04
+    owner: primary / ecochran76
+    objective: Correlated cross-runtime mailbox request and reply
+    work_items: [CW-MR-172/MR-04]
+    plan: docs/dev/plans/0172-multi-runtime/0004-2026-10-22-cross-runtime-a2a.md
+    plan_ref: docs/multiruntime-spec
+    branch: feat/mr04-cross-runtime-a2a
+    remote_ref: origin/feat/mr04-cross-runtime-a2a
+    checkpoint: 37f935fa820e186e5073e6bb22e371ba92afdb84
+    reconciled_source: docs/multiruntime-spec@ef8b5b4
+    target: origin/main
+    integration: squash_pr
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
+    dependencies: []
+    satisfied_dependency: CW-MR-172/MR-03, qualified source and isolated artifact
+    overlaps: [P172-MR05]
+    reconciled_overlaps: [P172-MR05]
+    updated_at: 2026-10-22
+    disposition: source packet retained; corrections and accepted artifact are on coordinator ef8b5b4; not a merge-ready packet ref
+  - id: P172-MR05
+    owner: subagent /root/mr05 / ecochran76
+    objective: Explicit busy policy and qualified fallback selection
+    work_items: [CW-MR-172/MR-05]
+    plan: docs/dev/plans/0172-multi-runtime/0005-2026-10-22-busy-and-fallback.md
+    plan_ref: docs/multiruntime-spec
+    branch: feat/mr05-runtime-policies
+    remote_ref: origin/feat/mr05-runtime-policies
+    checkpoint: dd2ca6de45dbaae5683a1b39748524a04d1e1b7b
+    reconciled_source: docs/multiruntime-spec@ef8b5b4
+    target: origin/main
+    integration: squash_pr
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
+    dependencies: []
+    satisfied_dependency: CW-MR-172/MR-03, qualified source and isolated artifact
+    overlaps: [P172-MR04]
+    reconciled_overlaps: [P172-MR04]
+    updated_at: 2026-10-22
+    disposition: worker packet retained; primary CLI/MCP integration and accepted artifact are on coordinator ef8b5b4; not a merge-ready packet ref

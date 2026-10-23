@@ -1125,3 +1125,7 @@ at `~/.local/state/codex-wake/host-counter`. Its Unix socket is private; it read
 fresh Windows QPC values and expires after60seconds idle. It needs no additional
 configuration. Cold launch failures or malformed/late replies hold clock authority;
 it never substitutes guest time or caches an earlier counter as a new sample.
+
+Candidate multi-runtime work: [managed Grok mailbox and delivery policies](docs/dev/multi-runtime-mailbox.md).
+Source/isolated-artifact qualification is separate from real cross-runtime TUI
+acceptance and production installation; see Plan0172 and its evidence.

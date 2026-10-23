@@ -1,0 +1,85 @@
+{
+  "work_items": [
+    "CW-MR-172/MR-04",
+    "CW-MR-172/MR-05"
+  ],
+  "base": "36412c4",
+  "source_commits": {
+    "mr04": "4407630",
+    "mr05": "1cf56a7",
+    "cli_mcp_selection": "4ee9c01",
+    "grok_native_grant_refusal": "ef8b5b4"
+  },
+  "worker": {
+    "handle": "/root/mr05",
+    "source_commit": "dd2ca6de45dbaae5683a1b39748524a04d1e1b7b",
+    "status": "COMPLETED",
+    "primary_disposition": "integrated after focused validation; one accepted shared-lock finding repaired and closed-world verified",
+    "model_usage": "not provided by runtime; no estimate"
+  },
+  "selected_method": "terminal_observation",
+  "native_grok_caller_attestation": "not_qualified",
+  "source_wheel_sha256": "c5078cd1d94286bbd84c71f112a62514501d6de63481ec9f20c864ec8d6aab34",
+  "wheel_version": "0.19.1 unreleased candidate",
+  "production_installation_changed": false,
+  "provider_prompts": 0,
+  "main_integration": false,
+  "isolated_controls": {
+    "tests": 75,
+    "seconds": 19.324,
+    "result": "PASS",
+    "scope": "before final MCP authority correction"
+  },
+  "final_installed_changed_axis": {
+    "tests": 15,
+    "seconds": 5.14,
+    "result": "PASS"
+  },
+  "lint": "F821,F822,F823 PASS",
+  "full_suite": {
+    "exit_code": 0,
+    "tests": 1451,
+    "failures": 0,
+    "errors": 0,
+    "skipped": [
+      [
+        "test_live_deadline_stops_service_without_controller (test_host_execution.HostExecutionTests.test_live_deadline_stops_service_without_controller)",
+        "opt-in disposable systemd test"
+      ]
+    ],
+    "seconds": 341.346,
+    "source_unchanged": true,
+    "verdict": "PASS",
+    "log_sha256": "b3a9103cb7a75056b8d2d1793be8dbca4bfc011c24688bd34f5e40505026cf4e",
+    "source_manifest_sha256": "ced149488063043bbfe9144d82fe4a72714721b69e3c11a9cbd2c0393d814d05"
+  },
+  "superseded_full_run": "retained: accepted MCP authority finding invalidated original candidate before terminal result",
+  "review_findings": [
+    {
+      "id": "MR04-R1",
+      "finding": "shared-pane lock missing between durable wakes and mailbox notifications",
+      "disposition": "blocking, repaired; mutation red/restored green; closed-world worker verification"
+    },
+    {
+      "id": "MR04-P1",
+      "finding": "Grok MCP native-only tool grant reuse",
+      "disposition": "blocking, repaired; valid-input red/green after non-qualifying first reproducer"
+    }
+  ],
+  "qualification_boundary": "Source and isolated artifact only; real visible TUI bidirectional acceptance belongs to MR06",
+  "private_evidence_directory": "/home/ecochran76/.local/state/codex-wake/design/grok-multi-runtime-20261021/mr04-mr05",
+  "verdict": "MR04_MR05_SOURCE_AND_ISOLATED_ARTIFACT_ACCEPTED",
+  "next_ticket": "MR-06 READY; real TUI/bidirectional live acceptance not run",
+  "frozen_source_commit": "ef8b5b4",
+  "source_modules": 121,
+  "audits": {
+    "active_planning": {
+      "inherited_findings": 4,
+      "added": 0
+    },
+    "catalog_lanes": {
+      "inherited_findings": 51,
+      "added": 0
+    }
+  }
+}

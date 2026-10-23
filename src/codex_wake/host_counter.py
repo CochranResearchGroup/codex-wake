@@ -71,7 +71,13 @@ def read_counter(directory=None, *, start=True):
                 if not isinstance(response, dict) or response.get('id') != request_id or response.get('status') != 'ok':
                     raise ValueError('counter_response_rejected')
                 return _values(response['counter'], response['frequency'])
-        except (FileNotFoundError, ConnectionRefusedError):
+        except (FileNotFoundError, ConnectionRefusedError) as exc:
+            # A private bridge publishes its socket before listen(). Waiting for
+            # that existing owner does not start a bridge or replay a request:
+            # connect() refused before any bytes reached the producer.
+            if not start and isinstance(exc, ConnectionRefusedError) and time.monotonic() < deadline:
+                time.sleep(.02)
+                continue
             if not start or time.monotonic() >= deadline:
                 raise ValueError('counter_bridge_unavailable') from None
             if not launched:

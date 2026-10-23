@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "ticket": "CW-MR-172/MR-01",
+  "source_base": "412789d",
+  "verdict": "QUALIFIED_TERMINAL_OBSERVATION",
+  "runtime": {
+    "name": "grok",
+    "version": "1.0.40",
+    "build": "eb1a2256660d",
+    "ui_mode": "minimal, no-alt-screen",
+    "model_label": "Grok 4.7",
+    "reported_model_id": "grok-4.7-build"
+  },
+  "selected_route": {
+    "method": "tmux literal bracketed paste + Enter",
+    "scope": "managed-launch binding only",
+    "evidence": "observed terminal acceptance and standalone model response",
+    "native_receiver_receipt": false,
+    "a2a_receipt": false
+  },
+  "identity": {
+    "session_id": "fce842bc-e502-40ba-a892-6d7778283ef1",
+    "session_info_before": {
+      "turn": 0
+    },
+    "session_info_after": {
+      "turn": 1
+    },
+    "same_session_id": true,
+    "same_pid_and_start_ticks": true,
+    "pane": "%0",
+    "process_pid": 1810655,
+    "process_start_ticks": 1017702,
+    "binding_inputs": [
+      "owned private tmux socket",
+      "explicit launch session UUID",
+      "process argv",
+      "process generation",
+      "TUI session-info UUID before and after"
+    ]
+  },
+  "observation": {
+    "marker": "CW_MR01_ACK_2ff83efe58",
+    "standalone_response": true,
+    "model_calls": 1,
+    "tool_use_observed": false,
+    "terminal_control_commands": [
+      "session-info before",
+      "session-info after"
+    ],
+    "negative_identity": {
+      "expected_uuid_mismatch": "withheld before input",
+      "screen_unchanged": true
+    },
+    "protected_composer": {
+      "owned_unsent_draft": "withheld submission",
+      "only_owned_draft_cleared": true
+    },
+    "guard_scope": "qualification helper, not production implementation"
+  },
+  "native_observation": {
+    "initialize": "PASS",
+    "cwd_scoped_session_list": "PASS_EMPTY",
+    "shared_open_tui_control": "NOT_QUALIFIED",
+    "note": "No private leader socket existed after TUI launch. A separate initialized native connection listed zero sessions; no native load/prompt attempted."
+  },
+  "capability_limits": {
+    "terminal_managed_launch": "qualified for this tested runtime/UI version",
+    "existing_unmanaged_session_adoption": "not_qualified",
+    "active_busy_queue_interrupt": "not_qualified",
+    "native_live_submission": "not_qualified",
+    "caller_attestation": "not_qualified",
+    "receiver_acknowledgment": "not_qualified",
+    "strict_resource_enforcement": "not_qualified"
+  },
+  "budget": {
+    "max_recipients": 2,
+    "tui_launches": 1,
+    "max_conversation_submissions": 6,
+    "conversation_submissions": 1,
+    "max_live_seconds": 300,
+    "live_seconds": 249.221
+  },
+  "usage": {
+    "source": "grok usage exact-session-id after teardown",
+    "inputTokens": 27805,
+    "outputTokens": 100,
+    "cachedReadTokens": 1280,
+    "cacheCreationTokens": 0,
+    "reasoningTokens": 88,
+    "totalTokens": 27905,
+    "modelCalls": 1,
+    "turnCount": 1,
+    "costUsdTicks": 184586000,
+    "interpretation": "native persisted fields retained without converting cost units or assigning fresh-token semantics"
+  },
+  "cleanup": {
+    "fresh_os_census": true,
+    "preexisting_process_generations_preserved": true,
+    "new_grok_or_tmux_processes_remaining": 0,
+    "test_tui_pid_absent": true
+  },
+  "reconciliation": {
+    "historical_sample": "mr01-auth-gated.json retained",
+    "mr01": "DONE with scoped terminal route",
+    "mr02": "READY",
+    "other_tickets": "dependency-blocked; not started",
+    "subagents": 0
+  }
+}

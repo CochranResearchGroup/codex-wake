@@ -2,7 +2,7 @@
 
 Default write schema version: `1`
 
-Supported read schema versions: `1`, `2`, `3`, `4`, `5`, `6`
+Supported read schema versions: `1`, `2`, `3`, `4`, `5`, `6`, `7`
 
 Wake records are durable runtime records stored as JSON. They are operational state, not source artifacts. Schema version `1` remains the default for the existing timer, file, process, CLI, and plugin writers. Schema version `2` is reserved for capability-gated signal records backed by the root-local signal journal. A schema-v1 record whose predicate claims `type: signal`, an unknown version, or a malformed schema-v2 record is held rather than evaluated through the legacy predicate path.
 
@@ -440,3 +440,73 @@ Contract2.0 finite NTS-verified bounds are supported with service freshness up t
 300s and bounded QPC handoff. Per-request precision still governs dispatch.
 Unbounded/best-effort UTC never supplies dispatch authority. Contract1.0 retains
 its below100ms qualification. No relative origin is created after an outage.
+
+## Runtime Intent Version 7 (runtime envelope version 1)
+
+Schema7 adds a separately versioned `target` with `transport: runtime`,
+`version: 1`, `runtime: grok`, opaque `session_id`, `binding_id`, pinned
+`binding_sha256`, `method: terminal_observation` or host-approved
+`native_preferred`, and `policy: wait`. No schema1–6
+transport or actor identity is reinterpreted. Older readers hold schema7;
+unknown runtime/envelope/method/policy combinations are held by current readers.
+Schema7 is allocated against MR-02/e435175, whose highest read version is6.
+
+The original `scheduling_intent` retains canonical root, stable idempotency key,
+request fingerprint, original trigger/TTL, qualified UTC/counter anchors and
+clock-continuity policy. Shared schema6 eligibility code evaluates time; relative
+requests are never rebased on restart or recovered clocks. All events lacking
+qualified timestamps remain explicitly unobserved. Schema7 cancellation and
+dispatch share the existing wake lifecycle lock and emergency pause guard.
+
+`runtime_delivery` records one durable submission UUID, exact prompt digest,
+method, certainty, execution and acknowledgment before terminal input. Ambiguous
+input stays uncertain across restarts and expiry; absence of UI evidence never
+authorizes replay. An exact accepted marker line in the bound TUI can resolve
+terminal observation, but cannot create execution or receiver acknowledgment.
+The marker must be a standalone accepted line, never a composer draft. Terminal
+frames are projected as hashes; private captures and credentials stay out of Git.
+
+The binding file is operator-enrolled under `runtime-bindings/` with restrictive
+ownership/permissions. Its digest is frozen in the intent. Process/boot/start
+identity, executable digest, managed-launch session argument, exact pane PID,
+qualified minimal UI and a fresh local session-info response precede prompt input.
+A user-scoped per-pane lock serializes Wake recipients across roots. Direct user
+keystrokes are not atomic with these checks; terminal observation is the actual
+guarantee. Queue/interrupt/native Grok receipts remain unsupported/unqualified.
+
+Managed workers advertise read version7 through the existing health contract.
+Agent-facing registration requires an active compatible worker; a registration
+failure after persistence retains its original intent and reports the worker gap.
+This source slice does not upgrade a production worker or create a grant.
+
+
+### Runtime policy and mailbox binding extensions (MR-04/MR-05)
+
+Queue/interrupt selections are public choices but refuse before retention or input
+until their guarantees qualify. Wait remains default. Native Codex wake CLI and
+Grok CLI/MCP expose explicit busy-policy selection. No strict dequeue expiry or
+owned-turn interruption is inferred from native queue admission.
+
+An operator may add `allow_terminal_fallback: true` to a newly enrolled Grok host
+binding through the explicit bind option. Its hash stays frozen in each original
+intent. Only definitive `not_sent` + `pre_io=true` + `native_unavailable` evidence
+permits that profile's terminal fallback. Uncertain/accepted/missing evidence
+never switches methods. The actually selected delivery method and terminal
+observation remain inspectable. An older schema7 reader that does not recognize
+`native_preferred` holds the record; old direct terminal bindings keep their meaning.
+
+Mailbox actor capabilities and Codex actor namespaces retain their formats.
+Grok actor context is a private operator-issued sidecar under `runtime-actors/`,
+keyed by the issued actor ID and freezing the binding digest. Capabilities remain
+independent authority. Caller validation checks process ancestry and generation,
+runtime-inherited session claim, host-bound session context and enrollment root.
+Native Grok caller attestation remains not qualified.
+
+The mailbox bindings file recognizes `grok_terminal_notification_v1` alongside
+existing owning-client/tmux transports. Old readers refuse the unfamiliar binding
+transport. Grok notifications use the same user-scoped pane lock as durable wakes,
+then revalidate journal authority and the original expiry/lease window. A terminal
+frame hash receipt is transport observation, never an authenticated work receipt.
+The existing mailbox claim/receipt protocol may subsequently strengthen that same
+message with a real credentialed work claim. Unknown outcomes remain uncertain
+and are never retried as if no bytes were sent. No bus schema migration is required.

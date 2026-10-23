@@ -106,13 +106,29 @@ for _action in WAKE_ACTIONS:
         _props, ['caller_thread_id'], _action in ('list', 'pause-status'))
 
 
+SPECS['wake_grok_sessions'] = ('grok','sessions',
+    'Inspect host-approved managed-launch Grok bindings and current capability/readiness. No enrollment, input or provider call.',
+    {},[],True)
+SPECS['wake_grok_show'] = ('grok','show','Inspect original runtime intent, selected method, readiness and actual delivery evidence without prompt bodies or new input.',
+    {'wake_id':{'type':'string','pattern':'^wake_intent_[0-9a-f]{32}$'}},['wake_id'],True)
+for _verb in ('after','at','file'):
+    SPECS['wake_grok_'+_verb] = ('grok',_verb,
+        'Retain a durable wake for a host-approved exact open Grok binding. Default wait; terminal observation is not execution or acknowledgment. Stable intent key and compatible monitor required. No arbitrary socket/executable or binding enrollment.',
+        {'binding_id':{'type':'string','pattern':'^grok_[0-9a-f]{32}$'},
+         'trigger':TEXT,'prompt':BODY,'idempotency_key':{**INTENT,'maxLength':200},'ttl':TEXT,
+         'busy_policy':{'enum':['wait','queue','interrupt'],'default':'wait'}},
+        ['binding_id','trigger','prompt','idempotency_key'],False)
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
-                 goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None):
+                 goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None,
+                 actor_runtime="codex", runtime_root=None):
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
+        self.actor_runtime,self.runtime_root=actor_runtime,runtime_root
         self.app_server = app_server
         self.tmux_socket, self.tmux_session = tmux_socket, tmux_session
         self.wake_root, self.sender_authority = wake_root, sender_authority
@@ -182,6 +198,8 @@ class CommandRunner:
         if name not in SPECS:
             return {"error": {"code": "unknown_tool", "message": "Unknown tool."}}, True
         group, verb, _, properties, required, readonly = SPECS[name]
+        if self.actor_runtime == 'grok' and group not in ('messages','grok'):
+            return {'error':{'code':'native_caller_attestation_unavailable'}}, True
         schema = {"type": "object", "additionalProperties": False,
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
@@ -231,6 +249,20 @@ class CommandRunner:
             for key, value in arguments.items():
                 command += ['--' + key.replace('_', '-'), str(value)]
             return self._execute(command, arguments, readonly)
+        if group == 'grok':
+            if arguments.get('busy_policy','wait') != 'wait':
+                return {'error':{'code':'busy_policy_unsupported'}}, True
+            if self.wake_root is None or not Path(self.wake_root).is_absolute():
+                return {'error':{'code':'runtime_host_scope_unavailable'}}, True
+            command=[*self.cli,'--wake-root',str(self.wake_root),'grok',verb,'--json']
+            if verb == 'show':
+                command += [arguments['wake_id']]
+            elif verb != 'sessions':
+                command += ['--require-monitor','--busy-policy',arguments.get('busy_policy','wait'),
+                            '--idempotency-key',arguments['idempotency_key'],
+                            '--ttl',arguments.get('ttl','24h'),arguments['binding_id'],
+                            arguments['trigger'],'--',arguments['prompt']]
+            return self._execute(command,arguments,readonly)
         body = arguments.get("body")
         if body is not None:
             try:
@@ -259,6 +291,10 @@ class CommandRunner:
         if verb not in ('spawn', 'refresh', 'handoff', 'configuration'):
             command += ["--app-server", self.app_server]
         if group == "messages":
+            if self.actor_runtime == 'grok':
+                command += ['--actor-runtime','grok','--caller-session-id',arguments['caller_thread_id']]
+            if self.runtime_root is not None:
+                command += ['--runtime-root',str(self.runtime_root)]
             for flag, value in (("--bus-root", self.bus_root), ("--capability", self.capability)):
                 if value is not None:
                     command += [flag, str(value)]
@@ -361,6 +397,8 @@ def main(argv=None):
     parser.add_argument("--bus-root", type=Path, default=os.environ.get("CODEX_WAKE_A2A_BUS_ROOT"))
     parser.add_argument("--capability", type=Path, default=os.environ.get("CODEX_WAKE_A2A_CAPABILITY"))
     parser.add_argument("--app-server", default="unix://")
+    parser.add_argument("--actor-runtime", choices=["codex","grok"], default="codex")
+    parser.add_argument("--runtime-root",type=Path,help="host-approved Grok binding root; never a tool argument")
     parser.add_argument("--tmux-socket")
     parser.add_argument("--tmux-session")
     parser.add_argument("--wake-root", type=Path, default=os.environ.get("CODEX_WAKE_WAKE_ROOT"))
