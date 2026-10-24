@@ -20,7 +20,7 @@ OUTCOME = {"enum": ["accepted", "declined", "completed", "failed"]}
 DELIVERY = {"enum": ["inbox", "notify"]}
 PAGE = {"cursor": {"type": "integer", "minimum": 0},
         "limit": {"type": "integer", "minimum": 1, "maximum": 100}}
-SEND = {"body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery": DELIVERY,
+SEND = {"task_id": MESSAGE, "body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery": DELIVERY,
         "ttl": TEXT, "subject": {**TEXT, "maxLength": 200}, "kind": {"enum": ["notice", "request", "result"]},
         "resume_missing": {"type": "boolean"}}
 TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
@@ -68,6 +68,7 @@ from .permission_commands import tool_specs as permission_tool_specs
 SPECS.update(permission_tool_specs())
 for _name in ('wake_sessions_refresh','wake_sessions_configuration'):
     SPECS[_name][3]['scope']={'enum':['current_connection','single_client','shared_server']}
+SPECS['wake_sessions_handoff'][3]['trigger']={'enum':['manual','context_limit','update','resource_warning']}
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 SPECS['wake_goal_limits_set'] = (
     'goal-limits', 'set',
@@ -307,13 +308,14 @@ class CommandRunner:
             if self.lifecycle_profiles is None or lifecycle_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
             from .session_permissions import PermissionStore
-            if verb in ('refresh','configuration') and PermissionStore(lifecycle_root).active():
+            if verb in ('refresh','configuration','handoff') and PermissionStore(lifecycle_root).active():
                 try:
                     from .goal_supervision import verified_native_caller
                     binding=verified_native_caller(native_context,arguments['caller_thread_id'])
                     if arguments['thread_id']!=binding['thread_id']:raise ValueError('exact self required')
                     packet=dict(verb=verb,arguments=arguments,binding=binding,root=str(lifecycle_root),profiles=str(self.lifecycle_profiles))
-                    return self._execute([sys.executable,'-m','codex_wake.permission_refresh'],arguments,readonly,json.dumps(packet))
+                    module='codex_wake.permission_handoff' if verb=='handoff' else 'codex_wake.permission_refresh'
+                    return self._execute([sys.executable,'-m',module],arguments,readonly,json.dumps(packet))
                 except ValueError as exc:
                     return {'error':{'code':'permission_identity_unverified','message':str(exc)}},True
             command = [*self.cli, '--wake-root', str(lifecycle_root), group, verb,

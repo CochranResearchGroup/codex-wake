@@ -76,6 +76,11 @@ def add_sessions_parser(subparsers):
         handoff.add_argument('--' + option, required=True)
     handoff.add_argument('--mode', required=True, choices=('new-tab', 'same-tab'))
     handoff.add_argument('--caller-thread-id')
+    handoff.add_argument('--trigger',choices=('manual','context_limit','update','resource_warning'),default='manual')
+    handoff.add_argument('--bus-root',type=str)
+    handoff.add_argument('--operator-capability',type=str)
+    handoff.add_argument('--actor-capability',type=str)
+    handoff.add_argument('--app-server',default='unix://')
     handoff.add_argument('--rollback', action='store_true', help='restore the original paused conversation without renewing allowance')
     handoff.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('open', 'close'):
