@@ -1,9 +1,10 @@
 # Agent harness ticket drafts
 
-HF-01 is DONE (design only); HF-02/HF-07/HF-13 are READY_FOR_AGENT; other tickets remain TRIAGE. No implementation or live-effect authority is granted.
+HF-01 is DONE (design only); HF-02/HF-06/HF-07/HF-13 are READY_FOR_AGENT; other tickets remain TRIAGE. No implementation or live-effect authority is granted.
 [HF-01 decisions](hf-01-decisions-and-handoffs.md) resolve the shared-contract interview; every later ticket still needs
 its own Matt grill-with-docs process before coding. Stable local locators are
 CW-HARNESS-173/HF-NN. The approved first frontier is published as #315, #316 and #317.
+HF-06 children are published as #320–#325; prerequisites remain explicit.
 
 [Parent plan and ownership/sequence decisions](../0173-2026-10-23-agent-harness-backlog.md).
 `index.json` is a generated dependency/coverage projection; Markdown bodies own
@@ -43,6 +44,8 @@ scope and acceptance. Priority indicates proposed product value, not readiness.
 | [HF-30](0030-2026-10-23-hf-30-completion-retirement.md) | Deliver an accepted work package and retire only its owned resources | P2 | HF-09, HF-14 |
 | [HF-31](0031-2026-10-23-hf-31-additional-runtime.md) | Qualify one selected additional TUI adapter | P2 | HF-25 |
 | [HF-32](0032-2026-10-23-hf-32-automatic-organization.md) | Apply opt-in tab organization with stable protection rules | P2 | HF-17, HF-21 |
+
+[Common session permissions: requirements and HF-06 design proposal](session-permissions-contract.md).
 
 ## Feature coverage
 
@@ -91,4 +94,13 @@ Keep at most three implementation lanes, and serialize shared hub edits.
 ## First-frontier specifications
 
 [Review HF-02/HF-07/HF-13 specs, testing seams and slice boundaries](first-frontier-spec-review.md).
-The three specs and testing seams are approved and published; implementation has not started.
+The three specs and testing seams are approved and published; consult GitHub
+issues #315–#317 for current execution state. Publication is not implementation proof.
+
+
+## HF-06 confirmed product and published implementation slices
+
+[Common permissions spec](hf-06-spec.md) records confirmed policy decisions and
+#318's scoped-refresh capability boundary. [Six-slice proposal](hf-06-implementation-breakdown.md)
+was approved and published as #320–#325 with verified native dependencies.
+HF-06 is specification-ready; implementation waits for the applicable blockers.
