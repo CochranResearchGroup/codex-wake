@@ -1,6 +1,6 @@
 # HF-06 execution ledger
 
-State: IN_PROGRESS
+State: DONE_SOURCE_VALIDATED
 Owner: ecochran76 / primary
 Goal: close #320–#325 on one validated integration branch, then one broad
 Standards/Spec review and one bounded TDD findings-remediation pass.
@@ -107,3 +107,32 @@ All worker owned branches retain committed custody. F is a dedicated one-ticket
 worker for convergence after primary's shared implementation; no parallel core
 edits. Final source closure gates the one broad review; final TDD remediation
 pass is still reserved. #318/#319 remain explicit runtime gaps, not closed here.
+
+## Final acceptance after the one review / TDD pass
+
+Runtime tipc266e42d3fba92d496eea28324a2986ec6cfbc78. All six source tickets
+#320–#325 read back closed/completed. Broad review1/1 and final bounded TDD1/1;
+all accepted findings fixed (two blocking Spec, one nonblocking Standards).
+The review packet retains the frozen pre-review diff and reviewer identities.
+
+Final comprehensive source validation: Python3.11 ran1553 tests in373.964s;
+Python3.12 ran1553 tests in370.074s. Both PASS with one unrelated opt-in systemd
+skip, isolated XDG roots and empty stable-time override. Logs in user-scoped
+publication directory: final311-remediation.log / final312-remediation.log.
+Focused32 tests PASS; Ruff undefined-name checks, compileall, policy wiring and
+diff checks PASS. Hosted CI40136439722 passes both3.11/3.12 release-gate jobs
+at the exact runtime tip. Earlier failed diagnostic logs remain retained.
+
+Rebuilt isolated0.21.0 wheel SHA256
+`8b178cedd15e61bda276bf82ad05501631df75d0b3a1c787eee9533d1234ac79`.
+Public installed stdio49-tool smoke PASS, including verified task/operation
+inspection, wrong-operation refusal, native-identity refusal and self restriction;
+public installed CLI explains operation scope/issuer. No provider effects.
+Production readback remains0.20.1. Fresh OS census after both test jobs and wheel
+stdio exited finds no remaining owned test/wheel permission subprocesses.
+
+PR327 remains stacked on PR326; no main merge, release, production installation,
+host-policy change, stop recovery or resource renewal. #310 installed acceptance
+and #318/#319 runtime issues remain open. Worker worktrees/branches are clean
+and retained with their exact custody commits above; unrelated work preserved.
+Memory disposition forbidden; user-scoped machine receipt records zero writes.

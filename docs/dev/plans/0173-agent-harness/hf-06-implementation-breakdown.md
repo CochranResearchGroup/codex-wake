@@ -40,3 +40,8 @@ Issue319 separately gates proof of observation-fault recovery. C must classify
 recovery authorization and refuse premature latch clearing; its general policy
 work does not require waiting for that runtime repair. No recovery can reset
 resource authority or be inferred from native goal resume.
+
+2026-10-24 source acceptance: #320–#325 closed on PR327. One broad review
+and one bounded TDD findings pass completed. See
+[execution ledger](hf-06-execution-ledger.md); main integration, installed
+acceptance #310 and runtime repairs #318/#319 remain distinct.

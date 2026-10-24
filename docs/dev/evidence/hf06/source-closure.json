@@ -1,7 +1,7 @@
 {
-  "state": "SOURCE_VALIDATED_BEFORE_FINAL_REVIEW",
+  "state": "SOURCE_VALIDATED_REVIEWED_REMEDIATED",
   "runtime_base": "588ff39",
-  "runtime_tip": "2689b57399e8590fc6eef15a777eed98499e23e9",
+  "runtime_tip": "c266e42d3fba92d496eea28324a2986ec6cfbc78",
   "integration_branch": "feat/hf06-permissions",
   "pr": 327,
   "source_tickets": [
@@ -14,15 +14,15 @@
   ],
   "local_full_matrix": {
     "python311": {
-      "tests": 1550,
+      "tests": 1553,
       "skipped": 1,
-      "seconds": 377.363,
+      "seconds": 373.964,
       "result": "PASS"
     },
     "python312": {
-      "tests": 1550,
+      "tests": 1553,
       "skipped": 1,
-      "seconds": 384.264,
+      "seconds": 370.074,
       "result": "PASS"
     }
   },
@@ -33,6 +33,10 @@
     318,
     319
   ],
-  "review_passes_completed": 0,
-  "final_tdd_remediation_passes_completed": 0
+  "review_passes_completed": 1,
+  "final_tdd_remediation_passes_completed": 1,
+  "ci_run": 40136439722,
+  "ci_result": "PASS_BOTH_RELEASE_GATES",
+  "wheel_sha256": "8b178cedd15e61bda276bf82ad05501631df75d0b3a1c787eee9533d1234ac79",
+  "production_version": "0.20.1"
 }

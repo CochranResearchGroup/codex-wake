@@ -65,7 +65,7 @@
         "HF-02",
         "HF-07"
       ],
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "spec": "hf-06-spec.md",
       "children": [
         "HF-06-A",
@@ -524,7 +524,7 @@
       "parent": "HF-06",
       "issue_number": 320,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/320",
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "blocked_by_issues": [
         315,
         316
@@ -536,7 +536,7 @@
       "parent": "HF-06",
       "issue_number": 321,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/321",
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "blocked_by_issues": [
         320
       ],
@@ -547,7 +547,7 @@
       "parent": "HF-06",
       "issue_number": 322,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/322",
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "blocked_by_issues": [
         320
       ],
@@ -558,7 +558,7 @@
       "parent": "HF-06",
       "issue_number": 323,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/323",
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "blocked_by_issues": [
         320
       ],
@@ -569,7 +569,7 @@
       "parent": "HF-06",
       "issue_number": 324,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/324",
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "blocked_by_issues": [
         317,
         320
@@ -581,7 +581,7 @@
       "parent": "HF-06",
       "issue_number": 325,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/325",
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "blocked_by_issues": [
         320,
         321,

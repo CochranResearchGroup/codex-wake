@@ -1,13 +1,13 @@
 # HF-06: Apply host-approved permissions to an assignment step
 
-State: READY_FOR_AGENT; children blocked by their explicit prerequisites
-Owner: ecochran76; implementation assignee unassigned
+State: DONE_SOURCE_VALIDATED; #320–#325 source-closed, PR327 stacked integration
+Owner: ecochran76 / primary integration with one-ticket workers
 Work item: CW-HARNESS-173/HF-06; published children #320–#325
 Priority: P0
 Area: Ownership and actions
 Blocked by: HF-02, HF-07
 Grill state: product, public test seams and six-slice breakdown approved
-Implementation state: approved bounded source-work handoffs; no live deployment authority
+Implementation state: common-policy source accepted; installed acceptance and #318/#319 runtime work remain separate
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
 
@@ -76,3 +76,7 @@ ready-for-agent labels. Twelve native blocking relationships are verified.
 retain exact locators/edges; the generated index projects the same graph.
 No implementation assignee has claimed these slices. #318/#319 remain conditional
 runtime-acceptance dependencies, not hard blockers for policy/refusal work.
+
+Source delivery: [execution ledger](hf-06-execution-ledger.md) and
+[review/remediation](../../evidence/hf06/review-and-remediation.md). One broad
+review and one bounded TDD pass completed; production remains0.20.1.

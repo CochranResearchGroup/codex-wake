@@ -1382,3 +1382,9 @@ primary retains shared hub integration and #310 overlap coordination.
 2026-10-24 first frontier source complete: #315/#316/#317 closed after acceptance.
 One two-axis review and one TDD remediation pass complete; PR326 final CI/integration
 pending. Remaining28 feature tickets retain their own interview gates.
+
+2026-10-24 HF-06 common permissions source complete: #320–#325 closed,
+stacked PR327 on PR326. One broad Standards/Spec review and one bounded TDD
+pass repaired assignment revocation checks and contextual approval inspection.
+Installed acceptance #310 and runtime gaps #318/#319 remain open; no production
+policy changes, deployment or resource renewal.
