@@ -8002,3 +8002,9 @@ Requirements are recorded; concrete design remains proposed and feature gates
 unchanged. Documentation-only isolated branch; no policy/runtime/provider effect.
 Policy wiring and whitespace checks pass. Memory disposition forbidden: no
 explicit request to write memory.
+## Turn 399 | 2026-10-24
+
+Recorded direct operator follow-up resolving HF-13 defaults: retire pending
+owner-bound wakes on explicit verified owner completion; default new wakes to
+create/load/run. Both remain configurable. Legacy behavior and uncertain effects
+remain intact. No runtime changes. Policy wiring and whitespace validation PASS.

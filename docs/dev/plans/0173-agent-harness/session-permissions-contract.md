@@ -4,7 +4,7 @@ State: REQUIREMENTS_RECORDED_DESIGN_PROPOSED
 Owner: ecochran76; integration through CW-HARNESS-173/HF-06
 Date: 2026-10-24
 Source: operator clarification in issue310's repair conversation; reconciled with
-first-frontier-decisions.md at docs/agent-harness-backlog 5593168.
+first-frontier-decisions.md at docs/agent-harness-backlog 4dfdc39.
 
 ## Required product behavior
 
@@ -129,7 +129,10 @@ integration owner for shared CLI/MCP/profile/controller surfaces.
 
 HF-06 still needs its own approved technical handoff, including concrete
 precedence/schema, authority for profile edits, migration and caller-level proof.
-HF-13's pending owner-completion policy and preferred startup default remain
-unanswered; this clarification does not choose either. HF-02 and HF-07 retain
+HF-13 now records configurable retirement of pending owner-bound wakes on
+verified explicit owner completion, and configurable create/load/run as the
+preferred default for new wakes (4dfdc39). The permission decision still applies
+to that selected route; a default mode is not blanket authority. Older intents
+retain their admitted behavior. HF-02 and HF-07 retain
 their prerequisites. This document records requirements and a reviewable design
 proposal; it performs no runtime implementation or global policy change.
