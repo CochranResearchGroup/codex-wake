@@ -178,6 +178,13 @@ Durability is separate from its deadline and delivery outcome.
 Moving a live terminal attachment into a holding workspace while preserving its
 agent. Parking alone does not pause work or renew resource allowance.
 
+
+**Session permission profile**:
+A named set of action permissions a session may use under operator authority.
+Selecting a profile does not establish session identity or provide more resource allowance.
+
+**Mandatory permission prohibition**:
+An operator restriction that a more permissive profile or session-specific rule cannot override.
 **Agent succession**:
 The relationship between a predecessor and successor managed agent continuing
 the same task, with outstanding obligations and resource continuity preserved.

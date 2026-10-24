@@ -7991,6 +7991,17 @@ unenrollment, permissive self-control profiles and separate lifetime/startup axe
 Preserved other-agent ownership of host-policy repair. HF-02/HF-07 product inputs
 resolved; HF-13 follow-up pending. No implementation/runtime effects.
 
+
+## 2026-10-24 | Common session permissions requirement
+
+Read default:19 wake tab and published harness backlog5593168. Reconciled the
+operator's global/per-action policy request under HF-06, with HF-13/18/19/24 as
+consumers. Added action coverage, proposed resolution/ceilings, sender/receiver
+checks, explicit delivery routes and migration boundary for issue310/PR311.
+Requirements are recorded; concrete design remains proposed and feature gates
+unchanged. Documentation-only isolated branch; no policy/runtime/provider effect.
+Policy wiring and whitespace checks pass. Memory disposition forbidden: no
+explicit request to write memory.
 ## Turn 399 | 2026-10-24
 
 Recorded direct operator follow-up resolving HF-13 defaults: retire pending
@@ -8015,3 +8026,30 @@ issues to github.com/CochranResearchGroup/codex-wake as ecochran76: #315 HF-02,
 enhancement/ready-for-agent labels. No parent issue, assignee or milestone changes.
 Linked local index/specs and retained shared integration and #310 boundaries.
 No feature implementation or live runtime effects.
+
+
+## 2026-10-24 | HF-06 confirmation and scoped-refresh reconciliation
+
+Operator confirmed the nine session-permission decisions and directed review of
+issue318. Read its full body/comments and current published frontier #315–317.
+Merged the latest planning branch, preserving glossary additions by intent.
+Drafted common permissions spec and six vertical slices; kept exact-connection
+refresh, client replacement and shared reload distinct. #318 owns missing scoped
+execution, not an excuse to block common-policy diagnostics or broaden effects.
+Public CLI/MCP plus independent controller test seams and the slice breakdown
+remain pending operator approval. No new implementation tickets, provider effects
+or installed-policy changes. Policy wiring, links, graph consistency and diff
+checks pass. Memory disposition forbidden: no explicit memory-write request.
+
+
+## 2026-10-24 | Publish approved HF-06 children and reconcile goal-limits error
+
+Created #320–#325 with approved public seams and six-slice dependency graph.
+Read back all issues, labels, actor and 12 native blocking links; no ambiguous
+creation was retried. #319 reports the new transient-observation-stop recovery
+defect; #322 requires explicit recovery authority without treating permission as
+latch clearance or allowance renewal. #318 retains scoped-refresh execution.
+Updated local HF-06 spec, parent, index and publication receipt. No parent issue
+closed/rewritten, no runtime fix or live policy change claimed. Documentation
+validation and graph equality checked before publication closeout. Memory
+disposition forbidden: developer requires explicit user request for memory write.
