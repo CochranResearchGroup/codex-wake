@@ -19,7 +19,9 @@ class HandoffPermissionsTests(unittest.TestCase):
                 'approvals':[dict(id='task-approval',action='handoff.self',subject='source',
                     scope='task',task_id='task',expires_at='2030-01-01T00:00:00Z',issuer='op')]},
                 Principal('op','operator'),expected_revision=0)
-            args=SimpleNamespace(thread_id='source',intent='handoff-1',trigger='context_limit',
+            profiles=root/'profiles.json'
+            profiles.write_text(json.dumps({'version':1,'callers':{},'profiles':{'worker':{}}}));profiles.chmod(0o600)
+            args=SimpleNamespace(profiles=profiles,profile='worker',thread_id='source',intent='handoff-1',trigger='context_limit',
                 _permission_principal=Principal('source'))
             body={'task_brief':{'task_id':'task'}}
             with patch('codex_wake.permission_handoff.validated_task',return_value='task'):
