@@ -1342,3 +1342,10 @@ Main integration/release/production
 installation remain separate; native Grok control/A2A receipts stay unqualified.
 [MR-02 verification](docs/dev/verification/0172-2026-10-22-mr02-runtime-seam.md).
 Preserve P168/#282 and existing controllers.
+
+Plan0172 release preparation: issue308 tracks candidate0.20.0. REL-01 packaging
+and independent REL-02 notes accepted; source/wheel/installed121 modules match,
+provider-free MCP/wake-control/product smokes pass. REL-03 candidate preparation
+DONE: PR309 sourcehead0f890c7 passed Python3.11/3.12 CI40048872250; final closure
+commit remains subject to normal PR integration checks.
+No public release or production rollout.
