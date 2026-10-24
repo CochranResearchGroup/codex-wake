@@ -15,7 +15,7 @@ from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_
 def add_a2a_parser(subparsers):
     parser = subparsers.add_parser('a2a', help='configure an explicitly enrolled local messaging bus')
     commands = parser.add_subparsers(dest='a2a_command', required=True)
-    for verb in ['configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'bind-grok', 'dispatch', 'worker', 'delegate-receipts', 'network-time', 'recovery-status', 'dispose-recovery', 'release-recovery']:
+    for verb in ['permissions','permission-tasks','configure', 'enroll', 'status', 'doctor', 'pause', 'resume', 'revoke', 'migrate', 'tick', 'rotate', 'retention', 'compact', 'reclaim-space', 'ack-projections', 'backup', 'verify-backup', 'restore-backup', 'recover-backup', 'reconcile-recovery', 'bind-client', 'bind-tmux', 'bind-grok', 'dispatch', 'worker', 'delegate-receipts', 'network-time', 'recovery-status', 'dispose-recovery', 'release-recovery']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path)
         command.add_argument('--bus-id', default='local')
@@ -70,6 +70,11 @@ def add_a2a_parser(subparsers):
             command.add_argument('--max-dispatches', type=int, default=2)
         if verb == 'network-time':
             command.add_argument('--accept-unauthenticated-ntp', action='store_true', required=True, help='opt this bus into bounded plain-NTP time; authenticated UTC is not claimed')
+        if verb == 'permissions':
+            command.add_argument('--wake-root',type=Path,required=True)
+        if verb == 'permission-tasks':
+            command.add_argument('--actor-id',required=True)
+            command.add_argument('--task-id',action='append',default=[])
         if verb == 'configure':
             command.add_argument('--allow-cross-root', action='store_true')
         if verb == 'enroll':
@@ -167,6 +172,12 @@ def a2a_command(args):
         # Validate explicit operator authority before observing or changing peers.
         with store.connection() as database:
             store.operator(database, args.operator_capability)
+        if args.a2a_command == 'permissions':
+            result(store.bind_permissions(args.wake_root,args.operator_capability))
+            return 0
+        if args.a2a_command == 'permission-tasks':
+            result(store.bind_permission_tasks(args.actor_id,args.task_id,args.operator_capability))
+            return 0
         if args.a2a_command in ('recovery-status', 'dispose-recovery', 'release-recovery'):
             from .a2a_recovery_disposition import RecoveryDisposition
             disposition = RecoveryDisposition(store, args.operator_capability)
