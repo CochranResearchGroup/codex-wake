@@ -522,7 +522,14 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(methods.count('thread/start'),1)
                             return
                         if bad_review:
-                            self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+                            successor = receipt.get('successor', {})
+                            self.assertEqual(receipt['reason'], 'substantive_work_review_unverified', {
+                                'handoff_state': receipt.get('state'),
+                                'successor_state': successor.get('state'),
+                                'successor_reason': successor.get('reason'),
+                                'successor_uncertain_effect': successor.get('uncertain_effect'),
+                                'successor_history': successor.get('history'),
+                            })
                             self.assertNotIn(target, goals)
                             self.assertEqual(receipt['preflight_tokens_used'], 30)
                             return
