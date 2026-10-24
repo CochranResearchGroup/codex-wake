@@ -132,3 +132,16 @@ class SessionPermissionsTests(unittest.TestCase):
             with self.assertRaises(PermissionDenied):store.evaluate('typo',Principal('self'))
             store.path.chmod(0o644)
             with self.assertRaises(Exception):store.evaluate('refresh.self',Principal('self'))
+
+    def test_task_approval_transfers_by_default_and_completion_revokes_it(self):
+        from codex_wake.session_permissions import PermissionStore,Principal
+        from codex_wake.wake_policy import complete_owner
+        with tempfile.TemporaryDirectory() as tmp:
+            store=PermissionStore(tmp,now=lambda:100)
+            store.configure({'version':1,'approvals':[dict(id='approve',action='enforcement.increase',
+                subject='source',scope='task',task_id='task',expires_at='1970-01-01T00:03:20Z',issuer='op')]},
+                Principal('op','operator'),expected_revision=0)
+            successor=Principal('next',tasks=('task',),predecessor='source')
+            self.assertEqual(store.evaluate('enforcement.increase',successor,task_id='task')['permission'],'allow')
+            complete_owner(tmp,{'kind':'task','id':'task'},'done',actor='operator:owner')
+            self.assertEqual(store.evaluate('enforcement.increase',successor,task_id='task')['permission'],'deny')

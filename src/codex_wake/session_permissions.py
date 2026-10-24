@@ -172,6 +172,8 @@ class PermissionStore:
         self.directory.mkdir(exist_ok=True, mode=0o700)
         _private(self.root, True)
         _private(self.directory, True)
+        from .wake_policy import _owners
+        _owners(self.root,initialize=True)
         with _lock(self.directory, 'policy'):
             old = self._read() if self.active() else {'revision': 0, 'history': []}
             if type(expected_revision) is not int or old['revision'] != expected_revision:
@@ -248,11 +250,16 @@ class PermissionStore:
             decision, source = 'deny', 'mandatory'
         elif action not in p.get('known_actions', list(ACTIONS)) and not p.get('future_actions_inherit', False):
             decision, source = 'approval_required', 'new_action'
+        if task_id is not None:
+            from .wake_policy import _owners, _owner_key
+            terminal=_owners(self.root)['owners'].get(_owner_key({'kind':'task','id':task_id}))
+            if terminal is not None:
+                decision, source='deny','task_completed'
         approval_id = None
         if decision == 'approval_required':
             for a in p.get('approvals', []):
                 subject_match = a['subject'] == principal.subject or (
-                    principal.predecessor == a['subject'] and a['scope'] == 'task' and a.get('successors') is True)
+                    principal.predecessor == a['subject'] and a['scope'] == 'task' and a.get('successors', True) is True)
                 if (a['action'] != action or not subject_match or a.get('target', target) != target
                         or ('expires_at' in a and parse_timestamp(a['expires_at']).timestamp() <= self.now())
                         or (a['scope'] != 'standing' and a['task_id'] != task_id)
