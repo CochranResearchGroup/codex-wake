@@ -13,9 +13,9 @@ Approved planning imported through 73600ca.
 
 | Ticket | Blockers | State | Owner | Branch / worktree | Owned surface |
 | --- | --- | --- | --- | --- | --- |
-| #315 / HF-02 | HF-01 design complete | integrated | /root/hf02 | feat/315-managed-inventory / codex-wake-hf02 | New inventory leaves, focused tests, feature docs |
-| #316 / HF-07 | HF-01 design complete | integrated | /root/hf07 | feat/316-task-briefs / codex-wake-hf07 | New task-brief leaves, focused tests, feature docs |
-| #317 / HF-13 | HF-01 design complete | integrated | /root | feat/harness-frontier / codex-wake-harness-frontier | Wake policy, record/dispatcher integration, shared CLI/MCP registration |
+| #315 / HF-02 | HF-01 design complete | validated | /root/hf02 | feat/315-managed-inventory / codex-wake-hf02 | New inventory leaves, focused tests, feature docs |
+| #316 / HF-07 | HF-01 design complete | validated | /root/hf07 | feat/316-task-briefs / codex-wake-hf07 | New task-brief leaves, focused tests, feature docs |
+| #317 / HF-13 | HF-01 design complete | validated | /root | feat/harness-frontier / codex-wake-harness-frontier | Wake policy, record/dispatcher integration, shared CLI/MCP registration |
 
 Each worker starts at 73600ca and commits only owned paths. Primary integrates
 serially, preserves exact caller/grant/resource semantics, and owns shared hubs,
@@ -121,3 +121,23 @@ tools advertised, new inventory read served and metadata-free wake registration
 denied with zero new wake records. Wheel SHA256:
 3a7c5dd83674400caea2418875c309483dfa55c90b928885d5ff9f104eb15736.
 This is a disposable prefix, not a production install or release.
+
+## Source acceptance and tracker closure gate
+
+Progress classification: progress. All three ticket acceptance mappings above
+are now validated on the integration branch. Serial Python3.12:1495 tests pass,
+with one unrelated opt-in systemd test skipped. CI run40129096911 independently
+passed the unit suites on Python3.11 and3.12; it failed later because the installed
+MCP smoke asserted exactly32 tools. The smoke now checks required names, and
+passes against the isolated0.21.0 wheel with45 tools, zero native turns and no
+notifications. Local serial3.11 remains running as additional verification.
+
+No runtime source changed after71d35b9. Diagnostic-only preflight assertion
+change0d57048 does not alter behavior. The observed parallel-full-suite fixture
+failures did not reproduce in valid serial178-prefix, full62-handoff module,
+serial full3.12 or independently hosted CI unit suites. No production guard or
+acceptance expectation was weakened.
+
+PR326 is draft. Ticket source closure precedes the single requested broad review;
+closure does not claim main integration, release or production deployment.
+Review fixed point remains f96f4c8244529e8b4e8e4206202d4a1e91084a52.

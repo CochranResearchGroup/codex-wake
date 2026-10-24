@@ -93,7 +93,11 @@ async def smoke(cli, mcp_command):
 
                 async with Client(parameters(0), mode="legacy") as sender, Client(parameters(1), mode="legacy") as recipient:
                     discovered = [tool.name for tool in (await sender.list_tools()).tools]
-                    assert len(discovered) == 32
+                    assert len(discovered) == len(set(discovered)), 'duplicate public tool names'
+                    assert {'wake_agents_list', 'wake_agents_show', 'wake_agents_enroll', 'wake_agents_reconcile',
+                            'wake_task_briefs_propose', 'wake_task_briefs_approve', 'wake_task_briefs_inspect',
+                            'wake_task_briefs_admit', 'wake_task_briefs_pin', 'wake_native_after',
+                            'wake_native_at', 'wake_native_file', 'wake_owner_complete'} <= set(discovered)
                     assert {'wake_grok_sessions', 'wake_grok_show', 'wake_grok_after',
                             'wake_grok_at', 'wake_grok_file'} <= set(discovered)
                     assert {'wake_goal_limits_set', 'wake_goal_limits_show'} <= set(discovered)
