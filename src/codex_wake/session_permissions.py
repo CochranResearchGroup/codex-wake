@@ -150,17 +150,39 @@ class PermissionStore:
         self.root = Path(root).absolute()
         if self.root != self.root.resolve():
             raise PermissionDenied('permission_root_not_canonical')
+        self.execution_root=self.root
+        self.routing_error=None
+        link=self.root/'session-permissions-root.json'
+        if link.exists() or link.is_symlink():
+            try:
+                from .wake_policy import _read
+                from .goal_supervision import _private
+                _private(self.root,True)
+                routing=_read(link)
+                if (not isinstance(routing,dict) or set(routing)!={'version','root','issuer'}
+                        or type(routing['version']) is not int or routing['version']!=1
+                        or not isinstance(routing['issuer'],str) or not routing['issuer']):
+                    raise ValueError('invalid policy root binding')
+                target=Path(routing['root'])
+                if (not target.is_absolute() or target!=target.resolve() or target==self.root
+                        or (target/'session-permissions-root.json').exists()
+                        or (target/'session-permissions-root.json').is_symlink()):
+                    raise ValueError('policy root routing must be canonical and single-hop')
+                self.root=target
+            except (OSError,ValueError,TypeError,KeyError,WakeError) as exc:
+                self.routing_error=exc
         self.directory = self.root / 'session-permissions'
         self.path = self.directory / 'policy.json'
         self.now = now
 
     def active(self):
-        return (self.path.exists() or self.path.is_symlink() or self.directory.is_symlink()
+        return (self.routing_error is not None or self.execution_root!=self.root or self.path.exists() or self.path.is_symlink() or self.directory.is_symlink()
                 or (self.directory/'adopted.json').exists() or (self.directory/'adopted.json').is_symlink())
 
     def _read(self):
         from .wake_policy import _read
         from .goal_supervision import _private
+        if self.routing_error is not None:raise PermissionDenied('permission_root_binding_invalid')
         _private(self.directory,True)
         if self.directory != self.directory.resolve():
             raise PermissionDenied('permission_directory_not_canonical')
@@ -174,6 +196,7 @@ class PermissionStore:
     def configure(self, policy, principal, *, expected_revision):
         from .goal_supervision import _private, _lock, _save
         _validate(policy)
+        if self.routing_error is not None:raise PermissionDenied('permission_root_binding_invalid')
         if not isinstance(principal, Principal) or principal.role != 'operator':
             raise PermissionDenied('permission_operator_required')
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -196,6 +219,27 @@ class PermissionStore:
             _save(self.path, value)
             _save(self.directory/'adopted.json',dict(version=1,initial_issuer=principal.subject))
             return dict(revision=value['revision'], digest=digest, adopted=True)
+
+    def bind_domain(self, domain_root, principal):
+        from .goal_supervision import _private, _lock, _save
+        from .wake_policy import _read
+        if not isinstance(principal,Principal) or principal.role!='operator':
+            raise PermissionDenied('permission_operator_required')
+        self._read()
+        domain=Path(domain_root).absolute()
+        if domain!=domain.resolve():raise PermissionDenied('permission_root_not_canonical')
+        if domain==self.root:return dict(bound=True,unchanged=True,root=str(self.root))
+        domain.mkdir(parents=True,exist_ok=True,mode=0o700);_private(domain,True)
+        link=domain/'session-permissions-root.json'
+        with _lock(domain,'permission-root'):
+            if link.exists() or link.is_symlink():
+                old=_read(link)
+                if old.get('root')!=str(self.root):raise PermissionDenied('permission_root_binding_conflict')
+                PermissionStore(domain)._read()
+                return dict(bound=True,unchanged=True,root=str(self.root))
+            if PermissionStore(domain).active():raise PermissionDenied('permission_domain_migration_required')
+            _save(link,dict(version=1,root=str(self.root),issuer=principal.subject))
+        return dict(bound=True,root=str(self.root),domain=str(domain))
 
     def change_session(self, subject, layer, principal, *, expected_revision):
         _layer(layer)

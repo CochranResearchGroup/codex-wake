@@ -114,7 +114,7 @@ def verified_tasks(root, subject, task_id, assignment_id, *, controller_tasks=()
     if assignment_id is None:
         raise PermissionDenied('permission_task_scope_unverified')
     from .task_briefs import TaskBriefStore
-    store = TaskBriefStore(root)
+    store = TaskBriefStore(PermissionStore(root).root)
     state = store.inspect(task_id)
     admission = next((item for item in state['admissions'] if item['assignment_id']==assignment_id),None)
     if not admission or admission['actor_id'] != (actor_id or 'native:' + subject):

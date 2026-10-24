@@ -168,3 +168,41 @@ class SessionPermissionsTests(unittest.TestCase):
             self.assertEqual(store.evaluate('refresh.self',Principal('self'))['permission'],'allow')
             self.assertEqual(store.evaluate('enforcement.recover',Principal('self'))['permission'],'deny')
             self.assertEqual(store.evaluate('resume.self',Principal('self'))['permission'],'approval_required')
+
+    def test_operator_pins_one_policy_across_separate_execution_roots(self):
+        from codex_wake.session_permissions import PermissionStore,Principal,PermissionDenied
+        with tempfile.TemporaryDirectory() as tmp:
+            common=Path(tmp)/'common';lifecycle=Path(tmp)/'lifecycle';goals=Path(tmp)/'goals'
+            operator=Principal('op','operator');policy=PermissionStore(common)
+            policy.configure({'version':1},operator,expected_revision=0)
+            policy.bind_domain(lifecycle,operator);policy.bind_domain(goals,operator)
+            self.assertEqual(PermissionStore(lifecycle).root,common)
+            policy.configure({'version':1,'mandatory':['refresh.self','enforcement.enroll']},operator,expected_revision=1)
+            self.assertEqual(PermissionStore(lifecycle).evaluate('refresh.self',Principal('self'))['permission'],'deny')
+            self.assertEqual(PermissionStore(goals).evaluate('enforcement.enroll',Principal('self'))['permission'],'deny')
+            self.assertFalse((lifecycle/'session-permissions').exists())
+            policy.path.unlink()
+            self.assertTrue(PermissionStore(goals).active())
+            with self.assertRaises(Exception):PermissionStore(goals).evaluate('enforcement.enroll',Principal('self'))
+            with self.assertRaises(PermissionDenied):policy.bind_domain(Path(tmp)/'new',Principal('self'))
+
+    @unittest.skipIf(__import__('os').name=='nt','POSIX flock boundary')
+    def test_held_policy_lock_returns_bounded_effect_uncertainty(self):
+        import fcntl,time
+        from codex_wake.session_permissions import PermissionStore,Principal
+        from codex_wake.mcp_server import CommandRunner
+        caller='00000000-0000-7000-8000-000000000320'
+        meta=dict(threadId=caller,sessionId=caller,callId='call',**{'x-codex-turn-metadata':dict(thread_id=caller,session_id=caller,turn_id='turn')})
+        with tempfile.TemporaryDirectory() as tmp:
+            store=PermissionStore(tmp);store.configure({'version':1},Principal('op','operator'),expected_revision=0)
+            lock=store.directory/'policy.lock'
+            with lock.open('a') as held:
+                fcntl.flock(held,fcntl.LOCK_EX)
+                runner=CommandRunner(wake_root=Path(tmp),call_timeout=.2)
+                before=time.monotonic()
+                result,failed=runner.call('wake_permissions_update',dict(caller_thread_id=caller,
+                    subject=caller,layer={'actions':{'refresh.self':'deny'}},expected_revision=1),native_context=meta)
+                self.assertTrue(failed,result)
+                self.assertEqual(result['error']['code'],'effect_uncertain')
+                self.assertLess(time.monotonic()-before,2)
+            self.assertEqual(store._read()['revision'],1)

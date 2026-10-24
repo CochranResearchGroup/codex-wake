@@ -34,7 +34,7 @@ def mcp_call(runner, arguments, native_context, verb="show"):
 def register_parser(subparsers):
     group=subparsers.add_parser('permissions',help='configure and explain common session action permissions')
     verbs=group.add_subparsers(dest='permission_command',required=True)
-    for verb in ('configure','show','restrict'):
+    for verb in ('configure','show','restrict','bind-domain'):
         p=verbs.add_parser(verb)
         p.add_argument('--bus-root',type=Path,required=True)
         p.add_argument('--operator-capability',type=Path)
@@ -45,6 +45,7 @@ def register_parser(subparsers):
             p.add_argument('--file',type=Path,required=True)
             p.add_argument('--expected-revision',type=int,required=True)
         if verb=='restrict':p.add_argument('--subject',required=True)
+        if verb=='bind-domain':p.add_argument('--domain-root',type=Path,required=True)
         if verb=='show':
             p.add_argument('--action',required=True)
             p.add_argument('--target')
@@ -74,7 +75,9 @@ def verified_cli_principal(args):
 def command(args,root):
     principal=verified_cli_principal(args)
     store=PermissionStore(root)
-    if args.permission_command=='show':
+    if args.permission_command=='bind-domain':
+        result=store.bind_domain(args.domain_root,principal)
+    elif args.permission_command=='show':
         subject=args.subject or principal.subject
         if subject!=principal.subject and principal.role!='operator':
             raise PermissionDenied('permission_inspection_denied')
