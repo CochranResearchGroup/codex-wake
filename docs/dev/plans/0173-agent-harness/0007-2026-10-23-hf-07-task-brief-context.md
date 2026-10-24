@@ -6,7 +6,7 @@ Work item: CW-HARNESS-173/HF-07 (local draft; not posted)
 Priority: P0
 Area: Task contracts
 Blocked by: None; HF-01 design resolved
-Grill state: READY; apply [HF-01 decisions](hf-01-decisions-and-handoffs.md)
+Grill state: PRODUCT_DECISIONS_RESOLVED; technical handoff pending; apply [HF-01 decisions](hf-01-decisions-and-handoffs.md)
 Implementation state: NOT_AUTHORIZED; own grill-with-docs and approved handoff required
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
@@ -40,3 +40,7 @@ Open decisions:
 No broad corpus-ingestion engine, automatic task expansion or copied secret/transcript dumps.
 
 This draft grants no live provider input, production/account/service change or manipulation of existing operator tabs. Begin with provider-free evidence at the real caller seam; record any later canary authority separately. Preserve exact identity/grants, original intent/deadline and uncertain-effect reconciliation. Shared CLI/MCP/schema/profile edits retain one integration owner; see the parent collision map.
+
+## 2026-10-24 interview update
+
+See [first-frontier decisions and overlap boundaries](first-frontier-decisions.md).

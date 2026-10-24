@@ -1361,3 +1361,8 @@ No implementation or new GitHub issue publication is authorized by these drafts.
 2026-10-24 HF-01 design resolved: seven scenario decisions recorded in Plan0173.
 Next interview frontier: HF-02 inventory, HF-07 task briefs and HF-13 wake durability.
 No feature implementation authorized by interview completion alone.
+
+2026-10-24 frontier interview: HF-02 configurable self-enrollment/operator
+unenrollment and HF-07 brief revision rules resolved. HF-13 lifetime accepted;
+recipient startup is an independent configurable axis; two policy defaults remain
+pending. HF-06 must consume the other agent's host-policy repair, not duplicate it.
