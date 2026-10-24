@@ -1,6 +1,6 @@
 # Common session permissions: HF-06 requirement and proposed contract
 
-State: PRODUCT_DECISIONS_RESOLVED; final shared-understanding confirmation pending
+State: PRODUCT_CONFIRMED; implementation seams and breakdown pending
 Owner: ecochran76; integration through CW-HARNESS-173/HF-06
 Date: 2026-10-24
 Source: operator clarification in issue310's repair conversation; reconciled with
@@ -218,10 +218,21 @@ Authority: operator answered "yes all" to Q7–Q9 in this conversation.
 
 ## Interview boundary
 
-All nine product questions have explicit affirmative answers. Final confirmation
-of the combined understanding is pending. Concrete schema, storage reuse,
+All nine product questions have explicit affirmative answers. The operator confirmed
+the combined understanding and directed reconciliation with issue318. Concrete schema, storage reuse,
 identity-adapter feasibility, compatibility and provider-free validation belong
 to the bounded technical handoff; no remaining technical choice may silently
 change these product decisions. HF-02/HF-07 prerequisites and the serialized
 shared-surface integration boundary remain. This record does not authorize
 implementation or production permission changes.
+
+
+## Confirmed understanding and issue318 reconciliation
+
+Operator confirmed the combined nine decisions, then requested review of #318.
+The [HF-06 spec](hf-06-spec.md) separates current-connection refresh, exact-client
+replacement and shared reload. An allowed action with unsupported scope or
+unverified ownership refuses before admission/effects; permission never supplies
+a missing runtime primitive. See [proposed bounded slices](hf-06-implementation-breakdown.md).
+Product confirmation does not imply the new test seams/breakdown are approved
+or authorize implementation/deployment.

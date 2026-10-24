@@ -94,3 +94,11 @@ Keep at most three implementation lanes, and serialize shared hub edits.
 
 [Review HF-02/HF-07/HF-13 specs, testing seams and slice boundaries](first-frontier-spec-review.md).
 The three specs and testing seams are approved and published; implementation has not started.
+
+
+## HF-06 confirmed product and proposed implementation
+
+[Common permissions spec](hf-06-spec.md) records confirmed policy decisions and
+#318's scoped-refresh capability boundary. [Six-slice proposal](hf-06-implementation-breakdown.md)
+is pending operator approval of seams/granularity/dependencies. No new issue was
+published and HF-06 remains TRIAGE for implementation.

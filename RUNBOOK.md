@@ -8026,3 +8026,17 @@ issues to github.com/CochranResearchGroup/codex-wake as ecochran76: #315 HF-02,
 enhancement/ready-for-agent labels. No parent issue, assignee or milestone changes.
 Linked local index/specs and retained shared integration and #310 boundaries.
 No feature implementation or live runtime effects.
+
+
+## 2026-10-24 | HF-06 confirmation and scoped-refresh reconciliation
+
+Operator confirmed the nine session-permission decisions and directed review of
+issue318. Read its full body/comments and current published frontier #315–317.
+Merged the latest planning branch, preserving glossary additions by intent.
+Drafted common permissions spec and six vertical slices; kept exact-connection
+refresh, client replacement and shared reload distinct. #318 owns missing scoped
+execution, not an excuse to block common-policy diagnostics or broaden effects.
+Public CLI/MCP plus independent controller test seams and the slice breakdown
+remain pending operator approval. No new implementation tickets, provider effects
+or installed-policy changes. Policy wiring, links, graph consistency and diff
+checks pass. Memory disposition forbidden: no explicit memory-write request.
