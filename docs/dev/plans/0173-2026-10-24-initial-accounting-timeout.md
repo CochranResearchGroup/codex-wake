@@ -1,6 +1,6 @@
 # Plan0173 — Refuse initial scan timeout without a durable stop
 
-State: OPEN
+State: CLOSED
 Branch: fix/usage-scan-recovery
 Target: main
 
@@ -40,3 +40,12 @@ confirmed defect is initial enrollment turning that failure into a durable stop.
 Source acceptance and installed delivery are separate: this source patch is not
 an installed MCP/controller upgrade. No shared client restart is needed to recover
 the exact affected runtime. Merge/release status follows the associated PR.
+
+
+## Delivery
+
+Preventive fix merged through PR313 after both Python release gates passed.
+Patch version0.20.1 prepares the user-requested local controller/MCP installation.
+The source fix refuses initial timeout admission; it does not clear existing
+stops or claim to repair unrelated native observation failures. Installed
+readback, maintenance handover and client refresh remain independent gates.
