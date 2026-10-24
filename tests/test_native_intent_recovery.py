@@ -151,7 +151,7 @@ class NativeIntentRecoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / 'wake'
             with patch('codex_wake.monitor.monitor_readiness', return_value={'monitor_ready': True}), patch('codex_wake.signal_records.probe_managed_reader_capability', return_value=SimpleNamespace(schema_versions={1, 2, 3, 4, 5})), patch('codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None}), contextlib.redirect_stdout(io.StringIO()):
-                with self.assertRaisesRegex(WakeError, 'schema6'):
+                with self.assertRaisesRegex(WakeError, 'schema8'):
                     run(['--wake-root', str(root), 'native', 'after', '--require-monitor', '--json', '--codex-path', sys.executable, THREAD, '3h', '--', 'Continue'])
             self.assertEqual(len(all_records(root)), 1)
 

@@ -106,6 +106,12 @@ def build_parser() -> argparse.ArgumentParser:
     add_native_parser(subparsers)
     from .runtime_wakes import add_grok_parser
     add_grok_parser(subparsers)
+    from .wake_policy import register_parser as register_wake_policy
+    register_wake_policy(subparsers)
+    from .task_brief_commands import register_parser as register_task_briefs
+    register_task_briefs(subparsers)
+    from .managed_inventory_commands import register_parser as register_managed_agents
+    register_managed_agents(subparsers)
     from .a2a_cli import add_a2a_parser
     add_a2a_parser(subparsers)
     from .messages_cli import add_messages_parser
@@ -2786,6 +2792,15 @@ def run(argv: list[str] | None = None) -> int:
             return lifecycle_command(args, root)
         from .sessions_cli import sessions_command
         return sessions_command(args)
+    if args.command == 'agents':
+        from .managed_inventory_commands import run as agents_command
+        return agents_command(args, root)
+    if args.command == 'task-briefs':
+        from .task_brief_commands import task_briefs_command
+        return task_briefs_command(args, root)
+    if args.command == 'wake-policy':
+        from .wake_policy import command
+        return command(args, root)
     if args.command == 'grok':
         from .runtime_wakes import command
         return command(args, root)

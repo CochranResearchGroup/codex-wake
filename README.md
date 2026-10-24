@@ -1135,3 +1135,11 @@ Codex/Grok mailbox exchanges. See the [support and recovery guide](docs/dev/mult
 and [0.20.0 candidate release notes](docs/dev/release-notes/0.20.0-multi-runtime-wakes.md).
 Real-TUI evidence is version/method-specific; publishing and production installation
 remain separate from source integration and isolated candidate qualification.
+
+## Managed harness controls
+
+The source now supports [managed conversation inventory](docs/managed-inventory.md),
+[approved task briefs and assignment pins](docs/task-briefs.md), and
+[explicit wake lifetime/startup policy](docs/wake-policy.md). CLI and MCP use the
+same state and authority boundaries. These source additions do not install or
+activate new host permissions, lifecycle adapters or production monitors.

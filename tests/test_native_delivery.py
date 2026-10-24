@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from codex_wake.cli import run
 from codex_wake.daemon import poll_once
+from codex_wake.time_provider import TimeDecision
 from codex_wake.records import all_records, build_record, write_record
 
 
@@ -366,7 +367,7 @@ class NativeDeliveryTests(unittest.TestCase):
             with patch('codex_wake.native_delivery.read_native_thread',
                        return_value={'id': thread, 'status': {'type': 'idle'}}), patch(
                        'codex_wake.injector.SubprocessTmuxRunner') as tmux:
-                result = poll_once(root, datetime(2026, 10, 9, tzinfo=UTC))
+                result = poll_once(root, datetime(2026, 10, 9, tzinfo=UTC), time_provider=lambda: TimeDecision('network', ('a', 'b'), 1791504001, 1791504001.1))
             tmux.assert_not_called()
             self.assertEqual(result.submitted, 1)
             record = all_records(root)[0].record
@@ -416,7 +417,7 @@ class NativeDeliveryTests(unittest.TestCase):
                     {'id':thread,'status':{'type':'notLoaded'}},{'id':thread,'status':{'type':'idle'}}]), patch(
                     'codex_wake.native_delivery.native_request',return_value={'thread':{'id':thread}}) as native, patch(
                     'codex_wake.injector.SubprocessTmuxRunner') as tmux:
-                result=poll_once(root,datetime(2026,10,9,tzinfo=UTC))
+                result=poll_once(root,datetime(2026,10,9,tzinfo=UTC), time_provider=lambda: TimeDecision('network', ('a', 'b'), 1791504001, 1791504001.1))
             self.assertEqual(result.submitted,1)
             self.assertEqual(native.call_args.args[2:4],('thread/resume',{'threadId':thread}))
             tmux.assert_not_called()

@@ -40,6 +40,10 @@ def binding_digest(root, binding_id):
     return digest((Path(root)/'runtime-bindings'/(binding_id+'.json')).read_bytes())
 
 
+from .wake_policy import guard_registration
+
+
+@guard_registration
 def retain(args, root):
     from .cli import normalize_prompt
     from .native_clock import snapshot
@@ -65,7 +69,11 @@ def retain(args, root):
         raise WakeError('stable_idempotency_key_required')
     intent = dict(canonical_root=str(root), schedule=schedule, ttl_seconds=ttl,
                   tolerance_seconds=1.0, stop_at=None, idempotency_key=args.idempotency_key)
+    from .wake_policy import request_policy, decorate, register_owner
+    policy = request_policy(root, args, "grok:" + binding["session_id"])
     canonical = dict(target=target, prompt=prompt, **intent)
+    if policy is not None:
+        canonical["wake_policy"] = policy
     intent['fingerprint'] = digest(json.dumps(canonical, sort_keys=True).encode())
     with WakeLifecycleLock(root, 'runtime-arm-'+args.idempotency_key):
         for item in all_records(root, include_archive=True):
@@ -83,6 +91,10 @@ def retain(args, root):
                     predicate={'type':'not_before','due_at':None} if schedule['kind']!='file' else {'type':'file_exists','path':schedule['path']},
                     scheduling_intent=intent,time_recovery={},status='pending',attempts=0,max_attempts=3,
                     ack_timeout_seconds=30,next_attempt_at=None,events=[])
+        decorate(record, policy, 7)
+        register_owner(root, policy)
+        from .wake_policy import apply_owner_state
+        apply_owner_state(root, record)
         record['time_recovery']=eligibility(record,clock)
         record=event(record,'runtime_intent_retained','Original Grok scheduling intent retained',None)
         path=write_record(root,record)
@@ -130,7 +142,11 @@ def dispatch(root, found, *, time_provider=None):
                         return DispatchResult('failed' if record['status']=='failed' else 'requeued',verdict['reason'])
                     observation=adapter.observe(recipient)
                     record['runtime_observation']=observation.summary(recipient)
-                    if observation.state!='ready':
+                    from .wake_policy import startup_reason
+                    policy_reason = startup_reason(record, observation)
+                    if policy_reason:
+                        record['policy_outcome'] = dict(state='held', reason=policy_reason)
+                    if observation.state!='ready' or policy_reason:
                         record['status']='pending'
                         replace_record(root,current,record)
                         return DispatchResult('requeued','exact Grok recipient not ready')
@@ -185,6 +201,8 @@ def add_grok_parser(subparsers):
     sessions.add_argument('--json',action='store_true')
     for verb in ('after','at','file'):
         cmd=commands.add_parser(verb)
+        from .wake_policy import add_options
+        add_options(cmd)
         cmd.add_argument('--busy-policy', choices=('wait','queue','interrupt'), default='wait')
         cmd.add_argument('--ttl',default='24h')
         cmd.add_argument('--idempotency-key',required=True)
@@ -222,11 +240,11 @@ def command(args,root):
     else:
         record,path,deduplicated=retain(args,root)
         value=dict(id=record['id'],path=str(path),status=record['status'],deduplicated=deduplicated,
-                   target=record['target'],time_recovery=record['time_recovery'],requires_worker_schema=7)
+                   target=record['target'],time_recovery=record['time_recovery'],requires_worker_schema=record['schema_version'], wake_policy=record.get('wake_policy'))
         if args.require_monitor:
             from .signal_records import probe_managed_reader_capability
             worker=probe_managed_reader_capability(Path(root))
-            if worker is None or 7 not in worker.schema_versions:
+            if worker is None or record['schema_version'] not in worker.schema_versions:
                 print(json.dumps(dict(value,state='held',reason='compatible_monitor_unavailable'),sort_keys=True))
                 return 3
     print(json.dumps(value,sort_keys=True))

@@ -50,6 +50,14 @@ def _request(args, root):
     content = {"root": str(root), "cwd": str(Path.cwd().resolve()), "target": target,
                "schedule": schedule, "ttl_seconds": ttl, "prompt": prompt,
                "tolerance_seconds": tolerance, "stop_at": stop}
+    from .wake_policy import request_policy
+    policy = request_policy(root, args, "codex:" + args.thread_id)
+    if policy is not None:
+        content["wake_policy"] = policy
+        target["startup_policy"] = policy["startup"]
+        if policy["startup"] == "active_tab" and args.resume_missing:
+            raise WakeError("active_tab_conflicts_with_resume_missing")
+        target["resume_policy"] = "hold" if policy["startup"] == "active_tab" else "same_thread"
     key = getattr(args, "idempotency_key", None)
     if key is not None and (not key.strip() or len(key) > 200):
         raise WakeError("idempotency key must contain 1..200 characters")
@@ -77,8 +85,8 @@ def _receipt(args, record, path, deduplicated):
     if getattr(args, 'require_monitor', False):
         from .signal_records import probe_managed_reader_capability
         reader = probe_managed_reader_capability(Path(record['scheduling_intent']['canonical_root']))
-        if reader is None or 6 not in reader.schema_versions:
-            raise WakeError(f"schema6 intent retained as {record['id']}; active compatible worker unavailable; upgrade the owning worker")
+        if reader is None or record["schema_version"] not in reader.schema_versions:
+            raise WakeError(f"schema{record['schema_version']} intent retained as {record['id']}; active compatible worker unavailable; upgrade the owning worker")
     intent = record['scheduling_intent']
     unanchored = (intent['schedule']['kind'] != 'at' and intent.get('counter_anchor') is None
                   and intent.get('utc_anchor') is None)
@@ -86,11 +94,11 @@ def _receipt(args, record, path, deduplicated):
     value = {"id": record["id"], "path": str(path), "status": record["status"],
              "time_recovery": record["time_recovery"], "deduplicated": deduplicated,
              "automatic_recovery": recovery, "requires_original_clock_evidence": unanchored,
-             "requires_worker_schema": 6}
+             "requires_worker_schema": record["schema_version"], "wake_policy": record.get("wake_policy")}
     if getattr(args, "as_json", False):
         print(json.dumps(value, sort_keys=True))
     else:
-        print(f"{record['id']} {path} state={record['time_recovery']['state']} reason={record['time_recovery']['reason']} recovery={recovery} requires_worker_schema=6")
+        print(f"{record['id']} {path} state={record['time_recovery']['state']} reason={record['time_recovery']['reason']} recovery={recovery} requires_worker_schema={record['schema_version']}")
     return 0
 
 
@@ -126,6 +134,12 @@ def retain(args, root):
                                         "origin_state": "at_request" if valid_counter(clock.get("counter")) or valid_utc(clock.get("utc")) else "awaiting_qualified_clock"},
                   "time_recovery": {"state": "pending_time", "reason": "scheduling_time_unavailable",
                                     "alert": "Retained intent needs an active monitor to recover; no dispatch authorized"}}
+        from .wake_policy import decorate, register_owner
+        policy = content.get("wake_policy")
+        decorate(record, policy, 6)
+        register_owner(root, policy)
+        from .wake_policy import apply_owner_state
+        apply_owner_state(root, record)
         if content['schedule']['kind'] != 'at' and record['scheduling_intent']['origin_state'] == 'awaiting_qualified_clock':
             record['time_recovery'] = eligibility(record, clock)
         path = _save(root, record)
@@ -162,6 +176,8 @@ def _valid_native_target(target):
 def valid_scheduling_record(record, version, target_validator):
     from .network_wakes import precise_deadline
     try:
+        from .wake_policy import core_record
+        record = core_record(record, version)
         intent = record["scheduling_intent"]
         schedule = intent["schedule"]
         target = record["target"]
@@ -272,6 +288,15 @@ def evaluate(root, identifier, clock, *, record_validator=None):
         record = dict(found.record)
         if not (record_validator or valid_record)(record) or record["status"] != "pending" or record["scheduling_intent"]["canonical_root"] != str(Path(root).resolve()):
             return "pending"
+        from .wake_policy import apply_owner_state
+        try:
+            held = apply_owner_state(root, record)
+        except WakeError as exc:
+            held = str(exc)
+        if held:
+            record["policy_outcome"] = dict(state="held" if record["status"] != "cancelled" else "retired", reason=held)
+            _save(root, record)
+            return record["status"]
         verdict = eligibility(record, clock)
         previous = record["time_recovery"]
         record["time_recovery"] = verdict

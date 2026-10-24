@@ -33,3 +33,21 @@ MCP refresh requires all affected conversations idle; queued admission is not
 verified refresh. Client replacement alone does not prove MCP reconnection.
 
 Detailed workflows and examples remain in [workflows](references/workflows.md).
+
+## Managed harness additions (0.21 source)
+
+Use `wake_agents_list/show/enroll/reconcile` for persistent managed identity and
+verified self-enrollment. Operator unenrollment remains effective until explicitly
+re-enabled; inventory membership grants no operations.
+
+Use `wake_task_briefs_propose/approve/inspect/admit/pin` to freeze approved scope
+for an instruction. A worker proposal cannot approve itself; controller approval
+is delegated by private host policy. Carry the exact admitted pin in checkpoints.
+
+Use `wake_native_after/at/file` for exact-self scheduled intent with explicit
+lifetime and recipient startup. New registration defaults to configurable
+create/load/run, but a missing runtime capability remains unsupported. Disk
+persistence is not monitor or delivery proof. `wake_owner_complete` records an
+exact authorized owner event; it never replays an uncertain submission. See
+repository docs/managed-inventory.md, docs/task-briefs.md and docs/wake-policy.md
+for the source contracts. This source update does not refresh installed skills.

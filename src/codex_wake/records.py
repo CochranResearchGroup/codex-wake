@@ -70,6 +70,18 @@ class WakeLifecycleLock:
 def classify_record(record: object) -> str:
     """Pure multi-version classification; unrecognized records are held."""
 
+    if isinstance(record, dict) and record.get('schema_version') == 8:
+        from .wake_policy import core_record
+        try:
+            version = record.get('intent_schema_version')
+            if type(version) is not int or version not in (6, 7):
+                return 'hold'
+            return classify_record(core_record(record, version))
+        except (WakeError, TypeError, KeyError):
+            return 'hold'
+    if isinstance(record, dict) and ('wake_policy' in record or 'intent_schema_version' in record):
+        return 'hold'
+
     if (isinstance(record, dict) and isinstance(record.get('target'), dict)
             and record['target'].get('transport') == 'runtime' and record.get('schema_version') != 7):
         return 'hold'
@@ -334,7 +346,7 @@ def append_event(
     **extra: Any,
 ) -> dict[str, Any]:
     updated = dict(record)
-    event = dict(at=None, type=event_type, message=message) if record.get("schema_version") in (6, 7) and now is None else make_event(event_type, message, now)
+    event = dict(at=None, type=event_type, message=message) if record.get("schema_version") in (6, 7, 8) and now is None else make_event(event_type, message, now)
     event.update(extra)
     events = list(updated.get("events") or [])
     events.append(event)
@@ -374,9 +386,12 @@ def build_record(
 def schema_summary() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "read_versions": [1, 2, 3, 4, 5, 6, 7],
-        "runtime_intent_write_version": 7,
-        "native_intent_write_version": 6,
+        "read_versions": [1, 2, 3, 4, 5, 6, 7, 8],
+        "policy_intent_write_version": 8,
+        "runtime_intent_write_version": 8,
+        "runtime_intent_base_version": 7,
+        "native_intent_write_version": 8,
+        "native_intent_base_version": 6,
         "native_network_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
         "native_write_version": NATIVE_NETWORK_SCHEMA_VERSION,
         "legacy_native_write_version": NATIVE_SCHEMA_VERSION,
@@ -443,13 +458,13 @@ def write_record(root: Path, record: dict[str, Any]) -> Path:
     # Schema6/7 keep one atomic authority file across all active/terminal states.
     # Status is in the record, not inferred from its directory. This prevents a
     # crash between status-directory writes from reviving a pre-submission copy.
-    target_dir = root / ("pending" if record.get('schema_version') in (6, 7) else status)
+    target_dir = root / ("pending" if record.get('schema_version') in (6, 7, 8) else status)
     target_dir.mkdir(parents=True, exist_ok=True)
     final_path = target_dir / f"{wake_id}.json"
     temp_path = final_path.with_suffix(".json.tmp")
     temp_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     temp_path.replace(final_path)
-    if record.get('schema_version') in (6, 7):
+    if record.get('schema_version') in (6, 7, 8):
         with final_path.open('rb') as stream:
             os.fsync(stream.fileno())
         for directory in (target_dir, root, root.parent):
@@ -524,7 +539,7 @@ def status_summary(root: Path) -> dict[str, Any]:
         record = item.record
         status = record.get("status")
         recovery = record.get('time_recovery')
-        if record.get('schema_version') in (6, 7) and isinstance(recovery, dict):
+        if record.get('schema_version') in (6, 7, 8) and isinstance(recovery, dict):
             state = recovery.get('state')
             if isinstance(state, str):
                 time_recovery_counts[state] = time_recovery_counts.get(state, 0) + 1
@@ -663,7 +678,7 @@ def archive_record(
     status = record.get("status")
     if status not in TERMINAL_STATUSES:
         raise WakeError(f"cannot archive wake in status {status}")
-    if record.get('schema_version') in (6, 7):
+    if record.get('schema_version') in (6, 7, 8):
         # Archival is an operator action, not evidence of UTC acquisition.
         current = None
     elif record.get("schema_version") == 3:

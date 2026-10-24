@@ -247,10 +247,21 @@ def guard_dispatch(function):
         from .injector import DispatchResult
         from .records import find_record
         try:
-            with delivery_guard(root):
+            from .wake_policy import effect_guard, apply_owner_state
+            from .records import WakeLifecycleLock, replace_record
+            with delivery_guard(root), effect_guard(root, found.record):
                 active = find_record(root,found.record['id'])
                 if active.record != found.record or active.record.get('status') != 'firing':
                     return DispatchResult('skipped','wake changed before dispatch admission')
+                if active.record.get('schema_version') == 8:
+                    with WakeLifecycleLock(root, active.record['id']):
+                        record = dict(active.record)
+                        reason = apply_owner_state(root, record)
+                        if record != active.record:
+                            replace_record(root, active, record)
+                            active = find_record(root, record['id'])
+                        if reason:
+                            return DispatchResult('skipped', reason)
                 return function(root,active,**kwargs)
         except WakeError as exc:
             return DispatchResult('skipped',str(exc))
