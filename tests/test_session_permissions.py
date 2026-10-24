@@ -145,3 +145,26 @@ class SessionPermissionsTests(unittest.TestCase):
             self.assertEqual(store.evaluate('enforcement.increase',successor,task_id='task')['permission'],'allow')
             complete_owner(Path(tmp),{'kind':'task','id':'task'},'done',actor='operator:owner')
             self.assertEqual(store.evaluate('enforcement.increase',successor,task_id='task')['permission'],'deny')
+
+    def test_globally_preauthorized_profile_needs_no_session_uuid_entry(self):
+        from codex_wake.session_permissions import PermissionStore,Principal
+        with tempfile.TemporaryDirectory() as tmp:
+            store=PermissionStore(tmp)
+            store.configure({'version':1,'global':{'authorized_profiles':['review']},
+                'profiles':{'review':{'default':'deny','actions':{'session.inspect':'allow'}}}},
+                Principal('op','operator'),expected_revision=0)
+            actor=Principal('new-session')
+            store.change_session('new-session',{'profile':'review'},actor,expected_revision=1)
+            self.assertEqual(store.evaluate('refresh.self',actor)['permission'],'deny')
+            self.assertEqual(store.evaluate('session.inspect',actor)['permission'],'allow')
+
+    def test_explicit_configuration_and_deny_win_over_new_action_default(self):
+        from codex_wake.session_permissions import PermissionStore,Principal
+        with tempfile.TemporaryDirectory() as tmp:
+            store=PermissionStore(tmp)
+            store.configure({'version':1,'known_actions':[],
+                'global':{'actions':{'refresh.self':'allow','enforcement.recover':'deny'}}},
+                Principal('op','operator'),expected_revision=0)
+            self.assertEqual(store.evaluate('refresh.self',Principal('self'))['permission'],'allow')
+            self.assertEqual(store.evaluate('enforcement.recover',Principal('self'))['permission'],'deny')
+            self.assertEqual(store.evaluate('resume.self',Principal('self'))['permission'],'approval_required')

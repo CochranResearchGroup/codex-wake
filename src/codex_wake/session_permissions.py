@@ -199,7 +199,7 @@ class PermissionStore:
                 if set(layer)-{'actions'} or set(layer.get('actions', {}))-set(delegation['actions']):
                     raise PermissionDenied('permission_delegation_exceeded')
             elif subject == principal.subject:
-                authorized = before.get('authorized_profiles', [])
+                authorized = before.get('authorized_profiles',policy.get('global',{}).get('authorized_profiles',[]))
                 if set(layer)-{'actions', 'profile'} or ('profile' in layer and layer['profile'] not in authorized):
                     raise PermissionDenied('permission_self_promotion')
                 if any(v != 'deny' for v in layer.get('actions', {}).values()):
@@ -230,9 +230,11 @@ class PermissionStore:
         assignment = p.get('assignments', {}).get(task_id, {}) if task_id else {}
         selected = assignment.get('profile', session.get('profile', p.get('global', {}).get('profile', 'permissive')))
         profile = p.get('profiles', {}).get(selected, {})
+        explicitly_configured=False
         decision, source, scope_failed = ACTIONS[action] if selected == 'permissive' else 'approval_required', 'profile:'+selected, False
         for name, layer in [('global', p.get('global', {})), ('profile:'+selected, profile),
                             ('session', session), ('assignment', assignment)]:
+            explicitly_configured |= action in layer.get('actions',{})
             value = layer.get('actions', {}).get(action, layer.get('default', 'inherit'))
             if isinstance(value, str):
                 value = {'decision': value}
@@ -248,7 +250,8 @@ class PermissionStore:
             decision, source = 'deny', 'shared_scope_required'
         if action in p.get('mandatory', []):
             decision, source = 'deny', 'mandatory'
-        elif action not in p.get('known_actions', list(ACTIONS)) and not p.get('future_actions_inherit', False):
+        elif (action not in p.get('known_actions', list(ACTIONS)) and not explicitly_configured
+              and not p.get('future_actions_inherit', False) and decision!='deny'):
             decision, source = 'approval_required', 'new_action'
         if task_id is not None:
             from .wake_policy import _owners, _owner_key
