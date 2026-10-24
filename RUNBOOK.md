@@ -8008,3 +8008,21 @@ Recorded direct operator follow-up resolving HF-13 defaults: retire pending
 owner-bound wakes on explicit verified owner completion; default new wakes to
 create/load/run. Both remain configurable. Legacy behavior and uncertain effects
 remain intact. No runtime changes. Policy wiring and whitespace validation PASS.
+
+## Turn 400 | 2026-10-24
+
+Applied to-spec synthesis to HF-02/HF-07/HF-13 and reconciled existing tracer-bullet
+tickets. Fetched origin/main f96f4c8 and located #310 as the other own-session
+permission lane. Updated domain-only glossary from accepted decisions. Prepared
+three-spec review packet; no new interviews, tracker mutations or runtime effects.
+Review pending for public testing seams and slice granularity, as required by the
+invoked local to-spec/to-tickets skills.
+
+## Turn 401 | 2026-10-24
+
+After explicit operator approval, published three combined spec/implementation
+issues to github.com/CochranResearchGroup/codex-wake as ecochran76: #315 HF-02,
+#316 HF-07, #317 HF-13. Verified exact title/marker/body, open state and existing
+enhancement/ready-for-agent labels. No parent issue, assignee or milestone changes.
+Linked local index/specs and retained shared integration and #310 boundaries.
+No feature implementation or live runtime effects.

@@ -1370,3 +1370,11 @@ pending. HF-06 must consume the other agent's host-policy repair, not duplicate 
 2026-10-24 HF-13 follow-up resolved: configurable owner-end retirement default
 and configurable create/load/run startup default for new wakes. HF-02/HF-07/HF-13
 product interviews are resolved; next work is bounded technical design/handoffs.
+
+2026-10-24 first-frontier specifications drafted: HF-02 inventory, HF-07 task
+briefs, HF-13 wake policy. Review public seams and existing three-ticket boundaries
+before canonical GitHub publication. #310 owns the parallel self-access repair.
+
+2026-10-24 approved first frontier published: HF-02 #315, HF-07 #316, HF-13 #317.
+All three are ready-for-agent with no mutual blockers. Implementation not started;
+primary retains shared hub integration and #310 overlap coordination.
