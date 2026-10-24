@@ -1,6 +1,6 @@
 # First frontier execution ledger
 
-State: RUNNING
+State: SOURCE_VALIDATED_REVIEW_REMEDIATED
 Owner: ecochran76 / primary
 Goal: close #315, #316 and #317; then one broad two-axis code review and one
 bounded TDD remediation pass. Maximum requested elapsed time: two hours, starting
@@ -167,3 +167,12 @@ Owned worker refs are durable: HF02 deef6c6; HF07 3a63878 (includes lifecycle an
 fixture follow-ups). Shared hub integration remains primary-owned. PR326 target
 is origin/main. Final source/merge/CI receipts remain separate from release and
 production activation.
+
+## Worker custody closeout
+
+Worker patches are equivalent to their integrated copies (`git cherry` reports
+only minus entries). Clean worktrees codex-wake-hf02 and codex-wake-hf07 were
+removed without force after exact remote readback. Branches remain recoverable
+at origin/feat/315-managed-inventory (deef6c6) and origin/feat/316-task-briefs
+(3a63878). The primary integration checkout remains the clean deliverable.
+Current final integration/check authority is PR326, not this historical log.

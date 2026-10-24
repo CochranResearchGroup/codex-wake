@@ -10,7 +10,7 @@ lanes:
     branch: feat/315-managed-inventory
     target: origin/main
     plan_state: CLOSED
-    custody_state: OWNED
+    custody_state: PAUSED_REF
     checkpoint: deef6c68547239aed9e85f9fda1e51ed0504ecb9
     integration: squash_pr
     dependencies: []
@@ -18,8 +18,9 @@ lanes:
     reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
     updated_at: 2026-10-24
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/326
+    checkout_required: false
     validation_status: passed
-    disposition: Source validated and tracker closed; review remediated; durable refs retained; final PR CI pending
+    disposition: Worker patches integrated; clean owned checkout removed after patch-equivalence and remote custody readback; durable branch retained; PR326 owns final integration
   - id: P173-HF07
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 316
@@ -29,7 +30,7 @@ lanes:
     branch: feat/316-task-briefs
     target: origin/main
     plan_state: CLOSED
-    custody_state: OWNED
+    custody_state: PAUSED_REF
     checkpoint: 3a638785935ff54273885dbd3eb54a5ff55fad82
     integration: squash_pr
     dependencies: []
@@ -37,8 +38,9 @@ lanes:
     reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
     updated_at: 2026-10-24
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/326
+    checkout_required: false
     validation_status: passed
-    disposition: Source validated and tracker closed; review remediated; durable refs retained; final PR CI pending
+    disposition: Worker patches integrated; clean owned checkout removed after patch-equivalence and remote custody readback; durable branch retained; PR326 owns final integration
   - id: P173-HF13
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 317
