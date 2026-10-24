@@ -1,6 +1,6 @@
 # First frontier: specification and ticket review
 
-State: APPROVED_AND_PUBLISHED; implementation not started
+State: IMPLEMENTED_AND_VALIDATED; tracker closed; PR326 integration pending
 Owner: ecochran76
 Work items: CW-HARNESS-173/HF-02, HF-07, HF-13
 

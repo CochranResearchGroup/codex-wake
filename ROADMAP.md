@@ -1378,3 +1378,7 @@ before canonical GitHub publication. #310 owns the parallel self-access repair.
 2026-10-24 approved first frontier published: HF-02 #315, HF-07 #316, HF-13 #317.
 All three are ready-for-agent with no mutual blockers. Implementation not started;
 primary retains shared hub integration and #310 overlap coordination.
+
+2026-10-24 first frontier source complete: #315/#316/#317 closed after acceptance.
+One two-axis review and one TDD remediation pass complete; PR326 final CI/integration
+pending. Remaining29 feature tickets retain their own interview gates.

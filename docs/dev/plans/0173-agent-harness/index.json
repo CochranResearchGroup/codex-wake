@@ -19,9 +19,10 @@
       "dependencies": [
         "HF-01"
       ],
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "issue_number": 315,
-      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/315"
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/315",
+      "tracker_state": "closed"
     },
     {
       "id": "HF-03",
@@ -74,9 +75,10 @@
       "dependencies": [
         "HF-01"
       ],
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "issue_number": 316,
-      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/316"
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/316",
+      "tracker_state": "closed"
     },
     {
       "id": "HF-08",
@@ -141,9 +143,10 @@
       "dependencies": [
         "HF-01"
       ],
-      "state": "READY_FOR_AGENT",
+      "state": "DONE_SOURCE_VALIDATED",
       "issue_number": 317,
-      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/317"
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/317",
+      "tracker_state": "closed"
     },
     {
       "id": "HF-14",

@@ -8015,3 +8015,13 @@ issues to github.com/CochranResearchGroup/codex-wake as ecochran76: #315 HF-02,
 enhancement/ready-for-agent labels. No parent issue, assignee or milestone changes.
 Linked local index/specs and retained shared integration and #310 boundaries.
 No feature implementation or live runtime effects.
+
+## Turn 402 | 2026-10-24
+
+Implemented first harness frontier with primary HF-13 and workers /root/hf02
+(HF-02) and /root/hf07 (HF-07), integrated on feat/harness-frontier from f96f4c8.
+Source acceptance closed #315/#316/#317; then exactly one Standards/Spec review
+and one bounded TDD pass fixed completion provenance and held-record mutation.
+Serial1495-test runs pass on3.11/3.12 (one unrelated opt-in skip); post-fix focused
+checks and isolated0.21.0 CLI/MCP wheel proof pass. PR326 owns final CI/integration.
+No production install, provider turns, host permission edits or release publication.

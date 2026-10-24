@@ -1,7 +1,7 @@
 # Agent harness backlog: reconciled ticket drafts
 
 State: OPEN
-Ticket state: HF-01 DONE (design only); HF-02–HF-32 TRIAGE
+Ticket state: HF-01 DONE (design); HF-02/HF-07/HF-13 DONE (source); remaining tickets TRIAGE
 Owner: ecochran76
 Work item: CW-HARNESS-173 (local planning intake; not posted)
 Lane: P173-PLAN
@@ -200,3 +200,11 @@ reviewed together. It is not implementation completion, external issue creation
 or approval of all policy choices. Source/glossary/links and graph checks are
 planning validation, never runtime qualification. Plan0172 remains the authority
 for the released0.20.0 work and existing acceptance receipts.
+
+## First-frontier execution
+
+HF-02 (#315), HF-07 (#316) and HF-13 (#317) are implemented and source-validated,
+and their tracker issues are closed. [Execution ledger](0173-agent-harness/execution-ledger.md)
+and [single review/remediation](0173-agent-harness/review-and-remediation.md) own
+evidence. PR326 integrates the source. Remaining feature interviews and tickets
+stay open; this does not close the entire32-ticket program.
