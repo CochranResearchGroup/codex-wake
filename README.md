@@ -17,6 +17,10 @@ Host setup and qualified accounting are required; polling and publication make
 token stops sampled, with unknown maximum overshoot. Installation alone does not enroll a session or provide an OS process-termination
 guarantee.
 
+An initial accounting scan timeout refuses enrollment without persisting a stop
+latch. Once enrolled, accounting loss retains the normal bounded winddown and
+stop behavior; retrying enrollment never clears an established stop.
+
 For memory, swap, CPU and task controls, use separate
 [dedicated executor containment](docs/agents/strict-objectives.md). Its ordinary
 caller first-launch MCP bootstrap remains a separate documented limitation.

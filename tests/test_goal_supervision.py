@@ -19,6 +19,44 @@ NOW=1893456000
 
 
 class GoalSupervisionTests(unittest.TestCase):
+    def test_initial_accounting_timeout_does_not_persist_an_irrecoverable_stop(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                with patch('codex_wake.goal_supervision._usage',return_value=dict(
+                        state='unknown',used_tokens=None,reason='usage_scan_time_limit')):
+                    with self.assertRaisesRegex(ValueError,'initial accounting unavailable'):
+                        enroll(root,policy,THREAD,100,120)
+                self.assertEqual(list((root/'goal-supervision').glob('[0-9a-f]'*64+'.json')),[])
+                accepted=enroll(root,policy,THREAD,100,120)
+                self.assertEqual(accepted['state'],'armed')
+                self.assertEqual(accepted['used_tokens'],40)
+                self.assertFalse(accepted.get('stop_latched',False))
+                self.assertFalse(any(method in ('thread/goal/set','turn/interrupt') for method,_ in native['calls']))
+
+    def test_delegated_initial_scan_timeout_leaves_allocation_retryable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            grant=json.loads(policy.read_text())['callers'][THREAD]
+            grant.pop('allocation_id')
+            policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,
+                allocations={},self_enrollment=grant)))
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='native-first-enrollment',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                with patch('codex_wake.goal_supervision._usage',return_value=dict(
+                        state='unknown',used_tokens=None,reason='allocation_member_accounting_unknown',
+                        member_thread_id=THREAD,member_reason='usage_scan_time_limit')):
+                    with self.assertRaisesRegex(ValueError,'initial accounting unavailable'):
+                        enroll(root,policy,THREAD,100,120,native_context=context)
+                ledger=next((root/'goal-supervision/allocations').glob('*.json'))
+                self.assertFalse(json.loads(ledger.read_text())['stop_latched'])
+                accepted=enroll(root,policy,THREAD,100,120,native_context=context)
+                self.assertEqual(accepted['state'],'armed')
+                self.assertEqual(accepted['used_tokens'],40)
+                self.assertEqual(accepted['deadline'],NOW+120)
+                self.assertFalse(accepted.get('stop_latched',False))
+
     def test_recognizing_native_state_never_clears_an_existing_stop_latch(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,_=self.fixture(directory)
