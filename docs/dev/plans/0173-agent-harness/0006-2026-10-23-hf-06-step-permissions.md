@@ -1,13 +1,13 @@
 # HF-06: Apply host-approved permissions to an assignment step
 
-State: TRIAGE
+State: READY_FOR_AGENT; children blocked by their explicit prerequisites
 Owner: ecochran76; implementation assignee unassigned
 Work item: CW-HARNESS-173/HF-06 (local draft; not posted)
 Priority: P0
 Area: Ownership and actions
 Blocked by: HF-02, HF-07
-Grill state: product understanding confirmed; test seams/breakdown pending
-Implementation state: NOT_AUTHORIZED; own grill-with-docs and approved handoff required
+Grill state: product, public test seams and six-slice breakdown approved
+Implementation state: approved bounded source-work handoffs; no live deployment authority
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
 
@@ -64,5 +64,5 @@ No implementation readiness or live permission is inferred from this update.
 [Implementation spec](hf-06-spec.md) records the confirmed nine decisions and
 issue318's scoped-refresh capability boundary. [Proposed slices](hf-06-implementation-breakdown.md)
 retain existing #315/#316 prerequisites and reuse #317/#318 rather than duplicating
-their execution work. Test seams and breakdown require operator review before
-new child tickets are published. This ticket remains TRIAGE for implementation.
+their execution work. Test seams and breakdown are approved for publication as six bounded children.
+Each child retains its explicit prerequisites and runtime qualification gates.

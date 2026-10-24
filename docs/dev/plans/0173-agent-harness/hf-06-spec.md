@@ -1,6 +1,6 @@
 # HF-06 specification: Common session permissions
 
-State: PRODUCT_CONFIRMED; proposed test seams and slice breakdown awaiting approval
+State: APPROVED_SPEC; test seams and six-slice breakdown approved
 Owner: ecochran76
 Work item: CW-HARNESS-173/HF-06
 Authority: nine affirmative interview answers followed by explicit final confirmation
@@ -138,8 +138,8 @@ Proposed primary seam: public CLI/MCP operation admission and effective-permissi
 inspection, with injected verified identities, policy and runtime adapter responses.
 Use existing operation/controller journals and test repeated commands across
 process restart. Exercise the independent controller seam where effects occur;
-helper-only tests do not prove enforcement. Operator approval of these seams is
-pending; no fixture becomes installed-runtime evidence.
+helper-only tests do not prove enforcement. The operator approved these seams and the six-slice breakdown. No fixture
+becomes installed-runtime evidence.
 
 Prior art includes public lifecycle MCP contracts, independent shared-refresh
 controllers, goal supervision, A2A identity/claims and native/runtime dispatch
@@ -171,5 +171,32 @@ Product understanding is explicitly confirmed. The contract interview retains
 all nine answers. HF-02/#315 and HF-07/#316 remain HF-06's declared prerequisites;
 HF-13/#317 owns wake lifetime/startup policy. Downstream runtime execution belongs
 to HF-18/19/20/24. The proposed slices separate hard prerequisites from shared
-write-surface coordination. No new implementation issues are published until the
-operator approves test seams and breakdown. Existing HF locators remain stable.
+write-surface coordination. The operator approved test seams, granularity and dependency edges; publish
+the six bounded children and read back their native blocking relationships. Existing HF locators remain stable.
+
+
+### Issue319: enforcement recovery is not resource renewal
+
+Issue319 reports an installed0.20.1 transient native observation timeout that
+leaves supervision durably stopped after observations recover. Its evidence does
+not deterministically reproduce the initial timeout; the retained stop and healthy
+recheck were observed. Keep this distinct from enrollment failure and #318.
+
+Common permissions must distinguish enrollment, allowance change, disabling
+enforcement and explicit recovery/reconciliation of an observation-fault stop.
+The permissive profile's enrollment permission grants neither recovery nor budget
+renewal. Recovery needs explicit operator authorization; an allowance-change
+approval is not an implicit recovery instruction. An existing task/standing grant
+applies only if its scope explicitly covers that recovery.
+
+Issue319 owns runtime recovery and stop-episode diagnostics. Permission to
+recover is only a prerequisite: qualified nondecreasing accounting, current exact
+native state, fresh controller, same-boot continuity and remaining original
+resources must also be verified. A successful read, heartbeat, native goal resume,
+refresh or handoff alone cannot clear the latch. Keep the original charges,
+deadline, accounting basis and attributable stop/recovery history.
+
+The enforcement slice can ship permission classification and actionable blocked/
+unsupported diagnostics before #319 is fixed. Claiming successful recovery of
+that observation fault requires #319's own acceptance; do not hide it inside
+profile migration, source fixtures or an operator's manual-monitoring workaround.

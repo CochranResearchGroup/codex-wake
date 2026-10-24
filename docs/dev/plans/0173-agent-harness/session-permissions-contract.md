@@ -1,6 +1,6 @@
 # Common session permissions: HF-06 requirement and proposed contract
 
-State: PRODUCT_CONFIRMED; implementation seams and breakdown pending
+State: PRODUCT_AND_IMPLEMENTATION_BREAKDOWN_APPROVED
 Owner: ecochran76; integration through CW-HARNESS-173/HF-06
 Date: 2026-10-24
 Source: operator clarification in issue310's repair conversation; reconciled with
@@ -234,5 +234,10 @@ The [HF-06 spec](hf-06-spec.md) separates current-connection refresh, exact-clie
 replacement and shared reload. An allowed action with unsupported scope or
 unverified ownership refuses before admission/effects; permission never supplies
 a missing runtime primitive. See [proposed bounded slices](hf-06-implementation-breakdown.md).
-Product confirmation does not imply the new test seams/breakdown are approved
-or authorize implementation/deployment.
+The operator subsequently approved the test seams and six-slice breakdown.
+Publication creates bounded source-work tickets, not deployment authority.
+
+
+The operator also directed attention to the new goal-limits error, issue319.
+The implementation spec separates observation-stop recovery from enrollment
+and renewal and retains #319 as its runtime-recovery acceptance owner.
