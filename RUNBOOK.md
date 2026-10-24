@@ -8040,3 +8040,16 @@ Public CLI/MCP plus independent controller test seams and the slice breakdown
 remain pending operator approval. No new implementation tickets, provider effects
 or installed-policy changes. Policy wiring, links, graph consistency and diff
 checks pass. Memory disposition forbidden: no explicit memory-write request.
+
+
+## 2026-10-24 | Publish approved HF-06 children and reconcile goal-limits error
+
+Created #320–#325 with approved public seams and six-slice dependency graph.
+Read back all issues, labels, actor and 12 native blocking links; no ambiguous
+creation was retried. #319 reports the new transient-observation-stop recovery
+defect; #322 requires explicit recovery authority without treating permission as
+latch clearance or allowance renewal. #318 retains scoped-refresh execution.
+Updated local HF-06 spec, parent, index and publication receipt. No parent issue
+closed/rewritten, no runtime fix or live policy change claimed. Documentation
+validation and graph equality checked before publication closeout. Memory
+disposition forbidden: developer requires explicit user request for memory write.

@@ -1,7 +1,7 @@
 # Agent harness backlog: reconciled ticket drafts
 
 State: OPEN
-Ticket state: HF-01 DONE (design only); HF-02–HF-32 TRIAGE
+Ticket state: HF-01 DONE (design only); HF-02/HF-06/HF-07/HF-13 specs approved; others TRIAGE. GitHub owns execution state.
 Owner: ecochran76
 Work item: CW-HARNESS-173 (local planning intake; not posted)
 Lane: P173-PLAN
@@ -211,3 +211,15 @@ A2A two-sided checks, wake-route distinctions, migration and acceptance. This is
 a documentation amendment from branch docs/310-common-session-permissions into
 docs/agent-harness-backlog; no shared worktree was edited. Existing interview and
 implementation gates remain intact. No new ticket family or runtime policy store.
+
+
+## HF-06 publication | 2026-10-24
+
+The operator approved all nine common-permission decisions, final shared
+understanding, public test seams, six vertical slices and blocking edges.
+Children #320–#325 are specification-ready with 12 verified native blockers.
+[Receipt](0173-agent-harness/hf-06-publication-receipt.json). HF-06 remains blocked
+by inventory #315/task brief #316; wake slice also depends on #317. #318 owns
+scoped-refresh execution; #319 owns observation-stop recovery. Those runtime
+claims remain separate from permission/capability diagnostics. No implementation
+or production effect was performed by publication.

@@ -1,9 +1,10 @@
 # Agent harness ticket drafts
 
-HF-01 is DONE (design only); HF-02/HF-07/HF-13 are READY_FOR_AGENT; other tickets remain TRIAGE. No implementation or live-effect authority is granted.
+HF-01 is DONE (design only); HF-02/HF-06/HF-07/HF-13 are READY_FOR_AGENT; other tickets remain TRIAGE. No implementation or live-effect authority is granted.
 [HF-01 decisions](hf-01-decisions-and-handoffs.md) resolve the shared-contract interview; every later ticket still needs
 its own Matt grill-with-docs process before coding. Stable local locators are
 CW-HARNESS-173/HF-NN. The approved first frontier is published as #315, #316 and #317.
+HF-06 children are published as #320–#325; prerequisites remain explicit.
 
 [Parent plan and ownership/sequence decisions](../0173-2026-10-23-agent-harness-backlog.md).
 `index.json` is a generated dependency/coverage projection; Markdown bodies own
@@ -93,12 +94,13 @@ Keep at most three implementation lanes, and serialize shared hub edits.
 ## First-frontier specifications
 
 [Review HF-02/HF-07/HF-13 specs, testing seams and slice boundaries](first-frontier-spec-review.md).
-The three specs and testing seams are approved and published; implementation has not started.
+The three specs and testing seams are approved and published; consult GitHub
+issues #315–#317 for current execution state. Publication is not implementation proof.
 
 
-## HF-06 confirmed product and proposed implementation
+## HF-06 confirmed product and published implementation slices
 
 [Common permissions spec](hf-06-spec.md) records confirmed policy decisions and
 #318's scoped-refresh capability boundary. [Six-slice proposal](hf-06-implementation-breakdown.md)
-is pending operator approval of seams/granularity/dependencies. No new issue was
-published and HF-06 remains TRIAGE for implementation.
+was approved and published as #320–#325 with verified native dependencies.
+HF-06 is specification-ready; implementation waits for the applicable blockers.

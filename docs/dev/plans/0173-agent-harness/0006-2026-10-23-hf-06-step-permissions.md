@@ -2,7 +2,7 @@
 
 State: READY_FOR_AGENT; children blocked by their explicit prerequisites
 Owner: ecochran76; implementation assignee unassigned
-Work item: CW-HARNESS-173/HF-06 (local draft; not posted)
+Work item: CW-HARNESS-173/HF-06; published children #320–#325
 Priority: P0
 Area: Ownership and actions
 Blocked by: HF-02, HF-07
@@ -66,3 +66,13 @@ issue318's scoped-refresh capability boundary. [Proposed slices](hf-06-implement
 retain existing #315/#316 prerequisites and reuse #317/#318 rather than duplicating
 their execution work. Test seams and breakdown are approved for publication as six bounded children.
 Each child retains its explicit prerequisites and runtime qualification gates.
+
+
+## Publication readback
+
+Six approved children are published as #320–#325 with existing enhancement and
+ready-for-agent labels. Twelve native blocking relationships are verified.
+[Breakdown](hf-06-implementation-breakdown.md) and [receipt](hf-06-publication-receipt.json)
+retain exact locators/edges; the generated index projects the same graph.
+No implementation assignee has claimed these slices. #318/#319 remain conditional
+runtime-acceptance dependencies, not hard blockers for policy/refusal work.

@@ -171,8 +171,8 @@ Product understanding is explicitly confirmed. The contract interview retains
 all nine answers. HF-02/#315 and HF-07/#316 remain HF-06's declared prerequisites;
 HF-13/#317 owns wake lifetime/startup policy. Downstream runtime execution belongs
 to HF-18/19/20/24. The proposed slices separate hard prerequisites from shared
-write-surface coordination. The operator approved test seams, granularity and dependency edges; publish
-the six bounded children and read back their native blocking relationships. Existing HF locators remain stable.
+write-surface coordination. The operator approved test seams, granularity and dependency edges. Six bounded
+children are published as #320–#325 with native blocking relationships read back. Existing HF locators remain stable.
 
 
 ### Issue319: enforcement recovery is not resource renewal

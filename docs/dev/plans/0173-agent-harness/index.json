@@ -64,7 +64,16 @@
         "HF-02",
         "HF-07"
       ],
-      "state": "TRIAGE"
+      "state": "READY_FOR_AGENT",
+      "spec": "hf-06-spec.md",
+      "children": [
+        "HF-06-A",
+        "HF-06-B",
+        "HF-06-C",
+        "HF-06-D",
+        "HF-06-E",
+        "HF-06-F"
+      ]
     },
     {
       "id": "HF-07",
@@ -505,5 +514,79 @@
     "270": "Reuse current enforcement/accounting baseline; HF-23/24 describe incremental remaining portability. No duplicate enforcement framework or automatic issue closure.",
     "282": "Current public self-refresh/configuration scope must be reconciled for HF-06/26. Retain issue ownership; do not duplicate it.",
     "135/142": "Existing webhook deployment/live-dispatch scope stays separate; await/background jobs reuse supported triggers without reopening live provider work."
-  }
+  },
+  "implementation_slices": [
+    {
+      "id": "HF-06-A",
+      "parent": "HF-06",
+      "issue_number": 320,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/320",
+      "state": "READY_FOR_AGENT",
+      "blocked_by_issues": [
+        315,
+        316
+      ],
+      "native_blocking_links_verified": true
+    },
+    {
+      "id": "HF-06-B",
+      "parent": "HF-06",
+      "issue_number": 321,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/321",
+      "state": "READY_FOR_AGENT",
+      "blocked_by_issues": [
+        320
+      ],
+      "native_blocking_links_verified": true
+    },
+    {
+      "id": "HF-06-C",
+      "parent": "HF-06",
+      "issue_number": 322,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/322",
+      "state": "READY_FOR_AGENT",
+      "blocked_by_issues": [
+        320
+      ],
+      "native_blocking_links_verified": true
+    },
+    {
+      "id": "HF-06-D",
+      "parent": "HF-06",
+      "issue_number": 323,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/323",
+      "state": "READY_FOR_AGENT",
+      "blocked_by_issues": [
+        320
+      ],
+      "native_blocking_links_verified": true
+    },
+    {
+      "id": "HF-06-E",
+      "parent": "HF-06",
+      "issue_number": 324,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/324",
+      "state": "READY_FOR_AGENT",
+      "blocked_by_issues": [
+        317,
+        320
+      ],
+      "native_blocking_links_verified": true
+    },
+    {
+      "id": "HF-06-F",
+      "parent": "HF-06",
+      "issue_number": 325,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/325",
+      "state": "READY_FOR_AGENT",
+      "blocked_by_issues": [
+        320,
+        321,
+        322,
+        323,
+        324
+      ],
+      "native_blocking_links_verified": true
+    }
+  ]
 }
