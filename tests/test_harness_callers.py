@@ -132,6 +132,25 @@ class HarnessCallerTests(unittest.TestCase):
             for forbidden in ('wake_root', 'harness_policy', 'operator', 'role', 'native_context', 'app_server'):
                 self.assertNotIn(forbidden, spec[3], name)
 
+    def test_caller_identity_cannot_assert_completion_but_can_reconcile_operator_event(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            body = dict(caller_thread_id=THREAD, owner_kind='conversation',
+                        owner_id='codex:' + THREAD, event_id='finished-1')
+            value, failed = CommandRunner(wake_root=root).call('wake_owner_complete', body, native_context=META)
+            self.assertTrue(failed, value)
+            self.assertIn('completion_evidence_required', value['error']['message'])
+            self.assertFalse((root / 'wake-owners.json').exists())
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(run(['--wake-root', str(root), 'wake-policy', 'owner-complete', '--operator',
+                                      '--owner-kind', 'conversation', '--owner-id', 'codex:' + THREAD,
+                                      '--event-id', 'finished-1']), 0)
+            journal = (root / 'wake-owners.json').read_bytes()
+            value, failed = CommandRunner(wake_root=root).call('wake_owner_complete', body, native_context=META)
+            self.assertFalse(failed, value)
+            self.assertTrue(value['deduplicated'])
+            self.assertEqual((root / 'wake-owners.json').read_bytes(), journal)
+
 
 if __name__ == '__main__':
     unittest.main()

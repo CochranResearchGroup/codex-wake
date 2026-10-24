@@ -232,7 +232,7 @@ def complete_owner(root, owner, event_id, *, actor):
             or not isinstance(owner['id'], str) or not 0 < len(owner['id']) <= 256
             or not isinstance(event_id, str) or not 0 < len(event_id) <= 200 or not actor):
         raise WakeError('invalid_owner_completion')
-    from .records import all_records, find_record, replace_record
+    from .records import all_records, classify_record, find_record, replace_record
     with WakeLifecycleLock(root, 'wake-policy'):
         state = _owners(root, initialize=True)
         key = _owner_key(owner)
@@ -250,11 +250,32 @@ def complete_owner(root, owner, event_id, *, actor):
                 continue
             with WakeLifecycleLock(root, item.record['id']):
                 current = find_record(root, item.record['id'])
+                if classify_record(current.record) == 'hold':
+                    continue
                 record = dict(current.record)
                 reason = apply_owner_state(root, record)
                 replace_record(root, current, record)
                 outcomes.append(dict(id=record['id'], status=record['status'], reason=reason))
         return dict(state='completed', owner=owner, event_id=event_id, deduplicated=previous is not None, wakes=outcomes)
+
+
+def reconcile_owner_completion(root, owner, event_id):
+    """Consume an existing operator event; actor identity is not terminal proof.
+
+    Automatic task acceptance and runtime terminal-event adapters are separate
+    capabilities. Until qualified, MCP can reconcile the exact explicit operator
+    completion but cannot manufacture one from an active caller's claim.
+    """
+    try:
+        terminal = _owners(root)['owners'].get(_owner_key(owner))
+    except WakeError:
+        raise WakeError('owner_completion_evidence_required') from None
+    if (type(terminal) is not dict or set(terminal) != {'owner', 'event_id', 'state', 'actor'}
+            or terminal['owner'] != owner or terminal['event_id'] != event_id
+            or terminal['state'] != 'completed' or not isinstance(terminal['actor'], str)
+            or not terminal['actor'].startswith('operator:')):
+        raise WakeError('owner_completion_evidence_required')
+    return complete_owner(root, owner, event_id, actor=terminal['actor'])
 
 
 @contextmanager

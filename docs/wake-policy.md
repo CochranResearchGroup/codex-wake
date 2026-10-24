@@ -52,8 +52,12 @@ codex-wake --wake-root ROOT wake-policy owner-complete --operator \
 ```
 
 The local CLI is in the existing OS-user operator trust domain; `--operator` is
-never a model-controlled MCP property. MCP verifies native private call metadata;
-task completion additionally requires exact task delegation in host policy.
+never a model-controlled MCP property. MCP verifies native private call metadata; task scope additionally requires exact
+delegation in host policy. Neither caller identity nor task delegation proves
+completion. The current MCP owner tool reconciles an exact completion event
+already recorded by the explicit local operator action; a model cannot mint that
+event. Qualified automatic runtime/task-acceptance event adapters are separate
+capabilities and are not inferred from an idle or active conversation.
 
 `retire` cancels future pending owner-bound delivery by default. `hold` keeps it
 pending with `owner_completed_review_required`; `retain` leaves original expiry
@@ -71,8 +75,9 @@ delivery. The journal stores owner events, not a second copy of wake policy.
 `wake_native_after`, `wake_native_at`, and `wake_native_file` register exact-self
 wakes using trusted native metadata. All expose lifetime/startup properties.
 Existing Grok registration tools expose the same policy properties while retaining
-their host-bound actor requirements. `wake_owner_complete` records an exact owner
-event; it cannot override lifetime or startup choices.
+their host-bound actor requirements. `wake_owner_complete` reconciles an exact operator-approved owner event; absent
+terminal evidence returns `owner_completion_evidence_required`. It cannot
+override lifetime or startup choices.
 
 Registration reports `requires_worker_schema=8`. `--require-monitor` requires a
 currently compatible worker; otherwise the original intent is retained with an

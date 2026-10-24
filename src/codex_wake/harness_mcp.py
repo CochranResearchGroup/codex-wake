@@ -56,7 +56,7 @@ def tool_specs():
                  idempotency_key=TEXT, ttl=TEXT, **POLICY),
             ['caller_thread_id', 'trigger', 'prompt', 'idempotency_key'], False)
     result['wake_owner_complete'] = ('harness-owner', 'complete',
-        'Record verified owner completion; retire, hold or retain pending owner-bound wakes according to frozen policy. Never retract or replay uncertain effects.',
+        'Reconcile an explicit operator-approved owner completion. Caller identity alone cannot declare work complete. Never retract or replay uncertain effects.',
         dict(caller_thread_id=CALLER, owner_kind={'enum': ['conversation', 'task']}, owner_id=TEXT, event_id=TEXT),
         ['caller_thread_id', 'owner_kind', 'owner_id', 'event_id'], False)
     return result
@@ -134,8 +134,8 @@ def call(runner, group, verb, arguments, native_context):
         kind, owner = arguments['owner_kind'], arguments['owner_id']
         if (kind == 'conversation' and owner != 'codex:' + caller) or (kind == 'task' and owner not in controller_tasks(runner, caller)):
             raise WakeError('owner_completion_authority_denied')
-        from .wake_policy import complete_owner
-        return complete_owner(root, dict(kind=kind, id=owner), arguments['event_id'], actor='native:' + caller)
+        from .wake_policy import reconcile_owner_completion
+        return reconcile_owner_completion(root, dict(kind=kind, id=owner), arguments['event_id'])
     if group == 'harness-native':
         if any(isinstance(arguments.get(key), str) and arguments[key].startswith('-') for key in ('trigger', 'owner_id', 'idempotency_key', 'ttl')):
             raise WakeError('invalid_option_prefixed_argument')

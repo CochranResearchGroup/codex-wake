@@ -156,6 +156,24 @@ class WakePolicyTests(unittest.TestCase):
                 self.register(root, '--wake-lifetime', 'task', '--owner-id', 'other-task', key='other')
             self.assertFalse((root / 'wake-owners.json').exists())
 
+    def test_owner_completion_preserves_unknown_record_and_policy_versions_byte_for_byte(self):
+        for field, value in [('intent_schema_version', 99), ('policy_version', 99)]:
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                record = self.register(root, '--wake-lifetime', 'task', '--owner-id', 'daily-report')
+                if field == 'policy_version':
+                    record['wake_policy']['version'] = value
+                else:
+                    record[field] = value
+                found = all_records(root)[0]
+                original = json.dumps(record, separators=(',', ':')).encode()
+                found.path.write_bytes(original)
+                self.assertEqual(classify_record(record), 'hold')
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(run(['--wake-root', str(root), 'wake-policy', 'owner-complete', '--operator',
+                                          '--owner-kind', 'task', '--owner-id', 'daily-report', '--event-id', 'finished-1']), 0)
+                self.assertEqual(found.path.read_bytes(), original)
+
 
 if __name__ == '__main__':
     unittest.main()

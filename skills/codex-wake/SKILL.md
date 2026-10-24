@@ -47,7 +47,8 @@ is delegated by private host policy. Carry the exact admitted pin in checkpoints
 Use `wake_native_after/at/file` for exact-self scheduled intent with explicit
 lifetime and recipient startup. New registration defaults to configurable
 create/load/run, but a missing runtime capability remains unsupported. Disk
-persistence is not monitor or delivery proof. `wake_owner_complete` records an
-exact authorized owner event; it never replays an uncertain submission. See
+persistence is not monitor or delivery proof. `wake_owner_complete` reconciles an
+exact operator-approved completion event; identity alone cannot declare an owner
+finished, and absent evidence holds. It never replays an uncertain submission. See
 repository docs/managed-inventory.md, docs/task-briefs.md and docs/wake-policy.md
 for the source contracts. This source update does not refresh installed skills.

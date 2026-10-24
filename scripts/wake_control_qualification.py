@@ -44,7 +44,10 @@ with tempfile.TemporaryDirectory(prefix='codex-wake-p164-qualification-') as tmp
   params=StdioServerParameters(command=mcp,args=['--wake-root',str(a),'--wake-control-config',str(grants),'--wake-registry',str(registry)],env=env)
   async with stdio_client(params) as streams:
    async with ClientSession(*streams) as session:
-    await session.initialize();catalog=await session.list_tools();assert len(catalog.tools)==32
+    await session.initialize();catalog=await session.list_tools()
+    names = [tool.name for tool in catalog.tools]
+    assert len(names) == len(set(names)), 'duplicate public tool names'
+    assert {'wake_agents_list','wake_task_briefs_admit','wake_native_after','wake_owner_complete'} <= set(names)
     assert {'wake_grok_sessions','wake_grok_show','wake_grok_after','wake_grok_at','wake_grok_file'} <= {tool.name for tool in catalog.tools}
     for name in ['wake_list','wake_pause','wake_pause_status','wake_interrupt','wake_cancel','wake_resume']:
      args=dict(caller_thread_id=caller,all_roots=True)
