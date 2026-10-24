@@ -146,6 +146,8 @@ def mcp_call(runner, verb, arguments, native_context):
 
 
 def cli_principal(args, root):
+    if not args.bus_root or bool(args.operator_capability)==bool(args.actor_capability):
+        raise PermissionDenied('permission_identity_unverified')
     from .permission_commands import verified_cli_principal
     principal = verified_cli_principal(args)
     thread = args.caller_thread_id
