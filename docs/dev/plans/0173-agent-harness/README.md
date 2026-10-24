@@ -1,7 +1,7 @@
 # Agent harness ticket drafts
 
-All tickets are TRIAGE. No implementation or live-effect authority is granted.
-HF-01 is ready for its shared-contract interview; every later ticket still needs
+HF-01 is DONE (design only); HF-02–HF-32 remain TRIAGE. No implementation or live-effect authority is granted.
+[HF-01 decisions](hf-01-decisions-and-handoffs.md) resolve the shared-contract interview; every later ticket still needs
 its own Matt grill-with-docs process before coding. Stable local locators are
 CW-HARNESS-173/HF-NN. No new GitHub issues have been created.
 

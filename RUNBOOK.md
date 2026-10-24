@@ -7973,3 +7973,12 @@ with their feature interview. [Plan](docs/dev/plans/0173-2026-10-23-agent-harnes
 Planning validation: 32 unique ticket bodies; known, acyclic dependency graph;
 25 covered feature groups; relative ticket/parent links resolve; policy wiring
 PASS; git diff whitespace check PASS. No runtime behavior changed or qualified.
+
+## Turn 397 | 2026-10-24
+
+HF-01 questionnaire response 4714471256de4ac29536f14d29677f03 was complete;
+all seven recommended choices selected. Recorded scenario decisions, component
+ownership, current open #270/#282 reconciliation and three bounded interview
+handoffs. HF-01 is DONE for design only; later tickets retain their own grills.
+No runtime effects. Validation: dependency/index consistency, local links, policy
+wiring and whitespace checks required before publishing this checkpoint.

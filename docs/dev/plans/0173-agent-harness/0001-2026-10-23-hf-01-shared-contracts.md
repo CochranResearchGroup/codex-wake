@@ -1,12 +1,12 @@
 # HF-01: Grill and reconcile the shared harness contracts
 
-State: TRIAGE
+State: DONE (design only)
 Owner: ecochran76; implementation assignee unassigned
 Work item: CW-HARNESS-173/HF-01 (local draft; not posted)
 Priority: P0
 Area: Shared contracts
 Blocked by: None for the shared-contract interview
-Grill state: READY for shared-contract interview
+Grill state: RESOLVED; see [decisions and handoffs](hf-01-decisions-and-handoffs.md)
 Implementation state: NOT_AUTHORIZED; own grill-with-docs and approved handoff required
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
@@ -31,9 +31,9 @@ Open decisions:
 
 ## Acceptance evidence
 
-- [ ] Resolve six scenarios: moved tab, rebooted process, replaced conversation, changed account, interrupted instruction, and missed daily occurrence.
-- [ ] Assign one owner for identity, observations, mutations, attempts, attention and wake occurrence state.
-- [ ] Reconcile open #270/#282 against current code; record remaining scope without silently closing either issue.
+- [x] Resolve six scenarios: moved tab, rebooted process, replaced conversation, changed account, interrupted instruction, and missed daily occurrence.
+- [x] Assign one owner for identity, observations, mutations, attempts, attention and wake occurrence state.
+- [x] Reconcile open #270/#282 against current code; record remaining scope without silently closing either issue.
 
 ## Scope limits and integration
 

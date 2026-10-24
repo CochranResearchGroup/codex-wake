@@ -9,7 +9,7 @@
       "file": "0001-2026-10-23-hf-01-shared-contracts.md",
       "priority": "P0",
       "dependencies": [],
-      "state": "TRIAGE"
+      "state": "DONE_DESIGN_ONLY"
     },
     {
       "id": "HF-02",
