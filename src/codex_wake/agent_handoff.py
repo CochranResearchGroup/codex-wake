@@ -64,16 +64,29 @@ def handoff_command(args, root):
                 or body.get('expires_at')!=args.expires_at):raise ValueError
     except (KeyError,TypeError,ValueError,OSError):
         raise WakeError('handoff requires a complete restart-safe checkpoint matching the host intent') from None
-    if args.caller_thread_id and (args.caller_thread_id!=args.thread_id or args.profile not in
+    from .permission_handoff import admission_context
+    try:
+        permission_context=admission_context(root,args,policy,body)
+    except WakeError as error:
+        from .permission_handoff import read_only_reconcile
+        observed=read_only_reconcile(root,args,error)
+        if observed is None:raise
+        from .sessions_cli import emit
+        emit(observed,args.as_json)
+        return 5
+    if permission_context:args.caller_thread_id=args.thread_id
+    if permission_context is None and args.caller_thread_id and (args.caller_thread_id!=args.thread_id or args.profile not in
             config.get('callers',{}).get(args.caller_thread_id,[])):
         raise WakeError('handoff requires the host-granted source caller')
     parse_timestamp(args.expires_at)
     intent=dict(operation='handoff',source_thread_id=args.thread_id,launch=profile,
         continuation=policy,checkpoint=str(checkpoint),checkpoint_sha256=args.checkpoint_sha256,
         mode=args.mode,expires_at=args.expires_at)
+    if permission_context:intent['handoff_trigger']=permission_context['trigger']
     if body.get('task_brief') is not None:
         from .task_briefs import TaskBriefStore
-        briefs = TaskBriefStore(root)
+        from .session_permissions import PermissionStore
+        briefs = TaskBriefStore(PermissionStore(root).root if permission_context else root)
         pin = briefs.validate_pin(body['task_brief'])
         approved = briefs.inspect(pin['task_id'])['revisions'][pin['revision'] - 1]['content']
         if (approved['objective'] != body['objective'] or approved['workspace'] != str(workspace)
@@ -82,7 +95,7 @@ def handoff_command(args, root):
         intent['task_brief'] = pin
     if config.get('lifecycle_defaults') or policy.get('configuration'):
         from .lifecycle_configuration import effective_configuration
-        intent['configuration'] = effective_configuration(config, args.thread_id, args.profile, args.caller_thread_id)
+        intent['configuration'] = effective_configuration(config, args.thread_id, args.profile, args.caller_thread_id,_permission_checked=bool(permission_context))
         if intent.get('task_brief') is not None:
             from .lifecycle_budget import objective_identity
             if approved['allocation_ref'] != objective_identity(policy):
@@ -99,6 +112,8 @@ def handoff_command(args, root):
         else:
             receipt=dict(version=1,intent_key=args.intent,fingerprint=fingerprint,
                 intent=intent,thread_id=args.thread_id,state='prepared')
+        if permission_context and 'permission_context' not in receipt:
+            receipt['permission_context']=permission_context
         if 'configuration' in intent:
             receipt['configuration'] = intent['configuration']
         if getattr(args,'rollback',False):
@@ -599,6 +614,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 caller_thread_id=args.caller_thread_id,as_json=True)
             if receipt['intent'].get('task_brief') is not None:
                 child.task_brief_pin = receipt['intent']['task_brief']
+            if receipt.get('permission_context'):
+                child._handoff_permission_receipt=receipt
             child.budget_context=dict(source_ref=receipt['thread_id'],actor_id=receipt['budget_actor'],
                 configuration_revision=effective['revision'])
             if args.mode=='same-tab':
@@ -722,15 +739,20 @@ def advance_handoff(path,receipt,profile,policy,args,root):
             receipt['objective_budget']=ledger_for(root,receipt).bind_goal(
                 'goal:'+target+':'+str(goal['createdAt']),receipt['budget_actor'],usage,now=trusted_upper())
             receipt.update(state='awaiting_activation',reason='deadline_fence_unverified')
+            from .permission_handoff import record_succession
+            record_succession(root,receipt,target)
             owner.update(state='successor_prepared',successor_thread_id=target);save(owner_path,owner)
         except Exception as exc:
             receipt.update(state='uncertain' if receipt.get('uncertain_effect') else 'blocked',reason=type(exc).__name__)
 
 
 def before_handoff_effect(path,receipt):
+    from .permission_handoff import before_effect as permission_before_effect
+    if not permission_before_effect(path,receipt):return False
     if receipt['intent'].get('task_brief') is not None:
         from .task_briefs import TaskBriefStore
-        TaskBriefStore(path.parent.parent).validate_pin(receipt['intent']['task_brief'])
+        from .session_permissions import PermissionStore
+        TaskBriefStore(PermissionStore(path.parent.parent).root if receipt.get('permission_context') else path.parent.parent).validate_pin(receipt['intent']['task_brief'])
     from .strict_runtime import guard_execution
     if not guard_execution(path.parent.parent,receipt):
         save(path,receipt)
@@ -902,6 +924,7 @@ def poll_handoffs(root,supervision=None,stop_reason=None):
                     if not identity:continue
                     from .wake_control import delivery_guard
                     with delivery_guard(root):
+                        if not before_handoff_effect(path,receipt):continue
                         receipt.update(state='activating',uncertain_effect='thread/goal/activate_successor',
                             deadline_fence=dict(pid=os.getpid(),identity=identity,utc=bounds,
                                 interval=supervision['interval'],deadline=receipt['continuation_deadline']))

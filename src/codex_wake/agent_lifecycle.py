@@ -26,7 +26,11 @@ def spawn_command(args, root):
             raise ValueError
     except (OSError, ValueError, KeyError, TypeError):
         raise WakeError('an approved launch profile is required') from None
-    if args.caller_thread_id:
+    permission_receipt=getattr(args,'_handoff_permission_receipt',None)
+    if permission_receipt is not None:
+        from .permission_handoff import revalidate
+        revalidate(root,permission_receipt)
+    if args.caller_thread_id and permission_receipt is None:
         grants = config.get('callers', {}).get(args.caller_thread_id, [])
         if not isinstance(grants, list) or args.profile not in grants:
             raise WakeError('host caller grant does not authorize this launch profile')
@@ -50,7 +54,7 @@ def spawn_command(args, root):
     intent = dict(operation='spawn', profile=args.profile, launch=profile, name=args.name,
                   task=args.task, expires_at=args.expires_at, source_thread_id=args.caller_thread_id)
     from .lifecycle_budget import operation_binding
-    binding=operation_binding(config,args)
+    binding=operation_binding(config,args,_permission_checked=bool(permission_receipt))
     if 'strict_execution' in profile and not binding:
         raise WakeError('strict execution requires an approved objective')
     if binding:intent.update(binding)
@@ -68,7 +72,8 @@ def spawn_command(args, root):
         if (carried_pin is not None and (task_id is not None or assignment_id is not None or brief_revision is not None)
                 or carried_pin is None and (not task_id or not assignment_id)):
             raise WakeError('task brief requires one paired task/assignment or a carried checkpoint pin')
-        briefs = TaskBriefStore(root)
+        from .session_permissions import PermissionStore
+        briefs = TaskBriefStore(PermissionStore(root).root if permission_receipt else root)
         if carried_pin is not None:
             pin = briefs.validate_pin(carried_pin)
         else:
@@ -114,6 +119,8 @@ def spawn_command(args, root):
         else:
             receipt = dict(version=1, intent_key=args.intent, fingerprint=fingerprint,
                            intent=intent, state='prepared', thread_id=None)
+            if permission_receipt:
+                receipt['permission_context']=permission_receipt['permission_context']
             if not binding:receipt['budget_mode']='explicit_expiry_only_legacy_profile'
             save(path, receipt)
         if receipt['state'] == 'starting' and receipt['thread_id'] is None:
@@ -162,6 +169,10 @@ def spawn_command(args, root):
                 runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile),
                                           codex=resolve_codex_cmd(profile['codex_path'], required=True))
                 tmux_command(runtime, 'has-session', '-t', runtime.tmux_session)
+                if permission_receipt and not before_effect(path,receipt):
+                    from .sessions_cli import emit
+                    emit(receipt,args.as_json)
+                    return 5
                 receipt.update(state='starting', uncertain_effect='thread/start')
                 save(path, receipt)
                 try:
@@ -377,9 +388,13 @@ def advance_spawn(path, receipt, profile):
 
 
 def before_effect(path, receipt):
+    if receipt.get('permission_context'):
+        from .permission_handoff import before_effect as permission_before_effect
+        if not permission_before_effect(path,receipt):return False
     if receipt['intent'].get('task_brief') is not None:
         from .task_briefs import TaskBriefStore
-        TaskBriefStore(path.parent.parent).validate_pin(receipt['intent']['task_brief'])
+        from .session_permissions import PermissionStore
+        TaskBriefStore(PermissionStore(path.parent.parent).root if receipt.get('permission_context') else path.parent.parent).validate_pin(receipt['intent']['task_brief'])
     from .strict_runtime import guard_execution
     if not guard_execution(path.parent.parent,receipt):
         save(path,receipt)
