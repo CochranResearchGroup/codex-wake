@@ -8006,3 +8006,12 @@ permission lane. Updated domain-only glossary from accepted decisions. Prepared
 three-spec review packet; no new interviews, tracker mutations or runtime effects.
 Review pending for public testing seams and slice granularity, as required by the
 invoked local to-spec/to-tickets skills.
+
+## Turn 401 | 2026-10-24
+
+After explicit operator approval, published three combined spec/implementation
+issues to github.com/CochranResearchGroup/codex-wake as ecochran76: #315 HF-02,
+#316 HF-07, #317 HF-13. Verified exact title/marker/body, open state and existing
+enhancement/ready-for-agent labels. No parent issue, assignee or milestone changes.
+Linked local index/specs and retained shared integration and #310 boundaries.
+No feature implementation or live runtime effects.
