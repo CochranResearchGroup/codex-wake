@@ -54,6 +54,8 @@ def register_parser(subparsers):
 def verified_cli_principal(args):
     from .a2a_bus import BusStore
     from .a2a_cli import invoking_actor
+    if not args.bus_root or bool(args.operator_capability)==bool(args.actor_capability):
+        raise PermissionDenied('permission_identity_unverified')
     bus=BusStore(args.bus_root)
     if args.operator_capability:
         with bus.connection() as database:

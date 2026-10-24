@@ -42,10 +42,17 @@ class Principal:
     tasks: tuple[str, ...] = ()
     # Only host/controller construction may supply this verified relationship.
     predecessor: str | None = None
+    ancestors: tuple[str, ...] = ()
 
     def __post_init__(self):
         if (not isinstance(self.subject, str) or not self.subject
                 or self.role not in ('session', 'operator', 'controller')):
+            raise PermissionDenied('permission_identity_unverified')
+        if (type(self.tasks) is not tuple or any(not isinstance(x,str) or not x for x in self.tasks)
+                or type(self.ancestors) is not tuple or len(self.ancestors)>256
+                or len(set(self.ancestors))!=len(self.ancestors)
+                or any(not isinstance(x,str) or not x for x in self.ancestors)
+                or (self.predecessor is not None and (not isinstance(self.predecessor,str) or not self.predecessor))):
             raise PermissionDenied('permission_identity_unverified')
 
 
@@ -148,7 +155,8 @@ class PermissionStore:
         self.now = now
 
     def active(self):
-        return self.path.exists() or self.path.is_symlink()
+        return (self.path.exists() or self.path.is_symlink() or self.directory.is_symlink()
+                or (self.directory/'adopted.json').exists() or (self.directory/'adopted.json').is_symlink())
 
     def _read(self):
         from .wake_policy import _read
@@ -186,6 +194,7 @@ class PermissionStore:
             value = dict(revision=entry['revision'], issuer=principal.subject,
                          policy=policy, history=[*old['history'], entry])
             _save(self.path, value)
+            _save(self.directory/'adopted.json',dict(version=1,initial_issuer=principal.subject))
             return dict(revision=value['revision'], digest=digest, adopted=True)
 
     def change_session(self, subject, layer, principal, *, expected_revision):
@@ -262,7 +271,7 @@ class PermissionStore:
         if decision == 'approval_required':
             for a in p.get('approvals', []):
                 subject_match = a['subject'] == principal.subject or (
-                    principal.predecessor == a['subject'] and a['scope'] == 'task' and a.get('successors', True) is True)
+                    a['subject'] in ((principal.predecessor,) + principal.ancestors) and a['scope'] == 'task' and a.get('successors', True) is True)
                 if (a['action'] != action or not subject_match or a.get('target', target) != target
                         or ('expires_at' in a and parse_timestamp(a['expires_at']).timestamp() <= self.now())
                         or (a['scope'] != 'standing' and a['task_id'] != task_id)
