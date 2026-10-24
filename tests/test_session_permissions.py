@@ -97,3 +97,38 @@ class SessionPermissionsTests(unittest.TestCase):
                 code=run(common+['show','--bus-root',str(bus.root),'--operator-capability',str(capability),'--subject','self','--action','refresh.self','--json'])
             self.assertEqual(code,0)
             self.assertEqual(json.loads(output.getvalue())['permission'],'deny')
+
+    def test_native_updates_cannot_self_promote_but_delegation_is_scoped(self):
+        from codex_wake.session_permissions import PermissionStore,Principal
+        from codex_wake.mcp_server import CommandRunner
+        caller='00000000-0000-7000-8000-000000000320'
+        peer='00000000-0000-7000-8000-000000000321'
+        meta=dict(threadId=caller,sessionId=caller,callId='call',**{'x-codex-turn-metadata':dict(thread_id=caller,session_id=caller,turn_id='turn')})
+        with tempfile.TemporaryDirectory() as tmp:
+            store=PermissionStore(tmp);store.configure({'version':1},Principal('op','operator'),expected_revision=0)
+            runner=CommandRunner(wake_root=Path(tmp))
+            value,failed=runner.call('wake_permissions_update',dict(caller_thread_id=caller,
+                subject=caller,layer={'actions':{'refresh.self':'allow'}},expected_revision=1),native_context=meta)
+            self.assertTrue(failed,value)
+            self.assertEqual(value['error']['code'],'permission_self_promotion')
+            store.configure({'version':1,'delegations':{caller:{'actions':['refresh.self'],'sessions':[peer]}}},Principal('op','operator'),expected_revision=1)
+            value,failed=runner.call('wake_permissions_update',dict(caller_thread_id=caller,
+                subject=peer,layer={'actions':{'refresh.self':'deny'}},expected_revision=2),native_context=meta)
+            self.assertFalse(failed,value)
+            self.assertEqual(store.evaluate('refresh.self',Principal(peer))['permission'],'deny')
+            value,failed=runner.call('wake_permissions_update',dict(caller_thread_id=caller,
+                subject=peer,layer={'actions':{'enforcement.increase':'allow'}},expected_revision=3),native_context=meta)
+            self.assertTrue(failed,value)
+            self.assertEqual(value['error']['code'],'permission_delegation_exceeded')
+
+    def test_malformed_policy_unknown_action_and_private_path_fail_closed(self):
+        from codex_wake.session_permissions import PermissionStore,Principal,PermissionDenied
+        with tempfile.TemporaryDirectory() as tmp:
+            store=PermissionStore(tmp);op=Principal('op','operator')
+            for value in ({'version':True},{'version':1,'global':{'actions':{'typo':'allow'}}},
+                          {'version':1,'mandatory':'refresh.self'}, {'version':1,'future_actions_inherit':'yes'}):
+                with self.assertRaises(ValueError):store.configure(value,op,expected_revision=0)
+            store.configure({'version':1},op,expected_revision=0)
+            with self.assertRaises(PermissionDenied):store.evaluate('typo',Principal('self'))
+            store.path.chmod(0o644)
+            with self.assertRaises(Exception):store.evaluate('refresh.self',Principal('self'))
