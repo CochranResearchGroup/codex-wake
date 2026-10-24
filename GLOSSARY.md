@@ -151,8 +151,9 @@ A particular terminal view associated with a conversation. Its label and positio
 are separate from the conversation's identity.
 
 **Managed agent**:
-An agent whose conversation, execution context and permitted operations are
-explicitly tracked by a controller.
+An agent whose one exact conversation, execution context and permitted operations
+are explicitly tracked by a controller. Its identity survives verified process
+and terminal changes; a successor conversation is a separate managed agent.
 
 **Agent instruction**:
 One bounded agent turn admitted as a declared instruction in a workflow.
@@ -176,3 +177,15 @@ Durability is separate from its deadline and delivery outcome.
 **Parking a tab**:
 Moving a live terminal attachment into a holding workspace while preserving its
 agent. Parking alone does not pause work or renew resource allowance.
+
+**Agent succession**:
+The relationship between a predecessor and successor managed agent continuing
+the same task, with outstanding obligations and resource continuity preserved.
+
+**Task brief**:
+The approved objective, phase, boundaries, acceptance conditions and context for
+an assignment. An admitted instruction refers to a particular revision.
+
+**Recipient-startup policy**:
+The selected conditions under which a wake may use an existing recipient, load
+a saved conversation or start its declared task. It is separate from wake lifetime.

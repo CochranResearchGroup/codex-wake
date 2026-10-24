@@ -48,3 +48,8 @@ See [first-frontier decisions and overlap boundaries](first-frontier-decisions.m
 Resolved defaults: configurable owner-end behavior defaults to retirement after
 verified explicit completion; configurable startup defaults to create/load/run
 for new wakes. Existing wakes retain their behavior. See the interview record.
+
+## Proposed build specification
+
+See [bounded spec](hf-13-spec.md) and the [three-ticket review](first-frontier-spec-review.md).
+Spec state: REVIEW_READY; public caller seam and ticket breakdown review pending.

@@ -87,3 +87,8 @@ Keep at most three implementation lanes, and serialize shared hub edits.
 - Frontier 5: HF-10, HF-19, HF-23, HF-26, HF-30, HF-31, HF-32.
 - Frontier 6: HF-11, HF-12, HF-24, HF-29.
 - Frontier 7: HF-15, HF-28.
+
+## First-frontier specifications
+
+[Review HF-02/HF-07/HF-13 specs, testing seams and slice boundaries](first-frontier-spec-review.md).
+These are proposed build contracts; product interview answers are already resolved.
