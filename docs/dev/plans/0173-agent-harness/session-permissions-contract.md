@@ -1,6 +1,6 @@
 # Common session permissions: HF-06 requirement and proposed contract
 
-State: INTERVIEW_IN_PROGRESS; round-one decisions resolved
+State: INTERVIEW_IN_PROGRESS; round-one and round-two decisions resolved
 Owner: ecochran76; integration through CW-HARNESS-173/HF-06
 Date: 2026-10-24
 Source: operator clarification in issue310's repair conversation; reconciled with
@@ -129,7 +129,8 @@ integration owner for shared CLI/MCP/profile/controller surfaces.
 ## Remaining design inputs and limits
 
 HF-06 still needs its own approved technical handoff, including concrete
-precedence/schema, authority for profile edits, migration and caller-level proof.
+schema, migration and caller-level proof. Precedence and authority for profile
+edits are resolved below.
 HF-13 now records configurable retirement of pending owner-bound wakes on
 verified explicit owner completion, and configurable create/load/run as the
 preferred default for new wakes (4dfdc39). The permission decision still applies
@@ -156,3 +157,41 @@ Authority: operator answered "yes all" to Q1–Q3 in this conversation.
 Next frontier: action defaults for the permissive profile, approval reuse and
 policy-change behavior for already queued work. No runtime change is authorized
 by this interview record.
+
+
+## Interview round two: resolved
+
+Authority: operator answered "yes all" to Q4–Q6 in this conversation.
+
+### Permissive profile action defaults
+
+| Action | Default |
+| --- | --- |
+| Self-refresh, self-handoff and self-resume | Allow |
+| Enroll in external resource enforcement | Allow |
+| Increase allowance or disable operator enforcement | Require approval |
+| A2A send/receive between operator-managed sessions | Allow when both sessions' rules permit |
+| Background app-server, existing-tab and create/load/run wakes | Allow when declared task and recipient authorize the selected route |
+| Shared-server refresh affecting other sessions | Require standing scope approval |
+
+These defaults retain mandatory restrictions, verified identity, declared scope
+and existing resource allowances. Automatic operation does not require repeated
+per-session UUID grants. They do not qualify unsupported runtime capabilities.
+
+### Approval lifetime and reuse
+
+Approvals support one operation, one task or a standing rule. Default scope is
+the current task until completion or expiry; standing approval must be selected
+explicitly. Matching actions reuse that approval. Broader actions require their
+own authority; a reusable approval is not an allowance renewal.
+
+### Revocation and work already in flight
+
+Revocation immediately blocks queued actions and subsequent effects. Already
+submitted effects may be observed and reconciled without granting another
+effect. Revocation alone does not automatically interrupt a running turn.
+Emergency pause and resource-stop controls retain their separate behavior.
+
+Next frontier: automatic trigger authority, approval continuity through successor
+handoff, and explicitly permitted delivery-route fallback. These decisions do
+not change production policy or authorize provider effects.
