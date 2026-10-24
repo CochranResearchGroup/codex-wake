@@ -17,6 +17,14 @@ def tool_specs():
     return result
 
 
+def inspect_action(store,principal,action,*,target=None,launch_profile=None):
+    relationship=None
+    if action=='refresh.shared':
+        relationship='shared'
+        target=target or 'shared-server'
+    return store.evaluate(action,principal,target=target,relationship=relationship,launch_profile=launch_profile)
+
+
 def mcp_call(runner, arguments, native_context, verb="show"):
     from .goal_supervision import verified_native_caller
     verified_native_caller(native_context, arguments['caller_thread_id'])
@@ -27,8 +35,8 @@ def mcp_call(runner, arguments, native_context, verb="show"):
         delegated=arguments['caller_thread_id'] in store._read()['policy'].get('delegations',{})
         principal=Principal(arguments['caller_thread_id'],'controller' if delegated else 'session')
         return store.change_session(arguments['subject'],arguments['layer'],principal,expected_revision=arguments['expected_revision'])
-    return store.evaluate(arguments['action'],
-        Principal(arguments['caller_thread_id']), target=arguments.get('target'),launch_profile=arguments.get('launch_profile'))
+    return inspect_action(store,Principal(arguments['caller_thread_id']),arguments['action'],
+        target=arguments.get('target'),launch_profile=arguments.get('launch_profile'))
 
 
 def register_parser(subparsers):
@@ -100,7 +108,7 @@ def _command(args,root):
         subject=args.subject or principal.subject
         if subject!=principal.subject and principal.role!='operator':
             raise PermissionDenied('permission_inspection_denied')
-        result=store.evaluate(args.action,Principal(subject,principal.role),target=args.target,launch_profile=args.launch_profile)
+        result=inspect_action(store,Principal(subject,principal.role),args.action,target=args.target,launch_profile=args.launch_profile)
     else:
         from .wake_policy import _read
         data=_read(args.file)
