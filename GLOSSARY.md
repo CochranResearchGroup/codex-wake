@@ -144,3 +144,35 @@ caller attestation; terminal text and claimed IDs alone grant no work authority.
 Positive adapter evidence that a selected method was unavailable before any
 submission bytes. An absent response, missing marker or timeout is insufficient.
 Only a host-approved fallback profile may switch methods on this evidence.
+
+
+**Terminal attachment**:
+A particular terminal view associated with a conversation. Its label and position
+are separate from the conversation's identity.
+
+**Managed agent**:
+An agent whose conversation, execution context and permitted operations are
+explicitly tracked by a controller.
+
+**Agent instruction**:
+One bounded agent turn admitted as a declared instruction in a workflow.
+
+**Step attempt**:
+One attempt to execute a declared workflow operation. Its reported completion
+and acceptance are separate outcomes.
+
+**Work acceptance**:
+An evidence-backed decision that a result meets its declared acceptance
+conditions. A worker's completion report alone is not that decision.
+
+**Scheduled occurrence**:
+One planned execution arising from a recurring schedule, distinct from attempts
+to deliver or execute that occurrence.
+
+**Wake durability**:
+The interruptions or owner lifecycles a retained wake is required to survive.
+Durability is separate from its deadline and delivery outcome.
+
+**Parking a tab**:
+Moving a live terminal attachment into a holding workspace while preserving its
+agent. Parking alone does not pause work or renew resource allowance.

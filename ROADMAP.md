@@ -1349,3 +1349,11 @@ provider-free MCP/wake-control/product smokes pass. REL-03 candidate preparation
 DONE: PR309 sourcehead0f890c7 passed Python3.11/3.12 CI40048872250; final closure
 commit remains subject to normal PR integration checks.
 No public release or production rollout.
+
+
+Agent harness planning backlog: [Plan0173](docs/dev/plans/0173-2026-10-23-agent-harness-backlog.md)
+consolidates the post0.20.0 feature discussion into32 local TRIAGE drafts. Shared
+ownership, coverage, hard dependencies and write-collision constraints are
+separate. HF-01 is the next shared-contract grill; after it, HF-02 inventory,
+HF-07 task/context and HF-13 wake durability form the first parallel frontier.
+No implementation or new GitHub issue publication is authorized by these drafts.
