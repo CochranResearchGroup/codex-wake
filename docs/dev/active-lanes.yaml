@@ -14,7 +14,7 @@ lanes:
     dependencies: []
     overlaps: [P168]
     updated_at: 2026-10-24
-    disposition: Fresh caller permissions repair; native ownership required; no implicit shared scope
+    disposition: Draft PR311; source and wheel focused checks pass; CI and installed acceptance pending
   - id: P172-REL-NOTES
     owner: primary / ecochran76; worker /root/release_notes
     objective: Prepare accurate candidate release notes and README link

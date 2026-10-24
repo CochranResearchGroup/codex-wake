@@ -74,3 +74,19 @@ independent controller with native-self admission), and 4 public stdio MCP tests
 PASS. Public transport identity is injected fixture evidence. The installed
 0.19.1 service has not been upgraded, so the original live probe remains a
 deployment acceptance gate. Full-suite result and PR tracked below.
+
+
+## Review delivery
+
+Draft PR311: https://github.com/CochranResearchGroup/codex-wake/pull/311.
+Source checkpoint 6d99a4b30bda81de1e9a657950d0d0856551c942 pushed and remote
+read back. Isolated wheel environment passes all 11 permission tests; the first
+wheel run lacked declared MCP dependencies, corrected by installing the wheel's
+[mcp] extra. No production install was involved. Final public stdio suite passes
+4 tests after tool-description updates. Pinned Ruff, compilation, policy wiring
+and diff whitespace checks pass. Full suite and Python3.11/3.12 PR CI pending.
+
+Memory disposition: forbidden. Developer requires explicit user request for
+memory writes; no such request occurred. A machine-readable no-write receipt
+exists in user state under codex-wake-310/memory-disposition.json; no Graphiti
+write was attempted.
