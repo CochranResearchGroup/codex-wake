@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 from . import __version__
+from .records import WakeError
 
 TEXT = {"type": "string", "minLength": 1, "maxLength": 1024}
 MESSAGE = {"type": "string", "minLength": 1, "maxLength": 128}
@@ -63,6 +64,10 @@ SPECS = {
     "wake_messages_cancel": ("messages", "cancel", "Cancel this actor's authorized original message; retain history and reconcile any uncertain effect.", {"message_id": MESSAGE}, ["message_id"], False),
     "wake_messages_arm_reply": ("messages", "arm-reply", "Register an exact correlated reply wake with a fixed timezone-aware expiry and stable arm key, then end the originating turn. Requires operator-delegated sender authority and an active native worker; registration is not reply completion.", {"message_id": MESSAGE, "idempotency_key": INTENT, "expires_at": TEXT}, ["message_id", "idempotency_key", "expires_at"], False),
 }
+from .permission_commands import tool_specs as permission_tool_specs
+SPECS.update(permission_tool_specs())
+for _name in ('wake_sessions_refresh','wake_sessions_configuration'):
+    SPECS[_name][3]['scope']={'enum':['current_connection','single_client','shared_server']}
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 SPECS['wake_goal_limits_set'] = (
     'goal-limits', 'set',
@@ -214,6 +219,12 @@ class CommandRunner:
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        if group == 'permissions':
+            try:
+                from .permission_commands import mcp_call
+                return mcp_call(self, arguments, native_context, verb), False
+            except (ValueError, OSError, WakeError) as exc:
+                return {'error': {'code': getattr(exc, 'code', 'permission_unavailable'), 'message': str(exc)}}, True
         if group in ('agents', 'task-briefs', 'harness-native', 'harness-owner'):
             try:
                 from .harness_mcp import call as harness_call
@@ -295,6 +306,16 @@ class CommandRunner:
             lifecycle_root = self.lifecycle_root if self.lifecycle_root is not None else self.wake_root
             if self.lifecycle_profiles is None or lifecycle_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
+            from .session_permissions import PermissionStore
+            if verb in ('refresh','configuration') and PermissionStore(lifecycle_root).active():
+                try:
+                    from .goal_supervision import verified_native_caller
+                    binding=verified_native_caller(native_context,arguments['caller_thread_id'])
+                    if arguments['thread_id']!=binding['thread_id']:raise ValueError('exact self required')
+                    packet=dict(verb=verb,arguments=arguments,binding=binding,root=str(lifecycle_root),profiles=str(self.lifecycle_profiles))
+                    return self._execute([sys.executable,'-m','codex_wake.permission_refresh'],arguments,readonly,json.dumps(packet))
+                except ValueError as exc:
+                    return {'error':{'code':'permission_identity_unverified','message':str(exc)}},True
             command = [*self.cli, '--wake-root', str(lifecycle_root), group, verb,
                        '--profiles', str(self.lifecycle_profiles)]
         else:

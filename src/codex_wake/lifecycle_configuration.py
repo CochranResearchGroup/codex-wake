@@ -7,12 +7,12 @@ from pathlib import Path
 from .records import WakeError, parse_timestamp
 
 
-def effective_configuration(config, thread_id, profile_name, caller_thread_id=None):
+def effective_configuration(config, thread_id, profile_name, caller_thread_id=None, *, _permission_checked=False):
     try:
         profile = config['profiles'][profile_name]
         policy = config['continuations'][thread_id]
-        if caller_thread_id and (caller_thread_id != thread_id or profile_name not in
-                config.get('callers', {}).get(caller_thread_id, [])):
+        if caller_thread_id and (caller_thread_id != thread_id or (not _permission_checked and profile_name not in
+                config.get('callers', {}).get(caller_thread_id, []))):
             raise ValueError('ungranted caller')
         if not policy['approval'] or not policy['objective']:
             raise ValueError('unapproved objective')
@@ -59,6 +59,10 @@ def effective_configuration(config, thread_id, profile_name, caller_thread_id=No
 
 
 def configuration_command(args, root):
+    from .session_permissions import PermissionStore
+    if PermissionStore(root).active():
+        from .permission_refresh import cli_request
+        return cli_request(args,root,"configuration")
     from .sessions_cli import emit
     try:
         config = json.loads(Path(args.profiles).read_text())

@@ -26,6 +26,12 @@ def add_sessions_parser(subparsers):
     for option in ('profiles', 'profile', 'thread-id'):
         configuration.add_argument('--' + option, required=True)
     configuration.add_argument('--caller-thread-id')
+    for command in (configuration,):
+        command.add_argument('--scope',choices=('current_connection','single_client','shared_server'))
+        command.add_argument('--bus-root',type=str)
+        command.add_argument('--operator-capability',type=str)
+        command.add_argument('--actor-capability',type=str)
+        command.add_argument('--app-server',default='unix://')
     configuration.add_argument('--apply-budget-authorization', action='store_true',
         help='apply an exact operator authorization revision from the host registry; not exposed to agent MCP')
     configuration.add_argument('--json', dest='as_json', action='store_true')
@@ -57,6 +63,11 @@ def add_sessions_parser(subparsers):
         refresh.add_argument('--' + option, required=True)
     refresh.add_argument('--resource', action='append', required=True)
     refresh.add_argument('--caller-thread-id')
+    refresh.add_argument('--scope',choices=('current_connection','single_client','shared_server'))
+    refresh.add_argument('--bus-root',type=str)
+    refresh.add_argument('--operator-capability',type=str)
+    refresh.add_argument('--actor-capability',type=str)
+    refresh.add_argument('--app-server',default='unix://')
     refresh.add_argument('--rollback', action='store_true', help='reattach the original conversation within the same fixed intent')
     refresh.add_argument('--json', dest='as_json', action='store_true')
     handoff = commands.add_parser('handoff', help='prepare a bounded fresh-context continuation')

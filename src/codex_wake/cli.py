@@ -118,6 +118,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_messages_parser(subparsers)
     from .goal_limits_cli import add_goal_limits_parser
     add_goal_limits_parser(subparsers)
+    from .permission_commands import register_parser as register_permissions
+    register_permissions(subparsers)
 
     after = subparsers.add_parser("after", help="create a wake after a duration such as 45m or 1h30m")
     after.add_argument("duration")
@@ -2792,6 +2794,9 @@ def run(argv: list[str] | None = None) -> int:
             return lifecycle_command(args, root)
         from .sessions_cli import sessions_command
         return sessions_command(args)
+    if args.command == 'permissions':
+        from .permission_commands import command as permissions_command
+        return permissions_command(args, root)
     if args.command == 'agents':
         from .managed_inventory_commands import run as agents_command
         return agents_command(args, root)

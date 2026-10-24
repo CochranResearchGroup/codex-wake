@@ -37,6 +37,9 @@ class SharedRefreshTests(unittest.TestCase):
             self.assertEqual(value['operations'], ['configuration', 'refresh'])
             self.assertFalse((base/'runtime'/'objective-ledgers').exists())
 
+    def test_common_permissions_survive_independent_refresh_controller(self):
+        self.shared_scenario(common_policy=True)
+
     def test_active_self_request_waits_then_reloads_once_with_same_goals(self):
         self.shared_scenario()
 
@@ -66,7 +69,7 @@ class SharedRefreshTests(unittest.TestCase):
 
     def shared_scenario(self, lost_reload=False, peer_busy=False, racing_peer=False,
                         stale_mcp=False, reset_counter=False, stop_during_preflight=False,
-                        cwd_mismatch=False, observation_timeout=False):
+                        cwd_mismatch=False, observation_timeout=False, common_policy=False):
         import hashlib
         import subprocess
         import sys
@@ -136,6 +139,14 @@ class SharedRefreshTests(unittest.TestCase):
                 '--caller-thread-id',THREAD,'--checkpoint','checkpoint.json','--checkpoint-sha256',
                 hashlib.sha256(checkpoint.read_bytes()).hexdigest(),'--resource','skill','--resource','mcp',
                 '--expires-at',expiry,'--json']
+            if common_policy:
+                from codex_wake.session_permissions import PermissionStore,Principal
+                PermissionStore(runtime).configure({'version':1,'approvals':[
+                    dict(id='shared-approval',action='refresh.shared',subject=THREAD,scope='standing',issuer='operator',target='shared-server')]},Principal('op','operator'),expected_revision=0)
+                saved=json.loads(policy.read_text());saved['callers']={};policy.write_text(json.dumps(saved));policy.chmod(0o600)
+                from codex_wake.a2a_bus import BusStore
+                bus,operator_capability=BusStore.configure(base/'bus')
+                argv+=['--bus-root',str(bus.root),'--operator-capability',str(operator_capability)]
             def invoke():
                 output=StringIO()
                 with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=time.time()),redirect_stdout(output):
