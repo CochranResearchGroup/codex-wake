@@ -324,6 +324,8 @@ def guard_registration(function):
     from functools import wraps
     @wraps(function)
     def guarded(args, root):
+        from .runtime_policies import require_wait_policy
+        require_wait_policy(getattr(args, "busy_policy", "wait"))
         with registration_guard(root, args):
             return function(args, root)
     return guarded

@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from codex_wake.cli import run
+from legacy_native_fixture import run_legacy_native
 from codex_wake.records import all_records, WakeError, write_record
 
 THREAD = '01a1227e-a041-7b72-9c36-18349e7dd22c'
@@ -27,7 +28,8 @@ class NativeMigrationTests(unittest.TestCase):
             self.assertEqual(run(['--wake-root', tmp, 'native', 'after',
                                   '--codex-path', sys.executable, THREAD, '1h', '--', 'Continue']), 0)
             record = all_records(root)[0].record
-            self.assertEqual(record['schema_version'], 5)
+            self.assertEqual(record['schema_version'], 8)
+            self.assertEqual(record['intent_schema_version'], 6)
             self.assertEqual(record['target']['thread_id'], THREAD)
 
     def test_classic_registration_requires_explicit_tmux_compatibility(self):
@@ -39,7 +41,7 @@ class NativeMigrationTests(unittest.TestCase):
     def test_migration_preserves_uncertainty_and_original_without_submission(self):
         with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
             root = Path(tmp)
-            run(['--wake-root', tmp, 'native', 'after', '--codex-path', sys.executable,
+            run_legacy_native(['--wake-root', tmp, 'native', 'after', '--codex-path', sys.executable,
                  THREAD, '1h', '--', 'Keep original prompt'])
             found = all_records(root)[0]
             record = dict(found.record, schema_version=1, status='firing',
@@ -64,7 +66,7 @@ class NativeMigrationTests(unittest.TestCase):
         from codex_wake.daemon import poll_once
         with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
             root = Path(tmp)
-            run(['--wake-root', tmp, 'native', 'after', '--codex-path', sys.executable,
+            run_legacy_native(['--wake-root', tmp, 'native', 'after', '--codex-path', sys.executable,
                  THREAD, '1h', '--', 'Continue'])
             found = all_records(root)[0]
             base = json.loads(found.path.read_text())
