@@ -1,6 +1,22 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P172-REL
+    owner: primary / ecochran76
+    objective: Prepare versioned multi-runtime candidate and reconcile release notes
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/308]
+    plan: docs/dev/plans/0172-multi-runtime/0007-2026-10-23-release-candidate.md
+    plan_ref: chore/0172-release-candidate
+    branch: chore/0172-release-candidate
+    target: origin/main
+    integration: squash_pr
+    remote_ref: origin/chore/0172-release-candidate
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-23
+    disposition: primary packaging and reconciliation; independent release-notes worker with disjoint files; no publication or production effects
   - id: P172-MR06
     owner: primary / ecochran76
     objective: Qualify installed Codex and Grok visible TUI exchanges
