@@ -457,6 +457,15 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             if first.get('parent_thread_id'):raise ValueError('successor must select its existing objective allocation')
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old)
         observation=_usage(receipt)
+        # Enrollment is not admitted until the first complete observation is
+        # qualified. A transient setup scan must not publish a stop receipt that
+        # only a resource renewal could clear. Existing campaigns still fail
+        # closed through their normal accounting/winddown path.
+        if (not old and observation.get('state')!='qualified' and
+                (observation.get('reason')=='usage_scan_time_limit' or
+                 observation.get('reason')=='allocation_member_accounting_unknown' and
+                 observation.get('member_reason')=='usage_scan_time_limit')):
+            raise ValueError('initial accounting unavailable; enrollment not admitted')
         if basis_changed and observation.get('state')!='qualified':
             raise ValueError('accounting basis change requires qualified original history')
         if old and not same and not grant.get('host_delegated'):
