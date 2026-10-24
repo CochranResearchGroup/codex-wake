@@ -25,12 +25,12 @@ intents; current published HF-06 contract owns the overlapping planning projecti
 
 | Ticket | Blockers | State | Worker / custody |
 | --- | --- | --- | --- |
-| #320 A policy/refresh | #315/#316 | running | primary; this integration worktree |
-| #321 B handoff | #320 | pending | unassigned |
-| #322 C enforcement | #320 | pending | unassigned |
-| #323 D A2A | #320 | pending | unassigned |
-| #324 E wakes | #320/#317 | pending | unassigned |
-| #325 F convergence | A–E | pending | primary after consumers |
+| #320 A policy/refresh | #315/#316 | validated; source-closed | primary;0597a2a + integrated corrections |
+| #321 B handoff | #320 | validated; source-closed | /root/hf06_b;4cf5c07 integrated2aff4aa |
+| #322 C enforcement | #320 | validated; source-closed | /root/hf06_c;1c3b7cb/19b5178 integratedad31cfa/3059038 |
+| #323 D A2A | #320 | validated; source-closed | /root/hf06_d;a6359ff integratedfaebbd6 |
+| #324 E wakes | #320/#317 | validated; source-closed | /root/hf06_e;e03779e integrated6b4a693 |
+| #325 F convergence | A–E | validated; closure readback pending | primary shared migration; /root/hf06_f51f4a12 integrated2689b57 |
 
 Shared evaluator/public policy CLI/MCP contract owned by primary. Worker hooks
 must call that frozen contract; no parallel configuration stores. Shared edits
@@ -71,3 +71,38 @@ Wave1 at20:44UTC (each base0597a2a, own clean worktree/branch):
 #324 ready but queued for worker capacity; max3 running workers. Primary is
 coordinator/serial shared-surface integrator until a slot opens. #325 remains
 blocked on all consumers. No broad code review invoked.
+
+
+## Convergence acceptance and comprehensive matrix
+
+Runtime freeze5b2a584, fixture correction1a858f3; shared inspection correction
+085bb7c and worker convergence2689b57 subsequently verified by three public
+convergence tests. First3.12 full run1550 had one fixture error (missing profile
+path after adding the retained legacy ceiling). Corrected fixture, preserving
+guard/assertions. Serial3.11:1550pass/one unrelated opt-in skip377.363s.
+Repeated3.12:1550pass/one unrelated opt-in skip384.264s. Original failures retained
+in user state. CI40134950121 passed both release-gates jobs on2d64cd1 after
+removing an installed-Codex dependency from the public registration fixture;
+that exact test also passes with PATH=/nonexistent.
+
+Worker F independently verified18 action defaults, current revocation, all18
+standing grants/expiry across root bindings and actual fresh CLI/MCP processes,
+plus independent handoff effect-owner fencing with original counters/deadline.
+It caught shared inspection defaulting to peer/self instead of shared scope;
+085bb7c aligns inspection with actual admission. Integrated convergence3pass.
+Migration4pass; consumer43pass; sharedrefresh14pass. Source and scope preserved.
+
+Isolated installed0.21.0 wheel07905bf47cf84c2de7342e0d53959866a06e77eb3b1ca7d4d9b903ce0b9b9230
+served49tools through publicstdio; injected native identity allowed inspection
+and self-restriction, missingmetadata denied, zero provider calls/allocations.
+This package is in an isolated user-state prefix, not production. Production
+command separately read back0.20.1. Final package is rebuilt after remediation.
+
+Manual resource reads:21:28:23UTC goal1,249,637tokens /3307seconds, under user
+2,000,000token /2h ceilings. Host available RAM42,507MiB at21:34; unrelated
+services/processes retained. No Wake goal enrollment or stop-record mutation.
+
+All worker owned branches retain committed custody. F is a dedicated one-ticket
+worker for convergence after primary's shared implementation; no parallel core
+edits. Final source closure gates the one broad review; final TDD remediation
+pass is still reserved. #318/#319 remain explicit runtime gaps, not closed here.

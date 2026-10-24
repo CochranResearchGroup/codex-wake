@@ -1,0 +1,38 @@
+{
+  "state": "SOURCE_VALIDATED_BEFORE_FINAL_REVIEW",
+  "runtime_base": "588ff39",
+  "runtime_tip": "2689b57399e8590fc6eef15a777eed98499e23e9",
+  "integration_branch": "feat/hf06-permissions",
+  "pr": 327,
+  "source_tickets": [
+    320,
+    321,
+    322,
+    323,
+    324,
+    325
+  ],
+  "local_full_matrix": {
+    "python311": {
+      "tests": 1550,
+      "skipped": 1,
+      "seconds": 377.363,
+      "result": "PASS"
+    },
+    "python312": {
+      "tests": 1550,
+      "skipped": 1,
+      "seconds": 384.264,
+      "result": "PASS"
+    }
+  },
+  "additional_public_convergence_tests": 3,
+  "live_deployment": false,
+  "provider_effects": 0,
+  "remaining_runtime_issues": [
+    318,
+    319
+  ],
+  "review_passes_completed": 0,
+  "final_tdd_remediation_passes_completed": 0
+}
