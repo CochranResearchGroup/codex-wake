@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P173
+    owner: primary / ecochran76
+    objective: Default native-attested sessions to appropriate own-session access
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/310]
+    plan: docs/dev/plans/0173-2026-10-24-own-session-permissions.md
+    plan_ref: fix/310-own-session-access
+    branch: fix/310-own-session-access
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P168]
+    updated_at: 2026-10-24
+    disposition: Fresh caller permissions repair; native ownership required; no implicit shared scope
   - id: P172-REL-NOTES
     owner: primary / ecochran76; worker /root/release_notes
     objective: Prepare accurate candidate release notes and README link

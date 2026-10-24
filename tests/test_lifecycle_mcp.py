@@ -115,3 +115,32 @@ class LifecycleMCPTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn('--app-server',command)
                 self.assertEqual(command[command.index('--mode')+1],'new-tab')
                 self.assertIn('--caller-thread-id',command)
+
+    async def test_native_self_configuration_works_over_public_stdio_without_uuid_grant(self):
+        from mcp.types import RequestParamsMeta
+        thread = '00000000-0000-7000-8000-000000000310'
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            policy = root / 'profiles.json'
+            policy.write_text(json.dumps(dict(version=1, callers={}, profiles={
+                'self-refresh': dict(refresh_mode='shared_mcp_idle',
+                    scope_approval='operator approved shared idle reload', cwd=tmp,
+                    app_server='unix:///missing.sock', codex_path='/bin/true', timeout=1,
+                    resources={'wake': dict(kind='skill', path='/missing',
+                        description='Wake', sha256='a' * 64)})})))
+            policy.chmod(0o600)
+            parameters = StdioServerParameters(command=sys.executable,
+                args=['-m', 'codex_wake.mcp_server', '--lifecycle-profiles', str(policy),
+                      '--lifecycle-root', str(root / 'state')],
+                env=dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / 'src')))
+            meta = RequestParamsMeta(threadId=thread, sessionId=thread,
+                callId='owned-call', **{'x-codex-turn-metadata': dict(
+                    thread_id=thread, session_id=thread, turn_id='owned-turn')})
+            async with Client(parameters, mode='legacy') as client:
+                result = await client.call_tool('wake_sessions_configuration',
+                    dict(profile='self-refresh', thread_id=thread, caller_thread_id=thread), meta=meta)
+                self.assertFalse(result.is_error, result.content)
+                value = json.loads(result.content[0].text)
+                self.assertEqual(value['thread_id'], thread)
+                self.assertEqual(value['refresh_scope'], 'shared_server_mcp')
+            self.assertEqual(json.loads(policy.read_text())['callers'], {})

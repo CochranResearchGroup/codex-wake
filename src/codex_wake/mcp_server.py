@@ -30,14 +30,14 @@ TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
 SPECS = {
     "wake_sessions_target": ("sessions", "target", "Resolve an informal Byobu descriptor (tab 18, 18:policies, typo). Return canonical identity or structured missing/inactive/ambiguous conditions. Default policies error; explicitly select tab_only, fresh or CWD-scoped resume with approved profile, stable intent and expiry. Starting is not readiness or delivery. Reuse the same intent to inspect startup; never enumerate tabs or repair spelling in the caller.",
         {"selector": TEXT, **TARGET}, ["selector"], False),
-    "wake_sessions_configuration": ("sessions", "configuration", "For existing-session token/time resource limits use wake_goal_limits_set and wake_goal_limits_show. For dedicated containment, inspect host-approved limits before work. strict_execution identifies dedicated executor containment for time, memory, swap, CPU and tasks, with sampled cumulative token stops. Compare effective caps, original deadline, objective_budget and objective_execution with the request; configured limits alone do not prove running enforcement. Missing setup requires the operator; defaults do not renew authority.",
+    "wake_sessions_configuration": ("sessions", "configuration", "Native-verified callers have own-session access by default on provisioned refresh profiles, subject to explicit denials and host scope approval. For existing-session token/time resource limits use wake_goal_limits_set and wake_goal_limits_show. For dedicated containment, inspect host-approved limits before work. strict_execution identifies dedicated executor containment for time, memory, swap, CPU and tasks, with sampled cumulative token stops. Compare effective caps, original deadline, objective_budget and objective_execution with the request; configured limits alone do not prove running enforcement. Missing setup requires the operator; defaults do not renew authority.",
         {"profile": MESSAGE, "thread_id": TEXT}, ["profile", "thread_id"], True),
     "wake_sessions_handoff": ("sessions", "handoff", "Prepare an explicitly approved fresh-context continuation from the source agent's verified checkpoint. Preserve cumulative allowance and original deadline; activation requires the owned continuous monitor. No inherited claims or automatic A2A enrollment.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
          "mode": {"enum": ["new-tab", "same-tab"]}, "expires_at": TEXT, "rollback": {"type": "boolean"}},
         ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "mode", "expires_at"], False),
-    "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources while preserving the source conversation. A client_idle profile queues independent replacement of only the invoking client after that conversation is idle, pauses an active goal and restores it only after resource checks if originally active. A shared_mcp_idle profile instead queues a shared-server MCP reload after all loaded conversations are idle. Exact host scope approval is required. Reuse the same intent to read completion. Preserved checkpoint, fixed expiry and actual resource proof are required; queued is not completed. Legacy profiles retain guarded client replacement; no fresh-thread or shared-daemon restart fallback.",
+    "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources while preserving the source conversation. Native-verified self access defaults on; explicit caller denials/default-off override it. Caller-supplied UUIDs alone do not grant access. A client_idle profile queues independent replacement of only the invoking client after that conversation is idle, pauses an active goal and restores it only after resource checks if originally active. A shared_mcp_idle profile instead queues a shared-server MCP reload after all loaded conversations are idle. Exact host scope approval is required. Reuse the same intent to read completion. Preserved checkpoint, fixed expiry and actual resource proof are required; queued is not completed. Legacy profiles retain guarded client replacement; no fresh-thread or shared-daemon restart fallback.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
          "rollback": {"type": "boolean"},
@@ -275,6 +275,11 @@ class CommandRunner:
             lifecycle_root = self.lifecycle_root if self.lifecycle_root is not None else self.wake_root
             if self.lifecycle_profiles is None or lifecycle_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
+            if group == 'sessions' and verb in ('configuration', 'refresh') and native_context is not None and any(
+                    key in native_context for key in ('threadId', 'sessionId', 'x-codex-turn-metadata')):
+                result = self._native_self_refresh(verb, arguments, native_context, lifecycle_root)
+                if result is not None:
+                    return result
             command = [*self.cli, '--wake-root', str(lifecycle_root), group, verb,
                        '--profiles', str(self.lifecycle_profiles)]
         else:
@@ -327,6 +332,26 @@ class CommandRunner:
         if verb == "list":
             command += ["--limit", str(arguments.get("limit", 100))]
         return self._execute(command, arguments, readonly, body)
+
+    def _native_self_refresh(self, verb, arguments, native_context, root):
+        """Attest in the host, then retain the existing bounded child boundary."""
+        from .goal_supervision import verified_native_caller
+        try:
+            binding = verified_native_caller(native_context, arguments['caller_thread_id'])
+            if arguments['thread_id'] != binding['thread_id']:
+                raise ValueError('native self access cannot target another session')
+        except ValueError as exc:
+            return {'error': {'code': 'session_access_denied', 'message': str(exc)}}, True
+        packet = dict(verb=verb, arguments=arguments, binding=binding,
+                      profiles=str(self.lifecycle_profiles), root=str(root))
+        body = json.dumps(packet)
+        if len(body.encode('utf-8')) > 65536:
+            return {'error': {'code': 'invalid_argument', 'message': 'Self request exceeds 64 KiB.'}}, True
+        value, failed = self._execute([sys.executable, '-m', 'codex_wake.session_permissions'],
+                                      arguments, verb == 'configuration', body)
+        if not failed and value == {'_legacy_session_profile': True}:
+            return None
+        return value, failed
 
     def _execute(self, command, arguments, readonly, body=None):
         try:

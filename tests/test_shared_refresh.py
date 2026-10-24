@@ -40,6 +40,9 @@ class SharedRefreshTests(unittest.TestCase):
     def test_active_self_request_waits_then_reloads_once_with_same_goals(self):
         self.shared_scenario()
 
+    def test_native_self_default_survives_independent_controller_revalidation(self):
+        self.shared_scenario(native_self=True)
+
     def test_native_observation_timeout_preserves_queued_intent_until_its_deadline(self):
         self.shared_scenario(observation_timeout=True)
 
@@ -64,7 +67,7 @@ class SharedRefreshTests(unittest.TestCase):
     def test_source_workspace_mismatch_blocks_before_shared_reload(self):
         self.shared_scenario(cwd_mismatch=True)
 
-    def shared_scenario(self, lost_reload=False, peer_busy=False, racing_peer=False,
+    def shared_scenario(self, lost_reload=False, peer_busy=False, racing_peer=False, native_self=False,
                         stale_mcp=False, reset_counter=False, stop_during_preflight=False,
                         cwd_mismatch=False, observation_timeout=False):
         import hashlib
@@ -121,7 +124,7 @@ class SharedRefreshTests(unittest.TestCase):
             socket=base/'native.sock'
             server=unix_serve(serve,path=str(socket));threading.Thread(target=server.serve_forever,daemon=True).start()
             policy=base/'profiles.json'
-            policy.write_text(json.dumps(dict(version=1,callers={THREAD:['self']},profiles={'self':dict(
+            policy.write_text(json.dumps(dict(version=1,callers={} if native_self else {THREAD:['self']},profiles={'self':dict(
                 refresh_mode='shared_mcp_idle',scope_approval='user approved shared reload after idle check',
                 cwd=tmp,app_server='unix://'+str(socket),codex_path='/bin/true',timeout=1,
                 resources={'skill':dict(kind='skill',path=str(skill),description='new skill',
@@ -137,6 +140,18 @@ class SharedRefreshTests(unittest.TestCase):
                 hashlib.sha256(checkpoint.read_bytes()).hexdigest(),'--resource','skill','--resource','mcp',
                 '--expires-at',expiry,'--json']
             def invoke():
+                if native_self:
+                    # Inject the same normalized host binding the public MCP route
+                    # hands its bounded private child; the watcher is independent.
+                    from codex_wake.session_permissions import native_request
+                    with patch('codex_wake.lifecycle_budget.trusted_upper', return_value=time.time()):
+                        value, failed = native_request(dict(verb='refresh', profiles=str(policy), root=str(runtime),
+                            binding=dict(thread_id=THREAD, turn_id='owned-turn', call_id='owned-call'),
+                            arguments=dict(profile='self', intent='self-refresh', thread_id=THREAD,
+                                caller_thread_id=THREAD, checkpoint='checkpoint.json',
+                                checkpoint_sha256=hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                                resources=['skill', 'mcp'], expires_at=expiry)))
+                    return (2 if failed else 0), value
                 output=StringIO()
                 with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=time.time()),redirect_stdout(output):
                     code=run(argv)

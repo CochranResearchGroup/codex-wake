@@ -7951,3 +7951,14 @@ command /home/ecochran76/.local/bin/codex-wake still reports0.19.1; isolated can
 is0.20.0 with no observed residual candidate commands. Final closure-only commit
 must pass ordinary PR checks before integration. No tag/release/upload/production
 install, grant/service effect or new provider prompt. Broader Plan0172 remains OPEN.
+
+
+## Turn396 | 2026-10-24 | Default own-session permissions
+
+Issue310 / Plan0173: native-attested callers receive own-session configuration
+and refresh admission without per-UUID registry edits on provisioned profiles.
+Explicit denials/default-off, independent shared scope, controller revalidation,
+limits and timeouts remain enforced. Focused tests cover actual stdio MCP,
+independent refresh execution, revocation, held locks and FIFO reads. Source and
+installed acceptance remain separate; production0.19.1 and operator policy were
+not changed. See Plan0173 for full validation and integration state.

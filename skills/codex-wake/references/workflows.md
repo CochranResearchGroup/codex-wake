@@ -7,7 +7,10 @@ Use `codex-wake` when work should resume after a defined trigger instead of rely
 Use `wake_sessions_configuration` with your actual caller UUID, the same
 `thread_id`, and the host's `self-refresh` profile. Its `refresh_scope` tells you
 whether refresh reconnects MCP servers across the shared server. That scope
-requires explicit host approval; a missing grant is a setup refusal.
+requires explicit host approval. Native-verified sessions receive own-session
+access by default on provisioned refresh profiles; explicit caller denials and
+`session_permissions.self_access: false` override that default. A UUID claim alone
+does not grant access. See [permission details](lifecycle.md#default-access-to-the-calling-session).
 
 For a `single_client` profile (`client_idle`), preserve the checkpoint and queue
 refresh with the same fixed intent. End this turn so the independent watcher can

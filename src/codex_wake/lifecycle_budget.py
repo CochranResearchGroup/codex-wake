@@ -6,7 +6,7 @@ from pathlib import Path
 from .objective_ledger import ObjectiveLedger
 
 
-def operation_binding(config, args, source_ref=None):
+def operation_binding(config, args, source_ref=None, *, native_self=False):
     """Only host registry context can bind an assignment to an objective."""
     from .lifecycle_configuration import effective_configuration
     from .records import WakeError
@@ -19,7 +19,7 @@ def operation_binding(config, args, source_ref=None):
         raise WakeError('configured spawn requires an approved objective reference')
     if args.caller_thread_id and reference!=args.caller_thread_id:
         raise WakeError('caller cannot select another objective reference')
-    effective=effective_configuration(config,reference,args.profile,args.caller_thread_id)
+    effective=effective_configuration(config,reference,args.profile,args.caller_thread_id,native_self=native_self)
     lower=policies[reference].get('spawn_token_limit',effective['session_token_limit'])
     if type(lower) is not int or not 0<lower<=effective['session_token_limit']:
         raise WakeError('host spawn token limit must be within the configured session allowance')

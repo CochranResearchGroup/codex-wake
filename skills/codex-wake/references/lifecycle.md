@@ -134,3 +134,24 @@ Initial deployment to a client whose cached MCP lacks host scope requires an
 operator bootstrap with the identical approved registry/checkpoint and caller.
 That is a deployment action, not an agent permission to bypass missing grants.
 After the shared reload, the public MCP can admit later self-refresh requests.
+
+### Default access to the calling session
+
+For provisioned `shared_mcp_idle` and `client_idle` refresh profiles, the MCP host
+uses native call metadata to verify that caller and target are the same session.
+A verified session can inspect and request its own refresh without adding its
+UUID to `callers`. A caller-supplied UUID or environment variable alone is not
+identity evidence. Other-session targets retain their existing restrictions.
+
+Explicit `callers` entries override the default: an empty list denies access,
+and a nonempty list permits only the named profiles. Set the host registry's
+`"session_permissions": {"self_access": false}` to require explicit grants for
+new sessions. Existing explicit grants remain valid. Malformed permissions fail
+closed. This default grants no objective allocation and renews no resource limit.
+
+Host profile provisioning, `scope_approval`, checkpoint/resource verification,
+emergency pause, expiry and idle checks remain required. Shared-server refresh
+still waits for all affected conversations. The independent controller rechecks
+permissions before advancing; revocation blocks a queued request. Private receipt
+ownership evidence survives restart and is omitted from public responses. Older
+receipts retain their explicit-grant behavior; no migration is required.

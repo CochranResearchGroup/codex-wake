@@ -369,3 +369,24 @@ separates paid native candidate runs, public fixture coverage and exact released
 installation checks. The [0.15.1 installed closeout](dev/evidence/plan0162/final-acceptance.md)
 records later tab targeting and installation qualification. These receipts do not
 configure profiles or grant authority on another host.
+
+### Default access to the calling session
+
+For provisioned `shared_mcp_idle` and `client_idle` refresh profiles, the MCP host
+uses native call metadata to verify that caller and target are the same session.
+A verified session can inspect and request its own refresh without adding its
+UUID to `callers`. A caller-supplied UUID or environment variable alone is not
+identity evidence. Other-session targets retain their existing restrictions.
+
+Explicit `callers` entries override the default: an empty list denies access,
+and a nonempty list permits only the named profiles. Set the host registry's
+`"session_permissions": {"self_access": false}` to require explicit grants for
+new sessions. Existing explicit grants remain valid. Malformed permissions fail
+closed. This default grants no objective allocation and renews no resource limit.
+
+Host profile provisioning, `scope_approval`, checkpoint/resource verification,
+emergency pause, expiry and idle checks remain required. Shared-server refresh
+still waits for all affected conversations. The independent controller rechecks
+permissions before advancing; revocation blocks a queued request. Private receipt
+ownership evidence survives restart and is omitted from public responses. Older
+receipts retain their explicit-grant behavior; no migration is required.

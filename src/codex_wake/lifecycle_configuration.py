@@ -7,12 +7,13 @@ from pathlib import Path
 from .records import WakeError, parse_timestamp
 
 
-def effective_configuration(config, thread_id, profile_name, caller_thread_id=None):
+def effective_configuration(config, thread_id, profile_name, caller_thread_id=None, *, native_self=False):
+    from .session_permissions import profile_granted
     try:
         profile = config['profiles'][profile_name]
         policy = config['continuations'][thread_id]
-        if caller_thread_id and (caller_thread_id != thread_id or profile_name not in
-                config.get('callers', {}).get(caller_thread_id, [])):
+        if caller_thread_id and (caller_thread_id != thread_id or not profile_granted(
+                config, profile_name, caller_thread_id, native_self=native_self)):
             raise ValueError('ungranted caller')
         if not policy['approval'] or not policy['objective']:
             raise ValueError('unapproved objective')

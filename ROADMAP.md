@@ -1349,3 +1349,11 @@ provider-free MCP/wake-control/product smokes pass. REL-03 candidate preparation
 DONE: PR309 sourcehead0f890c7 passed Python3.11/3.12 CI40048872250; final closure
 commit remains subject to normal PR integration checks.
 No public release or production rollout.
+
+## P173 | Default Own-Session Permissions
+
+State: OPEN
+
+Issue310: native-attested self configuration/refresh without per-UUID grants.
+
+Active Plan: `docs/dev/plans/0173-2026-10-24-own-session-permissions.md`
