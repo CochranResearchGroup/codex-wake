@@ -1,7 +1,7 @@
 # Agent harness backlog: reconciled ticket drafts
 
 State: OPEN
-Ticket state: TRIAGE
+Ticket state: HF-01 DONE (design only); HF-02–HF-32 TRIAGE
 Owner: ecochran76
 Work item: CW-HARNESS-173 (local planning intake; not posted)
 Lane: P173-PLAN
@@ -9,7 +9,7 @@ Branch: docs/agent-harness-backlog
 Base: 7ef73b1
 Target: origin/main
 Integration: squash_pr
-Decision status: Draft scope/sequence for operator review; implementation not authorized
+Decision status: HF-01 scenario decisions resolved; later feature designs pending
 
 ## Outcome and authority
 
@@ -27,8 +27,8 @@ projection for navigation and dependency validation, not another specification.
 
 ## Current state
 
-Drafts HF-01–HF-32 are TRIAGE, not implementation-ready. HF-01 is ready for the
-shared-contract interview. Every later item retains its own interview and an
+HF-01 is complete as a design ticket; [decisions and handoffs](0173-agent-harness/hf-01-decisions-and-handoffs.md)
+record the seven operator answers. HF-02–HF-32 remain TRIAGE, not implementation-ready. Every later item retains its own interview and an
 approved implementation handoff, even after technical prerequisites finish.
 Priority expresses proposed product value, not execution authority. No coding
 starts from an automatically inferred READY label.

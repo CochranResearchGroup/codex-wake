@@ -5,8 +5,8 @@ Owner: ecochran76; implementation assignee unassigned
 Work item: CW-HARNESS-173/HF-13 (local draft; not posted)
 Priority: P0
 Area: Durability and jobs
-Blocked by: HF-01
-Grill state: TRIAGE; read prerequisite decisions before freezing design
+Blocked by: None; HF-01 design resolved
+Grill state: READY; apply [HF-01 decisions](hf-01-decisions-and-handoffs.md)
 Implementation state: NOT_AUTHORIZED; own grill-with-docs and approved handoff required
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
