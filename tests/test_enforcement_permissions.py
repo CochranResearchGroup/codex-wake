@@ -130,9 +130,11 @@ class EnforcementPermissionTests(unittest.TestCase):
                 self.assertEqual(result.returncode,0,result.stderr)
                 return {item['thread_id']:item for item in json.loads(result.stdout)}
             with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
-                first=enroll(root,policy,THREAD,100,120,native_context=native_context())
+                first=enroll(root,policy,THREAD,100,120,native_context=native_context(),
+                    permission_principal=Principal(THREAD,tasks=('implementation-task',)),
+                    task_id='implementation-task',operation_id='enroll-operation')
                 second=enroll(root,policy,peer,100,120,native_context=native_context(peer))
-                self.configure(root,{'version':1,'sessions':{THREAD:{'actions':{'enforcement.enroll':'deny'}}}},revision=1)
+                self.configure(root,{'version':1,'assignments':{'implementation-task':{'actions':{'enforcement.enroll':'deny'}}}},revision=1)
                 native['calls'].clear()
                 samples=independent_poll();revoked=samples[THREAD]
                 self.assertEqual(revoked['state'],'held')
@@ -178,6 +180,18 @@ class EnforcementPermissionTests(unittest.TestCase):
             self.configure(root,{'version':1,'approvals':[dict(id='recover-task',action='enforcement.recover',
                 subject=THREAD,scope='task',task_id=task,issuer='operator',expires_at='2030-01-01T01:00:00Z')]})
             runner=SimpleNamespace(wake_root=root,goal_limits_root=None,goal_limits_policy=policy,harness_policy=None)
+            from codex_wake.mcp_server import CommandRunner
+            public=CommandRunner(wake_root=root)
+            inspected,failed=public.call('wake_permissions_show',dict(caller_thread_id=THREAD,
+                action='enforcement.recover',task_id=task,assignment_id=assignment),native_context=native_context())
+            self.assertFalse(failed,inspected)
+            self.assertEqual(inspected['permission'],'allow')
+            self.assertEqual(inspected['approval_scope'],'task')
+            self.assertEqual(inspected['approval_issuer'],'operator')
+            forged,failed=public.call('wake_permissions_show',dict(caller_thread_id=THREAD,
+                action='enforcement.recover',task_id=task),native_context=native_context())
+            self.assertTrue(failed,forged)
+            self.assertEqual(forged['error']['code'],'permission_task_scope_unverified')
             result=mcp_call(runner,'recover',dict(caller_thread_id=THREAD,
                 task_id=task,assignment_id=assignment),native_context())
             self.assertEqual(result['permission']['permission'],'allow')

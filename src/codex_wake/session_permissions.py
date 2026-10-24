@@ -328,7 +328,7 @@ class PermissionStore:
         legacy_grants=p.get('adoption',{}).get('legacy_profile_grants',{})
         if action in LIFECYCLE_ACTIONS and principal.subject in legacy_grants and launch_profile not in legacy_grants[principal.subject]:
             decision,source='deny','legacy_profile_ceiling'
-        approval_id = None
+        approval_id = approval_scope = approval_issuer = None
         if decision == 'approval_required':
             for a in p.get('approvals', []):
                 subject_match = a['subject'] == principal.subject or (
@@ -340,10 +340,11 @@ class PermissionStore:
                         or (action == 'refresh.shared' and a['scope'] != 'standing')):
                     continue
                 decision, approval_id = 'allow', a['id']
+                approval_scope, approval_issuer = a['scope'], a['issuer']
                 break
         return dict(permission=decision, action=action, subject=principal.subject, target=target,
-                    relationship=relation, task_id=task_id, rule=source, revision=saved['revision'],
-                    approval_id=approval_id, capability=capability, readiness=readiness,
+                    relationship=relation, task_id=task_id, operation_id=operation_id, rule=source, revision=saved['revision'],
+                    approval_id=approval_id, approval_scope=approval_scope, approval_issuer=approval_issuer, capability=capability, readiness=readiness,
                     scope_matched=not scope_failed, profile=selected)
 
 

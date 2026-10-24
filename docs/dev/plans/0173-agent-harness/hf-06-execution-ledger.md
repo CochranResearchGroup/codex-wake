@@ -30,7 +30,7 @@ intents; current published HF-06 contract owns the overlapping planning projecti
 | #322 C enforcement | #320 | validated; source-closed | /root/hf06_c;1c3b7cb/19b5178 integratedad31cfa/3059038 |
 | #323 D A2A | #320 | validated; source-closed | /root/hf06_d;a6359ff integratedfaebbd6 |
 | #324 E wakes | #320/#317 | validated; source-closed | /root/hf06_e;e03779e integrated6b4a693 |
-| #325 F convergence | A–E | validated; closure readback pending | primary shared migration; /root/hf06_f51f4a12 integrated2689b57 |
+| #325 F convergence | A–E | validated; source-closed | primary shared migration; /root/hf06_f51f4a12 integrated2689b57 |
 
 Shared evaluator/public policy CLI/MCP contract owned by primary. Worker hooks
 must call that frozen contract; no parallel configuration stores. Shared edits
@@ -46,9 +46,10 @@ No provider effects, production configuration, service changes or deployment.
 
 ## Review accounting
 
-Broad review invocations: 0/1. Final TDD remediation passes: 0/1.
+Broad review invocations: 1/1. Final TDD remediation passes: 1/1.
 Implementation regression tests use ordinary red/green slices; the single
-requested post-review remediation pass remains distinct and reserved.
+requested post-review remediation pass is recorded in
+[review and remediation](../../evidence/hf06/review-and-remediation.md).
 
 ## A acceptance and first worker wave
 

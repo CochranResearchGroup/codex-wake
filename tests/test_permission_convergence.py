@@ -2,6 +2,7 @@
 from contextlib import redirect_stdout
 from io import StringIO
 import json
+from datetime import datetime, timedelta, timezone
 import os
 from pathlib import Path
 import subprocess
@@ -104,9 +105,12 @@ print(json.dumps({action:runner.call('wake_permissions_show',
             self.assertEqual(value['revision'], 2)
 
     def test_expired_approvals_cannot_reappear_after_public_restart(self):
+        reference=datetime.now(timezone.utc)
+        future=(reference+timedelta(days=365)).isoformat()
+        past=(reference-timedelta(days=365)).isoformat()
         policy = {'version': 1, 'global': {'default': 'approval_required'},
                   'approvals': [dict(id=action, action=action, subject=THREAD,
-                    scope='standing', issuer='operator', expires_at='2030-01-01T00:00:00Z')
+                    scope='standing', issuer='operator', expires_at=future)
                     for action in DEFAULTS]}
         self.configure(policy, 0)
         self.assert_matrix(self.fresh_mcp(self.root), dict.fromkeys(DEFAULTS, 'allow'), 1)
@@ -115,7 +119,7 @@ print(json.dumps({action:runner.call('wake_permissions_show',
             self.assertEqual(value['permission'], 'allow')
             self.assertEqual(value['approval_id'], action)
         for approval in policy['approvals']:
-            approval['expires_at'] = '2000-01-01T00:00:00Z'
+            approval['expires_at'] = past
         self.configure(policy, 1)
         self.assert_matrix(self.fresh_mcp(self.root),
                            dict.fromkeys(DEFAULTS, 'approval_required'), 2)

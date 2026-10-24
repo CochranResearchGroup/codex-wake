@@ -8,7 +8,7 @@ def tool_specs():
     from .harness_mcp import CALLER, TEXT
     result={'wake_permissions_show': ('permissions', 'show',
         'Explain effective action permission separately from runtime capability/readiness. Native identity is host verified; arguments cannot assign roles.',
-        dict(caller_thread_id=CALLER, action=TEXT, target=TEXT,launch_profile=TEXT),
+        dict(caller_thread_id=CALLER, action=TEXT, target=TEXT,launch_profile=TEXT,task_id=TEXT,assignment_id=TEXT,operation_id=TEXT),
         ['caller_thread_id', 'action'], True)}
     result['wake_permissions_update']=('permissions','update',
         'Restrict your own permissions or select an operator-preauthorized profile. Increases require existing scoped host delegation; arguments cannot assign authority.',
@@ -17,12 +17,12 @@ def tool_specs():
     return result
 
 
-def inspect_action(store,principal,action,*,target=None,launch_profile=None):
+def inspect_action(store,principal,action,*,target=None,launch_profile=None,task_id=None,operation_id=None):
     relationship=None
     if action=='refresh.shared':
         relationship='shared'
         target=target or 'shared-server'
-    return store.evaluate(action,principal,target=target,relationship=relationship,launch_profile=launch_profile)
+    return store.evaluate(action,principal,target=target,relationship=relationship,launch_profile=launch_profile,task_id=task_id,operation_id=operation_id)
 
 
 def mcp_call(runner, arguments, native_context, verb="show"):
@@ -35,8 +35,13 @@ def mcp_call(runner, arguments, native_context, verb="show"):
         delegated=arguments['caller_thread_id'] in store._read()['policy'].get('delegations',{})
         principal=Principal(arguments['caller_thread_id'],'controller' if delegated else 'session')
         return store.change_session(arguments['subject'],arguments['layer'],principal,expected_revision=arguments['expected_revision'])
-    return inspect_action(store,Principal(arguments['caller_thread_id']),arguments['action'],
-        target=arguments.get('target'),launch_profile=arguments.get('launch_profile'))
+    from .permission_enforcement import verified_tasks
+    from .harness_mcp import controller_tasks
+    tasks=verified_tasks(store.root,arguments['caller_thread_id'],arguments.get('task_id'),
+        arguments.get('assignment_id'),controller_tasks=controller_tasks(runner,arguments['caller_thread_id']))
+    return inspect_action(store,Principal(arguments['caller_thread_id'],tasks=tasks),arguments['action'],
+        target=arguments.get('target'),launch_profile=arguments.get('launch_profile'),
+        task_id=arguments.get('task_id'),operation_id=arguments.get('operation_id'))
 
 
 def register_parser(subparsers):
@@ -62,6 +67,9 @@ def register_parser(subparsers):
             p.add_argument('--target')
             p.add_argument('--subject')
             p.add_argument('--launch-profile')
+            p.add_argument('--task-id')
+            p.add_argument('--assignment-id')
+            p.add_argument('--operation-id')
 
 
 def verified_cli_principal(args):
@@ -83,6 +91,7 @@ def verified_cli_principal(args):
             actor=invoking_actor(bus,Path(args.actor_capability),endpoint=args.app_server)
         with bus.connection() as database:
             bus.validate_actor(database,actor)
+        args.permission_actor_id=actor.actor_id
         principal=Principal(actor.thread_id)
     else:
         raise PermissionDenied('permission_identity_unverified')
@@ -108,7 +117,11 @@ def _command(args,root):
         subject=args.subject or principal.subject
         if subject!=principal.subject and principal.role!='operator':
             raise PermissionDenied('permission_inspection_denied')
-        result=inspect_action(store,Principal(subject,principal.role),args.action,target=args.target,launch_profile=args.launch_profile)
+        from .permission_enforcement import verified_tasks
+        tasks=() if principal.role=='operator' else verified_tasks(store.root,subject,args.task_id,
+            args.assignment_id,actor_id=args.permission_actor_id)
+        result=inspect_action(store,Principal(subject,principal.role,tasks=tasks),args.action,
+            target=args.target,launch_profile=args.launch_profile,task_id=args.task_id,operation_id=args.operation_id)
     else:
         from .wake_policy import _read
         data=_read(args.file)
@@ -150,7 +163,7 @@ def main():
         raw=sys.stdin.buffer.read(65537)
         if len(raw)>65536:raise ValueError('private permission packet exceeds limit')
         packet=json.loads(raw)
-        result=mcp_call(SimpleNamespace(wake_root=Path(packet['root'])),packet['arguments'],
+        result=mcp_call(SimpleNamespace(wake_root=Path(packet['root']),harness_policy=packet.get('harness_policy')),packet['arguments'],
             packet['native_context'],packet['verb'])
         failed=False
     except (ValueError,OSError,TypeError,KeyError,WakeError) as exc:

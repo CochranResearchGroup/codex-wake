@@ -174,8 +174,12 @@ def controller_permission(root, receipt):
     if not store.active():
         return {'permission':'legacy','action':'enforcement.enroll'}
     try:
-        return store.evaluate('enforcement.enroll',Principal(receipt['thread_id']),
-                              target=receipt['thread_id'])
+        admitted=receipt.get('enforcement_permission',{})
+        task_id=admitted.get('task_id')
+        principal=Principal(receipt['thread_id'],tasks=(task_id,) if task_id else ())
+        return store.evaluate('enforcement.enroll',principal,
+                              target=receipt['thread_id'],task_id=task_id,
+                              operation_id=admitted.get('operation_id'))
     except (OSError,ValueError,KeyError,TypeError,PermissionDenied) as error:
         return dict(permission='deny',action='enforcement.enroll',
                     reason='permission_policy_unavailable',error=type(error).__name__)

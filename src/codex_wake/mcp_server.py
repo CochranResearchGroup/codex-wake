@@ -227,7 +227,8 @@ class CommandRunner:
         if group == 'permissions':
             if self.wake_root is None:
                 return {'error': {'code':'permission_host_root_required'}},True
-            packet=dict(root=str(self.wake_root),verb=verb,arguments=arguments,native_context=native_context)
+            packet=dict(root=str(self.wake_root),verb=verb,arguments=arguments,native_context=native_context,
+                harness_policy=str(self.harness_policy) if self.harness_policy is not None else None)
             raw=json.dumps(packet)
             if len(raw.encode())>65536:
                 return {'error':{'code':'invalid_argument'}},True

@@ -98,6 +98,15 @@ standing scope approval in both policy and the provisioned host profile.
 Inspect using `wake_permissions_show`, or authenticated `permissions show`.
 The result distinguishes the deciding permission rule/revision from capability
 and readiness. Optional `launch_profile` explains migrated profile ceilings.
+For task or operation decisions, supply `task_id`, `assignment_id` and
+`operation_id` (CLI: `--task-id`, `--assignment-id`, `--operation-id`). Native
+callers must hold a current assignment admission or host controller delegation
+for that task; a task name alone grants nothing. Authenticated operators may
+inspect a subject's task scope. Matched approvals report `approval_id`,
+`approval_scope` and `approval_issuer`, alongside the admitted operation ID.
+Independent enforcement checks retain the original admitted task and operation
+when applying current restrictions; revocation does not renew resources or
+remove the original safety stop obligation.
 The action catalog covers session inspection, the three refresh scopes, self
 handoff/resume, enrollment/increase/disable/recovery, A2A send/receive/claim/reply,
 and background/existing-tab/new-tab/fresh-task wake routes.
