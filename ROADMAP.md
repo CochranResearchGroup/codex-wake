@@ -1381,4 +1381,4 @@ primary retains shared hub integration and #310 overlap coordination.
 
 2026-10-24 first frontier source complete: #315/#316/#317 closed after acceptance.
 One two-axis review and one TDD remediation pass complete; PR326 final CI/integration
-pending. Remaining29 feature tickets retain their own interview gates.
+pending. Remaining28 feature tickets retain their own interview gates.
