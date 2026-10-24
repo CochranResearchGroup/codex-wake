@@ -7982,3 +7982,11 @@ ownership, current open #270/#282 reconciliation and three bounded interview
 handoffs. HF-01 is DONE for design only; later tickets retain their own grills.
 No runtime effects. Validation: dependency/index consistency, local links, policy
 wiring and whitespace checks required before publishing this checkpoint.
+
+## Turn 398 | 2026-10-24
+
+Read complete response e7d360f4df91425fb8a251ac51bdec42 including active Other
+answers and notes. Recorded self-enrollment default, effective explicit operator
+unenrollment, permissive self-control profiles and separate lifetime/startup axes.
+Preserved other-agent ownership of host-policy repair. HF-02/HF-07 product inputs
+resolved; HF-13 follow-up pending. No implementation/runtime effects.
