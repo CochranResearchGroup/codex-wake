@@ -14,6 +14,18 @@ WIP limit: One primary ticket plus one independent subagent per other ready tick
 
 ## Current State
 
+Release preparation: [issue308](https://github.com/CochranResearchGroup/codex-wake/issues/308)
+tracks the0.20.0 candidate. Primary REL-01 built and installed an isolated wheel;
+independent /root/release_notes REL-02 supplied04e9ab7, reviewed/reconciled as
+d7291e6. All121 source/wheel/installed modules match final candidate digest
+4d1e243689bd85049af06061b3c52920755182baa08c9fd35f1d23eedf2d1c6f.
+Final provider-free MCP32-tool request/claim/reply, wake controls and product
+smoke pass. Preliminary local clock/retention refusals remain retained. REL-03
+owns required PR CI and integration. No tag, public release, upload, production
+installation/grant/service changes or new provider prompts.
+[Release packet](0172-multi-runtime/0007-2026-10-23-release-candidate.md).
+
+
 Integration complete: [PR306](https://github.com/CochranResearchGroup/codex-wake/pull/306)
 squash merged at dbc2dff75737d30395c513f0c16f66279b9dfbe6; issue
 [#305](https://github.com/CochranResearchGroup/codex-wake/issues/305) is CLOSED.

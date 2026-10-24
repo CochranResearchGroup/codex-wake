@@ -7915,3 +7915,26 @@ is silently promoted. Raw failed probes/experiments retained privately, all debu
 instrumentation removed. PR307 previously repaired privacy assertion passed both
 CI axes on53e1639; final combined fixture head still requires its own CI matrix.
 No provider prompts, production changes, quarantine or blind CI rerun.
+
+
+## Turn394 | 2026-10-23 | Parallel0.20.0 candidate preparation
+
+Fresh canonical maincf1ca8a/post-merge CI40018430636 SUCCESS. User “next” selects
+release preparation; no publication/production authority inferred. Created/read
+integration work item308 after duplicate/actor/target preflight. Primary REL-01
+owns aligned package/runtime version0.20.0 and isolated artifacts; independent
+/root/release_notes REL-02 owns two docs only, no nested workers. Worker04e9ab7
+accepted asd7291e6 after support/schema/qualification review. Source packetf921f81
+retained; primary serial coordinator owns REL-03/CI. All other runtime modules
+unchanged from main; __version__ is the only source-module difference.
+Final reconciled wheel4d1e243689bd85049af06061b3c52920755182baa08c9fd35f1d23eedf2d1c6f
+reports0.20.0, schema7 reader and write metadata;121 source/wheel/installed modules
+match. Final MCP smoke PASS5.562s/32 tools with authenticated fixture claim/reply,
+zero native turns/notifications and child cleanup. Wake controls and product smoke
+PASS. Preliminary MCPclock_anomaly and retention eligibility/delete mismatch stay
+retained; no forced cleanup or guard bypass. Initial schema probe omitted --json,
+corrected invocation rather than product change. Final artifact was rebuilt after
+README/notes reconciliation. Existing live0.19.1 candidate proof remains historical;
+no new provider qualification claimed for0.20.0. Required PR CI still pending.
+No tag/upload/release/production installation or existing user conversations touched.
+[Receipt](docs/dev/evidence/plan0172/release-candidate-0.20.0.json).

@@ -1,18 +1,36 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P172-REL-NOTES
+    owner: primary / ecochran76; worker /root/release_notes
+    objective: Prepare accurate candidate release notes and README link
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/308]
+    plan: docs/dev/plans/0172-multi-runtime/0008-2026-10-23-release-notes.md
+    plan_ref: chore/308-release-integration
+    branch: docs/0172-release-notes
+    checkpoint: 04e9ab78de680253fbfbdb6839d66796cc4878bc
+    target: origin/main
+    integration: squash_pr
+    remote_ref: origin/docs/0172-release-notes
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-23
+    disposition: worker packet reviewed and reconciled as d7291e6; retained remote ref; no provider/publication effects
   - id: P172-REL
     owner: primary / ecochran76
     objective: Prepare versioned multi-runtime candidate and reconcile release notes
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/308]
     plan: docs/dev/plans/0172-multi-runtime/0007-2026-10-23-release-candidate.md
-    plan_ref: chore/0172-release-candidate
+    plan_ref: chore/308-release-integration
     branch: chore/0172-release-candidate
+    checkpoint: f921f817746ec0e37300be68178016531bcd101d
     target: origin/main
     integration: squash_pr
     remote_ref: origin/chore/0172-release-candidate
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    custody_state: PAUSED_REF
     dependencies: []
     overlaps: []
     updated_at: 2026-10-23
