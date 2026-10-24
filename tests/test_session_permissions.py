@@ -143,5 +143,5 @@ class SessionPermissionsTests(unittest.TestCase):
                 Principal('op','operator'),expected_revision=0)
             successor=Principal('next',tasks=('task',),predecessor='source')
             self.assertEqual(store.evaluate('enforcement.increase',successor,task_id='task')['permission'],'allow')
-            complete_owner(tmp,{'kind':'task','id':'task'},'done',actor='operator:owner')
+            complete_owner(Path(tmp),{'kind':'task','id':'task'},'done',actor='operator:owner')
             self.assertEqual(store.evaluate('enforcement.increase',successor,task_id='task')['permission'],'deny')
