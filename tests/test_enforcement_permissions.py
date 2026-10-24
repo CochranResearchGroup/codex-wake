@@ -189,3 +189,20 @@ class EnforcementPermissionTests(unittest.TestCase):
                 mcp_call(runner,'recover',dict(caller_thread_id=THREAD,task_id=task),native_context())
             with self.assertRaises(ValueError):
                 mcp_call(runner,'recover',dict(caller_thread_id=THREAD),{})
+
+    def test_host_unenrollment_is_not_undone_by_permissive_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root,policy,_,native,_=self.fixture(tmp)
+            self.configure(root)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                first=enroll(root,policy,THREAD,100,120,native_context=native_context())
+                path=next(p for p in (root/'goal-supervision').glob('*.json') if p.name!='controller.json')
+                preserved=path.read_bytes()
+                value=json.loads(policy.read_text());value['callers']={}
+                policy.write_text(json.dumps(value));policy.chmod(0o600)
+                native['calls'].clear()
+                with self.assertRaisesRegex(ValueError,'host caller grant'):
+                    enroll(root,policy,THREAD,100,120,native_context=native_context())
+                self.assertEqual(native['calls'],[])
+                self.assertEqual(path.read_bytes(),preserved)
+                self.assertEqual(json.loads(path.read_text())['used_tokens'],first['used_tokens'])
