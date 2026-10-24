@@ -59,6 +59,37 @@ def spawn_command(args, root):
         if not isinstance(replacement,dict) or not replacement.get('source_thread_id') or not isinstance(replacement.get('attachment'),dict):
             raise WakeError('same-tab spawn requires an exact source attachment')
         intent['replacement']=replacement
+    task_id = getattr(args, 'task_id', None)
+    assignment_id = getattr(args, 'assignment_id', None)
+    carried_pin = getattr(args, 'task_brief_pin', None)
+    brief_revision = getattr(args, 'revision', None)
+    if task_id is not None or assignment_id is not None or carried_pin is not None or brief_revision is not None:
+        from .task_briefs import BriefAuthority, TaskBriefStore
+        if (carried_pin is not None and (task_id is not None or assignment_id is not None or brief_revision is not None)
+                or carried_pin is None and (not task_id or not assignment_id)):
+            raise WakeError('task brief requires one paired task/assignment or a carried checkpoint pin')
+        briefs = TaskBriefStore(root)
+        if carried_pin is not None:
+            pin = briefs.validate_pin(carried_pin)
+        else:
+            caller = (BriefAuthority('native:' + args.caller_thread_id, 'worker', (task_id,))
+                      if args.caller_thread_id else BriefAuthority('operator:local-cli', 'operator'))
+            briefs.admit(task_id, assignment_id, authority=caller, revision=brief_revision)
+            pin = briefs.assignment_pin(task_id, assignment_id, authority=caller)
+        approved = briefs.inspect(pin['task_id'])['revisions'][pin['revision'] - 1]['content']
+        if Path(approved['workspace']).resolve() != Path(profile['cwd']).resolve():
+            raise WakeError('approved task brief workspace differs from the launch profile')
+        if approved['permission_ref'] != args.profile:
+            raise WakeError('approved task brief permission reference differs from the launch profile')
+        if binding:
+            from .lifecycle_budget import objective_identity
+            if approved['allocation_ref'] != objective_identity(binding['continuation']):
+                raise WakeError('approved task brief allocation differs from the existing objective')
+        intent['task_brief'] = pin
+        intent['task'] = ('Assignment instructions, subject to the approved task brief:\n' + args.task
+            + '\n\nAPPROVED_TASK_BRIEF=' + json.dumps(dict(pin=pin, content=approved), sort_keys=True))
+        if len(intent['task'].encode()) > 65536:
+            raise WakeError('rendered task brief and instructions exceed the bounded assignment input')
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     journal = Path(root) / 'lifecycle'
     key = hashlib.sha256(args.intent.encode()).hexdigest()
@@ -346,6 +377,9 @@ def advance_spawn(path, receipt, profile):
 
 
 def before_effect(path, receipt):
+    if receipt['intent'].get('task_brief') is not None:
+        from .task_briefs import TaskBriefStore
+        TaskBriefStore(path.parent.parent).validate_pin(receipt['intent']['task_brief'])
     from .strict_runtime import guard_execution
     if not guard_execution(path.parent.parent,receipt):
         save(path,receipt)
