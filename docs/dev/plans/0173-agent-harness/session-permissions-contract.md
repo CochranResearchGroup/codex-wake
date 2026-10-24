@@ -1,6 +1,6 @@
 # Common session permissions: HF-06 requirement and proposed contract
 
-State: REQUIREMENTS_RECORDED_DESIGN_PROPOSED
+State: INTERVIEW_IN_PROGRESS; round-one decisions resolved
 Owner: ecochran76; integration through CW-HARNESS-173/HF-06
 Date: 2026-10-24
 Source: operator clarification in issue310's repair conversation; reconciled with
@@ -43,22 +43,23 @@ adapters. Global policy provides a baseline and action map. Named profiles and
 operator-approved session/assignment overrides use the same rule vocabulary.
 Sessions inherit policy automatically; they do not author their own grants.
 
-Proposed order: global baseline, named profile, explicit session/assignment
+Resolved precedence: global baseline, named profile, explicit session/assignment
 rule, then independently enforced host ceilings and delegated task scope.
 Within a layer an exact action overrides that layer's fallback; absent rules
 inherit. A more specific rule can replace an ordinary inherited default. A hard
 host ceiling, revoked grant or explicit operator unenrollment cannot be overridden
 by a permissive session profile. This distinguishes a configurable default deny
-from a non-overridable prohibition. Final precedence and rule syntax require
-HF-06's design interview; no JSON schema or default matrix is frozen here.
+from a non-overridable prohibition. The operator accepted this precedence in round one. Rule syntax and the action
+default matrix remain to be resolved; no JSON schema is frozen here.
 
 Proposed rule outcomes: allow, deny or require scoped operator approval; inherit
 is configuration syntax, not a fourth authorization result. An existing matching
 approval satisfies that rule without another prompt. A request cannot approve
 itself or widen a delegated ceiling. Unknown action keys and malformed policies
-fail closed with an actionable diagnostic. Explicit policy must determine how
-new actions added in later versions inherit; a wildcard must not silently turn
-an upgrade into new cross-session authority.
+fail closed with an actionable diagnostic. New actions introduced by an upgrade require approval until configured by
+default. The operator may explicitly enable a global option allowing future
+actions to inherit the chosen default. This option remains bounded by mandatory
+prohibitions and delegated scope.
 
 Evaluation uses verified principal/actor, exact target and relationship (self,
 peer, successor or shared), action, requested delivery mode/effect scope, task
@@ -136,3 +137,22 @@ to that selected route; a default mode is not blanket authority. Older intents
 retain their admitted behavior. HF-02 and HF-07 retain
 their prerequisites. This document records requirements and a reviewable design
 proposal; it performs no runtime implementation or global policy change.
+
+
+## Interview round one: resolved
+
+Authority: operator answered "yes all" to Q1–Q3 in this conversation.
+
+1. Global rules are defaults; profiles and session-specific rules may override
+   them. Explicit mandatory operator prohibitions always win.
+2. The operator controls permission increases. Agents may restrict themselves
+   or select profiles already authorized for them. The operator may delegate
+   profile management to a controller within an explicit scope; agents cannot
+   self-promote.
+3. Unknown actions added by upgrades require approval until configured. An
+   explicit global option may instead let future actions inherit the chosen
+   default, without overriding mandatory restrictions.
+
+Next frontier: action defaults for the permissive profile, approval reuse and
+policy-change behavior for already queued work. No runtime change is authorized
+by this interview record.
