@@ -132,3 +132,40 @@ class OwningClientDeliveryTests(unittest.TestCase):
         self.assertEqual(result['reason'], 'offline')
         self.assertEqual(self.deliveries, [])
         self.assertNotEqual(binding.generation, self.generation)
+
+    def test_common_receive_revocation_blocks_restarted_dispatcher_without_transport(self):
+        from codex_wake.session_permissions import PermissionStore,Principal
+        policy=PermissionStore(self.root/'wake')
+        policy.configure({'version':1},Principal('operator','operator'),expected_revision=0)
+        self.bus.bind_permissions(policy.root,self.operator)
+        admitted=self.mailbox.send(self.actors[0],self.identities[1],body='request',idempotency_key='policy-restart')
+        policy.configure({'version':1,'sessions':{'recipient':{'actions':{'a2a.receive':'deny'}}}},
+                         Principal('operator','operator'),expected_revision=1)
+        reopened=Mailbox(BusStore(self.bus.root),clock=lambda:self.wall_clock,monotonic=lambda:self.monotonic_clock)
+        restarted=NotificationDispatcher(MailScheduler(reopened,self.operator,lease_seconds=60),self.bindings)
+        result=restarted.tick()
+        self.assertEqual(result['submitted'],0)
+        self.assertEqual(self.deliveries,[])
+        saved=reopened.show(self.actors[0],admitted['message']['message_id'])
+        self.assertEqual(saved['idempotency_key'],'policy-restart')
+        self.assertEqual(saved['expires_at'],admitted['message']['expires_at'])
+        self.assertEqual(saved['state']['notification'],'pending')
+
+    def test_permission_revoked_after_claim_is_checked_before_client_io(self):
+        from codex_wake.session_permissions import PermissionStore,Principal
+        from unittest.mock import patch
+        policy=PermissionStore(self.root/'wake')
+        policy.configure({'version':1},Principal('operator','operator'),expected_revision=0)
+        self.bus.bind_permissions(policy.root,self.operator)
+        sent=self.mailbox.send(self.actors[0],self.identities[1],body='request',idempotency_key='policy-race')
+        claim=self.scheduler.claim
+        def revoke(*args,**kwargs):
+            admitted=claim(*args,**kwargs)
+            policy.configure({'version':1,'mandatory':['a2a.send']},Principal('op','operator'),expected_revision=1)
+            return admitted
+        with patch.object(self.scheduler,'claim',side_effect=revoke):result=self.dispatcher.tick()
+        self.assertEqual(result['submitted'],0)
+        self.assertEqual(self.deliveries,[])
+        saved=self.mailbox.show(self.actors[0],sent['message']['message_id'])
+        self.assertEqual(saved['state']['notification'],'deferred')
+        self.assertEqual(saved['expires_at'],sent['message']['expires_at'])

@@ -285,6 +285,13 @@ class NotificationDispatcher:
                         except BusError as error:
                             results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
                             continue
+                        try:
+                            scheduler.notification_context(job,attempt_id=claim['attempt_id'])
+                        except BusError as error:
+                            scheduler.finish(dispatcher,recipient,claim['attempt_id'],outcome='unsent',
+                                evidence=dict(reason='explicit_not_sent'))
+                            results.append(dict(message_id=job['message_id'],status='denied',reason=error.code))
+                            continue
                         from .a2a_tmux_delivery import TmuxBinding
                         from .runtime_a2a import GrokNotificationBinding
                         if isinstance(binding, (TmuxBinding,GrokNotificationBinding)):

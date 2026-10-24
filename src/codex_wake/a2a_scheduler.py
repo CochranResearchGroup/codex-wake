@@ -129,6 +129,11 @@ class MailScheduler:
                 expected = envelope.get('notification_authority', {}).get(role)
                 if expected != dict(actor_id=actor['actor_id'], generation=actor['generation'], root=actor['root']):
                     return False
+        try:
+            from .permission_a2a import check_message
+            check_message(self.mailbox.bus,database,row)
+        except BusError:
+            return False
         return True
 
     def defer(self, lease, job_id, reason, *, seconds=5):

@@ -425,6 +425,15 @@ class BusStore:
             raise BusError('cross_root_denied', 'cross-root messaging requires explicit bus permission')
         return target
 
+    def bind_permissions(self, wake_root, operator_capability):
+        """Pin one operator-approved common policy for participants and workers."""
+        from .permission_a2a import bind
+        return bind(self,wake_root,operator_capability)
+
+    def bind_permission_tasks(self, actor_id, task_ids, operator_capability):
+        from .permission_a2a import bind_tasks
+        return bind_tasks(self,actor_id,task_ids,operator_capability)
+
     def set_paused(self, paused: bool, operator_capability: Path) -> str:
         with self.connection() as database:
             database.execute('BEGIN IMMEDIATE')

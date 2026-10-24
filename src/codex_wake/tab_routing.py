@@ -22,6 +22,7 @@ def routed_send(args, bus, mailbox, actor, body, key, resolve_identity):
         delivery=args.delivery, kind=args.kind, ttl=args.ttl, subject=args.subject,
         correlation=args.correlation, resume_missing=args.resume_missing,
         runtime=[args.app_server,args.tmux_socket,args.tmux_session],caller=actor.key)
+    if getattr(args,'task_id',None) is not None:options['task_id']=args.task_id
     fingerprint = hashlib.sha256(json.dumps(options,sort_keys=True).encode()).hexdigest()
     route_key = hashlib.sha256(json.dumps([actor.key,key]).encode()).hexdigest()
     path = Path(root)/'lifecycle'/('route-'+route_key+'.json')
@@ -65,5 +66,5 @@ def routed_send(args, bus, mailbox, actor, body, key, resolve_identity):
         value=mailbox.send(actor,recipient,body=body,idempotency_key=key,kind=args.kind,
             ttl=parse_duration(args.ttl).total_seconds(),delivery=args.delivery,subject=args.subject,
             selector=dict(selector=args.to,identity=thread),correlation=args.correlation,
-            resume_missing=args.resume_missing)
+            resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None))
         return dict(value,target=report),True
