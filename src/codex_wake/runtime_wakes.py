@@ -117,6 +117,8 @@ def dispatch(root, found, *, time_provider=None):
         if (not valid_record(record) or record['status']!='firing' or record!=found.record
                 or record['scheduling_intent']['canonical_root']!=str(Path(root).resolve())):
             return DispatchResult('skipped','runtime intent changed')
+        from .permission_migration import legacy_wake_held
+        if legacy_wake_held(root,record):return DispatchResult('skipped','legacy_permission_adoption_required: retain original intent; resolve operator adoption')
         adapter=GrokRuntimeAdapter(GrokTerminalHost(root), preferred_method=record['target']['method'])
         delivery=record.get('runtime_delivery',{})
         uncertain=delivery.get('state')=='uncertain'

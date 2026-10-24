@@ -8,6 +8,9 @@ from .records import WakeError, parse_timestamp
 
 
 def effective_configuration(config, thread_id, profile_name, caller_thread_id=None, *, _permission_checked=False):
+    if _permission_checked and caller_thread_id:
+        from .permission_migration import profile_ceiling
+        profile_ceiling(config,profile_name,caller_thread_id)
     try:
         profile = config['profiles'][profile_name]
         policy = config['continuations'][thread_id]

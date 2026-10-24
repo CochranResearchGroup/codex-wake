@@ -133,6 +133,8 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
     from .injector import DispatchResult
     record = dict(found.record)
     target = record['target']
+    from .permission_migration import legacy_wake_held
+    if legacy_wake_held(root,record):return DispatchResult('skipped','legacy_permission_adoption_required: retain original intent; resolve operator adoption')
     from .permission_wake import common_record, dispatch_native as dispatch_permission_native
     if common_record(record):
         return dispatch_permission_native(root,found,now,clock_provider=clock_provider,adapter=runtime_adapter or _codex_adapter())

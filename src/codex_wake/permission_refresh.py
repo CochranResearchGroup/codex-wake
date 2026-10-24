@@ -23,7 +23,7 @@ def owned_client(profile, thread):
 
 def revalidate(root, context):
     return check_operation(root,context['action'],Principal(context['subject']),
-        target=context['target'],relationship=context['relationship'])
+        target=context['target'],relationship=context['relationship'],launch_profile=context.get('launch_profile'))
 
 
 def request(packet):
@@ -40,15 +40,17 @@ def request(packet):
         policy=Path(packet['profiles']).absolute();_private(policy)
         if policy!=policy.resolve():raise PermissionDenied('permission_profile_not_canonical')
         config=json.loads(policy.read_text());profile=config['profiles'][args['profile']]
+        from .permission_migration import profile_ceiling
+        profile_ceiling(config,args['profile'],binding['thread_id'])
         mode=profile.get('refresh_mode')
         if mode not in ('shared_mcp_idle','client_idle'):
             raise PermissionDenied('refresh_capability_unsupported')
         actual='single_client' if mode=='client_idle' else 'shared_server'
         selected=args.pop('scope',actual)
         action={'current_connection':'refresh.connection','single_client':'refresh.self','shared_server':'refresh.shared'}[selected]
-        context=dict(action=action,subject=binding['thread_id'],target=(binding['thread_id'] if selected!='shared_server' else 'shared-server'),relationship=('shared' if selected=='shared_server' else 'self'))
+        context=dict(action=action,subject=binding['thread_id'],target=(binding['thread_id'] if selected!='shared_server' else 'shared-server'),relationship=('shared' if selected=='shared_server' else 'self'),launch_profile=args['profile'])
         store=PermissionStore(root)
-        decision=store.evaluate(action,Principal(context['subject']),target=context['target'],relationship=context['relationship'])
+        decision=store.evaluate(action,Principal(context['subject']),target=context['target'],relationship=context['relationship'],launch_profile=context.get('launch_profile'))
         # Inspection reports permission separately even when denied/unsupported.
         supported=selected==actual and selected!='current_connection'
         if packet['verb']=='configuration':

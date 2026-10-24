@@ -322,6 +322,7 @@ def add_options(parser):
     parser.add_argument('--bus-root',type=Path)
     parser.add_argument('--operator-capability',type=Path)
     parser.add_argument('--actor-capability',type=Path)
+    parser.add_argument('--actor-runtime',choices=('codex','grok'),default='codex')
     parser.add_argument('--app-server',default='unix://')
 
 

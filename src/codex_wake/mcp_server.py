@@ -296,6 +296,10 @@ class CommandRunner:
                 return {'error':{'code':'busy_policy_unsupported'}}, True
             if self.wake_root is None or not Path(self.wake_root).is_absolute():
                 return {'error':{'code':'runtime_host_scope_unavailable'}}, True
+            from .session_permissions import PermissionStore
+            common_grok=verb in ('after','at','file') and PermissionStore(self.wake_root).active()
+            if common_grok and (self.actor_runtime!='grok' or self.bus_root is None or self.capability is None):
+                return {'error':{'code':'wake_identity_unverified','message':'Common-policy Grok wakes require an exact host-bound actor capability; no native Grok identity is inferred.'},'capability':'not_qualified'},True
             command=[*self.cli,'--wake-root',str(self.wake_root),'grok',verb,'--json']
             if verb == 'show':
                 command += [arguments['wake_id']]
@@ -304,6 +308,9 @@ class CommandRunner:
                             '--idempotency-key',arguments['idempotency_key'],
                             '--ttl',arguments.get('ttl','24h'),arguments['binding_id'],
                             arguments['trigger'],'--',arguments['prompt']]
+            if common_grok:
+                command[-4:-4]=['--bus-root',str(self.bus_root),'--actor-capability',str(self.capability),'--actor-runtime','grok']
+            for route in arguments.get('routes',[]):command[-4:-4]=['--wake-route',route]
             for key in ('wake_lifetime', 'owner_id', 'owner_end', 'recipient_startup'):
                 if key in arguments:
                     command[-4:-4] = ['--'+key.replace('_','-'), arguments[key]]

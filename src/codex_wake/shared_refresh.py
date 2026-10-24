@@ -38,6 +38,9 @@ def _client_effect_guard(receipt):
 
 
 def configuration(config, profile_name, thread_id, caller_thread_id, *, _permission_checked=False):
+    if _permission_checked:
+        from .permission_migration import profile_ceiling
+        profile_ceiling(config,profile_name,caller_thread_id)
     from . import __version__
     try:
         profile = config['profiles'][profile_name]

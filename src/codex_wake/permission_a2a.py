@@ -47,6 +47,7 @@ def bind(bus, root, operator_capability):
     store=PermissionStore(root)
     if not store.active():raise BusError('permission_policy_unavailable','configure the common policy before binding a bus')
     store._read()
+    root=store.root
     with bus.connection() as database:
         database.execute('BEGIN IMMEDIATE')
         bus.operator(database,Path(operator_capability))
@@ -74,7 +75,7 @@ def bind_tasks(bus, actor_id, task_ids, operator_capability):
         actor=database.execute('SELECT * FROM actors WHERE actor_id=? AND revoked=0',(actor_id,)).fetchone()
         if not actor:raise BusError('authorization_denied','exact active actor is required')
         references=[]
-        store=TaskBriefStore(configured['root'])
+        store=TaskBriefStore(PermissionStore(configured['root']).root)
         for task in task_ids:
             brief=store.inspect(task)
             revision=brief['approved_revision']
@@ -101,7 +102,7 @@ def _principal(configured, actor):
             raise BusError('permission_task_scope_unverified','stored task binding is invalid')
         if grant['generation']!=actor.generation:
             return Principal(actor.thread_id)
-        store=TaskBriefStore(configured['root'])
+        store=TaskBriefStore(PermissionStore(configured['root']).root)
         for ref in grant['references']:
             if type(ref) is not dict or set(ref)!={'task_id','revision','digest'}:
                 raise BusError('permission_task_scope_unverified','stored task reference is invalid')

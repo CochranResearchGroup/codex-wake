@@ -96,6 +96,9 @@ def caller_principal(args):
 def admission_context(root,args,policy,body):
     if not PermissionStore(root).active():return None
     caller_principal(args)
+    from .permission_migration import profile_ceiling
+    from .wake_policy import _read
+    profile_ceiling(_read(Path(args.profiles)),args.profile,args.thread_id)
     trigger=getattr(args,'trigger','manual') or 'manual'
     allowed=policy.get('handoff_triggers',[])
     if (trigger not in TRIGGERS or not isinstance(allowed,list) or any(x not in TRIGGERS for x in allowed)
@@ -104,7 +107,7 @@ def admission_context(root,args,policy,body):
     task_id=validated_task(root,body)
     verified=verified_successor_principal(root,args.thread_id,task_id)
     decision=check_operation(root,'handoff.self',verified,target=args.thread_id,
-        task_id=task_id,operation_id=args.intent)
+        task_id=task_id,operation_id=args.intent,launch_profile=args.profile)
     context=dict(action='handoff.self',subject=args.thread_id,target=args.thread_id,
         relationship='self',task_id=task_id,operation_id=args.intent,
         predecessor=verified.predecessor,ancestors=list(verified.ancestors),trigger=trigger,approval_id=decision['approval_id'],
@@ -142,13 +145,15 @@ def revalidate(root,receipt):
         profile_path=Path(context['profiles'])
         if profile_path!=profile_path.resolve():raise PermissionDenied('permission_profile_changed')
         current=_read(profile_path)
+        from .permission_migration import profile_ceiling
+        profile_ceiling(current,context['profile_name'],context['subject'])
         current_continuation=current.get('continuations',{}).get(context['subject'])
         if (current_continuation!=continuation or current.get('profiles',{}).get(context['profile_name'])!=receipt['intent'].get('launch')):
             raise PermissionDenied('permission_handoff_authority_changed')
     if trigger not in TRIGGERS or (trigger!='manual' and trigger not in continuation.get('handoff_triggers',[])):
         raise PermissionDenied('handoff_trigger_not_authorized')
     return check_operation(root,'handoff.self',principal,target=context['target'],
-        task_id=task_id,operation_id=context['operation_id'])
+        task_id=task_id,operation_id=context['operation_id'],launch_profile=context.get('profile_name'))
 
 
 def before_effect(path,receipt):

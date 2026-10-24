@@ -142,6 +142,17 @@ def _validate(policy):
     for layer in [policy.get('global', {}), *policy.get('sessions', {}).values(), *policy.get('assignments', {}).values()]:
         if layer.get('profile', 'permissive') not in profiles and layer.get('profile', 'permissive') != 'permissive':
             raise ValueError('unknown permission profile')
+    adoption=policy.get('adoption')
+    if adoption is not None:
+        if (not isinstance(adoption,dict) or set(adoption)!={'version','source_sha256','legacy_profile_grants'}
+                or type(adoption['version']) is not int or adoption['version']!=1
+                or not isinstance(adoption['source_sha256'],str) or len(adoption['source_sha256'])!=64
+                or any(c not in '0123456789abcdef' for c in adoption['source_sha256'])
+                or not isinstance(adoption['legacy_profile_grants'],dict)):
+            raise ValueError('invalid legacy adoption provenance')
+        for subject,grants in adoption['legacy_profile_grants'].items():
+            if not isinstance(subject,str) or not subject or not isinstance(grants,list) or any(not isinstance(x,str) or not x for x in grants):
+                raise ValueError('invalid legacy profile mapping')
     return policy
 
 
@@ -210,6 +221,8 @@ class PermissionStore:
             if type(expected_revision) is not int or old['revision'] != expected_revision:
                 raise PermissionDenied('permission_revision_conflict')
             policy = json.loads(json.dumps(policy))
+            if old.get('policy',{}).get('adoption') and 'adoption' not in policy:
+                policy['adoption']=old['policy']['adoption']
             policy.setdefault('known_actions', list(ACTIONS))
             digest = hashlib.sha256(json.dumps(policy, sort_keys=True).encode()).hexdigest()
             entry = dict(revision=old['revision']+1, issuer=principal.subject,
@@ -266,7 +279,7 @@ class PermissionStore:
         return self.configure(policy, Principal(principal.subject, 'operator'), expected_revision=expected_revision)
 
     def evaluate(self, action, principal, *, target=None, relationship=None, task_id=None,
-                 operation_id=None, capability='not_observed', readiness='not_observed'):
+                 operation_id=None, capability='not_observed', readiness='not_observed', launch_profile=None):
         if not isinstance(principal, Principal):
             raise PermissionDenied('permission_identity_unverified')
         if action not in ACTIONS:
@@ -311,6 +324,10 @@ class PermissionStore:
             terminal=_owners(self.root)['owners'].get(_owner_key({'kind':'task','id':task_id}))
             if terminal is not None:
                 decision, source='deny','task_completed'
+        from .permission_migration import LIFECYCLE_ACTIONS
+        legacy_grants=p.get('adoption',{}).get('legacy_profile_grants',{})
+        if action in LIFECYCLE_ACTIONS and principal.subject in legacy_grants and launch_profile not in legacy_grants[principal.subject]:
+            decision,source='deny','legacy_profile_ceiling'
         approval_id = None
         if decision == 'approval_required':
             for a in p.get('approvals', []):
