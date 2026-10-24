@@ -13,7 +13,10 @@ Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
 
 ## Outcome
 
-A review, implementation or test assignment runs under its declared tool/workspace profile and cannot silently widen it.
+Codex Wake resolves one common session permissions policy with global defaults,
+selectable profiles and action-specific overrides. Review, implementation and
+test assignments consume that policy without silently widening their scope.
+See [common permissions requirement and proposed contract](session-permissions-contract.md).
 
 ## Repository surface and reuse
 
@@ -44,3 +47,13 @@ This draft grants no live provider input, production/account/service change or m
 ## 2026-10-24 interview update
 
 See [first-frontier decisions and overlap boundaries](first-frontier-decisions.md).
+
+
+## 2026-10-24 common permissions clarification
+
+The operator explicitly requests global configuration tailored by action, covering
+refresh, handoff, external enforcement, A2A send/receive and distinct wake delivery
+routes. HF-06 owns the shared resolver; HF-13/18/19/24 consume it. The linked
+contract adds requirements, action coverage, proposed precedence and acceptance.
+Issue310 / PR311 is a narrow refresh bridge, not completion of this ticket.
+No implementation readiness or live permission is inferred from this update.

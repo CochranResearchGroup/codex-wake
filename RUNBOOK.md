@@ -7990,3 +7990,15 @@ answers and notes. Recorded self-enrollment default, effective explicit operator
 unenrollment, permissive self-control profiles and separate lifetime/startup axes.
 Preserved other-agent ownership of host-policy repair. HF-02/HF-07 product inputs
 resolved; HF-13 follow-up pending. No implementation/runtime effects.
+
+
+## 2026-10-24 | Common session permissions requirement
+
+Read default:19 wake tab and published harness backlog5593168. Reconciled the
+operator's global/per-action policy request under HF-06, with HF-13/18/19/24 as
+consumers. Added action coverage, proposed resolution/ceilings, sender/receiver
+checks, explicit delivery routes and migration boundary for issue310/PR311.
+Requirements are recorded; concrete design remains proposed and feature gates
+unchanged. Documentation-only isolated branch; no policy/runtime/provider effect.
+Policy wiring and whitespace checks pass. Memory disposition forbidden: no
+explicit request to write memory.

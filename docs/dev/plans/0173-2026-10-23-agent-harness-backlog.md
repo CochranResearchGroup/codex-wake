@@ -200,3 +200,14 @@ reviewed together. It is not implementation completion, external issue creation
 or approval of all policy choices. Source/glossary/links and graph checks are
 planning validation, never runtime qualification. Plan0172 remains the authority
 for the released0.20.0 work and existing acceptance receipts.
+
+
+## 2026-10-24 common session permissions reconciliation
+
+Operator clarification in the issue310 repair conversation expands HF-06's
+requirements to one globally configurable action policy. The [contract proposal](0173-agent-harness/session-permissions-contract.md)
+records action ownership, configurable defaults/overrides, identity/effect scope,
+A2A two-sided checks, wake-route distinctions, migration and acceptance. This is
+a documentation amendment from branch docs/310-common-session-permissions into
+docs/agent-harness-backlog; no shared worktree was edited. Existing interview and
+implementation gates remain intact. No new ticket family or runtime policy store.

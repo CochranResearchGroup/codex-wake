@@ -44,6 +44,8 @@ scope and acceptance. Priority indicates proposed product value, not readiness.
 | [HF-31](0031-2026-10-23-hf-31-additional-runtime.md) | Qualify one selected additional TUI adapter | P2 | HF-25 |
 | [HF-32](0032-2026-10-23-hf-32-automatic-organization.md) | Apply opt-in tab organization with stable protection rules | P2 | HF-17, HF-21 |
 
+[Common session permissions: requirements and HF-06 design proposal](session-permissions-contract.md).
+
 ## Feature coverage
 
 | Conversation feature | Owning tickets |
