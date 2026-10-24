@@ -49,3 +49,6 @@ Patch version0.20.1 prepares the user-requested local controller/MCP installatio
 The source fix refuses initial timeout admission; it does not clear existing
 stops or claim to repair unrelated native observation failures. Installed
 readback, maintenance handover and client refresh remain independent gates.
+
+
+Installed readback (2026-10-24): pinned0.20.1 from f59d3be526f76cbd1651f103f394388ec2dc68aa passed61 focused tests from the installed package. Supported maintenance handover reached `replaced`; controller process and all CLI entrypoints point to the new release. All five existing receipt authorities and stop latches were preserved, with nondecreasing counters. Existing shared MCP connections are a separate idle-only reload gate pending scope authorization; fresh stdio startup is verified separately. Deployment receipts and before/after runtime snapshots stay in the user-scoped operator-repair directory outside Git.
