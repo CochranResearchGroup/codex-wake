@@ -1,13 +1,13 @@
 # HF-02: Enroll one existing agent into a unified managed inventory
 
-State: TRIAGE
+State: READY_FOR_AGENT
 Owner: ecochran76; implementation assignee unassigned
-Work item: CW-HARNESS-173/HF-02 (local draft; not posted)
+Work item: CW-HARNESS-173/HF-02 (published as #315)
 Priority: P0
 Area: Identity and observation
 Blocked by: None; HF-01 design resolved
 Grill state: PRODUCT_DECISIONS_RESOLVED; technical handoff pending; apply [HF-01 decisions](hf-01-decisions-and-handoffs.md)
-Implementation state: NOT_AUTHORIZED; own grill-with-docs and approved handoff required
+Implementation state: READY_FOR_AGENT; source scope and handoff approved; no live effects
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
 
@@ -48,4 +48,6 @@ See [first-frontier decisions and overlap boundaries](first-frontier-decisions.m
 ## Proposed build specification
 
 See [bounded spec](hf-02-spec.md) and the [three-ticket review](first-frontier-spec-review.md).
-Spec state: REVIEW_READY; public caller seam and ticket breakdown review pending.
+Spec state: APPROVED; public caller seam and ticket breakdown approved.
+
+Canonical tracker: https://github.com/CochranResearchGroup/codex-wake/issues/315

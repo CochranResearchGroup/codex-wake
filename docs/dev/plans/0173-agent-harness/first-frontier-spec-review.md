@@ -1,6 +1,6 @@
 # First frontier: specification and ticket review
 
-State: REVIEW_READY; implementation not started
+State: APPROVED_AND_PUBLISHED; implementation not started
 Owner: ecochran76
 Work items: CW-HARNESS-173/HF-02, HF-07, HF-13
 
@@ -73,3 +73,9 @@ Local link, policy-wiring and whitespace checks validate this documentation;
 no runtime tests or implementation acceptance are claimed. Definition of done
 for this packet is a reviewable specification and reconciled slice map; public
 tracker publication follows the stated review, not another broad interview.
+
+## Publication readback
+
+Operator approved the seams and breakdown. Published #315 (HF-02), #316 (HF-07),
+#317 (HF-13), each open with enhancement and ready-for-agent labels. No separate
+parent issues were created. Shared hub edits remain serialized.

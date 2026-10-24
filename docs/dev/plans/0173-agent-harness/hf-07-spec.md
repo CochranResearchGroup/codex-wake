@@ -1,11 +1,11 @@
 # HF-07 specification: Revisioned task briefs and assignment scope
 
-State: SPEC_DRAFT_FOR_REVIEW
+State: APPROVED_SPEC
 Owner: ecochran76
 Decision authority: HF-01 and first-frontier interview records, including direct
 2026-10-24 follow-up. Source baseline: origin/main f96f4c8; planning branch
 4dfdc39. This spec describes proposed behavior, not implemented capability.
-Implementation tickets remain pending seam/breakdown review.
+Public caller seams and the three-ticket breakdown were approved by the operator.
 
 ## Problem Statement
 
@@ -82,4 +82,6 @@ inputs and required evidence without implementing either feature wholesale.
 
 ## Further Notes
 
-[Resolved interview](first-frontier-decisions.md) and [shared decisions](hf-01-decisions-and-handoffs.md) own product provenance. This document proposes the bounded build contract. The parent backlog owns wider sequencing. Public caller seams and ticket granularity are presented together for review before implementation.
+[Resolved interview](first-frontier-decisions.md) and [shared decisions](hf-01-decisions-and-handoffs.md) own product provenance. This document proposes the bounded build contract. The parent backlog owns wider sequencing. Public caller seams and ticket granularity were approved by the operator.
+
+Canonical implementation work item: [#316](https://github.com/CochranResearchGroup/codex-wake/issues/316).
