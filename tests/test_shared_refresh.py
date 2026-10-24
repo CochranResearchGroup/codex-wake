@@ -37,6 +37,9 @@ class SharedRefreshTests(unittest.TestCase):
             self.assertEqual(value['operations'], ['configuration', 'refresh'])
             self.assertFalse((base/'runtime'/'objective-ledgers').exists())
 
+    def test_legacy_profile_revocation_fences_adopted_pending_refresh(self):
+        self.shared_scenario(common_policy=True,revoke_legacy=True)
+
     def test_common_permissions_revocation_blocks_queued_controller_effects(self):
         self.shared_scenario(common_policy=True,revoke_common=True)
 
@@ -72,7 +75,7 @@ class SharedRefreshTests(unittest.TestCase):
 
     def shared_scenario(self, lost_reload=False, peer_busy=False, racing_peer=False,
                         stale_mcp=False, reset_counter=False, stop_during_preflight=False,
-                        cwd_mismatch=False, observation_timeout=False, common_policy=False, revoke_common=False):
+                        cwd_mismatch=False, observation_timeout=False, common_policy=False, revoke_common=False, revoke_legacy=False):
         import hashlib
         import subprocess
         import sys
@@ -173,15 +176,18 @@ class SharedRefreshTests(unittest.TestCase):
                 self.assertEqual(receipt['state'],'queued')
                 time.sleep(.15)
                 self.assertNotIn('config/mcpServer/reload',requests)
-                if revoke_common:
-                    PermissionStore(runtime).configure({'version':1,'mandatory':['refresh.shared']},Principal('op','operator'),expected_revision=1)
+                if revoke_common or revoke_legacy:
+                    if revoke_common:
+                        PermissionStore(runtime).configure({'version':1,'mandatory':['refresh.shared']},Principal('op','operator'),expected_revision=1)
+                    else:
+                        data=json.loads(policy.read_text());data['callers'][THREAD]=[];policy.write_text(json.dumps(data));policy.chmod(0o600)
                     while time.monotonic()<deadline:
                         files=list((runtime/'shared-refresh').glob('*.json'))
                         saved=next((json.loads(f.read_text()) for f in files if 'fingerprint' in json.loads(f.read_text())),{})
                         if saved.get('state')=='blocked':break
                         time.sleep(.02)
                     self.assertEqual(saved['state'],'blocked',saved)
-                    self.assertEqual(saved['reason'],'permission_revoked')
+                    self.assertEqual(saved['reason'],'permission_revoked' if revoke_common else 'permission_legacy_profile_denied')
                     self.assertNotIn('config/mcpServer/reload',requests)
                     self.assertNotIn('thread/goal/set',requests)
                     return

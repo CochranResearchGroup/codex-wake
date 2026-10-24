@@ -11,6 +11,8 @@ LIFECYCLE_ACTIONS={'refresh.self','refresh.connection','refresh.shared','handoff
 
 def profile_ceiling(config, profile, subject):
     """Preserve an explicit old caller entry, not the absence of a UUID grant."""
+    if 'session_permissions' in config:
+        raise PermissionDenied('permission_legacy_self_access_requires_mapping')
     callers=config.get('callers',{})
     if not isinstance(callers,dict):raise PermissionDenied('permission_legacy_profile_invalid')
     if subject in callers:
@@ -29,6 +31,7 @@ def plan(root, policy, *, legacy_profiles=None):
         if path!=path.resolve():raise PermissionDenied('permission_profile_not_canonical')
         legacy=_read(path)
         callers=legacy.get('callers',{});profiles=legacy.get('profiles',{})
+        if 'session_permissions' in legacy:issues.append('legacy_self_access_setting_requires_explicit_mapping')
         if (type(legacy.get('version')) is not int or legacy['version']!=1
                 or not isinstance(callers,dict) or not isinstance(profiles,dict)):
             raise PermissionDenied('permission_legacy_profile_invalid')

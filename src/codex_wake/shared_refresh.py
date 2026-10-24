@@ -299,7 +299,10 @@ def _poll_one(path, receipt):
         try:revalidate(path.parent.parent,context)
         except WakeError:
             receipt.update(state='blocked',reason='permission_revoked');return
-    configuration(config, receipt['profile_name'], receipt['thread_id'], receipt['thread_id'], _permission_checked=bool(context))
+    try:
+        configuration(config, receipt['profile_name'], receipt['thread_id'], receipt['thread_id'], _permission_checked=bool(context))
+    except WakeError as exc:
+        receipt.update(state='blocked',reason=getattr(exc,'code','host_refresh_authority_changed'));return
     if config['profiles'][receipt['profile_name']] != receipt['profile']:
         receipt.update(state='blocked', reason='host_refresh_policy_changed')
         return
