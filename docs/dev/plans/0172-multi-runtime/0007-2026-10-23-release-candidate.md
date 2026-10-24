@@ -1,7 +1,7 @@
 # Prepare the0.20.0 multi-runtime candidate
 
-State: OPEN
-Ticket state: IN_PROGRESS
+State: CLOSED
+Ticket state: DONE
 Owner: ecochran76
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/308
 Lane: P172-REL
@@ -25,7 +25,7 @@ not be called a new live provider test.
 | --- | --- | --- | --- |
 | REL-01 | primary: pyproject/package version, isolated build/install/CLI controls | DONE | none |
 | REL-02 | /root/release_notes: release notes and README link only | DONE | none |
-| REL-03 | primary: serial reconciliation, source/artifact comparison, PR/CI | IN_PROGRESS | REL-01 + REL-02 |
+| REL-03 | primary: serial reconciliation, source/artifact comparison, PR/CI | DONE | REL-01 + REL-02 |
 
 Two active agents, no nested workers. Separate worktrees from canonical main
 cf1ca8a; primary owns shared plan/catalog/authority and integration. Worker branch
@@ -37,7 +37,7 @@ is docs/0172-release-notes. No unrelated original-main policy commits included.
 - [x] Notes preserve qualified versions/routes, independent work claims, default wait and explicit unsupported modes.
 - [x] Build/install non-editably into a private candidate prefix; compare every source/installed module with the wheel.
 - [x] Provider-free installed version/schema/CLI/MCP and wake-control checks pass with isolated fixture state.
-- [ ] Primary reconciles worker packet, publishes coherent PR and records required matrix CI on exact head.
+- [x] Primary reconciles worker packet, publishes coherent PR and records required matrix CI on exact head.
 
 ## Validation and stop rules
 
@@ -64,3 +64,15 @@ product smoke PASS. Preliminary clock_anomaly and retention-refusal samples stay
 retained; no bypass or forced deletion. No new live provider qualification is
 claimed. Required PR CI remains the integration gate.
 [Receipt](../../evidence/plan0172/release-candidate-0.20.0.json).
+
+
+## Preparation closeout
+
+PR309 head0f890c7 passed both required Python3.11/3.12 release gates in
+CI40048872250, including installed-wheel checks. REL-01/REL-02/REL-03 are DONE
+for candidate preparation; the primary accepted worker packet04e9ab7 and owns
+reconciliation. The final closure-only commit still observes normal PR checks
+before integration. No artifact is published. Normal installed command remains
+/home/ecochran76/.local/bin/codex-wake0.19.1; isolated candidate is0.20.0.
+No isolated candidate command residuals were observed. Source refs and private
+receipts are retained; publication/production installation remain separate.

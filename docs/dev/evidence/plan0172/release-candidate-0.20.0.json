@@ -1,7 +1,7 @@
 {
   "work_item": 308,
   "version": "0.20.0",
-  "state": "LOCAL_CANDIDATE_PASS_PR_CI_PENDING",
+  "state": "RELEASE_PREPARATION_QUALIFIED",
   "base_main": "cf1ca8ac258a9eeb083043888a9945e98e06dc0f",
   "identity": {
     "version": "0.20.0",
@@ -330,5 +330,16 @@
   "provider_prompts": 0,
   "publication": false,
   "production_install_changed": false,
-  "temporary_prefix": "/tmp/cw-020-release/installed"
+  "temporary_prefix": "/tmp/cw-020-release/installed",
+  "candidate_ci": {
+    "run": 40048872250,
+    "head": "0f890c7d0ccbd89aa0273a9a5ba189af5f81d75d",
+    "python311": "SUCCESS",
+    "python312": "SUCCESS",
+    "includes_installed_wheel_smokes": true
+  },
+  "preparation_pr": 309,
+  "production_command": "/home/ecochran76/.local/bin/codex-wake",
+  "production_version_readback": "0.19.1",
+  "isolated_candidate_command_residuals": []
 }

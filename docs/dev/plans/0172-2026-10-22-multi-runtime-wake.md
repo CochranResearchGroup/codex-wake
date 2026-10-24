@@ -20,8 +20,10 @@ independent /root/release_notes REL-02 supplied04e9ab7, reviewed/reconciled as
 d7291e6. All121 source/wheel/installed modules match final candidate digest
 4d1e243689bd85049af06061b3c52920755182baa08c9fd35f1d23eedf2d1c6f.
 Final provider-free MCP32-tool request/claim/reply, wake controls and product
-smoke pass. Preliminary local clock/retention refusals remain retained. REL-03
-owns required PR CI and integration. No tag, public release, upload, production
+smoke pass. Preliminary local clock/retention refusals remain retained. PR309
+sourcehead0f890c7 passed required Python3.11/3.12 CI40048872250; REL-03 candidate
+preparation is DONE. Final closure commit still requires normal PR checks before
+integration. No tag, public release, upload, production
 installation/grant/service changes or new provider prompts.
 [Release packet](0172-multi-runtime/0007-2026-10-23-release-candidate.md).
 

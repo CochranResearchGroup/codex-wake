@@ -7938,3 +7938,16 @@ README/notes reconciliation. Existing live0.19.1 candidate proof remains histori
 no new provider qualification claimed for0.20.0. Required PR CI still pending.
 No tag/upload/release/production installation or existing user conversations touched.
 [Receipt](docs/dev/evidence/plan0172/release-candidate-0.20.0.json).
+
+
+## Turn395 | 2026-10-23 | Candidate0.20.0 preparation qualified
+
+PR309 sourcehead0f890c7 passed both required release-gates jobs inCI40048872250,
+including full unit suites and installed-wheel smokes. REL-01/REL-02/REL-03 source
+and candidate-preparation gates DONE. All121 wheel/installed/source modules match,
+only runtime __version__ changed from integrated main. Final artifact digest and
+prior local clock/retention refusals retained; no failed sample erased. Production
+command /home/ecochran76/.local/bin/codex-wake still reports0.19.1; isolated candidate
+is0.20.0 with no observed residual candidate commands. Final closure-only commit
+must pass ordinary PR checks before integration. No tag/release/upload/production
+install, grant/service effect or new provider prompt. Broader Plan0172 remains OPEN.
