@@ -7951,3 +7951,25 @@ command /home/ecochran76/.local/bin/codex-wake still reports0.19.1; isolated can
 is0.20.0 with no observed residual candidate commands. Final closure-only commit
 must pass ordinary PR checks before integration. No tag/release/upload/production
 install, grant/service effect or new provider prompt. Broader Plan0172 remains OPEN.
+
+
+## Turn396 | 2026-10-23 | Agent harness backlog reconciliation
+
+User requested organizing the working feature list into tickets, resolving
+component overlap and sequencing. Baseline origin/main7ef73b1 / released0.20.0.
+Primary planning owner only, no implementation workers, provider calls, real tab
+changes or new GitHub issues/labels/projects. Ticket-design skill produces
+copy-ready local drafts.32 TRIAGE tickets cover25 conversation feature groups;
+each starts with Matt grill-with-docs before any implementation handoff. HF-01
+shared contracts first, then independent HF-02/HF-07/HF-13. Daily task/reboot and
+Drift Guard paths do not wait for a full workflow language or dashboard. Existing
+#270 enforcement and #282 self-refresh are explicit reuse/reconciliation gates,
+not duplicated as new missing implementations. Separate hard dependency DAG from
+shared CLI/MCP/schema/terminal write-collision constraints; max three substantive
+implementation lanes. Added domain-only terms to existing GLOSSARY, preserved
+existing identity/claim/budget vocabulary. Detailed open product decisions stay
+with their feature interview. [Plan](docs/dev/plans/0173-2026-10-23-agent-harness-backlog.md).
+
+Planning validation: 32 unique ticket bodies; known, acyclic dependency graph;
+25 covered feature groups; relative ticket/parent links resolve; policy wiring
+PASS; git diff whitespace check PASS. No runtime behavior changed or qualified.
