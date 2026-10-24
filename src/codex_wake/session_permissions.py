@@ -72,7 +72,11 @@ def native_request(packet):
         options.update(profiles=str(policy), as_json=True)
         options.setdefault('rollback', False)
         emitted = []
-        root = Path(packet['root'])
+        root = Path(packet['root']).absolute()
+        if root != root.resolve():
+            raise WakeError('refresh root must be canonical')
+        root.mkdir(mode=0o700, parents=True, exist_ok=True)
+        _private(root, directory=True)
         with delivery_guard(root):
             code = command(SimpleNamespace(**options), root, config, profile,
                 checkpoint, content, native_self=True,

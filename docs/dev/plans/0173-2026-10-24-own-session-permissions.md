@@ -90,3 +90,16 @@ Memory disposition: forbidden. Developer requires explicit user request for
 memory writes; no such request occurred. A machine-readable no-write receipt
 exists in user state under codex-wake-310/memory-disposition.json; no Graphiti
 write was attempted.
+
+
+## CI correction
+
+First broad local run: 1468 tests, 23 failures and 3 errors with ambient operator
+configuration. Isolated base and fix time-policy probes both pass (10 tests each);
+CI-equivalent full rerun is retained separately. CI40114589559 found one genuine
+new-path failure on both Python versions: umask022 allowed the emergency guard
+to create a public parent before the private-root validator. Reproduced RED
+locally. The private child now creates the canonical owned root with mode0700
+before taking the guard and refuses preexisting unsafe roots. Permission tests
+exercise native admission under umask022; held-lock fixtures also provision their
+root explicitly. No check was relaxed and no existing root is chmodded.

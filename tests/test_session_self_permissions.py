@@ -125,7 +125,12 @@ class SessionSelfPermissionsTests(unittest.TestCase):
             root=str(self.root / 'state'), binding=dict(thread_id=THREAD, turn_id='turn-310', call_id='call-310'))
         with patch('codex_wake.goal_supervision._heartbeat', return_value={'fresh': True}), \
              patch('codex_wake.lifecycle_budget.trusted_upper', return_value=time.time()):
-            value, failed = native_request(packet)
+            previous_umask = os.umask(0o022)
+            try:
+                value, failed = native_request(packet)
+            finally:
+                os.umask(previous_umask)
+            self.assertEqual((self.root / "state").stat().st_mode & 0o777, 0o700)
             self.assertFalse(failed, value)
             self.assertEqual(value['state'], 'queued')
             self.assertNotIn('native_self_access', value)
@@ -155,6 +160,7 @@ class SessionSelfPermissionsTests(unittest.TestCase):
         checkpoint = self.root / 'checkpoint.json'
         checkpoint.write_text(json.dumps(dict(source_thread_id=THREAD,
             objective='Refresh', authority='user', next_packet='verify', pending_obligations=[])))
+        (self.root / 'state').mkdir(mode=0o700)
         lockdir = self.root / 'state' / 'emergency-control'
         lockdir.mkdir(parents=True, mode=0o700)
         lockfile = lockdir / 'effects.lock'
