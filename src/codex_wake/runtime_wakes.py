@@ -12,6 +12,7 @@ from uuid import uuid4
 
 from .grok_runtime import GrokRuntimeAdapter
 from .grok_terminal import GrokTerminalHost, digest
+from .session_permissions import PermissionDenied
 from .native_intents import eligibility, dispatch_gate, valid_counter, valid_utc, valid_scheduling_record
 from .records import (WakeError, WakeLifecycleLock, all_records, find_record,
                       parse_duration, replace_record, write_record)
@@ -142,6 +143,8 @@ def dispatch(root, found, *, time_provider=None):
                         return DispatchResult('failed' if record['status']=='failed' else 'requeued',verdict['reason'])
                     observation=adapter.observe(recipient)
                     record['runtime_observation']=observation.summary(recipient)
+                    from .permission_wake import common_record,runtime_route
+                    chosen_route=runtime_route(root,record,observation) if common_record(record) else None
                     from .wake_policy import startup_reason
                     policy_reason = startup_reason(record, observation)
                     if policy_reason:
@@ -155,21 +158,42 @@ def dispatch(root, found, *, time_provider=None):
                         record.update(status='failed' if verdict['state']=='missed_deadline' else 'pending',time_recovery=verdict)
                         replace_record(root,current,record)
                         return DispatchResult('failed' if record['status']=='failed' else 'requeued',verdict['reason'])
+                    if chosen_route:
+                        from .permission_wake import check_route
+                        record['permission_check']=check_route(root,record,chosen_route)
                     delivery=dict(state='uncertain',submission_id=str(uuid4()),method='terminal_observation',
                                   execution='not_observed',acknowledgment='not_observed',reason='submission_outcome_not_observed')
+                    if chosen_route:delivery['route']=chosen_route
+                    record.pop('policy_outcome',None)
                     record['runtime_delivery']=delivery
                     delivery['prompt_sha256']=digest(runtime_prompt(record).encode())
                     record['attempts']+=1
                     record=event(record,'runtime_submission_started','Durable intent before terminal input',None)
                     replace_record(root,current,record)
                     try:
+                        if chosen_route:check_route(root,record,chosen_route)
                         submitted=GrokRuntimeAdapter(adapter.host,deadline=time.monotonic()+verdict['dispatch_window_seconds'], preferred_method=record['target']['method']).submit(recipient,runtime_prompt(record))
                     except Exception:
                         return DispatchResult('skipped','runtime submission uncertain; no resend')
+                    if chosen_route and submitted.state=='not_sent' and submitted.pre_io is True:
+                        index=record['wake_policy']['routes'].index(chosen_route)
+                        previous=record.get('wake_route_progress',{'history':[]})
+                        record['wake_route_progress']=dict(next=index+1,history=[*previous['history'],dict(
+                            route=chosen_route,state='not_sent',pre_io=True,reason=submitted.reason,submission_id=delivery['submission_id'])])
+                        record.pop('runtime_delivery',None)
+                        record['status']='pending'
+                        replace_record(root,current,record)
+                        return DispatchResult('requeued','definitive pre-I/O runtime non-submission')
                     if submitted.state!='accepted' or submitted.evidence_kind!='terminal_observation':
                         return DispatchResult('skipped','runtime submission uncertain; no resend')
                     delivery=dict(delivery,state='accepted',evidence_kind='terminal_observation',
                                   evidence=submitted.evidence,reason='terminal_acceptance_observed')
+        except PermissionDenied as exc:
+            record['policy_outcome']=dict(state='held',reason=exc.code)
+            if not uncertain and record.get('runtime_delivery',{}).get('state')!='uncertain':
+                record['status']='pending'
+            replace_record(root,current,record)
+            return DispatchResult('skipped' if record.get('runtime_delivery',{}).get('state')=='uncertain' else 'requeued',exc.code)
         except Exception:
             if uncertain or record.get('runtime_delivery',{}).get('state')=='uncertain':
                 return DispatchResult('skipped','runtime evidence unavailable; no resend')
