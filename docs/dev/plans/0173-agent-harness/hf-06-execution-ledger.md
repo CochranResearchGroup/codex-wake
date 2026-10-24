@@ -49,3 +49,25 @@ No provider effects, production configuration, service changes or deployment.
 Broad review invocations: 0/1. Final TDD remediation passes: 0/1.
 Implementation regression tests use ordinary red/green slices; the single
 requested post-review remediation pass remains distinct and reserved.
+
+## A acceptance and first worker wave
+
+#320 primary source0597a2a validated. Public policy CLI/MCP tests5 pass;
+shared refresh12 pass including common-policy admission without caller UUID grant
+and separate watcher completion; lifecycle MCP3/configuration1 pass; harness
+prerequisite public callers6 pass. Ruff undefined-name check passes. Red proof
+retained in user state a-red.log (missing common policy) before green. Private
+refresh RPC retains MCP subprocess timeout and rejects scoped-to-shared fallback
+before checkpoint access/admission. Actual #318 scoped execution remains absent.
+
+Frozen shared contract: session_permissions.Principal, PermissionStore,
+check_operation. Primary owns central cli.py/mcp_server.py/evaluator. Workers
+own disjoint consumer modules and request primary hooks. No model-selected roles.
+
+Wave1 at20:44UTC (each base0597a2a, own clean worktree/branch):
+- #321 /root/hf06_b: codex-wake-hf06-b, feat/321-handoff-permissions; lifecycle.
+- #322 /root/hf06_c: codex-wake-hf06-c, feat/322-enforcement-permissions; limits.
+- #323 /root/hf06_d: codex-wake-hf06-d, feat/323-a2a-permissions; mailbox.
+#324 ready but queued for worker capacity; max3 running workers. Primary is
+coordinator/serial shared-surface integrator until a slot opens. #325 remains
+blocked on all consumers. No broad code review invoked.
