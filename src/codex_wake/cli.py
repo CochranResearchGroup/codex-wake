@@ -2744,9 +2744,13 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
-def run(argv: list[str] | None = None) -> int:
+def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if permission_principal is not None:
+        from .session_permissions import Principal
+        if not isinstance(permission_principal,Principal):raise WakeError('permission_identity_unverified')
+        args._permission_principal=permission_principal
     if args.command == "time":
         from .time_inspection import time_command
         return time_command(args)

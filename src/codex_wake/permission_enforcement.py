@@ -179,3 +179,24 @@ def controller_permission(root, receipt):
     except (OSError,ValueError,KeyError,TypeError,PermissionDenied) as error:
         return dict(permission='deny',action='enforcement.enroll',
                     reason='permission_policy_unavailable',error=type(error).__name__)
+
+
+def main():
+    import sys
+    from types import SimpleNamespace
+    from .records import WakeError
+    try:
+        raw=sys.stdin.buffer.read(65537)
+        if len(raw)>65536:raise ValueError('private enforcement packet exceeds limit')
+        packet=json.loads(raw)
+        runner=SimpleNamespace(**{k:Path(v) if v is not None else None for k,v in packet['runner'].items()})
+        value=mcp_call(runner,packet['verb'],packet['arguments'],packet['native_context'])
+        failed=packet['verb']!='show' and value.get('state') not in ('armed','checkpoint_requested')
+    except (ValueError,OSError,KeyError,TypeError,WakeError) as exc:
+        value={'error':{'code':getattr(exc,'code','goal_limits_unavailable'),'message':str(exc)}}
+        failed=True
+    print(json.dumps(value))
+    return 2 if failed else 0
+
+
+if __name__=='__main__':raise SystemExit(main())

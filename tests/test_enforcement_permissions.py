@@ -206,3 +206,21 @@ class EnforcementPermissionTests(unittest.TestCase):
                 self.assertEqual(native['calls'],[])
                 self.assertEqual(path.read_bytes(),preserved)
                 self.assertEqual(json.loads(path.read_text())['used_tokens'],first['used_tokens'])
+
+    def test_actual_public_mcp_denies_enrollment_and_reports_recovery_without_effect(self):
+        from codex_wake.mcp_server import CommandRunner
+        with tempfile.TemporaryDirectory() as tmp:
+            root,policy,_,native,_=self.fixture(tmp)
+            self.configure(root,{'version':1,'global':{'actions':{'enforcement.enroll':'deny',
+                'enforcement.recover':'allow'}}})
+            runner=CommandRunner(wake_root=root,goal_limits_root=root,goal_limits_policy=policy)
+            value,failed=runner.call('wake_goal_limits_set',dict(caller_thread_id=THREAD,
+                token_limit=100,time_limit_seconds=120),native_context=native_context())
+            self.assertTrue(failed,value)
+            self.assertEqual(value['error']['code'],'permission_deny')
+            value,failed=runner.call('wake_goal_limits_recover',dict(caller_thread_id=THREAD),native_context=native_context())
+            self.assertTrue(failed,value)
+            self.assertEqual(value['capability'],'unsupported')
+            self.assertFalse(value['effect_attempted'])
+            self.assertEqual(value['permission']['permission'],'allow')
+            self.assertEqual(native['calls'],[])

@@ -129,6 +129,10 @@ for _verb in ('after','at','file'):
 
 from .harness_mcp import tool_specs as harness_tool_specs
 SPECS.update(harness_tool_specs())
+from .permission_enforcement import tool_specs as enforcement_tool_specs
+SPECS.update(enforcement_tool_specs())
+for _name in ('wake_goal_limits_set','wake_goal_limits_show'):
+    SPECS[_name][3].update({key:MESSAGE for key in ('task_id','assignment_id','operation_id')})
 from .harness_mcp import POLICY as WAKE_POLICY_PROPERTIES
 for _name, _spec in tuple(SPECS.items()):
     if _spec[0] == 'grok' and _spec[1] in ('after', 'at', 'file'):
@@ -251,6 +255,13 @@ class CommandRunner:
             goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
             if self.goal_limits_policy is None or goal_root is None:
                 return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
+            from .session_permissions import PermissionStore
+            if PermissionStore(goal_root).active() or verb in ('recover','disable'):
+                packet=dict(verb=verb,arguments=arguments,native_context=native_context,
+                    runner=dict(wake_root=str(self.wake_root) if self.wake_root else None,
+                        goal_limits_root=str(goal_root),goal_limits_policy=str(self.goal_limits_policy),
+                        harness_policy=str(self.harness_policy) if self.harness_policy else None))
+                return self._execute([sys.executable,'-m','codex_wake.permission_enforcement'],arguments,readonly,json.dumps(packet))
             # Native owns the stdio connection and request _meta. Model tool
             # arguments cannot select a host policy, transport or caller binding.
             try:

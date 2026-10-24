@@ -85,6 +85,10 @@ def command(args,root):
         result=(store.configure(data,principal,expected_revision=args.expected_revision)
                 if args.permission_command=='configure' else store.change_session(
                     args.subject,data,principal,expected_revision=args.expected_revision))
+    if args.permission_command=='configure':
+        from .a2a_bus import BusStore
+        binding=BusStore(args.bus_root).bind_permissions(store.root,Path(args.operator_capability))
+        result['bus_binding']=binding
     print(json.dumps(result,sort_keys=True))
     return 0
 
