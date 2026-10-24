@@ -44,3 +44,8 @@ This draft grants no live provider input, production/account/service change or m
 ## 2026-10-24 interview update
 
 See [first-frontier decisions and overlap boundaries](first-frontier-decisions.md).
+
+## Proposed build specification
+
+See [bounded spec](hf-07-spec.md) and the [three-ticket review](first-frontier-spec-review.md).
+Spec state: REVIEW_READY; public caller seam and ticket breakdown review pending.
