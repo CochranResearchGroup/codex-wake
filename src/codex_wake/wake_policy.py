@@ -83,12 +83,15 @@ def configure(root, **options):
 
 
 def valid(policy):
-    if (type(policy) is not dict or set(policy) != {'version', 'lifetime', 'owner', 'owner_end', 'startup', 'configuration_revision'}
-            or type(policy['version']) is not int or policy['version'] != 1
+    if (type(policy) is not dict or set(policy) != ({'version', 'lifetime', 'owner', 'owner_end', 'startup', 'configuration_revision'} | ({'routes','permission_context'} if policy.get('version')==2 else set()))
+            or type(policy['version']) is not int or policy['version'] not in (1,2)
             or policy['lifetime'] not in LIFETIMES or policy['owner_end'] not in OWNER_END
             or policy['startup'] not in STARTUP or not isinstance(policy['configuration_revision'], str)
             or re.fullmatch(r'[0-9a-f]{64}', policy['configuration_revision']) is None):
         return False
+    if policy['version']==2:
+        from .permission_wake import valid_routes,valid_context
+        if not valid_routes(policy['routes']) or not valid_context(policy['permission_context']):return False
     owner = policy['owner']
     return ((policy['lifetime'] == 'persistent' and owner is None)
             or (policy['lifetime'] != 'persistent' and type(owner) is dict
@@ -122,6 +125,8 @@ def request_policy(root, args, conversation):
                 raise WakeError('idempotency_conflict: wake policy differs')
             if explicit_owner is not None and (policy['owner'] or {}).get('id') != explicit_owner:
                 raise WakeError('idempotency_conflict: wake owner differs')
+            from .permission_wake import validate_retry
+            validate_retry(root,args,policy,conversation)
             return dict(policy)
     config = configuration(root)
     selected = {k: explicit[k] if explicit[k] is not None else config[k] for k in DEFAULTS}
@@ -135,6 +140,8 @@ def request_policy(root, args, conversation):
         raise WakeError('persistent_wake_cannot_have_owner')
     value = dict(version=1, owner=owner, configuration_revision=hashlib.sha256(
         json.dumps(config, sort_keys=True).encode()).hexdigest(), **selected)
+    from .permission_wake import decorate_policy
+    value=decorate_policy(root,args,conversation,value)
     if not valid(value):
         raise WakeError('invalid_wake_policy')
     return value
@@ -155,6 +162,9 @@ def core_record(record, expected_version):
     if (type(record.get('schema_version')) is not int or type(record.get('intent_schema_version')) is not int
             or record['intent_schema_version'] != expected_version or not valid(record.get('wake_policy'))):
         raise WakeError('invalid_policy_wake')
+    if record['wake_policy']['version']==2:
+        from .permission_wake import valid_progress
+        if not valid_progress(record):raise WakeError('invalid_wake_route_progress')
     intent = record['scheduling_intent']
     if expected_version == 6:
         canonical = dict(root=intent['canonical_root'], cwd=record['cwd'], target=record['target'],
@@ -308,6 +318,11 @@ def add_options(parser):
     parser.add_argument('--owner-id')
     parser.add_argument('--owner-end', choices=OWNER_END)
     parser.add_argument('--recipient-startup', choices=STARTUP)
+    parser.add_argument('--wake-route',dest='wake_routes',action='append',choices=('background','existing_tab','new_tab','fresh_task'))
+    parser.add_argument('--bus-root',type=Path)
+    parser.add_argument('--operator-capability',type=Path)
+    parser.add_argument('--actor-capability',type=Path)
+    parser.add_argument('--app-server',default='unix://')
 
 
 def register_parser(subparsers):
