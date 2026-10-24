@@ -1126,6 +1126,8 @@ fresh Windows QPC values and expires after60seconds idle. It needs no additional
 configuration. Cold launch failures or malformed/late replies hold clock authority;
 it never substitutes guest time or caches an earlier counter as a new sample.
 
-Candidate multi-runtime work: [managed Grok mailbox and delivery policies](docs/dev/multi-runtime-mailbox.md).
-Source/isolated-artifact qualification is separate from real cross-runtime TUI
-acceptance and production installation; see Plan0172 and its evidence.
+The merged multi-runtime candidate supports the qualified managed Grok route and
+Codex/Grok mailbox exchanges. See the [support and recovery guide](docs/dev/multi-runtime-mailbox.md)
+and [0.20.0 candidate release notes](docs/dev/release-notes/0.20.0-multi-runtime-wakes.md).
+Real-TUI evidence is version/method-specific; publishing and production installation
+remain separate from source integration and isolated candidate qualification.
