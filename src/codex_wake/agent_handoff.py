@@ -71,9 +71,22 @@ def handoff_command(args, root):
     intent=dict(operation='handoff',source_thread_id=args.thread_id,launch=profile,
         continuation=policy,checkpoint=str(checkpoint),checkpoint_sha256=args.checkpoint_sha256,
         mode=args.mode,expires_at=args.expires_at)
+    if body.get('task_brief') is not None:
+        from .task_briefs import TaskBriefStore
+        briefs = TaskBriefStore(root)
+        pin = briefs.validate_pin(body['task_brief'])
+        approved = briefs.inspect(pin['task_id'])['revisions'][pin['revision'] - 1]['content']
+        if (approved['objective'] != body['objective'] or approved['workspace'] != str(workspace)
+                or approved['permission_ref'] != args.profile):
+            raise WakeError('checkpoint task brief differs from the approved handoff scope')
+        intent['task_brief'] = pin
     if config.get('lifecycle_defaults') or policy.get('configuration'):
         from .lifecycle_configuration import effective_configuration
         intent['configuration'] = effective_configuration(config, args.thread_id, args.profile, args.caller_thread_id)
+        if intent.get('task_brief') is not None:
+            from .lifecycle_budget import objective_identity
+            if approved['allocation_ref'] != objective_identity(policy):
+                raise WakeError('checkpoint task brief allocation differs from the existing objective')
     fingerprint=hashlib.sha256(json.dumps(intent,sort_keys=True).encode()).hexdigest()
     journal=Path(root)/'lifecycle';journal.mkdir(mode=0o700,parents=True,exist_ok=True)
     key=hashlib.sha256(args.intent.encode()).hexdigest();path=journal/(key+'.json')
@@ -565,6 +578,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 acceptance_criteria=policy.get('acceptance_criteria', []),
                 work_review_fields=['verdict','selected_review','changes','acceptance_progress',
                     'scope_deviations','unsupported_claims','unfinished_work','next_packet'])
+            if receipt['intent'].get('task_brief') is not None:
+                contract['task_brief'] = receipt['intent']['task_brief']
             receipt.setdefault('preflight_task',
                 'Preflight only. Read and apply the exact instruction files selected in PREFLIGHT_CONTRACT '
                 'and the exact source checkpoint. Record the actual downstream review selected by any router. '
@@ -582,6 +597,8 @@ def advance_handoff(path,receipt,profile,policy,args,root):
                 intent='handoff-preflight:'+receipt['fingerprint'],name='handoff-'+receipt['fingerprint'][:12],
                 task=receipt['preflight_task'],expires_at=datetime.fromtimestamp(receipt['continuation_deadline'],UTC).isoformat(),
                 caller_thread_id=args.caller_thread_id,as_json=True)
+            if receipt['intent'].get('task_brief') is not None:
+                child.task_brief_pin = receipt['intent']['task_brief']
             child.budget_context=dict(source_ref=receipt['thread_id'],actor_id=receipt['budget_actor'],
                 configuration_revision=effective['revision'])
             if args.mode=='same-tab':
@@ -711,6 +728,9 @@ def advance_handoff(path,receipt,profile,policy,args,root):
 
 
 def before_handoff_effect(path,receipt):
+    if receipt['intent'].get('task_brief') is not None:
+        from .task_briefs import TaskBriefStore
+        TaskBriefStore(path.parent.parent).validate_pin(receipt['intent']['task_brief'])
     from .strict_runtime import guard_execution
     if not guard_execution(path.parent.parent,receipt):
         save(path,receipt)
