@@ -1,7 +1,7 @@
 # First frontier interview: operator decisions and remaining wake policy
 
 Date: 2026-10-24
-State: HF-02/HF-07 product decisions resolved; HF-13 follow-up pending
+State: HF-02/HF-07/HF-13 product decisions resolved; technical handoffs pending
 Authority: questionnaire 1edde8f79e72, response e7d360f4df91425fb8a251ac51bdec42,
 revision 15e287fb35e466ab49aafdae39c0567b3b36b34951741190bfdb04f981de09b5,
 submitted 2026-10-24T17:08:11.568103+00:00.
@@ -76,16 +76,38 @@ reconstruction, and HF-20 daily-task launch/occurrence admission. Do not silentl
 expand HF-13 into an entire lifecycle or recurrence engine. Existing delivery
 behavior remains unchanged unless a new explicit policy is selected.
 
-The owner-end question was not answered by the recipient-startup response.
-Two follow-ups are pending: retirement/hold/expiry behavior after verified owner
-completion, and the preferred default startup mode for newly registered wakes.
-Do not infer owner cancellation from tab disappearance, or infer permission to
-start a fresh conversation from permission to resume an exact saved one.
+### Follow-up resolved in conversation
+
+The operator answered on 2026-10-24: “1. agree 2. default is configurable.
+I think create/load/run is a nice default.” This resolves the two pending
+questions without changing the original questionnaire submission.
+
+Owner completion: behavior is configurable per wake; the default retires pending
+owner-bound wakes after verified explicit completion/retirement of that owner.
+Retain history and unresolved attempts; retiring future delivery does not retract
+an effect or resolve uncertainty. Independent persistent wakes retain their own
+lifetime. Tab closure, temporary unavailability and process loss are not owner
+completion.
+
+Recipient startup: behavior is configurable; the preferred default for newly
+registered wakes is create/load/run as needed. Resolve that configured choice
+when admitting a wake and retain the selected policy with its intent, so later
+default changes do not reinterpret existing wakes. Older wakes preserve their
+existing behavior. This is the requested product default, not a claim that every
+runtime currently supports launch or background execution. Qualification and
+profile enforcement remain the owning lifecycle ticket's work. Unsupported
+operations return an actionable result rather than silently selecting another
+conversation or delivery mode.
+
+Do not infer permission to create a fresh conversation from an exact-conversation
+resume request. The create/load/run policy must distinguish those cases through
+its declared task and recipient policy, preserving HF-01 identity decisions.
 
 ## Acceptance status and next steps
 
 HF-02 and HF-07 have resolved product inputs; their concrete bounded technical
 design and caller-level validation plans must be reconciled before coding.
-HF-13 remains in interview for the two stated decisions. No implementation,
+HF-13 product decisions are now resolved. Its technical handoff must cover
+owner completion, new-wake defaults, legacy behavior and unsupported startup. No implementation,
 live wakes, provider input, installed-policy repair, tab creation or deployment
 was performed. Shared contracts and final integration remain with the primary.

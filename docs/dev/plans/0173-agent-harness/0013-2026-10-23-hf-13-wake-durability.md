@@ -6,7 +6,7 @@ Work item: CW-HARNESS-173/HF-13 (local draft; not posted)
 Priority: P0
 Area: Durability and jobs
 Blocked by: None; HF-01 design resolved
-Grill state: IN_PROGRESS; two wake policy answers pending; apply [HF-01 decisions](hf-01-decisions-and-handoffs.md)
+Grill state: PRODUCT_DECISIONS_RESOLVED; technical handoff pending; apply [HF-01 decisions](hf-01-decisions-and-handoffs.md)
 Implementation state: NOT_AUTHORIZED; own grill-with-docs and approved handoff required
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
@@ -44,3 +44,7 @@ This draft grants no live provider input, production/account/service change or m
 ## 2026-10-24 interview update
 
 See [first-frontier decisions and overlap boundaries](first-frontier-decisions.md).
+
+Resolved defaults: configurable owner-end behavior defaults to retirement after
+verified explicit completion; configurable startup defaults to create/load/run
+for new wakes. Existing wakes retain their behavior. See the interview record.
