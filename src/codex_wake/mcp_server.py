@@ -221,11 +221,13 @@ class CommandRunner:
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
         if group == 'permissions':
-            try:
-                from .permission_commands import mcp_call
-                return mcp_call(self, arguments, native_context, verb), False
-            except (ValueError, OSError, WakeError) as exc:
-                return {'error': {'code': getattr(exc, 'code', 'permission_unavailable'), 'message': str(exc)}}, True
+            if self.wake_root is None:
+                return {'error': {'code':'permission_host_root_required'}},True
+            packet=dict(root=str(self.wake_root),verb=verb,arguments=arguments,native_context=native_context)
+            raw=json.dumps(packet)
+            if len(raw.encode())>65536:
+                return {'error':{'code':'invalid_argument'}},True
+            return self._execute([sys.executable,'-m','codex_wake.permission_commands'],arguments,readonly,raw)
         if group in ('agents', 'task-briefs', 'harness-native', 'harness-owner'):
             try:
                 from .harness_mcp import call as harness_call

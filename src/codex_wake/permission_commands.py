@@ -85,3 +85,24 @@ def command(args,root):
                     args.subject,data,principal,expected_revision=args.expected_revision))
     print(json.dumps(result,sort_keys=True))
     return 0
+
+
+def main():
+    import sys
+    from types import SimpleNamespace
+    from .records import WakeError
+    try:
+        raw=sys.stdin.buffer.read(65537)
+        if len(raw)>65536:raise ValueError('private permission packet exceeds limit')
+        packet=json.loads(raw)
+        result=mcp_call(SimpleNamespace(wake_root=Path(packet['root'])),packet['arguments'],
+            packet['native_context'],packet['verb'])
+        failed=False
+    except (ValueError,OSError,TypeError,KeyError,WakeError) as exc:
+        result={'error':{'code':getattr(exc,'code','permission_unavailable'),'message':str(exc)}}
+        failed=True
+    print(json.dumps(result))
+    return 2 if failed else 0
+
+
+if __name__=='__main__':raise SystemExit(main())
