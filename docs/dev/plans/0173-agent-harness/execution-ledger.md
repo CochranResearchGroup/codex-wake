@@ -1,6 +1,6 @@
 # First frontier execution ledger
 
-State: RUNNING
+State: SOURCE_VALIDATED_REVIEW_REMEDIATED
 Owner: ecochran76 / primary
 Goal: close #315, #316 and #317; then one broad two-axis code review and one
 bounded TDD remediation pass. Maximum requested elapsed time: two hours, starting
@@ -141,3 +141,38 @@ acceptance expectation was weakened.
 PR326 is draft. Ticket source closure precedes the single requested broad review;
 closure does not claim main integration, release or production deployment.
 Review fixed point remains f96f4c8244529e8b4e8e4206202d4a1e91084a52.
+
+## Post-closure review and bounded remediation
+
+Progress classification: progress. Tracker closure readbacks: #315 at20:25:01Z,
+#316 at20:25:04Z, #317 at20:25:06Z on2026-10-24. Exact receipt is retained.
+
+One broad review at bf91146 against f96f4c8: /root/review_standards and
+/root/review_spec independently reported candidates. Primary accepted two unique
+blocking findings (one duplicate across axes). One TDD remediation pass at9fb5a69
+proved both red then green. See review-and-remediation.md. No second broad review.
+
+Serial full matrix before remediation:1495 tests pass on each Python3.11/3.12,
+one unrelated opt-in systemd test skipped per version. Focused post-remediation:
+8 policy +6 public caller tests pass on BOTH versions,18 native-intent tests pass,
+F821/F822/F823/compile/policy/whitespace checks pass. Current CI reruns the final
+full matrix and installed gates.
+
+Final isolated wheel wake-control qualification at9fb5a69:127 installed Python
+files match candidate source;45 MCP tools; actual pause/list/interrupt/cancel/
+resume calls pass, denied root stays denied; zero model turns, operator wake
+changes or service restarts. Existing installed production command is unchanged.
+
+Owned worker refs are durable: HF02 deef6c6; HF07 3a63878 (includes lifecycle and
+fixture follow-ups). Shared hub integration remains primary-owned. PR326 target
+is origin/main. Final source/merge/CI receipts remain separate from release and
+production activation.
+
+## Worker custody closeout
+
+Worker patches are equivalent to their integrated copies (`git cherry` reports
+only minus entries). Clean worktrees codex-wake-hf02 and codex-wake-hf07 were
+removed without force after exact remote readback. Branches remain recoverable
+at origin/feat/315-managed-inventory (deef6c6) and origin/feat/316-task-briefs
+(3a63878). The primary integration checkout remains the clean deliverable.
+Current final integration/check authority is PR326, not this historical log.

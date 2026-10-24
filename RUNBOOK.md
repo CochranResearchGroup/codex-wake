@@ -8055,3 +8055,13 @@ Updated local HF-06 spec, parent, index and publication receipt. No parent issue
 closed/rewritten, no runtime fix or live policy change claimed. Documentation
 validation and graph equality checked before publication closeout. Memory
 disposition forbidden: developer requires explicit user request for memory write.
+
+## Turn 402 | 2026-10-24
+
+Implemented first harness frontier with primary HF-13 and workers /root/hf02
+(HF-02) and /root/hf07 (HF-07), integrated on feat/harness-frontier from f96f4c8.
+Source acceptance closed #315/#316/#317; then exactly one Standards/Spec review
+and one bounded TDD pass fixed completion provenance and held-record mutation.
+Serial1495-test runs pass on3.11/3.12 (one unrelated opt-in skip); post-fix focused
+checks and isolated0.21.0 CLI/MCP wheel proof pass. PR326 owns final CI/integration.
+No production install, provider turns, host permission edits or release publication.

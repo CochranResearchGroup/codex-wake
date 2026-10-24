@@ -1,6 +1,6 @@
 # One review and one bounded TDD remediation pass
 
-State: REMEDIATED; final CI pending
+State: REMEDIATED; final integration/check authority is PR326
 Fixed point: f96f4c8244529e8b4e8e4206202d4a1e91084a52
 Reviewed tip: bf911469e0de5492e86c12ce260cd1739e62770a
 Review began after verified closure of #315, #316 and #317.

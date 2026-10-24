@@ -1,0 +1,49 @@
+{
+  "recorded_at": "2026-10-24T20:26:15.327Z",
+  "scope": "source acceptance, before requested post-closure review",
+  "issues": [
+    {
+      "issue": 315,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/315",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-24T20:25:01Z",
+      "source_tip": "bf911469e0de5492e86c12ce260cd1739e62770a",
+      "actor": "ecochran76",
+      "action": "close_completed",
+      "verified": true
+    },
+    {
+      "issue": 316,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/316",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-24T20:25:04Z",
+      "source_tip": "bf911469e0de5492e86c12ce260cd1739e62770a",
+      "actor": "ecochran76",
+      "action": "close_completed",
+      "verified": true
+    },
+    {
+      "issue": 317,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/317",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-24T20:25:06Z",
+      "source_tip": "bf911469e0de5492e86c12ce260cd1739e62770a",
+      "actor": "ecochran76",
+      "action": "close_completed",
+      "verified": true
+    }
+  ],
+  "review": {
+    "fixed_point": "f96f4c8244529e8b4e8e4206202d4a1e91084a52",
+    "tip": "bf911469e0de5492e86c12ce260cd1739e62770a",
+    "axes": [
+      "/root/review_standards",
+      "/root/review_spec"
+    ],
+    "broad_passes_authorized": 1,
+    "remediation_passes_authorized": 1
+  }
+}

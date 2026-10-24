@@ -9,15 +9,18 @@ lanes:
     plan_ref: feat/harness-frontier
     branch: feat/315-managed-inventory
     target: origin/main
-    plan_state: OPEN
-    custody_state: OWNED
-    checkpoint: 73600ca
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
+    checkpoint: deef6c68547239aed9e85f9fda1e51ed0504ecb9
     integration: squash_pr
     dependencies: []
     overlaps: [P173-HF02, P173-HF07, P173-HF13]
     reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
     updated_at: 2026-10-24
-    disposition: Separate leaf ownership; primary serializes common CLI/MCP and record integration
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/326
+    checkout_required: false
+    validation_status: passed
+    disposition: Worker patches integrated; clean owned checkout removed after patch-equivalence and remote custody readback; durable branch retained; PR326 owns final integration
   - id: P173-HF07
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 316
@@ -26,15 +29,18 @@ lanes:
     plan_ref: feat/harness-frontier
     branch: feat/316-task-briefs
     target: origin/main
-    plan_state: OPEN
-    custody_state: OWNED
-    checkpoint: 73600ca
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
+    checkpoint: 3a638785935ff54273885dbd3eb54a5ff55fad82
     integration: squash_pr
     dependencies: []
     overlaps: [P173-HF02, P173-HF07, P173-HF13]
     reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
     updated_at: 2026-10-24
-    disposition: Separate leaf ownership; primary serializes common CLI/MCP and record integration
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/326
+    checkout_required: false
+    validation_status: passed
+    disposition: Worker patches integrated; clean owned checkout removed after patch-equivalence and remote custody readback; durable branch retained; PR326 owns final integration
   - id: P173-HF13
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 317
@@ -43,15 +49,17 @@ lanes:
     plan_ref: feat/harness-frontier
     branch: feat/harness-frontier
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: OWNED
-    checkpoint: 73600ca
+    checkpoint: 9fb5a69b110c300e3cfd8673d639d14e2e59ee05
     integration: squash_pr
     dependencies: []
     overlaps: [P173-HF02, P173-HF07, P173-HF13]
     reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
     updated_at: 2026-10-24
-    disposition: Separate leaf ownership; primary serializes common CLI/MCP and record integration
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/326
+    validation_status: passed
+    disposition: Source validated and tracker closed; review remediated; durable refs retained; final PR CI pending
   - id: P172-REL-NOTES
     owner: primary / ecochran76; worker /root/release_notes
     objective: Prepare accurate candidate release notes and README link

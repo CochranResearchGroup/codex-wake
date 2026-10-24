@@ -1,6 +1,6 @@
 # Agent harness ticket drafts
 
-HF-01 is DONE (design only); HF-02/HF-06/HF-07/HF-13 are READY_FOR_AGENT; other tickets remain TRIAGE. No implementation or live-effect authority is granted.
+HF-01 is DONE (design); HF-02/HF-07/HF-13 are DONE (validated source, tracker closed). HF-06 implementation is active on PR327; #320 is source-closed and remaining consumers are in progress. Other tickets remain TRIAGE. No live-effect authority is granted.
 [HF-01 decisions](hf-01-decisions-and-handoffs.md) resolve the shared-contract interview; every later ticket still needs
 its own Matt grill-with-docs process before coding. Stable local locators are
 CW-HARNESS-173/HF-NN. The approved first frontier is published as #315, #316 and #317.
@@ -104,3 +104,5 @@ issues #315–#317 for current execution state. Publication is not implementatio
 #318's scoped-refresh capability boundary. [Six-slice proposal](hf-06-implementation-breakdown.md)
 was approved and published as #320–#325 with verified native dependencies.
 HF-06 is specification-ready; implementation waits for the applicable blockers.
+
+The three specs are implemented and validated. Issues #315/#316/#317 are closed; PR326 carries final integration.

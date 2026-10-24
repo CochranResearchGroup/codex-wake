@@ -1,7 +1,7 @@
 # Agent harness backlog: reconciled ticket drafts
 
 State: OPEN
-Ticket state: HF-01 DONE (design only); HF-02/HF-06/HF-07/HF-13 specs approved; others TRIAGE. GitHub owns execution state.
+Ticket state: HF-01 DONE (design); HF-02/HF-07/HF-13 DONE (source); HF-06 implementation active on PR327; other tickets TRIAGE
 Owner: ecochran76
 Work item: CW-HARNESS-173 (local planning intake; not posted)
 Lane: P173-PLAN
@@ -223,3 +223,11 @@ by inventory #315/task brief #316; wake slice also depends on #317. #318 owns
 scoped-refresh execution; #319 owns observation-stop recovery. Those runtime
 claims remain separate from permission/capability diagnostics. No implementation
 or production effect was performed by publication.
+
+## First-frontier execution
+
+HF-02 (#315), HF-07 (#316) and HF-13 (#317) are implemented and source-validated,
+and their tracker issues are closed. [Execution ledger](0173-agent-harness/execution-ledger.md)
+and [single review/remediation](0173-agent-harness/review-and-remediation.md) own
+evidence. PR326 integrates the source. Remaining feature interviews and tickets
+stay open; this does not close the entire32-ticket program.

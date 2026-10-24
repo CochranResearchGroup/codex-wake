@@ -1,13 +1,13 @@
 # HF-07: Pin a task brief and bounded context package to one assignment
 
-State: READY_FOR_AGENT
+State: DONE (validated source)
 Owner: ecochran76; implementation assignee unassigned
 Work item: CW-HARNESS-173/HF-07 (published as #316)
 Priority: P0
 Area: Task contracts
 Blocked by: None; HF-01 design resolved
 Grill state: PRODUCT_DECISIONS_RESOLVED; technical handoff pending; apply [HF-01 decisions](hf-01-decisions-and-handoffs.md)
-Implementation state: READY_FOR_AGENT; source scope and handoff approved; no live effects
+Implementation state: DONE; source validated, tracker closed; no production install
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
 
@@ -31,9 +31,9 @@ Open decisions:
 
 ## Acceptance evidence
 
-- [ ] The assignment pins a brief revision and its source evidence.
-- [ ] A proposed scope change remains a request until explicitly approved.
-- [ ] Context remains bounded and preserves unresolved obligations and authority references.
+- [x] The assignment pins a brief revision and its source evidence.
+- [x] A proposed scope change remains a request until explicitly approved.
+- [x] Context remains bounded and preserves unresolved obligations and authority references.
 
 ## Scope limits and integration
 
@@ -51,3 +51,8 @@ See [bounded spec](hf-07-spec.md) and the [three-ticket review](first-frontier-s
 Spec state: APPROVED; public caller seam and ticket breakdown approved.
 
 Canonical tracker: https://github.com/CochranResearchGroup/codex-wake/issues/316
+
+Source acceptance and GitHub closure are recorded in [execution ledger](execution-ledger.md).
+The single [review and TDD remediation](review-and-remediation.md) is complete;
+PR326 carries integration and final CI. Broader lifecycle/runtime features remain
+with their own tickets.
