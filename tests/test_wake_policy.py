@@ -117,6 +117,45 @@ class WakePolicyTests(unittest.TestCase):
                 self.register(root, '--recipient-startup', 'active_tab')
             self.assertEqual([x.record for x in all_records(root)], [original])
 
+    def test_startup_modes_gate_effects_and_never_guess_an_active_tab(self):
+        class Adapter:
+            submits = 0
+            def resolve(self, target):
+                return RuntimeRecipient('codex', THREAD, target)
+            def observe(self, recipient):
+                return RuntimeObservation('ready', 'fixture_loaded_without_tab_evidence', {})
+            def submit(self, recipient, prompt):
+                self.submits += 1
+                return RuntimeSubmission('accepted', receipt_id='00000000-0000-7000-8000-000000000318',
+                                         evidence_kind='native_queue_acceptance')
+        for startup, count in [('active_tab', 0), ('background_saved', 1), ('create_load_run', 1)]:
+            with self.subTest(startup=startup), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                self.register(root, '--recipient-startup', startup)
+                adapter = Adapter()
+                with patch('codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': dict(CLOCK['counter'], counter=62000)}):
+                    poll_once(root, dispatch=False)
+                    dispatch_firing_record(root, all_records(root)[0], runtime_adapter=adapter)
+                self.assertEqual(adapter.submits, count)
+                self.assertEqual(all_records(root)[0].record['attempts'], count)
+                if startup == 'active_tab':
+                    self.assertEqual(all_records(root)[0].record['policy_outcome']['reason'], 'active_tab_not_verified')
+
+    def test_lost_owner_journal_holds_existing_wakes_and_cannot_be_reset_by_enrollment(self):
+        from codex_wake.records import WakeError
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.register(root, '--wake-lifetime', 'task', '--owner-id', 'daily-report')
+            (root / 'wake-owners.json').unlink()
+            with patch('codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': dict(CLOCK['counter'], counter=62000)}):
+                poll_once(root, dispatch=False)
+            record = all_records(root)[0].record
+            self.assertEqual(record['status'], 'pending')
+            self.assertEqual(record['policy_outcome']['reason'], 'wake_owner_state_unavailable')
+            with self.assertRaisesRegex(WakeError, 'recovery_required'):
+                self.register(root, '--wake-lifetime', 'task', '--owner-id', 'other-task', key='other')
+            self.assertFalse((root / 'wake-owners.json').exists())
+
 
 if __name__ == '__main__':
     unittest.main()
