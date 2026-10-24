@@ -6,7 +6,7 @@ Work item: CW-HARNESS-173/HF-06 (local draft; not posted)
 Priority: P0
 Area: Ownership and actions
 Blocked by: HF-02, HF-07
-Grill state: TRIAGE; read prerequisite decisions before freezing design
+Grill state: nine product decisions resolved; final combined confirmation pending
 Implementation state: NOT_AUTHORIZED; own grill-with-docs and approved handoff required
 Source baseline: 7ef73b12dde59cedbd98b5b73ac5250106ee63aa / v0.20.0
 Parent: [Plan0173](../0173-2026-10-23-agent-harness-backlog.md)
@@ -30,7 +30,7 @@ Start with Matt’s grill-with-docs: read AGENTS.md, GLOSSARY.md, relevant ADRs/
 Open decisions:
 
 - Which restrictions are genuinely enforceable per runtime?
-- How does an operator approve a profile change?
+- Concrete approval interface and schema must implement the resolved operator/delegated-controller authority; see the contract interview.
 
 ## Acceptance evidence
 

@@ -1,6 +1,6 @@
 # Common session permissions: HF-06 requirement and proposed contract
 
-State: INTERVIEW_IN_PROGRESS; round-one and round-two decisions resolved
+State: PRODUCT_DECISIONS_RESOLVED; final shared-understanding confirmation pending
 Owner: ecochran76; integration through CW-HARNESS-173/HF-06
 Date: 2026-10-24
 Source: operator clarification in issue310's repair conversation; reconciled with
@@ -75,8 +75,10 @@ allow the exchange, including any peer/task scopes. Neither creates permission t
 execute the requested task. Replies/claims remain correlated and scoped. For
 sleeping owners, wake lifetime and recipient-startup choice are independent of
 permission. Authorizing an existing tab does not authorize a background route,
-new tab or new conversation. No route falls back to a broader allowed route
-unless the admitted intent explicitly allows that fallback.
+new tab or new conversation. Wake policy may declare an ordered list of permitted routes. Resolve and retain
+that list at admission; automatic fallback uses only its allowed, supported
+routes. An uncertain submission must be reconciled before another route is tried.
+No route falls back to a broader route outside the admitted list.
 
 Resolve permission before admitting work and revalidate it before each effect.
 Persist the admitted action, target, scope and policy/approval provenance with the
@@ -195,3 +197,31 @@ Emergency pause and resource-stop controls retain their separate behavior.
 Next frontier: automatic trigger authority, approval continuity through successor
 handoff, and explicitly permitted delivery-route fallback. These decisions do
 not change production policy or authorize provider effects.
+
+
+## Interview round three: resolved
+
+Authority: operator answered "yes all" to Q7–Q9 in this conversation.
+
+1. An authorized session or controller may perform allowed actions automatically
+   when configured conditions occur, without another prompt. The policy covers
+   both action and trigger. Automation stays within the existing task and
+   allowance; permission does not invent a trigger or a new task.
+2. A verified successor continuing the same task inherits applicable task-scoped
+   approvals, subject to its own effective permissions and current operator
+   restrictions. Original expiry and remaining allowance persist. Approvals
+   explicitly limited to the original session do not transfer.
+3. Wake policy supports an ordered list of permitted routes, with automatic
+   fallback only within that list. Every selected route must be allowed and
+   supported. Uncertain submissions are reconciled before a different route
+   is attempted, preventing duplicate work.
+
+## Interview boundary
+
+All nine product questions have explicit affirmative answers. Final confirmation
+of the combined understanding is pending. Concrete schema, storage reuse,
+identity-adapter feasibility, compatibility and provider-free validation belong
+to the bounded technical handoff; no remaining technical choice may silently
+change these product decisions. HF-02/HF-07 prerequisites and the serialized
+shared-surface integration boundary remain. This record does not authorize
+implementation or production permission changes.
