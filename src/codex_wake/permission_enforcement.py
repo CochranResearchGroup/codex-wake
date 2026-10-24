@@ -1,0 +1,179 @@
+"""Common-policy boundary for existing-goal enforcement, not a recovery engine.
+
+Host adapters construct Principal after native/capability verification. A policy
+result never clears a stop, renews a resource envelope, or qualifies accounting.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from .session_permissions import PermissionStore, Principal, PermissionDenied
+
+RECOVERY_REQUIREMENTS = (
+    'explicit_operator_recovery_authority', 'qualified_nondecreasing_accounting',
+    'verified_current_exact_native_state', 'fresh_controller',
+    'same_boot_continuity', 'remaining_original_resources',
+)
+
+
+def principal_for(root, thread, *, native_context=None, principal=None):
+    """Accept only private host proof; caller UUIDs remain untrusted claims."""
+    if not PermissionStore(root).active():
+        return None
+    if principal is None:
+        from .goal_supervision import verified_native_caller
+        verified_native_caller(native_context, thread)
+        principal = Principal(thread)
+    if not isinstance(principal, Principal) or principal.subject != thread:
+        raise PermissionDenied('permission_identity_unverified')
+    return principal
+
+
+def authorize(root, action, principal, *, task_id=None, operation_id=None):
+    """Operator CLI request is exact operation authority, never a deny override."""
+    store = PermissionStore(root)
+    if not store.active():
+        return {'permission': 'legacy', 'action': action}
+    decision = store.evaluate(action, principal, target=principal.subject,
+                              task_id=task_id, operation_id=operation_id)
+    if decision['permission'] == 'approval_required' and principal.role == 'operator':
+        decision = dict(decision, permission='allow', approval_id='explicit_operator_request',
+                        approval_scope='operation', rule='explicit_operator_request')
+    if decision['permission'] != 'allow':
+        raise PermissionDenied('permission_' + decision['permission'], decision)
+    return decision
+
+
+def enrollment_action(previous, token_limit, seconds, token_accounting, allocation_id):
+    if previous is not None and (
+            token_limit > previous['token_limit'] or seconds > previous['time_limit_seconds']
+            or allocation_id != previous['allocation_id']
+            or (token_accounting is not None and
+                token_accounting != previous.get('token_accounting', 'cache_inclusive'))):
+        return 'enforcement.increase'
+    return 'enforcement.enroll'
+
+
+def diagnostic(root, thread, action, *, principal, task_id=None, operation_id=None):
+    """Classify unavailable control without writing the existing campaign."""
+    from .goal_supervision import _name, _private, _public
+    decision = authorize(root, action, principal, task_id=task_id, operation_id=operation_id)
+    path = Path(root) / 'goal-supervision' / (_name(thread) + '.json')
+    receipt = None
+    if path.exists():
+        _private(path)
+        receipt = json.loads(path.read_text())
+        if receipt.get('thread_id') != thread:
+            raise PermissionDenied('permission_target_mismatch')
+    recovery = action == 'enforcement.recover'
+    result = dict(state='held', armed=False, effect_attempted=False,
+        permission=decision, capability='unsupported',
+        readiness='stop_latched' if receipt and receipt.get('stop_latched') else 'not_observed',
+        reason='observation_stop_recovery_unsupported' if recovery else 'enforcement_disable_unsupported',
+        next_action=('Follow issue319 for explicit observation-stop reconciliation; retain the '
+                     'original campaign, accounting and stop evidence. Native resume, a fresh '
+                     'read or heartbeat does not recover supervision.' if recovery else
+                     'Keep existing safety enforcement active; disabling is not implemented by '
+                     'this policy check and must not clear resource-stop records.'))
+    if recovery:
+        result.update(runtime_dependency='https://github.com/CochranResearchGroup/codex-wake/issues/319',
+                      recovery_requirements=list(RECOVERY_REQUIREMENTS))
+    if receipt is not None:
+        result['campaign'] = _public(receipt)
+    return result
+
+
+def describe(root, thread, *, principal):
+    store = PermissionStore(root)
+    if not store.active():
+        return None
+    actions = ('enforcement.enroll', 'enforcement.increase', 'enforcement.disable', 'enforcement.recover')
+    return {action: store.evaluate(action, principal, target=thread,
+        capability='unsupported' if action in ('enforcement.disable', 'enforcement.recover') else 'supported',
+        readiness='not_observed') for action in actions}
+
+
+def tool_specs():
+    from .harness_mcp import CALLER, TEXT
+    result = {}
+    for verb in ('recover', 'disable'):
+        result['wake_goal_limits_' + verb] = ('goal-limits', verb,
+            'Check explicit authority for ' + verb + '. Current runtime support is unavailable; '
+            'this never clears stops, changes resources or interrupts a turn. Recovery depends on issue319.',
+            dict(caller_thread_id=CALLER, allocation_id=TEXT, task_id=TEXT,
+                 assignment_id=TEXT, operation_id=TEXT), ['caller_thread_id'], False)
+    return result
+
+
+def verified_tasks(root, subject, task_id, assignment_id, *, controller_tasks=(), actor_id=None):
+    if task_id is None:
+        return ()
+    if task_id in controller_tasks:
+        return (task_id,)
+    if assignment_id is None:
+        raise PermissionDenied('permission_task_scope_unverified')
+    from .task_briefs import TaskBriefStore
+    store = TaskBriefStore(root)
+    state = store.inspect(task_id)
+    admission = next((item for item in state['admissions'] if item['assignment_id']==assignment_id),None)
+    if not admission or admission['actor_id'] != (actor_id or 'native:' + subject):
+        raise PermissionDenied('permission_task_scope_unverified')
+    store.assignment_pin(task_id, assignment_id)
+    return (task_id,)
+
+
+def mcp_call(runner, verb, arguments, native_context):
+    from .goal_supervision import verified_native_caller, enroll, show
+    from .harness_mcp import controller_tasks
+    root = runner.goal_limits_root if runner.goal_limits_root is not None else runner.wake_root
+    if root is None or runner.goal_limits_policy is None:
+        raise PermissionDenied('goal_limits_host_scope_unavailable')
+    thread = arguments['caller_thread_id']
+    verified_native_caller(native_context, thread)
+    tasks = verified_tasks(root, thread, arguments.get('task_id'), arguments.get('assignment_id'),
+                           controller_tasks=controller_tasks(runner, thread))
+    principal = Principal(thread, tasks=tasks)
+    if verb == 'show':
+        return show(root, runner.goal_limits_policy, thread, arguments.get('allocation_id'),
+                    permission_principal=principal)
+    if verb in ('recover', 'disable'):
+        return diagnostic(root, thread, 'enforcement.' + verb, principal=principal,
+                          task_id=arguments.get('task_id'), operation_id=arguments.get('operation_id'))
+    options = {k: v for k, v in arguments.items() if k not in ('assignment_id',)}
+    return enroll(root, runner.goal_limits_policy, native_context=native_context,
+                  permission_principal=principal, **options)
+
+
+def cli_principal(args, root):
+    from .permission_commands import verified_cli_principal
+    principal = verified_cli_principal(args)
+    thread = args.caller_thread_id
+    if principal.role == 'operator':
+        return Principal(thread, 'operator')
+    if principal.subject != thread:
+        raise PermissionDenied('permission_target_mismatch')
+    # The CLI capability has already verified the exact actor/native context.
+    from .a2a_bus import BusStore
+    from .a2a_cli import invoking_actor
+    bus = BusStore(args.bus_root)
+    actor = invoking_actor(bus, Path(args.actor_capability), endpoint=args.app_server)
+    tasks = verified_tasks(root, thread, args.task_id, args.assignment_id, actor_id=actor.actor_id)
+    return Principal(thread, tasks=tasks)
+
+
+def controller_permission(root, receipt):
+    """Recheck future continuation, without revoking committed safety stops.
+
+    A permission change alone is not a native turn-interrupt request. The original
+    resource envelope still owns its pause/interrupt obligation when exhausted.
+    """
+    store=PermissionStore(root)
+    if not store.active():
+        return {'permission':'legacy','action':'enforcement.enroll'}
+    try:
+        return store.evaluate('enforcement.enroll',Principal(receipt['thread_id']),
+                              target=receipt['thread_id'])
+    except (OSError,ValueError,KeyError,TypeError,PermissionDenied) as error:
+        return dict(permission='deny',action='enforcement.enroll',
+                    reason='permission_policy_unavailable',error=type(error).__name__)
