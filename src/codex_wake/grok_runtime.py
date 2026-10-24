@@ -57,6 +57,7 @@ class GrokRuntimeAdapter:
         }
         try:
             _, lines = self._snapshot(recipient)
+            capabilities['active_tab'] = RuntimeCapability('supported', 'exact_managed_pane_generation')
             last_identity=max(i for i,line in enumerate(lines) if line.strip().startswith('Session ID:'))
             if any(line.strip()=='No active session' or re.search(r'[⠀-⣿] Starting session',line)
                    for line in lines[last_identity+1:]):

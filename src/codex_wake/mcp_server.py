@@ -46,7 +46,8 @@ SPECS = {
         ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "resources", "expires_at"], False),
     "wake_sessions_spawn": ("sessions", "spawn", "Spawn one worker through a host-approved launch profile. For resource limits require strict_execution: dedicated containment and sampled token stops, not an exact token ceiling. A first strict launch from an ordinary caller needs operator bootstrap; this cannot contain the existing TUI in place. Never bypass caller grants through operator CLI. Stable intent and exact readiness precede task admission; reconcile uncertain effects without replacement.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "name": {**TEXT, "maxLength": 200},
-         "task": BODY, "expires_at": TEXT}, ["profile", "intent", "name", "task", "expires_at"], False),
+         "task": BODY, "expires_at": TEXT, "task_id": MESSAGE, "assignment_id": MESSAGE,
+         "revision": {"type": "integer", "minimum": 1}}, ["profile", "intent", "name", "task", "expires_at"], False),
     "wake_sessions_list": ("sessions", "list", "Discover existing Codex threads and Byobu tabs. Partial inventory does not prove absence or uniqueness.", {"limit": PAGE["limit"]}, [], True),
     "wake_sessions_resolve": ("sessions", "resolve", "Resolve a tab/name/thread selector to an exact thread. Pin the returned UUID before sending; discovery grants no delivery authority.", {"selector": TEXT}, ["selector"], True),
     "wake_sessions_show": ("sessions", "show", "Inspect an exact session or tab and its binding evidence without starting a turn.", {"selector": TEXT}, ["selector"], True),
@@ -120,12 +121,21 @@ for _verb in ('after','at','file'):
         ['binding_id','trigger','prompt','idempotency_key'],False)
 
 
+from .harness_mcp import tool_specs as harness_tool_specs
+SPECS.update(harness_tool_specs())
+from .harness_mcp import POLICY as WAKE_POLICY_PROPERTIES
+for _name, _spec in tuple(SPECS.items()):
+    if _spec[0] == 'grok' and _spec[1] in ('after', 'at', 'file'):
+        SPECS[_name] = (*_spec[:3], {**_spec[3], **WAKE_POLICY_PROPERTIES}, *_spec[4:])
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
                  goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None,
-                 actor_runtime="codex", runtime_root=None):
+                 actor_runtime="codex", runtime_root=None, harness_policy=None):
+        self.harness_policy = harness_policy
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
         self.actor_runtime,self.runtime_root=actor_runtime,runtime_root
@@ -198,12 +208,19 @@ class CommandRunner:
         if name not in SPECS:
             return {"error": {"code": "unknown_tool", "message": "Unknown tool."}}, True
         group, verb, _, properties, required, readonly = SPECS[name]
-        if self.actor_runtime == 'grok' and group not in ('messages','grok'):
+        if self.actor_runtime == 'grok' and group not in ('messages','grok','agents'):
             return {'error':{'code':'native_caller_attestation_unavailable'}}, True
         schema = {"type": "object", "additionalProperties": False,
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        if group in ('agents', 'task-briefs', 'harness-native', 'harness-owner'):
+            try:
+                from .harness_mcp import call as harness_call
+                return harness_call(self, group, verb, arguments, native_context), False
+            except (ValueError, OSError, KeyError, TypeError, RuntimeError) as exc:
+                return {'error': {'code': getattr(exc, 'code', 'harness_operation_held'),
+                                  'message': str(exc)}}, True
         if any(isinstance(arguments.get(k), str) and arguments[k].startswith('-') for k in ('selector', 'to')):
             return {"error": {"code": "invalid_argument", "message": "Descriptor cannot start with an option prefix."}}, True
         if name in ('wake_sessions_target', 'wake_messages_send') and any(
@@ -262,6 +279,9 @@ class CommandRunner:
                             '--idempotency-key',arguments['idempotency_key'],
                             '--ttl',arguments.get('ttl','24h'),arguments['binding_id'],
                             arguments['trigger'],'--',arguments['prompt']]
+            for key in ('wake_lifetime', 'owner_id', 'owner_end', 'recipient_startup'):
+                if key in arguments:
+                    command[-4:-4] = ['--'+key.replace('_','-'), arguments[key]]
             return self._execute(command,arguments,readonly)
         body = arguments.get("body")
         if body is not None:
@@ -403,6 +423,7 @@ def main(argv=None):
     parser.add_argument("--tmux-session")
     parser.add_argument("--wake-root", type=Path, default=os.environ.get("CODEX_WAKE_WAKE_ROOT"))
     parser.add_argument("--sender-authority", type=Path, default=os.environ.get("CODEX_WAKE_SENDER_RECEIPT_AUTHORITY"))
+    parser.add_argument('--harness-policy', type=Path, help='private host controller task-delegation policy; never a tool argument')
     parser.add_argument('--lifecycle-profiles', type=Path, help='host-approved lifecycle launch registry')
     parser.add_argument('--lifecycle-root', type=Path,
                         help='private lifecycle journal; falls back to --wake-root without changing other tool scope')

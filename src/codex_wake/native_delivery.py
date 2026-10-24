@@ -26,6 +26,8 @@ def add_native_parser(subparsers):
     migrate.add_argument('--apply', action='store_true', help='save original and promote schema1 native record to schema4')
     for verb in ('after', 'at', 'file'):
         command = commands.add_parser(verb)
+        from .wake_policy import add_options
+        add_options(command)
         command.add_argument('--codex-path', default='codex')
         command.add_argument('--endpoint', default='unix://')
         command.add_argument('--ttl', default='24h', help='expiry after time due, or after file registration')
@@ -42,6 +44,10 @@ def add_native_parser(subparsers):
         command.add_argument('prompt', nargs=argparse.REMAINDER)
 
 
+from .wake_policy import guard_registration
+
+
+@guard_registration
 def create_native(args, root):
     from .runtime_policies import require_wait_policy
     require_wait_policy(getattr(args,"busy_policy","wait"))
@@ -71,7 +77,7 @@ def create_native(args, root):
     if existing is not None:
         return existing
     from .native_clock import configuration
-    if configuration() or any(getattr(args, name, None) for name in ('idempotency_key', 'time_tolerance', 'stop_at', 'as_json')):
+    if getattr(args, 'wake_policy_enabled', False) or configuration() or any(getattr(args, name, None) for name in ('idempotency_key', 'time_tolerance', 'stop_at', 'as_json')):
         return retain(args, root)
     try:
         observation = read_time()
@@ -131,7 +137,7 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
     if existing.get('state') == 'uncertain':
         return reconcile_native(root, found, now, runtime_adapter=runtime_adapter)
     from .network_wakes import precise_deadline
-    intent = record.get('schema_version') == 6
+    intent = record.get('schema_version') in (6, 8)
     if intent:
         from .native_intents import dispatch_gate
         verdict = dispatch_gate(record, clock_provider())
@@ -158,7 +164,11 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
             raise RuntimeTargetError('unavailable', 'resolved_recipient_changed')
         observation = adapter.observe(recipient)
         record['runtime_observation'] = observation.summary(recipient)
-        ready = observation.state == 'ready'
+        from .wake_policy import startup_reason
+        policy_reason = startup_reason(record, observation)
+        ready = observation.state == 'ready' and policy_reason is None
+        if policy_reason:
+            record['policy_outcome'] = dict(state='held', reason=policy_reason)
         if observation.resumed:
             record = append_event(record, 'native_same_thread_resumed',
                                   'explicit workflow policy resumed its exact saved thread', now)

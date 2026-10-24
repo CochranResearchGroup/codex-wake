@@ -19,6 +19,19 @@ from codex_wake.cli import run
 
 
 class HandoffPreflightTests(unittest.TestCase):
+    def setUp(self):
+        isolated = tempfile.TemporaryDirectory()
+        self.addCleanup(isolated.cleanup)
+        environment = patch.dict(os.environ, {
+            'XDG_CONFIG_HOME': str(Path(isolated.name) / 'config'),
+            'XDG_STATE_HOME': str(Path(isolated.name) / 'state'),
+        })
+        environment.start()
+        self.addCleanup(environment.stop)
+
+    def test_pinned_task_brief_reaches_successor_preflight(self):
+        self.scenario(task_brief=True)
+
     def test_non_github_review_accepts_evidence_without_changing_native_guards(self):
         self.scenario(workflow='local-review')
 
@@ -168,7 +181,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False,reference_contract=False,resume_modal=False,lost_modal=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False,reference_contract=False,resume_modal=False,lost_modal=False,task_brief=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -219,6 +232,20 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 pending_wakes=[],pending_messages=[],claim_holders=[],reply_route='original thread',
                 hard_stops=['original expiry and caps'],expires_at='2030-01-01T00:00:00Z',
                 resources={k:policy[k] for k in ('token_cap','time_cap_seconds','tokens_before_source','seconds_before_source','started_at')})
+            if task_brief:
+                from codex_wake.task_briefs import BriefAuthority, TaskBriefStore
+                from codex_wake.lifecycle_budget import objective_identity
+                briefs = TaskBriefStore(root)
+                authority = BriefAuthority('operator:fixture', 'operator')
+                brief_content = dict(objective=policy['objective'], phase='implementation',
+                    non_goals=['Never deploy'], acceptance=['bounded continuation'], context=[],
+                    workspace=tmp, allocation_ref=objective_identity(policy), permission_ref='worker')
+                briefs.propose('fixture-task', brief_content, authority=authority)
+                briefs.approve('fixture-task', 1, authority=authority)
+                briefs.admit('fixture-task', 'original-instruction', authority=authority)
+                body['task_brief'] = briefs.assignment_pin('fixture-task', 'original-instruction')
+                briefs.propose('fixture-task', dict(brief_content, non_goals=['Future instructions only']), authority=authority)
+                briefs.approve('fixture-task', 2, authority=authority)
             checkpoint.write_text(json.dumps(body));digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
             threads[source]['turns'][0]['items'][0]['aggregatedOutput']='checkpoint:'+source+':'+digest
             if activate:policy['activation']=dict(approved=True,max_poll_seconds=1,deadline_margin_seconds=10)
@@ -412,6 +439,15 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             return
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         receipt=json.loads(output.getvalue())
+                        if task_brief:
+                            pin = body['task_brief']
+                            self.assertEqual(receipt['intent']['task_brief'], pin)
+                            self.assertEqual(receipt['successor']['intent']['task_brief'], pin)
+                            self.assertIn('Never deploy', receipt['successor']['intent']['task'])
+                            self.assertNotIn('Future instructions only', receipt['successor']['intent']['task'])
+                            contract = json.loads(receipt['preflight_task'].split('PREFLIGHT_CONTRACT=', 1)[1].split('\n', 1)[0])
+                            self.assertEqual(contract['task_brief'], pin)
+                            self.assertEqual(len(briefs.inspect('fixture-task')['admissions']), 1)
                         if reference_contract:
                             contract=json.loads(receipt['preflight_task'].split('PREFLIGHT_CONTRACT=',1)[1].split('\n',1)[0])
                             for selection in ('handoff_writer','preflight_reviewer'):
@@ -486,7 +522,14 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(methods.count('thread/start'),1)
                             return
                         if bad_review:
-                            self.assertEqual(receipt['reason'], 'substantive_work_review_unverified')
+                            successor = receipt.get('successor', {})
+                            self.assertEqual(receipt['reason'], 'substantive_work_review_unverified', {
+                                'handoff_state': receipt.get('state'),
+                                'successor_state': successor.get('state'),
+                                'successor_reason': successor.get('reason'),
+                                'successor_uncertain_effect': successor.get('uncertain_effect'),
+                                'successor_history': successor.get('history'),
+                            })
                             self.assertNotIn(target, goals)
                             self.assertEqual(receipt['preflight_tokens_used'], 30)
                             return

@@ -1349,3 +1349,36 @@ provider-free MCP/wake-control/product smokes pass. REL-03 candidate preparation
 DONE: PR309 sourcehead0f890c7 passed Python3.11/3.12 CI40048872250; final closure
 commit remains subject to normal PR integration checks.
 No public release or production rollout.
+
+
+Agent harness planning backlog: [Plan0173](docs/dev/plans/0173-2026-10-23-agent-harness-backlog.md)
+consolidates the post0.20.0 feature discussion into32 local TRIAGE drafts. Shared
+ownership, coverage, hard dependencies and write-collision constraints are
+separate. HF-01 is the next shared-contract grill; after it, HF-02 inventory,
+HF-07 task/context and HF-13 wake durability form the first parallel frontier.
+No implementation or new GitHub issue publication is authorized by these drafts.
+
+2026-10-24 HF-01 design resolved: seven scenario decisions recorded in Plan0173.
+Next interview frontier: HF-02 inventory, HF-07 task briefs and HF-13 wake durability.
+No feature implementation authorized by interview completion alone.
+
+2026-10-24 frontier interview: HF-02 configurable self-enrollment/operator
+unenrollment and HF-07 brief revision rules resolved. HF-13 lifetime accepted;
+recipient startup is an independent configurable axis; two policy defaults remain
+pending. HF-06 must consume the other agent's host-policy repair, not duplicate it.
+
+2026-10-24 HF-13 follow-up resolved: configurable owner-end retirement default
+and configurable create/load/run startup default for new wakes. HF-02/HF-07/HF-13
+product interviews are resolved; next work is bounded technical design/handoffs.
+
+2026-10-24 first-frontier specifications drafted: HF-02 inventory, HF-07 task
+briefs, HF-13 wake policy. Review public seams and existing three-ticket boundaries
+before canonical GitHub publication. #310 owns the parallel self-access repair.
+
+2026-10-24 approved first frontier published: HF-02 #315, HF-07 #316, HF-13 #317.
+All three are ready-for-agent with no mutual blockers. Implementation not started;
+primary retains shared hub integration and #310 overlap coordination.
+
+2026-10-24 first frontier source complete: #315/#316/#317 closed after acceptance.
+One two-axis review and one TDD remediation pass complete; PR326 final CI/integration
+pending. Remaining28 feature tickets retain their own interview gates.

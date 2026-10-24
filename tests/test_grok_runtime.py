@@ -86,7 +86,8 @@ class GrokScheduleTests(unittest.TestCase):
                 self.assertEqual(run(['--wake-root',str(root),'grok','after','--ttl','2m','--idempotency-key','original',binding_id,'1s','--','Synthetic wake']),0)
             authority_path=all_records(root)[0].path
             record=all_records(root)[0].record
-            self.assertEqual(record['schema_version'],7)
+            self.assertEqual(record['schema_version'],8)
+            self.assertEqual(record['intent_schema_version'],7)
             self.assertEqual(classify_record(record),'runtime_intent_v7')
             self.assertEqual(classify_record(dict(record,schema_version=1)),'hold')
             with patch('codex_wake.grok_runtime.GrokRuntimeAdapter.resolve', return_value=RuntimeRecipient('grok',SESSION,{})), patch(

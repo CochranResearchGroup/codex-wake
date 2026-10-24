@@ -1,3 +1,4 @@
+"""Historical schema5/6 clock and delivery compatibility; schema8 is tested separately."""
 import contextlib
 import io
 import sys
@@ -5,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from codex_wake.cli import run
+from legacy_native_fixture import run_legacy_native as run
 from codex_wake.records import all_records
 from codex_wake.time_provider import TimeDecision
 

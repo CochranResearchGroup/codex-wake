@@ -510,3 +510,10 @@ frame hash receipt is transport observation, never an authenticated work receipt
 The existing mailbox claim/receipt protocol may subsequently strengthen that same
 message with a real credentialed work claim. Unknown outcomes remain uncertain
 and are never retried as if no bytes were sent. No bus schema migration is required.
+
+## Schema8 policy-bearing scheduling intents
+
+See [wake policy](../wake-policy.md#record-compatibility) for the exact fields,
+legacy preservation and reader requirements. New native and managed Grok intent
+registrations write schema8, retaining base intent version6/7 semantics. Older
+records remain unchanged; unknown policy/record versions hold without delivery.

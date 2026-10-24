@@ -80,6 +80,18 @@ class CodexRuntimeAdapter:
             "terminal_input": RuntimeCapability("unsupported", "not_this_delivery_method"),
             "receiver_acknowledgment": RuntimeCapability("not_qualified", "queue_is_not_receiver_ack"),
         }
+        if target.get('startup_policy') == 'active_tab':
+            from .sessions import observe
+            try:
+                snapshot = observe(endpoint=target['endpoint'], timeout=5)
+                matches = [row for row in snapshot['sessions'] if row.get('thread_id') == recipient.session_id]
+                active = (snapshot.get('complete') and len(matches) == 1
+                          and matches[0].get('binding_status') == 'metadata_matched'
+                          and len(matches[0].get('attachments', [])) == 1)
+                capabilities['active_tab'] = RuntimeCapability('supported' if active else 'unavailable',
+                                                              'exact_metadata_attachment' if active else 'active_attachment_unavailable')
+            except Exception:
+                capabilities['active_tab'] = RuntimeCapability('unavailable', 'active_attachment_unavailable')
         resumed = False
         try:
             thread = self._read_thread(target)

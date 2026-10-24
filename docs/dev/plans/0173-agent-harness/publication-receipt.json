@@ -1,0 +1,94 @@
+{
+  "recorded_at": "2026-10-24T19:14:25.594Z",
+  "authority": "Operator approved first-frontier specification seams and ticket breakdown in conversation",
+  "target": "github.com/CochranResearchGroup/codex-wake",
+  "issues": [
+    {
+      "local_id": "HF-02",
+      "number": 315,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/315",
+      "marker": "cw-harness-173-hf-02",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create_with_existing_labels",
+      "before": "absent_by_exact_marker_search",
+      "after": {
+        "state": "open",
+        "labels": [
+          {
+            "name": "enhancement",
+            "color": "a2eeef",
+            "description": "New feature or request"
+          },
+          {
+            "name": "ready-for-agent",
+            "color": "ededed",
+            "description": "Matt engineering triage state: ready-for-agent"
+          }
+        ]
+      },
+      "verified": true,
+      "provenance_links_verified": true,
+      "after_body_length": 8357
+    },
+    {
+      "local_id": "HF-07",
+      "number": 316,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/316",
+      "marker": "cw-harness-173-hf-07",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create_with_existing_labels",
+      "before": "absent_by_exact_marker_search",
+      "after": {
+        "state": "open",
+        "labels": [
+          {
+            "name": "enhancement",
+            "color": "a2eeef",
+            "description": "New feature or request"
+          },
+          {
+            "name": "ready-for-agent",
+            "color": "ededed",
+            "description": "Matt engineering triage state: ready-for-agent"
+          }
+        ]
+      },
+      "verified": true,
+      "provenance_links_verified": true,
+      "after_body_length": 7610
+    },
+    {
+      "local_id": "HF-13",
+      "number": 317,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/317",
+      "marker": "cw-harness-173-hf-13",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create_with_existing_labels",
+      "before": "absent_by_exact_marker_search",
+      "after": {
+        "state": "open",
+        "labels": [
+          {
+            "name": "enhancement",
+            "color": "a2eeef",
+            "description": "New feature or request"
+          },
+          {
+            "name": "ready-for-agent",
+            "color": "ededed",
+            "description": "Matt engineering triage state: ready-for-agent"
+          }
+        ]
+      },
+      "verified": true,
+      "provenance_links_verified": true,
+      "after_body_length": 9557
+    }
+  ]
+}

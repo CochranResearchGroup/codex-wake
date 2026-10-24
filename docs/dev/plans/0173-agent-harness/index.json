@@ -1,0 +1,512 @@
+{
+  "status": "DRAFT_NOT_IMPLEMENTATION_AUTHORITY",
+  "source": "Markdown tickets are authoritative drafts; this JSON is a generated index",
+  "baseline": "7ef73b12dde59cedbd98b5b73ac5250106ee63aa",
+  "tickets": [
+    {
+      "id": "HF-01",
+      "title": "Grill and reconcile the shared harness contracts",
+      "file": "0001-2026-10-23-hf-01-shared-contracts.md",
+      "priority": "P0",
+      "dependencies": [],
+      "state": "DONE_DESIGN_ONLY"
+    },
+    {
+      "id": "HF-02",
+      "title": "Enroll one existing agent into a unified managed inventory",
+      "file": "0002-2026-10-23-hf-02-managed-inventory.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-01"
+      ],
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 315,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/315",
+      "tracker_state": "closed"
+    },
+    {
+      "id": "HF-03",
+      "title": "Observe and wait for meaningful agent states",
+      "file": "0003-2026-10-23-hf-03-semantic-observation.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-02"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-04",
+      "title": "Prevent competing agents from mutating the same resource",
+      "file": "0004-2026-10-23-hf-04-resource-ownership.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-02"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-05",
+      "title": "Perform one guarded multi-step interaction and human takeover",
+      "file": "0005-2026-10-23-hf-05-guarded-interactions.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-03",
+        "HF-04",
+        "HF-06"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-06",
+      "title": "Apply host-approved permissions to an assignment step",
+      "file": "0006-2026-10-23-hf-06-step-permissions.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-02",
+        "HF-07"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-07",
+      "title": "Pin a task brief and bounded context package to one assignment",
+      "file": "0007-2026-10-23-hf-07-task-brief-context.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-01"
+      ],
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 316,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/316",
+      "tracker_state": "closed"
+    },
+    {
+      "id": "HF-08",
+      "title": "Accept one work result using independent declared checks",
+      "file": "0008-2026-10-23-hf-08-acceptance-gates.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-04",
+        "HF-06",
+        "HF-07"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-09",
+      "title": "Execute and recover a durable sequence of bounded agent turns",
+      "file": "0009-2026-10-23-hf-09-turn-sequence.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-03",
+        "HF-06",
+        "HF-07",
+        "HF-08"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-10",
+      "title": "Choose if/else and select/case branches from verified outcomes",
+      "file": "0010-2026-10-23-hf-10-branching.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-09"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-11",
+      "title": "Execute a finite for-each collection with a durable cursor",
+      "file": "0011-2026-10-23-hf-11-finite-foreach.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-10"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-12",
+      "title": "Repeat a checked step with explicit exit and progress limits",
+      "file": "0012-2026-10-23-hf-12-bounded-repeat.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-10"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-13",
+      "title": "Specify wake lifetime, ownership and reboot recovery",
+      "file": "0013-2026-10-23-hf-13-wake-durability.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-01"
+      ],
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 317,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/317",
+      "tracker_state": "closed"
+    },
+    {
+      "id": "HF-14",
+      "title": "Own a durable background job and await its result",
+      "file": "0014-2026-10-23-hf-14-background-jobs.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-02",
+        "HF-04",
+        "HF-06",
+        "HF-13"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-15",
+      "title": "Run a bounded worker team and join accepted results",
+      "file": "0015-2026-10-23-hf-15-parallel-join.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-11",
+        "HF-14"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-16",
+      "title": "Preview and apply active/repo tab ordering with pins",
+      "file": "0016-2026-10-23-hf-16-tab-ordering.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-03",
+        "HF-04",
+        "HF-06"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-17",
+      "title": "Park and restore dormant live tabs in a holding session",
+      "file": "0017-2026-10-23-hf-17-holding-session.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-16"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-18",
+      "title": "Resume one saved agent binding after crash, reboot or profile change",
+      "file": "0018-2026-10-23-hf-18-agent-resume.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-03",
+        "HF-06"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-19",
+      "title": "Restore a saved workspace and its conversation bindings",
+      "file": "0019-2026-10-23-hf-19-workspace-resume.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-17",
+        "HF-18"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-20",
+      "title": "Run one reboot-safe daily codex-bots task occurrence",
+      "file": "0020-2026-10-23-hf-20-daily-bot-task.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-13",
+        "HF-18",
+        "HF-21"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-21",
+      "title": "Route one blocked decision through a durable human-attention queue",
+      "file": "0021-2026-10-23-hf-21-attention-inbox.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-03",
+        "HF-06"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-22",
+      "title": "Review and correct or hold one overlong owned turn",
+      "file": "0022-2026-10-23-hf-22-drift-guard.md",
+      "priority": "P0",
+      "dependencies": [
+        "HF-05",
+        "HF-08",
+        "HF-21"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-23",
+      "title": "Report cumulative usage and remaining allowance across agents and jobs",
+      "file": "0023-2026-10-23-hf-23-portable-accounting.md",
+      "priority": "P2",
+      "dependencies": [
+        "HF-09",
+        "HF-14"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-24",
+      "title": "Enforce one qualified allowance through continuation and recovery",
+      "file": "0024-2026-10-23-hf-24-portable-enforcement.md",
+      "priority": "P2",
+      "dependencies": [
+        "HF-18",
+        "HF-23"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-25",
+      "title": "Record a redacted adapter interaction and replay it as a conformance fixture",
+      "file": "0025-2026-10-23-hf-25-adapter-recording.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-05"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-26",
+      "title": "Qualify managed Grok lifecycle operations through the common interface",
+      "file": "0026-2026-10-23-hf-26-grok-lifecycle.md",
+      "priority": "P2",
+      "dependencies": [
+        "HF-18",
+        "HF-25"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-27",
+      "title": "Show a unified operator overview and attach to a known agent",
+      "file": "0027-2026-10-23-hf-27-dashboard-overview.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-03"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-28",
+      "title": "Approve a decision and step a paused workflow from the console",
+      "file": "0028-2026-10-23-hf-28-dashboard-controls.md",
+      "priority": "P1",
+      "dependencies": [
+        "HF-05",
+        "HF-11",
+        "HF-21",
+        "HF-27"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-29",
+      "title": "Attribute time and usage to accepted work and correction cycles",
+      "file": "0029-2026-10-23-hf-29-work-economics.md",
+      "priority": "P2",
+      "dependencies": [
+        "HF-23"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-30",
+      "title": "Deliver an accepted work package and retire only its owned resources",
+      "file": "0030-2026-10-23-hf-30-completion-retirement.md",
+      "priority": "P2",
+      "dependencies": [
+        "HF-09",
+        "HF-14"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-31",
+      "title": "Qualify one selected additional TUI adapter",
+      "file": "0031-2026-10-23-hf-31-additional-runtime.md",
+      "priority": "P2",
+      "dependencies": [
+        "HF-25"
+      ],
+      "state": "TRIAGE"
+    },
+    {
+      "id": "HF-32",
+      "title": "Apply opt-in tab organization with stable protection rules",
+      "file": "0032-2026-10-23-hf-32-automatic-organization.md",
+      "priority": "P2",
+      "dependencies": [
+        "HF-17",
+        "HF-21"
+      ],
+      "state": "TRIAGE"
+    }
+  ],
+  "topological_frontiers": [
+    [
+      "HF-01"
+    ],
+    [
+      "HF-02",
+      "HF-07",
+      "HF-13"
+    ],
+    [
+      "HF-03",
+      "HF-04",
+      "HF-06"
+    ],
+    [
+      "HF-05",
+      "HF-08",
+      "HF-14",
+      "HF-16",
+      "HF-18",
+      "HF-21",
+      "HF-27"
+    ],
+    [
+      "HF-09",
+      "HF-17",
+      "HF-20",
+      "HF-22",
+      "HF-25"
+    ],
+    [
+      "HF-10",
+      "HF-19",
+      "HF-23",
+      "HF-26",
+      "HF-30",
+      "HF-31",
+      "HF-32"
+    ],
+    [
+      "HF-11",
+      "HF-12",
+      "HF-24",
+      "HF-29"
+    ],
+    [
+      "HF-15",
+      "HF-28"
+    ]
+  ],
+  "feature_coverage": {
+    "Unified session inventory/adoption": [
+      "HF-02"
+    ],
+    "Cross-runtime lifecycle": [
+      "HF-18",
+      "HF-19",
+      "HF-26",
+      "HF-31"
+    ],
+    "Semantic observe/wait": [
+      "HF-03"
+    ],
+    "Guarded interactions/human takeover": [
+      "HF-04",
+      "HF-05",
+      "HF-06"
+    ],
+    "Task scope/context and acceptance": [
+      "HF-07",
+      "HF-08"
+    ],
+    "One turn per instruction/sequence": [
+      "HF-09"
+    ],
+    "If/else/select": [
+      "HF-10"
+    ],
+    "Finite for-each/break/continue/return": [
+      "HF-11"
+    ],
+    "Bounded repeat/progress checks": [
+      "HF-12"
+    ],
+    "Await/background jobs": [
+      "HF-13",
+      "HF-14"
+    ],
+    "Parallel/join/team/worktree recipes": [
+      "HF-04",
+      "HF-15"
+    ],
+    "Active/repo ordering/pins/preview/undo": [
+      "HF-16"
+    ],
+    "Dormant holding/restore": [
+      "HF-17"
+    ],
+    "Persistent TUI conversation resume/account profile": [
+      "HF-18",
+      "HF-19"
+    ],
+    "Explicit wake durability": [
+      "HF-13"
+    ],
+    "Codex-bots daily tasks": [
+      "HF-20"
+    ],
+    "Human attention queue": [
+      "HF-21"
+    ],
+    "Drift Guard/interrogation/steer/human hold": [
+      "HF-22"
+    ],
+    "Portable aggregate accounting/enforcement": [
+      "HF-23",
+      "HF-24"
+    ],
+    "Diagnostic recording/conformance/version drift": [
+      "HF-25"
+    ],
+    "Dashboard overview/attach": [
+      "HF-27"
+    ],
+    "Dashboard controls/step/breakpoints/variables": [
+      "HF-28"
+    ],
+    "Work economics": [
+      "HF-29"
+    ],
+    "Completion/artifact delivery/cleanup": [
+      "HF-30"
+    ],
+    "Automatic tab policy": [
+      "HF-32"
+    ]
+  },
+  "validation": {
+    "tickets": 32,
+    "unique_ids": true,
+    "known_dependency_ids": true,
+    "acyclic": true,
+    "unmapped_feature_groups": 0
+  },
+  "existing_tracker_reconciliation": {
+    "270": "Reuse current enforcement/accounting baseline; HF-23/24 describe incremental remaining portability. No duplicate enforcement framework or automatic issue closure.",
+    "282": "Current public self-refresh/configuration scope must be reconciled for HF-06/26. Retain issue ownership; do not duplicate it.",
+    "135/142": "Existing webhook deployment/live-dispatch scope stays separate; await/background jobs reuse supported triggers without reopening live provider work."
+  }
+}

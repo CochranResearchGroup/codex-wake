@@ -7951,3 +7951,77 @@ command /home/ecochran76/.local/bin/codex-wake still reports0.19.1; isolated can
 is0.20.0 with no observed residual candidate commands. Final closure-only commit
 must pass ordinary PR checks before integration. No tag/release/upload/production
 install, grant/service effect or new provider prompt. Broader Plan0172 remains OPEN.
+
+
+## Turn396 | 2026-10-23 | Agent harness backlog reconciliation
+
+User requested organizing the working feature list into tickets, resolving
+component overlap and sequencing. Baseline origin/main7ef73b1 / released0.20.0.
+Primary planning owner only, no implementation workers, provider calls, real tab
+changes or new GitHub issues/labels/projects. Ticket-design skill produces
+copy-ready local drafts.32 TRIAGE tickets cover25 conversation feature groups;
+each starts with Matt grill-with-docs before any implementation handoff. HF-01
+shared contracts first, then independent HF-02/HF-07/HF-13. Daily task/reboot and
+Drift Guard paths do not wait for a full workflow language or dashboard. Existing
+#270 enforcement and #282 self-refresh are explicit reuse/reconciliation gates,
+not duplicated as new missing implementations. Separate hard dependency DAG from
+shared CLI/MCP/schema/terminal write-collision constraints; max three substantive
+implementation lanes. Added domain-only terms to existing GLOSSARY, preserved
+existing identity/claim/budget vocabulary. Detailed open product decisions stay
+with their feature interview. [Plan](docs/dev/plans/0173-2026-10-23-agent-harness-backlog.md).
+
+Planning validation: 32 unique ticket bodies; known, acyclic dependency graph;
+25 covered feature groups; relative ticket/parent links resolve; policy wiring
+PASS; git diff whitespace check PASS. No runtime behavior changed or qualified.
+
+## Turn 397 | 2026-10-24
+
+HF-01 questionnaire response 4714471256de4ac29536f14d29677f03 was complete;
+all seven recommended choices selected. Recorded scenario decisions, component
+ownership, current open #270/#282 reconciliation and three bounded interview
+handoffs. HF-01 is DONE for design only; later tickets retain their own grills.
+No runtime effects. Validation: dependency/index consistency, local links, policy
+wiring and whitespace checks required before publishing this checkpoint.
+
+## Turn 398 | 2026-10-24
+
+Read complete response e7d360f4df91425fb8a251ac51bdec42 including active Other
+answers and notes. Recorded self-enrollment default, effective explicit operator
+unenrollment, permissive self-control profiles and separate lifetime/startup axes.
+Preserved other-agent ownership of host-policy repair. HF-02/HF-07 product inputs
+resolved; HF-13 follow-up pending. No implementation/runtime effects.
+
+## Turn 399 | 2026-10-24
+
+Recorded direct operator follow-up resolving HF-13 defaults: retire pending
+owner-bound wakes on explicit verified owner completion; default new wakes to
+create/load/run. Both remain configurable. Legacy behavior and uncertain effects
+remain intact. No runtime changes. Policy wiring and whitespace validation PASS.
+
+## Turn 400 | 2026-10-24
+
+Applied to-spec synthesis to HF-02/HF-07/HF-13 and reconciled existing tracer-bullet
+tickets. Fetched origin/main f96f4c8 and located #310 as the other own-session
+permission lane. Updated domain-only glossary from accepted decisions. Prepared
+three-spec review packet; no new interviews, tracker mutations or runtime effects.
+Review pending for public testing seams and slice granularity, as required by the
+invoked local to-spec/to-tickets skills.
+
+## Turn 401 | 2026-10-24
+
+After explicit operator approval, published three combined spec/implementation
+issues to github.com/CochranResearchGroup/codex-wake as ecochran76: #315 HF-02,
+#316 HF-07, #317 HF-13. Verified exact title/marker/body, open state and existing
+enhancement/ready-for-agent labels. No parent issue, assignee or milestone changes.
+Linked local index/specs and retained shared integration and #310 boundaries.
+No feature implementation or live runtime effects.
+
+## Turn 402 | 2026-10-24
+
+Implemented first harness frontier with primary HF-13 and workers /root/hf02
+(HF-02) and /root/hf07 (HF-07), integrated on feat/harness-frontier from f96f4c8.
+Source acceptance closed #315/#316/#317; then exactly one Standards/Spec review
+and one bounded TDD pass fixed completion provenance and held-record mutation.
+Serial1495-test runs pass on3.11/3.12 (one unrelated opt-in skip); post-fix focused
+checks and isolated0.21.0 CLI/MCP wheel proof pass. PR326 owns final CI/integration.
+No production install, provider turns, host permission edits or release publication.

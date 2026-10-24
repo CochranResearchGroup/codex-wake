@@ -1,0 +1,18 @@
+{
+  "state": "passed",
+  "installed_version": "0.21.0",
+  "tools": 45,
+  "expected_tools": [
+    "wake_agents_list",
+    "wake_agents_enroll",
+    "wake_task_briefs_admit",
+    "wake_task_briefs_approve",
+    "wake_native_after",
+    "wake_owner_complete"
+  ],
+  "mcp_read_success": true,
+  "unbound_native_registration_denied": true,
+  "wheel_sha256": "3a7c5dd83674400caea2418875c309483dfa55c90b928885d5ff9f104eb15736",
+  "source_commit": "71d35b9530b8a5da32c145feb564fa9b26023705",
+  "scope": "isolated wheel; no production installation"
+}

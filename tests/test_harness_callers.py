@@ -1,0 +1,156 @@
+"""Public caller seams preserve exact scope, authority and frozen intent."""
+import contextlib
+import io
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+from codex_wake.cli import run
+from codex_wake.mcp_server import CommandRunner, SPECS
+from codex_wake.records import all_records
+
+THREAD = '00000000-0000-7000-8000-000000000315'
+META = dict(threadId=THREAD, sessionId=THREAD, callId='call-315',
+            **{'x-codex-turn-metadata': dict(thread_id=THREAD, session_id=THREAD, turn_id='turn-315')})
+
+
+class HarnessCallerTests(unittest.TestCase):
+    def test_inventory_main_cli_and_mcp_share_suppression_and_identity(self):
+        from codex_wake.managed_inventory import Observation
+        import time
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            sample = Observation('codex', 'codex:fixture', THREAD, str(root), 'ready', time.time(),
+                                 'native_metadata', dict(pid=123, start_ticks=42, boot_id='boot-a'),
+                                 [dict(pane_id='%1', window_id='@1')], {'inspect': 'supported'})
+            output = io.StringIO()
+            with patch('codex_wake.managed_inventory_commands.RuntimeObserver.__call__', return_value=sample), contextlib.redirect_stdout(output):
+                code = run(['--wake-root', str(root), 'agents', 'enroll', '--operator', '--conversation-id', THREAD])
+            self.assertEqual(code, 0, output.getvalue())
+            enrolled = json.loads(output.getvalue())
+            runner = CommandRunner(wake_root=root)
+            with patch('codex_wake.managed_inventory_commands.RuntimeObserver.__call__', return_value=sample):
+                same, failed = runner.call('wake_agents_enroll', dict(runtime='codex', conversation_id=THREAD), native_context=META)
+            self.assertFalse(failed, same)
+            self.assertEqual(same['agent']['managed_agent_id'], enrolled['agent']['managed_agent_id'])
+            identity = same['agent']['managed_agent_id']
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(run(['--wake-root', str(root), 'agents', 'unenroll', '--operator', '--managed-agent-id', identity]), 0)
+            with patch('codex_wake.managed_inventory_commands.RuntimeObserver.__call__', return_value=sample):
+                suppressed, failed = CommandRunner(wake_root=root).call('wake_agents_enroll',
+                    dict(runtime='codex', conversation_id=THREAD), native_context=META)
+            self.assertFalse(failed, suppressed)
+            self.assertEqual(suppressed['status'], 'suppressed')
+            self.assertFalse(suppressed['agent']['binding_current'])
+
+    def test_brief_main_cli_and_native_mcp_admit_same_approved_revision(self):
+        from codex_wake.a2a_bus import BusStore
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bus, operator = BusStore.configure(root / 'bus')
+            wake = root / 'wake'
+            content = dict(objective='Implement approved packet', phase='implementation',
+                           non_goals=['No release'], acceptance=['Public result'], context=[],
+                           workspace=str(root), allocation_ref='allocation-existing', permission_ref='profile-existing')
+            def cli(verb, *extra):
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    result = run(['--wake-root', str(wake), 'task-briefs', verb, '--task-id', 'task-315',
+                                  '--bus-root', str(bus.root), '--operator-capability', str(operator), *extra])
+                self.assertEqual(result, 0, output.getvalue())
+                return json.loads(output.getvalue())
+            cli('propose', '--brief-json', json.dumps(content))
+            cli('approve', '--revision', '1')
+            runner = CommandRunner(wake_root=wake)
+            with patch('codex_wake.harness_mcp.native_workspace', return_value=root):
+                value, failed = runner.call('wake_task_briefs_admit', dict(caller_thread_id=THREAD,
+                    task_id='task-315', assignment_id='step-1'), native_context=META)
+                self.assertFalse(failed, value)
+                self.assertEqual(value['pin']['revision'], 1)
+                denied, failed = runner.call('wake_task_briefs_approve', dict(caller_thread_id=THREAD,
+                    task_id='task-315', revision=1), native_context=META)
+                self.assertTrue(failed)
+                self.assertEqual(denied['error']['code'], 'authority_denied')
+                lost, failed = runner.call('wake_task_briefs_admit', dict(caller_thread_id=THREAD,
+                    task_id='task-315', assignment_id='step-1'), native_context=None)
+                self.assertTrue(failed)
+            content['objective'] = 'Changed later scope'
+            cli('propose', '--brief-json', json.dumps(content))
+            cli('approve', '--revision', '2')
+            with patch('codex_wake.harness_mcp.native_workspace', return_value=root):
+                original, failed = runner.call('wake_task_briefs_admit', dict(caller_thread_id=THREAD,
+                    task_id='task-315', assignment_id='step-1'), native_context=META)
+            self.assertFalse(failed, original)
+            self.assertEqual(original['pin']['revision'], 1)
+
+    def test_only_host_delegation_can_promote_native_controller(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            policy = root / 'host.json'
+            policy.write_text(json.dumps(dict(version=1, controllers={THREAD: ['task-1']})))
+            policy.chmod(0o600)
+            runner = CommandRunner(wake_root=root / 'wake', harness_policy=policy)
+            content = dict(objective='Check fixture', phase='review', non_goals=['No release'], acceptance=['Checked'],
+                           context=[], workspace=str(root), allocation_ref='existing', permission_ref='existing')
+            value, failed = runner.call('wake_task_briefs_propose', dict(caller_thread_id=THREAD,
+                task_id='task-1', brief=content), native_context=META)
+            self.assertFalse(failed, value)
+            value, failed = runner.call('wake_task_briefs_approve', dict(caller_thread_id=THREAD,
+                task_id='task-1', revision=1), native_context=META)
+            self.assertFalse(failed, value)
+            invalid, failed = runner.call('wake_task_briefs_approve', dict(caller_thread_id=THREAD,
+                task_id='task-1', revision=1, role='operator'), native_context=META)
+            self.assertTrue(failed)
+            self.assertEqual(invalid['error']['code'], 'invalid_argument')
+
+    def test_native_registration_requires_host_metadata_and_preserves_policy(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            runner = CommandRunner(wake_root=root)
+            body = dict(caller_thread_id=THREAD, trigger='1m', prompt='Continue', idempotency_key='native-mcp',
+                        wake_lifetime='conversation', owner_end='hold', recipient_startup='background_saved')
+            denied, failed = runner.call('wake_native_after', body)
+            self.assertTrue(failed)
+            self.assertFalse(all_records(root))
+            with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                    'codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None}):
+                value, failed = runner.call('wake_native_after', body, native_context=META)
+            self.assertFalse(failed, value)
+            self.assertEqual(value['requires_worker_schema'], 8)
+            record = all_records(root)[0].record
+            self.assertEqual(record['wake_policy']['owner'], dict(kind='conversation', id='codex:' + THREAD))
+            self.assertEqual(record['wake_policy']['startup'], 'background_saved')
+            self.assertEqual(record['target']['resume_policy'], 'same_thread')
+
+    def test_harness_tool_schemas_exclude_host_and_role_overrides(self):
+        for name, spec in SPECS.items():
+            if spec[0] not in ('agents', 'task-briefs', 'harness-native', 'harness-owner'):
+                continue
+            for forbidden in ('wake_root', 'harness_policy', 'operator', 'role', 'native_context', 'app_server'):
+                self.assertNotIn(forbidden, spec[3], name)
+
+    def test_caller_identity_cannot_assert_completion_but_can_reconcile_operator_event(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            body = dict(caller_thread_id=THREAD, owner_kind='conversation',
+                        owner_id='codex:' + THREAD, event_id='finished-1')
+            value, failed = CommandRunner(wake_root=root).call('wake_owner_complete', body, native_context=META)
+            self.assertTrue(failed, value)
+            self.assertIn('completion_evidence_required', value['error']['message'])
+            self.assertFalse((root / 'wake-owners.json').exists())
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(run(['--wake-root', str(root), 'wake-policy', 'owner-complete', '--operator',
+                                      '--owner-kind', 'conversation', '--owner-id', 'codex:' + THREAD,
+                                      '--event-id', 'finished-1']), 0)
+            journal = (root / 'wake-owners.json').read_bytes()
+            value, failed = CommandRunner(wake_root=root).call('wake_owner_complete', body, native_context=META)
+            self.assertFalse(failed, value)
+            self.assertTrue(value['deduplicated'])
+            self.assertEqual((root / 'wake-owners.json').read_bytes(), journal)
+
+
+if __name__ == '__main__':
+    unittest.main()
