@@ -7990,3 +7990,10 @@ answers and notes. Recorded self-enrollment default, effective explicit operator
 unenrollment, permissive self-control profiles and separate lifetime/startup axes.
 Preserved other-agent ownership of host-policy repair. HF-02/HF-07 product inputs
 resolved; HF-13 follow-up pending. No implementation/runtime effects.
+
+## Turn 399 | 2026-10-24
+
+Recorded direct operator follow-up resolving HF-13 defaults: retire pending
+owner-bound wakes on explicit verified owner completion; default new wakes to
+create/load/run. Both remain configurable. Legacy behavior and uncertain effects
+remain intact. No runtime changes. Policy wiring and whitespace validation PASS.

@@ -1366,3 +1366,7 @@ No feature implementation authorized by interview completion alone.
 unenrollment and HF-07 brief revision rules resolved. HF-13 lifetime accepted;
 recipient startup is an independent configurable axis; two policy defaults remain
 pending. HF-06 must consume the other agent's host-policy repair, not duplicate it.
+
+2026-10-24 HF-13 follow-up resolved: configurable owner-end retirement default
+and configurable create/load/run startup default for new wakes. HF-02/HF-07/HF-13
+product interviews are resolved; next work is bounded technical design/handoffs.
