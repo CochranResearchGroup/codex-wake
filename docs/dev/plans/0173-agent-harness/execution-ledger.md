@@ -13,9 +13,9 @@ Approved planning imported through 73600ca.
 
 | Ticket | Blockers | State | Owner | Branch / worktree | Owned surface |
 | --- | --- | --- | --- | --- | --- |
-| #315 / HF-02 | HF-01 design complete | running | /root/hf02 | feat/315-managed-inventory / codex-wake-hf02 | New inventory leaves, focused tests, feature docs |
-| #316 / HF-07 | HF-01 design complete | running | /root/hf07 | feat/316-task-briefs / codex-wake-hf07 | New task-brief leaves, focused tests, feature docs |
-| #317 / HF-13 | HF-01 design complete | running | /root | feat/harness-frontier / codex-wake-harness-frontier | Wake policy, record/dispatcher integration, shared CLI/MCP registration |
+| #315 / HF-02 | HF-01 design complete | integrated | /root/hf02 | feat/315-managed-inventory / codex-wake-hf02 | New inventory leaves, focused tests, feature docs |
+| #316 / HF-07 | HF-01 design complete | integrated | /root/hf07 | feat/316-task-briefs / codex-wake-hf07 | New task-brief leaves, focused tests, feature docs |
+| #317 / HF-13 | HF-01 design complete | integrated | /root | feat/harness-frontier / codex-wake-harness-frontier | Wake policy, record/dispatcher integration, shared CLI/MCP registration |
 
 Each worker starts at 73600ca and commits only owned paths. Primary integrates
 serially, preserves exact caller/grant/resource semantics, and owns shared hubs,
@@ -68,3 +68,40 @@ Progress classification: progress. Worker leaves and lifecycle carrying are inte
 Remaining gates: integrate fixture follow-up, freeze source, complete comprehensive
 validation, reconcile every ticket criterion, then close tickets before the one
 requested broad Standards/Spec review and bounded TDD remediation pass.
+
+## Frozen validation checkpoint: 71d35b9
+
+Progress classification: progress. Feature implementation is frozen for the
+Python3.11 and3.12 comprehensive runs (sessions34829 and99902 respectively).
+
+- Worker8849e9a integrated639a7c6: per-test XDG isolation and full native/PTY
+  preflight fixture. Original pin/revision1 reaches the successor after revision2
+  is approved; original admission remains single. No production guard change.
+- Compatibility update71d35b9 retains authentic historical schema5/6 writer
+  fixtures for legacy reader/migration tests, while the real new-registration
+  public CLI asserts schema8. Monitor/CLI schema expectations include8.
+- Seven policy tests pass: frozen defaults/idempotency, explicit conflict,
+  malformed/changed intent, all owner-end actions, lost-response no-replay,
+  startup admission and missing owner-journal fencing. Twelve inventory, thirteen
+  task-brief and five integrated public caller tests pass. Legacy network10,
+  migration5 and monitor10 focused tests pass.
+- Presubmit compile, F821/F822/F823, policy wiring and whitespace checks pass.
+- Initial comprehensive diagnostic run on an evolving tree found compatibility
+  fixture expectations and ambient-XDG leakage; it is not final-tip acceptance.
+  Both were repaired without weakening the existing behavior assertions.
+- The one opt-in disposable systemd containment test is unrelated to these
+  features and remains outside this provider-free source acceptance envelope.
+
+Acceptance mapping pending comprehensive completion:
+
+| Ticket criterion | Public evidence |
+| --- | --- |
+| #315 deliberate exact enrollment | managed inventory command/runtime observer tests, integrated native MCP enrollment |
+| #315 persistent identity and stale binding | concurrent/restart/successor/reconcile tests; CLI/MCP share ID and suppression |
+| #315 Codex/Grok capability-aware inventory | native observer tests and authenticated host-bound Grok caller tests; grants_operations false |
+| #316 pinned approved revision | task-brief admission/restart tests and main CLI/MCP revision1 after approval2 |
+| #316 scope proposal is not approval | native worker denial, private exact controller delegation and CLI operator capability proof |
+| #316 bounded context and obligations | required context changed/missing/symlink/oversize tests; actual spawn/handoff/preflight pin propagation |
+| #317 existing durable behavior / explicit policy | schema5/6/7 compatibility and new schema8 policy/default/owner-action tests |
+| #317 origin/expiry/uncertainty continuity | native-intent18 tests, owner retirement no resend, restart/configuration freeze tests |
+| #317 isolated epoch/monitor evidence | counter discontinuity/time uncertainty tests, schema8 monitor refusal/advertisement; no live reboot claim |
