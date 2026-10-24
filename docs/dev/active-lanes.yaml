@@ -1,6 +1,57 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P173-HF02
+    owner: primary / ecochran76
+    objective: Implement approved harness frontier issue 315
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/315]
+    plan: docs/dev/plans/0173-agent-harness/execution-ledger.md
+    plan_ref: feat/harness-frontier
+    branch: feat/315-managed-inventory
+    target: origin/main
+    plan_state: OPEN
+    custody_state: OWNED
+    checkpoint: 73600ca
+    integration: squash_pr
+    dependencies: []
+    overlaps: [P173-HF02, P173-HF07, P173-HF13]
+    reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
+    updated_at: 2026-10-24
+    disposition: Separate leaf ownership; primary serializes common CLI/MCP and record integration
+  - id: P173-HF07
+    owner: primary / ecochran76
+    objective: Implement approved harness frontier issue 316
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/316]
+    plan: docs/dev/plans/0173-agent-harness/execution-ledger.md
+    plan_ref: feat/harness-frontier
+    branch: feat/316-task-briefs
+    target: origin/main
+    plan_state: OPEN
+    custody_state: OWNED
+    checkpoint: 73600ca
+    integration: squash_pr
+    dependencies: []
+    overlaps: [P173-HF02, P173-HF07, P173-HF13]
+    reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
+    updated_at: 2026-10-24
+    disposition: Separate leaf ownership; primary serializes common CLI/MCP and record integration
+  - id: P173-HF13
+    owner: primary / ecochran76
+    objective: Implement approved harness frontier issue 317
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/317]
+    plan: docs/dev/plans/0173-agent-harness/execution-ledger.md
+    plan_ref: feat/harness-frontier
+    branch: feat/harness-frontier
+    target: origin/main
+    plan_state: OPEN
+    custody_state: OWNED
+    checkpoint: 73600ca
+    integration: squash_pr
+    dependencies: []
+    overlaps: [P173-HF02, P173-HF07, P173-HF13]
+    reconciled_overlaps: [P173-HF02, P173-HF07, P173-HF13]
+    updated_at: 2026-10-24
+    disposition: Separate leaf ownership; primary serializes common CLI/MCP and record integration
   - id: P172-REL-NOTES
     owner: primary / ecochran76; worker /root/release_notes
     objective: Prepare accurate candidate release notes and README link
