@@ -105,3 +105,19 @@ Acceptance mapping pending comprehensive completion:
 | #317 existing durable behavior / explicit policy | schema5/6/7 compatibility and new schema8 policy/default/owner-action tests |
 | #317 origin/expiry/uncertainty continuity | native-intent18 tests, owner retirement no resend, restart/configuration freeze tests |
 | #317 isolated epoch/monitor evidence | counter discontinuity/time uncertainty tests, schema8 monitor refusal/advertisement; no live reboot claim |
+
+## Comprehensive matrix: first frozen-source result
+
+Both Python3.11 and3.12 executed1495 tests on the same frozen runtime source.
+Each reported three failing subcases in one existing acceptance-evidence fixture,
+with the same `successor_assignment_awaiting_preflight` instead of the expected
+review-rejection reason. New feature tests passed. This is not a clean matrix.
+Worker /root/hf07 is checking per-scenario XDG isolation because multiple
+subcases run inside one test; the first subcase passes and leaves registration
+state for the others. No production guard or expected assertion is being relaxed.
+
+Isolated installed-wheel smoke passed: version0.21.0 from site-packages,45 MCP
+tools advertised, new inventory read served and metadata-free wake registration
+denied with zero new wake records. Wheel SHA256:
+3a7c5dd83674400caea2418875c309483dfa55c90b928885d5ff9f104eb15736.
+This is a disposable prefix, not a production install or release.
