@@ -9,3 +9,7 @@ Terminal receipt PASS: real connected server PID/executable and separate client 
 Primary five-case public selection PASS before bound correction (12.114s); same final selection rerun after correction, recorded in /tmp/353-primary-final.log. Worker affected40casesPASS and final5casesPASS remain source regression evidence, not a replacement for this selected-native proof. Repo-wide pinned undefined-name checks and diffcheck PASS. No installed runtime/service or shared session was changed.
 
 Final primary five-case selection:5PASS,12.695s after bound correction.
+
+## Full-CI correction compatibility repair
+
+Run40235630606 on49df3a9 failed on both Python versions: two existing public handoff-correction cases became successor_assignment_blocked. #353 was reopened; local exact two-case reproduction failed2/2 in3.547s. The new shared before_effect guard unconditionally required a spawn-only launch field on handoff/refresh receipts. Restricting optional preflight lookup to available launch metadata preserves the existing non-spawn seam. Exact existing cases then PASS2/2 in5.307s. Combined gateway/ledger/control/notice/preflight/spawn/correction selection PASS33/33 in17.187s (/tmp/353-354-final-selection.log). No test was removed or weakened. Prior CI failure remains preserved; final full CI must run on the successor commit.

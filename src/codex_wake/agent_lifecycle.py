@@ -427,7 +427,8 @@ def advance_spawn(path, receipt, profile):
 
 
 def before_effect(path, receipt):
-    profile = receipt['intent']['launch']
+    # Refresh/handoff guards share this seam without a spawn launch profile.
+    profile = receipt['intent'].get('launch', {})
     if 'governance_preflight' in profile:
         from .goal_host_preflight import inspect_host
         preflight = inspect_host(path.parent.parent, profile, receipt['intent'].get('source_thread_id'))
