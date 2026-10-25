@@ -23,13 +23,24 @@ jobs cancel --job-id job_<id> --generation 1 <caller capability options>
 jobs await --job-id job_<id> <caller capability options>
 ```
 
-Use the host API to configure mutation profiles with `mutation=True` and a genuine
-`(claim_id, generation, Claimant)` tuple. It validates `ResourceClaims.guard` at
-configuration and again through the launch release. The claimant must remain
-fresh; a stale claim holds the job without execution. Mutation classification is
-an operator declaration, not an OS interceptor of arbitrary same-user commands.
-A host adapter must refresh binding evidence before configuring/launching such a
-profile. No model argument can construct the trusted claimant or an operator role.
+For mutation profiles, operator configuration additionally supplies `--mutation`,
+`--claim-id`, `--claim-generation` and `--managed-agent-id`. The adapter obtains
+current enrolled binding evidence through the existing `RuntimeObserver`; CLI
+arguments cannot serialize a claimant or choose an operator role. Launch observes
+the same managed owner afresh. Non-operator claimants must belong to the verified
+caller's exact conversation. Runtime endpoint, socket, bounded timeout and existing
+Grok binding/capability options select observation sources, not identity authority.
+
+The host API accepts `mutation=True` with a genuine
+`(claim_id, generation, Claimant)` tuple for configuration, then a fresh
+`claimant=Claimant(...)` for launch. Profiles retain only claim ID/generation and
+managed owner/process identity, not a reusable observation timestamp. Old profiles
+with an expired stored observation still work when the same exact owner/process
+is freshly verified; stale observations, suppressed owners and changed generations
+refuse. `ResourceClaims.guard` fences admission and actual release, with live
+process generation and the original fresh observation age checked immediately
+before exec. Mutation classification is an operator declaration, not an OS
+interceptor of arbitrary same-user commands.
 
 Profiles are revisioned. Each job freezes its original profile revision/digest.
 An identical idempotency key returns its original job, including unknown outcomes;

@@ -74,3 +74,14 @@ verified owner/task. Model caller chooses a profile ID, not arbitrary argv/role.
 Public profile lookup supports existing host task-verification adapters. Declared
 mutation profiles require genuine ResourceClaims.guard custody at release;
 read-only classification remains a cooperative operator declaration.
+
+## Caller-path correction
+
+Mutation configure is supported through the dedicated CLI parser: mutation flag,
+claim ID/generation and managed-agent locator. Existing verified caller and runtime
+observation seams construct the trusted Claimant. Profiles retain custody identity
+only; each new launch requires fresh host observation of the same exact owner and
+live process generation. A stored legacy observation is identity provenance, never
+fresh execution proof. The supervisor retains the just-observed launch binding and
+rechecks its real age and live generation before releasing exec. No timestamp is
+renewed synthetically. Read-only profiles remain unchanged.

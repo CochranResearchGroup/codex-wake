@@ -241,10 +241,75 @@ print(json.dumps(job))
             task_pin=self.pin, owner='worker', mutation=True,
             claim=(claim['claim_id'], claim['generation'], claimant), max_seconds=2)
         claims.release(claim['claim_id'], claim['generation'], claimant)
-        job = store.launch('mutation', principal=self.worker, idempotency_key='fenced')
-        value = self.terminal(store, job['job_id'])
-        self.assertEqual(value['status'], 'unknown')
+        from codex_wake.resource_claims import ResourceClaimError
+        with self.assertRaises(ResourceClaimError):
+            store.launch('mutation', principal=self.worker, idempotency_key='fenced', claimant=claimant)
         self.assertFalse(marker.exists())
+
+
+    def test_public_mutation_profile_uses_fresh_host_claimant_at_each_launch(self):
+        import argparse
+        from codex_wake.background_job_commands import execute, register_parser
+        from codex_wake.managed_inventory import ManagedInventory, Observation
+        from codex_wake.resource_claims import Claimant, ResourceClaims
+        from codex_wake.process_signals import observe_process_exit
+        from codex_wake.background_jobs import BackgroundJobError
+        identity = observe_process_exit(os.getpid()).identity()
+        process = dict(pid=identity['pid'], start_ticks=identity['start_time_ticks'], boot_id=identity['boot_id'])
+        def observer(_):
+            return Observation('codex', 'fixture', 'worker', str(self.workspace), 'ready', time.time(),
+                'native_metadata', process, [], {'inspect': 'supported'})
+        inventory = ManagedInventory(self.root)
+        agent = inventory.enroll(observer({}), operator=True)['agent']
+        claimant = Claimant(agent['managed_agent_id'], str(self.workspace), process, time.time())
+        claims = ResourceClaims(self.root)
+        claim = claims.claim('worktree', self.workspace, claimant)
+        parser = argparse.ArgumentParser()
+        register_parser(parser.add_subparsers(dest='command', required=True))
+        marker = self.workspace / 'configured-mutation'
+        argv = [sys.executable, '-c', f"import pathlib; pathlib.Path({str(marker)!r}).write_text('ok')"]
+        configure = parser.parse_args(['jobs', 'configure', '--profile', 'mutation', '--owner', 'worker',
+            '--task-id', 'task-1', '--assignment-id', 'assignment-1', '--cwd', str(self.workspace),
+            '--argv-json', json.dumps(argv), '--mutation', '--claim-id', claim['claim_id'],
+            '--claim-generation', str(claim['generation']), '--managed-agent-id', agent['managed_agent_id']])
+        profile = execute(configure, self.root, principal=self.operator, observer=observer)
+        self.assertNotIn('observed_at', json.dumps(profile['command']['claim']))
+        launch = parser.parse_args(['jobs', 'launch', '--profile', 'mutation', '--idempotency-key', 'fresh'])
+        job = execute(launch, self.root, principal=self.worker, observer=observer)
+        self.assertEqual(self.terminal(BackgroundJobs(self.root), job['job_id'])['status'], 'completed')
+        self.assertEqual(marker.read_text(), 'ok')
+        # A retained pre-correction profile fixture has an expired observation.
+        # Its identity remains data; only a newly observed Claimant may execute.
+        import hashlib
+        catalog_path = self.root / 'background-jobs' / 'commands.json'
+        catalog = json.loads(catalog_path.read_text())
+        legacy = catalog['profiles']['mutation']
+        stored_claim = legacy['command']['claim']
+        stored_claim['claimant'] = dict(stored_claim.pop('owner'), observed_at=time.time() - 60)
+        legacy['sha256'] = hashlib.sha256(json.dumps(legacy['command'], sort_keys=True,
+            separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+        catalog_path.write_text(json.dumps(catalog))
+        launch.idempotency_key = 'old-profile-fresh-observation'
+        old_profile_job = execute(launch, self.root, principal=self.worker, observer=observer)
+        self.assertEqual(self.terminal(BackgroundJobs(self.root), old_profile_job['job_id'])['status'], 'completed')
+        self.assertLess(legacy['command']['claim']['claimant']['observed_at'], time.time() - 30)
+        stale = Claimant(agent['managed_agent_id'], str(self.workspace), process, time.time() - 40)
+        with self.assertRaises(Exception):
+            BackgroundJobs(self.root).launch('mutation', principal=self.worker,
+                idempotency_key='stale', claimant=stale)
+        with self.assertRaises(BackgroundJobError):
+            BackgroundJobs(self.root).launch('mutation', principal=self.worker,
+                idempotency_key='model-dict', claimant=dict(claimant.__dict__))
+        from dataclasses import replace
+        def changed_observer(arguments):
+            return replace(observer(arguments), process=dict(process, start_ticks=process['start_ticks'] + 1))
+        launch.idempotency_key = 'changed-generation'
+        with self.assertRaises(BackgroundJobError):
+            execute(launch, self.root, principal=self.worker, observer=changed_observer)
+        inventory.set_enrollment(agent['managed_agent_id'], enabled=False)
+        launch.idempotency_key = 'suppressed'
+        with self.assertRaises(Exception):
+            execute(launch, self.root, principal=self.worker, observer=observer)
 
 
 if __name__ == '__main__':

@@ -67,3 +67,25 @@ authorized job to unknown (1failure/10). Corrected refusal retention consistentl
 before/after release. Final focused run:10pass,4.606seconds; full changed-file ruff,
 compileall and diff-check pass. This preserves the failing run rather than
 reporting the prior provisional checkpoint as accepted.
+
+## Bounded caller-path correction after01e69e8
+
+Public parser/execute regression first failed: mutation/claim configure options
+were unrecognized. Added operator configure flags and existing RuntimeObserver
+binding recovery, then fresh host claimant on each launch. Profiles now store
+claim ID/generation and owner/process only; just-observed launch evidence is
+separate from intent. Live /proc identity and original observation age are checked
+at admission and immediately before supervisor release. Old read-only profiles
+remain usable; old claimed-profile identity is read without trusting its timestamp.
+
+The released-claim test now asserts refusal before creating a launch, rather than
+unknown after supervisor admission: both preserve zero command effects, while the
+fresh admission guard is stronger. The public mutation test exercises real claimed
+command execution, no profile timestamp, an old-profile fixture with >30-second
+stale cached observation and fresh current binding, stale/model-dict claimant
+refusal, changed process generation and suppressed owner. Test observers are
+injected at the existing runtime observation seam; actual command child is real.
+No additional review pass or OS containment claim was introduced.
+
+Correction final selection:11background tests pass,6.223seconds;9resource-claim
+tests pass,0.611seconds. Changed-file full Ruff, compileall and diff-check pass.

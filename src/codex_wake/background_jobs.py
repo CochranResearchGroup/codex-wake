@@ -1,7 +1,7 @@
 """Durable bounded local commands; command profiles are data, never permissions."""
 from __future__ import annotations
 
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 import fcntl
 import hashlib
 import json
@@ -160,8 +160,8 @@ class BackgroundJobs:
                 if not cwd.is_relative_to(Path(record['resource']['path'])):
                     _error('job_workspace_denied', 'command directory exceeds claimed resource')
             claim = dict(claim_id=claim_id, generation=generation,
-                claimant=dict(managed_agent_id=claimant.managed_agent_id, root=claimant.root,
-                              process=claimant.process, observed_at=claimant.observed_at))
+                owner=dict(managed_agent_id=claimant.managed_agent_id, root=claimant.root,
+                           process=claimant.process))
         command = dict(argv=list(argv), cwd=str(cwd), task_pin=pin, owner=owner,
                        max_seconds=max_seconds, max_log_bytes=max_log_bytes, claim=claim, mutation=mutation)
         with _lock(self.directory / 'catalog.lock'):
@@ -210,7 +210,7 @@ class BackgroundJobs:
         return check_operation(self.root, action, principal, target=command['owner'],
                                task_id=task_id, operation_id=state['job_id'])
 
-    def launch(self, profile_id, *, principal, idempotency_key):
+    def launch(self, profile_id, *, principal, idempotency_key, claimant=None):
         _principal(principal)
         if type(idempotency_key) is not str or not 1 <= len(idempotency_key) <= 256:
             _error('job_invalid_argument', 'bounded idempotency key required')
@@ -234,6 +234,10 @@ class BackgroundJobs:
                          supervisor=None, reservation=_identity(os.getpid()), created_at=time.time(),
                          principal=dict(subject=principal.subject, role=principal.role, tasks=list(principal.tasks)))
             self._authorize(state, principal, 'job.launch')
+            with _claim_guard(self, profile['command'], claimant):
+                if claimant is not None:
+                    state['claimant'] = dict(managed_agent_id=claimant.managed_agent_id,
+                        root=claimant.root, process=claimant.process, observed_at=claimant.observed_at)
             directory = self.directory / job_id
             directory.mkdir(mode=0o700)
             _save(directory / 'state.json', state)
@@ -311,12 +315,36 @@ class BackgroundJobs:
         return dict(job=state, wake=wake)
 
 
-def _claim_guard(store, command):
+def _verify_claimant(claimant):
+    from .resource_claims import Claimant
+    if type(claimant) is not Claimant:
+        _error('job_claim_unverified', 'fresh host-verified claimant required for claimed command')
+    claimant.validated(time.time())
+    sample = observe_process_exit(claimant.process['pid'])
+    expected = dict(boot_id=claimant.process['boot_id'], pid=claimant.process['pid'],
+                    start_time_ticks=claimant.process['start_ticks'], owner_uid=os.geteuid())
+    if sample.state != 'alive' or sample.identity() != expected:
+        _error('job_claim_process_changed', 'claimant exact process generation is no longer live')
+
+
+@contextmanager
+def _claim_guard(store, command, claimant):
     claim = command.get('claim')
     if claim is None:
-        return nullcontext()
-    from .resource_claims import Claimant, ResourceClaims
-    return ResourceClaims(store.root).guard(claim['claim_id'], claim['generation'], Claimant(**claim['claimant']))
+        if claimant is not None:
+            _error('job_claim_unexpected', 'unclaimed command cannot accept a new custody claim')
+        yield
+        return
+    _verify_claimant(claimant)
+    owner = dict(managed_agent_id=claimant.managed_agent_id, root=claimant.root, process=claimant.process)
+    # Legacy profile timestamps are never execution freshness evidence.
+    expected = claim.get('owner') or {key: value for key, value in claim.get('claimant', {}).items()
+                                      if key != 'observed_at'}
+    if owner != expected:
+        _error('job_claim_owner_changed', 'fresh claimant differs from the approved managed owner')
+    from .resource_claims import ResourceClaims
+    with ResourceClaims(store.root).guard(claim['claim_id'], claim['generation'], claimant):
+        yield
 
 
 def _supervise(root, job_id):
@@ -336,7 +364,11 @@ def _supervise(root, job_id):
         child = None
         released = False
         try:
-            with _claim_guard(store, command):
+            claimant = None
+            if command.get('claim') is not None:
+                from .resource_claims import Claimant
+                claimant = Claimant(**state['claimant'])
+            with _claim_guard(store, command, claimant):
                 store._authorize(state, principal, 'job.launch')
                 gate_read, gate_write = os.pipe()
                 stdout_read, stdout_write = os.pipe()
@@ -400,6 +432,8 @@ def _supervise(root, job_id):
                             stored_log_bytes=0, log_truncated=False, completed_at=time.time(),
                             cancellation=request, command_not_released=True))
                         return
+                if claimant is not None:
+                    _verify_claimant(claimant)
                 # Persist the possible-effect boundary before releasing exec.
                 state['release_attempted'] = True
                 _save(directory / 'state.json', state)
