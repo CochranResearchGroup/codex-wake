@@ -285,3 +285,19 @@ qualify this new binary automatically. Matching artifact custody is complete;
 activation, whole-native-suite acceptance and shared runtime effects remain absent.
 Receipts: matching-native-build-start.json, matching-native-build-final.json and
 matching-native-build.log in the existing user-scoped qualification directory.
+
+## Matching artifact runtime qualification completed
+
+The matching299a49c...826aad binary subsequently passed three independent caller
+checks on the exact installed combined runtime snapshot: real native/TUI
+restart/renewal/reset51.457s (receipt a1114df5f4fddb8144e3399a6a3264ad63629f80fc2791d5550148b6765ef824),
+public Wake scoped refresh7.302s (receipt4c1d39d347d8e5ca6835fb05c211ce9a47fa88f2956b63a6fd8beb63e314d1b8),
+and notice busy-tool/reconnect/lost-ack acceptance
+(receipt f0e30214907acd43acc918720842b626a5a12d425518774776d0b3ed818dd6ae).
+Scoped refresh actually changed only selected toyMCPv1→v2, peer stayedv1, goals
+unchanged, exactly3toy startups and zero model turns. All162Python module hashes
+matched installed source. Real watcher-loss then found a separate Python graceful
+shutdown ordering defect; runtime9521bf1 corrects it and passes both the targeted
+loss probe and ordinary journey as documented in combined-restart-acceptance.md.
+These are private candidate checks, not shared-daemon activation. The classified
+baseline hook deadline remains; no whole-native-suite-green claim is made.

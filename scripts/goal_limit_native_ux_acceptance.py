@@ -42,6 +42,10 @@ def require(ok, message):
         raise AssertionError(message)
 
 
+class _ProbeComplete(Exception):
+    """Finish the selected probe through the shared cleanup and exit check."""
+
+
 def qualify(options):
     base = options.output.resolve()
     base.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -93,7 +97,9 @@ def qualify(options):
         tui_sha256=digest(tui),
         provider="owned localhost Responses fixture",
         external_provider_calls=0,
-        http_request_cap=6,
+        http_request_cap=3
+        if options.supervision_loss_only or options.observation_recovery_only
+        else 6,
         native_frontend_acceptance=True,
         shared_runtime_replaced=False,
     )
@@ -144,7 +150,7 @@ def qualify(options):
                     )
                 )
             save("response-request-" + str(number) + ".json", json.loads(body))
-            if number > 6:
+            if number > report["http_request_cap"]:
                 self.send_error(429)
                 return
             self.send_response(200)
@@ -181,7 +187,9 @@ def qualify(options):
                         arguments = dict(
                             caller_thread_id=thread,
                             token_limit=1000,
-                            time_limit_seconds=30,
+                            time_limit_seconds=120
+                            if options.observation_recovery_only
+                            else 30,
                             checkpoint_token_percent=5,
                             checkpoint_seconds=5,
                         )
@@ -774,6 +782,268 @@ def qualify(options):
             turn["id"] for turn in active["turns"] if turn["status"] == "inProgress"
         ]
         require(len(active_ids) == 1, "exactly one active native work turn required")
+        if options.observation_recovery_only:
+            original = goal_cli("show")
+            require(original["state"] == "armed", "recovery probe must begin armed")
+            backup = physical.with_name(physical.name + ".owned-fault")
+
+            def fault_episode(label):
+                require(not backup.exists(), "owned socket backup already exists")
+                physical.rename(backup)
+                try:
+                    fault = wait(
+                        lambda: value
+                        if (value := goal_cli("show")).get("reason")
+                        == "observation_unavailable"
+                        else None,
+                        label + " unavailable observation",
+                        8,
+                    )
+                finally:
+                    backup.rename(physical)
+                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+                    connection.connect(str(physical))
+                    peer_pid, peer_uid, _ = struct.unpack(
+                        "3i",
+                        connection.getsockopt(
+                            socket.SOL_SOCKET, socket.SO_PEERCRED, 12
+                        ),
+                    )
+                require(
+                    peer_pid == native.pid and peer_uid == os.geteuid(),
+                    "restored native identity changed",
+                )
+                stopped = wait(
+                    lambda: value
+                    if (value := goal_cli("show")).get("stop_proof") is True
+                    and value.get("pause_observed") is True
+                    else None,
+                    label + " real stop proof",
+                    8,
+                )
+                event = wait(
+                    lambda: next(
+                        (
+                            row
+                            for row in goal_cli("notices")["notices"]
+                            if row["identity"]["kind"] == "stop"
+                            and row["identity"]["stop_episode"]
+                            == stopped["active_stop_id"]
+                            and row["delivery"]["state"] == "recorded"
+                        ),
+                        None,
+                    ),
+                    label + " native notice",
+                    8,
+                )
+                wait(
+                    lambda: event["event_id"] in capture("tui-" + label + ".txt"),
+                    label + " visible notice",
+                    8,
+                )
+                retained = rpc(
+                    "thread/notice/read",
+                    dict(threadId=thread, eventId=event["event_id"]),
+                )
+                require(
+                    retained.get("modelContextAvailable") is True
+                    and retained.get("notice")
+                    == dict(eventId=event["event_id"], text=event["text"]),
+                    label + " native context unavailable",
+                )
+                require(
+                    event["identity"]["reason"] == "observation_unavailable",
+                    label + " stale reason",
+                )
+                return dict(
+                    initial_fault=fault,
+                    stopped=stopped,
+                    event=event,
+                    native_notice=retained,
+                )
+
+            first = fault_episode("first-observation-fault")
+            report["observation_recovery"] = dict(first=first)
+            turns = rpc("thread/read", dict(threadId=thread, includeTurns=True))[
+                "thread"
+            ]["turns"]
+            require(
+                any(
+                    turn["id"] == active_ids[0] and turn["status"] == "interrupted"
+                    for turn in turns
+                ),
+                "first fault did not interrupt captured turn",
+            )
+            recovered = goal_cli(
+                "recover", "--operation-id", "owned-observation-recovery"
+            )
+            recovery_event = wait(
+                lambda: next(
+                    (
+                        row
+                        for row in goal_cli("notices")["notices"]
+                        if row["identity"]["kind"] == "recovery"
+                        and row["identity"]["stop_episode"]
+                        == first["stopped"]["active_stop_id"]
+                        and row["delivery"]["state"] == "recorded"
+                    ),
+                    None,
+                ),
+                "native recovery notice",
+                8,
+            )
+            wait(
+                lambda: recovery_event["event_id"]
+                in capture("tui-observation-recovery.txt"),
+                "visible recovery notice",
+                8,
+            )
+            recovery_native = rpc(
+                "thread/notice/read",
+                dict(threadId=thread, eventId=recovery_event["event_id"]),
+            )
+            require(
+                recovery_native.get("modelContextAvailable") is True,
+                "recovery missing native context",
+            )
+            require(
+                recovery_event["identity"]["reason"] == "observation_recovered",
+                "recovery has stale reason",
+            )
+            require(
+                recovered["state"] == "armed" and not recovered["stop_latched"],
+                "recovery did not arm",
+            )
+            require(
+                rpc("thread/goal/get", dict(threadId=thread))["goal"]["status"]
+                == "paused",
+                "recovery resumed native goal",
+            )
+            second = fault_episode("second-observation-fault")
+            require(
+                first["stopped"]["active_stop_id"]
+                != second["stopped"]["active_stop_id"],
+                "second fault reused episode",
+            )
+            require(
+                first["event"]["event_id"] != second["event"]["event_id"],
+                "second fault reused notice",
+            )
+            require(
+                second["stopped"]["first_stop"] == first["stopped"]["first_stop"],
+                "first stop rewritten",
+            )
+            for key in ("deadline", "token_limit", "generation", "time_limit_seconds"):
+                require(
+                    second["stopped"][key] == recovered[key] == original[key],
+                    "recovery changed allowance: " + key,
+                )
+            require(
+                rpc(
+                    "thread/notice/read",
+                    dict(threadId=thread, eventId=first["event"]["event_id"]),
+                )
+                == first["native_notice"],
+                "first native notice rewritten",
+            )
+            require(
+                rpc("thread/goal/get", dict(threadId=peer))["goal"] == peer_goal,
+                "recovery changed peer goal",
+            )
+            require(
+                rpc("thread/read", dict(threadId=peer, includeTurns=True))["thread"][
+                    "turns"
+                ]
+                == peer_before["turns"],
+                "recovery changed peer turns",
+            )
+            require(len(calls) == 3, "recovery started additional model requests")
+            report["observation_recovery"].update(
+                recovered=recovered,
+                recovery_event=recovery_event,
+                recovery_native_notice=recovery_native,
+                second=second,
+                peer_unchanged=True,
+                original_allowance_unchanged=True,
+            )
+            report["verdict"] = "PASS_REAL_NATIVE_OBSERVATION_RECOVERY"
+            raise _ProbeComplete
+        if options.supervision_loss_only:
+            before_loss = goal_cli("show")
+            require(before_loss["state"] == "armed", "loss probe must begin armed")
+            require(
+                trusted_upper() < before_loss["deadline"] - 5,
+                "loss probe must precede original checkpoint reserve",
+            )
+            watcher_stop_started = time.monotonic()
+            watcher.terminate()
+            watcher.wait(timeout=8)
+            watcher_exit_elapsed = time.monotonic() - watcher_stop_started
+            after_loss = goal_cli("show")
+            require(after_loss["reason"] == "controller_stopped", "wrong stop reason")
+            goal_after = rpc("thread/goal/get", dict(threadId=thread))["goal"]
+            turns_after = rpc("thread/read", dict(threadId=thread, includeTurns=True))[
+                "thread"
+            ]["turns"]
+            report["supervision_loss"] = dict(
+                before=before_loss,
+                after=after_loss,
+                watcher_exit=watcher.returncode,
+                watcher_exit_elapsed_seconds=watcher_exit_elapsed,
+                goal_paused=goal_after["status"] == "paused",
+                exact_turn_interrupted=any(
+                    turn["id"] == active_ids[0] and turn["status"] == "interrupted"
+                    for turn in turns_after
+                ),
+                replacement_started=False,
+            )
+            require(
+                report["supervision_loss"]["goal_paused"],
+                "loss did not pause native goal",
+            )
+            require(
+                report["supervision_loss"]["exact_turn_interrupted"],
+                "loss did not interrupt captured turn",
+            )
+            observation_end = time.monotonic() + 5
+            while True:
+                events = goal_cli("notices")["notices"]
+                event = next(
+                    (
+                        row
+                        for row in reversed(events)
+                        if row["identity"]["kind"] == "stop"
+                        and row["snapshot"]["reason"] == "controller_stopped"
+                    ),
+                    None,
+                )
+                retained = (
+                    rpc(
+                        "thread/notice/read",
+                        dict(threadId=thread, eventId=event["event_id"]),
+                    )
+                    if event
+                    else None
+                )
+                frame = capture("tui-supervision-loss.txt")
+                visible = bool(event and event["event_id"] in frame)
+                report["supervision_loss"].update(
+                    stop_event=event, native_notice=retained, visible=visible
+                )
+                if visible or time.monotonic() >= observation_end:
+                    break
+                time.sleep(0.1)
+            require(
+                event and event["delivery"]["state"] == "recorded",
+                "controller-loss stop notice was not delivered before watcher exit",
+            )
+            require(
+                visible,
+                "controller-loss stop notice was not visible without replacement",
+            )
+            require(len(calls) <= 3, "supervision-loss request cap exceeded")
+            report["verdict"] = "PASS_REAL_NATIVE_SUPERVISION_LOSS"
+            raise _ProbeComplete
         stopped = wait(
             lambda: (
                 value if (value := goal_cli("show")).get("state") == "stopped" else None
@@ -1120,6 +1390,8 @@ def qualify(options):
             engagement_events=[event["event_id"] for event in events],
             ui_attachments=ui_count,
         )
+    except _ProbeComplete:
+        pass
     except BaseException as error:
         report.update(
             verdict="FAILED_PACKET", error=type(error).__name__ + ": " + str(error)
@@ -1209,7 +1481,16 @@ def qualify(options):
             )
         )
     )
-    return 0 if report["verdict"] == "PASS_REAL_NATIVE_INSTALLED_TUI_JOURNEY" else 2
+    return (
+        0
+        if report["verdict"]
+        in (
+            "PASS_REAL_NATIVE_INSTALLED_TUI_JOURNEY",
+            "PASS_REAL_NATIVE_SUPERVISION_LOSS",
+            "PASS_REAL_NATIVE_OBSERVATION_RECOVERY",
+        )
+        else 2
+    )
 
 
 if __name__ == "__main__":
@@ -1222,4 +1503,7 @@ if __name__ == "__main__":
     parser.add_argument("--app-server", type=Path, required=True)
     parser.add_argument("--app-server-sha256", required=True)
     parser.add_argument("--tui", type=Path, required=True)
+    probes = parser.add_mutually_exclusive_group()
+    probes.add_argument("--supervision-loss-only", action="store_true")
+    probes.add_argument("--observation-recovery-only", action="store_true")
     raise SystemExit(qualify(parser.parse_args()))

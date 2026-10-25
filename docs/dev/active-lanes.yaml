@@ -814,9 +814,10 @@ lanes:
     branch: feat/combined-refresh-goal-ux
     target: origin/main
     plan_state: OPEN
-    custody_state: LOCAL_CHECKPOINT
+    custody_state: PUBLISHED_CHECKPOINT
     integration: review_pr
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/349
     dependencies: [PR341, PR332, PR348]
     overlaps: [P173-NEXT-FRONTIER]
     updated_at: 2026-10-25
-    disposition: Qualified source carries, real combined restart/TUI journey passes; native static gates pass with explicit baseline failure; matching binary and final regression/review pending; no production activation
+    disposition: Qualified combined candidate PR349; matching native refresh/restart/recovery TUI acceptance and 81 affected tests pass both Python versions; review1of1 and findingsTDD1of1 complete; main integration and shared activation remain open
