@@ -23,6 +23,13 @@ def recover(root, policy, thread, *, principal, task_id=None, operation_id=None,
             raise PermissionDenied(reason,permission)
         if receipt.get('thread_id')!=thread:refuse('recovery_target_mismatch')
         if allocation_id is not None and receipt['allocation_id']!=allocation_id:refuse('recovery_allocation_mismatch')
+        if receipt.get('reason') in (None,'recovery_pending_reconciliation') and receipt.get('allocation_path'):
+            retained_path=Path(receipt['allocation_path']);g._private(retained_path)
+            with g._lock(retained_path.parent,retained_path.stem):
+                retained=json.loads(retained_path.read_text()).get('pending_recovery')
+            if retained and retained.get('receipt_generation')==receipt['generation'] and retained.get('operation_id')==operation_id:
+                receipt['reason']='observation_unavailable'
+                receipt['active_stop_id']=retained.get('stop_episode_id')
         if receipt.get('reason')!='observation_unavailable':refuse('recovery_requires_observation_fault')
         if receipt.get('winddown_deadline') is not None:refuse('recovery_accounting_winddown')
         grant=g._grant(policy,thread,receipt['allocation_id'],root)
@@ -66,7 +73,8 @@ def recover(root, policy, thread, *, principal, task_id=None, operation_id=None,
             before,active=first[member];after,again=second[member]
             if (not before or not after or any(before.get(k)!=after.get(k) for k in identity)
                     or set(active)!=set(again) or after.get('status')!='paused'
-                    or 'stop_turns' not in item or set(active).intersection(item['stop_turns'])):
+                    or 'stop_turns' not in item or set(active).intersection(item['stop_turns'])
+                    or (active and not item.get('stop_scope_observed',False))):
                 refuse('recovery_native_stop_unverified')
             if after.get('createdAt')!=item['goal_created_at']:refuse('recovery_goal_identity_changed')
 
@@ -104,7 +112,8 @@ def recover(root, policy, thread, *, principal, task_id=None, operation_id=None,
                     refuse('recovery_continuation_denied')
                 final,active=g._native(item['grant'],member)
                 if (not final or final.get('createdAt')!=item['goal_created_at']
-                        or final.get('status')!='paused' or set(active).intersection(item['stop_turns'])):
+                        or final.get('status')!='paused' or set(active).intersection(item['stop_turns'])
+                        or (active and not item.get('stop_scope_observed',False))):
                     refuse('recovery_native_stop_unverified')
             current=g._heartbeat(directory)
             if not current['fresh'] or current['generation']!=heartbeat['generation']:

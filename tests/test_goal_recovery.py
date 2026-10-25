@@ -100,7 +100,7 @@ class GoalRecoveryTests(unittest.TestCase):
         from codex_wake.session_permissions import PermissionDenied
         scenarios=dict(revoked='permission_deny',accounting='recovery_accounting_unqualified',
             boot='recovery_boot_identity_changed',exhausted='recovery_resources_exhausted',
-            active_work='recovery_native_stop_unverified',changed_goal='recovery_goal_identity_changed')
+            active_work='recovery_native_stop_unverified',unobserved_scope='recovery_native_stop_unverified',changed_goal='recovery_goal_identity_changed')
         for scenario in scenarios:
             with self.subTest(scenario=scenario),tempfile.TemporaryDirectory() as tmp:
                 root,policy,log,native,request=self.fixture(tmp)
@@ -111,6 +111,7 @@ class GoalRecoveryTests(unittest.TestCase):
                         if method=='thread/read':raise TimeoutError('fixture')
                         return request(endpoint,executable,method,params,limit)
                     with patch('codex_wake.goal_supervision.native_request',side_effect=timeout):poll(root)
+                    if scenario=='unobserved_scope':native['goal']['status']='paused'
                     poll(root)
                     path=next(p for p in (root/'goal-supervision').glob('*.json') if p.name!='controller.json')
                     before=path.read_bytes();manager=None
@@ -158,7 +159,9 @@ class GoalRecoveryTests(unittest.TestCase):
                 with patch('os.replace',side_effect=crash_final_commit):
                     with self.assertRaises(KeyboardInterrupt):recover(root,policy,THREAD,principal=Principal(THREAD,'operator'),operation_id='recover-once')
                 self.assertTrue(json.loads(ledger.read_text())['stop_latched'])
-                poll(root)
+                pending=show(root,policy,THREAD,permission_principal=Principal(THREAD))
+                self.assertEqual(pending['state'],'held')
+                self.assertEqual(pending['recovery']['status'],'pending_reconciliation')
                 reconciled=recover(root,policy,THREAD,principal=Principal(THREAD,'operator'),operation_id='recover-once')
                 self.assertFalse(reconciled['stop_latched'])
                 self.assertEqual(reconciled['deadline'],original['deadline'])

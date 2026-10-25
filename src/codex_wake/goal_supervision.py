@@ -410,6 +410,18 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
     if not path.exists():return dict(state='held',reason='not_enrolled',thread_id=caller_thread_id,controller=_heartbeat(directory))
     with _lock(directory,name):
         _private(path);receipt=json.loads(path.read_text())
+        pending_recovery=None
+        if receipt.get('allocation_path'):
+            ledger_path=Path(receipt['allocation_path']);_private(ledger_path)
+            with _lock(ledger_path.parent,ledger_path.stem):
+                ledger=json.loads(ledger_path.read_text())
+            pending_recovery=ledger.get('pending_recovery')
+            if pending_recovery:
+                receipt.update(state='held',reason='recovery_pending_reconciliation',stop_latched=True)
+            elif ledger.get('stop_latched'):
+                receipt['stop_latched']=True
+                if receipt['state'] in ('armed','checkpoint_requested'):
+                    receipt.update(state='held',reason=ledger.get('stop_reason','continuation_held'))
         if receipt['grant']!=grant:
             receipt.update(state='held',reason='host_policy_changed')
         receipt['controller']=_heartbeat(directory)
@@ -422,6 +434,10 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
             result['recovery']=dict(status='requires_authorized_recovery' if observation_fault else 'not_recoverable',
                 action='wake_goal_limits_recover' if observation_fault else None,
                 next_action='Request explicit scoped recovery; healthy reads or native resume alone do not clear supervision. Original resource limits remain.' if observation_fault else 'Keep this stop; observation recovery cannot clear exhaustion, accounting, policy or clock failures.')
+        if pending_recovery:
+            result['recovery']=dict(status='pending_reconciliation',action='wake_goal_limits_recover',
+                operation_id=pending_recovery.get('operation_id'),
+                next_action='Retry the same explicitly authorized recovery operation; the allocation remains held.')
         if principal:result['enforcement_permissions']=describe(root,caller_thread_id,principal=principal)
         return result
 
@@ -641,6 +657,7 @@ def _stop(path,receipt,reason,goal=None,active=None):
             legacy_turns = {effect.get('params', {}).get('turnId') or
                 effect.get('params', {}).get('expectedTurnId') for effect in receipt.get('effects', {}).values()
                 if effect.get('method') in ('turn/interrupt', 'turn/steer')}
+            receipt['stop_scope_observed']=bool(goal and goal.get('status')=='active')
             receipt['stop_turns']=list(active) if goal and goal.get('status')=='active' else sorted(legacy_turns - {None})
             _save(path,receipt)
         if receipt.get('pause_observed') and goal and goal.get('status')!='paused':
@@ -658,7 +675,9 @@ def _stop(path,receipt,reason,goal=None,active=None):
             if turn not in receipt['stop_turns']:continue
             _effect(path,receipt,'interrupt:'+turn,'turn/interrupt',dict(threadId=thread,turnId=turn))
         final_goal,final_active=_native(receipt['grant'],thread)
-        proven=(not final_goal or final_goal.get('status')=='paused') and not set(final_active).intersection(receipt['stop_turns'])
+        proven=((not final_goal or final_goal.get('status')=='paused')
+            and not set(final_active).intersection(receipt['stop_turns'])
+            and (receipt.get('stop_scope_observed',False) or not final_active))
         receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven,
             pause_observed=not final_goal or final_goal.get('status')=='paused')
     except Exception as exc:receipt['control_error']=type(exc).__name__
