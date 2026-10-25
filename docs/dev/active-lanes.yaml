@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P175
+    owner: primary / ecochran76
+    objective: Transparent operator-controlled governor and bounded execution
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/351, https://github.com/CochranResearchGroup/codex-wake/issues/352, https://github.com/CochranResearchGroup/codex-wake/issues/353, https://github.com/CochranResearchGroup/codex-wake/issues/354, https://github.com/CochranResearchGroup/codex-wake/issues/355, https://github.com/CochranResearchGroup/codex-wake/issues/356, https://github.com/CochranResearchGroup/codex-wake/issues/357]
+    plan: docs/dev/plans/0175-2026-10-25-transparent-governor-delivery.md
+    branch: feat/transparent-governor
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: ce1ad93
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-25
+    disposition: primary 351; isolated agents dispatch355 and validation356; no live effects
   - id: P173-GOAL-UX
     owner: primary / ecochran76
     objective: Implement visible goal supervision and approved renewal

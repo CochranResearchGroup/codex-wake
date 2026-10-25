@@ -451,6 +451,8 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
         receipt['sampled']=True;receipt['maximum_token_overshoot']=None
         from .goal_readiness import engagement
         result=_public(receipt)
+        from .goal_notices import governor_status
+        result['governor']=governor_status(root,receipt)
         if receipt.get('stop_latched'):
             observation_fault=receipt.get('reason')=='observation_unavailable'
             result['recovery']=dict(status='requires_authorized_recovery' if observation_fault else 'not_recoverable',
@@ -632,10 +634,12 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         if watcher_setup is not None:receipt['watcher_setup']=watcher_setup
         if goal.get('status') not in NATIVE_GOAL_STATUSES:
             hold('native_goal_state_unknown')
+        _record_supervision_notice(path,receipt,'activation',controller)
         _save(path,receipt)
         from .goal_readiness import engagement
+        from .goal_notices import governor_status
         return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None,
-            engagement=engagement(receipt,controller))
+            governor=governor_status(root,receipt),engagement=engagement(receipt,controller))
 
 
 def _effect(path,receipt,key,method,params):

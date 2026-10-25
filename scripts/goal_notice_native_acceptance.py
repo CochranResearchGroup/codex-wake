@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import shlex
 import shutil
+import signal
 import subprocess
 import tempfile
 import time
@@ -79,6 +80,7 @@ trust_level = "trusted"
             command = shlex.join(['env','CODEX_HOME='+str(home),'TERM=xterm-256color',str(frontend),
                 '--remote',endpoint,'--no-alt-screen','resume',thread_id])
             tmux('new-session','-d','-s','notice','-x','160','-y','55',command)
+            tmux('set-option', '-g', 'exit-empty', 'off')
             # Confirm the actual frontend is attached before emitting a notice.
             baseline = wait_for(lambda: text if (text := capture()) and ('mock-model' in text or 'context left' in text) else None)
             (output/'before.txt').write_text(baseline)
@@ -115,6 +117,13 @@ trust_level = "trusted"
             _save(_directory(wake_root)/(_name(thread_id)+'.json'),receipt)
             notice = record_notice(wake_root,receipt,'stop')
             native_adapter = NativeNoticeAdapter(wake_root)
+            activation = record_notice(wake_root, receipt, 'activation')
+            activation_delivery = present_notice(wake_root, activation['event_id'], adapter=native_adapter)
+            assert activation_delivery['proof']['model_context']['state'] == 'available', activation_delivery
+            activation_frame = wait_for(lambda: frame if activation['event_id'] in (frame := capture()) else None)
+            (output/'activation.txt').write_text(activation_frame)
+            assert 'Governor activated' in activation_frame
+            assert 'sampled_stop' in activation_frame
             class LostAcknowledgement:
                 def append(self, event):
                     native_adapter.append(event)
@@ -125,7 +134,10 @@ trust_level = "trusted"
             reconciled = present_notice(wake_root,notice['event_id'],adapter=native_adapter)
             assert reconciled['delivery']['state'] == 'recorded', reconciled
             assert reconciled['delivery']['attempts'] == 1, reconciled
-            duplicate = rpc('thread/notice/append',threadId=thread_id,eventId=event_id,text=text)
+            stop_frame = wait_for(lambda: frame if notice['event_id'] in (frame := capture()) else None)
+            (output/'governor-stop.txt').write_text(stop_frame)
+            assert 'Deactivate governor' in stop_frame
+            duplicate = rpc('thread/notice/append' ,threadId=thread_id,eventId=event_id,text=text)
             assert duplicate['alreadyRecorded'] is True and duplicate['notificationPublished'] is False, duplicate
             retained = rpc('thread/notice/read',threadId=thread_id,eventId=event_id)
             assert retained['notice'] == dict(eventId=event_id,text=text), retained
@@ -146,7 +158,7 @@ trust_level = "trusted"
             report.update(state='passed', thread_id=thread_id, peer_id=peer_id,
                 append=appended, duplicate=duplicate, retained=retained,
                 native_model_turns_started=0, explicit_shell_turns_started=1, rendered_live=True, rendered_reconnected_once=True, busy_tool_notice=busy_result,
-                model_context_retained=True, peer_unchanged=True, fixture_external_usage=True, lost_ack_reconciled_once=True)
+                activation_rendered=True, generated_stop_rendered=True, model_context_retained=True, peer_unchanged=True, fixture_external_usage=True, lost_ack_reconciled_once=True)
         except Exception as error:
             report.update(state='failed', failure=type(error).__name__)
             (output/'last-frame.txt').write_text(capture())
@@ -172,6 +184,14 @@ trust_level = "trusted"
                 if process.poll() is None:
                     process.terminate()
                     process.wait(timeout=15)
+            # Native plugin fetches may outlive their parent. Retire only the
+            # previously censused owned identities, never shared host processes.
+            for pid, identity in identities.items():
+                try:
+                    if process_identity(pid) == identity:
+                        os.kill(pid, signal.SIGTERM)
+                except (OSError, ValueError):
+                    pass
             log.close()
             end = time.monotonic()+5
             while True:

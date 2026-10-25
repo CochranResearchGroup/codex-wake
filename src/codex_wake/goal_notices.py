@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 from datetime import datetime, timezone
 
-KINDS = frozenset(('engagement', 'checkpoint', 'stop', 'recovery'))
+KINDS = frozenset(('activation', 'engagement', 'checkpoint', 'stop', 'recovery'))
 _EVENT = re.compile(r'notice_[a-f0-9]{64}')
 
 
@@ -101,6 +101,7 @@ def record_notice(root, receipt, kind, *, controller=None):
         snapshot = {key: receipt.get(key) for key in ('used_tokens', 'token_limit', 'token_accounting',
             'deadline', 'checkpoint_token_percent', 'checkpoint_seconds', 'state', 'reason', 'lifetime_tokens_before_window')}
         event = dict(version=1, event_id=event_id, identity=identity, snapshot=snapshot,
+            recorded_at=datetime.now(timezone.utc).isoformat(),
             controller_generation=(controller or {}).get('generation', receipt.get('controller_generation')),
             proof=dict(control=dict(stop_verified=receipt.get('stop_proof') is True,
                 state=receipt.get('state'), reason=receipt.get('reason')),
@@ -123,6 +124,8 @@ def render_notice(event):
         title = 'Goal paused' if event['proof']['control']['stop_verified'] else 'Stop requested; interruption unverified'
     elif kind == 'checkpoint':
         title = 'Checkpoint now within the remaining allowance'
+    elif kind == 'activation':
+        title = 'Governor activated'
     elif kind == 'engagement':
         title = 'External goal watcher engaged'
     else:
@@ -139,8 +142,10 @@ def render_notice(event):
             f"{snapshot.get('checkpoint_seconds')} seconds. Watcher healthy. ")
     else:
         text += ('Extend allowance / Reset budget window / Keep stopped. '
-            'Use goal-limits extend --help or goal-limits reset --help. '
             'Native /goal resume alone does not renew this external allowance. ')
+    text += ('Mode sampled_stop; maximum overshoot is not bounded. '
+        'Deactivate governor: goal-limits disable. '
+        f"At {event.get('recorded_at', 'unknown')}. " )
     return text + f"[External supervision event {event['event_id']}]"
 
 
@@ -273,3 +278,34 @@ def run_presenter(root, stop):
             pass
         if finishing:return
         stop.wait(.2)
+
+
+def governor_status(root, receipt):
+    """Independent inspection exposes control state even if notice delivery fails."""
+    status = dict(identity='Codex Wake governor', scope=receipt['allocation_id'],
+        mode='sampled_stop', maximum_token_overshoot=None,
+        controls=['Inspect governor', 'Deactivate governor', 'Keep stopped'],
+        intervention=None)
+    ids = receipt.get('notice_ids', {})
+    for kind in ('activation', 'engagement', 'checkpoint', 'stop', 'recovery'):
+        event_id = ids.get(kind)
+        if not event_id:
+            continue
+        try:
+            event = read_notice(root, event_id)
+            summary = dict(event_id=event_id, kind=kind, text=event['text'],
+                reason=event['snapshot'].get('reason'),
+                presentation=event['delivery']['state'],
+                next_action=event['delivery'].get('next_action') or
+                    'Inspect retained notices; verify native model delivery and operator display separately.',
+                ui=event['proof']['ui']['state'],
+                model_context=event['proof']['model_context']['state'])
+        except (OSError, ValueError, KeyError):
+            summary = dict(event_id=event_id, kind=kind, presentation='unavailable',
+                next_action='Inspect governor notice storage and native delivery; intervention remains in effect.')
+        status[kind] = summary
+        if kind in ('checkpoint', 'stop', 'recovery'):
+            status['intervention'] = summary
+    if receipt.get('notice_record_error'):
+        status['notice_error'] = receipt['notice_record_error']
+    return status

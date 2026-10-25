@@ -138,7 +138,8 @@ def test_hard_stop_retains_notice_even_when_native_visibility_is_unsupported(sel
             stopped=poll(root)[0]
             self.assertEqual(stopped['state'],'stopped')
             notices=execute(root,policy,THREAD)['notices']
-            self.assertEqual(len(notices),1)
+            self.assertEqual({event['identity']['kind'] for event in notices}, {'activation', 'stop'})
+            notices=[event for event in notices if event['identity']['kind']=='stop']
             self.assertEqual(notices[0]['identity']['kind'],'stop')
             self.assertIn('Used 40 of 40',notices[0]['text'])
             self.assertEqual(notices[0]['proof']['ui']['state'],'unverified')

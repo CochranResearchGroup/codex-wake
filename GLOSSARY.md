@@ -241,3 +241,9 @@ alone grants no permission, executes no effect and authorizes no uncertain repla
 **Background job result wake**:
 An existing exact-owner wake observing the durable result of one approved bounded
 local job. Awaiting the result does not relaunch the job or renew its task allowance.
+
+**Governor**:
+The operator-visible controller that applies authorized resource limits to a selected objective and explains its interventions to the operator and model.
+
+**Governor deactivation**:
+The operator's durable choice to stop governor interventions in a selected scope. It preserves accounting and work, does not renew resources or resume stopped work, and remains in effect until explicitly changed.
