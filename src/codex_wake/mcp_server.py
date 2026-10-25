@@ -317,7 +317,7 @@ class CommandRunner:
                     return explain_error(exc),True
             if verb=='readiness':verb='show'
             from .session_permissions import PermissionStore
-            if PermissionStore(goal_root).active() or verb in ('recover','disable'):
+            if PermissionStore(goal_root).active() or verb in ('recover','disable','enable'):
                 packet=dict(verb=verb,arguments=arguments,native_context=native_context,
                     runner=dict(wake_root=str(self.wake_root) if self.wake_root else None,
                         goal_limits_root=str(goal_root),goal_limits_policy=str(self.goal_limits_policy),
@@ -334,7 +334,7 @@ class CommandRunner:
                         value=enroll(goal_root,self.goal_limits_policy,native_context=native_context,**arguments)
                     else:
                         value=show(goal_root,self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id'))
-                    return value, verb=='set' and value.get('state') not in ('armed','checkpoint_requested')
+                    return value, verb=='set' and value.get('state') not in ('armed','checkpoint_requested','inactive')
             except Exception as exc:
                 # Legacy admission keeps its public CLI diagnostics. Delegated
                 # callers must never fall back to an unbound claimed identity.
