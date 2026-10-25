@@ -805,3 +805,18 @@ lanes:
     overlaps: [feat/harness-observation-ownership, feat/harness-frontier]
     updated_at: 2026-10-24
     disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; consolidated PR341 supersedes327/329/333; issue328 awaits main integration; CI skipped; main and production unchanged
+
+  - id: P173-COMBINED-UX
+    owner: primary / ecochran76
+    objective: Combine session recovery/scoped refresh with usable goal-limit controls
+    work_items: [318, 310, 343, 344, 345, 346]
+    plan: docs/dev/plans/0173-agent-harness/0004-2026-10-25-combined-refresh-goal-ux.md
+    branch: feat/combined-refresh-goal-ux
+    target: origin/main
+    plan_state: OPEN
+    custody_state: LOCAL_CHECKPOINT
+    integration: review_pr
+    dependencies: [PR341, PR332, PR348]
+    overlaps: [P173-NEXT-FRONTIER]
+    updated_at: 2026-10-25
+    disposition: Qualified source carries, real combined restart/TUI journey passes; native static gates pass with explicit baseline failure; matching binary and final regression/review pending; no production activation

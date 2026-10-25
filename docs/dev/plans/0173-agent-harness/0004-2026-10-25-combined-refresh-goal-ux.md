@@ -89,3 +89,31 @@ That specific compile correction is being qualified separately. Safety fixture's
 hostHOME contamination is proven; hook deadline reproduces on compatiblepre-345
 a50baseline as well asb0ce, so not introduced uniquely by goalUX. Its baseline
 root cause remains independent/open; no whole-native-green claim is made.
+
+## Native static successor qualified
+
+Owned native source98d5c6736ac66f06c62b9eaa275adb8a30baa431 carries formatter,
+three corrected genuineMCP expectation cases and one required exhaustive internal
+RawResponseCompleted handler in legacyMCPtoolrunner. The event already forwards
+as a notification before the match; the added no-op arm parallels RawResponseItem
+and preserves that forwarding. Compilerred before, scopedmcp-server/app-server/tui
+Clippy--tests GREEN7m11s after, finalfmt/fmtcheck and patchreverseapply GREEN.
+Fresh clean protocol/schema254passes. Original cache-copy/compiler-environment
+failures remain separate from the real missing-arm compile failure.
+
+Native safety test failure is inheritedHOME skill-warning contamination: same
+qualified86binary/harness fails inheritedHOME and passes privatechildHOME. Hook
+thread/start deadline fails with identical harness/privateHOME+TMPDIR on compatible
+pre-345nativea50 as well asb0ce; not uniquely introduced by goalUX. Stock0.164
+counterfactual was rejected for an unsupported test-only flag and is not used as
+baseline evidence. Underlying baseline hook failure remains recorded; no whole-native
+suite green or production activation is claimed.
+
+A separate bounded15minmatchingappserver build from frozen98d5 is running offline,
+locked,max2jobs in owned cache with64GiBfree reserve and32GiBprojected build budget.
+Old behavior86binary/sourceb0ce is not relabeled as a binary of98d5. No original
+native checkout/cache, deployment, watcher mask or user allocation was changed.
+
+Final Python comprehensive bound1200s derives from the prior823s full run plus
+new recovery/UX tests and shared-host compiler contention; focused46tests passboth
+Python versions. This is one frozen combined run, not a retry-until-green loop.
