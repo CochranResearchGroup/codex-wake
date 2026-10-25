@@ -8101,3 +8101,20 @@ renewed or recovered. #310 stays open. Full evidence/rollback locators:
 docs/dev/evidence/hf06/installed-deployment.md. Memory forbidden: no explicit
 memory-write request. No public release, native shared-daemon restart or broad
 session refresh occurred.
+
+
+## 2026-10-25 | Observation-fault recovery repair and native scoped-reload diagnosis
+
+One-hour goal uses diagnosing-bugs/TDD for318/319. PR332, stacked on327, implements
+explicit guarded recovery, append-only stop/recovery episodes, shared-member scope,
+pending-commit fencing and truthful status. Final runtimeef339e0 passes hosted
+Python3.11/3.12 gates1558 tests each and installed native timeout/healthy-read/
+operator-recovery proof; native active/operator reply also passes with local
+Responses fixture and no external provider calls. Installed0.21.1 candidate,
+controller/skills/commands updated, seven production resource/stop snapshots intact.
+Local mutable-tree diagnostics and preflight contention failures are retained;
+source-frozen supplemental run remains separately observable. Evidence:
+docs/dev/evidence/hf06/319-recovery.md.318 still needs qualified native scoped
+execution, Wake integration and unchanged-peer/live-session proof; local native
+protocol patch is not installed on the shared daemon. No overall goal completion
+or318 closure claimed. Memory forbidden: no explicit memory-write request.
