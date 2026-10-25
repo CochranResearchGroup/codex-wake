@@ -36,8 +36,14 @@ class GrokTerminalHost:
         timeout = 3 if self.deadline is None else min(3, self.deadline - time.monotonic())
         if timeout <= 0:
             raise WakeError('terminal_observation_deadline_reached')
-        result = subprocess.run([self.tmux or '/usr/bin/tmux', '-S', str(socket), *args],
-                                input=input, capture_output=True, timeout=timeout)
+        from contextlib import nullcontext
+        guard = nullcontext()
+        if args and args[0] in ('send-keys', 'paste-buffer', 'load-buffer', 'delete-buffer'):
+            from .guarded_interactions import automated_input_guard
+            guard = automated_input_guard(self.root, binding)
+        with guard:
+            result = subprocess.run([self.tmux or '/usr/bin/tmux', '-S', str(socket), *args],
+                                    input=input, capture_output=True, timeout=timeout)
         if result.returncode:
             raise WakeError('terminal_operation_unavailable')
         return result.stdout.decode('utf-8', errors='replace')
