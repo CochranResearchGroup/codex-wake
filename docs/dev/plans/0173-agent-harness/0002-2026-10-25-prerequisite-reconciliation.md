@@ -45,3 +45,9 @@ CochranResearchGroup/codex-wake, ecochran76, ADMIN, Issues enabled, unarchived.
 The three exact remote tips are frozen before closing superseded PRs; branch
 refs are retained. PR341 becomes ready for review, without main merge authority
 being inferred from this reconciliation step. CI remains explicitly skipped.
+
+Tracker readback:327/329/333 CLOSED as superseded, with each frozen head unchanged.
+No underlying issue was closed by those PR closures. PR341 is the sole consolidated
+integration delivery; its body links issue328 to close only on main integration.
+The source is ready for review, not merged by this bounded reconciliation packet.
+The three remote branches remain retained and existing installed services untouched.

@@ -775,11 +775,11 @@ lanes:
   - id: P173-NEXT-FRONTIER
     owner: primary / ecochran76
     objective: Source acceptance for HF05 HF08 HF14 HF16 HF18 HF21 HF27
-    work_items: [334, 335, 336, 337, 338, 339, 340, 342]
+    work_items: [328, 334, 335, 336, 337, 338, 339, 340, 342]
     plan: docs/dev/plans/0173-agent-harness/next-frontier-execution-ledger.md
     branch: feat/harness-next-frontier
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/341
-    checkpoint: 16c2501d950416099b0d7bf0def18a4dc99e8d98
+    checkpoint: b674427
     target: origin/main
     integration: review_pr
     plan_state: SOURCE_ACCEPTED
@@ -787,4 +787,4 @@ lanes:
     dependencies: [HF02, HF03, HF04, HF06, HF07, HF13]
     overlaps: [feat/harness-observation-ownership, feat/harness-frontier]
     updated_at: 2026-10-24
-    disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; draft PR and prerequisite overlaps remain; CI skipped; main and production unchanged
+    disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; consolidated PR341 supersedes327/329/333; issue328 awaits main integration; CI skipped; main and production unchanged
