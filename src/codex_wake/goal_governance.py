@@ -207,7 +207,7 @@ def change(
             "independent platform controls remain. Accounting and checkpoints are preserved; "
             "no work is resumed and no resources renewed."
             if not enabled
-            else "Governor reactivated in this scope in sampled_stop mode; no work resumed or resources renewed."
+            else f"Governor reactivated in this scope in {first.get('request_accounting',{}).get('mode','sampled_stop')} mode; no work resumed or resources renewed."
         ),
     )
 

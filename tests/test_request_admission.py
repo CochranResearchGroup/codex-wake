@@ -115,6 +115,17 @@ class RequestAdmissionTests(unittest.TestCase):
                 threading.Thread(target=server.serve_forever, daemon=True).start()
                 self.addCleanup(server.server_close)
                 self.addCleanup(server.shutdown)
+                from codex_wake.goal_notices import list_notices
+
+                activation = [
+                    event
+                    for event in list_notices(root, fixtures.THREAD)
+                    if event["identity"]["kind"] == "request_activation"
+                ]
+                self.assertEqual(len(activation), 1)
+                self.assertIn("Effective mode hard_admission", activation[0]["text"])
+                self.assertEqual(activation[0]["delivery"]["state"], "recorded")
+                self.assertLessEqual(len(activation[0]["text"].encode()), 768)
 
                 def submit(turn="work"):
                     body = dict(
@@ -155,6 +166,10 @@ class RequestAdmissionTests(unittest.TestCase):
                     release.set()
                     self.assertEqual(first.result(timeout=5)[0], 200)
                 self.assertEqual(calls[0]["max_output_tokens"], 10)
+                self.assertEqual(native["goal"]["status"], "paused")
+                self.assertFalse(
+                    any(method == "turn/interrupt" for method, _ in native["calls"])
+                )
                 view = ledger.inspect(now=fixtures.NOW)
                 self.assertEqual(view["tokens_used"], 47)
                 self.assertEqual(view["tokens_reserved"], 0)
@@ -187,11 +202,16 @@ class RequestAdmissionTests(unittest.TestCase):
                 # The actual whole native user message bypasses inference admission.
                 native["active"] = ["operator-control"]
                 native["user_text"] = "Deactivate governor"
+                # Native input can autoactivate its goal; deactivation must
+                # restore the already verified pause, without interrupting input.
+                native["goal"]["status"] = "active"
                 control = submit("operator-control")
                 self.assertEqual(control[0], 200, control)
                 self.assertIn(b"Governor-generated acknowledgement", control[1])
                 self.assertEqual(len(calls), attempts)
                 self.assertEqual(gateway.status()["mode"], "inactive")
+                self.assertEqual(native["goal"]["status"], "paused")
+                self.assertEqual(native["active"], ["operator-control"])
                 before = ledger.inspect(now=fixtures.NOW)
                 self.assertEqual(before["tokens_used"], unknown["tokens_used"])
                 self.assertEqual(before["tokens_reserved"], unknown["tokens_reserved"])
@@ -402,7 +422,11 @@ class RequestAdmissionTests(unittest.TestCase):
                     )
 
                 with self.assertRaisesRegex(ValueError, "unsupported or unreviewed"):
-                    RequestGateway(root, "allocation-1", **dict(options, reviewed_contract_sha256="unknown"))
+                    RequestGateway(
+                        root,
+                        "allocation-1",
+                        **dict(options, reviewed_contract_sha256="unknown"),
+                    )
                 self.assertEqual(calls, [])
                 # Original40 + worst-case50 exceeds session70 despite objective200.
                 self.assertEqual(gateway.execute(body(fixtures.THREAD))[0], 429)

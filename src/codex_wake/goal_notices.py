@@ -75,7 +75,8 @@ def record_notice(root, receipt, kind, *, controller=None):
         receipt=dict(receipt,active_stop_id=recovery['stop_episode_id'],reason=recovery['reason'])
     identity = dict(thread_id=receipt['thread_id'], allocation_id=receipt['allocation_id'],
         generation=receipt['generation'], enrollment_revision=receipt.get('enrollment_revision', 1),
-        kind=kind,governor_revision=receipt.get('governor_revision',0))
+        kind=kind,governor_revision=receipt.get('governor_revision',0),
+        governor_mode='inactive' if receipt.get('governor_enabled') is False else receipt.get('request_accounting',{}).get('mode','sampled_stop'))
     if kind in ('stop', 'recovery'):
         identity.update(stop_episode=receipt.get('active_stop_id') or receipt.get('stop_episode_id') or
             [stop.get('boot_id'), stop.get('observed_boottime'), receipt.get('pause_epoch', 0)],
@@ -136,8 +137,8 @@ def render_notice(event):
             f"[External supervision event {event['event_id']}]")
     if kind in ('deactivation','reactivation'):
         text=('Governor inactive. Drop stale governor checkpoint/stop instructions. Independent platform controls remain. '
-              'Say "Reactivate governor" to enable sampled stopping. ' if kind=='deactivation' else
-              'Governor reactivated. Mode sampled_stop; maximum overshoot is not bounded. Say "Deactivate governor" to disable. ')
+              'Say "Reactivate governor" to enable the configured governor. ' if kind=='deactivation' else
+              f"Governor reactivated. Mode {identity.get('governor_mode','sampled_stop')}; independent controls remain. Say \"Deactivate governor\" to disable. ")
         text += (f"Governor revision {identity.get('governor_revision',0)} supersedes older notices; latest durable scope state is authoritative. "
                  f"Scope {identity['allocation_id']}; session {identity['thread_id']}. "
                  'Accounting and checkpoints preserved; no resource renewal or work resume. '
@@ -250,7 +251,7 @@ def present_notice(root, event_id, *, adapter=None):
         if event['delivery']['attempts']==0:
             from .goal_governance import snapshot
             current=snapshot(root,event['identity']['thread_id'])
-            if (current['state']=='available' and current['revision']!=event['identity'].get('governor_revision',0)):
+            if (current['state']=='available' and (current['revision']!=event['identity'].get('governor_revision',0) or current['mode']!=event['identity'].get('governor_mode','sampled_stop'))):
                 event.setdefault('historical',dict(original_text=event['text']))
                 mode=current['mode']
                 identity=event['identity'];observed=event['snapshot']
