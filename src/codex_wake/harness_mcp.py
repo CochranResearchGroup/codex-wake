@@ -162,22 +162,14 @@ def call(runner, group, verb, arguments, native_context):
     caller = arguments['caller_thread_id']
     verified_native_caller(native_context, caller)
     if group == 'task-briefs':
-        from .task_briefs import BriefAuthority, TaskBriefStore
+        from .task_briefs import BriefAuthority
         from .task_brief_commands import execute_task_briefs
         tasks = controller_tasks(runner, caller)
         if arguments['task_id'] in tasks:
             authority = BriefAuthority('native:' + caller, 'controller', tasks)
         else:
-            store = TaskBriefStore(root)
-            if verb == 'propose':
-                workspace = arguments['brief'].get('workspace')
-            else:
-                existing = store.inspect(arguments['task_id'])
-                workspace = existing['revisions'][0]['content']['workspace'] if existing['revisions'] else None
-            if (type(workspace) is not str or not Path(workspace).is_absolute()
-                    or not Path(workspace).resolve().is_relative_to(native_workspace(runner, caller))):
-                raise WakeError('brief_workspace_outside_native_caller')
-            authority = BriefAuthority('native:' + caller, 'worker', (arguments['task_id'],))
+            authority = BriefAuthority('native:' + caller, 'worker', (arguments['task_id'],),
+                                       workspace=str(native_workspace(runner, caller)))
         args = SimpleNamespace(task_brief_command=verb, task_id=arguments['task_id'],
                                revision=arguments.get('revision'), assignment_id=arguments.get('assignment_id'),
                                brief_json=json.dumps(arguments.get('brief')) if 'brief' in arguments else None)

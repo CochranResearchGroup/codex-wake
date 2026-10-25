@@ -45,17 +45,7 @@ def _capability_authority(args, store):
         bus.validate_actor(database, actor)
     # The capability authorizes worker operations in its enrolled workspace.
     # It cannot approve scope or become a controller via command arguments.
-    workspace = None
-    if args.task_brief_command == 'propose':
-        content = _content(args)
-        workspace = content.get('workspace')
-    else:
-        existing = store.inspect(args.task_id)
-        if existing['revisions']:
-            workspace = existing['revisions'][0]['content']['workspace']
-    if type(workspace) is not str or not Path(workspace).is_relative_to(Path(actor.root)):
-        raise TaskBriefError('authority_denied', 'brief workspace is outside the actor enrollment')
-    return BriefAuthority(actor.actor_id, 'worker', (args.task_id,))
+    return BriefAuthority(actor.actor_id, 'worker', (args.task_id,), workspace=str(actor.root))
 
 
 def _read_brief(path):
