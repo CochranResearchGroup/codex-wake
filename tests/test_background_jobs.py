@@ -1,0 +1,251 @@
+"""Public job lifecycle with hermetic real Python commands (#336)."""
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+
+from codex_wake.background_jobs import BackgroundJobs
+from codex_wake.session_permissions import PermissionStore, Principal
+from codex_wake.task_briefs import BriefAuthority, TaskBriefStore
+
+
+class BackgroundJobsTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name) / 'wake'
+        self.workspace = Path(self.tmp.name) / 'work'
+        self.workspace.mkdir()
+        self.operator = Principal('operator', 'operator')
+        self.worker = Principal('worker', tasks=('task-1',))
+        PermissionStore(self.root).configure({'version': 1, 'global': {'actions': {'job.launch': 'allow', 'job.cancel': 'allow'}}},
+            self.operator, expected_revision=0)
+        brief = TaskBriefStore(self.root)
+        authority = BriefAuthority('operator', 'operator')
+        brief.propose('task-1', dict(objective='Run a bounded local fixture', phase='test',
+            non_goals=['No providers'], acceptance=['Retained exact exit and logs'], context=[],
+            workspace=str(self.workspace), allocation_ref='fixture', permission_ref='fixture'), authority=authority)
+        brief.approve('task-1', 1, authority=authority)
+        brief.admit('task-1', 'assignment-1', authority=authority)
+        self.pin = brief.assignment_pin('task-1', 'assignment-1')
+
+    def terminal(self, store, job_id, seconds=8):
+        deadline = time.monotonic() + seconds
+        while time.monotonic() < deadline:
+            value = store.inspect(job_id)
+            if value['status'] in ('completed', 'cancelled', 'timed_out', 'failed', 'unknown'):
+                return value
+            time.sleep(.02)
+        self.fail('job did not reach a terminal or unknown outcome')
+
+    def test_command_outlives_submitting_process_and_retains_exit_logs_on_restart(self):
+        script = "import time,sys; time.sleep(.2); print('retained stdout'); print('retained stderr',file=sys.stderr); sys.exit(7)"
+        submit = """
+import json,sys
+from codex_wake.background_jobs import BackgroundJobs
+from codex_wake.session_permissions import Principal
+store=BackgroundJobs(sys.argv[1])
+profile=store.approve_command('fixture', [sys.executable,'-c',sys.argv[3]], sys.argv[2],
+    principal=Principal('operator','operator'), task_pin=json.loads(sys.argv[4]), owner='worker', max_seconds=3, max_log_bytes=1024)
+job=store.launch('fixture',principal=Principal('worker',tasks=('task-1',)),idempotency_key='one')
+print(json.dumps(job))
+"""
+        result = subprocess.run([sys.executable, '-c', submit, str(self.root), str(self.workspace), script,
+            json.dumps(self.pin)], capture_output=True, text=True, check=True, timeout=5)
+        launched = json.loads(result.stdout)
+        value = self.terminal(BackgroundJobs(self.root), launched['job_id'])
+        self.assertEqual(value['status'], 'completed')
+        self.assertEqual(value['result']['returncode'], 7)
+        self.assertEqual(value['result']['process'], value['process'])
+        self.assertEqual(Path(value['stdout_path']).read_text(), 'retained stdout\n')
+        self.assertEqual(Path(value['stderr_path']).read_text(), 'retained stderr\n')
+        self.assertEqual(value['result']['generation'], launched['generation'])
+        self.assertEqual(value['result']['intent_sha256'], value['intent_sha256'])
+
+
+    def approve(self, script, **bounds):
+        store = BackgroundJobs(self.root)
+        store.approve_command('fixture', [sys.executable, '-c', script], self.workspace,
+            principal=self.operator, task_pin=self.pin, owner='worker', **bounds)
+        return store
+
+    def test_cancel_is_attributable_and_kills_owned_term_resistant_descendants(self):
+        marker = self.workspace / 'child-ready'
+        child = "import signal,time; signal.signal(signal.SIGTERM,signal.SIG_IGN); time.sleep(30)"
+        script = ("import subprocess,sys,signal,time,pathlib; "
+            "signal.signal(signal.SIGTERM,signal.SIG_IGN); "
+            f"p=subprocess.Popen([sys.executable,'-c',{child!r}]); "
+            f"pathlib.Path({str(marker)!r}).write_text(str(p.pid)); time.sleep(30)")
+        store = self.approve(script, max_seconds=5, max_log_bytes=64)
+        launched = store.launch('fixture', principal=self.worker, idempotency_key='cancel')
+        deadline = time.monotonic() + 2
+        while not marker.exists() and time.monotonic() < deadline:
+            time.sleep(.01)
+        self.assertTrue(marker.exists())
+        store.cancel(launched['job_id'], principal=self.worker, expected_generation=launched['generation'])
+        value = self.terminal(store, launched['job_id'])
+        self.assertEqual(value['status'], 'cancelled')
+        self.assertEqual(value['result']['cancellation']['actor'], 'worker')
+        self.assertEqual(value['result']['returncode'], -9)
+        from codex_wake.process_signals import observe_process_exit
+        child_sample = observe_process_exit(int(marker.read_text()))
+        self.assertIn(child_sample.state, ('disappeared', 'zombie'))
+
+
+    def test_public_command_inspects_owned_job_and_denies_foreign_owner(self):
+        from argparse import Namespace
+        from codex_wake.background_job_commands import execute
+        from codex_wake.background_jobs import BackgroundJobError
+        store = self.approve("print('ok')", max_seconds=2)
+        launched = store.launch('fixture', principal=self.worker, idempotency_key='inspect')
+        self.terminal(store, launched['job_id'])
+        args = Namespace(job_command='show', job_id=launched['job_id'])
+        value = execute(args, self.root, principal=self.worker)
+        self.assertEqual(value['result']['returncode'], 0)
+        with self.assertRaises(BackgroundJobError):
+            execute(args, self.root, principal=Principal('peer', tasks=('task-1',)))
+
+
+    def test_cancel_revocation_before_effect_does_not_interrupt_original_job(self):
+        import signal
+        store = self.approve("import time; time.sleep(.8)", max_seconds=2)
+        job = store.launch('fixture', principal=self.worker, idempotency_key='revoked-cancel')
+        os.kill(job['supervisor']['pid'], signal.SIGSTOP)
+        try:
+            store.cancel(job['job_id'], principal=self.worker, expected_generation=1)
+            PermissionStore(self.root).configure({'version': 1, 'mandatory': ['job.cancel'],
+                'global': {'actions': {'job.launch': 'allow'}}}, self.operator, expected_revision=1)
+        finally:
+            os.kill(job['supervisor']['pid'], signal.SIGCONT)
+        result = self.terminal(store, job['job_id'])
+        self.assertEqual(result['status'], 'completed')
+        self.assertEqual(result['result']['returncode'], 0)
+
+
+    def test_wall_and_combined_log_bounds_are_enforced(self):
+        store = self.approve("import os,time; os.write(1,b'x'*100000); os.write(2,b'y'*100000); time.sleep(30)",
+            max_seconds=.15, max_log_bytes=128)
+        job = store.launch('fixture', principal=self.worker, idempotency_key='bounded')
+        value = self.terminal(store, job['job_id'])
+        self.assertEqual(value['status'], 'timed_out')
+        self.assertTrue(value['result']['log_truncated'])
+        self.assertEqual(value['result']['stored_log_bytes'], 128)
+        self.assertEqual(sum(Path(value[key]).stat().st_size for key in ('stdout_path', 'stderr_path')), 128)
+
+    def test_supervisor_loss_preserves_unknown_and_key_never_relaunches(self):
+        import signal
+        marker = self.workspace / 'execution-count'
+        script = f"import pathlib,time; p=pathlib.Path({str(marker)!r}); p.write_text(p.read_text()+'x' if p.exists() else 'x'); time.sleep(.5)"
+        store = self.approve(script, max_seconds=2)
+        job = store.launch('fixture', principal=self.worker, idempotency_key='uncertain')
+        deadline = time.monotonic() + 2
+        while not marker.exists() and time.monotonic() < deadline:
+            time.sleep(.01)
+        self.assertTrue(marker.exists())
+        os.kill(job['supervisor']['pid'], signal.SIGKILL)
+        deadline = time.monotonic() + 2
+        while store.inspect(job['job_id'])['status'] != 'unknown' and time.monotonic() < deadline:
+            time.sleep(.01)
+        again = BackgroundJobs(self.root).launch('fixture', principal=self.worker, idempotency_key='uncertain')
+        self.assertEqual(again['job_id'], job['job_id'])
+        self.assertEqual(again['status'], 'unknown')
+        self.assertEqual(marker.read_text(), 'x')
+        # Only fixture ownership is cleaned up; product never guesses a lost group.
+        try:
+            os.killpg(job['process']['pid'], signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+
+    def test_launch_denial_and_changed_profile_cannot_reuse_old_intent(self):
+        from codex_wake.background_jobs import BackgroundJobError
+        from codex_wake.session_permissions import PermissionDenied
+        store = self.approve("print('once')", max_seconds=2)
+        job = store.launch('fixture', principal=self.worker, idempotency_key='stable')
+        self.terminal(store, job['job_id'])
+        self.assertEqual(store.launch('fixture', principal=self.worker, idempotency_key='stable')['job_id'], job['job_id'])
+        self.approve("print('different')", max_seconds=2)
+        with self.assertRaises(BackgroundJobError) as conflict:
+            store.launch('fixture', principal=self.worker, idempotency_key='stable')
+        self.assertEqual(conflict.exception.code, 'job_idempotency_conflict')
+        PermissionStore(self.root).configure({'version': 1, 'mandatory': ['job.launch']},
+            self.operator, expected_revision=1)
+        with self.assertRaises(PermissionDenied):
+            store.launch('fixture', principal=self.worker, idempotency_key='denied')
+
+    def test_await_registers_real_existing_exists_signal_and_reconstructs_after_completion(self):
+        from datetime import datetime, UTC
+        from codex_wake.event_wake import EventWake
+        from codex_wake.filesystem_signals import FilesystemSignalAdapter
+        from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+        from codex_wake.signal_store import SQLiteSignalModule
+        from codex_wake.signals import Resume, WakeIntent, Registration
+        from codex_wake.daemon import poll_once
+        store = self.approve("print('finished')", max_seconds=2)
+        job = store.launch('fixture', principal=self.worker, idempotency_key='await')
+        self.terminal(store, job['job_id'])
+        now = datetime.now(UTC)
+        publisher = WakeRecordPublisher(self.root,
+            ManagedReaderCapability(self.root, 'fixture', 1, frozenset({1, 2}), True))
+        runtime = SQLiteSignalModule(signal_journal_path(self.root), record_publisher=publisher)
+        def register(path, key, snapshot):
+            self.assertEqual(snapshot['intent']['owner'], 'worker')
+            adapter = FilesystemSignalAdapter(self.root, path)
+            value = EventWake(runtime, adapters=(adapter,), clock=lambda: now,
+                id_factory=lambda: 'wake_job_fixture').register(WakeIntent(adapter.request('exists'),
+                    Resume('Inspect original job result', self.root,
+                        {'transport': 'tmux', 'tmux_socket': '/tmp/fixture', 'pane': '%1'})), idempotency_key=key)
+            self.assertIsInstance(value, Registration)
+            return {'wake_id': value.wake_id}
+        awaiting = store.await_result(job['job_id'], principal=self.worker, register_wake=register)
+        self.assertEqual(awaiting['wake']['wake_id'], 'wake_job_fixture')
+        first = poll_once(self.root, now=now, dispatch=False, signal_runtime=runtime)
+        second = poll_once(self.root, now=now, dispatch=False, signal_runtime=runtime)
+        self.assertEqual(first.fired, 1)
+        self.assertEqual(second.fired, 0)
+
+
+    def test_unknown_store_version_is_retained_without_command_replay(self):
+        from codex_wake.background_jobs import BackgroundJobError
+        store = self.approve("print('version')", max_seconds=2)
+        job = store.launch('fixture', principal=self.worker, idempotency_key='version')
+        value = self.terminal(store, job['job_id'])
+        path = Path(value['result_path']).with_name('state.json')
+        state = json.loads(path.read_text())
+        state['version'] = 99
+        path.write_text(json.dumps(state))
+        original = path.read_bytes()
+        with self.assertRaises(BackgroundJobError):
+            BackgroundJobs(self.root).launch('fixture', principal=self.worker, idempotency_key='version')
+        self.assertEqual(path.read_bytes(), original)
+
+    def test_declared_mutation_requires_and_rechecks_real_claim(self):
+        from codex_wake.background_jobs import BackgroundJobError
+        from codex_wake.resource_claims import Claimant, ResourceClaims
+        from codex_wake.process_signals import observe_process_exit
+        store = BackgroundJobs(self.root)
+        marker = self.workspace / 'mutation-marker'
+        argv = [sys.executable, '-c', f"import pathlib; pathlib.Path({str(marker)!r}).write_text('effect')"]
+        with self.assertRaises(BackgroundJobError):
+            store.approve_command('mutation', argv, self.workspace, principal=self.operator,
+                task_pin=self.pin, owner='worker', mutation=True)
+        identity = observe_process_exit(os.getpid()).identity()
+        claimant = Claimant('agent_' + 'a' * 32, str(self.workspace),
+            dict(pid=identity['pid'], start_ticks=identity['start_time_ticks'], boot_id=identity['boot_id']), time.time())
+        claims = ResourceClaims(self.root)
+        claim = claims.claim('worktree', self.workspace, claimant)
+        store.approve_command('mutation', argv, self.workspace, principal=self.operator,
+            task_pin=self.pin, owner='worker', mutation=True,
+            claim=(claim['claim_id'], claim['generation'], claimant), max_seconds=2)
+        claims.release(claim['claim_id'], claim['generation'], claimant)
+        job = store.launch('mutation', principal=self.worker, idempotency_key='fenced')
+        value = self.terminal(store, job['job_id'])
+        self.assertEqual(value['status'], 'unknown')
+        self.assertFalse(marker.exists())
+
+
+if __name__ == '__main__':
+    unittest.main()
