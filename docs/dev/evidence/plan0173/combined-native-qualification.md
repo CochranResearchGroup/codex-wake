@@ -259,3 +259,29 @@ new immutable private prefix. The old86fad00 prefix is not overwritten. A matchi
 build will establish artifact custody only; targeted scoped-refresh and real
 journey acceptance remain separate and primary-coordinated. The historical goal
 was not resumed and no global runtime operation was authorized.
+
+## Matching successor artifact: BUILT, runtime acceptance pending
+
+The explicitly authorized locked/offline build with2Cargo jobs exited0. Cargo
+reported14m05s; its UTC interval was769.47seconds, so the monotonic Cargo duration
+is retained for the15minute bound. Initial free disk221124284416bytes exceeded the
+64GiB reserve plus32GiB projected build budget; free disk after build was
+209418510336bytes. Exact command:
+`cargo build --locked --offline -j 2 -p codex-app-server --bin codex-app-server`.
+
+Matching source:98d5c6736ac66f06c62b9eaa275adb8a30baa431.
+Private immutable artifact prefix:
+`~/.local/share/codex-wake/native/combined-98d5c6736a-20261025T195259Z/`.
+Binary:bin/codex-app-server.
+SHA256:299a49c85e107d9b48c9d24155867fa659bfaa68c1f74d345033c32839826aad.
+Adjacent manifest.json records source, full patch, build command and custody.
+The installed private copy and built artifact hashes matched. Source was clean
+before and after. Fresh owned process-group census found no remaining member of
+PGID2953160. The old qualified binary was rehashed unchanged as86fad00...683b1f.
+
+This artifact has not yet passed the targeted scoped-refresh and real-native/TUI
+journey; those are primary-coordinated gates. The old86fad00 journey does not
+qualify this new binary automatically. Matching artifact custody is complete;
+activation, whole-native-suite acceptance and shared runtime effects remain absent.
+Receipts: matching-native-build-start.json, matching-native-build-final.json and
+matching-native-build.log in the existing user-scoped qualification directory.
