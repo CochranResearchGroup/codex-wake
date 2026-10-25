@@ -195,3 +195,20 @@ Seven source-acceptance issues334–340 now meet their frozen source criteria an
 are being closed with this evidence. One broad review follows; issues will be
 reopened for any blocking source defect until repaired. Full3.12 suite is running;
 its result is not yet claimed. No main merge or production install occurred.
+
+## Final source closeout — outcome_progress
+
+Seven source tickets334–340 closed and tracker read back;335 reopened after the
+single review and reclosed following both accepted defect repairs at7bb337e.
+Review1/1; finalTDD1/1. Independent standards found one nonblocking duplication
+heuristic; spec found twoHF08 defects. Primary adjudication, red/green receipts
+and deferred heuristic are in next-frontier-review.md. No second broadreview.
+
+Final validation:85 featuretests3.12 pass;22 changedtests3.11 pass;64 prerequisite
+tests pass; final isolated wheel75 MCPtools andsevenCLIpaths pass. The one full
+1647-test run was NOTclean(2failures/4errors/1skip); exact baseline comparison,
+freshness qualification limits and firstfailures retained in
+../../evidence/plan0173/next-frontier-validation.md. DraftPR341 preserves those
+integration limitations; no mainmerge/release/install is claimed. Six ownedworker
+checkouts cleanly retired after durablebundle, otherlanes untouched. Memory
+forbidden receipt retained outsideGit; no memorywrite authorized.

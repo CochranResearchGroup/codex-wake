@@ -778,11 +778,13 @@ lanes:
     work_items: [334, 335, 336, 337, 338, 339, 340]
     plan: docs/dev/plans/0173-agent-harness/next-frontier-execution-ledger.md
     branch: feat/harness-next-frontier
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/341
+    checkpoint: 7bb337ef5bc248e06f059b62ff043ecc9e6807a2
     target: origin/main
     integration: review_pr
-    plan_state: IN_PROGRESS
-    custody_state: LOCAL_CHECKPOINT
+    plan_state: SOURCE_ACCEPTED
+    custody_state: PUBLISHED_REVIEW
     dependencies: [HF02, HF03, HF04, HF06, HF07, HF13]
     overlaps: [feat/harness-observation-ownership, feat/harness-frontier]
     updated_at: 2026-10-24
-    disposition: Seven disjoint worker packets reconciled; primary owns CLI/MCP and acceptance; CI explicitly skipped; main and production unchanged
+    disposition: Seven source tickets closed; one review and one TDD pass complete; comprehensive reliability failures retained in evidence; draft PR and prerequisite overlaps remain; CI skipped; main and production unchanged
