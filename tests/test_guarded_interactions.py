@@ -41,6 +41,7 @@ class GuardedInteractionsTests(unittest.TestCase):
             start_ticks=1, boot_id='boot', session_id=SID, executable_sha256=BINARY_SHA256,
             executable='/test/grok', cwd=str(Path.cwd()))
         self.host = Host(self.binding)
+        (self.root/'wake').mkdir(mode=0o700)
         self.service = GuardedInteractions(self.root/'wake', host=self.host)
         PermissionStore(self.root/'wake').configure({'version':1,'global':{'actions':{a:'allow' for a in ['terminal.menu','terminal.takeover','terminal.return']}}}, OP, expected_revision=0)
         self.service.configure('menu', self.binding, principal=OP, reason='isolated menu only')
