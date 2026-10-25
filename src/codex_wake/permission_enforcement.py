@@ -1,4 +1,4 @@
-"""Common-policy boundary for existing-goal enforcement, not a recovery engine.
+"""Common-policy boundary for existing-goal enforcement and qualified recovery.
 
 Host adapters construct Principal after native/capability verification. A policy
 result never clears a stop, renews a resource envelope, or qualifies accounting.
@@ -66,19 +66,13 @@ def diagnostic(root, thread, action, *, principal, task_id=None, operation_id=No
         receipt = json.loads(path.read_text())
         if receipt.get('thread_id') != thread:
             raise PermissionDenied('permission_target_mismatch')
-    recovery = action == 'enforcement.recover'
-    result = dict(state='held', armed=False, effect_attempted=False,
-        permission=decision, capability='unsupported',
+    if action!='enforcement.disable':
+        raise PermissionDenied('recovery_requires_qualified_command')
+    result=dict(state='held',armed=False,effect_attempted=False,permission=decision,
+        capability='unsupported',
         readiness='stop_latched' if receipt and receipt.get('stop_latched') else 'not_observed',
-        reason='observation_stop_recovery_unsupported' if recovery else 'enforcement_disable_unsupported',
-        next_action=('Follow issue319 for explicit observation-stop reconciliation; retain the '
-                     'original campaign, accounting and stop evidence. Native resume, a fresh '
-                     'read or heartbeat does not recover supervision.' if recovery else
-                     'Keep existing safety enforcement active; disabling is not implemented by '
-                     'this policy check and must not clear resource-stop records.'))
-    if recovery:
-        result.update(runtime_dependency='https://github.com/CochranResearchGroup/codex-wake/issues/319',
-                      recovery_requirements=list(RECOVERY_REQUIREMENTS))
+        reason='enforcement_disable_unsupported',
+        next_action='Keep existing safety enforcement active; disabling is not implemented by this policy check.')
     if receipt is not None:
         result['campaign'] = _public(receipt)
     return result

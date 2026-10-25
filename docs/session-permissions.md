@@ -57,8 +57,9 @@ A minimal file is `{"version":1}`. Its permissive profile allows self-inspection
 refresh/handoff/resume, enforcement enrollment, managed A2A and task/recipient-
 authorized wake routes. Shared reload requires standing approval. Increasing an
 allowance, disabling enforcement and recovering an observation-fault stop require
-their own authority. Recovery/disable execution remains unsupported where the
-runtime has no qualified implementation; permission checks never clear latches.
+their own authority. Observation recovery requires an explicit matching approval or authenticated
+operator request and fresh runtime qualification. Disable execution remains
+unsupported; inspecting permissions never clears latches.
 
 The optional `global`, named `profiles`, `sessions` and task `assignments` layers
 have `default` and `actions` fields. Decisions are `allow`, `deny`,

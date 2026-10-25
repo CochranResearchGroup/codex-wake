@@ -89,12 +89,26 @@ def recover(root, policy, thread, *, principal, task_id=None, operation_id=None,
                 if allocation.get('winddown_deadline') is not None:refuse('recovery_accounting_winddown')
                 if set(allocation['members'])!=member_ids:refuse('recovery_allocation_members_changed')
                 if allocation['used_tokens']!=observation['used_tokens']:refuse('recovery_accounting_changed')
+                if any(allocation[key]!=receipt[key] for key in ('token_limit','deadline','boot_id','grant')):
+                    refuse('recovery_resource_authority_changed')
             pending=allocation.get('pending_recovery') if allocation is not None else None
             if pending and (pending.get('operation_id')!=operation_id or pending.get('receipt_generation')!=receipt['generation']):
                 refuse('recovery_pending_operation_mismatch')
             authorize(root,'enforcement.recover',principal,task_id=task_id,operation_id=operation_id)
             if controller_permission(root,receipt)['permission'] not in ('allow','legacy'):refuse('recovery_continuation_denied')
             for member in member_ids-{thread}:authorize(root,'enforcement.recover',Principal(member,'operator'))
+            for member,(_,item) in participants.items():
+                if g._grant(policy,member,receipt['allocation_id'],root)!=item['grant']:
+                    refuse('recovery_host_policy_changed')
+                if controller_permission(root,item)['permission'] not in ('allow','legacy'):
+                    refuse('recovery_continuation_denied')
+                final,active=g._native(item['grant'],member)
+                if (not final or final.get('createdAt')!=item['goal_created_at']
+                        or final.get('status')!='paused' or set(active).intersection(item['stop_turns'])):
+                    refuse('recovery_native_stop_unverified')
+            current=g._heartbeat(directory)
+            if not current['fresh'] or current['generation']!=heartbeat['generation']:
+                refuse('recovery_controller_unavailable')
             if receipt['started_upper']+time.clock_gettime(time.CLOCK_BOOTTIME)-receipt['started_boottime']>=receipt['deadline']:
                 refuse('recovery_resources_exhausted')
             event=pending or dict(id=uuid4().hex,receipt_generation=receipt['generation'],stop_episode_id=receipt.get('active_stop_id'),operation_id=operation_id,kind='recovery',reason='observation_recovered',
