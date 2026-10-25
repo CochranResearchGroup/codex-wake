@@ -182,7 +182,7 @@ class WorkAcceptance:
                 environment = {key:value for key,value in os.environ.items() if not key.startswith('GIT_')}
                 commit = subprocess.check_output(['git', '-C', contract['workspace'], 'rev-parse', '--verify', 'HEAD^{commit}'],
                     env=environment, stderr=subprocess.DEVNULL, timeout=2, text=True).strip()
-            except (OSError, subprocess.SubprocessError):
+            except (OSError, AcceptanceError, subprocess.SubprocessError):
                 pass
             matched = commit == contract['checks']['git_commit']
             valid = valid and matched
@@ -222,6 +222,12 @@ class WorkAcceptance:
                 guard = ResourceClaims(self.root).guard(claim['claim_id'], claim['generation'], claimant)
             with guard:
                 for verifier in contract['checks']['verifiers'] if valid else []:
+                    current_valid, current_snapshot = self._snapshot(contract)
+                    if (not self._pin_current(contract, authority) or not current_valid
+                            or current_snapshot != observations):
+                        status = 'unknown'
+                        results.append(dict(name=verifier['name'], status='unknown', reason='scope_changed'))
+                        break
                     check_operation(self.root, 'acceptance.verify', principal, task_id=contract['task_id'],
                                     operation_id=contract_id, capability='supported', readiness='ready')
                     result = self._run(verifier, contract['workspace'])
@@ -241,7 +247,7 @@ class WorkAcceptance:
                     status = 'rejected'
                 results.append(dict(name=requirement['name'], status=decision['outcome'] if current else 'unknown', kind=requirement['kind']))
             after_valid, after = self._snapshot(contract)
-            if not after_valid or after != observations:
+            if not self._pin_current(contract, authority) or not after_valid or after != observations:
                 status = 'unknown'
             receipt = dict(contract_id=contract_id, contract_digest=contract['digest'], pin=contract['pin'],
                            status=status, artifacts=observations, checks=results,
@@ -300,11 +306,11 @@ class WorkAcceptance:
             return hashlib.sha256(stream.read(64 * 1024 * 1024 + 1)).hexdigest()
 
     def _run(self, verifier, cwd):
-        if self._executable_hash(Path(verifier['argv'][0])) != verifier['executable_sha256']:
-            return dict(name=verifier['name'], status='unknown', reason='verifier_changed')
         process = None
         timed_out = False
         try:
+            if self._executable_hash(Path(verifier['argv'][0])) != verifier['executable_sha256']:
+                return dict(name=verifier['name'], status='unknown', reason='verifier_changed')
             process = subprocess.Popen(verifier['argv'], cwd=cwd, stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
             deadline = time.monotonic() + verifier['timeout']
@@ -326,7 +332,7 @@ class WorkAcceptance:
                       else 'rejected' if code in verifier['fail_codes'] else 'unknown')
             return dict(name=verifier['name'], status=status, exit_code=code,
                         reason='verifier_timeout' if timed_out else 'declared_exit_classification')
-        except (OSError, subprocess.SubprocessError):
+        except (OSError, AcceptanceError, subprocess.SubprocessError):
             if process is not None:
                 try:
                     os.killpg(process.pid, signal.SIGKILL)

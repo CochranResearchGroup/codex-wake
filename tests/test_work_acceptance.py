@@ -152,6 +152,72 @@ class WorkAcceptanceTests(unittest.TestCase):
             path.unlink()
         self.assertEqual(self.owner.evaluate('missing', authority=self.authority, principal=self.principal)['status'], 'unknown')
 
+    def test_verifier_scope_changes_stop_later_effects_and_invalidate_publication(self):
+        from dataclasses import replace
+        import os
+        import sys
+        import time
+        from codex_wake.process import process_identity
+        from codex_wake.resource_claims import Claimant, ResourceClaims
+        native = process_identity(os.getpid())
+        claimant = Claimant('agent_' + '1' * 32, str(self.workspace),
+            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), time.time())
+        claim = ResourceClaims(self.root).claim('worktree', self.workspace, claimant)
+        marker = self.workspace / 'must-not-run'
+        for mode in ('artifact', 'pin'):
+            with self.subTest(mode=mode):
+                self.artifact.write_text('verified result')
+                marker.unlink(missing_ok=True)
+                target = self.artifact if mode == 'artifact' else self.root / 'task-briefs'
+                code = (f"from pathlib import Path; p=Path({str(target)!r}); "
+                        + ("p.write_text('changed')" if mode == 'artifact' else "p.rename(p.with_name('lost-briefs'))"))
+                def verifier(name, source):
+                    return dict(name=name, argv=[str(Path(sys.executable).resolve()), '-c', source],
+                                timeout=2, pass_codes=[0], fail_codes=[1])
+                checks = dict(self.checks, verifiers=[verifier('change', code),
+                    verifier('later', f"from pathlib import Path; Path({str(marker)!r}).touch()")],
+                    claim=dict(claim_id=claim['claim_id'], generation=1))
+                self.owner.define(mode, 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
+                claimant = replace(claimant, observed_at=time.time())
+                result = self.owner.evaluate(mode, authority=self.authority, principal=self.principal, claimant=claimant)
+                self.assertEqual(result['status'], 'unknown')
+                self.assertFalse(marker.exists(), 'stale scope must stop the next verifier effect')
+                self.artifact.write_text('verified result')
+        # Pin loss in the final verifier must also invalidate its own publication.
+        import shutil
+        shutil.rmtree(self.root / 'task-briefs', ignore_errors=True)
+        (self.root / 'lost-briefs').rename(self.root / 'task-briefs')
+        checks['verifiers'] = checks['verifiers'][:1]
+        self.owner.define('final-pin', 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
+        claimant = replace(claimant, observed_at=time.time())
+        result = self.owner.evaluate('final-pin', authority=self.authority, principal=self.principal, claimant=claimant)
+        self.assertEqual(result['status'], 'unknown')
+
+    def test_missing_frozen_executable_retains_unknown_receipt(self):
+        import os
+        import time
+        from codex_wake.process import process_identity
+        from codex_wake.resource_claims import Claimant, ResourceClaims
+        executable = self.workspace / 'approved-verifier'
+        executable.write_text('#!/bin/sh\nexit 0\n')
+        executable.chmod(0o700)
+        native = process_identity(os.getpid())
+        claimant = Claimant('agent_' + '1' * 32, str(self.workspace),
+            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), time.time())
+        claim = ResourceClaims(self.root).claim('worktree', self.workspace, claimant)
+        checks = dict(self.checks, verifiers=[dict(name='approved', argv=[str(executable)], timeout=2,
+            pass_codes=[0], fail_codes=[1])], claim=dict(claim_id=claim['claim_id'], generation=1))
+        self.owner.define('executable', 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
+        self.assertEqual(self.owner.evaluate('executable', authority=self.authority,
+            principal=self.principal, claimant=claimant)['status'], 'accepted')
+        executable.unlink()
+        result = self.owner.evaluate('executable', authority=self.authority, principal=self.principal, claimant=claimant)
+        self.assertEqual(result['status'], 'unknown')
+        self.assertEqual(result['checks'][0]['reason'], 'verifier_unavailable')
+        inspected = self.owner.inspect('executable', authority=self.authority, principal=self.principal)
+        self.assertEqual(inspected['status'], 'unknown')
+        self.assertEqual(inspected['original_receipt'], result)
+
     def test_executable_cli_and_native_mcp_share_approved_contract(self):
         import contextlib
         import io
