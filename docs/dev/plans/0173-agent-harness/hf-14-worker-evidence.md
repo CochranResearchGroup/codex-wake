@@ -59,3 +59,11 @@ captured-log bounds. Mutation profiles need a host-verified fresh claimant; stal
 claim evidence holds execution. No independent broad review performed in lane.
 
 Memory disposition: forbidden; explicit worker task prohibits memory writes.
+
+Final boundary check: cancellation discovered before exec now closes the gate and
+publishes an attributable cancelled/no-command-release receipt. Its first focused
+run exposed a revoked pre-release cancellation incorrectly changing the separately
+authorized job to unknown (1failure/10). Corrected refusal retention consistently
+before/after release. Final focused run:10pass,4.606seconds; full changed-file ruff,
+compileall and diff-check pass. This preserves the failing run rather than
+reporting the prior provisional checkpoint as accepted.

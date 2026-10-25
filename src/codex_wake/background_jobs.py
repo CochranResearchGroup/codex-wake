@@ -380,21 +380,26 @@ def _supervise(root, job_id):
                     actor = request['principal']
                     if request['job_id'] != job_id or request['generation'] != state['generation']:
                         _error('job_stale_generation', 'cancellation generation differs')
-                    store._authorize(state, Principal(actor['subject'], actor['role'], tuple(actor['tasks'])), 'job.cancel')
-                    os.close(gate_write)
-                    os.waitpid(child, 0)
-                    child = None
-                    os.close(stdout_read)
-                    os.close(stderr_read)
-                    for name in ('stdout.log', 'stderr.log'):
-                        fd = os.open(directory / name, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600)
-                        os.close(fd)
-                    _save(directory / 'result.json', dict(version=1, job_id=job_id,
-                        generation=state['generation'], intent_sha256=state['intent_sha256'],
-                        process=state['process'], status='cancelled', returncode=None,
-                        stored_log_bytes=0, log_truncated=False, completed_at=time.time(),
-                        cancellation=request, command_not_released=True))
-                    return
+                    try:
+                        store._authorize(state, Principal(actor['subject'], actor['role'], tuple(actor['tasks'])), 'job.cancel')
+                    except WakeError as error:
+                        _save(directory / 'cancel-refused.json', dict(version=1, job_id=job_id,
+                            reason=getattr(error, 'code', 'permission_denied'), request=request))
+                    else:
+                        os.close(gate_write)
+                        os.waitpid(child, 0)
+                        child = None
+                        os.close(stdout_read)
+                        os.close(stderr_read)
+                        for name in ('stdout.log', 'stderr.log'):
+                            fd = os.open(directory / name, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600)
+                            os.close(fd)
+                        _save(directory / 'result.json', dict(version=1, job_id=job_id,
+                            generation=state['generation'], intent_sha256=state['intent_sha256'],
+                            process=state['process'], status='cancelled', returncode=None,
+                            stored_log_bytes=0, log_truncated=False, completed_at=time.time(),
+                            cancellation=request, command_not_released=True))
+                        return
                 # Persist the possible-effect boundary before releasing exec.
                 state['release_attempted'] = True
                 _save(directory / 'state.json', state)
