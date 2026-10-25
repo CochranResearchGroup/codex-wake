@@ -1139,6 +1139,8 @@ remain separate from source integration and isolated candidate qualification.
 ## Managed harness controls
 
 The source now supports [managed conversation inventory](docs/managed-inventory.md),
+[semantic observation and bounded waits](docs/agent-observation.md),
+[cooperative mutation-resource custody](docs/resource-claims.md),
 [approved task briefs and assignment pins](docs/task-briefs.md), and
 [explicit wake lifetime/startup policy](docs/wake-policy.md). CLI and MCP use the
 same state and authority boundaries. These source additions do not install or

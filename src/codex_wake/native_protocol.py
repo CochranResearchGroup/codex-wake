@@ -11,6 +11,10 @@ from . import __version__
 from .records import WakeError
 
 
+class NativeCapabilityUnavailable(WakeError):
+    """The server explicitly rejected an unknown protocol method."""
+
+
 def native_request(endpoint, codex, method, params, timeout):
     from .shared_app_server import locate_shared_endpoint
     from websockets.sync.client import unix_connect
@@ -45,6 +49,8 @@ def native_request(endpoint, codex, method, params, timeout):
                 if result.get('id') != identifier:
                     continue
                 if 'error' in result:
+                    if isinstance(result['error'],dict) and result['error'].get('code')==-32601:
+                        raise NativeCapabilityUnavailable('native lifecycle method unavailable: '+name)
                     raise WakeError('native lifecycle request rejected: ' + name)
                 return result['result']
         request(1, 'initialize', {'clientInfo': {'name': 'codex_wake_lifecycle', 'version': __version__},

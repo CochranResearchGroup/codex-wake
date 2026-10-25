@@ -111,3 +111,15 @@ HF-13 product decisions are now resolved. Its technical handoff must cover
 owner completion, new-wake defaults, legacy behavior and unsupported startup. No implementation,
 live wakes, provider input, installed-policy repair, tab creation or deployment
 was performed. Shared contracts and final integration remain with the primary.
+
+
+## Common session permissions clarification, 2026-10-24
+
+The operator now explicitly requires a common globally configurable model with
+action-specific tailoring, including auto-refresh, auto-handoff, external resource
+enforcement, A2A send/receive, and separate background/existing-tab/new-tab wake
+delivery. [HF-06's contract proposal](session-permissions-contract.md) owns this
+requirement across execution consumers. It preserves the recorded permissive
+self-control preference and the resolved HF-13 owner-completion/startup defaults. Issue310 / PR311 is
+the independently owned refresh repair; it must converge with this model rather
+than become the final cross-feature policy schema.

@@ -425,7 +425,7 @@ class Mailbox:
 
     def _admit(self, database, actor, recipient, *, body, kind, ttl, key, delivery,
                subject, selector, now, original=None, correlation=None, acknowledgement=None,
-               resume_missing=False):
+               resume_missing=False, task_id=None):
         if type(resume_missing) is not bool or (resume_missing and delivery != 'notify'):
             raise BusError('invalid_argument', 'explicit reopening requires notification delivery')
         body_digest = self._parameters(body, kind, ttl, key, delivery, subject, selector, correlation)
@@ -434,6 +434,8 @@ class Mailbox:
         parameters = dict(recipient=recipient_key, body_digest=body_digest,
             kind=kind, ttl=ttl, delivery=delivery, subject=subject, in_reply_to=parent_id,
             correlation=correlation, acknowledgement=acknowledgement)
+        if task_id is not None:
+            parameters['task_id']=task_id
         if resume_missing:
             parameters['resume_policy'] = 'same_thread'
         fingerprint = hashlib.sha256(encoded(parameters).encode()).hexdigest()
@@ -453,6 +455,8 @@ class Mailbox:
         if original is not None and json.loads(original['envelope']).get('compacted'):
             raise BusError('message_compacted', 'new replies require a retained full envelope')
         target = self.bus.authorize_pair(database, actor, recipient)
+        from .permission_a2a import check_pair
+        permission=check_pair(self.bus,database,actor,target,task_id=task_id)
         parent = json.loads(original['envelope']) if original else None
         hop = parent['hop_count'] + 1 if parent else 0
         if hop > 8:
@@ -479,6 +483,8 @@ class Mailbox:
             idempotency_key=key, in_reply_to=parent_id, correlation=parent['correlation'] if parent else correlation,
             lineage=(parent['lineage'] + [parent_id]) if parent else [], hop_count=hop,
             selector_observation=selector, delivery=delivery)
+        if task_id is not None:envelope['task_id']=task_id
+        if permission is not None:envelope['permission_admission']=permission
         if resume_missing:
             envelope['resume_policy'] = 'same_thread'
             envelope['notification_authority'] = dict(
@@ -498,13 +504,13 @@ class Mailbox:
         return dict(message=self._projection(database, self._row(database, identifier)), deduplicated=False, receipt_id=receipt)
 
     def send(self, actor, recipient, *, body, idempotency_key, kind='request', ttl=86400,
-             delivery='notify', subject=None, selector=None, correlation=None, resume_missing=False):
+             delivery='notify', subject=None, selector=None, correlation=None, resume_missing=False, task_id=None):
         with self.transaction(actor, permission='send') as database:
             now = self._now(database)
             value = self._admit(database, actor, recipient, body=body, kind=kind, ttl=float(ttl),
                                 key=idempotency_key, delivery=delivery, subject=subject,
                                 selector=selector or {}, correlation=correlation, now=now,
-                                resume_missing=resume_missing)
+                                resume_missing=resume_missing,task_id=task_id)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
                          receipt_id=value.get('receipt_id'))
             return value
@@ -527,6 +533,8 @@ class Mailbox:
             recipient = actor.key == row['recipient_key']
             if recipient:
                 self.bus.validate_actor(database, actor, permission='receive')
+                from .permission_a2a import check_message
+                check_message(self.bus,database,row)
             now = self._now(database)
             row = self._expire(database, row, now)
             self._deadline_clear(database,row,now)
@@ -549,6 +557,8 @@ class Mailbox:
         if actor.key != row['recipient_key']:
             raise BusError('authorization_denied', 'only the exact recipient may acknowledge')
         self.bus.validate_actor(database, actor, permission='receive')
+        from .permission_a2a import check_message
+        check_message(self.bus,database,row,action='a2a.claim' if outcome=='accepted' else 'a2a.send')
         if outcome not in ('accepted', 'declined', 'completed', 'failed'):
             raise BusError('invalid_argument', 'unsupported recipient outcome')
         if evidence is not None and (not isinstance(evidence, str) or len(evidence) > 2048):
@@ -594,7 +604,7 @@ class Mailbox:
             return value
 
     def reply(self, actor, identifier, *, body, idempotency_key, kind='result', ttl=86400,
-              delivery='notify', subject=None, outcome=None, evidence=None, resume_missing=False):
+              delivery='notify', subject=None, outcome=None, evidence=None, resume_missing=False, task_id=None):
         with self.transaction(actor, permission='send') as database:
             original = self._row(database, identifier)
             self._require_current_work(database, original)
@@ -605,11 +615,18 @@ class Mailbox:
             self._deadline_clear(database,original,now)
             sender = json.loads(original['envelope'])['sender']
             recipient = RuntimeIdentity(sender['namespace'], sender['thread_id'], sender['root'])
+            original_task=json.loads(original['envelope']).get('task_id')
+            if task_id is not None and task_id!=original_task:
+                raise BusError('permission_task_scope_unverified','reply must retain the original task')
+            task_id=original_task
+            target=self.bus.authorize_pair(database,actor,recipient)
+            from .permission_a2a import check_pair
+            check_pair(self.bus,database,actor,target,task_id=task_id,action='a2a.reply')
             value = self._admit(database, actor, recipient, body=body, kind=kind, ttl=float(ttl), key=idempotency_key,
                                 delivery=delivery, subject=subject, selector=dict(reply_to=identifier),
                                 now=now, original=original,
                                 acknowledgement=dict(outcome=outcome, evidence=evidence) if outcome else None,
-                                resume_missing=resume_missing)
+                                resume_missing=resume_missing,task_id=task_id)
             if outcome:
                 value['acknowledgement'] = self._ack(database, actor, original, outcome, evidence, now)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,

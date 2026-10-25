@@ -21,7 +21,8 @@ def digest(data):
 
 
 class GrokTerminalHost:
-    def __init__(self, root):
+    def __init__(self, root, *, deadline=None):
+        self.deadline = deadline
         self.root = Path(root)
         self.tmux = shutil.which('tmux')
 
@@ -32,8 +33,17 @@ class GrokTerminalHost:
                 or info.st_uid != os.getuid() or info.st_mode & 0o077
                 or not re.fullmatch(r'%[0-9]+', binding['pane'])):
             raise WakeError('untrusted_terminal_endpoint')
-        result = subprocess.run([self.tmux or '/usr/bin/tmux', '-S', str(socket), *args],
-                                input=input, capture_output=True, timeout=3)
+        timeout = 3 if self.deadline is None else min(3, self.deadline - time.monotonic())
+        if timeout <= 0:
+            raise WakeError('terminal_observation_deadline_reached')
+        from contextlib import nullcontext
+        guard = nullcontext()
+        if args and args[0] in ('send-keys', 'paste-buffer', 'load-buffer', 'delete-buffer'):
+            from .guarded_interactions import automated_input_guard
+            guard = automated_input_guard(self.root, binding)
+        with guard:
+            result = subprocess.run([self.tmux or '/usr/bin/tmux', '-S', str(socket), *args],
+                                    input=input, capture_output=True, timeout=timeout)
         if result.returncode:
             raise WakeError('terminal_operation_unavailable')
         return result.stdout.decode('utf-8', errors='replace')

@@ -18,6 +18,10 @@ from .wake_control import guard_command
 
 @guard_command
 def refresh_command(args, root):
+    from .session_permissions import PermissionStore
+    if PermissionStore(root).active():
+        from .permission_refresh import cli_request
+        return cli_request(args,root,"refresh")
     try:
         config = json.loads(Path(args.profiles).read_text())
         profile = config['profiles'][args.profile]
@@ -29,7 +33,7 @@ def refresh_command(args, root):
         raise WakeError('approved profile and workspace checkpoint are required') from None
     if hashlib.sha256(content).hexdigest() != args.checkpoint_sha256:
         raise WakeError('checkpoint hash changed; original checkpoint must be preserved')
-    if profile.get('refresh_mode') in ('shared_mcp_idle', 'client_idle'):
+    if profile.get('refresh_mode') in ('shared_mcp_idle', 'client_idle', 'thread_mcp_idle'):
         from .shared_refresh import command
         from .sessions_cli import emit
         try:

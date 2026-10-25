@@ -5,9 +5,17 @@ Use `codex-wake` when work should resume after a defined trigger instead of rely
 ## Refresh this agent after an update
 
 Use `wake_sessions_configuration` with your actual caller UUID, the same
-`thread_id`, and the host's `self-refresh` profile. Its `refresh_scope` tells you
+`thread_id`, and the host's profile for the actual source workspace. Its `refresh_scope` tells you
 whether refresh reconnects MCP servers across the shared server. That scope
 requires explicit host approval; a missing grant is a setup refusal.
+
+For `current_connection` (`thread_mcp_idle`), require `capability: supported` and
+`native_scope: thread_mcp_connections` from the read-only scope probe. This
+refreshes all MCP connections of only the selected thread. Queue the preserved
+checkpoint with a fixed intent/expiry, then end this turn so its watcher observes
+source idle. Other conversations may remain active. Verify actual MCP resources
+and goal continuity separately from queue admission. Older native daemons need
+the explicit scoped API dependency; never select shared scope to bypass it.
 
 For a `single_client` profile (`client_idle`), preserve the checkpoint and queue
 refresh with the same fixed intent. End this turn so the independent watcher can

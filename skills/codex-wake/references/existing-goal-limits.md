@@ -20,7 +20,33 @@ work. Obtain your actual `CODEX_THREAD_ID` in a native shell, then call:
 
 Use `wake_goal_limits_set` with the user's actual allocation; these numbers are
 an example, not defaults. Neither the tool nor a new goal grants a larger budget.
-Read the full returned state. Proceed only when `state` is `armed` or
+Read the full returned state, including `engagement`. Registration is distinct
+from first-poll acknowledgement: `engagement.engaged` requires a fresh independent
+watcher to have polled this exact enrollment revision under its current generation.
+`wake_goal_limits_diagnose` reads original accounting without enrolling; the
+`accounting.reason` identifies a missing/unqualified history instead of a generic
+host-controller dead end. `wake_goal_limits_watcher_status` identifies an absent,
+masked, wrong-root or running configured service. `wake_goal_limits_start_watcher`
+requires the separate common `enforcement.watcher_start` permission, starts only
+that unmasked service and never renews resources. Explicit standing permission
+allows safe startup during enrollment. Configuration, process startup and JSON
+fields are not operator-visible conversation presentation proof.
+
+Use `goal-limits readiness` with the existing configured root/policy for a readable
+card; `--json` retains machine output. `goal-limits diagnose`, `watcher-status` and
+`start-watcher` are also public CLI commands (see `--help`); use existing operator
+capability arguments for authenticated startup. Do not hand-edit private JSON or
+create another watcher to recover a setup failure.
+
+When the operator explicitly elects manual resource monitoring for development or
+repair, honor that instruction with a cumulative token/time meter and closeout
+reserve. Report external enforcement as unavailable, retain every existing stop
+and resource boundary, and leave shared service changes to their exact authority.
+Do not make the broken setup being repaired a circular gate on that authorized
+repair work. Manual monitoring is not a claim of independent enforcement, an
+implicit renewal, or permission to resume another stopped campaign.
+
+For externally supervised continuation, proceed only when `state` is `armed` or
 `checkpoint_requested`, the independent controller is fresh, and accounting is
 qualified. `held`, `stopped`, `stop_unverified`, `winding_down` or a structured
 error holds autonomous campaign work. It does not prohibit operator replies,
@@ -259,3 +285,25 @@ only the latest turn. RPC failures record the method and exception class.
 An observation failure is distinct from token/time exhaustion. Existing stop
 latches remain authoritative after the transport recovers; this change does not
 clear them, renew resources, or restart the shared native daemon.
+
+
+## Recover an observation-fault stop
+
+A healthy read or native goal resume does not clear supervision. For a durable
+`observation_unavailable` stop, an authenticated operator may invoke
+`goal-limits recover` with the original policy/caller and existing operator bus
+capability; a native caller uses `wake_goal_limits_recover` only with an explicit
+matching common-policy approval. Supply a stable `operation_id` to reconcile an
+interrupted recovery. No allowance is renewed and the native goal stays paused.
+
+Recovery requires two agreeing exact-thread observations around a qualified
+nondecreasing accounting scan, a fresh independent controller, same boot, intact
+host policy and remaining original resources. The original campaign work must
+have stopped; a later operator reply may remain active. Exhaustion, accounting
+winddown, clock faults or changed goal identity hold without clearing stops.
+
+Shared allocations require an operator's explicit `--allocation-id` and qualified
+stopped state plus current permissions for every enrolled member. An interrupted
+commit retains a pending-recovery fence; retry the same operation to reconcile.
+Status exposes the supported recovery action. Stop episodes and recovery events
+retain the original first stop, charges, deadline and all prior effect outcomes.

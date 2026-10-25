@@ -1,0 +1,113 @@
+{
+  "repository": "CochranResearchGroup/codex-wake",
+  "issues": [
+    {
+      "number": 320,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/320",
+      "rest_id": 6016988021,
+      "state": "open",
+      "actor": "ecochran76",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "blocked_by": [
+        315,
+        316
+      ],
+      "local_id": "HF-06-A",
+      "native_blocking_links_verified": true
+    },
+    {
+      "number": 321,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/321",
+      "rest_id": 6016993116,
+      "state": "open",
+      "actor": "ecochran76",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "blocked_by": [
+        320
+      ],
+      "local_id": "HF-06-B",
+      "native_blocking_links_verified": true
+    },
+    {
+      "number": 322,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/322",
+      "rest_id": 6016993238,
+      "state": "open",
+      "actor": "ecochran76",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "blocked_by": [
+        320
+      ],
+      "local_id": "HF-06-C",
+      "native_blocking_links_verified": true
+    },
+    {
+      "number": 323,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/323",
+      "rest_id": 6016993426,
+      "state": "open",
+      "actor": "ecochran76",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "blocked_by": [
+        320
+      ],
+      "local_id": "HF-06-D",
+      "native_blocking_links_verified": true
+    },
+    {
+      "number": 324,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/324",
+      "rest_id": 6016993548,
+      "state": "open",
+      "actor": "ecochran76",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "blocked_by": [
+        317,
+        320
+      ],
+      "local_id": "HF-06-E",
+      "native_blocking_links_verified": true
+    },
+    {
+      "number": 325,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/325",
+      "rest_id": 6016993689,
+      "state": "open",
+      "actor": "ecochran76",
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ],
+      "blocked_by": [
+        320,
+        321,
+        322,
+        323,
+        324
+      ],
+      "local_id": "HF-06-F",
+      "native_blocking_links_verified": true
+    }
+  ],
+  "recorded_at": "2026-10-24T19:58:51.583064+00:00",
+  "authority": "Operator approved product, test seams, six slices and blocking edges; requested publication",
+  "spec_revision": "9d686e29c3d3cc55f69124db289247038c632aef",
+  "action": "create_six_issues_apply_existing_labels_and_native_blockers",
+  "implementation_started": false,
+  "live_effects": false
+}

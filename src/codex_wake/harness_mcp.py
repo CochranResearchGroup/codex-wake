@@ -11,7 +11,8 @@ from .records import WakeError
 
 TEXT = {'type': 'string', 'minLength': 1, 'maxLength': 256}
 CALLER = {'type': 'string', 'pattern': '^[0-9a-f-]{36}$'}
-POLICY = {'wake_lifetime': {'enum': ['conversation', 'task', 'persistent']},
+ROUTES={'type':'array','minItems':1,'maxItems':4,'uniqueItems':True,'items':{'enum':['background','existing_tab','new_tab','fresh_task']}}
+POLICY = {'routes':ROUTES,'wake_lifetime': {'enum': ['conversation', 'task', 'persistent']},
           'owner_id': TEXT, 'owner_end': {'enum': ['retire', 'hold', 'retain']},
           'recipient_startup': {'enum': ['active_tab', 'background_saved', 'create_load_run']}}
 
@@ -32,6 +33,36 @@ def tool_specs():
         result['wake_agents_' + verb] = ('agents', verb,
             'Inspect or enroll exact managed conversations. Self-enrollment uses trusted native or host-bound identity; membership never grants additional operations.',
             properties, required, verb in ('list', 'show'))
+    for verb in ('list', 'show', 'claim', 'check', 'release'):
+        properties, required = {}, []
+        if verb in ('show', 'check', 'release'):
+            properties['claim_id'] = TEXT
+            required.append('claim_id')
+        if verb in ('claim', 'check', 'release'):
+            properties['managed_agent_id'] = TEXT
+            required.append('managed_agent_id')
+        if verb in ('check', 'release'):
+            properties['generation'] = {'type': 'integer', 'minimum': 1}
+            required.append('generation')
+        if verb == 'claim':
+            properties.update(kind={'enum': ['worktree', 'build_prefix', 'install_prefix']},
+                              path={'type': 'string', 'minLength': 1, 'maxLength': 4096})
+            required += ['kind', 'path']
+        result['wake_resources_' + verb] = ('resources', verb,
+            'Declare cooperative resource custody using verified exact-owner identity. Check is point-in-time only; it grants no future mutation or filesystem permission.',
+            properties, required, verb in ('list', 'show', 'check'))
+    from .agent_observation import STATES
+    for verb in ('observe', 'wait'):
+        properties = dict(managed_agent_id=TEXT, freshness={'type': 'number', 'minimum': .1, 'maximum': 300},
+                          timeout={'type': 'number', 'minimum': 0 if verb == 'wait' else .001,
+                                   'maximum': 300 if verb == 'wait' else 60})
+        required = ['managed_agent_id']
+        if verb == 'wait':
+            properties.update(state={'enum': list(STATES)}, interval={'type': 'number', 'minimum': .05, 'maximum': 5})
+            required.append('state')
+        result['wake_agents_' + verb] = ('agent-state', verb,
+            'Observe or wait for exact managed-agent state using fresh runtime evidence. Unknown is not idle or completed; grants no operations.',
+            properties, required, True)
     for verb in ('propose', 'approve', 'inspect', 'admit', 'pin'):
         properties = dict(caller_thread_id=CALLER, task_id=TEXT)
         required = ['caller_thread_id', 'task_id']
@@ -93,6 +124,27 @@ def call(runner, group, verb, arguments, native_context):
     if runner.wake_root is None:
         raise WakeError('host_wake_root_required')
     root = Path(runner.wake_root)
+    if group == 'agent-state':
+        from .agent_observation import RuntimeStateObserver, grok_source_from_actor
+        from .agent_observation_commands import execute
+        grok = None
+        if runner.actor_runtime == 'grok' and runner.bus_root is not None and runner.capability is not None:
+            grok = grok_source_from_actor(runner.bus_root, runner.capability)
+        return execute(verb, arguments, root, observer=RuntimeStateObserver(endpoint=runner.app_server, grok_source=grok))
+    if group == 'resources':
+        from .managed_inventory_commands import RuntimeObserver
+        from .resource_claim_commands import execute
+        grok = bus = None
+        if runner.actor_runtime == 'grok':
+            from .runtime_a2a import GrokMailboxRuntime
+            from .a2a_bus import BusStore
+            if runner.bus_root is None or runner.capability is None:
+                raise WakeError('host_bound_runtime_capability_required')
+            bus = BusStore(runner.bus_root)
+            grok = GrokMailboxRuntime.from_actor(bus, runner.capability)
+        observer = RuntimeObserver(endpoint=runner.app_server, socket_path=runner.tmux_socket,
+                                   grok_runtime=grok, bus=bus, capability=runner.capability)
+        return execute(verb, arguments, root, native_context=native_context, observer=observer)
     if group == 'agents':
         from .managed_inventory_commands import RuntimeObserver, execute
         grok = bus = None
@@ -110,22 +162,14 @@ def call(runner, group, verb, arguments, native_context):
     caller = arguments['caller_thread_id']
     verified_native_caller(native_context, caller)
     if group == 'task-briefs':
-        from .task_briefs import BriefAuthority, TaskBriefStore
+        from .task_briefs import BriefAuthority
         from .task_brief_commands import execute_task_briefs
         tasks = controller_tasks(runner, caller)
         if arguments['task_id'] in tasks:
             authority = BriefAuthority('native:' + caller, 'controller', tasks)
         else:
-            store = TaskBriefStore(root)
-            if verb == 'propose':
-                workspace = arguments['brief'].get('workspace')
-            else:
-                existing = store.inspect(arguments['task_id'])
-                workspace = existing['revisions'][0]['content']['workspace'] if existing['revisions'] else None
-            if (type(workspace) is not str or not Path(workspace).is_absolute()
-                    or not Path(workspace).resolve().is_relative_to(native_workspace(runner, caller))):
-                raise WakeError('brief_workspace_outside_native_caller')
-            authority = BriefAuthority('native:' + caller, 'worker', (arguments['task_id'],))
+            authority = BriefAuthority('native:' + caller, 'worker', (arguments['task_id'],),
+                                       workspace=str(native_workspace(runner, caller)))
         args = SimpleNamespace(task_brief_command=verb, task_id=arguments['task_id'],
                                revision=arguments.get('revision'), assignment_id=arguments.get('assignment_id'),
                                brief_json=json.dumps(arguments.get('brief')) if 'brief' in arguments else None)
@@ -143,12 +187,16 @@ def call(runner, group, verb, arguments, native_context):
         argv = ['--wake-root', str(root), 'native', verb, '--endpoint', runner.app_server,
                 '--json', '--idempotency-key', arguments['idempotency_key'], '--ttl', arguments.get('ttl', '24h')]
         for name in POLICY:
-            if name in arguments:
+            if name=='routes':
+                for route in arguments.get('routes',[]):argv+=['--wake-route',route]
+            elif name in arguments:
                 argv += ['--' + name.replace('_', '-'), arguments[name]]
         argv += [caller, arguments['trigger'], '--', arguments['prompt']]
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            code = run(argv)
+            from .session_permissions import Principal
+            tasks=controller_tasks(runner,caller)
+            code = run(argv,permission_principal=Principal(caller,'controller' if tasks else 'session',tasks=tuple(tasks)))
         if code:
             raise WakeError('wake_registration_not_ready')
         return json.loads(output.getvalue())

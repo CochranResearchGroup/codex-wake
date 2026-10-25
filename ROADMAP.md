@@ -1266,6 +1266,15 @@ Host history-index blocker F2 resolved. Production controller heartbeat is fresh
 no goal enrolled/reset; existing clients need MCP refresh. Native stop scope is
 the registered session only. Strict bootstrap remains separately operator-owned.
 
+### P167 follow-up | Visible and actionable supervision
+
+State: READY. Owner: primary / ecochran76. Work item #343; children #344–#346.
+[Operator UX contract](docs/dev/plans/0173-agent-harness/goal-limit-operator-ux.md)
+covers self-service watcher engagement and visible startup confirmation, interrupting
+model/operator notices, and explicit allowance extension/window reset. This is new
+follow-up scope; the shipped P167 enforcement history above remains unchanged.
+Source/presentation implementation and installed acceptance are still pending.
+
 ## P168 | Operational self-refresh
 
 State: OPEN. Owner: primary / ecochran76. Work item #282,
@@ -1382,3 +1391,9 @@ primary retains shared hub integration and #310 overlap coordination.
 2026-10-24 first frontier source complete: #315/#316/#317 closed after acceptance.
 One two-axis review and one TDD remediation pass complete; PR326 final CI/integration
 pending. Remaining28 feature tickets retain their own interview gates.
+
+2026-10-24 HF-06 common permissions source complete: #320–#325 closed,
+stacked PR327 on PR326. One broad Standards/Spec review and one bounded TDD
+pass repaired assignment revocation checks and contextual approval inspection.
+Installed acceptance #310 and runtime gaps #318/#319 remain open; no production
+policy changes, deployment or resource renewal.

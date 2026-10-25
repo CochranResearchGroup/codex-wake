@@ -6,6 +6,7 @@ from .records import WakeError
 
 MODE = 'shared_mcp_idle'
 CLIENT_MODE = 'client_idle'
+THREAD_MODE = 'thread_mcp_idle'
 _stopping = False
 
 
@@ -37,21 +38,29 @@ def _client_effect_guard(receipt):
     _effect_guard()
 
 
-def configuration(config, profile_name, thread_id, caller_thread_id):
+def configuration(config, profile_name, thread_id, caller_thread_id, *, _permission_checked=False):
+    if _permission_checked:
+        from .permission_migration import profile_ceiling
+        profile_ceiling(config,profile_name,caller_thread_id)
     from . import __version__
     try:
         profile = config['profiles'][profile_name]
-        if (config['version'] != 1 or profile['refresh_mode'] not in (MODE, CLIENT_MODE)
+        if (config['version'] != 1 or profile['refresh_mode'] not in (MODE, CLIENT_MODE, THREAD_MODE)
                 or not profile['scope_approval'] or str(UUID(thread_id)) != thread_id
                 or caller_thread_id != thread_id
-                or profile_name not in config['callers'][caller_thread_id]
+                or (not _permission_checked and profile_name not in config.get('callers',{}).get(caller_thread_id,[]))
                 or not isinstance(profile['resources'], dict) or not profile['resources']):
             raise ValueError
     except (KeyError, TypeError, ValueError, AttributeError):
         raise WakeError('shared refresh requires exact host caller and explicit scope approval') from None
-    return dict(version=__version__, profile=profile_name, thread_id=thread_id,
-                refresh_scope='single_client' if profile['refresh_mode']==CLIENT_MODE else 'shared_server_mcp', idle_required=True,
+    value=dict(version=__version__, profile=profile_name, thread_id=thread_id,
+                refresh_scope={CLIENT_MODE:'single_client',MODE:'shared_server_mcp',THREAD_MODE:'current_connection'}[profile['refresh_mode']], idle_required=True,
                 resources=sorted(profile['resources']), operations=['configuration', 'refresh'])
+    if profile['refresh_mode']==THREAD_MODE:
+        _validate_profile(profile)
+        from .scoped_refresh import inspect_capability
+        value.update(inspect_capability(profile,thread_id))
+    return value
 
 
 def _directory(root):
@@ -69,7 +78,7 @@ def _directory(root):
 
 def _public(receipt):
     return {key: value for key, value in receipt.items()
-            if key not in ('profile', 'policy_path', 'checkpoint_path', 'goals_before', 'last_busy_thread')}
+            if key not in ('profile', 'policy_path', 'checkpoint_path', 'goals_before', 'last_busy_thread', 'permission_context', 'policy_root')}
 
 
 def _validate_profile(profile):
@@ -80,7 +89,7 @@ def _validate_profile(profile):
         if client:required.add('tmux_session')
         optional={'tmux_socket','codex_home','goal_supervision','client_connection'} if client else set()
         if (not required <= set(profile) or set(profile)-required-optional
-                or profile['refresh_mode'] not in (MODE,CLIENT_MODE) or not isinstance(profile['scope_approval'], str)
+                or profile['refresh_mode'] not in (MODE,CLIENT_MODE,THREAD_MODE) or not isinstance(profile['scope_approval'], str)
                 or not profile['scope_approval'].strip()
                 or not Path(profile['cwd']).is_absolute() or not Path(profile['cwd']).is_dir()
                 or not Path(profile['codex_path']).is_absolute() or not Path(profile['codex_path']).is_file()
@@ -94,6 +103,8 @@ def _validate_profile(profile):
                     (not Path(profile.get('codex_home','')).is_absolute() or not Path(profile['codex_home']).is_dir()))):
             raise ValueError
         for check in profile['resources'].values():
+            if profile['refresh_mode']==THREAD_MODE and check.get('kind') not in ('mcp','mcp_catalog'):
+                raise ValueError
             fields = ({'kind','server','version','tools'} if check['kind']=='mcp_catalog' else
                       {'kind', 'path', 'description', 'sha256'} if check['kind'] == 'skill' else
                       {'kind', 'server', 'tool', 'arguments', 'read_only', 'expected_content'})
@@ -111,7 +122,7 @@ def _validate_profile(profile):
         raise WakeError('shared refresh profile or read-only resource proof is invalid') from None
 
 
-def command(args, root, config, profile, checkpoint, content):
+def command(args, root, config, profile, checkpoint, content, *, permission_context=None, emit_result=None):
     import hashlib
     import json
     import time
@@ -120,7 +131,12 @@ def command(args, root, config, profile, checkpoint, content):
     from .process import boot_id_value
     from .records import parse_timestamp
     from .sessions_cli import emit
-    configuration(config, args.profile, args.thread_id, args.caller_thread_id)
+    if permission_context:
+        from .permission_refresh import revalidate
+        revalidate(root,permission_context)
+    info=configuration(config, args.profile, args.thread_id, args.caller_thread_id, _permission_checked=bool(permission_context))
+    if profile['refresh_mode']==THREAD_MODE and info.get('capability')!='supported':
+        raise WakeError('native scoped MCP reload dependency unavailable')
     _validate_profile(profile)
     policy = Path(args.profiles).absolute()
     _private(policy)
@@ -147,7 +163,7 @@ def command(args, root, config, profile, checkpoint, content):
                   expires_at=args.expires_at)
     if profile['refresh_mode']==CLIENT_MODE:
         from .lifecycle_budget import operation_binding
-        intent['client_binding']=operation_binding(config,args,source_ref=args.thread_id)
+        intent['client_binding']=operation_binding(config,args,source_ref=args.thread_id,_permission_checked=bool(permission_context))
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     name = hashlib.sha256(args.intent.encode()).hexdigest()
     path = directory/(name+'.json')
@@ -165,9 +181,11 @@ def command(args, root, config, profile, checkpoint, content):
             if deadline <= upper:
                 raise WakeError('shared refresh expiry reached')
             receipt = dict(intent, fingerprint=fingerprint, intent_key=args.intent,
-                           refresh_scope='single_client' if profile['refresh_mode']==CLIENT_MODE else 'shared_server_mcp', state='queued', reason='waiting_for_idle',
+                           refresh_scope=info['refresh_scope'], state='queued', reason='waiting_for_idle',
                            started_upper=upper, started_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
                            boot_id=boot_id_value(), deadline=deadline)
+            if profile['refresh_mode']==THREAD_MODE:
+                receipt['native_scope']=info['native_scope']
             if profile['refresh_mode']==CLIENT_MODE:
                 from .lifecycle_budget import operation_binding
                 receipt['intent']=dict(operation='refresh',source_thread_id=args.thread_id,
@@ -177,6 +195,9 @@ def command(args, root, config, profile, checkpoint, content):
                 if binding:receipt['intent'].update(binding)
                 if profile.get('client_connection')=='managed_default':
                     receipt['managed_client_binding']=_managed_binding(profile)
+            if permission_context:
+                receipt['permission_context']=permission_context
+                receipt['policy_root']=str(Path(root).absolute())
             _save(path, receipt)
             if profile['refresh_mode']==CLIENT_MODE:
                 from .refresh_goal import pause
@@ -192,7 +213,7 @@ def command(args, root, config, profile, checkpoint, content):
                     if pause(path,receipt,profile,goal,request):
                         receipt.update(state='queued',reason='waiting_for_source_idle')
                 _save(path,receipt)
-        emit(_public(receipt), args.as_json)
+        (emit_result or emit)(_public(receipt), args.as_json)
         return 0 if receipt['state'] in ('queued','prepared','stopping','starting','awaiting_preflight','restoring_goal','verifying','completed') else 5
 
 
@@ -210,6 +231,9 @@ def _remaining(receipt):
 def _request(receipt, method, params):
     if _stopping:
         raise WakeError('refresh controller is stopping')
+    if receipt.get('permission_context'):
+        from .permission_refresh import revalidate
+        revalidate(Path(receipt['policy_root']),receipt['permission_context'])
     from .native_protocol import native_request
     remaining = _remaining(receipt)
     if remaining <= 0:
@@ -258,7 +282,8 @@ def _resources(receipt):
                      and hashlib.sha256(Path(check['path']).read_bytes()).hexdigest() == check['sha256'])
         elif check['kind']=='mcp_catalog':
             from .refresh_resources import catalog_ready
-            ready=catalog_ready(check,lambda method,params:_request(receipt,method,params),receipt['thread_id'])
+            ready=catalog_ready(check,lambda method,params:_request(receipt,method,params),receipt['thread_id'],
+                                runtime_only=profile.get('refresh_mode')==THREAD_MODE)
         else:
             result = _request(receipt, 'mcpServer/tool/call', dict(threadId=receipt['thread_id'],
                 server=check['server'], tool=check['tool'], arguments=check['arguments']))
@@ -281,19 +306,32 @@ def _poll_one(path, receipt):
     policy = Path(receipt['policy_path'])
     _private(policy)
     config = json.loads(policy.read_text())
-    configuration(config, receipt['profile_name'], receipt['thread_id'], receipt['thread_id'])
+    context=receipt.get('permission_context')
+    if context:
+        from .permission_refresh import revalidate
+        try:revalidate(path.parent.parent,context)
+        except WakeError:
+            receipt.update(state='blocked',reason='permission_revoked');return
+    try:
+        configuration(config, receipt['profile_name'], receipt['thread_id'], receipt['thread_id'], _permission_checked=bool(context))
+    except WakeError as exc:
+        receipt.update(state='blocked',reason=getattr(exc,'code','host_refresh_authority_changed'));return
     if config['profiles'][receipt['profile_name']] != receipt['profile']:
         receipt.update(state='blocked', reason='host_refresh_policy_changed')
         return
     if hashlib.sha256(Path(receipt['checkpoint_path']).read_bytes()).hexdigest() != receipt['checkpoint_sha256']:
         receipt.update(state='blocked', reason='source_checkpoint_changed')
         return
+    if receipt['profile'].get('refresh_mode')==THREAD_MODE:
+        from .scoped_refresh import poll_one
+        poll_one(path,receipt)
+        return
     if receipt['profile'].get('refresh_mode')==CLIENT_MODE:
         from .agent_refresh import preflight, advance_refresh
         from .lifecycle_budget import operation_binding
         from types import SimpleNamespace
         current_binding=operation_binding(config,SimpleNamespace(profile=receipt['profile_name'],
-            caller_thread_id=receipt['thread_id']),source_ref=receipt['thread_id'])
+            caller_thread_id=receipt['thread_id']),source_ref=receipt['thread_id'],_permission_checked=bool(context))
         if current_binding!=receipt.get('client_binding'):
             receipt.update(state='blocked',reason='host_budget_policy_changed');return
         if receipt['state']=='pausing_goal':

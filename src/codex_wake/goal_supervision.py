@@ -169,6 +169,9 @@ def verified_native_caller(context,claimed):
 
 
 def _public(receipt):
+    receipt=dict(receipt)
+    if type(receipt.get('used_tokens')) is int:
+        receipt['lifetime_used_tokens']=receipt.get('lifetime_tokens_before_window',0)+receipt['used_tokens']
     return dict({key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')},
         stop_scope='registered_goal_campaign',descendant_stop_verified=False)
 
@@ -241,6 +244,7 @@ def _allocation_admit(directory,receipt,old):
     with _lock(path.parent,path.stem):
         if path.exists():
             _private(path);allocation=json.loads(path.read_text())
+            if allocation.get('pending_recovery'):raise ValueError('allocation recovery is pending reconciliation')
             if allocation['grant']!=receipt['grant']:raise ValueError('host allocation changed; explicit renewal required')
             if (receipt['token_limit']>allocation['token_limit'] or
                     receipt['time_limit_seconds']>allocation['time_limit_seconds']):
@@ -288,7 +292,12 @@ def _allocation_admit(directory,receipt,old):
             time_limit_seconds=allocation['time_limit_seconds'],allocation_path=str(path),
             used_tokens=allocation['used_tokens'])
         if allocation.get('boot_id')!=boot_id_value():allocation['stop_latched']=True
-        if allocation['stop_latched']:receipt['stop_latched']=True
+        if allocation['stop_latched']:
+            receipt['stop_latched']=True
+            if receipt.get('reason') is None:receipt['reason']=allocation.get('stop_reason','continuation_held')
+        if allocation.get('pending_recovery'):
+            receipt['reason']='observation_unavailable'
+            receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
         _save(path,allocation)
@@ -358,7 +367,12 @@ def _usage(receipt):
         if allocation.get('first_stop'):
             key='first_stop' if allocation['first_stop'].get('receipt_generation')==receipt['generation'] else 'allocation_first_stop'
             receipt.setdefault(key,allocation['first_stop'])
-        if allocation['stop_latched']:receipt['stop_latched']=True
+        if allocation['stop_latched']:
+            receipt['stop_latched']=True
+            if receipt.get('reason') is None:receipt['reason']=allocation.get('stop_reason','continuation_held')
+        if allocation.get('pending_recovery'):
+            receipt['reason']='observation_unavailable'
+            receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
         return dict(state='qualified',used_tokens=used,token_accounting=allocation['token_accounting'],
@@ -386,28 +400,125 @@ def _heartbeat(directory):
             and value['boot_id']==boot_id_value() and process_exists(value['pid'])
             and process_identity(value['pid'])==value['identity']
             and 0<=age<=max(3,3*value['interval']))
-        return dict(value,fresh=valid,age_seconds=age)
+        return dict(value,fresh=valid,age_seconds=age,process_alive=process_exists(value['pid']) and process_identity(value['pid'])==value['identity'])
     except (OSError,ValueError,KeyError,TypeError):return dict(fresh=False,reason='controller_unavailable')
 
 
-def show(root,policy_path,caller_thread_id,allocation_id=None):
+def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_principal=None,native_context=None):
+    from .permission_enforcement import principal_for, authorize, describe
+    principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
+    if principal:authorize(root,"session.inspect",principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
     directory=_directory(root);path=directory/(name+'.json')
-    if not path.exists():return dict(state='held',reason='not_enrolled',thread_id=caller_thread_id,controller=_heartbeat(directory))
+    if not path.exists():
+        controller=_heartbeat(directory)
+        from .goal_readiness import engagement
+        return dict(state='held',reason='not_enrolled',thread_id=caller_thread_id,controller=controller,
+            engagement=engagement({},controller))
     with _lock(directory,name):
         _private(path);receipt=json.loads(path.read_text())
+        pending_recovery=None
+        if receipt.get('allocation_path'):
+            ledger_path=Path(receipt['allocation_path']);_private(ledger_path)
+            with _lock(ledger_path.parent,ledger_path.stem):
+                ledger=json.loads(ledger_path.read_text())
+            pending_recovery=ledger.get('pending_recovery')
+            if pending_recovery:
+                receipt.update(state='held',reason='recovery_pending_reconciliation',stop_latched=True)
+            elif ledger.get('stop_latched'):
+                receipt['stop_latched']=True
+                if receipt['state'] in ('armed','checkpoint_requested'):
+                    receipt.update(state='held',reason=ledger.get('stop_reason','continuation_held'))
+        from .goal_renewal import renewal_hold
+        pending=renewal_hold(root,receipt)
+        if pending and not pending_recovery:
+            from .goal_readiness import engagement
+            return dict(_public(receipt),**pending,engagement=engagement(dict(receipt,**pending),_heartbeat(directory)))
         if receipt['grant']!=grant:
             receipt.update(state='held',reason='host_policy_changed')
         receipt['controller']=_heartbeat(directory)
+        permit_path=directory/'maintenance/permit.json'
+        if permit_path.exists():
+            _private(permit_path)
+            permit=json.loads(permit_path.read_text())
+            if (permit.get('state') in ('prepared','handoff')
+                    and receipt.get('state') in ('armed','checkpoint_requested')
+                    and not receipt.get('stop_latched')
+                    and time.clock_gettime(time.CLOCK_BOOTTIME)<permit.get('expires_boottime',0)):
+                receipt.update(state='held',reason='controller_maintenance')
         if receipt['state'] in ('armed','checkpoint_requested') and not receipt['controller']['fresh']:
             receipt.update(state='held',reason='controller_unavailable')
         receipt['sampled']=True;receipt['maximum_token_overshoot']=None
-        return _public(receipt)
+        from .goal_readiness import engagement
+        result=_public(receipt)
+        if receipt.get('stop_latched'):
+            observation_fault=receipt.get('reason')=='observation_unavailable'
+            result['recovery']=dict(status='requires_authorized_recovery' if observation_fault else 'not_recoverable',
+                action='wake_goal_limits_recover' if observation_fault else None,
+                next_action='Request explicit scoped recovery; healthy reads or native resume alone do not clear supervision. Original resource limits remain.' if observation_fault else 'Keep this stop; observation recovery cannot clear exhaustion, accounting, policy or clock failures.')
+        if pending_recovery:
+            result['recovery']=dict(status='pending_reconciliation',action='wake_goal_limits_recover',
+                operation_id=pending_recovery.get('operation_id'),
+                next_action='Retry the same explicitly authorized recovery operation; the allocation remains held.')
+
+        result['engagement']=engagement(receipt,receipt['controller'])
+        event_id=receipt.get('notice_ids',{}).get('engagement')
+        if event_id:
+            try:
+                from .goal_notices import read_notice
+                notice=read_notice(root,event_id)
+                result['engagement']['presentation']=notice['delivery']['state']
+                result['engagement']['presentation_proof']=notice['proof']
+                if notice['delivery']['state']=='unsupported':
+                    result['engagement']['visibility_status']='runtime_visibility_unsupported'
+                    result['engagement']['presentation_next_action']=notice['delivery'].get('next_action')
+            except (OSError,ValueError,KeyError):
+                result['engagement']['presentation']='unavailable'
+        if principal:result['enforcement_permissions']=describe(root,caller_thread_id,principal=principal)
+        return result
+
+
+class AccountingUnavailable(ValueError):
+    code='goal_accounting_unavailable'
+
+    def __init__(self,message,observation):
+        super().__init__(message)
+        self.accounting_reason=observation.get('member_reason') or observation.get('reason') or 'unqualified_history'
+
+
+def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_principal=None,native_context=None):
+    """Read original history and actual watcher without enrolling or changing authority."""
+    from .permission_enforcement import principal_for,authorize
+    principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
+    if principal:authorize(root,'session.inspect',principal)
+    grant=_grant(policy_path,caller_thread_id,allocation_id,root)
+    if grant.get('host_delegated'):verified_native_caller(native_context,caller_thread_id)
+    goal,active=_native(grant,caller_thread_id)
+    from .goal_usage import observe_usage
+    if not goal:
+        accounting=dict(state='unknown',reason='native_goal_missing')
+    else:
+        accounting=observe_usage(grant['codex_home'],caller_thread_id,goal['createdAt'],token_accounting='fresh')
+    controller=_heartbeat(_directory(root))
+    status=('accounting_unavailable' if accounting.get('state')!='qualified' else
+            'watcher_ready' if controller.get('fresh') else 'watcher_unavailable')
+    action=('Inspect original response-level usage and native writer compatibility. first_usage_unavailable can mean no completed response or an unsupported native usage writer; display totals cannot qualify accounting. Preserve history without synthesizing records or resetting usage.'
+            if status=='accounting_unavailable' else
+            'Enroll the existing session with the user-approved limits; registration does not itself prove engagement.'
+            if status=='watcher_ready' else
+            'Run goal-limits watcher-status, then start-watcher with existing authority if the configured service is unmasked.')
+    return dict(thread_id=caller_thread_id,allocation_id=grant['allocation_id'],
+        enrolled=(_directory(root)/(_name(caller_thread_id)+'.json')).exists(),
+        native_goal_status=goal.get('status') if goal else None,active_turn_count=len(active),
+        accounting={key:accounting[key] for key in ('state','reason','used_tokens','token_accounting') if key in accounting},
+        controller=controller,readiness=dict(status=status,next_action=action),effect_attempted=False)
 
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None):
+    from .permission_enforcement import principal_for,authorize,enrollment_action
+    principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
     binding=verified_native_caller(native_context,caller_thread_id) if grant.get('host_delegated') else None
     for key,value,maximum in [('tokens',token_limit,grant['max_tokens']),('seconds',time_limit_seconds,grant['max_seconds'])]:
@@ -416,11 +527,29 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         raise ValueError('invalid checkpoint token reserve')
     if type(checkpoint_seconds) not in (int,float) or not math.isfinite(checkpoint_seconds) or checkpoint_seconds<0:raise ValueError('invalid checkpoint time reserve')
     directory=_directory(root);path=directory/(name+'.json')
+    # Configured service repair is a distinct common-policy action. Never undo a
+    # mask or infer authority from enrollment permission alone.
+    watcher_setup=None
+    if principal and not _heartbeat(directory).get('fresh'):
+        from .session_permissions import PermissionStore
+        store=PermissionStore(root)
+        if store.active() and store.evaluate('enforcement.watcher_start',principal,
+                target=principal.subject,task_id=task_id,operation_id=operation_id)['permission']=='allow':
+            from .goal_watcher import start_watcher
+            watcher_setup=start_watcher(root,principal=principal,task_id=task_id,operation_id=operation_id)
     with _lock(directory,'maintenance'), _lock(directory,name):
         from .goal_maintenance import admission_guard
         admission_guard(directory)
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
+        if old:
+            from .goal_renewal import renewal_hold
+            pending=renewal_hold(root,old)
+            if pending:return dict(_public(old),**pending)
+        permission=None
+        if principal:
+            action=enrollment_action(old,token_limit,time_limit_seconds,token_accounting,grant['allocation_id'])
+            permission=authorize(root,action,principal,task_id=task_id,operation_id=operation_id)
         same=bool(old and old['allocation_id']==grant['allocation_id'])
         previous_basis=old.get('token_accounting','cache_inclusive') if old else None
         basis=token_accounting or (previous_basis if same else 'fresh')
@@ -450,10 +579,15 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 token_accounting=previous_basis,used_tokens=old['used_tokens'],accounting=old.get('accounting')))
         receipt['token_accounting']=basis
         receipt['deadline']=receipt['time_origin']+time_limit_seconds
+        authority_fields=('generation','token_limit','deadline','token_accounting','checkpoint_token_percent','checkpoint_seconds')
+        if not same or any(old.get(key)!=receipt.get(key) for key in authority_fields):
+            receipt['enrollment_revision']=old.get('enrollment_revision',0)+1 if same else 1
+            receipt.pop('poll_ack',None)
+        else:receipt.setdefault('enrollment_revision',1)
         if grant.get('auto_enrolled') and grant['allocation_id']=='native-'+caller_thread_id and not old:
             from .goal_usage import observe_usage
             first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis)
-            if first.get('state')!='qualified':raise ValueError('first enrollment requires qualified original history')
+            if first.get('state')!='qualified':raise AccountingUnavailable('first enrollment requires qualified original history',first)
             if first.get('parent_thread_id'):raise ValueError('successor must select its existing objective allocation')
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old)
         observation=_usage(receipt)
@@ -465,7 +599,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 (observation.get('reason')=='usage_scan_time_limit' or
                  observation.get('reason')=='allocation_member_accounting_unknown' and
                  observation.get('member_reason')=='usage_scan_time_limit')):
-            raise ValueError('initial accounting unavailable; enrollment not admitted')
+            raise AccountingUnavailable('initial accounting unavailable; enrollment not admitted',observation)
         if basis_changed and observation.get('state')!='qualified':
             raise ValueError('accounting basis change requires qualified original history')
         if old and not same and not grant.get('host_delegated'):
@@ -491,14 +625,28 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             hold('continuation_held')
         if receipt['boot_id']!=boot_id_value():
             hold('boot_identity_changed')
+        if permission:
+            receipt['enforcement_permission']=permission
+            receipt['permission_subject']=principal.subject
         receipt['native_goal_status']=goal.get('status')
+        if watcher_setup is not None:receipt['watcher_setup']=watcher_setup
         if goal.get('status') not in NATIVE_GOAL_STATUSES:
             hold('native_goal_state_unknown')
         _save(path,receipt)
-        return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None)
+        from .goal_readiness import engagement
+        return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None,
+            engagement=engagement(receipt,controller))
 
 
 def _effect(path,receipt,key,method,params):
+    if method=='turn/steer':
+        from .permission_enforcement import controller_permission
+        permission=controller_permission(path.parent.parent,receipt)
+        receipt['enforcement_continuation_permission']=permission
+        if permission['permission'] not in ('allow','legacy'):
+            receipt['permission_effect_blocked']=True
+            _save(path,receipt)
+            return False
     effects=receipt.setdefault('effects',{})
     if key in effects:return effects[key]['state']=='acknowledged'
     effects[key]=dict(state='intended',method=method,params=params)
@@ -519,13 +667,33 @@ def _allocation_latch(receipt,reason,deadline=None):
         allocation=json.loads(path.read_text())
         if receipt.get('first_stop'):
             allocation.setdefault('first_stop',receipt['first_stop'])
-        allocation.update(stop_latched=True,stop_reason=reason)
+        known={event['id'] for event in allocation.setdefault('stop_episodes',[])}
+        allocation['stop_episodes'].extend(event for event in receipt.get('stop_episodes',[]) if event['id'] not in known)
+        inherited=reason in (None,'continuation_held') and allocation.get('stop_latched')
+        allocation.update(stop_latched=True)
+        if not inherited:allocation['stop_reason']=reason
         if deadline is not None:
             deadline=min(deadline,allocation.get('winddown_deadline',deadline))
             allocation['winddown_deadline']=deadline
             receipt['allocation_winddown_deadline']=deadline
         _save(path,allocation)
     return deadline
+
+
+def _stop_episode(path,receipt,reason):
+    """Retain distinct faults across recovery without rewriting the first stop."""
+    episodes=receipt.setdefault('stop_episodes',[])
+    active=next((event for event in episodes if event['id']==receipt.get('active_stop_id')),None)
+    if active is not None and active['reason']==reason:return
+    controller=_heartbeat(path.parent)
+    event=dict(id=uuid4().hex,kind='stop',reason=reason,receipt_generation=receipt['generation'],
+        allocation_id=receipt['allocation_id'],boot_id=boot_id_value(),
+        observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
+        controller_generation=controller.get('generation'),used_tokens=receipt.get('used_tokens'),
+        token_limit=receipt['token_limit'],deadline=receipt['deadline'],
+        native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
+        cause=receipt.get('observation_error') if reason=='observation_unavailable' else None)
+    episodes.append(event);receipt['active_stop_id']=event['id']
 
 
 def _first_stop(path,receipt,reason):
@@ -570,7 +738,20 @@ def _first_stop(path,receipt,reason):
     _save(path,receipt)
 
 
+def _record_supervision_notice(path,receipt,kind,controller=None):
+    # Local durable intent only. Delivery is a separate worker so native/UI
+    # failure cannot delay this campaign's or a peer's pause/interrupt.
+    try:
+        from .goal_notices import record_notice
+        event=record_notice(path.parent.parent,receipt,kind,controller=controller)
+        receipt.setdefault('notice_ids',{})[kind]=event['event_id']
+    except Exception as error:
+        receipt['notice_record_error']=type(error).__name__
+
+
+
 def _stop(path,receipt,reason,goal=None,active=None):
+    _stop_episode(path,receipt,reason)
     _first_stop(path,receipt,reason)
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
     _allocation_latch(receipt,reason)
@@ -582,6 +763,7 @@ def _stop(path,receipt,reason,goal=None,active=None):
             legacy_turns = {effect.get('params', {}).get('turnId') or
                 effect.get('params', {}).get('expectedTurnId') for effect in receipt.get('effects', {}).values()
                 if effect.get('method') in ('turn/interrupt', 'turn/steer')}
+            receipt['stop_scope_observed']=bool(goal and goal.get('status')=='active')
             receipt['stop_turns']=list(active) if goal and goal.get('status')=='active' else sorted(legacy_turns - {None})
             _save(path,receipt)
         if receipt.get('pause_observed') and goal and goal.get('status')!='paused':
@@ -599,10 +781,13 @@ def _stop(path,receipt,reason,goal=None,active=None):
             if turn not in receipt['stop_turns']:continue
             _effect(path,receipt,'interrupt:'+turn,'turn/interrupt',dict(threadId=thread,turnId=turn))
         final_goal,final_active=_native(receipt['grant'],thread)
-        proven=(not final_goal or final_goal.get('status')=='paused') and not set(final_active).intersection(receipt['stop_turns'])
+        proven=((not final_goal or final_goal.get('status')=='paused')
+            and not set(final_active).intersection(receipt['stop_turns'])
+            and (receipt.get('stop_scope_observed',False) or not final_active))
         receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven,
             pause_observed=not final_goal or final_goal.get('status')=='paused')
     except Exception as exc:receipt['control_error']=type(exc).__name__
+    _record_supervision_notice(path,receipt,'stop')
     _save(path,receipt)
     return receipt
 
@@ -657,6 +842,13 @@ def poll(root):
         with _lock(directory,path.stem):
             _private(path);receipt=json.loads(path.read_text())
             try:
+                from .goal_renewal import renewal_hold
+                pending=renewal_hold(root,receipt)
+                if pending:
+                    results.append(dict(receipt,**pending));continue
+                from .permission_enforcement import controller_permission
+                permission=controller_permission(root,receipt)
+                receipt['enforcement_continuation_permission']=permission
                 grant=_grant(receipt['policy_path'],receipt['thread_id'],receipt['allocation_id'],root)
                 if grant!=receipt['grant']:
                     results.append(_stop(path,receipt,'host_policy_changed'));continue
@@ -682,6 +874,10 @@ def poll(root):
                     results.append(_stop(path,receipt,'allocation_exhausted',goal,active));continue
                 if receipt.get('stop_latched') or receipt.get('state') in ('stopped','stop_unverified'):
                     results.append(_stop(path,receipt,receipt.get('reason','continuation_held'),goal,active));continue
+                if permission['permission'] not in ('allow','legacy'):
+                    receipt.update(state='held',reason='permission_revoked',campaign_continuation='held')
+                    _save(path,receipt);results.append(receipt);continue
+                receipt.pop('campaign_continuation',None)
                 checkpoint=(receipt['token_limit']-used<=receipt['token_limit']*receipt['checkpoint_token_percent']/100
                     or receipt['deadline']-upper<=receipt['checkpoint_seconds'])
                 if checkpoint:
@@ -692,8 +888,10 @@ def poll(root):
                         key='checkpoint:'+active[0]
                         delivered=_effect(path,receipt,key,'turn/steer',dict(threadId=receipt['thread_id'],expectedTurnId=active[0],
                             input=[dict(type='text',text=receipt['checkpoint']['message'])]))
-                        receipt['checkpoint']['state']='acknowledged' if delivered else 'uncertain'
+                        receipt['checkpoint']['state']=('acknowledged' if delivered else
+                            'blocked' if receipt.pop('permission_effect_blocked',False) else 'uncertain')
                     receipt.update(state='checkpoint_requested',reason='checkpoint_reserve')
+                    _record_supervision_notice(path,receipt,'checkpoint')
                 else:receipt.update(state='armed',reason=None)
                 _save(path,receipt);results.append(receipt)
             except Exception as exc:
@@ -702,6 +900,25 @@ def poll(root):
                 receipt['observation_duration_seconds']=exc.duration if isinstance(exc,NativeObservationUnavailable) else None
                 results.append(_stop(path,receipt,'observation_unavailable'))
     return results
+
+
+def _acknowledge_enrollments(directory,controller,observations):
+    for observed in observations:
+        path=directory/(_name(observed['thread_id'])+'.json')
+        with _lock(directory,path.stem):
+            _private(path);receipt=json.loads(path.read_text())
+            if any(receipt.get(key)!=observed.get(key) for key in
+                    ('generation','enrollment_revision','token_limit','deadline','used_tokens')):continue
+            if (observed.get('state') not in ('armed','checkpoint_requested') or
+                    receipt.get('state') not in ('armed','checkpoint_requested') or receipt.get('stop_latched')
+                    or (receipt.get('accounting') or {}).get('state')!='qualified'):
+                continue
+            receipt['poll_ack']=dict(enrollment_revision=receipt.get('enrollment_revision',1),
+                receipt_generation=receipt['generation'],controller_generation=controller['generation'],
+                observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME))
+            receipt['controller_generation']=controller['generation']
+            _record_supervision_notice(path,receipt,'engagement',controller)
+            _save(path,receipt)
 
 
 def watch(root,interval=1):
@@ -717,10 +934,17 @@ def watch(root,interval=1):
         prior={sig:signal.signal(sig,finish) for sig in (signal.SIGTERM,signal.SIGINT)}
         heartbeat=dict(generation=generation,pid=os.getpid(),identity=process_identity(os.getpid()),
             boot_id=boot_id_value(),interval=interval)
+        import threading
+        from .goal_notices import run_presenter
+        presentation_stop=threading.Event()
+        presenter=threading.Thread(target=run_presenter,args=(root,presentation_stop),daemon=True,
+            name='goal-notice-presenter')
+        presenter.start()
         try:
             while running:
                 _save(directory/'controller.json',dict(heartbeat,active=True,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
-                poll(root)
+                observations=poll(root)
+                _acknowledge_enrollments(directory,heartbeat,observations)
                 from .goal_maintenance import replacement_observed
                 replacement_observed(directory,heartbeat)
                 time.sleep(interval)
@@ -734,4 +958,8 @@ def watch(root,interval=1):
                         with _lock(directory,path.stem):
                             _private(path);receipt=json.loads(path.read_text());_stop(path,receipt,'controller_stopped')
             _save(directory/'controller.json',dict(heartbeat,active=False,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
+            # Stop control precedes presentation. Drain the newly journaled stop
+            # once; stalled native I/O must not hold controller exit indefinitely.
+            presentation_stop.set()
+            presenter.join(timeout=2)
             for sig,handler in prior.items():signal.signal(sig,handler)

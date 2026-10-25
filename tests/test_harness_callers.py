@@ -86,6 +86,46 @@ class HarnessCallerTests(unittest.TestCase):
             self.assertFalse(failed, original)
             self.assertEqual(original['pin']['revision'], 1)
 
+    def test_worker_cannot_admit_later_revision_outside_its_workspace(self):
+        from codex_wake.task_briefs import TaskBriefStore, BriefAuthority
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            a, b = root / 'A', root / 'B'
+            a.mkdir(); b.mkdir()
+            store = TaskBriefStore(root / 'wake')
+            operator = BriefAuthority('operator:test', 'operator')
+            for workspace in (a, b):
+                content = dict(objective='Work', phase='implementation', non_goals=['Release'],
+                    acceptance=['Done'], context=[], workspace=str(workspace),
+                    allocation_ref='existing', permission_ref='existing')
+                proposal = store.propose('task', content, authority=operator)
+                store.approve('task', proposal['revision'], authority=operator)
+            runner = CommandRunner(wake_root=root / 'wake')
+            with patch('codex_wake.harness_mcp.native_workspace', return_value=a):
+                value, failed = runner.call('wake_task_briefs_admit', dict(caller_thread_id=THREAD,
+                    task_id='task', assignment_id='step'), native_context=META)
+            self.assertTrue(failed, value)
+            self.assertEqual(value['error']['code'], 'authority_denied')
+            with patch('codex_wake.harness_mcp.native_workspace', return_value=a):
+                for tool, extra in [('wake_task_briefs_inspect', {}),
+                                    ('wake_task_briefs_admit', dict(assignment_id='explicit', revision=2))]:
+                    value, failed = runner.call(tool, dict(caller_thread_id=THREAD, task_id='task', **extra), native_context=META)
+                    self.assertTrue(failed, value)
+                value, failed = runner.call('wake_task_briefs_admit', dict(caller_thread_id=THREAD,
+                    task_id='task', assignment_id='allowed', revision=1), native_context=META)
+                self.assertFalse(failed, value)
+                self.assertEqual(value['pin']['revision'], 1)
+                value, failed = runner.call('wake_task_briefs_pin', dict(caller_thread_id=THREAD,
+                    task_id='task', assignment_id='allowed'), native_context=META)
+                self.assertFalse(failed, value)
+            with patch('codex_wake.harness_mcp.native_workspace', return_value=b):
+                value, failed = runner.call('wake_task_briefs_pin', dict(caller_thread_id=THREAD,
+                    task_id='task', assignment_id='allowed'), native_context=META)
+                self.assertTrue(failed, value)
+                value, failed = runner.call('wake_task_briefs_admit', dict(caller_thread_id=THREAD,
+                    task_id='task', assignment_id='allowed', revision=1), native_context=META)
+                self.assertTrue(failed, value)
+
     def test_only_host_delegation_can_promote_native_controller(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 from . import __version__
+from .records import WakeError
 
 TEXT = {"type": "string", "minLength": 1, "maxLength": 1024}
 MESSAGE = {"type": "string", "minLength": 1, "maxLength": 128}
@@ -19,7 +20,7 @@ OUTCOME = {"enum": ["accepted", "declined", "completed", "failed"]}
 DELIVERY = {"enum": ["inbox", "notify"]}
 PAGE = {"cursor": {"type": "integer", "minimum": 0},
         "limit": {"type": "integer", "minimum": 1, "maximum": 100}}
-SEND = {"body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery": DELIVERY,
+SEND = {"task_id": MESSAGE, "body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery": DELIVERY,
         "ttl": TEXT, "subject": {**TEXT, "maxLength": 200}, "kind": {"enum": ["notice", "request", "result"]},
         "resume_missing": {"type": "boolean"}}
 TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
@@ -37,7 +38,7 @@ SPECS = {
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
          "mode": {"enum": ["new-tab", "same-tab"]}, "expires_at": TEXT, "rollback": {"type": "boolean"}},
         ["profile", "intent", "thread_id", "checkpoint", "checkpoint_sha256", "mode", "expires_at"], False),
-    "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources while preserving the source conversation. A client_idle profile queues independent replacement of only the invoking client after that conversation is idle, pauses an active goal and restores it only after resource checks if originally active. A shared_mcp_idle profile instead queues a shared-server MCP reload after all loaded conversations are idle. Exact host scope approval is required. Reuse the same intent to read completion. Preserved checkpoint, fixed expiry and actual resource proof are required; queued is not completed. Legacy profiles retain guarded client replacement; no fresh-thread or shared-daemon restart fallback.",
+    "wake_sessions_refresh": ("sessions", "refresh", "Refresh named host-approved resources while preserving the source conversation. A client_idle profile queues independent replacement of only the invoking client after that conversation is idle, pauses an active goal and restores it only after resource checks if originally active. A thread_mcp_idle profile refreshes only the selected thread after its read-only native scope probe succeeds and that thread is idle; older daemons remain unsupported with no shared fallback. A shared_mcp_idle profile instead queues a shared-server MCP reload after all loaded conversations are idle. Exact host scope approval is required. Reuse the same intent to read completion. Preserved checkpoint, fixed expiry and actual resource proof are required; queued is not completed. Legacy profiles retain guarded client replacement; no fresh-thread or shared-daemon restart fallback.",
         {"profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "thread_id": TEXT,
          "checkpoint": TEXT, "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
          "rollback": {"type": "boolean"},
@@ -63,6 +64,11 @@ SPECS = {
     "wake_messages_cancel": ("messages", "cancel", "Cancel this actor's authorized original message; retain history and reconcile any uncertain effect.", {"message_id": MESSAGE}, ["message_id"], False),
     "wake_messages_arm_reply": ("messages", "arm-reply", "Register an exact correlated reply wake with a fixed timezone-aware expiry and stable arm key, then end the originating turn. Requires operator-delegated sender authority and an active native worker; registration is not reply completion.", {"message_id": MESSAGE, "idempotency_key": INTENT, "expires_at": TEXT}, ["message_id", "idempotency_key", "expires_at"], False),
 }
+from .permission_commands import tool_specs as permission_tool_specs
+SPECS.update(permission_tool_specs())
+for _name in ('wake_sessions_refresh','wake_sessions_configuration'):
+    SPECS[_name][3]['scope']={'enum':['current_connection','single_client','shared_server']}
+SPECS['wake_sessions_handoff'][3]['trigger']={'enum':['manual','context_limit','update','resource_warning']}
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 SPECS['wake_goal_limits_set'] = (
     'goal-limits', 'set',
@@ -90,6 +96,16 @@ SPECS['wake_goal_limits_show'] = (
     'Reading does not reset or renew any allocation; missing/stale proof is not active enforcement. '
     'Supply actual native caller_thread_id; host grants still apply.',
     {'caller_thread_id': CALLER,'allocation_id':TEXT}, ['caller_thread_id'], True)
+for _verb in ('readiness','diagnose','notices','watcher-status','start-watcher'):
+    SPECS['wake_goal_limits_'+_verb.replace('-','_')]=(
+        'goal-limits',_verb,
+        ('Inspect verified enrollment/first-poll readiness, specific blockers and executable remedies. '
+         'Enrollment, independent enforcement and conversation presentation are distinct. '
+         'start-watcher starts only the exact configured unmasked service with common-policy authority; '
+         'never unmasks, changes roots, clears stops or renews resources.'),
+        {'caller_thread_id':CALLER,'allocation_id':TEXT,'task_id':TEXT,'assignment_id':TEXT,'operation_id':TEXT},
+        ['caller_thread_id'],_verb!='start-watcher')
+SPECS['wake_goal_limits_notices'][3]['event_id']=TEXT
 for _name, _spec in list(SPECS.items()):
     if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff", "configuration", "target"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
@@ -123,6 +139,16 @@ for _verb in ('after','at','file'):
 
 from .harness_mcp import tool_specs as harness_tool_specs
 SPECS.update(harness_tool_specs())
+from .frontier_mcp import tool_specs as frontier_tool_specs
+SPECS.update(frontier_tool_specs())
+from .agent_resume_commands import tool_specs as resume_tool_specs
+SPECS.update(resume_tool_specs())
+from .permission_enforcement import tool_specs as enforcement_tool_specs
+SPECS.update(enforcement_tool_specs())
+from .goal_renewal_commands import tool_specs as renewal_tool_specs
+SPECS.update(renewal_tool_specs())
+for _name in ('wake_goal_limits_set','wake_goal_limits_show'):
+    SPECS[_name][3].update({key:MESSAGE for key in ('task_id','assignment_id','operation_id')})
 from .harness_mcp import POLICY as WAKE_POLICY_PROPERTIES
 for _name, _spec in tuple(SPECS.items()):
     if _spec[0] == 'grok' and _spec[1] in ('after', 'at', 'file'):
@@ -208,13 +234,32 @@ class CommandRunner:
         if name not in SPECS:
             return {"error": {"code": "unknown_tool", "message": "Unknown tool."}}, True
         group, verb, _, properties, required, readonly = SPECS[name]
-        if self.actor_runtime == 'grok' and group not in ('messages','grok','agents'):
+        if self.actor_runtime == 'grok' and group not in ('messages','grok','agents','agent-state','resources','frontier'):
             return {'error':{'code':'native_caller_attestation_unavailable'}}, True
         schema = {"type": "object", "additionalProperties": False,
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
-        if group in ('agents', 'task-briefs', 'harness-native', 'harness-owner'):
+        if group == 'frontier':
+            try:
+                from .frontier_mcp import call as frontier_call
+                return frontier_call(self, verb, arguments, native_context), False
+            except (WakeError, ValueError, TypeError, KeyError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'frontier_operation_held'), 'message': 'Harness operation or qualified evidence is unavailable.'}}, True
+        if group == 'agents' and verb == 'resume':
+            from .agent_resume_commands import mcp_call
+            result = mcp_call(self, arguments, native_context)
+            return result, result.get('status') != 'resumed'
+        if group == 'permissions':
+            if self.wake_root is None:
+                return {'error': {'code':'permission_host_root_required'}},True
+            packet=dict(root=str(self.wake_root),verb=verb,arguments=arguments,native_context=native_context,
+                harness_policy=str(self.harness_policy) if self.harness_policy is not None else None)
+            raw=json.dumps(packet)
+            if len(raw.encode())>65536:
+                return {'error':{'code':'invalid_argument'}},True
+            return self._execute([sys.executable,'-m','codex_wake.permission_commands'],arguments,readonly,raw)
+        if group in ('agents', 'agent-state', 'resources', 'task-briefs', 'harness-native', 'harness-owner'):
             try:
                 from .harness_mcp import call as harness_call
                 return harness_call(self, group, verb, arguments, native_context), False
@@ -233,10 +278,51 @@ class CommandRunner:
             except (ValueError, OSError, TypeError, KeyError, ImportError):
                 return {"error": {"code": "policy_denied", "message": "Host wake-control root and action grants are required for the entire selected scope."}}, True
             return self._execute(command, arguments, readonly)
+        if group == 'goal-renewal':
+            try:
+                from .goal_renewal_commands import mcp_call
+                return mcp_call(self,verb,arguments,native_context),False
+            except Exception as exc:
+                from .goal_readiness import explain_error
+                return explain_error(exc),True
         if group == 'goal-limits':
             goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
             if self.goal_limits_policy is None or goal_root is None:
                 return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
+            if verb in ('diagnose','notices','watcher-status','start-watcher'):
+                try:
+                    from .goal_supervision import verified_native_caller,_grant
+                    from .goal_watcher import watcher_status,start_watcher
+                    from .session_permissions import Principal
+                    from .permission_enforcement import verified_tasks
+                    from .harness_mcp import controller_tasks
+                    thread=arguments['caller_thread_id']
+                    verified_native_caller(native_context,thread)
+                    _grant(self.goal_limits_policy,thread,arguments.get('allocation_id'),root=goal_root)
+                    if verb=='watcher-status':return watcher_status(goal_root),False
+                    if verb=='notices':
+                        from .goal_notice_commands import execute
+                        return execute(goal_root,self.goal_limits_policy,thread,event_id=arguments.get('event_id'),
+                            allocation_id=arguments.get('allocation_id'),native_context=native_context),False
+                    if verb=='diagnose':
+                        from .goal_supervision import diagnose
+                        return diagnose(goal_root,self.goal_limits_policy,thread,arguments.get('allocation_id'),native_context=native_context),False
+                    tasks=verified_tasks(goal_root,thread,arguments.get('task_id'),arguments.get('assignment_id'),
+                        controller_tasks=controller_tasks(self,thread))
+                    result=start_watcher(goal_root,principal=Principal(thread,tasks=tasks),
+                        task_id=arguments.get('task_id'),operation_id=arguments.get('operation_id'))
+                    return result,result['reason']!='watcher_running'
+                except Exception as exc:
+                    from .goal_readiness import explain_error
+                    return explain_error(exc),True
+            if verb=='readiness':verb='show'
+            from .session_permissions import PermissionStore
+            if PermissionStore(goal_root).active() or verb in ('recover','disable'):
+                packet=dict(verb=verb,arguments=arguments,native_context=native_context,
+                    runner=dict(wake_root=str(self.wake_root) if self.wake_root else None,
+                        goal_limits_root=str(goal_root),goal_limits_policy=str(self.goal_limits_policy),
+                        harness_policy=str(self.harness_policy) if self.harness_policy else None))
+                return self._execute([sys.executable,'-m','codex_wake.permission_enforcement'],arguments,readonly,json.dumps(packet))
             # Native owns the stdio connection and request _meta. Model tool
             # arguments cannot select a host policy, transport or caller binding.
             try:
@@ -258,9 +344,8 @@ class CommandRunner:
                 except Exception:
                     delegated=False
                 if delegated:
-                    return dict(state='held',armed=False,reason='native_caller_or_allocation_unavailable',
-                        error=dict(code='goal_limits_unavailable',message=str(exc)),
-                        operator_interaction='available',campaign_continuation='held'),True
+                    from .goal_readiness import explain_error
+                    return explain_error(exc),True
             command = [*self.cli, '--wake-root', str(goal_root), group, verb,
                        '--policy', str(self.goal_limits_policy), '--json']
             for key, value in arguments.items():
@@ -271,6 +356,10 @@ class CommandRunner:
                 return {'error':{'code':'busy_policy_unsupported'}}, True
             if self.wake_root is None or not Path(self.wake_root).is_absolute():
                 return {'error':{'code':'runtime_host_scope_unavailable'}}, True
+            from .session_permissions import PermissionStore
+            common_grok=verb in ('after','at','file') and PermissionStore(self.wake_root).active()
+            if common_grok and (self.actor_runtime!='grok' or self.bus_root is None or self.capability is None):
+                return {'error':{'code':'wake_identity_unverified','message':'Common-policy Grok wakes require an exact host-bound actor capability; no native Grok identity is inferred.'},'capability':'not_qualified'},True
             command=[*self.cli,'--wake-root',str(self.wake_root),'grok',verb,'--json']
             if verb == 'show':
                 command += [arguments['wake_id']]
@@ -279,6 +368,9 @@ class CommandRunner:
                             '--idempotency-key',arguments['idempotency_key'],
                             '--ttl',arguments.get('ttl','24h'),arguments['binding_id'],
                             arguments['trigger'],'--',arguments['prompt']]
+            if common_grok:
+                command[-4:-4]=['--bus-root',str(self.bus_root),'--actor-capability',str(self.capability),'--actor-runtime','grok']
+            for route in arguments.get('routes',[]):command[-4:-4]=['--wake-route',route]
             for key in ('wake_lifetime', 'owner_id', 'owner_end', 'recipient_startup'):
                 if key in arguments:
                     command[-4:-4] = ['--'+key.replace('_','-'), arguments[key]]
@@ -295,6 +387,17 @@ class CommandRunner:
             lifecycle_root = self.lifecycle_root if self.lifecycle_root is not None else self.wake_root
             if self.lifecycle_profiles is None or lifecycle_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
+            from .session_permissions import PermissionStore
+            if verb in ('refresh','configuration','handoff') and PermissionStore(lifecycle_root).active():
+                try:
+                    from .goal_supervision import verified_native_caller
+                    binding=verified_native_caller(native_context,arguments['caller_thread_id'])
+                    if arguments['thread_id']!=binding['thread_id']:raise ValueError('exact self required')
+                    packet=dict(verb=verb,arguments=arguments,binding=binding,root=str(lifecycle_root),profiles=str(self.lifecycle_profiles))
+                    module='codex_wake.permission_handoff' if verb=='handoff' else 'codex_wake.permission_refresh'
+                    return self._execute([sys.executable,'-m',module],arguments,readonly,json.dumps(packet))
+                except ValueError as exc:
+                    return {'error':{'code':'permission_identity_unverified','message':str(exc)}},True
             command = [*self.cli, '--wake-root', str(lifecycle_root), group, verb,
                        '--profiles', str(self.lifecycle_profiles)]
         else:

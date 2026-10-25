@@ -69,6 +69,7 @@ class BriefAuthority:
     actor_id: str
     role: str
     task_ids: tuple[str, ...] = ()
+    workspace: str | None = None
 
     def __post_init__(self):
         _identifier(self.actor_id, 'actor identity')
@@ -84,6 +85,11 @@ class BriefAuthority:
             return
         if task_id not in self.task_ids or (approval and self.role != 'controller'):
             raise TaskBriefError('authority_denied', 'caller lacks the required exact task authority')
+
+    def require_workspace(self, content):
+        if (self.workspace is not None
+                and not Path(content['workspace']).resolve().is_relative_to(Path(self.workspace).resolve())):
+            raise TaskBriefError('authority_denied', 'brief workspace is outside the caller workspace')
 
 
 def _brief(content):
@@ -206,6 +212,7 @@ class TaskBriefStore:
     def propose(self, task_id, content, *, authority):
         authority.require(task_id)
         value = _brief(content)
+        authority.require_workspace(value)
         with self._transaction(task_id, write=True) as state:
             if len(state['revisions']) >= MAX_REVISIONS:
                 raise TaskBriefError('limit_exceeded', 'task brief revision limit reached')
@@ -238,6 +245,9 @@ class TaskBriefStore:
         if authority is not None:
             authority.require(task_id)
         with self._transaction(task_id) as state:
+            if authority is not None:
+                for revision in state['revisions']:
+                    authority.require_workspace(revision['content'])
             approved = [int(key) for key in state['approvals']]
             return dict(task_id=task_id, approved_revision=max(approved) if approved else None,
                         revisions=_copy(state['revisions']), approvals=_copy(state['approvals']),
@@ -252,13 +262,15 @@ class TaskBriefStore:
             if existing:
                 if existing['request'] != request:
                     raise TaskBriefError('assignment_conflict', 'assignment already pins a different admission intent')
-                self._revision(state, existing['pin']['revision'])
+                original = self._revision(state, existing['pin']['revision'])
+                authority.require_workspace(original['content'])
                 return _copy(existing)
             approved = [int(key) for key in state['approvals']]
             selected = revision if revision is not None else (max(approved) if approved else None)
             if selected is None or str(selected) not in state['approvals']:
                 raise TaskBriefError('brief_unapproved', 'assignment requires an approved task brief')
             brief = self._revision(state, selected)
+            authority.require_workspace(brief['content'])
             context_evidence = _verify_context(brief['content'])
             pin = dict(task_id=task_id, revision=selected, digest=brief['digest'],
                        approval=_copy(state['approvals'][str(selected)]))
@@ -279,6 +291,8 @@ class TaskBriefStore:
             if admitted is None:
                 raise TaskBriefError('assignment_not_found', 'assignment has no admitted task brief')
             revision = self._revision(state, admitted['pin']['revision'])
+            if authority is not None:
+                authority.require_workspace(revision['content'])
             if (admitted['pin']['digest'] != revision['digest']
                     or admitted['pin']['approval'] != state['approvals'].get(str(revision['revision']))):
                 raise TaskBriefError('store_invalid', 'assignment pin differs from approved brief')

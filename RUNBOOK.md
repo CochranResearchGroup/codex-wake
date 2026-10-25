@@ -7991,6 +7991,18 @@ unenrollment, permissive self-control profiles and separate lifetime/startup axe
 Preserved other-agent ownership of host-policy repair. HF-02/HF-07 product inputs
 resolved; HF-13 follow-up pending. No implementation/runtime effects.
 
+
+
+## 2026-10-24 | Common session permissions requirement
+
+Read default:19 wake tab and published harness backlog5593168. Reconciled the
+operator's global/per-action policy request under HF-06, with HF-13/18/19/24 as
+consumers. Added action coverage, proposed resolution/ceilings, sender/receiver
+checks, explicit delivery routes and migration boundary for issue310/PR311.
+Requirements are recorded; concrete design remains proposed and feature gates
+unchanged. Documentation-only isolated branch; no policy/runtime/provider effect.
+Policy wiring and whitespace checks pass. Memory disposition forbidden: no
+explicit request to write memory.
 ## Turn 399 | 2026-10-24
 
 Recorded direct operator follow-up resolving HF-13 defaults: retire pending
@@ -8016,6 +8028,34 @@ enhancement/ready-for-agent labels. No parent issue, assignee or milestone chang
 Linked local index/specs and retained shared integration and #310 boundaries.
 No feature implementation or live runtime effects.
 
+
+
+## 2026-10-24 | HF-06 confirmation and scoped-refresh reconciliation
+
+Operator confirmed the nine session-permission decisions and directed review of
+issue318. Read its full body/comments and current published frontier #315–317.
+Merged the latest planning branch, preserving glossary additions by intent.
+Drafted common permissions spec and six vertical slices; kept exact-connection
+refresh, client replacement and shared reload distinct. #318 owns missing scoped
+execution, not an excuse to block common-policy diagnostics or broaden effects.
+Public CLI/MCP plus independent controller test seams and the slice breakdown
+remain pending operator approval. No new implementation tickets, provider effects
+or installed-policy changes. Policy wiring, links, graph consistency and diff
+checks pass. Memory disposition forbidden: no explicit memory-write request.
+
+
+## 2026-10-24 | Publish approved HF-06 children and reconcile goal-limits error
+
+Created #320–#325 with approved public seams and six-slice dependency graph.
+Read back all issues, labels, actor and 12 native blocking links; no ambiguous
+creation was retried. #319 reports the new transient-observation-stop recovery
+defect; #322 requires explicit recovery authority without treating permission as
+latch clearance or allowance renewal. #318 retains scoped-refresh execution.
+Updated local HF-06 spec, parent, index and publication receipt. No parent issue
+closed/rewritten, no runtime fix or live policy change claimed. Documentation
+validation and graph equality checked before publication closeout. Memory
+disposition forbidden: developer requires explicit user request for memory write.
+
 ## Turn 402 | 2026-10-24
 
 Implemented first harness frontier with primary HF-13 and workers /root/hf02
@@ -8025,3 +8065,96 @@ and one bounded TDD pass fixed completion provenance and held-record mutation.
 Serial1495-test runs pass on3.11/3.12 (one unrelated opt-in skip); post-fix focused
 checks and isolated0.21.0 CLI/MCP wheel proof pass. PR326 owns final CI/integration.
 No production install, provider turns, host permission edits or release publication.
+
+
+## 2026-10-24 | HF-06 source closure and review remediation
+
+Closed #320–#325 on stacked PR327 (base PR326), with one ticket per worker and
+primary shared-hub integration. Exactly one broad Standards/Spec review and one
+bounded TDD pass repaired task/operation authority in enforcement continuation,
+verified contextual approval inspection and time-bounded convergence fixtures.
+Runtime tipc266e42 passes1553 tests on Python3.11/3.12 (one opt-in skip each),
+both hosted CI40136439722 release gates, focused32 checks and isolated installed
+0.21.0 CLI/MCP49-tool wheel smoke. Source closure receipt and execution ledger
+retain details and original failed diagnostic logs. Production remains0.20.1;
+no native/provider effects, deployment, policy increase or resource renewal.
+#310/#318/#319 remain open. User reports another goal-limits ticket; current
+repository readback finds #319 latest open, and its number/URL was requested
+before attributing a new report or attempting recovery. Memory forbidden: no
+explicit user request for memory write; machine non-write receipt retained.
+
+
+## 2026-10-25 UTC | Deploy PR327 candidate and qualify installed behavior
+
+User authorized install/deploy followed by goal-limits/self-refresh bug review.
+Installed0.21.0 source7a52339,135-file parity, command links and whole skills;
+maintenance-handed-over goal controller and updated refresh monitor. Retained
+rollback and all five existing campaign invariants. Adopted common policyrev1,
+preserved legacy ceilings and bound lifecycle/goal roots. Actual native public
+self-enrollment/continuity, idle stopping, active controls/operator reply and
+isolated shared MCP reload pass with zero external provider calls. One older
+protocol fixture fails on unsupported thread/turns/list and is retained as failed.
+Current installed Codex0.164.0 schema still offers only unscoped MCP reload;
+current-session-only refresh and its old live connection remain unproven under
+#318. #319 timeout recovery remains unsupported; old expired campaigns were not
+renewed or recovered. #310 stays open. Full evidence/rollback locators:
+docs/dev/evidence/hf06/installed-deployment.md. Memory forbidden: no explicit
+memory-write request. No public release, native shared-daemon restart or broad
+session refresh occurred.
+
+
+## 2026-10-25 | Observation-fault recovery repair and native scoped-reload diagnosis
+
+One-hour goal uses diagnosing-bugs/TDD for318/319. PR332, stacked on327, implements
+explicit guarded recovery, append-only stop/recovery episodes, shared-member scope,
+pending-commit fencing and truthful status. Final runtimeef339e0 passes hosted
+Python3.11/3.12 gates1558 tests each and installed native timeout/healthy-read/
+operator-recovery proof; native active/operator reply also passes with local
+Responses fixture and no external provider calls. Installed0.21.1 candidate,
+controller/skills/commands updated, seven production resource/stop snapshots intact.
+Local mutable-tree diagnostics and preflight contention failures are retained;
+source-frozen supplemental run remains separately observable. Evidence:
+docs/dev/evidence/hf06/319-recovery.md.318 still needs qualified native scoped
+execution, Wake integration and unchanged-peer/live-session proof; local native
+protocol patch is not installed on the shared daemon. No overall goal completion
+or318 closure claimed. Memory forbidden: no explicit memory-write request.
+
+
+## 2026-10-25 —318/319 continuation until22:30Chicago
+
+Deployed Wake0.21.2-311da84 commands/skills/refresh watcher; retained qualified
+0.21.1 goal controller and all seven campaign invariants. Runtime CI40156033409
+passes both1564-test release gates, installed49-tool smoke passes, and native
+recovery passes again. Corrected native dependencya50f43518c (formatted6115475dd9)
+and installed Wake prove selected0.21.2 versus peer0.21.1, unchanged goals/thread
+IDs, zero model turns and no owned fixture survivors. Seven affected native
+regressions and254 protocol cases pass; lint/format pass. Hook warmup and safety
+notification native failures remain unclassified after bounded serial runs.
+Native patch is included for review, not activated in the current0.164.0 daemon.
+318 and310 stay open;319 stays closed. Current self permission is allow, while
+configuration correctly reports unsupported native scope. No current-session
+refresh, shared daemon restart, grant copying or production resource renewal.
+Memory disposition:forbidden (no user-authorized memory write). Evidence:
+docs/dev/evidence/hf06/318-scoped-refresh.md and user-scoped318-319 receipts.
+
+
+## 2026-10-25 — opt-in patched-runtime experiment
+
+User approved experimenting with the temporary native bridge. One isolated
+installed qualification PASSES in10.719s: selected Wake0.21.2, peer0.21.1, unchanged
+goals/thread IDs, zero model turns and completed owned-process cleanup. Stock
+runtime/shared daemon/production campaigns remain unchanged. Recorded the pinned
+candidate upgrade/rollback policy;318 remains open. Memory disposition:forbidden,
+because the user did not authorize a memory write.
+
+## 2026-10-25 — goal-limit operator UX follow-up
+
+Recorded operator requirements in343 with bounded children344 (engagement/startup
+confirmation),345 (visible interruption/transcript/context) and346 (approved
+extend/reset). Source inspection confirms checkpoint steering and hard-stop
+pause/interrupt do not provide the required visible journey, and direct extend/reset
+CLI/MCP actions are missing. Reuse common permissions and339 attention decisions;
+332/341 source integration remains a separate check. Added the contract and roadmap
+follow-up in docs/goal-limit-ux without changing runtime, campaign state or installed
+services. Publication is not implementation acceptance. Memory disposition:forbidden,
+because no memory write was requested or authorized.

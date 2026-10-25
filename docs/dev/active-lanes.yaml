@@ -1,6 +1,60 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P173-GOAL-UX
+    owner: primary / ecochran76
+    objective: Implement visible goal supervision and approved renewal
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/343, https://github.com/CochranResearchGroup/codex-wake/issues/344, https://github.com/CochranResearchGroup/codex-wake/issues/345, https://github.com/CochranResearchGroup/codex-wake/issues/346]
+    plan: docs/dev/plans/0173-agent-harness/goal-limit-ux-execution.md
+    plan_ref: feat/goal-limit-ux-implementation
+    branch: feat/goal-limit-ux-implementation
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: e181d28
+    integration: squash_pr
+    dependencies: [P173-NEXT-FRONTIER]
+    overlaps: [P173-NEXT-FRONTIER]
+    reconciled_overlaps: [P173-NEXT-FRONTIER]
+    updated_at: 2026-10-25
+    disposition: Isolated source pinned at16c2501; independent UX files and primary-owned shared integration; no production effects
+  - id: P173-HF03
+    owner: primary / ecochran76
+    objective: Implement observation and ownership frontier issue 330
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/330]
+    plan: docs/dev/plans/0173-agent-harness/hf-03-04-execution-ledger.md
+    plan_ref: feat/harness-observation-ownership
+    branch: feat/harness-observation-ownership
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: OWNED
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/333
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-10-24
+    validation_status: source_validated_comprehensive_flake_retained
+  - id: P173-HF04
+    owner: primary / ecochran76
+    objective: Implement observation and ownership frontier issue 331
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/331]
+    plan: docs/dev/plans/0173-agent-harness/hf-03-04-execution-ledger.md
+    plan_ref: feat/harness-observation-ownership
+    branch: feat/331-resource-ownership
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/333
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-10-24
+    validation_status: source_validated_comprehensive_flake_retained
+    checkpoint: fcc2030ab7a9147f0775f4fc8ccf8cb068a06abf
+    checkout_required: false
+    disposition: Worker patches integrated; clean owned checkout removed; published branch retained
   - id: P173-HF02
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 315
@@ -734,3 +788,36 @@ lanes:
     reconciled_overlaps: [P172-MR04]
     updated_at: 2026-10-22
     disposition: worker packet retained; primary CLI/MCP integration and accepted artifact are on coordinator ef8b5b4; not a merge-ready packet ref
+
+  - id: P173-NEXT-FRONTIER
+    owner: primary / ecochran76
+    objective: Source acceptance for HF05 HF08 HF14 HF16 HF18 HF21 HF27
+    work_items: [328, 334, 335, 336, 337, 338, 339, 340, 342]
+    plan: docs/dev/plans/0173-agent-harness/next-frontier-execution-ledger.md
+    branch: feat/harness-next-frontier
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/341
+    checkpoint: b674427
+    target: origin/main
+    integration: review_pr
+    plan_state: SOURCE_ACCEPTED
+    custody_state: PUBLISHED_REVIEW
+    dependencies: [HF02, HF03, HF04, HF06, HF07, HF13]
+    overlaps: [feat/harness-observation-ownership, feat/harness-frontier]
+    updated_at: 2026-10-24
+    disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; consolidated PR341 supersedes327/329/333; issue328 awaits main integration; CI skipped; main and production unchanged
+
+  - id: P173-COMBINED-UX
+    owner: primary / ecochran76
+    objective: Combine session recovery/scoped refresh with usable goal-limit controls
+    work_items: [318, 310, 343, 344, 345, 346]
+    plan: docs/dev/plans/0173-agent-harness/0004-2026-10-25-combined-refresh-goal-ux.md
+    branch: feat/combined-refresh-goal-ux
+    target: origin/main
+    plan_state: OPEN
+    custody_state: PUBLISHED_CHECKPOINT
+    integration: review_pr
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/349
+    dependencies: [PR341, PR332, PR348]
+    overlaps: [P173-NEXT-FRONTIER]
+    updated_at: 2026-10-25
+    disposition: Qualified combined candidate PR349; matching native refresh/restart/recovery TUI acceptance and 81 affected tests pass both Python versions; review1of1 and findingsTDD1of1 complete; main integration and shared activation remain open
