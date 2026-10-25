@@ -280,7 +280,8 @@ def _resources(receipt):
                      and hashlib.sha256(Path(check['path']).read_bytes()).hexdigest() == check['sha256'])
         elif check['kind']=='mcp_catalog':
             from .refresh_resources import catalog_ready
-            ready=catalog_ready(check,lambda method,params:_request(receipt,method,params),receipt['thread_id'])
+            ready=catalog_ready(check,lambda method,params:_request(receipt,method,params),receipt['thread_id'],
+                                runtime_only=profile.get('refresh_mode')==THREAD_MODE)
         else:
             result = _request(receipt, 'mcpServer/tool/call', dict(threadId=receipt['thread_id'],
                 server=check['server'], tool=check['tool'], arguments=check['arguments']))

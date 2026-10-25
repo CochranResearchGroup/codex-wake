@@ -70,7 +70,9 @@ class ScopedRefreshTests(unittest.TestCase):
                         value=dict(thread=dict(id=params['threadId'],cwd='/' if wrong_cwd else tmp,
                             status=dict(type='active' if params['threadId']==PEER else 'idle',activeFlags=[])))
                     elif method=='thread/goal/get':value=dict(goal=dict(goal,tokensUsed=0) if reset and state['reloaded'] else goal)
-                    elif method=='mcpServerStatus/list':value=dict(data=[dict(name='toy',
+                    elif method=='mcpServerStatus/list':
+                        self.assertTrue(params.get('runtimeOnly'))
+                        value=dict(data=[dict(name='toy',
                         serverInfo=dict(version='v2' if state['reloaded'] and not stale else 'v1'),
                         tools={'version':dict(inputSchema=dict(properties={}))})],nextCursor=None)
                     elif method=='mcpServer/tool/call':value=dict(content=[dict(type='text',text='v2' if state['reloaded'] and not stale else 'v1')],isError=False)

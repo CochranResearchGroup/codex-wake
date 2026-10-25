@@ -67,7 +67,7 @@ for line in sys.stdin:
     def snapshot(thread):
         return dict(goal=request('thread/goal/get',{'threadId':thread})['goal'],
             native=request('thread/read',{'threadId':thread,'includeTurns':True})['thread'],
-            catalog=request('mcpServerStatus/list',{'threadId':thread,'serverName':'toy','detail':'toolsAndAuthOnly'}),
+            catalog=request('mcpServerStatus/list',{'threadId':thread,'serverName':'toy','detail':'toolsAndAuthOnly','runtimeOnly':True}),
             behavior=request('mcpServer/tool/call',{'threadId':thread,'server':'toy','tool':'version','arguments':{}}))
     def emit():write(root/'receipt.json',receipt)
     try:
