@@ -28,3 +28,9 @@ Use compact outputs and focused tests; inspect process/resource state before exp
 ## Non-goals
 
 No release, service unmask, production session dispatch, automatic resource renewal, or unrelated old-ticket closure.
+
+## Checkpoint: first closures
+
+#351 CLOSED at6e11c34 (13 focused tests and real pinned-native/stock-TUI acceptance, empty owned process census). #356 CLOSED at6515311 (worker81c4610, five public runner subprocess regressions independently rerun). Remote integration readback6e11c34. Draft PR: https://github.com/CochranResearchGroup/codex-wake/pull/358.
+
+#352 assigned to agent validation356 in isolated feat/governor-disable-352 based6e11c34. #355 remains with dispatch355. #353/#354/#357 remain dependency-blocked; no implementation closure claimed. Final review/remediation counters remain0/0.
