@@ -37,6 +37,7 @@ def render_assignment(intent, *, root, brief=None, pin=None, admission=None, rec
     if configured:
         allowance['limits']['session_token_limit'] = policy.get(
             'spawn_token_limit', configuration['session_token_limit'])
+    control = intent.get('governance_snapshot') or {}
     packet = dict(version=1, context_mode='compact',
         objective=brief.get('objective', intent['task']),
         instructions=intent['task'], authority=authority,
@@ -51,10 +52,11 @@ def render_assignment(intent, *, root, brief=None, pin=None, admission=None, rec
         stop_conditions=options.get('stop_conditions', []) + [
             'Stop at the original expiry or earlier authorized resource limit.',
             'Return partial evidence when blocked; do not renew allowance or expand scope.',
-            'Reconcile current governance and allowance before work; unknown authority holds work.'],
+            'Honor the existing authorized allowance and operator choices; unknown governor availability alone does not revoke work authority.'],
         governance=dict(budget_mode=mode, configuration_revision=configuration.get('revision'),
-                        state='unknown',
-                        required_action='Inspect current governance through the authorized public operator interface before work.',
+                        state=control.get('mode', 'unknown'), snapshot=control,
+                        enabled=control.get('enabled'),
+                        required_action='Use available public governance status; do not insert a governor or block already-authorized repair merely because its status is unavailable.',
                         lifecycle_root=str(root), receipt_path=str(receipt_path),
                         source='Host launch configuration and durable lifecycle/objective receipts; packet is a snapshot.',
                         controls='Existing controls and operator choices remain authoritative; this packet changes none.'),

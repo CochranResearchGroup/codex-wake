@@ -104,11 +104,17 @@ def spawn_command(args, root):
     key = hashlib.sha256(args.intent.encode()).hexdigest()
     path = journal / (key + '.json')
     previous = json.loads(path.read_text()) if path.exists() else None
+    request_fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     legacy_fingerprint = hashlib.sha256(json.dumps(legacy_intent, sort_keys=True).encode()).hexdigest()
-    if previous and 'dispatch' not in previous and previous['fingerprint'] == legacy_fingerprint:
+    if previous and previous.get('request_fingerprint') == request_fingerprint:
+        # A status change or renderer upgrade cannot rewrite an admitted task.
+        intent, dispatch = previous['intent'], previous.get('dispatch')
+    elif previous and 'dispatch' not in previous and previous['fingerprint'] == legacy_fingerprint:
         intent, dispatch = legacy_intent, None
     else:
         from .dispatch_packet import render_assignment
+        from .goal_governance import snapshot
+        intent['governance_snapshot'] = snapshot(root, intent.get('source_thread_id'))
         intent['task'], dispatch = render_assignment(intent, root=root, brief=approved, pin=pin,
                                                     admission=admission, receipt_path=path)
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
@@ -134,7 +140,8 @@ def spawn_command(args, root):
                     raise WakeError('intent key already binds a different lifecycle assignment')
         else:
             receipt = dict(version=1, intent_key=args.intent, fingerprint=fingerprint,
-                           intent=intent, state='prepared', thread_id=None, dispatch=dispatch)
+                           intent=intent, state='prepared', thread_id=None, dispatch=dispatch,
+                           request_fingerprint=request_fingerprint)
             if permission_receipt:
                 receipt['permission_context']=permission_receipt['permission_context']
             if not binding:receipt['budget_mode']='explicit_expiry_only_legacy_profile'

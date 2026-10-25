@@ -108,3 +108,5 @@ those new fields. Existing admitted intents retain their prior format.
 Memory disposition: **forbidden**. This delegated lane is explicitly confined to
 its worktree; user-scoped memory writes and coordinator closeout are outside its
 authorized write surface.
+
+Primary integration supersedes the unknown-snapshot gap above: host-side read-only governance snapshots now carry available enabled/mode/scope/revision into first dispatch; admitted bytes remain immutable on retries. See `docs/dev/evidence/plan0175/352-355-control-integration.md`. Unknown governor availability alone is not a work-authority gate.

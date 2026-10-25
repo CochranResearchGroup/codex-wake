@@ -137,6 +137,19 @@ trust_level = "trusted"
             stop_frame = wait_for(lambda: frame if notice['event_id'] in (frame := capture()) else None)
             (output/'governor-stop.txt').write_text(stop_frame)
             assert 'Deactivate governor' in stop_frame
+            from codex_wake.goal_governance import change, snapshot
+            from codex_wake.session_permissions import Principal
+            disabled = change(wake_root, thread_id, enabled=False, principal=Principal(thread_id, 'operator'))
+            assert disabled['governor']['mode'] == 'inactive', disabled
+            assert disabled['resumed'] is False and disabled['renewed_resources'] is False
+            disabled_event = disabled['notice_ids']['deactivation']
+            disabled_frame = wait_for(lambda: frame if disabled_event in (frame := capture()) else None)
+            (output/'deactivated.txt').write_text(disabled_frame)
+            assert snapshot(wake_root, thread_id)['enabled'] is False
+            assert rpc('thread/notice/read', threadId=thread_id, eventId=disabled_event)['modelContextAvailable'] is True
+            assert rpc('thread/goal/get', threadId=thread_id)['goal']['status'] == 'paused'
+            report.update(deactivation_rendered=True, deactivation_model_context=True,
+                deactivation_retained=True, deactivation_resumed_nothing=True)
             duplicate = rpc('thread/notice/append' ,threadId=thread_id,eventId=event_id,text=text)
             assert duplicate['alreadyRecorded'] is True and duplicate['notificationPublished'] is False, duplicate
             retained = rpc('thread/notice/read',threadId=thread_id,eventId=event_id)

@@ -209,6 +209,9 @@ class AgentSpawnTests(unittest.TestCase):
     def test_reconciled_completion_keeps_original_uncertain_effect_history(self):
         self.spawn_scenario(loss='queue/add', check_history=True)
 
+    def test_deactivated_governor_choice_is_carried_without_reactivation_on_retry(self):
+        self.spawn_scenario(governor_disabled=True)
+
     def test_host_profile_uses_exact_isolated_socket_and_codex_home(self):
         self.spawn_scenario(isolated_profile=True)
 
@@ -233,7 +236,7 @@ class AgentSpawnTests(unittest.TestCase):
         self.spawn_scenario(resource_profile=True)
 
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False,budget_overrun=False,brief_dispatch=False,full_history=False):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False,budget_overrun=False,brief_dispatch=False,full_history=False,governor_disabled=False):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -322,6 +325,13 @@ class AgentSpawnTests(unittest.TestCase):
                 (root / 'codex-home').mkdir()
                 profile.update(tmux_socket=str(root / 'tmux.sock'), codex_home=str(root / 'codex-home'))
             registry={'version': 1, 'profiles': {'worker': profile}}
+            source_thread='00000000-0000-7000-8000-000000000158'
+            if governor_disabled:
+                from codex_wake.goal_supervision import _directory, _name, _save
+                _save(_directory(root)/(_name(source_thread)+'.json'), dict(
+                    thread_id=source_thread,allocation_id='operator-disabled-scope',
+                    governor_enabled=False,governor_revision=3))
+                registry['callers']={source_thread:['worker']}
             if budget:
                 home=root/'home';(home/'sessions').mkdir(parents=True)
                 profile['codex_home']=str(home);rollout=home/'sessions/fixture.jsonl'
@@ -387,6 +397,7 @@ class AgentSpawnTests(unittest.TestCase):
                     '--profile', 'worker', '--intent', 'one-worker', '--name', 'worker',
                     '--task', 'Calculate 6 * 7 and report 42.',
                     '--expires-at', '2030-01-01T00:00:00Z', '--json']
+            if governor_disabled:argv.extend(['--caller-thread-id',source_thread])
             if budget:argv.extend(['--objective-ref','bootstrap'])
             if brief_dispatch:
                 argv.extend(['--task-id','multiply','--assignment-id','multiply-one'])
@@ -494,6 +505,11 @@ class AgentSpawnTests(unittest.TestCase):
                                     self.assertEqual(actor['used'],70)
                                     self.assertEqual(len(tasks),1)
                                     return
+                            if governor_disabled:
+                                # A later operator change cannot rewrite an already admitted assignment.
+                                _save(_directory(root)/(_name(source_thread)+'.json'), dict(
+                                    thread_id=source_thread,allocation_id='operator-disabled-scope',
+                                    governor_enabled=True,governor_revision=4))
                             for _ in range(2):
                                 output = StringIO()
                                 with redirect_stdout(output):
@@ -519,6 +535,10 @@ class AgentSpawnTests(unittest.TestCase):
                             self.assertEqual(len(turn_starts), 0 if auto_start else 1)
                             packet = json.loads(tasks[0]['input'][0]['text'].split('BOUNDED_ASSIGNMENT=', 1)[1])
                             self.assertEqual(packet['objective'], 'Multiply the evidence operands' if brief_dispatch else 'Calculate 6 * 7 and report 42.')
+                            if governor_disabled:
+                                self.assertEqual(packet['governance']['state'], 'inactive')
+                                self.assertIs(packet['governance']['enabled'], False)
+                                self.assertEqual(packet['governance']['snapshot']['revision'], 3)
                             self.assertEqual(packet['instructions'], 'Calculate 6 * 7 and report 42.')
                             self.assertEqual(packet['context_mode'], 'full_history' if full_history else 'compact')
                             self.assertEqual(packet['scope']['workspace'], tmp)
