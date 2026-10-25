@@ -34,3 +34,11 @@ No release, service unmask, production session dispatch, automatic resource rene
 #351 CLOSED at6e11c34 (13 focused tests and real pinned-native/stock-TUI acceptance, empty owned process census). #356 CLOSED at6515311 (worker81c4610, five public runner subprocess regressions independently rerun). Remote integration readback6e11c34. Draft PR: https://github.com/CochranResearchGroup/codex-wake/pull/358.
 
 #352 assigned to agent validation356 in isolated feat/governor-disable-352 based6e11c34. #355 remains with dispatch355. #353/#354/#357 remain dependency-blocked; no implementation closure claimed. Final review/remediation counters remain0/0.
+
+## Checkpoint: control and dispatch closure
+
+#351/#352/#355/#356 CLOSED. Integrationc34592b includes immutable compact dispatch snapshots and durable operator deactivation. #352 real pinned-native/stock-TUI deactivation acceptance PASS with no provider turns and empty owned process census; combined focused selection24PASS. #353 assigned dispatch355 on feat/governor-preflight-353, basec34592b. #354/#357 remain dependency-blocked. Final review/remediation counters0/0.
+
+Bounded #354 source discovery (not implementation): native prototype b0ce988 client sends HTTP and WebSocket without Wake admission; request shape lacks max_output_tokens. Existing custom provider fixture explicitly supports HTTP-only configuration. A request reservation helper alone cannot prove hard-cap enforcement. Any chosen adapter must establish complete selected-path coverage and enforceable input/output bounds, preserve unsupported-host truth, and qualify against an actual native request path. Do not fabricate an input-byte/token bound or install an unqualified native binary to close a ticket.
+
+The operator's implementation request implicitly accepts using existing public operator/agent journeys as testing seams. Source behavior and isolated pinned-host acceptance remain separate from installation/deployment.
