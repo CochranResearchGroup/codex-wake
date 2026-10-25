@@ -11,7 +11,8 @@ from .records import WakeError
 
 TEXT = {'type': 'string', 'minLength': 1, 'maxLength': 256}
 CALLER = {'type': 'string', 'pattern': '^[0-9a-f-]{36}$'}
-POLICY = {'wake_lifetime': {'enum': ['conversation', 'task', 'persistent']},
+ROUTES={'type':'array','minItems':1,'maxItems':4,'uniqueItems':True,'items':{'enum':['background','existing_tab','new_tab','fresh_task']}}
+POLICY = {'routes':ROUTES,'wake_lifetime': {'enum': ['conversation', 'task', 'persistent']},
           'owner_id': TEXT, 'owner_end': {'enum': ['retire', 'hold', 'retain']},
           'recipient_startup': {'enum': ['active_tab', 'background_saved', 'create_load_run']}}
 
@@ -194,12 +195,16 @@ def call(runner, group, verb, arguments, native_context):
         argv = ['--wake-root', str(root), 'native', verb, '--endpoint', runner.app_server,
                 '--json', '--idempotency-key', arguments['idempotency_key'], '--ttl', arguments.get('ttl', '24h')]
         for name in POLICY:
-            if name in arguments:
+            if name=='routes':
+                for route in arguments.get('routes',[]):argv+=['--wake-route',route]
+            elif name in arguments:
                 argv += ['--' + name.replace('_', '-'), arguments[name]]
         argv += [caller, arguments['trigger'], '--', arguments['prompt']]
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            code = run(argv)
+            from .session_permissions import Principal
+            tasks=controller_tasks(runner,caller)
+            code = run(argv,permission_principal=Principal(caller,'controller' if tasks else 'session',tasks=tuple(tasks)))
         if code:
             raise WakeError('wake_registration_not_ready')
         return json.loads(output.getvalue())

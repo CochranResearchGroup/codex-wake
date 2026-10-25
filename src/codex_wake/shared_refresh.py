@@ -37,14 +37,17 @@ def _client_effect_guard(receipt):
     _effect_guard()
 
 
-def configuration(config, profile_name, thread_id, caller_thread_id):
+def configuration(config, profile_name, thread_id, caller_thread_id, *, _permission_checked=False):
+    if _permission_checked:
+        from .permission_migration import profile_ceiling
+        profile_ceiling(config,profile_name,caller_thread_id)
     from . import __version__
     try:
         profile = config['profiles'][profile_name]
         if (config['version'] != 1 or profile['refresh_mode'] not in (MODE, CLIENT_MODE)
                 or not profile['scope_approval'] or str(UUID(thread_id)) != thread_id
                 or caller_thread_id != thread_id
-                or profile_name not in config['callers'][caller_thread_id]
+                or (not _permission_checked and profile_name not in config.get('callers',{}).get(caller_thread_id,[]))
                 or not isinstance(profile['resources'], dict) or not profile['resources']):
             raise ValueError
     except (KeyError, TypeError, ValueError, AttributeError):
@@ -69,7 +72,7 @@ def _directory(root):
 
 def _public(receipt):
     return {key: value for key, value in receipt.items()
-            if key not in ('profile', 'policy_path', 'checkpoint_path', 'goals_before', 'last_busy_thread')}
+            if key not in ('profile', 'policy_path', 'checkpoint_path', 'goals_before', 'last_busy_thread', 'permission_context', 'policy_root')}
 
 
 def _validate_profile(profile):
@@ -111,7 +114,7 @@ def _validate_profile(profile):
         raise WakeError('shared refresh profile or read-only resource proof is invalid') from None
 
 
-def command(args, root, config, profile, checkpoint, content):
+def command(args, root, config, profile, checkpoint, content, *, permission_context=None, emit_result=None):
     import hashlib
     import json
     import time
@@ -120,7 +123,10 @@ def command(args, root, config, profile, checkpoint, content):
     from .process import boot_id_value
     from .records import parse_timestamp
     from .sessions_cli import emit
-    configuration(config, args.profile, args.thread_id, args.caller_thread_id)
+    if permission_context:
+        from .permission_refresh import revalidate
+        revalidate(root,permission_context)
+    configuration(config, args.profile, args.thread_id, args.caller_thread_id, _permission_checked=bool(permission_context))
     _validate_profile(profile)
     policy = Path(args.profiles).absolute()
     _private(policy)
@@ -147,7 +153,7 @@ def command(args, root, config, profile, checkpoint, content):
                   expires_at=args.expires_at)
     if profile['refresh_mode']==CLIENT_MODE:
         from .lifecycle_budget import operation_binding
-        intent['client_binding']=operation_binding(config,args,source_ref=args.thread_id)
+        intent['client_binding']=operation_binding(config,args,source_ref=args.thread_id,_permission_checked=bool(permission_context))
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     name = hashlib.sha256(args.intent.encode()).hexdigest()
     path = directory/(name+'.json')
@@ -177,6 +183,9 @@ def command(args, root, config, profile, checkpoint, content):
                 if binding:receipt['intent'].update(binding)
                 if profile.get('client_connection')=='managed_default':
                     receipt['managed_client_binding']=_managed_binding(profile)
+            if permission_context:
+                receipt['permission_context']=permission_context
+                receipt['policy_root']=str(Path(root).absolute())
             _save(path, receipt)
             if profile['refresh_mode']==CLIENT_MODE:
                 from .refresh_goal import pause
@@ -192,7 +201,7 @@ def command(args, root, config, profile, checkpoint, content):
                     if pause(path,receipt,profile,goal,request):
                         receipt.update(state='queued',reason='waiting_for_source_idle')
                 _save(path,receipt)
-        emit(_public(receipt), args.as_json)
+        (emit_result or emit)(_public(receipt), args.as_json)
         return 0 if receipt['state'] in ('queued','prepared','stopping','starting','awaiting_preflight','restoring_goal','verifying','completed') else 5
 
 
@@ -210,6 +219,9 @@ def _remaining(receipt):
 def _request(receipt, method, params):
     if _stopping:
         raise WakeError('refresh controller is stopping')
+    if receipt.get('permission_context'):
+        from .permission_refresh import revalidate
+        revalidate(Path(receipt['policy_root']),receipt['permission_context'])
     from .native_protocol import native_request
     remaining = _remaining(receipt)
     if remaining <= 0:
@@ -281,7 +293,16 @@ def _poll_one(path, receipt):
     policy = Path(receipt['policy_path'])
     _private(policy)
     config = json.loads(policy.read_text())
-    configuration(config, receipt['profile_name'], receipt['thread_id'], receipt['thread_id'])
+    context=receipt.get('permission_context')
+    if context:
+        from .permission_refresh import revalidate
+        try:revalidate(path.parent.parent,context)
+        except WakeError:
+            receipt.update(state='blocked',reason='permission_revoked');return
+    try:
+        configuration(config, receipt['profile_name'], receipt['thread_id'], receipt['thread_id'], _permission_checked=bool(context))
+    except WakeError as exc:
+        receipt.update(state='blocked',reason=getattr(exc,'code','host_refresh_authority_changed'));return
     if config['profiles'][receipt['profile_name']] != receipt['profile']:
         receipt.update(state='blocked', reason='host_refresh_policy_changed')
         return
@@ -293,7 +314,7 @@ def _poll_one(path, receipt):
         from .lifecycle_budget import operation_binding
         from types import SimpleNamespace
         current_binding=operation_binding(config,SimpleNamespace(profile=receipt['profile_name'],
-            caller_thread_id=receipt['thread_id']),source_ref=receipt['thread_id'])
+            caller_thread_id=receipt['thread_id']),source_ref=receipt['thread_id'],_permission_checked=bool(context))
         if current_binding!=receipt.get('client_binding'):
             receipt.update(state='blocked',reason='host_budget_policy_changed');return
         if receipt['state']=='pausing_goal':

@@ -325,6 +325,9 @@ def dispatch(root, found, clock_provider=None, *, runtime_adapter=None):
                 or record["scheduling_intent"]["canonical_root"] != str(Path(root).resolve())):
             return DispatchResult("skipped", "native intent changed or root does not match")
         if record.get("native_delivery", {}).get("state") == "uncertain":
+            from .permission_wake import common_record
+            if common_record(record):
+                return dispatch_native(root,active,None,clock_provider=provider,runtime_adapter=runtime_adapter)
             return reconcile_native(root, active, None, runtime_adapter=runtime_adapter)
         return dispatch_native(root, active, None, clock_provider=provider, runtime_adapter=runtime_adapter)
 

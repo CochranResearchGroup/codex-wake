@@ -51,6 +51,7 @@ def add_messages_parser(subparsers):
             command.add_argument('--ttl', default='24h')
             command.add_argument('--delivery', choices=['inbox','notify'], default='notify')
             command.add_argument('--subject')
+            command.add_argument('--task-id')
         if verb == 'send':
             command.add_argument('--to', required=True)
             command.add_argument('--tmux-socket')
@@ -180,12 +181,12 @@ def messages_command(args):
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                  subject=args.subject, selector=dict(selector=args.to, identity=recipient.thread_id),
-                                 correlation=args.correlation, resume_missing=args.resume_missing)
+                                 correlation=args.correlation, resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None))
         elif verb == 'reply':
             value = mailbox.reply(actor, args.message_id, body=body_input(args.body_file), idempotency_key=intent_key,
                                   kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                   subject=args.subject, outcome=args.outcome, evidence=args.evidence,
-                                  resume_missing=args.resume_missing)
+                                  resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None))
         elif verb in ('inbox','outbox'):
             value = mailbox.list(actor, outbox=verb == 'outbox', cursor=args.cursor, limit=args.limit, state=args.state)
         elif verb == 'show':

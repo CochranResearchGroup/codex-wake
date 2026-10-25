@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 from . import __version__
+from .records import WakeError
 
 TEXT = {"type": "string", "minLength": 1, "maxLength": 1024}
 MESSAGE = {"type": "string", "minLength": 1, "maxLength": 128}
@@ -19,7 +20,7 @@ OUTCOME = {"enum": ["accepted", "declined", "completed", "failed"]}
 DELIVERY = {"enum": ["inbox", "notify"]}
 PAGE = {"cursor": {"type": "integer", "minimum": 0},
         "limit": {"type": "integer", "minimum": 1, "maximum": 100}}
-SEND = {"body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery": DELIVERY,
+SEND = {"task_id": MESSAGE, "body": BODY, "idempotency_key": {**INTENT, "maxLength": 200}, "delivery": DELIVERY,
         "ttl": TEXT, "subject": {**TEXT, "maxLength": 200}, "kind": {"enum": ["notice", "request", "result"]},
         "resume_missing": {"type": "boolean"}}
 TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
@@ -63,6 +64,11 @@ SPECS = {
     "wake_messages_cancel": ("messages", "cancel", "Cancel this actor's authorized original message; retain history and reconcile any uncertain effect.", {"message_id": MESSAGE}, ["message_id"], False),
     "wake_messages_arm_reply": ("messages", "arm-reply", "Register an exact correlated reply wake with a fixed timezone-aware expiry and stable arm key, then end the originating turn. Requires operator-delegated sender authority and an active native worker; registration is not reply completion.", {"message_id": MESSAGE, "idempotency_key": INTENT, "expires_at": TEXT}, ["message_id", "idempotency_key", "expires_at"], False),
 }
+from .permission_commands import tool_specs as permission_tool_specs
+SPECS.update(permission_tool_specs())
+for _name in ('wake_sessions_refresh','wake_sessions_configuration'):
+    SPECS[_name][3]['scope']={'enum':['current_connection','single_client','shared_server']}
+SPECS['wake_sessions_handoff'][3]['trigger']={'enum':['manual','context_limit','update','resource_warning']}
 CALLER = {"type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"}
 SPECS['wake_goal_limits_set'] = (
     'goal-limits', 'set',
@@ -123,6 +129,10 @@ for _verb in ('after','at','file'):
 
 from .harness_mcp import tool_specs as harness_tool_specs
 SPECS.update(harness_tool_specs())
+from .permission_enforcement import tool_specs as enforcement_tool_specs
+SPECS.update(enforcement_tool_specs())
+for _name in ('wake_goal_limits_set','wake_goal_limits_show'):
+    SPECS[_name][3].update({key:MESSAGE for key in ('task_id','assignment_id','operation_id')})
 from .harness_mcp import POLICY as WAKE_POLICY_PROPERTIES
 for _name, _spec in tuple(SPECS.items()):
     if _spec[0] == 'grok' and _spec[1] in ('after', 'at', 'file'):
@@ -214,6 +224,15 @@ class CommandRunner:
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        if group == 'permissions':
+            if self.wake_root is None:
+                return {'error': {'code':'permission_host_root_required'}},True
+            packet=dict(root=str(self.wake_root),verb=verb,arguments=arguments,native_context=native_context,
+                harness_policy=str(self.harness_policy) if self.harness_policy is not None else None)
+            raw=json.dumps(packet)
+            if len(raw.encode())>65536:
+                return {'error':{'code':'invalid_argument'}},True
+            return self._execute([sys.executable,'-m','codex_wake.permission_commands'],arguments,readonly,raw)
         if group in ('agents', 'agent-state', 'resources', 'task-briefs', 'harness-native', 'harness-owner'):
             try:
                 from .harness_mcp import call as harness_call
@@ -237,6 +256,13 @@ class CommandRunner:
             goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
             if self.goal_limits_policy is None or goal_root is None:
                 return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
+            from .session_permissions import PermissionStore
+            if PermissionStore(goal_root).active() or verb in ('recover','disable'):
+                packet=dict(verb=verb,arguments=arguments,native_context=native_context,
+                    runner=dict(wake_root=str(self.wake_root) if self.wake_root else None,
+                        goal_limits_root=str(goal_root),goal_limits_policy=str(self.goal_limits_policy),
+                        harness_policy=str(self.harness_policy) if self.harness_policy else None))
+                return self._execute([sys.executable,'-m','codex_wake.permission_enforcement'],arguments,readonly,json.dumps(packet))
             # Native owns the stdio connection and request _meta. Model tool
             # arguments cannot select a host policy, transport or caller binding.
             try:
@@ -271,6 +297,10 @@ class CommandRunner:
                 return {'error':{'code':'busy_policy_unsupported'}}, True
             if self.wake_root is None or not Path(self.wake_root).is_absolute():
                 return {'error':{'code':'runtime_host_scope_unavailable'}}, True
+            from .session_permissions import PermissionStore
+            common_grok=verb in ('after','at','file') and PermissionStore(self.wake_root).active()
+            if common_grok and (self.actor_runtime!='grok' or self.bus_root is None or self.capability is None):
+                return {'error':{'code':'wake_identity_unverified','message':'Common-policy Grok wakes require an exact host-bound actor capability; no native Grok identity is inferred.'},'capability':'not_qualified'},True
             command=[*self.cli,'--wake-root',str(self.wake_root),'grok',verb,'--json']
             if verb == 'show':
                 command += [arguments['wake_id']]
@@ -279,6 +309,9 @@ class CommandRunner:
                             '--idempotency-key',arguments['idempotency_key'],
                             '--ttl',arguments.get('ttl','24h'),arguments['binding_id'],
                             arguments['trigger'],'--',arguments['prompt']]
+            if common_grok:
+                command[-4:-4]=['--bus-root',str(self.bus_root),'--actor-capability',str(self.capability),'--actor-runtime','grok']
+            for route in arguments.get('routes',[]):command[-4:-4]=['--wake-route',route]
             for key in ('wake_lifetime', 'owner_id', 'owner_end', 'recipient_startup'):
                 if key in arguments:
                     command[-4:-4] = ['--'+key.replace('_','-'), arguments[key]]
@@ -295,6 +328,17 @@ class CommandRunner:
             lifecycle_root = self.lifecycle_root if self.lifecycle_root is not None else self.wake_root
             if self.lifecycle_profiles is None or lifecycle_root is None:
                 return {"error": {"code": "lifecycle_host_scope_unavailable"}}, True
+            from .session_permissions import PermissionStore
+            if verb in ('refresh','configuration','handoff') and PermissionStore(lifecycle_root).active():
+                try:
+                    from .goal_supervision import verified_native_caller
+                    binding=verified_native_caller(native_context,arguments['caller_thread_id'])
+                    if arguments['thread_id']!=binding['thread_id']:raise ValueError('exact self required')
+                    packet=dict(verb=verb,arguments=arguments,binding=binding,root=str(lifecycle_root),profiles=str(self.lifecycle_profiles))
+                    module='codex_wake.permission_handoff' if verb=='handoff' else 'codex_wake.permission_refresh'
+                    return self._execute([sys.executable,'-m',module],arguments,readonly,json.dumps(packet))
+                except ValueError as exc:
+                    return {'error':{'code':'permission_identity_unverified','message':str(exc)}},True
             command = [*self.cli, '--wake-root', str(lifecycle_root), group, verb,
                        '--profiles', str(self.lifecycle_profiles)]
         else:

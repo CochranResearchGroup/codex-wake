@@ -37,6 +37,15 @@ class SharedRefreshTests(unittest.TestCase):
             self.assertEqual(value['operations'], ['configuration', 'refresh'])
             self.assertFalse((base/'runtime'/'objective-ledgers').exists())
 
+    def test_legacy_profile_revocation_fences_adopted_pending_refresh(self):
+        self.shared_scenario(common_policy=True,revoke_legacy=True)
+
+    def test_common_permissions_revocation_blocks_queued_controller_effects(self):
+        self.shared_scenario(common_policy=True,revoke_common=True)
+
+    def test_common_permissions_survive_independent_refresh_controller(self):
+        self.shared_scenario(common_policy=True)
+
     def test_active_self_request_waits_then_reloads_once_with_same_goals(self):
         self.shared_scenario()
 
@@ -66,7 +75,7 @@ class SharedRefreshTests(unittest.TestCase):
 
     def shared_scenario(self, lost_reload=False, peer_busy=False, racing_peer=False,
                         stale_mcp=False, reset_counter=False, stop_during_preflight=False,
-                        cwd_mismatch=False, observation_timeout=False):
+                        cwd_mismatch=False, observation_timeout=False, common_policy=False, revoke_common=False, revoke_legacy=False):
         import hashlib
         import subprocess
         import sys
@@ -136,6 +145,14 @@ class SharedRefreshTests(unittest.TestCase):
                 '--caller-thread-id',THREAD,'--checkpoint','checkpoint.json','--checkpoint-sha256',
                 hashlib.sha256(checkpoint.read_bytes()).hexdigest(),'--resource','skill','--resource','mcp',
                 '--expires-at',expiry,'--json']
+            if common_policy:
+                from codex_wake.session_permissions import PermissionStore,Principal
+                PermissionStore(runtime).configure({'version':1,'approvals':[
+                    dict(id='shared-approval',action='refresh.shared',subject=THREAD,scope='standing',issuer='operator',target='shared-server')]},Principal('op','operator'),expected_revision=0)
+                saved=json.loads(policy.read_text());saved['callers']={};policy.write_text(json.dumps(saved));policy.chmod(0o600)
+                from codex_wake.a2a_bus import BusStore
+                bus,operator_capability=BusStore.configure(base/'bus')
+                argv+=['--bus-root',str(bus.root),'--operator-capability',str(operator_capability)]
             def invoke():
                 output=StringIO()
                 with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=time.time()),redirect_stdout(output):
@@ -159,6 +176,21 @@ class SharedRefreshTests(unittest.TestCase):
                 self.assertEqual(receipt['state'],'queued')
                 time.sleep(.15)
                 self.assertNotIn('config/mcpServer/reload',requests)
+                if revoke_common or revoke_legacy:
+                    if revoke_common:
+                        PermissionStore(runtime).configure({'version':1,'mandatory':['refresh.shared']},Principal('op','operator'),expected_revision=1)
+                    else:
+                        data=json.loads(policy.read_text());data['callers'][THREAD]=[];policy.write_text(json.dumps(data));policy.chmod(0o600)
+                    while time.monotonic()<deadline:
+                        files=list((runtime/'shared-refresh').glob('*.json'))
+                        saved=next((json.loads(f.read_text()) for f in files if 'fingerprint' in json.loads(f.read_text())),{})
+                        if saved.get('state')=='blocked':break
+                        time.sleep(.02)
+                    self.assertEqual(saved['state'],'blocked',saved)
+                    self.assertEqual(saved['reason'],'permission_revoked' if revoke_common else 'permission_legacy_profile_denied')
+                    self.assertNotIn('config/mcpServer/reload',requests)
+                    self.assertNotIn('thread/goal/set',requests)
+                    return
                 native['active']=False
                 native['peer_active']=False
                 if racing_peer:

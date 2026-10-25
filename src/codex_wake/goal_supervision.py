@@ -390,7 +390,10 @@ def _heartbeat(directory):
     except (OSError,ValueError,KeyError,TypeError):return dict(fresh=False,reason='controller_unavailable')
 
 
-def show(root,policy_path,caller_thread_id,allocation_id=None):
+def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_principal=None,native_context=None):
+    from .permission_enforcement import principal_for, authorize, describe
+    principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
+    if principal:authorize(root,"session.inspect",principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
     directory=_directory(root);path=directory/(name+'.json')
     if not path.exists():return dict(state='held',reason='not_enrolled',thread_id=caller_thread_id,controller=_heartbeat(directory))
@@ -402,12 +405,16 @@ def show(root,policy_path,caller_thread_id,allocation_id=None):
         if receipt['state'] in ('armed','checkpoint_requested') and not receipt['controller']['fresh']:
             receipt.update(state='held',reason='controller_unavailable')
         receipt['sampled']=True;receipt['maximum_token_overshoot']=None
-        return _public(receipt)
+        result=_public(receipt)
+        if principal:result['enforcement_permissions']=describe(root,caller_thread_id,principal=principal)
+        return result
 
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None):
+    from .permission_enforcement import principal_for,authorize,enrollment_action
+    principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
     binding=verified_native_caller(native_context,caller_thread_id) if grant.get('host_delegated') else None
     for key,value,maximum in [('tokens',token_limit,grant['max_tokens']),('seconds',time_limit_seconds,grant['max_seconds'])]:
@@ -421,6 +428,10 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         admission_guard(directory)
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
+        permission=None
+        if principal:
+            action=enrollment_action(old,token_limit,time_limit_seconds,token_accounting,grant['allocation_id'])
+            permission=authorize(root,action,principal,task_id=task_id,operation_id=operation_id)
         same=bool(old and old['allocation_id']==grant['allocation_id'])
         previous_basis=old.get('token_accounting','cache_inclusive') if old else None
         basis=token_accounting or (previous_basis if same else 'fresh')
@@ -491,6 +502,9 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             hold('continuation_held')
         if receipt['boot_id']!=boot_id_value():
             hold('boot_identity_changed')
+        if permission:
+            receipt['enforcement_permission']=permission
+            receipt['permission_subject']=principal.subject
         receipt['native_goal_status']=goal.get('status')
         if goal.get('status') not in NATIVE_GOAL_STATUSES:
             hold('native_goal_state_unknown')
@@ -499,6 +513,14 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
 
 
 def _effect(path,receipt,key,method,params):
+    if method=='turn/steer':
+        from .permission_enforcement import controller_permission
+        permission=controller_permission(path.parent.parent,receipt)
+        receipt['enforcement_continuation_permission']=permission
+        if permission['permission'] not in ('allow','legacy'):
+            receipt['permission_effect_blocked']=True
+            _save(path,receipt)
+            return False
     effects=receipt.setdefault('effects',{})
     if key in effects:return effects[key]['state']=='acknowledged'
     effects[key]=dict(state='intended',method=method,params=params)
@@ -657,6 +679,9 @@ def poll(root):
         with _lock(directory,path.stem):
             _private(path);receipt=json.loads(path.read_text())
             try:
+                from .permission_enforcement import controller_permission
+                permission=controller_permission(root,receipt)
+                receipt['enforcement_continuation_permission']=permission
                 grant=_grant(receipt['policy_path'],receipt['thread_id'],receipt['allocation_id'],root)
                 if grant!=receipt['grant']:
                     results.append(_stop(path,receipt,'host_policy_changed'));continue
@@ -682,6 +707,10 @@ def poll(root):
                     results.append(_stop(path,receipt,'allocation_exhausted',goal,active));continue
                 if receipt.get('stop_latched') or receipt.get('state') in ('stopped','stop_unverified'):
                     results.append(_stop(path,receipt,receipt.get('reason','continuation_held'),goal,active));continue
+                if permission['permission'] not in ('allow','legacy'):
+                    receipt.update(state='held',reason='permission_revoked',campaign_continuation='held')
+                    _save(path,receipt);results.append(receipt);continue
+                receipt.pop('campaign_continuation',None)
                 checkpoint=(receipt['token_limit']-used<=receipt['token_limit']*receipt['checkpoint_token_percent']/100
                     or receipt['deadline']-upper<=receipt['checkpoint_seconds'])
                 if checkpoint:
@@ -692,7 +721,8 @@ def poll(root):
                         key='checkpoint:'+active[0]
                         delivered=_effect(path,receipt,key,'turn/steer',dict(threadId=receipt['thread_id'],expectedTurnId=active[0],
                             input=[dict(type='text',text=receipt['checkpoint']['message'])]))
-                        receipt['checkpoint']['state']='acknowledged' if delivered else 'uncertain'
+                        receipt['checkpoint']['state']=('acknowledged' if delivered else
+                            'blocked' if receipt.pop('permission_effect_blocked',False) else 'uncertain')
                     receipt.update(state='checkpoint_requested',reason='checkpoint_reserve')
                 else:receipt.update(state='armed',reason=None)
                 _save(path,receipt);results.append(receipt)

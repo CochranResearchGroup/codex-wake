@@ -9,12 +9,19 @@ from pathlib import Path
 def add_goal_limits_parser(subparsers):
     parser = subparsers.add_parser('goal-limits', help='supervise resource limits in an existing native session')
     commands = parser.add_subparsers(dest='goal_limits_command', required=True)
-    for name in ('set', 'show'):
+    for name in ('set', 'show', 'recover', 'disable'):
         command = commands.add_parser(name, help='enroll limits' if name == 'set' else 'read enforcement evidence')
         command.add_argument('--policy', type=Path, required=True, help='private host-approved caller allocations')
         command.add_argument('--caller-thread-id', required=True)
         command.add_argument('--allocation-id', help='existing host objective allocation')
         command.add_argument('--json', action='store_true', dest='as_json')
+        command.add_argument('--bus-root',type=Path)
+        command.add_argument('--operator-capability',type=Path)
+        command.add_argument('--actor-capability',type=Path)
+        command.add_argument('--app-server',default='unix://')
+        command.add_argument('--task-id')
+        command.add_argument('--assignment-id')
+        command.add_argument('--operation-id')
         if name == 'set':
             command.add_argument('--token-limit', type=int, required=True)
             command.add_argument('--time-limit-seconds', type=int, required=True)
@@ -40,16 +47,26 @@ def goal_limits_command(args, root):
         return 0
     try:
         from .goal_supervision import enroll, show
+        from .session_permissions import PermissionStore
+        principal=None
+        if args.goal_limits_command!='prepare-maintenance' and (PermissionStore(root).active() or args.goal_limits_command in ('recover','disable')):
+            from .permission_enforcement import cli_principal
+            principal=cli_principal(args,root)
         if args.goal_limits_command == 'prepare-maintenance':
             from .goal_maintenance import prepare
             result = prepare(root,args.policy,args.seconds)
         elif args.goal_limits_command == 'show':
-            result = show(root, args.policy, args.caller_thread_id,args.allocation_id)
+            result = show(root, args.policy, args.caller_thread_id,args.allocation_id,permission_principal=principal)
+        elif args.goal_limits_command in ('recover','disable'):
+            from .permission_enforcement import diagnostic
+            result=diagnostic(root,args.caller_thread_id,'enforcement.'+args.goal_limits_command,
+                principal=principal,task_id=args.task_id,operation_id=args.operation_id)
         else:
             result = enroll(root, args.policy, args.caller_thread_id,
                 args.token_limit, args.time_limit_seconds,
                 checkpoint_token_percent=args.checkpoint_token_percent,
-                checkpoint_seconds=args.checkpoint_seconds,token_accounting=args.token_accounting,allocation_id=args.allocation_id)
+                checkpoint_seconds=args.checkpoint_seconds,token_accounting=args.token_accounting,allocation_id=args.allocation_id,
+                permission_principal=principal,task_id=args.task_id,operation_id=args.operation_id)
     except Exception as exc:
         from .records import WakeError
         message = str(exc) if isinstance(exc, (ValueError, WakeError)) else 'Host filesystem, socket or controller unavailable; inspect operator setup.'
@@ -65,6 +82,9 @@ def goal_limits_command(args, root):
                     'authority before provisioning. Agents cannot issue their own grants. '
                     'Preserve the allocation; setup diagnosis, checkpointing and operator replies '
                     'remain available. Do not retry with another caller or copy a grant.')
+        if getattr(exc,'decision',None) is not None:result['permission']=exc.decision
+        if type(exc).__name__=='PermissionDenied':result['effect_attempted']=False
+        if getattr(exc,'code',None):result['error']['code']=exc.code
         print(json.dumps(result))
         return 2
     print(json.dumps(result))
