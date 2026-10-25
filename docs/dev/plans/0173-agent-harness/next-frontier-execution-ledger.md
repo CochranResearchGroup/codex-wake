@@ -185,3 +185,13 @@ The review fixed point is ff5911775eb54965454e664556fc96d53c5d3584, the validate
 prerequisite checkpoint proposed to the operator. Review0/1; final remediation0/1.
 CI skipped by explicit instruction. Main merge, release and production installs
 remain separate from these source-acceptance tickets.
+
+Source checkpoint66dc1d9 published and remote verified. HF16 offline journal
+inspection also passes without a runtime selector/server; red KeyError reproduced
+and removed. Isolated wheel at33d43c8 passes seven installed CLI paths and actual
+stdio MCP discovery(75tools), including all seven families and refusal of
+unattested menu inspection. Final-source artifact will be rebuilt after remediation.
+Seven source-acceptance issues334–340 now meet their frozen source criteria and
+are being closed with this evidence. One broad review follows; issues will be
+reopened for any blocking source defect until repaired. Full3.12 suite is running;
+its result is not yet claimed. No main merge or production install occurred.

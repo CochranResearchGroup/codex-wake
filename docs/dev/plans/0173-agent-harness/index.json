@@ -60,7 +60,11 @@
         "HF-04",
         "HF-06"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 334,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/334",
+      "tracker_state": "closed",
+      "source_acceptance": "feat/harness-next-frontier; main integration and release separate"
     },
     {
       "id": "HF-06",
@@ -105,7 +109,11 @@
         "HF-06",
         "HF-07"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 335,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/335",
+      "tracker_state": "closed",
+      "source_acceptance": "feat/harness-next-frontier; main integration and release separate"
     },
     {
       "id": "HF-09",
@@ -174,7 +182,11 @@
         "HF-06",
         "HF-13"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 336,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/336",
+      "tracker_state": "closed",
+      "source_acceptance": "feat/harness-next-frontier; main integration and release separate"
     },
     {
       "id": "HF-15",
@@ -197,7 +209,11 @@
         "HF-04",
         "HF-06"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 337,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/337",
+      "tracker_state": "closed",
+      "source_acceptance": "feat/harness-next-frontier; main integration and release separate"
     },
     {
       "id": "HF-17",
@@ -218,7 +234,11 @@
         "HF-03",
         "HF-06"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 338,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/338",
+      "tracker_state": "closed",
+      "source_acceptance": "feat/harness-next-frontier; main integration and release separate"
     },
     {
       "id": "HF-19",
@@ -252,7 +272,11 @@
         "HF-03",
         "HF-06"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 339,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/339",
+      "tracker_state": "closed",
+      "source_acceptance": "feat/harness-next-frontier; main integration and release separate"
     },
     {
       "id": "HF-22",
@@ -317,7 +341,11 @@
       "dependencies": [
         "HF-03"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 340,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/340",
+      "tracker_state": "closed",
+      "source_acceptance": "feat/harness-next-frontier; main integration and release separate"
     },
     {
       "id": "HF-28",
