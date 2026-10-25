@@ -830,8 +830,9 @@ lanes:
     branch: fix/native-managed-activation
     target: origin/main
     plan_state: OPEN
-    custody_state: LOCAL_CHECKPOINT
+    custody_state: PUBLISHED_CHECKPOINT
     integration: review_pr
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/359
     dependencies: [PR349]
     overlaps: [P173-COMBINED-UX]
     updated_at: 2026-10-25

@@ -137,3 +137,10 @@ Private qualification does not prove live existing-stock-to-candidate migration
 or authorize replacing a concurrent user's active native work. Final current
 readback remains0.164.0 with all8retained campaign files unchanged. No further
 build, nativecode edit, updater effect or liveactivation while Q1 is pending.
+
+Published draftPR359 carries the diagnosis/qualified opt-in runner. Final
+route-specific probe against the immutablefullCLI correctly reports modern
+update interface unavailable (reference0,candidate2), while the separate real
+legacy lifecycle oracle remainsGREEN. Source checks passRuff/compile/diff.
+The evidence report gives the concrete namespace-isolated reproduction command.
+No repeated broader review or additional runtime effects were introduced.

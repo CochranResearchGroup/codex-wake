@@ -124,3 +124,24 @@ is retained in associated userstate, formatted script
 passes Ruff/compile/diff checks. This formatting is not a new runtime proof.
 Live native0.164.0 and eight retained campaign files are unchanged. Deployment
 policy Q1 remains an operator choice; private managed qualification is complete.
+
+## Reproduction entrypoint
+
+Run from this Wake worktree with a new short private root. The original runner
+source/hash is retained with the receipt; formatting preserves its AST. This
+invocation uses real namespace isolation and does not contact the host daemon:
+
+```sh
+wake_install_prefix="$HOME/.local/share/codex-wake/releases/0.22.0.dev0-ce1ad93"
+wake_native_prefix="$HOME/.local/share/codex-wake/native/managed-98d5c6736a-20261025T213621Z"
+env CODEX_WAKE_QUALIFICATION_PARENT_NETNS="$(readlink /proc/self/ns/net)" \
+  unshare -Urn sh -c 'ip link set lo up; exec "$@"' sh \
+  "$wake_install_prefix/bin/python" scripts/scoped_refresh_native_qualification.py \
+  --execute --root "$HOME/.local/state/cw-managed-new-run" \
+  --prefix "$wake_install_prefix" --managed-cli "$wake_native_prefix/bin/codex" \
+  --code-mode-host "$wake_native_prefix/bin/codex-code-mode-host" \
+  --rollback-cli "$HOME/.local/bin/codex"
+```
+
+This documents the qualified path; it is not authorization for another effect
+run or live installation. A used root must be preserved, not cleared for retry.
