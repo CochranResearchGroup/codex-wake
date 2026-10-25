@@ -414,6 +414,12 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
         if receipt['grant']!=grant:
             receipt.update(state='held',reason='host_policy_changed')
         receipt['controller']=_heartbeat(directory)
+        permit_path=directory/'maintenance/permit.json'
+        if permit_path.exists():
+            _private(permit_path)
+            permit=json.loads(permit_path.read_text())
+            if permit.get('state') in ('prepared','handoff'):
+                receipt.update(state='held',reason='controller_maintenance')
         if receipt['state'] in ('armed','checkpoint_requested') and not receipt['controller']['fresh']:
             receipt.update(state='held',reason='controller_unavailable')
         receipt['sampled']=True;receipt['maximum_token_overshoot']=None

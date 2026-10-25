@@ -13,6 +13,9 @@ def engagement(receipt, controller):
         status = 'watcher_stale' if controller.get('active') and controller.get('process_alive',True) else 'watcher_not_running'
         action = ('Run goal-limits watcher-status for the configured service. An authorized operator '
                   'can use goal-limits start-watcher; masked services require an explicit operator decision.')
+    elif receipt.get('reason') == 'controller_maintenance':
+        status='maintenance'
+        action='Wait for the authorized controller handover and verify its replacement first poll; no resources are renewed.'
     elif receipt.get('reason') == 'permission_revoked':
         status = 'not_permitted'
         action = 'Inspect session permissions for this exact session/task; request the denied action from the operator.'
@@ -55,7 +58,10 @@ def explain_error(error):
     code = getattr(error, 'code', None)
     status = 'setup_unavailable'
     action = 'Run goal-limits watcher-status and inspect goal-limits show for this exact session.'
-    if 'accounting' in message or 'qualified original history' in message:
+    if type(error).__name__=='NativeObservationUnavailable':
+        status='runtime_unreachable'
+        action='Inspect the existing native endpoint and exact-session readback; preserve its allocation and do not start a competing server.'
+    elif 'accounting' in message or 'qualified original history' in message:
         status = 'accounting_unavailable'
         action = ('Restore readable original session history and inspect the accounting reason. '
                   'Do not replace the caller, erase history or reset counters to bypass this refusal.')

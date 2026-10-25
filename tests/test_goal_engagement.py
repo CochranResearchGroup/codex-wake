@@ -65,6 +65,11 @@ def test_real_watcher_acknowledges_enrollment_and_preserves_budget(self):
                 self.assertEqual(again['deadline'], first['deadline'])
                 self.assertEqual(again['generation'], first['generation'])
                 self.assertEqual(again['enrollment_revision'], first['enrollment_revision'])
+                tightened=enroll(root,policy,THREAD,90,120)
+                self.assertEqual(tightened['enrollment_revision'],first['enrollment_revision']+1)
+                self.assertEqual(tightened['engagement']['status'],'waiting_for_first_poll')
+                self.assertEqual(tightened['used_tokens'],40)
+                self.assertEqual(tightened['deadline'],first['deadline'])
         finally:
             process.kill()
             process.wait(timeout=3)
