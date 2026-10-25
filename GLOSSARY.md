@@ -205,3 +205,19 @@ It is distinct from binding readiness, work acceptance and permission to act.
 **Mutation resource claim**:
 Exclusive cooperative custody of a declared resource while work may mutate it.
 Losing contact with its owner does not release custody or authorize a new writer.
+
+**Acceptance contract**:
+An approved immutable set of checks bound to one exact task-brief assignment pin.
+An evaluation records independent evidence; missing or stale evidence is unknown.
+
+**Input owner generation**:
+The current cooperative custody token for automated or human terminal input.
+A takeover changes the generation and fences old automated operations.
+
+**Attention response**:
+An attributable operator answer to a specific current request. Recording an answer
+alone grants no permission, executes no effect and authorizes no uncertain replay.
+
+**Background job result wake**:
+An existing exact-owner wake observing the durable result of one approved bounded
+local job. Awaiting the result does not relaunch the job or renew its task allowance.
