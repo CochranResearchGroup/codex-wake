@@ -805,6 +805,80 @@ def qualify(options):
             active_turn_id=active_ids[0],
             http_calls_at_stop=calls_after_stop,
         )
+        frozen_keys = (
+            "generation",
+            "deadline",
+            "time_origin",
+            "token_limit",
+            "used_tokens",
+            "token_accounting",
+            "first_stop",
+            "stop_turns",
+            "effects",
+            "reset_anchor",
+            "budget_history",
+        )
+        before_restart = {key: deepcopy(stopped.get(key)) for key in frozen_keys}
+        old_watcher = watcher
+        old_generation = stopped["controller"]["generation"]
+        old_watcher.terminate()
+        old_watcher.wait(timeout=8)
+        require(
+            process_identity(old_watcher.pid) is None,
+            "old watcher remains live after graceful replacement",
+        )
+        watcher = subprocess.Popen(
+            [
+                str(cli),
+                "--wake-root",
+                str(root),
+                "goal-limits",
+                "watch",
+                "--interval",
+                ".2",
+            ],
+            env=env,
+            cwd=workspace,
+            stdin=subprocess.DEVNULL,
+            stdout=wlog,
+            stderr=wlog,
+            start_new_session=True,
+        )
+        replacement = wait(
+            lambda: (
+                value
+                if (value := goal_cli("show")).get("controller", {}).get("fresh")
+                and value["controller"]["generation"] != old_generation
+                else None
+            ),
+            "fresh replacement watcher",
+        )
+        require(
+            {key: replacement.get(key) for key in frozen_keys} == before_restart,
+            "watcher restart changed original allowance, usage or stop history",
+        )
+        require(
+            capture("tui-watcher-restarted.txt").count(stop_event["event_id"]) == 1,
+            "watcher restart duplicated visible stop notice",
+        )
+        retained = rpc(
+            "thread/notice/read", dict(threadId=thread, eventId=stop_event["event_id"])
+        )
+        require(
+            retained.get("notice")
+            == dict(eventId=stop_event["event_id"], text=stop_event["text"]),
+            "watcher restart changed native durable stop notice",
+        )
+        report["watcher_restart"] = dict(
+            old_pid=old_watcher.pid,
+            old_exit_code=old_watcher.returncode,
+            old_identity_after=process_identity(old_watcher.pid),
+            new_pid=watcher.pid,
+            old_generation=old_generation,
+            new_generation=replacement["controller"]["generation"],
+            original_budget_and_stop_history_unchanged=True,
+            notice_duplicate_count=0,
+        )
         tmux("kill-session", "-t", "ux")
         ui_started = False
         attach(endpoint, thread)
@@ -1025,7 +1099,11 @@ def qualify(options):
     finally:
         finish.set()
         operator_release.set()
-        groups = []
+        groups = (
+            [report["watcher_restart"]["old_pid"]]
+            if report.get("watcher_restart")
+            else []
+        )
         for pid in [
             native.pid if native else None,
             watcher.pid if watcher else None,

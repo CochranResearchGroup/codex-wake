@@ -778,3 +778,56 @@ class GoalRenewalTests(unittest.TestCase):
                     self.assertEqual(show(root, policy, THREAD)["token_limit"], 40)
                     self.assertEqual(native["active"], [active])
                     self.assertEqual(native["goal"]["status"], "paused")
+
+    def test_original_exhaustion_can_renew_after_fresh_watcher_replacement(self):
+        import time
+        from codex_wake.goal_supervision import poll
+        from codex_wake.goal_renewal import propose, apply
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            with patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW):
+                with self.controller(root) as old:
+                    enroll(root, policy, THREAD, 40, 120)
+                    stopped = poll(root)[0]
+                    first = stopped["first_stop"]
+                    old.terminate()
+                    old.wait(timeout=8)
+                    self.assertEqual(
+                        show(root, policy, THREAD)["reason"], "controller_stopped"
+                    )
+                with self.controller(root):
+                    deadline = time.monotonic() + 3
+                    while not show(root, policy, THREAD)["controller"]["fresh"]:
+                        if time.monotonic() > deadline:
+                            self.fail("replacement watcher did not become fresh")
+                        time.sleep(0.01)
+                    principal = Principal(THREAD, "operator")
+                    proposal = propose(
+                        root,
+                        policy,
+                        THREAD,
+                        principal=principal,
+                        operation_id="restart-extension",
+                        mode="extend",
+                        token_limit=90,
+                        remaining_seconds=180,
+                        expires_at=NOW + 60,
+                    )
+                    result = apply(
+                        root,
+                        policy,
+                        THREAD,
+                        proposal["proposal_id"],
+                        principal=principal,
+                        expected_fingerprint=proposal["fingerprint"],
+                        explicit=True,
+                    )
+                    self.assertEqual(result["new"]["used_tokens"], 40)
+                    self.assertEqual(
+                        show(root, policy, THREAD)["budget_history"][-1]["previous"][
+                            "first_stop"
+                        ],
+                        first,
+                    )
+                    self.assertEqual(native["goal"]["status"], "paused")
