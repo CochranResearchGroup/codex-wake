@@ -189,3 +189,11 @@ an assignment. An admitted instruction refers to a particular revision.
 **Recipient-startup policy**:
 The selected conditions under which a wake may use an existing recipient, load
 a saved conversation or start its declared task. It is separate from wake lifetime.
+
+**Semantic agent state**:
+A fresh evidence-backed account of what an exact managed conversation is doing.
+It is distinct from binding readiness, work acceptance and permission to act.
+
+**Mutation resource claim**:
+Exclusive cooperative custody of a declared resource while work may mutate it.
+Losing contact with its owner does not release custody or authorize a new writer.

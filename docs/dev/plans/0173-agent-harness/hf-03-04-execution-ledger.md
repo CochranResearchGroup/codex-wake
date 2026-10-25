@@ -47,3 +47,28 @@ base/tip and run exactly one independent Standards/Spec review. Primary adjudica
 blocking/backlog/rejected/needs_evidence; one TDD repair pass, focused revalidation.
 No repeated broad reviews. Local completion means validated branch and accurate
 tracker outcomes, not publication/deployment. Preserve unresolved custody.
+
+## Implementation checkpoint — outcome_progress
+
+HF03 implementation and shared CLI/MCP wiring are green. Native protocol tests
+use actual read-only SharedAppServerReader with external Unix-connection fixtures;
+Grok uses existing runtime/terminal-host fixtures. Ten observation tests pass on
+Python3.11/3.12;13 resource tests and7 public harness tests pass on both. Inventory
+compatibility12 and Grok runtime10 pass on3.12. Worker commits70c3ee7,b61afe6,fcc2030
+integrated asd5b4af3,6d442ba,da990e9. No scope conflicts. Fresh verified evidence
+requalifies a stale cached inventory while suppression and changed process deny.
+
+Build first attempt through `python -m pip wheel` failed because the reused
+venv lacks pip; `uv build --wheel` succeeded. Isolated wheel installed under
+/tmp/hf0304-installed using declared[mcp] dependencies. Its131 Python source
+modules match the integration source. Actual installed CLI and52-tool stdio MCP
+observe ready and wait matched against an owned local Unix protocol fixture;
+unattested stdio resource claim is denied. Native methods were only initialize,
+initialized andthread/read. No provider turn, process launch or production change.
+Receipt: user-scoped HF0304 validation directory (raw development logs outsideGit).
+
+An initial invalid-config test used real sleep and was interrupted on its301s
+input; corrected to a fake monotonic clock before recording its bounded red and
+green outcomes. This was harness correction, not policy relaxation. Exactlyone
+broadreview remains unused; finalTDD remediation remains unused. Recorded starting
+base37a5cbb offered as the review fixed point; it is the narrow goal startingbase.

@@ -120,6 +120,27 @@ class AgentObservationTests(unittest.TestCase):
                 self.assertEqual(value['state'], expected, value)
                 self.assertNotIn('PRIVATE', str(value))
                 self.assertTrue(all(call['method'] in ('initialize', 'initialized', 'thread/read') for call in conn.sent))
+        # Exercise the real CLI and MCP hubs against the same external protocol fixture.
+        import contextlib
+        import io
+        import json
+        from codex_wake.cli import run
+        from codex_wake.mcp_server import CommandRunner
+        thread = dict(native, status=dict(type='idle', activeFlags=[]))
+        def connect(*args, **kwargs):
+            return FakeConnection([result(1, server), result(2, {'thread': thread}), result(3, {'thread': thread})])
+        with patch('websockets.sync.client.unix_connect', side_effect=connect):
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                code = run(['--wake-root', str(self.root), 'agents', 'observe', '--managed-agent-id',
+                            agent['managed_agent_id'], '--app-server', 'unix://' + str(path), '--json'])
+            self.assertEqual(code, 0, output.getvalue())
+            self.assertEqual(json.loads(output.getvalue())['state'], 'ready')
+            value, failed = CommandRunner(wake_root=self.root, app_server='unix://' + str(path)).call(
+                'wake_agents_wait', dict(managed_agent_id=agent['managed_agent_id'], state='ready', timeout=1))
+            self.assertFalse(failed, value)
+            self.assertEqual(value['status'], 'matched')
+
 
     def test_public_cli_and_mcp_observe_share_unknown_result_without_launching_runtime(self):
         import contextlib
@@ -162,3 +183,19 @@ class AgentObservationTests(unittest.TestCase):
         self.assertNotIn('PRIVATE_DRAFT', str(value))
         host.changed = True
         self.assertEqual(owner.observe(agent['managed_agent_id'])['state'], 'unknown')
+
+    def test_unqualified_auth_state_is_reported_as_unsupported_not_inferred(self):
+        owner = AgentObservation(self.root, observer=lambda agent, timeout: replace(self.evidence, state='auth-required'), now=lambda: 100)
+        value = owner.observe(self.agent['managed_agent_id'])
+        self.assertEqual(value['capabilities']['auth-required'], 'unsupported')
+        self.assertEqual(value['state'], 'unknown')
+
+    def test_late_ready_response_cannot_satisfy_expired_wait(self):
+        elapsed = [0.0]
+        def read(agent, budget):
+            elapsed[0] += budget
+            return self.evidence
+        owner = AgentObservation(self.root, observer=read, now=lambda: 100,
+                                 monotonic=lambda: elapsed[0], sleep=lambda seconds: None)
+        result = owner.wait(self.agent['managed_agent_id'], state='ready', timeout=1)
+        self.assertEqual(result['status'], 'timeout')

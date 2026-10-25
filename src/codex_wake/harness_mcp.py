@@ -32,6 +32,24 @@ def tool_specs():
         result['wake_agents_' + verb] = ('agents', verb,
             'Inspect or enroll exact managed conversations. Self-enrollment uses trusted native or host-bound identity; membership never grants additional operations.',
             properties, required, verb in ('list', 'show'))
+    for verb in ('list', 'show', 'claim', 'check', 'release'):
+        properties, required = {}, []
+        if verb in ('show', 'check', 'release'):
+            properties['claim_id'] = TEXT
+            required.append('claim_id')
+        if verb in ('claim', 'check', 'release'):
+            properties['managed_agent_id'] = TEXT
+            required.append('managed_agent_id')
+        if verb in ('check', 'release'):
+            properties['generation'] = {'type': 'integer', 'minimum': 1}
+            required.append('generation')
+        if verb == 'claim':
+            properties.update(kind={'enum': ['worktree', 'build_prefix', 'install_prefix']},
+                              path={'type': 'string', 'minLength': 1, 'maxLength': 4096})
+            required += ['kind', 'path']
+        result['wake_resources_' + verb] = ('resources', verb,
+            'Declare cooperative resource custody using verified exact-owner identity. Check is point-in-time only; it grants no future mutation or filesystem permission.',
+            properties, required, verb in ('list', 'show', 'check'))
     from .agent_observation import STATES
     for verb in ('observe', 'wait'):
         properties = dict(managed_agent_id=TEXT, freshness={'type': 'number', 'minimum': .1, 'maximum': 300},
@@ -112,6 +130,20 @@ def call(runner, group, verb, arguments, native_context):
         if runner.actor_runtime == 'grok' and runner.bus_root is not None and runner.capability is not None:
             grok = grok_source_from_actor(runner.bus_root, runner.capability)
         return execute(verb, arguments, root, observer=RuntimeStateObserver(endpoint=runner.app_server, grok_source=grok))
+    if group == 'resources':
+        from .managed_inventory_commands import RuntimeObserver
+        from .resource_claim_commands import execute
+        grok = bus = None
+        if runner.actor_runtime == 'grok':
+            from .runtime_a2a import GrokMailboxRuntime
+            from .a2a_bus import BusStore
+            if runner.bus_root is None or runner.capability is None:
+                raise WakeError('host_bound_runtime_capability_required')
+            bus = BusStore(runner.bus_root)
+            grok = GrokMailboxRuntime.from_actor(bus, runner.capability)
+        observer = RuntimeObserver(endpoint=runner.app_server, socket_path=runner.tmux_socket,
+                                   grok_runtime=grok, bus=bus, capability=runner.capability)
+        return execute(verb, arguments, root, native_context=native_context, observer=observer)
     if group == 'agents':
         from .managed_inventory_commands import RuntimeObserver, execute
         grok = bus = None

@@ -39,10 +39,14 @@ class AgentObservation:
         _number(freshness, 'freshness', .1, 300)
         _number(timeout, 'source timeout', .001, 60)
         agent = self.inventory.inspect(managed_agent_id)['agent']
+        supported = {'ready', 'unknown'}
+        if agent['runtime'] == 'codex':
+            supported |= {'working', 'awaiting-human', 'disconnected'}
         expected_source = 'native_metadata' if agent['runtime'] == 'codex' else 'host_bound_runtime'
         result = dict(schema_version=1, managed_agent_id=managed_agent_id, runtime=agent['runtime'],
                       conversation_id=agent['conversation_id'], state='unknown', evidence_kind=expected_source,
-                      observed_at=None, fresh=False, reason='evidence_unavailable', grants_operations=False)
+                      observed_at=None, fresh=False, reason='evidence_unavailable', grants_operations=False,
+                      capabilities={state: 'supported' if state in supported else 'unsupported' for state in STATES})
         if agent['enrollment'] != 'enrolled' or not agent['process']:
             result['reason'] = 'binding_unavailable'
             return result
@@ -53,7 +57,7 @@ class AgentObservation:
         if (not isinstance(sample, StateEvidence) or sample.complete is not True
                 or any(getattr(sample, key) != agent[key] for key in
                        ('runtime', 'namespace', 'conversation_id', 'root', 'process'))
-                or sample.source != expected_source or sample.state not in STATES
+                or sample.source != expected_source or sample.state not in supported
                 or type(sample.observed_at) not in (int, float) or not math.isfinite(sample.observed_at)
                 or not sample.observed_at <= self.now() <= sample.observed_at + freshness):
             result['reason'] = 'evidence_stale_partial_or_mismatched'

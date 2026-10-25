@@ -1,6 +1,38 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P173-HF03
+    owner: primary / ecochran76
+    objective: Implement observation and ownership frontier issue 330
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/330]
+    plan: docs/dev/plans/0173-agent-harness/hf-03-04-execution-ledger.md
+    plan_ref: feat/harness-observation-ownership
+    branch: feat/harness-observation-ownership
+    target: validated integration branch
+    plan_state: OPEN
+    custody_state: OWNED
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-10-24
+    validation_status: focused_passed
+  - id: P173-HF04
+    owner: primary / ecochran76
+    objective: Implement observation and ownership frontier issue 331
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/331]
+    plan: docs/dev/plans/0173-agent-harness/hf-03-04-execution-ledger.md
+    plan_ref: feat/harness-observation-ownership
+    branch: feat/331-resource-ownership
+    target: validated integration branch
+    plan_state: OPEN
+    custody_state: OWNED
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-10-24
+    validation_status: focused_passed
   - id: P173-HF02
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 315

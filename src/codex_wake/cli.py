@@ -112,6 +112,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_task_briefs(subparsers)
     from .managed_inventory_commands import register_parser as register_managed_agents
     register_managed_agents(subparsers)
+    from .resource_claim_commands import register_parser as register_resources
+    register_resources(subparsers)
     from .a2a_cli import add_a2a_parser
     add_a2a_parser(subparsers)
     from .messages_cli import add_messages_parser
@@ -2792,6 +2794,9 @@ def run(argv: list[str] | None = None) -> int:
             return lifecycle_command(args, root)
         from .sessions_cli import sessions_command
         return sessions_command(args)
+    if args.command == 'resources':
+        from .resource_claim_commands import run as resources_command
+        return resources_command(args, root)
     if args.command == 'agents':
         from .managed_inventory_commands import run as agents_command
         return agents_command(args, root)
