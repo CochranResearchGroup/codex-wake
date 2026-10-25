@@ -821,3 +821,18 @@ lanes:
     overlaps: [P173-NEXT-FRONTIER]
     updated_at: 2026-10-25
     disposition: Qualified combined candidate PR349; matching native refresh/restart/recovery TUI acceptance and 81 affected tests pass both Python versions; review1of1 and findingsTDD1of1 complete; main integration and shared activation remain open
+
+  - id: P173-NATIVE-ACTIVATION
+    owner: primary / ecochran76
+    objective: Diagnose and qualify native managed installation and rollback
+    work_items: [318, 310, 343, 345]
+    plan: docs/dev/plans/0173-agent-harness/0005-2026-10-25-native-managed-activation.md
+    branch: fix/native-managed-activation
+    target: origin/main
+    plan_state: OPEN
+    custody_state: LOCAL_CHECKPOINT
+    integration: review_pr
+    dependencies: [PR349]
+    overlaps: [P173-COMBINED-UX]
+    updated_at: 2026-10-25
+    disposition: Documented legacy lifecycle under isolated executable qualification; no live native activation

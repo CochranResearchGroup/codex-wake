@@ -8158,3 +8158,15 @@ CLI/MCP actions are missing. Reuse common permissions and339 attention decisions
 follow-up in docs/goal-limit-ux without changing runtime, campaign state or installed
 services. Publication is not implementation acceptance. Memory disposition:forbidden,
 because no memory write was requested or authorized.
+
+## Turn | 2026-10-25 | Native managed activation diagnosis
+
+After PR349 merged/deployed Wake0.22.0.dev0 fromce1ad93, user authorized a
+diagnosing-bugs pass for unfinished native activation. Standalone299 fails the
+real managedCLI interface;0.164referencepasses. Source98d5 documents an older
+operator-managed fixed-path start/restart route, so missing modern update/from-cli
+is not alone proof that activation is impossible. FullCLI build and companion
+qualification are bounded and private; no shared daemon/updater or old campaign
+is changed. Existing scoped-refresh qualifier is being extended in an independent
+worktree for actual private lifecycle/features/rollback. Plan0173/0005 records
+authority, receipts and remaining decision. CI remains skipped.
