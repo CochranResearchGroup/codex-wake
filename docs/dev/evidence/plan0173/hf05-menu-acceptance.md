@@ -43,3 +43,22 @@ Common terminal.menu policy still independently gates each key. Operator human
 custody fences cooperative automated Grok inputs through the shared host hook.
 
 Memory disposition: forbidden by the bounded lane's explicit no-memory-write scope.
+
+## Final source verification
+
+Repeated once against exact final source `723a2b6` (including shared host hook),
+using a new private namespace/socket/profile/session and operation
+`final-723a2b6`. Receipt `/tmp/hf05-public-menu-zdsi9cc3/receipt.json` is
+PASS_ACTUAL_PUBLIC_CLI_MENU_ONLY. The newly binding-hashed token was consumed by
+separate CLI processes for configure, menu run, idempotent readback, takeover,
+legacy production host-input refusal and return. Generation1→2→3, same exact
+binding hash, two observed key intents, provider turns0, unchanged empty composer
+and fresh empty cleanup census. The receipt preserves distinct namespace IDs,
+only-lo zero-packet evidence and no IPv4 routes. No uncertain earlier operation
+was reused. This supersedes the earlier receipt as final source-path proof.
+
+Qualified-environment regressions: 25 tests passed using
+`/home/ecochran76/workspace.local/codex-wake-harness-frontier/.venv/bin/python`
+with `PYTHONPATH=src:tests`, covering test_guarded_interactions,
+test_grok_runtime and test_runtime_a2a. The earlier default-Python missing
+jsonschema errors were environment-only and are superseded by this completed run.
