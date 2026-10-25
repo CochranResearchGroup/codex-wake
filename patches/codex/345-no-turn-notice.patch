@@ -1,0 +1,1778 @@
+diff --git a/codex-rs/app-server-protocol/schema/json/ClientRequest.json b/codex-rs/app-server-protocol/schema/json/ClientRequest.json
+index 45ea74d0a2..c5bf6d721a 100644
+--- a/codex-rs/app-server-protocol/schema/json/ClientRequest.json
++++ b/codex-rs/app-server-protocol/schema/json/ClientRequest.json
+@@ -3985,6 +3985,41 @@
+       ],
+       "type": "object"
+     },
++    "ThreadNoticeAppendParams": {
++      "properties": {
++        "eventId": {
++          "type": "string"
++        },
++        "text": {
++          "description": "At most 768 UTF-8 bytes. The event id is at most 128 ASCII bytes.",
++          "type": "string"
++        },
++        "threadId": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "eventId",
++        "text",
++        "threadId"
++      ],
++      "type": "object"
++    },
++    "ThreadNoticeReadParams": {
++      "properties": {
++        "eventId": {
++          "type": "string"
++        },
++        "threadId": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "eventId",
++        "threadId"
++      ],
++      "type": "object"
++    },
+     "ThreadReadParams": {
+       "properties": {
+         "includeTurns": {
+@@ -5317,6 +5352,55 @@
+       "title": "Thread/injectItemsRequest",
+       "type": "object"
+     },
++    {
++      "description": "Persist a bounded external notice without starting or resuming a turn.",
++      "properties": {
++        "id": {
++          "$ref": "#/definitions/RequestId"
++        },
++        "method": {
++          "enum": [
++            "thread/notice/append"
++          ],
++          "title": "Thread/notice/appendRequestMethod",
++          "type": "string"
++        },
++        "params": {
++          "$ref": "#/definitions/ThreadNoticeAppendParams"
++        }
++      },
++      "required": [
++        "id",
++        "method",
++        "params"
++      ],
++      "title": "Thread/notice/appendRequest",
++      "type": "object"
++    },
++    {
++      "properties": {
++        "id": {
++          "$ref": "#/definitions/RequestId"
++        },
++        "method": {
++          "enum": [
++            "thread/notice/read"
++          ],
++          "title": "Thread/notice/readRequestMethod",
++          "type": "string"
++        },
++        "params": {
++          "$ref": "#/definitions/ThreadNoticeReadParams"
++        }
++      },
++      "required": [
++        "id",
++        "method",
++        "params"
++      ],
++      "title": "Thread/notice/readRequest",
++      "type": "object"
++    },
+     {
+       "properties": {
+         "id": {
+diff --git a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json
+index 9145100656..b26ce22dd0 100644
+--- a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json
++++ b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json
+@@ -709,6 +709,55 @@
+           "title": "Thread/injectItemsRequest",
+           "type": "object"
+         },
++        {
++          "description": "Persist a bounded external notice without starting or resuming a turn.",
++          "properties": {
++            "id": {
++              "$ref": "#/definitions/v2/RequestId"
++            },
++            "method": {
++              "enum": [
++                "thread/notice/append"
++              ],
++              "title": "Thread/notice/appendRequestMethod",
++              "type": "string"
++            },
++            "params": {
++              "$ref": "#/definitions/v2/ThreadNoticeAppendParams"
++            }
++          },
++          "required": [
++            "id",
++            "method",
++            "params"
++          ],
++          "title": "Thread/notice/appendRequest",
++          "type": "object"
++        },
++        {
++          "properties": {
++            "id": {
++              "$ref": "#/definitions/v2/RequestId"
++            },
++            "method": {
++              "enum": [
++                "thread/notice/read"
++              ],
++              "title": "Thread/notice/readRequestMethod",
++              "type": "string"
++            },
++            "params": {
++              "$ref": "#/definitions/v2/ThreadNoticeReadParams"
++            }
++          },
++          "required": [
++            "id",
++            "method",
++            "params"
++          ],
++          "title": "Thread/notice/readRequest",
++          "type": "object"
++        },
+         {
+           "properties": {
+             "id": {
+@@ -18723,6 +18772,114 @@
+         "title": "ThreadNameUpdatedNotification",
+         "type": "object"
+       },
++      "ThreadNotice": {
++        "description": "One host-owned external-supervision notice. No user instruction or resource grant.",
++        "properties": {
++          "eventId": {
++            "type": "string"
++          },
++          "text": {
++            "type": "string"
++          }
++        },
++        "required": [
++          "eventId",
++          "text"
++        ],
++        "type": "object"
++      },
++      "ThreadNoticeAppendParams": {
++        "$schema": "http://json-schema.org/draft-07/schema#",
++        "properties": {
++          "eventId": {
++            "type": "string"
++          },
++          "text": {
++            "description": "At most 768 UTF-8 bytes. The event id is at most 128 ASCII bytes.",
++            "type": "string"
++          },
++          "threadId": {
++            "type": "string"
++          }
++        },
++        "required": [
++          "eventId",
++          "text",
++          "threadId"
++        ],
++        "title": "ThreadNoticeAppendParams",
++        "type": "object"
++      },
++      "ThreadNoticeAppendResponse": {
++        "$schema": "http://json-schema.org/draft-07/schema#",
++        "properties": {
++          "alreadyRecorded": {
++            "type": "boolean"
++          },
++          "eventId": {
++            "type": "string"
++          },
++          "modelContextAvailable": {
++            "type": "boolean"
++          },
++          "notificationPublished": {
++            "description": "Publication is not proof of rendering or a human reading the notice.",
++            "type": "boolean"
++          },
++          "recorded": {
++            "type": "boolean"
++          }
++        },
++        "required": [
++          "alreadyRecorded",
++          "eventId",
++          "modelContextAvailable",
++          "notificationPublished",
++          "recorded"
++        ],
++        "title": "ThreadNoticeAppendResponse",
++        "type": "object"
++      },
++      "ThreadNoticeReadParams": {
++        "$schema": "http://json-schema.org/draft-07/schema#",
++        "properties": {
++          "eventId": {
++            "type": "string"
++          },
++          "threadId": {
++            "type": "string"
++          }
++        },
++        "required": [
++          "eventId",
++          "threadId"
++        ],
++        "title": "ThreadNoticeReadParams",
++        "type": "object"
++      },
++      "ThreadNoticeReadResponse": {
++        "$schema": "http://json-schema.org/draft-07/schema#",
++        "properties": {
++          "modelContextAvailable": {
++            "type": "boolean"
++          },
++          "notice": {
++            "anyOf": [
++              {
++                "$ref": "#/definitions/v2/ThreadNotice"
++              },
++              {
++                "type": "null"
++              }
++            ]
++          }
++        },
++        "required": [
++          "modelContextAvailable"
++        ],
++        "title": "ThreadNoticeReadResponse",
++        "type": "object"
++      },
+       "ThreadReadParams": {
+         "$schema": "http://json-schema.org/draft-07/schema#",
+         "properties": {
+diff --git a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json
+index 71f152ce6e..1eed9187d3 100644
+--- a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json
++++ b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json
+@@ -1739,6 +1739,55 @@
+           "title": "Thread/injectItemsRequest",
+           "type": "object"
+         },
++        {
++          "description": "Persist a bounded external notice without starting or resuming a turn.",
++          "properties": {
++            "id": {
++              "$ref": "#/definitions/RequestId"
++            },
++            "method": {
++              "enum": [
++                "thread/notice/append"
++              ],
++              "title": "Thread/notice/appendRequestMethod",
++              "type": "string"
++            },
++            "params": {
++              "$ref": "#/definitions/ThreadNoticeAppendParams"
++            }
++          },
++          "required": [
++            "id",
++            "method",
++            "params"
++          ],
++          "title": "Thread/notice/appendRequest",
++          "type": "object"
++        },
++        {
++          "properties": {
++            "id": {
++              "$ref": "#/definitions/RequestId"
++            },
++            "method": {
++              "enum": [
++                "thread/notice/read"
++              ],
++              "title": "Thread/notice/readRequestMethod",
++              "type": "string"
++            },
++            "params": {
++              "$ref": "#/definitions/ThreadNoticeReadParams"
++            }
++          },
++          "required": [
++            "id",
++            "method",
++            "params"
++          ],
++          "title": "Thread/notice/readRequest",
++          "type": "object"
++        },
+         {
+           "properties": {
+             "id": {
+@@ -16502,6 +16551,114 @@
+       "title": "ThreadNameUpdatedNotification",
+       "type": "object"
+     },
++    "ThreadNotice": {
++      "description": "One host-owned external-supervision notice. No user instruction or resource grant.",
++      "properties": {
++        "eventId": {
++          "type": "string"
++        },
++        "text": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "eventId",
++        "text"
++      ],
++      "type": "object"
++    },
++    "ThreadNoticeAppendParams": {
++      "$schema": "http://json-schema.org/draft-07/schema#",
++      "properties": {
++        "eventId": {
++          "type": "string"
++        },
++        "text": {
++          "description": "At most 768 UTF-8 bytes. The event id is at most 128 ASCII bytes.",
++          "type": "string"
++        },
++        "threadId": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "eventId",
++        "text",
++        "threadId"
++      ],
++      "title": "ThreadNoticeAppendParams",
++      "type": "object"
++    },
++    "ThreadNoticeAppendResponse": {
++      "$schema": "http://json-schema.org/draft-07/schema#",
++      "properties": {
++        "alreadyRecorded": {
++          "type": "boolean"
++        },
++        "eventId": {
++          "type": "string"
++        },
++        "modelContextAvailable": {
++          "type": "boolean"
++        },
++        "notificationPublished": {
++          "description": "Publication is not proof of rendering or a human reading the notice.",
++          "type": "boolean"
++        },
++        "recorded": {
++          "type": "boolean"
++        }
++      },
++      "required": [
++        "alreadyRecorded",
++        "eventId",
++        "modelContextAvailable",
++        "notificationPublished",
++        "recorded"
++      ],
++      "title": "ThreadNoticeAppendResponse",
++      "type": "object"
++    },
++    "ThreadNoticeReadParams": {
++      "$schema": "http://json-schema.org/draft-07/schema#",
++      "properties": {
++        "eventId": {
++          "type": "string"
++        },
++        "threadId": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "eventId",
++        "threadId"
++      ],
++      "title": "ThreadNoticeReadParams",
++      "type": "object"
++    },
++    "ThreadNoticeReadResponse": {
++      "$schema": "http://json-schema.org/draft-07/schema#",
++      "properties": {
++        "modelContextAvailable": {
++          "type": "boolean"
++        },
++        "notice": {
++          "anyOf": [
++            {
++              "$ref": "#/definitions/ThreadNotice"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        }
++      },
++      "required": [
++        "modelContextAvailable"
++      ],
++      "title": "ThreadNoticeReadResponse",
++      "type": "object"
++    },
+     "ThreadReadParams": {
+       "$schema": "http://json-schema.org/draft-07/schema#",
+       "properties": {
+diff --git a/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeAppendParams.json b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeAppendParams.json
+new file mode 100644
+index 0000000000..aeef6802e5
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeAppendParams.json
+@@ -0,0 +1,22 @@
++{
++  "$schema": "http://json-schema.org/draft-07/schema#",
++  "properties": {
++    "eventId": {
++      "type": "string"
++    },
++    "text": {
++      "description": "At most 768 UTF-8 bytes. The event id is at most 128 ASCII bytes.",
++      "type": "string"
++    },
++    "threadId": {
++      "type": "string"
++    }
++  },
++  "required": [
++    "eventId",
++    "text",
++    "threadId"
++  ],
++  "title": "ThreadNoticeAppendParams",
++  "type": "object"
++}
+\ No newline at end of file
+diff --git a/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeAppendResponse.json b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeAppendResponse.json
+new file mode 100644
+index 0000000000..69e00bcad4
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeAppendResponse.json
+@@ -0,0 +1,30 @@
++{
++  "$schema": "http://json-schema.org/draft-07/schema#",
++  "properties": {
++    "alreadyRecorded": {
++      "type": "boolean"
++    },
++    "eventId": {
++      "type": "string"
++    },
++    "modelContextAvailable": {
++      "type": "boolean"
++    },
++    "notificationPublished": {
++      "description": "Publication is not proof of rendering or a human reading the notice.",
++      "type": "boolean"
++    },
++    "recorded": {
++      "type": "boolean"
++    }
++  },
++  "required": [
++    "alreadyRecorded",
++    "eventId",
++    "modelContextAvailable",
++    "notificationPublished",
++    "recorded"
++  ],
++  "title": "ThreadNoticeAppendResponse",
++  "type": "object"
++}
+\ No newline at end of file
+diff --git a/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeReadParams.json b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeReadParams.json
+new file mode 100644
+index 0000000000..9600996960
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeReadParams.json
+@@ -0,0 +1,17 @@
++{
++  "$schema": "http://json-schema.org/draft-07/schema#",
++  "properties": {
++    "eventId": {
++      "type": "string"
++    },
++    "threadId": {
++      "type": "string"
++    }
++  },
++  "required": [
++    "eventId",
++    "threadId"
++  ],
++  "title": "ThreadNoticeReadParams",
++  "type": "object"
++}
+\ No newline at end of file
+diff --git a/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeReadResponse.json b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeReadResponse.json
+new file mode 100644
+index 0000000000..f2f490c2b5
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/json/v2/ThreadNoticeReadResponse.json
+@@ -0,0 +1,41 @@
++{
++  "$schema": "http://json-schema.org/draft-07/schema#",
++  "definitions": {
++    "ThreadNotice": {
++      "description": "One host-owned external-supervision notice. No user instruction or resource grant.",
++      "properties": {
++        "eventId": {
++          "type": "string"
++        },
++        "text": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "eventId",
++        "text"
++      ],
++      "type": "object"
++    }
++  },
++  "properties": {
++    "modelContextAvailable": {
++      "type": "boolean"
++    },
++    "notice": {
++      "anyOf": [
++        {
++          "$ref": "#/definitions/ThreadNotice"
++        },
++        {
++          "type": "null"
++        }
++      ]
++    }
++  },
++  "required": [
++    "modelContextAvailable"
++  ],
++  "title": "ThreadNoticeReadResponse",
++  "type": "object"
++}
+\ No newline at end of file
+diff --git a/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts b/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts
+index dc0d1a7809..f82094691a 100644
+--- a/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts
++++ b/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts
+@@ -73,6 +73,8 @@ import type { ThreadListParams } from "./v2/ThreadListParams";
+ import type { ThreadLoadedListParams } from "./v2/ThreadLoadedListParams";
+ import type { ThreadMcpServerRefreshParams } from "./v2/ThreadMcpServerRefreshParams";
+ import type { ThreadMetadataUpdateParams } from "./v2/ThreadMetadataUpdateParams";
++import type { ThreadNoticeAppendParams } from "./v2/ThreadNoticeAppendParams";
++import type { ThreadNoticeReadParams } from "./v2/ThreadNoticeReadParams";
+ import type { ThreadReadParams } from "./v2/ThreadReadParams";
+ import type { ThreadResumeParams } from "./v2/ThreadResumeParams";
+ import type { ThreadRollbackParams } from "./v2/ThreadRollbackParams";
+@@ -89,4 +91,4 @@ import type { WindowsSandboxSetupStartParams } from "./v2/WindowsSandboxSetupSta
+ /**
+  * Request from the client to the server.
+  */
+-export type ClientRequest ={ "method": "initialize", id: RequestId, params: InitializeParams, } | { "method": "thread/start", id: RequestId, params: ThreadStartParams, } | { "method": "thread/resume", id: RequestId, params: ThreadResumeParams, } | { "method": "thread/fork", id: RequestId, params: ThreadForkParams, } | { "method": "thread/archive", id: RequestId, params: ThreadArchiveParams, } | { "method": "thread/delete", id: RequestId, params: ThreadDeleteParams, } | { "method": "thread/unsubscribe", id: RequestId, params: ThreadUnsubscribeParams, } | { "method": "thread/name/set", id: RequestId, params: ThreadSetNameParams, } | { "method": "thread/goal/set", id: RequestId, params: ThreadGoalSetParams, } | { "method": "thread/goal/get", id: RequestId, params: ThreadGoalGetParams, } | { "method": "thread/goal/clear", id: RequestId, params: ThreadGoalClearParams, } | { "method": "thread/metadata/update", id: RequestId, params: ThreadMetadataUpdateParams, } | { "method": "thread/unarchive", id: RequestId, params: ThreadUnarchiveParams, } | { "method": "thread/compact/start", id: RequestId, params: ThreadCompactStartParams, } | { "method": "thread/shellCommand", id: RequestId, params: ThreadShellCommandParams, } | { "method": "thread/approveGuardianDeniedAction", id: RequestId, params: ThreadApproveGuardianDeniedActionParams, } | { "method": "thread/rollback", id: RequestId, params: ThreadRollbackParams, } | { "method": "thread/list", id: RequestId, params: ThreadListParams, } | { "method": "thread/loaded/list", id: RequestId, params: ThreadLoadedListParams, } | { "method": "thread/read", id: RequestId, params: ThreadReadParams, } | { "method": "thread/inject_items", id: RequestId, params: ThreadInjectItemsParams, } | { "method": "skills/list", id: RequestId, params: SkillsListParams, } | { "method": "skills/extraRoots/set", id: RequestId, params: SkillsExtraRootsSetParams, } | { "method": "hooks/list", id: RequestId, params: HooksListParams, } | { "method": "marketplace/add", id: RequestId, params: MarketplaceAddParams, } | { "method": "marketplace/remove", id: RequestId, params: MarketplaceRemoveParams, } | { "method": "marketplace/upgrade", id: RequestId, params: MarketplaceUpgradeParams, } | { "method": "plugin/list", id: RequestId, params: PluginListParams, } | { "method": "plugin/installed", id: RequestId, params: PluginInstalledParams, } | { "method": "plugin/read", id: RequestId, params: PluginReadParams, } | { "method": "plugin/skill/read", id: RequestId, params: PluginSkillReadParams, } | { "method": "plugin/share/save", id: RequestId, params: PluginShareSaveParams, } | { "method": "plugin/share/updateTargets", id: RequestId, params: PluginShareUpdateTargetsParams, } | { "method": "plugin/share/list", id: RequestId, params: PluginShareListParams, } | { "method": "plugin/share/checkout", id: RequestId, params: PluginShareCheckoutParams, } | { "method": "plugin/share/delete", id: RequestId, params: PluginShareDeleteParams, } | { "method": "app/list", id: RequestId, params: AppsListParams, } | { "method": "fs/readFile", id: RequestId, params: FsReadFileParams, } | { "method": "fs/writeFile", id: RequestId, params: FsWriteFileParams, } | { "method": "fs/createDirectory", id: RequestId, params: FsCreateDirectoryParams, } | { "method": "fs/getMetadata", id: RequestId, params: FsGetMetadataParams, } | { "method": "fs/readDirectory", id: RequestId, params: FsReadDirectoryParams, } | { "method": "fs/remove", id: RequestId, params: FsRemoveParams, } | { "method": "fs/copy", id: RequestId, params: FsCopyParams, } | { "method": "fs/watch", id: RequestId, params: FsWatchParams, } | { "method": "fs/unwatch", id: RequestId, params: FsUnwatchParams, } | { "method": "skills/config/write", id: RequestId, params: SkillsConfigWriteParams, } | { "method": "plugin/install", id: RequestId, params: PluginInstallParams, } | { "method": "plugin/uninstall", id: RequestId, params: PluginUninstallParams, } | { "method": "turn/start", id: RequestId, params: TurnStartParams, } | { "method": "turn/steer", id: RequestId, params: TurnSteerParams, } | { "method": "turn/interrupt", id: RequestId, params: TurnInterruptParams, } | { "method": "review/start", id: RequestId, params: ReviewStartParams, } | { "method": "model/list", id: RequestId, params: ModelListParams, } | { "method": "modelProvider/capabilities/read", id: RequestId, params: ModelProviderCapabilitiesReadParams, } | { "method": "experimentalFeature/list", id: RequestId, params: ExperimentalFeatureListParams, } | { "method": "permissionProfile/list", id: RequestId, params: PermissionProfileListParams, } | { "method": "experimentalFeature/enablement/set", id: RequestId, params: ExperimentalFeatureEnablementSetParams, } | { "method": "mcpServer/oauth/login", id: RequestId, params: McpServerOauthLoginParams, } | { "method": "config/mcpServer/reload", id: RequestId, params: undefined, } | { "method": "thread/mcpServer/reload", id: RequestId, params: ThreadMcpServerRefreshParams, } | { "method": "mcpServerStatus/list", id: RequestId, params: ListMcpServerStatusParams, } | { "method": "mcpServer/resource/read", id: RequestId, params: McpResourceReadParams, } | { "method": "mcpServer/tool/call", id: RequestId, params: McpServerToolCallParams, } | { "method": "windowsSandbox/setupStart", id: RequestId, params: WindowsSandboxSetupStartParams, } | { "method": "windowsSandbox/readiness", id: RequestId, params: undefined, } | { "method": "account/login/start", id: RequestId, params: LoginAccountParams, } | { "method": "account/login/cancel", id: RequestId, params: CancelLoginAccountParams, } | { "method": "account/logout", id: RequestId, params: undefined, } | { "method": "account/rateLimits/read", id: RequestId, params: undefined, } | { "method": "account/rateLimitResetCredit/consume", id: RequestId, params: ConsumeAccountRateLimitResetCreditParams, } | { "method": "account/usage/read", id: RequestId, params: undefined, } | { "method": "account/workspaceMessages/read", id: RequestId, params: undefined, } | { "method": "account/sendAddCreditsNudgeEmail", id: RequestId, params: SendAddCreditsNudgeEmailParams, } | { "method": "feedback/upload", id: RequestId, params: FeedbackUploadParams, } | { "method": "command/exec", id: RequestId, params: CommandExecParams, } | { "method": "command/exec/write", id: RequestId, params: CommandExecWriteParams, } | { "method": "command/exec/terminate", id: RequestId, params: CommandExecTerminateParams, } | { "method": "command/exec/resize", id: RequestId, params: CommandExecResizeParams, } | { "method": "config/read", id: RequestId, params: ConfigReadParams, } | { "method": "externalAgentConfig/detect", id: RequestId, params: ExternalAgentConfigDetectParams, } | { "method": "externalAgentConfig/import", id: RequestId, params: ExternalAgentConfigImportParams, } | { "method": "externalAgentConfig/import/readHistories", id: RequestId, params: undefined, } | { "method": "config/value/write", id: RequestId, params: ConfigValueWriteParams, } | { "method": "config/batchWrite", id: RequestId, params: ConfigBatchWriteParams, } | { "method": "configRequirements/read", id: RequestId, params: undefined, } | { "method": "account/read", id: RequestId, params: GetAccountParams, } | { "method": "getConversationSummary", id: RequestId, params: GetConversationSummaryParams, } | { "method": "gitDiffToRemote", id: RequestId, params: GitDiffToRemoteParams, } | { "method": "getAuthStatus", id: RequestId, params: GetAuthStatusParams, } | { "method": "fuzzyFileSearch", id: RequestId, params: FuzzyFileSearchParams, };
++export type ClientRequest ={ "method": "initialize", id: RequestId, params: InitializeParams, } | { "method": "thread/start", id: RequestId, params: ThreadStartParams, } | { "method": "thread/resume", id: RequestId, params: ThreadResumeParams, } | { "method": "thread/fork", id: RequestId, params: ThreadForkParams, } | { "method": "thread/archive", id: RequestId, params: ThreadArchiveParams, } | { "method": "thread/delete", id: RequestId, params: ThreadDeleteParams, } | { "method": "thread/unsubscribe", id: RequestId, params: ThreadUnsubscribeParams, } | { "method": "thread/name/set", id: RequestId, params: ThreadSetNameParams, } | { "method": "thread/goal/set", id: RequestId, params: ThreadGoalSetParams, } | { "method": "thread/goal/get", id: RequestId, params: ThreadGoalGetParams, } | { "method": "thread/goal/clear", id: RequestId, params: ThreadGoalClearParams, } | { "method": "thread/metadata/update", id: RequestId, params: ThreadMetadataUpdateParams, } | { "method": "thread/unarchive", id: RequestId, params: ThreadUnarchiveParams, } | { "method": "thread/compact/start", id: RequestId, params: ThreadCompactStartParams, } | { "method": "thread/shellCommand", id: RequestId, params: ThreadShellCommandParams, } | { "method": "thread/approveGuardianDeniedAction", id: RequestId, params: ThreadApproveGuardianDeniedActionParams, } | { "method": "thread/rollback", id: RequestId, params: ThreadRollbackParams, } | { "method": "thread/list", id: RequestId, params: ThreadListParams, } | { "method": "thread/loaded/list", id: RequestId, params: ThreadLoadedListParams, } | { "method": "thread/read", id: RequestId, params: ThreadReadParams, } | { "method": "thread/inject_items", id: RequestId, params: ThreadInjectItemsParams, } | { "method": "thread/notice/append", id: RequestId, params: ThreadNoticeAppendParams, } | { "method": "thread/notice/read", id: RequestId, params: ThreadNoticeReadParams, } | { "method": "skills/list", id: RequestId, params: SkillsListParams, } | { "method": "skills/extraRoots/set", id: RequestId, params: SkillsExtraRootsSetParams, } | { "method": "hooks/list", id: RequestId, params: HooksListParams, } | { "method": "marketplace/add", id: RequestId, params: MarketplaceAddParams, } | { "method": "marketplace/remove", id: RequestId, params: MarketplaceRemoveParams, } | { "method": "marketplace/upgrade", id: RequestId, params: MarketplaceUpgradeParams, } | { "method": "plugin/list", id: RequestId, params: PluginListParams, } | { "method": "plugin/installed", id: RequestId, params: PluginInstalledParams, } | { "method": "plugin/read", id: RequestId, params: PluginReadParams, } | { "method": "plugin/skill/read", id: RequestId, params: PluginSkillReadParams, } | { "method": "plugin/share/save", id: RequestId, params: PluginShareSaveParams, } | { "method": "plugin/share/updateTargets", id: RequestId, params: PluginShareUpdateTargetsParams, } | { "method": "plugin/share/list", id: RequestId, params: PluginShareListParams, } | { "method": "plugin/share/checkout", id: RequestId, params: PluginShareCheckoutParams, } | { "method": "plugin/share/delete", id: RequestId, params: PluginShareDeleteParams, } | { "method": "app/list", id: RequestId, params: AppsListParams, } | { "method": "fs/readFile", id: RequestId, params: FsReadFileParams, } | { "method": "fs/writeFile", id: RequestId, params: FsWriteFileParams, } | { "method": "fs/createDirectory", id: RequestId, params: FsCreateDirectoryParams, } | { "method": "fs/getMetadata", id: RequestId, params: FsGetMetadataParams, } | { "method": "fs/readDirectory", id: RequestId, params: FsReadDirectoryParams, } | { "method": "fs/remove", id: RequestId, params: FsRemoveParams, } | { "method": "fs/copy", id: RequestId, params: FsCopyParams, } | { "method": "fs/watch", id: RequestId, params: FsWatchParams, } | { "method": "fs/unwatch", id: RequestId, params: FsUnwatchParams, } | { "method": "skills/config/write", id: RequestId, params: SkillsConfigWriteParams, } | { "method": "plugin/install", id: RequestId, params: PluginInstallParams, } | { "method": "plugin/uninstall", id: RequestId, params: PluginUninstallParams, } | { "method": "turn/start", id: RequestId, params: TurnStartParams, } | { "method": "turn/steer", id: RequestId, params: TurnSteerParams, } | { "method": "turn/interrupt", id: RequestId, params: TurnInterruptParams, } | { "method": "review/start", id: RequestId, params: ReviewStartParams, } | { "method": "model/list", id: RequestId, params: ModelListParams, } | { "method": "modelProvider/capabilities/read", id: RequestId, params: ModelProviderCapabilitiesReadParams, } | { "method": "experimentalFeature/list", id: RequestId, params: ExperimentalFeatureListParams, } | { "method": "permissionProfile/list", id: RequestId, params: PermissionProfileListParams, } | { "method": "experimentalFeature/enablement/set", id: RequestId, params: ExperimentalFeatureEnablementSetParams, } | { "method": "mcpServer/oauth/login", id: RequestId, params: McpServerOauthLoginParams, } | { "method": "config/mcpServer/reload", id: RequestId, params: undefined, } | { "method": "thread/mcpServer/reload", id: RequestId, params: ThreadMcpServerRefreshParams, } | { "method": "mcpServerStatus/list", id: RequestId, params: ListMcpServerStatusParams, } | { "method": "mcpServer/resource/read", id: RequestId, params: McpResourceReadParams, } | { "method": "mcpServer/tool/call", id: RequestId, params: McpServerToolCallParams, } | { "method": "windowsSandbox/setupStart", id: RequestId, params: WindowsSandboxSetupStartParams, } | { "method": "windowsSandbox/readiness", id: RequestId, params: undefined, } | { "method": "account/login/start", id: RequestId, params: LoginAccountParams, } | { "method": "account/login/cancel", id: RequestId, params: CancelLoginAccountParams, } | { "method": "account/logout", id: RequestId, params: undefined, } | { "method": "account/rateLimits/read", id: RequestId, params: undefined, } | { "method": "account/rateLimitResetCredit/consume", id: RequestId, params: ConsumeAccountRateLimitResetCreditParams, } | { "method": "account/usage/read", id: RequestId, params: undefined, } | { "method": "account/workspaceMessages/read", id: RequestId, params: undefined, } | { "method": "account/sendAddCreditsNudgeEmail", id: RequestId, params: SendAddCreditsNudgeEmailParams, } | { "method": "feedback/upload", id: RequestId, params: FeedbackUploadParams, } | { "method": "command/exec", id: RequestId, params: CommandExecParams, } | { "method": "command/exec/write", id: RequestId, params: CommandExecWriteParams, } | { "method": "command/exec/terminate", id: RequestId, params: CommandExecTerminateParams, } | { "method": "command/exec/resize", id: RequestId, params: CommandExecResizeParams, } | { "method": "config/read", id: RequestId, params: ConfigReadParams, } | { "method": "externalAgentConfig/detect", id: RequestId, params: ExternalAgentConfigDetectParams, } | { "method": "externalAgentConfig/import", id: RequestId, params: ExternalAgentConfigImportParams, } | { "method": "externalAgentConfig/import/readHistories", id: RequestId, params: undefined, } | { "method": "config/value/write", id: RequestId, params: ConfigValueWriteParams, } | { "method": "config/batchWrite", id: RequestId, params: ConfigBatchWriteParams, } | { "method": "configRequirements/read", id: RequestId, params: undefined, } | { "method": "account/read", id: RequestId, params: GetAccountParams, } | { "method": "getConversationSummary", id: RequestId, params: GetConversationSummaryParams, } | { "method": "gitDiffToRemote", id: RequestId, params: GitDiffToRemoteParams, } | { "method": "getAuthStatus", id: RequestId, params: GetAuthStatusParams, } | { "method": "fuzzyFileSearch", id: RequestId, params: FuzzyFileSearchParams, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNotice.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNotice.ts
+new file mode 100644
+index 0000000000..450d75746c
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNotice.ts
+@@ -0,0 +1,8 @@
++// GENERATED CODE! DO NOT MODIFY BY HAND!
++
++// This file was generated by [ts-rs](https://github.com/Aleph-Alpha/ts-rs). Do not edit this file manually.
++
++/**
++ * One host-owned external-supervision notice. No user instruction or resource grant.
++ */
++export type ThreadNotice = { eventId: string, text: string, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeAppendParams.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeAppendParams.ts
+new file mode 100644
+index 0000000000..4b3c4888bc
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeAppendParams.ts
+@@ -0,0 +1,9 @@
++// GENERATED CODE! DO NOT MODIFY BY HAND!
++
++// This file was generated by [ts-rs](https://github.com/Aleph-Alpha/ts-rs). Do not edit this file manually.
++
++export type ThreadNoticeAppendParams = { threadId: string, eventId: string,
++/**
++ * At most 768 UTF-8 bytes. The event id is at most 128 ASCII bytes.
++ */
++text: string, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeAppendResponse.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeAppendResponse.ts
+new file mode 100644
+index 0000000000..35bf32250d
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeAppendResponse.ts
+@@ -0,0 +1,9 @@
++// GENERATED CODE! DO NOT MODIFY BY HAND!
++
++// This file was generated by [ts-rs](https://github.com/Aleph-Alpha/ts-rs). Do not edit this file manually.
++
++export type ThreadNoticeAppendResponse = { eventId: string, recorded: boolean, modelContextAvailable: boolean,
++/**
++ * Publication is not proof of rendering or a human reading the notice.
++ */
++notificationPublished: boolean, alreadyRecorded: boolean, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeReadParams.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeReadParams.ts
+new file mode 100644
+index 0000000000..19becb1368
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeReadParams.ts
+@@ -0,0 +1,5 @@
++// GENERATED CODE! DO NOT MODIFY BY HAND!
++
++// This file was generated by [ts-rs](https://github.com/Aleph-Alpha/ts-rs). Do not edit this file manually.
++
++export type ThreadNoticeReadParams = { threadId: string, eventId: string, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeReadResponse.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeReadResponse.ts
+new file mode 100644
+index 0000000000..626f38f63e
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadNoticeReadResponse.ts
+@@ -0,0 +1,6 @@
++// GENERATED CODE! DO NOT MODIFY BY HAND!
++
++// This file was generated by [ts-rs](https://github.com/Aleph-Alpha/ts-rs). Do not edit this file manually.
++import type { ThreadNotice } from "./ThreadNotice";
++
++export type ThreadNoticeReadResponse = { notice: ThreadNotice | null, modelContextAvailable: boolean, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/index.ts b/codex-rs/app-server-protocol/schema/typescript/v2/index.ts
+index 9e577101fc..06c3fa2d8d 100644
+--- a/codex-rs/app-server-protocol/schema/typescript/v2/index.ts
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/index.ts
+@@ -426,6 +426,11 @@ export type { ThreadMetadataGitInfoUpdateParams } from "./ThreadMetadataGitInfoU
+ export type { ThreadMetadataUpdateParams } from "./ThreadMetadataUpdateParams";
+ export type { ThreadMetadataUpdateResponse } from "./ThreadMetadataUpdateResponse";
+ export type { ThreadNameUpdatedNotification } from "./ThreadNameUpdatedNotification";
++export type { ThreadNotice } from "./ThreadNotice";
++export type { ThreadNoticeAppendParams } from "./ThreadNoticeAppendParams";
++export type { ThreadNoticeAppendResponse } from "./ThreadNoticeAppendResponse";
++export type { ThreadNoticeReadParams } from "./ThreadNoticeReadParams";
++export type { ThreadNoticeReadResponse } from "./ThreadNoticeReadResponse";
+ export type { ThreadReadParams } from "./ThreadReadParams";
+ export type { ThreadReadResponse } from "./ThreadReadResponse";
+ export type { ThreadRealtimeAudioChunk } from "./ThreadRealtimeAudioChunk";
+diff --git a/codex-rs/app-server-protocol/src/protocol/common.rs b/codex-rs/app-server-protocol/src/protocol/common.rs
+index 33a3699ace..5fa056cf72 100644
+--- a/codex-rs/app-server-protocol/src/protocol/common.rs
++++ b/codex-rs/app-server-protocol/src/protocol/common.rs
+@@ -654,6 +654,17 @@ client_request_definitions! {
+         serialization: thread_id(params.thread_id),
+         response: v2::ThreadInjectItemsResponse,
+     },
++    /// Persist a bounded external notice without starting or resuming a turn.
++    ThreadNoticeAppend => "thread/notice/append" {
++        params: v2::ThreadNoticeAppendParams,
++        serialization: thread_id(params.thread_id),
++        response: v2::ThreadNoticeAppendResponse,
++    },
++    ThreadNoticeRead => "thread/notice/read" {
++        params: v2::ThreadNoticeReadParams,
++        serialization: thread_id(params.thread_id),
++        response: v2::ThreadNoticeReadResponse,
++    },
+     SkillsList => "skills/list" {
+         params: v2::SkillsListParams,
+         serialization: global_shared_read("config"),
+diff --git a/codex-rs/app-server-protocol/src/protocol/thread_history.rs b/codex-rs/app-server-protocol/src/protocol/thread_history.rs
+index 2d9c6b6a1a..a32788cfec 100644
+--- a/codex-rs/app-server-protocol/src/protocol/thread_history.rs
++++ b/codex-rs/app-server-protocol/src/protocol/thread_history.rs
+@@ -369,7 +369,7 @@ impl ThreadHistoryBuilder {
+             EventMsg::ItemCompleted(payload) => self.handle_item_completed(payload),
+             EventMsg::HookStarted(_) | EventMsg::HookCompleted(_) => {}
+             EventMsg::Error(payload) => self.handle_error(payload),
+-            EventMsg::TokenCount(_) => {}
++            EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_) => {}
+             EventMsg::ThreadRolledBack(payload) => self.handle_thread_rollback(payload),
+             EventMsg::TurnAborted(payload) => self.handle_turn_aborted(payload),
+             EventMsg::TurnStarted(payload) => self.handle_turn_started(payload),
+@@ -388,7 +388,7 @@ impl ThreadHistoryBuilder {
+             RolloutItem::InterAgentCommunication(_)
+             | RolloutItem::InterAgentCommunicationMetadata { .. }
+             | RolloutItem::TurnContext(_)
+-            | RolloutItem::WorldState(_)
++            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::SessionMeta(_) => {}
+         }
+     }
+diff --git a/codex-rs/app-server-protocol/src/protocol/v2/thread.rs b/codex-rs/app-server-protocol/src/protocol/v2/thread.rs
+index 7cd03930d8..ec8f8ccb19 100644
+--- a/codex-rs/app-server-protocol/src/protocol/v2/thread.rs
++++ b/codex-rs/app-server-protocol/src/protocol/v2/thread.rs
+@@ -1300,6 +1300,54 @@ pub struct ThreadInjectItemsParams {
+ #[ts(export_to = "v2/")]
+ pub struct ThreadInjectItemsResponse {}
+ 
++/// One host-owned external-supervision notice. No user instruction or resource grant.
++#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
++#[serde(rename_all = "camelCase")]
++#[ts(export_to = "v2/")]
++pub struct ThreadNotice {
++    pub event_id: String,
++    pub text: String,
++}
++
++#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
++#[serde(rename_all = "camelCase")]
++#[ts(export_to = "v2/")]
++pub struct ThreadNoticeAppendParams {
++    pub thread_id: String,
++    pub event_id: String,
++    /// At most 768 UTF-8 bytes. The event id is at most 128 ASCII bytes.
++    pub text: String,
++}
++
++#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
++#[serde(rename_all = "camelCase")]
++#[ts(export_to = "v2/")]
++pub struct ThreadNoticeAppendResponse {
++    pub event_id: String,
++    pub recorded: bool,
++    pub model_context_available: bool,
++    /// Publication is not proof of rendering or a human reading the notice.
++    pub notification_published: bool,
++    pub already_recorded: bool,
++}
++
++#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
++#[serde(rename_all = "camelCase")]
++#[ts(export_to = "v2/")]
++pub struct ThreadNoticeReadParams {
++    pub thread_id: String,
++    pub event_id: String,
++}
++
++#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
++#[serde(rename_all = "camelCase")]
++#[ts(export_to = "v2/")]
++pub struct ThreadNoticeReadResponse {
++    pub notice: Option<ThreadNotice>,
++    pub model_context_available: bool,
++}
++
++
+ #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
+ #[serde(rename_all = "camelCase")]
+ #[ts(export_to = "v2/")]
+diff --git a/codex-rs/app-server/README.md b/codex-rs/app-server/README.md
+index 5f40baf769..fcd9e9294a 100644
+--- a/codex-rs/app-server/README.md
++++ b/codex-rs/app-server/README.md
+@@ -2218,3 +2218,15 @@ legacy config-inspection behavior. The scoped API and explicit runtime inspectio
+ admitted pending refresh without starting a model turn; legacy runtime reads
+ keep their previous behavior. In-flight steps retain
+ their previous snapshot until they finish.
++
++### External supervision notices (local extension)
++
++`thread/notice/append` accepts exact `threadId`, stable `eventId` (ASCII, 128 bytes)
++and `text` (768 UTF-8 bytes, ending `[External supervision event EVENT_ID]`).
++It records bounded `external_supervision` model context and a replayable display
++message without starting a turn or altering the goal. The exact event id/text is
++idempotent; changing content refuses. The existing `item/completed` notification
++publishes the message to subscribed clients. `notificationPublished` is publication,
++not proof of rendering or human reading. `thread/notice/read` accepts threadId and
++eventId, returning retained notice/context proof for ambiguous-append reconciliation.
++History replay makes notices available after reconnect; no model turn is dispatched.
+diff --git a/codex-rs/app-server/src/bespoke_event_handling.rs b/codex-rs/app-server/src/bespoke_event_handling.rs
+index c63103161f..7920412155 100644
+--- a/codex-rs/app-server/src/bespoke_event_handling.rs
++++ b/codex-rs/app-server/src/bespoke_event_handling.rs
+@@ -1086,6 +1086,7 @@ pub(crate) async fn apply_bespoke_event_handling(
+                 .send_server_notification(ServerNotification::ItemCompleted(completed))
+                 .await;
+         }
++        EventMsg::RawResponseCompleted(_) => {}
+         EventMsg::RawResponseItem(raw_response_item_event) => {
+             maybe_emit_hook_prompt_item_completed(
+                 conversation_id,
+diff --git a/codex-rs/app-server/src/message_processor.rs b/codex-rs/app-server/src/message_processor.rs
+index 1fc1c3c6ca..18dea77b5b 100644
+--- a/codex-rs/app-server/src/message_processor.rs
++++ b/codex-rs/app-server/src/message_processor.rs
+@@ -1332,6 +1332,12 @@ impl MessageProcessor {
+                     )
+                     .await
+             }
++            ClientRequest::ThreadNoticeAppend { params, .. } => {
++                self.turn_processor.thread_notice_append(params).await
++            }
++            ClientRequest::ThreadNoticeRead { params, .. } => {
++                self.turn_processor.thread_notice_read(params).await
++            }
+             ClientRequest::ThreadInjectItems { params, .. } => {
+                 self.turn_processor.thread_inject_items(params).await
+             }
+diff --git a/codex-rs/app-server/src/request_processors/thread_notice.rs b/codex-rs/app-server/src/request_processors/thread_notice.rs
+new file mode 100644
+index 0000000000..46432244e9
+--- /dev/null
++++ b/codex-rs/app-server/src/request_processors/thread_notice.rs
+@@ -0,0 +1,48 @@
++//! Exact-thread notice publication; native control remains a separate operation.
++use super::*;
++use codex_app_server_protocol::{ItemCompletedNotification, ThreadNotice, ThreadNoticeAppendParams, ThreadNoticeAppendResponse,
++    ThreadNoticeReadParams, ThreadNoticeReadResponse};
++
++impl TurnRequestProcessor {
++    pub(crate) async fn thread_notice_read(&self, params: ThreadNoticeReadParams)
++        -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
++        let (_, thread) = self.load_thread(&params.thread_id).await?;
++        let retained = thread.external_notice(&params.event_id).await
++            .map_err(|error| internal_error(format!("notice read failed: {error}")))?;
++        let model_context_available = retained.as_ref().is_some_and(|(_, available)| *available);
++        let notice = retained.map(|(text, _)| ThreadNotice { event_id: params.event_id, text });
++        Ok(Some(ThreadNoticeReadResponse { model_context_available, notice }.into()))
++    }
++
++    pub(crate) async fn thread_notice_append(&self, params: ThreadNoticeAppendParams)
++        -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
++        if params.event_id.is_empty() || params.event_id.len() > 128 ||
++            !params.event_id.bytes().all(|byte| byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'-') ||
++            params.text.is_empty() || params.text.len() > 768 ||
++            !params.text.ends_with(&format!("[External supervision event {}]", params.event_id)) {
++            return Err(invalid_request("bounded event id and marked notice text required"));
++        }
++        let (thread_id, thread) = self.load_thread(&params.thread_id).await?;
++        let prior = thread.external_notice(&params.event_id).await
++            .map_err(|error| internal_error(format!("notice history unavailable: {error}")))?;
++        if prior.as_ref().is_some_and(|(text, _)| text != &params.text) {
++            return Err(invalid_request("notice event id already has different content"));
++        }
++        let already_recorded = prior.is_some();
++        let mut notification_published = false;
++        if !already_recorded {
++            thread.record_external_notice(&params.event_id, &params.text).await
++                .map_err(|error| internal_error(format!("notice append failed: {error}")))?;
++            let connections = self.thread_state_manager.subscribed_connection_ids(thread_id).await;
++            notification_published = !connections.is_empty();
++            let outgoing = ThreadScopedOutgoingMessageSender::new(self.outgoing.clone(), connections, thread_id);
++            outgoing.send_server_notification(ServerNotification::ItemCompleted(ItemCompletedNotification {
++                thread_id: params.thread_id, turn_id: params.event_id.clone(), completed_at_ms: chrono::Utc::now().timestamp_millis(),
++                item: ThreadItem::AgentMessage { id: params.event_id.clone(), text: params.text,
++                    phase: None, memory_citation: None },
++            })).await;
++        }
++        Ok(Some(ThreadNoticeAppendResponse { event_id: params.event_id, recorded: true,
++            model_context_available: prior.is_none_or(|(_, available)| available), notification_published, already_recorded }.into()))
++    }
++}
+diff --git a/codex-rs/app-server/src/request_processors/turn_processor.rs b/codex-rs/app-server/src/request_processors/turn_processor.rs
+index bb074e457b..3923392ad2 100644
+--- a/codex-rs/app-server/src/request_processors/turn_processor.rs
++++ b/codex-rs/app-server/src/request_processors/turn_processor.rs
+@@ -1445,3 +1445,6 @@ fn xcode_26_4_mcp_elicitations_auto_deny(
+     client_name == Some("Xcode")
+         && client_version.is_some_and(|version| version.starts_with("26.4"))
+ }
++
++#[path = "thread_notice.rs"]
++mod thread_notice;
+diff --git a/codex-rs/app-server/tests/suite/v2/mod.rs b/codex-rs/app-server/tests/suite/v2/mod.rs
+index 3f1d8a030d..9c2babcda7 100644
+--- a/codex-rs/app-server/tests/suite/v2/mod.rs
++++ b/codex-rs/app-server/tests/suite/v2/mod.rs
+@@ -67,6 +67,7 @@ mod thread_archive;
+ mod thread_delete;
+ mod thread_fork;
+ mod thread_inject_items;
++mod thread_notice;
+ mod thread_list;
+ mod thread_loaded_list;
+ mod thread_memory_mode_set;
+diff --git a/codex-rs/app-server/tests/suite/v2/thread_notice.rs b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
+new file mode 100644
+index 0000000000..983a28f59f
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
+@@ -0,0 +1,134 @@
++use anyhow::Result;
++use app_test_support::{TestAppServer, to_response};
++use codex_app_server_protocol::{RequestId, ThreadStartParams, ThreadStartResponse, TurnStartParams, UserInput};
++use core_test_support::responses;
++use pretty_assertions::assert_eq;
++use serde_json::json;
++use tempfile::TempDir;
++use tokio::time::{Duration, timeout};
++
++#[tokio::test]
++async fn notice_is_durable_idempotent_visible_and_starts_no_model_turn() -> Result<()> {
++    let server = responses::start_mock_server().await;
++    let model = responses::mount_sse_once(&server, responses::sse(vec![
++        responses::ev_response_created("notice-response"),
++        responses::ev_assistant_message("notice-model-answer", "Operator continuation complete"),
++        json!({"type":"response.completed","response":{"id":"notice-response","usage":{
++            "input_tokens":20,"input_tokens_details":{"cached_tokens":10},"output_tokens":5,
++            "output_tokens_details":{"reasoning_tokens":0},"total_tokens":25}}}),
++    ])).await;
++    let home = TempDir::new()?;
++    std::fs::write(home.path().join("config.toml"), format!(r#"
++model = "mock-model"
++approval_policy = "never"
++sandbox_mode = "read-only"
++model_provider = "mock_provider"
++[model_providers.mock_provider]
++name = "Notice test"
++base_url = "{}/v1"
++wire_api = "responses"
++request_max_retries = 0
++stream_max_retries = 0
++"#, server.uri()))?;
++    let mut client = TestAppServer::new_with_auto_env(home.path()).await?;
++    client.initialize().await?;
++    let start = client.send_thread_start_request_with_auto_env(ThreadStartParams::default()).await?;
++    let started: ThreadStartResponse = to_response(client.read_stream_until_response_message(RequestId::Integer(start)).await?)?;
++    let thread = started.thread;
++    let event = "notice_owned_stop_1";
++    let text = "Goal paused: external token allowance reached. Extend allowance / Reset budget window / Keep stopped. Native /goal resume alone does not renew this external allowance. [External supervision event notice_owned_stop_1]";
++    let append = client.send_raw_request("thread/notice/append", Some(json!({"threadId":thread.id,"eventId":event,"text":text}))).await?;
++    let shown = timeout(Duration::from_secs(10), client.read_stream_until_notification_message("item/completed")).await??;
++    assert_eq!(shown.params.as_ref().and_then(|params| params.get("item")).and_then(|item| item.get("text")), Some(&json!(text)));
++    let appended = client.read_stream_until_response_message(RequestId::Integer(append)).await?;
++    assert_eq!(appended.result, json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":true,"alreadyRecorded":false}));
++    assert_eq!(model.requests().len(), 0);
++    let duplicate = client.send_raw_request("thread/notice/append", Some(json!({"threadId":thread.id,"eventId":event,"text":text}))).await?;
++    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(duplicate)).await?.result,
++        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":false,"alreadyRecorded":true}));
++    let changed = client.send_raw_request("thread/notice/append", Some(json!({"threadId":thread.id,"eventId":event,"text":format!("Changed {text}")}))).await?;
++    assert_eq!(client.read_stream_until_error_message(RequestId::Integer(changed)).await?.error.code, -32600);
++    let read = client.send_raw_request("thread/notice/read", Some(json!({"threadId":thread.id,"eventId":event}))).await?;
++    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(read)).await?.result,
++        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true}));
++    let history = std::fs::read_to_string(thread.path.as_ref().expect("rollout path"))?;
++    assert_eq!(history.lines().filter(|line| line.contains("external_supervision") && line.contains(event)).count(), 1);
++    assert_eq!(history.lines().filter(|line| line.contains("agent_message") && line.contains(event)).count(), 1);
++    // Only this explicit operator continuation starts a local mock model request.
++    let turn = client.send_turn_start_request(TurnStartParams {thread_id:thread.id.clone(),
++        input:vec![UserInput::Text {text:"Continue with approved operator work".into(),text_elements:Vec::new()}],
++        ..Default::default()}).await?;
++    client.read_stream_until_response_message(RequestId::Integer(turn)).await?;
++    timeout(Duration::from_secs(10), client.read_stream_until_notification_message("turn/completed")).await??;
++    let flushed = client.send_raw_request("thread/notice/read",Some(json!({"threadId":thread.id,"eventId":event}))).await?;
++    client.read_stream_until_response_message(RequestId::Integer(flushed)).await?;
++    let rows = std::fs::read_to_string(thread.path.as_ref().expect("rollout path"))?;
++    let usage_rows = rows.lines().map(|line|serde_json::from_str::<serde_json::Value>(line).expect("valid rollout"))
++        .filter(|row|row.get("type") == Some(&json!("token_usage_record"))).collect::<Vec<_>>();
++    assert_eq!(usage_rows.len(),1);
++    assert_eq!(usage_rows[0]["payload"]["response_id"],json!("notice-response"));
++    assert_eq!(usage_rows[0]["payload"]["thread_id"],json!(thread.id));
++    assert_eq!(usage_rows[0]["payload"]["root_turn_id"],usage_rows[0]["payload"]["turn_id"]);
++    assert_eq!(usage_rows[0]["payload"]["usage"],json!({"input_tokens":20,"cached_input_tokens":10,
++        "output_tokens":5,"reasoning_output_tokens":0,"total_tokens":25}));
++    let input = model.single_request().input();
++    assert!(input.iter().any(|item| item.get("content").and_then(|content|content.as_array()).is_some_and(|parts|
++        parts.iter().any(|part|part.get("text").and_then(|value|value.as_str()).is_some_and(|text|text.contains("external_supervision") && text.contains(event))))));
++    Ok(())
++}
++
++#[tokio::test]
++async fn notice_is_immediately_retained_while_model_response_is_pending() -> Result<()> {
++    use wiremock::{Mock, ResponseTemplate};
++    use wiremock::matchers::{method, path};
++    let server = responses::start_mock_server().await;
++    let body = responses::sse(vec![responses::ev_response_created("busy-notice-response"),
++        responses::ev_assistant_message("busy-notice-answer", "Local model finished"),
++        responses::ev_completed("busy-notice-response")]);
++    Mock::given(method("POST")).and(path("/v1/responses"))
++        .respond_with(ResponseTemplate::new(200).set_body_raw(body, "text/event-stream")
++            .set_delay(Duration::from_secs(2)))
++        .expect(1).mount(&server).await;
++    let home = TempDir::new()?;
++    std::fs::write(home.path().join("config.toml"), format!(r#"
++model = "mock-model"
++approval_policy = "never"
++sandbox_mode = "read-only"
++model_provider = "mock_provider"
++[model_providers.mock_provider]
++name = "Busy notice test"
++base_url = "{}/v1"
++wire_api = "responses"
++request_max_retries = 0
++stream_max_retries = 0
++"#, server.uri()))?;
++    let mut client = TestAppServer::new_with_auto_env(home.path()).await?;
++    client.initialize().await?;
++    let start = client.send_thread_start_request_with_auto_env(ThreadStartParams::default()).await?;
++    let started: ThreadStartResponse = to_response(client.read_stream_until_response_message(RequestId::Integer(start)).await?)?;
++    let thread = started.thread;
++    let turn = client.send_turn_start_request(TurnStartParams {thread_id:thread.id.clone(),
++        input:vec![UserInput::Text {text:"Owned local delayed response".into(),text_elements:Vec::new()}],
++        ..Default::default()}).await?;
++    client.read_stream_until_response_message(RequestId::Integer(turn)).await?;
++    let event = "notice_busy_model_1";
++    let text = "External supervision changed while this model request was busy. [External supervision event notice_busy_model_1]";
++    let append = client.send_raw_request("thread/notice/append",Some(json!({"threadId":thread.id,"eventId":event,"text":text}))).await?;
++    let notification = timeout(Duration::from_secs(10), async {
++        loop {
++            let notification = client.read_stream_until_notification_message("item/completed").await?;
++            if notification.params.as_ref().and_then(|value|value.get("item")).and_then(|item|item.get("id")) == Some(&json!(event)) {
++                break anyhow::Ok(notification);
++            }
++        }
++    }).await??;
++    assert_eq!(notification.params.as_ref().and_then(|value|value.get("item")).and_then(|item|item.get("text")),Some(&json!(text)));
++    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(append)).await?.result,
++        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":true,"alreadyRecorded":false}));
++    let read = client.send_raw_request("thread/notice/read",Some(json!({"threadId":thread.id,"eventId":event}))).await?;
++    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(read)).await?.result,
++        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true}));
++    timeout(Duration::from_secs(10),client.read_stream_until_notification_message("turn/completed")).await??;
++    assert_eq!(server.received_requests().await.expect("requests retained").len(),1);
++    Ok(())
++}
+diff --git a/codex-rs/core/src/agent/control/spawn.rs b/codex-rs/core/src/agent/control/spawn.rs
+index c4c40577ca..0641258436 100644
+--- a/codex-rs/core/src/agent/control/spawn.rs
++++ b/codex-rs/core/src/agent/control/spawn.rs
+@@ -63,6 +63,7 @@ fn keep_forked_rollout_item(item: &RolloutItem, preserve_reference_context_item:
+         // from the parent's durable baseline. Truncated forks drop part of that prompt,
+         // so they must rebuild context on their first child turn.
+         RolloutItem::TurnContext(_) | RolloutItem::WorldState(_) => preserve_reference_context_item,
++        RolloutItem::TokenUsageRecord(_) => false,
+         RolloutItem::Compacted(_) | RolloutItem::EventMsg(_) | RolloutItem::SessionMeta(_) => true,
+     }
+ }
+diff --git a/codex-rs/core/src/agent/control_tests.rs b/codex-rs/core/src/agent/control_tests.rs
+index 9863bfb7e2..cdc874fa62 100644
+--- a/codex-rs/core/src/agent/control_tests.rs
++++ b/codex-rs/core/src/agent/control_tests.rs
+@@ -171,7 +171,7 @@ async fn persisted_originator(thread: &CodexThread) -> String {
+             | RolloutItem::InterAgentCommunicationMetadata { .. }
+             | RolloutItem::EventMsg(_)
+             | RolloutItem::Compacted(_)
+-            | RolloutItem::WorldState(_)
++            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::TurnContext(_) => None,
+         })
+         .expect("session metadata should be persisted")
+diff --git a/codex-rs/core/src/codex_delegate.rs b/codex-rs/core/src/codex_delegate.rs
+index a671f0dd74..5727522f65 100644
+--- a/codex-rs/core/src/codex_delegate.rs
++++ b/codex-rs/core/src/codex_delegate.rs
+@@ -299,7 +299,7 @@ async fn forward_events(
+                 match event {
+                     Event {
+                         id: _,
+-                        msg: EventMsg::TokenCount(_),
++                        msg: EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_),
+                     } => {}
+                     Event {
+                         id: _,
+diff --git a/codex-rs/core/src/codex_thread.rs b/codex-rs/core/src/codex_thread.rs
+index f5ac4f4cb8..125e616323 100644
+--- a/codex-rs/core/src/codex_thread.rs
++++ b/codex-rs/core/src/codex_thread.rs
+@@ -700,3 +700,6 @@ impl CodexThread {
+         Ok(*guard)
+     }
+ }
++
++#[path = "codex_thread/external_notice.rs"]
++mod external_notice;
+diff --git a/codex-rs/core/src/codex_thread/external_notice.rs b/codex-rs/core/src/codex_thread/external_notice.rs
+new file mode 100644
+index 0000000000..718c4307bd
+--- /dev/null
++++ b/codex-rs/core/src/codex_thread/external_notice.rs
+@@ -0,0 +1,65 @@
++//! Durable, bounded external notices do not schedule model work.
++use super::CodexThread;
++use crate::context::{ContextualUserFragment, InternalContextSource, InternalModelContextFragment};
++use codex_protocol::error::{CodexErr, Result};
++use codex_protocol::models::ResponseItem;
++use codex_protocol::protocol::{AgentMessageEvent, EventMsg, RolloutItem};
++
++impl CodexThread {
++    /// Find a persisted notice without creating a model turn.
++    pub async fn external_notice(&self, event_id: &str) -> Result<Option<(String, bool)>> {
++        // A newly loaded thread can defer its rollout until first use. Materialize
++        // the existing session header, never a user turn, before inspecting it.
++        self.ensure_rollout_materialized().await;
++        self.flush_rollout().await?;
++        let history = self.load_history(/*include_archived*/ false).await
++            .map_err(|error| CodexErr::InvalidRequest(format!("notice history unavailable: {error}")))?;
++        let marker = format!("[External supervision event {event_id}]");
++        let context_exists = history.items.iter().any(|item| matches!(item,
++            RolloutItem::ResponseItem(ResponseItem::Message { id: Some(id), .. }) if id == event_id));
++        if !context_exists { return Ok(None); }
++        let in_context = self.codex.session.clone_history().await.raw_items().iter().any(|item| matches!(item,
++            ResponseItem::Message { id: Some(id), .. } if id == event_id));
++        Ok(history.items.iter().find_map(|item| match item {
++            RolloutItem::EventMsg(EventMsg::AgentMessage(message)) if message.message.ends_with(&marker) =>
++                Some((message.message.clone(), in_context)),
++            _ => None,
++        }))
++    }
++
++    /// Record model context and a replayable display event even while a tool is busy.
++    /// The caller serializes notice requests for this thread; no turn is started.
++    pub async fn record_external_notice(&self, event_id: &str, text: &str) -> Result<()> {
++        if text.len() > 768 || text.is_empty() || event_id.len() > 128 || event_id.is_empty() {
++            return Err(CodexErr::InvalidRequest("external notice exceeds bounded context size".into()));
++        }
++        let fragment = InternalModelContextFragment::new(
++            InternalContextSource::from_static("external_supervision"), text);
++        let mut item: ResponseItem = ContextualUserFragment::into(fragment);
++        if let ResponseItem::Message { id, .. } = &mut item { *id = Some(event_id.to_owned()); }
++        let history = self.load_history(/*include_archived*/ false).await
++            .map_err(|error| CodexErr::InvalidRequest(format!("notice history unavailable: {error}")))?;
++        let saved = history.items.iter().find_map(|saved| match saved {
++            RolloutItem::ResponseItem(ResponseItem::Message { id: Some(id), content, .. }) if id == event_id => Some(content),
++            _ => None,
++        });
++        if let Some(content) = saved {
++            let expected = match &item { ResponseItem::Message { content, .. } => content, _ => unreachable!() };
++            if content != expected { return Err(CodexErr::InvalidRequest("notice event id already has different content".into())); }
++        } else {
++            let turn = self.codex.session.new_default_turn().await;
++            self.codex.session.record_conversation_items(turn.as_ref(), &[item]).await;
++        }
++        // The event is separate from the model item so existing clients replay it.
++        // Reconcile a partial append by retaining the same id/context, never reinjecting it.
++        let marker = format!("[External supervision event {event_id}]");
++        if !history.items.iter().any(|saved| matches!(saved,
++            RolloutItem::EventMsg(EventMsg::AgentMessage(message)) if message.message.ends_with(&marker))) {
++            self.append_rollout_items(&[RolloutItem::EventMsg(EventMsg::AgentMessage(AgentMessageEvent {
++                message: text.to_owned(), phase: None, memory_citation: None,
++            }))]).await.map_err(|error| CodexErr::InvalidRequest(format!("notice display append failed: {error}")))?;
++        }
++        self.flush_rollout().await?;
++        Ok(())
++    }
++}
+diff --git a/codex-rs/core/src/compact.rs b/codex-rs/core/src/compact.rs
+index d2a9fd5222..0c3b8997f7 100644
+--- a/codex-rs/core/src/compact.rs
++++ b/codex-rs/core/src/compact.rs
+@@ -698,7 +698,8 @@ async fn drain_to_completed(
+             Ok(ResponseEvent::RateLimits(snapshot)) => {
+                 sess.update_rate_limits(turn_context, snapshot).await;
+             }
+-            Ok(ResponseEvent::Completed { token_usage, .. }) => {
++            Ok(ResponseEvent::Completed { response_id, token_usage, .. }) => {
++                sess.record_response_token_usage(turn_context, response_id, token_usage.clone()).await;
+                 sess.update_token_usage_info(turn_context, token_usage.as_ref())
+                     .await?;
+                 return Ok(());
+diff --git a/codex-rs/core/src/compact_remote.rs b/codex-rs/core/src/compact_remote.rs
+index 6b251562f7..29c80966a3 100644
+--- a/codex-rs/core/src/compact_remote.rs
++++ b/codex-rs/core/src/compact_remote.rs
+@@ -265,6 +265,9 @@ async fn run_remote_compact_task_inner_impl(
+             &responses_metadata,
+         )
+         .await?;
++    // This older endpoint returns items without a response identity or exact
++    // usage. Retain explicit unqualified completion, never an invented charge.
++    sess.record_response_token_usage(turn_context.as_ref(), String::new(), None).await;
+     let (new_window_number, new_window_ids) = sess.advance_auto_compact_window().await;
+     let (new_history, world_state_baseline) = process_compacted_history(
+         sess.as_ref(),
+diff --git a/codex-rs/core/src/compact_remote_v2.rs b/codex-rs/core/src/compact_remote_v2.rs
+index 6e110045bb..d520cf9630 100644
+--- a/codex-rs/core/src/compact_remote_v2.rs
++++ b/codex-rs/core/src/compact_remote_v2.rs
+@@ -287,7 +287,9 @@ async fn run_remote_compact_task_inner_impl(
+     let RemoteCompactionV2Output {
+         compaction_output,
+         token_usage,
++        response_id,
+     } = compaction_output_result?;
++    sess.record_response_token_usage(turn_context, response_id, token_usage.clone()).await;
+     if let Some(token_usage) = token_usage {
+         sess.record_rollout_budget_usage(&token_usage)?;
+         analytics_details.active_context_tokens_before = Some(token_usage.input_tokens);
+@@ -342,6 +344,7 @@ async fn run_remote_compact_task_inner_impl(
+ struct RemoteCompactionV2Output {
+     compaction_output: ResponseItem,
+     token_usage: Option<TokenUsage>,
++    response_id: String,
+ }
+ 
+ async fn run_remote_compaction_request_v2(
+@@ -402,6 +405,7 @@ async fn collect_compaction_output(
+     let mut compaction_output = None;
+     let mut saw_completed = false;
+     let mut completed_token_usage = None;
++    let mut completed_response_id = String::new();
+     while let Some(event) = stream.next().await {
+         match event? {
+             ResponseEvent::OutputItemDone(item) => {
+@@ -413,8 +417,9 @@ async fn collect_compaction_output(
+                     }
+                 }
+             }
+-            ResponseEvent::Completed { token_usage, .. } => {
++            ResponseEvent::Completed { response_id, token_usage, .. } => {
+                 saw_completed = true;
++                completed_response_id = response_id;
+                 completed_token_usage = token_usage;
+                 break;
+             }
+@@ -441,6 +446,7 @@ async fn collect_compaction_output(
+     Ok(RemoteCompactionV2Output {
+         compaction_output,
+         token_usage: completed_token_usage,
++        response_id: completed_response_id,
+     })
+ }
+ 
+diff --git a/codex-rs/core/src/mcp_tool_call.rs b/codex-rs/core/src/mcp_tool_call.rs
+index d03f232d12..9bf47fdf86 100644
+--- a/codex-rs/core/src/mcp_tool_call.rs
++++ b/codex-rs/core/src/mcp_tool_call.rs
+@@ -1095,6 +1095,10 @@ fn build_mcp_tool_call_request_meta(
+             reasoning_effort: turn_context.effective_reasoning_effort(),
+         })
+     {
++        if let Some(session_id) = turn_metadata.get("session_id").and_then(serde_json::Value::as_str) {
++            request_meta.insert("sessionId".to_string(), serde_json::Value::String(session_id.to_string()));
++        }
++        request_meta.insert("callId".to_string(), serde_json::Value::String(call_id.to_string()));
+         request_meta.insert(
+             crate::X_CODEX_TURN_METADATA_HEADER.to_string(),
+             turn_metadata,
+diff --git a/codex-rs/core/src/session/mod.rs b/codex-rs/core/src/session/mod.rs
+index f45616eed8..4fa35d440e 100644
+--- a/codex-rs/core/src/session/mod.rs
++++ b/codex-rs/core/src/session/mod.rs
+@@ -1315,6 +1315,11 @@ impl Session {
+             InitialHistory::Resumed(resumed_history) => {
+                 let turn_context = self.new_default_turn().await;
+                 let rollout_items = resumed_history.history;
++                self.state.lock().await.latest_token_usage_record = rollout_items.iter().rev()
++                    .find_map(|item| match item {
++                        RolloutItem::TokenUsageRecord(record) if record.thread_id == self.thread_id() => Some(record.clone()),
++                        _ => None,
++                    });
+                 let previous_turn_settings = self
+                     .apply_rollout_reconstruction(&turn_context, &rollout_items)
+                     .await;
+@@ -4034,3 +4039,5 @@ async fn build_hooks_for_config(
+ 
+ #[cfg(test)]
+ pub(crate) mod tests;
++
++mod response_usage;
+diff --git a/codex-rs/core/src/session/response_usage.rs b/codex-rs/core/src/session/response_usage.rs
+new file mode 100644
+index 0000000000..6253121a84
+--- /dev/null
++++ b/codex-rs/core/src/session/response_usage.rs
+@@ -0,0 +1,25 @@
++//! Response ledger compatibility from upstream 5f79a92e3936274318d2122ae3244e5edd80dd1f.
++//! Descendant lineage is unavailable in this older runtime, so it remains held.
++use super::Session;
++use super::TurnContext;
++use codex_protocol::protocol::{EventMsg, RawResponseCompletedEvent, RolloutItem, TokenUsage};
++
++impl Session {
++    pub(crate) async fn record_response_token_usage(&self, turn: &TurnContext,
++        response_id: String, usage: Option<TokenUsage>) {
++        let observed = RolloutItem::EventMsg(EventMsg::RawResponseCompleted(RawResponseCompletedEvent {
++            response_id:response_id.clone(),token_usage:usage.clone(),usage_metadata:None,
++        }));
++        let record = usage.as_ref().filter(|_| self.thread_id().to_string() == self.session_id().to_string())
++            .map(|usage| (response_id, usage));
++        if let Some((response_id, usage)) = record {
++            let record = self.state.lock().await.record_token_usage(self.thread_id(), &turn.sub_id,
++                self.session_id(),turn.sub_id.clone(),response_id,usage);
++            self.persist_rollout_items(&[observed,RolloutItem::TokenUsageRecord(record)]).await;
++        } else {
++            // No record is fabricated for missing usage or unproved descendant
++            // root-turn attribution. Wake sees the unmatched completion and holds.
++            self.persist_rollout_items(&[observed]).await;
++        }
++    }
++}
+diff --git a/codex-rs/core/src/session/rollout_reconstruction.rs b/codex-rs/core/src/session/rollout_reconstruction.rs
+index 0b89caaf05..d4bbeeba91 100644
+--- a/codex-rs/core/src/session/rollout_reconstruction.rs
++++ b/codex-rs/core/src/session/rollout_reconstruction.rs
+@@ -243,6 +243,7 @@ impl Session {
+                         }
+                     }
+                 }
++                RolloutItem::TokenUsageRecord(_) => {}
+                 RolloutItem::WorldState(_) => {
+                     let active_segment =
+                         active_segment.get_or_insert_with(ActiveReplaySegment::default);
+@@ -367,7 +368,7 @@ impl Session {
+                 }
+                 RolloutItem::EventMsg(_)
+                 | RolloutItem::TurnContext(_)
+-                | RolloutItem::WorldState(_)
++                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::SessionMeta(_) => {}
+             }
+         }
+@@ -411,6 +412,7 @@ impl Session {
+                     }
+                 }
+                 RolloutItem::SessionMeta(_)
++                | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::ResponseItem(_)
+                 | RolloutItem::InterAgentCommunication(_)
+                 | RolloutItem::InterAgentCommunicationMetadata { .. }
+diff --git a/codex-rs/core/src/session/tests.rs b/codex-rs/core/src/session/tests.rs
+index ece9d446b5..852ddf69de 100644
+--- a/codex-rs/core/src/session/tests.rs
++++ b/codex-rs/core/src/session/tests.rs
+@@ -2757,7 +2757,7 @@ async fn start_new_context_window_assigns_and_persists_item_ids() {
+         | RolloutItem::InterAgentCommunication(_)
+         | RolloutItem::InterAgentCommunicationMetadata { .. }
+         | RolloutItem::TurnContext(_)
+-        | RolloutItem::WorldState(_)
++        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::EventMsg(_) => None,
+     });
+     assert_eq!(
+@@ -2816,7 +2816,7 @@ async fn record_initial_history_assigns_and_persists_id_for_forked_response_item
+         | RolloutItem::InterAgentCommunicationMetadata { .. }
+         | RolloutItem::Compacted(_)
+         | RolloutItem::TurnContext(_)
+-        | RolloutItem::WorldState(_)
++        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::EventMsg(_) => None,
+     });
+     assert_eq!(persisted_item_id, Some(live_item_id.as_str()));
+diff --git a/codex-rs/core/src/session/turn.rs b/codex-rs/core/src/session/turn.rs
+index f16b525002..313a0713a4 100644
+--- a/codex-rs/core/src/session/turn.rs
++++ b/codex-rs/core/src/session/turn.rs
+@@ -1509,7 +1509,7 @@ pub(super) fn realtime_text_for_event(msg: &EventMsg) -> Option<(String, Option<
+         | EventMsg::TurnStarted(_)
+         | EventMsg::ThreadSettingsApplied(_)
+         | EventMsg::TurnComplete(_)
+-        | EventMsg::TokenCount(_)
++        | EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_)
+         | EventMsg::UserMessage(_)
+         | EventMsg::AgentReasoning(_)
+         | EventMsg::AgentReasoningRawContent(_)
+@@ -2210,9 +2210,9 @@ async fn try_run_sampling_request(
+                 sess.services.models_manager.refresh_if_new_etag(etag).await;
+             }
+             ResponseEvent::Completed {
++                response_id,
+                 token_usage,
+                 end_turn,
+-                ..
+             } => {
+                 flush_assistant_text_segments_all(
+                     &sess,
+@@ -2224,6 +2224,7 @@ async fn try_run_sampling_request(
+                 let budget_result = sess
+                     .record_token_usage_info(&turn_context, token_usage.as_ref())
+                     .await;
++                sess.record_response_token_usage(&turn_context, response_id, token_usage.clone()).await;
+                 should_emit_token_count = true;
+                 should_emit_turn_diff = true;
+                 if let Err(err) = budget_result {
+diff --git a/codex-rs/core/src/state/session.rs b/codex-rs/core/src/state/session.rs
+index d681c6fa87..5722b786b7 100644
+--- a/codex-rs/core/src/state/session.rs
++++ b/codex-rs/core/src/state/session.rs
+@@ -19,6 +19,8 @@ use crate::session_startup_prewarm::SessionStartupPrewarmHandle;
+ use codex_protocol::protocol::RateLimitSnapshot;
+ use codex_protocol::protocol::TokenUsage;
+ use codex_protocol::protocol::TokenUsageInfo;
++use codex_protocol::protocol::TokenUsageRecord;
++use codex_protocol::{ThreadId, SessionId};
+ use codex_protocol::protocol::TurnContextItem;
+ use codex_utils_output_truncation::TruncationPolicy;
+ 
+@@ -27,6 +29,7 @@ pub(crate) struct SessionState {
+     pub(crate) session_configuration: SessionConfiguration,
+     pub(crate) history: ContextManager,
+     pub(crate) latest_rate_limits: Option<RateLimitSnapshot>,
++    pub(crate) latest_token_usage_record: Option<TokenUsageRecord>,
+     pub(crate) server_reasoning_included: bool,
+     pub(crate) mcp_dependency_prompted: HashSet<String>,
+     pub(crate) additional_context: AdditionalContextStore,
+@@ -64,6 +67,7 @@ impl SessionState {
+             session_configuration,
+             history,
+             latest_rate_limits: None,
++            latest_token_usage_record: None,
+             server_reasoning_included: false,
+             mcp_dependency_prompted: HashSet::new(),
+             additional_context: AdditionalContextStore::default(),
+@@ -126,6 +130,44 @@ impl SessionState {
+         self.history.set_token_info(info);
+     }
+ 
++    pub(crate) fn record_token_usage(
++        &mut self,
++        thread_id: ThreadId,
++        turn_id: &str,
++        session_id: SessionId,
++        root_turn_id: String,
++        response_id: String,
++        usage: &TokenUsage,
++    ) -> TokenUsageRecord {
++        let mut turn_token_usage = self
++            .latest_token_usage_record
++            .as_ref()
++            .filter(|record| record.turn_id == turn_id)
++            .map_or_else(TokenUsage::default, |record| {
++                record.turn_token_usage.clone()
++            });
++        turn_token_usage.add_assign(usage);
++        let mut thread_token_usage = self
++            .latest_token_usage_record
++            .as_ref()
++            .map_or_else(TokenUsage::default, |record| {
++                record.thread_token_usage.clone()
++            });
++        thread_token_usage.add_assign(usage);
++        let record = TokenUsageRecord {
++            thread_id,
++            turn_id: turn_id.to_string(),
++            session_id,
++            root_turn_id,
++            response_id,
++            usage: usage.clone(),
++            turn_token_usage,
++            thread_token_usage,
++        };
++        self.latest_token_usage_record = Some(record.clone());
++        record
++    }
++
+     pub(crate) fn set_reference_context_item(&mut self, item: Option<TurnContextItem>) {
+         self.history.set_reference_context_item(item);
+     }
+diff --git a/codex-rs/memories/write/src/phase1.rs b/codex-rs/memories/write/src/phase1.rs
+index 712e11d0ef..840f734373 100644
+--- a/codex-rs/memories/write/src/phase1.rs
++++ b/codex-rs/memories/write/src/phase1.rs
+@@ -415,7 +415,7 @@ mod job {
+                 | RolloutItem::InterAgentCommunicationMetadata { .. }
+                 | RolloutItem::Compacted(_)
+                 | RolloutItem::TurnContext(_)
+-                | RolloutItem::WorldState(_)
++                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::EventMsg(_) => None,
+             })
+             .collect::<Vec<_>>();
+diff --git a/codex-rs/protocol/src/protocol.rs b/codex-rs/protocol/src/protocol.rs
+index 96a793bcd3..efd7b94d20 100644
+--- a/codex-rs/protocol/src/protocol.rs
++++ b/codex-rs/protocol/src/protocol.rs
+@@ -1430,6 +1430,7 @@ pub enum EventMsg {
+     ExitedReviewMode(ExitedReviewModeEvent),
+ 
+     RawResponseItem(RawResponseItemEvent),
++    RawResponseCompleted(RawResponseCompletedEvent),
+ 
+     ItemStarted(ItemStartedEvent),
+     ItemCompleted(ItemCompletedEvent),
+@@ -2665,7 +2666,7 @@ impl InitialHistory {
+                 | RolloutItem::InterAgentCommunication(_)
+                 | RolloutItem::InterAgentCommunicationMetadata { .. }
+                 | RolloutItem::Compacted(_)
+-                | RolloutItem::WorldState(_)
++                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::EventMsg(_) => None,
+             })
+             .and_then(|turn_context| turn_context.multi_agent_mode)
+@@ -3001,7 +3002,7 @@ fn multi_agent_version_from_items(
+             | RolloutItem::InterAgentCommunication(_)
+             | RolloutItem::InterAgentCommunicationMetadata { .. }
+             | RolloutItem::Compacted(_)
+-            | RolloutItem::WorldState(_)
++            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::EventMsg(_) => None,
+         })
+     })
+@@ -3155,6 +3156,7 @@ impl<'de> Deserialize<'de> for SessionMetaLine {
+ pub enum RolloutItem {
+     SessionMeta(SessionMetaLine),
+     ResponseItem(ResponseItem),
++    TokenUsageRecord(TokenUsageRecord),
+     /// Legacy delivery item reconstructed as a model-visible `agent_message`.
+     InterAgentCommunication(InterAgentCommunication),
+     /// Local delivery metadata that is not part of the Responses API item.
+@@ -3167,6 +3169,27 @@ pub enum RolloutItem {
+     EventMsg(EventMsg),
+ }
+ 
++/// Authentic noncumulative usage observed for one completed response.
++#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, TS)]
++pub struct TokenUsageRecord {
++    pub thread_id: ThreadId,
++    pub turn_id: String,
++    pub session_id: SessionId,
++    pub root_turn_id: String,
++    pub response_id: String,
++    pub usage: TokenUsage,
++    pub turn_token_usage: TokenUsage,
++    pub thread_token_usage: TokenUsage,
++}
++
++/// Exact response usage, including explicit absence. This is never a cumulative estimate.
++#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, TS)]
++pub struct RawResponseCompletedEvent {
++    pub response_id: String,
++    pub token_usage: Option<TokenUsage>,
++    pub usage_metadata: Option<serde_json::Value>,
++}
++
+ /// Persisted comparison state used to resume model-visible world-state diffing.
+ #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema, TS)]
+ pub struct WorldStateItem {
+diff --git a/codex-rs/rollout-trace/src/protocol_event.rs b/codex-rs/rollout-trace/src/protocol_event.rs
+index 42e0db04d2..64aeee8278 100644
+--- a/codex-rs/rollout-trace/src/protocol_event.rs
++++ b/codex-rs/rollout-trace/src/protocol_event.rs
+@@ -358,7 +358,7 @@ pub(crate) fn tool_runtime_trace_event(event: &EventMsg) -> Option<ToolRuntimeTr
+         | EventMsg::TurnStarted(_)
+         | EventMsg::ThreadSettingsApplied(_)
+         | EventMsg::TurnComplete(_)
+-        | EventMsg::TokenCount(_)
++        | EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_)
+         | EventMsg::AgentMessage(_)
+         | EventMsg::UserMessage(_)
+         | EventMsg::AgentReasoning(_)
+@@ -429,7 +429,7 @@ pub(crate) fn wrapped_protocol_event_type(event: &EventMsg) -> Option<&'static s
+         | EventMsg::TurnModerationMetadata(_)
+         | EventMsg::ContextCompacted(_)
+         | EventMsg::ThreadSettingsApplied(_)
+-        | EventMsg::TokenCount(_)
++        | EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_)
+         | EventMsg::AgentMessage(_)
+         | EventMsg::UserMessage(_)
+         | EventMsg::AgentReasoning(_)
+diff --git a/codex-rs/rollout/src/list.rs b/codex-rs/rollout/src/list.rs
+index 1154d36eee..8c4bce9a69 100644
+--- a/codex-rs/rollout/src/list.rs
++++ b/codex-rs/rollout/src/list.rs
+@@ -1176,7 +1176,7 @@ async fn read_head_summary(path: &Path, head_limit: usize) -> io::Result<HeadTai
+             RolloutItem::TurnContext(_) => {
+                 // Not included in `head`; skip.
+             }
+-            RolloutItem::WorldState(_) => {
++            RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => {
+                 // Not included in `head`; skip.
+             }
+             RolloutItem::Compacted(_) => {
+@@ -1241,7 +1241,7 @@ pub async fn read_head_for_summary(path: &Path) -> io::Result<Vec<serde_json::Va
+                 RolloutItem::InterAgentCommunicationMetadata { .. }
+                 | RolloutItem::Compacted(_)
+                 | RolloutItem::TurnContext(_)
+-                | RolloutItem::WorldState(_)
++                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::EventMsg(_) => {}
+             }
+         }
+diff --git a/codex-rs/rollout/src/metadata.rs b/codex-rs/rollout/src/metadata.rs
+index 127a8af223..1969c82b9f 100644
+--- a/codex-rs/rollout/src/metadata.rs
++++ b/codex-rs/rollout/src/metadata.rs
+@@ -73,7 +73,7 @@ pub fn builder_from_items(
+         | RolloutItem::InterAgentCommunicationMetadata { .. }
+         | RolloutItem::Compacted(_)
+         | RolloutItem::TurnContext(_)
+-        | RolloutItem::WorldState(_)
++        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::EventMsg(_) => None,
+     }) && let Some(builder) = builder_from_session_meta(session_meta, rollout_path)
+     {
+@@ -129,7 +129,7 @@ pub async fn extract_metadata_from_rollout(
+             | RolloutItem::InterAgentCommunicationMetadata { .. }
+             | RolloutItem::Compacted(_)
+             | RolloutItem::TurnContext(_)
+-            | RolloutItem::WorldState(_)
++            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::EventMsg(_) => None,
+         }),
+         parse_errors,
+diff --git a/codex-rs/rollout/src/persistence_metrics.rs b/codex-rs/rollout/src/persistence_metrics.rs
+index 8c2a7e18d2..a466df0a6a 100644
+--- a/codex-rs/rollout/src/persistence_metrics.rs
++++ b/codex-rs/rollout/src/persistence_metrics.rs
+@@ -233,6 +233,7 @@ fn rollout_item_type(item: &RolloutItem) -> String {
+         RolloutItem::Compacted(_) => "compacted".to_string(),
+         RolloutItem::TurnContext(_) => "turn_context".to_string(),
+         RolloutItem::WorldState(_) => "world_state".to_string(),
++        RolloutItem::TokenUsageRecord(_) => "token_usage_record".to_string(),
+         RolloutItem::EventMsg(EventMsg::ItemCompleted(event)) => {
+             format!("event.item_completed.{}", turn_item_type(&event.item))
+         }
+diff --git a/codex-rs/rollout/src/policy.rs b/codex-rs/rollout/src/policy.rs
+index 2390a0fc61..aeea8e83b0 100644
+--- a/codex-rs/rollout/src/policy.rs
++++ b/codex-rs/rollout/src/policy.rs
+@@ -12,7 +12,7 @@ pub fn is_persisted_rollout_item(item: &RolloutItem) -> bool {
+         // Persist Codex executive markers so we can analyze flows (e.g., compaction, API turns).
+         RolloutItem::Compacted(_)
+         | RolloutItem::TurnContext(_)
+-        | RolloutItem::WorldState(_)
++        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::SessionMeta(_) => true,
+     }
+ }
+@@ -80,7 +80,8 @@ pub fn should_persist_response_item_for_memories(item: &ResponseItem) -> bool {
+ #[inline]
+ pub fn should_persist_event_msg(ev: &EventMsg) -> bool {
+     match ev {
+-        EventMsg::UserMessage(_)
++        EventMsg::RawResponseCompleted(_)
++        | EventMsg::UserMessage(_)
+         | EventMsg::AgentMessage(_)
+         | EventMsg::AgentReasoning(_)
+         | EventMsg::AgentReasoningRawContent(_)
+diff --git a/codex-rs/rollout/src/recorder.rs b/codex-rs/rollout/src/recorder.rs
+index 87e97997a2..24ab1d119c 100644
+--- a/codex-rs/rollout/src/recorder.rs
++++ b/codex-rs/rollout/src/recorder.rs
+@@ -1929,7 +1929,7 @@ async fn resume_candidate_matches_cwd(
+             | RolloutItem::InterAgentCommunication(_)
+             | RolloutItem::InterAgentCommunicationMetadata { .. }
+             | RolloutItem::Compacted(_)
+-            | RolloutItem::WorldState(_)
++            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::EventMsg(_) => None,
+         })
+     {
+diff --git a/codex-rs/rollout/src/search.rs b/codex-rs/rollout/src/search.rs
+index 58b46887a9..a0e34b7b78 100644
+--- a/codex-rs/rollout/src/search.rs
++++ b/codex-rs/rollout/src/search.rs
+@@ -286,7 +286,7 @@ fn conversation_text_from_item(item: &RolloutItem) -> Option<String> {
+         | RolloutItem::InterAgentCommunication(_)
+         | RolloutItem::InterAgentCommunicationMetadata { .. }
+         | RolloutItem::Compacted(_)
+-        | RolloutItem::WorldState(_) => None,
++        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => None,
+     }
+ }
+ 
+diff --git a/codex-rs/state/src/extract.rs b/codex-rs/state/src/extract.rs
+index 48e308f627..ce8abc9b69 100644
+--- a/codex-rs/state/src/extract.rs
++++ b/codex-rs/state/src/extract.rs
+@@ -25,7 +25,7 @@ pub fn apply_rollout_item(
+         RolloutItem::InterAgentCommunication(_)
+         | RolloutItem::InterAgentCommunicationMetadata { .. } => {}
+         RolloutItem::Compacted(_) => {}
+-        RolloutItem::WorldState(_) => {}
++        RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => {}
+     }
+     if metadata.model_provider.is_empty() {
+         metadata.model_provider = default_provider.to_string();
+@@ -44,7 +44,7 @@ pub fn rollout_item_affects_thread_metadata(item: &RolloutItem) -> bool {
+         | RolloutItem::InterAgentCommunication(_)
+         | RolloutItem::InterAgentCommunicationMetadata { .. }
+         | RolloutItem::Compacted(_)
+-        | RolloutItem::WorldState(_) => false,
++        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => false,
+     }
+ }
+ 
+diff --git a/codex-rs/state/src/runtime/threads.rs b/codex-rs/state/src/runtime/threads.rs
+index c80b2b6716..88360c8e11 100644
+--- a/codex-rs/state/src/runtime/threads.rs
++++ b/codex-rs/state/src/runtime/threads.rs
+@@ -1244,7 +1244,7 @@ pub(super) fn extract_memory_mode(items: &[RolloutItem]) -> Option<String> {
+         | RolloutItem::InterAgentCommunicationMetadata { .. }
+         | RolloutItem::Compacted(_)
+         | RolloutItem::TurnContext(_)
+-        | RolloutItem::WorldState(_)
++        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::EventMsg(_) => None,
+     })
+ }
+diff --git a/codex-rs/thread-store/src/thread_metadata_sync.rs b/codex-rs/thread-store/src/thread_metadata_sync.rs
+index 1057715a4a..09d1d07155 100644
+--- a/codex-rs/thread-store/src/thread_metadata_sync.rs
++++ b/codex-rs/thread-store/src/thread_metadata_sync.rs
+@@ -287,7 +287,7 @@ impl ThreadMetadataSync {
+                 | RolloutItem::InterAgentCommunication(_)
+                 | RolloutItem::InterAgentCommunicationMetadata { .. }
+                 | RolloutItem::Compacted(_)
+-                | RolloutItem::WorldState(_) => {}
++                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => {}
+             }
+         }
+         Some(update)
+diff --git a/codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__external_supervision_notice_without_turn.snap b/codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__external_supervision_notice_without_turn.snap
+new file mode 100644
+index 0000000000..7b1f64584c
+--- /dev/null
++++ b/codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__external_supervision_notice_without_turn.snap
+@@ -0,0 +1,7 @@
++---
++source: tui/src/chatwidget/tests/app_server.rs
++expression: lines
++---
++• Goal paused: external allowance reached. Extend allowance / Reset budget
++  window / Keep stopped. Native /goal resume alone does not renew this external
++  allowance.
+diff --git a/codex-rs/tui/src/chatwidget/tests/app_server.rs b/codex-rs/tui/src/chatwidget/tests/app_server.rs
+index 3c7d9bbf50..7ca0fad60e 100644
+--- a/codex-rs/tui/src/chatwidget/tests/app_server.rs
++++ b/codex-rs/tui/src/chatwidget/tests/app_server.rs
+@@ -1256,3 +1256,23 @@ async fn live_app_server_thread_closed_requests_immediate_exit() {
+ 
+     assert_matches!(rx.try_recv(), Ok(AppEvent::Exit(ExitMode::Immediate)));
+ }
++
++#[tokio::test]
++async fn external_supervision_notice_renders_without_starting_a_turn() {
++    let (mut chat, mut rx, mut op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
++    let text = "Goal paused: external allowance reached. Extend allowance / Reset budget window / Keep stopped. Native /goal resume alone does not renew this external allowance.";
++    chat.handle_server_notification(
++        ServerNotification::ItemCompleted(ItemCompletedNotification {
++            thread_id: "thread-1".into(), turn_id: "notice_stop_1".into(), completed_at_ms: 0,
++            item: AppServerThreadItem::AgentMessage {id: "notice_stop_1".into(), text: text.into(),
++                phase: None, memory_citation: None},
++        }),
++        /*replay_kind*/ None,
++    );
++    let cells = drain_insert_history(&mut rx);
++    assert_eq!(cells.len(), 1);
++    let lines = lines_to_single_string(&cells[0]);
++    assert_chatwidget_snapshot!("external_supervision_notice_without_turn", lines);
++    assert!(!chat.bottom_pane.is_task_running());
++    assert!(op_rx.try_recv().is_err(), "notice must not submit a model operation");
++}
