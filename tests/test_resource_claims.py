@@ -162,3 +162,18 @@ class ResourceClaimTests(unittest.TestCase):
             with self.assertRaises(ResourceClaimError):
                 ResourceClaims(wake)
             self.assertFalse((wake / 'resource-claims').exists())
+
+    def test_duplicate_authority_fields_hold_original_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            workspace = root / 'workspace'; workspace.mkdir()
+            owner = Claimant('agent_' + '1' * 32, str(root), {'pid': 11, 'start_ticks': 1, 'boot_id': 'boot'}, 100)
+            store = ResourceClaims(root / 'wake', now=lambda: 100)
+            store.claim('worktree', workspace, owner)
+            path = root / 'wake/resource-claims/claims.json'
+            state = json.loads(path.read_text())
+            malformed = ('{"version":1,"claims":' + json.dumps(state['claims']) + ',"claims":[]}').encode()
+            path.write_bytes(malformed)
+            with self.assertRaises(ResourceClaimError):
+                store.claim('worktree', workspace, owner)
+            self.assertEqual(path.read_bytes(), malformed)

@@ -29,6 +29,15 @@ def _copy(value):
     return json.loads(json.dumps(value))
 
 
+def _unique(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError('duplicate authority field')
+        result[key] = value
+    return result
+
+
 @dataclass(frozen=True)
 class Claimant:
     """Host-verified managed identity and freshly observed process binding."""
@@ -94,7 +103,7 @@ class ResourceClaims:
                 with self.path.open() as source:
                     raw = source.read(MAX_BYTES + 1)
                 try:
-                    state = json.loads(raw)
+                    state = json.loads(raw, object_pairs_hook=_unique)
                     if (len(raw.encode()) > MAX_BYTES or type(state) is not dict
                             or set(state) != {'version', 'claims'} or type(state['version']) is not int
                             or state['version'] != 1 or type(state['claims']) is not list):
