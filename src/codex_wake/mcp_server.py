@@ -208,13 +208,13 @@ class CommandRunner:
         if name not in SPECS:
             return {"error": {"code": "unknown_tool", "message": "Unknown tool."}}, True
         group, verb, _, properties, required, readonly = SPECS[name]
-        if self.actor_runtime == 'grok' and group not in ('messages','grok','agents'):
+        if self.actor_runtime == 'grok' and group not in ('messages','grok','agents','agent-state'):
             return {'error':{'code':'native_caller_attestation_unavailable'}}, True
         schema = {"type": "object", "additionalProperties": False,
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
-        if group in ('agents', 'task-briefs', 'harness-native', 'harness-owner'):
+        if group in ('agents', 'agent-state', 'task-briefs', 'harness-native', 'harness-owner'):
             try:
                 from .harness_mcp import call as harness_call
                 return harness_call(self, group, verb, arguments, native_context), False

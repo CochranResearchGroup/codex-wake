@@ -32,6 +32,18 @@ def tool_specs():
         result['wake_agents_' + verb] = ('agents', verb,
             'Inspect or enroll exact managed conversations. Self-enrollment uses trusted native or host-bound identity; membership never grants additional operations.',
             properties, required, verb in ('list', 'show'))
+    from .agent_observation import STATES
+    for verb in ('observe', 'wait'):
+        properties = dict(managed_agent_id=TEXT, freshness={'type': 'number', 'minimum': .1, 'maximum': 300},
+                          timeout={'type': 'number', 'minimum': 0 if verb == 'wait' else .001,
+                                   'maximum': 300 if verb == 'wait' else 60})
+        required = ['managed_agent_id']
+        if verb == 'wait':
+            properties.update(state={'enum': list(STATES)}, interval={'type': 'number', 'minimum': .05, 'maximum': 5})
+            required.append('state')
+        result['wake_agents_' + verb] = ('agent-state', verb,
+            'Observe or wait for exact managed-agent state using fresh runtime evidence. Unknown is not idle or completed; grants no operations.',
+            properties, required, True)
     for verb in ('propose', 'approve', 'inspect', 'admit', 'pin'):
         properties = dict(caller_thread_id=CALLER, task_id=TEXT)
         required = ['caller_thread_id', 'task_id']
@@ -93,6 +105,13 @@ def call(runner, group, verb, arguments, native_context):
     if runner.wake_root is None:
         raise WakeError('host_wake_root_required')
     root = Path(runner.wake_root)
+    if group == 'agent-state':
+        from .agent_observation import RuntimeStateObserver, grok_source_from_actor
+        from .agent_observation_commands import execute
+        grok = None
+        if runner.actor_runtime == 'grok' and runner.bus_root is not None and runner.capability is not None:
+            grok = grok_source_from_actor(runner.bus_root, runner.capability)
+        return execute(verb, arguments, root, observer=RuntimeStateObserver(endpoint=runner.app_server, grok_source=grok))
     if group == 'agents':
         from .managed_inventory_commands import RuntimeObserver, execute
         grok = bus = None

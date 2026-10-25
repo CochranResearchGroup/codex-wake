@@ -172,6 +172,8 @@ def register_parser(subparsers):
             command.add_argument('--mode', choices=MODES, required=True)
             command.add_argument('--selected-json', default='[]',
                                  help='exact runtime/namespace/conversation selections')
+    from .agent_observation_commands import register_parser as register_observation
+    register_observation(commands)
     return parser
 
 
@@ -180,6 +182,9 @@ def run(args, root, *, native_context=None, observer=None):
     from pathlib import Path
     try:
         action = args.agents_command
+        if action in ('observe', 'wait'):
+            from .agent_observation_commands import run as observe_command
+            return observe_command(args, root)
         operator = getattr(args, 'operator', False) is True
         names = ('managed_agent_id', 'runtime', 'conversation_id', 'predecessor',
                  'task_id', 'allocation_id', 'binding_id', 'binding_sha256', 'mode')
