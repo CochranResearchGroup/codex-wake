@@ -56,26 +56,11 @@ def enrollment_action(previous, token_limit, seconds, token_accounting, allocati
 
 
 def diagnostic(root, thread, action, *, principal, task_id=None, operation_id=None):
-    """Classify unavailable control without writing the existing campaign."""
-    from .goal_supervision import _name, _private, _public
-    decision = authorize(root, action, principal, task_id=task_id, operation_id=operation_id)
-    path = Path(root) / 'goal-supervision' / (_name(thread) + '.json')
-    receipt = None
-    if path.exists():
-        _private(path)
-        receipt = json.loads(path.read_text())
-        if receipt.get('thread_id') != thread:
-            raise PermissionDenied('permission_target_mismatch')
+    """Compatibility adapter for an authenticated operator disable request."""
     if action!='enforcement.disable':
         raise PermissionDenied('recovery_requires_qualified_command')
-    result=dict(state='held',armed=False,effect_attempted=False,permission=decision,
-        capability='unsupported',
-        readiness='stop_latched' if receipt and receipt.get('stop_latched') else 'not_observed',
-        reason='enforcement_disable_unsupported',
-        next_action='Keep existing safety enforcement active; disabling is not implemented by this policy check.')
-    if receipt is not None:
-        result['campaign'] = _public(receipt)
-    return result
+    from .goal_governance import change
+    return change(root,thread,enabled=False,principal=principal)
 
 
 def describe(root, thread, *, principal):
@@ -84,18 +69,18 @@ def describe(root, thread, *, principal):
         return None
     actions = ('enforcement.enroll', 'enforcement.increase', 'enforcement.disable', 'enforcement.recover')
     return {action: store.evaluate(action, principal, target=thread,
-        capability='unsupported' if action=='enforcement.disable' else 'supported',
+        capability='supported',
         readiness='not_observed') for action in actions}
 
 
 def tool_specs():
     from .harness_mcp import CALLER, TEXT
     result = {}
-    for verb in ('recover', 'disable'):
+    for verb in ('recover', 'disable', 'enable'):
         result['wake_goal_limits_' + verb] = ('goal-limits', verb,
             ('Recover an observation-fault stop only with explicit approval, repeated exact native observations, '
              'qualified accounting, fresh controller, same boot and original remaining resources. Does not resume the goal or renew limits.'
-             if verb=='recover' else 'Check explicit disable authority; disabling runtime enforcement remains unsupported.'),
+             if verb=='recover' else ('Consume only the exact native operator message Reactivate governor.' if verb=='enable' else 'Consume only the exact native operator message Deactivate governor. Models cannot self-authorize. Works without watcher; does not resume or renew.')),
             dict(caller_thread_id=CALLER, allocation_id=TEXT, task_id=TEXT,
                  assignment_id=TEXT, operation_id=TEXT), ['caller_thread_id'], False)
     return result
@@ -137,9 +122,10 @@ def mcp_call(runner, verb, arguments, native_context):
         return recover(root,runner.goal_limits_policy,thread,principal=principal,
             task_id=arguments.get('task_id'),operation_id=arguments.get('operation_id'),
             allocation_id=arguments.get('allocation_id'))
-    if verb=='disable':
-        return diagnostic(root, thread, 'enforcement.' + verb, principal=principal,
-                          task_id=arguments.get('task_id'), operation_id=arguments.get('operation_id'))
+    if verb in ('disable','enable'):
+        from .goal_governance import change
+        return change(root, thread, enabled=verb=='enable', native_context=native_context,
+                      allocation_id=arguments.get('allocation_id'))
     options = {k: v for k, v in arguments.items() if k not in ('assignment_id',)}
     return enroll(root, runner.goal_limits_policy, native_context=native_context,
                   permission_principal=principal, **options)
@@ -195,7 +181,7 @@ def main():
         packet=json.loads(raw)
         runner=SimpleNamespace(**{k:Path(v) if v is not None else None for k,v in packet['runner'].items()})
         value=mcp_call(runner,packet['verb'],packet['arguments'],packet['native_context'])
-        failed=packet['verb']!='show' and value.get('state') not in ('armed','checkpoint_requested')
+        failed=packet['verb'] not in ('show','disable','enable') and value.get('state') not in ('armed','checkpoint_requested','inactive')
     except (ValueError,OSError,KeyError,TypeError,WakeError) as exc:
         from .goal_readiness import explain_error
         value=explain_error(exc)

@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 from datetime import datetime, timezone
 
-KINDS = frozenset(('activation', 'engagement', 'checkpoint', 'stop', 'recovery'))
+KINDS = frozenset(('activation', 'engagement', 'checkpoint', 'stop', 'recovery', 'deactivation', 'reactivation'))
 _EVENT = re.compile(r'notice_[a-f0-9]{64}')
 
 
@@ -75,7 +75,7 @@ def record_notice(root, receipt, kind, *, controller=None):
         receipt=dict(receipt,active_stop_id=recovery['stop_episode_id'],reason=recovery['reason'])
     identity = dict(thread_id=receipt['thread_id'], allocation_id=receipt['allocation_id'],
         generation=receipt['generation'], enrollment_revision=receipt.get('enrollment_revision', 1),
-        kind=kind)
+        kind=kind,governor_revision=receipt.get('governor_revision',0))
     if kind in ('stop', 'recovery'):
         identity.update(stop_episode=receipt.get('active_stop_id') or receipt.get('stop_episode_id') or
             [stop.get('boot_id'), stop.get('observed_boottime'), receipt.get('pause_epoch', 0)],
@@ -120,6 +120,16 @@ def render_notice(event):
     usage = f'{used:,} of {limit:,}' if type(used) is int and type(limit) is int else 'usage unavailable'
     remaining = f'{max(0, limit-used):,}' if type(used) is int and type(limit) is int else 'unknown'
     kind = identity['kind']
+    if kind in ('deactivation','reactivation'):
+        text=('Governor inactive. Drop stale governor checkpoint/stop instructions. Independent platform controls remain. '
+              'Say "Reactivate governor" to enable sampled stopping. ' if kind=='deactivation' else
+              'Governor reactivated. Mode sampled_stop; maximum overshoot is not bounded. Say "Deactivate governor" to disable. ')
+        text += (f"Governor revision {identity.get('governor_revision',0)} supersedes older notices; latest durable scope state is authoritative. "
+                 f"Scope {identity['allocation_id']}; session {identity['thread_id']}. "
+                 'Accounting and checkpoints preserved; no resource renewal or work resume. '
+                 f"At {event.get('recorded_at','unknown')}. [External supervision event {event['event_id']}]")
+        if len(text.encode())>768:raise ValueError('governor notice exceeds native bound')
+        return text
     if kind == 'stop':
         title = 'Goal paused' if event['proof']['control']['stop_verified'] else 'Stop requested; interruption unverified'
     elif kind == 'checkpoint':
@@ -144,7 +154,7 @@ def render_notice(event):
         text += ('Extend allowance / Reset budget window / Keep stopped. '
             'Native /goal resume alone does not renew this external allowance. ')
     text += ('Mode sampled_stop; maximum overshoot is not bounded. '
-        'Deactivate governor: goal-limits disable. '
+        'Say "Deactivate governor". '
         f"At {event.get('recorded_at', 'unknown')}. " )
     return text + f"[External supervision event {event['event_id']}]"
 
@@ -220,6 +230,25 @@ def present_notice(root, event_id, *, adapter=None):
                 event['delivery']['last_error'] = type(error).__name__
             _save(path, event)
             return event
+        # Unsubmitted historical events still explain their original outcome,
+        # without presenting an old activation/stop as today's control choice.
+        # Never rewrite text after any append attempt (including an unknown one).
+        if event['delivery']['attempts']==0:
+            from .goal_governance import snapshot
+            current=snapshot(root,event['identity']['thread_id'])
+            if (current['state']=='available' and current['revision']!=event['identity'].get('governor_revision',0)):
+                event.setdefault('historical',dict(original_text=event['text']))
+                mode=current['mode']
+                identity=event['identity'];observed=event['snapshot']
+                event['text']=(f"Historical {identity['kind']} event: {observed.get('reason') or identity['kind']}; "
+                    f"usage {observed.get('used_tokens')}/{observed.get('token_limit')}. "
+                    f"Current governor revision {current['revision']} is {mode}. This historical delivery does not reactivate governance. "
+                    'Honor latest durable scope state; drop superseded governor instructions. Independent platform controls remain. '
+                    f"Scope {identity['allocation_id']}; session {identity['thread_id']}. "
+                    f"[External supervision event {event['event_id']}]")
+                if len(event['text'].encode())>768:
+                    raise ValueError('historical notice exceeds native bound')
+                _save(path,event)
         # The read-only lookup also qualifies support before append. Only this
         # positively unsubmitted path can return pending/unsupported and retry.
         try:
@@ -283,11 +312,12 @@ def run_presenter(root, stop):
 def governor_status(root, receipt):
     """Independent inspection exposes control state even if notice delivery fails."""
     status = dict(identity='Codex Wake governor', scope=receipt['allocation_id'],
-        mode='sampled_stop', maximum_token_overshoot=None,
-        controls=['Inspect governor', 'Deactivate governor', 'Keep stopped'],
+        mode='inactive' if receipt.get('governor_enabled',True) is False else 'sampled_stop',
+        enabled=receipt.get('governor_enabled',True), maximum_token_overshoot=None,
+        controls=['Inspect governor', 'Reactivate governor' if receipt.get('governor_enabled',True) is False else 'Deactivate governor', 'Keep stopped'],
         intervention=None)
     ids = receipt.get('notice_ids', {})
-    for kind in ('activation', 'engagement', 'checkpoint', 'stop', 'recovery'):
+    for kind in ('activation', 'engagement', 'checkpoint', 'stop', 'recovery', 'deactivation', 'reactivation'):
         event_id = ids.get(kind)
         if not event_id:
             continue

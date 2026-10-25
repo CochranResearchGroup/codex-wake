@@ -5,6 +5,9 @@ import time
 
 def engagement(receipt, controller):
     """Describe current proof without manufacturing a watcher or resource authority."""
+    if receipt.get('governor_enabled',True) is False:
+        return dict(status='inactive',engaged=False,enforcement='inactive',presentation='pending',
+            operator_read='unverified',next_action='Governor disabled by operator. Drop stale governor instructions; independent platform controls remain. No resources renewed or work resumed.')
     status = 'waiting_for_first_poll'
     action = 'Wait for the independent watcher to poll this enrollment; inspect goal-limits show.'
     accounting = receipt.get('accounting') or {}

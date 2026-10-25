@@ -9,7 +9,7 @@ from pathlib import Path
 def add_goal_limits_parser(subparsers):
     parser = subparsers.add_parser('goal-limits', help='supervise resource limits in an existing native session')
     commands = parser.add_subparsers(dest='goal_limits_command', required=True)
-    for name in ('set', 'show', 'readiness', 'diagnose', 'notices', 'recover', 'disable', 'watcher-status', 'start-watcher'):
+    for name in ('set', 'show', 'readiness', 'diagnose', 'notices', 'recover', 'disable', 'enable', 'watcher-status', 'start-watcher'):
         command = commands.add_parser(name, help='enroll limits' if name == 'set' else 'read enforcement evidence')
         command.add_argument('--policy', type=Path, required=True, help='private host-approved caller allocations')
         command.add_argument('--caller-thread-id', required=True)
@@ -55,7 +55,7 @@ def goal_limits_command(args, root):
         from .goal_supervision import enroll, show
         from .session_permissions import PermissionStore
         principal=None
-        if args.goal_limits_command!='prepare-maintenance' and (PermissionStore(root).active() or args.goal_limits_command in ('recover','disable','start-watcher')):
+        if args.goal_limits_command!='prepare-maintenance' and (PermissionStore(root).active() or args.goal_limits_command in ('recover','disable','enable','start-watcher')):
             from .permission_enforcement import cli_principal
             principal=cli_principal(args,root)
         if args.goal_limits_command in ('watcher-status','start-watcher'):
@@ -78,10 +78,9 @@ def goal_limits_command(args, root):
             from .goal_recovery import recover
             result=recover(root,args.policy,args.caller_thread_id,principal=principal,
                 task_id=args.task_id,operation_id=args.operation_id,allocation_id=args.allocation_id)
-        elif args.goal_limits_command=='disable':
-            from .permission_enforcement import diagnostic
-            result=diagnostic(root,args.caller_thread_id,'enforcement.'+args.goal_limits_command,
-                principal=principal,task_id=args.task_id,operation_id=args.operation_id)
+        elif args.goal_limits_command in ('disable','enable'):
+            from .goal_governance import change
+            result=change(root,args.caller_thread_id,enabled=args.goal_limits_command=='enable',principal=principal,allocation_id=args.allocation_id)
         else:
             result = enroll(root, args.policy, args.caller_thread_id,
                 args.token_limit, args.time_limit_seconds,
@@ -120,4 +119,4 @@ def goal_limits_command(args, root):
             print('Conversation presentation: '+readiness['presentation']+'; operator reading: unverified.')
         print(readiness['next_action'])
     else:print(json.dumps(result))
-    return 0 if args.goal_limits_command in ('show','readiness','diagnose','notices','watcher-status') or result.get('state') in ('armed', 'checkpoint_requested', 'prepared') or result.get('reason')=='watcher_running' else 2
+    return 0 if args.goal_limits_command in ('show','readiness','diagnose','notices','watcher-status','disable','enable') or result.get('state') in ('armed', 'checkpoint_requested', 'prepared','inactive') or result.get('reason')=='watcher_running' else 2
