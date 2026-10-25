@@ -33,3 +33,20 @@ are staged separately and do not replace the shared native daemon.
 Final formatting revision: `6115475dd95f6ffd525992bd5f98051d543a4c68`.
 Scoped Clippy fix/check and final formatter pass. Behavioral tests ran before
 those final formatting steps, as required by the native repository workflow.
+
+
+## Opt-in experiment policy
+
+The operator has approved experimenting with this bridge. Stock Codex remains
+the default; experimental binaries stay in a separate pinned prefix with their
+source commit, patch digest and executable digests recorded. Installing a newer
+stock release does not silently rebuild or activate an experimental runtime.
+
+For each future candidate, first inspect whether upstream now supplies the needed
+scope. If a patch is still needed, rebase it explicitly, build a fresh candidate,
+and repeat native scope/legacy-compatibility checks plus the owned two-conversation
+qualification. A clean patch application alone is not acceptance. Retain the last
+qualified candidate and stock executable for rollback; preserve all session goals,
+charges, deadlines and stop decisions. Shared-daemon activation is a separate
+rollout with its own acceptance evidence. Retire the bridge when an official
+runtime provides the required behavior.

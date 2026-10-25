@@ -122,3 +122,16 @@ binaries are pinned to a50f43518c; their installed-native/Wake probe also PASSES
 The earlier ab5ec6430c binary manifest is explicitly marked as requiring the
 legacy-read correction and must not be promoted. A fresh process census finds no
 owned fixture command-line survivors; all seven production snapshots still match.
+
+
+## Opt-in experiment2026-10-25T03:43:24Z
+
+After explicit user approval to experiment, a fresh isolated run using the pinned
+installed nativea50f43518c and Wake0.21.2 PASSES in10.719s. Selected Wake upgrades
+to0.21.2 while the peer remains0.21.1; both native thread IDs and paused goals are
+unchanged. Zero model turns occur, exactly three toy startups are observed, and
+native/watcher/toy cleanup is terminal with no detected owned survivors. Receipt:
+user-scoped318-319/opt-in-experiment-20261025T034324Z/receipt.json.
+Stock Codex, the shared daemon and production campaigns were not changed. The
+experiment does not resolve the two broader native failures or refresh this
+requesting session. Upgrade/rollback discipline is recorded in patches/codex/README.md.

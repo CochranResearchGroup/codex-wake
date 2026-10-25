@@ -8136,3 +8136,13 @@ configuration correctly reports unsupported native scope. No current-session
 refresh, shared daemon restart, grant copying or production resource renewal.
 Memory disposition:forbidden (no user-authorized memory write). Evidence:
 docs/dev/evidence/hf06/318-scoped-refresh.md and user-scoped318-319 receipts.
+
+
+## 2026-10-25 — opt-in patched-runtime experiment
+
+User approved experimenting with the temporary native bridge. One isolated
+installed qualification PASSES in10.719s: selected Wake0.21.2, peer0.21.1, unchanged
+goals/thread IDs, zero model turns and completed owned-process cleanup. Stock
+runtime/shared daemon/production campaigns remain unchanged. Recorded the pinned
+candidate upgrade/rollback policy;318 remains open. Memory disposition:forbidden,
+because the user did not authorize a memory write.
