@@ -39,7 +39,10 @@ class ScopedRefreshTests(unittest.TestCase):
     def test_missing_thread_ownership_never_queues(self):
         self.scenario(wrong_cwd=True)
 
-    def scenario(self, unsupported=False, lost=False, stale=False, reset=False, wrong_cwd=False):
+    def test_active_goal_stays_active_without_reset_or_explicit_resume(self):
+        self.scenario(goal_active=True)
+
+    def scenario(self, unsupported=False, lost=False, stale=False, reset=False, wrong_cwd=False, goal_active=False):
         from websockets.sync.server import unix_serve
         from codex_wake.a2a_bus import BusStore
         with tempfile.TemporaryDirectory() as tmp:
@@ -50,7 +53,7 @@ class ScopedRefreshTests(unittest.TestCase):
             checkpoint.write_text(json.dumps(dict(source_thread_id=THREAD,objective='Same goal',
                 authority='user',next_packet='Continue',pending_obligations=[])))
             calls=[];state={'reloaded':False}
-            goal=dict(threadId=THREAD,objective='Same goal',createdAt=1,status='paused',
+            goal=dict(threadId=THREAD,objective='Same goal',createdAt=1,status='active' if goal_active else 'paused',
                 tokenBudget=100,tokensUsed=40,timeUsedSeconds=20,updatedAt=1)
             def dispatch(ws):
                 for message in ws:
@@ -132,6 +135,7 @@ class ScopedRefreshTests(unittest.TestCase):
                 effects=[params for method,params in calls if method=='thread/mcpServer/reload' and not params.get('dryRun')]
                 self.assertEqual(effects,[dict(threadId=THREAD)])
                 self.assertNotIn('config/mcpServer/reload',[method for method,_ in calls])
+                self.assertNotIn('thread/goal/set',[method for method,_ in calls])
                 self.assertFalse(any(params and params.get('threadId')==PEER for _,params in calls))
                 if not stale and not reset:
                     self.assertEqual(value['goal_before'],goal)
