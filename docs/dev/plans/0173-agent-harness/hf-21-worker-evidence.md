@@ -60,3 +60,24 @@ No installed, provider, production, dashboard, GitHub or memory effects. Shared
 registry integration and final combined review remain coordinator-owned. No
 worker review performed; global final review/remediation allowance preserved.
 Memory disposition: forbidden because the worker assignment prohibits writes.
+
+## Validation harness correction
+
+The initial pytest receipts above remain historical evidence only. Coordinator
+identified the repository's authoritative runner as unittest discovery, with no
+pytest dependency. Converted owned tests to unittest.TestCase and standard-library
+TemporaryDirectory, subTest, redirect_stdout and StringIO. Parameter cases remain
+covered as subtests. Removed owned principal-verifier mocks: adapter coverage now
+calls public execute with host Principal, and CLI coverage retains the real
+BusStore-issued operator capability for request, response and inspection without
+a feature validator. No dependency or shared-runner changes.
+
+Observed current validation:
+
+- `PYTHONPATH=src python3.11 -m unittest discover -s tests -p 'test_attention_queue*.py'`
+  — 10 test methods, parameter subtests included, OK (2.332s).
+- `PYTHONPATH=src python3.12 -m unittest discover -s tests -p 'test_attention_queue*.py'`
+  — 10 test methods, parameter subtests included, OK (1.643s).
+
+This corrects implementation validation only; no broad review or findings-remediation
+pass was performed or consumed.
