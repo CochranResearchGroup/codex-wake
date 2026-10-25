@@ -41,9 +41,9 @@ seams; primary alone adapts shared hooks. Final installed acceptance joins all l
 
 | Ticket | Owner | State | Dependencies | Evidence |
 | --- | --- | --- | --- | --- |
-| #344 | primary | running | common enrollment/permissions source present | pending |
-| #345 | /root/ticket345 | running | frozen event contract above | pending |
-| #346 | /root/ticket346 | running | common attention/permissions source present | pending |
+| #344 | primary | integrated | common enrollment/permissions source present | pending |
+| #345 | /root/ticket345 | integrated | frozen event contract above | pending |
+| #346 | /root/ticket346 | integrated | common attention/permissions source present | pending |
 | #343 | primary | pending | all three validated + installed journey | pending |
 
 Worker result requires exact base/result SHA, changed paths, red/green commands,
@@ -62,3 +62,37 @@ Worker handles: /root/ticket345 (feat/345-goal-notices) and /root/ticket346
 Manual meter note: get_goal still reports blocked historical counters despite
 explicit resume, so its44,278/151 values are stale; use UTC hard stop plus local
 native telemetry if available, and do not claim fresh watcher accounting.
+
+## Checkpoint 2026-10-25T04:54Z
+
+Progress classification: outcome_progress; all three source modules integrated.
+Primary readiness3768270, notice worker8012989 integrated19b6db4 plus3953528 hooks,
+renewal workerdf6f145 integratedb5760ea plus5fc32c4 hooks. Worker346 successor
+2c864ae integrated3c9230d qualifies isolated installed CLI/MCP with injected native
+protocol: extension100spent/100to150total, exact authentic operator response,
+first-poll resume, reset0window/100lifetime, unchanged peer, zero external providers.
+Receipt and final OS process census in goal-renewal-installed.md.
+
+Native worker345 owns fix/345-no-turn-notices in separate native checkout. Pinned
+experimental71620df server (development build) plus stock0.164 frontend proves
+actual rendered stop, busy owned shell task, exact interrupt, reconnect once,
+model context and unchanged peer with no model/provider turns. Receipt is
+345-native-render-3 under user-scoped goal-limit-ux evidence. This is presenter
+qualification, not the full watcher journey.
+
+The full real watcher/native/frontend join has NOT passed: actual new native
+response wrote display token_count but no response-level token_usage_record.
+Wake correctly refuses first_usage_unavailable. Failed owned attempts and cleanup
+are retained in goal-native-ux-journey.md. No synthetic accounting or policy
+weakening is permitted; native worker is qualifying the writer prerequisite.
+
+Comprehensive Python selection at3953528 completed exit0/603.752s in isolated
+XDG roots. Later source changes during the run mean this receipt alone is not
+proof of the final exact tip; affected checks and a frozen final join remain.
+Do not repeat unmodified tests merely to get green. First failures remain retained.
+
+All tickets remain open. No broad review/remediation has run (0/1 each). Required
+next join is actual watcher engagement/stop plus approved renewal on qualified
+native accounting, then requirement-by-requirement closure, one review and one
+bounded TDD remediation. Manual meter04:51Z692,026fresh tokens across3agents;
+no production watcher/service/daemon or allowance changed.
