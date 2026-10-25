@@ -345,6 +345,7 @@ class AttentionQueue:
                 fingerprint=row['fingerprint'], approval=approval)
             row['status'] = 'closed' if row['request']['kind'] == 'notice' else 'responded'
             self._event(row, 'responded', principal, response_id=row['response']['response_id'])
+            row['response']['at'] = row['history'][-1]['at']
             return _copy(row)
 
     def consume(self, principal, request_id, *, expected_revision, expected_fingerprint):

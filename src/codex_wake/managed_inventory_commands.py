@@ -174,6 +174,10 @@ def register_parser(subparsers):
                                  help='exact runtime/namespace/conversation selections')
     from .agent_observation_commands import register_parser as register_observation
     register_observation(commands)
+    from .operator_overview_commands import register_parser as register_overview
+    register_overview(commands)
+    from .agent_resume_commands import register_parser as register_resume
+    register_resume(commands)
     return parser
 
 
@@ -182,6 +186,12 @@ def run(args, root, *, native_context=None, observer=None):
     from pathlib import Path
     try:
         action = args.agents_command
+        if action in ('overview', 'focus'):
+            from .operator_overview_commands import run as overview_command
+            return overview_command(args, root)
+        if action == 'resume':
+            from .agent_resume_commands import run as resume_command
+            return resume_command(args, root)
         if action in ('observe', 'wait'):
             from .agent_observation_commands import run as observe_command
             return observe_command(args, root)

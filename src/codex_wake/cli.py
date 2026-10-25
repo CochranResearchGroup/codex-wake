@@ -114,6 +114,16 @@ def build_parser() -> argparse.ArgumentParser:
     register_managed_agents(subparsers)
     from .resource_claim_commands import register_parser as register_resources
     register_resources(subparsers)
+    from .attention_commands import register_parser as register_attention
+    register_attention(subparsers)
+    from .work_acceptance_commands import register_parser as register_acceptance
+    register_acceptance(subparsers)
+    from .background_job_commands import register_parser as register_jobs
+    register_jobs(subparsers)
+    from .tab_organization_commands import register_parser as register_tabs
+    register_tabs(subparsers)
+    from .guarded_interaction_commands import register_parser as register_interactions
+    register_interactions(subparsers)
     from .a2a_cli import add_a2a_parser
     add_a2a_parser(subparsers)
     from .messages_cli import add_messages_parser
@@ -2800,6 +2810,35 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
             return lifecycle_command(args, root)
         from .sessions_cli import sessions_command
         return sessions_command(args)
+    if args.command == 'acceptance':
+        from .work_acceptance_commands import run as acceptance_command
+        return acceptance_command(args, root)
+    if args.command == 'attention':
+        from .attention_commands import run as attention_command
+        return attention_command(args, root)
+    if args.command == 'tabs':
+        from .tab_organization_commands import run as tabs_command
+        return tabs_command(args, root)
+    if args.command == 'interactions':
+        from .guarded_interaction_commands import run as interactions_command
+        return interactions_command(args, root)
+    if args.command == 'jobs':
+        from .background_job_commands import jobs_command
+        register = None
+        principal = None
+        if args.job_command == 'await':
+            from .permission_commands import verified_cli_principal
+            from .background_jobs import BackgroundJobs
+            from .session_permissions import Principal
+            from .permission_enforcement import verified_tasks
+            principal = verified_cli_principal(args)
+            pin = BackgroundJobs(root).inspect(args.job_id)['intent']['profile']['command']['task_pin']
+            if principal.role != 'operator':
+                principal = Principal(principal.subject, tasks=verified_tasks(root, principal.subject,
+                    pin['task_id'], pin['assignment_id'], actor_id=getattr(args, 'permission_actor_id', None)))
+            from .frontier_mcp import job_awaiter
+            register = job_awaiter(root, args.app_server, principal)
+        return jobs_command(args, root, principal=principal, register_wake=register)
     if args.command == 'resources':
         from .resource_claim_commands import run as resources_command
         return resources_command(args, root)

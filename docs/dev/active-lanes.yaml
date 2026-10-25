@@ -771,3 +771,18 @@ lanes:
     reconciled_overlaps: [P172-MR04]
     updated_at: 2026-10-22
     disposition: worker packet retained; primary CLI/MCP integration and accepted artifact are on coordinator ef8b5b4; not a merge-ready packet ref
+
+  - id: P173-NEXT-FRONTIER
+    owner: primary / ecochran76
+    objective: Source acceptance for HF05 HF08 HF14 HF16 HF18 HF21 HF27
+    work_items: [334, 335, 336, 337, 338, 339, 340]
+    plan: docs/dev/plans/0173-agent-harness/next-frontier-execution-ledger.md
+    branch: feat/harness-next-frontier
+    target: origin/main
+    integration: review_pr
+    plan_state: IN_PROGRESS
+    custody_state: LOCAL_CHECKPOINT
+    dependencies: [HF02, HF03, HF04, HF06, HF07, HF13]
+    overlaps: [feat/harness-observation-ownership, feat/harness-frontier]
+    updated_at: 2026-10-24
+    disposition: Seven disjoint worker packets reconciled; primary owns CLI/MCP and acceptance; CI explicitly skipped; main and production unchanged

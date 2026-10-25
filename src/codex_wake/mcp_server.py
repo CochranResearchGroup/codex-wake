@@ -129,6 +129,10 @@ for _verb in ('after','at','file'):
 
 from .harness_mcp import tool_specs as harness_tool_specs
 SPECS.update(harness_tool_specs())
+from .frontier_mcp import tool_specs as frontier_tool_specs
+SPECS.update(frontier_tool_specs())
+from .agent_resume_commands import tool_specs as resume_tool_specs
+SPECS.update(resume_tool_specs())
 from .permission_enforcement import tool_specs as enforcement_tool_specs
 SPECS.update(enforcement_tool_specs())
 for _name in ('wake_goal_limits_set','wake_goal_limits_show'):
@@ -218,12 +222,22 @@ class CommandRunner:
         if name not in SPECS:
             return {"error": {"code": "unknown_tool", "message": "Unknown tool."}}, True
         group, verb, _, properties, required, readonly = SPECS[name]
-        if self.actor_runtime == 'grok' and group not in ('messages','grok','agents','agent-state','resources'):
+        if self.actor_runtime == 'grok' and group not in ('messages','grok','agents','agent-state','resources','frontier'):
             return {'error':{'code':'native_caller_attestation_unavailable'}}, True
         schema = {"type": "object", "additionalProperties": False,
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        if group == 'frontier':
+            try:
+                from .frontier_mcp import call as frontier_call
+                return frontier_call(self, verb, arguments, native_context), False
+            except (WakeError, ValueError, TypeError, KeyError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'frontier_operation_held'), 'message': 'Harness operation or qualified evidence is unavailable.'}}, True
+        if group == 'agents' and verb == 'resume':
+            from .agent_resume_commands import mcp_call
+            result = mcp_call(self, arguments, native_context)
+            return result, result.get('status') != 'resumed'
         if group == 'permissions':
             if self.wake_root is None:
                 return {'error': {'code':'permission_host_root_required'}},True

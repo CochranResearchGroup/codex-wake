@@ -151,3 +151,32 @@ class WorkAcceptanceTests(unittest.TestCase):
         for path in (self.root / 'task-briefs').glob('*.json'):
             path.unlink()
         self.assertEqual(self.owner.evaluate('missing', authority=self.authority, principal=self.principal)['status'], 'unknown')
+
+    def test_executable_cli_and_native_mcp_share_approved_contract(self):
+        import contextlib
+        import io
+        import json
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.cli import run
+        from codex_wake.mcp_server import CommandRunner
+        bus, capability = BusStore.configure(Path(self.tmp.name) / 'caller-bus')
+        path = Path(self.tmp.name) / 'hub-checks.json'
+        path.write_text(json.dumps(self.checks))
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = run(['--wake-root', str(self.root), 'acceptance', 'define', '--contract-id', 'hub',
+                '--task-id', 'task', '--assignment-id', 'assignment', '--checks-file', str(path),
+                '--bus-root', str(bus.root), '--operator-capability', str(capability), '--json'])
+        self.assertEqual(code, 0, output.getvalue())
+        thread = '00000000-0000-7000-8000-000000000335'
+        delegation = Path(self.tmp.name) / 'delegation.json'
+        delegation.write_text(json.dumps(dict(version=1, controllers={thread: ['task']})))
+        delegation.chmod(0o600)
+        meta = dict(threadId=thread, sessionId=thread, callId='acceptance',
+            **{'x-codex-turn-metadata': dict(thread_id=thread, session_id=thread, turn_id='turn')})
+        runner = CommandRunner(wake_root=self.root, harness_policy=delegation)
+        value, failed = runner.call('wake_acceptance_evaluate', dict(caller_thread_id=thread, contract_id='hub'), native_context=meta)
+        self.assertFalse(failed, value)
+        self.assertEqual(value['status'], 'accepted')
+        denied, failed = runner.call('wake_acceptance_evaluate', dict(caller_thread_id=thread, contract_id='hub'))
+        self.assertTrue(failed, denied)

@@ -155,3 +155,33 @@ Private test fixtures configure their policies explicitly. Source-only actions:
 acceptance.verify, job.launch/cancel, attention.request/respond/consume,
 workspace.order/undo/navigate, terminal.menu/takeover/return. Inspect reuses
 session.inspect and resume consumes existing resume.self. Primary owns registry.
+
+## Seven-feature integration — outcome_progress
+
+All seven owned lanes delivered and were reconciled into feat/harness-next-frontier.
+HF05 includes final-source installed Grok1.0.40 isolated menu qualification,
+binding-generation custody and real legacy host input refusal; zero provider turns.
+HF08 exact artifacts, genuine claimed verifier processes and explicit decisions
+are independent of worker prose. HF14 uses owned bounded supervisors and the
+existing exact-owner native file wake; real MCP registration, firing once and
+authoritative task retirement are covered. HF16 preserves focused/manual/mixed
+windows with conditional apply/undo. HF18 retains exact conversation/profile and
+refuses uncertain/new-history recovery. HF21 has real CLI/MCP callers; a real-clock
+response/history timestamp regression found during integration was fixed. HF27
+qualifies repository identity and an actually attached tmux client before focus.
+
+Shared CLI and native MCP adapters now expose all seven features. Model tools
+cannot acquire operator menu input, takeover, tab mutation, attention response,
+or dashboard focus. Host scope, lifecycle profiles, authority and runtime
+observations remain independently verified. Resume.recover is explicit alongside
+resume.self; no old policy gains an action implicitly.
+
+Focused matrix:79 tests pass Python3.12(24.020s) and3.11(25.526s), including real
+private tmux/native protocol compatibility. Additional actual top-level attention
+callers(2) and exact-owner job-await callers(2) pass. One earlier test invocation
+named nonexistent test_agent_resume_commands; corrected to actual protocol module,
+with no product failure concealed. Full suite and installed artifact checks follow.
+The review fixed point is ff5911775eb54965454e664556fc96d53c5d3584, the validated
+prerequisite checkpoint proposed to the operator. Review0/1; final remediation0/1.
+CI skipped by explicit instruction. Main merge, release and production installs
+remain separate from these source-acceptance tickets.
