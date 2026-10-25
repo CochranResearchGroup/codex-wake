@@ -95,7 +95,7 @@ class BriefAuthority:
 def _brief(content):
     fields = {'objective', 'phase', 'non_goals', 'acceptance', 'context', 'workspace',
               'allocation_ref', 'permission_ref'}
-    if type(content) is not dict or set(content) != fields:
+    if type(content) is not dict or not fields <= set(content) or set(content) - fields - {'dispatch'}:
         raise TaskBriefError('invalid_argument', 'brief fields differ from version 1 contract')
     value = _copy(content)
     if len(_json(value).encode()) > MAX_BRIEF_BYTES:
@@ -121,7 +121,39 @@ def _brief(content):
             raise TaskBriefError('invalid_argument', 'context paths must be canonical within the workspace')
         if type(ref['required']) is not bool or type(ref['sha256']) is not str or not _SHA256.fullmatch(ref['sha256']):
             raise TaskBriefError('invalid_argument', 'context reference requires a digest and required flag')
+    if 'dispatch' in value:
+        _dispatch(value['dispatch'], value['context'])
     return value
+
+
+def _dispatch(options, context):
+    if type(options) is not dict or set(options) - {'stop_conditions', 'evidence_summaries', 'history'}:
+        raise TaskBriefError('invalid_argument', 'dispatch options are invalid')
+    stops = options.get('stop_conditions', [])
+    if type(stops) is not list or len(stops) > 32:
+        raise TaskBriefError('invalid_argument', 'dispatch stop conditions must be bounded')
+    for stop in stops:
+        _text(stop, 'stop condition')
+    summaries = options.get('evidence_summaries', [])
+    if type(summaries) is not list or len(summaries) > 16:
+        raise TaskBriefError('invalid_argument', 'dispatch summaries must be bounded')
+    from .records import parse_timestamp
+    sources = {ref['path']: ref for ref in context}
+    for summary in summaries:
+        if (type(summary) is not dict or set(summary) != {'path', 'summary', 'observed_at', 'coverage', 'ambiguity'}
+                or type(summary.get('path')) is not str or summary['path'] not in sources):
+            raise TaskBriefError('invalid_argument', 'summary requires a raw context source and evidence caveats')
+        for key in ('summary', 'observed_at', 'coverage', 'ambiguity'):
+            _text(summary[key], key)
+        parse_timestamp(summary['observed_at'])
+    if 'history' in options:
+        history = options['history']
+        if (type(history) is not dict or set(history) != {'mode', 'reason', 'path'}
+                or history.get('mode') != 'full_history'
+                or type(history.get('path')) is not str
+                or not sources.get(history['path'], {}).get('required')):
+            raise TaskBriefError('invalid_argument', 'full history requires a reason and a required context source')
+        _text(history['reason'], 'task-specific full-history reason')
 
 
 def _verify_context(content):

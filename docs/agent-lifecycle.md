@@ -84,6 +84,11 @@ admits a bounded initial assignment only after its exact client is ready. Use
 `sessions open` for attachment without task delivery. Tab creation, task
 admission and completed execution have separate receipt evidence.
 
+New assignments use a [compact bounded packet](task-briefs.md#compact-delegated-dispatch),
+including plain `--task` launches. Inspect `dispatch` for input byte size/hash and
+`execution.output_summary` for bounded native output metadata. Packet snapshots
+never replenish allowance or override current operator controls.
+
 The operator supplies a host launch registry, an existing approved workspace,
 an existing owned app-server socket and tmux session. The workspace must already
 be trusted in the selected Codex home. Example registry:

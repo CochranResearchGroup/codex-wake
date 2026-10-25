@@ -342,6 +342,8 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     elif method=='thread/queue/list':value={'data':[queue[tid]] if tid in queue else [],'nextCursor':None}
                     elif method=='thread/queue/start':
                         q=queue.pop(tid);task=q['input'][0]['text']
+                        if task.startswith('BOUNDED_ASSIGNMENT='):
+                            task=json.loads(task.split('BOUNDED_ASSIGNMENT=',1)[1])['instructions']
                         contract=json.loads(task.split('PREFLIGHT_CONTRACT=',1)[1].split('\n',1)[0])
                         corrected='CORRECTION_PACKET=' in task
                         if corrected:

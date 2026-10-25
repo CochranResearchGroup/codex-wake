@@ -63,6 +63,9 @@ def spawn_command(args, root):
         if not isinstance(replacement,dict) or not replacement.get('source_thread_id') or not isinstance(replacement.get('attachment'),dict):
             raise WakeError('same-tab spawn requires an exact source attachment')
         intent['replacement']=replacement
+    approved = None
+    pin = None
+    admission = None
     task_id = getattr(args, 'task_id', None)
     assignment_id = getattr(args, 'assignment_id', None)
     carried_pin = getattr(args, 'task_brief_pin', None)
@@ -81,7 +84,9 @@ def spawn_command(args, root):
                       if args.caller_thread_id else BriefAuthority('operator:local-cli', 'operator'))
             briefs.admit(task_id, assignment_id, authority=caller, revision=brief_revision)
             pin = briefs.assignment_pin(task_id, assignment_id, authority=caller)
-        approved = briefs.inspect(pin['task_id'])['revisions'][pin['revision'] - 1]['content']
+        brief_state = briefs.inspect(pin['task_id'])
+        approved = brief_state['revisions'][pin['revision'] - 1]['content']
+        admission = next(item for item in brief_state['admissions'] if item['assignment_id'] == pin['assignment_id'])
         if Path(approved['workspace']).resolve() != Path(profile['cwd']).resolve():
             raise WakeError('approved task brief workspace differs from the launch profile')
         if approved['permission_ref'] != args.profile:
@@ -91,14 +96,22 @@ def spawn_command(args, root):
             if approved['allocation_ref'] != objective_identity(binding['continuation']):
                 raise WakeError('approved task brief allocation differs from the existing objective')
         intent['task_brief'] = pin
-        intent['task'] = ('Assignment instructions, subject to the approved task brief:\n' + args.task
+    legacy_intent = dict(intent)
+    if approved is not None:
+        legacy_intent['task'] = ('Assignment instructions, subject to the approved task brief:\n' + args.task
             + '\n\nAPPROVED_TASK_BRIEF=' + json.dumps(dict(pin=pin, content=approved), sort_keys=True))
-        if len(intent['task'].encode()) > 65536:
-            raise WakeError('rendered task brief and instructions exceed the bounded assignment input')
-    fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     journal = Path(root) / 'lifecycle'
     key = hashlib.sha256(args.intent.encode()).hexdigest()
     path = journal / (key + '.json')
+    previous = json.loads(path.read_text()) if path.exists() else None
+    legacy_fingerprint = hashlib.sha256(json.dumps(legacy_intent, sort_keys=True).encode()).hexdigest()
+    if previous and 'dispatch' not in previous and previous['fingerprint'] == legacy_fingerprint:
+        intent, dispatch = legacy_intent, None
+    else:
+        from .dispatch_packet import render_assignment
+        intent['task'], dispatch = render_assignment(intent, root=root, brief=approved, pin=pin,
+                                                    admission=admission, receipt_path=path)
+    fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
     if not path.exists() and 'strict_execution' not in profile:
         endpoint=profile['app_server']
         try:
@@ -115,10 +128,13 @@ def spawn_command(args, root):
         if path.exists():
             receipt = json.loads(path.read_text())
             if receipt['fingerprint'] != fingerprint:
-                raise WakeError('intent key already binds a different lifecycle assignment')
+                # Historical admission stays byte-for-byte stable across upgrades.
+                legacy_fingerprint = hashlib.sha256(json.dumps(legacy_intent, sort_keys=True).encode()).hexdigest()
+                if 'dispatch' in receipt or receipt['fingerprint'] != legacy_fingerprint:
+                    raise WakeError('intent key already binds a different lifecycle assignment')
         else:
             receipt = dict(version=1, intent_key=args.intent, fingerprint=fingerprint,
-                           intent=intent, state='prepared', thread_id=None)
+                           intent=intent, state='prepared', thread_id=None, dispatch=dispatch)
             if permission_receipt:
                 receipt['permission_context']=permission_receipt['permission_context']
             if not binding:receipt['budget_mode']='explicit_expiry_only_legacy_profile'

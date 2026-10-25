@@ -68,6 +68,32 @@ class TaskBriefLifecycleTests(unittest.TestCase):
         self.assertEqual(repeated['intent']['task_brief']['revision'], 1)
         self.assertNotIn('New approved objective', repeated['intent']['task'])
 
+    def test_preexisting_spawn_intent_keeps_original_assignment_on_upgrade(self):
+        endpoint = socket.socket(socket.AF_UNIX)
+        endpoint.bind(str(self.endpoint))
+        self.addCleanup(endpoint.close)
+        args = self.spawn_args()
+        def invoke():
+            output = StringIO()
+            with redirect_stdout(output), patch('codex_wake.native_clock.snapshot',
+                    return_value={'utc': {'lower': 1893456001, 'upper': 1893456002}}):
+                self.assertEqual(spawn_command(args, self.root), 5)
+            return json.loads(output.getvalue())
+        saved = invoke()
+        # Persisted version-1 fixture from the previous public spawn format.
+        original = ('Assignment instructions, subject to the approved task brief:\n' + args.task
+            + '\n\nAPPROVED_TASK_BRIEF=' + json.dumps(dict(pin=saved['intent']['task_brief'],
+                content=self.content), sort_keys=True))
+        saved['intent']['task'] = original
+        saved.pop('dispatch')
+        saved['fingerprint'] = hashlib.sha256(json.dumps(saved['intent'], sort_keys=True).encode()).hexdigest()
+        path = self.root / 'lifecycle' / (hashlib.sha256(args.intent.encode()).hexdigest() + '.json')
+        path.write_text(json.dumps(saved))
+        self.assertEqual(invoke()['intent']['task'], original)
+        args.task = 'A different assignment'
+        with self.assertRaisesRegex(WakeError, 'different lifecycle assignment'):
+            invoke()
+
     def test_unapproved_brief_cannot_reach_spawn_journal(self):
         self.store.propose('task-2', self.content, authority=self.operator)
         args = self.spawn_args()
