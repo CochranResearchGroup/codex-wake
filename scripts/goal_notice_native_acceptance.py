@@ -113,7 +113,8 @@ trust_level = "trusted"
             receipt = dict(thread_id=thread_id,allocation_id='owned-presentation',generation='owned-window',
                 state='stopped',reason='allocation_exhausted',used_tokens=100000,token_limit=100000,
                 token_accounting='fresh',deadline=time.time(),stop_turns=[work_turn],stop_proof=True,
-                grant=dict(app_server=endpoint,codex_path=str(frontend),rpc_timeout=15))
+                grant=dict(app_server=endpoint,codex_path=str(frontend),codex_home=str(home),
+                    allocation_id='owned-presentation',max_tokens=100000,max_seconds=600,rpc_timeout=5))
             _save(_directory(wake_root)/(_name(thread_id)+'.json'),receipt)
             notice = record_notice(wake_root,receipt,'stop')
             native_adapter = NativeNoticeAdapter(wake_root)
@@ -150,6 +151,25 @@ trust_level = "trusted"
             assert rpc('thread/goal/get', threadId=thread_id)['goal']['status'] == 'paused'
             report.update(deactivation_rendered=True, deactivation_model_context=True,
                 deactivation_retained=True, deactivation_resumed_nothing=True)
+            from codex_wake.goal_host_preflight import inspect_host
+            policy = wake_root/'preflight-policy.json'
+            _save(policy, dict(version=1, callers={thread_id: receipt['grant']}))
+            profile = dict(cwd=str(root), app_server=endpoint, codex_path=str(frontend),
+                codex_home=str(home), timeout=15, tmux_session='notice', governance_preflight=dict(
+                    policy=str(policy), thread_id=thread_id, requested_mode='sampled_stop'))
+            first_preflight = inspect_host(wake_root, profile, thread_id)
+            assert first_preflight['mode'] == 'inactive', first_preflight
+            assert first_preflight['static']['cache'] == 'created', first_preflight
+            assert first_preflight['static']['capabilities']['notice_read'] == 'supported'
+            reused_preflight = inspect_host(wake_root, profile, thread_id)
+            assert reused_preflight['static']['cache'] == 'reused', reused_preflight
+            profile['governance_preflight']['requested_mode'] = 'hard_admission'
+            unsupported = inspect_host(wake_root, profile, thread_id)
+            assert unsupported['admitted'] is False and unsupported['reason'] == 'hard_admission_unsupported'
+            (output/'host-preflight.json').write_text(json.dumps(dict(first=first_preflight,
+                reused=reused_preflight, unsupported=unsupported), indent=2)+'\n')
+            report.update(preflight_real_peer_identified=True, preflight_reused=True,
+                preflight_inactive_preserved=True, preflight_no_hardcap_claim=True)
             duplicate = rpc('thread/notice/append' ,threadId=thread_id,eventId=event_id,text=text)
             assert duplicate['alreadyRecorded'] is True and duplicate['notificationPublished'] is False, duplicate
             retained = rpc('thread/notice/read',threadId=thread_id,eventId=event_id)

@@ -24,7 +24,7 @@ def _digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
 
-def _file(path, maximum=256 * 1024 * 1024):
+def _file(path, maximum=2 * 1024 * 1024 * 1024):
     path = Path(path).resolve(strict=True)
     with path.open('rb') as stream:
         info = os.fstat(stream.fileno())
