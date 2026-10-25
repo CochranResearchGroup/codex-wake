@@ -1,6 +1,23 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P173-GOAL-UX
+    owner: primary / ecochran76
+    objective: Implement visible goal supervision and approved renewal
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/343, https://github.com/CochranResearchGroup/codex-wake/issues/344, https://github.com/CochranResearchGroup/codex-wake/issues/345, https://github.com/CochranResearchGroup/codex-wake/issues/346]
+    plan: docs/dev/plans/0173-agent-harness/goal-limit-ux-execution.md
+    plan_ref: feat/goal-limit-ux-implementation
+    branch: feat/goal-limit-ux-implementation
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    checkpoint: e181d28
+    integration: squash_pr
+    dependencies: [P173-NEXT-FRONTIER]
+    overlaps: [P173-NEXT-FRONTIER]
+    reconciled_overlaps: [P173-NEXT-FRONTIER]
+    updated_at: 2026-10-25
+    disposition: Isolated source pinned at16c2501; independent UX files and primary-owned shared integration; no production effects
   - id: P173-HF03
     owner: primary / ecochran76
     objective: Implement observation and ownership frontier issue 330

@@ -1,6 +1,7 @@
 # Visible and actionable goal-limit supervision
 
-State: READY. Owner: primary / ecochran76. Implementation: not started.
+State: OPEN. Owner: primary / ecochran76. Implementation: in progress.
+Execution evidence: goal-limit-ux-execution.md. Acceptance below is unchanged.
 Parent: #343. Slices: #344 engagement; #345 visible stop; #346 extend/reset.
 Authority: operator request2026-10-25; existing native-supervision ADR and Plan0167;
 common session permissions; HF-21 common human-attention contract (#339).

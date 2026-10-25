@@ -42,8 +42,8 @@ seams; primary alone adapts shared hooks. Final installed acceptance joins all l
 | Ticket | Owner | State | Dependencies | Evidence |
 | --- | --- | --- | --- | --- |
 | #344 | primary | running | common enrollment/permissions source present | pending |
-| #345 | worker to assign | pending | frozen event contract above | pending |
-| #346 | worker to assign | pending | common attention/permissions source present | pending |
+| #345 | /root/ticket345 | running | frozen event contract above | pending |
+| #346 | /root/ticket346 | running | common attention/permissions source present | pending |
 | #343 | primary | pending | all three validated + installed journey | pending |
 
 Worker result requires exact base/result SHA, changed paths, red/green commands,
@@ -56,3 +56,9 @@ Isolated integration checkout established. Frontier prerequisite source reused;
 conflicting runbook additions both preserved. Policy wiring and diff checks pass.
 #319 recovery/native #318 work is separate; do not claim it is installed here.
 No tickets are closed, no UX runtime is installed, no presentation is yet proved.
+
+Worker handles: /root/ticket345 (feat/345-goal-notices) and /root/ticket346
+(feat/346-goal-renewal); base e181d28, separate owned sibling worktrees.
+Manual meter note: get_goal still reports blocked historical counters despite
+explicit resume, so its44,278/151 values are stale; use UTC hard stop plus local
+native telemetry if available, and do not claim fresh watcher accounting.
