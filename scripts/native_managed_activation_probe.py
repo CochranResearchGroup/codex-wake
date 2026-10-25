@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only managed-CLI compatibility preflight; never installation acceptance."""
+"""Probe only modern update/from-cli support; never an overall activation oracle."""
 
 import argparse
 import hashlib
@@ -27,9 +27,11 @@ def probe(executable):
             command, env=environment, capture_output=True, text=True, timeout=10
         )
         output = result.stdout + result.stderr
+        with executable.open("rb") as binary:
+            digest = hashlib.file_digest(binary, "sha256").hexdigest()
         return dict(
             executable=str(executable),
-            sha256=hashlib.sha256(executable.read_bytes()).hexdigest(),
+            sha256=digest,
             command=command,
             returncode=result.returncode,
             output=output[:16000],
@@ -48,7 +50,7 @@ def main():
     verdict = (
         "PASS_INTERFACE_ONLY"
         if candidate["managed_update_interface"]
-        else "BLOCKED_MANAGED_INTERFACE"
+        else "MODERN_UPDATE_INTERFACE_UNAVAILABLE"
     )
     if not reference["managed_update_interface"]:
         verdict = "INVALID_REFERENCE"
@@ -56,6 +58,7 @@ def main():
         verdict=verdict,
         reference=reference,
         candidate=candidate,
+        route="modern_update_from_cli",
         installation_attempted=False,
         live_daemon_touched=False,
         feature_acceptance=False,

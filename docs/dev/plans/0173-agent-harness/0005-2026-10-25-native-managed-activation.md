@@ -8,9 +8,11 @@ Base: origin/main ce1ad93
 
 ## Current State
 
-Wake0.22.0.dev0 is deployed; managed Codex remains0.164.0. Qualified source98d5
-and standalone native299artifact pass isolated feature checks but are not yet
-a managed installation. User authorized diagnosing the gap after merge/deploy.
+Wake0.22.0.dev0 is deployed; live managed Codex remains0.164.0. The completed
+98d5 CLI/helper bundle now passes isolated managed lifecycle, scoped refresh,
+notice RPC/history and functional candidate-to-stock rollback. Live activation
+has not occurred. Operator deployment-policy question Q1 is pending; no elapsed
+time or silence supplies that decision.
 
 ## Bounded scope
 
@@ -65,3 +67,73 @@ firstwrongstandaloneartifactRED, thenfullCLI. No bootstrap/updater/provider call
 Primary owns sourcepin, common plan, interfaceprobe and final reconciliation.
 Native CodeGraph initialization reported database locking; a focused explore
 subsequently returned current source. Explicit named-file fallback was used.
+
+FullCLI build GREEN820.239s, Cargo13m39, below900s bound; owned compiler process
+group gone, free165452382208bytes afterward. Private executable is cache/debug/codex
+from98d5. Modern update/from-cli preflight remains route-specific; actual legacy
+managed lifecycle will be the installation oracle. Existing qualifier's first
+actual lifecycle RED copied standalone299 into private fixed-path managed release:
+daemonstart refusedapp-server argument,5.85s, no owned survivors. Its namespace
+witness read initially encountered/proc/1 permission denial before daemonlaunch;
+fixture now uses an explicit outer namespace witness plus onlylo/zero-route proof.
+
+Source package also requires adjacent same-source codex-code-mode-host. Helper
+build and one existing real stdio/RPC test are separately bounded300s each with
+2jobs/cache serialization. No helper from stock0.164 is borrowed. Initial helper
+preflight objected only to the authorized generated .codegraph directory; source
+qualification is exactHEAD plus clean tracked changes, with that index preserved.
+
+Same-source helper build GREEN171.90s; existing namedstdio RPC test GREEN1selected,
+6excluded, execution0.072s/build+test96.78s. Test configuration rebuilt the helper:
+tested SHA74379f24916b0ad993757300b607b86c5ed7381255a1018fcec0da2e55c7f1c9
+supersedes build-onlyd16051. CLI SHA497a0ff8560e3870c24e40f4422db19bff969f26cb12c7fd35c768787e686c7b
+is unchanged. Immutable private bundle managed-98d5c6736a-20261025T213621Z stages
+those two exact binaries and manifest; no hostmanagedpath changed.
+
+The modern interface probe now labels its unavailable result route-specifically,
+rather than suggesting an overall installation blocker. Its earlier RED receipts
+remain unchanged. Actual private managed lifecycle+selectedrefresh+notice+functional
+stock rollback is the decisive oracle. Rollback must read both candidate threads
+and goals, retain selected notice marker and peerabsence, and preserve rawrollout
+hashes. No automatic resume is used to conceal a read failure.
+
+## Terminal diagnostic result
+
+Private managed attempt3 PASSES25.44s/zero model turns. Candidate executable
+497a0ff... and tested helper74379f... match the immutable98d5 source bundle.
+Selected toy changesv1→v2/newcatalog while peer remainsv1; exact3toy startups.
+Native notice append/read proves selectedcontext and peerabsence. Both goal
+snapshots remain unchanged. Actual stock0.164 package rollback start/version/stop
+reads both candidate-created conversations/goals, retains the exact notice and
+preserves rawrollout hashes. Owned daemons/toys and fresh host census are empty.
+Receipt SHA256:c85e36ae2c3a57387a9cb68418a095041653ae49ffecd1f4dd694426c7426c79.
+Canonical source report:native-managed-lifecycle-qualification.md.
+
+Retained failures are source/report qualified: wrongstandaloneartifactRED, long
+fixturepathSUN_LEN, and overstrictsynthetic-display-container classification.
+The final no-model-turn check accepts only the exact notice container with null
+timestamps and rejects unrelated rawtask/usage/model-request history. No history
+rewrite/resume workaround/nativecode change was used to obtain green.
+
+Primary carried worker e5251703 as957218c. Ruffcheck initially found inherited
+and new E701/E702 semicolon style. Primary formatting changes only syntax layout:
+AST identity is verified, exact tested script1d9d661... retained in userstate,
+formatted source53ed05e... passes Ruff/compile/diffcheck. No new behavior run is
+claimed from formatting; receipt qualification-format-reconciliation.json maps
+source hashes. Full native suite and new rendered-TUI proof were not repeated.
+Earlier standalone299 rendered-TUI evidence remains separate.
+
+## Deployment policy frontier
+
+Q1 asks whether to preserve the modern managed package/update mechanism and port
+the native changes to a matching base (recommended), or pin the qualified legacy
+runtime with controlled manual upgrades and stock rollback. The source repository
+contains explicit modern-update changefc269b66adc37f3c855df222ad80b02733355c46;
+its624added/78removed lines touch preparation/CLI/install tests, so missing update
+is a real lifecycle variant, not a single omitted build flag. This is only local
+source discovery, not qualification of that commit or an installed-source match.
+
+Private qualification does not prove live existing-stock-to-candidate migration
+or authorize replacing a concurrent user's active native work. Final current
+readback remains0.164.0 with all8retained campaign files unchanged. No further
+build, nativecode edit, updater effect or liveactivation while Q1 is pending.

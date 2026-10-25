@@ -111,3 +111,16 @@ runtime remain primary/operator decisions. No further builds or activation were
 performed after terminal qualification.
 
 Memory disposition: forbidden; this task did not authorize a memory write.
+
+## Primary reconciliation
+
+Carriede5251703 into957218c. Canonical receipt hash verified independently as
+c85e36ae2c3a57387a9cb68418a095041653ae49ffecd1f4dd694426c7426c79.
+Primary lint exposed inherited/new E701/E702 style in the qualification runner.
+Ruff formatting was applied and ASTs compared identical; exact tested script
+1d9d661ccd69fd5add1dee4a95638b8ac15647e0d845553fa2212bfedb5b0ba5
+is retained in associated userstate, formatted script
+53ed05e87886a0ba94cdabff48f5d0d6ffdd81969d320cc8e3ef1d509d63eb80
+passes Ruff/compile/diff checks. This formatting is not a new runtime proof.
+Live native0.164.0 and eight retained campaign files are unchanged. Deployment
+policy Q1 remains an operator choice; private managed qualification is complete.
