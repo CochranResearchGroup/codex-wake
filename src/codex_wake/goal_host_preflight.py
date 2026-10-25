@@ -133,7 +133,7 @@ def inspect_host(root, profile, caller):
         return result
     if options['requested_mode'] == 'hard_admission':
         if result['static'].get('capabilities', {}).get('notice_read') != 'supported':
-            result.update(reason='hard_host_notice_unqualified', message='Hard admission withheld: selected native host/notice qualification is unavailable. Existing authorized manual repair remains available; no downgrade or renewal occurred.')
+            result.update(reason='hard_admission_unsupported', qualification_failure='host_notice_unqualified', message='Hard admission withheld: selected native host/notice qualification is unavailable. Existing authorized manual repair remains available; no downgrade or renewal occurred.')
             return result
         try:
             from .request_admission import qualify_gateway
