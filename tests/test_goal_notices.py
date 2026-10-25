@@ -105,3 +105,30 @@ class GoalNoticeTests(unittest.TestCase):
             self.assertEqual(retained['delivery']['state'], 'unsupported')
             self.assertEqual(retained['delivery']['attempts'], 0)
             self.assertEqual(read_notice(root, event['event_id'])['event_id'], event['event_id'])
+
+    def test_temporary_read_failure_remains_retryable_without_submitting_notice(self):
+        from codex_wake.records import WakeError
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            receipt=dict(thread_id='00000000-0000-7000-8000-000000000001',
+                allocation_id='objective-1',generation='window-1',state='stopped',
+                reason='observation_unavailable',used_tokens=10,token_limit=100)
+            event=record_notice(root,receipt,'stop')
+            class Reconnected:
+                available=False
+                sent=0
+                def reconcile(self,event):
+                    if not self.available:raise WakeError('native lifecycle endpoint is unavailable')
+                    return dict(transcript=False)
+                def append(self,event):
+                    self.sent+=1
+                    return dict(transcript=True,model_context=True)
+            adapter=Reconnected()
+            held=present_notice(root,event['event_id'],adapter=adapter)
+            self.assertEqual(held['delivery']['state'],'pending')
+            self.assertEqual(held['delivery']['attempts'],0)
+            self.assertEqual(adapter.sent,0)
+            adapter.available=True
+            delivered=present_notice(root,event['event_id'],adapter=adapter)
+            self.assertEqual(delivered['delivery']['state'],'recorded')
+            self.assertEqual(adapter.sent,1)

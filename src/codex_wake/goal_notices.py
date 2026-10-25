@@ -220,9 +220,15 @@ def present_notice(root, event_id, *, adapter=None):
         try:
             found = adapter.reconcile(event)
         except Exception as error:
-            event['delivery'].update(state='unsupported', last_error=type(error).__name__,
-                next_action='Use a native runtime with thread/notice/append and thread/notice/read; '
-                    'keep this notice pending. No notification turn is started.')
+            from .native_protocol import NativeCapabilityUnavailable
+            from .records import WakeError
+            unsupported=(isinstance(error,NativeCapabilityUnavailable) or
+                (isinstance(error,ValueError) and not isinstance(error,WakeError)))
+            event['delivery'].update(state='unsupported' if unsupported else 'pending',
+                last_error=type(error).__name__,next_action=(
+                    'Use a native runtime with thread/notice/append and thread/notice/read; '
+                    'keep this notice pending. No notification turn is started.' if unsupported else
+                    'Restore the native connection; the unsubmitted notice remains pending.'))
             _save(path, event)
             return event
         if found.get('transcript') is True:

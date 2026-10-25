@@ -45,3 +45,27 @@ class NativeLargeResponseTests(unittest.TestCase):
                 finally:
                     server.shutdown()
                     worker.join(timeout=2)
+
+    def test_method_not_found_is_distinct_from_other_native_rejections(self):
+        from codex_wake.native_protocol import native_request, NativeCapabilityUnavailable
+        from codex_wake.records import WakeError
+        for code in (-32601,-32603):
+            with self.subTest(code=code),tempfile.TemporaryDirectory() as directory:
+                def handler(ws):
+                    for raw in ws:
+                        request=json.loads(raw)
+                        if 'id' not in request:continue
+                        response=dict(id=request['id'])
+                        if request['method']=='initialize':response['result']={}
+                        else:response['error']=dict(code=code,message='native refusal')
+                        ws.send(json.dumps(response))
+                endpoint=Path(directory)/'server.sock'
+                with unix_serve(handler,str(endpoint)) as server:
+                    worker=threading.Thread(target=server.serve_forever,daemon=True)
+                    worker.start()
+                    try:
+                        with self.assertRaises(WakeError) as rejected:
+                            native_request('unix://'+str(endpoint),'unused','thread/notice/read',{},2)
+                        self.assertEqual(isinstance(rejected.exception,NativeCapabilityUnavailable),code==-32601)
+                    finally:
+                        server.shutdown();worker.join(timeout=2)
