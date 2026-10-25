@@ -59,12 +59,67 @@ class OperatorOverview:
             if not semantic.get('fresh'):
                 complete = False
             rows.append(dict(managed_agent_id=agent['managed_agent_id'], runtime=agent['runtime'],
-                workspace=agent['root'], repository=dict(status='uninspected'),
+                workspace=agent['root'], repository=self._repository(agent['root'], deadline),
                 task_id=agent.get('task_id'), enrollment=agent['enrollment'],
                 binding=dict(state=agent['state'], current=agent['binding_current']), semantic=semantic))
+        for row in rows:
+            semantic=row['semantic']
+            observed=semantic.get('observed_at')
+            if (semantic.get('fresh') and (type(observed) not in (int,float)
+                    or not observed <= time.time() <= observed+freshness)):
+                semantic.update(state='unknown',fresh=False,reason='evidence_expired_during_scan')
+            if row['repository']['status']!='verified' or not semantic.get('fresh'):
+                complete=False
+        if self.clock() >= deadline:
+            complete=False
         return dict(schema_version=1, status='overview', complete=complete,
                     truncated=len(population)>limit, population=len(population), agents=rows,
                     inventory_scope='managed_only', grants_operations=False)
+
+    def _repository(self, workspace, deadline):
+        remaining = deadline-self.clock()
+        if remaining <= .001:
+            return dict(status='unknown', reason='budget_exhausted')
+        environment = {k:v for k,v in os.environ.items() if not k.startswith('GIT_')}
+        try:
+            result = subprocess.run(['git','-C',workspace,'rev-parse','--show-toplevel',
+                '--path-format=absolute','--git-common-dir'], env=environment,
+                capture_output=True, text=True, timeout=min(remaining, 2), check=True)
+            lines=result.stdout.splitlines()
+            if len(lines)!=2:
+                raise ValueError('ambiguous git identity')
+            top, common = (Path(value).resolve(strict=True) for value in lines)
+            if any(any(ord(c)<32 for c in str(path)) for path in (top,common)):
+                raise ValueError('invalid git path')
+            info=common.stat()
+            if not stat.S_ISDIR(info.st_mode) or not top.is_dir():
+                raise ValueError('invalid Git directory')
+            return dict(status='verified', worktree=str(top), common_dir=str(common),
+                        device=info.st_dev, inode=info.st_ino)
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return dict(status='unknown', reason='git_identity_unavailable')
+
+    def _client(self, socket_path, client, timeout):
+        if client is None:
+            try:
+                client=os.ttyname(0)
+            except OSError:
+                raise OverviewError('invoking client tty unavailable') from None
+        if not isinstance(client,str) or not client.startswith('/dev/'):
+            raise OverviewError('owned client tty required')
+        tty=Path(client)
+        info=tty.stat()
+        if not stat.S_ISCHR(info.st_mode) or info.st_uid != os.geteuid():
+            raise OverviewError('owned client tty required')
+        result=subprocess.run(['tmux','-S',socket_path,'list-clients','-F',
+            '#{client_tty}\t#{client_pid}'], capture_output=True,text=True,check=True,timeout=timeout)
+        matches=[line.split('\t') for line in result.stdout.splitlines() if line.split('\t')[0]==client]
+        if len(matches)!=1 or len(matches[0])!=2:
+            raise OverviewError('invoking client ambiguous or unavailable')
+        pid=int(matches[0][1])
+        if Path('/proc/'+str(pid)).stat().st_uid != os.geteuid():
+            raise OverviewError('foreign tmux client')
+        return client, pid
 
     def _attachment(self, managed_agent_id, timeout):
         _bound(timeout, .1, 30)
@@ -97,7 +152,7 @@ class OperatorOverview:
         info = socket.lstat()
         if not socket.is_absolute() or socket != socket.resolve() or not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.geteuid():
             raise OverviewError('attachment socket unqualified')
-        return agent, pane
+        return agent, dict(pane,socket_device=info.st_dev,socket_inode=info.st_ino)
 
     def navigation_plan(self, managed_agent_id, *, timeout=10):
         agent, pane = self._attachment(managed_agent_id, timeout)
@@ -106,7 +161,7 @@ class OperatorOverview:
                     attachment={k:pane[k] for k in ('pane_id','window_id','session_id')},
                     grants_operations=False)
 
-    def focus(self, managed_agent_id, *, principal, timeout=10):
+    def focus(self, managed_agent_id, *, principal, timeout=10, client=None):
         _bound(timeout, .1, 30)
         if not isinstance(principal, Principal) or principal.role != 'operator':
             raise OverviewError('verified operator required')
@@ -119,16 +174,30 @@ class OperatorOverview:
         if remaining < .1:
             raise OverviewError('navigation deadline exhausted')
         _, latest = self._attachment(managed_agent_id, remaining)
-        keys = ('socket','pane_id','window_id','session_id','client_pid','client_start_time_ticks')
+        keys = ('socket','pane_id','window_id','session_id','client_pid','client_start_time_ticks','socket_device','socket_inode')
         if any(pane[k] != latest[k] for k in keys):
             raise OverviewError('attachment changed before focus')
         remaining=deadline-self.clock()
         if remaining <= 0:
             raise OverviewError('navigation deadline exhausted')
+        client_tty,client_pid=self._client(pane['socket'],client,remaining)
+        from .process import process_identity
+        client_generation=process_identity(client_pid)
+        if not client_generation:
+            raise OverviewError('client process unavailable')
+        remaining=deadline-self.clock()
+        if remaining <= 0:
+            raise OverviewError('navigation deadline exhausted')
+        if self._client(pane['socket'],client_tty,remaining) != (client_tty,client_pid) or process_identity(client_pid)!=client_generation:
+            raise OverviewError('client changed before focus')
+        remaining=deadline-self.clock()
+        if remaining <= 0:
+            raise OverviewError('navigation deadline exhausted')
         check_operation(self.root, 'workspace.navigate', principal,
                         target=agent['conversation_id'], capability='verified_operator', readiness='exact_existing_attachment')
-        subprocess.run(['tmux','-S',pane['socket'],'select-window','-t',pane['window_id'],
+        subprocess.run(['tmux','-S',pane['socket'],'switch-client','-c',client_tty,'-t',pane['session_id'],
+                        ';','select-window','-t',pane['window_id'],
                         ';','select-pane','-t',pane['pane_id']], check=True,
                        capture_output=True, timeout=remaining)
-        return dict(status='focused', managed_agent_id=managed_agent_id,
+        return dict(status='focused', managed_agent_id=managed_agent_id, client=client_tty,
                     attachment={k:pane[k] for k in ('pane_id','window_id','session_id')})

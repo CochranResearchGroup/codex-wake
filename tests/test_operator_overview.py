@@ -14,7 +14,7 @@ class OverviewTests(unittest.TestCase):
             monotonic=lambda: next(ticks, 2)).snapshot(timeout=1)
         self.assertFalse(view['complete'])
         self.assertEqual(view['agents'][1]['semantic']['reason'], 'budget_exhausted')
-        self.assertEqual(view['agents'][0]['repository']['status'], 'uninspected')
+        self.assertEqual(view['agents'][0]['repository']['status'], 'unknown')
         self.assertNotIn('process', str(view))
 
     def test_model_cannot_focus_and_no_policy_cannot_focus(self):
@@ -79,6 +79,22 @@ class OverviewTests(unittest.TestCase):
                 pane=subprocess.check_output(command+['display-message','-p','-t','owned','#{pane_id}'],text=True).strip()
                 subprocess.run(command+['select-pane','-t',pane,'-T','fixture'],check=True)
                 subprocess.run(command+['new-window','-d','-t','owned','-n','other','sleep 60'],check=True)
+                subprocess.run(command+['new-session','-d','-s','other','sleep 60'],check=True)
+                import pty
+                master,slave=pty.openpty()
+                client_tty=os.ttyname(slave)
+                environment={k:v for k,v in os.environ.items() if k not in ('TMUX','TMUX_PANE')}
+                environment['TERM']='xterm'
+                client_process=subprocess.Popen(command+['attach-session','-t','other'],stdin=slave,stdout=slave,stderr=slave,env=environment)
+                self.addCleanup(lambda: client_process.poll() is None and client_process.terminate())
+                self.addCleanup(lambda: os.close(master))
+                self.addCleanup(lambda: os.close(slave))
+                deadline=time.monotonic()+3
+                while time.monotonic()<deadline:
+                    clients=subprocess.check_output(command+['list-clients','-F','#{client_tty}'],text=True).splitlines()
+                    if client_tty in clients: break
+                    time.sleep(.01)
+                self.assertIn(client_tty,clients)
                 subprocess.run(command+['select-window','-t','owned:1'],check=True)
                 native_sock=socket.socket(socket.AF_UNIX)
                 self.addCleanup(native_sock.close)
@@ -101,7 +117,7 @@ class OverviewTests(unittest.TestCase):
                 register_parser(parser.add_subparsers(dest='agents_command',required=True))
                 args=parser.parse_args(['focus','--managed-agent-id',managed['managed_agent_id'],
                     '--bus-root',str(bus.root),'--operator-capability',str(capability),'--tmux-socket',str(socket_path),
-                    '--app-server','unix://'+str(native_path),'--json'])
+                    '--app-server','unix://'+str(native_path),'--client',client_tty,'--json'])
                 class Protocol(FakeConnection):
                     def __init__(self): super().__init__([])
                     def recv(self,timeout):
@@ -112,12 +128,16 @@ class OverviewTests(unittest.TestCase):
                     with contextlib.redirect_stdout(io.StringIO()): self.assertEqual(run(args,root),2)
                     policy.configure(dict(version=1,**{'global':{'actions':{'workspace.navigate':'allow'}}}),
                                      operator,expected_revision=1)
+                    before_sessions=subprocess.check_output(command+['list-sessions','-F','#{session_id}'],text=True)
                     output=io.StringIO()
                     with contextlib.redirect_stdout(output): code=run(args,root)
+                    self.assertEqual(subprocess.check_output(command+['list-sessions','-F','#{session_id}'],text=True),before_sessions)
                     self.assertEqual(code,0,output.getvalue())
                     self.assertEqual(json.loads(output.getvalue())['status'],'focused')
                     active=subprocess.check_output(command+['display-message','-p','-t','owned','#{pane_id}'],text=True).strip()
                     self.assertEqual(active,pane)
+                    selected_session=subprocess.check_output(command+['list-clients','-F','#{client_tty}\t#{session_name}'],text=True).strip()
+                    self.assertEqual(selected_session,client_tty+'\towned')
                     subprocess.run(command+['select-window','-t','owned:1'],check=True)
                     server['codexHome']=str(root/'changed-namespace')
                     with contextlib.redirect_stdout(io.StringIO()): self.assertEqual(run(args,root),2)
@@ -125,6 +145,7 @@ class OverviewTests(unittest.TestCase):
                     self.assertNotEqual(active,pane)
             finally:
                 subprocess.run(command+['kill-server'],capture_output=True)
+                if 'client_process' in locals(): client_process.wait(timeout=3)
 
     def test_projection_truncation_and_model_effect_denial(self):
         from codex_wake.operator_overview_commands import execute
@@ -146,3 +167,25 @@ class OverviewTests(unittest.TestCase):
                                  ('overview',{'operator':True}),('overview',{'limit':True})]:
             with self.subTest(action=action,arguments=arguments),self.assertRaises(OverviewError):
                 execute(action,arguments,None,owner=owner)
+
+    def test_git_identity_is_verified_and_ignores_inherited_git_environment(self):
+        import os
+        from pathlib import Path
+        import subprocess
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            subprocess.run(['git','init','-q',str(root)],check=True)
+            row=dict(managed_agent_id='a',runtime='codex',root=str(root),task_id=None,
+                     enrollment='enrolled',state='stale',binding_current=False)
+            owner=OperatorOverview(None,inventory=lambda:{'agents':[row]},
+                observe=lambda *a,**k:dict(state='unknown',fresh=False,observed_at=None,
+                                          reason='source_unavailable',capabilities={}))
+            with patch.dict(os.environ,{'GIT_DIR':'/nonexistent','GIT_WORK_TREE':'/wrong'}):
+                repository=owner.snapshot()['agents'][0]['repository']
+            self.assertEqual(repository['status'],'verified')
+            self.assertEqual(repository['worktree'],str(root.resolve()))
+            self.assertEqual(repository['common_dir'],str((root/'.git').resolve()))
+            self.assertEqual(repository['inode'],(root/'.git').stat().st_ino)
+            self.assertEqual(repository['device'],(root/'.git').stat().st_dev)

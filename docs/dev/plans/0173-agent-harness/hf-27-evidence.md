@@ -28,3 +28,20 @@ uninspected. The inventory owner's blocking file lock is not preempted by the
 runtime scan deadline. These are explicit limits, not completed broader claims.
 
 Memory disposition: forbidden; delegated packet explicitly prohibits memory writes.
+
+
+## Original-criteria integration correction
+
+A bounded correction replaces the initial Git-uninspected placeholder with actual
+canonical common-directory device/inode and worktree identity. Git environment
+poisoning is removed and tested; failed reads stay unknown. The initial pane-only
+effect is corrected to qualify the invoking or explicit owned client tty and switch
+that existing client to the exact existing target session before pane selection.
+An actual PTY-attached private client begins in another session; client-session and
+pane readbacks pass, session population remains unchanged, and namespace drift still
+holds. Client process is reaped and the private server terminated by fixture cleanup.
+
+`uv run --extra mcp python -m unittest discover -s tests -p 'test_operator_overview*.py'`
+passes six tests after correction. Earlier no-cross-session/Git-uninspected limits
+above describe the superseded checkpoint only. Remaining limit: inventory flock is
+not preempted. No production/provider/global review or shared-file effects.

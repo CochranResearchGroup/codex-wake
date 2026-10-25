@@ -1,5 +1,6 @@
 """Terminal overview callers; models receive read projections only."""
 import json
+import subprocess
 from pathlib import Path
 
 from .operator_overview import OperatorOverview, OverviewError
@@ -30,6 +31,7 @@ def register_parser(commands):
             parser.add_argument('--freshness',type=float,default=30)
         else:
             parser.add_argument('--managed-agent-id',required=True)
+            parser.add_argument('--client',help='exact owned tmux client tty for explicit local operator navigation')
             parser.add_argument('--bus-root',type=Path,required=True)
             parser.add_argument('--operator-capability',type=Path,required=True)
 
@@ -43,7 +45,7 @@ def run(args,root):
             with bus.connection() as database:
                 bus.operator(database,args.operator_capability)
             value=owner.focus(args.managed_agent_id,principal=Principal('operator:'+bus.bus_id,'operator'),
-                              timeout=args.timeout)
+                              timeout=args.timeout,client=args.client)
         else:
             value=owner.snapshot(limit=args.limit,timeout=args.timeout,freshness=args.freshness)
         if args.as_json or value['status']!='overview':
@@ -53,11 +55,11 @@ def run(args,root):
             for row in value['agents']:
                 print('\t'.join(str(x) for x in (row['managed_agent_id'],row['runtime'],
                     row['semantic']['state'],row['semantic']['fresh'],row['binding']['state'],row['task_id'] or 'unassigned',
-                    row['workspace'],'uninspected',row['semantic'].get('observed_at'),
+                    row['workspace'],json.dumps(row['repository'],sort_keys=True),row['semantic'].get('observed_at'),
                     row['semantic'].get('evidence_kind','unavailable'),row['semantic']['reason'],
                     json.dumps(row['semantic']['capabilities'],sort_keys=True))))
             print('managed-only inventory; complete='+str(value['complete'])+'; truncated='+str(value['truncated']))
         return 0 if value.get('complete',True) else 3
-    except (WakeError,ValueError,TypeError,KeyError,OSError):
+    except (WakeError,ValueError,TypeError,KeyError,OSError,subprocess.SubprocessError):
         print(json.dumps(dict(status='held',reason='overview_or_navigation_unavailable')))
         return 2
