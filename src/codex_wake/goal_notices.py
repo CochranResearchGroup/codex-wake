@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 from datetime import datetime, timezone
 
-KINDS = frozenset(('activation', 'engagement', 'checkpoint', 'stop', 'recovery', 'deactivation', 'reactivation'))
+KINDS = frozenset(('activation', 'engagement', 'checkpoint', 'stop', 'recovery', 'deactivation', 'reactivation', 'admission','request_activation'))
 _EVENT = re.compile(r'notice_[a-f0-9]{64}')
 
 
@@ -80,6 +80,8 @@ def record_notice(root, receipt, kind, *, controller=None):
         identity.update(stop_episode=receipt.get('active_stop_id') or receipt.get('stop_episode_id') or
             [stop.get('boot_id'), stop.get('observed_boottime'), receipt.get('pause_epoch', 0)],
             reason=receipt.get('reason') or stop.get('reason'), work_turns=sorted(receipt.get('stop_turns', [])))
+    if kind=='request_activation':identity['request_accounting']=receipt['request_accounting']
+    if kind=='admission':identity['request_admission_event']=receipt['request_admission_event']
     stable_identity=dict(identity)
     if receipt.get('active_stop_id'):
         # Captured turns may be refined by later control readback in this episode.
@@ -99,7 +101,7 @@ def record_notice(root, receipt, kind, *, controller=None):
         if sum(1 for _ in directory.glob('notice_*.json')) >= 10000:
             raise ValueError('supervision notice capacity reached; history retained')
         snapshot = {key: receipt.get(key) for key in ('used_tokens', 'token_limit', 'token_accounting',
-            'deadline', 'checkpoint_token_percent', 'checkpoint_seconds', 'state', 'reason', 'lifetime_tokens_before_window')}
+            'deadline', 'checkpoint_token_percent', 'checkpoint_seconds', 'state', 'reason', 'lifetime_tokens_before_window','governor_enabled')}
         event = dict(version=1, event_id=event_id, identity=identity, snapshot=snapshot,
             recorded_at=datetime.now(timezone.utc).isoformat(),
             controller_generation=(controller or {}).get('generation', receipt.get('controller_generation')),
@@ -120,6 +122,18 @@ def render_notice(event):
     usage = f'{used:,} of {limit:,}' if type(used) is int and type(limit) is int else 'usage unavailable'
     remaining = f'{max(0, limit-used):,}' if type(used) is int and type(limit) is int else 'unknown'
     kind = identity['kind']
+    if kind=='request_activation':
+        selected=identity['request_accounting']
+        return (f"Governor request-path owner configured. Effective mode {'inactive' if snapshot.get('governor_enabled') is False else selected['mode']} for reviewed HTTP Responses path only; WS/compact/bypass remain unqualified. "
+            f"Scope {identity['allocation_id']}; session {identity['thread_id']}. "
+            'ObjectiveLedger owns aggregate request accounting; original prior usage, caps and deadlines retained. No work resumed or resources renewed. '
+            'Say "Deactivate governor"; verified operator control needs no model inference. '
+            f"[External supervision event {event['event_id']}]")
+    if kind=='admission':
+        return (f"Model request denied before provider submission. Scope {identity['allocation_id']}; session {identity['thread_id']}. "
+            'Reason: objective/session resources unavailable or accounting uncertain. Mode hard_admission applies only to the selected qualified HTTP path. '
+            'Say "Deactivate governor" in this conversation; verified operator control needs no provider inference. No work resumed or resources renewed. '
+            f"[External supervision event {event['event_id']}]")
     if kind in ('deactivation','reactivation'):
         text=('Governor inactive. Drop stale governor checkpoint/stop instructions. Independent platform controls remain. '
               'Say "Reactivate governor" to enable sampled stopping. ' if kind=='deactivation' else
@@ -312,12 +326,12 @@ def run_presenter(root, stop):
 def governor_status(root, receipt):
     """Independent inspection exposes control state even if notice delivery fails."""
     status = dict(identity='Codex Wake governor', scope=receipt['allocation_id'],
-        mode='inactive' if receipt.get('governor_enabled',True) is False else 'sampled_stop',
+        mode='inactive' if receipt.get('governor_enabled',True) is False else receipt.get('request_accounting',{}).get('mode','sampled_stop'),
         enabled=receipt.get('governor_enabled',True), maximum_token_overshoot=None,
         controls=['Inspect governor', 'Reactivate governor' if receipt.get('governor_enabled',True) is False else 'Deactivate governor', 'Keep stopped'],
         intervention=None)
     ids = receipt.get('notice_ids', {})
-    for kind in ('activation', 'engagement', 'checkpoint', 'stop', 'recovery', 'deactivation', 'reactivation'):
+    for kind in ('activation', 'engagement', 'checkpoint', 'stop', 'recovery', 'deactivation', 'reactivation','admission','request_activation'):
         event_id = ids.get(kind)
         if not event_id:
             continue
@@ -334,7 +348,7 @@ def governor_status(root, receipt):
             summary = dict(event_id=event_id, kind=kind, presentation='unavailable',
                 next_action='Inspect governor notice storage and native delivery; intervention remains in effect.')
         status[kind] = summary
-        if kind in ('checkpoint', 'stop', 'recovery'):
+        if kind in ('checkpoint', 'stop', 'recovery','admission'):
             status['intervention'] = summary
     if receipt.get('notice_record_error'):
         status['notice_error'] = receipt['notice_record_error']

@@ -128,7 +128,22 @@ def inspect_host(root, profile, caller):
         result['static'] = _static(root, profile, options, thread)
     except (OSError, ValueError, TypeError, KeyError, WakeError) as error:
         result['static'] = dict(cache='unavailable', reason=type(error).__name__, message=str(error)[:256])
+    if control.get('state')=='available' and control.get('enabled') is False and control.get('scope')==grant['allocation_id']:
+        result.update(mode='inactive',admitted=True,reason='operator_disabled',message='Governor remains disabled; no request-path gate is imposed and no resource authority is renewed.')
+        return result
     if options['requested_mode'] == 'hard_admission':
+        try:
+            from .request_admission import qualify_gateway
+            qualified=qualify_gateway(root,profile,thread)
+            result.update(qualified)
+            result['native_admission']='selected_http_gateway_only'
+            return result
+        except (OSError,ValueError,KeyError,TypeError,WakeError) as error:
+            latest=snapshot(root,thread)
+            if latest.get('enabled') is False and latest.get('scope')==grant['allocation_id']:
+                result.update(mode='inactive',admitted=True,governance=latest,reason='operator_disabled')
+                return result
+            result['request_path_error']=type(error).__name__
         result.update(reason='hard_admission_unsupported', message='Hard admission is unsupported on this selected request path. No work was dispatched and no downgrade was applied. Use an already authorized manual route or explicitly select sampled stopping; no exact token ceiling is claimed.')
         return result
     try:

@@ -339,6 +339,14 @@ def _allocation_admit(directory,receipt,old):
 
 
 def _usage(receipt):
+    if receipt.get('request_accounting'):
+        from .objective_ledger import ObjectiveLedger
+        from .lifecycle_budget import trusted_upper
+        binding=receipt['request_accounting']
+        view=ObjectiveLedger(binding['root'],binding['objective_id']).inspect(now=trusted_upper())
+        return dict(state='qualified' if view['accounting_known'] else 'unknown',
+            used_tokens=view['tokens_used'],token_accounting='fresh',sampled=False,
+            reason=None if view['accounting_known'] else 'request_completion_unknown',request_accounting=binding)
     from .goal_usage import observe_usage
     if not receipt.get('grant',{}).get('host_delegated'):
         return observe_usage(receipt['grant']['codex_home'],receipt['thread_id'],receipt['goal_created_at'],

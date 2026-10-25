@@ -19,7 +19,7 @@ def sync(receipt):
         with supervision._lock(path.parent, path.stem):
             supervision._private(path)
             source = json.loads(path.read_text())
-    for key in ("governor_enabled", "governor_revision", "governor_control"):
+    for key in ("governor_enabled", "governor_revision", "governor_control", "request_accounting"):
         if key in source:
             receipt[key] = source[key]
     return receipt.get("governor_enabled", True) is False
@@ -260,7 +260,7 @@ def snapshot(root, thread_id):
         return dict(
             state="available",
             enabled=enabled,
-            mode="sampled_stop" if enabled else "inactive",
+            mode=authority.get("request_accounting",{}).get("mode","sampled_stop") if enabled else "inactive",
             revision=authority.get("governor_revision", 0),
             scope=receipt["allocation_id"],
             thread_id=thread_id,
