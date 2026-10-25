@@ -219,7 +219,7 @@ class WorkAcceptance:
                 if not isinstance(claimant, Claimant):
                     raise AcceptanceError('authority_denied', 'fresh verified resource owner required')
                 claim = contract['checks']['claim']
-                guard = ResourceClaims(self.root).guard(claim['claim_id'], claim['generation'], claimant)
+                guard = ResourceClaims(self.root, now=self.now).guard(claim['claim_id'], claim['generation'], claimant)
             with guard:
                 for verifier in contract['checks']['verifiers'] if valid else []:
                     current_valid, current_snapshot = self._snapshot(contract)

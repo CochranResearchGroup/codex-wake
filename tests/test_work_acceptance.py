@@ -31,7 +31,7 @@ class WorkAcceptanceTests(unittest.TestCase):
                                              self.principal, expected_revision=0)
         self.checks = dict(artifacts=[dict(name='result', path=str(self.artifact),
                             sha256=hashlib.sha256(b'verified result').hexdigest(), required=True)], verifiers=[], decisions=[])
-        self.owner = WorkAcceptance(self.root)
+        self.owner = WorkAcceptance(self.root, now=lambda: 100.0)
 
     def test_frozen_exact_artifact_is_accepted_and_changed_evidence_is_unknown(self):
         self.owner.define('contract', 'task', 'assignment', self.checks, authority=self.authority, principal=self.principal)
@@ -45,13 +45,12 @@ class WorkAcceptanceTests(unittest.TestCase):
     def test_required_verifier_failure_rejects_work_and_infrastructure_error_is_unknown(self):
         import os
         import sys
-        import time
         from codex_wake.process import process_identity
         from codex_wake.resource_claims import Claimant, ResourceClaims
         current = process_identity(os.getpid())
         claimant = Claimant('agent_' + '1' * 32, str(self.workspace),
-            dict(pid=os.getpid(), start_ticks=current['start_time_ticks'], boot_id=current['boot_id']), time.time())
-        claim = ResourceClaims(self.root).claim('worktree', self.workspace, claimant)
+            dict(pid=os.getpid(), start_ticks=current['start_time_ticks'], boot_id=current['boot_id']), self.owner.now())
+        claim = ResourceClaims(self.root, now=self.owner.now).claim('worktree', self.workspace, claimant)
         for name, code, expected in [('failed', 1, 'rejected'), ('broken', 2, 'unknown'), ('passed', 0, 'accepted')]:
             with self.subTest(code=code):
                 checks = dict(self.checks, verifiers=[dict(name='tests', argv=[str(Path(sys.executable).resolve()), '-c', f'raise SystemExit({code})'],
@@ -59,6 +58,32 @@ class WorkAcceptanceTests(unittest.TestCase):
                 self.owner.define(name, 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
                 receipt = self.owner.evaluate(name, authority=self.authority, principal=self.principal, claimant=claimant)
                 self.assertEqual(receipt['status'], expected)
+
+    def test_clock_discontinuity_refuses_verifier_effect_until_observation_is_current(self):
+        import os
+        import sys
+        from codex_wake.process import process_identity
+        from codex_wake.resource_claims import Claimant, ResourceClaims, ResourceClaimError
+        current = process_identity(os.getpid())
+        claimant = Claimant('agent_' + '1' * 32, str(self.workspace),
+            dict(pid=os.getpid(), start_ticks=current['start_time_ticks'], boot_id=current['boot_id']), 100.0)
+        claim = ResourceClaims(self.root, now=self.owner.now).claim('worktree', self.workspace, claimant)
+        marker = self.workspace / 'clock-effect'
+        checks = dict(self.checks, verifiers=[dict(name='effect', argv=[str(Path(sys.executable).resolve()), '-c',
+            f"from pathlib import Path; Path({str(marker)!r}).write_text('once')"],
+            timeout=2, pass_codes=[0], fail_codes=[1])], claim=dict(claim_id=claim['claim_id'], generation=1))
+        self.owner.define('clock', 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
+        for now in (99.0, 131.0):
+            with self.subTest(now=now):
+                self.owner.now = lambda: now
+                with self.assertRaises(ResourceClaimError) as denied:
+                    self.owner.evaluate('clock', authority=self.authority, principal=self.principal, claimant=claimant)
+                self.assertEqual(denied.exception.code, 'owner_unqualified')
+                self.assertFalse(marker.exists())
+        self.owner.now = lambda: 100.0
+        result = self.owner.evaluate('clock', authority=self.authority, principal=self.principal, claimant=claimant)
+        self.assertEqual(result['status'], 'accepted')
+        self.assertEqual(marker.read_text(), 'once')
 
     def test_explicit_human_decision_is_bound_to_contract_snapshot_and_authority(self):
         from codex_wake.records import WakeError
@@ -124,7 +149,6 @@ class WorkAcceptanceTests(unittest.TestCase):
     def test_missing_artifact_pin_and_timeout_never_accept_or_run_after_revocation(self):
         import os
         import sys
-        import time
         from codex_wake.records import WakeError
         from codex_wake.process import process_identity
         from codex_wake.resource_claims import Claimant, ResourceClaims
@@ -137,8 +161,8 @@ class WorkAcceptanceTests(unittest.TestCase):
         self.artifact.write_text('verified result')
         native = process_identity(os.getpid())
         claimant = Claimant('agent_' + '1' * 32, str(self.workspace),
-            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), time.time())
-        claim = ResourceClaims(self.root).claim('worktree', self.workspace, claimant)
+            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), self.owner.now())
+        claim = ResourceClaims(self.root, now=self.owner.now).claim('worktree', self.workspace, claimant)
         checks = dict(self.checks, verifiers=[dict(name='bounded', argv=[str(Path(sys.executable).resolve()), '-c', 'import time; time.sleep(5)'],
             timeout=.05, pass_codes=[0], fail_codes=[1])], claim=dict(claim_id=claim['claim_id'], generation=1))
         self.owner.define('timeout', 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
@@ -156,13 +180,12 @@ class WorkAcceptanceTests(unittest.TestCase):
         from dataclasses import replace
         import os
         import sys
-        import time
         from codex_wake.process import process_identity
         from codex_wake.resource_claims import Claimant, ResourceClaims
         native = process_identity(os.getpid())
         claimant = Claimant('agent_' + '1' * 32, str(self.workspace),
-            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), time.time())
-        claim = ResourceClaims(self.root).claim('worktree', self.workspace, claimant)
+            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), self.owner.now())
+        claim = ResourceClaims(self.root, now=self.owner.now).claim('worktree', self.workspace, claimant)
         marker = self.workspace / 'must-not-run'
         for mode in ('artifact', 'pin'):
             with self.subTest(mode=mode):
@@ -178,7 +201,7 @@ class WorkAcceptanceTests(unittest.TestCase):
                     verifier('later', f"from pathlib import Path; Path({str(marker)!r}).touch()")],
                     claim=dict(claim_id=claim['claim_id'], generation=1))
                 self.owner.define(mode, 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
-                claimant = replace(claimant, observed_at=time.time())
+                claimant = replace(claimant, observed_at=self.owner.now())
                 result = self.owner.evaluate(mode, authority=self.authority, principal=self.principal, claimant=claimant)
                 self.assertEqual(result['status'], 'unknown')
                 self.assertFalse(marker.exists(), 'stale scope must stop the next verifier effect')
@@ -189,13 +212,12 @@ class WorkAcceptanceTests(unittest.TestCase):
         (self.root / 'lost-briefs').rename(self.root / 'task-briefs')
         checks['verifiers'] = checks['verifiers'][:1]
         self.owner.define('final-pin', 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
-        claimant = replace(claimant, observed_at=time.time())
+        claimant = replace(claimant, observed_at=self.owner.now())
         result = self.owner.evaluate('final-pin', authority=self.authority, principal=self.principal, claimant=claimant)
         self.assertEqual(result['status'], 'unknown')
 
     def test_missing_frozen_executable_retains_unknown_receipt(self):
         import os
-        import time
         from codex_wake.process import process_identity
         from codex_wake.resource_claims import Claimant, ResourceClaims
         executable = self.workspace / 'approved-verifier'
@@ -203,8 +225,8 @@ class WorkAcceptanceTests(unittest.TestCase):
         executable.chmod(0o700)
         native = process_identity(os.getpid())
         claimant = Claimant('agent_' + '1' * 32, str(self.workspace),
-            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), time.time())
-        claim = ResourceClaims(self.root).claim('worktree', self.workspace, claimant)
+            dict(pid=os.getpid(), start_ticks=native['start_time_ticks'], boot_id=native['boot_id']), self.owner.now())
+        claim = ResourceClaims(self.root, now=self.owner.now).claim('worktree', self.workspace, claimant)
         checks = dict(self.checks, verifiers=[dict(name='approved', argv=[str(executable)], timeout=2,
             pass_codes=[0], fail_codes=[1])], claim=dict(claim_id=claim['claim_id'], generation=1))
         self.owner.define('executable', 'task', 'assignment', checks, authority=self.authority, principal=self.principal)
