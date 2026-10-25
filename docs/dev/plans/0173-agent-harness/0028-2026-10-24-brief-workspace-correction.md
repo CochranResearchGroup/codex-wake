@@ -14,7 +14,8 @@ Issue filed and read back. MCP regression reproduced cross-workspace admission
 before the fix. Shared store now checks the host-verified workspace against the
 selected or pinned revision while holding the task transaction. Inspection
 fails closed when any returned revision is outside that workspace. Source
-validation is underway; integration and release remain separate.
+validation completed at the focused seams; draft PR #329 awaits CI and
+integration. Release remains separate.
 
 ## Scope and non-goals
 
@@ -45,8 +46,15 @@ pre-implementation cycle.
 
 Focused: PYTHONPATH=src python -m unittest discover -s tests -p 'test_task_brief*.py'
 passed 14 tests on Python 3.11 and 3.12. Harness caller selection passed 7 on both.
-Undefined-name check and git diff --check passed. Broader handoff/lifecycle
-selection pending at this checkpoint.
+Undefined-name check and git diff --check passed. Broader handoff selection ran 62 tests with two preflight readiness failures;
+both passed on isolated retry and on the unchanged baseline. Preserve these as
+flaky results, not a clean broader pass. Spawn selection passed 27 tests. The
+initial test_agent_lifecycle filename selection matched no tests and is not
+counted as evidence. Required CI runs separately on PR #329.
+
+Delivery: https://github.com/CochranResearchGroup/codex-wake/pull/329
+Implementation checkpoint: 75789bd (remote readback matched). No integration
+or release claim. First-failure logs retained in user-scoped issue-328 evidence.
 
 ## Definition of done
 
