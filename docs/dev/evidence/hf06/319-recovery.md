@@ -100,3 +100,13 @@ was installed or shared production reload attempted.318 cannot close from these
 source/parser checks. The active user goal remains incomplete until318 is proved.
 
 Memory disposition forbidden: no explicit user memory-write request.
+
+
+Final supplemental local result: frozen-full312.log ran1558 tests in817.327s,
+with one failed harness inventory identity/suppression test and one opt-in skip.
+That local lane is not clean; the failure is retained for separate diagnosis.
+It does not replace the two passing immutable hosted ef339e0 gates. No claim is
+made that the supplemental local run passed. At the one-hour stop,318 remains
+unresolved; the local native dependency passes253 protocol/schema tests and
+`just fmt`, but application execution/Wake integration/peer proof are missing.
+The dependency patch is retained in user-state318-319/native-thread-reload.patch.
