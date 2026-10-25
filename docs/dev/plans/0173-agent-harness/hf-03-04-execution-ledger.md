@@ -6,6 +6,7 @@ Branch: feat/harness-observation-ownership
 Base: 37a5cbb03e1c9e7db5026c99d6dca3cbf443ee5f
 Target: validated integration branch; origin/main integration separate
 Work items: #330 (HF-03), #331 (HF-04)
+Pull request: https://github.com/CochranResearchGroup/codex-wake/pull/333
 Budget: 2 hours / 2,000,000 tokens cumulative; implementation stop at 100 minutes, reserve 20 minutes for validation/review/closeout
 Review bound: exactly one broad review; at most one bounded TDD remediation; discovery passes 0 used
 CI: explicitly skipped by operator

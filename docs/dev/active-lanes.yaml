@@ -11,6 +11,7 @@ lanes:
     target: origin/main
     plan_state: CLOSED
     custody_state: OWNED
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/333
     integration: squash_pr
     dependencies: []
     overlaps: []
@@ -27,6 +28,7 @@ lanes:
     target: origin/main
     plan_state: CLOSED
     custody_state: PAUSED_REF
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/333
     integration: squash_pr
     dependencies: []
     overlaps: []
