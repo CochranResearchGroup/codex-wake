@@ -121,3 +121,24 @@ def test_native_diagnose_and_cli_report_same_accounting_blocker(self):
         self.assertFalse(denied['effect_attempted'])
 
 GoalEngagementTests.test_native_diagnose_and_cli_report_same_accounting_blocker = test_native_diagnose_and_cli_report_same_accounting_blocker
+
+
+def test_hard_stop_retains_notice_even_when_native_visibility_is_unsupported(self):
+    from codex_wake.goal_supervision import poll
+    from codex_wake.goal_notice_commands import execute
+    with tempfile.TemporaryDirectory() as directory:
+        root,policy,_,native,_=self.fixture(directory)
+        with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+            enroll(root,policy,THREAD,40,120)
+            stopped=poll(root)[0]
+            self.assertEqual(stopped['state'],'stopped')
+            notices=execute(root,policy,THREAD)['notices']
+            self.assertEqual(len(notices),1)
+            self.assertEqual(notices[0]['identity']['kind'],'stop')
+            self.assertIn('Used 40 of 40',notices[0]['text'])
+            self.assertEqual(notices[0]['proof']['ui']['state'],'unverified')
+            self.assertEqual(native['goal']['status'],'paused')
+            self.assertEqual(native['active'],[])
+            self.assertFalse(any(method=='turn/start' for method,_ in native['calls']))
+
+GoalEngagementTests.test_hard_stop_retains_notice_even_when_native_visibility_is_unsupported = test_hard_stop_retains_notice_even_when_native_visibility_is_unsupported

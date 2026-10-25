@@ -9,7 +9,7 @@ from pathlib import Path
 def add_goal_limits_parser(subparsers):
     parser = subparsers.add_parser('goal-limits', help='supervise resource limits in an existing native session')
     commands = parser.add_subparsers(dest='goal_limits_command', required=True)
-    for name in ('set', 'show', 'readiness', 'diagnose', 'recover', 'disable', 'watcher-status', 'start-watcher'):
+    for name in ('set', 'show', 'readiness', 'diagnose', 'notices', 'recover', 'disable', 'watcher-status', 'start-watcher'):
         command = commands.add_parser(name, help='enroll limits' if name == 'set' else 'read enforcement evidence')
         command.add_argument('--policy', type=Path, required=True, help='private host-approved caller allocations')
         command.add_argument('--caller-thread-id', required=True)
@@ -22,6 +22,7 @@ def add_goal_limits_parser(subparsers):
         command.add_argument('--task-id')
         command.add_argument('--assignment-id')
         command.add_argument('--operation-id')
+        if name=='notices':command.add_argument('--event-id')
         if name == 'set':
             command.add_argument('--token-limit', type=int, required=True)
             command.add_argument('--time-limit-seconds', type=int, required=True)
@@ -64,6 +65,10 @@ def goal_limits_command(args, root):
         elif args.goal_limits_command == 'prepare-maintenance':
             from .goal_maintenance import prepare
             result = prepare(root,args.policy,args.seconds)
+        elif args.goal_limits_command=='notices':
+            from .goal_notice_commands import execute
+            result=execute(root,args.policy,args.caller_thread_id,event_id=args.event_id,
+                allocation_id=args.allocation_id,permission_principal=principal)
         elif args.goal_limits_command=='diagnose':
             from .goal_supervision import diagnose
             result=diagnose(root,args.policy,args.caller_thread_id,args.allocation_id,permission_principal=principal)
@@ -111,4 +116,4 @@ def goal_limits_command(args, root):
             print('Conversation presentation: '+readiness['presentation']+'; operator reading: unverified.')
         print(readiness['next_action'])
     else:print(json.dumps(result))
-    return 0 if args.goal_limits_command in ('show','readiness','diagnose','watcher-status') or result.get('state') in ('armed', 'checkpoint_requested', 'prepared') or result.get('reason')=='watcher_running' else 2
+    return 0 if args.goal_limits_command in ('show','readiness','diagnose','notices','watcher-status') or result.get('state') in ('armed', 'checkpoint_requested', 'prepared') or result.get('reason')=='watcher_running' else 2

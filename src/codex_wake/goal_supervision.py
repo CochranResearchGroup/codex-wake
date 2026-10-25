@@ -408,7 +408,9 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
         _private(path);receipt=json.loads(path.read_text())
         from .goal_renewal import renewal_hold
         pending=renewal_hold(root,receipt)
-        if pending:return dict(_public(receipt),**pending)
+        if pending:
+            from .goal_readiness import engagement
+            return dict(_public(receipt),**pending,engagement=engagement(dict(receipt,**pending),_heartbeat(directory)))
         if receipt['grant']!=grant:
             receipt.update(state='held',reason='host_policy_changed')
         receipt['controller']=_heartbeat(directory)
@@ -418,6 +420,18 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
         from .goal_readiness import engagement
         result=_public(receipt)
         result['engagement']=engagement(receipt,receipt['controller'])
+        event_id=receipt.get('notice_ids',{}).get('engagement')
+        if event_id:
+            try:
+                from .goal_notices import read_notice
+                notice=read_notice(root,event_id)
+                result['engagement']['presentation']=notice['delivery']['state']
+                result['engagement']['presentation_proof']=notice['proof']
+                if notice['delivery']['state']=='unsupported':
+                    result['engagement']['visibility_status']='runtime_visibility_unsupported'
+                    result['engagement']['presentation_next_action']=notice['delivery'].get('next_action')
+            except (OSError,ValueError,KeyError):
+                result['engagement']['presentation']='unavailable'
         if principal:result['enforcement_permissions']=describe(root,caller_thread_id,principal=principal)
         return result
 
@@ -662,6 +676,18 @@ def _first_stop(path,receipt,reason):
     _save(path,receipt)
 
 
+def _record_supervision_notice(path,receipt,kind,controller=None):
+    # Local durable intent only. Delivery is a separate worker so native/UI
+    # failure cannot delay this campaign's or a peer's pause/interrupt.
+    try:
+        from .goal_notices import record_notice
+        event=record_notice(path.parent.parent,receipt,kind,controller=controller)
+        receipt.setdefault('notice_ids',{})[kind]=event['event_id']
+    except Exception as error:
+        receipt['notice_record_error']=type(error).__name__
+
+
+
 def _stop(path,receipt,reason,goal=None,active=None):
     _first_stop(path,receipt,reason)
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
@@ -695,6 +721,7 @@ def _stop(path,receipt,reason,goal=None,active=None):
         receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven,
             pause_observed=not final_goal or final_goal.get('status')=='paused')
     except Exception as exc:receipt['control_error']=type(exc).__name__
+    _record_supervision_notice(path,receipt,'stop')
     _save(path,receipt)
     return receipt
 
@@ -798,6 +825,7 @@ def poll(root):
                         receipt['checkpoint']['state']=('acknowledged' if delivered else
                             'blocked' if receipt.pop('permission_effect_blocked',False) else 'uncertain')
                     receipt.update(state='checkpoint_requested',reason='checkpoint_reserve')
+                    _record_supervision_notice(path,receipt,'checkpoint')
                 else:receipt.update(state='armed',reason=None)
                 _save(path,receipt);results.append(receipt)
             except Exception as exc:
@@ -822,6 +850,8 @@ def _acknowledge_enrollments(directory,controller,observations):
             receipt['poll_ack']=dict(enrollment_revision=receipt.get('enrollment_revision',1),
                 receipt_generation=receipt['generation'],controller_generation=controller['generation'],
                 observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME))
+            receipt['controller_generation']=controller['generation']
+            _record_supervision_notice(path,receipt,'engagement',controller)
             _save(path,receipt)
 
 
@@ -838,6 +868,12 @@ def watch(root,interval=1):
         prior={sig:signal.signal(sig,finish) for sig in (signal.SIGTERM,signal.SIGINT)}
         heartbeat=dict(generation=generation,pid=os.getpid(),identity=process_identity(os.getpid()),
             boot_id=boot_id_value(),interval=interval)
+        import threading
+        from .goal_notices import run_presenter
+        presentation_stop=threading.Event()
+        presenter=threading.Thread(target=run_presenter,args=(root,presentation_stop),daemon=True,
+            name='goal-notice-presenter')
+        presenter.start()
         try:
             while running:
                 _save(directory/'controller.json',dict(heartbeat,active=True,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
@@ -847,6 +883,7 @@ def watch(root,interval=1):
                 replacement_observed(directory,heartbeat)
                 time.sleep(interval)
         finally:
+            presentation_stop.set()
             from .goal_maintenance import authorize_exit
             with _lock(directory,'maintenance'):
                 maintained=not running and authorize_exit(directory,heartbeat)

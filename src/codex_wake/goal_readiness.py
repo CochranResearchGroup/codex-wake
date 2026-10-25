@@ -38,6 +38,7 @@ def engagement(receipt, controller):
         result['card'] = dict(thread_id=receipt['thread_id'], allocation_id=receipt['allocation_id'],
             generation=receipt['generation'], enrollment_revision=receipt['enrollment_revision'],
             token_limit=limit, used_tokens=used, remaining_tokens=max(0, limit-used),
+            lifetime_used_tokens=receipt.get('lifetime_tokens_before_window',0)+used,
             token_accounting=receipt.get('token_accounting', 'cache_inclusive'),
             deadline_utc=datetime.fromtimestamp(receipt['deadline'], timezone.utc).isoformat().replace('+00:00', 'Z'),
             timezone='UTC', remaining_seconds=max(0, receipt['deadline']-upper),

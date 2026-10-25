@@ -92,7 +92,7 @@ def record_notice(root, receipt, kind, *, controller=None):
         if sum(1 for _ in directory.glob('notice_*.json')) >= 10000:
             raise ValueError('supervision notice capacity reached; history retained')
         snapshot = {key: receipt.get(key) for key in ('used_tokens', 'token_limit', 'token_accounting',
-            'deadline', 'checkpoint_token_percent', 'checkpoint_seconds', 'state', 'reason')}
+            'deadline', 'checkpoint_token_percent', 'checkpoint_seconds', 'state', 'reason', 'lifetime_tokens_before_window')}
         event = dict(version=1, event_id=event_id, identity=identity, snapshot=snapshot,
             controller_generation=(controller or {}).get('generation', receipt.get('controller_generation')),
             proof=dict(control=dict(stop_verified=receipt.get('stop_proof') is True,
@@ -125,12 +125,14 @@ def render_notice(event):
     text = (f"{title}. Reason: {snapshot.get('reason') or kind}. Used {usage} tokens "
         f"({snapshot.get('token_accounting') or 'unknown'}); remaining {remaining}. "
         f"Deadline {deadline_text} (UTC). Scope {identity['allocation_id']}; session {identity['thread_id']}. ")
+    lifetime=(snapshot.get('lifetime_tokens_before_window') or 0)+(used if type(used) is int else 0)
+    text += f'Current window; lifetime used {lifetime:,}. '
     if kind == 'engagement':
         text += (f"Checkpoint reserve {snapshot.get('checkpoint_token_percent')}% tokens / "
             f"{snapshot.get('checkpoint_seconds')} seconds. Watcher healthy. ")
     else:
         text += ('Extend allowance / Reset budget window / Keep stopped. '
-            'Use goal-limits renewal help for supported approved actions. '
+            'Use goal-limits extend --help or goal-limits reset --help. '
             'Native /goal resume alone does not renew this external allowance. ')
     return text + f"[External supervision event {event['event_id']}]"
 
@@ -230,3 +232,29 @@ def present_notice(root, event_id, *, adapter=None):
             event['delivery'].update(state='unknown', last_error=type(error).__name__)
         _save(path, event)
         return event
+
+
+def run_presenter(root, stop):
+    """Bounded independent I/O lane; never delays the enforcement poll loop.
+
+    Retained unknown effects are reconciled by readback, never blindly replayed.
+    Unsupported native capability is retried after watcher restart/upgrade.
+    """
+    unsupported=set()
+    while not stop.is_set():
+        try:
+            paths=list(_directory(root).glob('notice_*.json'))
+            if len(paths)>10000:
+                return  # retain capacity failure; never discard history
+            for path in sorted(paths):
+                if stop.is_set():break
+                if path.stem in unsupported:continue
+                event=_read(path)
+                if event['delivery']['state']=='recorded':continue
+                result=present_notice(root,event['event_id'])
+                if result['delivery']['state']=='unsupported':unsupported.add(event['event_id'])
+        except Exception:
+            # Per-event durable state records native errors; corrupt local state
+            # cannot stop enforcement. Inspection retains the original evidence.
+            pass
+        stop.wait(.2)

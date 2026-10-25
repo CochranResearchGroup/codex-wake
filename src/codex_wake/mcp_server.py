@@ -96,7 +96,7 @@ SPECS['wake_goal_limits_show'] = (
     'Reading does not reset or renew any allocation; missing/stale proof is not active enforcement. '
     'Supply actual native caller_thread_id; host grants still apply.',
     {'caller_thread_id': CALLER,'allocation_id':TEXT}, ['caller_thread_id'], True)
-for _verb in ('readiness','diagnose','watcher-status','start-watcher'):
+for _verb in ('readiness','diagnose','notices','watcher-status','start-watcher'):
     SPECS['wake_goal_limits_'+_verb.replace('-','_')]=(
         'goal-limits',_verb,
         ('Inspect verified enrollment/first-poll readiness, specific blockers and executable remedies. '
@@ -105,6 +105,7 @@ for _verb in ('readiness','diagnose','watcher-status','start-watcher'):
          'never unmasks, changes roots, clears stops or renews resources.'),
         {'caller_thread_id':CALLER,'allocation_id':TEXT,'task_id':TEXT,'assignment_id':TEXT,'operation_id':TEXT},
         ['caller_thread_id'],_verb!='start-watcher')
+SPECS['wake_goal_limits_notices'][3]['event_id']=TEXT
 for _name, _spec in list(SPECS.items()):
     if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff", "configuration", "target"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
@@ -288,7 +289,7 @@ class CommandRunner:
             goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
             if self.goal_limits_policy is None or goal_root is None:
                 return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
-            if verb in ('diagnose','watcher-status','start-watcher'):
+            if verb in ('diagnose','notices','watcher-status','start-watcher'):
                 try:
                     from .goal_supervision import verified_native_caller,_grant
                     from .goal_watcher import watcher_status,start_watcher
@@ -299,6 +300,10 @@ class CommandRunner:
                     verified_native_caller(native_context,thread)
                     _grant(self.goal_limits_policy,thread,arguments.get('allocation_id'),root=goal_root)
                     if verb=='watcher-status':return watcher_status(goal_root),False
+                    if verb=='notices':
+                        from .goal_notice_commands import execute
+                        return execute(goal_root,self.goal_limits_policy,thread,event_id=arguments.get('event_id'),
+                            allocation_id=arguments.get('allocation_id'),native_context=native_context),False
                     if verb=='diagnose':
                         from .goal_supervision import diagnose
                         return diagnose(goal_root,self.goal_limits_policy,thread,arguments.get('allocation_id'),native_context=native_context),False
