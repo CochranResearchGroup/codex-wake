@@ -129,3 +129,8 @@ records rather than interpreting the new routes as old semantics.
 #318 tracks missing current-connection/client refresh capability. #319 tracks
 recovery from transient observation stops. Neither is repaired by a permission
 allow, fresh process, heartbeat, ordinary native goal resume or resource renewal.
+
+Watcher service startup uses `enforcement.watcher_start` (approval required by
+default), separately from `enforcement.enroll`. Explicit standing permission permits
+automatic safe startup for the configured exact root; it never authorizes unmask,
+restart, competing services, resource renewal or changes to other sessions.

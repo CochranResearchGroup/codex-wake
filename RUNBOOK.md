@@ -8101,3 +8101,14 @@ renewed or recovered. #310 stays open. Full evidence/rollback locators:
 docs/dev/evidence/hf06/installed-deployment.md. Memory forbidden: no explicit
 memory-write request. No public release, native shared-daemon restart or broad
 session refresh occurred.
+## 2026-10-25 — goal-limit operator UX follow-up
+
+Recorded operator requirements in343 with bounded children344 (engagement/startup
+confirmation),345 (visible interruption/transcript/context) and346 (approved
+extend/reset). Source inspection confirms checkpoint steering and hard-stop
+pause/interrupt do not provide the required visible journey, and direct extend/reset
+CLI/MCP actions are missing. Reuse common permissions and339 attention decisions;
+332/341 source integration remains a separate check. Added the contract and roadmap
+follow-up in docs/goal-limit-ux without changing runtime, campaign state or installed
+services. Publication is not implementation acceptance. Memory disposition:forbidden,
+because no memory write was requested or authorized.

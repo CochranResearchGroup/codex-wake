@@ -17,7 +17,7 @@ ACTIONS = {
     'session.inspect': 'allow', 'refresh.self': 'allow',
     'refresh.connection': 'allow', 'refresh.shared': 'approval_required',
     'handoff.self': 'allow', 'resume.self': 'allow', 'resume.recover': 'approval_required',
-    'enforcement.enroll': 'allow', 'enforcement.increase': 'approval_required',
+    'enforcement.enroll': 'allow', 'enforcement.watcher_start': 'approval_required', 'enforcement.increase': 'approval_required',
     'enforcement.disable': 'approval_required', 'enforcement.recover': 'approval_required',
     'a2a.send': 'allow', 'a2a.receive': 'allow', 'a2a.claim': 'allow', 'a2a.reply': 'allow',
     'wake.background': 'allow', 'wake.existing_tab': 'allow',

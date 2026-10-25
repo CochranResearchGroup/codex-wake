@@ -11,6 +11,7 @@ import threading
 import unittest
 from unittest.mock import patch
 from websockets.sync.server import unix_serve
+from websockets.exceptions import ConnectionClosed
 
 from codex_wake.goal_supervision import enroll,show,poll
 
@@ -663,6 +664,8 @@ class GoalSupervisionTests(unittest.TestCase):
             if method=='thread/goal/get':return {'goal':dict(selected['goal'])}
             if method=='thread/read':return {'thread':dict(id=params['threadId'],turns=[dict(id=t,status='inProgress') for t in selected['active']])}
             if method=='thread/turns/list':return dict(data=[dict(id=t,status='inProgress') for t in selected['active']],nextCursor=None)
+            if method.startswith('thread/notice/'):
+                raise NotImplementedError('fixture native runtime has no notice capability')
             receipts=list((root/'goal-supervision').glob('*.json'))
             saved=next(value for p in receipts if p.name!='controller.json'
                 for value in [json.loads(p.read_text())] if value['thread_id']==params['threadId'])
@@ -673,15 +676,19 @@ class GoalSupervisionTests(unittest.TestCase):
             if method=='turn/steer':self.assertEqual(params['expectedTurnId'],'work')
             return {}
         def handler(ws):
-            for raw in ws:
-                message=json.loads(raw)
-                if 'id' not in message:continue
-                if message['method']=='initialize':result={}
-                else:
-                    try:result=request(None,None,message['method'],message['params'],None)
-                    except TimeoutError:
-                        ws.close();return
-                ws.send(json.dumps(dict(id=message['id'],result=result)))
+            try:
+                for raw in ws:
+                    message=json.loads(raw)
+                    if 'id' not in message:continue
+                    if message['method']=='initialize':result={}
+                    else:
+                        try:result=request(None,None,message['method'],message['params'],None)
+                        except NotImplementedError:
+                            ws.send(json.dumps(dict(id=message['id'],error=dict(code=-32601,message='Method not found'))));continue
+                        except TimeoutError:
+                            ws.close();return
+                    ws.send(json.dumps(dict(id=message['id'],result=result)))
+            except ConnectionClosed:return
         server=unix_serve(handler,str(Path(directory)/'unused.sock'))
         worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
         def close_server():
