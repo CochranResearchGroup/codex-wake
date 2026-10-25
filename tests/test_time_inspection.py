@@ -1,7 +1,9 @@
 import contextlib
 import io
 import json
+import os
 import unittest
+from unittest.mock import patch
 
 from codex_wake import cli
 
@@ -9,7 +11,7 @@ from codex_wake import cli
 class InspectionTests(unittest.TestCase):
     def test_offline_command_shows_all_candidates_and_no_trusted_time(self):
         output = io.StringIO()
-        with contextlib.redirect_stdout(output):
+        with patch.dict(os.environ, {'CODEX_WAKE_STABLE_TIME_CONFIG': ''}), contextlib.redirect_stdout(output):
             code = cli.main(['time', 'inspect', '--offline'])
         report = json.loads(output.getvalue())
         self.assertEqual(code, 0)
@@ -18,6 +20,20 @@ class InspectionTests(unittest.TestCase):
         self.assertEqual(report['sources'][2]['reason'], 'time_scale_unqualified')
         self.assertEqual(report['sources'][3]['reason'], 'time_scale_unqualified')
         self.assertFalse(report['production_ready'])
+
+    def test_offline_installed_service_reports_uncertainty_without_acquisition(self):
+        output = io.StringIO()
+        with patch.dict(os.environ, {'CODEX_WAKE_STABLE_TIME_CONFIG': '/unused/stable-time.json'}), \
+                patch('codex_wake.stable_time.service_time_result', side_effect=AssertionError('offline acquisition')), \
+                contextlib.redirect_stdout(output):
+            code = cli.main(['time', 'inspect', '--offline'])
+        report = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(report['provider'], 'stable-time')
+        self.assertEqual(report['purpose'], 'installed-service-consumer')
+        self.assertEqual(report['decision']['status'], 'uncertain')
+        self.assertEqual(report['decision']['reason'], 'acquisition_not_requested')
+        self.assertIsNone(report['observation'])
 
     def test_two_network_replies_are_normalized_to_one_host_counter_instant(self):
         from codex_wake.time_inspection import inspect_time
