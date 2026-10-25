@@ -8082,3 +8082,22 @@ no native/provider effects, deployment, policy increase or resource renewal.
 repository readback finds #319 latest open, and its number/URL was requested
 before attributing a new report or attempting recovery. Memory forbidden: no
 explicit user request for memory write; machine non-write receipt retained.
+
+
+## 2026-10-25 UTC | Deploy PR327 candidate and qualify installed behavior
+
+User authorized install/deploy followed by goal-limits/self-refresh bug review.
+Installed0.21.0 source7a52339,135-file parity, command links and whole skills;
+maintenance-handed-over goal controller and updated refresh monitor. Retained
+rollback and all five existing campaign invariants. Adopted common policyrev1,
+preserved legacy ceilings and bound lifecycle/goal roots. Actual native public
+self-enrollment/continuity, idle stopping, active controls/operator reply and
+isolated shared MCP reload pass with zero external provider calls. One older
+protocol fixture fails on unsupported thread/turns/list and is retained as failed.
+Current installed Codex0.164.0 schema still offers only unscoped MCP reload;
+current-session-only refresh and its old live connection remain unproven under
+#318. #319 timeout recovery remains unsupported; old expired campaigns were not
+renewed or recovered. #310 stays open. Full evidence/rollback locators:
+docs/dev/evidence/hf06/installed-deployment.md. Memory forbidden: no explicit
+memory-write request. No public release, native shared-daemon restart or broad
+session refresh occurred.

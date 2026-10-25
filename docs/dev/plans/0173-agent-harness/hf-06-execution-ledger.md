@@ -136,3 +136,17 @@ host-policy change, stop recovery or resource renewal. #310 installed acceptance
 and #318/#319 runtime issues remain open. Worker worktrees/branches are clean
 and retained with their exact custody commits above; unrelated work preserved.
 Memory disposition forbidden; user-scoped machine receipt records zero writes.
+
+
+## Authorized installed candidate — 2026-10-25 UTC
+
+After source closeout the operator explicitly requested deployment/install and
+proof. Candidate0.21.0 at7a52339 installed into an immutable versioned prefix;
+commands/skills and goal/refresh controllers updated with rollback retained.
+Common-policy revision1 adopted with legacy ceilings and bound goal/lifecycle
+roots. All five existing campaign resource/stop invariants remain unchanged.
+Installed native enrollment/continuity, idle stop, active controls/operator reply
+and isolated two-thread shared refresh PASS. Current-session-only refresh remains
+unsupported, and its existing MCP connection remains old. #310/#318/#319 stay
+open. [Installed evidence](../../evidence/hf06/installed-deployment.md) supersedes
+the earlier production0.20.1 checkpoint without rewriting its historical proof.
