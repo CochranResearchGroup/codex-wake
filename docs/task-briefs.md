@@ -12,6 +12,11 @@ argument for choosing an authority role. An A2A actor has worker operations only
 within its enrolled workspace and cannot approve a brief. A host-delegated
 controller must name its exact task scope.
 
+Workspace checks apply to the exact selected or pinned revision, including
+retries. Inspection rejects a task history containing any revision outside the
+worker workspace; it does not return partial history. Revision selection and
+authorization share the task transaction.
+
 A brief contains `objective`, `phase`, `non_goals`, `acceptance`, `workspace`,
 `allocation_ref`, `permission_ref` and `context`. Non-goals and acceptance are
 nonempty lists. Context is a list of `{path, sha256, required}` references to

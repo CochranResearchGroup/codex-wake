@@ -18,6 +18,10 @@ from .wake_control import guard_command
 
 @guard_command
 def refresh_command(args, root):
+    from .session_permissions import PermissionStore
+    if PermissionStore(root).active():
+        from .permission_refresh import cli_request
+        return cli_request(args,root,"refresh")
     try:
         config = json.loads(Path(args.profiles).read_text())
         profile = config['profiles'][args.profile]

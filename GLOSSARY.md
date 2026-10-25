@@ -178,6 +178,14 @@ Durability is separate from its deadline and delivery outcome.
 Moving a live terminal attachment into a holding workspace while preserving its
 agent. Parking alone does not pause work or renew resource allowance.
 
+
+
+**Session permission profile**:
+A named set of action permissions a session may use under operator authority.
+Selecting a profile does not establish session identity or provide more resource allowance.
+
+**Mandatory permission prohibition**:
+An operator restriction that a more permissive profile or session-specific rule cannot override.
 **Agent succession**:
 The relationship between a predecessor and successor managed agent continuing
 the same task, with outstanding obligations and resource continuity preserved.
@@ -189,3 +197,27 @@ an assignment. An admitted instruction refers to a particular revision.
 **Recipient-startup policy**:
 The selected conditions under which a wake may use an existing recipient, load
 a saved conversation or start its declared task. It is separate from wake lifetime.
+
+**Semantic agent state**:
+A fresh evidence-backed account of what an exact managed conversation is doing.
+It is distinct from binding readiness, work acceptance and permission to act.
+
+**Mutation resource claim**:
+Exclusive cooperative custody of a declared resource while work may mutate it.
+Losing contact with its owner does not release custody or authorize a new writer.
+
+**Acceptance contract**:
+An approved immutable set of checks bound to one exact task-brief assignment pin.
+An evaluation records independent evidence; missing or stale evidence is unknown.
+
+**Input owner generation**:
+The current cooperative custody token for automated or human terminal input.
+A takeover changes the generation and fences old automated operations.
+
+**Attention response**:
+An attributable operator answer to a specific current request. Recording an answer
+alone grants no permission, executes no effect and authorizes no uncertain replay.
+
+**Background job result wake**:
+An existing exact-owner wake observing the durable result of one approved bounded
+local job. Awaiting the result does not relaunch the job or renew its task allowance.
