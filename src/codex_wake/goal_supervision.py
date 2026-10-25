@@ -241,6 +241,7 @@ def _allocation_admit(directory,receipt,old):
     with _lock(path.parent,path.stem):
         if path.exists():
             _private(path);allocation=json.loads(path.read_text())
+            if allocation.get('pending_recovery'):raise ValueError('allocation recovery is pending reconciliation')
             if allocation['grant']!=receipt['grant']:raise ValueError('host allocation changed; explicit renewal required')
             if (receipt['token_limit']>allocation['token_limit'] or
                     receipt['time_limit_seconds']>allocation['time_limit_seconds']):
@@ -288,7 +289,12 @@ def _allocation_admit(directory,receipt,old):
             time_limit_seconds=allocation['time_limit_seconds'],allocation_path=str(path),
             used_tokens=allocation['used_tokens'])
         if allocation.get('boot_id')!=boot_id_value():allocation['stop_latched']=True
-        if allocation['stop_latched']:receipt['stop_latched']=True
+        if allocation['stop_latched']:
+            receipt['stop_latched']=True
+            if receipt.get('reason') is None:receipt['reason']=allocation.get('stop_reason','continuation_held')
+        if allocation.get('pending_recovery'):
+            receipt['reason']='observation_unavailable'
+            receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
         _save(path,allocation)
@@ -358,7 +364,12 @@ def _usage(receipt):
         if allocation.get('first_stop'):
             key='first_stop' if allocation['first_stop'].get('receipt_generation')==receipt['generation'] else 'allocation_first_stop'
             receipt.setdefault(key,allocation['first_stop'])
-        if allocation['stop_latched']:receipt['stop_latched']=True
+        if allocation['stop_latched']:
+            receipt['stop_latched']=True
+            if receipt.get('reason') is None:receipt['reason']=allocation.get('stop_reason','continuation_held')
+        if allocation.get('pending_recovery'):
+            receipt['reason']='observation_unavailable'
+            receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
         return dict(state='qualified',used_tokens=used,token_accounting=allocation['token_accounting'],
@@ -399,6 +410,18 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
     if not path.exists():return dict(state='held',reason='not_enrolled',thread_id=caller_thread_id,controller=_heartbeat(directory))
     with _lock(directory,name):
         _private(path);receipt=json.loads(path.read_text())
+        pending_recovery=None
+        if receipt.get('allocation_path'):
+            ledger_path=Path(receipt['allocation_path']);_private(ledger_path)
+            with _lock(ledger_path.parent,ledger_path.stem):
+                ledger=json.loads(ledger_path.read_text())
+            pending_recovery=ledger.get('pending_recovery')
+            if pending_recovery:
+                receipt.update(state='held',reason='recovery_pending_reconciliation',stop_latched=True)
+            elif ledger.get('stop_latched'):
+                receipt['stop_latched']=True
+                if receipt['state'] in ('armed','checkpoint_requested'):
+                    receipt.update(state='held',reason=ledger.get('stop_reason','continuation_held'))
         if receipt['grant']!=grant:
             receipt.update(state='held',reason='host_policy_changed')
         receipt['controller']=_heartbeat(directory)
@@ -406,6 +429,15 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
             receipt.update(state='held',reason='controller_unavailable')
         receipt['sampled']=True;receipt['maximum_token_overshoot']=None
         result=_public(receipt)
+        if receipt.get('stop_latched'):
+            observation_fault=receipt.get('reason')=='observation_unavailable'
+            result['recovery']=dict(status='requires_authorized_recovery' if observation_fault else 'not_recoverable',
+                action='wake_goal_limits_recover' if observation_fault else None,
+                next_action='Request explicit scoped recovery; healthy reads or native resume alone do not clear supervision. Original resource limits remain.' if observation_fault else 'Keep this stop; observation recovery cannot clear exhaustion, accounting, policy or clock failures.')
+        if pending_recovery:
+            result['recovery']=dict(status='pending_reconciliation',action='wake_goal_limits_recover',
+                operation_id=pending_recovery.get('operation_id'),
+                next_action='Retry the same explicitly authorized recovery operation; the allocation remains held.')
         if principal:result['enforcement_permissions']=describe(root,caller_thread_id,principal=principal)
         return result
 
@@ -541,13 +573,33 @@ def _allocation_latch(receipt,reason,deadline=None):
         allocation=json.loads(path.read_text())
         if receipt.get('first_stop'):
             allocation.setdefault('first_stop',receipt['first_stop'])
-        allocation.update(stop_latched=True,stop_reason=reason)
+        known={event['id'] for event in allocation.setdefault('stop_episodes',[])}
+        allocation['stop_episodes'].extend(event for event in receipt.get('stop_episodes',[]) if event['id'] not in known)
+        inherited=reason in (None,'continuation_held') and allocation.get('stop_latched')
+        allocation.update(stop_latched=True)
+        if not inherited:allocation['stop_reason']=reason
         if deadline is not None:
             deadline=min(deadline,allocation.get('winddown_deadline',deadline))
             allocation['winddown_deadline']=deadline
             receipt['allocation_winddown_deadline']=deadline
         _save(path,allocation)
     return deadline
+
+
+def _stop_episode(path,receipt,reason):
+    """Retain distinct faults across recovery without rewriting the first stop."""
+    episodes=receipt.setdefault('stop_episodes',[])
+    active=next((event for event in episodes if event['id']==receipt.get('active_stop_id')),None)
+    if active is not None and active['reason']==reason:return
+    controller=_heartbeat(path.parent)
+    event=dict(id=uuid4().hex,kind='stop',reason=reason,receipt_generation=receipt['generation'],
+        allocation_id=receipt['allocation_id'],boot_id=boot_id_value(),
+        observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
+        controller_generation=controller.get('generation'),used_tokens=receipt.get('used_tokens'),
+        token_limit=receipt['token_limit'],deadline=receipt['deadline'],
+        native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
+        cause=receipt.get('observation_error') if reason=='observation_unavailable' else None)
+    episodes.append(event);receipt['active_stop_id']=event['id']
 
 
 def _first_stop(path,receipt,reason):
@@ -593,6 +645,7 @@ def _first_stop(path,receipt,reason):
 
 
 def _stop(path,receipt,reason,goal=None,active=None):
+    _stop_episode(path,receipt,reason)
     _first_stop(path,receipt,reason)
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
     _allocation_latch(receipt,reason)
@@ -604,6 +657,7 @@ def _stop(path,receipt,reason,goal=None,active=None):
             legacy_turns = {effect.get('params', {}).get('turnId') or
                 effect.get('params', {}).get('expectedTurnId') for effect in receipt.get('effects', {}).values()
                 if effect.get('method') in ('turn/interrupt', 'turn/steer')}
+            receipt['stop_scope_observed']=bool(goal and goal.get('status')=='active')
             receipt['stop_turns']=list(active) if goal and goal.get('status')=='active' else sorted(legacy_turns - {None})
             _save(path,receipt)
         if receipt.get('pause_observed') and goal and goal.get('status')!='paused':
@@ -621,7 +675,9 @@ def _stop(path,receipt,reason,goal=None,active=None):
             if turn not in receipt['stop_turns']:continue
             _effect(path,receipt,'interrupt:'+turn,'turn/interrupt',dict(threadId=thread,turnId=turn))
         final_goal,final_active=_native(receipt['grant'],thread)
-        proven=(not final_goal or final_goal.get('status')=='paused') and not set(final_active).intersection(receipt['stop_turns'])
+        proven=((not final_goal or final_goal.get('status')=='paused')
+            and not set(final_active).intersection(receipt['stop_turns'])
+            and (receipt.get('stop_scope_observed',False) or not final_active))
         receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven,
             pause_observed=not final_goal or final_goal.get('status')=='paused')
     except Exception as exc:receipt['control_error']=type(exc).__name__
