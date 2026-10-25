@@ -96,3 +96,42 @@ next join is actual watcher engagement/stop plus approved renewal on qualified
 native accounting, then requirement-by-requirement closure, one review and one
 bounded TDD remediation. Manual meter04:51Z692,026fresh tokens across3agents;
 no production watcher/service/daemon or allowance changed.
+
+## RESOURCE STOP 2026-10-25T05:27Z
+
+The manual fresh-input/output meter crossed the explicit2,000,000token ceiling:
+2,048,897 first observed;2,055,524 observed during minimal cleanup. A native-worker
+cache miss published more usage than the100k reserve could absorb. This is a
+resource-ceiling breach, not successful in-budget enforcement. Stop substantive
+work immediately; do not infer renewed authority from automatic continuation.
+
+Published integration includes actual real-native/MCP/stock-TUI journey PASS in
+346-native-mcp-20261025T051000Z/attempt4, genuine self-enrollment,20fresh startup,
+extension retaining40spent, reset0window/50lifetime, no new notification turn,
+model-input notice proof, unchanged peer and empty owned-process census. It is
+an isolated development candidate, not a production install or general release.
+
+Required watcher-restart variant found a real renewal refusal after graceful
+replacement. Narrow original-exhaustion/fresh-controller fix303a664 successor
+3deddf6 integratedf81811d;12focusedtests reportedlypass. Final real restart join
+is unverified at the resource stop. Native final schema/protocol/Clippy/formatter
+pipeline was still pending; its exact owned Cargo process group2383107 received
+SIGTERM during cleanup. Source/patch and prior passing native RPC/render receipts
+are retained. Worker handles /root/ticket345 and /root/ticket346 were interrupted.
+
+PR348 remains draft. No tickets closed. Broad review0/1; post-review TDD remediation
+0/1. Do not claim the goal complete. Remaining gates: final watcher-restart proof,
+final native static/format custody, final exact-tip validation/CI, full acceptance
+audit, ticket closure, requested one review and bounded remediation.
+
+Validation honesty: initial mixed-tree1674pass/oneskip is not final proof. Frozen
+e9a46b3 run1676tests failed one strict-executor subprocess timeout; first receipt
+retained. Same single test passes isolated on prerequisite16c2501; causality of
+full-run timeout remains unclassified. CI's10guarded-interaction errors reproduce
+on baseline underumask022; private configured fixture root corrections now pass
+10tests under022. Preserve earlierfailedpartialfixture fixes; do not hide them.
+
+Shared goal watcher remains masked/inactive and no production allocation/reset,
+shared daemon replacement or default release occurred. Memory disposition:forbidden;
+no explicit memory update requested. Stop record is the continuation authority
+locator, not a new resource allowance.
