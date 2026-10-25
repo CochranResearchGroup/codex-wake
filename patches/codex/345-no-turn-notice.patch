@@ -713,7 +713,7 @@ index 33a3699ace..5fa056cf72 100644
          params: v2::SkillsListParams,
          serialization: global_shared_read("config"),
 diff --git a/codex-rs/app-server-protocol/src/protocol/thread_history.rs b/codex-rs/app-server-protocol/src/protocol/thread_history.rs
-index 2d9c6b6a1a..a32788cfec 100644
+index 2d9c6b6a1a..42074e97ec 100644
 --- a/codex-rs/app-server-protocol/src/protocol/thread_history.rs
 +++ b/codex-rs/app-server-protocol/src/protocol/thread_history.rs
 @@ -369,7 +369,7 @@ impl ThreadHistoryBuilder {
@@ -725,20 +725,19 @@ index 2d9c6b6a1a..a32788cfec 100644
              EventMsg::ThreadRolledBack(payload) => self.handle_thread_rollback(payload),
              EventMsg::TurnAborted(payload) => self.handle_turn_aborted(payload),
              EventMsg::TurnStarted(payload) => self.handle_turn_started(payload),
-@@ -388,7 +388,7 @@ impl ThreadHistoryBuilder {
-             RolloutItem::InterAgentCommunication(_)
+@@ -389,6 +389,7 @@ impl ThreadHistoryBuilder {
              | RolloutItem::InterAgentCommunicationMetadata { .. }
              | RolloutItem::TurnContext(_)
--            | RolloutItem::WorldState(_)
-+            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::WorldState(_)
++            | RolloutItem::TokenUsageRecord(_)
              | RolloutItem::SessionMeta(_) => {}
          }
      }
 diff --git a/codex-rs/app-server-protocol/src/protocol/v2/thread.rs b/codex-rs/app-server-protocol/src/protocol/v2/thread.rs
-index 7cd03930d8..ec8f8ccb19 100644
+index 7cd03930d8..ec65f0f02c 100644
 --- a/codex-rs/app-server-protocol/src/protocol/v2/thread.rs
 +++ b/codex-rs/app-server-protocol/src/protocol/v2/thread.rs
-@@ -1300,6 +1300,54 @@ pub struct ThreadInjectItemsParams {
+@@ -1300,6 +1300,53 @@ pub struct ThreadInjectItemsParams {
  #[ts(export_to = "v2/")]
  pub struct ThreadInjectItemsResponse {}
  
@@ -788,7 +787,6 @@ index 7cd03930d8..ec8f8ccb19 100644
 +    pub notice: Option<ThreadNotice>,
 +    pub model_context_available: bool,
 +}
-+
 +
  #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
  #[serde(rename_all = "camelCase")]
@@ -844,56 +842,116 @@ index 1fc1c3c6ca..18dea77b5b 100644
              }
 diff --git a/codex-rs/app-server/src/request_processors/thread_notice.rs b/codex-rs/app-server/src/request_processors/thread_notice.rs
 new file mode 100644
-index 0000000000..46432244e9
+index 0000000000..194d0e72d3
 --- /dev/null
 +++ b/codex-rs/app-server/src/request_processors/thread_notice.rs
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,108 @@
 +//! Exact-thread notice publication; native control remains a separate operation.
 +use super::*;
-+use codex_app_server_protocol::{ItemCompletedNotification, ThreadNotice, ThreadNoticeAppendParams, ThreadNoticeAppendResponse,
-+    ThreadNoticeReadParams, ThreadNoticeReadResponse};
++use codex_app_server_protocol::ItemCompletedNotification;
++use codex_app_server_protocol::ThreadNotice;
++use codex_app_server_protocol::ThreadNoticeAppendParams;
++use codex_app_server_protocol::ThreadNoticeAppendResponse;
++use codex_app_server_protocol::ThreadNoticeReadParams;
++use codex_app_server_protocol::ThreadNoticeReadResponse;
 +
 +impl TurnRequestProcessor {
-+    pub(crate) async fn thread_notice_read(&self, params: ThreadNoticeReadParams)
-+        -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
++    pub(crate) async fn thread_notice_read(
++        &self,
++        params: ThreadNoticeReadParams,
++    ) -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
 +        let (_, thread) = self.load_thread(&params.thread_id).await?;
-+        let retained = thread.external_notice(&params.event_id).await
++        let retained = thread
++            .external_notice(&params.event_id)
++            .await
 +            .map_err(|error| internal_error(format!("notice read failed: {error}")))?;
 +        let model_context_available = retained.as_ref().is_some_and(|(_, available)| *available);
-+        let notice = retained.map(|(text, _)| ThreadNotice { event_id: params.event_id, text });
-+        Ok(Some(ThreadNoticeReadResponse { model_context_available, notice }.into()))
++        let notice = retained.map(|(text, _)| ThreadNotice {
++            event_id: params.event_id,
++            text,
++        });
++        Ok(Some(
++            ThreadNoticeReadResponse {
++                model_context_available,
++                notice,
++            }
++            .into(),
++        ))
 +    }
 +
-+    pub(crate) async fn thread_notice_append(&self, params: ThreadNoticeAppendParams)
-+        -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
-+        if params.event_id.is_empty() || params.event_id.len() > 128 ||
-+            !params.event_id.bytes().all(|byte| byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'-') ||
-+            params.text.is_empty() || params.text.len() > 768 ||
-+            !params.text.ends_with(&format!("[External supervision event {}]", params.event_id)) {
-+            return Err(invalid_request("bounded event id and marked notice text required"));
++    pub(crate) async fn thread_notice_append(
++        &self,
++        params: ThreadNoticeAppendParams,
++    ) -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
++        if params.event_id.is_empty()
++            || params.event_id.len() > 128
++            || !params
++                .event_id
++                .bytes()
++                .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'-')
++            || params.text.is_empty()
++            || params.text.len() > 768
++            || !params
++                .text
++                .ends_with(&format!("[External supervision event {}]", params.event_id))
++        {
++            return Err(invalid_request(
++                "bounded event id and marked notice text required",
++            ));
 +        }
 +        let (thread_id, thread) = self.load_thread(&params.thread_id).await?;
-+        let prior = thread.external_notice(&params.event_id).await
++        let prior = thread
++            .external_notice(&params.event_id)
++            .await
 +            .map_err(|error| internal_error(format!("notice history unavailable: {error}")))?;
 +        if prior.as_ref().is_some_and(|(text, _)| text != &params.text) {
-+            return Err(invalid_request("notice event id already has different content"));
++            return Err(invalid_request(
++                "notice event id already has different content",
++            ));
 +        }
 +        let already_recorded = prior.is_some();
 +        let mut notification_published = false;
 +        if !already_recorded {
-+            thread.record_external_notice(&params.event_id, &params.text).await
++            thread
++                .record_external_notice(&params.event_id, &params.text)
++                .await
 +                .map_err(|error| internal_error(format!("notice append failed: {error}")))?;
-+            let connections = self.thread_state_manager.subscribed_connection_ids(thread_id).await;
++            let connections = self
++                .thread_state_manager
++                .subscribed_connection_ids(thread_id)
++                .await;
 +            notification_published = !connections.is_empty();
-+            let outgoing = ThreadScopedOutgoingMessageSender::new(self.outgoing.clone(), connections, thread_id);
-+            outgoing.send_server_notification(ServerNotification::ItemCompleted(ItemCompletedNotification {
-+                thread_id: params.thread_id, turn_id: params.event_id.clone(), completed_at_ms: chrono::Utc::now().timestamp_millis(),
-+                item: ThreadItem::AgentMessage { id: params.event_id.clone(), text: params.text,
-+                    phase: None, memory_citation: None },
-+            })).await;
++            let outgoing = ThreadScopedOutgoingMessageSender::new(
++                self.outgoing.clone(),
++                connections,
++                thread_id,
++            );
++            outgoing
++                .send_server_notification(ServerNotification::ItemCompleted(
++                    ItemCompletedNotification {
++                        thread_id: params.thread_id,
++                        turn_id: params.event_id.clone(),
++                        completed_at_ms: chrono::Utc::now().timestamp_millis(),
++                        item: ThreadItem::AgentMessage {
++                            id: params.event_id.clone(),
++                            text: params.text,
++                            phase: None,
++                            memory_citation: None,
++                        },
++                    },
++                ))
++                .await;
 +        }
-+        Ok(Some(ThreadNoticeAppendResponse { event_id: params.event_id, recorded: true,
-+            model_context_available: prior.is_none_or(|(_, available)| available), notification_published, already_recorded }.into()))
++        Ok(Some(
++            ThreadNoticeAppendResponse {
++                event_id: params.event_id,
++                recorded: true,
++                model_context_available: prior.is_none_or(|(_, available)| available),
++                notification_published,
++                already_recorded,
++            }
++            .into(),
++        ))
 +    }
 +}
 diff --git a/codex-rs/app-server/src/request_processors/turn_processor.rs b/codex-rs/app-server/src/request_processors/turn_processor.rs
@@ -908,44 +966,60 @@ index bb074e457b..3923392ad2 100644
 +#[path = "thread_notice.rs"]
 +mod thread_notice;
 diff --git a/codex-rs/app-server/tests/suite/v2/mod.rs b/codex-rs/app-server/tests/suite/v2/mod.rs
-index 3f1d8a030d..9c2babcda7 100644
+index 3f1d8a030d..b8bfaa9422 100644
 --- a/codex-rs/app-server/tests/suite/v2/mod.rs
 +++ b/codex-rs/app-server/tests/suite/v2/mod.rs
-@@ -67,6 +67,7 @@ mod thread_archive;
- mod thread_delete;
- mod thread_fork;
- mod thread_inject_items;
-+mod thread_notice;
- mod thread_list;
- mod thread_loaded_list;
+@@ -72,6 +72,7 @@ mod thread_loaded_list;
  mod thread_memory_mode_set;
+ mod thread_metadata_update;
+ mod thread_name_websocket;
++mod thread_notice;
+ mod thread_read;
+ mod thread_resume;
+ mod thread_rollback;
 diff --git a/codex-rs/app-server/tests/suite/v2/thread_notice.rs b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
 new file mode 100644
-index 0000000000..983a28f59f
+index 0000000000..9ea3b17e83
 --- /dev/null
 +++ b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
-@@ -0,0 +1,134 @@
+@@ -0,0 +1,345 @@
 +use anyhow::Result;
-+use app_test_support::{TestAppServer, to_response};
-+use codex_app_server_protocol::{RequestId, ThreadStartParams, ThreadStartResponse, TurnStartParams, UserInput};
++use app_test_support::TestAppServer;
++use app_test_support::to_response;
++use codex_app_server_protocol::RequestId;
++use codex_app_server_protocol::ThreadStartParams;
++use codex_app_server_protocol::ThreadStartResponse;
++use codex_app_server_protocol::TurnStartParams;
++use codex_app_server_protocol::UserInput;
 +use core_test_support::responses;
 +use pretty_assertions::assert_eq;
 +use serde_json::json;
 +use tempfile::TempDir;
-+use tokio::time::{Duration, timeout};
++use tokio::time::Duration;
++use tokio::time::timeout;
 +
 +#[tokio::test]
 +async fn notice_is_durable_idempotent_visible_and_starts_no_model_turn() -> Result<()> {
 +    let server = responses::start_mock_server().await;
-+    let model = responses::mount_sse_once(&server, responses::sse(vec![
-+        responses::ev_response_created("notice-response"),
-+        responses::ev_assistant_message("notice-model-answer", "Operator continuation complete"),
-+        json!({"type":"response.completed","response":{"id":"notice-response","usage":{
++    let model = responses::mount_sse_once(
++        &server,
++        responses::sse(vec![
++            responses::ev_response_created("notice-response"),
++            responses::ev_assistant_message(
++                "notice-model-answer",
++                "Operator continuation complete",
++            ),
++            json!({"type":"response.completed","response":{"id":"notice-response","usage":{
 +            "input_tokens":20,"input_tokens_details":{"cached_tokens":10},"output_tokens":5,
 +            "output_tokens_details":{"reasoning_tokens":0},"total_tokens":25}}}),
-+    ])).await;
++        ]),
++    )
++    .await;
 +    let home = TempDir::new()?;
-+    std::fs::write(home.path().join("config.toml"), format!(r#"
++    std::fs::write(
++        home.path().join("config.toml"),
++        format!(
++            r#"
 +model = "mock-model"
 +approval_policy = "never"
 +sandbox_mode = "read-only"
@@ -956,68 +1030,198 @@ index 0000000000..983a28f59f
 +wire_api = "responses"
 +request_max_retries = 0
 +stream_max_retries = 0
-+"#, server.uri()))?;
++"#,
++            server.uri()
++        ),
++    )?;
 +    let mut client = TestAppServer::new_with_auto_env(home.path()).await?;
 +    client.initialize().await?;
-+    let start = client.send_thread_start_request_with_auto_env(ThreadStartParams::default()).await?;
-+    let started: ThreadStartResponse = to_response(client.read_stream_until_response_message(RequestId::Integer(start)).await?)?;
++    let start = client
++        .send_thread_start_request_with_auto_env(ThreadStartParams::default())
++        .await?;
++    let started: ThreadStartResponse = to_response(
++        client
++            .read_stream_until_response_message(RequestId::Integer(start))
++            .await?,
++    )?;
 +    let thread = started.thread;
 +    let event = "notice_owned_stop_1";
 +    let text = "Goal paused: external token allowance reached. Extend allowance / Reset budget window / Keep stopped. Native /goal resume alone does not renew this external allowance. [External supervision event notice_owned_stop_1]";
-+    let append = client.send_raw_request("thread/notice/append", Some(json!({"threadId":thread.id,"eventId":event,"text":text}))).await?;
-+    let shown = timeout(Duration::from_secs(10), client.read_stream_until_notification_message("item/completed")).await??;
-+    assert_eq!(shown.params.as_ref().and_then(|params| params.get("item")).and_then(|item| item.get("text")), Some(&json!(text)));
-+    let appended = client.read_stream_until_response_message(RequestId::Integer(append)).await?;
-+    assert_eq!(appended.result, json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":true,"alreadyRecorded":false}));
++    let append = client
++        .send_raw_request(
++            "thread/notice/append",
++            Some(json!({"threadId":thread.id,"eventId":event,"text":text})),
++        )
++        .await?;
++    let shown = timeout(
++        Duration::from_secs(10),
++        client.read_stream_until_notification_message("item/completed"),
++    )
++    .await??;
++    assert_eq!(
++        shown
++            .params
++            .as_ref()
++            .and_then(|params| params.get("item"))
++            .and_then(|item| item.get("text")),
++        Some(&json!(text))
++    );
++    let appended = client
++        .read_stream_until_response_message(RequestId::Integer(append))
++        .await?;
++    assert_eq!(
++        appended.result,
++        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":true,"alreadyRecorded":false})
++    );
 +    assert_eq!(model.requests().len(), 0);
-+    let duplicate = client.send_raw_request("thread/notice/append", Some(json!({"threadId":thread.id,"eventId":event,"text":text}))).await?;
-+    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(duplicate)).await?.result,
-+        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":false,"alreadyRecorded":true}));
-+    let changed = client.send_raw_request("thread/notice/append", Some(json!({"threadId":thread.id,"eventId":event,"text":format!("Changed {text}")}))).await?;
-+    assert_eq!(client.read_stream_until_error_message(RequestId::Integer(changed)).await?.error.code, -32600);
-+    let read = client.send_raw_request("thread/notice/read", Some(json!({"threadId":thread.id,"eventId":event}))).await?;
-+    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(read)).await?.result,
-+        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true}));
++    let duplicate = client
++        .send_raw_request(
++            "thread/notice/append",
++            Some(json!({"threadId":thread.id,"eventId":event,"text":text})),
++        )
++        .await?;
++    assert_eq!(
++        client
++            .read_stream_until_response_message(RequestId::Integer(duplicate))
++            .await?
++            .result,
++        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":false,"alreadyRecorded":true})
++    );
++    let changed = client
++        .send_raw_request(
++            "thread/notice/append",
++            Some(json!({"threadId":thread.id,"eventId":event,"text":format!("Changed {text}")})),
++        )
++        .await?;
++    assert_eq!(
++        client
++            .read_stream_until_error_message(RequestId::Integer(changed))
++            .await?
++            .error
++            .code,
++        -32600
++    );
++    let read = client
++        .send_raw_request(
++            "thread/notice/read",
++            Some(json!({"threadId":thread.id,"eventId":event})),
++        )
++        .await?;
++    assert_eq!(
++        client
++            .read_stream_until_response_message(RequestId::Integer(read))
++            .await?
++            .result,
++        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true})
++    );
 +    let history = std::fs::read_to_string(thread.path.as_ref().expect("rollout path"))?;
-+    assert_eq!(history.lines().filter(|line| line.contains("external_supervision") && line.contains(event)).count(), 1);
-+    assert_eq!(history.lines().filter(|line| line.contains("agent_message") && line.contains(event)).count(), 1);
++    assert_eq!(
++        history
++            .lines()
++            .filter(|line| line.contains("external_supervision") && line.contains(event))
++            .count(),
++        1
++    );
++    assert_eq!(
++        history
++            .lines()
++            .filter(|line| line.contains("agent_message") && line.contains(event))
++            .count(),
++        1
++    );
 +    // Only this explicit operator continuation starts a local mock model request.
-+    let turn = client.send_turn_start_request(TurnStartParams {thread_id:thread.id.clone(),
-+        input:vec![UserInput::Text {text:"Continue with approved operator work".into(),text_elements:Vec::new()}],
-+        ..Default::default()}).await?;
-+    client.read_stream_until_response_message(RequestId::Integer(turn)).await?;
-+    timeout(Duration::from_secs(10), client.read_stream_until_notification_message("turn/completed")).await??;
-+    let flushed = client.send_raw_request("thread/notice/read",Some(json!({"threadId":thread.id,"eventId":event}))).await?;
-+    client.read_stream_until_response_message(RequestId::Integer(flushed)).await?;
++    let turn = client
++        .send_turn_start_request(TurnStartParams {
++            thread_id: thread.id.clone(),
++            input: vec![UserInput::Text {
++                text: "Continue with approved operator work".into(),
++                text_elements: Vec::new(),
++            }],
++            ..Default::default()
++        })
++        .await?;
++    client
++        .read_stream_until_response_message(RequestId::Integer(turn))
++        .await?;
++    timeout(
++        Duration::from_secs(10),
++        client.read_stream_until_notification_message("turn/completed"),
++    )
++    .await??;
++    let flushed = client
++        .send_raw_request(
++            "thread/notice/read",
++            Some(json!({"threadId":thread.id,"eventId":event})),
++        )
++        .await?;
++    client
++        .read_stream_until_response_message(RequestId::Integer(flushed))
++        .await?;
 +    let rows = std::fs::read_to_string(thread.path.as_ref().expect("rollout path"))?;
-+    let usage_rows = rows.lines().map(|line|serde_json::from_str::<serde_json::Value>(line).expect("valid rollout"))
-+        .filter(|row|row.get("type") == Some(&json!("token_usage_record"))).collect::<Vec<_>>();
-+    assert_eq!(usage_rows.len(),1);
-+    assert_eq!(usage_rows[0]["payload"]["response_id"],json!("notice-response"));
-+    assert_eq!(usage_rows[0]["payload"]["thread_id"],json!(thread.id));
-+    assert_eq!(usage_rows[0]["payload"]["root_turn_id"],usage_rows[0]["payload"]["turn_id"]);
-+    assert_eq!(usage_rows[0]["payload"]["usage"],json!({"input_tokens":20,"cached_input_tokens":10,
-+        "output_tokens":5,"reasoning_output_tokens":0,"total_tokens":25}));
++    let usage_rows = rows
++        .lines()
++        .map(|line| serde_json::from_str::<serde_json::Value>(line).expect("valid rollout"))
++        .filter(|row| row.get("type") == Some(&json!("token_usage_record")))
++        .collect::<Vec<_>>();
++    assert_eq!(usage_rows.len(), 1);
++    assert_eq!(
++        usage_rows[0]["payload"]["response_id"],
++        json!("notice-response")
++    );
++    assert_eq!(usage_rows[0]["payload"]["thread_id"], json!(thread.id));
++    assert_eq!(
++        usage_rows[0]["payload"]["root_turn_id"],
++        usage_rows[0]["payload"]["turn_id"]
++    );
++    assert_eq!(
++        usage_rows[0]["payload"]["usage"],
++        json!({"input_tokens":20,"cached_input_tokens":10,
++        "output_tokens":5,"reasoning_output_tokens":0,"total_tokens":25})
++    );
 +    let input = model.single_request().input();
-+    assert!(input.iter().any(|item| item.get("content").and_then(|content|content.as_array()).is_some_and(|parts|
-+        parts.iter().any(|part|part.get("text").and_then(|value|value.as_str()).is_some_and(|text|text.contains("external_supervision") && text.contains(event))))));
++    assert!(input.iter().any(|item| {
++        item.get("content")
++            .and_then(|content| content.as_array())
++            .is_some_and(|parts| {
++                parts.iter().any(|part| {
++                    part.get("text")
++                        .and_then(|value| value.as_str())
++                        .is_some_and(|text| {
++                            text.contains("external_supervision") && text.contains(event)
++                        })
++                })
++            })
++    }));
 +    Ok(())
 +}
 +
 +#[tokio::test]
 +async fn notice_is_immediately_retained_while_model_response_is_pending() -> Result<()> {
-+    use wiremock::{Mock, ResponseTemplate};
-+    use wiremock::matchers::{method, path};
++    use wiremock::Mock;
++    use wiremock::ResponseTemplate;
++    use wiremock::matchers::method;
++    use wiremock::matchers::path;
 +    let server = responses::start_mock_server().await;
-+    let body = responses::sse(vec![responses::ev_response_created("busy-notice-response"),
++    let body = responses::sse(vec![
++        responses::ev_response_created("busy-notice-response"),
 +        responses::ev_assistant_message("busy-notice-answer", "Local model finished"),
-+        responses::ev_completed("busy-notice-response")]);
-+    Mock::given(method("POST")).and(path("/v1/responses"))
-+        .respond_with(ResponseTemplate::new(200).set_body_raw(body, "text/event-stream")
-+            .set_delay(Duration::from_secs(2)))
-+        .expect(1).mount(&server).await;
++        responses::ev_completed("busy-notice-response"),
++    ]);
++    Mock::given(method("POST"))
++        .and(path("/v1/responses"))
++        .respond_with(
++            ResponseTemplate::new(200)
++                .set_body_raw(body, "text/event-stream")
++                .set_delay(Duration::from_secs(2)),
++        )
++        .expect(1)
++        .mount(&server)
++        .await;
 +    let home = TempDir::new()?;
-+    std::fs::write(home.path().join("config.toml"), format!(r#"
++    std::fs::write(
++        home.path().join("config.toml"),
++        format!(
++            r#"
 +model = "mock-model"
 +approval_policy = "never"
 +sandbox_mode = "read-only"
@@ -1028,35 +1232,100 @@ index 0000000000..983a28f59f
 +wire_api = "responses"
 +request_max_retries = 0
 +stream_max_retries = 0
-+"#, server.uri()))?;
++"#,
++            server.uri()
++        ),
++    )?;
 +    let mut client = TestAppServer::new_with_auto_env(home.path()).await?;
 +    client.initialize().await?;
-+    let start = client.send_thread_start_request_with_auto_env(ThreadStartParams::default()).await?;
-+    let started: ThreadStartResponse = to_response(client.read_stream_until_response_message(RequestId::Integer(start)).await?)?;
++    let start = client
++        .send_thread_start_request_with_auto_env(ThreadStartParams::default())
++        .await?;
++    let started: ThreadStartResponse = to_response(
++        client
++            .read_stream_until_response_message(RequestId::Integer(start))
++            .await?,
++    )?;
 +    let thread = started.thread;
-+    let turn = client.send_turn_start_request(TurnStartParams {thread_id:thread.id.clone(),
-+        input:vec![UserInput::Text {text:"Owned local delayed response".into(),text_elements:Vec::new()}],
-+        ..Default::default()}).await?;
-+    client.read_stream_until_response_message(RequestId::Integer(turn)).await?;
++    let turn = client
++        .send_turn_start_request(TurnStartParams {
++            thread_id: thread.id.clone(),
++            input: vec![UserInput::Text {
++                text: "Owned local delayed response".into(),
++                text_elements: Vec::new(),
++            }],
++            ..Default::default()
++        })
++        .await?;
++    client
++        .read_stream_until_response_message(RequestId::Integer(turn))
++        .await?;
 +    let event = "notice_busy_model_1";
 +    let text = "External supervision changed while this model request was busy. [External supervision event notice_busy_model_1]";
-+    let append = client.send_raw_request("thread/notice/append",Some(json!({"threadId":thread.id,"eventId":event,"text":text}))).await?;
++    let append = client
++        .send_raw_request(
++            "thread/notice/append",
++            Some(json!({"threadId":thread.id,"eventId":event,"text":text})),
++        )
++        .await?;
 +    let notification = timeout(Duration::from_secs(10), async {
 +        loop {
-+            let notification = client.read_stream_until_notification_message("item/completed").await?;
-+            if notification.params.as_ref().and_then(|value|value.get("item")).and_then(|item|item.get("id")) == Some(&json!(event)) {
++            let notification = client
++                .read_stream_until_notification_message("item/completed")
++                .await?;
++            if notification
++                .params
++                .as_ref()
++                .and_then(|value| value.get("item"))
++                .and_then(|item| item.get("id"))
++                == Some(&json!(event))
++            {
 +                break anyhow::Ok(notification);
 +            }
 +        }
-+    }).await??;
-+    assert_eq!(notification.params.as_ref().and_then(|value|value.get("item")).and_then(|item|item.get("text")),Some(&json!(text)));
-+    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(append)).await?.result,
-+        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":true,"alreadyRecorded":false}));
-+    let read = client.send_raw_request("thread/notice/read",Some(json!({"threadId":thread.id,"eventId":event}))).await?;
-+    assert_eq!(client.read_stream_until_response_message(RequestId::Integer(read)).await?.result,
-+        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true}));
-+    timeout(Duration::from_secs(10),client.read_stream_until_notification_message("turn/completed")).await??;
-+    assert_eq!(server.received_requests().await.expect("requests retained").len(),1);
++    })
++    .await??;
++    assert_eq!(
++        notification
++            .params
++            .as_ref()
++            .and_then(|value| value.get("item"))
++            .and_then(|item| item.get("text")),
++        Some(&json!(text))
++    );
++    assert_eq!(
++        client
++            .read_stream_until_response_message(RequestId::Integer(append))
++            .await?
++            .result,
++        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":true,"alreadyRecorded":false})
++    );
++    let read = client
++        .send_raw_request(
++            "thread/notice/read",
++            Some(json!({"threadId":thread.id,"eventId":event})),
++        )
++        .await?;
++    assert_eq!(
++        client
++            .read_stream_until_response_message(RequestId::Integer(read))
++            .await?
++            .result,
++        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true})
++    );
++    timeout(
++        Duration::from_secs(10),
++        client.read_stream_until_notification_message("turn/completed"),
++    )
++    .await??;
++    assert_eq!(
++        server
++            .received_requests()
++            .await
++            .expect("requests retained")
++            .len(),
++        1
++    );
 +    Ok(())
 +}
 diff --git a/codex-rs/core/src/agent/control/spawn.rs b/codex-rs/core/src/agent/control/spawn.rs
@@ -1072,15 +1341,14 @@ index c4c40577ca..0641258436 100644
      }
  }
 diff --git a/codex-rs/core/src/agent/control_tests.rs b/codex-rs/core/src/agent/control_tests.rs
-index 9863bfb7e2..cdc874fa62 100644
+index 9863bfb7e2..46bf34d06c 100644
 --- a/codex-rs/core/src/agent/control_tests.rs
 +++ b/codex-rs/core/src/agent/control_tests.rs
-@@ -171,7 +171,7 @@ async fn persisted_originator(thread: &CodexThread) -> String {
-             | RolloutItem::InterAgentCommunicationMetadata { .. }
+@@ -172,6 +172,7 @@ async fn persisted_originator(thread: &CodexThread) -> String {
              | RolloutItem::EventMsg(_)
              | RolloutItem::Compacted(_)
--            | RolloutItem::WorldState(_)
-+            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::WorldState(_)
++            | RolloutItem::TokenUsageRecord(_)
              | RolloutItem::TurnContext(_) => None,
          })
          .expect("session metadata should be persisted")
@@ -1110,16 +1378,21 @@ index f5ac4f4cb8..125e616323 100644
 +mod external_notice;
 diff --git a/codex-rs/core/src/codex_thread/external_notice.rs b/codex-rs/core/src/codex_thread/external_notice.rs
 new file mode 100644
-index 0000000000..718c4307bd
+index 0000000000..eeeb27a706
 --- /dev/null
 +++ b/codex-rs/core/src/codex_thread/external_notice.rs
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,114 @@
 +//! Durable, bounded external notices do not schedule model work.
 +use super::CodexThread;
-+use crate::context::{ContextualUserFragment, InternalContextSource, InternalModelContextFragment};
-+use codex_protocol::error::{CodexErr, Result};
++use crate::context::ContextualUserFragment;
++use crate::context::InternalContextSource;
++use crate::context::InternalModelContextFragment;
++use codex_protocol::error::CodexErr;
++use codex_protocol::error::Result;
 +use codex_protocol::models::ResponseItem;
-+use codex_protocol::protocol::{AgentMessageEvent, EventMsg, RolloutItem};
++use codex_protocol::protocol::AgentMessageEvent;
++use codex_protocol::protocol::EventMsg;
++use codex_protocol::protocol::RolloutItem;
 +
 +impl CodexThread {
 +    /// Find a persisted notice without creating a model turn.
@@ -1128,17 +1401,37 @@ index 0000000000..718c4307bd
 +        // the existing session header, never a user turn, before inspecting it.
 +        self.ensure_rollout_materialized().await;
 +        self.flush_rollout().await?;
-+        let history = self.load_history(/*include_archived*/ false).await
-+            .map_err(|error| CodexErr::InvalidRequest(format!("notice history unavailable: {error}")))?;
++        let history = self
++            .load_history(/*include_archived*/ false)
++            .await
++            .map_err(|error| {
++                CodexErr::InvalidRequest(format!("notice history unavailable: {error}"))
++            })?;
 +        let marker = format!("[External supervision event {event_id}]");
-+        let context_exists = history.items.iter().any(|item| matches!(item,
-+            RolloutItem::ResponseItem(ResponseItem::Message { id: Some(id), .. }) if id == event_id));
-+        if !context_exists { return Ok(None); }
-+        let in_context = self.codex.session.clone_history().await.raw_items().iter().any(|item| matches!(item,
-+            ResponseItem::Message { id: Some(id), .. } if id == event_id));
++        let context_exists = history.items.iter().any(|item| {
++            matches!(item,
++            RolloutItem::ResponseItem(ResponseItem::Message { id: Some(id), .. }) if id == event_id)
++        });
++        if !context_exists {
++            return Ok(None);
++        }
++        let in_context = self
++            .codex
++            .session
++            .clone_history()
++            .await
++            .raw_items()
++            .iter()
++            .any(|item| {
++                matches!(item,
++            ResponseItem::Message { id: Some(id), .. } if id == event_id)
++            });
 +        Ok(history.items.iter().find_map(|item| match item {
-+            RolloutItem::EventMsg(EventMsg::AgentMessage(message)) if message.message.ends_with(&marker) =>
-+                Some((message.message.clone(), in_context)),
++            RolloutItem::EventMsg(EventMsg::AgentMessage(message))
++                if message.message.ends_with(&marker) =>
++            {
++                Some((message.message.clone(), in_context))
++            }
 +            _ => None,
 +        }))
 +    }
@@ -1147,24 +1440,48 @@ index 0000000000..718c4307bd
 +    /// The caller serializes notice requests for this thread; no turn is started.
 +    pub async fn record_external_notice(&self, event_id: &str, text: &str) -> Result<()> {
 +        if text.len() > 768 || text.is_empty() || event_id.len() > 128 || event_id.is_empty() {
-+            return Err(CodexErr::InvalidRequest("external notice exceeds bounded context size".into()));
++            return Err(CodexErr::InvalidRequest(
++                "external notice exceeds bounded context size".into(),
++            ));
 +        }
 +        let fragment = InternalModelContextFragment::new(
-+            InternalContextSource::from_static("external_supervision"), text);
++            InternalContextSource::from_static("external_supervision"),
++            text,
++        );
 +        let mut item: ResponseItem = ContextualUserFragment::into(fragment);
-+        if let ResponseItem::Message { id, .. } = &mut item { *id = Some(event_id.to_owned()); }
-+        let history = self.load_history(/*include_archived*/ false).await
-+            .map_err(|error| CodexErr::InvalidRequest(format!("notice history unavailable: {error}")))?;
++        if let ResponseItem::Message { id, .. } = &mut item {
++            *id = Some(event_id.to_owned());
++        }
++        let history = self
++            .load_history(/*include_archived*/ false)
++            .await
++            .map_err(|error| {
++                CodexErr::InvalidRequest(format!("notice history unavailable: {error}"))
++            })?;
 +        let saved = history.items.iter().find_map(|saved| match saved {
-+            RolloutItem::ResponseItem(ResponseItem::Message { id: Some(id), content, .. }) if id == event_id => Some(content),
++            RolloutItem::ResponseItem(ResponseItem::Message {
++                id: Some(id),
++                content,
++                ..
++            }) if id == event_id => Some(content),
 +            _ => None,
 +        });
 +        if let Some(content) = saved {
-+            let expected = match &item { ResponseItem::Message { content, .. } => content, _ => unreachable!() };
-+            if content != expected { return Err(CodexErr::InvalidRequest("notice event id already has different content".into())); }
++            let expected = match &item {
++                ResponseItem::Message { content, .. } => content,
++                _ => unreachable!(),
++            };
++            if content != expected {
++                return Err(CodexErr::InvalidRequest(
++                    "notice event id already has different content".into(),
++                ));
++            }
 +        } else {
 +            let turn = self.codex.session.new_default_turn().await;
-+            self.codex.session.record_conversation_items(turn.as_ref(), &[item]).await;
++            self.codex
++                .session
++                .record_conversation_items(turn.as_ref(), &[item])
++                .await;
 +        }
 +        // The event is separate from the model item so existing clients replay it.
 +        // Reconcile a partial append by retaining the same id/context, never reinjecting it.
@@ -1180,48 +1497,55 @@ index 0000000000..718c4307bd
 +    }
 +}
 diff --git a/codex-rs/core/src/compact.rs b/codex-rs/core/src/compact.rs
-index d2a9fd5222..0c3b8997f7 100644
+index d2a9fd5222..d1730b35b3 100644
 --- a/codex-rs/core/src/compact.rs
 +++ b/codex-rs/core/src/compact.rs
-@@ -698,7 +698,8 @@ async fn drain_to_completed(
+@@ -698,7 +698,13 @@ async fn drain_to_completed(
              Ok(ResponseEvent::RateLimits(snapshot)) => {
                  sess.update_rate_limits(turn_context, snapshot).await;
              }
 -            Ok(ResponseEvent::Completed { token_usage, .. }) => {
-+            Ok(ResponseEvent::Completed { response_id, token_usage, .. }) => {
-+                sess.record_response_token_usage(turn_context, response_id, token_usage.clone()).await;
++            Ok(ResponseEvent::Completed {
++                response_id,
++                token_usage,
++                ..
++            }) => {
++                sess.record_response_token_usage(turn_context, response_id, token_usage.clone())
++                    .await;
                  sess.update_token_usage_info(turn_context, token_usage.as_ref())
                      .await?;
                  return Ok(());
 diff --git a/codex-rs/core/src/compact_remote.rs b/codex-rs/core/src/compact_remote.rs
-index 6b251562f7..29c80966a3 100644
+index 6b251562f7..01ad4fa490 100644
 --- a/codex-rs/core/src/compact_remote.rs
 +++ b/codex-rs/core/src/compact_remote.rs
-@@ -265,6 +265,9 @@ async fn run_remote_compact_task_inner_impl(
+@@ -265,6 +265,10 @@ async fn run_remote_compact_task_inner_impl(
              &responses_metadata,
          )
          .await?;
 +    // This older endpoint returns items without a response identity or exact
 +    // usage. Retain explicit unqualified completion, never an invented charge.
-+    sess.record_response_token_usage(turn_context.as_ref(), String::new(), None).await;
++    sess.record_response_token_usage(turn_context.as_ref(), String::new(), None)
++        .await;
      let (new_window_number, new_window_ids) = sess.advance_auto_compact_window().await;
      let (new_history, world_state_baseline) = process_compacted_history(
          sess.as_ref(),
 diff --git a/codex-rs/core/src/compact_remote_v2.rs b/codex-rs/core/src/compact_remote_v2.rs
-index 6e110045bb..d520cf9630 100644
+index 6e110045bb..de600aa142 100644
 --- a/codex-rs/core/src/compact_remote_v2.rs
 +++ b/codex-rs/core/src/compact_remote_v2.rs
-@@ -287,7 +287,9 @@ async fn run_remote_compact_task_inner_impl(
+@@ -287,7 +287,10 @@ async fn run_remote_compact_task_inner_impl(
      let RemoteCompactionV2Output {
          compaction_output,
          token_usage,
 +        response_id,
      } = compaction_output_result?;
-+    sess.record_response_token_usage(turn_context, response_id, token_usage.clone()).await;
++    sess.record_response_token_usage(turn_context, response_id, token_usage.clone())
++        .await;
      if let Some(token_usage) = token_usage {
          sess.record_rollout_budget_usage(&token_usage)?;
          analytics_details.active_context_tokens_before = Some(token_usage.input_tokens);
-@@ -342,6 +344,7 @@ async fn run_remote_compact_task_inner_impl(
+@@ -342,6 +345,7 @@ async fn run_remote_compact_task_inner_impl(
  struct RemoteCompactionV2Output {
      compaction_output: ResponseItem,
      token_usage: Option<TokenUsage>,
@@ -1229,7 +1553,7 @@ index 6e110045bb..d520cf9630 100644
  }
  
  async fn run_remote_compaction_request_v2(
-@@ -402,6 +405,7 @@ async fn collect_compaction_output(
+@@ -402,6 +406,7 @@ async fn collect_compaction_output(
      let mut compaction_output = None;
      let mut saw_completed = false;
      let mut completed_token_usage = None;
@@ -1237,18 +1561,22 @@ index 6e110045bb..d520cf9630 100644
      while let Some(event) = stream.next().await {
          match event? {
              ResponseEvent::OutputItemDone(item) => {
-@@ -413,8 +417,9 @@ async fn collect_compaction_output(
+@@ -413,8 +418,13 @@ async fn collect_compaction_output(
                      }
                  }
              }
 -            ResponseEvent::Completed { token_usage, .. } => {
-+            ResponseEvent::Completed { response_id, token_usage, .. } => {
++            ResponseEvent::Completed {
++                response_id,
++                token_usage,
++                ..
++            } => {
                  saw_completed = true;
 +                completed_response_id = response_id;
                  completed_token_usage = token_usage;
                  break;
              }
-@@ -441,6 +446,7 @@ async fn collect_compaction_output(
+@@ -441,6 +451,7 @@ async fn collect_compaction_output(
      Ok(RemoteCompactionV2Output {
          compaction_output,
          token_usage: completed_token_usage,
@@ -1257,37 +1585,81 @@ index 6e110045bb..d520cf9630 100644
  }
  
 diff --git a/codex-rs/core/src/mcp_tool_call.rs b/codex-rs/core/src/mcp_tool_call.rs
-index d03f232d12..9bf47fdf86 100644
+index d03f232d12..b0e53ec005 100644
 --- a/codex-rs/core/src/mcp_tool_call.rs
 +++ b/codex-rs/core/src/mcp_tool_call.rs
-@@ -1095,6 +1095,10 @@ fn build_mcp_tool_call_request_meta(
+@@ -1095,6 +1095,19 @@ fn build_mcp_tool_call_request_meta(
              reasoning_effort: turn_context.effective_reasoning_effort(),
          })
      {
-+        if let Some(session_id) = turn_metadata.get("session_id").and_then(serde_json::Value::as_str) {
-+            request_meta.insert("sessionId".to_string(), serde_json::Value::String(session_id.to_string()));
++        if let Some(session_id) = turn_metadata
++            .get("session_id")
++            .and_then(serde_json::Value::as_str)
++        {
++            request_meta.insert(
++                "sessionId".to_string(),
++                serde_json::Value::String(session_id.to_string()),
++            );
 +        }
-+        request_meta.insert("callId".to_string(), serde_json::Value::String(call_id.to_string()));
++        request_meta.insert(
++            "callId".to_string(),
++            serde_json::Value::String(call_id.to_string()),
++        );
          request_meta.insert(
              crate::X_CODEX_TURN_METADATA_HEADER.to_string(),
              turn_metadata,
+diff --git a/codex-rs/core/src/mcp_tool_call_tests.rs b/codex-rs/core/src/mcp_tool_call_tests.rs
+index 6b642b1cd0..9d6f050f03 100644
+--- a/codex-rs/core/src/mcp_tool_call_tests.rs
++++ b/codex-rs/core/src/mcp_tool_call_tests.rs
+@@ -1186,6 +1186,8 @@ async fn plugin_mcp_tool_call_request_meta_includes_plugin_id() {
+     assert_eq!(
+         build_mcp_tool_call_request_meta(&turn_context, "sample", "call-plugin", Some(&metadata),),
+         Some(serde_json::json!({
++            "sessionId": expected_turn_metadata.get("session_id"),
++            "callId": "call-plugin",
+             crate::X_CODEX_TURN_METADATA_HEADER: expected_turn_metadata,
+             MCP_TOOL_PLUGIN_ID_META_KEY: "sample@test",
+         }))
+@@ -1328,6 +1330,8 @@ async fn codex_apps_tool_call_request_meta_includes_turn_metadata_and_codex_apps
+             Some(&metadata),
+         ),
+         Some(serde_json::json!({
++            "sessionId": expected_turn_metadata.get("session_id"),
++            "callId": "call_abc123xyz789",
+             crate::X_CODEX_TURN_METADATA_HEADER: expected_turn_metadata,
+             MCP_TOOL_CODEX_APPS_META_KEY: {
+                 "call_id": "call_abc123xyz789",
+@@ -1355,6 +1359,8 @@ async fn codex_apps_tool_call_request_meta_includes_call_id_without_existing_cod
+             /*metadata*/ None,
+         ),
+         Some(serde_json::json!({
++            "sessionId": expected_turn_metadata.get("session_id"),
++            "callId": "call_abc123xyz789",
+             crate::X_CODEX_TURN_METADATA_HEADER: expected_turn_metadata,
+             MCP_TOOL_CODEX_APPS_META_KEY: {
+                 "call_id": "call_abc123xyz789",
 diff --git a/codex-rs/core/src/session/mod.rs b/codex-rs/core/src/session/mod.rs
-index f45616eed8..4fa35d440e 100644
+index f45616eed8..de53e4a3ba 100644
 --- a/codex-rs/core/src/session/mod.rs
 +++ b/codex-rs/core/src/session/mod.rs
-@@ -1315,6 +1315,11 @@ impl Session {
+@@ -1315,6 +1315,15 @@ impl Session {
              InitialHistory::Resumed(resumed_history) => {
                  let turn_context = self.new_default_turn().await;
                  let rollout_items = resumed_history.history;
-+                self.state.lock().await.latest_token_usage_record = rollout_items.iter().rev()
-+                    .find_map(|item| match item {
-+                        RolloutItem::TokenUsageRecord(record) if record.thread_id == self.thread_id() => Some(record.clone()),
++                self.state.lock().await.latest_token_usage_record =
++                    rollout_items.iter().rev().find_map(|item| match item {
++                        RolloutItem::TokenUsageRecord(record)
++                            if record.thread_id == self.thread_id() =>
++                        {
++                            Some(record.clone())
++                        }
 +                        _ => None,
 +                    });
                  let previous_turn_settings = self
                      .apply_rollout_reconstruction(&turn_context, &rollout_items)
                      .await;
-@@ -4034,3 +4039,5 @@ async fn build_hooks_for_config(
+@@ -4034,3 +4043,5 @@ async fn build_hooks_for_config(
  
  #[cfg(test)]
  pub(crate) mod tests;
@@ -1295,28 +1667,47 @@ index f45616eed8..4fa35d440e 100644
 +mod response_usage;
 diff --git a/codex-rs/core/src/session/response_usage.rs b/codex-rs/core/src/session/response_usage.rs
 new file mode 100644
-index 0000000000..6253121a84
+index 0000000000..7aad8644dd
 --- /dev/null
 +++ b/codex-rs/core/src/session/response_usage.rs
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,44 @@
 +//! Response ledger compatibility from upstream 5f79a92e3936274318d2122ae3244e5edd80dd1f.
 +//! Descendant lineage is unavailable in this older runtime, so it remains held.
 +use super::Session;
 +use super::TurnContext;
-+use codex_protocol::protocol::{EventMsg, RawResponseCompletedEvent, RolloutItem, TokenUsage};
++use codex_protocol::protocol::EventMsg;
++use codex_protocol::protocol::RawResponseCompletedEvent;
++use codex_protocol::protocol::RolloutItem;
++use codex_protocol::protocol::TokenUsage;
 +
 +impl Session {
-+    pub(crate) async fn record_response_token_usage(&self, turn: &TurnContext,
-+        response_id: String, usage: Option<TokenUsage>) {
-+        let observed = RolloutItem::EventMsg(EventMsg::RawResponseCompleted(RawResponseCompletedEvent {
-+            response_id:response_id.clone(),token_usage:usage.clone(),usage_metadata:None,
-+        }));
-+        let record = usage.as_ref().filter(|_| self.thread_id().to_string() == self.session_id().to_string())
++    pub(crate) async fn record_response_token_usage(
++        &self,
++        turn: &TurnContext,
++        response_id: String,
++        usage: Option<TokenUsage>,
++    ) {
++        let observed =
++            RolloutItem::EventMsg(EventMsg::RawResponseCompleted(RawResponseCompletedEvent {
++                response_id: response_id.clone(),
++                token_usage: usage.clone(),
++                usage_metadata: None,
++            }));
++        let record = usage
++            .as_ref()
++            .filter(|_| self.thread_id().to_string() == self.session_id().to_string())
 +            .map(|usage| (response_id, usage));
 +        if let Some((response_id, usage)) = record {
-+            let record = self.state.lock().await.record_token_usage(self.thread_id(), &turn.sub_id,
-+                self.session_id(),turn.sub_id.clone(),response_id,usage);
-+            self.persist_rollout_items(&[observed,RolloutItem::TokenUsageRecord(record)]).await;
++            let record = self.state.lock().await.record_token_usage(
++                self.thread_id(),
++                &turn.sub_id,
++                self.session_id(),
++                turn.sub_id.clone(),
++                response_id,
++                usage,
++            );
++            self.persist_rollout_items(&[observed, RolloutItem::TokenUsageRecord(record)])
++                .await;
 +        } else {
 +            // No record is fabricated for missing usage or unproved descendant
 +            // root-turn attribution. Wake sees the unmatched completion and holds.
@@ -1325,7 +1716,7 @@ index 0000000000..6253121a84
 +    }
 +}
 diff --git a/codex-rs/core/src/session/rollout_reconstruction.rs b/codex-rs/core/src/session/rollout_reconstruction.rs
-index 0b89caaf05..d4bbeeba91 100644
+index 0b89caaf05..16a4366740 100644
 --- a/codex-rs/core/src/session/rollout_reconstruction.rs
 +++ b/codex-rs/core/src/session/rollout_reconstruction.rs
 @@ -243,6 +243,7 @@ impl Session {
@@ -1336,16 +1727,15 @@ index 0b89caaf05..d4bbeeba91 100644
                  RolloutItem::WorldState(_) => {
                      let active_segment =
                          active_segment.get_or_insert_with(ActiveReplaySegment::default);
-@@ -367,7 +368,7 @@ impl Session {
-                 }
+@@ -368,6 +369,7 @@ impl Session {
                  RolloutItem::EventMsg(_)
                  | RolloutItem::TurnContext(_)
--                | RolloutItem::WorldState(_)
-+                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::WorldState(_)
++                | RolloutItem::TokenUsageRecord(_)
                  | RolloutItem::SessionMeta(_) => {}
              }
          }
-@@ -411,6 +412,7 @@ impl Session {
+@@ -411,6 +413,7 @@ impl Session {
                      }
                  }
                  RolloutItem::SessionMeta(_)
@@ -1354,41 +1744,38 @@ index 0b89caaf05..d4bbeeba91 100644
                  | RolloutItem::InterAgentCommunication(_)
                  | RolloutItem::InterAgentCommunicationMetadata { .. }
 diff --git a/codex-rs/core/src/session/tests.rs b/codex-rs/core/src/session/tests.rs
-index ece9d446b5..852ddf69de 100644
+index ece9d446b5..eb667f5a4d 100644
 --- a/codex-rs/core/src/session/tests.rs
 +++ b/codex-rs/core/src/session/tests.rs
-@@ -2757,7 +2757,7 @@ async fn start_new_context_window_assigns_and_persists_item_ids() {
-         | RolloutItem::InterAgentCommunication(_)
+@@ -2758,6 +2758,7 @@ async fn start_new_context_window_assigns_and_persists_item_ids() {
          | RolloutItem::InterAgentCommunicationMetadata { .. }
          | RolloutItem::TurnContext(_)
--        | RolloutItem::WorldState(_)
-+        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::WorldState(_)
++        | RolloutItem::TokenUsageRecord(_)
          | RolloutItem::EventMsg(_) => None,
      });
      assert_eq!(
-@@ -2816,7 +2816,7 @@ async fn record_initial_history_assigns_and_persists_id_for_forked_response_item
-         | RolloutItem::InterAgentCommunicationMetadata { .. }
+@@ -2817,6 +2818,7 @@ async fn record_initial_history_assigns_and_persists_id_for_forked_response_item
          | RolloutItem::Compacted(_)
          | RolloutItem::TurnContext(_)
--        | RolloutItem::WorldState(_)
-+        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::WorldState(_)
++        | RolloutItem::TokenUsageRecord(_)
          | RolloutItem::EventMsg(_) => None,
      });
      assert_eq!(persisted_item_id, Some(live_item_id.as_str()));
 diff --git a/codex-rs/core/src/session/turn.rs b/codex-rs/core/src/session/turn.rs
-index f16b525002..313a0713a4 100644
+index f16b525002..3ce981af8d 100644
 --- a/codex-rs/core/src/session/turn.rs
 +++ b/codex-rs/core/src/session/turn.rs
-@@ -1509,7 +1509,7 @@ pub(super) fn realtime_text_for_event(msg: &EventMsg) -> Option<(String, Option<
-         | EventMsg::TurnStarted(_)
+@@ -1510,6 +1510,7 @@ pub(super) fn realtime_text_for_event(msg: &EventMsg) -> Option<(String, Option<
          | EventMsg::ThreadSettingsApplied(_)
          | EventMsg::TurnComplete(_)
--        | EventMsg::TokenCount(_)
-+        | EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_)
+         | EventMsg::TokenCount(_)
++        | EventMsg::RawResponseCompleted(_)
          | EventMsg::UserMessage(_)
          | EventMsg::AgentReasoning(_)
          | EventMsg::AgentReasoningRawContent(_)
-@@ -2210,9 +2210,9 @@ async fn try_run_sampling_request(
+@@ -2210,9 +2211,9 @@ async fn try_run_sampling_request(
                  sess.services.models_manager.refresh_if_new_etag(etag).await;
              }
              ResponseEvent::Completed {
@@ -1399,28 +1786,33 @@ index f16b525002..313a0713a4 100644
              } => {
                  flush_assistant_text_segments_all(
                      &sess,
-@@ -2224,6 +2224,7 @@ async fn try_run_sampling_request(
+@@ -2224,6 +2225,8 @@ async fn try_run_sampling_request(
                  let budget_result = sess
                      .record_token_usage_info(&turn_context, token_usage.as_ref())
                      .await;
-+                sess.record_response_token_usage(&turn_context, response_id, token_usage.clone()).await;
++                sess.record_response_token_usage(&turn_context, response_id, token_usage.clone())
++                    .await;
                  should_emit_token_count = true;
                  should_emit_turn_diff = true;
                  if let Err(err) = budget_result {
 diff --git a/codex-rs/core/src/state/session.rs b/codex-rs/core/src/state/session.rs
-index d681c6fa87..5722b786b7 100644
+index d681c6fa87..e6ef9e4ecb 100644
 --- a/codex-rs/core/src/state/session.rs
 +++ b/codex-rs/core/src/state/session.rs
-@@ -19,6 +19,8 @@ use crate::session_startup_prewarm::SessionStartupPrewarmHandle;
+@@ -16,9 +16,12 @@ use crate::session::PreviousTurnSettings;
+ use crate::session::session::SessionConfiguration;
+ use crate::session::time_reminder::CurrentTimeReminderState;
+ use crate::session_startup_prewarm::SessionStartupPrewarmHandle;
++use codex_protocol::SessionId;
++use codex_protocol::ThreadId;
  use codex_protocol::protocol::RateLimitSnapshot;
  use codex_protocol::protocol::TokenUsage;
  use codex_protocol::protocol::TokenUsageInfo;
 +use codex_protocol::protocol::TokenUsageRecord;
-+use codex_protocol::{ThreadId, SessionId};
  use codex_protocol::protocol::TurnContextItem;
  use codex_utils_output_truncation::TruncationPolicy;
  
-@@ -27,6 +29,7 @@ pub(crate) struct SessionState {
+@@ -27,6 +30,7 @@ pub(crate) struct SessionState {
      pub(crate) session_configuration: SessionConfiguration,
      pub(crate) history: ContextManager,
      pub(crate) latest_rate_limits: Option<RateLimitSnapshot>,
@@ -1428,7 +1820,7 @@ index d681c6fa87..5722b786b7 100644
      pub(crate) server_reasoning_included: bool,
      pub(crate) mcp_dependency_prompted: HashSet<String>,
      pub(crate) additional_context: AdditionalContextStore,
-@@ -64,6 +67,7 @@ impl SessionState {
+@@ -64,6 +68,7 @@ impl SessionState {
              session_configuration,
              history,
              latest_rate_limits: None,
@@ -1436,7 +1828,7 @@ index d681c6fa87..5722b786b7 100644
              server_reasoning_included: false,
              mcp_dependency_prompted: HashSet::new(),
              additional_context: AdditionalContextStore::default(),
-@@ -126,6 +130,44 @@ impl SessionState {
+@@ -126,6 +131,44 @@ impl SessionState {
          self.history.set_token_info(info);
      }
  
@@ -1481,21 +1873,32 @@ index d681c6fa87..5722b786b7 100644
      pub(crate) fn set_reference_context_item(&mut self, item: Option<TurnContextItem>) {
          self.history.set_reference_context_item(item);
      }
+diff --git a/codex-rs/mcp-server/src/codex_tool_runner.rs b/codex-rs/mcp-server/src/codex_tool_runner.rs
+index cbc113ff79..ada17e92b7 100644
+--- a/codex-rs/mcp-server/src/codex_tool_runner.rs
++++ b/codex-rs/mcp-server/src/codex_tool_runner.rs
+@@ -358,6 +358,7 @@ async fn run_codex_tool_session_inner(
+                     | EventMsg::ImageGenerationEnd(_)
+                     | EventMsg::ViewImageToolCall(_)
+                     | EventMsg::RawResponseItem(_)
++                    | EventMsg::RawResponseCompleted(_)
+                     | EventMsg::EnteredReviewMode(_)
+                     | EventMsg::ItemStarted(_)
+                     | EventMsg::ItemCompleted(_)
 diff --git a/codex-rs/memories/write/src/phase1.rs b/codex-rs/memories/write/src/phase1.rs
-index 712e11d0ef..840f734373 100644
+index 712e11d0ef..e18cc21a2e 100644
 --- a/codex-rs/memories/write/src/phase1.rs
 +++ b/codex-rs/memories/write/src/phase1.rs
-@@ -415,7 +415,7 @@ mod job {
-                 | RolloutItem::InterAgentCommunicationMetadata { .. }
+@@ -416,6 +416,7 @@ mod job {
                  | RolloutItem::Compacted(_)
                  | RolloutItem::TurnContext(_)
--                | RolloutItem::WorldState(_)
-+                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::WorldState(_)
++                | RolloutItem::TokenUsageRecord(_)
                  | RolloutItem::EventMsg(_) => None,
              })
              .collect::<Vec<_>>();
 diff --git a/codex-rs/protocol/src/protocol.rs b/codex-rs/protocol/src/protocol.rs
-index 96a793bcd3..efd7b94d20 100644
+index 96a793bcd3..6e19042bdc 100644
 --- a/codex-rs/protocol/src/protocol.rs
 +++ b/codex-rs/protocol/src/protocol.rs
 @@ -1430,6 +1430,7 @@ pub enum EventMsg {
@@ -1506,25 +1909,23 @@ index 96a793bcd3..efd7b94d20 100644
  
      ItemStarted(ItemStartedEvent),
      ItemCompleted(ItemCompletedEvent),
-@@ -2665,7 +2666,7 @@ impl InitialHistory {
-                 | RolloutItem::InterAgentCommunication(_)
+@@ -2666,6 +2667,7 @@ impl InitialHistory {
                  | RolloutItem::InterAgentCommunicationMetadata { .. }
                  | RolloutItem::Compacted(_)
--                | RolloutItem::WorldState(_)
-+                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::WorldState(_)
++                | RolloutItem::TokenUsageRecord(_)
                  | RolloutItem::EventMsg(_) => None,
              })
              .and_then(|turn_context| turn_context.multi_agent_mode)
-@@ -3001,7 +3002,7 @@ fn multi_agent_version_from_items(
-             | RolloutItem::InterAgentCommunication(_)
+@@ -3002,6 +3004,7 @@ fn multi_agent_version_from_items(
              | RolloutItem::InterAgentCommunicationMetadata { .. }
              | RolloutItem::Compacted(_)
--            | RolloutItem::WorldState(_)
-+            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::WorldState(_)
++            | RolloutItem::TokenUsageRecord(_)
              | RolloutItem::EventMsg(_) => None,
          })
      })
-@@ -3155,6 +3156,7 @@ impl<'de> Deserialize<'de> for SessionMetaLine {
+@@ -3155,6 +3158,7 @@ impl<'de> Deserialize<'de> for SessionMetaLine {
  pub enum RolloutItem {
      SessionMeta(SessionMetaLine),
      ResponseItem(ResponseItem),
@@ -1532,7 +1933,7 @@ index 96a793bcd3..efd7b94d20 100644
      /// Legacy delivery item reconstructed as a model-visible `agent_message`.
      InterAgentCommunication(InterAgentCommunication),
      /// Local delivery metadata that is not part of the Responses API item.
-@@ -3167,6 +3169,27 @@ pub enum RolloutItem {
+@@ -3167,6 +3171,27 @@ pub enum RolloutItem {
      EventMsg(EventMsg),
  }
  
@@ -1561,29 +1962,27 @@ index 96a793bcd3..efd7b94d20 100644
  #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema, TS)]
  pub struct WorldStateItem {
 diff --git a/codex-rs/rollout-trace/src/protocol_event.rs b/codex-rs/rollout-trace/src/protocol_event.rs
-index 42e0db04d2..64aeee8278 100644
+index 42e0db04d2..71c1b5f4b0 100644
 --- a/codex-rs/rollout-trace/src/protocol_event.rs
 +++ b/codex-rs/rollout-trace/src/protocol_event.rs
-@@ -358,7 +358,7 @@ pub(crate) fn tool_runtime_trace_event(event: &EventMsg) -> Option<ToolRuntimeTr
-         | EventMsg::TurnStarted(_)
+@@ -359,6 +359,7 @@ pub(crate) fn tool_runtime_trace_event(event: &EventMsg) -> Option<ToolRuntimeTr
          | EventMsg::ThreadSettingsApplied(_)
          | EventMsg::TurnComplete(_)
--        | EventMsg::TokenCount(_)
-+        | EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_)
+         | EventMsg::TokenCount(_)
++        | EventMsg::RawResponseCompleted(_)
          | EventMsg::AgentMessage(_)
          | EventMsg::UserMessage(_)
          | EventMsg::AgentReasoning(_)
-@@ -429,7 +429,7 @@ pub(crate) fn wrapped_protocol_event_type(event: &EventMsg) -> Option<&'static s
-         | EventMsg::TurnModerationMetadata(_)
+@@ -430,6 +431,7 @@ pub(crate) fn wrapped_protocol_event_type(event: &EventMsg) -> Option<&'static s
          | EventMsg::ContextCompacted(_)
          | EventMsg::ThreadSettingsApplied(_)
--        | EventMsg::TokenCount(_)
-+        | EventMsg::TokenCount(_) | EventMsg::RawResponseCompleted(_)
+         | EventMsg::TokenCount(_)
++        | EventMsg::RawResponseCompleted(_)
          | EventMsg::AgentMessage(_)
          | EventMsg::UserMessage(_)
          | EventMsg::AgentReasoning(_)
 diff --git a/codex-rs/rollout/src/list.rs b/codex-rs/rollout/src/list.rs
-index 1154d36eee..8c4bce9a69 100644
+index 1154d36eee..85647e3011 100644
 --- a/codex-rs/rollout/src/list.rs
 +++ b/codex-rs/rollout/src/list.rs
 @@ -1176,7 +1176,7 @@ async fn read_head_summary(path: &Path, head_limit: usize) -> io::Result<HeadTai
@@ -1595,34 +1994,31 @@ index 1154d36eee..8c4bce9a69 100644
                  // Not included in `head`; skip.
              }
              RolloutItem::Compacted(_) => {
-@@ -1241,7 +1241,7 @@ pub async fn read_head_for_summary(path: &Path) -> io::Result<Vec<serde_json::Va
-                 RolloutItem::InterAgentCommunicationMetadata { .. }
+@@ -1242,6 +1242,7 @@ pub async fn read_head_for_summary(path: &Path) -> io::Result<Vec<serde_json::Va
                  | RolloutItem::Compacted(_)
                  | RolloutItem::TurnContext(_)
--                | RolloutItem::WorldState(_)
-+                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+                 | RolloutItem::WorldState(_)
++                | RolloutItem::TokenUsageRecord(_)
                  | RolloutItem::EventMsg(_) => {}
              }
          }
 diff --git a/codex-rs/rollout/src/metadata.rs b/codex-rs/rollout/src/metadata.rs
-index 127a8af223..1969c82b9f 100644
+index 127a8af223..83c994c936 100644
 --- a/codex-rs/rollout/src/metadata.rs
 +++ b/codex-rs/rollout/src/metadata.rs
-@@ -73,7 +73,7 @@ pub fn builder_from_items(
-         | RolloutItem::InterAgentCommunicationMetadata { .. }
+@@ -74,6 +74,7 @@ pub fn builder_from_items(
          | RolloutItem::Compacted(_)
          | RolloutItem::TurnContext(_)
--        | RolloutItem::WorldState(_)
-+        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::WorldState(_)
++        | RolloutItem::TokenUsageRecord(_)
          | RolloutItem::EventMsg(_) => None,
      }) && let Some(builder) = builder_from_session_meta(session_meta, rollout_path)
      {
-@@ -129,7 +129,7 @@ pub async fn extract_metadata_from_rollout(
-             | RolloutItem::InterAgentCommunicationMetadata { .. }
+@@ -130,6 +131,7 @@ pub async fn extract_metadata_from_rollout(
              | RolloutItem::Compacted(_)
              | RolloutItem::TurnContext(_)
--            | RolloutItem::WorldState(_)
-+            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::WorldState(_)
++            | RolloutItem::TokenUsageRecord(_)
              | RolloutItem::EventMsg(_) => None,
          }),
          parse_errors,
@@ -1639,19 +2035,18 @@ index 8c2a7e18d2..a466df0a6a 100644
              format!("event.item_completed.{}", turn_item_type(&event.item))
          }
 diff --git a/codex-rs/rollout/src/policy.rs b/codex-rs/rollout/src/policy.rs
-index 2390a0fc61..aeea8e83b0 100644
+index 2390a0fc61..abf5a29c0d 100644
 --- a/codex-rs/rollout/src/policy.rs
 +++ b/codex-rs/rollout/src/policy.rs
-@@ -12,7 +12,7 @@ pub fn is_persisted_rollout_item(item: &RolloutItem) -> bool {
-         // Persist Codex executive markers so we can analyze flows (e.g., compaction, API turns).
+@@ -13,6 +13,7 @@ pub fn is_persisted_rollout_item(item: &RolloutItem) -> bool {
          RolloutItem::Compacted(_)
          | RolloutItem::TurnContext(_)
--        | RolloutItem::WorldState(_)
-+        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::WorldState(_)
++        | RolloutItem::TokenUsageRecord(_)
          | RolloutItem::SessionMeta(_) => true,
      }
  }
-@@ -80,7 +80,8 @@ pub fn should_persist_response_item_for_memories(item: &ResponseItem) -> bool {
+@@ -80,7 +81,8 @@ pub fn should_persist_response_item_for_memories(item: &ResponseItem) -> bool {
  #[inline]
  pub fn should_persist_event_msg(ev: &EventMsg) -> bool {
      match ev {
@@ -1662,33 +2057,33 @@ index 2390a0fc61..aeea8e83b0 100644
          | EventMsg::AgentReasoning(_)
          | EventMsg::AgentReasoningRawContent(_)
 diff --git a/codex-rs/rollout/src/recorder.rs b/codex-rs/rollout/src/recorder.rs
-index 87e97997a2..24ab1d119c 100644
+index 87e97997a2..b998537bc1 100644
 --- a/codex-rs/rollout/src/recorder.rs
 +++ b/codex-rs/rollout/src/recorder.rs
-@@ -1929,7 +1929,7 @@ async fn resume_candidate_matches_cwd(
-             | RolloutItem::InterAgentCommunication(_)
+@@ -1930,6 +1930,7 @@ async fn resume_candidate_matches_cwd(
              | RolloutItem::InterAgentCommunicationMetadata { .. }
              | RolloutItem::Compacted(_)
--            | RolloutItem::WorldState(_)
-+            | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+             | RolloutItem::WorldState(_)
++            | RolloutItem::TokenUsageRecord(_)
              | RolloutItem::EventMsg(_) => None,
          })
      {
 diff --git a/codex-rs/rollout/src/search.rs b/codex-rs/rollout/src/search.rs
-index 58b46887a9..a0e34b7b78 100644
+index 58b46887a9..9fe0011027 100644
 --- a/codex-rs/rollout/src/search.rs
 +++ b/codex-rs/rollout/src/search.rs
-@@ -286,7 +286,7 @@ fn conversation_text_from_item(item: &RolloutItem) -> Option<String> {
+@@ -286,7 +286,8 @@ fn conversation_text_from_item(item: &RolloutItem) -> Option<String> {
          | RolloutItem::InterAgentCommunication(_)
          | RolloutItem::InterAgentCommunicationMetadata { .. }
          | RolloutItem::Compacted(_)
 -        | RolloutItem::WorldState(_) => None,
-+        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => None,
++        | RolloutItem::WorldState(_)
++        | RolloutItem::TokenUsageRecord(_) => None,
      }
  }
  
 diff --git a/codex-rs/state/src/extract.rs b/codex-rs/state/src/extract.rs
-index 48e308f627..ce8abc9b69 100644
+index 48e308f627..844c57b640 100644
 --- a/codex-rs/state/src/extract.rs
 +++ b/codex-rs/state/src/extract.rs
 @@ -25,7 +25,7 @@ pub fn apply_rollout_item(
@@ -1700,38 +2095,39 @@ index 48e308f627..ce8abc9b69 100644
      }
      if metadata.model_provider.is_empty() {
          metadata.model_provider = default_provider.to_string();
-@@ -44,7 +44,7 @@ pub fn rollout_item_affects_thread_metadata(item: &RolloutItem) -> bool {
+@@ -44,7 +44,8 @@ pub fn rollout_item_affects_thread_metadata(item: &RolloutItem) -> bool {
          | RolloutItem::InterAgentCommunication(_)
          | RolloutItem::InterAgentCommunicationMetadata { .. }
          | RolloutItem::Compacted(_)
 -        | RolloutItem::WorldState(_) => false,
-+        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => false,
++        | RolloutItem::WorldState(_)
++        | RolloutItem::TokenUsageRecord(_) => false,
      }
  }
  
 diff --git a/codex-rs/state/src/runtime/threads.rs b/codex-rs/state/src/runtime/threads.rs
-index c80b2b6716..88360c8e11 100644
+index c80b2b6716..fd9b4f4ad0 100644
 --- a/codex-rs/state/src/runtime/threads.rs
 +++ b/codex-rs/state/src/runtime/threads.rs
-@@ -1244,7 +1244,7 @@ pub(super) fn extract_memory_mode(items: &[RolloutItem]) -> Option<String> {
-         | RolloutItem::InterAgentCommunicationMetadata { .. }
+@@ -1245,6 +1245,7 @@ pub(super) fn extract_memory_mode(items: &[RolloutItem]) -> Option<String> {
          | RolloutItem::Compacted(_)
          | RolloutItem::TurnContext(_)
--        | RolloutItem::WorldState(_)
-+        | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_)
+         | RolloutItem::WorldState(_)
++        | RolloutItem::TokenUsageRecord(_)
          | RolloutItem::EventMsg(_) => None,
      })
  }
 diff --git a/codex-rs/thread-store/src/thread_metadata_sync.rs b/codex-rs/thread-store/src/thread_metadata_sync.rs
-index 1057715a4a..09d1d07155 100644
+index 1057715a4a..1e32733931 100644
 --- a/codex-rs/thread-store/src/thread_metadata_sync.rs
 +++ b/codex-rs/thread-store/src/thread_metadata_sync.rs
-@@ -287,7 +287,7 @@ impl ThreadMetadataSync {
+@@ -287,7 +287,8 @@ impl ThreadMetadataSync {
                  | RolloutItem::InterAgentCommunication(_)
                  | RolloutItem::InterAgentCommunicationMetadata { .. }
                  | RolloutItem::Compacted(_)
 -                | RolloutItem::WorldState(_) => {}
-+                | RolloutItem::WorldState(_) | RolloutItem::TokenUsageRecord(_) => {}
++                | RolloutItem::WorldState(_)
++                | RolloutItem::TokenUsageRecord(_) => {}
              }
          }
          Some(update)
@@ -1749,10 +2145,10 @@ index 0000000000..7b1f64584c
 +  window / Keep stopped. Native /goal resume alone does not renew this external
 +  allowance.
 diff --git a/codex-rs/tui/src/chatwidget/tests/app_server.rs b/codex-rs/tui/src/chatwidget/tests/app_server.rs
-index 3c7d9bbf50..7ca0fad60e 100644
+index 3c7d9bbf50..2e8bc9edaa 100644
 --- a/codex-rs/tui/src/chatwidget/tests/app_server.rs
 +++ b/codex-rs/tui/src/chatwidget/tests/app_server.rs
-@@ -1256,3 +1256,23 @@ async fn live_app_server_thread_closed_requests_immediate_exit() {
+@@ -1256,3 +1256,32 @@ async fn live_app_server_thread_closed_requests_immediate_exit() {
  
      assert_matches!(rx.try_recv(), Ok(AppEvent::Exit(ExitMode::Immediate)));
  }
@@ -1763,9 +2159,15 @@ index 3c7d9bbf50..7ca0fad60e 100644
 +    let text = "Goal paused: external allowance reached. Extend allowance / Reset budget window / Keep stopped. Native /goal resume alone does not renew this external allowance.";
 +    chat.handle_server_notification(
 +        ServerNotification::ItemCompleted(ItemCompletedNotification {
-+            thread_id: "thread-1".into(), turn_id: "notice_stop_1".into(), completed_at_ms: 0,
-+            item: AppServerThreadItem::AgentMessage {id: "notice_stop_1".into(), text: text.into(),
-+                phase: None, memory_citation: None},
++            thread_id: "thread-1".into(),
++            turn_id: "notice_stop_1".into(),
++            completed_at_ms: 0,
++            item: AppServerThreadItem::AgentMessage {
++                id: "notice_stop_1".into(),
++                text: text.into(),
++                phase: None,
++                memory_citation: None,
++            },
 +        }),
 +        /*replay_kind*/ None,
 +    );
@@ -1774,5 +2176,8 @@ index 3c7d9bbf50..7ca0fad60e 100644
 +    let lines = lines_to_single_string(&cells[0]);
 +    assert_chatwidget_snapshot!("external_supervision_notice_without_turn", lines);
 +    assert!(!chat.bottom_pane.is_task_running());
-+    assert!(op_rx.try_recv().is_err(), "notice must not submit a model operation");
++    assert!(
++        op_rx.try_recv().is_err(),
++        "notice must not submit a model operation"
++    );
 +}
