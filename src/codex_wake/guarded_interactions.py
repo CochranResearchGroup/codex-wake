@@ -109,7 +109,8 @@ def _save_owner(binding, value):
 
 
 def owner_token(binding, generation):
-    return dict(pane=_digest(pane_key(binding)), generation=generation)
+    return dict(pane=_digest(pane_key(binding)), generation=generation,
+                binding=_digest({key: binding.get(key) for key in GENERATION_KEYS}))
 
 
 def assert_input_allowed(root, binding, owner_token=None):
@@ -271,7 +272,7 @@ class GuardedInteractions:
                 if not _empty(before['frame']):
                     raise MenuError('menu_empty_composer_required')
                 row = dict(version=1, operation=operation, profile=name, pane=_digest(pane_key(binding)),
-                           token=token, state='admitted', pre_sha256=_digest(before['frame']), steps=[])
+                           token=token, state='admitted', pre_sha256=_digest(before['frame']), composer_sha256=_digest(_lines(before['frame'])[-3:]), steps=[])
                 _write(path, row)
                 for key, expected in [('C-p', _palette), ('Escape', _empty)]:
                     # Recheck immediately before every distinct effect, never repeat.
@@ -295,10 +296,10 @@ class GuardedInteractions:
                             if time.monotonic() >= deadline:
                                 raise MenuError('menu_post_state_unconfirmed')
                             time.sleep(.05)
-                        if key == 'Escape' and _digest(after['frame']) != row['pre_sha256']:
+                        if key == 'Escape' and _digest(_lines(after['frame'])[-3:]) != row['composer_sha256']:
                             raise MenuError('menu_post_frame_changed')
                     except Exception as exc:
-                        row['reason'] = type(exc).__name__
+                        row['reason'] = str(exc)[:200]
                         _write(path, row)
                         return row
                     row['steps'][-1]['state'] = 'observed'

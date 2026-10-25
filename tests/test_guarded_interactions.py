@@ -96,3 +96,31 @@ class GuardedInteractionsTests(unittest.TestCase):
         _fence_path(self.binding).write_text('{}')
         with self.assertRaises(MenuError):assert_input_allowed(self.root,self.binding)
         self.assertEqual(self.host.keys, [])
+
+    def test_revocation_between_keys_prevents_escape(self):
+        original = self.host._tmux
+        def revoke(binding, *args):
+            original(binding, *args)
+            PermissionStore(self.root/'wake').configure(
+                {'version':1,'global':{'actions':{'terminal.menu':'deny'}}}, OP, expected_revision=1)
+        self.host._tmux = revoke
+        with self.assertRaises(ValueError):
+            self.service.run('menu', self.token, principal=OP, operation='revoked')
+        self.assertEqual(self.host.keys, ['C-p'])
+        row = self.service.reconcile('menu', 'revoked')
+        self.assertEqual(row['reconciliation_observation'], 'palette')
+        self.assertFalse(row['retry_allowed'])
+
+    def test_missing_initialized_owner_and_wrong_profile_hold(self):
+        from codex_wake.guarded_interactions import _fence_path
+        self.service.run('menu', self.token, principal=OP, operation='done')
+        self.service.configure('other',self.binding,principal=OP,reason='other named profile')
+        with self.assertRaises(MenuError):self.service.reconcile('other','done')
+        _fence_path(self.binding).unlink()
+        with self.assertRaisesRegex(MenuError,'input_owner_state_missing'):
+            with automated_input_guard(self.root,self.binding):pass
+
+    def test_foreign_process_token_cannot_guard_reused_pane(self):
+        different = dict(self.binding, start_ticks=2)
+        with self.assertRaisesRegex(MenuError,'stale_input_owner_generation'):
+            with automated_input_guard(self.root,different,self.token):pass
