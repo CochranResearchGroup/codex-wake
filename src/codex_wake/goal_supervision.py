@@ -466,7 +466,7 @@ def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_p
     controller=_heartbeat(_directory(root))
     status=('accounting_unavailable' if accounting.get('state')!='qualified' else
             'watcher_ready' if controller.get('fresh') else 'watcher_unavailable')
-    action=('Restore the original history identified by the accounting reason; do not reset its usage.'
+    action=('Inspect original response-level usage and native writer compatibility. first_usage_unavailable can mean no completed response or an unsupported native usage writer; display totals cannot qualify accounting. Preserve history without synthesizing records or resetting usage.'
             if status=='accounting_unavailable' else
             'Enroll the existing session with the user-approved limits; registration does not itself prove engagement.'
             if status=='watcher_ready' else

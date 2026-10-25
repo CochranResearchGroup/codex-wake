@@ -63,8 +63,8 @@ def explain_error(error):
         action='Inspect the existing native endpoint and exact-session readback; preserve its allocation and do not start a competing server.'
     elif 'accounting' in message or 'qualified original history' in message:
         status = 'accounting_unavailable'
-        action = ('Restore readable original session history and inspect the accounting reason. '
-                  'Do not replace the caller, erase history or reset counters to bypass this refusal.')
+        action = ('Inspect the accounting reason and native compatibility. first_usage_unavailable means no qualified response-level usage was observed: a response may not have completed, or this runtime may lack the required usage writer. '
+                  'Display token totals cannot substitute for that evidence. Preserve original history; do not synthesize records or reset counters.')
     elif 'maintenance' in message:
         status = 'maintenance'
         action = 'Wait for the authorized controller handover, then verify its first poll with goal-limits show.'
