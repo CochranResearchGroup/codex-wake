@@ -17,7 +17,7 @@ No live calls, production state, installs, tracker mutations, pushes or CI.
 Python: /home/ecochran76/workspace.local/codex-wake-harness-frontier/.venv/bin/python
 All runs use PYTHONPATH=src in the isolated resource-ownership checkout.
 
-For cycles 01-05,08-09 the exact command was:
+For cycles 01-05,08-10 the exact command was:
 `python -m unittest discover -s tests -p test_resource_claims.py`.
 For cycles 06-07 it was:
 `python -m unittest discover -s tests -p test_resource_claim_commands.py`.
@@ -34,8 +34,9 @@ Each red command failed before its implementation; the same command then passed.
 | 07 | Missing CLI parser | Explicit external-prefix allocation and reason-required recovery |
 | 08 | Unknown lookup poisoned first store availability | Initial empty authority published before first operation |
 | 09 | Shared writable root accepted | Unsafe Wake root refused before metadata creation |
+| 10 | Duplicate claims field erased parsed authority | Duplicate authority keys hold original bytes |
 
-Raw development receipts are /tmp/hf04-red01.log through red09.log and matching
+Raw development receipts are /tmp/hf04-red01.log through red10.log and matching
 green files. Primary should retain compact acceptance facts here and copy raw logs
 outside Git if needed. Additional acceptance tests cover overlap both directions,
 controller reconstruction, serialization while guarded effect is active, stale
@@ -47,7 +48,7 @@ was a test expectation correction, not a product-policy change.
 ## Focused validation
 
 `PYTHONPATH=src python -m unittest discover -s tests -p 'test_resource_claim*.py'`:
-11 tests PASS on Python 3.12 (0.751s) and 3.11 (0.774s).
+12 tests PASS on Python 3.12 (0.879s) and Python 3.11 (latest focused receipt).
 Ruff undefined-name selection F821,F822,F823 passes on owned source/tests.
 `git diff --check` passes. No comprehensive suite or installed-runtime claim.
 
