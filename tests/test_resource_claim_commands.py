@@ -90,3 +90,27 @@ class ResourceClaimCommandTests(unittest.TestCase):
             with self.assertRaises((WakeError, ValueError)):
                 execute('release', check, wake, native_context=other_meta, observer=lambda args: sample, now=lambda: 100)
             self.assertEqual(execute('show', dict(claim_id=claim['claim_id']), wake)['status'], 'active')
+
+    def test_fresh_exact_runtime_binding_qualifies_after_cached_inventory_ages(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            workspace = root / 'workspace'; workspace.mkdir()
+            wake = root / 'wake'
+            cached = Observation('codex', 'codex:fixture', THREAD, str(workspace), 'ready', 100,
+                'native_metadata', dict(pid=123, start_ticks=42, boot_id='boot'), [], {'inspect': 'supported'})
+            inventory = ManagedInventory(wake, now=lambda: 100)
+            agent = inventory.enroll(cached, operator=True)['agent']
+            fresh = Observation('codex', 'codex:fixture', THREAD, str(workspace), 'ready', 140,
+                'native_metadata', dict(pid=123, start_ticks=42, boot_id='boot'), [], {'inspect': 'supported'})
+            args = dict(managed_agent_id=agent['managed_agent_id'], kind='worktree', path=str(workspace))
+            claim = execute('claim', args, wake, native_context=META, observer=lambda args: fresh, now=lambda: 140)
+            check = dict(managed_agent_id=agent['managed_agent_id'], claim_id=claim['claim_id'], generation=1)
+            self.assertEqual(execute('check', check, wake, native_context=META,
+                observer=lambda args: fresh, now=lambda: 140)['status'], 'admitted')
+            changed = Observation('codex', 'codex:fixture', THREAD, str(workspace), 'ready', 140,
+                'native_metadata', dict(pid=123, start_ticks=43, boot_id='boot'), [], {'inspect': 'supported'})
+            with self.assertRaises(ResourceClaimError):
+                execute('check', check, wake, native_context=META, observer=lambda args: changed, now=lambda: 140)
+            inventory.set_enrollment(agent['managed_agent_id'], enabled=False)
+            with self.assertRaises(ResourceClaimError):
+                execute('check', check, wake, native_context=META, observer=lambda args: fresh, now=lambda: 140)
