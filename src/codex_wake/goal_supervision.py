@@ -289,7 +289,9 @@ def _allocation_admit(directory,receipt,old):
             time_limit_seconds=allocation['time_limit_seconds'],allocation_path=str(path),
             used_tokens=allocation['used_tokens'])
         if allocation.get('boot_id')!=boot_id_value():allocation['stop_latched']=True
-        if allocation['stop_latched']:receipt['stop_latched']=True
+        if allocation['stop_latched']:
+            receipt['stop_latched']=True
+            if receipt.get('reason') is None:receipt['reason']=allocation.get('stop_reason','continuation_held')
         if allocation.get('pending_recovery'):
             receipt['reason']='observation_unavailable'
             receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
@@ -362,7 +364,9 @@ def _usage(receipt):
         if allocation.get('first_stop'):
             key='first_stop' if allocation['first_stop'].get('receipt_generation')==receipt['generation'] else 'allocation_first_stop'
             receipt.setdefault(key,allocation['first_stop'])
-        if allocation['stop_latched']:receipt['stop_latched']=True
+        if allocation['stop_latched']:
+            receipt['stop_latched']=True
+            if receipt.get('reason') is None:receipt['reason']=allocation.get('stop_reason','continuation_held')
         if allocation.get('pending_recovery'):
             receipt['reason']='observation_unavailable'
             receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
@@ -555,7 +559,9 @@ def _allocation_latch(receipt,reason,deadline=None):
             allocation.setdefault('first_stop',receipt['first_stop'])
         known={event['id'] for event in allocation.setdefault('stop_episodes',[])}
         allocation['stop_episodes'].extend(event for event in receipt.get('stop_episodes',[]) if event['id'] not in known)
-        allocation.update(stop_latched=True,stop_reason=reason)
+        inherited=reason in (None,'continuation_held') and allocation.get('stop_latched')
+        allocation.update(stop_latched=True)
+        if not inherited:allocation['stop_reason']=reason
         if deadline is not None:
             deadline=min(deadline,allocation.get('winddown_deadline',deadline))
             allocation['winddown_deadline']=deadline

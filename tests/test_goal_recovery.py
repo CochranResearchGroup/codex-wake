@@ -169,28 +169,29 @@ class GoalRecoveryTests(unittest.TestCase):
     def test_explicit_operator_allocation_recovery_reconciles_all_members(self):
         from codex_wake.goal_recovery import recover
         peer='00000000-0000-7000-8000-000000000320'
-        with tempfile.TemporaryDirectory() as tmp:
-            root,policy,log,native,request=self.fixture(tmp)
-            grant=json.loads(policy.read_text())['callers'][THREAD]
-            policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,
-                default_allocation='allocation-1',allocations={'allocation-1':grant})))
-            log.with_name('peer.jsonl').write_text(log.read_text().replace(THREAD,peer))
-            native['siblings']={peer:dict(goal=dict(threadId=peer,createdAt=NOW,status='active'),active=['peer-work'],calls=[])}
-            PermissionStore(root).configure({'version':1},Principal('operator','operator'),expected_revision=0)
-            def meta(thread):return dict(threadId=thread,sessionId=thread,callId='admit',**{
-                'x-codex-turn-metadata':dict(thread_id=thread,session_id=thread,turn_id='work')})
-            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
-                first=enroll(root,policy,THREAD,100,120,permission_principal=Principal(THREAD),native_context=meta(THREAD))
-                enroll(root,policy,peer,100,120,permission_principal=Principal(peer),native_context=meta(peer))
-                def timeout(endpoint,executable,method,params,limit):
-                    if method=='thread/read' and params['threadId']==THREAD:raise TimeoutError('fixture')
-                    return request(endpoint,executable,method,params,limit)
-                with patch('codex_wake.goal_supervision.native_request',side_effect=timeout):poll(root)
-                poll(root)
-                value=recover(root,policy,THREAD,principal=Principal(THREAD,'operator'),allocation_id='allocation-1')
-                self.assertFalse(value['stop_latched'])
-                self.assertEqual(value['used_tokens'],80)
-                self.assertEqual(value['deadline'],first['deadline'])
-                samples=poll(root)
-                self.assertTrue(all(not item['stop_latched'] for item in samples))
-                self.assertTrue(all(item['used_tokens']==80 for item in samples))
+        for fault_target in (THREAD,peer):
+            with tempfile.TemporaryDirectory() as tmp:
+                root,policy,log,native,request=self.fixture(tmp)
+                grant=json.loads(policy.read_text())['callers'][THREAD]
+                policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,
+                    default_allocation='allocation-1',allocations={'allocation-1':grant})))
+                log.with_name('peer.jsonl').write_text(log.read_text().replace(THREAD,peer))
+                native['siblings']={peer:dict(goal=dict(threadId=peer,createdAt=NOW,status='active'),active=['peer-work'],calls=[])}
+                PermissionStore(root).configure({'version':1},Principal('operator','operator'),expected_revision=0)
+                def meta(thread):return dict(threadId=thread,sessionId=thread,callId='admit',**{
+                    'x-codex-turn-metadata':dict(thread_id=thread,session_id=thread,turn_id='work')})
+                with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                    first=enroll(root,policy,THREAD,100,120,permission_principal=Principal(THREAD),native_context=meta(THREAD))
+                    enroll(root,policy,peer,100,120,permission_principal=Principal(peer),native_context=meta(peer))
+                    def timeout(endpoint,executable,method,params,limit):
+                        if method=='thread/read' and params['threadId']==fault_target:raise TimeoutError('fixture')
+                        return request(endpoint,executable,method,params,limit)
+                    with patch('codex_wake.goal_supervision.native_request',side_effect=timeout):poll(root)
+                    poll(root)
+                    value=recover(root,policy,fault_target,principal=Principal(fault_target,'operator'),allocation_id='allocation-1')
+                    self.assertFalse(value['stop_latched'])
+                    self.assertEqual(value['used_tokens'],80)
+                    self.assertEqual(value['deadline'],first['deadline'])
+                    samples=poll(root)
+                    self.assertTrue(all(not item['stop_latched'] for item in samples))
+                    self.assertTrue(all(item['used_tokens']==80 for item in samples))
