@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from unittest.mock import patch
 from websockets.sync.server import unix_serve
@@ -436,10 +437,24 @@ print('preflight:'+target+':'+nonce+':'+digest)
                 '--checkpoint-sha256',digest,'--expires-at','2030-01-01T00:00:00Z','--mode','same-tab' if same_tab else 'new-tab','--json']
             if common_permissions:
                 argv+=['--bus-root',str(permission_bus.root),'--operator-capability',str(permission_capability),'--trigger','context_limit']
+            # Preserve the exact readiness observation if the aggregate guard fails.
+            from codex_wake.sessions import observe, revalidate_attachment
+            readiness = {}
+            def observed_readiness(**kwargs):
+                snapshot = observe(**kwargs)
+                readiness.clear()
+                readiness['snapshot'] = snapshot
+                readiness['clock'] = dict(wall=time.time(), monotonic=time.monotonic(), native=clock)
+                return snapshot
+            def revalidated_readiness(attachment):
+                valid = revalidate_attachment(attachment)
+                readiness['revalidation'] = dict(attachment=attachment, valid=valid)
+                return valid
             server=unix_serve(handler,str(endpoint));worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
             try:
                 with patch('subprocess.run',side_effect=command),patch('codex_wake.native_clock.snapshot',
-                        return_value=clock):
+                        return_value=clock),patch('codex_wake.sessions.observe',side_effect=observed_readiness),patch(
+                        'codex_wake.sessions.revalidate_attachment',side_effect=revalidated_readiness):
                     for _ in range(3 if pending_usage or correction or stale_title else 2):
                         output=StringIO()
                         if changed_defaults and _==1:
@@ -536,7 +551,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             if _==1:return
                             continue
                         if expire_preflight:
-                            self.assertEqual(receipt['state'],'expired')
+                            self.assertEqual(receipt['state'],'expired', {'receipt':receipt,'readiness':readiness})
                             self.assertEqual(receipt['reason'],'continuation_time_exhausted')
                             self.assertNotIn(target,goals)
                             self.assertEqual(goal_sets,[])
@@ -573,7 +588,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             self.assertEqual(receipt['reason'],'detached_source_retirement_unverified')
                             self.assertNotIn(target,goals)
                             return
-                        self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns)})
+                        self.assertEqual(receipt['state'],'awaiting_activation',{'history':receipt.get('successor',{}).get('history'),'respawns':len(respawns),'readiness':readiness})
                         if inherited_deadline:
                             self.assertEqual(receipt['continuation_deadline'],inherited_deadline)
                             self.assertEqual(receipt['objective_budget']['actors'][receipt['budget_actor']]['session_deadline'],inherited_deadline)
