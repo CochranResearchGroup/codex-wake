@@ -123,18 +123,33 @@ def render_notice(event):
     usage = f'{used:,} of {limit:,}' if type(used) is int and type(limit) is int else 'usage unavailable'
     remaining = f'{max(0, limit-used):,}' if type(used) is int and type(limit) is int else 'unknown'
     kind = identity['kind']
-    if kind=='request_activation':
-        selected=identity['request_accounting']
-        return (f"Governor request-path owner configured. Effective mode {'inactive' if snapshot.get('governor_enabled') is False else selected['mode']} for reviewed HTTP Responses path only; WS/compact/bypass remain unqualified. "
-            f"Scope {identity['allocation_id']}; session {identity['thread_id']}. "
-            'ObjectiveLedger owns aggregate request accounting; original prior usage, caps and deadlines retained. No work resumed or resources renewed. '
-            'Say "Deactivate governor"; verified operator control needs no model inference. '
+    if kind in ('request_activation', 'admission'):
+        selected = identity['request_accounting'] if kind == 'request_activation' else identity['request_admission_event']
+        resources = selected.get('resources') or {}
+        if resources:
+            deadline = resources['deadline']
+            if isinstance(deadline, (int, float)):
+                deadline = datetime.fromtimestamp(deadline, timezone.utc).isoformat().replace('+00:00', 'Z')
+            card = (f"Used {resources['used']}/{resources['cap']}; reserved {resources['reserved']}; remaining {resources['remaining']}; "
+                f"completion protected {resources['protected_tokens']} tokens/{resources['protected_seconds']}s; deadline {deadline}. "
+                + ('' if resources['accounting_known'] else 'Accounting uncertain; reservations retained. '))
+        else:
+            card = 'Accounting snapshot unavailable; inspect the retained ledger. '
+        scope = str(identity['allocation_id'])
+        if len(scope) > 64:
+            scope = scope[:61] + '...'
+        if kind == 'request_activation':
+            text = (f"Governor request-path owner configured. Effective mode {'inactive' if snapshot.get('governor_enabled') is False else selected['mode']}; "
+                'reviewed HTTP Responses only; WS/compact/bypass unqualified. ')
+        else:
+            text = (f"Model request denied before provider submission. Reason {selected['reason']}. "
+                'Hard admission: selected HTTP path only. Checkpoint/narrow when completion work remains. ')
+        text += (f"Scope {scope}; session {identity['thread_id']}. " + card +
+            'Say "Deactivate governor"; no provider inference. No work resumed or resources renewed. '
             f"[External supervision event {event['event_id']}]")
-    if kind=='admission':
-        return (f"Model request denied before provider submission. Scope {identity['allocation_id']}; session {identity['thread_id']}. "
-            'Reason: objective/session resources unavailable or accounting uncertain. Mode hard_admission applies only to the selected qualified HTTP path. '
-            'Say "Deactivate governor" in this conversation; verified operator control needs no provider inference. No work resumed or resources renewed. '
-            f"[External supervision event {event['event_id']}]")
+        if len(text.encode()) > 768:
+            raise ValueError('request governance notice exceeds native bound')
+        return text
     if kind in ('deactivation','reactivation'):
         text=('Governor inactive. Drop stale governor checkpoint/stop instructions. Independent platform controls remain. '
               'Say "Reactivate governor" to enable the configured governor. ' if kind=='deactivation' else

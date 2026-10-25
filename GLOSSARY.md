@@ -258,3 +258,9 @@ The operator's durable choice to stop governor interventions in a selected scope
 A bounded read-only check before opted-in dispatch, separating reusable static
 host observations from fresh accounting, controller and operator-control state.
 It reports the actual enforcement mode without granting work or resource authority.
+
+**Protected completion resources**:
+The unused acceptance, review and bounded remediation estimates retained inside
+an existing objective allowance. Host-bound completion work may use them;
+implementation must leave them available. Deferral keeps mandatory work pending,
+and verified completion releases unused protection without renewing the grant.

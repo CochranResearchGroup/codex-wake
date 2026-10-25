@@ -31,15 +31,15 @@ class RequestAdmissionTests(unittest.TestCase):
                     return_value=fixtures.NOW,
                 ),
             ):
-                enroll(root, policy, fixtures.THREAD, 110, 120)
+                enroll(root, policy, fixtures.THREAD, 100, 120)
                 native["notices"] = {}
                 ledger = ObjectiveLedger(root, "allocation-1")
                 ledger.configure(
                     dict(
                         revision=1,
-                        objective_token_limit=110,
+                        objective_token_limit=100,
                         objective_time_limit_seconds=120,
-                        session_token_limit=110,
+                        session_token_limit=100,
                         session_time_limit_seconds=120,
                         max_correction_cycles=0,
                         started_at=fixtures.NOW,
@@ -125,6 +125,9 @@ class RequestAdmissionTests(unittest.TestCase):
                 self.assertEqual(len(activation), 1)
                 self.assertIn("Effective mode hard_admission", activation[0]["text"])
                 self.assertEqual(activation[0]["delivery"]["state"], "recorded")
+                self.assertIn("Used 40/100", activation[0]["text"])
+                self.assertIn("reserved 0; remaining 60", activation[0]["text"])
+                self.assertIn("2030-01-01T00:02:00Z", activation[0]["text"])
                 self.assertLessEqual(len(activation[0]["text"].encode()), 768)
 
                 def submit(turn="work"):
@@ -163,6 +166,10 @@ class RequestAdmissionTests(unittest.TestCase):
                     denied = second.result(timeout=3)
                     self.assertEqual(denied[0], 429, denied)
                     self.assertEqual(len(calls), 1)
+                    denial_notice = [event for event in list_notices(root, fixtures.THREAD) if event["identity"]["kind"] == "admission"][-1]
+                    self.assertIn("objective_token_allowance_unavailable", denial_notice["text"])
+                    self.assertIn("Used 40/100; reserved 50; remaining 10", denial_notice["text"])
+                    self.assertLessEqual(len(denial_notice["text"].encode()), 768)
                     release.set()
                     self.assertEqual(first.result(timeout=5)[0], 200)
                 self.assertEqual(calls[0]["max_output_tokens"], 10)
