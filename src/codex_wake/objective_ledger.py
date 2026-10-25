@@ -120,6 +120,8 @@ class ObjectiveLedger:
                       original_deadline=state['original_deadline'],
                       correction_cycles=state['correction_cycles'],
                       goal_aliases=state.get('goal_aliases',{}),
+                      request_binding=state.get('request_binding'),
+                      request_sessions=state.get('request_sessions',{}),
                       authorization_history=state['authorization_history'],
                       remaining_seconds=max(0, _epoch(config['objective_deadline']) - max(now, state.get('observed_at', now))),
                       actors={key: dict(value, tokens_remaining=max(0, value['reservation'] - value['used']),
@@ -167,6 +169,7 @@ class ObjectiveLedger:
         with self._transaction() as state:
             self._observe(state, now)
             view = self._view(state, now)
+            if state.get('request_binding'):raise ValueError('request transport owns accounting; lifecycle reservation refused')
             actor = state['actors'].get(actor_id)
             if actor and actor.get('terms') is not None:
                 if actor['terms'] != [tokens, seconds]:
@@ -212,6 +215,7 @@ class ObjectiveLedger:
         with self._transaction() as state:
             self._observe(state,now)
             view=self._view(state,now)
+            if state.get('request_binding'):raise ValueError('request transport owns accounting; native goal reservation refused')
             alias=state.get('goal_aliases',{}).get(goal_id)
             actor_id=alias['actor_id'] if alias else goal_id
             offset=alias['preflight_tokens'] if alias else 0
@@ -235,6 +239,7 @@ class ObjectiveLedger:
         _count(preflight_tokens)
         with self._transaction() as state:
             self._observe(state, now)
+            if state.get('request_binding'):raise ValueError('request transport owns accounting; native alias refused')
             actor = state['actors'][actor_id]
             if actor['used'] < preflight_tokens:
                 raise ValueError('preflight accounting must precede goal binding')
@@ -253,6 +258,7 @@ class ObjectiveLedger:
         with self._transaction() as state:
             self._observe(state, now)
             self._view(state, now)
+            if state.get('request_binding'):raise ValueError('request transport owns accounting; sampled actor charge refused')
             if goal:
                 binding = state.get('goal_aliases', {}).get(actor_id)
                 if binding:
@@ -267,6 +273,86 @@ class ObjectiveLedger:
                 actor['used'] = cumulative_tokens
                 actor['known'] = True
                 actor['settled'] = actor['settled'] or bool(settled)
+            return self._view(state, now)
+
+    def bind_requests(self, binding, thread_prior_tokens, *, now):
+        """Select one authoritative request transport without adding allowance.
+
+        Migration from live lifecycle actors is deliberately unsupported. The
+        imported prior charges remain in prior_tokens, with per-session floors.
+        """
+        with self._transaction() as state:
+            self._view(state, now)
+            if state.get('request_binding') == binding:
+                return self._view(state, now)
+            if state.get('request_binding') or state['actors'] or state.get('goal_aliases'):
+                raise ValueError('request accounting requires explicit migration from existing actor accounting')
+            if sum(_count(value) for value in thread_prior_tokens.values()) != state['prior_tokens']:
+                raise ValueError('request binding must import all prior usage without reset')
+            state['request_binding'] = binding
+            config = state['configuration']
+            state['request_sessions'] = {thread: dict(prior_tokens=value,
+                deadline=min(_epoch(config['objective_deadline']), _epoch(config['started_at'])+config['session_time_limit_seconds']))
+                for thread, value in thread_prior_tokens.items()}
+            state['request_completions'] = {}
+            return self._view(state, now)
+
+    def register_request_thread(self, thread_id, parent_thread_id, provenance, *, now):
+        with self._transaction() as state:
+            self._view(state,now)
+            if not state.get('request_binding') or parent_thread_id not in state['request_sessions']:
+                raise ValueError('qualified parent request binding required')
+            config=state['configuration']
+            sessions=state['request_sessions']
+            if thread_id not in sessions:
+                sessions[thread_id]=dict(prior_tokens=0,parent_thread_id=parent_thread_id,provenance=provenance,
+                    deadline=min(_epoch(config['objective_deadline']),_epoch(now)+config['session_time_limit_seconds']))
+            elif sessions[thread_id].get('parent_thread_id')!=parent_thread_id:
+                raise ValueError('request thread provenance changed')
+            return self._view(state,now)
+
+    def reserve_request(self, actor_id, thread_id, tokens, seconds, *, enforce=True, now):
+        _count(tokens);_count(seconds)
+        with self._transaction() as state:
+            self._observe(state, now)
+            view = self._view(state, now)
+            if not state.get('request_binding') or not actor_id.startswith('request:'):
+                raise ValueError('authoritative request binding required')
+            if actor_id in state['actors']:
+                raise ValueError('an admitted attempt cannot be forwarded twice')
+            config = state['configuration']
+            session = state['request_sessions'].setdefault(thread_id, dict(prior_tokens=0,
+                deadline=min(_epoch(config['objective_deadline']), _epoch(now)+config['session_time_limit_seconds'])))
+            used = session['prior_tokens'] + sum(max(a['used'], a['reservation']) if not a['settled'] else a['used']
+                for a in state['actors'].values() if a.get('request_thread')==thread_id)
+            admitted = not enforce or (view['ready'] and tokens<=view['remaining_tokens']
+                and used+tokens<=config['session_token_limit'] and seconds<=config['session_time_limit_seconds']
+                and state['observed_at']+seconds<=session['deadline'])
+            if admitted:
+                state['actors'][actor_id]=dict(terms=[tokens,seconds],reservation=tokens,used=0,
+                    settled=False,known=True,session_deadline=session['deadline'],request_thread=thread_id)
+            return self._view(state, now, admitted=admitted)
+
+    def settle_request(self, actor_id, response_id, tokens, request_fingerprint, *, now):
+        """Unknown completion retains the reservation; duplicate exact proof is inert."""
+        if tokens is not None:_count(tokens)
+        with self._transaction() as state:
+            self._observe(state, now)
+            self._view(state, now)
+            actor = state['actors'][actor_id]
+            if not state.get('request_binding') or not actor_id.startswith('request:'):
+                raise ValueError('authoritative request binding required')
+            prior = state['request_completions'].get(response_id) if response_id else None
+            proof = dict(actor_id=actor_id,tokens=tokens,fingerprint=request_fingerprint)
+            if prior == proof:
+                return self._view(state, now)
+            if (tokens is None or not response_id or prior is not None or actor['settled']
+                    or (actor['reservation'] and tokens>actor['reservation'])):
+                actor.update(known=False,settled=False)
+                if tokens is not None:actor['used']=max(actor['used'],tokens)
+            else:
+                state['request_completions'][response_id]=proof
+                actor.update(used=tokens,settled=True,known=True)
             return self._view(state, now)
 
     def correction(self, *, now, key=None, actor_id=None):

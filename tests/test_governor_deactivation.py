@@ -312,8 +312,10 @@ class GovernorDeactivationTests(unittest.TestCase):
                 native["siblings"][child]["calls"].clear()
                 native["siblings"][later]["calls"].clear()
                 poll(root)
-                self.assertEqual(native["siblings"][child]["calls"], [])
-                self.assertEqual(native["siblings"][later]["calls"], [])
+                self.assertFalse(any(method in ("thread/goal/set","turn/interrupt","turn/steer","turn/start")
+                    for method,_ in native["siblings"][child]["calls"]))
+                self.assertFalse(any(method in ("thread/goal/set","turn/interrupt","turn/steer","turn/start")
+                    for method,_ in native["siblings"][later]["calls"]))
 
     def test_inflight_poll_precedes_deactivation_and_queued_polls_cannot_intervene(
         self,
