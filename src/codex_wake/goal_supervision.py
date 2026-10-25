@@ -949,7 +949,6 @@ def watch(root,interval=1):
                 replacement_observed(directory,heartbeat)
                 time.sleep(interval)
         finally:
-            presentation_stop.set()
             from .goal_maintenance import authorize_exit
             with _lock(directory,'maintenance'):
                 maintained=not running and authorize_exit(directory,heartbeat)
@@ -959,4 +958,8 @@ def watch(root,interval=1):
                         with _lock(directory,path.stem):
                             _private(path);receipt=json.loads(path.read_text());_stop(path,receipt,'controller_stopped')
             _save(directory/'controller.json',dict(heartbeat,active=False,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
+            # Stop control precedes presentation. Drain the newly journaled stop
+            # once; stalled native I/O must not hold controller exit indefinitely.
+            presentation_stop.set()
+            presenter.join(timeout=2)
             for sig,handler in prior.items():signal.signal(sig,handler)

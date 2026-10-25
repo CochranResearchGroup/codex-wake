@@ -241,13 +241,14 @@ def run_presenter(root, stop):
     Unsupported native capability is retried after watcher restart/upgrade.
     """
     unsupported=set()
-    while not stop.is_set():
+    while True:
+        finishing=stop.is_set()
         try:
             paths=list(_directory(root).glob('notice_*.json'))
             if len(paths)>10000:
                 return  # retain capacity failure; never discard history
             for path in sorted(paths):
-                if stop.is_set():break
+                if stop.is_set() and not finishing:break
                 if path.stem in unsupported:continue
                 event=_read(path)
                 if event['delivery']['state']=='recorded':continue
@@ -257,4 +258,5 @@ def run_presenter(root, stop):
             # Per-event durable state records native errors; corrupt local state
             # cannot stop enforcement. Inspection retains the original evidence.
             pass
+        if finishing:return
         stop.wait(.2)
