@@ -71,6 +71,10 @@ def execute(action, arguments, root, *, principal, observer=None, transport=None
     if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0 < timeout <= 30:
         raise TabError('workspace_invalid_argument', 'timeout must be positive and at most 30 seconds')
     deadline = time.monotonic() + timeout
+    if action == 'show':
+        owner = TabOrganization(root, transport=None)
+        record = owner.read(arguments.get('plan_id') or arguments['receipt_id'])
+        return dict(status='inspection', record=record)
     if action != 'show':
         transport = transport or TmuxTransport(arguments['socket_path'], arguments['session_id'])
     from .permission_enforcement import authorize
@@ -94,8 +98,8 @@ def register_parser(subparsers):
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
     for action in ('preview', 'show', 'apply', 'undo'):
         command = verbs.add_parser(action)
-        command.add_argument('--socket-path', required=True)
-        command.add_argument('--session-id', required=True)
+        command.add_argument('--socket-path', required=action != 'show')
+        command.add_argument('--session-id', required=action != 'show')
         command.add_argument('--bus-root', type=Path, required=True)
         command.add_argument('--operator-capability', type=Path)
         command.add_argument('--actor-capability', type=Path)

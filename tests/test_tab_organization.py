@@ -209,5 +209,5 @@ class TabOrderingTests(unittest.TestCase):
     def test_private_journal_can_be_inspected_after_socket_disappears(self):
         preview = self.call('preview')
         self.tmux('kill-server')
-        shown = self.call('show', plan_id=preview['plan']['plan_id'])
+        shown = execute('show', {'plan_id': preview['plan']['plan_id']}, self.root / 'wake', principal=self.principal)
         self.assertEqual(shown['record']['plan_id'], preview['plan']['plan_id'])
