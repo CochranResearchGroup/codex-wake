@@ -35,6 +35,8 @@ class GuardedInteractionsTests(unittest.TestCase):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        (self.root/'global').mkdir(mode=0o700)
+        (self.root/'global'/'runtime-recipient-locks').mkdir(mode=0o700)
         self.p = patch('codex_wake.guarded_interactions.user_state_dir', return_value=self.root/'global')
         self.p.start(); self.addCleanup(self.p.stop)
         self.binding = dict(socket=str(self.root/'tmux.sock'), pane='%0', pid=os.getpid(),
