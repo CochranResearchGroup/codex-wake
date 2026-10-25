@@ -29,6 +29,8 @@ def add_goal_limits_parser(subparsers):
             command.add_argument('--checkpoint-seconds', type=int, default=60)
             command.add_argument('--token-accounting', choices=('fresh','cache_inclusive'),
                                  help='new enrollments default to fresh input plus output, excluding cache')
+    from .goal_renewal_commands import register_parser as renewal_parser
+    renewal_parser(commands)
     maintenance = commands.add_parser('prepare-maintenance', help='host-only bounded graceful controller handover; never renews resources')
     maintenance.add_argument('--policy', type=Path, required=True, help='private operator maintenance authorization, separate from allocation policy')
     maintenance.add_argument('--seconds', type=int, required=True)
@@ -38,6 +40,9 @@ def add_goal_limits_parser(subparsers):
 
 
 def goal_limits_command(args, root):
+    if args.goal_limits_command in ('extend','reset','apply-renewal'):
+        from .goal_renewal_commands import command
+        return command(args,root)
     if args.goal_limits_command == 'watch':
         if not math.isfinite(args.interval) or not .05 <= args.interval <= 5:
             from .records import WakeError

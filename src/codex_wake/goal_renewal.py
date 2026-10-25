@@ -976,7 +976,7 @@ def _resume(root, policy, thread, path, journal, principal):
                 supervision._request(
                     receipt["grant"],
                     "thread/goal/set",
-                    dict(threadId=member, status="active", origin="user"),
+                    dict(threadId=member, status="active"),
                 )
             except Exception:
                 effect["state"] = "uncertain"

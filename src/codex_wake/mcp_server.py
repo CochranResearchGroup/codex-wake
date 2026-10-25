@@ -144,6 +144,8 @@ from .agent_resume_commands import tool_specs as resume_tool_specs
 SPECS.update(resume_tool_specs())
 from .permission_enforcement import tool_specs as enforcement_tool_specs
 SPECS.update(enforcement_tool_specs())
+from .goal_renewal_commands import tool_specs as renewal_tool_specs
+SPECS.update(renewal_tool_specs())
 for _name in ('wake_goal_limits_set','wake_goal_limits_show'):
     SPECS[_name][3].update({key:MESSAGE for key in ('task_id','assignment_id','operation_id')})
 from .harness_mcp import POLICY as WAKE_POLICY_PROPERTIES
@@ -275,6 +277,13 @@ class CommandRunner:
             except (ValueError, OSError, TypeError, KeyError, ImportError):
                 return {"error": {"code": "policy_denied", "message": "Host wake-control root and action grants are required for the entire selected scope."}}, True
             return self._execute(command, arguments, readonly)
+        if group == 'goal-renewal':
+            try:
+                from .goal_renewal_commands import mcp_call
+                return mcp_call(self,verb,arguments,native_context),False
+            except Exception as exc:
+                from .goal_readiness import explain_error
+                return explain_error(exc),True
         if group == 'goal-limits':
             goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
             if self.goal_limits_policy is None or goal_root is None:

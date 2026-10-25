@@ -169,6 +169,9 @@ def verified_native_caller(context,claimed):
 
 
 def _public(receipt):
+    receipt=dict(receipt)
+    if type(receipt.get('used_tokens')) is int:
+        receipt['lifetime_used_tokens']=receipt.get('lifetime_tokens_before_window',0)+receipt['used_tokens']
     return dict({key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')},
         stop_scope='registered_goal_campaign',descendant_stop_verified=False)
 
@@ -403,6 +406,9 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
             engagement=engagement({},controller))
     with _lock(directory,name):
         _private(path);receipt=json.loads(path.read_text())
+        from .goal_renewal import renewal_hold
+        pending=renewal_hold(root,receipt)
+        if pending:return dict(_public(receipt),**pending)
         if receipt['grant']!=grant:
             receipt.update(state='held',reason='host_policy_changed')
         receipt['controller']=_heartbeat(directory)
@@ -480,6 +486,10 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         admission_guard(directory)
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
+        if old:
+            from .goal_renewal import renewal_hold
+            pending=renewal_hold(root,old)
+            if pending:return dict(_public(old),**pending)
         permission=None
         if principal:
             action=enrollment_action(old,token_limit,time_limit_seconds,token_accounting,grant['allocation_id'])
@@ -739,6 +749,10 @@ def poll(root):
         with _lock(directory,path.stem):
             _private(path);receipt=json.loads(path.read_text())
             try:
+                from .goal_renewal import renewal_hold
+                pending=renewal_hold(root,receipt)
+                if pending:
+                    results.append(dict(receipt,**pending));continue
                 from .permission_enforcement import controller_permission
                 permission=controller_permission(root,receipt)
                 receipt['enforcement_continuation_permission']=permission
