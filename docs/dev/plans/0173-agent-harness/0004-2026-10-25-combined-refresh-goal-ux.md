@@ -46,3 +46,20 @@ accepted blockers; no repeated broad reviews. CI remains skipped by user instruc
 Tracker closure only follows unchanged frozen criteria. Source candidate not global
 release; any eventual activation must satisfy main-integration/release policy and
 qualified exact-artifact authority. Explicit remaining gates retained if not met.
+
+## Integrated source checkpoint
+
+Qualified332 delta committedfc4c9eb after20recovery/scoped/enforcement tests pass.
+UX merged at24bb671 after46combined public suites pass73.677s. Conflicts resolved
+by preserving recovery-pending projection alongside renewal hold and engagement,
+retaining PermissionDenied decision detail with actionable errors, both runbook
+histories and candidate0.22.0.dev0 identity. No capability widening or allowance
+renewal was introduced by merge. Prior broad review counters remain0/1 here.
+
+A previously uncarried successor5d9643 four-line fault fence is carried separately.
+One public proposal/application regression across six fault/stage combinations
+failed before the fix (36.087s) and passes34.074s afterward. It injects retained
+independent fault flags at the persisted input boundary after real watcher
+replacement; results are checked through public proposal/apply/show. No passing
+outcome or accounting is supplied by the fixture. Existing restart proof was
+found PASS on5d9643 but is not substituted for fresh combined-source acceptance.
