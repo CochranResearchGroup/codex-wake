@@ -224,17 +224,30 @@ def qualify(options):
                         ),
                         None,
                     )
+                    flat = next(
+                        (
+                            tool["name"]
+                            for tool in advertised
+                            if tool.get("type") == "function"
+                            and (
+                                tool.get("name") == name
+                                or tool.get("name", "").endswith("__" + name)
+                            )
+                        ),
+                        None,
+                    )
                     require(
-                        namespace is not None,
+                        namespace is not None or flat is not None,
                         "actual advertised native MCP tool unavailable: " + name,
                     )
                     item = dict(
                         type="function_call",
-                        namespace=namespace,
-                        name=name,
+                        name=name if namespace else flat,
                         call_id="owned-native-tool-" + str(number),
                         arguments=json.dumps(arguments),
                     )
+                    if namespace:
+                        item["namespace"] = namespace
                 elif number == 3:
                     stream_open.set()
                     while not finish.wait(0.2) and time.monotonic() < expiry:
@@ -286,7 +299,7 @@ def qualify(options):
     http_thread = threading.Thread(target=http.serve_forever, daemon=True)
     http_thread.start()
     port = http.server_address[1]
-    config = 'model="gpt-5.4-mini"\nmodel_provider="local_fixture"\napproval_policy="never"\nsandbox_mode="danger-full-access"\n'
+    config = 'model="mock-model"\nmodel_provider="local_fixture"\napproval_policy="never"\nsandbox_mode="danger-full-access"\n'
     config += (
         '[model_providers.local_fixture]\nname="Local fixture only"\nbase_url="http://127.0.0.1:'
         + str(port)
@@ -534,6 +547,10 @@ def qualify(options):
             "thread/start",
             dict(cwd=str(workspace), historyMode="legacy", experimentalRawEvents=True),
         )["thread"]["id"]
+        rpc(
+            "thread/name/set",
+            dict(threadId=thread, name="Owned goal-limit UX acceptance"),
+        )
         for selected in (thread, peer):
             rpc(
                 "thread/notice/read",
@@ -560,7 +577,7 @@ def qualify(options):
         attach(endpoint, thread)
         wait(
             lambda: "context left" in capture("tui-initial.txt")
-            or "gpt-5.4-mini" in capture("tui-initial.txt").lower(),
+            or "mock-model" in capture("tui-initial.txt").lower(),
             "stock TUI attachment",
             15,
         )
@@ -648,16 +665,8 @@ def qualify(options):
             "qualified original native goal time",
         )
         rpc(
-            "turn/start",
-            dict(
-                threadId=thread,
-                input=[
-                    dict(
-                        type="text",
-                        text="Begin the explicitly limited native MCP fixture.",
-                    )
-                ],
-            ),
+            "thread/goal/set",
+            dict(threadId=thread, status="active", tokenBudget=1000000),
         )
         wait(
             lambda: stream_open.is_set(),
@@ -742,10 +751,6 @@ def qualify(options):
         )
         report.update(enrolled=enrolled, startup=startup, startup_event=startup_event)
         before_active_calls = len(calls)
-        rpc(
-            "thread/goal/set",
-            dict(threadId=thread, status="active", tokenBudget=1000000),
-        )
         wait(lambda: stream_open.is_set(), "owned active native stream", 8)
         active = rpc("thread/read", dict(threadId=thread, includeTurns=True))["thread"]
         active_ids = [
@@ -778,7 +783,7 @@ def qualify(options):
         )
         stop_event = wait(lambda: notice("stop"), "native stop append")
         wait(
-            lambda: "Goal paused:" in capture("tui-stop.txt"),
+            lambda: "Goal paused." in capture("tui-stop.txt"),
             "visible interrupting stop notice",
         )
         require(

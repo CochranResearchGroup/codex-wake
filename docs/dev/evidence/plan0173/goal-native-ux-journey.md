@@ -70,3 +70,74 @@ build, then rerun this unchanged journey with a fresh owned output directory.
 Do not advertise the present dev-native build as enforcement-ready or close #346
 from the injected protocol receipt alone. No broad review was run by this worker.
 Memory disposition: forbidden; no memory write was requested.
+
+## Qualified real journey after authentic native compatibility port
+
+Final verdict: PASS_REAL_NATIVE_INSTALLED_TUI_JOURNEY. Historical failures above
+remain retained. The qualifying candidate contains Wake source e9a46b3
+(0.22.0.dev0, including the attested active-operator-reply fix) and the script
+successor whose tested SHA256 is
+12f1fc28e9a6615bec643ef718993d54ec71fbcf496217bd848db8e9c717fdaf.
+The isolated installed package's Python bytes matched source; no shared installation
+was replaced.
+
+Native app-server source b0ce988429488a3e37966c318f3fe0bfdf3af77a, pinned binary
+SHA25686fad00e38f0c26a5c8d2eb2dbe34536c74655fb2fb45b4efc5d94e97e683b1f,
+provides authentic per-response usage and host MCP metadata. Stock TUI remains
+0.164.0. The local provider is explicitly named mock-model: its built-in fallback
+metadata correctly advertises no deferred tool search. The fixture selects actual
+advertised MCP namespace/function names; it never inserts tools or supplies MCP
+request metadata itself. The owned root thread was explicitly named before TUI
+attachment, preventing an unrelated stock-TUI title-generation model request from
+confounding the six-request cap.
+
+Final user-scoped evidence root:
+`~/.local/state/codex-wake/goal-limit-ux/346-native-mcp-20261025T051000Z/attempt4/`.
+The actual run took51.618seconds and six localhost POSTs, zero external provider
+requests. Native and watcher both exited0, after-identities absent; fresh final
+owned process-group census is empty.
+
+Observed acceptance:
+
+- Genuine native MCP enrollment used version2 self_enrollment with no per-session
+  caller UUID map. The native host supplied the current thread/session/turn/call
+  metadata. Warmup and real native ledger yielded20fresh tokens at enrollment.
+- The independent installed watcher acknowledged the actual enrollment revision.
+  Stock TUI rendered the engagement card, authoritative allowance/deadline/scope,
+  accounting basis and checkpoint reserve (tui-startup.txt).
+- Original30second time cap and five-second reserve produced a readable checkpoint,
+  then verified native goal pause and exact captured-turn interrupt. A durable
+  prominent stop card rendered in stock TUI (tui-stop.txt). Notices added no model
+  request or turn at exhaustion.
+- Reconnecting the same real TUI rendered the same durable stop event once
+  (tui-reconnected.txt). The stop event is also present in the actual later
+  localhost model request4; model-context-verification.json records that independent
+  request-body hash and event identity, beyond native append acknowledgement.
+- A later operator reply stayed active across fresh watcher observations. Its
+  genuine native MCP proposal reached the existing common queue. The authenticated
+  public attention CLI accepted it once. Genuine MCP application in that same
+  attested active reply retained40spent and raised the total ceiling to1500,
+  without another approval or resuming the paused native goal. The reply then
+  completed and rendered (native-tool-wake_goal_limits_extend.json,
+  native-tool-wake_goal_limits_apply_renewal.json, tui-operator-reply.txt).
+- Explicit public CLI reset created a new budget generation/window at0used while
+  retaining50lifetime tokens, charges and stop history. It remained apply-only
+  paused. New revision/window engagement cards rendered (tui-extension.txt,
+  tui-reset.txt).
+- The unrelated real native peer's goal and turns matched their pre-run snapshots.
+  No shared daemon, watcher mask, production allowance or provider credential was
+  changed.
+
+Additional preserved new-pin attempts: attempt1 exposed actual MCP deferral for a
+model claiming tool-search capability; the local mock was correctly configured
+with supported no-search fallback metadata. Attempt2 proved genuine MCP enrollment,
+startup and hard-stop rendering but the fixture expected punctuation inconsistent
+with the formatter. Attempt3 exposed the TUI's background title request; explicit
+thread naming removed that unrelated request. These are retained fixture failures,
+not passing reruns erased or hidden. No product acceptance criterion was relaxed.
+
+This is an explicitly pinned development runtime/frontend combination, not an
+upstream Codex release or production default installation. Native protocol and
+whole-native-suite qualification boundaries are owned by the native evidence.
+The coordinator still owns final source review, integration, tracker closure and
+any later deployment. No broad review was run by this worker.
