@@ -23,7 +23,7 @@ Primary #351 seams: enroll/show/poll plus retained notices and native notice ada
 
 ## Working controls
 
-Use compact outputs and focused tests; inspect process/resource state before expensive fan-out. Do not repeat whole-source discovery. Counters for requested final review: 0; post-review remediation passes: 0. Keep historical red/green logs in /tmp and curate source evidence before closeout.
+Use compact outputs and focused tests; inspect process/resource state before expensive fan-out. Do not repeat whole-source discovery. Counters for requested final review: 1 (in progress); post-review remediation passes: 0. Keep historical red/green logs in /tmp and curate source evidence before closeout.
 
 ## Non-goals
 
@@ -52,3 +52,7 @@ The operator's implementation request implicitly accepts using existing public o
 #357 assigned agent dispatch355 in isolated feat/completion-reserve-357 basedb5f5f77. Add small named completion obligations/protection to existing requestledger/publicHTTPseam; preserve operator controls and originalgrant. Rootprimary owns final integration/acceptance. Formal review count0; post-review TDD remediation passes0. Fixedpoint remainsce1ad93.
 
 Full successor CI on b5f5f7720914fc990d63c22600a460dbbe1502d4 PASS both Python3.11/3.12 release-gates, run40241319799. The older49df3a9 failure remains superseded by a verified fix, not erased or retried asclean. #357 remains in progress.
+
+## Checkpoint: all child tickets closed; formal review started
+
+#351–#357 are CLOSED, read back from GitHub. Source checkpoint da2f848 has actual native completion-funding proof; latest release-gates run40243924355 is pending. The single requested formal review now starts with independent Standards and Spec axes against the pinned ce1ad93 baseline. Funding-fixture phase names did not consume the formal review or post-review TDD pass. Counters: review1 in progress; post-review TDD0.
