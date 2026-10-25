@@ -184,6 +184,8 @@ def command(args, root, config, profile, checkpoint, content, *, permission_cont
                            refresh_scope=info['refresh_scope'], state='queued', reason='waiting_for_idle',
                            started_upper=upper, started_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
                            boot_id=boot_id_value(), deadline=deadline)
+            if profile['refresh_mode']==THREAD_MODE:
+                receipt['native_scope']=info['native_scope']
             if profile['refresh_mode']==CLIENT_MODE:
                 from .lifecycle_budget import operation_binding
                 receipt['intent']=dict(operation='refresh',source_thread_id=args.thread_id,

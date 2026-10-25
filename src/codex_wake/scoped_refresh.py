@@ -15,9 +15,9 @@ def inspect_capability(profile,thread):
             raise WakeError('source_workspace_mismatch')
         result=request(METHOD,dict(threadId=thread,dryRun=True))
         if result!=dict(threadId=thread,queued=False):raise WakeError('native_scope_unverified')
-        return dict(capability='supported',native_dependency=METHOD,readiness='observed')
+        return dict(capability='supported',native_dependency=METHOD,native_scope='thread_mcp_connections',readiness='observed')
     except (OSError,ValueError,KeyError,TypeError,WakeError):
-        return dict(capability='unsupported',native_dependency=METHOD,readiness='native_scope_unavailable')
+        return dict(capability='unsupported',native_dependency=METHOD,native_scope='thread_mcp_connections',readiness='native_scope_unavailable')
 
 
 def poll_one(path,receipt):

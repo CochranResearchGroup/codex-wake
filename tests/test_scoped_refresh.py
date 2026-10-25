@@ -108,6 +108,7 @@ class ScopedRefreshTests(unittest.TestCase):
                 code,config=invoke('configuration')
                 self.assertEqual(code,0,config)
                 self.assertEqual(config['capability'],'unsupported' if unsupported or wrong_cwd else 'supported',config)
+                self.assertEqual(config['native_scope'],'thread_mcp_connections')
                 self.assertFalse(state['reloaded'])
                 if unsupported or wrong_cwd:
                     code,value=invoke('refresh');self.assertNotEqual(code,0,value)
