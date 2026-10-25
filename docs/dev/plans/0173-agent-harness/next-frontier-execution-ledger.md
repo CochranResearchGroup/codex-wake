@@ -132,3 +132,26 @@ Feature coding waits for literal product answers (especially UI mode/navigation,
 ordering precedence, acceptance andjobclasses); silence is not approval. Goal
 remainsactive, review0/1 andfinalTDD0/1 unused. This turn advanced authoritative
 source and validation; it is progress, not a repeated no-progress/blocked turn.
+
+## Operator decisions resolved — outcome_progress
+
+Form4c4576f4308b response d9b59f368e984dff925597304f90e901,
+revision6a969d0c6b36f0193fe0bd9d5644895d798c022efc2a6e60d719fcdbb1965f4b,
+submitted2026-10-25T02:48:49Z, iscomplete. All eight primary choices are
+recommended; Other fields are inactive/unanswered, not inferred decisions.
+Resolved: one version-qualified menu flow with explicit takeover/return; exact
+artifact checks and bounded deterministic verifiers with explicit human/reviewer
+judgments; approved bounded local process-group jobs; configurable activity-first
+repo ordering with protected exceptions; exact saved resume with verified access
+and no silent fallback/renewal; one durable human queue with no implicit grant;
+terminal-first overview and explicit existing-only attachment focus.
+
+Ready implementation wave1: primaryHF08; independentHF14 andHF21 workers.
+HF05/HF16/HF18/HF27 remain assigned and queue for slots. Each feature freezes its
+spec before its first red test. Shared new action names join HF06 ACTIONS; old
+policies retain their known_actions and therefore do not silently gain new
+mutation rights. No global/operator policy is changed by source registration.
+Private test fixtures configure their policies explicitly. Source-only actions:
+acceptance.verify, job.launch/cancel, attention.request/respond/consume,
+workspace.order/undo/navigate, terminal.menu/takeover/return. Inspect reuses
+session.inspect and resume consumes existing resume.self. Primary owns registry.

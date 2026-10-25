@@ -22,6 +22,12 @@ ACTIONS = {
     'a2a.send': 'allow', 'a2a.receive': 'allow', 'a2a.claim': 'allow', 'a2a.reply': 'allow',
     'wake.background': 'allow', 'wake.existing_tab': 'allow',
     'wake.new_tab': 'allow', 'wake.fresh_task': 'allow',
+    'acceptance.verify': 'approval_required', 'job.launch': 'approval_required',
+    'job.cancel': 'approval_required', 'attention.request': 'allow',
+    'attention.respond': 'approval_required', 'attention.consume': 'allow',
+    'workspace.order': 'approval_required', 'workspace.undo': 'approval_required',
+    'workspace.navigate': 'approval_required', 'terminal.menu': 'approval_required',
+    'terminal.takeover': 'approval_required', 'terminal.return': 'approval_required',
 }
 DECISIONS = {'allow', 'deny', 'approval_required', 'inherit'}
 RELATIONSHIPS = {'self', 'peer', 'successor', 'shared'}
