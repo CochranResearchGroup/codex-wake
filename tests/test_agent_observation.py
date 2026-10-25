@@ -109,15 +109,24 @@ class AgentObservationTests(unittest.TestCase):
                  ('active', ['waitingOnApproval'], 'awaiting-human'),
                  ('active', ['waitingOnUserInput'], 'awaiting-human'),
                  ('idle', ['waitingOnApproval'], 'unknown'),
-                 ('active', ['newUnknownFlag'], 'unknown'), ('notLoaded', [], 'disconnected')]
+                 ('active', ['newUnknownFlag'], 'unknown'), ('active', None, 'unknown'),
+                 ('notLoaded', [], 'disconnected')]
         for status, flags, expected in cases:
             with self.subTest(status=status, flags=flags):
-                thread = dict(native, status=dict(type=status, activeFlags=flags), turns=['PRIVATE'])
+                native_status = dict(type=status)
+                if flags is not None:
+                    native_status['activeFlags'] = flags
+                thread = dict(native, status=native_status, turns=['PRIVATE'])
                 conn = FakeConnection([result(1, server), result(2, {'thread': thread}), result(3, {'thread': thread})])
                 with patch('websockets.sync.client.unix_connect', return_value=conn):
                     owner = AgentObservation(self.root, observer=RuntimeStateObserver(endpoint='unix://' + str(path), now=lambda: 100), now=lambda: 100)
                     value = owner.observe(agent['managed_agent_id'])
                 self.assertEqual(value['state'], expected, value)
+                if flags is None:
+                    with patch('websockets.sync.client.unix_connect', side_effect=lambda *a, **kw: FakeConnection([
+                            result(1, server), result(2, {'thread': thread}), result(3, {'thread': thread})])):
+                        waited = owner.wait(agent['managed_agent_id'], state='working', timeout=.01, interval=.05)
+                    self.assertNotEqual(waited['status'], 'matched')
                 self.assertNotIn('PRIVATE', str(value))
                 self.assertTrue(all(call['method'] in ('initialize', 'initialized', 'thread/read') for call in conn.sent))
         # Exercise the real CLI and MCP hubs against the same external protocol fixture.

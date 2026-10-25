@@ -128,8 +128,8 @@ class RuntimeStateObserver:
         status = repeated.get('status')
         state, reason = 'unknown', 'unsupported_native_status'
         if type(status) is dict:
-            flags = status.get('activeFlags', [])
             kind = status.get('type')
+            flags = status.get('activeFlags', None if kind == 'active' else [])
             if type(flags) is list and all(type(flag) is str for flag in flags):
                 if kind == 'idle' and not flags:
                     state, reason = 'ready', 'native_idle'
