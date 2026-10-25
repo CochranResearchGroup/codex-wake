@@ -108,6 +108,9 @@ def qualify(options):
     finish = threading.Event()
     operator_open = threading.Event()
     operator_release = threading.Event()
+    approved_application = {}
+    policy = base / "policy.json"
+    harness = base / "harness.json"
     stream_disconnected = threading.Event()
 
     class Handler(BaseHTTPRequestHandler):
@@ -136,6 +139,7 @@ def qualify(options):
                         in body,
                     )
                 )
+            save("response-request-" + str(number) + ".json", json.loads(body))
             if number > 6:
                 self.send_error(429)
                 return
@@ -164,25 +168,84 @@ def qualify(options):
                     )
                 )
                 text = None
+                item = None
                 if number == 1:
                     text = "LOCAL FIXTURE READY"
-                elif (
-                    b"Operator status question while the campaign stays paused." in body
-                ):
-                    operator_open.set()
-                    while (
-                        not operator_release.wait(0.1)
-                        and not finish.is_set()
-                        and time.monotonic() < expiry
-                    ):
-                        self.wfile.write(b": operator reply pending\n\n")
-                        self.wfile.flush()
-                    text = "OPERATOR REPLY AFTER PAUSE"
-                else:
+                elif number in (2, 4, 5):
+                    if number == 2:
+                        name = "wake_goal_limits_set"
+                        arguments = dict(
+                            caller_thread_id=thread,
+                            token_limit=1000,
+                            time_limit_seconds=30,
+                            checkpoint_token_percent=5,
+                            checkpoint_seconds=5,
+                        )
+                    elif number == 4:
+                        operator_open.set()
+                        name = "wake_goal_limits_extend"
+                        arguments = dict(
+                            caller_thread_id=thread,
+                            task_id="renewal-acceptance",
+                            operation_id="native-extension",
+                            token_limit=1500,
+                            remaining_seconds=45,
+                        )
+                    else:
+                        while (
+                            not operator_release.wait(0.1)
+                            and not finish.is_set()
+                            and time.monotonic() < expiry
+                        ):
+                            self.wfile.write(
+                                b": waiting exact public operator acceptance\n\n"
+                            )
+                            self.wfile.flush()
+                        require(
+                            bool(approved_application),
+                            "exact approved application unavailable",
+                        )
+                        name = "wake_goal_limits_apply_renewal"
+                        arguments = dict(
+                            caller_thread_id=thread,
+                            task_id="renewal-acceptance",
+                            **approved_application,
+                        )
+                    advertised = json.loads(body).get("tools", [])
+                    namespace = next(
+                        (
+                            tool["name"]
+                            for tool in advertised
+                            if tool.get("type") == "namespace"
+                            and any(
+                                value.get("name") == name
+                                for value in tool.get("tools", [])
+                            )
+                        ),
+                        None,
+                    )
+                    require(
+                        namespace is not None,
+                        "actual advertised native MCP tool unavailable: " + name,
+                    )
+                    item = dict(
+                        type="function_call",
+                        namespace=namespace,
+                        name=name,
+                        call_id="owned-native-tool-" + str(number),
+                        arguments=json.dumps(arguments),
+                    )
+                elif number == 3:
                     stream_open.set()
                     while not finish.wait(0.2) and time.monotonic() < expiry:
                         self.wfile.write(b": local fixture pending\n\n")
                         self.wfile.flush()
+                elif number == 6:
+                    text = "OPERATOR REPLY AFTER PAUSE"
+                else:
+                    raise AssertionError("unexpected localhost response number")
+                if item:
+                    emit(dict(type="response.output_item.done", item=item))
                 if text:
                     emit(
                         dict(
@@ -195,23 +258,26 @@ def qualify(options):
                             ),
                         )
                     )
-                    emit(
-                        dict(
-                            type="response.completed",
-                            response=dict(
-                                id="local-response-" + str(number),
-                                usage=dict(
-                                    input_tokens=20,
-                                    input_tokens_details=dict(cached_tokens=10),
-                                    output_tokens=0,
-                                    output_tokens_details=None,
-                                    total_tokens=20,
-                                ),
+                emit(
+                    dict(
+                        type="response.completed",
+                        response=dict(
+                            id="local-response-" + str(number),
+                            usage=dict(
+                                input_tokens=20,
+                                input_tokens_details=dict(cached_tokens=10),
+                                output_tokens=0,
+                                output_tokens_details=None,
+                                total_tokens=20,
                             ),
-                        )
+                        ),
                     )
+                )
             except (BrokenPipeError, ConnectionResetError):
                 stream_disconnected.set()
+            except BaseException as error:
+                report["fixture_error"] = type(error).__name__ + ": " + str(error)
+                raise
             finally:
                 self.close_connection = True
 
@@ -225,6 +291,24 @@ def qualify(options):
         '[model_providers.local_fixture]\nname="Local fixture only"\nbase_url="http://127.0.0.1:'
         + str(port)
         + '/v1"\nwire_api="responses"\nrequires_openai_auth=false\nrequest_max_retries=0\nstream_max_retries=0\nsupports_websockets=false\n'
+    )
+    config += (
+        "[features]\ncode_mode=false\n[mcp_servers.wake]\ncommand="
+        + json.dumps(str(prefix / "bin/codex-wake-mcp"))
+        + "\nargs="
+        + json.dumps(
+            [
+                "--wake-root",
+                str(root),
+                "--goal-limits-root",
+                str(root),
+                "--goal-limits-policy",
+                str(policy),
+                "--harness-policy",
+                str(harness),
+            ]
+        )
+        + "\n"
     )
     config += "[projects." + json.dumps(str(workspace)) + ']\ntrust_level="trusted"\n'
     (home / "config.toml").write_text(config)
@@ -425,6 +509,23 @@ def qualify(options):
             bounded()
             return native_request(endpoint, str(tui), method, params, 3)
 
+        save(
+            "policy.json",
+            dict(
+                version=2,
+                native_caller_binding=True,
+                allocations={},
+                self_enrollment=dict(
+                    app_server=endpoint,
+                    codex_path=str(tui),
+                    codex_home=str(home),
+                    max_tokens=2000,
+                    max_seconds=180,
+                    rpc_timeout=3,
+                ),
+            ),
+        )
+        save("harness.json", dict(version=1, controllers={}))
         thread = rpc(
             "thread/start",
             dict(cwd=str(workspace), historyMode="legacy", experimentalRawEvents=True),
@@ -493,23 +594,9 @@ def qualify(options):
             "first nonzero native response",
             15,
         )
-        policy = base / "policy.json"
         save(
-            "policy.json",
-            dict(
-                version=1,
-                callers={
-                    thread: dict(
-                        app_server=endpoint,
-                        codex_path=str(tui),
-                        codex_home=str(home),
-                        allocation_id="owned-native-ux",
-                        max_tokens=2000,
-                        max_seconds=180,
-                        rpc_timeout=3,
-                    )
-                },
-            ),
+            "harness.json",
+            dict(version=1, controllers={thread: ["renewal-acceptance"]}),
         )
 
         def goal_cli(verb, *extra, expected=0):
@@ -560,16 +647,68 @@ def qualify(options):
             lambda: trusted_upper() >= goal["createdAt"],
             "qualified original native goal time",
         )
-        enrolled = goal_cli(
-            "set",
-            "--token-limit",
-            "1000",
-            "--time-limit-seconds",
-            "30",
-            "--checkpoint-seconds",
-            "5",
-            "--checkpoint-token-percent",
-            "5",
+        rpc(
+            "turn/start",
+            dict(
+                threadId=thread,
+                input=[
+                    dict(
+                        type="text",
+                        text="Begin the explicitly limited native MCP fixture.",
+                    )
+                ],
+            ),
+        )
+        wait(
+            lambda: stream_open.is_set(),
+            "actual native MCP enrollment continuation",
+            15,
+        )
+
+        def tool_result(name):
+            read = rpc("thread/read", dict(threadId=thread, includeTurns=True))[
+                "thread"
+            ]
+            items = [
+                item
+                for turn in read["turns"]
+                for item in turn["items"]
+                if item["type"] == "mcpToolCall"
+                and item.get("tool") == name
+                and item.get("status") == "completed"
+            ]
+            if not items:
+                return None
+            item = items[-1]
+            save("native-tool-" + name + ".json", item)
+            require(
+                not item.get("error"),
+                "genuine native MCP tool failed: " + json.dumps(item),
+            )
+            result = item.get("result") or {}
+            if isinstance(result.get("structuredContent"), dict):
+                return result["structuredContent"]
+            for part in result.get("content", []):
+                if part.get("type") == "text":
+                    value = json.loads(part["text"])
+                    require(
+                        "error" not in value,
+                        "genuine native MCP returned an error: " + json.dumps(value),
+                    )
+                    return value
+            raise AssertionError("native MCP result content unavailable")
+
+        enrolled = wait(
+            lambda: tool_result("wake_goal_limits_set"),
+            "genuine native enrollment result",
+        )
+        require(
+            enrolled["state"] in ("armed", "checkpoint_requested"),
+            "native enrollment did not arm",
+        )
+        require(
+            "callers" not in json.loads(policy.read_text()),
+            "native enrollment required a per-session caller grant",
         )
         require(
             enrolled["used_tokens"] > 0,
@@ -652,7 +791,7 @@ def qualify(options):
         )
         calls_after_stop = len(calls)
         require(
-            calls_after_stop == before_active_calls + 1,
+            calls_after_stop == before_active_calls,
             "notice delivery dispatched a fresh model turn",
         )
         report.update(
@@ -704,31 +843,11 @@ def qualify(options):
             ),
             "watcher interrupted later operator reply",
         )
-        operator_release.set()
-        wait(
-            lambda: any(
-                turn["id"] == operator_turn and turn["status"] == "completed"
-                for turn in rpc(
-                    "thread/read", dict(threadId=thread, includeTurns=True)
-                )["thread"]["turns"]
-            ),
-            "later operator reply completion",
-            8,
-        )
-        wait(
-            lambda: "OPERATOR REPLY AFTER PAUSE" in capture("tui-operator-reply.txt"),
-            "visible operator reply",
-            8,
-        )
         spent = goal_cli("show")["used_tokens"]
-        proposal = goal_cli(
-            "extend",
-            "--operation-id",
-            "native-extension",
-            "--token-limit",
-            "1500",
-            "--remaining-seconds",
-            "45",
+        proposal = wait(
+            lambda: tool_result("wake_goal_limits_extend"),
+            "genuine active operator MCP proposal",
+            15,
         )
         row = proposal["attention"]
         accepted = invoke(
@@ -749,12 +868,29 @@ def qualify(options):
                 "--json",
             ]
         )
-        extended = goal_cli(
-            "apply-renewal",
-            "--proposal-id",
-            proposal["proposal_id"],
-            "--fingerprint",
-            proposal["fingerprint"],
+        approved_application.update(
+            proposal_id=proposal["proposal_id"], fingerprint=proposal["fingerprint"]
+        )
+        operator_release.set()
+        extended = wait(
+            lambda: tool_result("wake_goal_limits_apply_renewal"),
+            "genuine active operator MCP apply",
+            15,
+        )
+        wait(
+            lambda: any(
+                turn["id"] == operator_turn and turn["status"] == "completed"
+                for turn in rpc(
+                    "thread/read", dict(threadId=thread, includeTurns=True)
+                )["thread"]["turns"]
+            ),
+            "later operator reply completion",
+            10,
+        )
+        wait(
+            lambda: "OPERATOR REPLY AFTER PAUSE" in capture("tui-operator-reply.txt"),
+            "visible operator reply",
+            10,
         )
         require(
             extended["new"]["used_tokens"] >= spent > 0,
@@ -866,6 +1002,9 @@ def qualify(options):
             peer_after=peer_after,
             peer_unchanged=True,
             notification_started_no_model_turn=True,
+            genuine_native_mcp_enrollment=True,
+            genuine_native_mcp_operator_renewal=True,
+            no_per_session_caller_grant=True,
             engagement_events=[event["event_id"] for event in events],
             ui_attachments=ui_count,
         )
