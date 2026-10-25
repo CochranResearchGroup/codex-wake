@@ -13,7 +13,8 @@ def _claimant(agent_id, root, *, observer, operator, native_context, now):
     agent = ManagedInventory(root, now=now).inspect(agent_id)['agent']
     if not operator and agent['runtime'] == 'codex':
         verified_native_caller(native_context, agent['conversation_id'])
-    if observer is None or not agent['binding_current']:
+    if (observer is None or agent['enrollment'] != 'enrolled'
+            or agent['state'] not in ('ready', 'stale')):
         raise ResourceClaimError('owner_unqualified', 'current enrolled managed binding and runtime observer required')
     sample = observer(dict(runtime=agent['runtime'], conversation_id=agent['conversation_id'])).validated(now())
     if (sample.runtime != agent['runtime'] or sample.namespace != agent['namespace']

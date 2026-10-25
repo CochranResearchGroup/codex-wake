@@ -19,7 +19,7 @@ All runs use PYTHONPATH=src in the isolated resource-ownership checkout.
 
 For cycles 01-05,08-10 the exact command was:
 `python -m unittest discover -s tests -p test_resource_claims.py`.
-For cycles 06-07 it was:
+For cycles 06-07,11 it was:
 `python -m unittest discover -s tests -p test_resource_claim_commands.py`.
 Each red command failed before its implementation; the same command then passed.
 
@@ -35,8 +35,9 @@ Each red command failed before its implementation; the same command then passed.
 | 08 | Unknown lookup poisoned first store availability | Initial empty authority published before first operation |
 | 09 | Shared writable root accepted | Unsafe Wake root refused before metadata creation |
 | 10 | Duplicate claims field erased parsed authority | Duplicate authority keys hold original bytes |
+| 11 | Aged inventory refused fresh exact runtime observation | Cache age alone no longer blocks fresh exact binding; suppression and changed process still deny |
 
-Raw development receipts are /tmp/hf04-red01.log through red10.log and matching
+Raw development receipts are /tmp/hf04-red01.log through red11.log and matching
 green files. Primary should retain compact acceptance facts here and copy raw logs
 outside Git if needed. Additional acceptance tests cover overlap both directions,
 controller reconstruction, serialization while guarded effect is active, stale
@@ -48,7 +49,7 @@ was a test expectation correction, not a product-policy change.
 ## Focused validation
 
 `PYTHONPATH=src python -m unittest discover -s tests -p 'test_resource_claim*.py'`:
-12 tests PASS on Python 3.12 (0.879s) and Python 3.11 (latest focused receipt).
+13 tests PASS on Python 3.12 and Python 3.11 (latest focused receipts).
 Ruff undefined-name selection F821,F822,F823 passes on owned source/tests.
 `git diff --check` passes. No comprehensive suite or installed-runtime claim.
 
