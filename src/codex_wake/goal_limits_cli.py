@@ -57,7 +57,11 @@ def goal_limits_command(args, root):
             result = prepare(root,args.policy,args.seconds)
         elif args.goal_limits_command == 'show':
             result = show(root, args.policy, args.caller_thread_id,args.allocation_id,permission_principal=principal)
-        elif args.goal_limits_command in ('recover','disable'):
+        elif args.goal_limits_command=='recover':
+            from .goal_recovery import recover
+            result=recover(root,args.policy,args.caller_thread_id,principal=principal,
+                task_id=args.task_id,operation_id=args.operation_id,allocation_id=args.allocation_id)
+        elif args.goal_limits_command=='disable':
             from .permission_enforcement import diagnostic
             result=diagnostic(root,args.caller_thread_id,'enforcement.'+args.goal_limits_command,
                 principal=principal,task_id=args.task_id,operation_id=args.operation_id)

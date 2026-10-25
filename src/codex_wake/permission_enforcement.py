@@ -90,7 +90,7 @@ def describe(root, thread, *, principal):
         return None
     actions = ('enforcement.enroll', 'enforcement.increase', 'enforcement.disable', 'enforcement.recover')
     return {action: store.evaluate(action, principal, target=thread,
-        capability='unsupported' if action in ('enforcement.disable', 'enforcement.recover') else 'supported',
+        capability='unsupported' if action=='enforcement.disable' else 'supported',
         readiness='not_observed') for action in actions}
 
 
@@ -99,8 +99,9 @@ def tool_specs():
     result = {}
     for verb in ('recover', 'disable'):
         result['wake_goal_limits_' + verb] = ('goal-limits', verb,
-            'Check explicit authority for ' + verb + '. Current runtime support is unavailable; '
-            'this never clears stops, changes resources or interrupts a turn. Recovery depends on issue319.',
+            ('Recover an observation-fault stop only with explicit approval, repeated exact native observations, '
+             'qualified accounting, fresh controller, same boot and original remaining resources. Does not resume the goal or renew limits.'
+             if verb=='recover' else 'Check explicit disable authority; disabling runtime enforcement remains unsupported.'),
             dict(caller_thread_id=CALLER, allocation_id=TEXT, task_id=TEXT,
                  assignment_id=TEXT, operation_id=TEXT), ['caller_thread_id'], False)
     return result
@@ -137,7 +138,12 @@ def mcp_call(runner, verb, arguments, native_context):
     if verb == 'show':
         return show(root, runner.goal_limits_policy, thread, arguments.get('allocation_id'),
                     permission_principal=principal)
-    if verb in ('recover', 'disable'):
+    if verb=='recover':
+        from .goal_recovery import recover
+        return recover(root,runner.goal_limits_policy,thread,principal=principal,
+            task_id=arguments.get('task_id'),operation_id=arguments.get('operation_id'),
+            allocation_id=arguments.get('allocation_id'))
+    if verb=='disable':
         return diagnostic(root, thread, 'enforcement.' + verb, principal=principal,
                           task_id=arguments.get('task_id'), operation_id=arguments.get('operation_id'))
     options = {k: v for k, v in arguments.items() if k not in ('assignment_id',)}
@@ -198,6 +204,8 @@ def main():
         failed=packet['verb']!='show' and value.get('state') not in ('armed','checkpoint_requested')
     except (ValueError,OSError,KeyError,TypeError,WakeError) as exc:
         value={'error':{'code':getattr(exc,'code','goal_limits_unavailable'),'message':str(exc)}}
+        if isinstance(exc,PermissionDenied):
+            value.update(permission=exc.decision,effect_attempted=False,state='held',armed=False)
         failed=True
     print(json.dumps(value))
     return 2 if failed else 0
