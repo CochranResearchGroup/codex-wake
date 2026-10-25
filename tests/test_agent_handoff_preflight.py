@@ -12,6 +12,7 @@ import sys
 import tempfile
 import threading
 import time
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 from websockets.sync.server import unix_serve
@@ -72,7 +73,7 @@ class HandoffPreflightTests(unittest.TestCase):
         self.scenario(work_verdict='correct')
 
     def test_one_successor_runs_preflight_without_two_active_goals_or_duplicate_assignment(self):
-        self.scenario()
+        self.scenario(inventory_budget_miss=True)
 
     def test_preflight_allowance_must_fit_before_creating_a_successor(self):
         self.scenario(source_budget=60)
@@ -185,7 +186,7 @@ class HandoffPreflightTests(unittest.TestCase):
     def test_cached_rollback_budget_charges_late_receiver_usage_once(self):
         self.scenario(rollback=True,lost_rollback=True,late_usage=True)
 
-    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False,reference_contract=False,resume_modal=False,lost_modal=False,task_brief=False,common_permissions=False):
+    def scenario(self,source_budget=1000,lost_goal=False,pause_used=None,expire_preflight=False,monitor_expiry=False,activate=False,enforce_deadline=False,lost_pause=False,lost_activate=False,shutdown=False,readback=False,foreign_monitor=False,rollback=False,lost_rollback=False,owner_conflict=False,running_overspend=False,lost_preflight_interrupt=False,same_tab=False,lost_respawn=False,stale_title=False,active_rollback=False,lost_rollback_pause=False,missing_source=False,lost_restore=False,late_usage=False,late_source=False,before_source=False,work_verdict=None,workflow='github-handoff',bad_review=None,unread_writer=False,changed_defaults=False,session_cap=1000,correction=None,pending_usage=False,unloaded_source=False,unloaded_active=False,inherited_deadline=None,cached_goal=False,reference_contract=False,resume_modal=False,lost_modal=False,task_brief=False,common_permissions=False,inventory_budget_miss=False):
         source='00000000-0000-7000-8000-000000000159'
         target='00000000-0000-7000-8000-000000000160'
         with tempfile.TemporaryDirectory() as tmp:
@@ -438,13 +439,42 @@ print('preflight:'+target+':'+nonce+':'+digest)
             if common_permissions:
                 argv+=['--bus-root',str(permission_bus.root),'--operator-capability',str(permission_capability),'--trigger','context_limit']
             # Preserve the exact readiness observation if the aggregate guard fails.
-            from codex_wake.sessions import observe, revalidate_attachment
+            from codex_wake.sessions import observe, revalidate_attachment, tmux_inventory, codex_client_identity_for_tty
             readiness = {}
+            readiness_deferrals = 0
+            inventory_diagnostics = []
+            budget_miss = dict(injected=False, base=0.0, offset=0.0, armed=False)
+            def timed_identity(tty):
+                started = time.monotonic()
+                try:
+                    return codex_client_identity_for_tty(tty)
+                finally:
+                    inventory_diagnostics.append(dict(kind='identity', tty=tty, elapsed=time.monotonic()-started))
+                    if budget_miss['armed']:
+                        budget_miss.update(injected=True, armed=False, offset=2.0)
+            def diagnosed_inventory(*args, **kwargs):
+                started = time.monotonic()
+                budget_miss.update(base=budget_miss['base']+budget_miss['offset']+1.0, offset=0.0, armed=inventory_budget_miss and not budget_miss['injected'] and len(panes)==2)
+                try:
+                    # Host scheduling and unrelated /proc size are not fixture inputs.
+                    # Advance a monotonic observation clock between inventories; only
+                    # the explicit miss advances during a real identity scan.
+                    # Keep all process identity and uniqueness checks real.
+                    with patch('codex_wake.sessions.time', SimpleNamespace(
+                            monotonic=lambda:budget_miss['base']+budget_miss['offset'])):
+                        return tmux_inventory(*args, **kwargs)
+                except Exception as exc:
+                    inventory_diagnostics.append(dict(kind='inventory_error', type=type(exc).__name__, message=str(exc)))
+                    raise
+                finally:
+                    inventory_diagnostics.append(dict(kind='inventory', elapsed=time.monotonic()-started))
             def observed_readiness(**kwargs):
+                inventory_diagnostics.clear()
                 snapshot = observe(**kwargs)
                 readiness.clear()
                 readiness['snapshot'] = snapshot
-                readiness['clock'] = dict(wall=time.time(), monotonic=time.monotonic(), native=clock)
+                readiness['inventory'] = list(inventory_diagnostics)
+                readiness['clock'] = dict(wall=time.time(), monotonic=time.monotonic(), native=json.loads(json.dumps(clock)))
                 return snapshot
             def revalidated_readiness(attachment):
                 valid = revalidate_attachment(attachment)
@@ -454,7 +484,9 @@ print('preflight:'+target+':'+nonce+':'+digest)
             try:
                 with patch('subprocess.run',side_effect=command),patch('codex_wake.native_clock.snapshot',
                         return_value=clock),patch('codex_wake.sessions.observe',side_effect=observed_readiness),patch(
-                        'codex_wake.sessions.revalidate_attachment',side_effect=revalidated_readiness):
+                        'codex_wake.sessions.revalidate_attachment',side_effect=revalidated_readiness),patch(
+                        'codex_wake.sessions.tmux_inventory',side_effect=diagnosed_inventory),patch(
+                        'codex_wake.sessions.codex_client_identity_for_tty',side_effect=timed_identity):
                     for _ in range(3 if pending_usage or correction or stale_title else 2):
                         output=StringIO()
                         if changed_defaults and _==1:
@@ -469,6 +501,19 @@ print('preflight:'+target+':'+nonce+':'+digest)
                             return
                         with redirect_stdout(output):self.assertEqual(run(argv),5)
                         receipt=json.loads(output.getvalue())
+                        if (receipt['state']=='awaiting_preflight' and receipt.get('successor',{}).get('reason')=='exact_idle_owned_client_not_ready'):
+                            # An incomplete observation defers admission safely. Reconcile
+                            # the same intent once, within the scenario's existing bound.
+                            self.assertEqual(_,0,readiness)
+                            readiness_deferrals += 1
+                            self.assertEqual(methods.count('thread/start'),1)
+                            self.assertEqual(methods.count('thread/queue/start'),0)
+                            self.assertNotIn(target,goals)
+                            if inventory_budget_miss:
+                                self.assertTrue(budget_miss['injected'])
+                                self.assertIn(dict(kind='inventory_error',type='SharedSourceError',
+                                    message='tmux observation timed out'),readiness['inventory'])
+                            continue
                         if common_permissions:
                             self.assertEqual(receipt['permission_context']['approval_id'],'task-approval')
                             self.assertEqual(receipt['permission_context']['trigger'],'context_limit')
@@ -747,6 +792,8 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         self.assertEqual(json.loads(output.getvalue())['state'],'awaiting_activation')
                 self.assertEqual(methods.count('thread/start'),1)
                 self.assertEqual(methods.count('thread/queue/add'),1)
+                if inventory_budget_miss:
+                    self.assertEqual(readiness_deferrals,1)
                 self.assertEqual(methods.count('thread/queue/start'),1)
                 self.assertEqual(len(goal_sets),(2 if foreign_monitor else 3) if activate else (3 if active_rollback or late_usage else 2 if rollback or pause_used is not None else 1))
                 self.assertEqual(goals[source]['tokensUsed'],150 if late_source and late_source!="time" else 50 if pause_used is None else pause_used)

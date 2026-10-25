@@ -53,3 +53,8 @@ Raw repro/instrumentation logs are retained in user-scoped validation receipts;
 scripts, never production source. Temporary scripts are removed after their
 receipts are preserved. Repository glossary remains the terminology authority;
 no new clock domain or scheduling semantics is introduced.
+
+Final focused34tests pass3.12/4.408s and3.11/4.247s; installed isolated wheel's
+10 acceptance tests pass5.172s outside repository. Joined comprehensive run at
+17c1d4c passes1651tests/636.042s, OK(skipped1), exit0. Previous first failures remain
+retained and the independent handoff component remains unproven/open in issue342.

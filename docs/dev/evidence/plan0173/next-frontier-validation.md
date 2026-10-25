@@ -74,3 +74,33 @@ branches retained. Bundle and exactsource/pathreceipt live in
 Other worktrees/services untouched. Baseline diagnostic checkout is disposable.
 Memory dispositionforbidden: explicit developer boundary requires a memory-update
 request; receipt next-frontier-final-memory.json, no Graphiti write attempted.
+
+## Corrective local validation, issue342
+
+At17c1d4c the single corrective comprehensive3.12 run passes1651tests/636.042s,
+OK(skipped1), exit0. It includes the two acceptance review regressions plus one
+clock discontinuity regression and one additional offline-mode regression absent
+from the original1647-test collection. Focused34tests pass3.11/3.12; final isolated
+wheel's10 acceptance tests pass outside repository.
+
+The acceptance errors were traced to an actual backward wall-clock step of0.7587s;
+production correctly refused future observation. Existing configured clock now
+propagates into resource checks and tests use a consistent injected clock. Offline
+inspection explicitly selects its intended configuration instead of ambient host
+settings. Detailed red/green records are in acceptance-freshness-repair.md and
+time-inspection-repair.md.
+
+The earlier handoff failures remain unproven as to cause; current full pass does
+not erase them. Issue342 staysopen for that component, with fixture-only exact
+readiness diagnostics retained. DraftPR341 still requires prerequisite integration
+and an explicit disposition of known intermittent handoff behavior before claiming
+merge readiness. No main/provider/service change or CI run occurred.
+
+Handoff follow-up after the passing17c1d4c join captured a fresh original failure:
+exact natural tmux observation timeout, identity scans1.421–1.738s beyond the
+fixture's1s budget. The test fixture now controls the external observation clock,
+retains real process evidence, and explicitly exercises safe timeout/deferral and
+same-intent reconciliation. Intermediate51-case run retained6failures; final
+clock-isolated51cases pass205.689s. See handoff-preflight-repair.md. This supersedes
+the previously unresolved handoff disposition; a final joined run follows the
+concrete fixture repair rather than retrying unchanged code until green.
