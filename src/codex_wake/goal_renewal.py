@@ -213,6 +213,10 @@ def _snapshot(root, receipts, allocation, *, caller=None):
             and controller.get("generation") != first_stop["controller_generation"]
             and receipt.get("stop_proof") is True
             and receipt.get("pause_observed") is True
+            and not any(
+                receipt.get(key)
+                for key in ("winddown_reason", "observation_error", "control_error")
+            )
         )
         if (
             receipt.get("stop_latched")
