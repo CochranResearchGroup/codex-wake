@@ -24,3 +24,16 @@ See docs/dev/evidence/plan0173/goal-notice-native-qualification.md for the owned
 stock-frontend captures, lost-ack reconciliation, peer proof and exact limits.
 Final schema/static cleanup is tracked separately in the integration ledger;
 the existing behavior pin remains stable until an explicitly qualified successor.
+
+## Bounded static successor under qualification
+
+The patch now includes the owned successor formatting, three MCP unit-test
+expectation corrections and one exhaustive RawResponseCompleted match arm in the
+MCP tool runner on top of b0ce988. Event notification forwarding precedes that
+local no-op arm. The installed behavior binary and its
+pin above remain unchanged; there is no newly qualified successor binary.
+See docs/dev/evidence/plan0173/combined-native-qualification.md for fresh checks,
+cache failures, source custody and remaining broad native gates.
+
+Qualified static successor source:98d5c6736ac66f06c62b9eaa275adb8a30baa431.
+Matching successor artifact build is separate from the existing b0ce988 behavior pin.
