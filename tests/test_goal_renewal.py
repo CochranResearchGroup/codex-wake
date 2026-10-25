@@ -1,0 +1,610 @@
+"""Renewal through public APIs, real accounting files and owned native endpoint."""
+
+import tempfile
+import unittest
+from unittest.mock import patch
+
+from codex_wake.goal_supervision import enroll, show
+from codex_wake.session_permissions import Principal
+import test_goal_supervision as fixture_module
+
+THREAD = fixture_module.THREAD
+NOW = fixture_module.NOW
+
+
+class GoalRenewalTests(unittest.TestCase):
+    fixture = fixture_module.GoalSupervisionTests.fixture
+    controller = fixture_module.GoalSupervisionTests.controller
+
+    def test_operator_extension_retains_consumed_usage_and_does_not_resume(self):
+        from codex_wake.goal_renewal import propose, apply
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            native["goal"]["status"] = "paused"
+            native["active"] = []
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                enroll(root, policy, THREAD, 40, 120)
+                operator = Principal(THREAD, "operator")
+                packet = propose(
+                    root,
+                    policy,
+                    THREAD,
+                    principal=operator,
+                    operation_id="extension-1",
+                    mode="extend",
+                    token_limit=90,
+                    deadline=NOW + 180,
+                    expires_at=NOW + 60,
+                )
+                self.assertEqual(packet["proposal"]["old"]["used_tokens"], 40)
+                self.assertEqual(packet["proposal"]["new"]["remaining_tokens"], 50)
+                result = apply(
+                    root,
+                    policy,
+                    THREAD,
+                    packet["proposal_id"],
+                    principal=operator,
+                    expected_fingerprint=packet["fingerprint"],
+                    explicit=True,
+                )
+                self.assertEqual(result["status"], "applied")
+                campaign = show(root, policy, THREAD)
+                self.assertEqual(
+                    (campaign["token_limit"], campaign["used_tokens"]), (90, 40)
+                )
+                self.assertEqual(native["goal"]["status"], "paused")
+                again = apply(
+                    root,
+                    policy,
+                    THREAD,
+                    packet["proposal_id"],
+                    principal=operator,
+                    expected_fingerprint=packet["fingerprint"],
+                    explicit=True,
+                )
+                self.assertEqual(again, result)
+
+    def test_reset_opens_new_window_and_retains_lifetime_and_stop_history(self):
+        from codex_wake.goal_renewal import propose, apply
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, log, native, _ = self.fixture(directory)
+            native["goal"]["status"] = "paused"
+            native["active"] = []
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                first = enroll(root, policy, THREAD, 40, 120)
+                operator = Principal(THREAD, "operator")
+                packet = propose(
+                    root,
+                    policy,
+                    THREAD,
+                    principal=operator,
+                    operation_id="reset-1",
+                    mode="reset",
+                    token_limit=100,
+                    remaining_seconds=180,
+                    expires_at=NOW + 60,
+                )
+                result = apply(
+                    root,
+                    policy,
+                    THREAD,
+                    packet["proposal_id"],
+                    principal=operator,
+                    expected_fingerprint=packet["fingerprint"],
+                    explicit=True,
+                )
+                campaign = show(root, policy, THREAD)
+                self.assertEqual(campaign["used_tokens"], 0)
+                self.assertEqual(campaign["lifetime_used_tokens"], 40)
+                self.assertNotEqual(campaign["generation"], first["generation"])
+                self.assertEqual(
+                    campaign["budget_history"][0]["previous"]["used_tokens"], 40
+                )
+                self.assertTrue(
+                    campaign["budget_history"][0]["previous"]["stop_latched"]
+                )
+                self.assertEqual(result["new"]["used_tokens"], 0)
+                row = __import__("json").loads(log.read_text().splitlines()[-1])
+                row["payload"]["response_id"] = "post-reset"
+                with log.open("a") as stream:
+                    stream.write(__import__("json").dumps(row) + "\n")
+                from codex_wake.goal_supervision import poll
+
+                self.assertEqual(poll(root)[0]["used_tokens"], 40)
+                self.assertEqual(native["goal"]["status"], "paused")
+
+    def test_model_cannot_self_approve_and_stale_or_expired_proposal_has_no_effect(
+        self,
+    ):
+        from codex_wake.goal_renewal import propose, apply, RenewalError
+
+        for scenario in ("model", "stale", "expired", "host-ceiling"):
+            with (
+                self.subTest(scenario=scenario),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                root, policy, _, native, _ = self.fixture(directory)
+                native["goal"]["status"] = "paused"
+                native["active"] = []
+                with (
+                    self.controller(root),
+                    patch(
+                        "codex_wake.lifecycle_budget.trusted_upper", return_value=NOW
+                    ),
+                ):
+                    enroll(root, policy, THREAD, 40, 120)
+                    operator = Principal(THREAD, "operator")
+                    if scenario == "host-ceiling":
+                        with self.assertRaises(RenewalError):
+                            propose(
+                                root,
+                                policy,
+                                THREAD,
+                                principal=operator,
+                                operation_id="denied",
+                                mode="extend",
+                                token_limit=1001,
+                                deadline=NOW + 180,
+                                expires_at=NOW + 60,
+                            )
+                    else:
+                        packet = propose(
+                            root,
+                            policy,
+                            THREAD,
+                            principal=operator,
+                            operation_id="denied",
+                            mode="extend",
+                            token_limit=90,
+                            deadline=NOW + 180,
+                            expires_at=NOW + 60,
+                        )
+                        if scenario == "stale":
+                            enroll(root, policy, THREAD, 39, 120)
+                        when = NOW + 61 if scenario == "expired" else NOW
+                        actor = Principal(THREAD) if scenario == "model" else operator
+                        with patch(
+                            "codex_wake.lifecycle_budget.trusted_upper",
+                            return_value=when,
+                        ):
+                            with self.assertRaises(RenewalError):
+                                apply(
+                                    root,
+                                    policy,
+                                    THREAD,
+                                    packet["proposal_id"],
+                                    principal=actor,
+                                    expected_fingerprint=packet["fingerprint"],
+                                    explicit=True,
+                                )
+                    self.assertLessEqual(show(root, policy, THREAD)["token_limit"], 40)
+                    self.assertEqual(native["goal"]["status"], "paused")
+
+    def test_reset_and_extend_use_common_operator_response_with_no_model_approval(self):
+        from codex_wake.goal_renewal_commands import execute
+        from codex_wake.attention_queue import AttentionQueue
+        from codex_wake.goal_renewal import RenewalError
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            native["goal"]["status"] = "paused"
+            native["active"] = []
+            context = dict(
+                threadId=THREAD,
+                sessionId=THREAD,
+                callId="renewal-proposal",
+                **{
+                    "x-codex-turn-metadata": dict(
+                        thread_id=THREAD, session_id=THREAD, turn_id="operator-request"
+                    )
+                },
+            )
+            model = Principal(THREAD)
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                enroll(root, policy, THREAD, 40, 120)
+                packet = execute(
+                    "extend",
+                    dict(
+                        caller_thread_id=THREAD,
+                        operation_id="native-proposal",
+                        token_limit=90,
+                        remaining_seconds=180,
+                    ),
+                    root,
+                    policy,
+                    principal=model,
+                    native_context=context,
+                    mcp=True,
+                )
+                with self.assertRaises(RenewalError):
+                    execute(
+                        "apply-renewal",
+                        dict(
+                            caller_thread_id=THREAD,
+                            proposal_id=packet["proposal_id"],
+                            fingerprint=packet["fingerprint"],
+                            approve=True,
+                        ),
+                        root,
+                        policy,
+                        principal=model,
+                        native_context=context,
+                        mcp=True,
+                    )
+                row = packet["attention"]
+                queue = AttentionQueue(root, now=lambda: NOW)
+                queue.respond(
+                    Principal("local-operator", "operator"),
+                    row["request_id"],
+                    "accept",
+                    expected_revision=row["revision"],
+                    expected_fingerprint=row["fingerprint"],
+                )
+                result = execute(
+                    "apply-renewal",
+                    dict(
+                        caller_thread_id=THREAD,
+                        proposal_id=packet["proposal_id"],
+                        fingerprint=packet["fingerprint"],
+                    ),
+                    root,
+                    policy,
+                    principal=model,
+                    native_context=context,
+                    mcp=True,
+                )
+                self.assertEqual(result["status"], "applied")
+                self.assertEqual(show(root, policy, THREAD)["used_tokens"], 40)
+                self.assertEqual(
+                    queue.inspect(model, row["request_id"])["status"], "consumed"
+                )
+
+    def test_approved_resume_waits_for_new_revision_first_poll(self):
+        from codex_wake.goal_renewal import propose, apply
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            native["goal"]["status"] = "paused"
+            native["active"] = []
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                enroll(root, policy, THREAD, 40, 120)
+                operator = Principal(THREAD, "operator")
+                packet = propose(
+                    root,
+                    policy,
+                    THREAD,
+                    principal=operator,
+                    operation_id="resume-1",
+                    mode="extend",
+                    token_limit=90,
+                    remaining_seconds=180,
+                    expires_at=NOW + 60,
+                    resume=True,
+                )
+                result = apply(
+                    root,
+                    policy,
+                    THREAD,
+                    packet["proposal_id"],
+                    principal=operator,
+                    expected_fingerprint=packet["fingerprint"],
+                    explicit=True,
+                )
+                self.assertEqual(result["resume_state"], "awaiting_first_poll")
+                self.assertFalse(result["resumed"])
+                self.assertEqual(native["goal"]["status"], "paused")
+                retry = apply(
+                    root,
+                    policy,
+                    THREAD,
+                    packet["proposal_id"],
+                    principal=operator,
+                    expected_fingerprint=packet["fingerprint"],
+                )
+                self.assertEqual(retry["resume_state"], "awaiting_first_poll")
+
+    def test_interrupted_state_publication_reconciles_same_operation_without_new_authority(
+        self,
+    ):
+        import json
+        import os
+        from pathlib import Path
+        from codex_wake.goal_renewal import propose, apply
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            native["goal"]["status"] = "paused"
+            native["active"] = []
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                enroll(root, policy, THREAD, 40, 120)
+                operator = Principal(THREAD, "operator")
+                packet = propose(
+                    root,
+                    policy,
+                    THREAD,
+                    principal=operator,
+                    operation_id="interrupted",
+                    mode="extend",
+                    token_limit=90,
+                    remaining_seconds=180,
+                    expires_at=NOW + 60,
+                )
+                replace = os.replace
+                broken = []
+
+                def lose_publication(source, target):
+                    body = json.loads(Path(source).read_text())
+                    if (
+                        body.get("budget_revision") == 2
+                        and body.get("thread_id") == THREAD
+                        and not broken
+                    ):
+                        broken.append(True)
+                        raise OSError("owned filesystem publication failed")
+                    return replace(source, target)
+
+                with patch("os.replace", side_effect=lose_publication):
+                    with self.assertRaises(OSError):
+                        apply(
+                            root,
+                            policy,
+                            THREAD,
+                            packet["proposal_id"],
+                            principal=operator,
+                            expected_fingerprint=packet["fingerprint"],
+                            explicit=True,
+                        )
+                result = apply(
+                    root,
+                    policy,
+                    THREAD,
+                    packet["proposal_id"],
+                    principal=operator,
+                    expected_fingerprint=packet["fingerprint"],
+                )
+                self.assertEqual(result["status"], "applied")
+                self.assertEqual(show(root, policy, THREAD)["token_limit"], 90)
+                self.assertEqual(show(root, policy, THREAD)["used_tokens"], 40)
+
+    def test_shared_reset_requires_explicit_scope_and_qualifies_every_member(self):
+        import json
+        from codex_wake.goal_renewal import propose, apply, RenewalError
+
+        peer = "00000000-0000-7000-8000-000000000346"
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, log, native, _ = self.fixture(directory)
+            template = json.loads(policy.read_text())["callers"][THREAD]
+            template.pop("allocation_id")
+            policy.write_text(
+                json.dumps(
+                    dict(
+                        version=2,
+                        native_caller_binding=True,
+                        allocations={},
+                        self_enrollment=template,
+                    )
+                )
+            )
+            rows = json.loads(
+                json.dumps(
+                    [json.loads(line) for line in log.read_text().splitlines()]
+                ).replace(THREAD, peer)
+            )
+            (log.parent / "peer.jsonl").write_text(
+                "".join(json.dumps(row) + "\n" for row in rows)
+            )
+            native["siblings"] = {
+                peer: dict(
+                    goal=dict(threadId=peer, createdAt=NOW, status="paused"),
+                    active=[],
+                    calls=[],
+                )
+            }
+            native["goal"]["status"] = "paused"
+            native["active"] = []
+            context = lambda thread: dict(
+                threadId=thread,
+                sessionId=thread,
+                callId="shared-" + thread,
+                **{
+                    "x-codex-turn-metadata": dict(
+                        thread_id=thread, session_id=thread, turn_id="operator-request"
+                    )
+                },
+            )
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                first = enroll(
+                    root, policy, THREAD, 100, 120, native_context=context(THREAD)
+                )
+                enroll(
+                    root,
+                    policy,
+                    peer,
+                    100,
+                    120,
+                    allocation_id=first["allocation_id"],
+                    native_context=context(peer),
+                )
+                operator = Principal(THREAD, "operator")
+                with self.assertRaises(RenewalError):
+                    propose(
+                        root,
+                        policy,
+                        THREAD,
+                        principal=operator,
+                        operation_id="shared-denied",
+                        mode="reset",
+                        token_limit=100,
+                        remaining_seconds=180,
+                        expires_at=NOW + 60,
+                    )
+                packet = propose(
+                    root,
+                    policy,
+                    THREAD,
+                    principal=operator,
+                    operation_id="shared-reset",
+                    mode="reset",
+                    token_limit=100,
+                    remaining_seconds=180,
+                    expires_at=NOW + 60,
+                    shared=True,
+                )
+                self.assertEqual(packet["proposal"]["old"]["used_tokens"], 80)
+                result = apply(
+                    root,
+                    policy,
+                    THREAD,
+                    packet["proposal_id"],
+                    principal=operator,
+                    expected_fingerprint=packet["fingerprint"],
+                    explicit=True,
+                )
+                self.assertEqual(result["members"], sorted([THREAD, peer]))
+                self.assertEqual(result["new"]["used_tokens"], 0)
+                self.assertEqual(show(root, policy, peer)["used_tokens"], 0)
+                self.assertEqual(show(root, policy, peer)["lifetime_used_tokens"], 80)
+
+    def test_mandatory_policy_denial_unknown_accounting_and_dead_watcher_cannot_be_bypassed(
+        self,
+    ):
+        import json
+        from codex_wake.goal_renewal import propose, apply, RenewalError
+        from codex_wake.session_permissions import PermissionStore, PermissionDenied
+
+        for scenario in ("deny", "accounting", "watcher"):
+            with (
+                self.subTest(scenario=scenario),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                root, policy, log, native, _ = self.fixture(directory)
+                native["goal"]["status"] = "paused"
+                native["active"] = []
+                with (
+                    self.controller(root) as watcher,
+                    patch(
+                        "codex_wake.lifecycle_budget.trusted_upper", return_value=NOW
+                    ),
+                ):
+                    if scenario == "deny":
+                        PermissionStore(root, now=lambda: NOW).configure(
+                            dict(version=1, mandatory=["enforcement.increase"]),
+                            Principal("operator", "operator"),
+                            expected_revision=0,
+                        )
+                    enroll(
+                        root,
+                        policy,
+                        THREAD,
+                        40,
+                        120,
+                        permission_principal=Principal(THREAD, "operator"),
+                    )
+                    operator = Principal(THREAD, "operator")
+                    packet = propose(
+                        root,
+                        policy,
+                        THREAD,
+                        principal=operator,
+                        operation_id="held-" + scenario,
+                        mode="extend",
+                        token_limit=90,
+                        remaining_seconds=180,
+                        expires_at=NOW + 60,
+                    )
+                    if scenario == "accounting":
+                        row = json.loads(log.read_text().splitlines()[-1])
+                        row["payload"]["usage"]["total_tokens"] = 999
+                        with log.open("a") as stream:
+                            stream.write(json.dumps(row) + "\n")
+                    if scenario == "watcher":
+                        watcher.kill()
+                        watcher.wait(timeout=3)
+                    with self.assertRaises((RenewalError, PermissionDenied)):
+                        apply(
+                            root,
+                            policy,
+                            THREAD,
+                            packet["proposal_id"],
+                            principal=operator,
+                            expected_fingerprint=packet["fingerprint"],
+                            explicit=True,
+                        )
+                    self.assertEqual(
+                        show(root, policy, THREAD, permission_principal=operator)[
+                            "token_limit"
+                        ],
+                        40,
+                    )
+
+    def test_cli_adapter_uses_authenticated_operator_capability_and_exact_deadline(
+        self,
+    ):
+        import argparse
+        import contextlib
+        import io
+        import json
+        from pathlib import Path
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.goal_renewal_commands import register_parser, command
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            native["goal"]["status"] = "paused"
+            native["active"] = []
+            bus, capability = BusStore.configure(Path(directory) / "bus")
+            parser = argparse.ArgumentParser()
+            register_parser(
+                parser.add_subparsers(dest="goal_limits_command", required=True)
+            )
+            words = [
+                "extend",
+                "--policy",
+                str(policy),
+                "--caller-thread-id",
+                THREAD,
+                "--bus-root",
+                str(bus.root),
+                "--operator-capability",
+                str(capability),
+                "--operation-id",
+                "cli-renewal",
+                "--token-limit",
+                "90",
+                "--deadline",
+                str(NOW + 180),
+                "--apply",
+            ]
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                enroll(root, policy, THREAD, 40, 120)
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    code = command(parser.parse_args(words), root)
+                self.assertEqual(code, 0, output.getvalue())
+                result = json.loads(output.getvalue())
+                self.assertEqual(result["new"]["deadline"], NOW + 180)
+                self.assertEqual(result["new"]["remaining_tokens"], 50)
+                self.assertFalse(result["resumed"])
