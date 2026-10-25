@@ -205,9 +205,23 @@ def _snapshot(root, receipts, allocation, *, caller=None):
                 "renewal_permission_revoked",
                 "current enforcement enrollment permission is revoked",
             )
-        if receipt.get("stop_latched") and receipt.get("reason") not in (
-            "allocation_exhausted",
-            "continuation_held",
+        first_stop = receipt.get("first_stop", {})
+        replaced_exhaustion = (
+            receipt.get("reason") == "controller_stopped"
+            and first_stop.get("reason") == "allocation_exhausted"
+            and first_stop.get("controller_generation")
+            and controller.get("generation") != first_stop["controller_generation"]
+            and receipt.get("stop_proof") is True
+            and receipt.get("pause_observed") is True
+        )
+        if (
+            receipt.get("stop_latched")
+            and receipt.get("reason")
+            not in (
+                "allocation_exhausted",
+                "continuation_held",
+            )
+            and not replaced_exhaustion
         ):
             _fail(
                 "renewal_fault_held",
