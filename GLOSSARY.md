@@ -50,6 +50,12 @@ and requires fresh grants before new work; original history stays fenced.
 **Agent spawn**:
 Starting a separate agent conversation with an explicit assignment and scope.
 
+**Compact dispatch packet**:
+A bounded assignment containing objective, authority, scope, acceptance, evidence
+locators, allowance, stop conditions and governance readback requirements. It
+starts fresh context by default; full-history context requires a recorded
+task-specific reason and a pinned source. A packet snapshot creates no authority.
+
 **Agent refresh**:
 Reloading selected runtime resources while preserving the conversation identity
 and unfinished work. Legacy profiles reopen its client; approved shared MCP

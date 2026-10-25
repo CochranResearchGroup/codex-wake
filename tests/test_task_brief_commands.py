@@ -49,6 +49,33 @@ class TaskBriefCommandTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertEqual(checkpoint['brief']['task_id'], 'task-1')
 
+    def test_dispatch_refuses_unqualified_summaries_and_unjustified_full_history(self):
+        from codex_wake.cli import run
+        import hashlib
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            evidence = directory / 'raw.txt'
+            evidence.write_text('Preserved raw evidence')
+            bus, capability = BusStore.configure(directory / 'bus')
+            content = dict(objective='Inspect fixture', phase='verification',
+                non_goals=['No release'], acceptance=['Return evidence'],
+                context=[dict(path=str(evidence), sha256=hashlib.sha256(evidence.read_bytes()).hexdigest(), required=True)],
+                workspace=tmp, allocation_ref='existing', permission_ref='worker')
+            summary = dict(path=str(evidence), summary='Evidence summary', coverage='Fixture only',
+                ambiguity='Unreviewed outside fixture', observed_at='2030-01-01T00:00:00Z')
+            invalid = [dict(history=dict(mode='full_history', path=str(evidence))),
+                dict(history=dict(mode='full_history', path=str(evidence), reason=' ')),
+                dict(history=dict(mode='full_history', path='/other/raw.txt', reason='Continuity')),
+                dict(evidence_summaries=[{key: value for key, value in summary.items() if key != 'ambiguity'}])]
+            for options in invalid:
+                output = StringIO()
+                with redirect_stdout(output):
+                    code = run(['--wake-root', str(directory / 'wake'), 'task-briefs', 'propose',
+                        '--task-id', 'task', '--brief-json', json.dumps(dict(content, dispatch=options)),
+                        '--bus-root', str(bus.root), '--operator-capability', str(capability)])
+                self.assertEqual(code, 5, output.getvalue())
+                self.assertFalse(json.loads(output.getvalue())['success'])
+
     def test_worker_workspace_is_enforced_for_revision_selection_and_retries(self):
         from codex_wake.task_briefs import TaskBriefStore
         with tempfile.TemporaryDirectory() as tmp:

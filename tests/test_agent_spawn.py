@@ -163,6 +163,12 @@ class AgentSpawnTests(unittest.TestCase):
     def test_spawn_executes_exact_assignment_once_across_pending_observation(self):
         self.spawn_scenario()
 
+    def test_fresh_worker_uses_bounded_brief_and_summary_without_parent_history(self):
+        self.spawn_scenario(brief_dispatch=True)
+
+    def test_full_history_exception_carries_recorded_task_specific_reason(self):
+        self.spawn_scenario(brief_dispatch=True,full_history=True)
+
     def test_configured_spawn_reserves_and_settles_one_shared_actor(self):
         self.spawn_scenario(budget=True)
 
@@ -227,7 +233,7 @@ class AgentSpawnTests(unittest.TestCase):
         self.spawn_scenario(resource_profile=True)
 
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False,budget_overrun=False):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False,budget_overrun=False,brief_dispatch=False,full_history=False):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -273,6 +279,11 @@ class AgentSpawnTests(unittest.TestCase):
                         status='completed' if loss else 'inProgress', items=[
                         dict(id='user157', type='userMessage', clientId=task['clientUserMessageId'],
                              content=task['input'])])]
+                    if brief_dispatch:
+                        packet = json.loads(task['input'][0]['text'].split('BOUNDED_ASSIGNMENT=', 1)[1])
+                        operands = json.loads(Path(packet['evidence'][0]['path']).read_text())
+                        state['turns'][0]['items'].append(dict(type='agentMessage', id='result157',
+                            text=str(operands[0] * operands[1])))
                     result = {'turn': state['turns'][0]}
                     if loss == 'queue/start':
                         ws.close()
@@ -324,6 +335,26 @@ class AgentSpawnTests(unittest.TestCase):
                     continuations={'bootstrap':dict(approval='operator fixture',objective='Finish fixture',
                         started_at='1970-01-01T00:16:40Z')})
                 if budget_overrun:registry['continuations']['bootstrap']['spawn_token_limit']=50
+            if brief_dispatch:
+                from codex_wake.task_briefs import BriefAuthority, TaskBriefStore
+                import hashlib
+                evidence = root / 'operands.json'
+                evidence.write_text('[6,7]')
+                brief = dict(objective='Multiply the evidence operands', phase='verification',
+                    non_goals=['Never deploy'], acceptance=['Report the product 42'],
+                    workspace=tmp, allocation_ref='existing-fixture-allowance', permission_ref='worker',
+                    context=[dict(path=str(evidence), sha256=hashlib.sha256(evidence.read_bytes()).hexdigest(), required=True)],
+                    dispatch=dict(stop_conditions=['Return partial evidence after one attempt'],
+                        evidence_summaries=[dict(path=str(evidence), summary='Two operands',
+                            observed_at='1970-01-01T00:16:40Z', coverage='Only this fixture',
+                            ambiguity='No inference about other inputs')]))
+                if full_history:
+                    brief['dispatch']['history'] = dict(mode='full_history', path=str(evidence),
+                        reason='Exact original operands are required to reproduce this task')
+                store = TaskBriefStore(root)
+                authority = BriefAuthority('operator:fixture', 'operator')
+                store.propose('multiply', brief, authority=authority)
+                store.approve('multiply', 1, authority=authority)
             profiles.write_text(json.dumps(registry))
             master, slave = pty.openpty()
             client = None
@@ -357,6 +388,8 @@ class AgentSpawnTests(unittest.TestCase):
                     '--task', 'Calculate 6 * 7 and report 42.',
                     '--expires-at', '2030-01-01T00:00:00Z', '--json']
             if budget:argv.extend(['--objective-ref','bootstrap'])
+            if brief_dispatch:
+                argv.extend(['--task-id','multiply','--assignment-id','multiply-one'])
             interrupted = False
             budget_expired=False
             def clock():
@@ -480,11 +513,37 @@ class AgentSpawnTests(unittest.TestCase):
                                                    'reason': 'ConnectionClosedOK'}, receipt['history'])
                                     self.assertIsNone(receipt.get('reason'))
                             self.assertEqual(len(starts), 1)
+                            self.assertEqual(starts[0], {'cwd': tmp, 'ephemeral': False})
                             self.assertEqual(len(tasks), 1)
                             self.assertEqual(len(windows), 1)
                             self.assertEqual(len(turn_starts), 0 if auto_start else 1)
-                            self.assertEqual(tasks[0]['input'], [
-                                {'type': 'text', 'text': 'Calculate 6 * 7 and report 42.'}])
+                            packet = json.loads(tasks[0]['input'][0]['text'].split('BOUNDED_ASSIGNMENT=', 1)[1])
+                            self.assertEqual(packet['objective'], 'Multiply the evidence operands' if brief_dispatch else 'Calculate 6 * 7 and report 42.')
+                            self.assertEqual(packet['instructions'], 'Calculate 6 * 7 and report 42.')
+                            self.assertEqual(packet['context_mode'], 'full_history' if full_history else 'compact')
+                            self.assertEqual(packet['scope']['workspace'], tmp)
+                            self.assertEqual(packet['authority']['permission_ref'], 'worker')
+                            self.assertTrue(packet['acceptance'])
+                            self.assertTrue(packet['stop_conditions'])
+                            self.assertEqual(packet['allowance']['expires_at'], '2030-01-01T00:00:00Z')
+                            self.assertEqual(packet['governance']['budget_mode'],
+                                'configured_objective' if budget else 'explicit_expiry_only_legacy_profile')
+                            self.assertEqual(receipt['dispatch']['input_bytes'], len(tasks[0]['input'][0]['text'].encode()))
+                            self.assertLess(receipt['dispatch']['input_bytes'], 8192)
+                            if full_history:
+                                self.assertEqual(receipt['dispatch']['history_reason'],
+                                    'Exact original operands are required to reproduce this task')
+                                self.assertEqual(packet['history']['path'], str(evidence))
+                            if brief_dispatch:
+                                self.assertNotIn('[6,7]', tasks[0]['input'][0]['text'])
+                                self.assertEqual(packet['evidence_admission']['sources'][0]['status'], 'verified')
+                                self.assertEqual(packet['evidence_summaries'][0]['coverage'], 'Only this fixture')
+                                self.assertEqual(packet['evidence_summaries'][0]['ambiguity'], 'No inference about other inputs')
+                                self.assertEqual(packet['evidence_summaries'][0]['observed_at'], '1970-01-01T00:16:40Z')
+                                self.assertEqual(packet['stop_conditions'][0], 'Return partial evidence after one attempt')
+                                self.assertEqual(state['turns'][0]['items'][-1]['text'], '42')
+                                self.assertEqual(receipt['execution']['output_summary']['text_bytes'], 2)
+                                self.assertEqual(receipt['execution']['output_summary']['source']['turn_id'], 'turn157')
                             if check_environment:
                                 variables = json.loads((root / 'client-env.json').read_text())
                                 self.assertFalse(set(variables) & {
