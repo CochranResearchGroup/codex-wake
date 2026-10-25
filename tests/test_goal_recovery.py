@@ -43,6 +43,7 @@ class GoalRecoveryTests(unittest.TestCase):
                         '--operator-capability',str(cap),'--json'])
                 recovered=json.loads(output.getvalue())
                 self.assertEqual(code,0,recovered)
+                from codex_wake.goal_notices import list_notices
                 self.assertFalse(recovered['stop_latched'])
                 self.assertEqual(recovered['first_stop'],failed['first_stop'])
                 for key in ('deadline','used_tokens','token_limit','time_limit_seconds','generation','allocation_id'):
@@ -57,6 +58,15 @@ class GoalRecoveryTests(unittest.TestCase):
                 self.assertEqual(second_fault['first_stop'],failed['first_stop'])
                 self.assertNotEqual(second_fault['stop_episodes'][0]['id'],second_fault['stop_episodes'][1]['id'])
                 self.assertEqual(recovered['recovery_events'][0]['stop_episode_id'],second_fault['stop_episodes'][0]['id'])
+                stops=[event for event in list_notices(root,THREAD) if event['identity']['kind']=='stop']
+                self.assertEqual(len(stops),2)
+                self.assertCountEqual([event['identity']['stop_episode'] for event in stops],
+                    [episode['id'] for episode in second_fault['stop_episodes']])
+                recovery_notices=[event for event in list_notices(root,THREAD) if event['identity']['kind']=='recovery']
+                self.assertEqual(len(recovery_notices),1)
+                self.assertEqual(recovery_notices[0]['identity']['stop_episode'],failed['active_stop_id'])
+                self.assertEqual(recovery_notices[0]['identity']['reason'],'observation_recovered')
+                self.assertIn('goal remains paused',recovery_notices[0]['text'])
 
     def test_public_native_recovery_uses_approval_and_keeps_unrelated_campaign(self):
         from codex_wake.mcp_server import CommandRunner

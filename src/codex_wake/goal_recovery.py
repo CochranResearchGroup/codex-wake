@@ -133,6 +133,7 @@ def recover(root, policy, thread, *, principal, task_id=None, operation_id=None,
                 item.update(stop_latched=False,state='armed',reason=None,accounting=observation,
                     used_tokens=observation['used_tokens'],native_goal_status='paused',recovery_permission=permission)
                 # Evidence/effects remain append-only; goal activation is separate.
+                g._record_supervision_notice(member_path,item,'recovery',current)
                 g._save(member_path,item)
             if allocation is not None:
                 if not any(old['id']==event['id'] for old in allocation.setdefault('recovery_events',[])):

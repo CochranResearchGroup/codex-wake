@@ -70,14 +70,21 @@ def record_notice(root, receipt, kind, *, controller=None):
                 or receipt.get('state') not in ('armed', 'checkpoint_requested')):
             raise ValueError('engagement notice requires qualified first-poll acknowledgement')
     stop = receipt.get('first_stop') or {}
+    if kind=='recovery' and receipt.get('recovery_events'):
+        recovery=receipt['recovery_events'][-1]
+        receipt=dict(receipt,active_stop_id=recovery['stop_episode_id'],reason=recovery['reason'])
     identity = dict(thread_id=receipt['thread_id'], allocation_id=receipt['allocation_id'],
         generation=receipt['generation'], enrollment_revision=receipt.get('enrollment_revision', 1),
         kind=kind)
     if kind in ('stop', 'recovery'):
-        identity.update(stop_episode=receipt.get('stop_episode_id') or
+        identity.update(stop_episode=receipt.get('active_stop_id') or receipt.get('stop_episode_id') or
             [stop.get('boot_id'), stop.get('observed_boottime'), receipt.get('pause_epoch', 0)],
-            reason=stop.get('reason', receipt.get('reason')), work_turns=sorted(receipt.get('stop_turns', [])))
-    event_id = 'notice_' + hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
+            reason=receipt.get('reason') or stop.get('reason'), work_turns=sorted(receipt.get('stop_turns', [])))
+    stable_identity=dict(identity)
+    if receipt.get('active_stop_id'):
+        # Captured turns may be refined by later control readback in this episode.
+        stable_identity.pop('work_turns',None)
+    event_id = 'notice_' + hashlib.sha256(json.dumps(stable_identity, sort_keys=True).encode()).hexdigest()
     directory = _directory(root)
     with _lock(directory, event_id):
         path = _path(directory, event_id)
