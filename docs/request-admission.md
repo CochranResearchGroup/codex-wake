@@ -176,3 +176,93 @@ zero remaining allowance; it is an explicit mode change, not a silent downgrade.
 Focused proof uses `tests/test_request_admission.py` with real HTTP dispatch,
 controlled native transport/usage and no external inference. Actual pinned-native
 and stock-frontend proof is a separate acceptance artifact owned by integration.
+
+## Protect the completion path
+
+A trusted host can protect acceptance, review and bounded remediation **inside**
+the existing request-owned ledger before its first implementation request. This
+is an optional planning contract, not a new allowance, approval workflow or
+allocator. Legacy gateways without a plan retain their admission behavior.
+
+```python
+# Each source is an existing reviewed, canonical, owned regular file plus SHA256.
+# The host selects this authority; no HTTP body can install or change it.
+plan_source = {"path": "/owned/approved-plan.md", "sha256": "PINNED_SHA256"}
+gateway.protect_completion([
+    {"id": "acceptance", "kind": "acceptance", "tokens": 40, "seconds": 4,
+     "criterion": "Verify the frozen public behavior"},
+    {"id": "review", "kind": "review", "tokens": 40, "seconds": 4,
+     "criterion": "Resolve the bounded review findings"},
+    {"id": "remediation", "kind": "remediation", "tokens": 40, "seconds": 4,
+     "criterion": "Verify the authorized remediation or evidenced no-finding result"},
+], source=plan_source)
+
+# The gateway verifies existing native ancestry before its first request:
+gateway.assign_completion(worker_thread, "review", source=assignment_source)
+# The host assesses the criterion and supplies its pinned evidence and decision:
+gateway.resolve_completion("review", "completed", source=review_evidence,
+                           note="Named criterion verified against the frozen objective")
+```
+
+There must be exactly one obligation of each mandatory kind. IDs, criteria,
+resource estimates and the source are immutable; reapplying the same plan keeps
+all progress and charges. Source files must be canonical, owned, regular, no
+larger than 1 MiB and match their digest. This verifies bytes/provenance, not the
+semantic conclusion: the trusted host owns that assessment. A source-bound
+validation receipt can be evidence, but a passing test count is never automatic
+quality acceptance. These APIs are not HTTP endpoints and do not accept a model's
+claimed role. Unassigned descendants, retries and successors remain ordinary
+implementation requests until the host records their exact durable purpose.
+
+Before forwarding, `reserve_request` atomically leaves the pending obligations'
+unused token and time bounds available. An assigned completion request can use
+its own remaining bound while leaving other mandatory work protected. Each
+request still uses the provider-reviewed whole-request maximum and the existing
+objective/session ceilings and deadlines. Phase changes do not reclassify old
+actors, reset per-thread spending, create another session window or replenish
+resources. The first actual remediation request consumes one existing correction
+cycle; retries in that same bounded obligation do not mint another cycle.
+
+Time feasibility uses conservative serial future work against the original
+objective deadline and already assigned workers' original session deadlines.
+Every admitted request's full timeout bound remains charged to its obligation's
+time estimate, even if it returned sooner. This is conservative planning, not an
+optimal parallel schedule or a new wall-clock budget. Actual wall time continues
+to reduce the unchanged original allowance.
+
+Only `completed` with verified source evidence releases unused protection.
+An unresolved/unknown attempt cannot release it. `deferred` requires a source and
+an explicit reason, stays mandatory/pending, retains its funds and produces a
+checkpoint outcome; it does not free funds for more implementation. When the
+remaining path cannot fit, admission returns its exact reason and an explicit
+checkpoint/narrow-work explanation before forwarding. The host can finish funded
+completion work, record valid unaffected evidence, or checkpoint; it cannot use
+phase changes to renew an exhausted campaign.
+
+`GET /status` exposes `accounting.completion`: named pending/deferred/completed
+obligations, protected tokens/seconds, feasibility, and the next action. All
+obligations completed means only that the host recorded their evidence-backed
+dispositions. `objective_complete` remains false: objective acceptance and closure
+stay with their existing owner. A disabled governor bypasses this scheduling gate
+and reports `completion_enforced:false`; retained usage and unfinished obligations
+remain visible. No new watcher requirement or per-packet consent is introduced.
+
+Worked provider-free campaign: original cap 200, prior usage 40, three protected
+40-token/4-second obligations, and a reviewed maximum of 40 tokens per request.
+One implementation request settles 10, leaving 150 available and 120 protected;
+the next 40-token implementation request is denied before forwarding, including
+when its body claims to be a reviewer. A host-bound acceptance request still
+fits. Its verified completion releases unused protection, permitting another
+already authorized implementation request while review/remediation stay funded.
+Acceptance, review and remediation each settle 10. Five forwarded requests plus
+prior usage total **90/200**, reservations settle to zero, one authorized
+correction cycle is retained, and the original deadline/history are unchanged.
+Only after all three evidence-backed dispositions are recorded are their
+obligations reported completed; no objective closure is inferred.
+
+Hard activation and admission notices use a fresh ledger projection, not a
+possibly lagging native source counter. Within the existing 768-byte bound they
+show actual used/cap, reserved/remaining, protected completion funds/time, deadline
+and denial trigger. They disclose no raw actors or credentials. Delivery to
+native model context, operator rendering and human reading retain their separate
+qualification boundaries.

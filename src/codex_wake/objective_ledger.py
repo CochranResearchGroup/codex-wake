@@ -36,6 +36,54 @@ def _private(path, directory=False):
         raise ValueError('ledger paths must be owned and private without symlinks')
 
 
+def _completion_source(source):
+    if type(source) is not dict or set(source) != {'path', 'sha256'}:
+        raise ValueError('completion authority/evidence requires a pinned source')
+    path = Path(source['path'])
+    if not path.is_absolute() or path != path.resolve(strict=True):
+        raise ValueError('completion source must be canonical')
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(descriptor, 'rb') as stream:
+        info = os.fstat(stream.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or info.st_size > 1024 * 1024:
+            raise ValueError('completion source must be bounded, regular and owned')
+        raw = stream.read(1024 * 1024 + 1)
+    if len(raw) > 1024 * 1024 or hashlib.sha256(raw).hexdigest() != source['sha256']:
+        raise ValueError('completion source digest differs')
+    return dict(source)
+
+
+def _completion_status(state, view, now):
+    plan = state.get('completion_plan')
+    if not plan:
+        return None
+    obligations = {}
+    for name, obligation in plan['obligations'].items():
+        actors = [a for a in state['actors'].values() if a.get('completion_obligation') == name]
+        charged = sum(a['used'] if a['settled'] else max(a['reservation'], a['used']) for a in actors)
+        seconds = sum(a['terms'][1] for a in actors)
+        closed = obligation['state'] == 'completed'
+        obligations[name] = dict(obligation, charged_tokens=charged, charged_request_seconds=seconds,
+            protected_tokens=0 if closed else max(0, obligation['tokens']-charged),
+            protected_seconds=0 if closed else max(0, obligation['seconds']-seconds))
+    tokens = sum(item['protected_tokens'] for item in obligations.values())
+    seconds = sum(item['protected_seconds'] for item in obligations.values())
+    pending = [name for name, item in obligations.items() if item['state'] != 'completed']
+    deferred = [name for name, item in obligations.items() if item['state'] == 'deferred']
+    deadline = min([_epoch(view['objective_deadline'])] + [session['deadline']
+        for session in state.get('request_sessions', {}).values() if session.get('completion_obligation') in pending])
+    available_seconds = max(0, deadline - max(now, state.get('observed_at', now)))
+    feasible = view['accounting_known'] and tokens <= view['remaining_tokens'] and seconds <= available_seconds
+    return dict(source=plan['source'], obligations=obligations, protected_tokens=tokens, protected_seconds=seconds,
+        pending=pending, deferred=deferred, feasible=feasible, obligations_completed=not pending,
+        completion_deadline=deadline, available_seconds=available_seconds,
+        outcome='obligations_completed' if not pending else 'checkpoint_required' if not feasible or deferred else 'pending',
+        objective_complete=False, next_action='Host must assess objective acceptance from the named evidence; request/test counts never establish closure.' if not pending else
+            'Checkpoint or narrow authorized work; mandatory deferred obligations retain protected funds.' if not feasible or deferred else
+            'Complete the named acceptance, review and bounded remediation within the existing allowance.',
+        time_basis='Conservative serial future work; accepted request timeout bounds remain charged to each obligation.')
+
+
 class ObjectiveLedger:
     _lock_flags = fcntl.LOCK_EX
 
@@ -127,6 +175,7 @@ class ObjectiveLedger:
                       actors={key: dict(value, tokens_remaining=max(0, value['reservation'] - value['used']),
                                        session_deadline=value.get('session_deadline'))
                               for key, value in actors.items()})
+        result['completion'] = _completion_status(state, result, now)
         if admitted is not None:
             result['admitted'] = admitted
         return result
@@ -311,6 +360,80 @@ class ObjectiveLedger:
                 raise ValueError('request thread provenance changed')
             return self._view(state,now)
 
+    def protect_completion(self, obligations, *, source, now):
+        """Trusted host reserves purpose, not another allowance or approval."""
+        source = _completion_source(source)
+        if type(obligations) is not list or len(obligations) != 3:
+            raise ValueError('acceptance, review and bounded remediation obligations required')
+        values = {}
+        for item in obligations:
+            if (type(item) is not dict or set(item) != {'id', 'kind', 'tokens', 'seconds', 'criterion'}
+                    or type(item['id']) is not str or not 0 < len(item['id']) <= 64
+                    or item['id'] in values or item['kind'] not in {'acceptance', 'review', 'remediation'}
+                    or type(item['criterion']) is not str or not item['criterion'].strip() or len(item['criterion']) > 4096
+                    or _count(item['tokens']) == 0 or _count(item['seconds']) == 0):
+                raise ValueError('invalid bounded completion obligation')
+            values[item['id']] = dict(item, state='pending')
+        if {item['kind'] for item in values.values()} != {'acceptance', 'review', 'remediation'}:
+            raise ValueError('all mandatory completion kinds are required')
+        with self._transaction() as state:
+            self._observe(state, now)
+            self._view(state, now)
+            plan = dict(version=1, source=source, obligations=values)
+            if state.get('completion_plan'):
+                original = state['completion_plan']
+                terms = ('id', 'kind', 'tokens', 'seconds', 'criterion')
+                if (original['source'] != source or set(original['obligations']) != set(values)
+                        or any({key: original['obligations'][name][key] for key in terms} !=
+                               {key: values[name][key] for key in terms} for name in values)):
+                    raise ValueError('completion protection already has immutable terms')
+            else:
+                if not state.get('request_binding') or state['actors']:
+                    raise ValueError('completion protection must precede implementation request dispatch')
+                state['completion_plan'] = plan
+                state['completion_history'] = []
+            return self._view(state, now)
+
+    def assign_completion(self, thread_id, obligation_id, *, source, now):
+        """Only a host API can select purpose for an existing durable thread."""
+        source = _completion_source(source)
+        with self._transaction() as state:
+            self._observe(state, now)
+            plan = state.get('completion_plan')
+            if not plan or obligation_id not in plan['obligations'] or thread_id not in state['request_sessions']:
+                raise ValueError('existing completion obligation and registered thread required')
+            session = state['request_sessions'][thread_id]
+            if session.get('completion_obligation') != obligation_id:
+                session['completion_obligation'] = obligation_id
+                state['completion_history'].append(dict(action='assign', thread_id=thread_id,
+                    obligation_id=obligation_id, source=source, at=state['observed_at']))
+            return self._view(state, now)
+
+    def resolve_completion(self, obligation_id, outcome, *, source, note, now):
+        """Host disposition with verified evidence; deferral never frees protection."""
+        source = _completion_source(source)
+        if outcome not in {'completed', 'deferred'} or type(note) is not str or not note.strip() or len(note) > 4096:
+            raise ValueError('explicit bounded completion disposition required')
+        with self._transaction() as state:
+            self._observe(state, now)
+            plan = state.get('completion_plan')
+            if not plan or obligation_id not in plan['obligations']:
+                raise ValueError('existing completion obligation required')
+            item = plan['obligations'][obligation_id]
+            disposition = dict(state=outcome, source=source, note=note)
+            if item['state'] == 'completed':
+                if item.get('disposition') != disposition:
+                    raise ValueError('completed obligation disposition is immutable')
+                return self._view(state, now)
+            if outcome == 'completed' and any(not actor['settled'] or not actor['known']
+                    for actor in state['actors'].values() if actor.get('completion_obligation') == obligation_id):
+                raise ValueError('unsettled completion work cannot release protection')
+            if item.get('disposition') != disposition:
+                item.update(state=outcome, disposition=disposition)
+                state['completion_history'].append(dict(action=outcome, obligation_id=obligation_id,
+                    source=source, note=note, at=state['observed_at']))
+            return self._view(state, now)
+
     def reserve_request(self, actor_id, thread_id, tokens, seconds, *, enforce=True, now):
         _count(tokens);_count(seconds)
         with self._transaction() as state:
@@ -328,10 +451,52 @@ class ObjectiveLedger:
             admitted = not enforce or (view['ready'] and tokens<=view['remaining_tokens']
                 and used+tokens<=config['session_token_limit'] and seconds<=config['session_time_limit_seconds']
                 and state['observed_at']+seconds<=session['deadline'])
+            purpose = session.get('completion_obligation')
+            reason = None
+            if enforce and not admitted:
+                if not view['accounting_known']:
+                    reason = 'request_accounting_unknown'
+                elif state['observed_at'] + seconds > _epoch(config['objective_deadline']):
+                    reason = 'objective_deadline_unavailable'
+                elif tokens > view['remaining_tokens']:
+                    reason = 'objective_token_allowance_unavailable'
+                elif used + tokens > config['session_token_limit']:
+                    reason = 'session_token_allowance_unavailable'
+                else:
+                    reason = 'session_time_allowance_unavailable'
+            completion = view['completion']
+            if enforce and completion and admitted:
+                own = completion['obligations'].get(purpose, {})
+                other_tokens = completion['protected_tokens'] - own.get('protected_tokens', 0)
+                other_seconds = completion['protected_seconds'] - own.get('protected_seconds', 0)
+                remediation = (state['completion_plan']['obligations'].get(purpose) or {}).get('kind') == 'remediation'
+                cycle_needed = remediation and not state['completion_plan']['obligations'][purpose].get('started')
+                if cycle_needed and state['correction_cycles'] >= config['max_correction_cycles']:
+                    reason = 'completion_remediation_cycle_limit'
+                elif not completion['feasible']:
+                    reason = 'completion_path_infeasible'
+                elif not purpose and completion['deferred']:
+                    reason = 'mandatory_completion_deferred'
+                elif purpose and (own.get('state') == 'completed' or tokens > own.get('protected_tokens', 0)
+                        or seconds > own.get('protected_seconds', 0)):
+                    reason = 'completion_obligation_allowance_unavailable'
+                elif tokens + other_tokens > view['remaining_tokens'] or seconds + other_seconds > completion['available_seconds']:
+                    reason = 'completion_resources_protected'
+                if reason:
+                    admitted = False
             if admitted:
+                if completion and purpose:
+                    item = state['completion_plan']['obligations'][purpose]
+                    if item['kind'] == 'remediation' and not item.get('started'):
+                        state['correction_cycles'] += 1
+                        item['started'] = True
                 state['actors'][actor_id]=dict(terms=[tokens,seconds],reservation=tokens,used=0,
-                    settled=False,known=True,session_deadline=session['deadline'],request_thread=thread_id)
-            return self._view(state, now, admitted=admitted)
+                    settled=False,known=True,session_deadline=session['deadline'],request_thread=thread_id,
+                    completion_obligation=purpose)
+            result = self._view(state, now, admitted=admitted)
+            if reason:
+                result['admission_reason'] = reason
+            return result
 
     def settle_request(self, actor_id, response_id, tokens, request_fingerprint, *, now):
         """Unknown completion retains the reservation; duplicate exact proof is inert."""

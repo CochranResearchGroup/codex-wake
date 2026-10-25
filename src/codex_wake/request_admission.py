@@ -238,6 +238,19 @@ class RequestGateway:
                     supervision._save(path, allocation)
             supervision._save(self.source_path, source)
 
+    def protect_completion(self, obligations, *, source):
+        """Host-only planning; no HTTP body can install or release protection."""
+        return self.ledger.protect_completion(obligations, source=source, now=self.now())
+
+    def assign_completion(self, thread_id, obligation_id, *, source):
+        """Retain the host's exact purpose assignment in request_sessions."""
+        if thread_id not in self.thread_ids:
+            self._inherit_thread(thread_id)
+        return self.ledger.assign_completion(thread_id, obligation_id, source=source, now=self.now())
+
+    def resolve_completion(self, obligation_id, outcome, *, source, note):
+        return self.ledger.resolve_completion(obligation_id, outcome, source=source, note=note, now=self.now())
+
     def status(self):
         current = snapshot(self.root, self.source_thread)
         view = self.ledger.inspect(now=self.now())
@@ -250,6 +263,7 @@ class RequestGateway:
         )
         return dict(
             mode=mode,
+            completion_enforced=current.get("enabled") is not False,
             scope=self.objective_id,
             source_thread_id=self.source_thread,
             contract_sha256=self.contract_sha256,
@@ -432,9 +446,18 @@ class RequestGateway:
             )
         return None
 
+    def _resource_summary(self):
+        view = self.ledger.inspect(now=self.now())
+        completion = view.get("completion") or {}
+        return dict(used=view["tokens_used"], reserved=view["tokens_reserved"],
+            remaining=view["remaining_tokens"], cap=view["objective_token_limit"],
+            deadline=view["objective_deadline"], accounting_known=view["accounting_known"],
+            protected_tokens=completion.get("protected_tokens", 0),
+            protected_seconds=completion.get("protected_seconds", 0))
+
     def _notice(self, receipt, reason, request_fingerprint):
         receipt["request_admission_event"] = dict(
-            reason=reason, fingerprint=request_fingerprint
+            reason=reason, fingerprint=request_fingerprint, resources=self._resource_summary()
         )
         supervision._record_supervision_notice(self.source_path, receipt, "admission")
         supervision._save(self.source_path, receipt)
@@ -490,15 +513,22 @@ class RequestGateway:
             if not reserved["admitted"]:
                 pause = self._pause_registered_goal(receipt, "request_admission_denied")
                 notice = self._notice(
-                    receipt, "objective_or_session_allowance_unavailable", fingerprint
+                    receipt, reserved.get("admission_reason", "objective_or_session_allowance_unavailable"), fingerprint
                 )
+                explanation = (reserved.get("admission_reason") or "objective_or_session_allowance_unavailable") + ". "
+                completion = reserved.get("completion")
+                if completion:
+                    explanation += ("Checkpoint or narrow authorized work; completion obligations remain pending. "
+                        if completion["pending"] else "Named completion dispositions are recorded; objective acceptance remains separate. ")
                 result = (
                     429,
                     "application/json",
                     json.dumps(
                         _error(
                             "governor_admission_denied",
-                            "Request denied before provider submission. Registered goal pause "
+                            "Request denied before provider submission. "
+                            + explanation
+                            + "Registered goal pause "
                             + ("verified" if pause["verified"] else "unverified")
                             + "; independently admitted requests were not interrupted. Say Deactivate governor in the native conversation; no inference is needed for that control.",
                         )
@@ -745,6 +775,8 @@ class RequestGateway:
             supervision._lock(self.directory, supervision._name(self.source_thread)),
         ):
             source = json.loads(self.source_path.read_text())
+            if source["request_accounting"].get("gateway_url") != url or "resources" not in source["request_accounting"]:
+                source["request_accounting"]["resources"] = self._resource_summary()
             source["request_accounting"]["gateway_url"] = url
             if source.get("allocation_path"):
                 path = Path(source["allocation_path"])
