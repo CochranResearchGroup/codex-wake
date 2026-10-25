@@ -75,6 +75,11 @@ def _write(path, value):
             out.flush()
             os.fsync(out.fileno())
         os.replace(name, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
     finally:
         if os.path.exists(name):
             os.unlink(name)
