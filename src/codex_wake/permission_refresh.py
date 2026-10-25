@@ -43,20 +43,20 @@ def request(packet):
         from .permission_migration import profile_ceiling
         profile_ceiling(config,args['profile'],binding['thread_id'])
         mode=profile.get('refresh_mode')
-        if mode not in ('shared_mcp_idle','client_idle'):
+        if mode not in ('shared_mcp_idle','client_idle','thread_mcp_idle'):
             raise PermissionDenied('refresh_capability_unsupported')
-        actual='single_client' if mode=='client_idle' else 'shared_server'
+        actual={'client_idle':'single_client','shared_mcp_idle':'shared_server','thread_mcp_idle':'current_connection'}[mode]
         selected=args.pop('scope',actual)
         action={'current_connection':'refresh.connection','single_client':'refresh.self','shared_server':'refresh.shared'}[selected]
         context=dict(action=action,subject=binding['thread_id'],target=(binding['thread_id'] if selected!='shared_server' else 'shared-server'),relationship=('shared' if selected=='shared_server' else 'self'),launch_profile=args['profile'])
         store=PermissionStore(root)
         decision=store.evaluate(action,Principal(context['subject']),target=context['target'],relationship=context['relationship'],launch_profile=context.get('launch_profile'))
         # Inspection reports permission separately even when denied/unsupported.
-        supported=selected==actual and selected!='current_connection'
+        info=configuration(config,args['profile'],args['thread_id'],args['caller_thread_id'],_permission_checked=True)
+        supported=selected==actual and (selected!='current_connection' or info.get('capability')=='supported')
         if packet['verb']=='configuration':
-            info=configuration(config,args['profile'],args['thread_id'],args['caller_thread_id'],_permission_checked=True)
             return dict(info,effective_permission=decision,requested_scope=selected,
-                        capability='supported' if supported else 'unsupported',readiness='not_observed'),False
+                        capability='supported' if supported else 'unsupported',readiness=info.get('readiness','not_observed')),False
         if not supported:raise PermissionDenied('refresh_scope_unsupported',decision)
         revalidate(root,context)
         if mode=='client_idle':owned_client(profile,args['thread_id'])
