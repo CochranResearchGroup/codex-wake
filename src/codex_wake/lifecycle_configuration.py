@@ -69,7 +69,7 @@ def configuration_command(args, root):
     from .sessions_cli import emit
     try:
         config = json.loads(Path(args.profiles).read_text())
-        if config.get('profiles', {}).get(args.profile, {}).get('refresh_mode') == 'shared_mcp_idle':
+        if config.get('profiles', {}).get(args.profile, {}).get('refresh_mode') in ('shared_mcp_idle','thread_mcp_idle'):
             from .shared_refresh import configuration
             if args.apply_budget_authorization:
                 raise WakeError('shared refresh never authorizes a budget reset or extension')

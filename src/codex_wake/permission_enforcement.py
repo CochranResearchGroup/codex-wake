@@ -1,4 +1,4 @@
-"""Common-policy boundary for existing-goal enforcement, not a recovery engine.
+"""Common-policy boundary for existing-goal enforcement and qualified recovery.
 
 Host adapters construct Principal after native/capability verification. A policy
 result never clears a stop, renews a resource envelope, or qualifies accounting.
@@ -66,19 +66,13 @@ def diagnostic(root, thread, action, *, principal, task_id=None, operation_id=No
         receipt = json.loads(path.read_text())
         if receipt.get('thread_id') != thread:
             raise PermissionDenied('permission_target_mismatch')
-    recovery = action == 'enforcement.recover'
-    result = dict(state='held', armed=False, effect_attempted=False,
-        permission=decision, capability='unsupported',
+    if action!='enforcement.disable':
+        raise PermissionDenied('recovery_requires_qualified_command')
+    result=dict(state='held',armed=False,effect_attempted=False,permission=decision,
+        capability='unsupported',
         readiness='stop_latched' if receipt and receipt.get('stop_latched') else 'not_observed',
-        reason='observation_stop_recovery_unsupported' if recovery else 'enforcement_disable_unsupported',
-        next_action=('Follow issue319 for explicit observation-stop reconciliation; retain the '
-                     'original campaign, accounting and stop evidence. Native resume, a fresh '
-                     'read or heartbeat does not recover supervision.' if recovery else
-                     'Keep existing safety enforcement active; disabling is not implemented by '
-                     'this policy check and must not clear resource-stop records.'))
-    if recovery:
-        result.update(runtime_dependency='https://github.com/CochranResearchGroup/codex-wake/issues/319',
-                      recovery_requirements=list(RECOVERY_REQUIREMENTS))
+        reason='enforcement_disable_unsupported',
+        next_action='Keep existing safety enforcement active; disabling is not implemented by this policy check.')
     if receipt is not None:
         result['campaign'] = _public(receipt)
     return result
@@ -90,7 +84,7 @@ def describe(root, thread, *, principal):
         return None
     actions = ('enforcement.enroll', 'enforcement.increase', 'enforcement.disable', 'enforcement.recover')
     return {action: store.evaluate(action, principal, target=thread,
-        capability='unsupported' if action in ('enforcement.disable', 'enforcement.recover') else 'supported',
+        capability='unsupported' if action=='enforcement.disable' else 'supported',
         readiness='not_observed') for action in actions}
 
 
@@ -99,8 +93,9 @@ def tool_specs():
     result = {}
     for verb in ('recover', 'disable'):
         result['wake_goal_limits_' + verb] = ('goal-limits', verb,
-            'Check explicit authority for ' + verb + '. Current runtime support is unavailable; '
-            'this never clears stops, changes resources or interrupts a turn. Recovery depends on issue319.',
+            ('Recover an observation-fault stop only with explicit approval, repeated exact native observations, '
+             'qualified accounting, fresh controller, same boot and original remaining resources. Does not resume the goal or renew limits.'
+             if verb=='recover' else 'Check explicit disable authority; disabling runtime enforcement remains unsupported.'),
             dict(caller_thread_id=CALLER, allocation_id=TEXT, task_id=TEXT,
                  assignment_id=TEXT, operation_id=TEXT), ['caller_thread_id'], False)
     return result
@@ -137,7 +132,12 @@ def mcp_call(runner, verb, arguments, native_context):
     if verb == 'show':
         return show(root, runner.goal_limits_policy, thread, arguments.get('allocation_id'),
                     permission_principal=principal)
-    if verb in ('recover', 'disable'):
+    if verb=='recover':
+        from .goal_recovery import recover
+        return recover(root,runner.goal_limits_policy,thread,principal=principal,
+            task_id=arguments.get('task_id'),operation_id=arguments.get('operation_id'),
+            allocation_id=arguments.get('allocation_id'))
+    if verb=='disable':
         return diagnostic(root, thread, 'enforcement.' + verb, principal=principal,
                           task_id=arguments.get('task_id'), operation_id=arguments.get('operation_id'))
     options = {k: v for k, v in arguments.items() if k not in ('assignment_id',)}
@@ -198,6 +198,8 @@ def main():
         failed=packet['verb']!='show' and value.get('state') not in ('armed','checkpoint_requested')
     except (ValueError,OSError,KeyError,TypeError,WakeError) as exc:
         value={'error':{'code':getattr(exc,'code','goal_limits_unavailable'),'message':str(exc)}}
+        if isinstance(exc,PermissionDenied):
+            value.update(permission=exc.decision,effect_attempted=False,state='held',armed=False)
         failed=True
     print(json.dumps(value))
     return 2 if failed else 0

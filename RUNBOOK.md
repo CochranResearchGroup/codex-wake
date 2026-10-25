@@ -8101,3 +8101,48 @@ renewed or recovered. #310 stays open. Full evidence/rollback locators:
 docs/dev/evidence/hf06/installed-deployment.md. Memory forbidden: no explicit
 memory-write request. No public release, native shared-daemon restart or broad
 session refresh occurred.
+
+
+## 2026-10-25 | Observation-fault recovery repair and native scoped-reload diagnosis
+
+One-hour goal uses diagnosing-bugs/TDD for318/319. PR332, stacked on327, implements
+explicit guarded recovery, append-only stop/recovery episodes, shared-member scope,
+pending-commit fencing and truthful status. Final runtimeef339e0 passes hosted
+Python3.11/3.12 gates1558 tests each and installed native timeout/healthy-read/
+operator-recovery proof; native active/operator reply also passes with local
+Responses fixture and no external provider calls. Installed0.21.1 candidate,
+controller/skills/commands updated, seven production resource/stop snapshots intact.
+Local mutable-tree diagnostics and preflight contention failures are retained;
+source-frozen supplemental run remains separately observable. Evidence:
+docs/dev/evidence/hf06/319-recovery.md.318 still needs qualified native scoped
+execution, Wake integration and unchanged-peer/live-session proof; local native
+protocol patch is not installed on the shared daemon. No overall goal completion
+or318 closure claimed. Memory forbidden: no explicit memory-write request.
+
+
+## 2026-10-25 —318/319 continuation until22:30Chicago
+
+Deployed Wake0.21.2-311da84 commands/skills/refresh watcher; retained qualified
+0.21.1 goal controller and all seven campaign invariants. Runtime CI40156033409
+passes both1564-test release gates, installed49-tool smoke passes, and native
+recovery passes again. Corrected native dependencya50f43518c (formatted6115475dd9)
+and installed Wake prove selected0.21.2 versus peer0.21.1, unchanged goals/thread
+IDs, zero model turns and no owned fixture survivors. Seven affected native
+regressions and254 protocol cases pass; lint/format pass. Hook warmup and safety
+notification native failures remain unclassified after bounded serial runs.
+Native patch is included for review, not activated in the current0.164.0 daemon.
+318 and310 stay open;319 stays closed. Current self permission is allow, while
+configuration correctly reports unsupported native scope. No current-session
+refresh, shared daemon restart, grant copying or production resource renewal.
+Memory disposition:forbidden (no user-authorized memory write). Evidence:
+docs/dev/evidence/hf06/318-scoped-refresh.md and user-scoped318-319 receipts.
+
+
+## 2026-10-25 — opt-in patched-runtime experiment
+
+User approved experimenting with the temporary native bridge. One isolated
+installed qualification PASSES in10.719s: selected Wake0.21.2, peer0.21.1, unchanged
+goals/thread IDs, zero model turns and completed owned-process cleanup. Stock
+runtime/shared daemon/production campaigns remain unchanged. Recorded the pinned
+candidate upgrade/rollback policy;318 remains open. Memory disposition:forbidden,
+because the user did not authorize a memory write.

@@ -104,8 +104,9 @@ never renews any resource allowance. Expiry or unknown ownership prevents effect
 
 This mode reconnects MCP servers for every loaded conversation on that native
 server. It keeps existing TUI clients, conversation IDs and goal authority;
-all observed counters must remain nondecreasing. Native Codex currently provides
-no thread-only reload and no atomic idle compare-and-swap. A racing start after
+all observed counters must remain nondecreasing. Native Codex0.164.0 provides
+no thread-only reload; the scoped mode below requires its explicit native patch.
+Neither path supplies an atomic idle compare-and-swap. A racing start after
 the final idle observation remains a limitation. The host must approve shared
 scope; agents cannot silently select it as a fallback from client-only refresh.
 
@@ -134,3 +135,26 @@ Initial deployment to a client whose cached MCP lacks host scope requires an
 operator bootstrap with the identical approved registry/checkpoint and caller.
 That is a deployment action, not an agent permission to bypass missing grants.
 After the shared reload, the public MCP can admit later self-refresh requests.
+
+
+### Exact current-thread MCP reload
+
+A host profile with `refresh_mode: "thread_mcp_idle"` targets only the invoking
+thread's MCP connections. Common permissions use `refresh.connection` and the
+MCP/CLI request uses `scope: "current_connection"`. The profile retains exact
+workspace, endpoint, scope approval, checkpoint, expiry and resource proof checks.
+Before advertising support or admitting work, Wake calls native
+`thread/mcpServer/reload` with the exact `threadId` and `dryRun: true`, requiring
+the same thread ID and `queued: false` response. Codex0.164.0 lacks this primitive;
+the native dependency must be installed in the running daemon. Installing a Wake
+wheel alone cannot supply it.
+
+The independent refresh watcher waits for the selected thread to be idle,
+journals the intent, and calls the scoped method once. Other loaded threads may
+remain active. Admission (`queued: true`) is separate from completion: Wake checks
+the selected resource version/catalog or read-only behavior and unchanged goal
+identity/status/budget with nondecreasing counters. A lost response is reconciled
+without replay. No global reload, guessed pane, new thread, daemon restart, caller
+grant copying, goal reset or implicit resume is a fallback. Unsupported ownership
+or scope refuses admission. Use configuration inspection first, then reuse the
+same intent to inspect the terminal refresh result.

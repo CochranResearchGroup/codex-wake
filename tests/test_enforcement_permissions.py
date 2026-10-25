@@ -74,13 +74,13 @@ class EnforcementPermissionTests(unittest.TestCase):
                 value=json.loads(output.getvalue())
                 self.assertEqual(code,2)
                 self.assertEqual(value['permission']['permission'],'allow')
-                self.assertEqual(value['capability'],'unsupported')
-                self.assertEqual(value['reason'],'observation_stop_recovery_unsupported')
+                self.assertEqual(value['error']['code'],'recovery_native_stop_unverified')
                 self.assertFalse(value['effect_attempted'])
                 self.assertEqual(path.read_bytes(),preserved)
-                self.assertEqual(value['campaign']['used_tokens'],first['used_tokens'])
-                self.assertEqual(value['campaign']['deadline'],first['deadline'])
-                self.assertTrue(value['campaign']['stop_latched'])
+                retained=json.loads(path.read_text())
+                self.assertEqual(retained['used_tokens'],first['used_tokens'])
+                self.assertEqual(retained['deadline'],first['deadline'])
+                self.assertTrue(retained['stop_latched'])
 
     def test_increase_needs_its_own_approval_before_native_observation(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -96,7 +96,7 @@ class EnforcementPermissionTests(unittest.TestCase):
                 later=show(root,policy,THREAD,native_context=native_context())
                 self.assertEqual(later['deadline'],first['deadline'])
                 self.assertEqual(later['used_tokens'],first['used_tokens'])
-                self.assertEqual(later['enforcement_permissions']['enforcement.recover']['capability'],'unsupported')
+                self.assertEqual(later['enforcement_permissions']['enforcement.recover']['capability'],'supported')
 
     def test_unverified_cli_cannot_use_a_copied_caller_grant(self):
         from codex_wake.cli import run
@@ -192,12 +192,11 @@ class EnforcementPermissionTests(unittest.TestCase):
                 action='enforcement.recover',task_id=task),native_context=native_context())
             self.assertTrue(failed,forged)
             self.assertEqual(forged['error']['code'],'permission_task_scope_unverified')
-            result=mcp_call(runner,'recover',dict(caller_thread_id=THREAD,
-                task_id=task,assignment_id=assignment),native_context())
-            self.assertEqual(result['permission']['permission'],'allow')
-            self.assertEqual(result['permission']['approval_id'],'recover-task')
-            self.assertEqual(result['capability'],'unsupported')
-            self.assertFalse(result['effect_attempted'])
+            with self.assertRaises(PermissionDenied) as absent:
+                mcp_call(runner,'recover',dict(caller_thread_id=THREAD,
+                    task_id=task,assignment_id=assignment),native_context())
+            self.assertEqual(absent.exception.code,'recovery_not_enrolled')
+            self.assertEqual(absent.exception.decision['approval_id'],'recover-task')
             self.assertEqual(native['calls'],[])
             with self.assertRaises(PermissionDenied):
                 mcp_call(runner,'recover',dict(caller_thread_id=THREAD,task_id=task),native_context())
@@ -234,7 +233,7 @@ class EnforcementPermissionTests(unittest.TestCase):
             self.assertEqual(value['error']['code'],'permission_deny')
             value,failed=runner.call('wake_goal_limits_recover',dict(caller_thread_id=THREAD),native_context=native_context())
             self.assertTrue(failed,value)
-            self.assertEqual(value['capability'],'unsupported')
+            self.assertEqual(value['error']['code'],'recovery_not_enrolled')
             self.assertFalse(value['effect_attempted'])
             self.assertEqual(value['permission']['permission'],'allow')
             self.assertEqual(native['calls'],[])

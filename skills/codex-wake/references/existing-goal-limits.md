@@ -259,3 +259,25 @@ only the latest turn. RPC failures record the method and exception class.
 An observation failure is distinct from token/time exhaustion. Existing stop
 latches remain authoritative after the transport recovers; this change does not
 clear them, renew resources, or restart the shared native daemon.
+
+
+## Recover an observation-fault stop
+
+A healthy read or native goal resume does not clear supervision. For a durable
+`observation_unavailable` stop, an authenticated operator may invoke
+`goal-limits recover` with the original policy/caller and existing operator bus
+capability; a native caller uses `wake_goal_limits_recover` only with an explicit
+matching common-policy approval. Supply a stable `operation_id` to reconcile an
+interrupted recovery. No allowance is renewed and the native goal stays paused.
+
+Recovery requires two agreeing exact-thread observations around a qualified
+nondecreasing accounting scan, a fresh independent controller, same boot, intact
+host policy and remaining original resources. The original campaign work must
+have stopped; a later operator reply may remain active. Exhaustion, accounting
+winddown, clock faults or changed goal identity hold without clearing stops.
+
+Shared allocations require an operator's explicit `--allocation-id` and qualified
+stopped state plus current permissions for every enrolled member. An interrupted
+commit retains a pending-recovery fence; retry the same operation to reconcile.
+Status exposes the supported recovery action. Stop episodes and recovery events
+retain the original first stop, charges, deadline and all prior effect outcomes.

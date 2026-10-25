@@ -1,0 +1,1027 @@
+diff --git a/codex-rs/app-server-protocol/schema/json/ClientRequest.json b/codex-rs/app-server-protocol/schema/json/ClientRequest.json
+index f3983e31f4..45ea74d0a2 100644
+--- a/codex-rs/app-server-protocol/schema/json/ClientRequest.json
++++ b/codex-rs/app-server-protocol/schema/json/ClientRequest.json
+@@ -1359,6 +1359,10 @@
+             "null"
+           ]
+         },
++        "runtimeOnly": {
++          "description": "Observe only an exact loaded thread's existing MCP manager.",
++          "type": "boolean"
++        },
+         "threadId": {
+           "type": [
+             "string",
+@@ -3910,6 +3914,22 @@
+       },
+       "type": "object"
+     },
++    "ThreadMcpServerRefreshParams": {
++      "additionalProperties": false,
++      "properties": {
++        "dryRun": {
++          "description": "Validate the exact loaded target without queuing a refresh.",
++          "type": "boolean"
++        },
++        "threadId": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "threadId"
++      ],
++      "type": "object"
++    },
+     "ThreadMemoryMode": {
+       "enum": [
+         "enabled",
+@@ -6232,6 +6252,30 @@
+       "title": "Config/mcpServer/reloadRequest",
+       "type": "object"
+     },
++    {
++      "properties": {
++        "id": {
++          "$ref": "#/definitions/RequestId"
++        },
++        "method": {
++          "enum": [
++            "thread/mcpServer/reload"
++          ],
++          "title": "Thread/mcpServer/reloadRequestMethod",
++          "type": "string"
++        },
++        "params": {
++          "$ref": "#/definitions/ThreadMcpServerRefreshParams"
++        }
++      },
++      "required": [
++        "id",
++        "method",
++        "params"
++      ],
++      "title": "Thread/mcpServer/reloadRequest",
++      "type": "object"
++    },
+     {
+       "properties": {
+         "id": {
+diff --git a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json
+index b77b512b36..9145100656 100644
+--- a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json
++++ b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json
+@@ -1644,6 +1644,30 @@
+           "title": "Config/mcpServer/reloadRequest",
+           "type": "object"
+         },
++        {
++          "properties": {
++            "id": {
++              "$ref": "#/definitions/v2/RequestId"
++            },
++            "method": {
++              "enum": [
++                "thread/mcpServer/reload"
++              ],
++              "title": "Thread/mcpServer/reloadRequestMethod",
++              "type": "string"
++            },
++            "params": {
++              "$ref": "#/definitions/v2/ThreadMcpServerRefreshParams"
++            }
++          },
++          "required": [
++            "id",
++            "method",
++            "params"
++          ],
++          "title": "Thread/mcpServer/reloadRequest",
++          "type": "object"
++        },
+         {
+           "properties": {
+             "id": {
+@@ -11374,6 +11398,10 @@
+               "null"
+             ]
+           },
++          "runtimeOnly": {
++            "description": "Observe only an exact loaded thread's existing MCP manager.",
++            "type": "boolean"
++          },
+           "threadId": {
+             "type": [
+               "string",
+@@ -18570,6 +18598,42 @@
+         "title": "ThreadLoadedListResponse",
+         "type": "object"
+       },
++      "ThreadMcpServerRefreshParams": {
++        "$schema": "http://json-schema.org/draft-07/schema#",
++        "additionalProperties": false,
++        "properties": {
++          "dryRun": {
++            "description": "Validate the exact loaded target without queuing a refresh.",
++            "type": "boolean"
++          },
++          "threadId": {
++            "type": "string"
++          }
++        },
++        "required": [
++          "threadId"
++        ],
++        "title": "ThreadMcpServerRefreshParams",
++        "type": "object"
++      },
++      "ThreadMcpServerRefreshResponse": {
++        "$schema": "http://json-schema.org/draft-07/schema#",
++        "properties": {
++          "queued": {
++            "description": "Queue admission only; callers must independently verify resource readiness.",
++            "type": "boolean"
++          },
++          "threadId": {
++            "type": "string"
++          }
++        },
++        "required": [
++          "queued",
++          "threadId"
++        ],
++        "title": "ThreadMcpServerRefreshResponse",
++        "type": "object"
++      },
+       "ThreadMemoryMode": {
+         "enum": [
+           "enabled",
+diff --git a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json
+index bdd61d6b94..71f152ce6e 100644
+--- a/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json
++++ b/codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json
+@@ -2674,6 +2674,30 @@
+           "title": "Config/mcpServer/reloadRequest",
+           "type": "object"
+         },
++        {
++          "properties": {
++            "id": {
++              "$ref": "#/definitions/RequestId"
++            },
++            "method": {
++              "enum": [
++                "thread/mcpServer/reload"
++              ],
++              "title": "Thread/mcpServer/reloadRequestMethod",
++              "type": "string"
++            },
++            "params": {
++              "$ref": "#/definitions/ThreadMcpServerRefreshParams"
++            }
++          },
++          "required": [
++            "id",
++            "method",
++            "params"
++          ],
++          "title": "Thread/mcpServer/reloadRequest",
++          "type": "object"
++        },
+         {
+           "properties": {
+             "id": {
+@@ -7778,6 +7802,10 @@
+             "null"
+           ]
+         },
++        "runtimeOnly": {
++          "description": "Observe only an exact loaded thread's existing MCP manager.",
++          "type": "boolean"
++        },
+         "threadId": {
+           "type": [
+             "string",
+@@ -16349,6 +16377,42 @@
+       "title": "ThreadLoadedListResponse",
+       "type": "object"
+     },
++    "ThreadMcpServerRefreshParams": {
++      "$schema": "http://json-schema.org/draft-07/schema#",
++      "additionalProperties": false,
++      "properties": {
++        "dryRun": {
++          "description": "Validate the exact loaded target without queuing a refresh.",
++          "type": "boolean"
++        },
++        "threadId": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "threadId"
++      ],
++      "title": "ThreadMcpServerRefreshParams",
++      "type": "object"
++    },
++    "ThreadMcpServerRefreshResponse": {
++      "$schema": "http://json-schema.org/draft-07/schema#",
++      "properties": {
++        "queued": {
++          "description": "Queue admission only; callers must independently verify resource readiness.",
++          "type": "boolean"
++        },
++        "threadId": {
++          "type": "string"
++        }
++      },
++      "required": [
++        "queued",
++        "threadId"
++      ],
++      "title": "ThreadMcpServerRefreshResponse",
++      "type": "object"
++    },
+     "ThreadMemoryMode": {
+       "enum": [
+         "enabled",
+diff --git a/codex-rs/app-server-protocol/schema/json/v2/ListMcpServerStatusParams.json b/codex-rs/app-server-protocol/schema/json/v2/ListMcpServerStatusParams.json
+index 19dad86adf..8fb4f65ec0 100644
+--- a/codex-rs/app-server-protocol/schema/json/v2/ListMcpServerStatusParams.json
++++ b/codex-rs/app-server-protocol/schema/json/v2/ListMcpServerStatusParams.json
+@@ -37,6 +37,10 @@
+         "null"
+       ]
+     },
++    "runtimeOnly": {
++      "description": "Observe only an exact loaded thread's existing MCP manager.",
++      "type": "boolean"
++    },
+     "threadId": {
+       "type": [
+         "string",
+diff --git a/codex-rs/app-server-protocol/schema/json/v2/ThreadMcpServerRefreshParams.json b/codex-rs/app-server-protocol/schema/json/v2/ThreadMcpServerRefreshParams.json
+new file mode 100644
+index 0000000000..9fa99bbcd9
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/json/v2/ThreadMcpServerRefreshParams.json
+@@ -0,0 +1,18 @@
++{
++  "$schema": "http://json-schema.org/draft-07/schema#",
++  "additionalProperties": false,
++  "properties": {
++    "dryRun": {
++      "description": "Validate the exact loaded target without queuing a refresh.",
++      "type": "boolean"
++    },
++    "threadId": {
++      "type": "string"
++    }
++  },
++  "required": [
++    "threadId"
++  ],
++  "title": "ThreadMcpServerRefreshParams",
++  "type": "object"
++}
+\ No newline at end of file
+diff --git a/codex-rs/app-server-protocol/schema/json/v2/ThreadMcpServerRefreshResponse.json b/codex-rs/app-server-protocol/schema/json/v2/ThreadMcpServerRefreshResponse.json
+new file mode 100644
+index 0000000000..63706adf20
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/json/v2/ThreadMcpServerRefreshResponse.json
+@@ -0,0 +1,18 @@
++{
++  "$schema": "http://json-schema.org/draft-07/schema#",
++  "properties": {
++    "queued": {
++      "description": "Queue admission only; callers must independently verify resource readiness.",
++      "type": "boolean"
++    },
++    "threadId": {
++      "type": "string"
++    }
++  },
++  "required": [
++    "queued",
++    "threadId"
++  ],
++  "title": "ThreadMcpServerRefreshResponse",
++  "type": "object"
++}
+\ No newline at end of file
+diff --git a/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts b/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts
+index 6af04ef401..dc0d1a7809 100644
+--- a/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts
++++ b/codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts
+@@ -71,6 +71,7 @@ import type { ThreadGoalSetParams } from "./v2/ThreadGoalSetParams";
+ import type { ThreadInjectItemsParams } from "./v2/ThreadInjectItemsParams";
+ import type { ThreadListParams } from "./v2/ThreadListParams";
+ import type { ThreadLoadedListParams } from "./v2/ThreadLoadedListParams";
++import type { ThreadMcpServerRefreshParams } from "./v2/ThreadMcpServerRefreshParams";
+ import type { ThreadMetadataUpdateParams } from "./v2/ThreadMetadataUpdateParams";
+ import type { ThreadReadParams } from "./v2/ThreadReadParams";
+ import type { ThreadResumeParams } from "./v2/ThreadResumeParams";
+@@ -88,4 +89,4 @@ import type { WindowsSandboxSetupStartParams } from "./v2/WindowsSandboxSetupSta
+ /**
+  * Request from the client to the server.
+  */
+-export type ClientRequest ={ "method": "initialize", id: RequestId, params: InitializeParams, } | { "method": "thread/start", id: RequestId, params: ThreadStartParams, } | { "method": "thread/resume", id: RequestId, params: ThreadResumeParams, } | { "method": "thread/fork", id: RequestId, params: ThreadForkParams, } | { "method": "thread/archive", id: RequestId, params: ThreadArchiveParams, } | { "method": "thread/delete", id: RequestId, params: ThreadDeleteParams, } | { "method": "thread/unsubscribe", id: RequestId, params: ThreadUnsubscribeParams, } | { "method": "thread/name/set", id: RequestId, params: ThreadSetNameParams, } | { "method": "thread/goal/set", id: RequestId, params: ThreadGoalSetParams, } | { "method": "thread/goal/get", id: RequestId, params: ThreadGoalGetParams, } | { "method": "thread/goal/clear", id: RequestId, params: ThreadGoalClearParams, } | { "method": "thread/metadata/update", id: RequestId, params: ThreadMetadataUpdateParams, } | { "method": "thread/unarchive", id: RequestId, params: ThreadUnarchiveParams, } | { "method": "thread/compact/start", id: RequestId, params: ThreadCompactStartParams, } | { "method": "thread/shellCommand", id: RequestId, params: ThreadShellCommandParams, } | { "method": "thread/approveGuardianDeniedAction", id: RequestId, params: ThreadApproveGuardianDeniedActionParams, } | { "method": "thread/rollback", id: RequestId, params: ThreadRollbackParams, } | { "method": "thread/list", id: RequestId, params: ThreadListParams, } | { "method": "thread/loaded/list", id: RequestId, params: ThreadLoadedListParams, } | { "method": "thread/read", id: RequestId, params: ThreadReadParams, } | { "method": "thread/inject_items", id: RequestId, params: ThreadInjectItemsParams, } | { "method": "skills/list", id: RequestId, params: SkillsListParams, } | { "method": "skills/extraRoots/set", id: RequestId, params: SkillsExtraRootsSetParams, } | { "method": "hooks/list", id: RequestId, params: HooksListParams, } | { "method": "marketplace/add", id: RequestId, params: MarketplaceAddParams, } | { "method": "marketplace/remove", id: RequestId, params: MarketplaceRemoveParams, } | { "method": "marketplace/upgrade", id: RequestId, params: MarketplaceUpgradeParams, } | { "method": "plugin/list", id: RequestId, params: PluginListParams, } | { "method": "plugin/installed", id: RequestId, params: PluginInstalledParams, } | { "method": "plugin/read", id: RequestId, params: PluginReadParams, } | { "method": "plugin/skill/read", id: RequestId, params: PluginSkillReadParams, } | { "method": "plugin/share/save", id: RequestId, params: PluginShareSaveParams, } | { "method": "plugin/share/updateTargets", id: RequestId, params: PluginShareUpdateTargetsParams, } | { "method": "plugin/share/list", id: RequestId, params: PluginShareListParams, } | { "method": "plugin/share/checkout", id: RequestId, params: PluginShareCheckoutParams, } | { "method": "plugin/share/delete", id: RequestId, params: PluginShareDeleteParams, } | { "method": "app/list", id: RequestId, params: AppsListParams, } | { "method": "fs/readFile", id: RequestId, params: FsReadFileParams, } | { "method": "fs/writeFile", id: RequestId, params: FsWriteFileParams, } | { "method": "fs/createDirectory", id: RequestId, params: FsCreateDirectoryParams, } | { "method": "fs/getMetadata", id: RequestId, params: FsGetMetadataParams, } | { "method": "fs/readDirectory", id: RequestId, params: FsReadDirectoryParams, } | { "method": "fs/remove", id: RequestId, params: FsRemoveParams, } | { "method": "fs/copy", id: RequestId, params: FsCopyParams, } | { "method": "fs/watch", id: RequestId, params: FsWatchParams, } | { "method": "fs/unwatch", id: RequestId, params: FsUnwatchParams, } | { "method": "skills/config/write", id: RequestId, params: SkillsConfigWriteParams, } | { "method": "plugin/install", id: RequestId, params: PluginInstallParams, } | { "method": "plugin/uninstall", id: RequestId, params: PluginUninstallParams, } | { "method": "turn/start", id: RequestId, params: TurnStartParams, } | { "method": "turn/steer", id: RequestId, params: TurnSteerParams, } | { "method": "turn/interrupt", id: RequestId, params: TurnInterruptParams, } | { "method": "review/start", id: RequestId, params: ReviewStartParams, } | { "method": "model/list", id: RequestId, params: ModelListParams, } | { "method": "modelProvider/capabilities/read", id: RequestId, params: ModelProviderCapabilitiesReadParams, } | { "method": "experimentalFeature/list", id: RequestId, params: ExperimentalFeatureListParams, } | { "method": "permissionProfile/list", id: RequestId, params: PermissionProfileListParams, } | { "method": "experimentalFeature/enablement/set", id: RequestId, params: ExperimentalFeatureEnablementSetParams, } | { "method": "mcpServer/oauth/login", id: RequestId, params: McpServerOauthLoginParams, } | { "method": "config/mcpServer/reload", id: RequestId, params: undefined, } | { "method": "mcpServerStatus/list", id: RequestId, params: ListMcpServerStatusParams, } | { "method": "mcpServer/resource/read", id: RequestId, params: McpResourceReadParams, } | { "method": "mcpServer/tool/call", id: RequestId, params: McpServerToolCallParams, } | { "method": "windowsSandbox/setupStart", id: RequestId, params: WindowsSandboxSetupStartParams, } | { "method": "windowsSandbox/readiness", id: RequestId, params: undefined, } | { "method": "account/login/start", id: RequestId, params: LoginAccountParams, } | { "method": "account/login/cancel", id: RequestId, params: CancelLoginAccountParams, } | { "method": "account/logout", id: RequestId, params: undefined, } | { "method": "account/rateLimits/read", id: RequestId, params: undefined, } | { "method": "account/rateLimitResetCredit/consume", id: RequestId, params: ConsumeAccountRateLimitResetCreditParams, } | { "method": "account/usage/read", id: RequestId, params: undefined, } | { "method": "account/workspaceMessages/read", id: RequestId, params: undefined, } | { "method": "account/sendAddCreditsNudgeEmail", id: RequestId, params: SendAddCreditsNudgeEmailParams, } | { "method": "feedback/upload", id: RequestId, params: FeedbackUploadParams, } | { "method": "command/exec", id: RequestId, params: CommandExecParams, } | { "method": "command/exec/write", id: RequestId, params: CommandExecWriteParams, } | { "method": "command/exec/terminate", id: RequestId, params: CommandExecTerminateParams, } | { "method": "command/exec/resize", id: RequestId, params: CommandExecResizeParams, } | { "method": "config/read", id: RequestId, params: ConfigReadParams, } | { "method": "externalAgentConfig/detect", id: RequestId, params: ExternalAgentConfigDetectParams, } | { "method": "externalAgentConfig/import", id: RequestId, params: ExternalAgentConfigImportParams, } | { "method": "externalAgentConfig/import/readHistories", id: RequestId, params: undefined, } | { "method": "config/value/write", id: RequestId, params: ConfigValueWriteParams, } | { "method": "config/batchWrite", id: RequestId, params: ConfigBatchWriteParams, } | { "method": "configRequirements/read", id: RequestId, params: undefined, } | { "method": "account/read", id: RequestId, params: GetAccountParams, } | { "method": "getConversationSummary", id: RequestId, params: GetConversationSummaryParams, } | { "method": "gitDiffToRemote", id: RequestId, params: GitDiffToRemoteParams, } | { "method": "getAuthStatus", id: RequestId, params: GetAuthStatusParams, } | { "method": "fuzzyFileSearch", id: RequestId, params: FuzzyFileSearchParams, };
++export type ClientRequest ={ "method": "initialize", id: RequestId, params: InitializeParams, } | { "method": "thread/start", id: RequestId, params: ThreadStartParams, } | { "method": "thread/resume", id: RequestId, params: ThreadResumeParams, } | { "method": "thread/fork", id: RequestId, params: ThreadForkParams, } | { "method": "thread/archive", id: RequestId, params: ThreadArchiveParams, } | { "method": "thread/delete", id: RequestId, params: ThreadDeleteParams, } | { "method": "thread/unsubscribe", id: RequestId, params: ThreadUnsubscribeParams, } | { "method": "thread/name/set", id: RequestId, params: ThreadSetNameParams, } | { "method": "thread/goal/set", id: RequestId, params: ThreadGoalSetParams, } | { "method": "thread/goal/get", id: RequestId, params: ThreadGoalGetParams, } | { "method": "thread/goal/clear", id: RequestId, params: ThreadGoalClearParams, } | { "method": "thread/metadata/update", id: RequestId, params: ThreadMetadataUpdateParams, } | { "method": "thread/unarchive", id: RequestId, params: ThreadUnarchiveParams, } | { "method": "thread/compact/start", id: RequestId, params: ThreadCompactStartParams, } | { "method": "thread/shellCommand", id: RequestId, params: ThreadShellCommandParams, } | { "method": "thread/approveGuardianDeniedAction", id: RequestId, params: ThreadApproveGuardianDeniedActionParams, } | { "method": "thread/rollback", id: RequestId, params: ThreadRollbackParams, } | { "method": "thread/list", id: RequestId, params: ThreadListParams, } | { "method": "thread/loaded/list", id: RequestId, params: ThreadLoadedListParams, } | { "method": "thread/read", id: RequestId, params: ThreadReadParams, } | { "method": "thread/inject_items", id: RequestId, params: ThreadInjectItemsParams, } | { "method": "skills/list", id: RequestId, params: SkillsListParams, } | { "method": "skills/extraRoots/set", id: RequestId, params: SkillsExtraRootsSetParams, } | { "method": "hooks/list", id: RequestId, params: HooksListParams, } | { "method": "marketplace/add", id: RequestId, params: MarketplaceAddParams, } | { "method": "marketplace/remove", id: RequestId, params: MarketplaceRemoveParams, } | { "method": "marketplace/upgrade", id: RequestId, params: MarketplaceUpgradeParams, } | { "method": "plugin/list", id: RequestId, params: PluginListParams, } | { "method": "plugin/installed", id: RequestId, params: PluginInstalledParams, } | { "method": "plugin/read", id: RequestId, params: PluginReadParams, } | { "method": "plugin/skill/read", id: RequestId, params: PluginSkillReadParams, } | { "method": "plugin/share/save", id: RequestId, params: PluginShareSaveParams, } | { "method": "plugin/share/updateTargets", id: RequestId, params: PluginShareUpdateTargetsParams, } | { "method": "plugin/share/list", id: RequestId, params: PluginShareListParams, } | { "method": "plugin/share/checkout", id: RequestId, params: PluginShareCheckoutParams, } | { "method": "plugin/share/delete", id: RequestId, params: PluginShareDeleteParams, } | { "method": "app/list", id: RequestId, params: AppsListParams, } | { "method": "fs/readFile", id: RequestId, params: FsReadFileParams, } | { "method": "fs/writeFile", id: RequestId, params: FsWriteFileParams, } | { "method": "fs/createDirectory", id: RequestId, params: FsCreateDirectoryParams, } | { "method": "fs/getMetadata", id: RequestId, params: FsGetMetadataParams, } | { "method": "fs/readDirectory", id: RequestId, params: FsReadDirectoryParams, } | { "method": "fs/remove", id: RequestId, params: FsRemoveParams, } | { "method": "fs/copy", id: RequestId, params: FsCopyParams, } | { "method": "fs/watch", id: RequestId, params: FsWatchParams, } | { "method": "fs/unwatch", id: RequestId, params: FsUnwatchParams, } | { "method": "skills/config/write", id: RequestId, params: SkillsConfigWriteParams, } | { "method": "plugin/install", id: RequestId, params: PluginInstallParams, } | { "method": "plugin/uninstall", id: RequestId, params: PluginUninstallParams, } | { "method": "turn/start", id: RequestId, params: TurnStartParams, } | { "method": "turn/steer", id: RequestId, params: TurnSteerParams, } | { "method": "turn/interrupt", id: RequestId, params: TurnInterruptParams, } | { "method": "review/start", id: RequestId, params: ReviewStartParams, } | { "method": "model/list", id: RequestId, params: ModelListParams, } | { "method": "modelProvider/capabilities/read", id: RequestId, params: ModelProviderCapabilitiesReadParams, } | { "method": "experimentalFeature/list", id: RequestId, params: ExperimentalFeatureListParams, } | { "method": "permissionProfile/list", id: RequestId, params: PermissionProfileListParams, } | { "method": "experimentalFeature/enablement/set", id: RequestId, params: ExperimentalFeatureEnablementSetParams, } | { "method": "mcpServer/oauth/login", id: RequestId, params: McpServerOauthLoginParams, } | { "method": "config/mcpServer/reload", id: RequestId, params: undefined, } | { "method": "thread/mcpServer/reload", id: RequestId, params: ThreadMcpServerRefreshParams, } | { "method": "mcpServerStatus/list", id: RequestId, params: ListMcpServerStatusParams, } | { "method": "mcpServer/resource/read", id: RequestId, params: McpResourceReadParams, } | { "method": "mcpServer/tool/call", id: RequestId, params: McpServerToolCallParams, } | { "method": "windowsSandbox/setupStart", id: RequestId, params: WindowsSandboxSetupStartParams, } | { "method": "windowsSandbox/readiness", id: RequestId, params: undefined, } | { "method": "account/login/start", id: RequestId, params: LoginAccountParams, } | { "method": "account/login/cancel", id: RequestId, params: CancelLoginAccountParams, } | { "method": "account/logout", id: RequestId, params: undefined, } | { "method": "account/rateLimits/read", id: RequestId, params: undefined, } | { "method": "account/rateLimitResetCredit/consume", id: RequestId, params: ConsumeAccountRateLimitResetCreditParams, } | { "method": "account/usage/read", id: RequestId, params: undefined, } | { "method": "account/workspaceMessages/read", id: RequestId, params: undefined, } | { "method": "account/sendAddCreditsNudgeEmail", id: RequestId, params: SendAddCreditsNudgeEmailParams, } | { "method": "feedback/upload", id: RequestId, params: FeedbackUploadParams, } | { "method": "command/exec", id: RequestId, params: CommandExecParams, } | { "method": "command/exec/write", id: RequestId, params: CommandExecWriteParams, } | { "method": "command/exec/terminate", id: RequestId, params: CommandExecTerminateParams, } | { "method": "command/exec/resize", id: RequestId, params: CommandExecResizeParams, } | { "method": "config/read", id: RequestId, params: ConfigReadParams, } | { "method": "externalAgentConfig/detect", id: RequestId, params: ExternalAgentConfigDetectParams, } | { "method": "externalAgentConfig/import", id: RequestId, params: ExternalAgentConfigImportParams, } | { "method": "externalAgentConfig/import/readHistories", id: RequestId, params: undefined, } | { "method": "config/value/write", id: RequestId, params: ConfigValueWriteParams, } | { "method": "config/batchWrite", id: RequestId, params: ConfigBatchWriteParams, } | { "method": "configRequirements/read", id: RequestId, params: undefined, } | { "method": "account/read", id: RequestId, params: GetAccountParams, } | { "method": "getConversationSummary", id: RequestId, params: GetConversationSummaryParams, } | { "method": "gitDiffToRemote", id: RequestId, params: GitDiffToRemoteParams, } | { "method": "getAuthStatus", id: RequestId, params: GetAuthStatusParams, } | { "method": "fuzzyFileSearch", id: RequestId, params: FuzzyFileSearchParams, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ListMcpServerStatusParams.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ListMcpServerStatusParams.ts
+index 2296c73621..2990246814 100644
+--- a/codex-rs/app-server-protocol/schema/typescript/v2/ListMcpServerStatusParams.ts
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ListMcpServerStatusParams.ts
+@@ -4,6 +4,10 @@
+ import type { McpServerStatusDetail } from "./McpServerStatusDetail";
+ 
+ export type ListMcpServerStatusParams = {
++/**
++ * Observe only an exact loaded thread's existing MCP manager.
++ */
++runtimeOnly?: boolean,
+ /**
+  * Opaque pagination cursor returned by a previous call.
+  */
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ThreadMcpServerRefreshParams.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadMcpServerRefreshParams.ts
+new file mode 100644
+index 0000000000..0939f5a3d6
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadMcpServerRefreshParams.ts
+@@ -0,0 +1,9 @@
++// GENERATED CODE! DO NOT MODIFY BY HAND!
++
++// This file was generated by [ts-rs](https://github.com/Aleph-Alpha/ts-rs). Do not edit this file manually.
++
++export type ThreadMcpServerRefreshParams = { threadId: string,
++/**
++ * Validate the exact loaded target without queuing a refresh.
++ */
++dryRun?: boolean, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/ThreadMcpServerRefreshResponse.ts b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadMcpServerRefreshResponse.ts
+new file mode 100644
+index 0000000000..c93bcb86e0
+--- /dev/null
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/ThreadMcpServerRefreshResponse.ts
+@@ -0,0 +1,9 @@
++// GENERATED CODE! DO NOT MODIFY BY HAND!
++
++// This file was generated by [ts-rs](https://github.com/Aleph-Alpha/ts-rs). Do not edit this file manually.
++
++export type ThreadMcpServerRefreshResponse = { threadId: string,
++/**
++ * Queue admission only; callers must independently verify resource readiness.
++ */
++queued: boolean, };
+diff --git a/codex-rs/app-server-protocol/schema/typescript/v2/index.ts b/codex-rs/app-server-protocol/schema/typescript/v2/index.ts
+index c405082c4c..9e577101fc 100644
+--- a/codex-rs/app-server-protocol/schema/typescript/v2/index.ts
++++ b/codex-rs/app-server-protocol/schema/typescript/v2/index.ts
+@@ -420,6 +420,8 @@ export type { ThreadListParams } from "./ThreadListParams";
+ export type { ThreadListResponse } from "./ThreadListResponse";
+ export type { ThreadLoadedListParams } from "./ThreadLoadedListParams";
+ export type { ThreadLoadedListResponse } from "./ThreadLoadedListResponse";
++export type { ThreadMcpServerRefreshParams } from "./ThreadMcpServerRefreshParams";
++export type { ThreadMcpServerRefreshResponse } from "./ThreadMcpServerRefreshResponse";
+ export type { ThreadMetadataGitInfoUpdateParams } from "./ThreadMetadataGitInfoUpdateParams";
+ export type { ThreadMetadataUpdateParams } from "./ThreadMetadataUpdateParams";
+ export type { ThreadMetadataUpdateResponse } from "./ThreadMetadataUpdateResponse";
+diff --git a/codex-rs/app-server-protocol/src/protocol/common.rs b/codex-rs/app-server-protocol/src/protocol/common.rs
+index d8db99d4ff..33a3699ace 100644
+--- a/codex-rs/app-server-protocol/src/protocol/common.rs
++++ b/codex-rs/app-server-protocol/src/protocol/common.rs
+@@ -963,6 +963,12 @@ client_request_definitions! {
+         response: v2::McpServerRefreshResponse,
+     },
+ 
++    ThreadMcpServerRefresh => "thread/mcpServer/reload" {
++        params: v2::ThreadMcpServerRefreshParams,
++        serialization: thread_id(params.thread_id),
++        response: v2::ThreadMcpServerRefreshResponse,
++    },
++
+     McpServerStatusList => "mcpServerStatus/list" {
+         params: v2::ListMcpServerStatusParams,
+         serialization: global("mcp-registry"),
+diff --git a/codex-rs/app-server-protocol/src/protocol/common_tests.rs b/codex-rs/app-server-protocol/src/protocol/common_tests.rs
+index 83e5d37117..44fc011acb 100644
+--- a/codex-rs/app-server-protocol/src/protocol/common_tests.rs
++++ b/codex-rs/app-server-protocol/src/protocol/common_tests.rs
+@@ -42,3 +42,35 @@ fn interrupt_conversation_payload_stays_jsonrpc_only() -> Result<()> {
+     assert!(payload.is_none());
+     Ok(())
+ }
++
++#[test]
++fn mcp_reload_preserves_an_explicit_thread_selector() -> Result<()> {
++    let wire = json!({"id": 1, "method": "thread/mcpServer/reload", "params": {
++        "threadId": "00000000-0000-7000-8000-000000000318"
++    }});
++    let request: ClientRequest = serde_json::from_value(wire.clone())?;
++    assert_eq!(serde_json::to_value(request)?, wire);
++    Ok(())
++}
++
++#[test]
++fn malformed_mcp_thread_selector_never_becomes_global_reload() {
++    for params in [
++        json!({}),
++        json!({"thredId": "selected"}),
++        json!({"threadId": 1}),
++    ] {
++        let wire = json!({"id": 2, "method": "thread/mcpServer/reload", "params": params});
++        assert!(serde_json::from_value::<ClientRequest>(wire).is_err());
++    }
++}
++
++#[test]
++fn thread_mcp_reload_inspection_preserves_dry_run() -> Result<()> {
++    let wire = json!({"id": 3, "method": "thread/mcpServer/reload", "params": {
++        "threadId": "00000000-0000-7000-8000-000000000318", "dryRun": true
++    }});
++    let request: ClientRequest = serde_json::from_value(wire.clone())?;
++    assert_eq!(serde_json::to_value(request)?, wire);
++    Ok(())
++}
+diff --git a/codex-rs/app-server-protocol/src/protocol/v2/mcp.rs b/codex-rs/app-server-protocol/src/protocol/v2/mcp.rs
+index d24da0c879..d3063a29f9 100644
+--- a/codex-rs/app-server-protocol/src/protocol/v2/mcp.rs
++++ b/codex-rs/app-server-protocol/src/protocol/v2/mcp.rs
+@@ -33,6 +33,9 @@ v2_enum_from_core!(
+ #[serde(rename_all = "camelCase")]
+ #[ts(export_to = "v2/")]
+ pub struct ListMcpServerStatusParams {
++    /// Observe only an exact loaded thread's existing MCP manager.
++    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
++    pub runtime_only: bool,
+     /// Opaque pagination cursor returned by a previous call.
+     #[ts(optional = nullable)]
+     pub cursor: Option<String>,
+@@ -735,3 +738,22 @@ impl From<rmcp::model::CreateElicitationResult> for McpServerElicitationRequestR
+         }
+     }
+ }
++
++#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
++#[serde(rename_all = "camelCase", deny_unknown_fields)]
++#[ts(export_to = "v2/")]
++pub struct ThreadMcpServerRefreshParams {
++    pub thread_id: String,
++    /// Validate the exact loaded target without queuing a refresh.
++    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
++    pub dry_run: bool,
++}
++
++#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema, TS)]
++#[serde(rename_all = "camelCase")]
++#[ts(export_to = "v2/")]
++pub struct ThreadMcpServerRefreshResponse {
++    pub thread_id: String,
++    /// Queue admission only; callers must independently verify resource readiness.
++    pub queued: bool,
++}
+diff --git a/codex-rs/app-server/README.md b/codex-rs/app-server/README.md
+index c9ac2f5fb2..5f40baf769 100644
+--- a/codex-rs/app-server/README.md
++++ b/codex-rs/app-server/README.md
+@@ -2194,3 +2194,27 @@ For server-initiated request payloads, annotate the field the same way so schema
+    ```bash
+    just test -p codex-app-server-protocol
+    ```
++
++
++### Thread-scoped MCP reload
++
++`thread/mcpServer/reload` accepts `{"threadId":"<loaded-thread-id>"}` to plan
++and queue an MCP reload only for that exact loaded thread. Invalid, unknown or
++unloaded selectors fail without falling back to a global reload. The response
++returns `{"threadId":"<loaded-thread-id>","queued":true}` for queue admission; callers must separately observe the selected resources and
++preserve goal/budget state. The method does not restart the shared app-server or
++load another conversation. Legacy `config/mcpServer/reload` remains unchanged.
++
++A request with `"dryRun":true` only validates the loaded target and returns the
++exact `threadId` with `"queued":false`. It does not reload config or MCP clients.
++Clients can use this read-only probe to distinguish this scoped capability from
++older servers before admitting a refresh. Unknown fields are rejected. A missing
++or invalid selector never invokes the legacy global operation.
++
++For completion proof, `mcpServerStatus/list` with `runtimeOnly: true` requires an
++exact loaded `threadId` and reads its existing MCP manager. It never creates a
++temporary connection from the latest file configuration. Omission preserves the
++legacy config-inspection behavior. The scoped API and explicit runtime inspection apply an already
++admitted pending refresh without starting a model turn; legacy runtime reads
++keep their previous behavior. In-flight steps retain
++their previous snapshot until they finish.
+diff --git a/codex-rs/app-server/src/mcp_refresh.rs b/codex-rs/app-server/src/mcp_refresh.rs
+index 848d201f2e..bb558c26f0 100644
+--- a/codex-rs/app-server/src/mcp_refresh.rs
++++ b/codex-rs/app-server/src/mcp_refresh.rs
+@@ -30,6 +30,21 @@ pub(crate) async fn queue_strict_refresh(
+     Ok(())
+ }
+ 
++/// Plan and queue a refresh for one exact loaded thread without touching its peers.
++pub(crate) async fn queue_thread_refresh(
++    thread_manager: &Arc<ThreadManager>,
++    config_manager: &ConfigManager,
++    thread_id: ThreadId,
++) -> io::Result<()> {
++    let thread = thread_manager.get_thread(thread_id).await.map_err(|err| {
++        io::Error::other(format!("failed to load refresh thread {thread_id}: {err}"))
++    })?;
++    let config = build_refresh_config(thread.as_ref(), config_manager).await?;
++    queue_refresh(thread_id, Arc::clone(&thread), config).await?;
++    thread.apply_pending_mcp_server_refresh().await;
++    Ok(())
++}
++
+ pub(crate) async fn queue_best_effort_refresh(
+     thread_manager: &Arc<ThreadManager>,
+     config_manager: &ConfigManager,
+diff --git a/codex-rs/app-server/src/message_processor.rs b/codex-rs/app-server/src/message_processor.rs
+index 375307e804..1fc1c3c6ca 100644
+--- a/codex-rs/app-server/src/message_processor.rs
++++ b/codex-rs/app-server/src/message_processor.rs
+@@ -1377,6 +1377,9 @@ impl MessageProcessor {
+             ClientRequest::McpServerOauthLogin { params, .. } => {
+                 self.mcp_processor.mcp_server_oauth_login(params).await
+             }
++            ClientRequest::ThreadMcpServerRefresh { params, .. } => {
++                self.mcp_processor.thread_mcp_server_refresh(params).await
++            }
+             ClientRequest::McpServerRefresh { params, .. } => {
+                 self.mcp_processor.mcp_server_refresh(params).await
+             }
+diff --git a/codex-rs/app-server/src/request_processors.rs b/codex-rs/app-server/src/request_processors.rs
+index 587325c246..7b80f718ea 100644
+--- a/codex-rs/app-server/src/request_processors.rs
++++ b/codex-rs/app-server/src/request_processors.rs
+@@ -223,6 +223,8 @@ use codex_app_server_protocol::ThreadListParams;
+ use codex_app_server_protocol::ThreadListResponse;
+ use codex_app_server_protocol::ThreadLoadedListParams;
+ use codex_app_server_protocol::ThreadLoadedListResponse;
++use codex_app_server_protocol::ThreadMcpServerRefreshParams;
++use codex_app_server_protocol::ThreadMcpServerRefreshResponse;
+ use codex_app_server_protocol::ThreadMemoryModeSetParams;
+ use codex_app_server_protocol::ThreadMemoryModeSetResponse;
+ use codex_app_server_protocol::ThreadMetadataGitInfoUpdateParams;
+diff --git a/codex-rs/app-server/src/request_processors/mcp_processor.rs b/codex-rs/app-server/src/request_processors/mcp_processor.rs
+index ac2125c2cf..5a8abb5491 100644
+--- a/codex-rs/app-server/src/request_processors/mcp_processor.rs
++++ b/codex-rs/app-server/src/request_processors/mcp_processor.rs
+@@ -43,6 +43,37 @@ impl McpRequestProcessor {
+             .map(|response| Some(response.into()))
+     }
+ 
++    pub(crate) async fn thread_mcp_server_refresh(
++        &self,
++        params: ThreadMcpServerRefreshParams,
++    ) -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
++        let thread_id = ThreadId::from_string(&params.thread_id)
++            .map_err(|err| invalid_request(format!("invalid refresh thread id: {err}")))?;
++        if params.dry_run {
++            self.thread_manager
++                .get_thread(thread_id)
++                .await
++                .map_err(|err| invalid_request(format!("refresh target is not loaded: {err}")))?;
++        } else {
++            crate::mcp_refresh::queue_thread_refresh(
++                &self.thread_manager,
++                &self.config_manager,
++                thread_id,
++            )
++            .await
++            .map_err(|err| {
++                internal_error(format!("failed to refresh thread MCP servers: {err}"))
++            })?;
++        }
++        Ok(Some(
++            ThreadMcpServerRefreshResponse {
++                thread_id: params.thread_id,
++                queued: !params.dry_run,
++            }
++            .into(),
++        ))
++    }
++
+     pub(crate) async fn mcp_server_status_list(
+         &self,
+         request_id: &ConnectionRequestId,
+@@ -230,6 +261,42 @@ impl McpRequestProcessor {
+         let request = request_id.clone();
+ 
+         let outgoing = Arc::clone(&self.outgoing);
++        if params.runtime_only {
++            let thread_id = params
++                .thread_id
++                .as_deref()
++                .ok_or_else(|| invalid_request("runtimeOnly requires an exact loaded thread"))?;
++            let (_, thread) = self.load_thread(thread_id).await?;
++            thread.apply_pending_mcp_server_refresh().await;
++            let runtime = thread.current_mcp_runtime().await;
++            let auth = self.auth_manager.auth().await;
++            tokio::spawn(async move {
++                let config = runtime.config();
++                let servers = codex_mcp::effective_mcp_servers(config, auth.as_ref());
++                let auth_entries = codex_mcp::compute_auth_statuses(
++                    servers.iter(),
++                    config.mcp_oauth_credentials_store_mode,
++                    config.auth_keyring_backend_kind,
++                    auth.as_ref(),
++                    runtime.runtime_context(),
++                )
++                .await;
++                let detail = match params.detail.unwrap_or(McpServerStatusDetail::Full) {
++                    McpServerStatusDetail::Full => McpSnapshotDetail::Full,
++                    McpServerStatusDetail::ToolsAndAuthOnly => McpSnapshotDetail::ToolsAndAuthOnly,
++                };
++                let snapshot = codex_mcp::collect_mcp_server_status_snapshot_from_manager(
++                    runtime.manager(),
++                    auth_entries,
++                    servers.keys().cloned().collect(),
++                    detail,
++                )
++                .await;
++                let result = Self::mcp_server_status_from_snapshot(params, snapshot);
++                outgoing.send_result(request, result).await;
++            });
++            return Ok(());
++        }
+         let (config, thread) = match params.thread_id.as_deref() {
+             Some(thread_id) => {
+                 let (_, thread) = self.load_thread(thread_id).await?;
+@@ -321,6 +388,13 @@ impl McpRequestProcessor {
+         )
+         .await;
+ 
++        Self::mcp_server_status_from_snapshot(params, snapshot)
++    }
++
++    fn mcp_server_status_from_snapshot(
++        params: ListMcpServerStatusParams,
++        snapshot: McpServerStatusSnapshot,
++    ) -> Result<ListMcpServerStatusResponse, JSONRPCErrorError> {
+         let McpServerStatusSnapshot {
+             server_infos,
+             tools_by_server,
+diff --git a/codex-rs/app-server/tests/suite/v2/executor_mcp.rs b/codex-rs/app-server/tests/suite/v2/executor_mcp.rs
+index aa650c3ecf..d0c5a6e3c1 100644
+--- a/codex-rs/app-server/tests/suite/v2/executor_mcp.rs
++++ b/codex-rs/app-server/tests/suite/v2/executor_mcp.rs
+@@ -468,6 +468,7 @@ async fn mcp_server_names(
+ ) -> Result<Vec<String>> {
+     let request_id = app_server
+         .send_list_mcp_server_status_request(ListMcpServerStatusParams {
++            runtime_only: false,
+             cursor: None,
+             limit: None,
+             detail: None,
+diff --git a/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs b/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
+index 2c34684ada..a65035df6e 100644
+--- a/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
++++ b/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
+@@ -72,6 +72,7 @@ url = "{mcp_server_url}/mcp"
+ 
+     let request_id = mcp
+         .send_list_mcp_server_status_request(ListMcpServerStatusParams {
++            runtime_only: false,
+             cursor: None,
+             limit: None,
+             detail: None,
+@@ -162,6 +163,7 @@ url = "{mcp_server_url}/mcp"
+ 
+     let threadless_request_id = mcp
+         .send_list_mcp_server_status_request(ListMcpServerStatusParams {
++            runtime_only: false,
+             cursor: None,
+             limit: None,
+             detail: Some(McpServerStatusDetail::ToolsAndAuthOnly),
+@@ -178,6 +180,7 @@ url = "{mcp_server_url}/mcp"
+ 
+     let thread_request_id = mcp
+         .send_list_mcp_server_status_request(ListMcpServerStatusParams {
++            runtime_only: false,
+             cursor: None,
+             limit: None,
+             detail: Some(McpServerStatusDetail::ToolsAndAuthOnly),
+@@ -341,6 +344,7 @@ url = "{mcp_server_url}/mcp"
+ 
+     let request_id = mcp
+         .send_list_mcp_server_status_request(ListMcpServerStatusParams {
++            runtime_only: false,
+             cursor: None,
+             limit: None,
+             detail: Some(McpServerStatusDetail::ToolsAndAuthOnly),
+@@ -406,6 +410,7 @@ url = "{underscore_server_url}/mcp"
+ 
+     let request_id = mcp
+         .send_list_mcp_server_status_request(ListMcpServerStatusParams {
++            runtime_only: false,
+             cursor: None,
+             limit: None,
+             detail: None,
+diff --git a/codex-rs/app-server/tests/suite/v2/mcp_thread_refresh.rs b/codex-rs/app-server/tests/suite/v2/mcp_thread_refresh.rs
+new file mode 100644
+index 0000000000..712095171e
+--- /dev/null
++++ b/codex-rs/app-server/tests/suite/v2/mcp_thread_refresh.rs
+@@ -0,0 +1,217 @@
++use std::collections::BTreeMap;
++use std::sync::Arc;
++use std::time::Duration;
++
++use anyhow::Result;
++use app_test_support::TestAppServer;
++use app_test_support::to_response;
++use app_test_support::write_mock_responses_config_toml;
++use axum::Router;
++use codex_app_server_protocol::RequestId;
++use codex_app_server_protocol::ThreadStartParams;
++use codex_app_server_protocol::ThreadStartResponse;
++use core_test_support::responses;
++use pretty_assertions::assert_eq;
++use rmcp::ServerHandler;
++use rmcp::model::CallToolRequestParams;
++use rmcp::model::CallToolResult;
++use rmcp::model::Content;
++use rmcp::model::ListToolsResult;
++use rmcp::model::PaginatedRequestParams;
++use rmcp::model::ServerCapabilities;
++use rmcp::model::ServerInfo;
++use rmcp::model::Tool;
++use rmcp::service::RequestContext;
++use rmcp::service::RoleServer;
++use rmcp::transport::StreamableHttpServerConfig;
++use rmcp::transport::StreamableHttpService;
++use rmcp::transport::streamable_http_server::session::local::LocalSessionManager;
++use serde_json::Value;
++use serde_json::json;
++use tempfile::TempDir;
++use tokio::net::TcpListener;
++use tokio::task::JoinHandle;
++use tokio::time::timeout;
++
++const WAIT: Duration = Duration::from_secs(15);
++
++#[derive(Clone)]
++struct VersionServer(&'static str);
++
++impl ServerHandler for VersionServer {
++    fn get_info(&self) -> ServerInfo {
++        let mut info = ServerInfo::new(ServerCapabilities::builder().enable_tools().build());
++        info.server_info.version = self.0.into();
++        info
++    }
++
++    async fn list_tools(
++        &self,
++        _request: Option<PaginatedRequestParams>,
++        _context: RequestContext<RoleServer>,
++    ) -> Result<ListToolsResult, rmcp::ErrorData> {
++        Ok(ListToolsResult {
++            tools: vec![Tool::new(
++                "version",
++                "Report pinned runtime version",
++                Arc::new(
++                    serde_json::from_value(json!({"type":"object","properties":{}}))
++                        .expect("schema"),
++                ),
++            )],
++            next_cursor: None,
++            meta: None,
++        })
++    }
++
++    async fn call_tool(
++        &self,
++        _request: CallToolRequestParams,
++        _context: RequestContext<RoleServer>,
++    ) -> Result<CallToolResult, rmcp::ErrorData> {
++        Ok(CallToolResult::success(vec![Content::text(self.0)]))
++    }
++}
++
++async fn version_server(version: &'static str) -> Result<(String, JoinHandle<()>)> {
++    let listener = TcpListener::bind("127.0.0.1:0").await?;
++    let address = listener.local_addr()?;
++    let service = StreamableHttpService::new(
++        move || Ok(VersionServer(version)),
++        Arc::new(LocalSessionManager::default()),
++        StreamableHttpServerConfig::default(),
++    );
++    let router = Router::new().nest_service("/mcp", service);
++    let task = tokio::spawn(async move {
++        let _ = axum::serve(listener, router).await;
++    });
++    Ok((format!("http://{address}/mcp"), task))
++}
++
++async fn rpc(app: &mut TestAppServer, method: &str, params: Value) -> Result<Value> {
++    let id = app.send_raw_request(method, Some(params)).await?;
++    let response = timeout(
++        WAIT,
++        app.read_stream_until_response_message(RequestId::Integer(id)),
++    )
++    .await??;
++    Ok(response.result)
++}
++
++async fn snapshot(app: &mut TestAppServer, thread: &str) -> Result<Value> {
++    let catalog = rpc(
++        app,
++        "mcpServerStatus/list",
++        json!({"threadId":thread,"detail":"toolsAndAuthOnly","runtimeOnly":true}),
++    )
++    .await?;
++    let behavior = rpc(
++        app,
++        "mcpServer/tool/call",
++        json!({"threadId":thread,"server":"versioned","tool":"version","arguments":{}}),
++    )
++    .await?;
++    Ok(json!({"catalog":catalog,"behavior":behavior}))
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn thread_reload_inspection_and_refresh_preserve_the_loaded_peer() -> Result<()> {
++    let provider = responses::start_mock_server().await;
++    let home = TempDir::new()?;
++    write_mock_responses_config_toml(
++        home.path(),
++        &provider.uri(),
++        &BTreeMap::new(),
++        1024,
++        None,
++        "mock_provider",
++        "compact",
++    )?;
++    let path = home.path().join("config.toml");
++    let original = std::fs::read_to_string(&path)?;
++    let (old_url, old_task) = version_server("v1").await?;
++    let (new_url, new_task) = version_server("v2").await?;
++    std::fs::write(
++        &path,
++        format!("{original}\n[mcp_servers.versioned]\nurl = {old_url:?}\n"),
++    )?;
++    let mut app = TestAppServer::new_with_auto_env(home.path()).await?;
++    timeout(WAIT, app.initialize()).await??;
++    let mut threads = Vec::new();
++    for _ in 0..2 {
++        let id = app
++            .send_thread_start_request_with_auto_env(ThreadStartParams {
++                model: Some("mock-model".into()),
++                ..Default::default()
++            })
++            .await?;
++        let response = timeout(
++            WAIT,
++            app.read_stream_until_response_message(RequestId::Integer(id)),
++        )
++        .await??;
++        let response: ThreadStartResponse = to_response(response)?;
++        threads.push(response.thread.id);
++    }
++    let selected_before = snapshot(&mut app, &threads[0]).await?;
++    let peer_before = snapshot(&mut app, &threads[1]).await?;
++    assert_eq!(
++        selected_before["catalog"]["data"][0]["serverInfo"]["version"],
++        "v1"
++    );
++    std::fs::write(
++        &path,
++        format!("{original}\n[mcp_servers.versioned]\nurl = {new_url:?}\n"),
++    )?;
++    assert_eq!(
++        rpc(
++            &mut app,
++            "thread/mcpServer/reload",
++            json!({"threadId":threads[0],"dryRun":true})
++        )
++        .await?,
++        json!({"threadId":threads[0],"queued":false})
++    );
++    // A status read must observe the loaded runtime, not connect to the new config.
++    assert_eq!(snapshot(&mut app, &threads[0]).await?, selected_before);
++    assert_eq!(snapshot(&mut app, &threads[1]).await?, peer_before);
++    let id = app
++        .send_raw_request(
++            "thread/mcpServer/reload",
++            Some(json!({"threadId":"00000000-0000-7000-8000-000000000318"})),
++        )
++        .await?;
++    timeout(
++        WAIT,
++        app.read_stream_until_error_message(RequestId::Integer(id)),
++    )
++    .await??;
++    assert_eq!(snapshot(&mut app, &threads[1]).await?, peer_before);
++    assert_eq!(
++        rpc(
++            &mut app,
++            "thread/mcpServer/reload",
++            json!({"threadId":threads[0]})
++        )
++        .await?,
++        json!({"threadId":threads[0],"queued":true})
++    );
++    timeout(WAIT, async {
++        loop {
++            let selected = snapshot(&mut app, &threads[0]).await?;
++            if selected["behavior"]["content"][0]["text"] == "v2" {
++                assert_eq!(
++                    selected["catalog"]["data"][0]["serverInfo"]["version"],
++                    "v2"
++                );
++                break Ok::<(), anyhow::Error>(());
++            }
++            tokio::time::sleep(Duration::from_millis(20)).await;
++        }
++    })
++    .await??;
++    assert_eq!(snapshot(&mut app, &threads[1]).await?, peer_before);
++    old_task.abort();
++    new_task.abort();
++    Ok(())
++}
+diff --git a/codex-rs/app-server/tests/suite/v2/mod.rs b/codex-rs/app-server/tests/suite/v2/mod.rs
+index bdb03271d0..3f1d8a030d 100644
+--- a/codex-rs/app-server/tests/suite/v2/mod.rs
++++ b/codex-rs/app-server/tests/suite/v2/mod.rs
+@@ -33,6 +33,7 @@ mod marketplace_upgrade;
+ mod mcp_resource;
+ mod mcp_server_elicitation;
+ mod mcp_server_status;
++mod mcp_thread_refresh;
+ mod mcp_tool;
+ mod memory_reset;
+ mod model_list;
+diff --git a/codex-rs/app-server/tests/suite/v2/selected_capability_stack.rs b/codex-rs/app-server/tests/suite/v2/selected_capability_stack.rs
+index 6a70116aef..c2442b128a 100644
+--- a/codex-rs/app-server/tests/suite/v2/selected_capability_stack.rs
++++ b/codex-rs/app-server/tests/suite/v2/selected_capability_stack.rs
+@@ -687,6 +687,7 @@ async fn wait_for_selected_mcp_server(
+         loop {
+             let request_id = app_server
+                 .send_list_mcp_server_status_request(ListMcpServerStatusParams {
++                    runtime_only: false,
+                     cursor: None,
+                     limit: None,
+                     detail: None,
+diff --git a/codex-rs/codex-mcp/src/lib.rs b/codex-rs/codex-mcp/src/lib.rs
+index eda7ac2399..895f53ff1a 100644
+--- a/codex-rs/codex-mcp/src/lib.rs
++++ b/codex-rs/codex-mcp/src/lib.rs
+@@ -53,6 +53,7 @@ pub use plugin_config::parse_plugin_mcp_config;
+ 
+ pub use mcp::McpServerStatusSnapshot;
+ pub use mcp::McpSnapshotDetail;
++pub use mcp::collect_mcp_server_status_snapshot_from_manager;
+ pub use mcp::collect_mcp_server_status_snapshot_with_detail;
+ pub use mcp::read_mcp_resource;
+ 
+diff --git a/codex-rs/codex-mcp/src/mcp/mod.rs b/codex-rs/codex-mcp/src/mcp/mod.rs
+index ffb797f26e..a93edb2d2d 100644
+--- a/codex-rs/codex-mcp/src/mcp/mod.rs
++++ b/codex-rs/codex-mcp/src/mcp/mod.rs
+@@ -652,7 +652,7 @@ fn convert_mcp_resource_templates(
+         .collect::<HashMap<_, _>>()
+ }
+ 
+-async fn collect_mcp_server_status_snapshot_from_manager(
++pub async fn collect_mcp_server_status_snapshot_from_manager(
+     mcp_connection_manager: &McpConnectionManager,
+     auth_status_entries: HashMap<String, crate::mcp::auth::McpAuthStatusEntry>,
+     server_names: Vec<String>,
+diff --git a/codex-rs/core/src/codex_thread.rs b/codex-rs/core/src/codex_thread.rs
+index 4a562092f1..f5ac4f4cb8 100644
+--- a/codex-rs/core/src/codex_thread.rs
++++ b/codex-rs/core/src/codex_thread.rs
+@@ -596,6 +596,16 @@ impl CodexThread {
+         self.codex.session.runtime_mcp_config(config).await
+     }
+ 
++    /// Apply an admitted MCP refresh explicitly, without starting a model turn.
++    /// In-flight steps retain their previous runtime snapshot.
++    pub async fn apply_pending_mcp_server_refresh(&self) {
++        let turn_context = self.codex.session.new_default_turn().await;
++        self.codex
++            .session
++            .refresh_mcp_servers_if_requested(&turn_context, None)
++            .await;
++    }
++
+     /// Returns the exact MCP config, environment bindings, and manager most recently published.
+     pub async fn current_mcp_runtime(&self) -> Arc<crate::session::McpRuntimeSnapshot> {
+         let turn_context = self.codex.session.new_default_turn().await;
+diff --git a/codex-rs/tui/src/app/background_requests.rs b/codex-rs/tui/src/app/background_requests.rs
+index 9391f4b3e3..1f818cf33c 100644
+--- a/codex-rs/tui/src/app/background_requests.rs
++++ b/codex-rs/tui/src/app/background_requests.rs
+@@ -745,6 +745,7 @@ pub(super) async fn fetch_all_mcp_server_statuses(
+             .request_typed(ClientRequest::McpServerStatusList {
+                 request_id,
+                 params: ListMcpServerStatusParams {
++                    runtime_only: false,
+                     cursor: cursor.clone(),
+                     limit: Some(100),
+                     detail: Some(detail),
