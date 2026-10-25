@@ -99,6 +99,26 @@ Provisioning alone is not proof of accounting or running enforcement.
 Observing an existing goal's authorized resource usage, requesting a checkpoint
 before its limits, and pausing continuation when its stopping condition is reached.
 
+**External goal watcher**:
+The independent process observing one goal/allocation and requesting native
+checkpoint, pause and exact-turn interruption. Configuration alone does not prove
+that the watcher is running or has accepted an enrollment.
+
+**Allowance extension**:
+An explicitly authorized increase to an allocation's ceiling or deadline that
+retains the resources already consumed. This is a form of allocation renewal.
+
+**Budget window reset**:
+An explicitly authorized new allocation generation/window with a qualified usage
+anchor. Prior charges, stop history and native counters remain intact; a zero
+current-window counter does not mean zero lifetime usage of that objective.
+
+**Enforcement notice**:
+A durable explanation of watcher engagement, checkpoint, stop or supervision loss
+for model context and operator presentation. Recording, control acknowledgement,
+presentation and operator response are separate proof boundaries. The visible
+notice/renewal workflow is planned under #343, not established by this definition.
+
 **Handoff preflight**:
 The successor's verification of runtime readiness and assessment of whether the
 outgoing work advanced the approved objective with adequate evidence and scope
