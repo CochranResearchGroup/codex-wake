@@ -130,7 +130,7 @@ def render_notice(event):
             f"{snapshot.get('checkpoint_seconds')} seconds. Watcher healthy. ")
     else:
         text += ('Extend allowance / Reset budget window / Keep stopped. '
-            'Use goal-limits renewal help for supported approved actions. '
+            'Help: codex-wake goal-limits extend --help; codex-wake goal-limits reset --help. '
             'Native /goal resume alone does not renew this external allowance. ')
     return text + f"[External supervision event {event['event_id']}]"
 
