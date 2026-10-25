@@ -37,6 +37,7 @@ def main():
     parser.add_argument('--app-server', type=Path, required=True)
     parser.add_argument('--frontend', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--completion', action='store_true', help='also prove protected native acceptance/review/remediation funding')
     options = parser.parse_args()
     options.output.mkdir(mode=0o700, parents=True, exist_ok=False)
     appserver, frontend = options.app_server.resolve(strict=True), options.frontend.resolve(strict=True)
@@ -46,6 +47,7 @@ def main():
         with path.open('rb') as stream:
             report[name+'_sha256'] = hashlib.file_digest(stream, 'sha256').hexdigest()
     report['script_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    token_cap = 207 if options.completion else 57
     expiry = time.monotonic()+150
     calls, inbound = [], []
     selected = {'gateway': None}
@@ -80,7 +82,7 @@ def main():
                     self.send_error(413); return
                 body = json.loads(self.rfile.read(size))
                 number = len(calls)+1
-                assert number<=3, 'bounded provider request count exceeded'
+                assert number <= (5 if options.completion else 3), 'bounded provider request count exceeded'
                 guarded = selected['gateway'] is not None
                 if guarded:
                     assert body.get('max_output_tokens') == 5
@@ -177,9 +179,9 @@ def main():
             policy=root/'policy.json'
             policy.write_text(json.dumps(dict(version=1,callers={thread:dict(app_server='unix://'+str(endpoint),
                 codex_path=str(frontend),codex_home=str(home),allocation_id='owned-request-scope',
-                max_tokens=57,max_seconds=120,rpc_timeout=5)})))
+                max_tokens=token_cap,max_seconds=120,rpc_timeout=5)})))
             policy.chmod(0o600)
-            enrolled=enroll(root,policy,thread,57,120,checkpoint_token_percent=0,checkpoint_seconds=0)
+            enrolled=enroll(root,policy,thread,token_cap,120,checkpoint_token_percent=0,checkpoint_seconds=0)
             save('enrollment.json',enrolled)
             assert enrolled['used_tokens']==7, enrolled
             # Interactive warmup may activate the goal. Pause it outside the hard
@@ -195,8 +197,8 @@ def main():
                 row['status']=='inProgress' for row in rpc('thread/turns/list',threadId=thread,limit=128,itemsView='notLoaded')['data']))
             assert len(calls)==1, 'frontend warmup created an unaccounted request'
             now=trusted_upper()
-            configuration=dict(revision='owned-native-request-v1',objective_token_limit=57,objective_time_limit_seconds=120,
-                session_token_limit=57,session_time_limit_seconds=120,max_correction_cycles=1,
+            configuration=dict(revision='owned-native-request-v1',objective_token_limit=token_cap,objective_time_limit_seconds=120,
+                session_token_limit=token_cap,session_time_limit_seconds=120,max_correction_cycles=1,
                 started_at=enrolled['time_origin'],objective_deadline=enrolled['deadline'])
             ledger=ObjectiveLedger(root,'owned-request-scope')
             ledger.configure(configuration,'explicit owned provider-free qualification',prior_tokens=7,now=now)
@@ -206,10 +208,21 @@ def main():
             gateway=RequestGateway(root,'owned-request-scope',upstream_url='http://127.0.0.1:'+str(provider.server_port)+'/v1/responses',
                 contract=contract,reviewed_contract_sha256=contract_digest(contract),thread_ids=[thread],
                 now=trusted_upper,request_timeout=10,client_token=token)
+            def completion_source(name, text):
+                directory=root/'completion-evidence'; directory.mkdir(mode=0o700,exist_ok=True)
+                path=directory/(name+'.txt'); path.write_text(text); path.chmod(0o600)
+                return dict(path=str(path),sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+            if options.completion:
+                gateway.protect_completion([dict(id=name,kind=name,tokens=50,seconds=10,
+                    criterion='Prove the inert native funding path for '+name)
+                    for name in ('acceptance','review','remediation')],
+                    source=completion_source('plan','Host-approved inert funding proof; same original cap/deadline.'))
             gateway.bind_listener(listener_url); selected['gateway']=gateway
             activation_frame=wait_for(lambda: value if 'Effective mode hard_admission' in (value:=capture()) else None)
             (options.output/'hard-activation-tui.txt').write_text(activation_frame)
+            assert f'Used 7/{token_cap}' in activation_frame, activation_frame
             report['hard_activation_rendered_before_guarded_request']=True
+            report['activation_limits_rendered']=True
             first=turn('Run exactly one inert guarded request. Do not use tools.')
             assert first['status']=='completed',first
             assert len(calls)==2,calls
@@ -218,6 +231,30 @@ def main():
             denied=turn('This request must be stopped by the governor before reaching the provider.')
             assert len(calls)==2,calls
             save('after-denied.json',gateway.status())
+            if options.completion:
+                # These names exercise resource funding, not semantic code review
+                # or remediation of this repository. The final review is separate.
+                current=gateway.status()['accounting']
+                assert current['tokens_used']==57 and current['completion']['protected_tokens']==150,current
+                protected_frame=wait_for(lambda: value if 'completion_resources_protected' in (value:=capture()) else None)
+                (options.output/'protected-tail-tui.txt').write_text(protected_frame)
+                for number,name in enumerate(('acceptance','review','remediation'),1):
+                    gateway.assign_completion(thread,name,source=completion_source('assign-'+name,'Host binds this fixture request to '+name))
+                    outcome=turn('Inert funding-path fixture for '+name+'. Do not use tools.')
+                    assert outcome['status']=='completed',outcome
+                    assert len(calls)==2+number,calls
+                    gateway.resolve_completion(name,'completed',source=completion_source('result-'+name,
+                        'Observed native provider completion; measured50 and no protected-fund bypass for '+name),
+                        note='Funding-path criterion observed; this is not semantic acceptance of the repository.')
+                current=gateway.status()['accounting']; save('after-tail.json',current)
+                assert current['tokens_used']==207 and current['tokens_reserved']==0,current
+                assert current['correction_cycles']==1,current
+                assert current['completion']['obligations_completed'] is True,current
+                assert current['completion']['objective_complete'] is False,current
+                assert current['original_deadline']==configuration['objective_deadline'],current
+                report.update(native_completion_funding=True,tail_phases_are_funding_fixtures=True,
+                    tail_phases=['acceptance','review','remediation'],completion_protected_before_dispatch=True,
+                    original_deadline_preserved=True,correction_cycles=1)
             assert rpc('thread/goal/get',threadId=thread)['goal']['status']=='paused', 'Admission denial did not pause autonomous continuation'
             wait_for(lambda: 'Ask Codex to do anything' in capture() and not any(
                 row['status']=='inProgress' for row in rpc('thread/turns/list',threadId=thread,limit=128,itemsView='notLoaded')['data']))
@@ -231,12 +268,12 @@ def main():
             wait_for(lambda: not any(row['status']=='inProgress' for row in rpc('thread/turns/list',threadId=thread,limit=128,itemsView='notLoaded')['data']))
             ack=wait_for(lambda: value if 'Governor-generated acknowledgement' in (value:=capture()) else None)
             (options.output/'zero-inference-control-ack.txt').write_text(ack)
-            assert len(calls)==2,'control action reached provider'
+            assert len(calls)==(5 if options.completion else 2),'control action reached provider'
             final=gateway.status(); save('after-control.json',final)
-            assert final['accounting']['objective_token_limit']==57,final
-            assert final['accounting']['tokens_used']==57,final
+            assert final['accounting']['objective_token_limit']==token_cap,final
+            assert final['accounting']['tokens_used']==token_cap,final
             assert rpc('thread/goal/get',threadId=thread)['goal']['status']=='paused'
-            report.update(state='passed',warmup_requests=1,guarded_provider_requests=1,
+            report.update(state='passed',warmup_requests=1,guarded_provider_requests=4 if options.completion else 1,
                 denied_request_never_forwarded=True,control_at_zero_allowance=True,
                 control_external_inference=0,control_rendered_in_stock_tui=True,
                 original_usage_and_cap_preserved=True,thread_id=thread,denied_turn_status=denied['status'])
