@@ -1,6 +1,22 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: FIX328
+    owner: primary / ecochran76
+    objective: Enforce exact task brief revision workspace authorization
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/328]
+    plan: docs/dev/plans/0173-agent-harness/0028-2026-10-24-brief-workspace-correction.md
+    plan_ref: fix/328-brief-workspace
+    branch: fix/328-brief-workspace
+    target: origin/main
+    plan_state: OPEN
+    custody_state: OWNED
+    integration: squash_pr
+    dependencies: []
+    overlaps: []
+    reconciled_overlaps: []
+    updated_at: 2026-10-24
+    validation_status: focused_passed
   - id: P173-HF02
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 315
