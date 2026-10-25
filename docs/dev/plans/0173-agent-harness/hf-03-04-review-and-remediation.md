@@ -54,7 +54,7 @@ command green:10tests onPython3.12 and3.11. Original reproducer now returns
 timeout with stateunknown instead ofmatchedworking. No second broadreview.
 
 Critical final selections:13resource and7publicharness tests passed on3.12;
-3.11 had the same selections green immediately before the two-line statusfix.
+3.11 final source passed the same selections after the statusfix.
 Undefined-name, compileall, policywiring anddiffchecks pass. Rebuilt isolatedwheel
 matches131Pythonmodules; actualCLI and52-toolstdioMCP ready/matched checks pass,
 partialactivestatus cannotmatchworking, unattestedresourceclaim remainsdenied.

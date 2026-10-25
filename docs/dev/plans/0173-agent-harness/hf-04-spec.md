@@ -1,6 +1,6 @@
 # HF-04 resource ownership specification
 
-State: OPEN
+State: CLOSED
 Owner: ecochran76 / primary coordinator; implementation worker hf04
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/331
 Base: 37a5cbb
@@ -50,4 +50,5 @@ existing operator-tab manipulation, automatic stale cleanup or generic lock daem
 ## Current state
 
 Conservative defaults frozen under explicit implementation goal after optional
-questionnaire opportunity. TDD implementation begins in isolated worker checkout.
+questionnaire opportunity. TDD implementation integrated and source acceptance
+validated; one final review found no HF04 defect. Main integration is separate.

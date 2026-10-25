@@ -8,15 +8,15 @@ lanes:
     plan: docs/dev/plans/0173-agent-harness/hf-03-04-execution-ledger.md
     plan_ref: feat/harness-observation-ownership
     branch: feat/harness-observation-ownership
-    target: validated integration branch
-    plan_state: OPEN
+    target: origin/main
+    plan_state: CLOSED
     custody_state: OWNED
     integration: squash_pr
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
     updated_at: 2026-10-24
-    validation_status: focused_passed
+    validation_status: source_validated_comprehensive_flake_retained
   - id: P173-HF04
     owner: primary / ecochran76
     objective: Implement observation and ownership frontier issue 331
@@ -24,15 +24,18 @@ lanes:
     plan: docs/dev/plans/0173-agent-harness/hf-03-04-execution-ledger.md
     plan_ref: feat/harness-observation-ownership
     branch: feat/331-resource-ownership
-    target: validated integration branch
-    plan_state: OPEN
-    custody_state: OWNED
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: PAUSED_REF
     integration: squash_pr
     dependencies: []
     overlaps: []
     reconciled_overlaps: []
     updated_at: 2026-10-24
-    validation_status: focused_passed
+    validation_status: source_validated_comprehensive_flake_retained
+    checkpoint: fcc2030ab7a9147f0775f4fc8ccf8cb068a06abf
+    checkout_required: false
+    disposition: Worker patches integrated; clean owned checkout removed; published branch retained
   - id: P173-HF02
     owner: primary / ecochran76
     objective: Implement approved harness frontier issue 315

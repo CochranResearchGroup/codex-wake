@@ -1,6 +1,6 @@
 {
-  "status": "DRAFT_NOT_IMPLEMENTATION_AUTHORITY",
-  "source": "Markdown tickets are authoritative drafts; this JSON is a generated index",
+  "status": "SOURCE_FRONTIER_IN_PROGRESS",
+  "source": "Ticket/spec Markdown owns requirements; GitHub owns tracker state; this JSON is a generated index.",
   "baseline": "7ef73b12dde59cedbd98b5b73ac5250106ee63aa",
   "tickets": [
     {
@@ -32,7 +32,10 @@
       "dependencies": [
         "HF-02"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 330,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/330",
+      "tracker_state": "closed"
     },
     {
       "id": "HF-04",
@@ -42,7 +45,10 @@
       "dependencies": [
         "HF-02"
       ],
-      "state": "TRIAGE"
+      "state": "DONE_SOURCE_VALIDATED",
+      "issue_number": 331,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/331",
+      "tracker_state": "closed"
     },
     {
       "id": "HF-05",

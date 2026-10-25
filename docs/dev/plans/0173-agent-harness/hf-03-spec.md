@@ -1,6 +1,6 @@
 # HF-03: Semantic observation and bounded wait
 
-State: OPEN
+State: CLOSED
 Owner: ecochran76 / primary coordinator
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/330
 Base: 37a5cbb
