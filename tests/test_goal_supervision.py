@@ -690,7 +690,7 @@ class GoalSupervisionTests(unittest.TestCase):
                 for raw in ws:
                     message=json.loads(raw)
                     if 'id' not in message:continue
-                    if message['method']=='initialize':result={}
+                    if message['method']=='initialize':result=native.get('metadata', {})
                     else:
                         try:result=request(None,None,message['method'],message['params'],None)
                         except NotImplementedError:

@@ -36,7 +36,7 @@ def spawn_command(args, root):
             raise WakeError('host caller grant does not authorize this launch profile')
     required = {'cwd', 'app_server', 'codex_path', 'tmux_session', 'timeout'}
     strings = (required - {'timeout'}) | (set(profile) & {'tmux_socket', 'codex_home'})
-    if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home', 'resources', 'strict_execution'}
+    if (not required <= set(profile) or set(profile) - required - {'tmux_socket', 'codex_home', 'resources', 'strict_execution', 'governance_preflight'}
             or ('resources' in profile and not isinstance(profile['resources'], dict))
             or any(not isinstance(profile.get(k), str) or not profile[k]
                    or '\x00' in profile[k] for k in strings)
@@ -66,6 +66,14 @@ def spawn_command(args, root):
     approved = None
     pin = None
     admission = None
+    compatibility = None
+    if 'governance_preflight' in profile:
+        from .goal_host_preflight import inspect_host
+        compatibility = inspect_host(root, profile, args.caller_thread_id)
+        if not compatibility['admitted']:
+            from .sessions_cli import emit
+            emit(dict(state='held', reason=compatibility['reason'], compatibility_preflight=compatibility), args.as_json)
+            return 5
     task_id = getattr(args, 'task_id', None)
     assignment_id = getattr(args, 'assignment_id', None)
     carried_pin = getattr(args, 'task_brief_pin', None)
@@ -115,6 +123,11 @@ def spawn_command(args, root):
         from .dispatch_packet import render_assignment
         from .goal_governance import snapshot
         intent['governance_snapshot'] = snapshot(root, intent.get('source_thread_id'))
+        if compatibility is not None:
+            intent['preflight_snapshot'] = {key: compatibility.get(key) for key in
+                ('mode', 'reason', 'requested_mode', 'message', 'authorization', 'observed_at')}
+            intent['preflight_snapshot']['static_receipt'] = compatibility['static'].get('receipt_path')
+            intent['governance_snapshot'] = compatibility['governance']
         intent['task'], dispatch = render_assignment(intent, root=root, brief=approved, pin=pin,
                                                     admission=admission, receipt_path=path)
     fingerprint = hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest()
@@ -146,11 +159,14 @@ def spawn_command(args, root):
                 receipt['permission_context']=permission_receipt['permission_context']
             if not binding:receipt['budget_mode']='explicit_expiry_only_legacy_profile'
             save(path, receipt)
+        if compatibility is not None:
+            receipt['compatibility_preflight'] = compatibility
         if receipt['state'] == 'starting' and receipt['thread_id'] is None:
             receipt.update(state='uncertain', uncertain_effect='thread/start')
             save(path, receipt)
         if receipt['state'] == 'prepared':
-            if binding and not intent.get('budget_inherited'):
+            if (binding and not intent.get('budget_inherited')
+                    and (compatibility or {}).get('mode') != 'manual'):
                 from .lifecycle_supervision import supervision_ready
                 if not supervision_ready(root,profile['timeout']):
                     receipt['reason']='resident_objective_supervisor_required'
@@ -192,7 +208,7 @@ def spawn_command(args, root):
                 runtime = SimpleNamespace(**(dict(tmux_socket=None) | profile),
                                           codex=resolve_codex_cmd(profile['codex_path'], required=True))
                 tmux_command(runtime, 'has-session', '-t', runtime.tmux_session)
-                if permission_receipt and not before_effect(path,receipt):
+                if (permission_receipt or compatibility is not None) and not before_effect(path,receipt):
                     from .sessions_cli import emit
                     emit(receipt,args.as_json)
                     return 5
@@ -411,6 +427,15 @@ def advance_spawn(path, receipt, profile):
 
 
 def before_effect(path, receipt):
+    profile = receipt['intent']['launch']
+    if 'governance_preflight' in profile:
+        from .goal_host_preflight import inspect_host
+        preflight = inspect_host(path.parent.parent, profile, receipt['intent'].get('source_thread_id'))
+        receipt['compatibility_preflight'] = preflight
+        if not preflight['admitted']:
+            receipt['reason'] = preflight['reason']
+            save(path, receipt)
+            return False
     if receipt.get('permission_context'):
         from .permission_handoff import before_effect as permission_before_effect
         if not permission_before_effect(path,receipt):return False
@@ -423,7 +448,8 @@ def before_effect(path, receipt):
         save(path,receipt)
         return False
     if (receipt['intent']['operation']=='spawn' and receipt['intent'].get('configuration')
-            and not receipt['intent'].get('budget_inherited')):
+            and not receipt['intent'].get('budget_inherited')
+            and receipt.get('compatibility_preflight', {}).get('mode') != 'manual'):
         from .lifecycle_supervision import supervision_ready
         if not supervision_ready(path.parent.parent,receipt['intent']['launch']['timeout']):
             receipt['reason']='resident_objective_supervisor_required'

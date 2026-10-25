@@ -160,6 +160,18 @@ class AgentSpawnTests(unittest.TestCase):
                      '--task', 'Report readiness.', '--expires-at', '2030-01-01T00:00:00Z',
                      '--caller-thread-id', '00000000-0000-7000-8000-000000000099', '--json'])
 
+    def test_hard_admission_preflight_refuses_before_thread_tab_or_task_effects(self):
+        self.spawn_scenario(host_preflight='hard_admission')
+
+    def test_authorized_manual_repair_spawns_without_a_resident_watcher_or_renewal(self):
+        self.spawn_scenario(host_preflight='manual',budget=True)
+
+    def test_inactive_preflight_honors_operator_choice_without_manual_permission(self):
+        self.spawn_scenario(host_preflight='sampled_stop',governor_disabled=True)
+
+    def test_sampled_preflight_reports_degraded_before_costly_dispatch(self):
+        self.spawn_scenario(host_preflight='sampled_stop')
+
     def test_spawn_executes_exact_assignment_once_across_pending_observation(self):
         self.spawn_scenario()
 
@@ -236,7 +248,7 @@ class AgentSpawnTests(unittest.TestCase):
         self.spawn_scenario(resource_profile=True)
 
     def spawn_scenario(self, *, loss=None, check_environment=False, expire_at_task=False,
-                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False,budget_overrun=False,brief_dispatch=False,full_history=False,governor_disabled=False):
+                       check_history=False, isolated_profile=False, normalized_input=False, auto_start=False, composer=None, interrupted_admission=False, recipient_guard=None, resource_profile=False,budget=False,budget_stop=False,budget_delayed=False,budget_read_error=False,budget_queue_stop=False,budget_overrun=False,brief_dispatch=False,full_history=False,governor_disabled=False,host_preflight=None):
         thread_id = '00000000-0000-7000-8000-000000000157'
         starts, tasks, windows = [], [], []
         turn_starts = []
@@ -326,6 +338,19 @@ class AgentSpawnTests(unittest.TestCase):
                 profile.update(tmux_socket=str(root / 'tmux.sock'), codex_home=str(root / 'codex-home'))
             registry={'version': 1, 'profiles': {'worker': profile}}
             source_thread='00000000-0000-7000-8000-000000000158'
+            if host_preflight:
+                home = root / 'preflight-home'
+                (home / 'sessions').mkdir(parents=True)
+                policy = root / 'preflight-policy.json'
+                policy.write_text(json.dumps(dict(version=1, callers={source_thread: dict(
+                    app_server=profile['app_server'], codex_path=str(client_script), codex_home=str(home),
+                    allocation_id='operator-disabled-scope' if governor_disabled else 'repair-scope', max_tokens=1000, max_seconds=300, rpc_timeout=1)})))
+                policy.chmod(0o600)
+                profile['governance_preflight'] = dict(policy=str(policy), thread_id=source_thread,
+                    requested_mode=host_preflight)
+                if host_preflight == 'manual':
+                    profile['governance_preflight']['manual_authorization'] = 'existing approved repair ticket'
+                registry['callers'] = {source_thread: ['worker']}
             if governor_disabled:
                 from codex_wake.goal_supervision import _directory, _name, _save
                 _save(_directory(root)/(_name(source_thread)+'.json'), dict(
@@ -365,6 +390,10 @@ class AgentSpawnTests(unittest.TestCase):
                 authority = BriefAuthority('operator:fixture', 'operator')
                 store.propose('multiply', brief, authority=authority)
                 store.approve('multiply', 1, authority=authority)
+            if host_preflight and 'codex_home' in profile:
+                grant = json.loads(policy.read_text())
+                grant['callers'][source_thread]['codex_home'] = profile['codex_home']
+                policy.write_text(json.dumps(grant))
             profiles.write_text(json.dumps(registry))
             master, slave = pty.openpty()
             client = None
@@ -397,7 +426,7 @@ class AgentSpawnTests(unittest.TestCase):
                     '--profile', 'worker', '--intent', 'one-worker', '--name', 'worker',
                     '--task', 'Calculate 6 * 7 and report 42.',
                     '--expires-at', '2030-01-01T00:00:00Z', '--json']
-            if governor_disabled:argv.extend(['--caller-thread-id',source_thread])
+            if governor_disabled or host_preflight and not budget:argv.extend(['--caller-thread-id',source_thread])
             if budget:argv.extend(['--objective-ref','bootstrap'])
             if brief_dispatch:
                 argv.extend(['--task-id','multiply','--assignment-id','multiply-one'])
@@ -417,7 +446,7 @@ class AgentSpawnTests(unittest.TestCase):
                     try:
                         with patch('subprocess.run', side_effect=command), patch(
                                 'codex_wake.native_clock.snapshot', side_effect=clock):
-                            if budget:
+                            if budget and host_preflight != 'manual':
                                 from codex_wake.lifecycle_supervision import publish_supervision
                                 publish_supervision(root,1)
                             if interrupted_admission:
@@ -427,6 +456,15 @@ class AgentSpawnTests(unittest.TestCase):
                             pending = StringIO()
                             with redirect_stdout(pending):
                                 self.assertEqual(run(argv), 5, pending.getvalue())
+                            if host_preflight == 'hard_admission' or host_preflight == 'sampled_stop' and not governor_disabled:
+                                preflight = json.loads(pending.getvalue())['compatibility_preflight']
+                                self.assertEqual(preflight['mode'], 'degraded')
+                                self.assertEqual(preflight['reason'], 'hard_admission_unsupported' if host_preflight == 'hard_admission' else 'required_supervision_unqualified')
+                                self.assertFalse(preflight['admitted'])
+                                self.assertEqual(starts, [])
+                                self.assertEqual(windows, [])
+                                self.assertEqual(tasks, [])
+                                return
                             if recipient_guard:
                                 self.assertEqual(tasks, [])
                                 self.assertEqual(len(starts), 1)
@@ -505,7 +543,7 @@ class AgentSpawnTests(unittest.TestCase):
                                     self.assertEqual(actor['used'],70)
                                     self.assertEqual(len(tasks),1)
                                     return
-                            if governor_disabled:
+                            if governor_disabled and not host_preflight:
                                 # A later operator change cannot rewrite an already admitted assignment.
                                 _save(_directory(root)/(_name(source_thread)+'.json'), dict(
                                     thread_id=source_thread,allocation_id='operator-disabled-scope',
@@ -518,6 +556,12 @@ class AgentSpawnTests(unittest.TestCase):
                                 self.assertEqual(receipt['state'], 'completed')
                                 self.assertEqual(receipt['thread_id'], thread_id)
                                 self.assertEqual(receipt['execution']['turn_id'], 'turn157')
+                                if host_preflight == 'manual':
+                                    self.assertEqual(receipt['compatibility_preflight']['mode'], 'manual')
+                                    self.assertEqual(receipt['compatibility_preflight']['authorization'], 'existing approved repair ticket')
+                                    self.assertFalse(receipt['compatibility_preflight']['resources_renewed'])
+                                    self.assertEqual(receipt['compatibility_preflight']['static']['cache'], 'reused')
+                                    self.assertFalse((root / 'lifecycle/supervision.json').exists())
                                 if budget:
                                     view=receipt['objective_budget']
                                     self.assertEqual(view['tokens_used'],70)
@@ -535,6 +579,9 @@ class AgentSpawnTests(unittest.TestCase):
                             self.assertEqual(len(turn_starts), 0 if auto_start else 1)
                             packet = json.loads(tasks[0]['input'][0]['text'].split('BOUNDED_ASSIGNMENT=', 1)[1])
                             self.assertEqual(packet['objective'], 'Multiply the evidence operands' if brief_dispatch else 'Calculate 6 * 7 and report 42.')
+                            if host_preflight == 'manual':
+                                self.assertEqual(packet['governance']['state'], 'manual')
+                                self.assertIn('No automatic containment', packet['governance']['preflight']['message'])
                             if governor_disabled:
                                 self.assertEqual(packet['governance']['state'], 'inactive')
                                 self.assertIs(packet['governance']['enabled'], False)

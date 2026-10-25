@@ -253,3 +253,8 @@ The operator-visible controller that applies authorized resource limits to a sel
 
 **Governor deactivation**:
 The operator's durable choice to stop governor interventions in a selected scope. It preserves accounting and work, does not renew resources or resume stopped work, and remains in effect until explicitly changed.
+
+**Host compatibility preflight**:
+A bounded read-only check before opted-in dispatch, separating reusable static
+host observations from fresh accounting, controller and operator-control state.
+It reports the actual enforcement mode without granting work or resource authority.
