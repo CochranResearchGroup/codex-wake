@@ -24,12 +24,19 @@ class CompletionReserveTests(unittest.TestCase):
     controller = fixtures.GoalSupervisionTests.controller
 
     @contextmanager
-    def campaign(self):
+    def campaign(self, *, request_timeout=2, provider_release=None, provider_arrived=None, shared_allocation=False):
         with tempfile.TemporaryDirectory() as directory:
             root, policy, log, native, _ = self.fixture(directory)
+            if shared_allocation:
+                config = json.loads(policy.read_text())
+                grant = config['callers'][fixtures.THREAD]
+                grant.pop('allocation_id')
+                policy.write_text(json.dumps(dict(version=2, allocations={'allocation-1': grant}, default_allocation='allocation-1', native_caller_binding=True)))
             clock = [fixtures.NOW]
             with self.controller(root), patch('codex_wake.lifecycle_budget.trusted_upper', return_value=fixtures.NOW):
-                enroll(root, policy, fixtures.THREAD, 200, 120)
+                context = dict(threadId=fixtures.THREAD, sessionId=fixtures.THREAD, callId='fixture-native',
+                    **{'x-codex-turn-metadata': dict(thread_id=fixtures.THREAD, session_id=fixtures.THREAD, turn_id='work')})
+                enroll(root, policy, fixtures.THREAD, 200, 120, native_context=context if shared_allocation else None)
                 native['notices'] = {}
                 native['siblings'] = {CHILD: dict(goal=dict(threadId=CHILD, createdAt=fixtures.NOW, status='active'), active=['work'], calls=[])}
                 (log.parent / 'child.jsonl').write_text(json.dumps(dict(type='session_meta',
@@ -45,6 +52,10 @@ class CompletionReserveTests(unittest.TestCase):
                         pass
                     def do_POST(self):
                         calls.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
+                        if provider_arrived is not None:
+                            provider_arrived.set()
+                        if provider_release is not None:
+                            provider_release.wait(2)
                         response = dict(id='response-' + str(len(calls)), usage=dict(input_tokens=8,
                             input_tokens_details=dict(cached_tokens=0), output_tokens=2, total_tokens=10))
                         data = ('data: ' + json.dumps(dict(type='response.completed', response=response)) + '\n\n').encode()
@@ -63,7 +74,7 @@ class CompletionReserveTests(unittest.TestCase):
                     usage='response.completed:fresh-v1', review='Inert local provider enforces literal input8/output2 test contract.')
                 gateway = RequestGateway(root, 'allocation-1', upstream_url=f'http://127.0.0.1:{provider.server_port}/v1/responses',
                     contract=contract, reviewed_contract_sha256=contract_digest(contract),
-                    thread_ids=[fixtures.THREAD], now=lambda: clock[0])
+                    thread_ids=[fixtures.THREAD], request_timeout=request_timeout, now=lambda: clock[0])
                 server = gateway.server()
                 threading.Thread(target=server.serve_forever, daemon=True).start()
                 self.addCleanup(server.server_close)

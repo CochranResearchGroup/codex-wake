@@ -71,6 +71,21 @@ def _sse(text):
     ).encode()
 
 
+def _activation_status(root, receipt):
+    """Current native delivery; screen rendering remains separate qualification."""
+    from .goal_notices import NativeNoticeAdapter, read_notice
+    event_id = receipt.get("notice_ids", {}).get("request_activation")
+    try:
+        event = read_notice(root, event_id)
+        observed = NativeNoticeAdapter(root).reconcile(event)
+        published = event["proof"]["notification"]["state"] == "published"
+        return dict(qualified=bool(published and observed.get("transcript")
+            and observed.get("model_context")), event_id=event_id,
+            notification_published=published, operator_rendering="separately_qualified")
+    except (OSError, ValueError, KeyError, TypeError, WakeError):
+        return dict(qualified=False, event_id=event_id, reason="activation_delivery_unavailable")
+
+
 class RequestGateway:
     def __init__(
         self,
@@ -229,14 +244,7 @@ class RequestGateway:
                 coverage="selected HTTP request path only",
             )
             source["request_accounting"] = authority
-            if source.get("allocation_path"):
-                path = Path(source["allocation_path"])
-                with supervision._lock(path.parent, path.stem):
-                    supervision._private(path)
-                    allocation = json.loads(path.read_text())
-                    allocation["request_accounting"] = authority
-                    supervision._save(path, allocation)
-            supervision._save(self.source_path, source)
+            supervision._save_request_accounting(self.source_path, source)
 
     def protect_completion(self, obligations, *, source):
         """Host-only planning; no HTTP body can install or release protection."""
@@ -264,6 +272,7 @@ class RequestGateway:
         return dict(
             mode=mode,
             completion_enforced=current.get("enabled") is not False,
+            activation=_activation_status(self.root, json.loads(self.source_path.read_text())),
             scope=self.objective_id,
             source_thread_id=self.source_thread,
             contract_sha256=self.contract_sha256,
@@ -496,6 +505,20 @@ class RequestGateway:
                         )
                     ).encode(),
                 )
+            if not inactive:
+                from .goal_notices import present_notice
+                if not receipt.get("notice_ids", {}).get("request_activation"):
+                    receipt["request_accounting"]["resources"] = self._resource_summary()
+                    supervision._record_supervision_notice(self.source_path, receipt, "request_activation")
+                    supervision._save(self.source_path, receipt)
+                    event = receipt.get("notice_ids", {}).get("request_activation")
+                    if event:
+                        present_notice(self.root, event)
+                if not _activation_status(self.root, receipt)["qualified"]:
+                    return (503, "application/json", json.dumps(_error(
+                        "governor_activation_unavailable",
+                        "Hard-governed provider dispatch withheld: current model/operator activation delivery is unqualified. Inspect governor status or Deactivate governor; existing authorized manual repair remains available."
+                    )).encode())
             goal, active = supervision._native(self.grant, thread)
             if active != [context["x-codex-turn-metadata"]["turn_id"]]:
                 raise ValueError("request is not the exact current native turn")
@@ -541,7 +564,7 @@ class RequestGateway:
                 address = self.provider_address
                 connection = (
                     HTTPSConnection if address.scheme == "https" else HTTPConnection
-                )(address.hostname, address.port, timeout=self.timeout)
+                )(address.hostname, address.port, timeout=None if inactive else self.timeout)
                 expired = threading.Event()
                 socket_ref = {}
 
@@ -554,9 +577,11 @@ class RequestGateway:
                         except OSError:
                             pass
 
-                request_timer = threading.Timer(self.timeout, expire)
-                request_timer.daemon = True
-                request_timer.start()
+                request_timer = None
+                if not inactive:
+                    request_timer = threading.Timer(self.timeout, expire)
+                    request_timer.daemon = True
+                    request_timer.start()
                 try:
                     connection.connect()
                     socket_ref["socket"] = connection.sock
@@ -580,7 +605,8 @@ class RequestGateway:
                     )
                     upstream = connection
                 except Exception:
-                    request_timer.cancel()
+                    if request_timer is not None:
+                        request_timer.cancel()
                     connection.close()
                     self.ledger.settle_request(
                         actor, None, None, fingerprint, now=self.now()
@@ -677,7 +703,8 @@ class RequestGateway:
                 ).encode(),
             )
         finally:
-            request_timer.cancel()
+            if request_timer is not None:
+                request_timer.cancel()
             upstream.close()
 
     def server(self, host="127.0.0.1", port=0):
@@ -778,12 +805,7 @@ class RequestGateway:
             if source["request_accounting"].get("gateway_url") != url or "resources" not in source["request_accounting"]:
                 source["request_accounting"]["resources"] = self._resource_summary()
             source["request_accounting"]["gateway_url"] = url
-            if source.get("allocation_path"):
-                path = Path(source["allocation_path"])
-                with supervision._lock(path.parent, path.stem):
-                    allocation = json.loads(path.read_text())
-                    allocation["request_accounting"] = source["request_accounting"]
-                    supervision._save(path, allocation)
+            supervision._save_request_accounting(self.source_path, source)
             supervision._record_supervision_notice(
                 self.source_path, source, "request_activation"
             )
@@ -851,6 +873,7 @@ def qualify_gateway(root, profile, thread):
         or status.get("contract_sha256") != binding.get("contract_sha256")
         or status.get("mode") not in ("hard_admission", "degraded")
         or not status.get("reviewed_provider_contract")
+        or not status.get("activation", {}).get("qualified")
     ):
         raise ValueError("gateway contract/scope/accounting is unavailable")
     if config_path.read_bytes() != config_bytes:

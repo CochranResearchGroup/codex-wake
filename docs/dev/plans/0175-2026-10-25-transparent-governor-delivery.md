@@ -23,7 +23,7 @@ Primary #351 seams: enroll/show/poll plus retained notices and native notice ada
 
 ## Working controls
 
-Use compact outputs and focused tests; inspect process/resource state before expensive fan-out. Do not repeat whole-source discovery. Counters for requested final review: 1 (in progress); post-review remediation passes: 0. Keep historical red/green logs in /tmp and curate source evidence before closeout.
+Use compact outputs and focused tests; inspect process/resource state before expensive fan-out. Do not repeat whole-source discovery. Counters for requested final review: 1 (completed); post-review remediation passes: 1 (completed). Keep historical red/green logs in /tmp and curate source evidence before closeout.
 
 ## Non-goals
 
@@ -56,3 +56,7 @@ Full successor CI on b5f5f7720914fc990d63c22600a460dbbe1502d4 PASS both Python3.
 ## Checkpoint: all child tickets closed; formal review started
 
 #351–#357 are CLOSED, read back from GitHub. Source checkpoint da2f848 has actual native completion-funding proof; latest release-gates run40243924355 is pending. The single requested formal review now starts with independent Standards and Spec axes against the pinned ce1ad93 baseline. Funding-fixture phase names did not consume the formal review or post-review TDD pass. Counters: review1 in progress; post-review TDD0.
+
+## Checkpoint: single review and remediation complete
+
+Frozen review545ec79 againstce1ad93: Standards1 P3 accepted; Spec2 accepted, highestP1. All addressed in one TDD pass with retained red/green evidence at docs/dev/evidence/plan0175/review-and-tdd.md. 352/353/354 reopened for explicit findings and now qualify for reclosure. Source-bound presubmit PASS all3axes; actual native completion/control rerun PASS, externalcalls0/ownedPIDs0. Full successor CI pending. Formal review1 completed; post-review TDD1 completed; no second invocation.

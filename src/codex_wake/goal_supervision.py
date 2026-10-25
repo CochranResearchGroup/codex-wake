@@ -231,6 +231,22 @@ def _allocation_path(directory,allocation_id):
     return child/(hashlib.sha256(allocation_id.encode()).hexdigest()+'.json')
 
 
+def _save_request_accounting(path, receipt):
+    """Persist shared accounting before its session projection.
+
+    Caller holds maintenance then session locks; allocation lock is innermost.
+    A failed qualification must not overwrite the allocation or source receipt.
+    """
+    if receipt.get('allocation_path'):
+        allocation_path = Path(receipt['allocation_path'])
+        with _lock(allocation_path.parent, allocation_path.stem):
+            _private(allocation_path)
+            allocation = json.loads(allocation_path.read_text())
+            allocation['request_accounting'] = receipt['request_accounting']
+            _save(allocation_path, allocation)
+    _save(path, receipt)
+
+
 def _allocation_admit(directory,receipt,old):
     renewal=bool(old and old['allocation_id']!=receipt['allocation_id'])
     anchor=None

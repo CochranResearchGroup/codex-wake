@@ -266,3 +266,20 @@ show actual used/cap, reserved/remaining, protected completion funds/time, deadl
 and denial trigger. They disclose no raw actors or credentials. Delivery to
 native model context, operator rendering and human reading retain their separate
 qualification boundaries.
+
+## Activation delivery and inactive transport
+
+Governed provider sends require the current activation retained in native history,
+available to model context, and acknowledged as published to operator clients.
+Failure returns `governor_activation_unavailable` before reservation/provider I/O;
+status exposes the failure independently. Native publication is not physical
+screen-render proof; the pinned native/stock-TUI acceptance qualifies that separate
+boundary. Hard-mode lifecycle preflight also requires successful selected-host
+and notice capability qualification. Explicitly authorized manual repair and the
+zero-inference deactivation control remain available.
+
+Requests submitted after durable deactivation have no governor output ceiling,
+resource timer or socket timeout. Protocol/authentication/response-size constraints
+remain independent transport boundaries. Disabling does not recall a timer already
+issued for an admitted request or automatically resume paused work. Accounting
+continues, without resource renewal.

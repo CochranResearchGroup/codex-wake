@@ -132,6 +132,9 @@ def inspect_host(root, profile, caller):
         result.update(mode='inactive',admitted=True,reason='operator_disabled',message='Governor remains disabled; no request-path gate is imposed and no resource authority is renewed.')
         return result
     if options['requested_mode'] == 'hard_admission':
+        if result['static'].get('capabilities', {}).get('notice_read') != 'supported':
+            result.update(reason='hard_host_notice_unqualified', message='Hard admission withheld: selected native host/notice qualification is unavailable. Existing authorized manual repair remains available; no downgrade or renewal occurred.')
+            return result
         try:
             from .request_admission import qualify_gateway
             qualified=qualify_gateway(root,profile,thread)

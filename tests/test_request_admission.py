@@ -242,6 +242,7 @@ class RequestAdmissionTests(unittest.TestCase):
                 ),
             ):
                 enroll(root, policy, fixtures.THREAD, 110, 120)
+                native["notices"] = {}
                 ledger = ObjectiveLedger(root, "allocation-1")
                 ledger.configure(
                     dict(
@@ -346,6 +347,7 @@ class RequestAdmissionTests(unittest.TestCase):
                 ),
             ):
                 enroll(root, policy, fixtures.THREAD, 200, 120)
+                native["notices"] = {}
                 ledger = ObjectiveLedger(root, "allocation-1")
                 ledger.configure(
                     dict(
