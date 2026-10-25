@@ -24,7 +24,9 @@ Use your actual native caller identity and existing objective allocation.
 Successors retain cumulative spend, the original deadline and stop latches.
 New enrollment defaults to fresh input plus output; re-enrollment preserves its
 accounting basis. Verify a fresh independent controller and qualified accounting
-before autonomous campaign work. A held campaign still permits operator replies,
+before externally supervised campaign work. An explicit operator choice of manual
+resource monitoring permits bounded development/repair under the same cumulative
+limits; report the fallback and keep shared services and stopped campaigns unchanged. A held campaign still permits operator replies,
 bounded setup diagnosis and checkpoint writing. Only explicit user renewal
 recorded through host authority creates a new allowance.
 

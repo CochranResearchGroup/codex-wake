@@ -96,6 +96,16 @@ SPECS['wake_goal_limits_show'] = (
     'Reading does not reset or renew any allocation; missing/stale proof is not active enforcement. '
     'Supply actual native caller_thread_id; host grants still apply.',
     {'caller_thread_id': CALLER,'allocation_id':TEXT}, ['caller_thread_id'], True)
+for _verb in ('readiness','diagnose','notices','watcher-status','start-watcher'):
+    SPECS['wake_goal_limits_'+_verb.replace('-','_')]=(
+        'goal-limits',_verb,
+        ('Inspect verified enrollment/first-poll readiness, specific blockers and executable remedies. '
+         'Enrollment, independent enforcement and conversation presentation are distinct. '
+         'start-watcher starts only the exact configured unmasked service with common-policy authority; '
+         'never unmasks, changes roots, clears stops or renews resources.'),
+        {'caller_thread_id':CALLER,'allocation_id':TEXT,'task_id':TEXT,'assignment_id':TEXT,'operation_id':TEXT},
+        ['caller_thread_id'],_verb!='start-watcher')
+SPECS['wake_goal_limits_notices'][3]['event_id']=TEXT
 for _name, _spec in list(SPECS.items()):
     if _spec[0] == "messages" or _spec[1] in ("current", "spawn", "refresh", "handoff", "configuration", "target"):
         SPECS[_name] = (*_spec[:2], _spec[2] + " Supply your actual caller_thread_id from native shell CODEX_THREAD_ID; it is a claim, not permission or attestation.",
@@ -135,6 +145,8 @@ from .agent_resume_commands import tool_specs as resume_tool_specs
 SPECS.update(resume_tool_specs())
 from .permission_enforcement import tool_specs as enforcement_tool_specs
 SPECS.update(enforcement_tool_specs())
+from .goal_renewal_commands import tool_specs as renewal_tool_specs
+SPECS.update(renewal_tool_specs())
 for _name in ('wake_goal_limits_set','wake_goal_limits_show'):
     SPECS[_name][3].update({key:MESSAGE for key in ('task_id','assignment_id','operation_id')})
 from .harness_mcp import POLICY as WAKE_POLICY_PROPERTIES
@@ -266,10 +278,44 @@ class CommandRunner:
             except (ValueError, OSError, TypeError, KeyError, ImportError):
                 return {"error": {"code": "policy_denied", "message": "Host wake-control root and action grants are required for the entire selected scope."}}, True
             return self._execute(command, arguments, readonly)
+        if group == 'goal-renewal':
+            try:
+                from .goal_renewal_commands import mcp_call
+                return mcp_call(self,verb,arguments,native_context),False
+            except Exception as exc:
+                from .goal_readiness import explain_error
+                return explain_error(exc),True
         if group == 'goal-limits':
             goal_root = self.goal_limits_root if self.goal_limits_root is not None else self.wake_root
             if self.goal_limits_policy is None or goal_root is None:
                 return {'error': {'code': 'goal_limits_host_scope_unavailable'}}, True
+            if verb in ('diagnose','notices','watcher-status','start-watcher'):
+                try:
+                    from .goal_supervision import verified_native_caller,_grant
+                    from .goal_watcher import watcher_status,start_watcher
+                    from .session_permissions import Principal
+                    from .permission_enforcement import verified_tasks
+                    from .harness_mcp import controller_tasks
+                    thread=arguments['caller_thread_id']
+                    verified_native_caller(native_context,thread)
+                    _grant(self.goal_limits_policy,thread,arguments.get('allocation_id'),root=goal_root)
+                    if verb=='watcher-status':return watcher_status(goal_root),False
+                    if verb=='notices':
+                        from .goal_notice_commands import execute
+                        return execute(goal_root,self.goal_limits_policy,thread,event_id=arguments.get('event_id'),
+                            allocation_id=arguments.get('allocation_id'),native_context=native_context),False
+                    if verb=='diagnose':
+                        from .goal_supervision import diagnose
+                        return diagnose(goal_root,self.goal_limits_policy,thread,arguments.get('allocation_id'),native_context=native_context),False
+                    tasks=verified_tasks(goal_root,thread,arguments.get('task_id'),arguments.get('assignment_id'),
+                        controller_tasks=controller_tasks(self,thread))
+                    result=start_watcher(goal_root,principal=Principal(thread,tasks=tasks),
+                        task_id=arguments.get('task_id'),operation_id=arguments.get('operation_id'))
+                    return result,result['reason']!='watcher_running'
+                except Exception as exc:
+                    from .goal_readiness import explain_error
+                    return explain_error(exc),True
+            if verb=='readiness':verb='show'
             from .session_permissions import PermissionStore
             if PermissionStore(goal_root).active() or verb in ('recover','disable'):
                 packet=dict(verb=verb,arguments=arguments,native_context=native_context,
@@ -298,9 +344,8 @@ class CommandRunner:
                 except Exception:
                     delegated=False
                 if delegated:
-                    return dict(state='held',armed=False,reason='native_caller_or_allocation_unavailable',
-                        error=dict(code='goal_limits_unavailable',message=str(exc)),
-                        operator_interaction='available',campaign_continuation='held'),True
+                    from .goal_readiness import explain_error
+                    return explain_error(exc),True
             command = [*self.cli, '--wake-root', str(goal_root), group, verb,
                        '--policy', str(self.goal_limits_policy), '--json']
             for key, value in arguments.items():

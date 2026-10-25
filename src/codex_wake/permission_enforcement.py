@@ -197,7 +197,8 @@ def main():
         value=mcp_call(runner,packet['verb'],packet['arguments'],packet['native_context'])
         failed=packet['verb']!='show' and value.get('state') not in ('armed','checkpoint_requested')
     except (ValueError,OSError,KeyError,TypeError,WakeError) as exc:
-        value={'error':{'code':getattr(exc,'code','goal_limits_unavailable'),'message':str(exc)}}
+        from .goal_readiness import explain_error
+        value=explain_error(exc)
         if isinstance(exc,PermissionDenied):
             value.update(permission=exc.decision,effect_attempted=False,state='held',armed=False)
         failed=True

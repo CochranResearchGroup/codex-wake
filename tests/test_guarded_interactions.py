@@ -35,12 +35,15 @@ class GuardedInteractionsTests(unittest.TestCase):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        (self.root/'global').mkdir(mode=0o700)
+        (self.root/'global'/'runtime-recipient-locks').mkdir(mode=0o700)
         self.p = patch('codex_wake.guarded_interactions.user_state_dir', return_value=self.root/'global')
         self.p.start(); self.addCleanup(self.p.stop)
         self.binding = dict(socket=str(self.root/'tmux.sock'), pane='%0', pid=os.getpid(),
             start_ticks=1, boot_id='boot', session_id=SID, executable_sha256=BINARY_SHA256,
             executable='/test/grok', cwd=str(Path.cwd()))
         self.host = Host(self.binding)
+        (self.root/'wake').mkdir(mode=0o700)
         self.service = GuardedInteractions(self.root/'wake', host=self.host)
         PermissionStore(self.root/'wake').configure({'version':1,'global':{'actions':{a:'allow' for a in ['terminal.menu','terminal.takeover','terminal.return']}}}, OP, expected_revision=0)
         self.service.configure('menu', self.binding, principal=OP, reason='isolated menu only')
