@@ -149,7 +149,8 @@ class RequestGateway:
         ):
             raise ValueError("request timeout must be positive and at most 30 seconds")
         self.timeout = request_timeout
-        if not self.eligible:raise ValueError('selected provider contract is unsupported or unreviewed')
+        if not self.eligible:
+            raise ValueError("selected provider contract is unsupported or unreviewed")
         self.ledger = ObjectiveLedger(self.root, objective_id)
         view = self.ledger.inspect(now=self.now())
         if source.get("token_accounting") != "fresh":
@@ -344,6 +345,42 @@ class RequestGateway:
                 now=self.now(),
             )
 
+    def _pause_registered_goal(self, receipt, reason):
+        """Pause future native continuation, never interrupt an admitted request."""
+        proof = dict(
+            reason=reason, goal_created_at=receipt["goal_created_at"], verified=False
+        )
+        try:
+            goal, _ = supervision._native(self.grant, self.source_thread)
+            if not goal or goal.get("createdAt") != receipt["goal_created_at"]:
+                proof["reason"] = "registered_goal_identity_unverified"
+            else:
+                if goal.get("status") != "paused":
+                    supervision._effect(
+                        self.source_path,
+                        receipt,
+                        "request-pause:" + uuid4().hex,
+                        "thread/goal/set",
+                        dict(
+                            threadId=self.source_thread,
+                            status="paused",
+                            origin="automatic",
+                        ),
+                    )
+                observed, _ = supervision._native(self.grant, self.source_thread)
+                proof["verified"] = bool(
+                    observed
+                    and observed.get("createdAt") == receipt["goal_created_at"]
+                    and observed.get("status") == "paused"
+                )
+        except (OSError, ValueError, KeyError, TypeError, WakeError) as error:
+            proof.update(
+                reason="registered_goal_pause_unavailable", error=type(error).__name__
+            )
+        receipt["request_admission_pause"] = proof
+        supervision._save(self.source_path, receipt)
+        return proof
+
     def _control(self, thread, context):
         source = json.loads(self.source_path.read_text())
         native = dict(source, thread_id=thread)
@@ -352,6 +389,22 @@ class RequestGateway:
                 proof = native_operator(self.root, native, context, enabled)
             except PermissionDenied:
                 continue
+            # Native operator input/attachment may reactivate the underlying goal.
+            # Preserve a retained admission pause before committing deactivation;
+            # this restores work state, never interrupts this operator response.
+            if not enabled:
+                with supervision._lock(
+                    self.directory, supervision._name(self.source_thread)
+                ):
+                    retained = json.loads(self.source_path.read_text())
+                    if retained.get("request_admission_pause", {}).get(
+                        "verified"
+                    ) and not sync(retained):
+                        restored = self._pause_registered_goal(
+                            retained, "operator_control_preserves_pause"
+                        )
+                        # A pause failure cannot veto the operator's durable disable.
+                        # It remains explicit in the acknowledgement and receipt.
             result = change(
                 self.root,
                 self.source_thread,
@@ -362,6 +415,17 @@ class RequestGateway:
             return _sse(
                 "Governor-generated acknowledgement; no model inference or provider usage. "
                 + result["message"]
+                + (
+                    " Registered goal pause "
+                    + (
+                        "verified"
+                        if restored["verified"]
+                        else "unverified; inspect native work state"
+                    )
+                    + "."
+                    if not enabled and "restored" in locals()
+                    else ""
+                )
                 + " Verified native operator turn "
                 + proof["turn_id"]
                 + "."
@@ -424,6 +488,7 @@ class RequestGateway:
                 actor, thread, bound, seconds, enforce=not inactive, now=self.now()
             )
             if not reserved["admitted"]:
+                pause = self._pause_registered_goal(receipt, "request_admission_denied")
                 notice = self._notice(
                     receipt, "objective_or_session_allowance_unavailable", fingerprint
                 )
@@ -433,7 +498,9 @@ class RequestGateway:
                     json.dumps(
                         _error(
                             "governor_admission_denied",
-                            "Request denied before provider submission. Objective/session resources are unavailable. Say Deactivate governor in the native conversation; no inference is needed for that control.",
+                            "Request denied before provider submission. Registered goal pause "
+                            + ("verified" if pause["verified"] else "unverified")
+                            + "; independently admitted requests were not interrupted. Say Deactivate governor in the native conversation; no inference is needed for that control.",
                         )
                     ).encode(),
                 )
@@ -710,7 +777,8 @@ def qualify_gateway(root, profile, thread):
         raise ValueError("no selected HTTP request gateway binding")
     home = Path(receipt["grant"]["codex_home"])
     config_path = home / "config.toml"
-    config = tomllib.loads(config_path.read_text())
+    config_bytes = config_path.read_bytes()
+    config = tomllib.loads(config_bytes.decode())
     provider = config.get("model_provider")
     selected = config.get("model_providers", {}).get(provider, {})
     if (
@@ -749,19 +817,26 @@ def qualify_gateway(root, profile, thread):
         status.get("scope") != receipt["allocation_id"]
         or status.get("source_thread_id") != thread
         or status.get("contract_sha256") != binding.get("contract_sha256")
-        or status.get("mode") != "hard_admission"
+        or status.get("mode") not in ("hard_admission", "degraded")
         or not status.get("reviewed_provider_contract")
-        or not status.get("accounting", {}).get("ready")
     ):
         raise ValueError("gateway contract/scope/accounting is unavailable")
+    if config_path.read_bytes() != config_bytes:
+        raise ValueError("native provider configuration changed during qualification")
+    ready = status["accounting"]["ready"]
+    known = status["accounting"]["accounting_known"]
     return dict(
-        mode="hard_admission",
-        admitted=True,
-        reason="qualified_selected_http_request_path",
+        mode="hard_admission" if known else "degraded",
+        admitted=ready,
+        reason="qualified_selected_http_request_path"
+        if ready
+        else "objective_resources_unavailable"
+        if known
+        else "request_accounting_unknown",
         scope=receipt["allocation_id"],
         gateway=url,
         contract_sha256=status["contract_sha256"],
-        config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+        config_sha256=hashlib.sha256(config_bytes).hexdigest(),
         accounting=status["accounting"],
         maximum_token_overshoot=0,
         coverage="Only requests through this reviewed HTTP provider path. WS, compact, alternative providers and bypass routes remain unsupported.",
