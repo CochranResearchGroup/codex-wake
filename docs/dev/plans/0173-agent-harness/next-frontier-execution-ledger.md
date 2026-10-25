@@ -82,3 +82,30 @@ Source closure requires each ticket's frozen criteria proven on the integration
 branch. Then run one independent Standards/Spec review, adjudicate all candidates
 and run one bounded TDD pass on accepted blockers. Preserve unresolved branches,
 first failures, uncertainty and exact remaining gates. No repeated broad reviews.
+
+## Prerequisite checkpoint — blocker_reduction
+
+Known workspace fix carried at a5ca8ef. Combined prerequisite selection passes64
+onPython3.12 (28.273s) andPython3.11; exact command:
+PYTHONPATH=src:tests python -m unittest test_agent_observation test_resource_claims test_resource_claim_commands test_harness_callers test_harness_resource_callers test_task_briefs test_task_brief_commands test_task_brief_lifecycle test_session_permissions test_permission_convergence test_permission_migration.
+Undefined-name anddiffchecks pass. The current integration base now validates
+HF02/03/04/06/07/13 together; current frontier is HF05/08/14/16/18/21/27. Existing
+permission source, semantic observation, durable custody and exact revision scope
+are preserved. This is prerequisite integration, not closure of any new feature.
+
+All seven ticket discovery packets assigned separately: HF08primary; HF05hf05,
+HF14hf14, HF16hf16, HF18hf18, HF21hf21, HF27hf27. Their bounded read-only findings
+are retained in the session and will become feature specs after product answers.
+No worker implementation lane has begun; no broad review or finalTDD consumed.
+
+HF05 installed capability evidence advanced: actual Grok1.0.40 command palette
+Ctrl+P thenEscape, disposable private tmux/config/cwd with external networking
+blocked in a distinct network namespace; no provider prompt/Enter/paste in the
+first probe, byte-identical composer restored and owned cleanup census empty.
+A bounded follow-up uses the existing local /session-info control and explicit
+4.7/high configuration to prove the unchanged host identity grammar. Do not
+claim a model footer or control geometry alone as exact runtime identity.
+
+Product questionnaire remains unanswered at latest readback. Seven feature
+specifications are not frozen; no implementation is authorized from silence.
+Next dependent action is literal reconciliation of submitted form answers.
