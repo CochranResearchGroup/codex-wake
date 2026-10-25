@@ -10,12 +10,12 @@ lanes:
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
-    checkpoint: 6e11c34
+    checkpoint: b5f5f77
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/358
     dependencies: []
     overlaps: []
     updated_at: 2026-10-25
-    disposition: 351/356 CLOSED; isolated agents dispatch355 and validation356 on 352; no live effects
+    disposition: 351-356 CLOSED; dispatch355 owns 357; native request/control proof PASS; final review/remediation pending; no live effects
   - id: P173-GOAL-UX
     owner: primary / ecochran76
     objective: Implement visible goal supervision and approved renewal
