@@ -8,14 +8,14 @@ lanes:
     plan: docs/dev/plans/0175-2026-10-25-transparent-governor-delivery.md
     branch: feat/transparent-governor
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
-    checkpoint: b5f5f77
+    plan_state: CLOSED
+    custody_state: PUBLISHED_REVIEW
+    checkpoint: 38afb9c44b7817a518b3a329fd9566b19ea7a0ec
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/358
     dependencies: []
     overlaps: []
     updated_at: 2026-10-25
-    disposition: 351-356 CLOSED; dispatch355 owns 357; native request/control proof PASS; final review/remediation pending; no live effects
+    disposition: 351-357 CLOSED; review1/TDD1 complete with all3 findings addressed; native control/funding and source-bound checks PASS; final successor CI pending; PR358 integration open; no live effects
   - id: P173-GOAL-UX
     owner: primary / ecochran76
     objective: Implement visible goal supervision and approved renewal

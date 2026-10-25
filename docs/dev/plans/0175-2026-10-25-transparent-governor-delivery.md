@@ -1,6 +1,6 @@
 # Transparent governor delivery
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work items: GitHub CochranResearchGroup/codex-wake #351–#357
 Specification: https://github.com/CochranResearchGroup/codex-wake/issues/350
@@ -60,3 +60,9 @@ Full successor CI on b5f5f7720914fc990d63c22600a460dbbe1502d4 PASS both Python3.
 ## Checkpoint: single review and remediation complete
 
 Frozen review545ec79 againstce1ad93: Standards1 P3 accepted; Spec2 accepted, highestP1. All addressed in one TDD pass with retained red/green evidence at docs/dev/evidence/plan0175/review-and-tdd.md. 352/353/354 reopened for explicit findings and now qualify for reclosure. Source-bound presubmit PASS all3axes; actual native completion/control rerun PASS, externalcalls0/ownedPIDs0. Full successor CI pending. Formal review1 completed; post-review TDD1 completed; no second invocation.
+
+## Source delivery closeout
+
+All seven child tickets351–357 are CLOSED after the single formal review and single TDD pass. Source delivery and delegation are complete; PR358 remains the integration boundary. One CI compatibility correction preserved the existing hard_admission_unsupported reason and adds qualification_failure detail, without changing the new host/notice guard. Exact existing spawn regression plus3 review regressions:4PASS3.595s. Failed full run40244973786 (1723tests,1failure,1skip on each version) is preserved; final successor matrix on the published closeout candidate must pass before PR readiness, with its exact run recorded in PR358. This plan's source-delivery closure does not claim a pending CI result, merge, release or deployment.
+
+Review1/1 completed; TDD remediation1/1 completed. Accepted Standards1 P3 and Spec2 (highestP1), all addressed. Source-bound presubmit and actual native/TUI proof remain at the evidence locator above. No new inference, shared runtime changes, original allocation renewal or silent service activation. Memory disposition: forbidden; no user request authorized a persistent memory update, machine receipt /tmp/governor-memory-disposition.json records0writes.
