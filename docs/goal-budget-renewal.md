@@ -12,7 +12,12 @@ window generation and usage, increasing its budget revision. `reset` creates a
 new generation and qualified response anchor; the current window starts at zero
 while lifetime usage, prior charges and stop episodes remain retained.
 
-The exact enrolled goal must be paused, with no captured work still active.
+The exact enrolled goal must be paused, with no captured campaign work still active.
+A later operator reply may remain active only on the native MCP path: the private
+host metadata must attest its exact current turn, the original campaign stop must
+be proved, the native goal identity must be unchanged, and that reply cannot be
+any historical captured campaign turn. Other active turns and busy shared peers
+continue to hold. CLI callers do not gain this exception by naming a turn.
 The configured independent watcher, original history, boot/clock and all shared
 members must qualify. Recovery from an observation or accounting fault is a
 separate operation; more resource authority cannot repair that fault.

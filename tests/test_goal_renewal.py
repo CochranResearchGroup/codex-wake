@@ -458,6 +458,24 @@ class GoalRenewalTests(unittest.TestCase):
                         remaining_seconds=180,
                         expires_at=NOW + 60,
                     )
+                native["siblings"][peer]["active"] = ["unrelated-peer-turn"]
+                with self.assertRaises(RenewalError):
+                    propose(
+                        root,
+                        policy,
+                        THREAD,
+                        principal=operator,
+                        operation_id="busy-peer-reset",
+                        mode="reset",
+                        token_limit=100,
+                        remaining_seconds=180,
+                        expires_at=NOW + 60,
+                        shared=True,
+                    )
+                self.assertEqual(
+                    native["siblings"][peer]["active"], ["unrelated-peer-turn"]
+                )
+                native["siblings"][peer]["active"] = []
                 packet = propose(
                     root,
                     policy,
@@ -608,3 +626,155 @@ class GoalRenewalTests(unittest.TestCase):
                 self.assertEqual(result["new"]["deadline"], NOW + 180)
                 self.assertEqual(result["new"]["remaining_tokens"], 50)
                 self.assertFalse(result["resumed"])
+
+    def test_native_mcp_operator_reply_can_propose_and_apply_after_campaign_stops(self):
+        from pathlib import Path
+        from codex_wake.mcp_server import CommandRunner
+        from codex_wake.goal_supervision import poll
+        from codex_wake.attention_queue import AttentionQueue
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            with (
+                self.controller(root),
+                patch("codex_wake.lifecycle_budget.trusted_upper", return_value=NOW),
+            ):
+                enroll(root, policy, THREAD, 40, 120)
+                stopped = poll(root)[0]
+                self.assertTrue(stopped["stop_proof"])
+                self.assertEqual(stopped["stop_turns"], ["work"])
+                native["active"] = ["operator-request"]
+                context = dict(
+                    threadId=THREAD,
+                    sessionId=THREAD,
+                    callId="real-operator-mcp",
+                    **{
+                        "x-codex-turn-metadata": dict(
+                            thread_id=THREAD,
+                            session_id=THREAD,
+                            turn_id="operator-request",
+                        )
+                    },
+                )
+                runner = CommandRunner(wake_root=Path(root), goal_limits_policy=policy)
+                proposal, failed = runner.call(
+                    "wake_goal_limits_extend",
+                    dict(
+                        caller_thread_id=THREAD,
+                        operation_id="active-operator-reply",
+                        token_limit=90,
+                        remaining_seconds=180,
+                        expires_at=NOW + 60,
+                    ),
+                    native_context=context,
+                )
+                self.assertFalse(failed, proposal)
+                row = proposal["attention"]
+                AttentionQueue(root, now=lambda: NOW).respond(
+                    Principal("operator", "operator"),
+                    row["request_id"],
+                    "accept",
+                    expected_revision=row["revision"],
+                    expected_fingerprint=row["fingerprint"],
+                )
+                result, failed = runner.call(
+                    "wake_goal_limits_apply_renewal",
+                    dict(
+                        caller_thread_id=THREAD,
+                        proposal_id=proposal["proposal_id"],
+                        fingerprint=proposal["fingerprint"],
+                    ),
+                    native_context=context,
+                )
+                self.assertFalse(failed, result)
+                self.assertEqual(result["status"], "applied")
+                self.assertEqual(native["active"], ["operator-request"])
+                self.assertEqual(native["goal"]["status"], "paused")
+                self.assertEqual(show(root, policy, THREAD)["used_tokens"], 40)
+
+    def test_active_turn_exception_rejects_campaign_mismatch_missing_or_argument_claims(
+        self,
+    ):
+        from codex_wake.mcp_server import CommandRunner
+        from codex_wake.goal_supervision import poll
+        from codex_wake.goal_renewal import propose, RenewalError
+
+        for scenario in (
+            "captured-campaign",
+            "metadata-mismatch",
+            "missing-metadata",
+            "argument-claim",
+            "cli-no-attestation",
+            "replacement-native-goal",
+        ):
+            with (
+                self.subTest(scenario=scenario),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                root, policy, _, native, _ = self.fixture(directory)
+                with (
+                    self.controller(root),
+                    patch(
+                        "codex_wake.lifecycle_budget.trusted_upper", return_value=NOW
+                    ),
+                ):
+                    enroll(root, policy, THREAD, 40, 120)
+                    self.assertTrue(poll(root)[0]["stop_proof"])
+                    active = (
+                        "work"
+                        if scenario == "captured-campaign"
+                        else "operator-request"
+                    )
+                    native["active"] = [active]
+                    if scenario == "replacement-native-goal":
+                        native["goal"]["createdAt"] = NOW + 1
+                    attested = (
+                        "another-turn" if scenario == "metadata-mismatch" else active
+                    )
+                    context = dict(
+                        threadId=THREAD,
+                        sessionId=THREAD,
+                        callId="untrusted-turn-case",
+                        **{
+                            "x-codex-turn-metadata": dict(
+                                thread_id=THREAD, session_id=THREAD, turn_id=attested
+                            )
+                        },
+                    )
+                    arguments = dict(
+                        caller_thread_id=THREAD,
+                        operation_id="refuse-" + scenario,
+                        token_limit=90,
+                        remaining_seconds=180,
+                        expires_at=NOW + 60,
+                    )
+                    if scenario == "argument-claim":
+                        arguments["operator_turn_id"] = "operator-request"
+                    if scenario == "cli-no-attestation":
+                        with self.assertRaises(RenewalError):
+                            propose(
+                                root,
+                                policy,
+                                THREAD,
+                                principal=Principal(THREAD, "operator"),
+                                operation_id="cli-reply",
+                                mode="extend",
+                                token_limit=90,
+                                remaining_seconds=180,
+                                expires_at=NOW + 60,
+                            )
+                    else:
+                        runner = CommandRunner(
+                            wake_root=root, goal_limits_policy=policy
+                        )
+                        result, failed = runner.call(
+                            "wake_goal_limits_extend",
+                            arguments,
+                            native_context=None
+                            if scenario == "missing-metadata"
+                            else context,
+                        )
+                        self.assertTrue(failed, result)
+                    self.assertEqual(show(root, policy, THREAD)["token_limit"], 40)
+                    self.assertEqual(native["active"], [active])
+                    self.assertEqual(native["goal"]["status"], "paused")

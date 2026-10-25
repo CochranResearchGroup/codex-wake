@@ -34,6 +34,7 @@ def execute(
             principal=principal,
             expected_fingerprint=arguments["fingerprint"],
             explicit=arguments.get("approve", False),
+            native_context=native_context if mcp else None,
         )
     if verb not in ("extend", "reset"):
         raise RenewalError("renewal_invalid", "unsupported renewal action")
@@ -52,7 +53,15 @@ def execute(
         if arguments.get(key) is not None
     }
     options.setdefault("expires_at", _now() + 300)
-    result = propose(root, policy, thread, principal=principal, mode=verb, **options)
+    result = propose(
+        root,
+        policy,
+        thread,
+        principal=principal,
+        mode=verb,
+        native_context=native_context if mcp else None,
+        **options,
+    )
     if arguments.get("apply"):
         return apply(
             root,

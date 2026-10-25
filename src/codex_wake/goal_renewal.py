@@ -137,7 +137,42 @@ def _campaign(root, policy, thread):
             yield directory, receipts, allocation_path, allocation
 
 
-def _snapshot(root, receipts, allocation):
+def _native_caller(native_context, thread):
+    if native_context is None:
+        return None
+    return supervision.verified_native_caller(native_context, thread)
+
+
+def _attested_operator_reply(receipt, active, caller, goal):
+    """Exclude only the host-attested later reply from captured campaign work.
+
+    A claimed turn argument is never accepted. Native metadata, the exact active
+    turn and retained proof that the original campaign stopped must all agree.
+    Peers and every historical campaign work turn remain outside this exception.
+    """
+    if (
+        not caller
+        or caller["thread_id"] != receipt["thread_id"]
+        or active != [caller["turn_id"]]
+        or goal.get("createdAt") != receipt["goal_created_at"]
+    ):
+        return False
+    episodes = [receipt] + [
+        entry["previous"] for entry in receipt.get("budget_history", [])
+    ]
+    campaign_turns = {
+        turn for episode in episodes for turn in episode.get("stop_turns", [])
+    }
+    stopped = any(
+        episode.get("stop_latched") is True
+        and episode.get("stop_proof") is True
+        and episode.get("pause_observed") is True
+        for episode in episodes
+    )
+    return stopped and caller["turn_id"] not in campaign_turns
+
+
+def _snapshot(root, receipts, allocation, *, caller=None):
     now = _now()
     directory = supervision._directory(root)
     from .goal_maintenance import admission_guard
@@ -195,7 +230,7 @@ def _snapshot(root, receipts, allocation):
             not goal
             or goal.get("threadId") != thread
             or goal.get("status") != "paused"
-            or active
+            or (active and not _attested_operator_reply(receipt, active, caller, goal))
         ):
             _fail(
                 "renewal_native_not_paused",
@@ -314,10 +349,12 @@ def propose(
     shared=False,
     resume=False,
     task_id=None,
+    native_context=None,
 ):
     """Freeze an exact proposal. This grants no resources and never resumes work."""
     _principal(principal, thread)
     authorize(root, "session.inspect", principal)
+    caller = _native_caller(native_context, thread)
     if mode not in ("extend", "reset"):
         _fail("renewal_invalid", "mode must be extend or reset")
     _number(token_limit, "token limit", integer=True)
@@ -355,7 +392,7 @@ def propose(
                     "operation already names a different proposal",
                 )
             return _public(prior)
-        snapshot = _snapshot(root, receipts, allocation)
+        snapshot = _snapshot(root, receipts, allocation, caller=caller)
         if not snapshot["now"] < expires_at <= snapshot["now"] + 3600:
             _fail("renewal_invalid", "proposal expiry must be within the next hour")
         if len(receipts) > 1 and not shared:
@@ -390,6 +427,7 @@ def propose(
             thread_id=thread,
             operation_id=operation_id,
             mode=mode,
+            native_proposal_caller=caller,
             task_id=task_id or "goal-renewal",
             binding=_binding(receipts, allocation, snapshot["goals"]),
             old=dict(
@@ -465,9 +503,11 @@ def apply(
     principal,
     expected_fingerprint,
     explicit=False,
+    native_context=None,
 ):
     """Apply exact verified operator authority, preserving lifetime history."""
     _principal(principal, thread)
+    caller = _native_caller(native_context, thread)
     directory = supervision._directory(root)
     with supervision._lock(directory, "renewal-applications"):
         path = _journal_path(directory, proposal_id)
@@ -482,13 +522,13 @@ def apply(
             )
         if journal["status"] == "applied":
             return (
-                _resume(root, policy, thread, path, journal, principal)
+                _resume(root, policy, thread, path, journal, principal, caller=caller)
                 if journal["proposal"]["resume"]
                 else deepcopy(journal["result"])
             )
         if journal["status"] in ("authorized", "applying"):
             return _reconcile_application(
-                root, policy, thread, path, journal, principal
+                root, policy, thread, path, journal, principal, caller=caller
             )
         if journal["status"] != "proposed":
             _fail(
@@ -501,7 +541,7 @@ def apply(
             allocation_path,
             allocation,
         ):
-            snapshot = _snapshot(root, receipts, allocation)
+            snapshot = _snapshot(root, receipts, allocation, caller=caller)
             proposal = journal["proposal"]
             if _now() >= proposal["expires_at"]:
                 _fail("renewal_expired", "proposal expired; authority was not changed")
@@ -707,6 +747,7 @@ def apply(
                 allocation_source=deepcopy(allocation),
                 result=result,
                 accepted_at=_now(),
+                native_application_caller=caller,
                 response=deepcopy(row["response"]),
             )
             supervision._save(path, journal)
@@ -742,7 +783,9 @@ def _commit_targets(directory, path, journal, allocation_path):
     supervision._save(path, journal)
 
 
-def _reconcile_application(root, policy, thread, path, journal, principal):
+def _reconcile_application(
+    root, policy, thread, path, journal, principal, *, caller=None
+):
     """Complete only the recorded filesystem transaction; no new allowance/effect."""
     with _campaign(root, policy, thread) as (
         directory,
@@ -813,7 +856,7 @@ def _reconcile_application(root, policy, thread, path, journal, principal):
                 "renewal_reconciliation_conflict",
                 "allocation differs from recorded transaction",
             )
-        snapshot = _snapshot(root, sources, journal["allocation_source"])
+        snapshot = _snapshot(root, sources, journal["allocation_source"], caller=caller)
         if (
             _binding(sources, journal["allocation_source"], snapshot["goals"])
             != journal["proposal"]["binding"]
@@ -880,7 +923,7 @@ def renewal_hold(root, receipt):
     return None
 
 
-def _resume(root, policy, thread, path, journal, principal):
+def _resume(root, policy, thread, path, journal, principal, *, caller=None):
     """Reconcile one approved resume; never replay an uncertain native effect."""
     result = deepcopy(journal["result"])
     if result.get("resumed"):
@@ -929,7 +972,7 @@ def _resume(root, policy, thread, path, journal, principal):
         # before each first attempt. After an uncertain attempt use readback only.
         effects = journal.setdefault("resume_effects", {})
         if not effects:
-            _snapshot(root, receipts, allocation)
+            _snapshot(root, receipts, allocation, caller=caller)
         for member, receipt in receipts.items():
             effect = effects.get(member)
             if effect:
@@ -949,7 +992,10 @@ def _resume(root, policy, thread, path, journal, principal):
             goal, active = supervision._native(receipt["grant"], member)
             if (
                 not goal
-                or active
+                or (
+                    active
+                    and not _attested_operator_reply(receipt, active, caller, goal)
+                )
                 or goal.get("status") != "paused"
                 or goal.get("createdAt")
                 != journal["proposal"]["binding"]["goals"][member]["created_at"]
