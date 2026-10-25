@@ -1,5 +1,10 @@
 # Next frontier source acceptance
 
+Latest corrective result: source16c2501 passes the final full local3.12 suite,
+1651tests/823.097s, OK(skipped1), exit0 under900scap. Issue342's three failure
+patterns are repaired. Earlier failures/provisional dispositions below are retained
+history and are superseded by the final corrective evidence at the end.
+
 Source:7bb337ef5bc248e06f059b62ff043ecc9e6807a2, branchfeat/harness-next-frontier,
 draftPR341. Seven source tickets334–340 closed;335 reopened for review defects
 and reclosed after repair. Main integration/release/production install separate.
@@ -104,3 +109,10 @@ same-intent reconciliation. Intermediate51-case run retained6failures; final
 clock-isolated51cases pass205.689s. See handoff-preflight-repair.md. This supersedes
 the previously unresolved handoff disposition; a final joined run follows the
 concrete fixture repair rather than retrying unchanged code until green.
+
+Final corrective join at16c2501:1651tests/823.097s, OK(skipped1), exit0.
+All three repairs qualified; source issue342 closed. Handoff module51/205.689s
+and affected3cases3.11/19.958s pass. Original process/start-time and admission
+guards remain real; production still safely defers an incomplete observation.
+Previous open handoff disposition is superseded by natural timeout evidence and
+controlled regression in handoff-preflight-repair.md. CI remains skipped.

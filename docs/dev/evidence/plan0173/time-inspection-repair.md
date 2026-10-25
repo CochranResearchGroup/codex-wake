@@ -52,3 +52,10 @@ primary lane; this packet does not claim either.
 Residual risk: live service acquisition and platform collection were deliberately
 not exercised. They are unchanged. Memory disposition: not_durable; narrow
 pre-existing test-fixture isolation repair is retained in this source evidence.
+
+Primary final reconciliation: comprehensive3.12 at16c2501 passes1651tests in
+823.097s, OK(skipped1), exit0 under900s. All three targeted repairs now qualify;
+issue342 closes. Earlier provisional open/pending statements are historical and
+superseded. No production/provider effects or CI run. Primary memory disposition
+is forbidden(no explicit memory-update request); lane-local non-write labels
+above do not authorize a memory write.

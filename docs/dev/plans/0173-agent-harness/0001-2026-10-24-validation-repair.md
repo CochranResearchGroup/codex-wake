@@ -1,6 +1,6 @@
 # PR341 local validation repair
 
-State: OPEN
+State: CLOSED
 Issue: https://github.com/CochranResearchGroup/codex-wake/issues/342
 Owner: ecochran76 / primary coordinator
 Branch: feat/harness-next-frontier
@@ -8,12 +8,12 @@ Source baseline: e6e2227c63f3b7cc22a6a921db686b5a1e78ba9c
 
 ## Current State
 
-Feature source acceptance is complete. One comprehensive local run has two
-handoff qualification failures, three acceptance freshness errors and one
-ambient offline-time configuration error. All first failures retained in the
-prior validation evidence. This corrective packet changes no provider authority,
-production installation, CI policy or accepted scope. Main integration remains
-separate. User authorized diagnosis and repair through Ask Matt recommendation.
+All three targeted failure patterns are repaired and validated. Final comprehensive
+Python3.12 source16c2501 passes1651tests/823.097s, OK(skipped1), exit0 within900s.
+Focused34tests pass3.11/3.12; handoff51cases pass and three affected cases pass3.11.
+Issue342 closes the source validation repair. Main integration/release and
+production install remain separate in draftPR341. Initial failures and intermediate
+partial diagnoses remain recorded chronologically below and in the evidence files.
 
 ## Work and bounds
 
@@ -103,3 +103,18 @@ comprehensive result remain retained. After clock isolation all51 handoff cases
 pass205.689s. This supersedes the earlier missing-evidence disposition; no open
 causal gap is disguised by repeated green probes. Final comprehensive validation
 is justified by this concrete shared-fixture repair and will run once under900s.
+
+## Final closeout
+
+The post-repair comprehensive join at16c2501 passes1651tests/823.097s, skip1,
+exit0. This second joined run was justified by the concrete handoff shared-fixture
+repair following the earlier17c1d4c pass and newly captured natural failure. No
+unchanged full-suite retry or additional broad review was used. Controlled timeout
+regression and all earlier first failures remain retained, not erased by green runs.
+
+Accountable primary reconciled diagnose_time and diagnose_handoff reports against
+source and observed results. Runtime source matches the isolated installed wheel's
+qualified17c1d4c source; final fixture/docs differ, verified by gitdiff onsrc/pyproject.
+Raw logs and post-run process readback retained under user-state validation-repair-342.
+CI skipped, no mainmerge/provider/globalinstall effects. Memory dispositionforbidden
+by explicit developer boundary; memory-disposition.json records zero writes.
