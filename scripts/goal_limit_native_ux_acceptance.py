@@ -19,7 +19,6 @@ import socket
 import stat
 import struct
 import subprocess
-import sys
 import tempfile
 import threading
 import time
@@ -81,6 +80,11 @@ def qualify(options):
         source_commit=subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=source, text=True
         ).strip(),
+        source_python_sha256={
+            str(path.relative_to(source)): digest(path)
+            for path in sorted((source / "src/codex_wake").glob("*.py"))
+        },
+        acceptance_script_sha256=digest(Path(__file__).resolve()),
         wake_prefix=str(prefix),
         wake_version=codex_wake.__version__,
         native_app_server=str(appserver),
@@ -329,9 +333,22 @@ def qualify(options):
     env = dict(
         os.environ,
         CODEX_HOME=str(home),
+        XDG_CONFIG_HOME=str(base / "xdg-config"),
+        XDG_DATA_HOME=str(base / "xdg-data"),
+        XDG_STATE_HOME=str(base / "xdg-state"),
+        XDG_CACHE_HOME=str(base / "xdg-cache"),
+        XDG_RUNTIME_DIR=str(base / "xdg-runtime"),
         TERM="xterm-256color",
         OPENAI_BASE_URL="http://127.0.0.1:" + str(port) + "/v1",
     )
+    for key in (
+        "XDG_CONFIG_HOME",
+        "XDG_DATA_HOME",
+        "XDG_STATE_HOME",
+        "XDG_CACHE_HOME",
+        "XDG_RUNTIME_DIR",
+    ):
+        Path(env[key]).mkdir(mode=0o700)
     for key in (
         "CODEX_THREAD_ID",
         "PYTHONPATH",
@@ -1001,16 +1018,32 @@ def qualify(options):
             "renewed startup append",
         )
         capture("tui-extension.txt")
-        reset = goal_cli(
-            "reset",
-            "--operation-id",
-            "native-reset",
-            "--token-limit",
-            "1000",
-            "--remaining-seconds",
-            "45",
-            "--apply",
-        )
+        report["controller_before_reset"] = wait(
+            lambda: (
+                value
+                if (value := goal_cli("show")).get("controller", {}).get("fresh")
+                and value["controller"].get("age_seconds", 999) < 1
+                else None
+            ),
+            "fresh replacement watcher before reset",
+        )["controller"]
+        try:
+            reset = goal_cli(
+                "reset",
+                "--operation-id",
+                "native-reset",
+                "--token-limit",
+                "1000",
+                "--remaining-seconds",
+                "45",
+                "--apply",
+            )
+        except AssertionError:
+            # Readback only: never retry an ambiguous or held reset effect.
+            report["controller_after_reset_failure"] = goal_cli("show").get(
+                "controller"
+            )
+            raise
         reset_state = wait(
             lambda: (
                 value

@@ -63,3 +63,29 @@ independent fault flags at the persisted input boundary after real watcher
 replacement; results are checked through public proposal/apply/show. No passing
 outcome or accounting is supplied by the fixture. Existing restart proof was
 found PASS on5d9643 but is not substituted for fresh combined-source acceptance.
+
+## Combined installed journey accepted
+
+Restart worker's exact830585d runtime install matches162Python module hashes before
+and after its real native/stockTUI journey. Attempt3 PASS66.016s/sixlocalhostPOSTs:
+actual enrollment/firstpoll, checkpoint/stop, new watcher generation, durable notice
+reconnect/model-input proof, authentic approved MCP extension40spent->1500total,
+CLI reset0window/50lifetime with nativegoal paused, unchanged peer and empty owned
+process census. Native behavior pin86fad00...e683b1f/sourceb0ce988 remains explicit.
+Namespace has loopback only/zero routes, with a fixed-endpoint encrypted genuine
+clock relay through an owned Unix socket; no provider route or fabricated accounting.
+
+Attempt1 correctly held when namespace could not reach the qualified clock;
+attempt2 reached restart/renewal but held reset on unavailable/stale watcher.
+Attempt3 waits readonly for a genuinely fresh controller before the single reset
+(age0.464s, interval0.2s), with the owned Rust build paused113.58s and resumed after
+terminal receipt. No effect replay, timestamp replacement, new limits or production
+service changes. Source and raw receipt hashes in combined-restart-acceptance.md.
+
+BothPython3.11/3.12 combined46-case selections pass (84.025s/73.677s). Native fresh
+protocol/schema254passes; source-format successor passesfmt, but scopedClippy
+caught a missing exhaustiveRawResponseCompleted arm in the legacyMCP toolrunner.
+That specific compile correction is being qualified separately. Safety fixture's
+hostHOME contamination is proven; hook deadline reproduces on compatiblepre-345
+a50baseline as well asb0ce, so not introduced uniquely by goalUX. Its baseline
+root cause remains independent/open; no whole-native-green claim is made.
