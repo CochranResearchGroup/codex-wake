@@ -1266,6 +1266,15 @@ Host history-index blocker F2 resolved. Production controller heartbeat is fresh
 no goal enrolled/reset; existing clients need MCP refresh. Native stop scope is
 the registered session only. Strict bootstrap remains separately operator-owned.
 
+### P167 follow-up | Visible and actionable supervision
+
+State: READY. Owner: primary / ecochran76. Work item #343; children #344–#346.
+[Operator UX contract](docs/dev/plans/0173-agent-harness/goal-limit-operator-ux.md)
+covers self-service watcher engagement and visible startup confirmation, interrupting
+model/operator notices, and explicit allowance extension/window reset. This is new
+follow-up scope; the shipped P167 enforcement history above remains unchanged.
+Source/presentation implementation and installed acceptance are still pending.
+
 ## P168 | Operational self-refresh
 
 State: OPEN. Owner: primary / ecochran76. Work item #282,
