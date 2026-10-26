@@ -81,10 +81,10 @@ def tool_specs():
             properties, required, verb in ('inspect', 'pin'))
     for verb in ('after', 'at', 'file'):
         result['wake_native_' + verb] = ('harness-native', verb,
-            'Retain one exact-self native wake with frozen lifetime/startup policy. Registration is not readiness or delivery; unsupported startup stays explicit.',
+            'Schedule one exact-self native wake with frozen lifetime/startup policy. Delays may exceed 24 hours; time-wake TTL starts after due. Select persistent lifetime to survive creator completion. Inspect armed/monitor state: retention is not readiness or delivery.',
             dict(caller_thread_id=CALLER, trigger={'type': 'string', 'minLength': 1, 'maxLength': 1024},
                  prompt={'type': 'string', 'minLength': 1, 'maxLength': 32768},
-                 idempotency_key=TEXT, ttl=TEXT, **POLICY),
+                 idempotency_key=TEXT, ttl=dict(TEXT, description='Delivery window after due for time wakes; from registration for file wakes.'), **POLICY),
             ['caller_thread_id', 'trigger', 'prompt', 'idempotency_key'], False)
     result['wake_owner_complete'] = ('harness-owner', 'complete',
         'Reconcile an explicit operator-approved owner completion. Caller identity alone cannot declare work complete. Never retract or replay uncertain effects.',

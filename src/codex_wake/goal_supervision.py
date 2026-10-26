@@ -170,6 +170,9 @@ def verified_native_caller(context,claimed):
 
 def _public(receipt):
     receipt=dict(receipt)
+    receipt.setdefault('governor_enabled',True)
+    if receipt['governor_enabled'] is False:
+        receipt.update(campaign_state=receipt.get('state'),state='inactive')
     if type(receipt.get('used_tokens')) is int:
         receipt['lifetime_used_tokens']=receipt.get('lifetime_tokens_before_window',0)+receipt['used_tokens']
     return dict({key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')},
@@ -226,6 +229,22 @@ def _native(grant,thread):
 def _allocation_path(directory,allocation_id):
     child=directory/'allocations';child.mkdir(exist_ok=True,mode=0o700);_private(child,True)
     return child/(hashlib.sha256(allocation_id.encode()).hexdigest()+'.json')
+
+
+def _save_request_accounting(path, receipt):
+    """Persist shared accounting before its session projection.
+
+    Caller holds maintenance then session locks; allocation lock is innermost.
+    A failed qualification must not overwrite the allocation or source receipt.
+    """
+    if receipt.get('allocation_path'):
+        allocation_path = Path(receipt['allocation_path'])
+        with _lock(allocation_path.parent, allocation_path.stem):
+            _private(allocation_path)
+            allocation = json.loads(allocation_path.read_text())
+            allocation['request_accounting'] = receipt['request_accounting']
+            _save(allocation_path, allocation)
+    _save(path, receipt)
 
 
 def _allocation_admit(directory,receipt,old):
@@ -336,6 +355,14 @@ def _allocation_admit(directory,receipt,old):
 
 
 def _usage(receipt):
+    if receipt.get('request_accounting'):
+        from .objective_ledger import ObjectiveLedger
+        from .lifecycle_budget import trusted_upper
+        binding=receipt['request_accounting']
+        view=ObjectiveLedger(binding['root'],binding['objective_id']).inspect(now=trusted_upper())
+        return dict(state='qualified' if view['accounting_known'] else 'unknown',
+            used_tokens=view['tokens_used'],token_accounting='fresh',sampled=False,
+            reason=None if view['accounting_known'] else 'request_completion_unknown',request_accounting=binding)
     from .goal_usage import observe_usage
     if not receipt.get('grant',{}).get('host_delegated'):
         return observe_usage(receipt['grant']['codex_home'],receipt['thread_id'],receipt['goal_created_at'],
@@ -422,6 +449,8 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
             ledger_path=Path(receipt['allocation_path']);_private(ledger_path)
             with _lock(ledger_path.parent,ledger_path.stem):
                 ledger=json.loads(ledger_path.read_text())
+            from .goal_governance import sync
+            sync(receipt)
             pending_recovery=ledger.get('pending_recovery')
             if pending_recovery:
                 receipt.update(state='held',reason='recovery_pending_reconciliation',stop_latched=True)
@@ -451,6 +480,8 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
         receipt['sampled']=True;receipt['maximum_token_overshoot']=None
         from .goal_readiness import engagement
         result=_public(receipt)
+        from .goal_notices import governor_status
+        result['governor']=governor_status(root,receipt)
         if receipt.get('stop_latched'):
             observation_fault=receipt.get('reason')=='observation_unavailable'
             result['recovery']=dict(status='requires_authorized_recovery' if observation_fault else 'not_recoverable',
@@ -529,6 +560,11 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
     directory=_directory(root);path=directory/(name+'.json')
     # Configured service repair is a distinct common-policy action. Never undo a
     # mask or infer authority from enrollment permission alone.
+    from .goal_governance import sync
+    if path.exists():
+        with _lock(directory,name):
+            _private(path);retained=json.loads(path.read_text())
+            if sync(retained):return _public(retained)
     watcher_setup=None
     if principal and not _heartbeat(directory).get('fresh'):
         from .session_permissions import PermissionStore
@@ -543,6 +579,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
         if old:
+            if sync(old):return _public(old)
             from .goal_renewal import renewal_hold
             pending=renewal_hold(root,old)
             if pending:return dict(_public(old),**pending)
@@ -590,6 +627,10 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             if first.get('state')!='qualified':raise AccountingUnavailable('first enrollment requires qualified original history',first)
             if first.get('parent_thread_id'):raise ValueError('successor must select its existing objective allocation')
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old)
+        if sync(receipt):
+            _record_supervision_notice(path,receipt,'deactivation')
+            _save(path,receipt)
+            return _public(receipt)
         observation=_usage(receipt)
         # Enrollment is not admitted until the first complete observation is
         # qualified. A transient setup scan must not publish a stop receipt that
@@ -632,13 +673,17 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         if watcher_setup is not None:receipt['watcher_setup']=watcher_setup
         if goal.get('status') not in NATIVE_GOAL_STATUSES:
             hold('native_goal_state_unknown')
+        _record_supervision_notice(path,receipt,'activation',controller)
         _save(path,receipt)
         from .goal_readiness import engagement
+        from .goal_notices import governor_status
         return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None,
-            engagement=engagement(receipt,controller))
+            governor=governor_status(root,receipt),engagement=engagement(receipt,controller))
 
 
 def _effect(path,receipt,key,method,params):
+    from .goal_governance import sync
+    if sync(receipt):return False
     if method=='turn/steer':
         from .permission_enforcement import controller_permission
         permission=controller_permission(path.parent.parent,receipt)
@@ -751,6 +796,8 @@ def _record_supervision_notice(path,receipt,kind,controller=None):
 
 
 def _stop(path,receipt,reason,goal=None,active=None):
+    from .goal_governance import sync
+    if sync(receipt):return dict(receipt,state='inactive')
     _stop_episode(path,receipt,reason)
     _first_stop(path,receipt,reason)
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
@@ -842,6 +889,9 @@ def poll(root):
         with _lock(directory,path.stem):
             _private(path);receipt=json.loads(path.read_text())
             try:
+                from .goal_governance import sync
+                if sync(receipt):
+                    results.append(dict(receipt,state='inactive'));continue
                 from .goal_renewal import renewal_hold
                 pending=renewal_hold(root,receipt)
                 if pending:
@@ -907,6 +957,8 @@ def _acknowledge_enrollments(directory,controller,observations):
         path=directory/(_name(observed['thread_id'])+'.json')
         with _lock(directory,path.stem):
             _private(path);receipt=json.loads(path.read_text())
+            from .goal_governance import sync
+            if sync(receipt):continue
             if any(receipt.get(key)!=observed.get(key) for key in
                     ('generation','enrollment_revision','token_limit','deadline','used_tokens')):continue
             if (observed.get('state') not in ('armed','checkpoint_requested') or

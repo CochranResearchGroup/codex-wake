@@ -1,6 +1,34 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P176
+    owner: primary / ecochran76
+    objective: Repair durable future scheduling and native MCP host wiring
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/360]
+    plan: docs/dev/plans/0176-2026-10-26-durable-scheduling-repair.md
+    branch: fix/durable-scheduling-360
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-26
+    disposition: Qualified live red; future-horizon reporting regression red to green; preserve both retained intents; host activation scope pending operator answer
+  - id: P175
+    owner: primary / ecochran76
+    objective: Transparent operator-controlled governor and bounded execution
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/351, https://github.com/CochranResearchGroup/codex-wake/issues/352, https://github.com/CochranResearchGroup/codex-wake/issues/353, https://github.com/CochranResearchGroup/codex-wake/issues/354, https://github.com/CochranResearchGroup/codex-wake/issues/355, https://github.com/CochranResearchGroup/codex-wake/issues/356, https://github.com/CochranResearchGroup/codex-wake/issues/357]
+    plan: docs/dev/plans/0175-2026-10-25-transparent-governor-delivery.md
+    branch: feat/transparent-governor
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: PUBLISHED_REVIEW
+    checkpoint: 38afb9c44b7817a518b3a329fd9566b19ea7a0ec
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/358
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-25
+    disposition: 351-357 CLOSED; review1/TDD1 complete with all3 findings addressed; native control/funding and source-bound checks PASS; final successor CI pending; PR358 integration open; no live effects
   - id: P173-GOAL-UX
     owner: primary / ecochran76
     objective: Implement visible goal supervision and approved renewal

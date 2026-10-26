@@ -81,12 +81,42 @@ def _existing(root, fingerprint, key):
     return None
 
 
+def schedule_projection(record):
+    """Display original anchored dates; never rebase or grant dispatch authority."""
+    intent = record['scheduling_intent']
+    schedule = intent['schedule']
+    due = None
+    if schedule['kind'] == 'at':
+        from .network_wakes import precise_deadline
+        due = precise_deadline(schedule['due_at']).timestamp()
+    elif valid_utc(intent.get('utc_anchor')):
+        due = intent['utc_anchor']['upper'] + schedule.get('delay_seconds', 0)
+    if due is None:
+        return dict(due_at=None, expires_at=None, basis='original_utc_unavailable')
+    try:
+        dates = [datetime.fromtimestamp(value, UTC).isoformat().replace('+00:00', 'Z')
+                 for value in (due, due + intent['ttl_seconds'])]
+    except (OverflowError, ValueError, OSError):
+        return dict(due_at=None, expires_at=None, basis='outside_supported_calendar')
+    return dict(due_at=dates[0], expires_at=dates[1], basis='original_utc_anchor')
+
+
+def project_schedule(record):
+    projection = schedule_projection(record)
+    if record['predicate']['type'] == 'not_before':
+        record['predicate']['due_at'] = projection['due_at']
+    return projection
+
+
 def _receipt(args, record, path, deduplicated):
-    if getattr(args, 'require_monitor', False):
-        from .signal_records import probe_managed_reader_capability
-        reader = probe_managed_reader_capability(Path(record['scheduling_intent']['canonical_root']))
-        if reader is None or record["schema_version"] not in reader.schema_versions:
-            raise WakeError(f"schema{record['schema_version']} intent retained as {record['id']}; active compatible worker unavailable; upgrade the owning worker")
+    from .signal_records import probe_managed_reader_capability
+    root = Path(record['scheduling_intent']['canonical_root'])
+    reader = probe_managed_reader_capability(root)
+    from .monitor import read_monitor_health
+    health = read_monitor_health(root) or {}
+    monitored = reader is not None and record['schema_version'] in reader.schema_versions and health.get('mode') == 'loop'
+    if getattr(args, 'require_monitor', False) and not monitored:
+        raise WakeError(f"schema{record['schema_version']} intent retained as {record['id']}; active compatible worker unavailable; upgrade or enroll the owning monitor")
     intent = record['scheduling_intent']
     unanchored = (intent['schedule']['kind'] != 'at' and intent.get('counter_anchor') is None
                   and intent.get('utc_anchor') is None)
@@ -95,6 +125,21 @@ def _receipt(args, record, path, deduplicated):
              "time_recovery": record["time_recovery"], "deduplicated": deduplicated,
              "automatic_recovery": recovery, "requires_original_clock_evidence": unanchored,
              "requires_worker_schema": record["schema_version"], "wake_policy": record.get("wake_policy")}
+    projection = schedule_projection(record)
+    owner_held = record.get('policy_outcome', {}).get('state') in ('held', 'retired')
+    unsupported = projection['basis'] == 'outside_supported_calendar'
+    armed = bool(monitored and not unanchored and not owner_held and not unsupported
+                 and record['time_recovery'].get('state') not in ('pending_time', 'missed_deadline')
+                 and record['status'] in ('pending', 'firing'))
+    value.update(projection, armed=armed,
+        scheduling_status=('held_owner_policy' if owner_held else 'unsupported_calendar' if unsupported else 'armed' if armed else 'retained_unmonitored' if not monitored
+            else 'retained_pending_time' if record['status'] == 'pending' else record['status']),
+        monitor=dict(ready=monitored, wake_root=str(root), required_schema=record['schema_version']),
+        next_action=('Choose a representable due time and delivery expiry within ISO calendar years1–9999.' if unsupported else
+            'Inspect owner completion policy; this intent remains held or retired.' if owner_held else
+            'Monitor owns this intent; inspect delivery separately.' if armed else
+            'Enroll a compatible monitor for this exact wake root; then reconcile this retained ID, do not create a duplicate.'
+            if not monitored else 'Inspect retained time/owner state; preserve the original origin and deadline.'))
     if getattr(args, "as_json", False):
         print(json.dumps(value, sort_keys=True))
     else:
@@ -140,8 +185,8 @@ def retain(args, root):
         register_owner(root, policy)
         from .wake_policy import apply_owner_state
         apply_owner_state(root, record)
-        if content['schedule']['kind'] != 'at' and record['scheduling_intent']['origin_state'] == 'awaiting_qualified_clock':
-            record['time_recovery'] = eligibility(record, clock)
+        record['time_recovery'] = eligibility(record, clock)
+        project_schedule(record)
         path = _save(root, record)
         return _receipt(args, record, path, False)
 
@@ -298,6 +343,7 @@ def evaluate(root, identifier, clock, *, record_validator=None):
             _save(root, record)
             return record["status"]
         verdict = eligibility(record, clock)
+        project_schedule(record)
         previous = record["time_recovery"]
         record["time_recovery"] = verdict
         if any(previous.get(key) != verdict.get(key) for key in ("state", "reason", "mode")):

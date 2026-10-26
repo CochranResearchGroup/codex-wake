@@ -319,11 +319,29 @@ def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeA
 
 def reconcile_command(args, root):
     from .records import WakeLifecycleLock, find_record
+    # Time recovery is a separate no-dispatch operation from submission recovery.
+    # evaluate takes its own lifecycle lock and rechecks the current record.
+    initial = find_record(root, args.wake_id)
+    from .records import classify_record
+    time_reconciled = (classify_record(initial.record) == 'native_intent_v6'
+        and initial.record.get('status') == 'pending'
+        and not initial.record.get('native_delivery'))
+    if time_reconciled:
+        from .native_clock import snapshot
+        from .native_intents import evaluate
+        evaluate(root, args.wake_id, snapshot())
     with WakeLifecycleLock(root, args.wake_id):
         found = find_record(root, args.wake_id)
         if found.record.get('target', {}).get('transport') != 'native':
             raise WakeError('reconciliation requires a native wake')
-        from .records import classify_record
+        if time_reconciled and not found.record.get('native_delivery'):
+            from .native_intents import schedule_projection
+            print(json.dumps(dict(wake_id=args.wake_id, result='time_reconciled',
+                status=found.record['status'], native_delivery=None, dispatch_attempted=False,
+                time_recovery=found.record['time_recovery'],
+                next_action='Verify an active compatible monitor for this root; time recovery alone is not delivery.',
+                **schedule_projection(found.record)), sort_keys=True))
+            return 0
         if classify_record(found.record) == 'native_intent_v6':
             current = None
         elif classify_record(found.record) == 'native_network_v5':

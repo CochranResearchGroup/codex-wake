@@ -176,7 +176,7 @@ class CommandRunner:
         self.goal_limits_policy = goal_limits_policy
         self.goal_limits_root = goal_limits_root
 
-    def _wake_control_command(self, action, arguments):
+    def _wake_control_command(self, action, arguments, native_context=None):
         import re
         if self.wake_control_config is None or self.wake_root is None:
             raise ValueError('Missing host scope')
@@ -188,8 +188,21 @@ class CommandRunner:
                 result[key] = value
             return result
         config = json.loads(Path(self.wake_control_config).read_text(encoding='utf-8'), object_pairs_hook=unique_object)
-        if not isinstance(config, dict) or set(config) != {'version', 'callers'} or type(config['version']) is not int or config['version'] != 1 or not isinstance(config['callers'], dict):
+        if (not isinstance(config, dict) or type(config.get('version')) is not int
+                or config['version'] not in (1, 2) or not isinstance(config.get('callers'), dict)
+                or set(config) != ({'version', 'callers'} if config['version'] == 1
+                                   else {'version', 'callers', 'native_self'})):
             raise ValueError('Invalid grant config')
+        native_self = config.get('native_self')
+        if config['version'] == 2:
+            from .goal_supervision import _private
+            _private(Path(self.wake_control_config))
+            if (not isinstance(native_self, dict) or set(native_self) != {'roots', 'actions'}
+                    or not isinstance(native_self['roots'], list) or not native_self['roots']
+                    or any(not isinstance(root, str) or not Path(root).is_absolute() for root in native_self['roots'])
+                    or not isinstance(native_self['actions'], list) or not native_self['actions']
+                    or any(item not in ('list', 'cancel') for item in native_self['actions'])):
+                raise ValueError('Invalid verified-self control grant')
         for caller, grant in config['callers'].items():
             if not re.fullmatch(CALLER['pattern'], caller) or not isinstance(grant, dict) or set(grant) != {'roots', 'actions'}:
                 raise ValueError('Invalid caller grant')
@@ -199,6 +212,14 @@ class CommandRunner:
             if not isinstance(actions, list) or not actions or any(item not in WAKE_ACTIONS for item in actions):
                 raise ValueError('Invalid actions')
         grant = config['callers'].get(arguments['caller_thread_id'])
+        self_subject = None
+        if grant is None and native_self is not None:
+            from .goal_supervision import verified_native_caller
+            verified_native_caller(native_context, arguments['caller_thread_id'])
+            if arguments.get('all_roots'):
+                raise ValueError('Verified-self controls cannot select all roots')
+            grant = native_self
+            self_subject = arguments['caller_thread_id']
         if grant is None or action not in grant['actions']:
             raise ValueError('Action denied')
         root = Path(self.wake_root)
@@ -212,6 +233,8 @@ class CommandRunner:
         if not selected or any(Path(item).resolve() not in allowed for item in selected):
             raise ValueError('Root denied')
         command = [*self.cli, '--wake-root', str(root), action, '--json']
+        if self_subject is not None:
+            command += ['--caller-wake-subject', self_subject]
         # The CLI checks its fresh registry snapshot against this frozen scope.
         # A registry addition between authorization and execution cannot widen effects.
         for selected_root in selected:
@@ -274,7 +297,7 @@ class CommandRunner:
                 return {"error": {"code": "policy_denied", "message": "Host lifecycle scope is required."}}, True
         if group == 'wake-control':
             try:
-                command = self._wake_control_command(verb, arguments)
+                command = self._wake_control_command(verb, arguments, native_context)
             except (ValueError, OSError, TypeError, KeyError, ImportError):
                 return {"error": {"code": "policy_denied", "message": "Host wake-control root and action grants are required for the entire selected scope."}}, True
             return self._execute(command, arguments, readonly)
@@ -317,7 +340,7 @@ class CommandRunner:
                     return explain_error(exc),True
             if verb=='readiness':verb='show'
             from .session_permissions import PermissionStore
-            if PermissionStore(goal_root).active() or verb in ('recover','disable'):
+            if PermissionStore(goal_root).active() or verb in ('recover','disable','enable'):
                 packet=dict(verb=verb,arguments=arguments,native_context=native_context,
                     runner=dict(wake_root=str(self.wake_root) if self.wake_root else None,
                         goal_limits_root=str(goal_root),goal_limits_policy=str(self.goal_limits_policy),
@@ -334,7 +357,7 @@ class CommandRunner:
                         value=enroll(goal_root,self.goal_limits_policy,native_context=native_context,**arguments)
                     else:
                         value=show(goal_root,self.goal_limits_policy,arguments['caller_thread_id'],arguments.get('allocation_id'))
-                    return value, verb=='set' and value.get('state') not in ('armed','checkpoint_requested')
+                    return value, verb=='set' and value.get('state') not in ('armed','checkpoint_requested','inactive')
             except Exception as exc:
                 # Legacy admission keeps its public CLI diagnostics. Delegated
                 # callers must never fall back to an unbound claimed identity.

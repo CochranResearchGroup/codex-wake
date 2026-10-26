@@ -661,9 +661,19 @@ class GoalSupervisionTests(unittest.TestCase):
         def request(endpoint,executable,method,params,timeout):
             selected=native if params['threadId']==THREAD else native['siblings'][params['threadId']]
             selected['calls'].append((method,params))
+            if selected.get('request_hook'):selected['request_hook'](method,params)
             if method=='thread/goal/get':return {'goal':dict(selected['goal'])}
-            if method=='thread/read':return {'thread':dict(id=params['threadId'],turns=[dict(id=t,status='inProgress') for t in selected['active']])}
+            if method=='thread/read':
+                items=selected.get('user_items', [dict(type='userMessage',content=[dict(type='text',text=selected['user_text'])])] if 'user_text' in selected else [])
+                return {'thread':dict(id=params['threadId'],turns=[dict(id=t,status='inProgress',items=items) for t in selected['active']])}
             if method=='thread/turns/list':return dict(data=[dict(id=t,status='inProgress') for t in selected['active']],nextCursor=None)
+            if method.startswith('thread/notice/') and 'notices' in selected:
+                notice=selected['notices'].get(params['eventId'])
+                if method=='thread/notice/append':
+                    notice=dict(eventId=params['eventId'],text=params['text'])
+                    selected['notices'][params['eventId']]=notice
+                    return dict(eventId=params['eventId'],recorded=True,modelContextAvailable=True,notificationPublished=True)
+                return dict(notice=notice,modelContextAvailable=notice is not None)
             if method.startswith('thread/notice/'):
                 raise NotImplementedError('fixture native runtime has no notice capability')
             receipts=list((root/'goal-supervision').glob('*.json'))
@@ -680,7 +690,7 @@ class GoalSupervisionTests(unittest.TestCase):
                 for raw in ws:
                     message=json.loads(raw)
                     if 'id' not in message:continue
-                    if message['method']=='initialize':result={}
+                    if message['method']=='initialize':result=native.get('metadata', {})
                     else:
                         try:result=request(None,None,message['method'],message['params'],None)
                         except NotImplementedError:

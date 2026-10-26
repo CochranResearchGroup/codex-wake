@@ -199,10 +199,21 @@ class CodexRuntimeAdapter:
                     if previous.get("source") == "native_turn" and (
                             previous["turn_id"] != turn["id"] or previous["user_message_id"] != item["id"]):
                         return RuntimeReconciliation(None, "multiple_native_submissions")
+                    outputs = [entry for entry in turn['items']
+                        if entry.get('type') == 'agentMessage' and isinstance(entry.get('text'), str)]
                     evidence[identity] = dict(
                         previous, source="native_turn", turn_id=turn["id"],
                         user_message_id=item["id"], client_message_id=identity,
                         execution="turn_" + turn["status"],
+                        output_summary=dict(
+                            text_bytes=sum(len(entry['text'].encode()) for entry in outputs),
+                            item_count=len(outputs),
+                            item_ids=[entry.get('id') for entry in outputs[:16]],
+                            locators_truncated=len(outputs) > 16,
+                            coverage='Native agentMessage text only; excludes tools, reasoning and token usage.',
+                            source=dict(thread_id=recipient.session_id, turn_id=turn['id']),
+                            freshness='Observed with this exact native turn reconciliation',
+                            ambiguity='Completion establishes execution, not acceptance of the result.'),
                     )
         if len(evidence) != 1:
             return RuntimeReconciliation(

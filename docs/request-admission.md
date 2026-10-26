@@ -1,0 +1,285 @@
+# Reviewed HTTP request admission
+
+Ticket #354 adds an explicit host-selected HTTP Responses gateway. It does not
+qualify every native host, provider, or model route. No external provider contract
+is currently supplied as qualified. Native transport acceptance uses an inert
+local provider and is separate from external provider eligibility.
+
+The gateway is ordinary production transport/accounting code. A trusted host must
+select a reviewed provider contract with enforceable maxima for the **entire**
+accepted request input and generated output. There is no byte/token estimate.
+The provider must reject excessive input before billing and enforce the injected
+`max_output_tokens`, including every kind of billable generated output. Review
+must substantiate those properties for the exact selected model/provider/version
+and the `response.completed` usage schema. An operator's desired ceiling is not
+provider-bound evidence. Unknown or unreviewed contracts fail configuration
+explicitly; they cannot silently enable hard admission.
+
+A contract has these fields:
+
+```json
+{
+  "version": 1,
+  "provider": "EXACT REVIEWED PROVIDER",
+  "model": "EXACT MODEL",
+  "max_input_tokens": 100,
+  "max_output_tokens": 20,
+  "input_limit": "provider_enforced_reject_before_billing",
+  "output_limit": "max_output_tokens_enforced",
+  "usage": "response.completed:fresh-v1",
+  "review": "LOCATOR AND SCOPE OF ACTUAL REVIEWED BOUND EVIDENCE"
+}
+```
+
+The numbers above illustrate the schema and are **not a qualified contract**.
+The trusted host supplies the separately reviewed exact `contract_digest(contract)`
+as `reviewed_contract_sha256`; models cannot select it, bounds, endpoint, ledger,
+credential or purpose through a request body. Source/runtime/provider changes
+require fresh contract qualification. A false provider guarantee cannot be made
+true by a digest: this trust boundary must be reviewed before use.
+
+## Existing allowance and ownership
+
+First enroll an existing native goal and retain qualified original fresh usage.
+Configure the existing `ObjectiveLedger` using its original authorized objective
+configuration, approval, cap, absolute deadline and `prior_tokens`. Do not create
+another objective or a new time window to gain allowance. The gateway constructor
+requires the receipt's allocation ID, cap and deadline to agree with that ledger,
+and requires imported per-thread prior usage to sum to the qualified source usage.
+
+`bind_requests` makes that ledger the authoritative accounting owner. An existing
+lifecycle actor, native goal alias, or changed binding refuses attachment: a
+live migration needs its own explicit reconciliation. Later lifecycle/session
+reservations and sampled charges are refused rather than added on top of request
+charges. This bounded version does not silently migrate those workflows.
+
+The source receipt and shared allocation retain `request_accounting` with the
+owner, ledger scope, selected contract and listener. The sampled watcher reads
+that ledger after handoff; it cannot overwrite request usage from a missing or
+lagging native writer. The operator's enabled choice, prior usage, limits,
+checkpoints and stop history remain intact. Listener attachment publishes a new
+mode-bound `request_activation` notice to native model/operator surfaces without
+starting a model turn. It does not reuse an earlier sampled activation event.
+
+## Host interface
+
+```python
+from codex_wake.request_admission import RequestGateway, contract_digest
+
+gateway = RequestGateway(
+    root, existing_allocation_id,
+    upstream_url=reviewed_responses_url,
+    contract=reviewed_contract,
+    reviewed_contract_sha256=separately_reviewed_digest,
+    thread_ids=[verified_source_thread],
+    request_timeout=2,
+    client_token=host_private_bootstrap_token,
+)
+server = gateway.server()  # loopback only; host runs serve_forever()
+```
+
+The constructor never configures, extends or resets the objective ledger. With
+multiple initial threads, supply `thread_prior_tokens` for every initial thread;
+all original charges must be accounted for. A fresh native descendant/reviewer
+inherits its registered parent's scope automatically using bounded owned,
+canonical native `session_meta` ancestry, before its first usage record exists.
+Existing descendant usage needs an explicit prior-usage binding instead of a
+fresh quota. An unrelated or ambiguous thread is refused before forwarding.
+
+The same ledger retains per-thread prior spending, all request actors' thread
+identities, and original per-thread deadlines. Retries do not create another
+session ceiling/window. Children share the objective's remaining allowance; the
+host may later attach purpose/phase metadata to that durable thread mapping.
+A model-supplied phase is never admission authority.
+
+`execute(body)` is the stable trusted host transport seam and returns
+`(http_status, content_type, response_bytes)`. `server()` exposes authenticated
+`POST /v1/responses` and `GET /status`. `bind_listener(origin)` supports an existing
+authenticated host listener, including a provider-free warmup delegate. That host
+must verify `Authorization: Bearer TOKEN` before calling `execute` or `status`.
+The generated/supplied token persists separately in a private mode-0600 file;
+its locator may appear in binding receipts but its value never does. Provide a
+native provider `env_key` before launch for a bootstrap token. `upstream_headers`
+are host-only credentials and are not copied from arbitrary incoming headers.
+
+Native configuration selects this listener's `/v1` base URL, `wire_api="responses"`
+and `supports_websockets=false`. WebSocket, compact, previous-response shortcuts,
+alternative providers and bypass routes remain unqualified. The native-generated
+`client_metadata['x-codex-turn-metadata']`, exact current native turn, host credential,
+and registered lineage bind requests to scope. This is a host authority boundary,
+not hostile same-UID isolation.
+
+## Admission and completion
+
+Before its single upstream submission, each incoming attempt atomically reserves
+`max_input_tokens + max_output_tokens` against objective and cumulative session
+limits. HTTP retries/fallback attempts through this route each need a fresh
+reservation. No implicit retry or redirect follows an upstream failure. Output
+limits are inserted by the gateway, never trusted from model arguments. Protocol
+limits are 2 MiB per request and 8 MiB per buffered response; these are transport
+limits, not token estimates.
+
+The existing receipt/scope locks serialize admission/submission with deactivation.
+Response headers/body are awaited outside those locks so a hanging stream cannot
+hold the control. An independent monotonic wall-clock timer closes the upstream
+socket, including a continuously heartbeating stream. Admission requires that
+this full request interval fits the original objective/session deadline. Client
+cancellation cannot leave an unbounded upstream reader. Disconnecting cannot
+promise that remote inference itself was recalled; its reservation remains.
+
+A qualified completion settles `input_tokens - cached_tokens + output_tokens`
+from attributable provider evidence. Exact repeated settlement for the same
+immutable attempt is idempotent. Reusing a response ID for a different actual
+attempt is ambiguous billing and retains that attempt's reservation. Missing,
+conflicting, out-of-bound or incomplete usage never creates a refund; accounting
+becomes unknown and future governed admission holds. Actual known usage floors
+are retained. Settlement and recovery must use the same immutable request
+identity/fingerprint; inventing another request cannot reconcile the old one.
+
+Denials are returned before forwarding and emit durable no-turn intervention
+notices. They pause future continuation of the exact registered native goal,
+retaining its identity and readback proof, without interrupting independently
+admitted requests. A failed/unverified pause is reported explicitly. They do not require another model request to become operator-visible.
+Native append, model context, UI rendering and human reading remain distinct
+proof boundaries. No live/provider or UI guarantee follows from unit tests.
+
+## Deactivation at zero allowance
+
+Before request admission, the gateway independently reads the exact native current
+user message. The whole message `Deactivate governor` invokes the existing scoped
+operator control mechanically; quoted/tool/body text cannot authorize it. The
+adapter restores a previously verified registered-goal pause if native operator
+input automatically activated that goal. Pause verification is retained; a pause
+failure cannot veto durable deactivation and remains explicit. The response is
+explicitly governor-generated SSE with zero provider inference and
+zero provider usage. It is not a model decision or another permission prompt.
+`Reactivate governor` uses the same verification and does not resume/renew work.
+
+The current durable disabled choice bypasses governor budget denials for that
+scope, including registered children. Original usage/reservations remain; new
+attributable passthrough usage remains recorded without manufacturing allowance.
+Previously issued/in-flight decisions cannot be recalled; no new admission
+intervention is issued while disabled. Protocol, authentication and independent
+platform controls still apply. The authenticated operator API remains callable
+when the model/native request route is disconnected.
+
+## Qualification
+
+The existing host preflight inspects this selected native provider configuration,
+the thread's actual `modelProvider`, the private binding, live authenticated gateway
+status, reviewed contract and current ledger. It can qualify only this declared
+HTTP request path. Unsupported paths keep the original explicit unsupported result.
+Exhausted/unknown accounting remains a separate resource outcome. A fresh same-scope
+disabled operator choice takes precedence over an old hard-mode request, even at
+zero remaining allowance; it is an explicit mode change, not a silent downgrade.
+
+Focused proof uses `tests/test_request_admission.py` with real HTTP dispatch,
+controlled native transport/usage and no external inference. Actual pinned-native
+and stock-frontend proof is a separate acceptance artifact owned by integration.
+
+## Protect the completion path
+
+A trusted host can protect acceptance, review and bounded remediation **inside**
+the existing request-owned ledger before its first implementation request. This
+is an optional planning contract, not a new allowance, approval workflow or
+allocator. Legacy gateways without a plan retain their admission behavior.
+
+```python
+# Each source is an existing reviewed, canonical, owned regular file plus SHA256.
+# The host selects this authority; no HTTP body can install or change it.
+plan_source = {"path": "/owned/approved-plan.md", "sha256": "PINNED_SHA256"}
+gateway.protect_completion([
+    {"id": "acceptance", "kind": "acceptance", "tokens": 40, "seconds": 4,
+     "criterion": "Verify the frozen public behavior"},
+    {"id": "review", "kind": "review", "tokens": 40, "seconds": 4,
+     "criterion": "Resolve the bounded review findings"},
+    {"id": "remediation", "kind": "remediation", "tokens": 40, "seconds": 4,
+     "criterion": "Verify the authorized remediation or evidenced no-finding result"},
+], source=plan_source)
+
+# The gateway verifies existing native ancestry before its first request:
+gateway.assign_completion(worker_thread, "review", source=assignment_source)
+# The host assesses the criterion and supplies its pinned evidence and decision:
+gateway.resolve_completion("review", "completed", source=review_evidence,
+                           note="Named criterion verified against the frozen objective")
+```
+
+There must be exactly one obligation of each mandatory kind. IDs, criteria,
+resource estimates and the source are immutable; reapplying the same plan keeps
+all progress and charges. Source files must be canonical, owned, regular, no
+larger than 1 MiB and match their digest. This verifies bytes/provenance, not the
+semantic conclusion: the trusted host owns that assessment. A source-bound
+validation receipt can be evidence, but a passing test count is never automatic
+quality acceptance. These APIs are not HTTP endpoints and do not accept a model's
+claimed role. Unassigned descendants, retries and successors remain ordinary
+implementation requests until the host records their exact durable purpose.
+
+Before forwarding, `reserve_request` atomically leaves the pending obligations'
+unused token and time bounds available. An assigned completion request can use
+its own remaining bound while leaving other mandatory work protected. Each
+request still uses the provider-reviewed whole-request maximum and the existing
+objective/session ceilings and deadlines. Phase changes do not reclassify old
+actors, reset per-thread spending, create another session window or replenish
+resources. The first actual remediation request consumes one existing correction
+cycle; retries in that same bounded obligation do not mint another cycle.
+
+Time feasibility uses conservative serial future work against the original
+objective deadline and already assigned workers' original session deadlines.
+Every admitted request's full timeout bound remains charged to its obligation's
+time estimate, even if it returned sooner. This is conservative planning, not an
+optimal parallel schedule or a new wall-clock budget. Actual wall time continues
+to reduce the unchanged original allowance.
+
+Only `completed` with verified source evidence releases unused protection.
+An unresolved/unknown attempt cannot release it. `deferred` requires a source and
+an explicit reason, stays mandatory/pending, retains its funds and produces a
+checkpoint outcome; it does not free funds for more implementation. When the
+remaining path cannot fit, admission returns its exact reason and an explicit
+checkpoint/narrow-work explanation before forwarding. The host can finish funded
+completion work, record valid unaffected evidence, or checkpoint; it cannot use
+phase changes to renew an exhausted campaign.
+
+`GET /status` exposes `accounting.completion`: named pending/deferred/completed
+obligations, protected tokens/seconds, feasibility, and the next action. All
+obligations completed means only that the host recorded their evidence-backed
+dispositions. `objective_complete` remains false: objective acceptance and closure
+stay with their existing owner. A disabled governor bypasses this scheduling gate
+and reports `completion_enforced:false`; retained usage and unfinished obligations
+remain visible. No new watcher requirement or per-packet consent is introduced.
+
+Worked provider-free campaign: original cap 200, prior usage 40, three protected
+40-token/4-second obligations, and a reviewed maximum of 40 tokens per request.
+One implementation request settles 10, leaving 150 available and 120 protected;
+the next 40-token implementation request is denied before forwarding, including
+when its body claims to be a reviewer. A host-bound acceptance request still
+fits. Its verified completion releases unused protection, permitting another
+already authorized implementation request while review/remediation stay funded.
+Acceptance, review and remediation each settle 10. Five forwarded requests plus
+prior usage total **90/200**, reservations settle to zero, one authorized
+correction cycle is retained, and the original deadline/history are unchanged.
+Only after all three evidence-backed dispositions are recorded are their
+obligations reported completed; no objective closure is inferred.
+
+Hard activation and admission notices use a fresh ledger projection, not a
+possibly lagging native source counter. Within the existing 768-byte bound they
+show actual used/cap, reserved/remaining, protected completion funds/time, deadline
+and denial trigger. They disclose no raw actors or credentials. Delivery to
+native model context, operator rendering and human reading retain their separate
+qualification boundaries.
+
+## Activation delivery and inactive transport
+
+Governed provider sends require the current activation retained in native history,
+available to model context, and acknowledged as published to operator clients.
+Failure returns `governor_activation_unavailable` before reservation/provider I/O;
+status exposes the failure independently. Native publication is not physical
+screen-render proof; the pinned native/stock-TUI acceptance qualifies that separate
+boundary. Hard-mode lifecycle preflight also requires successful selected-host
+and notice capability qualification. Explicitly authorized manual repair and the
+zero-inference deactivation control remain available.
+
+Requests submitted after durable deactivation have no governor output ceiling,
+resource timer or socket timeout. Protocol/authentication/response-size constraints
+remain independent transport boundaries. Disabling does not recall a timer already
+issued for an admitted request or automatically resume paused work. Accounting
+continues, without resource renewal.

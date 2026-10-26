@@ -1,10 +1,10 @@
 # Modern native bridge port and managed deployment
 
-State: OPEN  
-Owner: primary / ecochran76  
-Work items: 318, 310, 343, 345, 346  
-Branch: `fix/native-managed-activation`; native branch: `fix/wake-native-0.164`  
-Target: origin/main through PR359, with the native dependency pinned by source, patch and artifact.  
+State: OPEN
+Owner: primary / ecochran76
+Work items: 318, 310, 343, 345, 346
+Branch: `fix/native-managed-activation`; native branch: `fix/wake-native-0.164`
+Target: origin/main through PR359, with the native dependency pinned by source, patch and artifact.
 Authority: operator approved Q1, preserving modern managed updates, plus standing merge/deploy authorization.
 
 ## Scope and current state

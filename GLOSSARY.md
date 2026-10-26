@@ -50,6 +50,12 @@ and requires fresh grants before new work; original history stays fenced.
 **Agent spawn**:
 Starting a separate agent conversation with an explicit assignment and scope.
 
+**Compact dispatch packet**:
+A bounded assignment containing objective, authority, scope, acceptance, evidence
+locators, allowance, stop conditions and governance readback requirements. It
+starts fresh context by default; full-history context requires a recorded
+task-specific reason and a pinned source. A packet snapshot creates no authority.
+
 **Agent refresh**:
 Reloading selected runtime resources while preserving the conversation identity
 and unfinished work. Legacy profiles reopen its client; approved shared MCP
@@ -241,3 +247,20 @@ alone grants no permission, executes no effect and authorizes no uncertain repla
 **Background job result wake**:
 An existing exact-owner wake observing the durable result of one approved bounded
 local job. Awaiting the result does not relaunch the job or renew its task allowance.
+
+**Governor**:
+The operator-visible controller that applies authorized resource limits to a selected objective and explains its interventions to the operator and model.
+
+**Governor deactivation**:
+The operator's durable choice to stop governor interventions in a selected scope. It preserves accounting and work, does not renew resources or resume stopped work, and remains in effect until explicitly changed.
+
+**Host compatibility preflight**:
+A bounded read-only check before opted-in dispatch, separating reusable static
+host observations from fresh accounting, controller and operator-control state.
+It reports the actual enforcement mode without granting work or resource authority.
+
+**Protected completion resources**:
+The unused acceptance, review and bounded remediation estimates retained inside
+an existing objective allowance. Host-bound completion work may use them;
+implementation must leave them available. Deferral keeps mandatory work pending,
+and verified completion releases unused protection without renewing the grant.

@@ -5,6 +5,20 @@ moving to another tab or agent. Installation, host delegation and a running cont
 are required. Host policy version2 lets native callers self-enroll without
 per-session UUID grants. Check the installed version and controller receipt before claiming enforcement.
 
+## Visible operator control
+
+Announce governor activation, scope, actual enforcement mode and interventions to
+both the model and operator. Never insert governance silently or treat a recorded
+event as proof that either audience received it. New control-capable builds accept
+the operator's whole conversation message **Deactivate governor** through the
+verified native adapter, without repeated confirmation. Honor the resulting
+inactive state across retries, delegates and restart; it neither resumes work nor
+renews resources. **Reactivate governor** is the explicit inverse. A missing or
+deactivated governor is not a reason to block already-authorized manual repair.
+See [governor controls](../../../docs/governor-control.md) for offline authenticated
+host access and notice-delivery limitations. Verify installed capabilities before
+claiming these source features are present.
+
 ## Agent workflow
 
 When the user supplies a token or time allowance, load this guide before heavy
