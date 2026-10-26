@@ -15,6 +15,7 @@ import signal
 import shutil
 import socket
 import stat
+import struct
 import subprocess
 import time
 
@@ -99,8 +100,8 @@ class ManagedFixture:
         )
         return staged
 
-    def command(self, verb, label):
-        argv = [str(self.cli), "app-server", "daemon", verb]
+    def command(self, verb, label, *arguments):
+        argv = [str(self.cli), "app-server", "daemon", verb, *arguments]
         result = subprocess.run(
             argv,
             env=self.env,
@@ -314,6 +315,250 @@ class ManagedFixture:
             raise RuntimeError("rollback lifecycle changed private rollouts")
 
 
+class ModernManagedFixture(ManagedFixture):
+    """Use the real complete-package updater; never select a package manually."""
+
+    def __init__(self, root, home, env, receipt):
+        super().__init__(root, home, env, receipt)
+        self.current = home / "packages/app-server-daemon/current"
+        self.reference_cli = None
+        self.candidate_attempted = False
+        self.effect_unknown = False
+
+    @staticmethod
+    def package_files(package):
+        files = {}
+        for path in package.rglob("*"):
+            relative = path.relative_to(package)
+            if (
+                relative == Path("codex")
+                and path.is_symlink()
+                and os.readlink(path) == "bin/codex"
+            ):
+                continue  # The upstream Unix installer adds this compatibility alias.
+            if path.is_symlink():
+                resolved = path.resolve(strict=True)
+                if not resolved.is_relative_to(package.resolve()) or resolved.is_dir():
+                    raise RuntimeError(
+                        "modern package contains an escaping or directory symlink"
+                    )
+            if path.is_file():
+                files[str(relative)] = dict(
+                    sha256=_sha256(path), mode=stat.S_IMODE(path.stat().st_mode)
+                )
+        return files
+
+    def copy_package(self, source, label):
+        source = source.resolve(strict=True)
+        package = source.parent.parent
+        if (
+            source.parent.name != "bin"
+            or not (package / "codex-package.json").is_file()
+        ):
+            raise RuntimeError("modern managed mode requires a complete packaged CLI")
+        metadata = json.loads((package / "codex-package.json").read_text())
+        if metadata.get("entrypoint") != "bin/codex":
+            raise RuntimeError(
+                "modern managed mode requires the codex package entrypoint"
+            )
+        before = self.package_files(package)
+        required = {
+            "codex-package.json",
+            "bin/codex",
+            "bin/codex-code-mode-host",
+            "codex-path/rg",
+            "codex-resources/bwrap",
+        }
+        if not required <= before.keys():
+            raise RuntimeError("modern managed input package is incomplete")
+        bundle = self.root / "caller-packages" / (label + "-" + _sha256(source)[:16])
+        bundle.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        shutil.copytree(package, bundle, symlinks=True)
+        if (
+            self.package_files(bundle) != before
+            or self.package_files(package) != before
+        ):
+            raise RuntimeError("modern caller package changed while copying")
+        self.records[label + "_artifact"] = dict(
+            source=str(source),
+            installed=str(bundle / "bin/codex"),
+            sha256=_sha256(source),
+            kind="complete_modern_caller_package",
+            metadata=metadata,
+            files=before,
+        )
+        return bundle / "bin/codex"
+
+    def updaters(self):
+        identities = []
+        marker = ("CODEX_HOME=" + str(self.home)).encode()
+        for process in Path("/proc").iterdir():
+            if not process.name.isdigit():
+                continue
+            try:
+                command = (process / "cmdline").read_bytes().split(b"\0")
+                if (
+                    b"pid-update-loop" not in command
+                    or str(self.root).encode() not in command[0]
+                ):
+                    continue
+                if marker not in (process / "environ").read_bytes().split(b"\0"):
+                    continue
+                identity = self.identity(int(process.name))
+                if identity is not None:
+                    identities.append(identity)
+            except (OSError, PermissionError):
+                continue
+        return identities
+
+    def running(self, label):
+        value = self.command("version", label + "_version")
+        if value.get("status") != "running":
+            raise RuntimeError("modern managed daemon is not running")
+        advertised = Path(value["socketPath"])
+        expected_socket = self.home / "app-server-control/app-server-control.sock"
+        if advertised != expected_socket:
+            raise RuntimeError(
+                "modern managed socket rendezvous differs from private home"
+            )
+        # Modern Codex exposes an owned rendezvous symlink to its protected socket.
+        # The target may live in the per-user shared socket directory; bind the
+        # actual peer to the private home and exact invoking executable below.
+        endpoint_path = advertised.resolve(strict=True)
+        socket_info = endpoint_path.stat()
+        if not stat.S_ISSOCK(socket_info.st_mode) or socket_info.st_uid != os.geteuid():
+            raise RuntimeError("modern managed socket ownership differs")
+        self.records[label + "_socket"] = dict(
+            advertised=str(advertised), resolved=str(endpoint_path)
+        )
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+            connection.settimeout(5)
+            connection.connect(str(endpoint_path))
+            pid, uid, _ = struct.unpack(
+                "3i", connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12)
+            )
+        if uid != os.geteuid():
+            raise RuntimeError("modern daemon peer owner differs")
+        marker = ("CODEX_HOME=" + str(self.home)).encode()
+        if marker not in Path("/proc", str(pid), "environ").read_bytes().split(b"\0"):
+            raise RuntimeError("modern daemon peer does not own the private home")
+        identity = self.identity(pid)
+        expected = _sha256(self.cli)
+        if identity is None or identity["sha256"] != expected:
+            raise RuntimeError(
+                "modern daemon executable differs from the invoking package"
+            )
+        selected = Path(value["managedCodexPath"]).resolve(strict=True)
+        if not selected.is_relative_to(
+            (self.home / "packages/app-server-daemon/releases").resolve()
+        ):
+            raise RuntimeError(
+                "modern daemon was not selected through the dedicated package root"
+            )
+        if self.package_files(selected.parent.parent) != self.package_files(
+            self.cli.parent.parent
+        ):
+            raise RuntimeError("selected modern package bytes or file modes differ")
+        self.pid = pid
+        self.records[label + "_process"] = identity
+        self.records[label + "_selected_package"] = str(selected.parent.parent)
+        return "unix://" + str(endpoint_path)
+
+    def select_from_cli(self, label):
+        old = self.identity(self.pid) if self.pid else None
+        old_updaters = self.updaters()
+        self.records[label + "_updaters_before"] = old_updaters
+        try:
+            result = self.command("update", label + "_update", "--from-cli", "--yes")
+        except subprocess.TimeoutExpired:
+            self.effect_unknown = True
+            self.records[label + "_effect"] = "unknown_after_cli_timeout"
+            raise
+        if result.get("status") != "updated":
+            raise RuntimeError("modern --from-cli installation did not report updated")
+        endpoint = self.running(label)
+        if old is not None:
+            until = time.monotonic() + 5
+            while time.monotonic() < until:
+                observed = self.identity(old["pid"])
+                if observed is None or observed["start_ticks"] != old["start_ticks"]:
+                    break
+                time.sleep(0.05)
+            else:
+                raise RuntimeError("old private managed daemon survived replacement")
+        remaining_updaters = self.updaters()
+        marker = self.current.parent / "auto-update-version"
+        self.records[label + "_pin"] = dict(
+            latest_marker_present=marker.exists(), updaters_after=remaining_updaters
+        )
+        if marker.exists() or remaining_updaters:
+            raise RuntimeError("the built-in explicit package pin is unverified")
+        return endpoint
+
+    def seed(self, reference):
+        self.reference_cli = self.copy_package(reference, "reference")
+        self.cli = self.reference_cli
+        super().start("reference_seed")
+        return self.select_from_cli("reference_pin")
+
+    def install_candidate(self, candidate):
+        self.cli = self.copy_package(candidate, "candidate")
+        self.candidate_attempted = True
+        return self.select_from_cli("candidate")
+
+    def rollback(self, reference, verify):
+        del (
+            reference
+        )  # Reuse the initial frozen reference package, not a moving host link.
+        before = {
+            str(path.relative_to(self.home)): _sha256(path)
+            for path in (self.home / "sessions").rglob("*.jsonl")
+        }
+        self.records["rollback_rollout_hashes_before"] = before
+        self.cli = self.reference_cli
+        try:
+            endpoint = self.select_from_cli("rollback")
+            verify(endpoint)
+        finally:
+            try:
+                self.stop("rollback")
+            finally:
+                after = {
+                    str(path.relative_to(self.home)): _sha256(path)
+                    for path in (self.home / "sessions").rglob("*.jsonl")
+                }
+                self.records["rollback_rollout_hashes_after"] = after
+                self.records["rollback_rollouts_unchanged"] = before == after
+        if before != after:
+            raise RuntimeError("modern rollback changed private rollout bytes")
+
+    def cleanup_failed_updaters(self):
+        """Failure cleanup is not evidence that the real installer pinned correctly."""
+        identities = self.updaters()
+        self.records["failed_fixture_updater_cleanup"] = identities
+        for original in identities:
+            observed = self.identity(original["pid"])
+            if observed is None or observed["start_ticks"] != original["start_ticks"]:
+                continue
+            os.kill(original["pid"], signal.SIGTERM)
+            until = time.monotonic() + 5
+            while time.monotonic() < until:
+                observed = self.identity(original["pid"])
+                if (
+                    observed is None
+                    or observed["start_ticks"] != original["start_ticks"]
+                ):
+                    break
+                time.sleep(0.05)
+            else:
+                observed = self.identity(original["pid"])
+                if (
+                    observed is not None
+                    and observed["start_ticks"] == original["start_ticks"]
+                ):
+                    os.kill(original["pid"], signal.SIGKILL)
+
+
 def execute(
     root,
     prefix,
@@ -323,7 +568,19 @@ def execute(
     managed_cli=None,
     rollback_cli=None,
     code_mode_host=None,
+    modern_managed_update=False,
 ):
+    if modern_managed_update and (
+        not managed_cli
+        or not rollback_cli
+        or app_server
+        or previous_prefix
+        or wake_workflow
+        or code_mode_host
+    ):
+        raise ValueError(
+            "modern managed update requires complete managed-cli/rollback-cli packages only"
+        )
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     home = root / "home"
     home.mkdir(mode=0o700)
@@ -354,17 +611,19 @@ for line in sys.stdin:
  print(json.dumps(dict(jsonrpc='2.0',id=r['id'],result=v)),flush=True)
 """)
 
-    def config(version):
+    def config(version, include_mcp=True):
         active_prefix = (
             previous_prefix if version == "v1" and previous_prefix else prefix
         )
-        (home / "config.toml").write_text(
+        base = (
             'model = "gpt-5.4"\nmodel_provider = "owned_no_provider"\napproval_policy = "never"\n'
             + '[model_providers.owned_no_provider]\nname = "Owned no-provider fixture"\nbase_url = "http://127.0.0.1:1/v1"\nwire_api = "responses"\nrequires_openai_auth = false\nsupports_websockets = false\nrequest_max_retries = 0\nstream_max_retries = 0\n'
             + "[projects."
             + json.dumps(str(workspace))
             + ']\ntrust_level = "trusted"\n'
-            + "[mcp_servers.toy]\ncommand = "
+        )
+        mcp = (
+            "[mcp_servers.toy]\ncommand = "
             + json.dumps(str(python))
             + "\nargs = "
             + json.dumps([str(toy), version, str(toy_pids)])
@@ -386,6 +645,7 @@ for line in sys.stdin:
             )
             + "\n"
         )
+        (home / "config.toml").write_text(base + (mcp if include_mcp else ""))
 
     config("v1")
     env = dict(os.environ, CODEX_HOME=str(home), XDG_STATE_HOME=str(root / "state"))
@@ -409,6 +669,8 @@ for line in sys.stdin:
         prefix=str(prefix),
         codex=str(codex),
         model_turn_limit=0,
+        modern_managed_update=modern_managed_update,
+        nonzero_accounting_proven=False,
         authority="Issues318/319 disposable two-thread scoped reload acceptance",
     )
     managed = None
@@ -432,7 +694,8 @@ for line in sys.stdin:
             XDG_DATA_HOME=str(root / "data"),
         )
         Path(env["HOME"]).mkdir(mode=0o700)
-        managed = ManagedFixture(root, home, env, receipt)
+        fixture = ModernManagedFixture if modern_managed_update else ManagedFixture
+        managed = fixture(root, home, env, receipt)
     server = None
     watcher = None
     native_log = (root / "native.log").open("w")
@@ -477,8 +740,78 @@ for line in sys.stdin:
     def emit():
         write(root / "receipt.json", receipt)
 
+    def baseline_snapshot(active_endpoint):
+        thread = receipt["baseline_thread_id"]
+        native = managed.request(
+            active_endpoint, "thread/read", dict(threadId=thread, includeTurns=True)
+        )["thread"]
+        goal = managed.request(
+            active_endpoint, "thread/goal/get", dict(threadId=thread)
+        )["goal"]
+        return dict(
+            native=native,
+            goal=goal,
+            history=managed.notice_history(native, "", "", False),
+        )
+
+    def verify_baseline(active_endpoint, label):
+        expected = receipt["baseline_reference"]
+        observed = baseline_snapshot(active_endpoint)
+        receipt[label] = observed
+        if (
+            observed["native"]["id"] != receipt["baseline_thread_id"]
+            or observed["goal"] != expected["goal"]
+            or observed["history"]["rollout_sha256"]
+            != expected["history"]["rollout_sha256"]
+        ):
+            raise RuntimeError("pre-update stock conversation, goal or history changed")
+
     try:
-        if managed:
+        if modern_managed_update:
+            config("v1", include_mcp=False)
+            endpoint = managed.seed(rollback_cli)
+            receipt["baseline_thread_id"] = request(
+                "thread/start", dict(cwd=str(workspace), ephemeral=False)
+            )["thread"]["id"]
+            request(
+                "thread/goal/set",
+                dict(
+                    threadId=receipt["baseline_thread_id"],
+                    objective="Preserve this stock-created paused goal through package replacement",
+                    status="paused",
+                    tokenBudget=1000,
+                    origin="automatic",
+                ),
+            )
+            native = request(
+                "thread/read",
+                dict(threadId=receipt["baseline_thread_id"], includeTurns=True),
+            )["thread"]
+            until = time.monotonic() + 3
+            while time.monotonic() < until:
+                rows = [
+                    json.loads(line)
+                    for line in Path(native["path"]).read_text().splitlines()
+                ]
+                if any(
+                    row["type"] == "event_msg"
+                    and row.get("payload", {}).get("type") == "thread_goal_updated"
+                    for row in rows
+                ):
+                    break
+                time.sleep(0.05)
+            else:
+                raise RuntimeError("stock goal update did not reach its actual rollout")
+            receipt["baseline_reference"] = baseline_snapshot(endpoint)
+            emit()
+            config("v1")
+            endpoint = managed.install_candidate(managed_cli)
+            codex = managed.cli
+            receipt.update(server_pid=managed.pid, endpoint=endpoint, codex=str(codex))
+            verify_baseline(endpoint, "baseline_under_candidate")
+            receipt["stock_to_candidate_preserved"] = True
+            emit()
+        elif managed:
             codex = managed.stage(managed_cli, "candidate", code_mode_host)
             endpoint = managed.start("candidate")
             receipt.update(server_pid=managed.pid, endpoint=endpoint, codex=str(codex))
@@ -793,13 +1126,23 @@ for line in sys.stdin:
     finally:
         if managed:
             try:
-                managed.stop("candidate")
-                if receipt["state"] == "passed":
+                if modern_managed_update:
+                    should_rollback = (
+                        managed.candidate_attempted and not managed.effect_unknown
+                    )
+                else:
+                    managed.stop("candidate")
+                    should_rollback = receipt["state"] == "passed"
+                if should_rollback:
 
                     def verify_rollback(rollback_endpoint):
+                        if modern_managed_update:
+                            verify_baseline(
+                                rollback_endpoint, "baseline_after_rollback"
+                            )
                         observed = {}
                         receipt["rollback_threads"] = observed
-                        for thread in receipt["threads"]:
+                        for thread in receipt.get("threads", []):
                             native = managed.request(
                                 rollback_endpoint,
                                 "thread/read",
@@ -810,7 +1153,12 @@ for line in sys.stdin:
                                 "thread/goal/get",
                                 dict(threadId=thread),
                             )["goal"]
-                            expected = receipt["after"][thread]["goal"]
+                            snapshots = receipt.get("after", receipt.get("before", {}))
+                            if thread not in snapshots:
+                                raise RuntimeError(
+                                    "rollback has no qualified goal snapshot"
+                                )
+                            expected = snapshots[thread]["goal"]
                             row = dict(
                                 native=native,
                                 goal=goal,
@@ -828,20 +1176,32 @@ for line in sys.stdin:
                                 raise RuntimeError(
                                     "rollback conversation, goal identity, counters or deadlines differ"
                                 )
+                            notice = receipt.get("managed_notice")
                             row["history"] = managed.notice_history(
                                 native,
-                                receipt["managed_notice"]["event_id"],
-                                receipt["managed_notice"]["selected"]["notice"]["text"],
-                                thread == receipt["threads"][0],
+                                notice["event_id"] if notice else "",
+                                notice["selected"]["notice"]["text"] if notice else "",
+                                bool(notice) and thread == receipt["threads"][0],
                             )
                         receipt["rollback_conversations_readable"] = True
 
                     managed.rollback(rollback_cli, verify_rollback)
+                    if modern_managed_update:
+                        receipt["modern_package_roundtrip_preserved"] = True
+                elif modern_managed_update and managed.cli is not None:
+                    if managed.effect_unknown:
+                        receipt["modern_rollback_held"] = (
+                            "unknown installation outcome; readback required"
+                        )
+                    managed.stop("modern_cleanup")
             except Exception as exc:
                 receipt.update(
                     state="failed",
                     managed_cleanup_error=type(exc).__name__ + ": " + str(exc),
                 )
+            finally:
+                if modern_managed_update and receipt["state"] != "passed":
+                    managed.cleanup_failed_updaters()
         for process in (watcher, server):
             if process is not None and process.poll() is None:
                 os.killpg(process.pid, signal.SIGTERM)
@@ -922,6 +1282,7 @@ if __name__ == "__main__":
     parser.add_argument("--managed-cli", type=Path)
     parser.add_argument("--rollback-cli", type=Path)
     parser.add_argument("--code-mode-host", type=Path)
+    parser.add_argument("--modern-managed-update", action="store_true")
     args = parser.parse_args()
     raise SystemExit(
         execute(
@@ -933,5 +1294,6 @@ if __name__ == "__main__":
             args.managed_cli,
             args.rollback_cli,
             args.code_mode_host,
+            args.modern_managed_update,
         )
     )
