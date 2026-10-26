@@ -51,6 +51,9 @@ def qualify(options):
     base.mkdir(mode=0o700, parents=True, exist_ok=False)
     prefix = options.prefix.resolve()
     appserver = options.app_server.resolve()
+    appserver_command = [str(appserver)] + (
+        ["app-server"] if options.app_server_cli else []
+    )
     tui = options.tui.absolute()
     require(
         digest(appserver) == options.app_server_sha256,
@@ -92,6 +95,9 @@ def qualify(options):
         wake_prefix=str(prefix),
         wake_version=codex_wake.__version__,
         native_app_server=str(appserver),
+        app_server_launch_mode="package_cli"
+        if options.app_server_cli
+        else "standalone",
         app_server_sha256=digest(appserver),
         stock_tui=str(tui),
         tui_sha256=digest(tui),
@@ -498,8 +504,8 @@ def qualify(options):
 
     try:
         native = subprocess.Popen(
-            [
-                str(appserver),
+            appserver_command
+            + [
                 "--listen",
                 "unix://" + str(alias),
                 "--session-source",
@@ -1511,6 +1517,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--app-server", type=Path, required=True)
     parser.add_argument("--app-server-sha256", required=True)
+    parser.add_argument("--app-server-cli", action="store_true")
     parser.add_argument("--tui", type=Path, required=True)
     parser.add_argument(
         "--history-mode", choices=("legacy", "paginated"), default="legacy"
