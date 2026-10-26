@@ -37,3 +37,12 @@ Selected SoyLei thread is currently idle, but actual thread/mcpServer/reload dry
 Source/public60-case selection PASS; curated evidence docs/dev/evidence/issue0360/acceptance.md. PR361 carries integration. Source check against HF-13/#360 confirms due/TTL and owner invariants, explicit version1 compatibility/version2 opt-in, peer filtering and effect-lock rechecks. Supported future calendar is explicit, not a24h limit. Final CI and installed connection cutover remain pending.
 
 PR361 merged02b68e8 with identical CI-qualified treefad5868; full CI40265950701 PASS both Python versions,1728tests/1skip plus wheel gates. An install-identity follow-up advances the development version to0.22.0.dev1 so the existing mcp_catalog resource proof can distinguish a refreshed resident connection from olddev0. No behavior or wake schema change in this follow-up; exact catalog/skill and goal-continuity readbacks remain required.
+
+
+## Reconciled deployment outcome — 2026-10-26
+
+State remains OPEN; source repairs are integrated through PR361 and PR362. Main e58d3a9701a34e39f7d1ded2668a4f15a1cc18d4 is installed as0.22.0.dev1-e58d3a9. Both full CI matrices passed1728tests/1skip. Original SoyLei timer is monitored and preserved in place (due2026-10-27T01:21:37.949431Z, expiry24h later, attempts0). No original resubmission or expired LitScout revival occurred.
+
+The existing shared-idle refresh issue360-shared-mcp-upgrade-dev1 expired at its fixed deadline without attempting reload. Terminal receipt contains no successful resource/goal-continuity qualification. Read-only native catalog remains0.21.2; actual agent-facing list still policy_denied. No retry, renewed allowance, native restart or governor activation. The callback delivered this continuation once; it does not establish resident refresh or daily recurrence acceptance. Own terminal observer stopped/disabled after reconciliation.
+
+The remaining acceptance gate is a supported, authorized native connection refresh followed by actual catalog0.22.0.dev1, caller-scoped list/cancel and resource/goal-continuity proof. Do not automatically retry the expired intent. HF-20 recurrence remains separate. See docs/dev/evidence/issue0360/acceptance.md for exact boundaries and terminal evidence. No source changes were required in this continuation; this is an evidence-only reconciliation.
