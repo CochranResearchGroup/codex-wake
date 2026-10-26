@@ -54,6 +54,11 @@ def _private_network():
     )
 
 
+def expected_toy_startup_versions(modern_managed_update):
+    # Modern mode also loads the pre-update baseline as a resident thread.
+    return ["v1"] * (3 if modern_managed_update else 2) + ["v2"]
+
+
 class ManagedFixture:
     """Exercise only documented lifecycle commands against the owned fixed path."""
 
@@ -1095,9 +1100,13 @@ for line in sys.stdin:
         receipt["toy_processes"] = [
             json.loads(line) for line in toy_pids.read_text().splitlines()
         ]
-        receipt["exact_toy_startups"] = sorted(
-            row["version"] for row in receipt["toy_processes"]
-        ) == ["v1", "v1", "v2"]
+        receipt["expected_toy_startup_versions"] = expected_toy_startup_versions(
+            modern_managed_update
+        )
+        receipt["exact_toy_startups"] = (
+            sorted(row["version"] for row in receipt["toy_processes"])
+            == receipt["expected_toy_startup_versions"]
+        )
         if previous_prefix:
 
             def wake_version(section, thread):
