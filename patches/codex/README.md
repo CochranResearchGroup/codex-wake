@@ -10,8 +10,8 @@ exports and workspace-only release lockfile normalization. Modern accounting,
 caller metadata and managed installation remain upstream implementations.
 
 Build the complete GNU package through the matching upstream package builder,
-including its helper, bwrap and manifest. Runtime qualification and coordinated
-live deployment are still pending; this patch is not an activation command.
+including its helper, bwrap and manifest. Private managed update/rollback and genuine paginated stock-TUI acceptance pass.
+Coordinated live activation remains pending; this patch is not an activation command.
 See the [modern plan](../../docs/dev/plans/0173-agent-harness/0006-2026-10-25-modern-native-port.md).
 
 ## Historical June candidate for issue318

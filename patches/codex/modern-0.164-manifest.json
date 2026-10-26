@@ -1,10 +1,14 @@
 {
   "upstream_base": "6aaac694803004a63c6f393d153c96d22521a6b9",
-  "source_commit": "eceb9d578809fded64d91bbdb1f8f5a3fcb546f3",
+  "source_commit": "fbfe287f4d738946ed3b158da9d9081db01ed039",
   "patch": "modern-0.164-scoped-notices.patch",
-  "patch_sha256": "37d0c5a4941465638d8c301d421e3517606f4fb810fd972f32e64ebe8337f916",
-  "status": "completed_display_container_regression_passed_final_runtime_pending",
+  "patch_sha256": "50d2cbb1c04bbcc0d8170c360878f4c36fed82db7f3a3e3b87fb54114fd0393b",
+  "status": "qualified_complete_package_live_activation_pending",
   "upstream_release": "rust-v0.164.0",
   "applies_at": "native repository root",
-  "external_dependency_upgrades": false
+  "external_dependency_upgrades": false,
+  "runtime_source_commit": "eceb9d578809fded64d91bbdb1f8f5a3fcb546f3",
+  "cli_sha256": "31b27c12fb4639b4568002cde21a6ab75d76f29cab8c32d0e1f137bb2c7c640b",
+  "helper_sha256": "8838d6e3846bd2edd665d8f284b3f1ef50013e911ea990f1b177f0c0660c4ba2",
+  "final_package_identical_to_tested_package": true
 }

@@ -15345,7 +15345,7 @@ index 129006b3d2..912498791e 100644
                  server_name: None,
                  cursor: None,
 diff --git a/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs b/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
-index c7dc29539e..5d62153e64 100644
+index c7dc29539e..d32dc91e21 100644
 --- a/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
 +++ b/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
 @@ -28,6 +28,8 @@ use codex_app_server_protocol::McpServerStatusDetail;
@@ -15369,7 +15369,17 @@ index c7dc29539e..5d62153e64 100644
      let server = MockServer::start().await;
      let tool = json!({
          "name": "open_widget",
-@@ -137,6 +141,7 @@ async fn mcp_server_status_list_reuses_thread_connection() -> Result<()> {
+@@ -86,7 +90,8 @@ async fn mcp_server_status_list_reuses_thread_connection() -> Result<()> {
+     Mock::given(method("POST"))
+         .and(path("/mcp"))
+         .respond_with(move |request: &wiremock::Request| {
+-            let request: serde_json::Value = serde_json::from_slice(&request.body).unwrap();
++            let request: serde_json::Value =
++                serde_json::from_slice(&request.body).expect("valid MCP request JSON");
+             let result = match request["method"].as_str() {
+                 Some("initialize") => json!({
+                     "protocolVersion": "2025-11-25",
+@@ -137,6 +142,7 @@ async fn mcp_server_status_list_reuses_thread_connection() -> Result<()> {
              .request(|request_id| ClientRequest::McpServerStatusList {
                  request_id,
                  params: ListMcpServerStatusParams {
@@ -15377,7 +15387,16 @@ index c7dc29539e..5d62153e64 100644
                      thread_id: Some(thread.id.clone()),
                      server_name: Some("widget".to_string()),
                      detail: Some(detail),
-@@ -671,6 +676,7 @@ async fn oauth_login_automatically_selects_callback_specific_cimd_without_metada
+@@ -159,7 +165,7 @@ async fn mcp_server_status_list_reuses_thread_connection() -> Result<()> {
+     let discovery_methods: Vec<_> = server
+         .received_requests()
+         .await
+-        .unwrap()
++        .expect("recorded MCP requests")
+         .iter()
+         .filter_map(|request| serde_json::from_slice::<serde_json::Value>(&request.body).ok())
+         .filter_map(|request| request["method"].as_str().map(str::to_owned))
+@@ -671,6 +677,7 @@ async fn oauth_login_automatically_selects_callback_specific_cimd_without_metada
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15385,7 +15404,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -761,6 +767,7 @@ async fn mcp_server_status_list_returns_raw_server_and_tool_names(plugin: bool)
+@@ -761,6 +768,7 @@ async fn mcp_server_status_list_returns_raw_server_and_tool_names(plugin: bool)
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15393,7 +15412,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -868,6 +875,7 @@ MCP_TEST_PID_FILE = {}
+@@ -868,6 +876,7 @@ MCP_TEST_PID_FILE = {}
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15401,7 +15420,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -882,6 +890,7 @@ MCP_TEST_PID_FILE = {}
+@@ -882,6 +891,7 @@ MCP_TEST_PID_FILE = {}
      std::fs::remove_file(&barrier_file)?;
      let second_request_id = mcp
          .send_list_mcp_server_status_request(ListMcpServerStatusParams {
@@ -15409,7 +15428,7 @@ index c7dc29539e..5d62153e64 100644
              server_name: None,
              cursor: None,
              limit: None,
-@@ -946,6 +955,7 @@ url = "{mcp_server_url}/mcp"
+@@ -946,6 +956,7 @@ url = "{mcp_server_url}/mcp"
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15417,7 +15436,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -960,6 +970,7 @@ url = "{mcp_server_url}/mcp"
+@@ -960,6 +971,7 @@ url = "{mcp_server_url}/mcp"
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15425,7 +15444,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -1016,6 +1027,7 @@ async fn mcp_server_status_list_reports_thread_runtime_connections() -> Result<(
+@@ -1016,6 +1028,7 @@ async fn mcp_server_status_list_reports_thread_runtime_connections() -> Result<(
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15433,7 +15452,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -1055,6 +1067,7 @@ async fn mcp_server_status_list_reports_thread_runtime_connections() -> Result<(
+@@ -1055,6 +1068,7 @@ async fn mcp_server_status_list_reports_thread_runtime_connections() -> Result<(
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15441,7 +15460,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -1139,6 +1152,7 @@ async fn mcp_server_status_list_reports_disconnected_stdio_transport() -> Result
+@@ -1139,6 +1153,7 @@ async fn mcp_server_status_list_reports_disconnected_stdio_transport() -> Result
                      .request(|request_id| ClientRequest::McpServerStatusList {
                          request_id,
                          params: ListMcpServerStatusParams {
@@ -15449,7 +15468,7 @@ index c7dc29539e..5d62153e64 100644
                              server_name: None,
                              cursor: None,
                              limit: None,
-@@ -1187,6 +1201,7 @@ async fn mcp_server_status_retains_capabilities_when_tool_discovery_fails() -> R
+@@ -1187,6 +1202,7 @@ async fn mcp_server_status_retains_capabilities_when_tool_discovery_fails() -> R
              .request(|request_id| ClientRequest::McpServerStatusList {
                  request_id,
                  params: ListMcpServerStatusParams {
@@ -15457,7 +15476,7 @@ index c7dc29539e..5d62153e64 100644
                      server_name: None,
                      cursor: None,
                      limit: None,
-@@ -1342,6 +1357,7 @@ async fn mcp_server_status_list_tools_and_auth_only_skips_slow_inventory_calls()
+@@ -1342,6 +1358,7 @@ async fn mcp_server_status_list_tools_and_auth_only_skips_slow_inventory_calls()
  
      let request_id = mcp
          .send_list_mcp_server_status_request(ListMcpServerStatusParams {
@@ -15465,7 +15484,7 @@ index c7dc29539e..5d62153e64 100644
              server_name: None,
              cursor: None,
              limit: None,
-@@ -1397,6 +1413,7 @@ url = "{underscore_server_url}/mcp"
+@@ -1397,6 +1414,7 @@ url = "{underscore_server_url}/mcp"
          .request(|request_id| ClientRequest::McpServerStatusList {
              request_id,
              params: ListMcpServerStatusParams {
@@ -15473,7 +15492,7 @@ index c7dc29539e..5d62153e64 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -1490,3 +1507,155 @@ fn mock_responses_config(server_uri: &str) -> MockResponsesConfig {
+@@ -1490,3 +1508,155 @@ fn mock_responses_config(server_uri: &str) -> MockResponsesConfig {
          .with_root_config("compact_prompt = \"compact\"\nmodel_auto_compact_token_limit = 1024")
          .with_provider_config("supports_websockets = false")
  }
