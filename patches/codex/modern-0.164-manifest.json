@@ -3,7 +3,7 @@
   "source_commit": "3ab07eac61e3247524e66afcb3f9271a87725482",
   "patch": "modern-0.164-scoped-notices.patch",
   "patch_sha256": "ca1a5768cd09e4b096cc4bc235537973bba98591f8a73376694ae5a7482bc1a3",
-  "status": "source_reviewed_focused_tests_pass_final_package_qualification_pending",
+  "status": "managed_roundtrip_passed_tui_cold_replay_failed_do_not_activate",
   "upstream_release": "rust-v0.164.0",
   "applies_at": "native repository root",
   "external_dependency_upgrades": false

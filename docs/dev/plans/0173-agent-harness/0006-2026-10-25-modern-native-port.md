@@ -136,3 +136,12 @@ prefix. Earlier ce1ad 162-module private proofs remain historical baseline evide
 do not call them current host qualification or overwrite the newer deployment.
 The old proposed ce1ad goal-limit unit prefix is superseded without applying it.
 Re-anchor the final Wake acceptance target after this reconciliation.
+
+
+Current Wake acceptance target is now frozen at merged main
+`e58d3a9701a34e39f7d1ded2668a4f15a1cc18d4` (PR362, install identity).
+Merge `09afeaa` includes that exact parent. Live commands select
+`0.22.0.dev1-e58d3a9`; all 166 installed Python files match this branch and the
+private candidate. Use this target for the next native/TUI journey; the earlier
+ce1ad baseline is not current host evidence. No installed service was changed by
+this reconciliation.
