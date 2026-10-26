@@ -32,3 +32,8 @@ no file was created. The private root had an explicit profile extending
 `:read-only`. Two earlier invocations used obsolete syntax or omitted the now
 required profile and failed during command setup; neither is a runtime regression.
 Private receipt: `native-modern-0164/sandbox-readonly-smoke.json` under user state.
+
+The cumulative binary patch is preserved byte for byte and passes reverse
+application checking against its exact source. Ordinary whitespace scanning of
+the patch file reports its required single-space blank context lines; source
+whitespace checks remain separate. Do not trim patch context to silence that scan.
