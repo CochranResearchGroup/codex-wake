@@ -15655,10 +15655,10 @@ index 87999efce1..cecb5bba62 100644
              limit: None,
 diff --git a/codex-rs/app-server/tests/suite/v2/thread_notice.rs b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
 new file mode 100644
-index 0000000000..01382bc6e6
+index 0000000000..42629ab3cb
 --- /dev/null
 +++ b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
-@@ -0,0 +1,425 @@
+@@ -0,0 +1,544 @@
 +use anyhow::Result;
 +use app_test_support::TestAppServer;
 +use app_test_support::to_response;
@@ -15675,6 +15675,18 @@ index 0000000000..01382bc6e6
 +use test_case::test_case;
 +use tokio::time::Duration;
 +use tokio::time::timeout;
++
++async fn rpc(
++    client: &mut TestAppServer,
++    method: &str,
++    params: serde_json::Value,
++) -> Result<serde_json::Value> {
++    let id = client.send_raw_request(method, Some(params)).await?;
++    Ok(client
++        .read_stream_until_response_message(RequestId::Integer(id))
++        .await?
++        .result)
++}
 +
 +#[test_case(None; "default_paginated")]
 +#[test_case(Some(ThreadHistoryMode::Legacy); "legacy")]
@@ -15732,6 +15744,12 @@ index 0000000000..01382bc6e6
 +            .await?,
 +    )?;
 +    let thread = started.thread;
++    let goal_before_notice = rpc(
++        &mut client,
++        "thread/goal/get",
++        json!({"threadId":thread.id}),
++    )
++    .await?;
 +    let event = "notice_owned_stop_1";
 +    let text = "Goal paused: external token allowance reached. Extend allowance / Reset budget window / Keep stopped. Native /goal resume alone does not renew this external allowance. [External supervision event notice_owned_stop_1]";
 +    let append = client
@@ -15844,6 +15862,19 @@ index 0000000000..01382bc6e6
 +            row["payload"]["type"].as_str(),
 +            Some("task_started" | "token_count")
 +        )));
++    let completions = rows
++        .iter()
++        .filter(|row| row["type"] == "event_msg" && row["payload"]["type"] == "task_complete")
++        .collect::<Vec<_>>();
++    if history_mode == Some(ThreadHistoryMode::Legacy) {
++        assert!(completions.is_empty());
++    } else {
++        assert_eq!(completions.len(), 1);
++        assert_eq!(
++            completions[0]["payload"],
++            json!({"type":"task_complete","root_turn_id":event,"turn_id":event,"last_agent_message":null})
++        );
++    }
 +    // A new process must discover the persisted notice, not a live-session cache.
 +    client.shutdown_gracefully().await?;
 +    let mut client = TestAppServer::builder()
@@ -15883,6 +15914,48 @@ index 0000000000..01382bc6e6
 +        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":false,"alreadyRecorded":true})
 +    );
 +    assert_eq!(model.requests().len(), 0);
++    assert_eq!(
++        rpc(
++            &mut client,
++            "thread/goal/get",
++            json!({"threadId":thread.id})
++        )
++        .await?,
++        goal_before_notice
++    );
++    if history_mode != Some(ThreadHistoryMode::Legacy) {
++        let page = rpc(
++            &mut client,
++            "thread/turns/list",
++            json!({"threadId":thread.id}),
++        )
++        .await?;
++        let turns = page["data"].as_array().expect("public turn page");
++        assert_eq!(
++            turns.len(),
++            1,
++            "notice requires a cold-readable display container"
++        );
++        let container = &turns[0];
++        assert_eq!(container["id"], event);
++        assert_eq!(container["rootTurnId"], event);
++        assert_eq!(container["status"], "completed");
++        for field in ["startedAt", "completedAt", "durationMs", "error"] {
++            assert!(container[field].is_null(), "display container {field}");
++        }
++        let items = rpc(
++            &mut client,
++            "thread/items/list",
++            json!({"threadId":thread.id,"turnId":event}),
++        )
++        .await?;
++        let entries = items["data"].as_array().expect("public item page");
++        assert_eq!(entries.len(), 1);
++        assert_eq!(entries[0]["turnId"], event);
++        assert_eq!(entries[0]["item"]["id"], event);
++        assert_eq!(entries[0]["item"]["type"], "agentMessage");
++        assert_eq!(entries[0]["item"]["text"], text);
++    }
 +    // Only this explicit operator continuation starts a local mock model request.
 +    let turn = client
 +        .send_turn_start_request(TurnStartParams {
@@ -16003,6 +16076,12 @@ index 0000000000..01382bc6e6
 +            .await?,
 +    )?;
 +    let thread = started.thread;
++    let goal_before_notice = rpc(
++        &mut client,
++        "thread/goal/get",
++        json!({"threadId":thread.id}),
++    )
++    .await?;
 +    let turn = client
 +        .send_turn_start_request(TurnStartParams {
 +            thread_id: thread.id.clone(),
@@ -16013,9 +16092,13 @@ index 0000000000..01382bc6e6
 +            ..Default::default()
 +        })
 +        .await?;
-+    client
++    let real_turn = client
 +        .read_stream_until_response_message(RequestId::Integer(turn))
-+        .await?;
++        .await?
++        .result["turn"]["id"]
++        .as_str()
++        .expect("actual model turn id")
++        .to_owned();
 +    let event = "notice_busy_model_1";
 +    let text = "External supervision changed while this model request was busy. [External supervision event notice_busy_model_1]";
 +    let append = client
@@ -16069,11 +16152,47 @@ index 0000000000..01382bc6e6
 +            .result,
 +        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true})
 +    );
-+    timeout(
++    assert_eq!(
++        rpc(
++            &mut client,
++            "thread/goal/get",
++            json!({"threadId":thread.id})
++        )
++        .await?,
++        goal_before_notice
++    );
++    let page = rpc(
++        &mut client,
++        "thread/turns/list",
++        json!({"threadId":thread.id}),
++    )
++    .await?;
++    let turns = page["data"].as_array().expect("public turn page");
++    let active = turns
++        .iter()
++        .find(|turn| turn["id"] == real_turn)
++        .expect("actual pending turn");
++    assert_eq!(
++        active["status"], "inProgress",
++        "display completion must not complete model work"
++    );
++    assert!(active["completedAt"].is_null());
++    let container = turns
++        .iter()
++        .find(|turn| turn["id"] == event)
++        .expect("separate notice container");
++    assert_eq!(container["status"], "completed");
++    assert_eq!(container["rootTurnId"], event);
++    assert!(container["startedAt"].is_null());
++    let completed = timeout(
 +        Duration::from_secs(10),
 +        client.read_stream_until_notification_message("turn/completed"),
 +    )
 +    .await??;
++    assert_eq!(
++        completed.params.as_ref().expect("completion params")["turn"]["id"],
++        real_turn
++    );
 +    assert_eq!(
 +        server
 +            .received_requests()
@@ -16197,10 +16316,10 @@ index 024eb76132..6a3337a971 100644
          &self,
 diff --git a/codex-rs/core/src/codex_thread/external_notice.rs b/codex-rs/core/src/codex_thread/external_notice.rs
 new file mode 100644
-index 0000000000..3c3fc818f7
+index 0000000000..44e2a9709b
 --- /dev/null
 +++ b/codex-rs/core/src/codex_thread/external_notice.rs
-@@ -0,0 +1,190 @@
+@@ -0,0 +1,208 @@
 +//! Durable, bounded external notices do not schedule model work.
 +use super::CodexThread;
 +use crate::context::ContextualUserFragment;
@@ -16217,6 +16336,8 @@ index 0000000000..3c3fc818f7
 +use codex_protocol::protocol::AgentMessageEvent;
 +use codex_protocol::protocol::EventMsg;
 +use codex_protocol::protocol::ItemCompletedEvent;
++use codex_protocol::protocol::ThreadHistoryMode;
++use codex_protocol::protocol::TurnCompleteEvent;
 +use codex_thread_store::ItemSortKey;
 +use codex_thread_store::ListItemsParams;
 +use codex_thread_store::ListItemsPosition;
@@ -16370,7 +16491,7 @@ index 0000000000..3c3fc818f7
 +            // Upstream persistence selects AgentMessage for legacy history and
 +            // ItemCompleted for paginated history. Keep both inputs so each mode
 +            // retains its canonical display representation without a model turn.
-+            self.append_rollout_items(&[
++            let mut display_items = vec![
 +                RolloutItem::EventMsg(EventMsg::AgentMessage(AgentMessageEvent {
 +                    message: text.to_owned(), phase: None, memory_citation: None, delivery: None, questions: None,
 +                })),
@@ -16385,7 +16506,23 @@ index 0000000000..3c3fc818f7
 +                    started_at_ms: None,
 +                    completed_at_ms: chrono::Utc::now().timestamp_millis(),
 +                })),
-+            ]).await.map_err(|error| CodexErr::InvalidRequest(format!("notice display append failed: {error}")))?;
++            ];
++            if self.config_snapshot().await.history_mode == ThreadHistoryMode::Paginated {
++                // Canonical paginated turn paging needs a display container as well
++                // as its item. This is persisted directly, never dispatched through
++                // the session's model-turn completion or goal/accounting handlers.
++                display_items.push(RolloutItem::EventMsg(EventMsg::TurnComplete(TurnCompleteEvent {
++                    root_turn_id: Some(event_id.to_owned()),
++                    turn_id: event_id.to_owned(),
++                    last_agent_message: None,
++                    error: None,
++                    started_at: None,
++                    completed_at: None,
++                    duration_ms: None,
++                    time_to_first_token_ms: None,
++                })));
++            }
++            self.append_rollout_items(&display_items).await.map_err(|error| CodexErr::InvalidRequest(format!("notice display append failed: {error}")))?;
 +        }
 +        self.flush_rollout().await?;
 +        Ok(())

@@ -63,3 +63,26 @@ Final formatting changed only the MCP snapshot call layout, committed as
 `3ab07eac61e3247524e66afcb3f9271a87725482`. No tests were repeated solely for
 formatting. The cumulative patch now points to that source; the final complete
 package is rebuilding before runtime qualification.
+
+## Cold TUI replay repair
+
+A genuine paginated TUI run found a second production issue: live notices were
+visible and persisted, but cold TUI hydration discarded their orphan items.
+Read-only database and source tracing showed no matching turn metadata. Public
+item readback alone was insufficient frontend acceptance.
+
+The producer now uses upstream's existing ItemCompleted plus TurnComplete
+representation for a completed display container in paginated history only.
+It writes directly to persistence without TurnStarted, provider usage, a session
+completion callback or a TurnCompleted notification. Legacy behavior is unchanged.
+The regression first failed public turn paging (zero containers, expected one),
+then all four focused cases passed with retries disabled. They verify cold
+turn/item association, exact null-timing display completion, unchanged goals,
+zero extra model starts/usage, and a busy real work turn remaining in progress.
+Primary reviewed the 22-line production change and its upstream precedent.
+
+Source `eceb9d578809fded64d91bbdb1f8f5a3fcb546f3` passed final formatting with
+no further edits. The complete package is rebuilding; actual stock TUI replay
+and current Wake 0.22.0.dev1 acceptance remain open. Caller metadata passed on
+unchanged source; the previous scoped Clippy packet timed out without findings
+and is not counted as green.
