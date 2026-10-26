@@ -1,6 +1,6 @@
 # Native managed activation diagnosis
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work items:318,310,343,345
 Branch: fix/native-managed-activation
@@ -11,8 +11,8 @@ Base: origin/main ce1ad93
 Wake0.22.0.dev0 is deployed; live managed Codex remains0.164.0. The completed
 98d5 CLI/helper bundle now passes isolated managed lifecycle, scoped refresh,
 notice RPC/history and functional candidate-to-stock rollback. Live activation
-has not occurred. Operator deployment-policy question Q1 is pending; no elapsed
-time or silence supplies that decision.
+has not occurred. Operator answered yes to Q1: preserve the modern managed
+mechanism and port to its matching source base. Successor0006 owns that work.
 
 ## Bounded scope
 
@@ -144,3 +144,10 @@ update interface unavailable (reference0,candidate2), while the separate real
 legacy lifecycle oracle remainsGREEN. Source checks passRuff/compile/diff.
 The evidence report gives the concrete namespace-isolated reproduction command.
 No repeated broader review or additional runtime effects were introduced.
+
+## Decision and closeout
+
+Operator answered yes to the recommended modern mechanism. Diagnosis and private
+legacy qualification are complete; no legacy activation occurs. Successor0006
+uses exact official0.164 source and normal complete-package/from-cli handling.
+This closure does not claim live deployment or requesting-session acceptance.
