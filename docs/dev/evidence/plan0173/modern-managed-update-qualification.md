@@ -1,6 +1,6 @@
 # Modern managed package qualification
 
-The optional `--modern-managed-update` path is implemented; acceptance against the new GNU candidate is **NOT RUN**. Its source package must first pass the native build gates. The legacy default qualifier is retained.
+The optional `--modern-managed-update` path is implemented. The authorized new GNU candidate roundtrip reached real stock→candidate→stock replacement but the overall qualifier is **FAILED** on raw rollout-byte preservation: native cold reads append settings checkpoints. The legacy default qualifier is retained. Historical intermediate gates below are retained with their actual execution status.
 
 The modern path copies complete caller packages into the private fixture, invokes reference `app-server daemon start`, then actual reference `app-server daemon update --from-cli --yes`. It creates a paused reference-owned thread, snapshots its actual goal and rollout, updates through the candidate's real `--from-cli` command, reads the same baseline, exercises the existing selected-thread MCP refresh and no-turn notice checks, and rolls back through the frozen reference caller package's real `--from-cli`. It checks exact package files/modes, process executable SHA, peer UID/private CODEX_HOME, builtin updater-stop/pin effects, goal identity, conversations and raw rollout hashes. No manual current selection, history rewrite, resume workaround, custom success-path pinning, host installation, or model turn is introduced. Nonzero token accounting is explicitly **not proven** by this fixture.
 
@@ -51,3 +51,19 @@ The first actual run used root `/home/ecochran76/.local/state/cw-modern-run1` an
 Full input package maps before/after are `modern-roundtrip1-inputs-{before,after}.json` in `/home/ecochran76/.local/state/codex-wake/native-modern-0164/`; maps are identical. Candidate CLI SHA256: `37d750ff09e3b47d1ceb0745c9f0b88adc2e4b21d67e27230a4055e28adcdcf5`; reference CLI retains the stock SHA above.
 
 Upstream `protocol.rs:2329–2336` defines this as the thread-owned settings snapshot; `core/src/session/thread_settings.rs:129–151` emits/checkpoints it without a model turn. The modern-only allowlist now admits that exact event shape only for the native thread ID, private workspace and `owned_no_provider`. Legacy behavior and rejection of unknown events are retained. A focused temporary-rollout regression accepted this settings event and rejected task_started, token_count, unknown and foreign-owner events. Ruff passes. A fresh-root rerun was explicitly authorized after this known compatibility correction; its result is recorded separately below.
+
+## Authorized corrected run: actual replacement completed, byte-preservation failed
+
+Run2 used fresh root `/home/ecochran76/.local/state/cw-modern-run2`, the same command and frozen caller packages as run1, and stopped at the first different failure after 69.92 seconds. Log: `/home/ecochran76/.local/state/codex-wake/native-modern-0164/modern-roundtrip2.log`. Receipt SHA256: `08c077bad526c552694b29c0029c3028b8c03451d8a4729faae7fb1146006a59`.
+
+The real reference start/pin, NEW GNU candidate `update --from-cli --yes`, and frozen reference rollback `update --from-cli --yes` all completed with matching complete package files, process executable, owned peer/private CODEX_HOME and builtin pin/updater-stop readbacks. Baseline thread `01a17631-4287-7bf0-827b-436eb553a2bc` and its full paused goal (including timestamps, tokenBudget 1000, tokensUsed 0 and timeUsedSeconds 0) remained identical and readable under candidate and reference rollback. No resume was needed.
+
+The strict raw history comparison failed: baseline had three rows, candidate read had four and reference rollback read had five. Each added row is `event_msg/thread_settings_applied`; all three settings payloads are identical. Original session metadata and goal event remain present. Raw SHA values are:
+
+- Reference baseline: `6be8b8a5e2395709fbcc56a4d9723a16276061a4a3d94ef4b0162fbc730175c1`
+- Candidate read: `c48fdc3dfdf5b9996b22ea08f7a248cb6c66e32caaa32f375b689c64d52c5fa3`
+- Reference rollback read: `d8d3aee2564d426d53176301c91a07b12156eb5c73876c02ed811e4efd8a555b`
+
+The first error is `RuntimeError: pre-update stock conversation, goal or history changed`; the rollback verification reports the same error. This is **not a passing byte-preservation proof**. No normalization, rollout rewrite, manual resume, relaxed hash comparison or retry was performed. Selected two-thread MCP refresh/notice qualification was not reached. No model turns or nonzero token accounting were proven.
+
+Full source input maps remain identical to run1's frozen before map; run2 after-map is `/home/ecochran76/.local/state/codex-wake/native-modern-0164/modern-roundtrip2-inputs-after.json`. Cleanup receipt and fresh exact-root/private CODEX_HOME `/proc` census are empty. The owned reference daemon was stopped and no private updater survived. Host CLI/updater/resources were untouched. Remaining decision: assess the upstream cold-read checkpoint behavior against the required raw-byte contract before authorizing any further execution or contract change.
