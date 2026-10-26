@@ -158,6 +158,7 @@ def add_scope_options(parser):
     parser.add_argument('--all-roots', action='store_true', help='snapshot all registered roots, including disabled roots')
     parser.add_argument('--registry-dir', type=Path, help='operator-selected root registry')
     parser.add_argument('--authorized-root', type=Path, action='append', help=__import__('argparse').SUPPRESS)
+    parser.add_argument('--caller-wake-subject', help=__import__('argparse').SUPPRESS)
 
 
 def add_control_parsers(subparsers):
@@ -168,6 +169,17 @@ def add_control_parsers(subparsers):
         parser = subparsers.add_parser(name, help=description)
         add_scope_options(parser)
         parser.add_argument('--json', dest='as_json', action='store_true')
+
+
+def _owned_by(record, subject):
+    if subject is None:
+        return True
+    from .records import classify_record
+    if classify_record(record) != 'native_intent_v6':
+        return False
+    context = record.get('wake_policy', {}).get('permission_context', {})
+    return (context.get('subject') == subject and context.get('target') == subject
+            and record.get('target', {}).get('thread_id') == subject)
 
 
 def _cancel(root, args):
@@ -182,12 +194,17 @@ def _cancel(root, args):
         for item in candidates:
             record = item.record if hasattr(item, 'record') else item
             identifier = record['id']
+            subject = getattr(args, 'caller_wake_subject', None)
+            if args.all and not _owned_by(record, subject):
+                continue
             if args.all and record.get('status') not in ('pending','firing'):
                 results.append(dict(wake_id=identifier,state='skipped',reason='not_cancellable'))
                 continue
             try:
                 from .records import find_record
                 current = find_record(root,identifier).record
+                if not _owned_by(current, subject):
+                    raise WakeError('wake outside verified caller scope')
                 # An ambiguous external submission may already have been consumed.
                 if (current.get('native_delivery',{}).get('state') == 'uncertain'
                         or current.get('app_server_delivery',{}).get('state') == 'uncertain'):
@@ -206,14 +223,28 @@ def _control_command(args, root):
         allowed = {p.expanduser().resolve() for p in args.authorized_root}
         if not set(roots) <= allowed:
             raise WakeError('host-authorized root snapshot changed; no operation performed')
+    subject = getattr(args, 'caller_wake_subject', None)
+    if subject is not None:
+        from uuid import UUID
+        if str(UUID(subject)) != subject or args.command not in ('list', 'cancel') or args.all_roots:
+            raise WakeError('invalid verified-self control scope')
     rows = []
     for selected in roots:
         row = dict(wake_root=str(selected))
         try:
             if args.command == 'list':
-                row['wakes'] = [dict(wake_id=x.record.get('id'),status=x.record.get('status'),
-                    target=x.record.get('target'),next_attempt_at=x.record.get('next_attempt_at'))
-                    for x in all_records(selected,include_archive=args.archived)]
+                from .native_intents import schedule_projection
+                from .records import classify_record
+                row['wakes'] = []
+                for item in all_records(selected, include_archive=args.archived):
+                    record = item.record
+                    if not _owned_by(record, subject):
+                        continue
+                    dates = (schedule_projection(record) if classify_record(record) in ('native_intent_v6', 'runtime_intent_v7') else
+                        dict(due_at=record.get('predicate', {}).get('due_at'),
+                            expires_at=record.get('target', {}).get('expires_at')))
+                    row['wakes'].append(dict(wake_id=record.get('id'), status=record.get('status'),
+                        target=record.get('target'), next_attempt_at=record.get('next_attempt_at'), **dates))
                 row['paused'] = paused(selected)
                 row['inventory_errors'] = inventory_errors(selected,args.archived)
             elif args.command == 'pause-status':

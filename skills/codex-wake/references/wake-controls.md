@@ -33,3 +33,11 @@ work, restart stopped handoffs, or renew deadlines/budgets. Retain operation rec
 CLI equivalents: codex-wake list; cancel WAKE_ID or cancel --all; pause;
 pause-status; interrupt; resume. Add --all-roots and --json for an explicit
 registered-root snapshot with structured per-root results.
+
+A host may explicitly enable verified-self list/cancel on its selected root.
+That mode requires actual native caller metadata and frozen creator/recipient
+provenance. It selects only the caller's own native wakes, including for `all`;
+peer IDs and all-root or root-wide controls remain denied. Older records without
+provenance need explicit host grants. Listing includes original due/expiry dates.
+Do not grant yourself scope or treat a changed host config as proof that an old
+MCP connection has reloaded.

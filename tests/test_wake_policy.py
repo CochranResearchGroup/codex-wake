@@ -40,7 +40,7 @@ class WakePolicyTests(unittest.TestCase):
 
     def test_owner_completion_actions_are_distinct_and_closed_tab_is_not_completion(self):
         for action, expected in [('retire', 'cancelled'), ('hold', 'pending'), ('retain', 'firing')]:
-            with self.subTest(action=action), tempfile.TemporaryDirectory() as temporary:
+            with self.subTest(action=action), tempfile.TemporaryDirectory() as temporary, patch.dict('os.environ', {'XDG_STATE_HOME': temporary}):
                 root = Path(temporary)
                 original = self.register(root, '--wake-lifetime', 'task', '--owner-id', 'daily-report', '--owner-end', action)
                 with patch('codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': dict(CLOCK['counter'], counter=62000)}):
@@ -57,6 +57,17 @@ class WakePolicyTests(unittest.TestCase):
                 self.assertEqual(record['status'], expected)
                 self.assertEqual(record['scheduling_intent'], original['scheduling_intent'])
                 self.assertEqual(record['attempts'], 0)
+
+                from codex_wake.monitor import write_monitor_health
+                write_monitor_health(wake_root=root, source='owner-fixture', mode='loop')
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    self.assertEqual(run(['--wake-root', str(root), 'native', 'after', '--json',
+                        '--codex-path', sys.executable, '--idempotency-key', 'policy-test',
+                        '--wake-lifetime', 'task', '--owner-id', 'daily-report', '--owner-end', action,
+                        THREAD, '1m', '--', 'Continue']), 0)
+                receipt = json.loads(output.getvalue())
+                self.assertEqual(receipt['armed'], action == 'retain')
 
     def test_uncertain_submission_survives_owner_retirement_and_reconciles_without_resend(self):
         class Adapter:

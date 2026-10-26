@@ -109,3 +109,61 @@ class WakeControlMCPTests(unittest.TestCase):
         self.assertNotIn(str(extra), command)
         self.assertIn('--all-roots', command)
         self.assertEqual(command[command.index('--registry-dir')+1], str(registry))
+
+    def test_agent_can_inspect_due_time_and_cancel_its_future_wake_with_host_scope(self):
+        import sys
+        runner = CommandRunner(wake_root=self.root, wake_control_config=self.config)
+        context = dict(threadId=CALLER, sessionId=CALLER, callId='fixture-native',
+            **{'x-codex-turn-metadata':dict(thread_id=CALLER, session_id=CALLER, turn_id='fixture-turn')})
+        clock = dict(utc=dict(status='network', sources=['a', 'b'], lower=1893456000, upper=1893456000.2), counter=None)
+        with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                'codex_wake.native_clock.snapshot', return_value=clock):
+            made, failed = runner.call('wake_native_after', dict(caller_thread_id=CALLER,
+                trigger='3650d', ttl='24h', prompt='Read-only review', idempotency_key='inspect-future',
+                wake_lifetime='persistent'), native_context=context)
+        self.assertFalse(failed, made)
+        listed, failed = runner.call('wake_list', dict(caller_thread_id=CALLER))
+        self.assertFalse(failed, listed)
+        wake, = listed['roots'][0]['wakes']
+        self.assertEqual(wake.get('due_at'), made['due_at'])
+        self.assertEqual(wake['expires_at'], made['expires_at'])
+        cancelled, failed = runner.call('wake_cancel', dict(caller_thread_id=CALLER, wake_id=made['id']))
+        self.assertFalse(failed, cancelled)
+        self.assertEqual(cancelled['roots'][0]['results'], [dict(wake_id=made['id'], state='cancelled')])
+
+    def test_verified_self_controls_do_not_need_per_thread_grants_or_reach_peer_wakes(self):
+        import sys
+        from codex_wake.records import find_record
+        peer = '22345678-1234-1234-1234-123456789abc'
+        from codex_wake.session_permissions import PermissionStore, Principal
+        self.root.chmod(0o700)
+        PermissionStore(self.root).configure({'version': 1}, Principal('fixture-operator', 'operator'), expected_revision=0)
+        runner = CommandRunner(wake_root=self.root, wake_control_config=self.config)
+        self.config.write_text(json.dumps(dict(version=2, callers={}, native_self=dict(
+            roots=[str(self.root)], actions=['list', 'cancel']))))
+        self.config.chmod(0o600)
+        clock = dict(utc=dict(status='network', sources=['a', 'b'], lower=1893456000, upper=1893456000.2), counter=None)
+        def context(caller):
+            return dict(threadId=caller, sessionId=caller, callId='fixture-native',
+                **{'x-codex-turn-metadata':dict(thread_id=caller, session_id=caller, turn_id='fixture-turn')})
+        made = {}
+        with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                'codex_wake.native_clock.snapshot', return_value=clock):
+            for caller in (CALLER, peer):
+                value, failed = runner.call('wake_native_after', dict(caller_thread_id=caller,
+                    trigger='24h', prompt='Read-only review', idempotency_key='owned-' + caller,
+                    wake_lifetime='persistent'), native_context=context(caller))
+                self.assertFalse(failed, value)
+                made[caller] = value['id']
+        listed, failed = runner.call('wake_list', dict(caller_thread_id=CALLER), native_context=context(CALLER))
+        self.assertFalse(failed, listed)
+        self.assertEqual([w['wake_id'] for w in listed['roots'][0]['wakes']], [made[CALLER]])
+        self.assertTrue(runner.call('wake_list', dict(caller_thread_id=CALLER))[1])
+        self.assertTrue(runner.call('wake_pause', dict(caller_thread_id=CALLER), native_context=context(CALLER))[1])
+        self.assertTrue(runner.call('wake_list', dict(caller_thread_id=peer), native_context=context(CALLER))[1])
+        self.assertTrue(runner.call('wake_list', dict(caller_thread_id=CALLER, all_roots=True), native_context=context(CALLER))[1])
+        self.assertTrue(runner.call('wake_cancel', dict(caller_thread_id=CALLER, wake_id=made[peer]), native_context=context(CALLER))[1])
+        self.assertEqual(find_record(self.root, made[peer]).record['status'], 'pending')
+        cancelled, failed = runner.call('wake_cancel', dict(caller_thread_id=CALLER, all=True), native_context=context(CALLER))
+        self.assertFalse(failed, cancelled)
+        self.assertEqual(find_record(self.root, made[CALLER]).record['status'], 'cancelled')

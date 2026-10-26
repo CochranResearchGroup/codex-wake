@@ -160,6 +160,15 @@ codex-wake native file --ttl 2h THREAD_UUID /absolute/condition -- "Read the res
 codex-wake native reconcile WAKE_ID
 ```
 
+For a user-requested follow-up that must survive completion of the creating task,
+select `--wake-lifetime persistent` (MCP `wake_lifetime:"persistent"`) explicitly.
+A time wake's `ttl` starts **after due**, so `after 24h` plus `ttl 24h` means a
+24-hour delivery window following tomorrow's due time, not expiry at tomorrow's
+registration boundary. Scheduling is supported beyond 24 hours. Inspect returned
+`due_at`, `expires_at`, `armed` and `scheduling_status`; a retained unmonitored
+intent is not an active schedule. Reconcile its original ID instead of creating
+a second wake. Counter-only clocks remain relative; never invent UTC.
+
 Verify an installed compatible Wake scheduler owns the selected wake root, then end the
 originating turn. Native queue acceptance does not prove execution or ack.
 Unavailable/busy targets hold until expiry; `--resume-missing` explicitly allows
