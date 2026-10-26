@@ -369,9 +369,106 @@ class ModernManagedFixture(ManagedFixture):
         return files
 
     def notice_history(self, native, event, text, selected):
-        result = super().notice_history(native, event, text, selected)
-        result["raw_rollout_text"] = Path(native["path"]).read_bytes().decode("utf-8")
-        return result
+        if native.get("historyMode") != "paginated" or native["turns"]:
+            raise RuntimeError(
+                "modern notice history must remain paginated without model turns"
+            )
+        page = self.request(
+            self.endpoint,
+            "thread/items/list",
+            dict(threadId=native["id"], limit=100, sortDirection="asc"),
+        )
+        entries = page["data"]
+        if page.get("nextCursor") is not None:
+            raise RuntimeError("unexpected additional modern notice history page")
+        if selected:
+            if len(entries) != 1:
+                raise RuntimeError("expected one canonical paginated notice item")
+            entry = entries[0]
+            item = entry["item"]
+            if (
+                entry.get("turnId") != event
+                or entry.get("startedAtMs") is not None
+                or not isinstance(entry.get("completedAtMs"), int)
+                or item.get("type") != "agentMessage"
+                or item.get("id") != event
+                or item.get("text") != text
+            ):
+                raise RuntimeError(
+                    "canonical paginated notice identity or content differs"
+                )
+        elif entries:
+            raise RuntimeError("peer or baseline acquired a paginated item")
+        path = Path(native["path"]).resolve(strict=True)
+        if not path.is_relative_to((self.home / "sessions").resolve()):
+            raise RuntimeError("modern notice rollout escaped private home")
+        raw = path.read_bytes()
+        rows = [json.loads(line) for line in raw.splitlines()]
+        contexts = displays = 0
+        expected_context = (
+            '<codex_internal_context source="external_supervision">\n'
+            + text
+            + "\n</codex_internal_context>"
+        )
+        for row in rows:
+            payload = row.get("payload", {})
+            if row["type"] == "session_meta":
+                continue
+            if (
+                row["type"] == "event_msg"
+                and payload.get("type") == "thread_goal_updated"
+            ):
+                continue
+            if (
+                row["type"] == "event_msg"
+                and payload.get("type") == "thread_settings_applied"
+            ):
+                # Reuse the strict owner/workspace/provider append validator.
+                self.preserve_prefix(b"", json.dumps(row).encode(), native["id"])
+                continue
+            if (
+                selected
+                and row["type"] == "response_item"
+                and payload.get("type") == "message"
+                and payload.get("id") == event
+                and payload.get("role") == "user"
+                and payload.get("content")
+                == [dict(type="input_text", text=expected_context)]
+            ):
+                contexts += 1
+                continue
+            if (
+                selected
+                and row["type"] == "event_msg"
+                and payload.get("type") == "item_completed"
+                and payload.get("thread_id") == native["id"]
+                and payload.get("turn_id") == event
+                and payload.get("item")
+                == dict(
+                    type="AgentMessage",
+                    id=event,
+                    content=[dict(type="Text", text=text)],
+                )
+                and isinstance(payload.get("completed_at_ms"), int)
+                and payload["completed_at_ms"] == entries[0]["completedAtMs"]
+            ):
+                displays += 1
+                continue
+            raise RuntimeError("unexpected modern raw history event or model activity")
+        if (contexts, displays) != ((1, 1) if selected else (0, 0)):
+            raise RuntimeError("modern notice context/display count differs")
+        return dict(
+            model_turn_starts=0,
+            synthetic_notice_containers=0,
+            canonical_paginated_notice_items=len(entries),
+            paginated_items=page,
+            model_requests_or_completions=0,
+            usage_events=0,
+            rollout_sha256=_sha256(path),
+            notice_marker_present=selected,
+            raw_record_types=[row["type"] for row in rows],
+            raw_rollout_text=raw.decode("utf-8"),
+        )
 
     def preserve_prefix(self, before, after, thread):
         if not after.startswith(before):
@@ -513,7 +610,8 @@ class ModernManagedFixture(ManagedFixture):
         self.pid = pid
         self.records[label + "_process"] = identity
         self.records[label + "_selected_package"] = str(selected.parent.parent)
-        return "unix://" + str(endpoint_path)
+        self.endpoint = "unix://" + str(endpoint_path)
+        return self.endpoint
 
     def select_from_cli(self, label):
         old = self.identity(self.pid) if self.pid else None
