@@ -98,3 +98,62 @@ Schema8 keeps one atomic canonical record across statuses, preserving original
 origin/clock anchors, expiry, prompt and uncertain attempt identity. Startup
 failure does not consume an attempt. Owner retirement cannot retract a submitted
 effect or turn missing evidence into non-submission.
+
+## Future scheduling, lifetime and delivery windows
+
+A time wake may be scheduled beyond24hours, independently of the creating
+session's execution window. Positive relative durations use `s`, `m`, `h`, or
+`d`; absolute due times use timezone-qualified ISO8601 dates. There is no24hour
+scheduling ceiling. Dates and their displayed expiry must fit the supported ISO
+calendar; unrepresentable projections are explicitly unsupported, never armed.
+
+For time wakes, `ttl` is the delivery window **after the due time**, not a limit
+on how far in the future the wake may be scheduled. File-wake TTL starts at its
+registration origin. Independently persistent lifetime removes owner-completion
+retirement; it does not erase an explicit expiry or authorize new execution
+resources. Task/conversation completion policy remains separately enforceable.
+
+Registration receipts expose original `due_at`, `expires_at`, `armed`, monitor
+ownership and `scheduling_status`. Qualified original UTC anchors provide dates
+immediately; counter-only origins remain explicitly relative rather than
+inventing UTC. A compatible persistent loop must be observed for `armed=true`.
+A retained unmonitored intent is not an active schedule; its response names the
+root and asks for monitor setup/reconciliation. Journal persistence and delivery
+are separate outcomes.
+
+`native reconcile ID` can refresh a pending native timer from its saved clock
+origin without submitting a model turn or restarting the delay. An uncertain
+submission still uses evidence reconciliation and is never replayed. Agent
+inventory includes original due/expiry dates, and cancellation still requires
+host root/action grants. Reusing an unchanged idempotency key returns the same
+intent, including after monitor setup or a process restart.
+
+Recurrence remains the existing HF-20 responsibility: one schedule authority
+computes each occurrence, with declared missed-run/overlap behavior. A prompt
+that asks a model to re-arm a wake is a continuation contract, not proof of a
+native cron timer. This repair does not create a second recurrence authority or
+change those existing decisions.
+
+### Verified-session controls on a shared root
+
+The host can opt into self-service inspection/cancellation without a new caller
+entry for every conversation. Pass a private owned `--wake-control-config` to
+the MCP process, with this version2 format:
+
+```json
+{"version":2,"callers":{},"native_self":{"roots":["/absolute/host/wake-root"],"actions":["list","cancel"]}}
+```
+
+Actual native caller metadata is required. Only integrity-qualified native wakes
+whose frozen permission context identifies that same creator and recipient are
+selected. Listing filters peers; cancellation (including `all`) rechecks ownership
+under the existing effect lock. Spoofed caller IDs, peer wake IDs, all-root scope,
+and root-wide pause/resume/interruption are refused. Configure the existing
+common permission policy first so new native registrations freeze provenance.
+Older records without that provenance still need explicit operator grants.
+
+Version1 explicit caller/root/action grants retain their existing semantics.
+An explicit caller entry takes precedence over the optional verified-self default;
+that default cannot bypass a caller-specific restriction. Fresh connections use
+the configured host file; editing config does not prove resident MCP connections
+have reloaded. Existing supported refresh/idle boundaries still apply.

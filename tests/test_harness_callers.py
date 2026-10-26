@@ -165,6 +165,55 @@ class HarnessCallerTests(unittest.TestCase):
             self.assertEqual(record['wake_policy']['startup'], 'background_saved')
             self.assertEqual(record['target']['resume_policy'], 'same_thread')
 
+    def test_future_wakes_expose_original_due_and_delivery_window_without_claiming_monitoring(self):
+        from datetime import datetime, UTC, timedelta
+        origin = datetime(2030, 1, 1, tzinfo=UTC)
+        clock = dict(utc=dict(status='network', sources=['fixture-a', 'fixture-b'],
+            lower=origin.timestamp(), upper=origin.timestamp() + .2), counter=None)
+        for delay, days in [('24h', 1), ('3650d', 3650)]:
+            with self.subTest(delay=delay), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                runner = CommandRunner(wake_root=root)
+                body = dict(caller_thread_id=THREAD, trigger=delay, ttl='24h', prompt='Read-only review',
+                    idempotency_key='future-fixture', wake_lifetime='persistent', recipient_startup='create_load_run')
+                with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                        'codex_wake.native_clock.snapshot', return_value=clock):
+                    value, failed = runner.call('wake_native_after', body, native_context=META)
+                self.assertFalse(failed, value)
+                due = origin + timedelta(days=days, microseconds=200000)
+                self.assertEqual(value.get('due_at'), due.isoformat().replace('+00:00', 'Z'))
+                self.assertEqual(value['expires_at'], (due + timedelta(days=1)).isoformat().replace('+00:00', 'Z'))
+                self.assertFalse(value['armed'])
+                self.assertEqual(value['scheduling_status'], 'retained_unmonitored')
+                self.assertIn('monitor', value['next_action'].lower())
+                record = all_records(root)[0].record
+                self.assertEqual(record['predicate']['due_at'], value['due_at'])
+                self.assertEqual(record['time_recovery']['reason'], 'not_due')
+
+    def test_future_wake_requires_loop_worker_and_keeps_identity_when_monitor_arrives(self):
+        from codex_wake.monitor import write_monitor_health
+        clock = dict(utc=dict(status='network', sources=['fixture-a', 'fixture-b'],
+            lower=1893456000, upper=1893456000.2), counter=None)
+        with tempfile.TemporaryDirectory() as temporary, patch.dict('os.environ', {'XDG_STATE_HOME': temporary}):
+            root = Path(temporary) / 'wake'
+            runner = CommandRunner(wake_root=root)
+            body = dict(caller_thread_id=THREAD, trigger='3650d', ttl='24h', prompt='Read-only review',
+                idempotency_key='future-monitor-fixture', wake_lifetime='persistent')
+            write_monitor_health(wake_root=root, source='qualification-fixture', mode='once')
+            with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                    'codex_wake.native_clock.snapshot', return_value=clock):
+                first, failed = runner.call('wake_native_after', body, native_context=META)
+                self.assertFalse(failed, first)
+                self.assertFalse(first['armed'], 'a one-shot observation is not durable monitor ownership')
+                write_monitor_health(wake_root=root, source='qualification-fixture', mode='loop')
+                same, failed = runner.call('wake_native_after', body, native_context=META)
+                self.assertFalse(failed, same)
+            self.assertTrue(same['armed'])
+            self.assertTrue(same['deduplicated'])
+            self.assertEqual(same['id'], first['id'])
+            self.assertEqual(same['due_at'], first['due_at'])
+            self.assertEqual(len(all_records(root)), 1)
+
     def test_harness_tool_schemas_exclude_host_and_role_overrides(self):
         for name, spec in SPECS.items():
             if spec[0] not in ('agents', 'task-briefs', 'harness-native', 'harness-owner'):

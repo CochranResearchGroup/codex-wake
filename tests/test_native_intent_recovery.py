@@ -308,3 +308,28 @@ class NativeIntentRecoveryTests(unittest.TestCase):
             with patch('codex_wake.native_clock.snapshot', return_value=recovered):
                 self.assertEqual(poll_once(root, dispatch=False).fired, 1)
             self.assertEqual(all_records(root)[0].record['time_recovery']['mode'], 'bounded_utc')
+
+    def test_reconcile_recovers_original_future_timer_without_submitting_or_rebasing(self):
+        origin = dict(utc=dict(status='network', sources=['a', 'b'], lower=1893456000, upper=1893456000.2), counter=None)
+        later = dict(utc=dict(status='network', sources=['a', 'b'], lower=1893542401, upper=1893542401.2), counter=None)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'wake'
+            output = io.StringIO()
+            with patch('codex_wake.native_clock.snapshot', return_value=origin), contextlib.redirect_stdout(output):
+                self.assertEqual(run(['--wake-root', str(root), 'native', 'after', '--json',
+                    '--ttl', '24h', '--wake-lifetime', 'persistent', '--idempotency-key', 'recover-future',
+                    '--codex-path', sys.executable, THREAD, '24h', '--', 'Read-only review']), 0)
+            identifier = json.loads(output.getvalue())['id']
+            output = io.StringIO()
+            with patch('codex_wake.native_clock.snapshot', return_value=later), contextlib.redirect_stdout(output):
+                self.assertEqual(run(['--wake-root', str(root), 'native', 'reconcile', identifier]), 0)
+            result = json.loads(output.getvalue())
+            self.assertEqual(result['status'], 'firing')
+            self.assertEqual(result['result'], 'time_reconciled')
+            self.assertEqual(result['due_at'], '2030-01-02T00:00:00.200000Z')
+            self.assertEqual(result['expires_at'], '2030-01-03T00:00:00.200000Z')
+            record = all_records(root)[0].record
+            self.assertEqual(record['scheduling_intent']['utc_anchor'], origin['utc'])
+            self.assertEqual(record['attempts'], 0)
+            self.assertNotIn('native_delivery', record)
+            self.assertEqual(len(all_records(root)), 1)
