@@ -508,9 +508,8 @@ def qualify(options):
             + [
                 "--listen",
                 "unix://" + str(alias),
-                "--session-source",
-                "cli",
-            ],
+            ]
+            + ([] if options.app_server_cli else ["--session-source", "cli"]),
             cwd=workspace,
             env=env,
             stdin=subprocess.DEVNULL,
