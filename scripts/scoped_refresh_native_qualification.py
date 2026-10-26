@@ -369,9 +369,48 @@ class ModernManagedFixture(ManagedFixture):
         return files
 
     def notice_history(self, native, event, text, selected):
-        if native.get("historyMode") != "paginated" or native["turns"]:
+        if native.get("historyMode") != "paginated":
+            raise RuntimeError("modern notice history must remain paginated")
+        turn_page = self.request(
+            self.endpoint,
+            "thread/turns/list",
+            dict(
+                threadId=native["id"],
+                limit=100,
+                sortDirection="asc",
+                itemsView="notLoaded",
+            ),
+        )
+        if turn_page.get("nextCursor") is not None:
+            raise RuntimeError("unexpected additional modern display-turn page")
+        expected_turn_count = 1 if selected else 0
+        if len(native["turns"]) > expected_turn_count:
+            raise RuntimeError("unexpected native display-turn containers")
+        if len(turn_page["data"]) != expected_turn_count:
+            raise RuntimeError("modern display-turn count differs")
+        for turn in turn_page["data"] + native["turns"]:
+            if not (
+                selected
+                and turn.get("id") == event
+                and turn.get("rootTurnId") == event
+                and turn.get("status") == "completed"
+                and all(
+                    key in turn and turn[key] is None
+                    for key in ("error", "startedAt", "completedAt", "durationMs")
+                )
+                and all(
+                    item.get("type") == "agentMessage"
+                    and item.get("id") == event
+                    and item.get("text") == text
+                    for item in turn.get("items", [])
+                )
+            ):
+                raise RuntimeError(
+                    "modern display turn identity or lifecycle fields differ"
+                )
+        if any(turn.get("items") for turn in turn_page["data"]):
             raise RuntimeError(
-                "modern notice history must remain paginated without model turns"
+                "notLoaded display-turn page unexpectedly contains items"
             )
         page = self.request(
             self.endpoint,
@@ -404,7 +443,7 @@ class ModernManagedFixture(ManagedFixture):
             raise RuntimeError("modern notice rollout escaped private home")
         raw = path.read_bytes()
         rows = [json.loads(line) for line in raw.splitlines()]
-        contexts = displays = 0
+        contexts = displays = completions = 0
         expected_context = (
             '<codex_internal_context source="external_supervision">\n'
             + text
@@ -454,13 +493,28 @@ class ModernManagedFixture(ManagedFixture):
             ):
                 displays += 1
                 continue
+            if (
+                selected
+                and row["type"] == "event_msg"
+                and payload
+                == dict(
+                    type="task_complete",
+                    root_turn_id=event,
+                    turn_id=event,
+                    last_agent_message=None,
+                )
+            ):
+                completions += 1
+                continue
             raise RuntimeError("unexpected modern raw history event or model activity")
-        if (contexts, displays) != ((1, 1) if selected else (0, 0)):
+        if (contexts, displays, completions) != ((1, 1, 1) if selected else (0, 0, 0)):
             raise RuntimeError("modern notice context/display count differs")
         return dict(
             model_turn_starts=0,
             synthetic_notice_containers=0,
             canonical_paginated_notice_items=len(entries),
+            completed_display_containers=len(turn_page["data"]),
+            paginated_turns=turn_page,
             paginated_items=page,
             model_requests_or_completions=0,
             usage_events=0,
