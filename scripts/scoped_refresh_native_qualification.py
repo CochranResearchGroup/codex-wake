@@ -256,6 +256,21 @@ class ManagedFixture:
             ):
                 displays += 1
                 continue
+            if (
+                isinstance(self, ModernManagedFixture)
+                and row["type"] == "event_msg"
+                and payload.get("type") == "thread_settings_applied"
+                and set(payload) == {"type", "thread_id", "thread_settings"}
+                and payload["thread_id"] == native["id"]
+                and isinstance(payload["thread_settings"], dict)
+                and payload["thread_settings"].get("cwd")
+                == str(self.root / "workspace")
+                and payload["thread_settings"].get("model_provider_id")
+                == "owned_no_provider"
+            ):
+                # Upstream settings checkpoints contain configuration, not turns.
+                # Unknown events and all model activity remain rejected below.
+                continue
             expected_context = (
                 '<codex_internal_context source="external_supervision">\n'
                 + text
