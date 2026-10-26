@@ -1,6 +1,6 @@
 """Owned real-native, installed-Wake and stock-TUI goal-limit journey.
 
-Runs only a localhost Responses fixture: at most six POSTs and 180 seconds.
+Runs only a localhost Responses fixture: at most seven POSTs and 180 seconds.
 Requires an explicitly pinned development app-server with thread/notice support.
 It never replaces shared runtimes or reads provider credentials.
 """
@@ -46,11 +46,86 @@ class _ProbeComplete(Exception):
     """Finish the selected probe through the shared cleanup and exit check."""
 
 
+def owned_model_start_snapshot(public_thread, home, thread_id):
+    """Read every native TaskStarted from a guarded, publicly located rollout.
+
+    The caller must first cross the native read-only notice/flush barrier.
+    Display-only public turns are deliberately not used as a model-work oracle.
+    """
+    home = Path(home).absolute()
+    require(home == home.resolve(strict=True), "private native home must be canonical")
+    info = home.stat()
+    require(
+        info.st_uid == os.geteuid() and info.st_mode & 0o077 == 0,
+        "private native home required",
+    )
+    require(
+        public_thread.get("id") == thread_id, "public rollout thread identity differs"
+    )
+    value = public_thread.get("path")
+    require(
+        isinstance(value, str) and Path(value).is_absolute(),
+        "public native rollout path required",
+    )
+    path = Path(value)
+    require(
+        path == path.resolve(strict=True) and path.is_relative_to(home / "sessions"),
+        "native rollout escaped canonical private sessions",
+    )
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    with os.fdopen(descriptor, "rb") as stream:
+        info = os.fstat(stream.fileno())
+        require(
+            stat.S_ISREG(info.st_mode) and info.st_uid == os.geteuid(),
+            "owned native rollout file required",
+        )
+        data = stream.read(32 * 1024 * 1024 + 1)
+    require(
+        len(data) <= 32 * 1024 * 1024 and data.endswith(b"\n"),
+        "bounded complete native rollout required",
+    )
+    rows = [json.loads(line) for line in data.splitlines()]
+    require(
+        rows and rows[0].get("type") == "session_meta",
+        "native rollout session header required",
+    )
+    header = rows[0]["payload"]
+    require(
+        header.get("id") == thread_id
+        and header.get("session_id", thread_id) == thread_id,
+        "native rollout header identity differs",
+    )
+    require(
+        sum(row.get("type") == "session_meta" for row in rows) == 1,
+        "native rollout must have one session header",
+    )
+    starts = []
+    for row in rows:
+        payload = row.get("payload", {})
+        if row.get("type") == "event_msg" and payload.get("type") == "task_started":
+            turn_id = payload.get("turn_id")
+            require(
+                isinstance(turn_id, str) and turn_id,
+                "native TaskStarted turn identity required",
+            )
+            starts.append(turn_id)
+    return dict(
+        path=str(path),
+        sha256=hashlib.sha256(data).hexdigest(),
+        model_turn_ids=sorted(set(starts)),
+        task_started_count=len(starts),
+        row_count=len(rows),
+    )
+
+
 def qualify(options):
     base = options.output.resolve()
     base.mkdir(mode=0o700, parents=True, exist_ok=False)
     prefix = options.prefix.resolve()
     appserver = options.app_server.resolve()
+    appserver_command = [str(appserver)] + (
+        ["app-server"] if options.app_server_cli else []
+    )
     tui = options.tui.absolute()
     require(
         digest(appserver) == options.app_server_sha256,
@@ -92,6 +167,9 @@ def qualify(options):
         wake_prefix=str(prefix),
         wake_version=codex_wake.__version__,
         native_app_server=str(appserver),
+        app_server_launch_mode="package_cli"
+        if options.app_server_cli
+        else "standalone",
         app_server_sha256=digest(appserver),
         stock_tui=str(tui),
         tui_sha256=digest(tui),
@@ -99,8 +177,9 @@ def qualify(options):
         external_provider_calls=0,
         http_request_cap=3
         if options.supervision_loss_only or options.observation_recovery_only
-        else 6,
+        else 7,
         native_frontend_acceptance=True,
+        history_mode=options.history_mode,
         shared_runtime_replaced=False,
     )
 
@@ -114,9 +193,11 @@ def qualify(options):
 
     mutex = threading.Lock()
     calls = []
+    fixture_state = dict(phase="warmup", work_responses=0)
     stream_open = threading.Event()
     finish = threading.Event()
     operator_open = threading.Event()
+    operator_phase_started = threading.Event()
     operator_release = threading.Event()
     approved_application = {}
     policy = base / "policy.json"
@@ -138,20 +219,56 @@ def qualify(options):
                 self.send_error(413)
                 return
             body = self.rfile.read(length)
+            operator_reply = (
+                b"Operator status question while the campaign stays paused." in body
+            )
+            checkpoint_steer = (
+                b"Stop work and write a restart-safe checkpoint now." in body
+            )
             with mutex:
                 number = len(calls) + 1
+                state = fixture_state["phase"]
+                phase = "unexpected"
+                if not operator_reply and state == "warmup":
+                    phase = "warmup"
+                    fixture_state["phase"] = "enrollment"
+                elif not operator_reply and state == "enrollment":
+                    phase = "enrollment"
+                    fixture_state["phase"] = "work"
+                elif not operator_reply and state == "work":
+                    count = fixture_state["work_responses"]
+                    if count == 0:
+                        phase = "work_stream"
+                    elif count == 1 and checkpoint_steer:
+                        phase = "checkpoint_continuation"
+                    fixture_state["work_responses"] += 1
+                elif operator_reply and operator_phase_started.is_set():
+                    if state == "work":
+                        phase = "operator_extend"
+                        fixture_state["phase"] = "operator_apply"
+                    elif state == "operator_apply":
+                        phase = "operator_apply"
+                        fixture_state["phase"] = "operator_final"
+                    elif state == "operator_final":
+                        phase = "operator_final"
+                        fixture_state["phase"] = "done"
                 calls.append(
                     dict(
                         number=number,
                         path=self.path,
                         body_sha256=hashlib.sha256(body).hexdigest(),
-                        operator_reply=b"Operator status question while the campaign stays paused."
-                        in body,
+                        operator_reply=operator_reply,
+                        checkpoint_steer=checkpoint_steer,
+                        phase=phase,
                     )
                 )
             save("response-request-" + str(number) + ".json", json.loads(body))
             if number > report["http_request_cap"]:
                 self.send_error(429)
+                return
+            if phase == "unexpected":
+                report["fixture_error"] = "unexpected request phase: " + state
+                self.send_error(409)
                 return
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
@@ -179,10 +296,10 @@ def qualify(options):
                 )
                 text = None
                 item = None
-                if number == 1:
+                if phase == "warmup":
                     text = "LOCAL FIXTURE READY"
-                elif number in (2, 4, 5):
-                    if number == 2:
+                elif phase in ("enrollment", "operator_extend", "operator_apply"):
+                    if phase == "enrollment":
                         name = "wake_goal_limits_set"
                         arguments = dict(
                             caller_thread_id=thread,
@@ -193,7 +310,7 @@ def qualify(options):
                             checkpoint_token_percent=5,
                             checkpoint_seconds=5,
                         )
-                    elif number == 4:
+                    elif phase == "operator_extend":
                         operator_open.set()
                         name = "wake_goal_limits_extend"
                         arguments = dict(
@@ -260,15 +377,15 @@ def qualify(options):
                     )
                     if namespace:
                         item["namespace"] = namespace
-                elif number == 3:
+                elif phase in ("work_stream", "checkpoint_continuation"):
                     stream_open.set()
                     while not finish.wait(0.2) and time.monotonic() < expiry:
                         self.wfile.write(b": local fixture pending\n\n")
                         self.wfile.flush()
-                elif number == 6:
+                elif phase == "operator_final":
                     text = "OPERATOR REPLY AFTER PAUSE"
                 else:
-                    raise AssertionError("unexpected localhost response number")
+                    raise AssertionError("unexpected localhost response phase")
                 if item:
                     emit(dict(type="response.output_item.done", item=item))
                 if text:
@@ -497,13 +614,12 @@ def qualify(options):
 
     try:
         native = subprocess.Popen(
-            [
-                str(appserver),
+            appserver_command
+            + [
                 "--listen",
                 "unix://" + str(alias),
-                "--session-source",
-                "cli",
-            ],
+            ]
+            + ([] if options.app_server_cli else ["--session-source", "cli"]),
             cwd=workspace,
             env=env,
             stdin=subprocess.DEVNULL,
@@ -547,6 +663,23 @@ def qualify(options):
             bounded()
             return native_request(endpoint, str(tui), method, params, 3)
 
+        def model_start_snapshot():
+            # Native external_notice crosses flush_rollout before replying. This
+            # absent lookup adds no notice, model work, history or usage.
+            rpc(
+                "thread/notice/read",
+                dict(threadId=thread, eventId="qualification_model_start_flush"),
+            )
+            public = rpc("thread/read", dict(threadId=thread, includeTurns=True))[
+                "thread"
+            ]
+            snapshot = owned_model_start_snapshot(public, home, thread)
+            snapshot["public_turn_ids"] = sorted(turn["id"] for turn in public["turns"])
+            snapshot["display_only_turn_ids"] = sorted(
+                set(snapshot["public_turn_ids"]) - set(snapshot["model_turn_ids"])
+            )
+            return snapshot
+
         save(
             "policy.json",
             dict(
@@ -566,11 +699,19 @@ def qualify(options):
         save("harness.json", dict(version=1, controllers={}))
         thread = rpc(
             "thread/start",
-            dict(cwd=str(workspace), historyMode="legacy", experimentalRawEvents=True),
+            dict(
+                cwd=str(workspace),
+                historyMode=options.history_mode,
+                experimentalRawEvents=True,
+            ),
         )["thread"]["id"]
         peer = rpc(
             "thread/start",
-            dict(cwd=str(workspace), historyMode="legacy", experimentalRawEvents=True),
+            dict(
+                cwd=str(workspace),
+                historyMode=options.history_mode,
+                experimentalRawEvents=True,
+            ),
         )["thread"]["id"]
         rpc(
             "thread/name/set",
@@ -775,13 +916,17 @@ def qualify(options):
             "startup card must render once",
         )
         report.update(enrolled=enrolled, startup=startup, startup_event=startup_event)
-        before_active_calls = len(calls)
         wait(lambda: stream_open.is_set(), "owned active native stream", 8)
         active = rpc("thread/read", dict(threadId=thread, includeTurns=True))["thread"]
         active_ids = [
             turn["id"] for turn in active["turns"] if turn["status"] == "inProgress"
         ]
         require(len(active_ids) == 1, "exactly one active native work turn required")
+        before_model_starts = model_start_snapshot()
+        require(
+            before_model_starts["task_started_count"] == 2,
+            "expected warmup and work native TaskStarted events",
+        )
         if options.observation_recovery_only:
             original = goal_cli("show")
             require(original["state"] == "armed", "recovery probe must begin armed")
@@ -1082,8 +1227,13 @@ def qualify(options):
             "native stop unavailable to model context",
         )
         calls_after_stop = len(calls)
+        after_model_starts = model_start_snapshot()
         require(
-            calls_after_stop == before_active_calls,
+            after_model_starts["model_turn_ids"]
+            == before_model_starts["model_turn_ids"]
+            and after_model_starts["task_started_count"]
+            == before_model_starts["task_started_count"]
+            == 2,
             "notice delivery dispatched a fresh model turn",
         )
         report.update(
@@ -1091,6 +1241,11 @@ def qualify(options):
             stop_event=stop_event,
             active_turn_id=active_ids[0],
             http_calls_at_stop=calls_after_stop,
+            model_turn_ids_before_stop=before_model_starts["model_turn_ids"],
+            model_turn_ids_after_notice=after_model_starts["model_turn_ids"],
+            native_model_start_snapshots=dict(
+                before=before_model_starts, after_notice=after_model_starts
+            ),
         )
         frozen_keys = (
             "generation",
@@ -1179,6 +1334,7 @@ def qualify(options):
             "reconnect duplicated stop notice",
         )
         # A later operator reply must remain usable while the campaign stays stopped.
+        operator_phase_started.set()
         operator_turn = rpc(
             "turn/start",
             dict(
@@ -1370,9 +1526,38 @@ def qualify(options):
             peer_after["turns"] == peer_before["turns"],
             "unrelated native peer turns changed",
         )
-        require(len(calls) <= 6, "localhost fixture request cap exceeded")
+        require(
+            len(calls) <= report["http_request_cap"],
+            "localhost fixture request cap exceeded",
+        )
+        phase_counts = {
+            phase: sum(call["phase"] == phase for call in calls)
+            for phase in (
+                "warmup",
+                "enrollment",
+                "work_stream",
+                "checkpoint_continuation",
+                "operator_extend",
+                "operator_apply",
+                "operator_final",
+            )
+        }
+        require(
+            all(
+                count == 1
+                for phase, count in phase_counts.items()
+                if phase != "checkpoint_continuation"
+            ),
+            "expected exactly one request for each journey phase",
+        )
+        require(
+            phase_counts["checkpoint_continuation"]
+            == (1 if options.history_mode == "paginated" else 0),
+            "unexpected checkpoint continuation count for selected journey",
+        )
         report.update(
             verdict="PASS_REAL_NATIVE_INSTALLED_TUI_JOURNEY",
+            response_phase_counts=phase_counts,
             operator_reply_preserved=True,
             operator_turn_id=operator_turn,
             extension_proposal=proposal,
@@ -1502,7 +1687,11 @@ if __name__ == "__main__":
     )
     parser.add_argument("--app-server", type=Path, required=True)
     parser.add_argument("--app-server-sha256", required=True)
+    parser.add_argument("--app-server-cli", action="store_true")
     parser.add_argument("--tui", type=Path, required=True)
+    parser.add_argument(
+        "--history-mode", choices=("legacy", "paginated"), default="legacy"
+    )
     probes = parser.add_mutually_exclusive_group()
     probes.add_argument("--supervision-loss-only", action="store_true")
     probes.add_argument("--observation-recovery-only", action="store_true")

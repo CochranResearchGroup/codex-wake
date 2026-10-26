@@ -8158,3 +8158,39 @@ CLI/MCP actions are missing. Reuse common permissions and339 attention decisions
 follow-up in docs/goal-limit-ux without changing runtime, campaign state or installed
 services. Publication is not implementation acceptance. Memory disposition:forbidden,
 because no memory write was requested or authorized.
+
+## Turn | 2026-10-25 | Native managed activation diagnosis
+
+After PR349 merged/deployed Wake0.22.0.dev0 fromce1ad93, user authorized a
+diagnosing-bugs pass for unfinished native activation. Standalone299 fails the
+real managedCLI interface;0.164referencepasses. Source98d5 documents an older
+operator-managed fixed-path start/restart route, so missing modern update/from-cli
+is not alone proof that activation is impossible. FullCLI build and companion
+qualification are bounded and private; no shared daemon/updater or old campaign
+is changed. Existing scoped-refresh qualifier is being extended in an independent
+worktree for actual private lifecycle/features/rollback. Plan0173/0005 records
+authority, receipts and remaining decision. CI remains skipped.
+
+
+## 2026-10-26 — modern native package qualification
+
+Ported scoped MCP refresh and durable no-turn notices to exact official Codex
+0.164.0 source. Matching accounting/caller metadata was retained upstream.
+Final source fbfe287f4d builds complete GNU CLI31b27c12fb with unchanged qualified
+helper. Protocol317, focused notice/reload4, existing reuse/hook cases and caller
+metadata pass. Scoped Clippy passes with two unchanged upstream warnings; final
+formatting passes. Final package files/modes equal the runtime-tested package.
+
+Modern stock→candidate→stock acceptance passes82.05s. Actual installed Wake
+0.22.0.dev1-e58d3a9 (166 module hashes) plus stock TUI passes47.422s/7localPOSTs:
+accounting, visible checkpoint/stop, cold replay once, watcher replacement and
+approved renewal/reset. The observed paginated orphan-item replay bug was fixed
+using canonical completed display containers without model starts or goal effects.
+Earlier fixture failures and Clippy timeout remain retained; no external provider.
+
+Parallel governor/future-wake/install-identity mainline is reconciled through
+e58d3a9. Live native daemon remains stock; all eight historical supervision files
+are byte-identical. Controller remains masked and current caller has no host
+refresh grant. Prepared scope/service proposals are not applied. Shared cutover
+and actual requesting-session proof remain open; 318/310 are not closed.
+Memory disposition: forbidden because no memory write was authorized.
