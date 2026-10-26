@@ -39,6 +39,22 @@ its original receipt and transcript remain, and no replacement log was fabricate
 Receipts and package provenance live outside Git under
 `~/.local/state/codex-wake/native-modern-0164/`.
 
+## Final source checkpoint
+
+Native source is frozen at `3ab07eac61e3247524e66afcb3f9271a87725482`.
+Focused validation found and repaired a real modern paginated-history bug:
+notices now persist the canonical ItemCompleted form, with the legacy form
+retained for old conversations. All four remediation cases passed with retries
+disabled, covering both history modes, restart/readback, deduplication,
+pending-response retention and scoped MCP reload. Both connection-reuse modes
+and modern hook warmup passed in the original selection.
+
+The final complete package is rebuilding from this checkpoint. The first broad
+source review had no findings; the later runtime failure and bounded repair are
+recorded in the source-review evidence. Final caller-metadata/Clippy checks,
+managed package qualification, paginated TUI/accounting journey and live handover
+remain open. The TUI runner now supports an explicit paginated-history mode.
+
 ## Acceptance and execution graph
 
 Stock runtime baselines failed with native unknown-method errors for scoped reload
