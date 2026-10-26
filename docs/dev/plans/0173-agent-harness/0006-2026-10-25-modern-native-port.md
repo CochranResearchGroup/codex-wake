@@ -112,3 +112,27 @@ Done means the final qualified package is installed through the modern mechanism
 process/package/capability readbacks match, resource invariants hold, and actual
 requesting-session goal controls work. Keep issues 318 and 310 open until those
 outcomes are proved. CI remains skipped by operator instruction.
+
+## Replay repair and concurrent mainline reconciliation
+
+The `3ab07eac61` package passed the complete modern managed roundtrip, selected
+MCP isolation, canonical paginated notice reads and stock rollback. Genuine TUI
+acceptance then passed enrollment/accounting, live cards, exact interruption
+and watcher replacement, but failed cold replay: notice items had no matching
+turn metadata and stock TUI omitted them. This package is not ready for activation.
+
+Read-only source tracing and the fixture database confirm orphan notice items.
+The bounded repair will use upstream's existing ItemCompleted plus TurnComplete
+representation for a completed display container, without TurnStarted, provider
+usage or session completion-handler effects. Preserve real work/goal state and
+legacy history. Require public turn/item association and actual stock TUI cold
+replay before accepting the successor package. Actual persisted task_started IDs,
+not response counts or display-container IDs, establish model-turn absence.
+
+Concurrent main now includes PR358 (`1a31564`, governor controls) and PR361
+(`02b68e8`, future-wake repair). Both are merged into this branch without conflicts.
+The live Wake CLI/MCP/refresh monitor selects the newer 166-module `1a31564`
+prefix. Earlier ce1ad 162-module private proofs remain historical baseline evidence;
+do not call them current host qualification or overwrite the newer deployment.
+The old proposed ce1ad goal-limit unit prefix is superseded without applying it.
+Re-anchor the final Wake acceptance target after this reconciliation.
