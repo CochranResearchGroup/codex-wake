@@ -363,6 +363,37 @@ class ModernManagedFixture(ManagedFixture):
                 )
         return files
 
+    def notice_history(self, native, event, text, selected):
+        result = super().notice_history(native, event, text, selected)
+        result["raw_rollout_text"] = Path(native["path"]).read_bytes().decode("utf-8")
+        return result
+
+    def preserve_prefix(self, before, after, thread):
+        if not after.startswith(before):
+            raise RuntimeError("modern rollout was rewritten or truncated")
+        appended = after[len(before) :]
+        for line in appended.splitlines():
+            row = json.loads(line)
+            payload = row.get("payload", {})
+            if not (
+                row.get("type") == "event_msg"
+                and payload.get("type") == "thread_settings_applied"
+                and set(payload) == {"type", "thread_id", "thread_settings"}
+                and payload["thread_id"] == thread
+                and isinstance(payload["thread_settings"], dict)
+                and payload["thread_settings"].get("cwd")
+                == str(self.root / "workspace")
+                and payload["thread_settings"].get("model_provider_id")
+                == "owned_no_provider"
+            ):
+                raise RuntimeError(
+                    "modern rollout appended a non-settings or foreign event"
+                )
+        return dict(
+            original_bytes_preserved=True,
+            appended_settings_events=len(appended.splitlines()),
+        )
+
     def copy_package(self, source, label):
         source = source.resolve(strict=True)
         package = source.parent.parent
@@ -529,6 +560,10 @@ class ModernManagedFixture(ManagedFixture):
             str(path.relative_to(self.home)): _sha256(path)
             for path in (self.home / "sessions").rglob("*.jsonl")
         }
+        raw_before = {
+            str(path.relative_to(self.home)): path.read_bytes()
+            for path in (self.home / "sessions").rglob("*.jsonl")
+        }
         self.records["rollback_rollout_hashes_before"] = before
         self.cli = self.reference_cli
         try:
@@ -544,8 +579,16 @@ class ModernManagedFixture(ManagedFixture):
                 }
                 self.records["rollback_rollout_hashes_after"] = after
                 self.records["rollback_rollouts_unchanged"] = before == after
-        if before != after:
-            raise RuntimeError("modern rollback changed private rollout bytes")
+        if set(before) != set(after):
+            raise RuntimeError("modern rollback changed the rollout file set")
+        self.records["rollback_rollout_prefixes"] = {
+            name: self.preserve_prefix(
+                raw,
+                (self.home / name).read_bytes(),
+                json.loads(raw.splitlines()[0])["payload"]["id"],
+            )
+            for name, raw in raw_before.items()
+        }
 
     def cleanup_failed_updaters(self):
         """Failure cleanup is not evidence that the real installer pinned correctly."""
@@ -776,10 +819,13 @@ for line in sys.stdin:
         if (
             observed["native"]["id"] != receipt["baseline_thread_id"]
             or observed["goal"] != expected["goal"]
-            or observed["history"]["rollout_sha256"]
-            != expected["history"]["rollout_sha256"]
         ):
             raise RuntimeError("pre-update stock conversation, goal or history changed")
+        receipt[label + "_prefix"] = managed.preserve_prefix(
+            expected["history"]["raw_rollout_text"].encode("utf-8"),
+            observed["history"]["raw_rollout_text"].encode("utf-8"),
+            receipt["baseline_thread_id"],
+        )
 
     try:
         if modern_managed_update:
