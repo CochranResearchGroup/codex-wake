@@ -7,6 +7,22 @@ Branch: `fix/native-managed-activation`; native branch: `fix/wake-native-0.164`
 Target: origin/main through PR359, with the native dependency pinned by source, patch and artifact.
 Authority: operator approved Q1, preserving modern managed updates, plus standing merge/deploy authorization.
 
+## Current State
+
+Source and private package qualification are complete. Final native source is
+`fbfe287f4d738946ed3b158da9d9081db01ed039`; the complete package CLI is
+`31b27c12fb4639b4568002cde21a6ab75d76f29cab8c32d0e1f137bb2c7c640b`.
+Every file and mode matches the package that passed actual installed Wake dev1,
+paginated stock-TUI replay/control and modern managed rollback acceptance.
+Scoped Clippy and final formatting pass; only unchanged upstream warnings remain.
+
+Live activation remains open. The shared daemon is still stock, the goal-limit
+service is masked, and this requesting caller lacks a host refresh grant.
+A validated current-connection-only proposal and current dev1 service override
+are prepared privately, not applied. Preserve all stopped budgets and unrelated
+active work. Actual requesting-session acceptance is still required for 318/310.
+See [final qualification](../../evidence/plan0173/modern-native-tui-qualification.md).
+
 ## Scope and current state
 
 Port only scoped MCP reload/runtime inspection and bounded, idempotent notices that
