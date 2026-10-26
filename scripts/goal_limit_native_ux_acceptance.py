@@ -101,6 +101,7 @@ def qualify(options):
         if options.supervision_loss_only or options.observation_recovery_only
         else 6,
         native_frontend_acceptance=True,
+        history_mode=options.history_mode,
         shared_runtime_replaced=False,
     )
 
@@ -566,11 +567,19 @@ def qualify(options):
         save("harness.json", dict(version=1, controllers={}))
         thread = rpc(
             "thread/start",
-            dict(cwd=str(workspace), historyMode="legacy", experimentalRawEvents=True),
+            dict(
+                cwd=str(workspace),
+                historyMode=options.history_mode,
+                experimentalRawEvents=True,
+            ),
         )["thread"]["id"]
         peer = rpc(
             "thread/start",
-            dict(cwd=str(workspace), historyMode="legacy", experimentalRawEvents=True),
+            dict(
+                cwd=str(workspace),
+                historyMode=options.history_mode,
+                experimentalRawEvents=True,
+            ),
         )["thread"]["id"]
         rpc(
             "thread/name/set",
@@ -1503,6 +1512,9 @@ if __name__ == "__main__":
     parser.add_argument("--app-server", type=Path, required=True)
     parser.add_argument("--app-server-sha256", required=True)
     parser.add_argument("--tui", type=Path, required=True)
+    parser.add_argument(
+        "--history-mode", choices=("legacy", "paginated"), default="legacy"
+    )
     probes = parser.add_mutually_exclusive_group()
     probes.add_argument("--supervision-loss-only", action="store_true")
     probes.add_argument("--observation-recovery-only", action="store_true")
