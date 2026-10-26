@@ -101,9 +101,9 @@ effect or turn missing evidence into non-submission.
 
 ## Future scheduling, lifetime and delivery windows
 
-A time wake may be scheduled beyond24hours, independently of the creating
+A time wake may be scheduled beyond 24 hours, independently of the creating
 session's execution window. Positive relative durations use `s`, `m`, `h`, or
-`d`; absolute due times use timezone-qualified ISO8601 dates. There is no24hour
+`d`; absolute due times use timezone-qualified ISO8601 dates. There is no24-hour
 scheduling ceiling. Dates and their displayed expiry must fit the supported ISO
 calendar; unrepresentable projections are explicitly unsupported, never armed.
 
