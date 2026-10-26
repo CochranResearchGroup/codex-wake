@@ -15345,7 +15345,7 @@ index 129006b3d2..912498791e 100644
                  server_name: None,
                  cursor: None,
 diff --git a/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs b/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
-index c7dc29539e..61bcba8fd8 100644
+index c7dc29539e..5d62153e64 100644
 --- a/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
 +++ b/codex-rs/app-server/tests/suite/v2/mcp_server_status.rs
 @@ -28,6 +28,8 @@ use codex_app_server_protocol::McpServerStatusDetail;
@@ -15473,7 +15473,7 @@ index c7dc29539e..61bcba8fd8 100644
                  server_name: None,
                  cursor: None,
                  limit: None,
-@@ -1490,3 +1507,159 @@ fn mock_responses_config(server_uri: &str) -> MockResponsesConfig {
+@@ -1490,3 +1507,155 @@ fn mock_responses_config(server_uri: &str) -> MockResponsesConfig {
          .with_root_config("compact_prompt = \"compact\"\nmodel_auto_compact_token_limit = 1024")
          .with_provider_config("supports_websockets = false")
  }
@@ -15600,20 +15600,16 @@ index c7dc29539e..61bcba8fd8 100644
 +            .tools
 +            .contains_key("old_widget")
 +    );
-+    let missing_scope: Result<ListMcpServerStatusResponse> = app
-+        .request(|request_id| ClientRequest::McpServerStatusList {
-+            request_id,
-+            params: ListMcpServerStatusParams {
-+                runtime_only: Some(true),
-+                thread_id: None,
-+                server_name: None,
-+                detail: None,
-+                cursor: None,
-+                limit: None,
-+            },
-+        })
-+        .await;
-+    assert!(missing_scope.is_err());
++    let missing_scope_id = app
++        .send_raw_request("mcpServerStatus/list", Some(json!({"runtimeOnly": true})))
++        .await?;
++    let missing_scope = timeout(
++        DEFAULT_READ_TIMEOUT,
++        app.read_stream_until_error_message(RequestId::Integer(missing_scope_id)),
++    )
++    .await??;
++    assert_eq!(missing_scope.error.code, -32600);
++    assert!(missing_scope.error.message.contains("exact loaded thread"));
 +    let requests = server
 +        .received_requests()
 +        .await
@@ -15659,14 +15655,15 @@ index 87999efce1..cecb5bba62 100644
              limit: None,
 diff --git a/codex-rs/app-server/tests/suite/v2/thread_notice.rs b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
 new file mode 100644
-index 0000000000..9235f18978
+index 0000000000..01382bc6e6
 --- /dev/null
 +++ b/codex-rs/app-server/tests/suite/v2/thread_notice.rs
-@@ -0,0 +1,349 @@
+@@ -0,0 +1,425 @@
 +use anyhow::Result;
 +use app_test_support::TestAppServer;
 +use app_test_support::to_response;
 +use codex_app_server_protocol::RequestId;
++use codex_app_server_protocol::ThreadHistoryMode;
 +use codex_app_server_protocol::ThreadStartParams;
 +use codex_app_server_protocol::ThreadStartResponse;
 +use codex_app_server_protocol::TurnStartParams;
@@ -15675,11 +15672,16 @@ index 0000000000..9235f18978
 +use pretty_assertions::assert_eq;
 +use serde_json::json;
 +use tempfile::TempDir;
++use test_case::test_case;
 +use tokio::time::Duration;
 +use tokio::time::timeout;
 +
++#[test_case(None; "default_paginated")]
++#[test_case(Some(ThreadHistoryMode::Legacy); "legacy")]
 +#[tokio::test]
-+async fn notice_is_durable_idempotent_visible_and_starts_no_model_turn() -> Result<()> {
++async fn notice_is_durable_idempotent_visible_and_starts_no_model_turn(
++    history_mode: Option<ThreadHistoryMode>,
++) -> Result<()> {
 +    let server = responses::start_mock_server().await;
 +    let model = responses::mount_sse_once(
 +        &server,
@@ -15719,7 +15721,10 @@ index 0000000000..9235f18978
 +        .build_initialized_with_timeout(Duration::from_secs(10))
 +        .await?;
 +    let start = client
-+        .send_thread_start_request_with_auto_env(ThreadStartParams::default())
++        .send_thread_start_request_with_auto_env(ThreadStartParams {
++            history_mode,
++            ..Default::default()
++        })
 +        .await?;
 +    let started: ThreadStartResponse = to_response(
 +        client
@@ -15804,13 +15809,80 @@ index 0000000000..9235f18978
 +            .count(),
 +        1
 +    );
++    let rows = history
++        .lines()
++        .map(|line| serde_json::from_str::<serde_json::Value>(line).expect("valid rollout"))
++        .collect::<Vec<_>>();
++    let display_rows = rows
++        .iter()
++        .filter(|row| {
++            row["type"] == "event_msg"
++                && (row["payload"]["type"] == "agent_message" && row["payload"]["message"] == text
++                    || row["payload"]["type"] == "item_completed"
++                        && row["payload"]["item"]["type"] == "AgentMessage"
++                        && row["payload"]["item"]["id"] == event)
++        })
++        .collect::<Vec<_>>();
++    assert_eq!(display_rows.len(), 1);
++    let display = &display_rows[0]["payload"];
++    if history_mode == Some(ThreadHistoryMode::Legacy) {
++        assert_eq!(display["type"], "agent_message");
++        assert_eq!(display["message"], text);
++    } else {
++        assert_eq!(display["type"], "item_completed");
++        assert_eq!(display["thread_id"], thread.id);
++        assert_eq!(display["turn_id"], event);
++        assert_eq!(display["item"]["type"], "AgentMessage");
++        assert_eq!(display["item"]["id"], event);
++        assert_eq!(
++            display["item"]["content"],
++            json!([{"type":"Text","text":text}])
++        );
++    }
++    assert!(!rows.iter().any(|row| row["type"] == "event_msg"
++        && matches!(
++            row["payload"]["type"].as_str(),
++            Some("task_started" | "token_count")
++        )));
++    // A new process must discover the persisted notice, not a live-session cache.
++    client.shutdown_gracefully().await?;
++    let mut client = TestAppServer::builder()
++        .with_codex_home(home.path())
++        .build_initialized_with_timeout(Duration::from_secs(10))
++        .await?;
++    let resume = client
++        .send_raw_request("thread/resume", Some(json!({"threadId":thread.id})))
++        .await?;
++    client
++        .read_stream_until_response_message(RequestId::Integer(resume))
++        .await?;
++    let cold_read = client
++        .send_raw_request(
++            "thread/notice/read",
++            Some(json!({"threadId":thread.id,"eventId":event})),
++        )
++        .await?;
 +    assert_eq!(
-+        history
-+            .lines()
-+            .filter(|line| line.contains("agent_message") && line.contains(event))
-+            .count(),
-+        1
++        client
++            .read_stream_until_response_message(RequestId::Integer(cold_read))
++            .await?
++            .result,
++        json!({"notice":{"eventId":event,"text":text},"modelContextAvailable":true})
 +    );
++    let cold_duplicate = client
++        .send_raw_request(
++            "thread/notice/append",
++            Some(json!({"threadId":thread.id,"eventId":event,"text":text})),
++        )
++        .await?;
++    assert_eq!(
++        client
++            .read_stream_until_response_message(RequestId::Integer(cold_duplicate))
++            .await?
++            .result,
++        json!({"eventId":event,"recorded":true,"modelContextAvailable":true,"notificationPublished":false,"alreadyRecorded":true})
++    );
++    assert_eq!(model.requests().len(), 0);
 +    // Only this explicit operator continuation starts a local mock model request.
 +    let turn = client
 +        .send_turn_start_request(TurnStartParams {
@@ -15857,7 +15929,7 @@ index 0000000000..9235f18978
 +    );
 +    assert_eq!(
 +        usage_rows[0]["payload"]["usage"],
-+        json!({"input_tokens":20,"cached_input_tokens":10,
++        json!({"input_tokens":20,"cached_input_tokens":10,"cache_write_input_tokens":0,
 +        "output_tokens":5,"reasoning_output_tokens":0,"total_tokens":25})
 +    );
 +    let input = model.single_request().input();
@@ -16025,10 +16097,10 @@ index 3fc8a0a2ed..9a7d7e698c 100644
                  cursor: None,
                  limit: None,
 diff --git a/codex-rs/codex-mcp/src/runtime/status.rs b/codex-rs/codex-mcp/src/runtime/status.rs
-index c183524d1c..99430870bf 100644
+index c183524d1c..5a5ec49ca0 100644
 --- a/codex-rs/codex-mcp/src/runtime/status.rs
 +++ b/codex-rs/codex-mcp/src/runtime/status.rs
-@@ -22,6 +22,28 @@ impl McpRuntime {
+@@ -22,6 +22,33 @@ impl McpRuntime {
          detail: McpSnapshotDetail,
          expected_registration: Option<&ResolvedMcpServer>,
          runtime_context: &McpRuntimeContext,
@@ -16044,8 +16116,13 @@ index c183524d1c..99430870bf 100644
 +        detail: McpSnapshotDetail,
 +        runtime_context: &McpRuntimeContext,
 +    ) -> anyhow::Result<(Arc<McpConfig>, McpServerStatusSnapshot)> {
-+        self.status_snapshot(server, detail, /*expected_registration*/ None, runtime_context)
-+            .await
++        self.status_snapshot(
++            server,
++            detail,
++            /*expected_registration*/ None,
++            runtime_context,
++        )
++        .await
 +    }
 +
 +    async fn status_snapshot(
@@ -16057,7 +16134,7 @@ index c183524d1c..99430870bf 100644
      ) -> anyhow::Result<(Arc<McpConfig>, McpServerStatusSnapshot)> {
          let current = self.current.load_full();
          let runtime_context = runtime_context.clone().with_selected_environments(
-@@ -36,7 +58,7 @@ impl McpRuntime {
+@@ -36,7 +63,7 @@ impl McpRuntime {
          );
          let mut servers = effective_mcp_servers(&config, current.auth.as_ref());
          servers.retain(|name, _| {
@@ -16066,7 +16143,7 @@ index c183524d1c..99430870bf 100644
                  && expected_registration
                      .is_none_or(|expected| config.mcp_server_catalog.server(name) == Some(expected))
          });
-@@ -48,7 +70,7 @@ impl McpRuntime {
+@@ -48,7 +75,7 @@ impl McpRuntime {
              // Finish selected startup and any rejected-grant cleanup before reading auth.
              current
                  .connections
@@ -16120,10 +16197,10 @@ index 024eb76132..6a3337a971 100644
          &self,
 diff --git a/codex-rs/core/src/codex_thread/external_notice.rs b/codex-rs/core/src/codex_thread/external_notice.rs
 new file mode 100644
-index 0000000000..649d81752c
+index 0000000000..3c3fc818f7
 --- /dev/null
 +++ b/codex-rs/core/src/codex_thread/external_notice.rs
-@@ -0,0 +1,111 @@
+@@ -0,0 +1,190 @@
 +//! Durable, bounded external notices do not schedule model work.
 +use super::CodexThread;
 +use crate::context::ContextualUserFragment;
@@ -16133,9 +16210,19 @@ index 0000000000..649d81752c
 +use codex_protocol::ResponseItemId;
 +use codex_protocol::error::CodexErr;
 +use codex_protocol::error::Result;
++use codex_protocol::items::AgentMessageContent;
++use codex_protocol::items::AgentMessageItem;
++use codex_protocol::items::TurnItem;
 +use codex_protocol::models::ResponseItem;
 +use codex_protocol::protocol::AgentMessageEvent;
 +use codex_protocol::protocol::EventMsg;
++use codex_protocol::protocol::ItemCompletedEvent;
++use codex_thread_store::ItemSortKey;
++use codex_thread_store::ListItemsParams;
++use codex_thread_store::ListItemsPosition;
++use codex_thread_store::LoadThreadHistoryParams;
++use codex_thread_store::SortDirection;
++use codex_thread_store::ThreadStoreError;
 +
 +impl CodexThread {
 +    /// Find a persisted notice without creating a model turn.
@@ -16144,26 +16231,13 @@ index 0000000000..649d81752c
 +        // the existing session header, never a user turn, before inspecting it.
 +        self.ensure_rollout_materialized().await;
 +        self.flush_rollout().await?;
-+        let history = self
-+            .load_history(/*include_archived*/ false)
-+            .await
-+            .map_err(|error| {
-+                CodexErr::InvalidRequest(format!("notice history unavailable: {error}"))
-+            })?;
++        let history = self.external_notice_history(event_id).await?;
 +        let marker = format!("[External supervision event {event_id}]");
-+        let context_exists = history.items.iter().any(|item| {
-+            matches!(item,
-+            RolloutItem::ResponseItem(envelope) if matches!(&envelope.item,
-+                ResponseItem::Message { id: Some(id), .. } if id.as_str() == event_id))
-+        });
-+        if !context_exists {
-+            return Ok(None);
-+        }
 +        let in_context = self.session.clone_history().await.raw_items().any(|item| {
 +            matches!(item,
 +            ResponseItem::Message { id: Some(id), .. } if id.as_str() == event_id)
 +        });
-+        Ok(history.items.iter().find_map(|item| match item {
++        Ok(history.iter().find_map(|item| match item {
 +            RolloutItem::EventMsg(EventMsg::AgentMessage(message))
 +                if message.message.ends_with(&marker) =>
 +            {
@@ -16171,6 +16245,77 @@ index 0000000000..649d81752c
 +            }
 +            _ => None,
 +        }))
++    }
++
++    /// Paginated stores retain display items independently of compacted model context.
++    /// Scan every persisted item page so an old notice remains an idempotency key.
++    async fn external_notice_history(&self, event_id: &str) -> Result<Vec<RolloutItem>> {
++        let store = &self.session.services.thread_store;
++        let mut items = match self.load_history(false).await {
++            Ok(history) => return Ok(history.items),
++            Err(ThreadStoreError::Unsupported {
++                operation: "paginated_threads",
++            }) => {
++                store
++                    .load_latest_model_context(LoadThreadHistoryParams {
++                        thread_id: self.session.thread_id,
++                        include_archived: false,
++                    })
++                    .await
++                    .map_err(|error| {
++                        CodexErr::InvalidRequest(format!("notice context unavailable: {error}"))
++                    })?
++                    .items
++            }
++            Err(error) => {
++                return Err(CodexErr::InvalidRequest(format!(
++                    "notice history unavailable: {error}"
++                )));
++            }
++        };
++        let marker = format!("[External supervision event {event_id}]");
++        let mut position = None;
++        loop {
++            let page = store
++                .list_items(ListItemsParams {
++                    item_ids: None,
++                    thread_id: self.session.thread_id,
++                    turn_id: None,
++                    include_archived: false,
++                    position,
++                    page_size: 256,
++                    sort_direction: SortDirection::Asc,
++                    sort_key: ItemSortKey::CreatedAtOrdinal,
++                    after_updated_at_ordinal: None,
++                })
++                .await
++                .map_err(|error| {
++                    CodexErr::InvalidRequest(format!("notice items unavailable: {error}"))
++                })?;
++            for saved in page.items {
++                let item: serde_json::Value =
++                    serde_json::from_slice(&saved.item_json).map_err(|error| {
++                        CodexErr::InvalidRequest(format!("notice item invalid: {error}"))
++                    })?;
++                if item["type"] == "agentMessage"
++                    && let Some(text) = item["text"].as_str().filter(|text| text.ends_with(&marker))
++                {
++                    items.push(RolloutItem::EventMsg(EventMsg::AgentMessage(
++                        AgentMessageEvent {
++                            message: text.to_owned(),
++                            phase: None,
++                            memory_citation: None,
++                            delivery: None,
++                            questions: None,
++                        },
++                    )));
++                }
++            }
++            match page.next_cursor {
++                Some(cursor) => position = Some(ListItemsPosition::Cursor(cursor)),
++                None => return Ok(items),
++            }
++        }
 +    }
 +
 +    /// Record model context and a replayable display event even while a tool is busy.
@@ -16189,13 +16334,8 @@ index 0000000000..649d81752c
 +        if let ResponseItem::Message { id, .. } = &mut item {
 +            *id = Some(ResponseItemId::from_server(event_id.to_owned()));
 +        }
-+        let history = self
-+            .load_history(/*include_archived*/ false)
-+            .await
-+            .map_err(|error| {
-+                CodexErr::InvalidRequest(format!("notice history unavailable: {error}"))
-+            })?;
-+        let saved = history.items.iter().find_map(|saved| match saved {
++        let history = self.external_notice_history(event_id).await?;
++        let saved = history.iter().find_map(|saved| match saved {
 +            RolloutItem::ResponseItem(envelope) => match &envelope.item {
 +                ResponseItem::Message {
 +                    id: Some(id),
@@ -16225,11 +16365,27 @@ index 0000000000..649d81752c
 +        // The event is separate from the model item so existing clients replay it.
 +        // Reconcile a partial append by retaining the same id/context, never reinjecting it.
 +        let marker = format!("[External supervision event {event_id}]");
-+        if !history.items.iter().any(|saved| matches!(saved,
++        if !history.iter().any(|saved| matches!(saved,
 +            RolloutItem::EventMsg(EventMsg::AgentMessage(message)) if message.message.ends_with(&marker))) {
-+            self.append_rollout_items(&[RolloutItem::EventMsg(EventMsg::AgentMessage(AgentMessageEvent {
-+                message: text.to_owned(), phase: None, memory_citation: None, delivery: None, questions: None,
-+            }))]).await.map_err(|error| CodexErr::InvalidRequest(format!("notice display append failed: {error}")))?;
++            // Upstream persistence selects AgentMessage for legacy history and
++            // ItemCompleted for paginated history. Keep both inputs so each mode
++            // retains its canonical display representation without a model turn.
++            self.append_rollout_items(&[
++                RolloutItem::EventMsg(EventMsg::AgentMessage(AgentMessageEvent {
++                    message: text.to_owned(), phase: None, memory_citation: None, delivery: None, questions: None,
++                })),
++                RolloutItem::EventMsg(EventMsg::ItemCompleted(ItemCompletedEvent {
++                    thread_id: self.session.thread_id,
++                    turn_id: event_id.to_owned(),
++                    item: TurnItem::AgentMessage(AgentMessageItem {
++                        id: event_id.to_owned(),
++                        content: vec![AgentMessageContent::Text { text: text.to_owned() }],
++                        phase: None, memory_citation: None, delivery: None, questions: None,
++                    }),
++                    started_at_ms: None,
++                    completed_at_ms: chrono::Utc::now().timestamp_millis(),
++                })),
++            ]).await.map_err(|error| CodexErr::InvalidRequest(format!("notice display append failed: {error}")))?;
 +        }
 +        self.flush_rollout().await?;
 +        Ok(())

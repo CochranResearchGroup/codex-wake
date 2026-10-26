@@ -1,9 +1,9 @@
 {
   "upstream_base": "6aaac694803004a63c6f393d153c96d22521a6b9",
-  "source_commit": "fda3733d6a5b3e6e6197c2e08243d3704c097921",
+  "source_commit": "3ab07eac61e3247524e66afcb3f9271a87725482",
   "patch": "modern-0.164-scoped-notices.patch",
-  "patch_sha256": "23a6605cd8786d47bca914e878304fce848efc1578b92dd50e891a5e8a009ae8",
-  "status": "source_reviewed_runtime_qualification_pending",
+  "patch_sha256": "ca1a5768cd09e4b096cc4bc235537973bba98591f8a73376694ae5a7482bc1a3",
+  "status": "source_reviewed_focused_tests_pass_final_package_qualification_pending",
   "upstream_release": "rust-v0.164.0",
   "applies_at": "native repository root",
   "external_dependency_upgrades": false
