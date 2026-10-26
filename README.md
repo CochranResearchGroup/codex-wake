@@ -11,6 +11,14 @@ provides MCP enrollment and an independent watcher: request checkpoint,
 then pause the current native goal and interrupt its exact active turn. Limits
 persist across replacement goals until an explicit user reset. Start with the
 [existing-session workflow](skills/codex-wake/references/existing-goal-limits.md).
+Governor activation and interventions must be explicit to both the operator and
+model. In builds with the new governor controls, send **Deactivate governor** in
+the selected conversation to disable its scope without another confirmation;
+**Reactivate governor** explicitly restores it. Deactivation survives continuation,
+delegation and restart, preserves accounting, and resumes nothing. See
+[governor controls and offline host access](docs/governor-control.md) for capability
+requirements; these source changes do not upgrade an installed runtime.
+
 Each new conversation needs its own approved host grant; reusing a tab or CWD
 does not transfer a previous conversation's resource authority.
 Host setup and qualified accounting are required; polling and publication make

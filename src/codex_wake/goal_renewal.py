@@ -947,6 +947,10 @@ def _resume(root, policy, thread, path, journal, principal, *, caller=None):
     if result.get("resumed"):
         return result
     with _campaign(root, policy, thread) as (_, receipts, allocation_path, allocation):
+        if (allocation or next(iter(receipts.values()))).get('governor_enabled',True) is False:
+            result['resume_state'] = 'governor_inactive'
+            result['next_action'] = 'Governor was deactivated; this queued resume cannot start work. Reactivation does not itself authorize resume.'
+            return result
         now = _now()
         controller = supervision._heartbeat(supervision._directory(root))
         if not controller.get("fresh"):

@@ -84,6 +84,11 @@ admits a bounded initial assignment only after its exact client is ready. Use
 `sessions open` for attachment without task delivery. Tab creation, task
 admission and completed execution have separate receipt evidence.
 
+New assignments use a [compact bounded packet](task-briefs.md#compact-delegated-dispatch),
+including plain `--task` launches. Inspect `dispatch` for input byte size/hash and
+`execution.output_summary` for bounded native output metadata. Packet snapshots
+never replenish allowance or override current operator controls.
+
 The operator supplies a host launch registry, an existing approved workspace,
 an existing owned app-server socket and tmux session. The workspace must already
 be trusted in the selected Codex home. Example registry:
@@ -369,3 +374,71 @@ separates paid native candidate runs, public fixture coverage and exact released
 installation checks. The [0.15.1 installed closeout](dev/evidence/plan0162/final-acceptance.md)
 records later tab targeting and installation qualification. These receipts do not
 configure profiles or grant authority on another host.
+
+## Host compatibility before delegated dispatch
+
+An operator can opt a spawn profile into a read-only compatibility preflight.
+Add this field to that existing approved launch profile; it does not change the
+strict private goal-policy grant schema or introduce caller-selected authority:
+
+```json
+{
+  "governance_preflight": {
+    "policy": "/owned/goal-policy.json",
+    "requested_mode": "sampled_stop",
+    "manual_authorization": "existing approved repair ticket or authorization locator"
+  }
+}
+```
+
+`manual_authorization` is optional. It records already authorized manual work,
+not a request for another approval. `thread_id` can name the host-selected source
+for an operator CLI launch; a caller-bound launch must match its exact caller.
+The goal grant must select the same endpoint, client path and Codex home as the
+launch profile. Existing profiles without this field retain their behavior;
+preflight neither enrolls them nor inserts a governor.
+
+Public spawn returns `compatibility_preflight` before thread, tab or task effects
+when a required capability is unavailable. It also rechecks at effect boundaries.
+The worker's compact packet carries the initial mode/notice and a receipt locator;
+retry retains its exact input, while current dynamic preflight results are fresh.
+
+- `hard_admission` is a requested guarantee, currently **unsupported**. The result
+  is `degraded`, `admitted:false`, with actionable supported routes; it does not
+  silently use sampled stopping or manual fallback. No native per-request hook
+  or enforceable output ceiling is claimed, even when a ledger exists.
+- `sampled_stop` requires current qualified accounting, a fresh resident first
+  poll, existing control readback and observed notice-read/model-delivery proof.
+  It has no exact token overshoot bound. Read-only preflight does not attest that
+  the operator UI rendered a notice; that remains an independent qualification.
+- `manual` requires the retained host authorization locator. It can also be an
+  explicitly preauthorized fallback when sampled requirements are unavailable.
+  It carries an explicit notice and may bypass the resident *lifecycle watcher*
+  prerequisite for that repair assignment. It still checks and settles existing
+  budget reservations, original deadlines, permissions and strict executor gates.
+  It never starts/unmasks a service, clears a stop, changes counters, enrolls or
+  resumes the original goal, or renews an exhausted campaign.
+- `inactive` requires an explicit disabled control snapshot for the exact selected
+  allocation. Unavailable/unknown governance is not deactivation or revocation.
+  Independent lifecycle/strict-executor controls remain unchanged.
+- `degraded` identifies missing requested supervision, accounting, notice or
+  control proof without granting authority or blocking unrelated ordinary work.
+
+Static observations are private receipts beneath
+`WAKE_ROOT/goal-supervision/host-preflight/`. Reuse is keyed by the selected source
+file hashes, client executable hash, connected Unix peer process generation and
+executable hash, native metadata, exact profile/policy hashes and caller/workspace
+identity. A connected peer executable is distinct from the selected client;
+Python/wrapper/native binary differences and unqualified request-path coverage
+remain explicit. The cache cannot promote a native admission guarantee.
+
+Every attempt rechecks those bindings and performs fresh public `diagnose`/`show`
+and operator-control reads. Controller heartbeat, accounting, usage, stop state
+and current operator choices are not cached. Only the static notice-read capability probe is
+reused; current notice/model-context evidence is read again. Unknown probe
+outcomes are not qualified cache entries. Static probes use the
+smaller selected timeout (at most five seconds); diagnostic/native-notice reads
+retain the host grant timeout (also at most five seconds), and accounting scans
+retain their owner's bounds. File hashing is capped at 256 MiB per executable
+and 1 MiB per selected source/policy file. An unavailable static observation is
+reported rather than turned into installed capability proof.

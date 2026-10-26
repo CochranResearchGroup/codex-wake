@@ -58,8 +58,10 @@ refresh/handoff/resume, enforcement enrollment, managed A2A and task/recipient-
 authorized wake routes. Shared reload requires standing approval. Increasing an
 allowance, disabling enforcement and recovering an observation-fault stop require
 their own authority. Observation recovery requires an explicit matching approval or authenticated
-operator request and fresh runtime qualification. Disable execution remains
-unsupported; inspecting permissions never clears latches.
+operator request and fresh runtime qualification. [Governor deactivation](governor-control.md)
+requires an authenticated operator control or an exact host-verified native user
+directive, even if a model has standing policy approval. Inspecting permissions
+never clears latches; deactivation preserves latches and the original allowance.
 
 The optional `global`, named `profiles`, `sessions` and task `assignments` layers
 have `default` and `actions` fields. Decisions are `allow`, `deny`,
