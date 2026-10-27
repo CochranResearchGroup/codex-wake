@@ -1,0 +1,53 @@
+{
+  "source_commit": "b706004728800f4cba08e5554b854f1bd5461f25",
+  "source_baseline": "fbfe287f4d738946ed3b158da9d9081db01ed039",
+  "package_version": "0.164.0",
+  "status": "QUALIFIED_PRIVATE_CANDIDATE_NOT_ACTIVATED",
+  "normalization_regression": {
+    "red": "3selected:2passed,1failed; retry also failed",
+    "green": "2passed"
+  },
+  "context_manager_tests": "95passed",
+  "resumed_history_integration": "1passed; terminal TurnComplete and aborted output asserted",
+  "replay": {
+    "minimal": {
+      "recovered_aborted_output": true,
+      "panic": false,
+      "loopback_requests": 1,
+      "terminal_turn": "failed",
+      "terminal_reason": "intentional local HTTP400 fixture; no external model call"
+    },
+    "original": {
+      "recovered_aborted_output": true,
+      "panic": false,
+      "loopback_requests": 1,
+      "terminal_turn": "failed",
+      "terminal_reason": "intentional local HTTP400 fixture; no external model call"
+    }
+  },
+  "binaries": {
+    "bin/codex": {
+      "sha256": "0696309a7cf4f140287901079a15117553701b5813a2f820282e21fde509776c",
+      "bytes": 418696904
+    },
+    "bin/codex-code-mode-host": {
+      "sha256": "1bf7ca0d8cb596bc33a7fa3f0791264dbd04cb74c6a0528c9443d86d0d26bfad",
+      "bytes": 100622576
+    },
+    "codex-resources/bwrap": {
+      "sha256": "8b6679d62120e60335aac2bfe141f60237710ff0897e658113d1e039987a78db",
+      "bytes": 427584
+    },
+    "codex-path/rg": {
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+      "bytes": 5408904
+    }
+  },
+  "shared_native_restart": false,
+  "live_history_mutation": false,
+  "resource_renewal": false,
+  "governor_activation": false,
+  "external_provider_calls": 0,
+  "retained_helpers": "unchanged fbfe287f4d immutable helpers; their hashes match currently installed daemon package",
+  "package_locator": "operator-local immutable native/ar2-orphan-b706004728; not selected by the shared daemon"
+}

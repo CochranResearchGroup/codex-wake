@@ -1,0 +1,167 @@
+diff --git a/codex-rs/core/src/context_manager/history_tests.rs b/codex-rs/core/src/context_manager/history_tests.rs
+index 70178c446f..f6c11bf8af 100644
+--- a/codex-rs/core/src/context_manager/history_tests.rs
++++ b/codex-rs/core/src/context_manager/history_tests.rs
+@@ -2334,7 +2334,7 @@ fn format_exec_output_prefers_line_marker_when_both_limits_exceeded() {
+     assert_truncated_message_matches(&truncated, "line-0-", /*expected_removed*/ 17_423);
+ }
+ 
+-#[cfg_attr(not(debug_assertions), test_case::test_case(false; "local"))]
++#[test_case::test_case(false; "local")]
+ #[test_case::test_case(true; "inherited")]
+ fn normalize_adds_missing_output_for_custom_tool_call(inherited: bool) {
+     let items = vec![ResponseItem::CustomToolCall {
+@@ -2732,24 +2732,6 @@ fn normalize_adds_missing_output_for_tool_search_call() {
+     );
+ }
+ 
+-#[cfg(debug_assertions)]
+-#[test]
+-#[should_panic]
+-fn normalize_adds_missing_output_for_custom_tool_call_panics_in_debug() {
+-    let items = vec![ResponseItem::CustomToolCall {
+-        encrypted_content: None,
+-        id: None,
+-        status: None,
+-        call_id: "tool-x".to_string(),
+-        name: "custom".to_string(),
+-        namespace: None,
+-        input: "{}".to_string(),
+-        internal_chat_message_metadata_passthrough: None,
+-    }];
+-    let mut h = create_history_with_items(items);
+-    h.normalize_history(&default_input_modalities());
+-}
+-
+ #[cfg(debug_assertions)]
+ #[test]
+ #[should_panic]
+diff --git a/codex-rs/core/src/context_manager/normalize.rs b/codex-rs/core/src/context_manager/normalize.rs
+index 387bc8f75a..1331821039 100644
+--- a/codex-rs/core/src/context_manager/normalize.rs
++++ b/codex-rs/core/src/context_manager/normalize.rs
+@@ -94,9 +94,7 @@ pub(crate) fn ensure_call_outputs_present(items: &mut Vec<ResponseItemEnvelope>)
+                     .as_ref()
+                     .is_some_and(|metadata| metadata.inherited_user_message)
+                 {
+-                    error_or_panic(format!(
+-                        "Custom tool call output is missing for call id: {call_id}"
+-                    ));
++                    info!("Custom tool call output is missing for call id: {call_id}");
+                 }
+                 missing_outputs_to_insert.push((
+                     idx,
+diff --git a/codex-rs/core/tests/suite/resume.rs b/codex-rs/core/tests/suite/resume.rs
+index 138a73a203..e8bf525f58 100644
+--- a/codex-rs/core/tests/suite/resume.rs
++++ b/codex-rs/core/tests/suite/resume.rs
+@@ -6,10 +6,13 @@ use codex_history::ResumedHistory;
+ use codex_protocol::config_types::WindowsSandboxLevel;
+ use codex_protocol::error::CodexErrorDetails;
+ use codex_protocol::mcp::ClientMcpExtensions;
++use codex_protocol::models::ResponseItem;
+ use codex_protocol::protocol::EventMsg;
+ use codex_protocol::protocol::ThreadHistoryMode;
+ use codex_protocol::protocol::ThreadSettingsOverrides;
+ use codex_protocol::user_input::UserInput;
++use codex_rollout::RolloutItem;
++use codex_rollout::append_rollout_item_to_path;
+ use codex_thread_store::InMemoryThreadStore;
+ use codex_thread_store::LoadThreadHistoryParams;
+ use codex_thread_store::ThreadStoreResumePreparation;
+@@ -371,3 +374,95 @@ async fn resume_model_switch_is_not_duplicated_after_pre_turn_override() -> Resu
+ 
+     Ok(())
+ }
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn resumed_custom_call_without_output_recovers_and_completes_turn() -> Result<()> {
++    skip_if_no_network!(Ok(()));
++    let server = start_mock_server().await;
++    let initial = test_codex().build_with_auto_env(&server).await?;
++    mount_sse_once(
++        &server,
++        sse(vec![
++            ev_assistant_message("seed", "Saved context."),
++            ev_completed("seed"),
++        ]),
++    )
++    .await;
++    initial.submit_text_turn("Seed the saved history.").await?;
++    initial.codex.shutdown_and_wait().await?;
++    let orphaned_call = RolloutItem::ResponseItem(
++        ResponseItem::CustomToolCall {
++            encrypted_content: None,
++            id: None,
++            status: Some("completed".to_string()),
++            call_id: "orphaned-exec".to_string(),
++            name: "exec".to_string(),
++            namespace: Some("functions".to_string()),
++            input: "throw new Error('historical call must not be replayed')".to_string(),
++            internal_chat_message_metadata_passthrough: None,
++        }
++        .into(),
++    );
++    append_rollout_item_to_path(
++        initial
++            .session_configured
++            .rollout_path
++            .as_ref()
++            .expect("seed turn materializes its rollout"),
++        &orphaned_call,
++    )
++    .await?;
++    let history = initial
++        .thread_store
++        .load_latest_model_context(LoadThreadHistoryParams {
++            thread_id: initial.session_configured.thread_id,
++            include_archived: true,
++        })
++        .await?;
++    let resumed = initial
++        .thread_manager
++        .resume_thread_with_history(
++            initial.config.clone(),
++            InitialHistory::Resumed(ResumedHistory {
++                history_revision: None,
++                conversation_id: history.thread_id,
++                history: Arc::new(history.items),
++                rollout_path: initial.session_configured.rollout_path.clone(),
++            }),
++            initial.thread_manager.auth_manager(),
++            /*parent_trace*/ None,
++            ClientMcpExtensions::default(),
++        )
++        .await?;
++    let response = mount_sse_once(
++        &server,
++        sse(vec![
++            ev_assistant_message("recovered", "Historical tool result was unavailable."),
++            ev_completed("recovered"),
++        ]),
++    )
++    .await;
++    resumed
++        .thread
++        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
++            text: "Continue without replaying the historical tool.".to_string(),
++            text_elements: Vec::new(),
++        }]))
++        .await?;
++    wait_for_event(&resumed.thread, |event| {
++        matches!(event, EventMsg::TurnComplete(_))
++    })
++    .await;
++    assert_eq!(
++        response
++            .single_request()
++            .custom_tool_call_output("orphaned-exec"),
++        serde_json::json!({
++            "type": "custom_tool_call_output",
++            "call_id": "orphaned-exec",
++            "output": "aborted"
++        })
++    );
++    resumed.thread.shutdown_and_wait().await?;
++    Ok(())
++}
