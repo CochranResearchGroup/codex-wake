@@ -2,19 +2,10 @@ diff --git a/codex-rs/core/src/context_manager/history_tests.rs b/codex-rs/core/
 index 70178c446f..f6c11bf8af 100644
 --- a/codex-rs/core/src/context_manager/history_tests.rs
 +++ b/codex-rs/core/src/context_manager/history_tests.rs
-@@ -2334,7 +2334,7 @@ fn format_exec_output_prefers_line_marker_when_both_limits_exceeded() {
-     assert_truncated_message_matches(&truncated, "line-0-", /*expected_removed*/ 17_423);
- }
- 
+@@ -2337 +2337 @@ fn format_exec_output_prefers_line_marker_when_both_limits_exceeded() {
 -#[cfg_attr(not(debug_assertions), test_case::test_case(false; "local"))]
 +#[test_case::test_case(false; "local")]
- #[test_case::test_case(true; "inherited")]
- fn normalize_adds_missing_output_for_custom_tool_call(inherited: bool) {
-     let items = vec![ResponseItem::CustomToolCall {
-@@ -2732,24 +2732,6 @@ fn normalize_adds_missing_output_for_tool_search_call() {
-     );
- }
- 
+@@ -2735,18 +2734,0 @@ fn normalize_adds_missing_output_for_tool_search_call() {
 -#[cfg(debug_assertions)]
 -#[test]
 -#[should_panic]
@@ -33,46 +24,25 @@ index 70178c446f..f6c11bf8af 100644
 -    h.normalize_history(&default_input_modalities());
 -}
 -
- #[cfg(debug_assertions)]
- #[test]
- #[should_panic]
 diff --git a/codex-rs/core/src/context_manager/normalize.rs b/codex-rs/core/src/context_manager/normalize.rs
 index 387bc8f75a..1331821039 100644
 --- a/codex-rs/core/src/context_manager/normalize.rs
 +++ b/codex-rs/core/src/context_manager/normalize.rs
-@@ -94,9 +94,7 @@ pub(crate) fn ensure_call_outputs_present(items: &mut Vec<ResponseItemEnvelope>)
-                     .as_ref()
-                     .is_some_and(|metadata| metadata.inherited_user_message)
-                 {
+@@ -97,3 +97 @@ pub(crate) fn ensure_call_outputs_present(items: &mut Vec<ResponseItemEnvelope>)
 -                    error_or_panic(format!(
 -                        "Custom tool call output is missing for call id: {call_id}"
 -                    ));
 +                    info!("Custom tool call output is missing for call id: {call_id}");
-                 }
-                 missing_outputs_to_insert.push((
-                     idx,
 diff --git a/codex-rs/core/tests/suite/resume.rs b/codex-rs/core/tests/suite/resume.rs
 index 138a73a203..e8bf525f58 100644
 --- a/codex-rs/core/tests/suite/resume.rs
 +++ b/codex-rs/core/tests/suite/resume.rs
-@@ -6,10 +6,13 @@ use codex_history::ResumedHistory;
- use codex_protocol::config_types::WindowsSandboxLevel;
- use codex_protocol::error::CodexErrorDetails;
- use codex_protocol::mcp::ClientMcpExtensions;
+@@ -8,0 +9 @@ use codex_protocol::mcp::ClientMcpExtensions;
 +use codex_protocol::models::ResponseItem;
- use codex_protocol::protocol::EventMsg;
- use codex_protocol::protocol::ThreadHistoryMode;
- use codex_protocol::protocol::ThreadSettingsOverrides;
- use codex_protocol::user_input::UserInput;
+@@ -12,0 +14,2 @@ use codex_protocol::user_input::UserInput;
 +use codex_rollout::RolloutItem;
 +use codex_rollout::append_rollout_item_to_path;
- use codex_thread_store::InMemoryThreadStore;
- use codex_thread_store::LoadThreadHistoryParams;
- use codex_thread_store::ThreadStoreResumePreparation;
-@@ -371,3 +374,95 @@ async fn resume_model_switch_is_not_duplicated_after_pre_turn_override() -> Resu
- 
-     Ok(())
- }
+@@ -373,0 +377,92 @@ async fn resume_model_switch_is_not_duplicated_after_pre_turn_override() -> Resu
 +
 +#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 +async fn resumed_custom_call_without_output_recovers_and_completes_turn() -> Result<()> {
