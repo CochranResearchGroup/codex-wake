@@ -625,7 +625,28 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             from .goal_usage import observe_usage
             first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis)
             if first.get('state')!='qualified':raise AccountingUnavailable('first enrollment requires qualified original history',first)
-            if first.get('parent_thread_id'):raise ValueError('successor must select its existing objective allocation')
+            parent=first.get('parent_thread_id')
+            if parent:
+                if allocation_id is not None:
+                    raise ValueError('successor must continue its existing objective allocation, not select a fresh one')
+                source=directory/(_name(parent)+'.json')
+                if not source.exists():
+                    raise ValueError('successor allocation is unavailable; inspect the verified source continuation')
+                _private(source);predecessor=json.loads(source.read_text())
+                if predecessor.get('thread_id')!=parent:
+                    raise ValueError('successor source identity changed')
+                inherited=_grant(policy_path,caller_thread_id,predecessor['allocation_id'],root)
+                if any(inherited[key]!=grant[key] for key in ('app_server','codex_home','codex_path')):
+                    raise ValueError('cross-native successor allocation is unsupported')
+                # This remains the caller's explicit supervision request. Select
+                # its qualified existing allocation without creating a new window
+                # or asking the operator to copy an internal allocation identity.
+                grant=inherited
+                if token_accounting is None:
+                    basis=predecessor.get('token_accounting','cache_inclusive')
+                    receipt['token_accounting']=basis
+                receipt.update(grant=grant,allocation_id=grant['allocation_id'],
+                    continuation_source_thread_id=parent)
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old)
         if sync(receipt):
             _record_supervision_notice(path,receipt,'deactivation')

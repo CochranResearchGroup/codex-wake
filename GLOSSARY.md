@@ -64,7 +64,9 @@ idle observations. Neither path renews counters or resource allocation.
 
 **Agent handoff**:
 Passing an unfinished objective and its checkpoint to a different conversation,
-without implicitly transferring identity, permissions or resource allowance.
+continuing its already-authorized scope, cumulative spending, remaining allowance
+and original deadline. It does not renew resources, change identity or widen
+permissions, and does not require optional governor enrollment in manual mode.
 
 **Handoff checkpoint**:
 The outgoing agent's durable account of completed work, remaining work, evidence,

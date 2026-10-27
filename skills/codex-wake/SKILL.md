@@ -1,6 +1,6 @@
 ---
 name: codex-wake
-description: Use Codex Wake when a user gives /goal resource limits (tokens, time, memory, swap, CPU, tasks): register token/time limits for the existing native goal through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, self-refresh of MCP resources through an approved selected-thread reload, or skill/MCP resources through approved client replacement or shared reload after idle checks, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake for resource allowances and optional existing-native-goal supervision. Honor numeric ceilings and the operator-selected manual or supervised mode; reading a handoff continues already-authorized work without reset, repeated approval or optional enrollment. When external supervision is selected, register token/time limits through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, self-refresh of MCP resources through an approved selected-thread reload, or skill/MCP resources through approved client replacement or shared reload after idle checks, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
@@ -29,6 +29,18 @@ resource monitoring permits bounded development/repair under the same cumulative
 limits; report the fallback and keep shared services and stopped campaigns unchanged. A held campaign still permits operator replies,
 bounded setup diagnosis and checkpoint writing. Only explicit user renewal
 recorded through host authority creates a new allowance.
+
+Reading an operator-provided handoff in a new session continues the already
+authorized objective with its remaining allowance and original deadline. It does
+not require resource reset, repeated approval or optional governor enrollment.
+Continue in the operator-selected manual mode when applicable; do not enable a
+watcher or governor just because a handoff was read. A completed or blocked native
+goal for another objective is not a global session lock. Genuine exhaustion of
+the continuing objective remains explicit and does not replenish on handoff.
+When already-enabled supervision is requested through the host adapter, a
+qualified native successor automatically selects its source's existing allocation.
+An ordinary Markdown read alone is not native lineage or accounting proof; keep
+manual continuation separate from claims of verified automatic enforcement.
 
 For refresh, inspect the profile's scope and preserve one fixed intent. A
 thread_mcp_idle profile requires a successful read-only native scope probe and
