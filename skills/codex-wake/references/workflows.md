@@ -39,18 +39,32 @@ See [lifecycle requests and setup](lifecycle.md#shared-mcp-refresh).
 ## When the user gives resource limits
 
 For "use at most 2M tokens" or "stop after four hours", read the
-[existing-session workflow](existing-goal-limits.md) before work.
-Use `wake_goal_limits_set` with your actual caller UUID and the user's allocation;
-verify qualified accounting and a fresh independent watcher in the returned
-state. `wake_goal_limits_show` reconciles status. A configured policy alone is
-insufficient. Limits persist across replacement goals and resume; only an
-explicit user reset recorded by the host can reset counters/allocation. Missing
-setup, unknown accounting and unverified stops hold autonomous campaign work;
-report the reason and next action. Operator replies, status checks, bounded setup
-diagnosis and checkpoint writing remain available. A halted goal is not a disabled
-chat. New enrollments count fresh input plus output by default; cache-inclusive
-accounting requires explicit selection. Re-enrollment preserves its existing basis.
-Token stops are sampled, with unknown maximum overshoot.
+[existing-session workflow](existing-goal-limits.md) and preserve the user's actual
+numeric ceiling, cumulative spending, remaining allowance and original deadline.
+Honor the operator-selected manual or supervised mode. Reading an operator-provided
+handoff continues already-authorized work without resource reset, repeated approval
+or optional governor enrollment. Do not activate supervision merely because limits
+or a handoff are present. A stale completed or blocked native goal for unrelated
+work is not a global lock; do not reset or reuse its allocation to admit new work.
+
+When external supervision is selected, use `wake_goal_limits_set` with the actual
+caller UUID and authorized allocation. Qualified native successors may omit the
+internal allocation ID: the adapter selects their retained source allocation and
+inherits the same accounting basis when omitted, preserving cumulative charges,
+original deadline, genuine exhaustion and governor deactivation. Ordinary Markdown
+does not establish verified native lineage or accounting. Do not infer unlimited
+resources or a new allocation from absent measurements.
+
+Verify qualified accounting and a fresh independent watcher before claiming
+external enforcement. `wake_goal_limits_show` reconciles status; configuration
+alone is insufficient. Missing setup, unknown accounting and unverified stops
+hold externally supervised execution, not operator-authorized manual continuation
+within demonstrably remaining resources. Report the exact limitation and next
+action without requiring an enrollment ritual for manual work. Handoff does not
+renew a genuinely exhausted objective; only explicit user renewal through host
+authority can change its allowance. New supervised allocations default to fresh
+input plus output; explicit cache-inclusive selection and inherited accounting
+basis remain supported. Token stops are sampled, with unknown maximum overshoot.
 
 For explicit memory, swap, CPU or task controls, use the separate
 [dedicated executor workflow](resource-limits.md). Native supervision
