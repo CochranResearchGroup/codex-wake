@@ -86,6 +86,17 @@ Refresh, handoff and rollback preserve spending and deadlines; only explicit
 operator authorization can extend the budget. Missing profiles, grants or
 instructions require operator setup; an agent cannot invent replacements.
 
+## Manual handoff reading
+
+The commands above manage an explicit runtime transition. They are not required
+when the operator starts a new session and asks it to read a handoff and continue.
+Continue the already-authorized objective in its existing manual or supervised
+mode, carrying forward remaining resources and the original deadline. Reading a
+handoff does not authorize a reset, new enrollment, silent governor activation or
+repeated operator approval. A stale native goal for another objective is not a
+continuation gate. Ordinary Markdown does not supply verified runtime lineage;
+do not claim automatic supervised attachment from that read alone.
+
 ## Shared MCP refresh
 
 A host profile with `refresh_mode: "shared_mcp_idle"` uses the existing refresh

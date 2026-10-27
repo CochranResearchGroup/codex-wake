@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P178
+    owner: primary / ecochran76; handoff_ritual_diagnosis
+    objective: Remove handoff resource ritual without renewing resources or activating governance
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/365]
+    plan: docs/dev/plans/0178-2026-10-27-handoff-resource-continuity.md
+    branch: fix/handoff-automatic-allocation
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-27
+    disposition: Bounded automatic source-allocation selection and manual-mode guidance; native file-read linkage and deployed acceptance remain separate
   - id: P176
     owner: primary / ecochran76
     objective: Repair durable future scheduling and native MCP host wiring

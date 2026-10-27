@@ -30,6 +30,18 @@ limits; report the fallback and keep shared services and stopped campaigns uncha
 bounded setup diagnosis and checkpoint writing. Only explicit user renewal
 recorded through host authority creates a new allowance.
 
+Reading an operator-provided handoff in a new session continues the already
+authorized objective with its remaining allowance and original deadline. It does
+not require resource reset, repeated approval or optional governor enrollment.
+Continue in the operator-selected manual mode when applicable; do not enable a
+watcher or governor just because a handoff was read. A completed or blocked native
+goal for another objective is not a global session lock. Genuine exhaustion of
+the continuing objective remains explicit and does not replenish on handoff.
+When already-enabled supervision is requested through the host adapter, a
+qualified native successor automatically selects its source's existing allocation.
+An ordinary Markdown read alone is not native lineage or accounting proof; keep
+manual continuation separate from claims of verified automatic enforcement.
+
 For refresh, inspect the profile's scope and preserve one fixed intent. A
 thread_mcp_idle profile requires a successful read-only native scope probe and
 refreshes only the selected thread's MCP connections after that thread is idle.

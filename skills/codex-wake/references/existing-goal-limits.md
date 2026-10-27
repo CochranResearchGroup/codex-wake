@@ -19,10 +19,35 @@ See [governor controls](../../../docs/governor-control.md) for offline authentic
 host access and notice-delivery limitations. Verify installed capabilities before
 claiming these source features are present.
 
+## Handoff continuation without an operator ritual
+
+Reading an operator-provided handoff does not create an enrollment requirement.
+Carry forward the same objective, cumulative spending, remaining allowance,
+original deadline and operator-selected governor/manual mode, then continue work
+within that authority. Do not ask the operator to reset resources or repeat
+approval merely because conversation identity changed. Do not silently activate
+the governor. An old completed or blocked goal for unrelated work does not lock
+this session; do not reset or reuse its stopped allocation to admit a new objective.
+
+For optional supervised enrollment, a verified native successor with qualified
+source lineage and a retained source allocation can omit `allocation_id`; the
+adapter selects the existing allocation without renewing its window. Explicit
+host grants and explicit allocation selection remain compatible. Genuine
+exhaustion and deactivation are inherited. Missing source allocation or changed
+runtime/envelope remains a supervised-admission limitation, not a mandate to
+perform enrollment before operator-authorized manual work.
+
+Opening a new session and reading arbitrary Markdown does not itself establish
+verified native lineage or response-level accounting. Do not invent an allocation
+from prose or infer unlimited resources from a missing meter. Preserve stated
+numeric ceilings and use available evidence for manual accounting; report an
+actual limit or missing measurement plainly. This source change does not install
+a startup hook that observes ordinary file reads.
+
 ## Agent workflow
 
-When the user supplies a token or time allowance, load this guide before heavy
-work. Obtain your actual `CODEX_THREAD_ID` in a native shell, then call:
+When the user requests external supervision for a token or time allowance, load
+this guide before heavy work. For that opt-in mode, obtain your actual `CODEX_THREAD_ID` in a native shell, then call:
 
 ```json
 {
