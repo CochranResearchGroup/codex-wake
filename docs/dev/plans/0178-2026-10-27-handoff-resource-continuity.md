@@ -45,3 +45,5 @@ The fix changes only the established first-enrollment successor refusal: after q
 - No new native/provider acceptance, installation, live controller or goal mutation. Tests own isolated temporary roots and fixture watchers/native sockets, with normal unittest cleanup.
 
 Primary review/integration, installed skill refresh and release validation remain pending. This plan does not claim the arbitrary Markdown/no-lineage case has an automatic metering protocol. Memory disposition: forbidden — task does not authorize persistent memory writes.
+
+Primary reconciliation: development identity advances to0.22.0.dev2 for future installed/resident catalog discrimination. No live activation is implied by the source version. Native source repair remains separate.
