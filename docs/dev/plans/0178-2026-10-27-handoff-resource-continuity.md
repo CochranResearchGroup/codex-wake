@@ -1,6 +1,6 @@
 # Handoff resource continuity / #365
 
-State: OPEN — bounded source and instruction repair, pending primary reconciliation
+State: CLOSED — bounded source, installed commands and agent guidance qualified
 Owner: primary / ecochran76; delegated implementation: handoff_ritual_diagnosis
 Branch: fix/handoff-automatic-allocation
 Baseline: origin/main96f0f01104e6f0297d3c1ea4c7c2477051270787
@@ -54,3 +54,12 @@ Primary reconciliation: development identity advances to0.22.0.dev2 for future i
 Frozen review base96f0f01; implementation95cc3e2, identityb2284ea, documentation remediation9bf8b24. Primary reviewed Standards and Spec independently. One blocking Spec finding: workflows.md and the skill description still mandated enrollment for a stated ceiling, contradicting the new manual-handoff contract. Remediated in9bf8b24; exact paragraphs rechecked. No remaining blocking finding on the source behavior or scope. Public regression and affected54-case evidence retained; no redundant full local suite requested. Code review is source qualification, not installed activation or native-panic repair.
 
 Integration candidate0.22.0.dev2 retains existing API shape, explicit grants/selections, exhaustion and deactivation. No native reload, watcher activation or allocation renewal is part of merge. Missing manual-file lineage is explicitly not represented as verified metering. A future installed/readback packet must distinguish CLI/skill identity from resident MCP identity.
+
+
+## Qualified installed outcome
+
+PR366 merged as7c94481aeba0096c4d95b7146797795a5d16fa9a. CI40430750759 passed both Python3.11/3.12 matrices:1739tests/1skip, plus installed-wheel9-case smoke and package gates. Immutable prefix0.22.0.dev2-7c94481 was installed from that exact main commit;166Python source files matched. Actual installed package imports from the new prefix and passes the three public-boundary regressions (including all source-status/accounting subcases) in1.992s.
+
+Five command links now resolve to the qualified prefix. Both installed Wake skill trees exactly match the ten source files. Private rollback copies and installation receipt are operator-local under repairs/365; no private prompts or credentials are in this plan. Native daemon and existing service pins were not restarted or rewritten. Goal-limits service remains masked/inactive; no resource ledger, goal, allowance or governor state was changed. Existing MCP connections were not force-reloaded; installed/new-launch identity is distinct from a resident catalog claim.
+
+The bounded source/instruction/installation outcome is complete. This does not implement a file-read interception hook or magically attach an unrelated manual session to metered lineage. User-directed manual continuation requires no such attachment. Native orphaned-output repair remains a separate issue364 with its own candidate/cutover gate.

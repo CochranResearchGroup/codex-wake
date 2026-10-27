@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P177
+    owner: primary / ecochran76
+    objective: Recover orphaned custom tool outputs without native debug panic
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/364]
+    plan: docs/dev/plans/0177-2026-10-26-native-orphan-output-recovery.md
+    branch: fix/native-orphan-output-364
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-26
+    disposition: Native source b706004728 and private package qualified; red-green/95component/resumed/full-replay PASS; temporary cache cleaned; shared cutover pending approval
   - id: P178
     owner: primary / ecochran76; handoff_ritual_diagnosis
     objective: Remove handoff resource ritual without renewing resources or activating governance
@@ -8,12 +21,12 @@ lanes:
     plan: docs/dev/plans/0178-2026-10-27-handoff-resource-continuity.md
     branch: fix/handoff-automatic-allocation
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: []
     updated_at: 2026-10-27
-    disposition: Bounded automatic source-allocation selection and manual-mode guidance; native file-read linkage and deployed acceptance remain separate
+    disposition: PR366 merged7c94481; installed0.22.0.dev2 with exact source/skill parity and installed regression PASS; manual mode preserved; no resident reload
   - id: P176
     owner: primary / ecochran76
     objective: Repair durable future scheduling and native MCP host wiring
