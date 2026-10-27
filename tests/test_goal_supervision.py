@@ -222,9 +222,10 @@ class GoalSupervisionTests(unittest.TestCase):
                 self.assertIn('successor',result['error']['message'])
 
     def test_verified_successor_inherits_allocation_without_operator_selection(self):
-        for source_status,enabled in (('active',True),('complete',True),('blocked',True),('active',False)):
+        for source_status,enabled,accounting in (('active',True,'fresh'),('complete',True,'fresh'),
+                ('blocked',True,'fresh'),('active',False,'fresh'),('active',True,'cache_inclusive')):
             from codex_wake.mcp_server import CommandRunner
-            with self.subTest(source_status=source_status,enabled=enabled),tempfile.TemporaryDirectory() as directory:
+            with self.subTest(source_status=source_status,enabled=enabled,accounting=accounting),tempfile.TemporaryDirectory() as directory:
                 root,policy,log,native,_=self.fixture(directory)
                 native['goal']['status']=source_status
                 template=json.loads(policy.read_text())['callers'][THREAD];template.pop('allocation_id')
@@ -244,7 +245,7 @@ class GoalSupervisionTests(unittest.TestCase):
                     **{'x-codex-turn-metadata':dict(thread_id=thread,session_id=thread,turn_id='work')})
                 runner=CommandRunner(goal_limits_policy=policy,goal_limits_root=root)
                 with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+10):
-                    first,failed=runner.call('wake_goal_limits_set',dict(caller_thread_id=THREAD,token_limit=100,time_limit_seconds=120),native_context=context(THREAD))
+                    first,failed=runner.call('wake_goal_limits_set',dict(caller_thread_id=THREAD,token_limit=100,time_limit_seconds=120,token_accounting=accounting),native_context=context(THREAD))
                     self.assertFalse(failed,first)
                     if not enabled:
                         from codex_wake.goal_governance import change
@@ -255,6 +256,7 @@ class GoalSupervisionTests(unittest.TestCase):
                     self.assertEqual(second['allocation_id'],first['allocation_id'])
                     self.assertEqual(second['deadline'],first['deadline'])
                     self.assertEqual(second['used_tokens'],80)
+                    self.assertEqual(second['token_accounting'],accounting)
                     self.assertEqual(second['continuation_source_thread_id'],THREAD)
                     self.assertEqual(second['state'],'armed' if enabled else 'inactive')
                     self.assertEqual(second['governor_enabled'],enabled)

@@ -642,6 +642,9 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 # its qualified existing allocation without creating a new window
                 # or asking the operator to copy an internal allocation identity.
                 grant=inherited
+                if token_accounting is None:
+                    basis=predecessor.get('token_accounting','cache_inclusive')
+                    receipt['token_accounting']=basis
                 receipt.update(grant=grant,allocation_id=grant['allocation_id'],
                     continuation_source_thread_id=parent)
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old)
