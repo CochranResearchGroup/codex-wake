@@ -47,3 +47,10 @@ The fix changes only the established first-enrollment successor refusal: after q
 Primary review/integration, installed skill refresh and release validation remain pending. This plan does not claim the arbitrary Markdown/no-lineage case has an automatic metering protocol. Memory disposition: forbidden — task does not authorize persistent memory writes.
 
 Primary reconciliation: development identity advances to0.22.0.dev2 for future installed/resident catalog discrimination. No live activation is implied by the source version. Native source repair remains separate.
+
+
+## Primary review and integration
+
+Frozen review base96f0f01; implementation95cc3e2, identityb2284ea, documentation remediation9bf8b24. Primary reviewed Standards and Spec independently. One blocking Spec finding: workflows.md and the skill description still mandated enrollment for a stated ceiling, contradicting the new manual-handoff contract. Remediated in9bf8b24; exact paragraphs rechecked. No remaining blocking finding on the source behavior or scope. Public regression and affected54-case evidence retained; no redundant full local suite requested. Code review is source qualification, not installed activation or native-panic repair.
+
+Integration candidate0.22.0.dev2 retains existing API shape, explicit grants/selections, exhaustion and deactivation. No native reload, watcher activation or allocation renewal is part of merge. Missing manual-file lineage is explicitly not represented as verified metering. A future installed/readback packet must distinguish CLI/skill identity from resident MCP identity.
