@@ -11,6 +11,25 @@ def config(revision=1, limit=100, deadline=200):
 
 
 class ObjectiveLedgerTests(unittest.TestCase):
+    def test_cross_account_continuation_shares_original_session_spend_and_deadline(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger=ObjectiveLedger(root,'objective')
+            ledger.configure(config(),'operator',prior_tokens=20,now=100)
+            ledger.bind_requests({'transport':'fixture'}, {'source':20},now=100)
+            before=ledger.inspect(now=110)
+            linked=ledger.continue_request_thread('successor','source',{'intent':'switch'},now=110)
+            self.assertEqual(linked['request_sessions']['successor']['deadline'],150)
+            self.assertEqual(linked['tokens_used'],before['tokens_used'])
+            self.assertEqual(linked['authorization_history'],before['authorization_history'])
+            self.assertTrue(ledger.reserve_request('request:child','successor',30,10,now=110)['admitted'])
+            ledger.settle_request('request:child','response',30,'fixture',now=111)
+            ledger=ObjectiveLedger(root,'objective')
+            self.assertFalse(ledger.reserve_request('request:source-again','source',11,1,now=112)['admitted'])
+            replay=ledger.continue_request_thread('successor','source',{'intent':'switch'},now=113)
+            self.assertEqual(replay['tokens_used'],50)
+            self.assertEqual(replay['original_deadline'],200)
+            self.assertFalse(ledger.reserve_request('request:late','successor',1,1,now=150)['admitted'])
+
     def test_late_sampled_floor_remains_unknown_atomically_and_cannot_readmit(self):
         with tempfile.TemporaryDirectory() as root:
             ledger=ObjectiveLedger(root,'objective');ledger.configure(config(),'operator',now=100)

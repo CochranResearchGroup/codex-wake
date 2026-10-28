@@ -360,6 +360,29 @@ class ObjectiveLedger:
                 raise ValueError('request thread provenance changed')
             return self._view(state,now)
 
+    def continue_request_thread(self, thread_id, source_thread_id, provenance, *, now):
+        """Bind a context successor to the same session cap without new authority.
+
+        Unlike a new worker, a replacement context shares all predecessor and
+        successor spending, including outstanding requests, and the old deadline.
+        """
+        if not thread_id or thread_id==source_thread_id or not provenance:
+            raise ValueError('distinct successor and continuation provenance required')
+        with self._transaction() as state:
+            self._view(state,now)
+            sessions=state.get('request_sessions',{})
+            if not state.get('request_binding') or source_thread_id not in sessions:
+                raise ValueError('qualified source request binding required')
+            source=sessions[source_thread_id]
+            group=source.get('continuation_group',source_thread_id)
+            binding=dict(prior_tokens=0,parent_thread_id=source_thread_id,provenance=provenance,
+                         deadline=source['deadline'],continuation_group=group)
+            existing=sessions.get(thread_id)
+            if existing is not None and existing!=binding:
+                raise ValueError('successor accounting binding changed')
+            sessions[thread_id]=binding
+            return self._view(state,now)
+
     def protect_completion(self, obligations, *, source, now):
         """Trusted host reserves purpose, not another allowance or approval."""
         source = _completion_source(source)
@@ -446,8 +469,12 @@ class ObjectiveLedger:
             config = state['configuration']
             session = state['request_sessions'].setdefault(thread_id, dict(prior_tokens=0,
                 deadline=min(_epoch(config['objective_deadline']), _epoch(now)+config['session_time_limit_seconds'])))
-            used = session['prior_tokens'] + sum(max(a['used'], a['reservation']) if not a['settled'] else a['used']
-                for a in state['actors'].values() if a.get('request_thread')==thread_id)
+            group=session.get('continuation_group',thread_id)
+            members={key for key,value in state['request_sessions'].items()
+                     if value.get('continuation_group',key)==group}
+            used = sum(state['request_sessions'][key]['prior_tokens'] for key in members) + sum(
+                max(a['used'], a['reservation']) if not a['settled'] else a['used']
+                for a in state['actors'].values() if a.get('request_thread') in members)
             admitted = not enforce or (view['ready'] and tokens<=view['remaining_tokens']
                 and used+tokens<=config['session_token_limit'] and seconds<=config['session_time_limit_seconds']
                 and state['observed_at']+seconds<=session['deadline'])

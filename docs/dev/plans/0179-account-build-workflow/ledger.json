@@ -249,5 +249,48 @@
     "coordination": "https://github.com/CochranResearchGroup/codex-wake/pull/379",
     "merged": false,
     "production_activated": false
+  },
+  "continuation_20261028": {
+    "base_profiles": "2375574e212c276300dfc324dc43071c3dab9128",
+    "review_rounds": 0,
+    "remediation_passes": 0,
+    "review_fixed_point": "2375574e212c276300dfc324dc43071c3dab9128",
+    "tickets": {
+      "372": {
+        "state": "validated",
+        "worker": "/root/finish372",
+        "worktree": "/home/ecochran76/workspace.local/codex-profiles-finish372",
+        "owned": [
+          "authentication tests",
+          "authentication docs",
+          "authentication seam if required"
+        ],
+        "worker_result": "f8769e3ad8998e4440c14b43e9f03a3788f1db69",
+        "integrated_commit": "650f5b6",
+        "proof": "genuine installed baseline red/candidate green;20 native file/keyring rotation/rejection checks;2real-account canaries"
+      },
+      "376": {
+        "state": "validated",
+        "worker": "/root",
+        "worktree": "/home/ecochran76/workspace.local/codex-profiles-369",
+        "owned": [
+          "continuation.py",
+          "continuation tests",
+          "continuation docs"
+        ],
+        "integrated_commit": "ec90086",
+        "proof": "108 profile tests with matching owner;13 ledger tests;3 request admission tests;7 installed WSL groups+13 upgrade tests",
+        "limits": [
+          "plain JSONL lineage only; compressed ancestors held",
+          "request-accounting owner continuity; lifecycle native-goal accounting held",
+          "native goals deferred; no automatic work start"
+        ]
+      }
+    },
+    "active_agent_cap": 2,
+    "mode": "manual resource monitoring; synthetic isolated WSL; no production effects",
+    "candidate_profiles": "fcf06a9",
+    "installed_receipt": "user-scoped continuation-installed.json",
+    "review_state": "pending"
   }
 }
