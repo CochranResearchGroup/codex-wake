@@ -1,0 +1,331 @@
+{
+  "spec": {
+    "number": 371,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/371"
+  },
+  "parent": 369,
+  "review_rounds": 1,
+  "remediation_passes": 1,
+  "wake": {
+    "base": "bbc780ab41d8b978b187956f6ddce2a7621662c2",
+    "branch": "feat/account-build-workflow-369",
+    "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/379",
+    "ci_authority": "Current PR379 checks; final remote readback retained in user-scoped final receipt"
+  },
+  "profiles": {
+    "base": "48602bd",
+    "branch": "feat/account-build-workflow",
+    "tip": "2375574e212c276300dfc324dc43071c3dab9128",
+    "pull_request": "https://github.com/ecochran76/codex-profiles/pull/1",
+    "ci": {
+      "run": 40687796719,
+      "python3.11": "PASS",
+      "python3.12": "PASS",
+      "tests_each": 106,
+      "initial_run": 40687354265,
+      "initial_failure": "runner missing required zsh; provisioned rather than skipped"
+    }
+  },
+  "tickets": {
+    "01": {
+      "number": 372,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/372"
+    },
+    "02": {
+      "number": 373,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/373"
+    },
+    "03": {
+      "number": 374,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/374"
+    },
+    "04": {
+      "number": 375,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/375"
+    },
+    "05": {
+      "number": 376,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/376"
+    },
+    "06": {
+      "number": 377,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/377"
+    },
+    "07": {
+      "number": 378,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/378"
+    }
+  },
+  "states": {
+    "01": "validated",
+    "02": "validated",
+    "03": "validated",
+    "04": "validated",
+    "05": "validated",
+    "06": "validated",
+    "07": "validated"
+  },
+  "workers": {
+    "01": "/root",
+    "02": "/root/ticket373",
+    "03": "/root/ticket374",
+    "04": "/root",
+    "06": "/root/ticket377",
+    "05": "/root/ticket376",
+    "07": "/root/ticket378"
+  },
+  "dependencies": {
+    "01": [],
+    "02": [],
+    "03": [
+      "01",
+      "02"
+    ],
+    "04": [
+      "01",
+      "02"
+    ],
+    "05": [
+      "04"
+    ],
+    "06": [
+      "02"
+    ],
+    "07": [
+      "03",
+      "04",
+      "05",
+      "06"
+    ]
+  },
+  "validation": [
+    {
+      "ticket": 372,
+      "target": "source and installed synthetic-fixture launcher/auth-state loading",
+      "result": "PASS",
+      "red": "standalone launcher ignored CODEX_PROFILES_CONFIG; alias A failed with no profile/default",
+      "green": "71 profile tests and actual installed wheel A/B/A against stock0.164 pass in wsl-test",
+      "remaining": "Operator live reauthentication root cause not established; exact use/plain vs explicit launch question pending; genuine refresh/expiry not proved",
+      "tracker_closure": "OPEN pending remaining acceptance, not equated with source fixture validation"
+    },
+    {
+      "ticket": 373,
+      "result": "PASS source and owned installed native fixture",
+      "tip": "7b57da9",
+      "proof": "73 profile tests; four actual stock/modded \u00d7 syntheticaccount native observations; actual idle+resize native TUI retained selected channel/profile titles",
+      "limits": "account RPC opt-in in contained routing fixture; default live identity remains explicit unverified; stricter same-home serialization until native multiwriter qualified; broader upgrade/nativecapability acceptance ticket378"
+    },
+    {
+      "ticket": 375,
+      "tip": "3f9dceb",
+      "result": "78 tests pass; five public subprocess history scenarios",
+      "proof": "readonly distinct namespaces for identical IDs; exact owner resume; ambiguous owner rejection; unknown-newer schema hold; main sessions CLI",
+      "remaining": "full native saved-history resume in installed matrix378; source tracker closure remains separate"
+    },
+    {
+      "ticket": 374,
+      "source": "92635e3 integrated9798671; public caller hook4612b1f",
+      "result": "86 integration tests; contained native two-tenant concurrent TUI and sharedconfig checks PASS",
+      "receipt": "private repair/ticket374/acceptance.json",
+      "remaining": "live MCP OAuth reuse not simulated; installed full matrix378"
+    },
+    {
+      "ticket": 376,
+      "source": "035d9f0,871a116,8a29fe9 integrated",
+      "proof": "public CLI tests and actual native legacy fork+lostresponse reconciliation; zeroHTTP/sourceunchanged",
+      "limits": "foreign paginated history held; actual successor accounting binding/activegoaltransfer not qualified; no workstart"
+    },
+    {
+      "ticket": 377,
+      "source": "3f8e24b,22266ea,16e57b9,0989fd6,b07f573 integratedfaf58c4",
+      "proof": "source archive digest fixtures, complete native package stage/select/rollback, readschemas guards, archive/tamper fixtures, nonblocking boundedmetadata checker",
+      "limits": "hosttrustedpins/attestation notsignatureproof; broadnativechecks inherited vs rerun recorded; no realHDDarchive or productionactivation"
+    },
+    {
+      "ticket": 378,
+      "proof": "installed137wheel six-scenario PASS; earlierwheel allsixRED; final741docs-onlywheel runtime/entrypoint parity, freshinstall; ownedcensuszero",
+      "limits": "real auth refresh, paginated cross-account transfer and actual active-goal/accountingbinding remain qualified gaps; inherited native checks distinct"
+    },
+    {
+      "profiles_final_tip": "5ac08cf",
+      "local_python3.11": "106 PASS",
+      "local_python3.12": "106 PASS",
+      "installed_wheel": "c90421584cdc6cd8219fde164e22ded6443fe5b353e798b90dabae67c3cecff3",
+      "installed_runtime_source": "2d56a07",
+      "module_parity": "9/9 current runtime modules equal installed artifact",
+      "installed_matrix": "7 groups plus 13 installed upgrade tests PASS",
+      "owned_processes": 0,
+      "model_turns": 0,
+      "production_credentials_imported": false,
+      "cache_assertion": "single intermittent local assertion retained; not reproduced in12 isolates, focused13 tests or subsequent full3.11/3.12 suites; nonblocking evidence gap"
+    }
+  ],
+  "tracker_publication": {
+    "spec": 371,
+    "children": [
+      372,
+      373,
+      374,
+      375,
+      376,
+      377,
+      378
+    ],
+    "native_dependencies": true,
+    "subissues": true
+  },
+  "worktrees": {
+    "primary_profiles": "/home/ecochran76/workspace.local/codex-profiles-369",
+    "primary_wake": "/home/ecochran76/workspace.local/codex-wake-369",
+    "ticket373": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-373",
+      "base": "48602bd",
+      "tip": "77e2cdd",
+      "owned": [
+        "build_channels.py",
+        "test_build_channels.py"
+      ],
+      "state": "integrated"
+    },
+    "ticket374": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-374",
+      "base": "7b57da9",
+      "tip": "92635e3",
+      "owned": [
+        "layout.py",
+        "config.py",
+        "test_concurrent_profiles.py",
+        "docs/concurrent-accounts.md"
+      ],
+      "state": "integrated"
+    },
+    "ticket376": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-376",
+      "base": "3f9dceb",
+      "owned": [
+        "continuation.py",
+        "dedicated tests"
+      ],
+      "state": "running"
+    },
+    "ticket377": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-377",
+      "base": "7b57da9",
+      "owned": [
+        "upgrades.py",
+        "dedicated tests"
+      ],
+      "state": "running"
+    }
+  },
+  "tracker_resolved": [
+    372,
+    373,
+    374,
+    375,
+    376,
+    377,
+    378
+  ],
+  "tracker_open": [
+    369,
+    371
+  ],
+  "review_state": "complete",
+  "review_fixed_points": {
+    "profiles": "48602bd458152cddb4f2ce1ab721098e9417d599",
+    "profiles_candidate": "6fec3d7",
+    "wake": "bbc780ab41d8b978b187956f6ddce2a7621662c2"
+  },
+  "remediation_state": "validated",
+  "acceptance": {
+    "372": "accepted: confirmed config-discovery defect, genuine canary,20 native file/keyring/rotation/rejection cases",
+    "376": "accepted for supported JSONL lineage and existing request-accounting owner; compressed ancestry and automatic native-goal/lifecycle-goal transfer explicitly unsupported",
+    "377": "accepted after P1 remediation; per-tenant selection, launch schema guard and real-source link layout qualified",
+    "378": "seven installed groups and thirteen installed upgrade tests pass"
+  },
+  "publication": {
+    "profiles": "https://github.com/ecochran76/codex-profiles/pull/1",
+    "coordination": "https://github.com/CochranResearchGroup/codex-wake/pull/379",
+    "merged": false,
+    "production_activated": false
+  },
+  "continuation_20261028": {
+    "base_profiles": "2375574e212c276300dfc324dc43071c3dab9128",
+    "review_rounds": 1,
+    "remediation_passes": 1,
+    "review_fixed_point": "2375574e212c276300dfc324dc43071c3dab9128",
+    "tickets": {
+      "372": {
+        "state": "validated",
+        "worker": "/root/finish372",
+        "worktree": "/home/ecochran76/workspace.local/codex-profiles-finish372",
+        "owned": [
+          "authentication tests",
+          "authentication docs",
+          "authentication seam if required"
+        ],
+        "worker_result": "f8769e3ad8998e4440c14b43e9f03a3788f1db69",
+        "integrated_commit": "650f5b6",
+        "proof": "genuine installed baseline red/candidate green;20 native file/keyring rotation/rejection checks;2real-account canaries"
+      },
+      "376": {
+        "state": "validated",
+        "worker": "/root",
+        "worktree": "/home/ecochran76/workspace.local/codex-profiles-369",
+        "owned": [
+          "continuation.py",
+          "continuation tests",
+          "continuation docs"
+        ],
+        "integrated_commit": "ec90086",
+        "proof": "108 profile tests with matching owner;13 ledger tests;3 request admission tests;7 installed WSL groups+13 upgrade tests",
+        "limits": [
+          "plain JSONL lineage only; compressed ancestors held",
+          "request-accounting owner continuity; lifecycle native-goal accounting held",
+          "native goals deferred; no automatic work start"
+        ]
+      }
+    },
+    "active_agent_cap": 2,
+    "mode": "manual resource monitoring; synthetic isolated WSL; no production effects",
+    "candidate_profiles": "b416c05",
+    "installed_receipt": "user-scoped continuation-installed-remediation.json",
+    "review_state": "complete",
+    "review_axes": {
+      "Standards": {
+        "accepted": 1,
+        "highest": "P2",
+        "finding": "accounting artifact identity",
+        "disposition": "fixed"
+      },
+      "Spec": {
+        "accepted": 1,
+        "highest": "P2",
+        "finding": "completion purpose retained across successor/replay",
+        "disposition": "fixed"
+      }
+    },
+    "remediation_state": "validated",
+    "reviewers": [
+      "/root/continuation_review_standards",
+      "/root/continuation_review_spec"
+    ],
+    "candidate_wake_runtime": "7359384",
+    "installed_profile_wheel_sha256": "f9157d03dd137bde3e11a694a54d8daff3f832e70d590c3a1cfbad7d8f2edef9",
+    "installed_accounting_wheel_sha256": "8d98cc8bb67f51ea2289942a93d14c3b8ad49b97f7ca2b5348bada5e36ac4c8e",
+    "validation": {
+      "profiles_python3.11": "108 PASS with matching accounting owner",
+      "profiles_python3.12": "108 PASS with matching accounting owner",
+      "objective_ledger": "14 PASS",
+      "request_admission": "3 PASS",
+      "completion_reserve": "3 PASS",
+      "native_auth": "20 PASS",
+      "installed_groups": 7,
+      "installed_upgrade_tests": 13,
+      "installed_completion_assignment_retained": true,
+      "local_full_wake": "Unqualified/interrupted: invoked without required mcp extra; errors observed, retained log; final correctly provisioned CI is full-suite authority",
+      "full_suite_authority": "Current PR379 CI checks"
+    }
+  }
+}

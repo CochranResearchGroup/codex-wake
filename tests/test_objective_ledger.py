@@ -1,5 +1,7 @@
 import tempfile
 import unittest
+import hashlib
+from pathlib import Path
 from codex_wake.objective_ledger import ObjectiveLedger
 
 
@@ -11,6 +13,44 @@ def config(revision=1, limit=100, deadline=200):
 
 
 class ObjectiveLedgerTests(unittest.TestCase):
+    def test_context_successor_retains_completion_assignment_and_replay_does_not_reassign(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger=ObjectiveLedger(root,'objective')
+            ledger.configure(config(limit=200),'operator',now=100)
+            ledger.bind_requests({'transport':'fixture'},{'source':0},now=100)
+            evidence=Path(root)/'approved-plan';evidence.write_text('existing completion authority')
+            authority={'path':str(evidence),'sha256':hashlib.sha256(evidence.read_bytes()).hexdigest()}
+            obligations=[dict(id=name,kind=name,tokens=60,seconds=4,criterion='Verify '+name)
+                         for name in ('acceptance','review','remediation')]
+            ledger.protect_completion(obligations,source=authority,now=100)
+            ledger.assign_completion('source','acceptance',source=authority,now=100)
+            self.assertTrue(ledger.reserve_request('request:first','source',40,1,now=101)['admitted'])
+            ledger.settle_request('request:first','response',10,'fixture',now=102)
+            ledger.continue_request_thread('successor','source',{'intent':'switch'},now=103)
+            self.assertTrue(ledger.reserve_request('request:continued','successor',40,1,now=104)['admitted'])
+            ledger.assign_completion('source','review',source=authority,now=105)
+            view=ledger.continue_request_thread('successor','source',{'intent':'switch'},now=106)
+            self.assertEqual(view['request_sessions']['successor']['completion_obligation'],'acceptance')
+
+    def test_cross_account_continuation_shares_original_session_spend_and_deadline(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger=ObjectiveLedger(root,'objective')
+            ledger.configure(config(),'operator',prior_tokens=20,now=100)
+            ledger.bind_requests({'transport':'fixture'}, {'source':20},now=100)
+            before=ledger.inspect(now=110)
+            linked=ledger.continue_request_thread('successor','source',{'intent':'switch'},now=110)
+            self.assertEqual(linked['request_sessions']['successor']['deadline'],150)
+            self.assertEqual(linked['tokens_used'],before['tokens_used'])
+            self.assertEqual(linked['authorization_history'],before['authorization_history'])
+            self.assertTrue(ledger.reserve_request('request:child','successor',30,10,now=110)['admitted'])
+            ledger.settle_request('request:child','response',30,'fixture',now=111)
+            ledger=ObjectiveLedger(root,'objective')
+            self.assertFalse(ledger.reserve_request('request:source-again','source',11,1,now=112)['admitted'])
+            replay=ledger.continue_request_thread('successor','source',{'intent':'switch'},now=113)
+            self.assertEqual(replay['tokens_used'],50)
+            self.assertEqual(replay['original_deadline'],200)
+            self.assertFalse(ledger.reserve_request('request:late','successor',1,1,now=150)['admitted'])
+
     def test_late_sampled_floor_remains_unknown_atomically_and_cannot_readmit(self):
         with tempfile.TemporaryDirectory() as root:
             ledger=ObjectiveLedger(root,'objective');ledger.configure(config(),'operator',now=100)
