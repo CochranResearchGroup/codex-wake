@@ -12,7 +12,8 @@
   },
   "profiles": {
     "base": "48602bd",
-    "branch": "feat/account-build-workflow"
+    "branch": "feat/account-build-workflow",
+    "tip": "5a9176a"
   },
   "tickets": {
     "01": {
@@ -45,7 +46,7 @@
     }
   },
   "states": {
-    "01": "running",
+    "01": "validated",
     "02": "running",
     "03": "pending",
     "04": "pending",
@@ -81,5 +82,29 @@
       "06"
     ]
   },
-  "validation": []
+  "validation": [
+    {
+      "ticket": 372,
+      "target": "source and installed synthetic-fixture launcher/auth-state loading",
+      "result": "PASS",
+      "red": "standalone launcher ignored CODEX_PROFILES_CONFIG; alias A failed with no profile/default",
+      "green": "71 profile tests and actual installed wheel A/B/A against stock0.164 pass in wsl-test",
+      "remaining": "Operator live reauthentication root cause not established; exact use/plain vs explicit launch question pending; genuine refresh/expiry not proved",
+      "tracker_closure": "OPEN pending remaining acceptance, not equated with source fixture validation"
+    }
+  ],
+  "tracker_publication": {
+    "spec": 371,
+    "children": [
+      372,
+      373,
+      374,
+      375,
+      376,
+      377,
+      378
+    ],
+    "native_dependencies": true,
+    "subissues": true
+  }
 }
