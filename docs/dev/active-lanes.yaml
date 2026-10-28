@@ -9,11 +9,11 @@ lanes:
     branch: feat/account-build-workflow-369
     target: origin/main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    custody_state: PUBLISHED_REVIEW
     dependencies: []
     overlaps: []
     updated_at: 2026-10-28
-    disposition: Five source-fixture outcomes accepted; original auth and active-goal-paginated continuity remain open; review1 and TDD1 complete; profiles PR1 published; no production activation
+    disposition: Five source-fixture outcomes accepted; original auth and active-goal-paginated continuity remain open; review1 and TDD1 complete; profiles PR1 CI3.11/3.12 PASS; coordination PR379 published; no production activation
   - id: P177
     owner: primary / ecochran76
     objective: Recover orphaned custom tool outputs without native debug panic

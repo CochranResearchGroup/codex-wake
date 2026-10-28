@@ -8,13 +8,23 @@
   "remediation_passes": 1,
   "wake": {
     "base": "bbc780ab41d8b978b187956f6ddce2a7621662c2",
-    "branch": "feat/account-build-workflow-369"
+    "branch": "feat/account-build-workflow-369",
+    "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/379",
+    "ci_authority": "Current PR379 checks; final remote readback retained in user-scoped final receipt"
   },
   "profiles": {
     "base": "48602bd",
     "branch": "feat/account-build-workflow",
-    "tip": "5ac08cf10d488c50e101b78c9c41d151aaad54a8",
-    "pull_request": "https://github.com/ecochran76/codex-profiles/pull/1"
+    "tip": "2375574e212c276300dfc324dc43071c3dab9128",
+    "pull_request": "https://github.com/ecochran76/codex-profiles/pull/1",
+    "ci": {
+      "run": 40687796719,
+      "python3.11": "PASS",
+      "python3.12": "PASS",
+      "tests_each": 106,
+      "initial_run": 40687354265,
+      "initial_failure": "runner missing required zsh; provisioned rather than skipped"
+    }
   },
   "tickets": {
     "01": {
@@ -233,5 +243,11 @@
     "376": "partial: qualified legacy context preparation; paginated transfer and native-goal/accounting binding held",
     "377": "accepted after P1 remediation; per-tenant selection, launch schema guard and real-source link layout qualified",
     "378": "seven installed groups and thirteen installed upgrade tests pass"
+  },
+  "publication": {
+    "profiles": "https://github.com/ecochran76/codex-profiles/pull/1",
+    "coordination": "https://github.com/CochranResearchGroup/codex-wake/pull/379",
+    "merged": false,
+    "production_activated": false
   }
 }
