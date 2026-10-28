@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P179
+    owner: primary / ecochran76
+    objective: Deliver concurrent accounts and identifiable stock or modified Codex with qualified upgrades
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/369, https://github.com/CochranResearchGroup/codex-wake/issues/371, https://github.com/CochranResearchGroup/codex-wake/issues/372, https://github.com/CochranResearchGroup/codex-wake/issues/373, https://github.com/CochranResearchGroup/codex-wake/issues/374, https://github.com/CochranResearchGroup/codex-wake/issues/375, https://github.com/CochranResearchGroup/codex-wake/issues/376, https://github.com/CochranResearchGroup/codex-wake/issues/377, https://github.com/CochranResearchGroup/codex-wake/issues/378]
+    plan: docs/dev/plans/0179-account-build-workflow/spec.md
+    branch: feat/account-build-workflow-369
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-10-28
+    disposition: Native and profile source owned on separate integration branch; execution ledger records worker custody, public TDD and contained WSL acceptance; no production activation
   - id: P177
     owner: primary / ecochran76
     objective: Recover orphaned custom tool outputs without native debug panic
