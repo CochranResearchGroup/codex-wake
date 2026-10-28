@@ -1,0 +1,85 @@
+{
+  "spec": {
+    "number": 371,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/371"
+  },
+  "parent": 369,
+  "review_rounds": 0,
+  "remediation_passes": 0,
+  "wake": {
+    "base": "bbc780ab41d8b978b187956f6ddce2a7621662c2",
+    "branch": "feat/account-build-workflow-369"
+  },
+  "profiles": {
+    "base": "48602bd",
+    "branch": "feat/account-build-workflow"
+  },
+  "tickets": {
+    "01": {
+      "number": 372,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/372"
+    },
+    "02": {
+      "number": 373,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/373"
+    },
+    "03": {
+      "number": 374,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/374"
+    },
+    "04": {
+      "number": 375,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/375"
+    },
+    "05": {
+      "number": 376,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/376"
+    },
+    "06": {
+      "number": 377,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/377"
+    },
+    "07": {
+      "number": 378,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/378"
+    }
+  },
+  "states": {
+    "01": "running",
+    "02": "running",
+    "03": "pending",
+    "04": "pending",
+    "05": "pending",
+    "06": "pending",
+    "07": "pending"
+  },
+  "workers": {
+    "01": "/root",
+    "02": "/root/ticket373"
+  },
+  "dependencies": {
+    "01": [],
+    "02": [],
+    "03": [
+      "01",
+      "02"
+    ],
+    "04": [
+      "01",
+      "02"
+    ],
+    "05": [
+      "04"
+    ],
+    "06": [
+      "02"
+    ],
+    "07": [
+      "03",
+      "04",
+      "05",
+      "06"
+    ]
+  },
+  "validation": []
+}
