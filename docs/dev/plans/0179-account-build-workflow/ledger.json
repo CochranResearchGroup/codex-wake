@@ -219,17 +219,17 @@
     }
   },
   "tracker_resolved": [
+    372,
     373,
     374,
     375,
+    376,
     377,
     378
   ],
   "tracker_open": [
     369,
-    371,
-    372,
-    376
+    371
   ],
   "review_state": "complete",
   "review_fixed_points": {
@@ -239,8 +239,8 @@
   },
   "remediation_state": "validated",
   "acceptance": {
-    "372": "partial: demonstrated routing and credential-environment fixes; original real-account refresh failure not established",
-    "376": "partial: qualified legacy context preparation; paginated transfer and native-goal/accounting binding held",
+    "372": "accepted: confirmed config-discovery defect, genuine canary,20 native file/keyring/rotation/rejection cases",
+    "376": "accepted for supported JSONL lineage and existing request-accounting owner; compressed ancestry and automatic native-goal/lifecycle-goal transfer explicitly unsupported",
     "377": "accepted after P1 remediation; per-tenant selection, launch schema guard and real-source link layout qualified",
     "378": "seven installed groups and thirteen installed upgrade tests pass"
   },
@@ -252,8 +252,8 @@
   },
   "continuation_20261028": {
     "base_profiles": "2375574e212c276300dfc324dc43071c3dab9128",
-    "review_rounds": 0,
-    "remediation_passes": 0,
+    "review_rounds": 1,
+    "remediation_passes": 1,
     "review_fixed_point": "2375574e212c276300dfc324dc43071c3dab9128",
     "tickets": {
       "372": {
@@ -289,8 +289,43 @@
     },
     "active_agent_cap": 2,
     "mode": "manual resource monitoring; synthetic isolated WSL; no production effects",
-    "candidate_profiles": "fcf06a9",
-    "installed_receipt": "user-scoped continuation-installed.json",
-    "review_state": "pending"
+    "candidate_profiles": "b416c05",
+    "installed_receipt": "user-scoped continuation-installed-remediation.json",
+    "review_state": "complete",
+    "review_axes": {
+      "Standards": {
+        "accepted": 1,
+        "highest": "P2",
+        "finding": "accounting artifact identity",
+        "disposition": "fixed"
+      },
+      "Spec": {
+        "accepted": 1,
+        "highest": "P2",
+        "finding": "completion purpose retained across successor/replay",
+        "disposition": "fixed"
+      }
+    },
+    "remediation_state": "validated",
+    "reviewers": [
+      "/root/continuation_review_standards",
+      "/root/continuation_review_spec"
+    ],
+    "candidate_wake_runtime": "7359384",
+    "installed_profile_wheel_sha256": "f9157d03dd137bde3e11a694a54d8daff3f832e70d590c3a1cfbad7d8f2edef9",
+    "installed_accounting_wheel_sha256": "8d98cc8bb67f51ea2289942a93d14c3b8ad49b97f7ca2b5348bada5e36ac4c8e",
+    "validation": {
+      "profiles_python3.11": "108 PASS with matching accounting owner",
+      "profiles_python3.12": "108 PASS with matching accounting owner",
+      "objective_ledger": "14 PASS",
+      "request_admission": "3 PASS",
+      "completion_reserve": "3 PASS",
+      "native_auth": "20 PASS",
+      "installed_groups": 7,
+      "installed_upgrade_tests": 13,
+      "installed_completion_assignment_retained": true,
+      "local_full_wake": "Unqualified/interrupted: invoked without required mcp extra; errors observed, retained log; final correctly provisioned CI is full-suite authority",
+      "full_suite_authority": "Current PR379 CI checks"
+    }
   }
 }

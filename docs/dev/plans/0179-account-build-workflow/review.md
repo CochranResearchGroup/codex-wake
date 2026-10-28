@@ -28,3 +28,20 @@ Exactly one combined Standards/Spec review and one coordinated TDD remediation p
 The real-account reauthentication report remains open in#372; local routing/loading and inherited-credential crossover fixes are demonstrated, not real refresh/expiry acceptance. Cross-account foreign paginated history and actual active-goal/allocation binding remain open in#376. Preparing legacy context neither starts work nor renews resources. Broader existing native reload/notices/accounting evidence was causally inherited and is distinguished from freshly run cases. Byobu workspace restoration remains#368.
 
 Standards:1 maintenance finding fixed,1 nonblocking backlog; no documented violations. Spec:2 accepted P1 findings fixed; broader#372/#376 acceptance remains open.
+
+
+## Continuation review | 2026-10-28
+
+One new round explicitly requested for the remaining372/376 implementation. Profiles fixed2375574 → fcf06a9; Wake fixeda47de7c → dfcaebf. Prior review counts remain historical; this continuation has exactly one broad round and one TDD remediation pass.
+
+### Standards
+
+S1(P2), accepted blocking: installed acceptance omitted the accounting wheel/import identity. Red receipt assertion confirmed the gap. The runner now records accounting wheel SHA256, and the fixture verifies the imported owner is in the installed prefix and retains its path/hash.
+
+### Spec
+
+P1(P2), accepted blocking: successor request binding omitted the existing completion obligation, denying reserved completion work. The public owner test failed, then passed after capturing the existing assignment. Replay retains that assignment even if the source is later reassigned; it does not recreate plan or resource authority.
+
+Native installed verification includes paginated prefix+child context, source hash preservation, no future-parent leakage, shared cumulative spending/deadline, retained completion assignment, and uncertain-fork reconciliation. Compressed ancestors and automatic native-goal/lifecycle-goal transfer remain explicitly unsupported, not inferred from request-owner acceptance.
+
+Summary: Standards1 accepted P2, remediated; Spec1 accepted P2, remediated. No second broad review.
