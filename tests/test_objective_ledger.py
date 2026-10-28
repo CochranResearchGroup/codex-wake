@@ -1,5 +1,7 @@
 import tempfile
 import unittest
+import hashlib
+from pathlib import Path
 from codex_wake.objective_ledger import ObjectiveLedger
 
 
@@ -11,6 +13,25 @@ def config(revision=1, limit=100, deadline=200):
 
 
 class ObjectiveLedgerTests(unittest.TestCase):
+    def test_context_successor_retains_completion_assignment_and_replay_does_not_reassign(self):
+        with tempfile.TemporaryDirectory() as root:
+            ledger=ObjectiveLedger(root,'objective')
+            ledger.configure(config(limit=200),'operator',now=100)
+            ledger.bind_requests({'transport':'fixture'},{'source':0},now=100)
+            evidence=Path(root)/'approved-plan';evidence.write_text('existing completion authority')
+            authority={'path':str(evidence),'sha256':hashlib.sha256(evidence.read_bytes()).hexdigest()}
+            obligations=[dict(id=name,kind=name,tokens=60,seconds=4,criterion='Verify '+name)
+                         for name in ('acceptance','review','remediation')]
+            ledger.protect_completion(obligations,source=authority,now=100)
+            ledger.assign_completion('source','acceptance',source=authority,now=100)
+            self.assertTrue(ledger.reserve_request('request:first','source',40,1,now=101)['admitted'])
+            ledger.settle_request('request:first','response',10,'fixture',now=102)
+            ledger.continue_request_thread('successor','source',{'intent':'switch'},now=103)
+            self.assertTrue(ledger.reserve_request('request:continued','successor',40,1,now=104)['admitted'])
+            ledger.assign_completion('source','review',source=authority,now=105)
+            view=ledger.continue_request_thread('successor','source',{'intent':'switch'},now=106)
+            self.assertEqual(view['request_sessions']['successor']['completion_obligation'],'acceptance')
+
     def test_cross_account_continuation_shares_original_session_spend_and_deadline(self):
         with tempfile.TemporaryDirectory() as root:
             ledger=ObjectiveLedger(root,'objective')

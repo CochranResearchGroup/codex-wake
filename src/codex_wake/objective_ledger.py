@@ -378,8 +378,12 @@ class ObjectiveLedger:
             binding=dict(prior_tokens=0,parent_thread_id=source_thread_id,provenance=provenance,
                          deadline=source['deadline'],continuation_group=group)
             existing=sessions.get(thread_id)
-            if existing is not None and existing!=binding:
-                raise ValueError('successor accounting binding changed')
+            if existing is not None:
+                if any(existing.get(key)!=value for key,value in binding.items()):
+                    raise ValueError('successor accounting binding changed')
+                return self._view(state,now)
+            if source.get('completion_obligation'):
+                binding['completion_obligation']=source['completion_obligation']
             sessions[thread_id]=binding
             return self._view(state,now)
 
