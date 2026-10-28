@@ -4,8 +4,8 @@
     "url": "https://github.com/CochranResearchGroup/codex-wake/issues/371"
   },
   "parent": 369,
-  "review_rounds": 0,
-  "remediation_passes": 0,
+  "review_rounds": 1,
+  "remediation_passes": 1,
   "wake": {
     "base": "bbc780ab41d8b978b187956f6ddce2a7621662c2",
     "branch": "feat/account-build-workflow-369"
@@ -13,7 +13,8 @@
   "profiles": {
     "base": "48602bd",
     "branch": "feat/account-build-workflow",
-    "tip": "2afc551"
+    "tip": "5ac08cf10d488c50e101b78c9c41d151aaad54a8",
+    "pull_request": "https://github.com/ecochran76/codex-profiles/pull/1"
   },
   "tickets": {
     "01": {
@@ -50,9 +51,9 @@
     "02": "validated",
     "03": "validated",
     "04": "validated",
-    "05": "running",
-    "06": "running",
-    "07": "pending"
+    "05": "validated",
+    "06": "validated",
+    "07": "validated"
   },
   "workers": {
     "01": "/root",
@@ -60,7 +61,8 @@
     "03": "/root/ticket374",
     "04": "/root",
     "06": "/root/ticket377",
-    "05": "/root/ticket376"
+    "05": "/root/ticket376",
+    "07": "/root/ticket378"
   },
   "dependencies": {
     "01": [],
@@ -116,6 +118,36 @@
       "result": "86 integration tests; contained native two-tenant concurrent TUI and sharedconfig checks PASS",
       "receipt": "private repair/ticket374/acceptance.json",
       "remaining": "live MCP OAuth reuse not simulated; installed full matrix378"
+    },
+    {
+      "ticket": 376,
+      "source": "035d9f0,871a116,8a29fe9 integrated",
+      "proof": "public CLI tests and actual native legacy fork+lostresponse reconciliation; zeroHTTP/sourceunchanged",
+      "limits": "foreign paginated history held; actual successor accounting binding/activegoaltransfer not qualified; no workstart"
+    },
+    {
+      "ticket": 377,
+      "source": "3f8e24b,22266ea,16e57b9,0989fd6,b07f573 integratedfaf58c4",
+      "proof": "source archive digest fixtures, complete native package stage/select/rollback, readschemas guards, archive/tamper fixtures, nonblocking boundedmetadata checker",
+      "limits": "hosttrustedpins/attestation notsignatureproof; broadnativechecks inherited vs rerun recorded; no realHDDarchive or productionactivation"
+    },
+    {
+      "ticket": 378,
+      "proof": "installed137wheel six-scenario PASS; earlierwheel allsixRED; final741docs-onlywheel runtime/entrypoint parity, freshinstall; ownedcensuszero",
+      "limits": "real auth refresh, paginated cross-account transfer and actual active-goal/accountingbinding remain qualified gaps; inherited native checks distinct"
+    },
+    {
+      "profiles_final_tip": "5ac08cf",
+      "local_python3.11": "106 PASS",
+      "local_python3.12": "106 PASS",
+      "installed_wheel": "c90421584cdc6cd8219fde164e22ded6443fe5b353e798b90dabae67c3cecff3",
+      "installed_runtime_source": "2d56a07",
+      "module_parity": "9/9 current runtime modules equal installed artifact",
+      "installed_matrix": "7 groups plus 13 installed upgrade tests PASS",
+      "owned_processes": 0,
+      "model_turns": 0,
+      "production_credentials_imported": false,
+      "cache_assertion": "single intermittent local assertion retained; not reproduced in12 isolates, focused13 tests or subsequent full3.11/3.12 suites; nonblocking evidence gap"
     }
   ],
   "tracker_publication": {
@@ -175,5 +207,31 @@
       ],
       "state": "running"
     }
+  },
+  "tracker_resolved": [
+    373,
+    374,
+    375,
+    377,
+    378
+  ],
+  "tracker_open": [
+    369,
+    371,
+    372,
+    376
+  ],
+  "review_state": "complete",
+  "review_fixed_points": {
+    "profiles": "48602bd458152cddb4f2ce1ab721098e9417d599",
+    "profiles_candidate": "6fec3d7",
+    "wake": "bbc780ab41d8b978b187956f6ddce2a7621662c2"
+  },
+  "remediation_state": "validated",
+  "acceptance": {
+    "372": "partial: demonstrated routing and credential-environment fixes; original real-account refresh failure not established",
+    "376": "partial: qualified legacy context preparation; paginated transfer and native-goal/accounting binding held",
+    "377": "accepted after P1 remediation; per-tenant selection, launch schema guard and real-source link layout qualified",
+    "378": "seven installed groups and thirteen installed upgrade tests pass"
   }
 }
