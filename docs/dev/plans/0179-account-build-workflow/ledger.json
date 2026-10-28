@@ -13,7 +13,7 @@
   "profiles": {
     "base": "48602bd",
     "branch": "feat/account-build-workflow",
-    "tip": "5a9176a"
+    "tip": "2afc551"
   },
   "tickets": {
     "01": {
@@ -47,16 +47,20 @@
   },
   "states": {
     "01": "validated",
-    "02": "running",
-    "03": "pending",
-    "04": "pending",
-    "05": "pending",
-    "06": "pending",
+    "02": "validated",
+    "03": "validated",
+    "04": "validated",
+    "05": "running",
+    "06": "running",
     "07": "pending"
   },
   "workers": {
     "01": "/root",
-    "02": "/root/ticket373"
+    "02": "/root/ticket373",
+    "03": "/root/ticket374",
+    "04": "/root",
+    "06": "/root/ticket377",
+    "05": "/root/ticket376"
   },
   "dependencies": {
     "01": [],
@@ -91,6 +95,27 @@
       "green": "71 profile tests and actual installed wheel A/B/A against stock0.164 pass in wsl-test",
       "remaining": "Operator live reauthentication root cause not established; exact use/plain vs explicit launch question pending; genuine refresh/expiry not proved",
       "tracker_closure": "OPEN pending remaining acceptance, not equated with source fixture validation"
+    },
+    {
+      "ticket": 373,
+      "result": "PASS source and owned installed native fixture",
+      "tip": "7b57da9",
+      "proof": "73 profile tests; four actual stock/modded \u00d7 syntheticaccount native observations; actual idle+resize native TUI retained selected channel/profile titles",
+      "limits": "account RPC opt-in in contained routing fixture; default live identity remains explicit unverified; stricter same-home serialization until native multiwriter qualified; broader upgrade/nativecapability acceptance ticket378"
+    },
+    {
+      "ticket": 375,
+      "tip": "3f9dceb",
+      "result": "78 tests pass; five public subprocess history scenarios",
+      "proof": "readonly distinct namespaces for identical IDs; exact owner resume; ambiguous owner rejection; unknown-newer schema hold; main sessions CLI",
+      "remaining": "full native saved-history resume in installed matrix378; source tracker closure remains separate"
+    },
+    {
+      "ticket": 374,
+      "source": "92635e3 integrated9798671; public caller hook4612b1f",
+      "result": "86 integration tests; contained native two-tenant concurrent TUI and sharedconfig checks PASS",
+      "receipt": "private repair/ticket374/acceptance.json",
+      "remaining": "live MCP OAuth reuse not simulated; installed full matrix378"
     }
   ],
   "tracker_publication": {
@@ -106,5 +131,49 @@
     ],
     "native_dependencies": true,
     "subissues": true
+  },
+  "worktrees": {
+    "primary_profiles": "/home/ecochran76/workspace.local/codex-profiles-369",
+    "primary_wake": "/home/ecochran76/workspace.local/codex-wake-369",
+    "ticket373": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-373",
+      "base": "48602bd",
+      "tip": "77e2cdd",
+      "owned": [
+        "build_channels.py",
+        "test_build_channels.py"
+      ],
+      "state": "integrated"
+    },
+    "ticket374": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-374",
+      "base": "7b57da9",
+      "tip": "92635e3",
+      "owned": [
+        "layout.py",
+        "config.py",
+        "test_concurrent_profiles.py",
+        "docs/concurrent-accounts.md"
+      ],
+      "state": "integrated"
+    },
+    "ticket376": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-376",
+      "base": "3f9dceb",
+      "owned": [
+        "continuation.py",
+        "dedicated tests"
+      ],
+      "state": "running"
+    },
+    "ticket377": {
+      "path": "/home/ecochran76/workspace.local/codex-profiles-377",
+      "base": "7b57da9",
+      "owned": [
+        "upgrades.py",
+        "dedicated tests"
+      ],
+      "state": "running"
+    }
   }
 }
