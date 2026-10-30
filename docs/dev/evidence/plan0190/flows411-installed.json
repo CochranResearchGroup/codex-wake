@@ -1,0 +1,300 @@
+{
+  "authorities": {
+    "governor_enrollments": 0,
+    "provider_experiments": 0,
+    "resource_mode": "manual",
+    "resource_renewals": 0,
+    "shared_restarts": 0
+  },
+  "checks": [
+    {
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python",
+        "/home/ecochran76/workspace.local/codex-wake-flow411-resumed/scripts/controller_flow_acceptance.py"
+      ],
+      "elapsed_seconds": 3.515,
+      "exit_code": 0,
+      "name": "versioned_wait_and_late_result",
+      "result": {
+        "checks": [
+          "installed CLI immutable publish and idempotent start",
+          "actual Mailbox submission and retained cursor after caller process exit",
+          "late actual recipient result returned by restarted flow",
+          "typed Boolean branch and completed result never redispatch",
+          "actual installed stdio MCP native identity and correlated Mailbox answer"
+        ],
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "status": "passed"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python",
+        "/home/ecochran76/workspace.local/codex-wake-flow411-resumed/scripts/controller_foreach_acceptance.py"
+      ],
+      "elapsed_seconds": 5.361,
+      "exit_code": 0,
+      "name": "new_session_and_sequential_foreach",
+      "result": {
+        "boundary": "deterministic disposable Python protocol server; no actual model/provider call or packaged Codex qualification",
+        "checks": [
+          "actual existing Unix socket with kernel peer PID/account/build pins",
+          "installed CLI new session per snapshotted member",
+          "late native-shaped result across caller process exit with no resubmission",
+          "real OAuth API/MCP and remote CLI sequential prompts wait in same conversation",
+          "actual stdio MCP inherited native grant starts structured foreach"
+        ],
+        "join_and_retry": false,
+        "join_and_retry_checks": [],
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "status": "passed"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python",
+        "/home/ecochran76/workspace.local/codex-wake-flow411-resumed/scripts/controller_foreach_acceptance.py",
+        "--join-and-retry"
+      ],
+      "elapsed_seconds": 19.731,
+      "exit_code": 0,
+      "name": "join_retry_cancel_revocation",
+      "result": {
+        "boundary": "deterministic disposable Python protocol server; no actual model/provider call or packaged Codex qualification",
+        "checks": [
+          "actual existing Unix socket with kernel peer PID/account/build pins",
+          "installed CLI new session per snapshotted member",
+          "late native-shaped result across caller process exit with no resubmission",
+          "real OAuth API/MCP and remote CLI sequential prompts wait in same conversation",
+          "actual stdio MCP inherited native grant starts structured foreach"
+        ],
+        "join_and_retry": true,
+        "join_and_retry_checks": [
+          "bounded concurrent siblings",
+          "wait-all aggregate failure and explicit all-complete release",
+          "all active siblings cancelled once",
+          "asynchronous cancellation reconciles without repeat interrupt",
+          "revocation cancels only grant-owned native turns and preserves peer",
+          "readonly transient retry and exhaustion persist across caller restart"
+        ],
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "status": "passed"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python",
+        "/home/ecochran76/workspace.local/codex-wake-flow411-resumed/scripts/controller_fork_acceptance.py"
+      ],
+      "elapsed_seconds": 8.055,
+      "exit_code": 0,
+      "name": "common_prefix_fork_protocol",
+      "result": {
+        "boundary": "deterministic disposable Python protocol server; no actual model/provider call or packaged Codex qualification",
+        "checks": [
+          "actual existing Unix socket with kernel peer PID/account/build pins",
+          "installed CLI forks distinct native-shaped child per snapshotted member from one completed persisted common checkpoint using existing lastTurnId",
+          "late native-shaped result across caller process exit with no resubmission",
+          "real OAuth API/MCP and remote CLI fork variants retain source snapshot unchanged",
+          "actual stdio MCP inherited native grant starts checkpoint-pinned fork foreach"
+        ],
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "status": "passed"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python",
+        "/home/ecochran76/workspace.local/codex-wake-flow411-resumed/scripts/controller_conditions_acceptance.py"
+      ],
+      "elapsed_seconds": 5.885,
+      "exit_code": 0,
+      "name": "typed_composed_semantic_conditions",
+      "result": {
+        "boundary": "deterministic disposable Python protocol server; no actual model/provider call or packaged Codex qualification",
+        "checks": [
+          "actual existing Unix socket with kernel peer PID/account/build pins",
+          "installed CLI typed deterministic and existing native turn predicate with explicit inherited action",
+          "condition accounting and result persist across caller process exit without re-evaluation",
+          "real OAuth API/MCP and remote CLI preserve cumulative conservative token estimates",
+          "actual stdio MCP inherited grant short-circuits unevaluated semantic predicate"
+        ],
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "status": "passed"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python",
+        "/home/ecochran76/workspace.local/codex-wake-flow411-resumed/scripts/controller_conditions_acceptance.py",
+        "--limit-stop"
+      ],
+      "elapsed_seconds": 2.231,
+      "exit_code": 0,
+      "name": "original_semantic_limit_cleanup",
+      "result": {
+        "cancellation": "confirmed",
+        "hard_stop_claim": false,
+        "original_authority_cleanup": true,
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "peer_preserved": true,
+        "scope": "focused limit-stop",
+        "status": "passed",
+        "usage_retained": true
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python",
+        "/home/ecochran76/workspace.local/codex-wake-flow411-resumed/scripts/controller_flow_recovery_acceptance.py"
+      ],
+      "elapsed_seconds": 15.776,
+      "exit_code": 0,
+      "name": "process_loss_and_transport_recovery",
+      "result": {
+        "boundary": "deterministic disposable Python Unix protocol fixture; real caller process death and all five installed public surfaces; no model/provider call or native packaged capability claim",
+        "checks": [
+          {
+            "effects_replayed": 0,
+            "flow_version": 1,
+            "newer_version_did_not_migrate": true,
+            "original_operation": "flowrun_5f321c63cb674f678ca8bad66e8b4e24.condition.function3",
+            "phase": "completed",
+            "real_caller_sigkill": true,
+            "surface": "cli",
+            "usage": {
+              "calls": 3,
+              "tokens": 32
+            }
+          },
+          {
+            "effects_replayed": 0,
+            "flow_version": 2,
+            "newer_version_did_not_migrate": true,
+            "original_operation": "flowrun_f6fd3429294744dca71a9387ba73a446.condition.function3",
+            "phase": "completed",
+            "real_caller_sigkill": true,
+            "surface": "api",
+            "usage": {
+              "calls": 3,
+              "tokens": 32
+            }
+          },
+          {
+            "effects_replayed": 0,
+            "flow_version": 3,
+            "newer_version_did_not_migrate": true,
+            "original_operation": "flowrun_88d1b9645a5d4a15901a2f12f64a9b34.condition.function3",
+            "phase": "completed",
+            "real_caller_sigkill": true,
+            "surface": "oauth_mcp",
+            "usage": {
+              "calls": 3,
+              "tokens": 32
+            }
+          },
+          {
+            "effects_replayed": 0,
+            "flow_version": 4,
+            "newer_version_did_not_migrate": true,
+            "original_operation": "flowrun_ccb464ae26e64a8086f779fa79d1bd7a.condition.function3",
+            "phase": "completed",
+            "real_caller_sigkill": true,
+            "surface": "remote_cli",
+            "usage": {
+              "calls": 3,
+              "tokens": 32
+            }
+          },
+          {
+            "effects_replayed": 0,
+            "flow_version": 5,
+            "newer_version_did_not_migrate": true,
+            "original_operation": "flowrun_cd11e5ccb31745d9a9ee134c1e183df8.condition.function3",
+            "phase": "completed",
+            "real_caller_sigkill": true,
+            "surface": "native_mcp",
+            "usage": {
+              "calls": 3,
+              "tokens": 32
+            }
+          }
+        ],
+        "governor_enrollments": 0,
+        "original_principal_preserved": true,
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "resource_renewals": 0,
+        "source_sha": "3d13a919339c267ee058280075d28ffadbd359d4",
+        "status": "passed"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "collected_at": "2026-10-30T16:20:49.150199+00:00",
+  "compatibility": {
+    "active_versions": "new publication affects future runs; checkpoint migration is not advertised",
+    "concurrency": "per-run owner-only flock prevents recovery stealing an evaluator still running; process death releases it without operator reset",
+    "legacy_interrupted": "missing path/frame identity retains explicit uncertain legacy_condition_interrupted_no_replay; no inferred replay or accounting reset",
+    "native_conditions": "observation-only tool isolation, exact metering and parallel conditions remain unqualified and rejected before effects; semantic action requires explicit inherited tools and estimate opt-in",
+    "schema": "additive evaluation_id/path/arguments/limits/frame/semantic_outcome/outcome fields inside existing private flow state; no new execution or resource owner"
+  },
+  "hosted_ci": "not run: operator requires local validation; no GitHub Actions capacity requested",
+  "hosted_environment_differences": "local Linux/WSL Python3.12 only; deterministic Unix fixtures; no hosted OS matrix, native build, provider turn or production activation",
+  "installed_package": "/home/ecochran76/.local/state/codex-wake/testing/flow411-installed/lib/python3.12/site-packages/codex_wake",
+  "installed_source_sha256": {
+    "controller_condition_native.py": "be5dab5df7eb1c0ec788c0ca46e97d09dbacf9174c15866ddd9bede271c7a1ac",
+    "controller_conditions.py": "c999d9e2f82ae454c1de2715172733bad1916ee1e200176d3e7116675f24241e",
+    "controller_flow_foreach.py": "295dbb36bcab30761b344c1fc552de8ed8b6f26f7d3f84245759a9170ecaaa29",
+    "controller_flow_fork.py": "e4878ed6e61dc1499f240eea6c600cedee9e4509f07e76a165a5dc650a2ac596",
+    "controller_flow_retry.py": "032959c7ffad801feee075c04ce64329f8f06a5e73233878cda1334ddb45d11a",
+    "controller_flow_sessions.py": "88cf8e0fb5133dcf8204213bef84ce170ff707c8e487be241c2031aecfe578c3",
+    "controller_flows.py": "f92bb0a3fafcda52d6214aa4f2a738af6346abf5b89db55139b8ed2128dba347"
+  },
+  "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.13 (main, Mar 20 2026, 00:33:26) [Clang 22.1.1 ]",
+  "retained_native_boundary": "docs/dev/evidence/plan0190/fork408-native-correction.json retains actual packaged native lastTurnId proof; this aggregate reruns the protocol fixture only",
+  "review_round_consumed": false,
+  "schema_version": 1,
+  "source_commit": "3d13a919339c267ee058280075d28ffadbd359d4",
+  "status": "passed",
+  "tdd": [
+    {
+      "green": "same original child observed through sessions.wait,2calls/8tokens retained",
+      "red": "phase executing instead of ready",
+      "seam": "ControllerFlows.reconcile after nested semantic process loss"
+    },
+    {
+      "green": "original operation cancellation confirmed;1call/4tokens andcreated_at100 preserved",
+      "red": "KeyError limit_stop; pending recovered turn had no owned cleanup",
+      "seam": "ControllerFlows.reconcile after original deadline"
+    },
+    {
+      "green": "condition_attempt remains recoverable; late original result selects pinned true branch",
+      "red": "phase held instead of uncertain",
+      "seam": "ControllerFlows.advance on uncertain native submission"
+    }
+  ],
+  "ticket": 411,
+  "validation": [
+    {
+      "command": "env -u PYTHONPATH /home/ecochran76/.local/state/codex-wake/testing/flow411-installed/bin/python -m unittest discover -s tests -p 'test_controller*.py' -v",
+      "log_path": "/home/ecochran76/.local/state/codex-wake/testing/flow411-evidence/controller-tests-final3d13a91.log",
+      "log_sha256": "7ee8dbb94dc7d297d3ad007dca49c86423fe34dd4695a6aa4d92f1827a6430f3",
+      "result": "123 tests passed in29.304s"
+    },
+    {
+      "command": "PYTHONPATH=src repository-venv/python -m unittest discover -s tests -p 'test_controller_condition*.py' -v",
+      "result": "12 focused condition tests passed"
+    },
+    {
+      "command": "uvx --from ruff==0.14.2 ruff check --select F821,F822,F823 [3 changed modules,2 acceptance scripts,recovery tests]",
+      "result": "All checks passed"
+    }
+  ]
+}
