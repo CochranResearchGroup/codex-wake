@@ -33,12 +33,13 @@ def raw_target(target):
 
 
 class ControllerRecovery:
-    def __init__(self,root,*,now=time.time,probe=None,notice=None,action=None):
+    def __init__(self,root,*,now=time.time,probe=None,notice=None,action=None,request=None):
         self.root,self.now=Path(root),now
         self.runtime=ControllerRuntime(root,now=now)
         self.probe=probe or (lambda target,timeout:ControllerHealth(root).execute('health.observe',dict(expected_target=target,timeout=timeout)))
         self.notice=notice or self._native_notice
         self.action=action or self._action
+        self.request=request
         directory=self.root/'controller-recovery';directory.mkdir(mode=0o700,parents=True,exist_ok=True)
         self.path=directory/'policies.sqlite'
         fd=os.open(self.path,os.O_CREAT|os.O_RDWR,0o600);os.close(fd);os.chmod(self.path,0o600)
@@ -126,6 +127,7 @@ class ControllerRecovery:
         def change(record):
             record['generation']+=1
             record['mode']='activation_pending' if enabled else 'off'
+            record['activation_source_id']=args['_request']['operation_id'] if enabled else None
             if not enabled and record['in_flight'] is not None:record['action_status']='deactivated_in_flight'
         record=self._edit(args['policy_id'],change)
         return self._outcome(record,'activation_requested' if enabled else 'disabled',
@@ -134,6 +136,7 @@ class ControllerRecovery:
     def _check(self,actor,args,authorize,*,due_only):
         record=self._owned(actor,args['policy_id'],args['expected_target'],'observe',authorize)
         now=self.now();definition=record['definition']
+        if now<record['created_at'] or (record['last_observation'] and now<record['last_observation']['observed_at']):raise InventoryError('time_uncertain','clock continuity lost; original schedule retained')
         if due_only and now<record['next_due']:return self._outcome(record,'not_due','scheduled check deadline has not arrived')
         observed=self.probe(raw_target(record['target']),definition['probe_timeout'])
         self._authorize(actor,record['target'],'observe',authorize)
@@ -161,7 +164,7 @@ class ControllerRecovery:
         if record['in_flight'] is not None:return self._outcome(record,'uncertain','original in-flight effect must be reconciled before any further action')
         if record['health_status']!='suspected_unresponsive':return self._outcome(record,'held','required repeated unknown evidence is absent')
         observation=record['last_observation']
-        if now-observation['observed_at']>definition['interval_seconds']:return self._outcome(record,'held','health evidence is stale')
+        if not 0<=now-observation['observed_at']<=definition['interval_seconds']:return self._outcome(record,'held','health evidence is stale')
         if record['attempts']>=definition['max_attempts']:
             self._edit(record['policy_id'],lambda value:value.update(action_status='exhausted'))
             return self._outcome(record,'attempt_ceiling','cumulative recovery attempt ceiling reached; escalation stopped')
@@ -169,7 +172,9 @@ class ControllerRecovery:
             return self._outcome(record,'cooldown','recovery cooldown has not elapsed')
         generation=record['generation'];operation_id=args['_request']['operation_id']
         def reserve(current):
-            if current['mode']!='automatic' or current['generation']!=generation or current['in_flight'] is not None:raise InventoryError('policy_deactivated','policy changed before effect admission')
+            if current['mode']!='automatic' or current['generation']!=generation or current['in_flight'] is not None or current['health_status']!='suspected_unresponsive':raise InventoryError('policy_deactivated','policy changed before effect admission')
+            if current['attempts']>=definition['max_attempts']:raise InventoryError('attempt_ceiling','cumulative attempt ceiling reached')
+            if current['last_action_at'] is not None and now-current['last_action_at']<definition['cooldown_seconds']:raise InventoryError('cooldown','policy cooldown has not elapsed')
             current['attempts']+=1;current['last_action_at']=now;current['action_status']='executing'
             current['in_flight']=dict(operation_id=operation_id,generation=generation,step=0,phase='admitted',actions=[])
         self._edit(record['policy_id'],reserve)
@@ -184,8 +189,9 @@ class ControllerRecovery:
                 guard()
             except Exception as error:
                 def uncertain(current):
-                    current['action_status']='uncertain';current['in_flight']['phase']='uncertain'
-                    current['in_flight']['reason']=getattr(error,'code','effect_uncertain')
+                    if current['in_flight'] is not None:
+                        current['action_status']='uncertain';current['in_flight']['phase']='uncertain'
+                        current['in_flight']['reason']=getattr(error,'code','effect_uncertain')
                 self._edit(record['policy_id'],uncertain)
                 return self._outcome(self._load(record['policy_id']),'uncertain','action outcome uncertain or policy deactivated; never replay automatically')
             def finish_step(current):
@@ -220,7 +226,7 @@ class ControllerRecovery:
         except Exception as error:result=dict(pending,reason=getattr(error,'code','notice_uncertain'))
         def saved(current):
             current['notifications'][source_id]=result
-            if current['mode']=='activation_pending' and current['generation']==generation and result['status']=='recorded':current['mode']='automatic'
+            if current['mode']=='activation_pending' and current['generation']==generation and current.get('activation_source_id')==source_id and result['status']=='recorded':current['mode']='automatic'
         self._edit(policy_id,saved)
         return result
 
@@ -234,8 +240,60 @@ class ControllerRecovery:
             return dict(kind=action['kind'],operation_id=action['operation_id'],status='confirmed' if result['cancellation']=='confirmed' or result['phase']=='terminal' else 'uncertain')
         return self._refresh(actor,record,action,operation_id,index,guard)
 
-    def _refresh(self,actor,record,action,operation_id,index,guard):
-        raise InventoryError('unsupported_operation','exact-thread refresh host profile adapter not configured')
+    def _refresh(self,actor,record,action,operation_id,index,guard,*,reconcile=False):
+        from .shared_refresh import _validate_profile
+        from .scoped_refresh import poll_one
+        from .native_protocol import native_request
+        from .controller_health import _image_hash
+        import socket,struct
+        registry=self.root/'controller-recovery.json'
+        if registry.is_symlink() or not registry.is_file() or registry.stat().st_uid!=os.geteuid() or registry.stat().st_mode&0o077 or registry.stat().st_size>1048576:
+            raise InventoryError('configuration_unavailable','private host recovery refresh profiles required')
+        config=json.loads(registry.read_text())
+        if config.get('version')!=1 or not isinstance(config.get('profiles'),dict) or len(config['profiles'])>256:raise InventoryError('configuration_unavailable','bounded recovery refresh registry required')
+        selected=config['profiles'].get(action['profile'])
+        if not isinstance(selected,dict) or selected.get('target')!=record['target']:raise InventoryError('stale_target','refresh host profile differs from exact policy target')
+        profile=selected.get('refresh')
+        _validate_profile(profile)
+        if profile['refresh_mode']!='thread_mcp_idle' or not profile['resources']:raise InventoryError('unsupported_operation','only exact thread MCP refresh with resource proof is supported')
+        binding=ControllerNotices(self.root)._binding(record['target'])
+        if profile['app_server']!=binding['endpoint']:raise InventoryError('stale_target','refresh endpoint differs from exact private binding')
+        directory=self.root/'controller-recovery'/'refresh';directory.mkdir(mode=0o700,exist_ok=True)
+        key=hashlib.sha256(encoded([operation_id,index]).encode()).hexdigest()
+        path=directory/(key+'.json')
+        if path.exists():
+            if path.is_symlink() or path.stat().st_uid!=os.geteuid() or path.stat().st_mode&0o077:raise InventoryError('configuration_unavailable','private original refresh receipt required')
+            receipt=json.loads(path.read_text())
+            if receipt['profile']!=profile or receipt['thread_id']!=record['target']['conversation_id']:raise InventoryError('stale_target','original refresh binding changed')
+        else:
+            if reconcile:return dict(kind='thread_mcp_refresh',status='uncertain',reason='original refresh receipt missing')
+            receipt=dict(thread_id=record['target']['conversation_id'],profile=profile,resources=sorted(profile['resources']),state='queued')
+        if reconcile and receipt['state']=='queued':
+            return dict(kind='thread_mcp_refresh',status='not_submitted',reason='original effect was never admitted')
+        if receipt['state']=='completed':return dict(kind='thread_mcp_refresh',status='completed',receipt_id=key,goal_continuity=True)
+        if receipt['state']=='blocked':return dict(kind='thread_mcp_refresh',status='uncertain',receipt_id=key,reason=receipt.get('reason'))
+        def request(method,params):
+            guard()
+            ControllerNotices(self.root)._binding(record['target'])
+            if self.request is not None:
+                result=self.request(profile['app_server'],profile['codex_path'],method,params,profile['timeout'])
+            else:
+                def verify(connection,metadata):
+                    pid,uid,unused=struct.unpack('3i',connection.socket.getsockopt(socket.SOL_SOCKET,socket.SO_PEERCRED,12))
+                    if uid!=os.geteuid() or metadata.get('codexHome')!=record['target']['home'] or _image_hash(pid)!=record['target']['build_sha256']:
+                        raise InventoryError('stale_target','native refresh endpoint account/build changed')
+                result=native_request(profile['app_server'],profile['codex_path'],method,params,profile['timeout'],verify_connection=verify)
+            guard()
+            if method=='thread/read' and result.get('thread',{}).get('modelProvider')!=record['target']['provider']:
+                raise InventoryError('stale_target','native refresh provider differs from policy target')
+            return result
+        try:
+            poll_one(path,receipt,request=request,guard=guard)
+        finally:
+            from .goal_supervision import _save
+            _save(path,receipt)
+        return dict(kind='thread_mcp_refresh',status='completed' if receipt['state']=='completed' else 'uncertain',
+            receipt_id=key,native_scope='thread_mcp_connections',goal_continuity=receipt.get('goal_continuity_verified',False),reason=receipt.get('reason'))
 
     def execute(self,actor,operation,args,*,authorize):
         allowed={'recovery.configure':{'policy_id','expected_target','policy','_request'},
@@ -249,6 +307,7 @@ class ControllerRecovery:
             with self._db() as db:records=[json.loads(row[0]) for row in db.execute('SELECT record FROM policies')]
             return dict(schema_version=1,operation=operation,status='completed',result=dict(policies=[self._public(row) for row in records if row['target']==target and row['principal']==identity(actor)]))
         bounded_id(args.get('policy_id'))
+        if operation=='recovery.configure':self._definition(args.get('policy'))
         if operation=='recovery.show':
             return dict(schema_version=1,operation=operation,status='completed',result=dict(policy=self._public(self._owned(actor,args['policy_id'],target,'observe',authorize))))
         if operation=='recovery.reconcile':return self._reconcile(actor,args,authorize)
@@ -271,9 +330,45 @@ class ControllerRecovery:
             value=source['result']
             if operation!='recovery.apply' or value['outcome'] in ('completed','uncertain','attempt_ceiling'):
                 result['result']['notification']=self._publish(actor,args,source['operation_id'],authorize)
+            if operation=='recovery.disable':
+                result['result']['reconciliation']=self._reconcile(actor,args,authorize)['result']
         self._authorize(actor,target,capability,authorize)
         return result
 
     def _reconcile(self,actor,args,authorize):
         record=self._owned(actor,args['policy_id'],args['expected_target'],'recovery',authorize)
+        def guard():return self._authorize(actor,record['target'],'recovery',authorize)
+        pending=record['in_flight']
+        if pending is not None:
+            action=record['definition']['actions'][pending['step']]
+            result=None
+            if action['kind']=='notify_operator':
+                result=dict(kind='notify_operator',status='not_submitted',reason='notice is separately journaled after retained action result')
+            elif action['kind']=='cancel_owned_operation':
+                original=self.runtime.operation(actor,'operations.result',dict(operation_id=action['operation_id']),authorize=guard)['result']['operation']
+                if original['target']!=record['target']:raise InventoryError('stale_target','original cancellation belongs to another exact target')
+                if original['phase']=='terminal' or original['cancellation']=='confirmed':result=dict(kind=action['kind'],status='confirmed',operation_id=action['operation_id'])
+            else:
+                result=self._refresh(actor,record,action,pending['operation_id'],pending['step'],guard,reconcile=True)
+                if result.get('status') not in ('completed','confirmed','not_submitted'):result=None
+            if result is not None:
+                def finish(current):
+                    if current['in_flight']!=pending:return
+                    current['in_flight'].update(reconciled=result,remaining_steps='not_submitted')
+                    current['history'].append(current['in_flight']);current['in_flight']=None
+                    current['action_status']='reconciled_no_replay'
+                record=self._edit(record['policy_id'],finish)
+        # Unknown notice delivery is observed only by original ID, never appended again.
+        for source_id,notice in list(record['notifications'].items())[-16:]:
+            if notice['status']!='uncertain':continue
+            try:
+                envelope=ControllerNotices(self.root).execute(actor,'notices.reconcile',dict(expected_target=record['target'],operation_id=notice['operation_id']),authorize=guard)
+                value=envelope['result']['operation'];delivery=(value.get('result') or {}).get('delivery',{})
+                if delivery.get('status')=='recorded':
+                    def saved(current):
+                        current['notifications'][source_id]=dict(notice,status='recorded')
+                        if current['mode']=='activation_pending' and current.get('activation_source_id')==source_id:current['mode']='automatic'
+                    record=self._edit(record['policy_id'],saved)
+            except (ValueError,OSError,KeyError):pass
+        guard()
         return dict(schema_version=1,operation='recovery.reconcile',status='completed',result=dict(policy=self._public(record),effects='original_only',replayed=False))
