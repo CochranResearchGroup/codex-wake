@@ -16,10 +16,14 @@ from controller_crosshost_acceptance import WINDOWS,WSL,ROOTS
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--state',type=Path,required=True);parser.add_argument('--output',type=Path,required=True)
-    args=parser.parse_args();root=args.state/'psmux-wake';root.mkdir(mode=0o700,parents=True,exist_ok=False)
+    parser=argparse.ArgumentParser();parser.add_argument('--state',type=Path,required=True);parser.add_argument('--output',type=Path,required=True);parser.add_argument('--namespace',required=True)
+    args=parser.parse_args();root=args.state/('psmux-wake-'+args.namespace);root.mkdir(mode=0o700,parents=True,exist_ok=False)
     script=subprocess.check_output(['wslpath','-w',str(Path(__file__).parent/'controller_psmux_bridge405.py')],text=True).strip()
-    base=[WINDOWS+'/python.exe',script,'--namespace','controller405-20261030','--session','controller405']
+    import re
+    assert re.fullmatch(r'controller405-[A-Za-z0-9-]+',args.namespace)
+    creation='from pathlib import Path;import os,subprocess;p=str(Path(os.environ["LOCALAPPDATA"])/"Microsoft/WinGet/Links/psmux.exe");namespace='+repr(args.namespace)+';subprocess.run([p,"-L",namespace,"new-session","-d","-s","controller405","-n","alpha","--","cmd.exe","/d","/k"],check=True,capture_output=True);subprocess.run([p,"-L",namespace,"new-window","-d","-t","controller405","-n","beta","--","cmd.exe","/d","/k"],check=True,capture_output=True)'
+    subprocess.run([WINDOWS+'/python.exe','-c',creation],capture_output=True,check=True,timeout=15)
+    base=[WINDOWS+'/python.exe',script,'--namespace',args.namespace,'--session','controller405']
     description=json.loads(subprocess.check_output(base+['--describe'],text=True,timeout=10));identity=description['identity']
     bridge=base+['--server-pid',str(identity['pid']),'--server-birth',str(identity['creation_filetime'])]
     path=root/'controller-tabs.json';path.write_text(json.dumps(dict(schema_version=1,workspaces={'windows405':dict(kind='psmux',bridge_command=bridge,bridge_generation=description['generation'],evidence_scope='disposable_fixture',privacy='safe')})));path.chmod(0o600)
@@ -62,7 +66,7 @@ def main():
         denied=call('tabs.input',dict(workspace='windows405',expected_target=target,pane=pane,input='echo never-submitted',custody={},transport='terminal',_request=dict(request,operation_id='psmux405-input',idempotency_key='psmux405-input')))
         assert denied['result']['operation']['reason']=='input_custody_required',denied
         # Exact owned namespace only; this also proves unavailable bridge fails closed.
-        command=[WINDOWS+'/python.exe','-c',"from pathlib import Path;import os,subprocess;subprocess.run([str(Path(os.environ['LOCALAPPDATA'])/'Microsoft/WinGet/Links/psmux.exe'),'-L','controller405-20261030','kill-server'],check=True)"]
+        command=[WINDOWS+'/python.exe','-c',"from pathlib import Path;import os,subprocess;subprocess.run([str(Path(os.environ['LOCALAPPDATA'])/'Microsoft/WinGet/Links/psmux.exe'),'-L',"+repr(args.namespace)+",'kill-server'],check=True)"]
         subprocess.run(command,capture_output=True,check=True,timeout=10)
         unavailable,failed=invoke(endpoint,token_path,'tabs.list',{})
         assert failed and unavailable['error']['code']=='attachment_unavailable',unavailable

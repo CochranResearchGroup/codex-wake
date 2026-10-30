@@ -151,7 +151,7 @@ path.write_text(payload['token'],encoding='utf-8');print(str(path))
             execute(role,[ROOTS[role]+'/venv/bin/python','-c',code])
             for transport in ('api','mcp'):
                 rejected=portable('windows',meta['client_endpoint'],windows_tokens[role],'inventory.list',transport=transport,expected=2)
-                assert rejected['error']['code']=='invalid_token',rejected
+                assert rejected['error']=='invalid_token',rejected
             checks.append(dict(caller='windows',target=role,transport='API_and_OAuthMCP',original_oauth_grant_revoked=True))
         result=dict(status='passed',ticket=405,run=run,checks=checks,roles={role:{key:value for key,value in meta.items() if key not in ('token_file','actor','ssh_command')} for role,meta in metadata.items()},
                     boundary='Actual native Windows caller and actual WSL/remote Linux execution authorities; synthetic inventory accounts, real isolated Byobu panes. Native Windows owner, psmux bridge, staged upgrade and Bots health acceptance remain separate evidence.',provider_calls=0)
