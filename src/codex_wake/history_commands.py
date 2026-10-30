@@ -10,7 +10,7 @@ from .managed_inventory import InventoryError
 from .records import WakeError
 
 
-def execute(operation, arguments, root, *, authorized_accounts=(), principal=None, runtime=None, now=None):
+def execute(operation, arguments, root, *, authorized_accounts=(), principal=None, runtime=None, now=None, authorization_guard=None):
     try:
         if root is None:
             raise InventoryError('host_wake_root_required', 'host Wake root is required')
@@ -18,7 +18,7 @@ def execute(operation, arguments, root, *, authorized_accounts=(), principal=Non
         resume = ManagedHistoryResume(root, principal, runtime=runtime, now=now) if principal is not None else None
         owner = ControllerHistory(root / 'controller-accounts.toml', root=root,
             host=socket.gethostname(), environment=os.environ.get('WSL_DISTRO_NAME') or os.name,
-            authorized_accounts=authorized_accounts, resume_owner=resume)
+            authorized_accounts=authorized_accounts, resume_owner=resume, authorization_guard=authorization_guard)
         result = owner.execute(operation, arguments)
         status = 'completed'
         if operation == 'history.resume' and result.get('resume', {}).get('status') != 'resumed':
@@ -54,6 +54,7 @@ def register_parser(subparsers):
             command.add_argument('--expires-at', required=True)
             command.add_argument('--bus-root', required=True)
             command.add_argument('--operator-capability', required=True)
+            command.set_defaults(actor_capability=None)
             command.add_argument('--app-server', default='unix://')
 
 
