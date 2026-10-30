@@ -91,3 +91,29 @@ class ConditionRecoveryTests(unittest.TestCase):
             self.assertEqual(stopped['condition_usage'],dict(calls=1,tokens=4))
             self.assertEqual(stopped['created_at'],100)
             self.assertEqual(owner().advance(actor,run['run_id']),stopped)
+
+    def test_interrupted_legacy_receipts_without_path_identity_remain_explicitly_uncertain(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            path=root/'controller-conditions.json'
+            path.write_text(json.dumps(dict(version=1,functions={'one@1':dict(kind='semantic',inputs={},effects='action')})));path.chmod(0o600)
+            actor=Actor('author','service','client','grant','local://test','wake:controller',frozenset({'observe','control'}),
+                        [dict(host='host',environment='test',flow_id='fixture')],10000)
+            def owner():return ControllerFlows(root,host='host',environment='test',invoke=lambda *a,**k:self.fail('legacy effect replayed'),authorize=lambda:actor,now=lambda:100)
+            definition=dict(id='fixture',version=1,entry='choose',nodes=[
+                dict(id='choose',type='branch',condition=dict(function='one',version=1,arguments={}),then='yes',**{'else':'no'}),
+                dict(id='yes',type='end',value=True),dict(id='no',type='end',value=False)])
+            first=owner();first.publish(actor,definition);run=first.start(actor,'fixture',1,inputs={},intent='legacy',binding='caller')
+            def legacy_evaluate(expression,state,**kwargs):
+                # Serialized v0 receipt had no evaluation/path/frame identity.
+                state['condition_trace']=[dict(function='one@1',depth=1,effects='action',status='known',value=True)]
+                state['condition_usage']=dict(calls=1,tokens=8);kwargs['save']()
+                raise SystemExit('legacy evaluator exited before branch commit')
+            with patch('codex_wake.controller_conditions.Conditions.evaluate',side_effect=legacy_evaluate):
+                with self.assertRaises(SystemExit):first.advance(actor,run['run_id'])
+            with patch('codex_wake.controller_condition_native.invoke',side_effect=AssertionError('legacy effect replayed')):
+                held=owner().reconcile(actor,run['run_id'])
+            self.assertEqual(held['phase'],'uncertain')
+            self.assertEqual(held['reason'],'legacy_condition_interrupted_no_replay')
+            self.assertEqual(held['condition_usage'],dict(calls=1,tokens=8))
+            self.assertEqual(owner().inspect(actor,run['run_id']),held)
