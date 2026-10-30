@@ -38,6 +38,9 @@ class BuildAuthorization:
             fields = self.ACCOUNT_FIELDS
         if not isinstance(target, dict) or not fields <= target.keys():
             raise AuthError('insufficient_scope')
+        request = arguments.get('_request')
+        if request is not None and (not isinstance(request, dict) or request.get('target') != target):
+            raise InventoryError('stale_target', 'durable request must name the authorized target')
         if not any(fields <= scope.keys() and all(target.get(k) == v for k, v in scope.items())
                    for scope in actor.targets):
             raise AuthError('insufficient_scope')

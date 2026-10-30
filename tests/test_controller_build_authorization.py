@@ -55,3 +55,22 @@ class BuildAuthorizationTests(unittest.TestCase):
             with self.assertRaises(InventoryError) as caught:
                 service.execute('token', 'builds.stage', {'recipe': 'approved'})
             self.assertEqual(caught.exception.code, 'stale_target')
+
+    def test_stage_receipt_cannot_claim_a_different_recipe_target(self):
+        import hashlib
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as directory:
+            recipe = Path(directory) / 'approved.json'
+            recipe.write_text('{}')
+            target = {'host': 'host', 'environment': 'test', 'recipe': 'approved',
+                      'recipe_sha256': hashlib.sha256(recipe.read_bytes()).hexdigest()}
+            actor = SimpleNamespace(scopes={'admin'}, targets=[target])
+            service = BuildAuthorization(SimpleNamespace(authenticate=lambda token: actor),
+                SimpleNamespace(recipes={'approved': str(recipe)}, execute=lambda *args: None),
+                recipe_targets={'approved': target},
+                runtime=SimpleNamespace(execute=lambda *args, **kwargs: self.fail('wrong receipt target admitted')))
+            with self.assertRaises(InventoryError) as caught:
+                service.execute('token', 'builds.stage', {'recipe': 'approved',
+                    '_request': {'target': dict(target, recipe='other')}})
+            self.assertEqual(caught.exception.code, 'stale_target')
