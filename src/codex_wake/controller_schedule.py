@@ -6,6 +6,7 @@ revalidated against the policy's original snapshot for every scheduled step.
 import json
 import os
 from pathlib import Path
+import sqlite3
 import time
 from uuid import uuid4
 
@@ -47,5 +48,5 @@ def maintain(authority, root):
         result=ControllerRecovery(root).drive_due(lambda principal,snapshot:
             resolve_original(authority,root,principal,snapshot),limit=8)
         status(root,'held' if any(item['status']=='held' for item in result) else 'idle')
-    except (ValueError,OSError,KeyError,AttributeError):
+    except (ValueError,OSError,KeyError,AttributeError,sqlite3.Error):
         status(root,'held','scheduler_owner_unavailable')
