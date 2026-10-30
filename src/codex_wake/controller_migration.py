@@ -243,9 +243,14 @@ class ControllerMigration:
         def credential_field(value, trail=()):
             if isinstance(value, dict):
                 return any(credential_field(child, (*trail, key)) for key, child in value.items())
+            if isinstance(value, list):
+                return any(credential_field(child, trail) for child in value)
             if trail and trail[-1] in ('mcp_oauth_credentials_store', 'cli_auth_credentials_store') and value in ('auto', 'file', 'keyring'):
                 return False
-            return any(key.lower() == 'env' or _secret_name(Path(key)) for key in trail)
+            names = {key.lower().replace('-', '_') for key in trail}
+            secrets = {'env', 'auth', 'credentials', 'password', 'passwd', 'secret', 'client_secret',
+                       'token', 'access_token', 'refresh_token', 'id_token', 'api_key', 'authorization', 'bearer_token'}
+            return bool(names & secrets) or any(name.endswith(('_api_key', '_password', '_secret', '_access_token', '_refresh_token')) for name in names)
         if credential_field(before):
             raise InventoryError('unsupported_target', 'embedded credential settings require the native credential owner; registry is not copied')
         lines, section, replaced = [], '', 0
