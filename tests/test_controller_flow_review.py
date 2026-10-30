@@ -232,3 +232,30 @@ class FlowReviewTests(unittest.TestCase):
             self.assertEqual(done['limit_stop']['reason'],'flow_token_limit')
             self.assertEqual(done['condition_usage'],dict(calls=1,tokens=4))
             self.assertEqual(done['iteration_frames']['each.0']['usage'],dict(calls=0,tokens=0))
+
+    def test_wall_high_water_and_elapsed_spend_are_retained_across_wait_handoff(self):
+        with tempfile.TemporaryDirectory() as directory:
+            wall=[100];sample={'boot_id':'fixture-clock-only','seconds':10};calls=[]
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']();calls.append(operation)
+                if operation=='operations.send':return dict(result=dict(operation=dict(operation_id=kwargs['request']['operation_id'],phase='waiting',execution='queued')))
+                if operation=='operations.wait':return dict(result=dict(wait=dict(status='timeout'),operation=dict(operation_id=args['operation_id'],phase='waiting',execution='queued')))
+                if operation=='operations.cancel':return dict(result=dict(operation=dict(phase='terminal',execution='cancelled',cancellation='confirmed')))
+                self.fail(operation)
+            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=actor,now=lambda:wall[0],clock=lambda:dict(sample))
+            source=dict(id='example',version=1,entry='submit',limits=dict(max_seconds=1,metering='estimate_opt_in'),nodes=[
+                dict(id='submit',type='call',operation='operations.send',arguments={},next='await'),
+                dict(id='await',type='wait',operation_id={'ref':'steps.submit.result.operation.operation_id'},timeout=0)])
+            owner().publish(actor(),source);run=owner().start(actor(),'example',1,inputs={},intent='high-water',binding='caller')
+            wall[0]=100.5;sample['seconds']=10.25
+            first=owner().advance(actor(),run['run_id']);self.assertEqual(first['phase'],'waiting')
+            wall[0]=99;sample['seconds']=10.4
+            second=owner().advance(actor(),run['run_id']);self.assertEqual(second['phase'],'waiting')
+            self.assertEqual(second['elapsed_clock']['elapsed'],.5)
+            self.assertEqual(second['elapsed_clock']['wall_latest'],100.5)
+            sample['seconds']=11.2
+            stopped=owner().advance(actor(),run['run_id'])
+            self.assertEqual(stopped['limit_stop']['cancellation'],'confirmed')
+            self.assertEqual(stopped['created_at'],100)
+            self.assertEqual(stopped['condition_usage']['calls'],3)
+            self.assertEqual(calls,['operations.send','operations.wait','operations.wait','operations.cancel'])
