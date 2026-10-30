@@ -228,3 +228,51 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(accepted['result']['operation']['execution'],'queued')
             message=mailbox.show(natives[0],accepted['result']['operation']['result']['message_id'])
             self.assertEqual(message['sender']['thread_id'],sender)
+
+    def test_revocation_cancels_only_original_grant_owned_mailbox_work_without_minting_actor(self):
+        from dataclasses import replace
+        from codex_wake.controller_job_adapter import ControllerEffects
+        with tempfile.TemporaryDirectory() as directory:
+            runtime, actor, args, mailbox, natives=self.fixture(directory)
+            runtime.adapter=ControllerEffects(runtime.root)
+            first=runtime.operation(actor,'operations.send',args,authorize=lambda:actor)['result']['operation']
+            peer=replace(actor,grant_id='unrevoked-peer')
+            peer_args=dict(args,_request=dict(args['_request'],operation_id='peer-operation',idempotency_key='peer-intent',correlation_id='peer-correlation'))
+            second=runtime.operation(peer,'operations.send',peer_args,authorize=lambda:peer)['result']['operation']
+            receipt=runtime.revoke_grant(actor.grant_id,issuer=actor.issuer,resource=actor.resource)
+            self.assertEqual(receipt['operations'],[dict(operation_id='mail-operation',cancellation='confirmed')])
+            self.assertEqual(mailbox.show(natives[0],first['result']['message_id'])['state']['admission'],'cancelled')
+            self.assertEqual(mailbox.show(natives[0],second['result']['message_id'])['state']['admission'],'accepted')
+            with self.assertRaises(AuthError):runtime.operation(actor,'operations.result',{'operation_id':'mail-operation'},authorize=lambda:actor)
+            self.assertEqual(runtime.operation(peer,'operations.result',{'operation_id':'peer-operation'},authorize=lambda:peer)['result']['operation']['execution'],'queued')
+
+    def test_revocation_requests_only_owned_background_job_cancel_and_preserves_peer(self):
+        import json,sys,time
+        from dataclasses import replace
+        from codex_wake.background_jobs import BackgroundJobs
+        from codex_wake.session_permissions import Principal,PermissionStore
+        from codex_wake.task_briefs import TaskBriefStore,BriefAuthority
+        from codex_wake.controller_job_adapter import ControllerEffects
+        with tempfile.TemporaryDirectory() as directory:
+            runtime,actor,args,mailbox,natives=self.fixture(directory)
+            operator=Principal('operator','operator')
+            PermissionStore(runtime.root).configure({'version':1,'global':{'actions':{'job.launch':'allow','job.cancel':'allow'}}},operator,expected_revision=0)
+            authority=BriefAuthority('operator','operator');briefs=TaskBriefStore(runtime.root);work=Path(directory)/'work'
+            briefs.propose('revocation-task',dict(objective='Synthetic grant cancellation',phase='test',non_goals=['No providers'],acceptance=['Only owned job cancelled'],context=[],workspace=str(work),allocation_ref='fixture',permission_ref='fixture'),authority=authority)
+            briefs.approve('revocation-task',1,authority=authority);briefs.admit('revocation-task','revocation-assignment',authority=authority)
+            jobs=BackgroundJobs(runtime.root)
+            profile=jobs.approve_command('revoke',[sys.executable,'-c',"import time;time.sleep(1);print('unrevoked peer survived')"],work,principal=operator,task_pin=briefs.assignment_pin('revocation-task','revocation-assignment'),owner='native-worker',max_seconds=3,max_log_bytes=1024)
+            target=dict(host='fixture',environment='linux',namespace='jobs',conversation_id='revoke',configuration_revision=profile['sha256'])
+            actor=replace(actor,targets=[target]);peer=replace(actor,grant_id='unrevoked-job-peer')
+            path=runtime.root/'controller-messaging.json';config=json.loads(path.read_text());config['job_bindings']={'job':dict(subject=actor.subject,client_id=actor.client_id,native_subject='native-worker',tasks=['revocation-task'],profile='revoke',target=target)};path.write_text(json.dumps(config))
+            runtime.adapter=ControllerEffects(runtime.root)
+            def launch(caller,key):return runtime.operation(caller,'operations.send',dict(_request=dict(operation_id=key,idempotency_key=key,correlation_id=key,binding='opaque',target=target),expected_target=target,sender_binding='job',backend='job',job_profile='revoke',response_requested=False),authorize=lambda:caller)['result']['operation']
+            owned=launch(actor,'owned-job');other=launch(peer,'peer-job')
+            receipt=runtime.revoke_grant(actor.grant_id,issuer=actor.issuer,resource=actor.resource)
+            self.assertEqual([r['operation_id'] for r in receipt['operations']],['owned-job'])
+            self.assertIn(receipt['operations'][0]['cancellation'],('requested','confirmed'))
+            deadline=time.monotonic()+3
+            while jobs.inspect(owned['result']['job_id'])['status'] not in ('cancelled','completed','failed','timed_out') and time.monotonic()<deadline:time.sleep(.02)
+            self.assertEqual(jobs.inspect(owned['result']['job_id'])['status'],'cancelled')
+            result=runtime.operation(peer,'operations.wait',dict(operation_id='peer-job',timeout=5),authorize=lambda:peer)
+            self.assertEqual(result['result']['operation']['answer']['text'],'unrevoked peer survived\n')
