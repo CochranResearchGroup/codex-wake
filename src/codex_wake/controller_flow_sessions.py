@@ -87,12 +87,19 @@ class ControllerFlowSessions:
             raise InventoryError('configuration_unavailable', 'qualified private native session profile required') from None
 
     def target(self, name):
+        if isinstance(name,str) and name.startswith('grok:'):
+            from .controller_grok_sessions import ControllerGrokSessions
+            return ControllerGrokSessions(self.root).target(name[5:])
         profile = self.profile(name)
         namespace = RuntimeIdentity.from_metadata(dict(id='profile',cwd=profile['cwd'],modelProvider=profile['native_provider']),
             dict(codexHome=profile['target']['home'])).namespace
         return dict(profile['target'], runtime='codex', namespace=namespace, generation=profile['revision'], process=profile['process'])
 
     def _context(self, actor, name, target, authorize, capability):
+        if isinstance(target,dict) and target.get('runtime')=='grok':
+            from .controller_grok_sessions import ControllerGrokSessions
+            name=name[5:] if isinstance(name,str) and name.startswith('grok:') else name
+            return ControllerGrokSessions(self.root)._context(actor,name,target,authorize,capability)
         profile = self.profile(name)
         base = self.target(name)
         if {key:value for key,value in target.items() if key != 'conversation_id'} != base:
@@ -111,6 +118,18 @@ class ControllerFlowSessions:
         return RuntimeIdentity.from_metadata(thread,dict(codexHome=profile['target']['home']))
 
     def execute(self, actor, operation, arguments, *, authorize):
+        if operation in ('sessions.wait','sessions.cancel') and isinstance(arguments,dict) and 'operation_id' in arguments:
+            original=self.runtime._owned(actor,self.runtime._load(arguments['operation_id']),authorize,
+                capability='control' if operation=='sessions.cancel' else 'observe')
+            if original['operation']=='grok.prompt':
+                from .controller_grok_sessions import ControllerGrokSessions
+                return ControllerGrokSessions(self.root).execute(actor,operation,arguments,authorize=authorize)
+        if isinstance(arguments,dict) and isinstance(arguments.get('expected_target'),dict) and arguments['expected_target'].get('runtime')=='grok':
+            from .controller_grok_sessions import ControllerGrokSessions
+            arguments=dict(arguments)
+            name=arguments.get('profile')
+            if isinstance(name,str) and name.startswith('grok:'):arguments['profile']=name[5:]
+            return ControllerGrokSessions(self.root).execute(actor,operation,arguments,authorize=authorize)
         if operation in ('sessions.wait','sessions.cancel'):
             return self._existing(actor,operation,arguments,authorize)
         fields = {'sessions.create':{'profile','expected_target','_request'},
@@ -200,6 +219,9 @@ class ControllerFlowSessions:
         return profile,target,result
 
     def observe_native_owned(self,record):
+        if record['operation'].startswith('grok.'):
+            from .controller_grok import ControllerGrok
+            return ControllerGrok(self.root).observe_native_owned(record)
         profile,target,result=self._owned_native_context(record)
         thread=self.request(profile['endpoint'],profile['target']['executable'],'thread/read',
             dict(threadId=target['conversation_id'],includeTurns=True),5)['thread']
@@ -225,6 +247,9 @@ class ControllerFlowSessions:
         This does not mint an Actor or grant. It cannot start work or change a
         target; the private journal and current host profile fence the exact turn.
         """
+        if record['operation']=='grok.prompt':
+            from .controller_grok import ControllerGrok
+            return ControllerGrok(self.root).cancel_native_owned(record)
         self.observe_native_owned(record)
         if record['phase']=='terminal':return 'confirmed'
         profile,target,result=self._owned_native_context(record)
