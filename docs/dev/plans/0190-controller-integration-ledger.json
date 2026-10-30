@@ -137,7 +137,8 @@
       "worker_branch": "feat/controller-397",
       "worker_worktree": "/tmp/codex-wake-397",
       "integrated_sha": "f4ea22b",
-      "remaining_gate": "Durable operation runtime401 for protected mutations; inspection and existing operator owner installed checks pass"
+      "remaining_gate": "Durable operation runtime401 for protected mutations; inspection and existing operator owner installed checks pass",
+      "coordinator_owned_remaining": "Protected mutation plugin/shared registration integration after401validation"
     },
     "398": {
       "title": "Preview and qualify legacy migration with reversible cutover",
@@ -225,16 +226,17 @@
         399,
         400
       ],
-      "worker": "/root",
+      "worker": "/root/oauth399",
       "owned_paths": [
-        "durable operation runtime",
-        "operation/result commands",
-        "shared registrations",
-        "runtime tests"
+        "controller operation runtime",
+        "operation commands",
+        "mailbox/result adapter",
+        "tests/scripts"
       ],
       "base_sha": "538694c",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "worker_branch": "pending worker allocation"
     },
     "402": {
       "title": "Organize Byobu and psmux attachments without changing session identity",
