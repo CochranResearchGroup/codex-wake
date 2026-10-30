@@ -266,3 +266,36 @@ The unused acceptance, review and bounded remediation estimates retained inside
 an existing objective allowance. Host-bound completion work may use them;
 implementation must leave them available. Deferral keeps mandatory work pending,
 and verified completion releases unused protection without renewing the grant.
+
+
+**Logical agent**:
+A durable controller identity linking an agent's work across explicitly related
+conversations and runtime instances. Keeping this identity does not transfer
+credentials, permissions or resource allowance.
+
+**Conversation**:
+A provider or coding runtime's durable record of an exchange. A successor
+conversation has its own identity and retains a relationship to its predecessor.
+
+**Runtime instance**:
+A particular running instance of a coding agent or app server. It is distinct
+from the durable conversations it can serve.
+
+**Presentation attachment**:
+A terminal pane, TUI connection or structured client connection through which a
+runtime can be presented or accessed. Replacing an attachment does not by itself
+replace the conversation or logical agent.
+
+**Resource binding**:
+The explicit relationship between a stable controller resource identity and its
+scoped native representations. A binding identifies context; it grants no action
+or resource authority.
+
+**Resolved operation target**:
+The particular resource identity and instance selected for one operation.
+Subsequent label reuse or instance replacement does not redirect that operation.
+
+**Searchable agent inventory**:
+A view relating agents and conversations to their accounts, execution contexts,
+runtimes, presentation attachments and control relationships. Names and stable
+identifiers can locate observations, whose freshness and uncertainty remain visible.

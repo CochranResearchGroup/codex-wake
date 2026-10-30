@@ -1,0 +1,85 @@
+{
+  "actual_bots_states": [
+    {
+      "challenge": "42a71ab7e2704e378db81cd92e81fc850e59eeb1706249b79aaa8faf92eaeda9",
+      "evidence": "tui_main_loop_ack",
+      "grantsRecovery": false,
+      "observedAt": 1793378910.6185422,
+      "responsive": true,
+      "state": "responsive"
+    },
+    {
+      "evidence": "none",
+      "grantsRecovery": false,
+      "reason": "native_loop_unobserved",
+      "responsive": false,
+      "state": "unknown"
+    },
+    {
+      "challenge": "85e153fa692143368c2c33c06a26da533852ecbcba3542f484bfc186f8ed4767",
+      "evidence": "tui_main_loop_ack",
+      "grantsRecovery": false,
+      "observedAt": 1793378916.1054273,
+      "responsive": true,
+      "state": "responsive"
+    }
+  ],
+  "actual_os_loop_tid": 725926,
+  "background_daemon_rpc_healthy": true,
+  "bots_archive_sha256": "9316239897f0156b721c93837b8c788eb66a446402045c77ab5ec233db6eb41d",
+  "bots_candidate": "26bf9c57707a7a51d2aab1039617d84b5943e1acc6f9b19d26141fca830a1b8b",
+  "bots_source": "b0da68d330213419c9ba35dc0b60d48fc3062a48",
+  "boundary": "immutable Bots public health API with actual OS receiver binding; no production SharedCodex enrollment",
+  "cleanup": {
+    "consumer_owned_processes_exited": true,
+    "fresh_owned_process_count": 0,
+    "known_native_pids_absent": true
+  },
+  "draft_cursor_preserved": true,
+  "health_appended_no_notices": true,
+  "health_started_no_resume": true,
+  "history_preserved": true,
+  "local_bots_suite": {
+    "command": "node --test --test-concurrency=2 test/*.test.mjs",
+    "failed": 0,
+    "opt_in_skipped": 235,
+    "passed": 805,
+    "source": "1e56acc; runtime source identical to packagedb0da68d"
+  },
+  "native_sha256": "5597f709655cfc5ec6accf69670483a937fe7cdfba6ad8899f820a5ebc26b015",
+  "native_source": "95cd89dd5f3cddeb241a9de75a3cc255a9484606",
+  "no_model_turn": true,
+  "only_tui_thread_stopped": true,
+  "private_receipt": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/bots-native-health-expanded/receipt.json",
+  "public_wake_frontdoors": [
+    "CLI",
+    "API",
+    "OAuth MCP",
+    "native MCP",
+    "remote CLI"
+  ],
+  "public_wake_readback": {
+    "api_ack": "0eda3b517c41403d888e58ebd42aeefd93bf2bfcb3ab43bea43e3ab100d5942d",
+    "broad_grant_denied": true,
+    "cli_ack": "f98cea48a6dd4aed8e0764d6a355b32f4ef3dd62b1d843f28d7a0f9e7b1bd65e",
+    "native_mcp_ack": "d34c0cb5ce354bc9a572c545aaab133991cedc02d7d24989881bfc91db22c2b6",
+    "oauth_mcp_ack": "6ca4b30d4f9b4491b4757ee6344002e2570b03cc89c24b2689612b34362ae5dd",
+    "remote_cli_ack": "962096d603e842bf9d8ddabbdc9d4124f7891dc5b9b14999a3435ed950142328",
+    "revoked_access_denied": true
+  },
+  "queue_preserved": true,
+  "schema_version": 1,
+  "startup_network_requests_trapped": 5,
+  "status": "passed",
+  "ticket": 405,
+  "total_network_requests_trapped": 5,
+  "wake_modules": {
+    "cli.py": "74a5239cfe14adae4458cfa017068415233f3f54d65c440fce46740b13c8a6c5",
+    "controller_auth.py": "b1ae3b16c0e33ce1e55d191026444abf69bd2e99f6281112ab24ec7ead4d196e",
+    "controller_health.py": "8f3c6c7db9f963ae083b5bb7084d182b58a0f20c19b676fe72d63def708f7d47",
+    "controller_http.py": "d3659b19c53ed85f53680847dc5f0562954002a83933cadd72393642645c9ca0",
+    "controller_operations.py": "daa319895dc5d8fab286e34e1239696f27b0b5a2f3cb3f1ad10e63021b67c539",
+    "health_commands.py": "aea884d9113f889b841ef11ace6bac3e975b8f9522322c66082d48ecabadb752",
+    "mcp_server.py": "eea92161b8abc36e9fc91ff767da6157db5ccb260c1767270c50e0a6da74d7e9"
+  }
+}

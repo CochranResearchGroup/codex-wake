@@ -1,0 +1,23 @@
+{
+  "issue": 409,
+  "source_commit": "299b6c2",
+  "package": "0.22.0.dev2",
+  "installed_module_hashes": {
+    "controller_flows.py": "deae5adc95fb22efc603d759bede7805ce64d084c0c87bfeb8ec92f05d5e862d",
+    "controller_flow_retry.py": "032959c7ffad801feee075c04ce64329f8f06a5e73233878cda1334ddb45d11a",
+    "controller_runtime.py": "e76a2b8200ec01236e3603440c93e1452aefc45b12febe83744cd4525d3c52cc",
+    "controller_flow_sessions.py": "a3e8981b934caf86a014620ed569d0b2314db70b2f9bba0951a20a2c40ba0843",
+    "controller_job_adapter.py": "891dfd856a555eb27984dbb8d90df718b8c13584113d174e9da6a2289c5db9e8"
+  },
+  "checks": [
+    "102 controller tests green before final pure flow cancellation reconciliation;14 flow tests green after it",
+    "installed actualUnix protocol all5 public surfaces passed --join-and-retry",
+    "bounded concurrent sibling submission; all_success default retains both failed/success outcomes before failing; all_complete explicitly releases",
+    "cancel all active owned siblings once; deferred interruption reconciles from owner observation without resend",
+    "OAuth revocation interrupts only original grant native turns; peer remains active",
+    "observational retries are opt-in <=3 total attempts; exhaustion persists; effectful/unknown retry rejected",
+    "uncertain dispatch blocks dependent effects and only looks up existing owner result"
+  ],
+  "fixture_failure": "broader first run had1-second supervised fixture finish before revoke under load; replaced that timing race with an explicit bounded release gate;10 runtime tests then passed;102 broader tests passed",
+  "boundary": "disposable deterministic protocol source/package qualification; no provider/model call, new allowance, governor activation, or production activation"
+}

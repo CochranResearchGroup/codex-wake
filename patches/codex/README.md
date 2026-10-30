@@ -66,3 +66,16 @@ qualified candidate and stock executable for rollback; preserve all session goal
 charges, deadlines and stop decisions. Shared-daemon activation is a separate
 rollout with its own acceptance evidence. Retire the bridge when an official
 runtime provides the required behavior.
+
+### Private TUI-loop health candidate (ticket390)
+
+`modern-0.164-tui-health.patch` is a cumulative alternative to the preceding
+modern patch, not an extra patch to stack on top. Apply it to the same official
+`rust-v0.164.0` base. Its paired `modern-0.164-tui-health-manifest.json` pins source,
+verified applied tree and the complete privately qualified GNU package. It adds
+read-only foreground TUI challenges on the existing native connection; daemon
+registration/transport metadata is never positive loop health. See
+`docs/dev/notes/controller-390-qualification.md` for actual main-loop-only stall,
+privacy/current-queue/active-work and installed CLI/API/MCP evidence. This entry
+neither selects nor activates a live package. Windows/macOS and network-only
+peer identity are unsupported by this candidate's health capability.

@@ -904,3 +904,17 @@ lanes:
     overlaps: [P173-COMBINED-UX]
     updated_at: 2026-10-25
     disposition: Final modern package, managed rollback and installed dev1 paginated stock-TUI acceptance pass; live cutover/current caller grant and controller activation remain open
+
+  - id: P190-CONTROLLER393
+    owner: primary / ecochran76
+    objective: Implement the cross-host controller ticket graph through installed disposable qualification
+    work_items: [393, 412]
+    plan: docs/dev/plans/0190-2026-10-29-cross-host-controller-specification.md
+    branch: feat/controller-393-resumed
+    target: origin/main
+    integration: review_pr
+    plan_state: SOURCE_ACCEPTED
+    custody_state: PUBLISHED_REVIEW
+    updated_at: 2026-10-30
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/419
+    disposition: All20children and parent393 closed from source/disposable qualification; review1of1 and TDD1of1 fixed6findings; both Python versions1909passed/1skip; production380 and recovery368/370 separate; manual resource monitoring only

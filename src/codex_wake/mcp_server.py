@@ -29,6 +29,14 @@ TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
           "profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "expires_at": TEXT}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_hosts_list": ("controller-hosts", "list", "Read registered host/environment authorities and observation freshness.", {}, [], True),
+    "wake_hosts_resolve": ("controller-hosts", "resolve", "Resolve exact host/environment generation; stale bindings do not redirect.", {"host": TEXT, "environment": TEXT, "expected_target": {"type": "object"}}, ["host", "environment"], True),
+    "wake_builds_list": ("builds", "list", "Inspect pinned stock/modded build identities. Mutation tools require separate authority and are not exposed by this read tool.", {"account": TEXT}, ["account"], True),
+    "wake_controller_accounts": ("controller-accounts", "accounts.list", "List host-configured isolated accounts without reading credentials.", {}, [], True),
+    "wake_controller_account_resolve": ("controller-accounts", "accounts.resolve", "Resolve an account alias and pin its home/configuration generation.", {"selector": TEXT, "expected_target": {"type": "object"}}, ["selector"], True),
+    "wake_controller_configuration": ("controller-accounts", "configuration.explain", "Explain account configuration values and scoped provenance; secrets are redacted.", {"selector": TEXT, "expected_target": {"type": "object"}}, ["selector"], True),
+    "wake_controller_list": ("controller", "list", "Read scoped controller inventory; observation grants no control authority.", {"query": TEXT}, [], True),
+    "wake_controller_resolve": ("controller", "resolve", "Pin an exact current controller target; reject ambiguous or replaced generations.", {"selector": TEXT, "expected_target": {"type": "object"}}, ["selector"], True),
     "wake_sessions_target": ("sessions", "target", "Resolve an informal Byobu descriptor (tab 18, 18:policies, typo). Return canonical identity or structured missing/inactive/ambiguous conditions. Default policies error; explicitly select tab_only, fresh or CWD-scoped resume with approved profile, stable intent and expiry. Starting is not readiness or delivery. Reuse the same intent to inspect startup; never enumerate tabs or repair spelling in the caller.",
         {"selector": TEXT, **TARGET}, ["selector"], False),
     "wake_sessions_configuration": ("sessions", "configuration", "For existing-session token/time resource limits use wake_goal_limits_set and wake_goal_limits_show. For dedicated containment, inspect host-approved limits before work. strict_execution identifies dedicated executor containment for time, memory, swap, CPU and tasks, with sampled cumulative token stops. Compare effective caps, original deadline, objective_budget and objective_execution with the request; configured limits alone do not prove running enforcement. Missing setup requires the operator; defaults do not renew authority.",
@@ -155,12 +163,50 @@ for _name, _spec in tuple(SPECS.items()):
         SPECS[_name] = (*_spec[:3], {**_spec[3], **WAKE_POLICY_PROPERTIES}, *_spec[4:])
 
 
+from .history_commands import tool_specs as history_tool_specs
+SPECS.update(history_tool_specs())
+from .migration_commands import tool_specs as migration_tool_specs
+SPECS.update(migration_tool_specs())
+from .tab_commands import tool_specs as tab_tool_specs
+SPECS.update(tab_tool_specs())
+
+
+from .flow_session_commands import tool_specs as flow_session_specs
+SPECS.update(flow_session_specs())
+
+from .health_commands import tool_specs as health_tool_specs
+SPECS.update(health_tool_specs())
+from .notice_commands import tool_specs as notice_tool_specs
+SPECS.update(notice_tool_specs())
+from .recovery_commands import tool_specs as recovery_tool_specs
+SPECS.update(recovery_tool_specs())
+from .grok_commands import tool_specs as grok_tool_specs
+SPECS.update(grok_tool_specs())
+
+from .flow_commands import tool_specs as flow_tool_specs
+for _name, _spec in flow_tool_specs().items():
+    SPECS[_name] = (*_spec[:3], dict(_spec[3], caller_thread_id={'type': 'string'}),
+        [*_spec[4], 'caller_thread_id'], _spec[5])
+
+from .controller_http import TOOLS as controller_public_tools
+for tool_name, (operation, schema) in controller_public_tools.items():
+    if operation.startswith('operations.'):
+        SPECS[tool_name] = ('controller-operations', operation.split('.')[1],
+            'Use durable correlated operations under a fixed host grant; native senders require verified transport identity.',
+            schema['properties'], schema.get('required', []), operation in ('operations.result', 'operations.wait', 'operations.stream'))
+    elif operation.startswith('builds.') and operation != 'builds.list':
+        SPECS[tool_name] = ('controller-builds', operation.split('.')[1],
+            'Use pinned build operations under a fixed host grant and durable request; no caller-selected manifest or native configuration overrides.',
+            schema['properties'], schema.get('required', []), False)
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
                  goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None,
-                 actor_runtime="codex", runtime_root=None, harness_policy=None):
+                 actor_runtime="codex", runtime_root=None, harness_policy=None, migration_writer_probe=None):
+        self.migration_writer_probe = migration_writer_probe
         self.harness_policy = harness_policy
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
@@ -273,6 +319,110 @@ class CommandRunner:
             from .agent_resume_commands import mcp_call
             result = mcp_call(self, arguments, native_context)
             return result, result.get('status') != 'resumed'
+        if group == 'controller-accounts':
+            from .account_commands import execute
+            from .managed_inventory import InventoryError
+            try:
+                result = execute(verb, arguments, self.wake_root)
+                return result, result['status'] != 'completed'
+            except InventoryError as error:
+                return {'error': {'code': error.code, 'message': str(error)}}, True
+        if group == 'controller-tabs':
+            from .tab_commands import protected_execute
+            try:
+                value = protected_execute(verb,arguments,self.wake_root)
+                return value,value['status'] != 'completed'
+            except (ValueError,OSError,KeyError) as error:
+                return {'error':{'code':getattr(error,'code','attachment_held'),'message':str(error)}},True
+        if group == 'controller-flow-sessions':
+            from .flow_session_commands import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'session_held'), 'message': str(error)}}, True
+        if group == 'controller-grok':
+            from .grok_commands import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'grok_held'), 'message': str(error)}}, True
+        if group == 'controller-recovery':
+            from .recovery_commands import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'recovery_held'), 'message': str(error)}}, True
+        if group == 'controller-notices':
+            from .notice_commands import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'notice_held'), 'message': str(error)}}, True
+        if group == 'controller-health':
+            from .health_commands import protected_execute
+            try:
+                value = protected_execute('health.' + verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'health_held'), 'message': str(error)}}, True
+        if group == 'controller-flows':
+            from .flow_commands import mcp_call
+            try:
+                value = mcp_call(self, verb, arguments, native_context)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'flow_held'), 'message': str(error)}}, True
+        if group == 'controller-operations':
+            from .operation_commands import mcp_call
+            try:
+                value = mcp_call(self, verb, arguments, native_context)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'operation_held'), 'message': str(error)}}, True
+        if group == 'controller-migration':
+            from .migration_commands import protected_execute
+            from .managed_inventory import InventoryError
+            try:
+                value = protected_execute(verb, arguments, self.wake_root, writer_probe=self.migration_writer_probe)
+                return value, value['status'] != 'completed'
+            except (InventoryError, ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'migration_held'), 'message': str(error)}}, True
+        if group == 'controller-builds':
+            from .build_commands import protected_execute
+            try:
+                value = protected_execute('builds.' + verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, True
+        if group == 'controller-hosts':
+            from .host_commands import owner
+            try:
+                result = owner(self.wake_root).execute('hosts.' + verb, arguments)
+                return {'schema_version': 1, 'operation': 'hosts.' + verb, 'status': 'completed', 'result': result}, False
+            except ValueError as error:
+                return {'error': {'code': getattr(error, 'code', 'host_unavailable'), 'message': str(error)}}, True
+        if group == 'controller-history':
+            from .history_commands import mcp_call
+            return mcp_call(self, arguments, native_context, verb)
+        if group == 'builds':
+            from .build_commands import owner_from_root
+            try:
+                result = owner_from_root(self.wake_root).execute('builds.' + verb, arguments)
+                return {'schema_version': 1, 'operation': 'builds.' + verb, 'status': 'completed', 'result': result}, False
+            except ValueError as error:
+                return {'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, True
+        if group == 'controller':
+            from .controller_commands import execute
+            try:
+                result = execute(verb, arguments, self.wake_root)
+                return result, result['status'] != 'completed'
+            except (ValueError, OSError, RuntimeError) as error:
+                return {'error': {'code': getattr(error, 'code', 'inventory_unavailable'),
+                                  'message': str(error)}}, True
         if group == 'permissions':
             if self.wake_root is None:
                 return {'error': {'code':'permission_host_root_required'}},True

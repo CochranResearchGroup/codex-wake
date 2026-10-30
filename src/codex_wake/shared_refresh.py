@@ -263,10 +263,11 @@ def _source_workspace(receipt, value):
         return False
 
 
-def _resources(receipt):
+def _resources(receipt,*,request=None):
     import hashlib
+    transport=request or (lambda method,params:_request(receipt,method,params))
     profile = receipt['profile']
-    source = _request(receipt, 'thread/read', dict(threadId=receipt['thread_id'], includeTurns=False))['thread']
+    source = transport('thread/read', dict(threadId=receipt['thread_id'], includeTurns=False))['thread']
     if not _source_workspace(receipt, source):
         return None
     checks = {}
@@ -275,17 +276,17 @@ def _resources(receipt):
         check = profile['resources'][name]
         if check['kind'] == 'skill':
             if catalog is None:
-                catalog = _request(receipt, 'skills/list', dict(cwds=[profile['cwd']], forceReload=True))['data']
+                catalog = transport('skills/list', dict(cwds=[profile['cwd']], forceReload=True))['data']
             selected = [skill for row in catalog if row['cwd'] == profile['cwd'] and not row['errors']
                         for skill in row['skills'] if skill['path'] == check['path'] and skill['enabled']]
             ready = (len(selected) == 1 and selected[0]['description'] == check['description']
                      and hashlib.sha256(Path(check['path']).read_bytes()).hexdigest() == check['sha256'])
         elif check['kind']=='mcp_catalog':
             from .refresh_resources import catalog_ready
-            ready=catalog_ready(check,lambda method,params:_request(receipt,method,params),receipt['thread_id'],
+            ready=catalog_ready(check,transport,receipt['thread_id'],
                                 runtime_only=profile.get('refresh_mode')==THREAD_MODE)
         else:
-            result = _request(receipt, 'mcpServer/tool/call', dict(threadId=receipt['thread_id'],
+            result = transport('mcpServer/tool/call', dict(threadId=receipt['thread_id'],
                 server=check['server'], tool=check['tool'], arguments=check['arguments']))
             ready = result.get('isError') is not True and result['content'] == check['expected_content']
         checks[name] = dict(state='ready' if ready else 'stale', kind=check['kind'])

@@ -20,23 +20,31 @@ def inspect_capability(profile,thread):
         return dict(capability='unsupported',native_dependency=METHOD,native_scope='thread_mcp_connections',readiness='native_scope_unavailable')
 
 
-def poll_one(path,receipt):
+def poll_one(path,receipt,*,request=None,guard=None):
     from .shared_refresh import _request, _source_workspace, _continuity, _resources
     from .goal_supervision import _save
     from .wake_control import delivery_guard
+    transport=request or (lambda method,params:_request(receipt,method,params))
+    guard=guard or (lambda:None)
+    def request(method,params):
+        guard()
+        value=transport(method,params)
+        guard()
+        return value
+    guard()
     thread=receipt['thread_id']
     if receipt['state']=='queued':
-        source=_request(receipt,'thread/read',dict(threadId=thread,includeTurns=False))['thread']
+        source=request('thread/read',dict(threadId=thread,includeTurns=False))['thread']
         if not _source_workspace(receipt,source):
             receipt.update(state='blocked',reason='source_workspace_mismatch');return
         if source['status']['type']!='idle' or source['status'].get('activeFlags'):
             receipt.update(reason='waiting_for_source_idle');return
-        goal=_request(receipt,'thread/goal/get',dict(threadId=thread))['goal']
-        proof=_request(receipt,METHOD,dict(threadId=thread,dryRun=True))
+        goal=request('thread/goal/get',dict(threadId=thread))['goal']
+        proof=request(METHOD,dict(threadId=thread,dryRun=True))
         if proof!=dict(threadId=thread,queued=False):
             receipt.update(state='blocked',reason='native_scope_unverified');return
         # Recheck the selected conversation after capability/goal observations.
-        source=_request(receipt,'thread/read',dict(threadId=thread,includeTurns=False))['thread']
+        source=request('thread/read',dict(threadId=thread,includeTurns=False))['thread']
         if not _source_workspace(receipt,source):
             receipt.update(state='blocked',reason='source_workspace_mismatch');return
         if source['status']['type']!='idle' or source['status'].get('activeFlags'):
@@ -45,7 +53,8 @@ def poll_one(path,receipt):
         _save(path,receipt)
         try:
             with delivery_guard(path.parent.parent):
-                result=_request(receipt,METHOD,dict(threadId=thread))
+                guard()
+                result=request(METHOD,dict(threadId=thread))
             if result!=dict(threadId=thread,queued=True):raise WakeError('native_scope_admission_unverified')
             receipt.update(state='verifying',reload_acknowledged=True)
         except Exception as exc:
@@ -53,10 +62,12 @@ def poll_one(path,receipt):
             return
         _save(path,receipt)
     if receipt['state'] in ('reloading','verifying','uncertain'):
-        goal=_request(receipt,'thread/goal/get',dict(threadId=thread))['goal']
+        goal=request('thread/goal/get',dict(threadId=thread))['goal']
         if not _continuity(receipt['goal_before'],goal):
             receipt.update(state='blocked',reason='goal_continuity_unverified');return
-        checks=_resources(receipt)
+        guard()
+        checks=_resources(receipt,request=request)
+        guard()
         if checks is None:
             receipt.update(state='blocked',reason='source_workspace_mismatch');return
         receipt.update(goal_after=goal,goal_continuity_verified=True,resource_status=checks)

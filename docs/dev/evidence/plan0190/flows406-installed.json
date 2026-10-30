@@ -1,0 +1,37 @@
+{
+  "issue": 406,
+  "source_commit": "d79a78c",
+  "package": "0.22.0.dev2",
+  "installed_module_hashes": {
+    "controller_flows.py": "0e5943b4483f9053950e11f96b4b8d8a1d88d8b84dc67de387760c5f3d69bf67",
+    "flow_commands.py": "597684a7292a3a4c94382f913ffd576442d9e7f144f848cad3e705de946361aa",
+    "controller_http.py": "7d993eff3184007e2526074d15da1735df8a607118586cd96e5371b57edbf84e",
+    "controller_auth.py": "2b661497e236ed4bf020a538fdfe9c0440267b035881873d6f56205a64b4f4ce",
+    "cli.py": "7ea70b2b3f8ea71f1099668aa94c0e704c7d81a2a64d6effb831ab19450168e5",
+    "mcp_server.py": "8ea20433a9c8cf5ad6c7fc83c99fa319b8b2bd5cb294c69e249ac4efb8350aaf",
+    "controller_remote_commands.py": "2c07a4b6eb2dd5fb3e6baa50d0a5f9c47c69a08e8887eeea3eb71f08d4567a3f"
+  },
+  "checks": [
+    "9 focused public flow behaviors green",
+    "real installed CLI and stdio MCP Mailbox late answer/restart/no replay passed",
+    "installed real OAuth HTTP API/MCP and remote CLI pinned versions/revocation passed"
+  ],
+  "red_receipts": [
+    "reconcile missing interrupted retained result",
+    "cancel method absent",
+    "waiting cancellation did not reach owner",
+    "unsupported predicate accepted",
+    "flows CLI missing",
+    "OAuth target flow_id rejected"
+  ],
+  "delivery_boundary": "isolated source/package qualification; no production activation/provider calls/allowance renewal",
+  "deferred": [
+    "foreach407",
+    "fork408",
+    "parallel join retry409",
+    "semantic conditions limits410",
+    "whole-flow qualification411",
+    "legacy automatic handoff370"
+  ],
+  "broader_validation": "87 controller tests passed in36.147s"
+}

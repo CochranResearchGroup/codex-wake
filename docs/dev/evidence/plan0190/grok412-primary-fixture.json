@@ -1,0 +1,85 @@
+{
+  "broad_observer_stale_revoked_denied": true,
+  "caller_disconnect_retained": true,
+  "cancelled_final_classified": true,
+  "definitive_auth_refusal": true,
+  "effect_count": 45,
+  "exact_turn_cancel_unsupported_no_io": true,
+  "frontdoors": {
+    "api": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "cli": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "native_mcp": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "oauth_mcp": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "remote_cli": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    }
+  },
+  "hashes": {
+    "cli.py": "74a5239cfe14adae4458cfa017068415233f3f54d65c440fce46740b13c8a6c5",
+    "controller_flow_sessions.py": "c867fdbe60bfcb95846964beb3b71c0ffc1cd2babb06a89954b88312b63f961b",
+    "controller_grok.py": "9d880e2c873f0ab053ef9e3cba6b2e391d0ba9627ab8bb1ebc5eab70ee0281cd",
+    "controller_grok_sessions.py": "ff78ac647c083129a59c0d99de47bc0eee5653d7a61d697b44a319250801d694",
+    "controller_http.py": "9a65062b1a9c31f57ac07370cd45d28aa8b9c1db3956b36868c09fbc8a76acd4",
+    "controller_runtime.py": "2ee1e6947027111c6fd1a38f4c45192a88fdefd15c7f16b95e8acd2d8920e671",
+    "grok_acp.py": "52606774e7921fba73bbe67787f150a00d8e50bf81fb218b2e1c2b291b154728",
+    "grok_commands.py": "b7cb8192802edd06ababc7b71d8ad0b54cf04fc774d0cec9156a30f910f15ffa",
+    "mcp_server.py": "a8806870a1d537faa7213b4bd3022196cd88336c0b0988ed5ce767194a52e69e"
+  },
+  "install_boundary": "Isolated installed403 prefix; initial no-build-isolation attempt failed for missing setuptools backend; normal isolated package build/install passed. No production install.",
+  "native_request_count": 120,
+  "no_resources_or_governor": true,
+  "no_terminal_fallback": true,
+  "owned_controller_exited": true,
+  "partial_error_not_mislabeled_not_started": true,
+  "permission_denied_without_client_capability": true,
+  "primary_reconciliation": "All nine recorded installed module hashes matched source 4b2ec00; fixture endpoints only; not actual Grok native/model acceptance.",
+  "private_receipt": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/grok-primary-fixture/receipt.json",
+  "qualification": "installed ACPv1-shaped protocol fixture; not native Grok/model acceptance",
+  "receipt_sha256": "04d48e44649e23928b6c27747584649b5ad5657757d10af29ab748eb91e86d7c",
+  "source_commit": "4b2ec00",
+  "status": "passed",
+  "unknown_no_replay": true
+}

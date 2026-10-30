@@ -1,0 +1,17 @@
+{
+  "issue": 408,
+  "source_commit": "399c574ed945f84b4e5dd054adb1493ff50c5f75",
+  "worker": "/root/builds397",
+  "package": "0.22.0.dev2",
+  "installed_prefix": "/tmp/codex-wake-408-public-installed",
+  "installed_checks": [
+    "controller_fork_acceptance.py: all5 public surfaces passed over real disposable Unix protocol fixture",
+    "4 installed fork tests passed in1.540s including unsupported native method uncertain/no replay"
+  ],
+  "module_hashes": {
+    "controller_flow_sessions.py": "97533f0c346c9ad15eee11a7d533221c8f825e2660cc43af53e4cbc5a27d77a7",
+    "controller_flow_fork.py": "ec5618f77904c75e575b3889682bba274ef643382a871c3922e8f1fb398d0ce7"
+  },
+  "boundary": "deterministic disposable protocol qualification; actual packaged native/provider acceptance not claimed",
+  "primary_disposition": "accepted delegated installed evidence; primary independently reproduced3 initial fork and4 foreach tests before final guard; exact owned followups integrated"
+}

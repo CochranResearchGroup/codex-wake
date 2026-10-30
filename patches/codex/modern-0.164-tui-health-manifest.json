@@ -1,0 +1,58 @@
+{
+  "activation": false,
+  "cli_sha256": "f1775c5dd0a1c450a6eec2c76b2f35c5197b0d3df7e9eb2cfb156bdfb403d448",
+  "helper_sha256": "3394385db8d7016d56570e4acb7e7223062204cc32574672960febb20441be14",
+  "owner": "codex-wake-native-patch",
+  "package": {
+    "build_jobs": 2,
+    "cargo_profile": "dev",
+    "files": {
+      "bin/codex": {
+        "sha256": "f1775c5dd0a1c450a6eec2c76b2f35c5197b0d3df7e9eb2cfb156bdfb403d448",
+        "size_bytes": 419682080
+      },
+      "bin/codex-code-mode-host": {
+        "sha256": "3394385db8d7016d56570e4acb7e7223062204cc32574672960febb20441be14",
+        "size_bytes": 100639040
+      },
+      "codex-package.json": {
+        "sha256": "ae04908eddd3eb52d7ac68984b664f45b9fcec7747bbd594e4ecec13dca0a203",
+        "size_bytes": 204
+      },
+      "codex-path/rg": {
+        "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+        "size_bytes": 5408904
+      },
+      "codex-resources/bwrap": {
+        "sha256": "20ace369122f4d0d03a0767221e54347854e5cb69d60c8c344cf528ec27f3bae",
+        "size_bytes": 4774520
+      }
+    },
+    "owner_script": "scripts/build_codex_package.py",
+    "rust_toolchain": "1.99.1",
+    "strip": "all",
+    "target": "x86_64-unknown-linux-gnu"
+  },
+  "patch": "modern-0.164-tui-health.patch",
+  "patch_sha256": "a2ff05ede23f8d3aa69f3e0a6a50209fc86e4c7fa9377a9d1921599621d034c0",
+  "prior_wake_source": "fbfe287f4d738946ed3b158da9d9081db01ed039",
+  "qualification": "docs/dev/notes/controller-390-qualification.json",
+  "qualified_health_platforms": [
+    "Linux x86_64 GNU; host-local native Unix app-server channel"
+  ],
+  "runtime_source": "95cd89dd5f3cddeb241a9de75a3cc255a9484606",
+  "schema_version": 1,
+  "source_commit": "95cd89dd5f3cddeb241a9de75a3cc255a9484606",
+  "source_tree": "7cdb7769fc5f1a207263a5c763daaffbf534f9e6",
+  "specification": 393,
+  "status": "qualified_private_linux_package_not_activated",
+  "ticket": 390,
+  "unsupported_health_platforms": [
+    "Windows",
+    "macOS",
+    "network-only WebSocket without local kernel peer PID"
+  ],
+  "upstream_base": "6aaac694803004a63c6f393d153c96d22521a6b9",
+  "upstream_version": "0.164.0",
+  "verified_applied_tree": "7cdb7769fc5f1a207263a5c763daaffbf534f9e6"
+}

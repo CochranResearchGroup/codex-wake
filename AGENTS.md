@@ -1,5 +1,12 @@
 # Codex Wake
 
+## GitHub CI cost policy
+
+- The operator does not pay for GitHub Actions CI. Skip hosted GitHub CI and run the applicable checks locally instead.
+- Documented passing local checks satisfy CI validation for review, merge and release. Billing or spending limits that prevent hosted checks from starting are not a blocker and require no repeated approval.
+- Record commands, results, source commit and material differences from the hosted environment. Resolve actual local failures before declaring validation complete.
+- Do not purchase CI capacity, change billing settings or enable paid runs. Merge, deployment and live effects retain their separate authorization requirements.
+
 ## Repo Context
 
 - Codex Wake provides durable triggers and agent-to-agent mailbox delivery.

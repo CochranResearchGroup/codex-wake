@@ -18,7 +18,11 @@ dependencies = [
 ]
 
 [project.scripts]
-codex-wake = "codex_wake.cli:main"
+codex-wake = "codex_wake.entrypoint:main"
+codex-profiles = "codex_wake.profile_compat:main"
+codex-profile = "codex_wake.profile_compat:profile_main"
+codex-stock = "codex_wake.profile_compat:stock_main"
+codex-modded = "codex_wake.profile_compat:modded_main"
 codex-waked = "codex_wake.daemon:main"
 codex-wake-hook = "codex_wake.hook:main"
 codex-wake-github-webhook = "codex_wake.webhook_listener:main"
@@ -33,3 +37,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 codex_wake = ["time_collect.ps1"]
+codex_profiles = ["LICENSE"]

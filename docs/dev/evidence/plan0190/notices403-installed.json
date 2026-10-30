@@ -1,0 +1,46 @@
+{
+  "acceptance_command": "env -u PYTHONPATH installed403/bin/python scripts/controller_notices_acceptance.py --package modern-0164-fbfe287f4d-final3 --bin-dir installed403/bin --artifacts notices-native-6",
+  "broad_denied": true,
+  "failed_runs_preserved": [
+    "notices-native-1",
+    "notices-native-2",
+    "notices-native-3",
+    "notices-native-4",
+    "notices-native-5"
+  ],
+  "frontdoors": [
+    "cli",
+    "api",
+    "oauth_mcp",
+    "remote_cli",
+    "native_mcp"
+  ],
+  "health_probe_calls": 0,
+  "model_context_available": true,
+  "native_binary": "/home/ecochran76/.local/share/codex-wake/native/modern-0164-fbfe287f4d-final3/bin/codex",
+  "native_sha256": "31b27c12fb4639b4568002cde21a6ab75d76f29cab8c32d0e1f137bb2c7c640b",
+  "native_tui_rendered": true,
+  "network_requests_trapped": [
+    "CONNECT github.com:443",
+    "CONNECT chatgpt.com:443",
+    "CONNECT api.github.com:443",
+    "CONNECT chatgpt.com:443"
+  ],
+  "no_governor": true,
+  "no_model_turns": true,
+  "owned_processes_exited": true,
+  "platform": "Linux GNU in WSL; Python3.12; MCP2.2; websockets17.4; isolated pip-installed wheel; no hosted CI",
+  "private_receipt": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/notices-native-6/receipt.json",
+  "revoked_denied": true,
+  "source_commit": "3a63a94 plus bounded notice renderer correction (next commit)",
+  "source_hashes": {
+    "cli.py": "47d3eddb265bff63ae705ba929a6ee8d110eb28b761241eff5bcdb7ed7666579",
+    "controller_http.py": "fd6b5abeb192a2ddaecc78a46f7310515ced278189d48cb4780e1cd5cdb3129f",
+    "controller_notices.py": "8c3afda6fd9a75f584b536a6bfe87c23ddd2ad9d9b0caab83aa629301c401cbf",
+    "controller_runtime.py": "25be3f1a4b6ea2756a69aff542e6596be298660e6fb3f42033c42b5cd13d1e3e",
+    "mcp_server.py": "19e384ffa2b7fcd129221f1fa56f53ef890caebb01c2548d86ff0aabe68eb11e",
+    "native_protocol.py": "a269618850c77859b610752e5719ffe3504b3ff12f2af0cf8103c2806f0559ff",
+    "notice_commands.py": "61018cfd21b68612cf31f2e70a0f8e1c0f1b96e9c6aa3aece2ca316dc9fdfc2c"
+  },
+  "status": "passed"
+}

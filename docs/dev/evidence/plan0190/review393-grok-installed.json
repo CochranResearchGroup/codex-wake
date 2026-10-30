@@ -1,0 +1,84 @@
+{
+  "broad_observer_stale_revoked_denied": true,
+  "caller_disconnect_retained": true,
+  "cancelled_final_classified": true,
+  "definitive_auth_refusal": true,
+  "effect_count": 45,
+  "exact_turn_cancel_unsupported_no_io": true,
+  "frontdoors": {
+    "api": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "cli": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "native_mcp": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "oauth_mcp": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    },
+    "remote_cli": {
+      "flow_modes": {
+        "new_session": "passed",
+        "semantic": "passed",
+        "sequential": "passed"
+      },
+      "health": "unsupported",
+      "idempotent": true,
+      "prompt": "retained"
+    }
+  },
+  "hashes": {
+    "cli.py": "74a5239cfe14adae4458cfa017068415233f3f54d65c440fce46740b13c8a6c5",
+    "controller_flow_sessions.py": "c867fdbe60bfcb95846964beb3b71c0ffc1cd2babb06a89954b88312b63f961b",
+    "controller_grok.py": "1a90bc3c2beb4b716b724f67a07d46e2ea7bd77d36cb3449545d0e26aff311a0",
+    "controller_grok_sessions.py": "ff78ac647c083129a59c0d99de47bc0eee5653d7a61d697b44a319250801d694",
+    "controller_http.py": "9a65062b1a9c31f57ac07370cd45d28aa8b9c1db3956b36868c09fbc8a76acd4",
+    "controller_runtime.py": "2ee1e6947027111c6fd1a38f4c45192a88fdefd15c7f16b95e8acd2d8920e671",
+    "grok_acp.py": "41396bebef3a447c85ef719287203982c123b0139279db37cc482690a3f7ba0b",
+    "grok_commands.py": "b7cb8192802edd06ababc7b71d8ad0b54cf04fc774d0cec9156a30f910f15ffa",
+    "mcp_server.py": "a8806870a1d537faa7213b4bd3022196cd88336c0b0988ed5ce767194a52e69e"
+  },
+  "native_request_count": 120,
+  "no_resources_or_governor": true,
+  "no_terminal_fallback": true,
+  "owned_controller_exited": true,
+  "partial_error_not_mislabeled_not_started": true,
+  "permission_denied_without_client_capability": true,
+  "qualification": "installed ACPv1-shaped protocol fixture; not native Grok/model acceptance",
+  "status": "passed",
+  "unknown_no_replay": true,
+  "product_source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+  "primary_reconciliation": "All9installed/source module hashes match; fresh uninstrumented all5frontdoors/15flowprograms passed after clock refinement; no test clock override.",
+  "private_receipt": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/grok-qualified-fixture/receipt.json",
+  "receipt_sha256": "2b4ff818f7f93debb0ed1fac9c8c09a80d6839c1a79644869b86e21ed9cf735c"
+}

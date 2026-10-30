@@ -1,0 +1,678 @@
+{
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
+  "integration_branch": "feat/controller-393-resumed",
+  "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
+  "tip_sha": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+  "state": "source_accepted",
+  "tickets": {
+    "394": {
+      "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [],
+      "worker": "/root",
+      "owned_paths": [
+        "controller_operations",
+        "controller_commands",
+        "CLI/MCP registration",
+        "controller operation tests"
+      ],
+      "base_sha": "9538354ce2d8ec9f097664946ea4847079fba9c3",
+      "result_sha": "6a009f0",
+      "validation": [
+        {
+          "command": "PYTHONPATH=src python -m unittest discover -s tests -p test_controller_operations.py",
+          "red": "missing module, unsupported resolve, missing CLI command, missing freshness",
+          "green": "4 tests passed using repository venv; default interpreter lacks jsonschema"
+        },
+        {
+          "command": "PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -p test_managed_inventory.py",
+          "result": "9 passed"
+        },
+        {
+          "command": "repository venv unittest discover -s tests -p *mcp.py",
+          "result": "19 passed"
+        },
+        {
+          "command": "uv pip install --target /tmp/controller394-installed --no-deps .; installed CLI/MCP fixture",
+          "result": "passed; import path verified; isolated empty inventory; no live discovery"
+        }
+      ]
+    },
+    "395": {
+      "title": "Select accounts and explain effective configuration through Wake",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        394,
+        372,
+        374
+      ],
+      "worker": "/root/accounts395",
+      "owned_paths": [
+        "src/codex_wake/controller_accounts.py",
+        "src/codex_wake/account_commands.py",
+        "src/codex_profiles",
+        "account/config tests",
+        "CLI/MCP account registration",
+        "packaging ownership"
+      ],
+      "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
+      "result_sha": "38c97833f178fcb2f7004f8456feb8be41f6adf6",
+      "validation": [
+        {
+          "command": "PYTHONPATH=src repository-venv/python -m unittest discover -s tests -p *controller*py",
+          "result": "11 passed on integrated tip"
+        },
+        {
+          "command": "repository-venv unittest test_absorbed_profiles_concurrency.py",
+          "result": "7 passed"
+        },
+        {
+          "command": "uv pip install --python disposable/bin/python --no-deps --reinstall .; disposable/bin/python scripts/controller_accounts_acceptance.py --bin-dir disposable/bin",
+          "result": "integrated package passes CLI/MCP, concurrent accounts, peer-preserving restart, synthetic credential invariance; 0 providers"
+        }
+      ],
+      "worker_branch": "feat/controller-accounts395",
+      "worker_worktree": "/tmp/codex-wake-accounts395",
+      "integrated_sha": "226ff0b"
+    },
+    "396": {
+      "title": "Search permitted history and resume its owning conversation",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        395,
+        375,
+        376
+      ],
+      "worker": "/root/accounts395",
+      "owned_paths": [],
+      "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
+      "result_sha": "097b69e",
+      "validation": [
+        {
+          "command": "source unittest test_controller*.py",
+          "result": "34 passed including history grant, resume and host routing owner tests"
+        },
+        {
+          "command": "reinstall integrated package in /tmp/codex-wake-accounts395-installed; run scripts/controller_history_acceptance.py",
+          "result": "passed actual installed CLI/API/MCP and qualified fixture effects on integration538694c"
+        }
+      ],
+      "worker_branch": "feat/controller-history396",
+      "worker_worktree": "/tmp/codex-wake-history396",
+      "integrated_sha": "565d856",
+      "remaining_gate": null
+    },
+    "397": {
+      "title": "Launch visibly identified stock and modded immutable builds",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        395,
+        373,
+        377,
+        401
+      ],
+      "worker": "/root/builds397",
+      "owned_paths": [
+        "controller_builds",
+        "build_commands",
+        "build tests",
+        "primary shared registrations"
+      ],
+      "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
+      "result_sha": "6a0b2b9",
+      "validation": [
+        {
+          "command": "installed python -m unittest discover -s tests -p test_controller_builds.py",
+          "result": "5 passed including API/OAuthMCP/remoteCLI/nativeMCP one durable intent plus installed staging/select/rollback"
+        },
+        {
+          "command": "source unittest test_controller_build_authorization.py",
+          "result": "8 passed: scopes, recipe pin, target metadata and configuration preservation"
+        }
+      ],
+      "worker_branch": "feat/controller-397",
+      "worker_worktree": "/tmp/codex-wake-397",
+      "integrated_sha": "f4ea22b",
+      "remaining_gate": null,
+      "coordinator_owned_remaining": "Protected mutation plugin/shared registration integration after401validation"
+    },
+    "398": {
+      "title": "Preview and qualify legacy migration with reversible cutover",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        396,
+        397,
+        378
+      ],
+      "worker": "/root/accounts395",
+      "owned_paths": [],
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
+      "result_sha": "efbbf8c",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/migration398-installed.json",
+          "result": "delegated all5 installed surfaces,14focused/73regressions accepted; primary10migration tests reproduced after integration"
+        }
+      ],
+      "integrated_commits": [
+        "c6af360",
+        "012dc11",
+        "7679732",
+        "dab9ddb"
+      ]
+    },
+    "399": {
+      "title": "Authorize direct API and OAuth MCP operations with scoped principals",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        394
+      ],
+      "worker": "/root/oauth399",
+      "owned_paths": [
+        "src/codex_wake/controller_auth.py",
+        "src/codex_wake/controller_http.py",
+        "src/codex_wake/controller_remote_commands.py",
+        "remote bootstrap registration",
+        "admission tests"
+      ],
+      "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
+      "result_sha": "401ae5d81ecaeb6ea70c4dadf4695252e0ba50a4",
+      "validation": [
+        {
+          "command": "repository venv unittest discover -s tests -p test_controller*.py",
+          "result": "14 passed before additional integrated account-grant regression"
+        },
+        {
+          "command": "installed disposable python -m unittest discover -s tests -p test_controller_auth.py",
+          "result": "4 passed including integrated account filtering, config redaction and revision invalidation"
+        },
+        {
+          "command": "rebuild/reinstall integrated package; installed python scripts/controller_oauth_acceptance.py",
+          "result": "passed actual CLI/OAuth/API/MCP/reconnect/revocation; isolated synthetic state; no production effects"
+        }
+      ],
+      "worker_branch": "feat/controller-399",
+      "worker_worktree": "/tmp/codex-wake-399",
+      "integrated_sha": "724da66"
+    },
+    "400": {
+      "title": "Route pinned operations through SSH and registered host environments",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        394,
+        399
+      ],
+      "worker": "/root/oauth399",
+      "owned_paths": [
+        "host/environment registry",
+        "SSH routing adapter",
+        "host command registrations",
+        "host routing tests"
+      ],
+      "base_sha": "71b7766fbd199c91c45ee5b1a4425a99b5aa4bcf",
+      "result_sha": "0d895443f00eba70adc5793f055d2e2073388211",
+      "validation": [
+        {
+          "command": "reinstall integrated package in /tmp/codex-wake-accounts395-installed; run scripts/controller_hosts_acceptance.py",
+          "result": "passed actual installed CLI/API/MCP and qualified fixture effects on integration538694c"
+        }
+      ],
+      "worker_branch": "feat/controller-400",
+      "worker_worktree": "/tmp/codex-wake-400",
+      "integrated_sha": "5964375",
+      "remaining_gate": null
+    },
+    "401": {
+      "title": "Return correlated answers durably through caller disconnect",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        399,
+        400
+      ],
+      "worker": "/root/oauth399",
+      "owned_paths": [
+        "controller operation runtime",
+        "operation commands",
+        "mailbox/result adapter",
+        "tests/scripts"
+      ],
+      "base_sha": "538694c",
+      "result_sha": "754b43f044efc3ebd83bcadf86df3a0aafc55f33",
+      "validation": [
+        {
+          "command": "source unittest discover -s tests -p test_controller*.py",
+          "result": "51 passed"
+        },
+        {
+          "command": "reinstall integration; installed python scripts/controller_runtime_expanded_acceptance.py --shared-cli --retain-on-failure",
+          "result": "passed full public send/wait/result matrix, real nativeMailbox and supervisedjobs, peer-safe revocation; eight installed module hashes match"
+        }
+      ],
+      "worker_branch": "pending worker allocation",
+      "integrated_sha": "4c6ee49",
+      "known_boundary": "One prior expanded fixture clock_anomaly remains unattributed; failed checkpoint was cleaned. Diagnostics and uninstrumented fresh fixture passed; no clock reset or policy bypass. Failed receipt retained."
+    },
+    "402": {
+      "title": "Organize Byobu and psmux attachments without changing session identity",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        397,
+        400
+      ],
+      "worker": "/root/builds397",
+      "owned_paths": [],
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
+      "result_sha": "8a20e6e",
+      "validation": [
+        {
+          "command": "worker installed controller_tabs_acceptance.py plus 9tabs/9legacy/1flow; primary 9tabs/1flow",
+          "result": "passed; delegated installed evidence accepted against a9ef6d8 integrated8a20e6e",
+          "evidence": "docs/dev/evidence/plan0190/tabs402-public.json"
+        }
+      ],
+      "integrated_commits": [
+        "9042dc8",
+        "75417a3",
+        "cd31d76",
+        "e71ccdb",
+        "b562dfe",
+        "f9c1061"
+      ]
+    },
+    "403": {
+      "title": "Display Wake controller notifications and model-readable intervention state",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        397,
+        399,
+        400,
+        390
+      ],
+      "worker": "/root",
+      "owned_paths": [
+        "controller_notices.py",
+        "notice commands/tests/acceptance",
+        "shared CLI/API/MCP registration",
+        "controller_runtime.py trusted notice access"
+      ],
+      "base_sha": "393c87b",
+      "result_sha": "607f1f7",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/notices403-installed.json",
+          "result": "all5 installed interfaces; actual native TUI render and model context; 2focused/10runtime/6health checks passed; lost acknowledgement readback/no replay; unsupported explicit"
+        }
+      ]
+    },
+    "404": {
+      "title": "Apply and deactivate bounded recovery policies visibly",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        402,
+        403
+      ],
+      "worker": "/root/recovery404",
+      "owned_paths": [
+        "controller_recovery.py",
+        "recovery_commands.py",
+        "recovery tests/acceptance"
+      ],
+      "base_sha": "607f1f7",
+      "result_sha": "aec3495",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/recovery404-installed.json",
+          "result": "all5 installed scheduled without publictick/apply;9primaryrecovery/2originalauthority-server tests;11modulehashes matched;fresh0ownedprocesses"
+        }
+      ]
+    },
+    "405": {
+      "title": "Qualify the packaged cross-host milestone with Codex Bots",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        398,
+        401,
+        402,
+        404,
+        378
+      ],
+      "worker": "/root/flow411_resume",
+      "owned_paths": [
+        "crosshost405 acceptance",
+        "portableWindowsclient",
+        "nativeartifactrebuild"
+      ],
+      "base_sha": "f23fd08",
+      "result_sha": "b1aa712",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/crosshost405-installed.json",
+          "result": "currentintegration03677e6/wheelcf2db34c onWindows+wsl-test+Bastion;13physicalmatrixchecks,4portablecaller,13buildchecks/eachLinuxhost;realSSHwithheldreply/originalreceipt;freshownedcleanup0"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/bots405-native-consumer.json",
+          "result": "immutableBotsconsumer actualnative95+all5Wakefrontdoors, exactlooponlystallunknown/freshresume;draft/history/queuepreserved;0ownedprocesses"
+        }
+      ],
+      "remaining_gate": "NativeWindowsowner unsupported; Windowscaller+WSLauthorizedWindowspsmux andLinuxexecutionrolesqualified; production380 separate"
+    },
+    "406": {
+      "title": "Run a versioned branch-and-wait flow durably",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        401
+      ],
+      "worker": "/root",
+      "owned_paths": [
+        "versioned flow core",
+        "flow commands/SDK/proposal",
+        "flow tests",
+        "shared service integration"
+      ],
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
+      "result_sha": "d79a78c",
+      "validation": [
+        {
+          "command": "PYTHONPATH=src repository-venv/python -m unittest discover -s tests -p test_controller_flows.py -v",
+          "red": "interrupted retained-result recovery absent; cancellation absent; waiting cancellation did not reach owner",
+          "green": "8 focused behaviors passed; public installed CLI red pending shared registration"
+        },
+        {
+          "command": "source test_controller*.py; installed controller_flow_acceptance.py; installed test_controller_flow_surfaces.py",
+          "result": "87 controller tests; 10 focused flow tests; installed CLI/native stdio MCP late actual Mailbox result; OAuth API/MCP/remote CLI passed",
+          "evidence": "docs/dev/evidence/plan0190/flows406-installed.json"
+        }
+      ]
+    },
+    "407": {
+      "title": "Execute foreach in new sessions and ordered same-session prompts",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        406
+      ],
+      "worker": "/root",
+      "owned_paths": [
+        "controller_flow_foreach.py",
+        "foreach tests",
+        "controller_flows.py node integration after shared402 release"
+      ],
+      "base_sha": "d79a78c",
+      "result_sha": "aec16f7",
+      "validation": [
+        {
+          "command": "test_controller*.py; post-guard test_controller_flow*.py; installed controller_foreach_acceptance.py",
+          "result": "92 controller tests;14 focused after final guard; all five installed surfaces passed with actual disposable Unix protocol fixture",
+          "evidence": "docs/dev/evidence/plan0190/foreach407-installed.json"
+        }
+      ]
+    },
+    "408": {
+      "title": "Fork foreach sessions from a pinned common checkpoint",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        407
+      ],
+      "worker": "/root/accounts395",
+      "owned_paths": [
+        "controller_flow_fork.py supported lastTurnId variant",
+        "controller_flow_sessions.py fork capability only",
+        "fork tests and installed acceptance"
+      ],
+      "base_sha": "03e79e1",
+      "result_sha": "393c87b",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/fork408-installed.json",
+          "result": "delegated all5 installed public surfaces +4 fork tests green, source/install module hashes match; accepted by primary"
+        },
+        {
+          "finding": "Adapter qualification used a provisional native extension absent from the supported native build; existing lastTurnId is source-verified and must replace it before feature closure",
+          "source": "/tmp/codex-native-390 at d1325aeb: ThreadForkParams.last_turn_id; request processor ThroughTurn; paginated/legacy truncation"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/fork408-native-correction.json",
+          "result": "actual native lastTurnId commonprefix;5 installed surfaces;goal-present/unknown denied;30 primary flowchecks"
+        }
+      ]
+    },
+    "409": {
+      "title": "Join parallel iterations with safe retry and uncertain-effect reconciliation",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        407
+      ],
+      "worker": "/root",
+      "owned_paths": [
+        "controller_flows.py",
+        "controller_flow_foreach.py",
+        "parallel/join/retry tests",
+        "shared registrations"
+      ],
+      "base_sha": "aec16f7",
+      "result_sha": "299b6c2",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/join409-installed.json",
+          "result": "102broader controller checks;14focused flow checks after final reconciliation;all5 installed surfaces with join/retry/native revocation/peer survival passed"
+        }
+      ]
+    },
+    "410": {
+      "title": "Evaluate composable semantic Boolean functions under nested limits",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        406,
+        409
+      ],
+      "worker": "/root/builds397",
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": "ccfc088",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/conditions410-installed.json",
+          "result": "7installedconditiontests/14flowregressions/all5 installed public surfaces delegated; primary7conditiontests reproduced and3modulehashes match"
+        },
+        {
+          "integration_gap": "Limit reached stops scheduling but must request owned cancellation on semantic timeout and active sibling call/time exhaustion; bounded followup assigned, original qualification retained"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/conditions410-limit-stop-installed.json",
+          "result": "owned limit cleanup confirmed/uncertain under original authority; estimates retained; peer preserved; primary public-ownercheck"
+        }
+      ]
+    },
+    "411": {
+      "title": "Qualify durable flows across handoff, limits and caller recovery",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        408,
+        409,
+        410
+      ],
+      "worker": "/root/accounts395",
+      "owned_paths": [
+        "flow aggregate acceptance",
+        "controller_flows.py continuation",
+        "condition/session fixes ifneeded; Runtime/shared changes by proposal only"
+      ],
+      "base_sha": "393c87b",
+      "result_sha": "814b53a",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/flows411-installed.json",
+          "result": "123installed controller checks,12focused,7aggregate programs/all5SIGKILL recovery; primary12conditions reproduced and7modulehashes matched"
+        }
+      ]
+    },
+    "412": {
+      "title": "Control Grok through an honest structured-runtime adapter",
+      "state": "validated",
+      "tracker_state": "closed",
+      "blockers": [
+        405,
+        411
+      ],
+      "worker": "/root/recovery404",
+      "owned_paths": [
+        "controller_grok.py",
+        "grok operation contracts/tests/acceptance",
+        "sharedhooksbyroot"
+      ],
+      "base_sha": "b1aa712",
+      "result_sha": "d2181d1",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/grok412-primary-fixture.json",
+          "result": "Primary all5 installed frontdoors/15 flow programs;120 ACP fixture requests,45 synthetic effects;9 module hashes matched;original disconnect/no replay/authority negatives passed"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/grok412-native-initialize.json",
+          "result": "Actual Grok1.0.70 through explicit stdio host;all5 public interfaces match native identity;6 module hashes matched;fresh native/bridge PIDs absent;no native sessions/model/auth requests"
+        },
+        {
+          "command": "PYTHONPATH=src installed403/bin/python -m unittest discover -s tests -p test_grok_stdio_host.py",
+          "result": "1 actual child/socket custody and busy/noqueue test passed;public CLI help and Ruff passed"
+        }
+      ],
+      "remaining_gate": "Native WebSocket serve unqualified; exact cancellation/TUI health/fork/metering/tool isolation unsupported; model/provider and production activation separate"
+    },
+    "390": {
+      "state": "validated",
+      "tracker_state": "closed",
+      "existing_consumer": true,
+      "blockers": [
+        388,
+        389,
+        397,
+        399,
+        400
+      ],
+      "worker": "/root/oauth399",
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
+      "result_sha": "670dea9",
+      "validation": [
+        {
+          "evidence": "docs/dev/notes/controller-390-qualification.json",
+          "result": "actual packaged UI loop-only stall and5 frontdoors;0 owned processes;7 primary healthchecks"
+        }
+      ]
+    }
+  },
+  "validation": {
+    "dependency_cycle_check": "passed after adding397->401",
+    "native_children_count": 20,
+    "frontier": []
+  },
+  "review_rounds": 1,
+  "remediation_rounds": 1,
+  "review_fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
+  "whole_python_ci": {
+    "state": "passed",
+    "final": "docs/dev/evidence/plan0190/review393-final-validation.json",
+    "pre_remediation": {
+      "state": "pre_remediation_passed_final_remediation_pending",
+      "tier": "comprehensive_local",
+      "command": "PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'",
+      "hosted": "skipped by operator cost policy",
+      "environment": "local WSL Linux; isolated XDG_CONFIG_HOME/XDG_STATE_HOME/CODEX_HOME, stable-time config empty; Python3.11.15/3.12.13; applicable checks only; parked OpenClaw excluded",
+      "runs": [
+        {
+          "python": "3.11",
+          "source": "d2181d1de0aca67a6e59ef4bf6cdefab087d48ee",
+          "tests": 1896,
+          "skipped": 1,
+          "seconds": 806.118,
+          "status": "passed",
+          "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/final-python3.11/unittest.log",
+          "log_sha256": "436dc1ee780feb93a0653f8959df02d135410a1697b07c08c8d42f5bc17354db",
+          "timing": "unittest monotonic duration; original launcher wall elapsed may differ during observed host clock rollback"
+        },
+        {
+          "python": "3.12",
+          "source": "d2181d1de0aca67a6e59ef4bf6cdefab087d48ee",
+          "tests": 1896,
+          "skipped": 1,
+          "seconds": 793.52,
+          "status": "passed",
+          "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/final-python3.12/unittest.log",
+          "log_sha256": "ce3d51d45c45018c2f22081c53cd32ec3da49fb91c20dcbd88edb54f53b07cdc",
+          "timing": "unittest monotonic duration; original launcher wall elapsed may differ during observed host clock rollback"
+        }
+      ]
+    },
+    "runs": [
+      {
+        "python": "3.11",
+        "source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+        "tests": 1909,
+        "skipped": 1,
+        "seconds": 620.951,
+        "status": "passed",
+        "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-python3.11/unittest.log",
+        "log_sha256": "3b66558c3a07b65ed120c83a59f655011a84abd553ced3b94b982faa32823a06",
+        "launcher_receipt_sha256": "04b7eeebd766870570b9d481ea28b03d0c504b06b98d2c96712effc1f71bd557"
+      },
+      {
+        "python": "3.12",
+        "source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+        "tests": 1909,
+        "skipped": 1,
+        "seconds": 603.335,
+        "status": "passed",
+        "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-python3.12/unittest.log",
+        "log_sha256": "d50e275d2a6190ec688da075f0eb009239b234979f0d61fed1a1ac6be51b17c7",
+        "launcher_receipt_sha256": "8e7c6f79969c48de506f99ef4c03b0352bfd8d110af65842797462ab15a5b52c"
+      }
+    ]
+  },
+  "review": {
+    "frozen_tip": "415607bd6eda7a0bbff0161eec4917988ed02c91",
+    "fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
+    "bots_fixed_point": "864a93967",
+    "bots_tip": "0614856ec340da6d2d84f1b5cb5104fd26528403",
+    "axes": {
+      "standards": "/root/review393_standards_once",
+      "spec": "/root/review393_spec_once"
+    },
+    "state": "complete",
+    "remediation": "complete:6accepted findings fixed in1TDDpass",
+    "adjudication": "docs/dev/evidence/plan0190/review393-adjudication.json"
+  },
+  "tip_kind": "validated product source; later commits documentation only",
+  "final_validation": "docs/dev/evidence/plan0190/review393-final-validation.json",
+  "remaining_gates": [
+    368,
+    370,
+    380
+  ],
+  "parent_tracker_state": "closed",
+  "publication": {
+    "wake_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/419",
+    "bots_pr": "https://github.com/ecochran76/grok-bots/pull/239",
+    "state": "draft_source_reviews; main integration separate",
+    "validated_product_source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+    "wake_head_at_creation": "b30d45b449d9f2f9bb43e97b74b0a1cde8bc5e2c",
+    "bots_reviewed_head": "0614856ec340da6d2d84f1b5cb5104fd26528403",
+    "bots_publication_docs_head": "58bbdfc",
+    "source_delta_after_qualification": "none; documentation only"
+  }
+}

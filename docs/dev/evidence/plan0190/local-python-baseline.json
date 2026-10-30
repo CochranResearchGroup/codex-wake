@@ -1,0 +1,44 @@
+{
+  "status": "baseline_qualified_current_grok_regression_pending",
+  "scope": "local comprehensive Python baseline before Grok412 integration; not final release or production acceptance",
+  "source_baseline": "2d6389d",
+  "python311_test_fixture_commit": "84961431af3d76481d5e2c7332cb50de169efad2",
+  "command": "PYTHONPATH=src python -m unittest discover -s tests -p test_*.py",
+  "environment": {
+    "platform": "local WSL Linux",
+    "isolated": [
+      "XDG_CONFIG_HOME",
+      "XDG_STATE_HOME",
+      "CODEX_HOME"
+    ],
+    "CODEX_WAKE_STABLE_TIME_CONFIG": "",
+    "hosted_ci": "skipped by operator cost policy"
+  },
+  "runs": [
+    {
+      "python": "3.12",
+      "tests": 1890,
+      "skipped": 1,
+      "result": "passed",
+      "seconds": 538.657,
+      "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/ci312.log",
+      "log_sha256": "c9ad66a4cec89bbc894987024ce55f7ca4e7179bf2b7cf2bed863ff48265d64e"
+    },
+    {
+      "python": "3.11",
+      "tests": 1890,
+      "skipped": 1,
+      "result": "passed",
+      "seconds": 492.48,
+      "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/ci311-rerun.log",
+      "log_sha256": "703daa2b1b162952bae3a7af82dffa6832155962ef27a8f0d9a8f4b82848e619"
+    }
+  ],
+  "first_failure": {
+    "python": "3.11",
+    "result": "one clock_anomaly failure in mailbox cancellation fixture during host wall-clock rollback",
+    "disposition": "test-only injected monotonic wall clock; production clock guards unchanged; first log retained"
+  },
+  "excluded": "Parked OpenClaw plugin work and live provider/production activation gates",
+  "followup": "Run current integrated product checks after Grok412 bridge integration and bounded review remediation."
+}
