@@ -1,0 +1,27 @@
+{
+  "ticket": 410,
+  "followup": "Limit reached stops new work and requests only owned cancellation",
+  "source": "cfd794514e33876be9650be7a53068dbb4183026",
+  "implementation_commit": "e01e171",
+  "earlier_qualification_retained": "conditions410-installed.json",
+  "red": [
+    "Public ControllerFlows max_calls and elapsed-time cases submitted the first pending child but made no sessions.cancel request",
+    "Actual Unix semantic timeout returned without limit_cancellation receipt"
+  ],
+  "focused_installed_tests": "test_controller_condition_limit_stop.py: passed in 0.867s (call bound, time bound, and unconfirmed cancellation subcases)",
+  "focused_installed_command": "/tmp/codex-wake-410-installed/bin/python /tmp/codex-wake-410/scripts/controller_conditions_acceptance.py --limit-stop",
+  "focused_installed_result": {
+    "status": "passed",
+    "original_authority_cleanup": true,
+    "usage_retained": true,
+    "peer_preserved": true,
+    "cancellation": "confirmed",
+    "hard_stop_claim": false,
+    "package": "/tmp/codex-wake-410-installed/lib/python3.12/site-packages/codex_wake/__init__.py"
+  },
+  "source_and_installed_sha256": {
+    "controller_flows.py": "199440eb7f1d9117c14b4eebbf72586abe6337891ae22a1cff7622e7db79b9ab",
+    "controller_condition_native.py": "ea6f6b9f03f71b1a3ef79313946b2772ec57499971f69c49b9360ea21b5bf46a"
+  },
+  "scope": "Provider-free disposable Unix protocol fixture and focused owner tests only. No new authority, native allowance, tool policy, exact metering, parallel condition support or production effect. Cleanup uses original authorization, not the expired admission wrapper; confirmed and uncertain outcomes remain distinct."
+}
