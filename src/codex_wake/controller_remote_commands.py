@@ -35,7 +35,7 @@ def register(commands):
     remote = commands.add_parser('remote', help='perform authenticated direct controller operation')
     remote.add_argument('--endpoint', required=True)
     remote.add_argument('--token-file', type=Path, required=True)
-    remote.add_argument('operation', choices=['inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list'])
+    remote.add_argument('operation', choices=['inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list', 'hosts.list', 'hosts.resolve', 'hosts.route', 'history.search', 'history.read', 'history.resume'])
     remote.add_argument('--arguments', type=json.loads, default={})
 
 
@@ -87,7 +87,8 @@ def command(args):
         print(json.dumps(auth.revoke_grant(args.grant_id), sort_keys=True)); return 0
     host, environment = socket.gethostname(), os.environ.get('WSL_DISTRO_NAME') or os.name
     account_config = Path(args.wake_root) / 'controller-accounts.toml'
-    options = {}
+    from .host_commands import owner as host_owner
+    options = {'hosts': host_owner(args.wake_root)}
     if account_config.is_file():
         # The account owner is delivered by ticket395; no caller-selected path.
         from .controller_accounts import ControllerAccounts

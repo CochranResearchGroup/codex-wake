@@ -9,14 +9,20 @@ from .managed_inventory import InventoryError
 
 
 class ControllerOperations:
-    def __init__(self, inventory, *, host, environment, accounts=None, builds=None):
+    def __init__(self, inventory, *, host, environment, accounts=None, builds=None, hosts=None):
+        self.hosts = hosts
         self.builds = builds
         self.accounts = accounts
         self.inventory = inventory
         self.host = host
         self.environment = environment
 
-    def execute(self, operation, arguments):
+    def execute(self, operation, arguments, *, actor=None, authorize=None):
+        if operation.startswith('hosts.'):
+            if self.hosts is None:
+                raise InventoryError('configuration_unavailable', 'host routing owner is unavailable')
+            return dict(schema_version=1, operation=operation, status='completed',
+                        result=self.hosts.execute(operation, arguments, actor=actor, authorize=authorize))
         if operation.startswith('builds.'):
             if self.builds is None:
                 raise InventoryError('configuration_unavailable', 'host build owner is unavailable')

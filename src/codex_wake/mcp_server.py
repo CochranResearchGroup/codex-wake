@@ -29,6 +29,8 @@ TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
           "profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "expires_at": TEXT}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_hosts_list": ("controller-hosts", "list", "Read registered host/environment authorities and observation freshness.", {}, [], True),
+    "wake_hosts_resolve": ("controller-hosts", "resolve", "Resolve exact host/environment generation; stale bindings do not redirect.", {"host": TEXT, "environment": TEXT, "expected_target": {"type": "object"}}, ["host", "environment"], True),
     "wake_builds_list": ("builds", "list", "Inspect pinned stock/modded build identities. Mutation tools require separate authority and are not exposed by this read tool.", {"account": TEXT}, ["account"], True),
     "wake_controller_accounts": ("controller-accounts", "accounts.list", "List host-configured isolated accounts without reading credentials.", {}, [], True),
     "wake_controller_account_resolve": ("controller-accounts", "accounts.resolve", "Resolve an account alias and pin its home/configuration generation.", {"selector": TEXT, "expected_target": {"type": "object"}}, ["selector"], True),
@@ -291,6 +293,13 @@ class CommandRunner:
                 return result, result['status'] != 'completed'
             except InventoryError as error:
                 return {'error': {'code': error.code, 'message': str(error)}}, True
+        if group == 'controller-hosts':
+            from .host_commands import owner
+            try:
+                result = owner(self.wake_root).execute('hosts.' + verb, arguments)
+                return {'schema_version': 1, 'operation': 'hosts.' + verb, 'status': 'completed', 'result': result}, False
+            except ValueError as error:
+                return {'error': {'code': getattr(error, 'code', 'host_unavailable'), 'message': str(error)}}, True
         if group == 'controller-history':
             from .history_commands import mcp_call
             return mcp_call(self, arguments, native_context, verb)

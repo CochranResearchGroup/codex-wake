@@ -25,6 +25,19 @@ TOOLS = {
 }
 
 
+# Native-MCP caller identity is not part of the OAuth-MCP argument schema.
+from .history_commands import tool_specs as history_specs
+for name, spec in history_specs().items():
+    properties = {key: value for key, value in spec[3].items() if key != 'caller_thread_id'}
+    TOOLS[name] = ('history.' + spec[1], {'type': 'object', 'properties': properties,
+        'required': [key for key in spec[4] if key != 'caller_thread_id'], 'additionalProperties': False})
+TOOLS.update({
+    'wake_hosts_list': ('hosts.list', {'type': 'object', 'properties': {}, 'additionalProperties': False}),
+    'wake_hosts_resolve': ('hosts.resolve', {'type': 'object', 'properties': {'host': {'type': 'string'}, 'environment': {'type': 'string'}, 'expected_target': {'type': 'object'}}, 'required': ['host', 'environment'], 'additionalProperties': False}),
+    'wake_hosts_route': ('hosts.route', {'type': 'object', 'properties': {'target': {'type': 'object'}, 'operation': {'type': 'string'}, 'arguments': {'type': 'object'}, 'operation_id': {'type': 'string'}, 'idempotency_key': {'type': 'string'}}, 'required': ['target', 'operation', 'arguments', 'operation_id', 'idempotency_key'], 'additionalProperties': False}),
+})
+
+
 def operation_failure(operation, error):
     return {'schema_version': 1, 'operation': operation, 'status': 'failed',
             'error': {'code': error.code, 'message': str(error)}}
@@ -40,6 +53,12 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        'hosts.list': ('observe', 'environments', None),
+        'hosts.resolve': ('observe', None, 'environment'),
+        'hosts.route': ('observe', None, None),
+        'history.search': ('history.observe', None, None),
+        'history.read': ('history.observe', None, None),
+        'history.resume': ('history.resume', None, None),
         'builds.list': ('account.observe', 'builds', None),
         'inventory.list': ('observe', 'resources', None),
         'inventory.resolve': ('observe', None, 'resource'),
@@ -58,22 +77,33 @@ class ProtectedOperations:
                     'grants.revoke': 'admin'}.get(operation)
         if required is None:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
-        if required not in actor.scopes: raise AuthError('insufficient_scope')
-        # Mutations are deliberately unsupported until their owning service lands.
-        if policy is None:
-            raise InventoryError('unsupported_operation', 'operation is unsupported')
-        result = self.operations.execute(operation, arguments)
-        def allowed(row):
-            if policy[0] == 'observe': return permitted(actor, row['target'])
-            required_fields = {'host', 'environment', 'provider', 'account', 'home', 'home_generation', 'configuration_revision'}
-            return any(required_fields <= set(scope) and all(row['target'].get(key) == val for key, val in scope.items()) for scope in actor.targets)
-        if policy[1]:
-            result['result'][policy[1]] = [row for row in result['result'][policy[1]] if allowed(row)]
-        elif not allowed(result['result'][policy[2]]):
+        if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        # Recheck after observation so a revoked grant cannot deliver a newly read result.
+        if operation.startswith('history.'):
+            from .controller_history_authorization import HistoryAuthorization
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host history owner is unavailable')
+            result = HistoryAuthorization(self.authority, self.operations.inventory.root,
+                host=self.operations.host, environment=self.operations.environment).execute(token, operation, arguments)
+        elif operation == 'hosts.route':
+            result = self.operations.execute(operation, arguments, actor=actor,
+                authorize=lambda: self.authority.authenticate(token))
+        else:
+            if policy is None:
+                raise InventoryError('unsupported_operation', 'operation is unsupported')
+            result = self.operations.execute(operation, arguments)
+            def allowed(row):
+                if policy[0] == 'observe':
+                    return permitted(actor, row['target'])
+                fields = {'host', 'environment', 'provider', 'account', 'home', 'home_generation', 'configuration_revision'}
+                return any(fields <= set(scope) and all(row['target'].get(key) == val for key, val in scope.items()) for scope in actor.targets)
+            if policy[1]:
+                result['result'][policy[1]] = [row for row in result['result'][policy[1]] if allowed(row)]
+            elif not allowed(result['result'][policy[2]]):
+                raise AuthError('insufficient_scope')
         current = self.authority.authenticate(token)
-        if current.grant_id != actor.grant_id: raise AuthError()
+        if current.grant_id != actor.grant_id:
+            raise AuthError()
         result['actor'] = dict(subject=actor.subject, principal_kind=actor.principal_kind,
             client_id=actor.client_id, grant_id=actor.grant_id, issuer=actor.issuer,
             resource=actor.resource, scopes=sorted(actor.scopes))
@@ -214,8 +244,10 @@ class ControllerHandler(BaseHTTPRequestHandler):
             result = {'tools': [dict(name=name, description='Read scoped controller resource', inputSchema=schema)
                 for name, (operation, schema) in TOOLS.items()
                 if ProtectedOperations.READ_POLICIES[operation][0] in actor.scopes
-                and (operation.startswith('inventory.') or (operation.startswith('builds.') and getattr(self.server.operations.operations, 'builds', None) is not None) or (not operation.startswith('builds.') and getattr(self.server.operations.operations, 'accounts', None) is not None))]}
-        elif method == 'tools/call':
+                and (operation.startswith('inventory.')
+                     or (operation.startswith('hosts.') and self.server.operations.operations.hosts is not None)
+                     or (operation.startswith('builds.') and self.server.operations.operations.builds is not None)
+                     or (not operation.startswith(('hosts.', 'builds.')) and self.server.operations.operations.accounts is not None))]}        elif method == 'tools/call':
             name = params.get('name')
             if name not in TOOLS:
                 return self.reply(200, dict(jsonrpc='2.0', id=identifier, error={'code': -32602, 'message': 'unsupported tool'}))
