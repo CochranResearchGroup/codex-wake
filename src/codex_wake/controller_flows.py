@@ -534,7 +534,13 @@ class ControllerFlows:
                 if latest.get('attempt')==attempt:
                     latest.update(phase='uncertain',reason=str(pending),condition_usage=state['condition_usage'],condition_trace=state['condition_trace'])
                     self._write(db,latest)
-                return self.projection(latest)
+                pending_state=self.projection(latest)
+            overall=state.get('condition_limits',{})
+            timed_out=self.now()-state['created_at']>=overall.get('max_seconds',300)
+            timed_out=timed_out or any('outcome' not in item and item.get('frame') and
+                self.now()-item['frame']['began']>=item['limits']['max_seconds'] for item in state.get('condition_trace',[]))
+            if timed_out:raise _FlowLimitReached('condition_time_limit')
+            return pending_state
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             latest=self._owned(actor,self._load(run_id,db),'control')
