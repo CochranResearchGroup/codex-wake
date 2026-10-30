@@ -142,16 +142,16 @@
     },
     "398": {
       "title": "Preview and qualify legacy migration with reversible cutover",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         396,
         397,
         378
       ],
-      "worker": null,
+      "worker": "/root/accounts395",
       "owned_paths": [],
-      "base_sha": null,
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
       "result_sha": null,
       "validation": []
     },
@@ -251,15 +251,15 @@
     },
     "402": {
       "title": "Organize Byobu and psmux attachments without changing session identity",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         397,
         400
       ],
-      "worker": null,
+      "worker": "/root/builds397",
       "owned_paths": [],
-      "base_sha": null,
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
       "result_sha": null,
       "validation": []
     },
@@ -312,14 +312,19 @@
     },
     "406": {
       "title": "Run a versioned branch-and-wait flow durably",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         401
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root",
+      "owned_paths": [
+        "versioned flow core",
+        "flow commands/SDK/proposal",
+        "flow tests",
+        "shared service integration"
+      ],
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
       "result_sha": null,
       "validation": []
     },
@@ -406,7 +411,7 @@
       "validation": []
     },
     "390": {
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "existing_consumer": true,
       "blockers": [
@@ -415,7 +420,9 @@
         397,
         399,
         400
-      ]
+      ],
+      "worker": "/root/oauth399",
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292"
     }
   },
   "validation": {
