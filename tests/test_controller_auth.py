@@ -1,0 +1,103 @@
+import base64
+import hashlib
+import tempfile
+import unittest
+from pathlib import Path
+
+
+class OAuthTests(unittest.TestCase):
+    def test_pkce_grant_exact_resource_rotation_and_independent_revocation(self):
+        from codex_wake.controller_auth import OAuthAuthority, AuthError
+        with tempfile.TemporaryDirectory() as directory:
+            auth = OAuthAuthority(Path(directory) / 'auth.sqlite', issuer='https://wake.test', resource='https://wake.test/controller', now=lambda: 100)
+            client = auth.register({'redirect_uris': ['http://127.0.0.1:45000/callback'], 'client_name': 'fixture'})
+            verifier = 'x' * 43
+            challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            code = auth.authorize(subject='alice', principal_kind='owner', client_id=client['client_id'], redirect_uri=client['redirect_uris'][0], resource=auth.resource, scopes=['observe'], targets=[{'host': 'fixture'}], code_challenge=challenge)
+            args = dict(grant_type='authorization_code', client_id=client['client_id'], code=code, redirect_uri=client['redirect_uris'][0], code_verifier=verifier, resource=auth.resource)
+            tokens = auth.token(args)
+            actor = auth.authenticate(tokens['access_token'])
+            self.assertEqual((actor.subject, actor.client_id, actor.scopes), ('alice', client['client_id'], frozenset({'observe'})))
+            self.assertEqual(actor.targets, [{'host': 'fixture'}])
+            with self.assertRaises(AuthError): auth.token(args)
+            with self.assertRaises(AuthError): auth.token(dict(grant_type='refresh_token', refresh_token=tokens['refresh_token'], client_id=client['client_id'], resource=auth.resource + '/other'))
+            rotated = auth.token(dict(grant_type='refresh_token', refresh_token=tokens['refresh_token'], client_id=client['client_id'], resource=auth.resource))
+            with self.assertRaises(AuthError): auth.authenticate(tokens['access_token'])
+            self.assertEqual(auth.authenticate(rotated['access_token']).grant_id, actor.grant_id)
+            auth.revoke_grant(actor.grant_id)
+            with self.assertRaises(AuthError): auth.authenticate(rotated['access_token'])
+
+    def test_http_api_and_oauth_mcp_share_target_scopes_and_reauthenticate(self):
+        import json
+        import threading
+        from urllib.request import Request, urlopen
+        from urllib.error import HTTPError
+        from codex_wake.controller_http import ControllerHTTPServer
+        from codex_wake.controller_auth import OAuthAuthority
+        from codex_wake.controller_operations import ControllerOperations
+        from codex_wake.managed_inventory import ManagedInventory, Observation
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            inventory = ManagedInventory(root / 'wake', now=lambda: 100)
+            for account in ('alice', 'bob'):
+                inventory.enroll(Observation('codex', 'account:' + account, account, '/fixture', 'ready', 100, 'native_metadata', {'pid': 123, 'start_ticks': 42, 'boot_id': 'fixture'}, [], {}), operator=True)
+            auth = OAuthAuthority(root / 'auth.sqlite', issuer='https://wake.test', resource='https://wake.test/controller')
+            client = auth.register({'redirect_uris': ['http://127.0.0.1:45000/callback']})
+            verifier = 'x' * 43
+            challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            code = auth.authorize(subject='robot', principal_kind='service', client_id=client['client_id'], redirect_uri=client['redirect_uris'][0], resource=auth.resource, scopes=['observe'], targets=[{'host': 'fixture', 'namespace': 'account:alice'}], code_challenge=challenge)
+            token = auth.token(dict(grant_type='authorization_code', client_id=client['client_id'], code=code, redirect_uri=client['redirect_uris'][0], code_verifier=verifier, resource=auth.resource))['access_token']
+            server = ControllerHTTPServer(('127.0.0.1', 0), auth, ControllerOperations(inventory, host='fixture', environment='test'))
+            thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+            def request(path, body, bearer=token, headers=None):
+                req = Request('http://127.0.0.1:' + str(server.server_port) + path, data=json.dumps(body).encode(), headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + bearer, **(headers or {})})
+                try:
+                    with urlopen(req) as response: return response.status, json.load(response)
+                except HTTPError as error: return error.code, json.load(error)
+            try:
+                status, api = request('/operations', {'operation': 'inventory.list', 'arguments': {}})
+                self.assertEqual(status, 200)
+                self.assertEqual(api['actor']['subject'], 'robot')
+                self.assertEqual([r['target']['namespace'] for r in api['result']['resources']], ['account:alice'])
+                status, mcp = request('/mcp', {'jsonrpc': '2.0', 'id': 1, 'method': 'tools/call', 'params': {'name': 'wake_controller_list', 'arguments': {}}})
+                self.assertEqual(mcp['result']['structuredContent'], api)
+                status, denied = request('/operations', {'operation': 'inventory.resolve', 'arguments': {'selector': 'bob'}})
+                self.assertEqual(status, 403)
+                status, denied = request('/operations', {'operation': 'runtime.input', 'arguments': {}})
+                self.assertEqual(status, 403)
+                status, denied = request('/operations', {'operation': 'inventory.list', 'arguments': {}}, headers={'X-Wake-Subject': 'owner'})
+                self.assertEqual(status, 400)
+                status, missing = request('/operations', {'operation': 'inventory.resolve', 'arguments': {'selector': 'missing'}})
+                self.assertEqual((status, missing['error']['code']), (400, 'target_not_found'))
+                original = api['result']['resources'][0]
+                inventory.reconcile(original['id'], Observation('codex', 'account:alice', 'alice', '/fixture', 'ready', 100, 'native_metadata', {'pid': 123, 'start_ticks': 99, 'boot_id': 'fixture'}, [], {}))
+                status, stale = request('/operations', {'operation': 'inventory.resolve', 'arguments': {'selector': 'alice', 'expected_target': original['target']}})
+                self.assertEqual((status, stale['error']['code']), (400, 'stale_target'))
+                actor = auth.authenticate(token)
+                self.assertEqual(auth.revoke_grant(actor.grant_id)['cancellation'], 'no_owned_active_work')
+                self.assertEqual(request('/operations', {'operation': 'inventory.list', 'arguments': {}})[0], 401)
+                self.assertEqual(request('/mcp', {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'})[0], 401)
+            finally:
+                server.shutdown(); server.server_close(); thread.join()
+
+    def test_refresh_replay_and_expiry_preserve_unrelated_principals(self):
+        from codex_wake.controller_auth import OAuthAuthority, AuthError
+        with tempfile.TemporaryDirectory() as directory:
+            clock = [100]
+            auth = OAuthAuthority(Path(directory) / 'auth.sqlite', issuer='https://wake.test', resource='https://wake.test/controller', now=lambda: clock[0])
+            def grant(subject, scopes):
+                client = auth.register({'redirect_uris': ['http://localhost/callback']})
+                verifier = 'x' * 43
+                challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+                code = auth.authorize(subject=subject, principal_kind='service', client_id=client['client_id'], redirect_uri='http://localhost/callback', resource=auth.resource, scopes=scopes, targets=[{'host': 'fixture'}], code_challenge=challenge)
+                return client, auth.token(dict(grant_type='authorization_code', client_id=client['client_id'], code=code, redirect_uri='http://localhost/callback', code_verifier=verifier, resource=auth.resource))
+            alice, original = grant('alice', ['observe'])
+            bob, separate = grant('bob', ['recovery'])
+            refresh = dict(grant_type='refresh_token', client_id=alice['client_id'], refresh_token=original['refresh_token'], resource=auth.resource)
+            rotated = auth.token(refresh)
+            with self.assertRaises(AuthError): auth.token(refresh)
+            with self.assertRaises(AuthError): auth.authenticate(rotated['access_token'])
+            self.assertEqual(auth.authenticate(separate['access_token']).subject, 'bob')
+            clock[0] = 701
+            with self.assertRaises(AuthError): auth.authenticate(separate['access_token'])
+            with self.assertRaises(ValueError): OAuthAuthority(auth.path, issuer='https://another.test', resource=auth.resource)
