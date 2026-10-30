@@ -202,6 +202,19 @@ class PublicBuildAdapterTests(unittest.TestCase):
                     'builds.launch', '--arguments', json.dumps(arguments)], capture_output=True, text=True, timeout=5)
                 self.assertEqual(cli.returncode, 0, cli.stderr)
                 self.assertEqual(json.loads(cli.stdout)['result'], first['result'])
+                from dataclasses import asdict
+                from codex_wake.mcp_server import CommandRunner
+                absent, denied = CommandRunner(wake_root=root).call('wake_builds_launch', arguments)
+                self.assertTrue(denied)
+                self.assertEqual(absent['error']['code'], 'configuration_unavailable')
+                local = asdict(authority.authenticate(token))
+                local['scopes'] = sorted(local['scopes'])
+                messaging = root / 'controller-messaging.json'
+                messaging.write_text(json.dumps({'version': 1, 'local_caller': local}))
+                messaging.chmod(0o600)
+                native_mcp, failed = CommandRunner(wake_root=root).call('wake_builds_launch', arguments)
+                self.assertFalse(failed, native_mcp)
+                self.assertEqual(native_mcp['result'], first['result'])
                 self.assertEqual((home / 'effects').read_text(), 'effect\n')
             finally:
                 server.shutdown(); server.server_close(); thread.join()
