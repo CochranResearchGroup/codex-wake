@@ -9,7 +9,7 @@ def execute(owner, operation, arguments):
 def register_parser(subparsers):
     parser = subparsers.add_parser('builds')
     commands = parser.add_subparsers(dest='build_command', required=True)
-    for verb in ('list', 'launch', 'stage', 'rollback'):
+    for verb in ('list', 'launch', 'stage', 'select', 'rollback'):
         item = commands.add_parser(verb)
         item.add_argument('--arguments', type=json.loads, default={})
     return parser

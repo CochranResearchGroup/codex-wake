@@ -19,8 +19,24 @@ def test_named_pinned_build_launch_preserves_identity(tmp_path):
             return {'account': {'id': 'fixture', 'home': str(home), 'target': {'provider': 'codex'}}}
     owner = ControllerBuilds(manifest, Accounts())
     listed = owner.execute('builds.list', {'account': 'fixture'})
-    target = listed['builds'][0]['target']
+    target = next(row['target'] for row in listed['builds'] if row['name'] == 'modded')
     result = owner.execute('builds.launch', {'account': 'fixture', 'channel': 'modded', 'expected_target': target, 'args': ['--version']})
+    from codex_wake.managed_inventory import InventoryError
+    from codex_profiles.build_channels import _home_ownership
+    for expected in ({}, dict(target, build_sha256='0' * 64)):
+        try:
+            owner.execute('builds.launch', {'account': 'fixture', 'channel': 'modded', 'expected_target': expected})
+        except InventoryError as error:
+            assert error.code == 'stale_target'
+        else:
+            raise AssertionError('stale build accepted')
+    with _home_ownership(home):
+        try:
+            owner.execute('builds.launch', {'account': 'fixture', 'channel': 'modded', 'expected_target': target})
+        except InventoryError as error:
+            assert error.code == 'build_held'
+        else:
+            raise AssertionError('same home concurrent launch accepted')
     assert result['exit_code'] == 0
     assert result['target'] == target
     assert (home / 'result').read_text() == 'modded'
@@ -35,3 +51,61 @@ def test_unregistered_recipe_is_unauthorized(tmp_path):
         assert error.code == 'unauthorized_target'
     else:
         raise AssertionError('untrusted recipe accepted')
+
+
+import unittest
+import tempfile
+
+class BuildTests(unittest.TestCase):
+    def test_launch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            test_named_pinned_build_launch_preserves_identity(__import__('pathlib').Path(directory))
+
+    def test_unauthorized(self):
+        with tempfile.TemporaryDirectory() as directory:
+            test_unregistered_recipe_is_unauthorized(__import__('pathlib').Path(directory))
+
+    def test_staging_is_repeatable_and_pinned(self):
+        import tarfile
+        from pathlib import Path
+        from codex_profiles import upgrades
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'source'
+            (source / 'package/bin').mkdir(parents=True)
+            binary = source / 'package/bin/codex'
+            binary.write_text('#!/bin/sh\nexit 0\n')
+            binary.chmod(0o700)
+            for name in ('bin/codex-code-mode-host', 'codex-resources/bwrap', 'codex-path/rg'):
+                extra = source / 'package' / name
+                extra.parent.mkdir(parents=True, exist_ok=True)
+                extra.write_bytes(binary.read_bytes())
+                extra.chmod(0o700)
+            (source / 'package/codex-package.json').write_text('{}')
+            archive = root / 'source.tar'
+            with tarfile.open(archive, 'w') as stream:
+                stream.add(source / 'package', arcname='package')
+            recipe = root / 'recipe.json'
+            recipe.write_text(json.dumps(dict(schema_version=1, id='fixture', channel='stock',
+                upstream_version='1', revision='fixture', package='package',
+                source=dict(official_url='https://github.com/openai/codex/releases/download/fixture/source.tar',
+                            archive_file=str(archive), sha256=hashlib.sha256(archive.read_bytes()).hexdigest()),
+                qualify=[['/bin/echo', '{"schema_version":1,"checks":{"official_cli":true}}']],
+                read_schemas=[1], write_schema=1)))
+            owner = ControllerBuilds(root / 'install/builds.json', None, recipes={'fixture': recipe})
+            first = owner.execute('builds.stage', {'recipe': 'fixture'})
+            self.assertEqual(first['status'], 'staged', first)
+            self.assertEqual(owner.execute('builds.stage', {'recipe': 'fixture'}), first)
+            home = root / 'home'
+            home.mkdir()
+            selected = upgrades.select(root / 'install', home, identifier='fixture')
+            self.assertEqual(selected['status'], 'selected')
+            payload = json.loads(recipe.read_text())
+            payload['id'] = 'successor'
+            payload['revision'] = 'second'
+            recipe.write_text(json.dumps(payload))
+            second = owner.execute('builds.stage', {'recipe': 'fixture'})
+            self.assertEqual(second['status'], 'staged')
+            upgrades.select(root / 'install', home, identifier='successor')
+            rolled = upgrades.select(root / 'install', home, channel='stock', rollback=True)
+            self.assertEqual(rolled['id'], 'fixture')
