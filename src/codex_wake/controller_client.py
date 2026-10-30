@@ -1,0 +1,104 @@
+"""Portable OAuth caller, deliberately independent of native execution owners.
+
+The Windows CLI can call an enrolled controller over API or OAuth MCP. Native
+Windows state/locking and native TUI health are not qualified by this client.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import stat
+import sys
+from urllib.error import HTTPError,URLError
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler,Request,build_opener
+
+OPERATIONS=frozenset(('tabs.list', 'tabs.show', 'tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input', 'inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list', 'builds.launch', 'builds.stage', 'builds.select', 'builds.rollback', 'hosts.list', 'hosts.resolve', 'hosts.route', 'history.search', 'history.read', 'history.resume', 'operations.send', 'operations.result', 'operations.wait', 'operations.stream', 'operations.cancel', 'operations.rebind', 'migration.preview', 'migration.apply', 'migration.rollback', 'flows.propose', 'flows.publish', 'flows.definition', 'flows.start', 'flows.inspect', 'flows.advance', 'flows.reconcile', 'flows.cancel', 'health.observe', 'notices.list', 'notices.publish', 'notices.reconcile', 'recovery.list', 'recovery.show', 'recovery.configure', 'recovery.enable', 'recovery.disable', 'recovery.check', 'recovery.tick', 'recovery.apply', 'recovery.reconcile', 'sessions.capabilities', 'sessions.create', 'sessions.prompt', 'sessions.wait', 'sessions.cancel', 'sessions.checkpoint', 'sessions.fork'))
+
+
+class ClientError(ValueError):
+    def __init__(self,code,message):super().__init__(message);self.code=code
+
+
+def private_token(path):
+    path=Path(path)
+    info=path.lstat()
+    if not stat.S_ISREG(info.st_mode) or path.is_symlink() or getattr(info,'st_file_attributes',0)&1024:
+        raise ClientError('token_file_not_private','OAuth token must be a private regular file')
+    if os.name=='nt':
+        from .controller_client_windows import check_private_file
+        check_private_file(path)
+    elif info.st_uid!=os.geteuid() or stat.S_IMODE(info.st_mode)&0o077:
+        raise ClientError('token_file_not_private','OAuth token file must be owned and private')
+    with path.open(encoding='utf-8') as stream:value=stream.read(16385)
+    value=value.strip()
+    if not value or len(value)>16384 or any(ord(c)<=32 or ord(c)==127 for c in value):
+        raise ClientError('invalid_token_file','bounded opaque OAuth token required')
+    return value
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self,*args,**kwargs):return None
+
+
+def invoke(endpoint,token_file,operation,arguments,*,transport='api'):
+    url=urlsplit(endpoint)
+    if (len(endpoint)>4096 or any(ord(c)<=32 or ord(c)==127 for c in endpoint) or url.username or url.password or
+        url.query or url.fragment or not url.netloc or (url.scheme!='https' and not(url.scheme=='http' and url.hostname in ('127.0.0.1','::1','localhost')))):
+        raise ClientError('invalid_endpoint','canonical HTTPS endpoint required except loopback fixtures')
+    if operation not in OPERATIONS or not isinstance(arguments,dict):
+        raise ClientError('unsupported_operation','registered operation and JSON object arguments required')
+    if transport not in ('api','mcp'):raise ClientError('unsupported_transport','API or OAuth MCP transport required')
+    token=private_token(token_file)
+    body=dict(operation=operation,arguments=arguments)
+    if transport=='mcp':body=dict(jsonrpc='2.0',id=1,method='tools/call',params=dict(name='wake_'+operation.replace('.','_'),arguments=arguments))
+    data=json.dumps(body).encode()
+    if len(data)>1048576:raise ClientError('request_limit','request exceeds bounded capacity')
+    request=Request(endpoint.rstrip('/')+('/operations' if transport=='api' else '/mcp'),data=data,
+                    headers={'Content-Type':'application/json','Authorization':'Bearer '+token})
+    failed=False
+    try:response=build_opener(NoRedirect).open(request,timeout=35)
+    except HTTPError as error:response=error;failed=True
+    try:
+        with response:raw=response.read(4194305)
+        if len(raw)>4194304:raise ClientError('response_limit','response exceeds bounded capacity')
+        value=json.loads(raw)
+    except (ValueError,UnicodeError):raise ClientError('invalid_response','controller response was not a bounded JSON envelope') from None
+    if not isinstance(value,dict):raise ClientError('invalid_response','controller operation envelope required')
+    if transport=='mcp' and not failed:
+        if value.get('error'):raise ClientError('remote_mcp_error','controller MCP operation failed')
+        result=value.get('result',{})
+        value=result.get('structuredContent')
+        if not isinstance(value,dict):raise ClientError('invalid_response','controller MCP envelope unavailable')
+        failed=result.get('isError',False)
+    if not isinstance(value,dict):raise ClientError('invalid_response','controller operation envelope required')
+    return value,failed or value.get('status')=='failed'
+
+
+def main(argv=None):
+    argv=list(sys.argv[1:] if argv is None else argv)
+    if argv not in ([],['-h'],['--help']) and argv[:2]!=['controller','remote']:
+        print(json.dumps(dict(schema_version=1,status='failed',error=dict(code='unsupported_native_windows_owner',
+            message='This portable client supports controller remote API/OAuth MCP calls. Native Windows Wake execution owners are not qualified.'))))
+        return 2
+    parser=argparse.ArgumentParser(prog='codex-wake',description='Portable controller caller; native Windows execution owners are not qualified.')
+    controller=parser.add_subparsers(dest='command',required=True).add_parser('controller')
+    remote=controller.add_subparsers(dest='verb',required=True).add_parser('remote')
+    remote.add_argument('--endpoint',required=True);remote.add_argument('--token-file',type=Path,required=True)
+    remote.add_argument('--transport',choices=('api','mcp'),default='api')
+    remote.add_argument('operation',choices=sorted(OPERATIONS));remote.add_argument('--arguments',type=json.loads,default={})
+    args=parser.parse_args(argv)
+    try:
+        value,failed=invoke(args.endpoint,args.token_file,args.operation,args.arguments,transport=args.transport)
+        print(json.dumps(value,sort_keys=True));return 2 if failed else 0
+    except (ClientError,OSError,URLError,ValueError):
+        error=sys.exception()
+        code=error.code if isinstance(error,ClientError) else 'controller_unavailable'
+        message=str(error) if isinstance(error,ClientError) else 'controller request or private token unavailable'
+        print(json.dumps(dict(schema_version=1,operation=args.operation,status='failed',error=dict(code=code,message=message)),sort_keys=True))
+        return 2
+
+
+if __name__=='__main__':raise SystemExit(main())
