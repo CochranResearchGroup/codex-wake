@@ -164,9 +164,14 @@ class ControllerFlows:
             counter=sample['seconds']
             if (not isinstance(sample['boot_id'],str) or not sample['boot_id'] or sample['boot_id']!=anchor['boot_id']
                 or type(counter) not in (int,float) or not math.isfinite(counter) or counter<anchor['latest']
-                or type(wall) not in (int,float) or not math.isfinite(wall) or wall<anchor['wall_latest']):
+                or type(wall) not in (int,float) or not math.isfinite(wall)):
                 raise ValueError('clock continuity lost')
-            anchor.update(latest=counter,wall_latest=wall,elapsed=max(anchor['elapsed'],counter-anchor['start'],wall-state['created_at']))
+            regressed=wall<anchor['wall_latest']
+            high_water=max(anchor['wall_latest'],wall)
+            anchor.update(latest=counter,wall_latest=high_water,wall_observed=wall,
+                wall_observation='regressed' if regressed else 'nondecreasing',
+                wall_regression_observations=anchor.get('wall_regression_observations',0)+int(regressed),
+                elapsed=max(anchor['elapsed'],counter-anchor['start'],high_water-state['created_at']))
             return state['created_at']+anchor['elapsed']
         except (KeyError,OSError,TypeError,ValueError):
             raise ConditionPending('flow_clock_uncertain') from None
