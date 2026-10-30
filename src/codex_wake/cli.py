@@ -118,6 +118,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_health(subparsers)
     from .notice_commands import register_parser as register_notices
     register_notices(subparsers)
+    from .recovery_commands import register_parser as register_recovery
+    register_recovery(subparsers)
     from .flow_session_commands import register_parser as register_flow_sessions
     register_flow_sessions(subparsers)
     from .flow_commands import register_parser as register_flows
@@ -2949,6 +2951,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         return command(args, args.wake_root)
     if args.command == "notices":
         from .notice_commands import command
+        return command(args, args.wake_root)
+    if args.command == "recovery":
+        from .recovery_commands import command
         return command(args, args.wake_root)
     if args.command == "flow-sessions":
         from .flow_session_commands import command

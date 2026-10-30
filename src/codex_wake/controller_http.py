@@ -96,6 +96,9 @@ TOOLS['wake_controller_health'] = ('health.observe', health_schema)
 from .notice_commands import tool_specs as notice_specs
 for name, spec in notice_specs().items():
     TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
+from .recovery_commands import tool_specs as recovery_specs
+for name, spec in recovery_specs().items():
+    TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
 
 
 def operation_failure(operation, error):
@@ -116,6 +119,8 @@ class ProtectedOperations:
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
+        **{'recovery.'+verb: ('observe' if verb in ('list','show','check') else 'recovery',None,None)
+            for verb in ('list','show','configure','enable','disable','check','tick','apply','reconcile')},
         **{'notices.'+verb: ('observe',None,None)
             for verb in ('list','publish','reconcile')},
         **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
@@ -160,7 +165,13 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('notices.'):
+        if operation.startswith('recovery.'):
+            from .controller_recovery import ControllerRecovery
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host recovery owner unavailable')
+            result = ControllerRecovery(self.operations.inventory.root).execute(actor,operation,arguments,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('notices.'):
             from .controller_notices import ControllerNotices
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host notice owner unavailable')
