@@ -33,18 +33,33 @@ def invoke(root,actor,function,arguments,bounds,tokens,receipt,*,authorize,reque
     receipt.update(authority='inherited',target=target,metering='estimate_opt_in',enforcement='estimate_only_no_native_stop',operation_id=request_id)
     prompt=rubric+'\nTyped input: '+json.dumps(arguments,sort_keys=True)+'\nReturn only JSON {"value": true} or {"value": false}. If evidence is insufficient return {"status":"unknown"}. You may request one host-allowed nested callee with JSON {"call":{"function":"name","version":1,"arguments":{}}}; no other execution directives are accepted.'
     request=dict(operation_id=request_id,idempotency_key=request_id,correlation_id=request_id,binding=binding,target=target)
-    submitted=owner.execute(actor,'sessions.prompt',dict(profile=function['profile'],expected_target=target,prompt=prompt,_request=request),authorize=authorize)
-    operation=submitted['result']['operation']
-    receipt['native_phase']=operation['phase']
-    receipt['native_reason']=operation.get('reason')
-    if operation['phase'] not in ('terminal','waiting') or not isinstance(operation.get('result'),dict):
-        raise InventoryError('semantic_effect_uncertain','native predicate turn submission uncertain; do not replay')
-    waited=owner.execute(actor,'sessions.wait',dict(operation_id=request_id,timeout=max(0,min(30,deadline-time.monotonic()))),authorize=authorize)
-    record=waited['result']['operation']
-    receipt['native_execution']=record.get('execution','unknown')
     usage=dict(tokens=tokens,kind='estimate',enforcement='estimate_only_no_native_stop')
-    if waited['result'].get('wait',{}).get('status')=='timeout':
+    def stop_timeout():
+        # Cleanup retains the original grant and exact native owner handle. The
+        # expired admission deadline stops new work, never blocks owned cleanup.
+        try:
+            cancelled=owner.execute(actor,'sessions.cancel',dict(operation_id=request_id),authorize=original_authorize)['result']['operation']
+            confirmed=cancelled.get('cancellation')=='confirmed' and cancelled.get('phase')=='terminal'
+            receipt.update(limit_cancellation='confirmed' if confirmed else 'uncertain',
+                native_execution=cancelled.get('execution','unknown'),native_phase=cancelled.get('phase'),
+                cancellation_request=cancelled.get('cancellation','uncertain'),hard_stop_claim=False)
+        except Exception as error:
+            receipt.update(limit_cancellation='uncertain',cancellation_error=getattr(error,'code','cleanup_uncertain'),hard_stop_claim=False)
         return dict(type='boolean',status='timeout',value=None,usage=usage,operation_id=request_id)
+    try:
+        submitted=owner.execute(actor,'sessions.prompt',dict(profile=function['profile'],expected_target=target,prompt=prompt,_request=request),authorize=authorize)
+        operation=submitted['result']['operation']
+        receipt['native_phase']=operation['phase']
+        receipt['native_reason']=operation.get('reason')
+        if operation['phase'] not in ('terminal','waiting') or not isinstance(operation.get('result'),dict):
+            raise InventoryError('semantic_effect_uncertain','native predicate turn submission uncertain; do not replay')
+        waited=owner.execute(actor,'sessions.wait',dict(operation_id=request_id,timeout=max(0,min(30,deadline-time.monotonic()))),authorize=authorize)
+        record=waited['result']['operation']
+        receipt['native_execution']=record.get('execution','unknown')
+    except TimeoutError:
+        return stop_timeout()
+    if waited['result'].get('wait',{}).get('status')=='timeout':
+        return stop_timeout()
     if record.get('execution')!='completed':
         return dict(type='boolean',status='error',value=None,usage=usage,operation_id=request_id)
     try:

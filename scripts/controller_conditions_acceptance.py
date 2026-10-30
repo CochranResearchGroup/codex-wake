@@ -24,6 +24,7 @@ def main():
     import argparse
     parser=argparse.ArgumentParser()
     parser.add_argument('--join-and-retry',action='store_true')
+    parser.add_argument('--limit-stop',action='store_true')
     options=parser.parse_args()
     import codex_wake
     from codex_wake.build_commands import owner_from_root
@@ -102,6 +103,29 @@ def main():
                     if turn['status']=='inProgress':turn['status']='completed'
         http=None;http_worker=None
         try:
+            if options.limit_stop:
+                from codex_wake.operation_commands import local_actor
+                actor=local_actor(root);auto[0]=False
+                threads['peer']=dict(id='peer',cwd=str(root),modelProvider='openai',turns=[])
+                peer_target=dict(target,conversation_id='peer')
+                peer_request=dict(operation_id='peer',idempotency_key='peer',correlation_id='peer',binding='peer',target=peer_target)
+                ControllerFlowSessions(root).execute(actor,'sessions.prompt',dict(profile='fixture',expected_target=peer_target,prompt='peer',_request=peer_request),authorize=lambda:actor)
+                limited=definition(1);limited['limits']['max_seconds']=1
+                cli('flows','publish',dict(definition=limited))
+                run=cli('flows','start',dict(flow_id='fixture',version=1,inputs={},intent='limit',binding='original-cli'))
+                stopped=cli('flows','advance',dict(run_id=run['run_id']))
+                assert stopped['limit_stop']['cancellation']=='confirmed',stopped
+                receipt=stopped['condition_trace'][-1]
+                assert receipt['limit_cancellation']=='confirmed',receipt
+                assert receipt['native_execution']=='cancelled',receipt
+                assert stopped['condition_usage']==dict(calls=2,tokens=16),stopped
+                assert threads['predicate-source']['turns'][-1]['status']=='interrupted'
+                assert threads['peer']['turns'][-1]['status']=='inProgress'
+                interrupts=len([effect for effect in effects if effect[0]=='interrupt'])
+                assert cli('flows','advance',dict(run_id=run['run_id']))==stopped
+                assert len([effect for effect in effects if effect[0]=='interrupt'])==interrupts
+                print(json.dumps(dict(status='passed',scope='focused limit-stop',original_authority_cleanup=True,usage_retained=True,peer_preserved=True,cancellation='confirmed',hard_stop_claim=False,package=codex_wake.__file__)))
+                return
             cli('flows','publish',dict(definition=definition(1)))
             run=cli('flows','start',dict(flow_id='fixture',version=1,inputs={},intent='one',binding='original-cli'))
             state=cli('flows','advance',dict(run_id=run['run_id']))
