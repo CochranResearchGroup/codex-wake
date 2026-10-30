@@ -132,7 +132,9 @@ class ControllerFlows:
         os.close(descriptor)
         private_path(self.path)
         with self.connect() as db:
-            db.executescript('''CREATE TABLE IF NOT EXISTS definitions (
+            db.executescript('''CREATE TABLE IF NOT EXISTS condition_definitions (
+                function_key TEXT PRIMARY KEY, digest TEXT, definition TEXT);
+                CREATE TABLE IF NOT EXISTS definitions (
                 flow_id TEXT, version INTEGER, digest TEXT, definition TEXT,
                 PRIMARY KEY(flow_id,version));
                 CREATE TABLE IF NOT EXISTS runs (
@@ -232,6 +234,16 @@ class ControllerFlows:
         def named(value):
             return isinstance(value,dict) and ('function' in value or any(named(v) for v in value.values())) or isinstance(value,list) and any(named(v) for v in value)
         registry=Conditions(self.root) if any(named(node.get('condition')) for node in definition['nodes']) else Conditions(self.root,registry={})
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            for function_key,function in registry.registry.items():
+                if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}@[1-9][0-9]*',function_key):
+                    flow_error('invalid_condition','function registry keys require bounded name@version')
+                text=encoded(function);digest=hashlib.sha256(text.encode()).hexdigest()
+                previous=db.execute('SELECT digest FROM condition_definitions WHERE function_key=?',(function_key,)).fetchone()
+                if previous and previous[0]!=digest:
+                    flow_error('immutable_condition_version','host function version changed; register a new version')
+                db.execute('INSERT OR IGNORE INTO condition_definitions VALUES(?,?,?)',(function_key,digest,text))
         fingerprint = hashlib.sha256(encoded(dict(definition=compiled.digest, inputs=inputs, binding=binding)).encode()).hexdigest()
         key = hashlib.sha256(encoded(dict(owner=identity(actor), intent=intent)).encode()).hexdigest()
         state = dict(schema_version=1, run_id='flowrun_' + uuid4().hex, flow_id=flow_id, version=version,
