@@ -3,7 +3,7 @@
   "integration_branch": "feat/controller-393-resumed",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
   "tip_sha": "d2181d1",
-  "state": "review_pending",
+  "state": "reviewing",
   "tickets": {
     "394": {
       "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
@@ -582,7 +582,7 @@
     "native_children_count": 20,
     "frontier": []
   },
-  "review_rounds": 0,
+  "review_rounds": 1,
   "remediation_rounds": 0,
   "review_fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
   "whole_python_ci": {
@@ -590,5 +590,17 @@
     "result": "1861 tests passed with1skip in578.147s",
     "private_log": "/tmp/wake-controller393-ci-39s10ny8/unittest.log",
     "ruff": "F821,F822,F823 passed after integrated source packets"
+  },
+  "review": {
+    "frozen_tip": "415607bd6eda7a0bbff0161eec4917988ed02c91",
+    "fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
+    "bots_fixed_point": "864a93967",
+    "bots_tip": "0614856ec340da6d2d84f1b5cb5104fd26528403",
+    "axes": {
+      "standards": "/root/review393_standards_once",
+      "spec": "/root/review393_spec_once"
+    },
+    "state": "running",
+    "remediation": "pending bounded TDD pass"
   }
 }
