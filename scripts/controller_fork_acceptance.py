@@ -78,7 +78,7 @@ def main():
         sender='11111111-1111-4111-8111-111111111111'
         path=root/'controller-messaging.json';path.write_text(json.dumps(dict(version=1,local_caller=caller,flow_callers={sender:dict(caller,grant_id='native-fixture')})));path.chmod(0o600)
         def cli(group,verb,args):
-            value=subprocess.run([sys.executable,'-m','codex_wake.cli','--wake-root',str(root),group,verb,'--arguments',json.dumps(args)],text=True,capture_output=True)
+            value=subprocess.run([str(Path(sys.executable).parent/'codex-wake'),'--wake-root',str(root),group,verb,'--arguments',json.dumps(args)],text=True,capture_output=True)
             assert value.returncode==0,(value.stdout,value.stderr)
             return json.loads(value.stdout)['result']
         def definition(version,mode,pinned,items):
@@ -119,7 +119,7 @@ def main():
                 return value['result']['structuredContent']['result'] if mcp else value['result']
             api('publish',dict(definition=definition(2,'fork',target,['three','four'])),True)
             path=root/'token';path.write_text(token);path.chmod(0o600)
-            remote=subprocess.run([sys.executable,'-m','codex_wake.cli','controller','remote','--endpoint','http://127.0.0.1:'+str(http.server_port),
+            remote=subprocess.run([str(Path(sys.executable).parent/'codex-wake'),'controller','remote','--endpoint','http://127.0.0.1:'+str(http.server_port),
                 '--token-file',str(path),'flows.start','--arguments',json.dumps(dict(flow_id='fixture',version=2,inputs={'members':['three','four']},intent='sequential',binding='original-oauth'))],text=True,capture_output=True)
             assert remote.returncode==0,(remote.stdout,remote.stderr)
             run=json.loads(remote.stdout)['result'];before=len(effects)
