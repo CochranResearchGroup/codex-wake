@@ -128,7 +128,7 @@ trust_level = "trusted"
         verifier='n'*43;challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
         def token_for(targets):
             code=run('controller','authorize-client','--client-id='+client['client_id'],'--redirect-uri',client['redirect_uris'][0],
-                '--subject','fixture','--principal-kind','service','--scope','observe','--scope','control','--targets',json.dumps(targets),'--code-challenge',challenge)['code']
+                '--subject','fixture','--principal-kind','service','--scope','observe','--scope','control','--scope','recovery','--targets',json.dumps(targets),'--code-challenge',challenge)['code']
             status,value=http('/token',dict(grant_type='authorization_code',client_id=client['client_id'],redirect_uri=client['redirect_uris'][0],code=code,code_verifier=verifier,resource=resource),form=True)
             assert status==200,value
             return value['access_token']
@@ -136,7 +136,7 @@ trust_level = "trusted"
         from codex_wake.controller_auth import OAuthAuthority
         oauth=OAuthAuthority(wake/'controller-auth'/'authority.sqlite',issuer=base,resource=resource)
         actor=oauth.authenticate(token)
-        caller=Actor('fixture','service','host-local','host-local',base,resource,frozenset({'observe','control'}),[target],time.time()+600)
+        caller=Actor('fixture','service','host-local','host-local',base,resource,frozenset({'observe','control','recovery'}),[target],time.time()+600)
         policy=wake/'controller-messaging.json';policy.write_text(json.dumps(dict(version=1,host=target['host'],environment=target['environment'],bindings={},local_caller=caller.__dict__|{'scopes':sorted(caller.scopes)})));policy.chmod(0o600)
         runtime=ControllerRuntime(wake)
         def args_for(name,principal):
