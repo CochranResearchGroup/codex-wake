@@ -214,6 +214,8 @@ def add_grok_parser(subparsers):
     commands=group.add_subparsers(dest='grok_command',required=True)
     from .grok_commands import register_verbs
     register_verbs(commands)
+    from .grok_stdio_host import register_host
+    register_host(commands)
     bind=commands.add_parser('bind',help='operator-only approval of an exact already-open minimal TUI')
     for key in ('socket','pane','session-id','executable'):
         bind.add_argument('--'+key,required=True)
@@ -242,6 +244,9 @@ def add_grok_parser(subparsers):
 
 
 def command(args,root):
+    if args.grok_command == 'stdio-host':
+        from .grok_stdio_host import command as host_command
+        return host_command(args,root)
     if args.grok_command in ('capabilities','create','load','prompt','wait','cancel','health','checkpoint','fork'):
         from .grok_commands import command as structured_command
         return structured_command(args,root)
