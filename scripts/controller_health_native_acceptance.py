@@ -40,7 +40,10 @@ def main():
     parser.add_argument('--expect-unsupported',action='store_true')
     parser.add_argument('--core-only',action='store_true',help='first qualify only actual UI ack/mainloop-only stop/fresh post-stop ack')
     parser.add_argument('--wake-cli',type=Path,help='private installed candidate CLI; enables all public adapters')
+    parser.add_argument('--bots-app',type=Path,help='explicit immutable Bots candidate for actual consumer proof')
+    parser.add_argument('--bots-node',type=Path,help='explicit Node executable for the owned consumer')
     args=parser.parse_args()
+    if args.bots_app and (not args.wake_cli or not args.bots_node):parser.error('Bots proof requires --wake-cli and --bots-node')
     import pyte
     from codex_wake.native_protocol import native_request,NativeCapabilityUnavailable
     from codex_wake.controller_health import ControllerHealth
@@ -76,6 +79,7 @@ trust_level = "trusted"
     env.update(HOME=str(home),CODEX_HOME=str(home),XDG_CONFIG_HOME=str(root/'config'),XDG_DATA_HOME=str(root/'data'),XDG_STATE_HOME=str(root/'state'),XDG_CACHE_HOME=str(root/'cache'),TERM='xterm-256color',NO_PROXY='127.0.0.1,localhost',HTTPS_PROXY=trap_url,HTTP_PROXY=trap_url,ALL_PROXY=trap_url)
     binary=args.codex.resolve();endpoint='unix://'+str(root/'native.sock')
     daemon_log=(root/'daemon.log').open('wb');daemon=subprocess.Popen([str(binary),'app-server','--listen',endpoint],cwd=cwd,env=env,stdout=daemon_log,stderr=subprocess.STDOUT,start_new_session=True)
+    bots_consumer=None
     ui=None;master=None;stopped_tid=None;queued_id=None;queue_nonce=str(uuid4());thread=None;raw=None;work_done=root/'work-done'
     receipt={'schema_version':1,'ticket':390,'native_executable':str(binary),'native_sha256':hashlib.sha256(binary.read_bytes()).hexdigest(),'fixture_only':True}
     def rpc(method,body,timeout=3):
@@ -188,6 +192,10 @@ trust_level = "trusted"
         def observe(timeout=2):return service.execute('health.observe',{'expected_target':target,'timeout':timeout})['observation']
         if not args.core_only:require(len(before_queue['data'])==1,'synthetic native queue fixture unavailable')
         from codex_wake.process import process_identity
+        if args.bots_app:
+            from controller_bots_health_acceptance import BotsHealthConsumer
+            bots_consumer=BotsHealthConsumer(args.wake_cli.resolve(),target,root,env,args.bots_app.resolve(),node=args.bots_node.resolve())
+            bots_consumer.observe('responsive')
         receipt['proc_identity_before']=process_identity(ui.pid)
         try:receipt['proc_executable_before']=str(Path(f'/proc/{ui.pid}/exe').readlink())
         except OSError as error:receipt['proc_executable_error']=str(error)
@@ -217,6 +225,7 @@ trust_level = "trusted"
         require(states.get(tid) in ('t','T') and len(states)>1 and all(state not in ('t','T') for task,state in states.items() if task!=tid),'ptrace stopped more than the exact UI loop')
         receipt['stopped_ui_task_states']=states
         require(rpc('server/diagnostics',{})['process']['id']==daemon.pid,'background daemon RPC not healthy during exact UI-loop stop')
+        if bots_consumer:bots_consumer.observe('unknown')
         negatives=[observe(.25) for _ in range(1 if args.core_only else 9)]
         require(all(not v['responsive'] for v in negatives),'stopped UI loop falsely acknowledged')
         receipt['stopped_loop_background_rpc']=True;receipt['stalled_probe_statuses']=[v['status'] for v in negatives]
@@ -228,6 +237,8 @@ trust_level = "trusted"
             receipt['stalled_native_queue_bounded']=True
         ptrace(17);stopped_tid=None;drain(.4)
         final=observe(3);require(final['responsive'] and final['challenge']!=first['challenge'] and final['loop_tid']==tid,'fresh post-resume loop challenge failed')
+        if bots_consumer:
+            bots_consumer.observe('responsive');receipt['bots_consumer']=bots_consumer.proof
         if args.core_only:
             require(requests==startup_requests,'health caused a provider/proxy query')
             import codex_wake
@@ -260,6 +271,7 @@ trust_level = "trusted"
         receipt.update(result='passed' ,draft_cursor_preserved=True,history_preserved=True,queue_preserved=True,no_model_turn=True,fixture_shell_task_only=True,expired_reply_not_reused=True,fresh_ack=True,duplicate_wrong_target_denied=True,target=target)
         return receipt
     finally:
+        if bots_consumer:bots_consumer.close()
         if stopped_tid is not None:
             libc.ptrace(17,stopped_tid,None,None)
         # Remove only our queued sentinel before ending held work; never let it auto-start.
