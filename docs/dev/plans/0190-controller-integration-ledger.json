@@ -306,7 +306,7 @@
         "controller_runtime.py trusted notice access"
       ],
       "base_sha": "393c87b",
-      "result_sha": "pending notice qualification commit",
+      "result_sha": "607f1f7",
       "validation": [
         {
           "evidence": "docs/dev/evidence/plan0190/notices403-installed.json",
@@ -316,15 +316,19 @@
     },
     "404": {
       "title": "Apply and deactivate bounded recovery policies visibly",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         402,
         403
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root/recovery404",
+      "owned_paths": [
+        "controller_recovery.py",
+        "recovery_commands.py",
+        "recovery tests/acceptance"
+      ],
+      "base_sha": "607f1f7",
       "result_sha": null,
       "validation": []
     },
@@ -478,8 +482,8 @@
     },
     "411": {
       "title": "Qualify durable flows across handoff, limits and caller recovery",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         408,
         409,
@@ -492,8 +496,13 @@
         "condition/session fixes ifneeded; Runtime/shared changes by proposal only"
       ],
       "base_sha": "393c87b",
-      "result_sha": null,
-      "validation": []
+      "result_sha": "814b53a",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/flows411-installed.json",
+          "result": "123installed controller checks,12focused,7aggregate programs/all5SIGKILL recovery; primary12conditions reproduced and7modulehashes matched"
+        }
+      ]
     },
     "412": {
       "title": "Control Grok through an honest structured-runtime adapter",
