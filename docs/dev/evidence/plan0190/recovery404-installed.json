@@ -1,6 +1,12 @@
 {
   "authorized_observation_continues_after_off": true,
   "broad_denied": true,
+  "cleanup": {
+    "observed_at": 1793378831.3305984,
+    "observer_excluded": true,
+    "owned_process_count": 0,
+    "owned_processes": []
+  },
   "command": "env -u PYTHONPATH recovery404-installed/bin/python scripts/controller_recovery_acceptance.py --bin-dir recovery404-installed/bin --artifacts recovery404-acceptance-scheduled-1",
   "environment": "Linux GNU/WSL; Python3.12; MCP2.2; pip-installed isolated wheel. No hosted GitHub CI; operator cost policy. Unix protocol fixture is not native TUI or cross-host acceptance.",
   "exact_thread_reload_count": 5,
@@ -84,5 +90,6 @@
   "revoked_denied": true,
   "scheduled_without_public_tick": true,
   "source_commit": "32020c0",
-  "status": "passed"
+  "status": "passed",
+  "wheel_sha256": "79e261ff3315bcbd6d5cf1eacffe43afad27aef6c48a7976d8fb0f82db96f03a"
 }
