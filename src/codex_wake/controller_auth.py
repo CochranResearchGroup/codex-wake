@@ -171,6 +171,34 @@ class OAuthAuthority:
         if not row or row[6] <= self.now(): raise AuthError()
         return Actor(*row[:4], self.issuer, self.resource, frozenset(json.loads(row[4])), json.loads(row[5]), row[6])
 
+    def revalidate_original(self, principal, authorization):
+        """Host-only scheduled-policy continuation, without issuing credentials.
+
+        The private policy owns this immutable snapshot. Rotation does not change
+        its identity or original deadline; revocation/current grant changes hold.
+        This method is not an HTTP operation or a delegated-token exchange.
+        """
+        if not isinstance(principal,dict) or set(principal)!={'issuer','resource','subject','client_id','grant_id'}:
+            raise AuthError()
+        if not isinstance(authorization,dict) or set(authorization)!={'scopes','targets','expires_at','principal_kind'}:
+            raise AuthError()
+        if principal['issuer']!=self.issuer or principal['resource']!=self.resource:
+            raise AuthError()
+        expires=authorization['expires_at']
+        if type(expires) not in (int,float) or not self.now()<expires<float('inf'):
+            raise AuthError()
+        with self.connect() as db:
+            row=db.execute('SELECT subject,kind,client,scopes,targets,revoked FROM grants WHERE id=?',
+                (principal['grant_id'],)).fetchone()
+            issued=db.execute("SELECT 1 FROM tokens WHERE grant_id=? AND kind='access' AND expires=? LIMIT 1",
+                (principal['grant_id'],expires)).fetchone()
+        if not row or not issued or row[5] or (row[0],row[1],row[2])!=(principal['subject'],authorization['principal_kind'],principal['client_id']):
+            raise AuthError()
+        if json.loads(row[3])!=authorization['scopes'] or json.loads(row[4])!=authorization['targets']:
+            raise AuthError()
+        return Actor(principal['subject'],authorization['principal_kind'],principal['client_id'],principal['grant_id'],
+            self.issuer,self.resource,frozenset(authorization['scopes']),authorization['targets'],expires)
+
     def recover_revocations(self, *, limit=4, grant_id=None):
         if self.on_revoke is None:
             return
