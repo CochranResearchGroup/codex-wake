@@ -190,3 +190,79 @@ shared directory; candidate planning now reuses the complete absorbed Settings
 value with only state_root replaced. Custom prefixes/shared paths and policy
 remain intact. Absolute/escaping shared paths and noncanonical account alias
 bindings remain explicit qualification holds rather than inferred ownership.
+
+## Final installed qualification
+
+Product source `0d8893fbd19fcdaccd9eac36b6a4a51debc207d3`, shared registration
+`2dbc917924cfd239945eb34dc4b9f096eef2365a`, accepted on the isolated
+`feat/controller-migration398-wiring` worktree. Source dependency/schema commits
+supplied by the coordinator are separate from worker implementation commits.
+No shared registration edits occurred after its handoff to Flow406/402.
+
+The final actual wheel is
+`/tmp/codex-wake-migration398-final-wheel/codex_wake-0.22.0.dev2-py3-none-any.whl`,
+SHA256 `9f28c1f932d8e1ec9d625dfbe1e7ac8fe7b2b14b4b91fbf484933cd080ad4626`.
+It was built with `uv build --wheel --out-dir /tmp/codex-wake-migration398-final-wheel`
+and installed, with declared MCP dependencies already provisioned in a fresh
+owned venv, using:
+
+```text
+uv pip install --reinstall-package codex-wake --python /tmp/codex-wake-migration398-installed/bin/python /tmp/codex-wake-migration398-final-wheel/codex_wake-0.22.0.dev2-py3-none-any.whl
+/tmp/codex-wake-migration398-installed/bin/python scripts/controller_migration_acceptance.py --bin-dir /tmp/codex-wake-migration398-installed/bin
+```
+
+The installed script passes. It asserts site-packages product identity; seventeen
+installed product modules were byte-compared to the exact source. Only fixture
+code is imported from the source tree. Child processes use a private synthetic
+HOME and a minimal environment without inherited provider credentials/profile
+selection. No actual Codex/provider process, service restart, governor or
+allocation is created.
+
+Actual CLI/default native MCP preview reports real host writer coverage (UNKNOWN
+here) and production not_authorized; a controlled real child writable FD is
+positively detected. Independent census samples are not falsely required to
+have identical PID/freshness observations. Positive effect qualification uses
+an explicit trusted controlled-fixture writer witness injected only at the host
+seam; it does not override or qualify unknown production writers.
+
+Actual API, OAuth MCP and remote CLI perform three apply/rollback cycles with
+the SAME stable administrative grant, then native MCP performs an additional
+controlled cycle. Replay returns original durable operation IDs. Each phase
+uses normal packaged accounts list, configuration explain, owning history read,
+legacy codex-profiles inspect and unified Wake profiles inspect, including no-
+argument current selection and a non-default shared-directory setting. Cached
+HTTP account owners update to the candidate, and old exact account target grants
+are denied; a fresh explicit current-target account grant succeeds. The original
+shared store, unassigned shared history, credential inodes and opaque accounting/
+authority bytes remain unchanged. Rollback over post-cutover work is refused and
+retains that work until the enclosing disposable test scope is cleaned.
+
+Final focused migration tests: 14 passed in 14.414s. The existing controller
+selection passed 73 tests in 30.999s at the shared-registration checkpoint; later
+product changes affect migration planning/selection only and received focused
+and installed requalification. Ruff 0.14.2 and whitespace checks pass. This is not
+the full repository suite, a live native account experiment, a provider test or
+Windows acceptance. Live keyring/enterprise auth, real writer attribution and
+production activation remain unexecuted under issue380; no source qualification
+is presented as that acceptance.
+
+Preserved first installed failures are `/tmp/migration398-installed-first.log`
+and `/tmp/migration398-installed-diagnostic.log`. The fixture left its SQLite
+creation connection open; closing it explicitly removed that fixture writer.
+The parity assertion was also corrected to treat independently sampled real
+censuses as fresh observations while checking stable identity/plan semantics.
+Controlled API/MCP/remote CLI observations have exact parity. Subsequent source
+selection/layout red/green receipts are retained above. These were repaired
+fixture/implementation failures, not erased passing retries or hidden exclusions.
+
+Curated receipt: `docs/dev/evidence/plan0190/migration398-installed.json`.
+Private raw stdout/stderr: `/tmp/migration398-installed-final-preservation.json`
+and `/tmp/migration398-installed-final-preservation.stderr`; intermediate wheel
+build/install logs remain under `/tmp/migration398-*`. Native loop health,
+provider identity and live activation are never inferred from these receipts.
+Manual resource snapshot: approximately 40.4 GiB available memory and 263 GiB
+free disk; no other lane caches/worktrees were removed and no allowance renewed.
+
+Memory disposition: `not_durable`; this is a delegated acceptance packet pending
+primary integration. The coordinator owns the single integrated durable project
+closeout and tracker closure. No issue or integration ledger was changed here.
