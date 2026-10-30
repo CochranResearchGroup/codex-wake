@@ -63,3 +63,31 @@ class ConditionRecoveryTests(unittest.TestCase):
             self.assertEqual([(op,args['operation_id']) for op,args in observations],[('sessions.wait',submissions[-1])])
             self.assertEqual(len(submissions),2)
             self.assertEqual(owner().reconcile(actor,started['run_id']),done)
+
+    def test_recovery_after_original_deadline_requests_owned_cancellation_without_renewal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);clock=[100]
+            registry=root/'controller-conditions.json'
+            registry.write_text(json.dumps(dict(version=1,functions={'one@1':dict(kind='semantic',inputs={},effects='action',estimated_tokens=4)})));registry.chmod(0o600)
+            actor=Actor('author','service','client','grant','local://test','wake:controller',frozenset({'observe','control'}),
+                        [dict(host='host',environment='test',flow_id='fixture')],10000)
+            cancellations=[]
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']();self.assertEqual(operation,'sessions.cancel');cancellations.append(args['operation_id'])
+                return dict(result=dict(operation=dict(phase='terminal',execution='cancelled',cancellation='confirmed')))
+            def owner():return ControllerFlows(root,host='host',environment='test',invoke=invoke,authorize=lambda:actor,now=lambda:clock[0])
+            definition=dict(id='fixture',version=1,entry='choose',limits=dict(max_seconds=1,max_tokens=4,metering='estimate_opt_in'),nodes=[
+                dict(id='choose',type='branch',condition=dict(function='one',version=1,arguments={}),then='yes',**{'else':'no'}),
+                dict(id='yes',type='end',value=True),dict(id='no',type='end',value=False)])
+            first=owner();first.publish(actor,definition);run=first.start(actor,'fixture',1,inputs={},intent='deadline',binding='caller')
+            with patch('codex_wake.controller_condition_native.invoke',side_effect=SystemExit):
+                with self.assertRaises(SystemExit):first.advance(actor,run['run_id'])
+            original=owner().inspect(actor,run['run_id']);identifier=original['condition_trace'][0]['native_operation_id']
+            clock[0]=102
+            with patch('codex_wake.controller_condition_native.ControllerFlowSessions.execute',return_value=dict(result=dict(operation=dict(phase='waiting',execution='queued')))):
+                stopped=owner().reconcile(actor,run['run_id'])
+            self.assertEqual(stopped['limit_stop']['cancellation'],'confirmed')
+            self.assertEqual(cancellations,[identifier])
+            self.assertEqual(stopped['condition_usage'],dict(calls=1,tokens=4))
+            self.assertEqual(stopped['created_at'],100)
+            self.assertEqual(owner().advance(actor,run['run_id']),stopped)
