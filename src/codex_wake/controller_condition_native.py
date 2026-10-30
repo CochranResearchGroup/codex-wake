@@ -60,6 +60,10 @@ def invoke(root,actor,function,arguments,bounds,tokens,receipt,*,authorize,reque
         return stop_timeout()
     if waited['result'].get('wait',{}).get('status')=='timeout':
         return stop_timeout()
+    return _outcome(record,usage,request_id)
+
+
+def _outcome(record,usage,request_id):
     if record.get('execution')!='completed':
         return dict(type='boolean',status='error',value=None,usage=usage,operation_id=request_id)
     try:
@@ -74,3 +78,24 @@ def invoke(root,actor,function,arguments,bounds,tokens,receipt,*,authorize,reque
     if value=={'status':'unknown'}:
         return dict(type='boolean',status='unknown',value=None,usage=usage,operation_id=request_id)
     return dict(type='boolean',status='error',value=None,reason='semantic_boolean_type',usage=usage,operation_id=request_id)
+
+
+def recover(root,actor,receipt,*,authorize):
+    """Observe the original durable owner only; no prompt or resource admission."""
+    from .controller_conditions import ConditionPending
+    identifier=receipt.get('native_operation_id')
+    if not isinstance(identifier,str) or not identifier:
+        raise ConditionPending('original semantic operation handle unavailable')
+    try:
+        waited=ControllerFlowSessions(root).execute(actor,'sessions.wait',
+            dict(operation_id=identifier,timeout=0),authorize=authorize)
+    except InventoryError as error:
+        if error.code=='operation_not_found':
+            raise ConditionPending('original semantic operation unavailable') from None
+        raise
+    record=waited['result']['operation']
+    receipt.update(native_phase=record.get('phase'),native_execution=record.get('execution','unknown'))
+    if record.get('phase')!='terminal' or record.get('execution') not in ('completed','failed','cancelled'):
+        raise ConditionPending('original semantic operation pending or uncertain')
+    usage=dict(tokens=receipt['reserved_tokens'],kind='estimate',enforcement='estimate_only_no_native_stop')
+    return _outcome(record,usage,identifier)
