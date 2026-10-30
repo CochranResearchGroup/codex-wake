@@ -66,11 +66,36 @@ class ControllerTabsTests(unittest.TestCase):
                 capture = owner.execute('tabs.capture', dict(base,pane=row['window']['panes'][0]['pane_id'], lines=5))
                 self.assertTrue(capture['fallback'])
                 plan = owner.execute('tabs.preview', base)['plan']
-                result = owner.execute('tabs.apply', dict(base,plan_id=plan['plan_id']))
+                from codex_wake.controller_auth import OAuthAuthority
+                from codex_wake.controller_runtime import ControllerRuntime
+                from codex_wake.controller_tabs import AuthorizedTabs
+                import hashlib,base64
+                authority = OAuthAuthority(Path(directory)/'oauth.sqlite',issuer='https://issuer',resource='https://resource')
+                client = authority.register(dict(redirect_uris=['http://127.0.0.1/callback']))
+                verifier = 'v'*43
+                challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+                stable = {k:v for k,v in row['target'].items() if k != 'generation'}
+                code = authority.authorize(subject='operator',principal_kind='owner',client_id=client['client_id'],
+                    redirect_uri='http://127.0.0.1/callback',resource=authority.resource,scopes=['control'],targets=[stable],code_challenge=challenge)
+                token = authority.token(dict(grant_type='authorization_code',code=code,code_verifier=verifier,client_id=client['client_id'],
+                    redirect_uri='http://127.0.0.1/callback',resource=authority.resource))['access_token']
+                facade = AuthorizedTabs(authority,owner,ControllerRuntime(directory))
+                def mutate(operation,payload,key):
+                    request = dict(operation_id=key,idempotency_key=key,correlation_id=key,binding='fixture-cli',target=payload['expected_target'])
+                    return facade.execute(token,operation,dict(payload,_request=request))['result']['operation']
+                applied = mutate('tabs.apply',dict(base,plan_id=plan['plan_id']),'apply')
+                self.assertEqual(applied['phase'],'terminal')
+                result = applied['result']
                 self.assertEqual(result['receipt']['status'], 'applied')
                 self.assertTrue(result['receipt']['swaps'])
                 current = owner.execute('tabs.list', {})['resources'][0]['target']
-                undone = owner.execute('tabs.undo', dict(workspace='fixture',expected_target=current,receipt_id=result['receipt']['receipt_id']))
+                self.assertNotEqual(current,row['target'])
+                stale = mutate('tabs.undo',dict(base,receipt_id=result['receipt']['receipt_id']),'stale')
+                self.assertEqual(stale['reason'],'stale_target')
+                self.assertEqual(owner.execute('tabs.list',{})['resources'][0]['target'],current)
+                undone_operation = mutate('tabs.undo',dict(workspace='fixture',expected_target=current,receipt_id=result['receipt']['receipt_id']),'undo')
+                self.assertEqual(undone_operation['phase'],'terminal')
+                undone = undone_operation['result']
                 self.assertEqual(undone['receipt']['status'], 'undone')
             finally:
                 subprocess.run(['tmux','-S',socket,'kill-server'], check=False)
