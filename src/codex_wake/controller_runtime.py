@@ -68,6 +68,10 @@ class ControllerRuntime:
                 raise AuthError()
         return actor
 
+    def check_authority(self, actor, target, capability, *, authorize=None):
+        """Authorize composed host workflows without admitting a new effect."""
+        return self._authorize(actor, target, capability, authorize)
+
     def _save(self, record, *, update_owner=False):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -124,7 +128,7 @@ class ControllerRuntime:
         target = meta['target']
         if 'expected_target' in payload and payload['expected_target'] != target:
             raise InventoryError('stale_target', 'request target differs from pinned owner target')
-        capability = 'admin' if operation in ('builds.stage', 'builds.select', 'builds.rollback') else 'control'
+        capability = 'admin' if operation in ('builds.stage', 'builds.select', 'builds.rollback', 'migration.apply', 'migration.rollback') else 'control'
         self._authorize(actor, target, capability, authorize)
         intent = dict(operation=operation, payload=payload, correlation_id=meta['correlation_id'], binding=meta['binding'], target=target)
         raw = encoded(intent)
