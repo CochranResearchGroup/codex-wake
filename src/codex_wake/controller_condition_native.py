@@ -17,28 +17,39 @@ def invoke(root,actor,function,arguments,bounds,tokens,receipt,*,authorize,reque
         raise InventoryError('invalid_argument','semantic function requires a pinned existing private conversation')
     if function.get('effects','observe')!='action':
         raise InventoryError('unsupported_observation_tool_policy','native sandbox alone cannot deny external MCP/app tools; observation-only semantic dispatch is unqualified')
+    if function.get('tools')!='inherited':
+        raise InventoryError('unsupported_condition_tools','semantic action requires explicit inherited native tools; narrower per-turn allowlists are unqualified')
+    receipt['tools']='inherited'
     profile=owner._context(actor,function['profile'],target,authorize,'control')
     rubric=function.get('prompt')
     if not isinstance(rubric,str) or not 0<len(rubric.encode())<=16384:
         raise InventoryError('configuration_unavailable','bounded host-authored semantic predicate required')
     receipt.update(authority='inherited',target=target,metering='estimate_opt_in',enforcement='estimate_only_no_native_stop',operation_id=request_id)
-    prompt=rubric+'\nTyped input: '+json.dumps(arguments,sort_keys=True)+'\nReturn only JSON {"value": true} or {"value": false}. If evidence is insufficient return {"status":"unknown"}.'
+    prompt=rubric+'\nTyped input: '+json.dumps(arguments,sort_keys=True)+'\nReturn only JSON {"value": true} or {"value": false}. If evidence is insufficient return {"status":"unknown"}. You may request one host-allowed nested callee with JSON {"call":{"function":"name","version":1,"arguments":{}}}; no other execution directives are accepted.'
     request=dict(operation_id=request_id,idempotency_key=request_id,correlation_id=request_id,binding=binding,target=target)
     submitted=owner.execute(actor,'sessions.prompt',dict(profile=function['profile'],expected_target=target,prompt=prompt,_request=request),authorize=authorize)
     operation=submitted['result']['operation']
-    if operation['phase']!='terminal' or not isinstance(operation.get('result'),dict):
+    receipt['native_phase']=operation['phase']
+    receipt['native_reason']=operation.get('reason')
+    if operation['phase'] not in ('terminal','waiting') or not isinstance(operation.get('result'),dict):
         raise InventoryError('semantic_effect_uncertain','native predicate turn submission uncertain; do not replay')
     waited=owner.execute(actor,'sessions.wait',dict(operation_id=request_id,timeout=min(30,bounds['max_seconds'])),authorize=authorize)
     record=waited['result']['operation']
+    receipt['native_execution']=record.get('execution','unknown')
     usage=dict(tokens=tokens,kind='estimate',enforcement='estimate_only_no_native_stop')
     if waited['result'].get('wait',{}).get('status')=='timeout':
         return dict(type='boolean',status='timeout',value=None,usage=usage,operation_id=request_id)
     if record.get('execution')!='completed':
         return dict(type='boolean',status='error',value=None,usage=usage,operation_id=request_id)
-    try:value=json.loads(record['answer']['text'])
+    try:
+        text=record['answer']['text']
+        if len(text.encode())>32768:raise ValueError()
+        value=json.loads(text)
     except (ValueError,KeyError,TypeError):value=None
     if isinstance(value,dict) and set(value)=={'value'} and type(value['value']) is bool:
         return dict(type='boolean',status='known',value=value['value'],usage=usage,operation_id=request_id)
+    if isinstance(value,dict) and set(value)=={'call'}:
+        return dict(type='boolean',status='delegate',value=None,call=value['call'],usage=usage,operation_id=request_id)
     if value=={'status':'unknown'}:
         return dict(type='boolean',status='unknown',value=None,usage=usage,operation_id=request_id)
     return dict(type='boolean',status='error',value=None,reason='semantic_boolean_type',usage=usage,operation_id=request_id)

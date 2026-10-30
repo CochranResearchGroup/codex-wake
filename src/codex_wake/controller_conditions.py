@@ -67,6 +67,7 @@ class Conditions:
         overall=limits(state.get('condition_limits',{}))
         usage=state.setdefault('condition_usage',dict(calls=0,tokens=0))
         start=now()
+        frames=[(overall,0,0,state['created_at'])]
         def result(status,value=None,**extra):return dict(type='boolean',status=status,value=value,**extra)
         def local(value,arguments):
             if isinstance(value,dict) and set(value)=={'ref'} and value['ref'].startswith('arguments.'):
@@ -75,7 +76,7 @@ class Conditions:
             if isinstance(value,list):return [local(v,arguments) for v in value]
             return value
         def run(value,parent,depth=0):
-            if now()-state['created_at']>=overall['max_seconds'] or now()-start>=parent['max_seconds']:
+            if any(now()-began>=bounds['max_seconds'] for bounds,calls,tokens,began in frames):
                 return result('timeout',reason='condition_time_limit')
             if type(value) is bool:return result('known',value)
             if value.get('op') in ('and','or'):
@@ -93,12 +94,14 @@ class Conditions:
                 answer=compare(value)
                 return result('unknown' if answer is None else 'known',answer)
             nested=limits(value.get('limits',{}),parent)
-            if depth>=nested['max_depth'] or usage['calls']>=nested['max_calls']:
+            if depth>=nested['max_depth'] or any(usage['calls']-calls>=bounds['max_calls'] for bounds,calls,tokens,began in frames):
                 return result('error',reason='condition_call_limit')
             key=value['function']+'@'+str(value['version'])
             function=self.registry.get(key)
             if not isinstance(function,dict):return result('error',reason='function_version_not_found',function=key)
             nested=limits(function.get('limits',{}),nested)
+            if depth>=nested['max_depth'] or nested['max_calls']<=0 or any(usage['calls']-calls>=bounds['max_calls'] for bounds,calls,tokens,began in frames):
+                return result('error',reason='condition_call_limit')
             args=resolve(value['arguments'])
             types={'string':str,'boolean':bool,'integer':int,'number':(int,float),'object':dict,'array':list}
             declared=function.get('inputs',{})
@@ -106,6 +109,7 @@ class Conditions:
                 return result('error',reason='function_argument_type',function=key)
             if function.get('effects','observe') not in ('observe','action'):
                 return result('error',reason='function_effect_declaration',function=key)
+            frames.append((nested,usage['calls'],usage['tokens'],now()))
             usage['calls']+=1
             receipt=dict(function=key,depth=depth+1,effects=function.get('effects','observe'),status='admitted',value=None)
             state.setdefault('condition_trace',[]).append(receipt)
@@ -115,13 +119,16 @@ class Conditions:
                 validate_condition(expression)
                 outcome=run(expression,nested,depth+1)
             elif function.get('kind')=='semantic' and semantic:
-                remaining=min(nested['max_tokens'],overall['max_tokens']-usage['tokens'])
+                remaining=min(bounds['max_tokens']-(usage['tokens']-tokens) for bounds,calls,tokens,began in frames)
+                estimate=function.get('estimated_tokens',remaining)
+                if type(estimate) is not int or estimate<=0:remaining=0
+                else:remaining=min(remaining,estimate)
                 if remaining<=0:outcome=result('error',reason='condition_token_limit')
                 else:
                     # Reservation remains charged if submission/usage is uncertain.
                     usage['tokens']+=remaining;receipt['reserved_tokens']=remaining;save()
                     try:
-                        bounded=dict(nested,max_seconds=min(nested['max_seconds'],overall['max_seconds']-(now()-state['created_at']),parent['max_seconds']-(now()-start)))
+                        bounded=dict(nested,max_seconds=min(bounds['max_seconds']-(now()-began) for bounds,calls,tokens,began in frames))
                         outcome=semantic(function,args,bounded,remaining,receipt)
                         consumed=outcome.get('usage',{}).get('tokens')
                         if type(consumed) is not int or not 0<=consumed<=remaining:
@@ -132,8 +139,18 @@ class Conditions:
                     except Exception as error:
                         outcome=result('timeout' if isinstance(error,TimeoutError) else 'error',reason=getattr(error,'code','semantic_effect_uncertain'))
             else:outcome=result('error',reason='unsupported_function_kind')
+            if outcome.get('status')=='delegate':
+                call=outcome.get('call')
+                key_requested=str(call.get('function'))+'@'+str(call.get('version')) if isinstance(call,dict) else ''
+                if key_requested not in function.get('callees',[]) or not isinstance(call,dict) or set(call)!={'function','version','arguments'}:
+                    outcome=result('error',reason='semantic_callee_not_allowed')
+                else:
+                    validate_condition(call)
+                    receipt['delegation']=call
+                    outcome=run(call,nested,depth+1)
             if outcome.get('status') not in ('known','unknown','error','timeout') or (outcome.get('status')=='known' and type(outcome.get('value')) is not bool):
                 outcome=result('error',reason='semantic_boolean_type')
+            frames.pop()
             receipt.update(outcome);save()
             return dict(outcome,function=key)
         return run(expression,overall)

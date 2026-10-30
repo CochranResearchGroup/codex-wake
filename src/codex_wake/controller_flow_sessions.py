@@ -62,7 +62,7 @@ class ControllerFlowSessions:
                 raise ValueError()
             if not profile['endpoint'].startswith('unix:///') or not Path(profile['cwd']).is_dir():
                 raise ValueError()
-            if not isinstance(profile['modes'], list) or set(profile['modes']) - {'new_session','sequential','fork','semantic'}:
+            if not isinstance(profile['modes'], list) or set(profile['modes']) - {'new_session','sequential','fork'}:
                 raise ValueError()
             if not {'thread/start','turn/start','thread/read','turn/interrupt'} <= set(profile['methods']):
                 raise ValueError()
