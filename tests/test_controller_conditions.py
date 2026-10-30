@@ -40,6 +40,12 @@ class ConditionsTests(unittest.TestCase):
             self.assertEqual(done['condition_usage'],dict(calls=2,tokens=0))
             self.assertEqual(owner().advance(actor,started['run_id']),done)
             self.assertEqual(len(done['condition_trace']),2)
+            changed=json.loads(registry.read_text())
+            changed['functions']['positive@1']['expression']=False
+            registry.write_text(json.dumps(changed))
+            with self.assertRaises(InventoryError) as caught:
+                owner().start(actor,'fixture',1,inputs={},intent='two',binding='caller')
+            self.assertEqual(caught.exception.code,'immutable_condition_version')
 
     def test_explicit_parallel_unknown_and_false_are_distinct(self):
         with self.assertRaises(InventoryError):validate_condition(dict(op='and',operands=[True],parallel=True))
