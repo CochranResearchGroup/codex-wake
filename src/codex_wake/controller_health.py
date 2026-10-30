@@ -12,8 +12,10 @@ import json
 import os
 from pathlib import Path
 import threading
+import sys
 import time
 from uuid import uuid4
+from websockets.exceptions import WebSocketException
 
 from .native_protocol import native_request, NativeCapabilityUnavailable
 from .process import process_identity
@@ -48,7 +50,7 @@ def _process_matches(target):
     expected=target.get('process')
     if not isinstance(expected,dict) or set(expected)!={'pid','start_ticks','boot_id'} or type(expected['pid']) is not int or expected['pid']<=0:return False
     observed=process_identity(expected['pid'])
-    return bool(observed and observed.get('start_time_ticks')==expected['start_ticks'] and observed.get('boot_id')==expected['boot_id'])
+    return bool(observed and str(observed.get('start_time_ticks'))==str(expected['start_ticks']) and observed.get('boot_id')==expected['boot_id'])
 
 
 class ControllerHealth:
@@ -63,6 +65,8 @@ class ControllerHealth:
         except (OSError,ValueError):raise InventoryError('configuration_unavailable','invalid private health registry') from None
         if value.get('version')!=1 or not isinstance(value.get('bindings'),list) or len(value['bindings'])>256:
             raise InventoryError('configuration_unavailable','unsupported bounded health binding registry')
+        if any(not isinstance(row,dict) or not isinstance(row.get('target'),dict) for row in value['bindings']):
+            raise InventoryError('configuration_unavailable','invalid private health bindings')
         return value['bindings']
 
     def execute(self,operation,arguments):
@@ -82,7 +86,7 @@ class ControllerHealth:
         matches=[row for row in self.bindings() if row.get('target')==target]
         if len(matches)!=1:return unknown('stale_or_ambiguous_binding')
         binding=matches[0]
-        if target['runtime']!='codex':return unknown('native_health_unsupported','unsupported')
+        if target['runtime']!='codex' or sys.platform!='linux':return unknown('native_health_unsupported','unsupported')
         endpoint,command=binding.get('endpoint'),binding.get('codex_cmd')
         if not isinstance(endpoint,str) or not endpoint.startswith('unix:///') or not isinstance(command,list) or not command or any(not isinstance(arg,str) for arg in command):
             return unknown('native_health_binding_unavailable','unsupported')
@@ -113,5 +117,5 @@ class ControllerHealth:
                 challenge=challenge,latency_seconds=time.monotonic()-started,loop_tid=tid)
             return result
         except NativeCapabilityUnavailable:return unknown('native_health_capability_unavailable','unsupported')
-        except (ValueError,OSError,TimeoutError,WakeError):return unknown('native_loop_unobserved')
+        except (ValueError,OSError,TimeoutError,WakeError,WebSocketException):return unknown('native_loop_unobserved')
         finally:_SLOTS.release()
