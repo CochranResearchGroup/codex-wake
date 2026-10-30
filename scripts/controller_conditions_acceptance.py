@@ -135,6 +135,7 @@ def main():
             assert state['phase']=='completed' and state['result'] is True and len(effects)==before+2,state
             assert state['condition_usage']==dict(calls=3,tokens=32)
             cli('flows','publish',dict(definition=definition(3,short=True)))
+            cli('flows','publish',dict(definition=definition(4)))
             async def native_mcp():
                 from mcp import ClientSession,StdioServerParameters
                 from mcp.client.stdio import stdio_client
@@ -152,6 +153,10 @@ def main():
                         done=await call('advance',dict(run_id=started['run_id']))
                         assert done['phase']=='completed' and done['result'] is False,done
                         assert done['steps']['condition']['trace'][1]['status']=='unevaluated',done
+                        positive=await call('start',dict(flow_id='fixture',version=4,inputs={},intent='native-positive',binding='native-origin'))
+                        finished=await call('advance',dict(run_id=positive['run_id']))
+                        assert finished['phase']=='completed' and finished['result'] is True,finished
+                        assert finished['condition_usage']==dict(calls=3,tokens=32),finished
             asyncio.run(native_mcp())
             print(json.dumps(dict(status='passed',package=codex_wake.__file__,checks=[
                 'actual existing Unix socket with kernel peer PID/account/build pins','installed CLI typed deterministic and existing native turn predicate with explicit inherited action',
