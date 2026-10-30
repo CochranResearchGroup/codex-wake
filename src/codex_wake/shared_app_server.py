@@ -64,7 +64,7 @@ class SharedAppServerReader:
                 "clientInfo": {"name": "codex_wake_discovery", "version": __version__},
                 "capabilities": {"experimentalApi": True},
             })
-            self.server_metadata = {key: initialization.get(key) for key in ("codexHome", "userAgent", "platformFamily", "platformOs")}
+            self.server_metadata = {key: initialization.get(key) for key in ("codexHome", "userAgent", "platformFamily", "platformOs", "forkCheckpointV1")}
             self.connection.send(json.dumps({"method": "initialized"}))
             return self
         except Exception as exc:
