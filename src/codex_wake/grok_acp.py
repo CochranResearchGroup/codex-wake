@@ -21,8 +21,29 @@ class ACPRefusal(InventoryError):
         super().__init__(code,message);self.native_code=native_code
 
 
+def pin_transport_owner(profile):
+    from .controller_health import _image_hash,_process_matches
+    owner=profile['transport_owner']
+    fields={'kind','pid','start_ticks','boot_id','sha256','stdin_inode','stdout_inode'}
+    if not isinstance(owner,dict) or set(owner)!=fields or owner['kind']!='grok_stdio_host' or type(owner['pid']) is not int:
+        raise InventoryError('configuration_unavailable','qualified sole stdio-owner binding required')
+    raw=dict(process=dict(pid=owner['pid'],start_ticks=owner['start_ticks'],boot_id=owner['boot_id']))
+    if not _process_matches(raw) or _image_hash(owner['pid'])!=owner['sha256']:
+        raise InventoryError('stale_target','Grok stdio bridge process/image changed')
+    native=Path('/proc')/profile['target']['process_pid'];bridge=Path('/proc')/str(owner['pid'])
+    parent=next((line.split()[1] for line in (native/'status').read_text().splitlines() if line.startswith('PPid:')),None)
+    if parent!=str(owner['pid']) or bridge.stat().st_uid!=os.geteuid():raise InventoryError('stale_target','Grok native child is not held by the pinned stdio owner')
+    expected={f"pipe:[{owner['stdin_inode']}]",f"pipe:[{owner['stdout_inode']}]"}
+    if os.readlink(native/'fd/0')!=f"pipe:[{owner['stdin_inode']}]" or os.readlink(native/'fd/1')!=f"pipe:[{owner['stdout_inode']}]":raise InventoryError('stale_target','Grok native stdio pipes changed')
+    observed=set()
+    for fd in (bridge/'fd').iterdir():
+        try:observed.add(os.readlink(fd))
+        except OSError:pass
+    if not expected<=observed:raise InventoryError('stale_target','Grok stdio owner no longer holds the native pipes')
+
+
 def owned_listener(profile):
-    target=profile['target'];pid=int(target['process_pid']);port=urlsplit(profile['endpoint']).port
+    target=profile['target'];pid=profile.get('transport_owner',{}).get('pid',int(target['process_pid']));port=urlsplit(profile['endpoint']).port
     directory=Path('/proc')/str(pid)
     inodes=set()
     for path in (directory/'fd').iterdir():
@@ -50,7 +71,7 @@ class GrokACPConnection:
         if not token or any(ord(c)<32 for c in token):raise InventoryError('configuration_unavailable','invalid native transport secret')
         self.deadline=time.monotonic()+self.profile['timeout']
         try:
-            self.connection=connect(self.profile['endpoint']+'?server-key='+quote(token,safe=''),proxy=None,
+            self.connection=connect(self.profile['endpoint']+'?server-key='+quote(token,safe=''),proxy=None,legacy=True,
                 open_timeout=min(5,self.profile['timeout']),close_timeout=1,compression=None,max_size=1048576)
         except Exception:
             raise InventoryError('native_unavailable','fixed native Grok ACP connection unavailable') from None
@@ -83,6 +104,7 @@ class GrokACPConnection:
                 if 'error' in value:
                     code=(value.get('error') or {}).get('code')
                     if progress_seen:raise InventoryError('effect_uncertain','native error followed correlated progress; prior effects are uncertain')
+                    if code==-32098 and self.profile.get('transport_owner',{}).get('kind')=='grok_stdio_host' and (value['error'].get('data') or {})==dict(source='codex_wake_stdio_host',pre_io=True,reason='busy'):raise ACPRefusal('native_owner_busy','owned stdio transport refused before native I/O; nothing queued',code)
                     if code==-32000:raise ACPRefusal('native_auth_required','native Grok authentication required; no authentication or provider experiment attempted',code)
                     if code in (-32601,-32602):raise ACPRefusal('unsupported_operation' if code==-32601 else 'invalid_native_argument','native ACP definitively refused the requested method/parameters',code)
                     raise InventoryError('effect_uncertain','native ACP returned an unqualified error; original effect is uncertain')
