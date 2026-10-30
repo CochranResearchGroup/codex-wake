@@ -1,0 +1,97 @@
+{
+  "status": "qualified_source_and_disposable_candidate",
+  "product_source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+  "tier": "comprehensive_local_and_installed_disposable",
+  "command": "PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'",
+  "runs": [
+    {
+      "python": "3.11",
+      "source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+      "tests": 1909,
+      "skipped": 1,
+      "seconds": 620.951,
+      "status": "passed",
+      "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-python3.11/unittest.log",
+      "log_sha256": "3b66558c3a07b65ed120c83a59f655011a84abd553ced3b94b982faa32823a06",
+      "launcher_receipt_sha256": "04b7eeebd766870570b9d481ea28b03d0c504b06b98d2c96712effc1f71bd557"
+    },
+    {
+      "python": "3.12",
+      "source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+      "tests": 1909,
+      "skipped": 1,
+      "seconds": 603.335,
+      "status": "passed",
+      "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-python3.12/unittest.log",
+      "log_sha256": "d50e275d2a6190ec688da075f0eb009239b234979f0d61fed1a1ac6be51b17c7",
+      "launcher_receipt_sha256": "8e7c6f79969c48de506f99ef4c03b0352bfd8d110af65842797462ab15a5b52c"
+    }
+  ],
+  "smokes": [
+    {
+      "name": "qualified-source-registry-smoke.log",
+      "result": {},
+      "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-source-registry-smoke.log",
+      "sha256": "25d2722ebea670b5ff018ea6594b90c3c7ac4b0d272dd1694c8830d446d0e85e"
+    },
+    {
+      "name": "qualified-session-discovery-smoke.log",
+      "result": {
+        "status": "accepted"
+      },
+      "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-session-discovery-smoke.log",
+      "sha256": "e1f1e8bb6ab3835684d88e7e6b136410a9bc9f1a4ad543e74385cd288065768d"
+    },
+    {
+      "name": "qualified-mcp-smoke.log",
+      "result": {
+        "status": "PASS",
+        "children_after": 0,
+        "native_turns": 0,
+        "notifications": 0
+      },
+      "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-mcp-smoke.log",
+      "sha256": "2ce1c1f6eb3057758b6de748be2468b598d669584757dbd9577069344411e161"
+    }
+  ],
+  "wheel": {
+    "name": "codex_wake-0.22.0.dev2-py3-none-any.whl",
+    "sha256": "f0f70a32866f0883a9685241c996cf413b4773b1dd34e8776be90eaffa7620f6"
+  },
+  "checks": {
+    "ruff": "python -m ruff check --select F821,F822,F823 src scripts tests .codex/hooks:PASS",
+    "compile": "python -m compileall -q src scripts tests .codex/hooks:PASS",
+    "policy": "python scripts/check_policy_wiring.py:PASS",
+    "flow_aggregate": "7 installed acceptance programs passed",
+    "grok": "all5 installed interfaces/15flowprograms; synthetic effects only",
+    "windows": "native Windows Python3.12.10 API/MCP success and response_limit; source hashes matched",
+    "bots": "1040tests:805passed,235opt-in skips,0failed; unchanged runtime sourceb0da68d"
+  },
+  "hosted_ci": "Skipped under operator cost policy; no hosted runs/capacity/billing requested",
+  "material_environment_differences": [
+    "Local WSL Linux rather than hosted Ubuntu runner; Python3.11.15 and3.12.13 with installed MCP2.2.0",
+    "XDG_CONFIG_HOME/XDG_STATE_HOME/CODEX_HOME isolated; CODEX_WAKE_STABLE_TIME_CONFIG empty",
+    "Host wall-clock corrections observed; original failure logs retained, durable elapsed budget refinement and startup-timeout test repair documented",
+    "Parked OpenClaw plugin checks and opt-in live/provider/production effects excluded; applicable source/installed checks passed"
+  ],
+  "review": {
+    "rounds": 1,
+    "standards_accepted": 2,
+    "spec_accepted": 4,
+    "remediation_rounds": 1,
+    "unresolved_accepted_findings": 0
+  },
+  "memory": {
+    "disposition": "queued",
+    "group": "codex_bots_main",
+    "job_id": "39e3b44e-0366-465f-88f6-298b2a7a703e",
+    "scope": "qualified Bots integration only; queue acceptance, not persistence proof"
+  },
+  "boundaries": [
+    "Source and disposable candidate qualification; production380 separate",
+    "Native Windows execution owners unsupported; actual Windows callers and WSL-authorized psmux presentation qualified",
+    "Actual Grok native initialization only; model/effect qualification remains synthetic; exact cancellation/health/fork/metering/tool isolation unsupported",
+    "Recovery368/370 and explicit parallel semantic operands/in-flight condition migration remain separate or unsupported",
+    "Manual resource monitoring; no governor activation, old-goal resume, resource renewal, shared restart, credential replication or business/model work"
+  ]
+}

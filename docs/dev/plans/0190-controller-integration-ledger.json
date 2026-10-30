@@ -2,8 +2,8 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393-resumed",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "d2181d1",
-  "state": "remediating",
+  "tip_sha": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+  "state": "source_accepted",
   "tickets": {
     "394": {
       "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
@@ -586,10 +586,63 @@
   "remediation_rounds": 1,
   "review_fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
   "whole_python_ci": {
-    "source_baseline": "211d89b; product source frozen throughout run; docs7994114 followed",
-    "result": "1861 tests passed with1skip in578.147s",
-    "private_log": "/tmp/wake-controller393-ci-39s10ny8/unittest.log",
-    "ruff": "F821,F822,F823 passed after integrated source packets"
+    "state": "passed",
+    "final": "docs/dev/evidence/plan0190/review393-final-validation.json",
+    "pre_remediation": {
+      "state": "pre_remediation_passed_final_remediation_pending",
+      "tier": "comprehensive_local",
+      "command": "PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'",
+      "hosted": "skipped by operator cost policy",
+      "environment": "local WSL Linux; isolated XDG_CONFIG_HOME/XDG_STATE_HOME/CODEX_HOME, stable-time config empty; Python3.11.15/3.12.13; applicable checks only; parked OpenClaw excluded",
+      "runs": [
+        {
+          "python": "3.11",
+          "source": "d2181d1de0aca67a6e59ef4bf6cdefab087d48ee",
+          "tests": 1896,
+          "skipped": 1,
+          "seconds": 806.118,
+          "status": "passed",
+          "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/final-python3.11/unittest.log",
+          "log_sha256": "436dc1ee780feb93a0653f8959df02d135410a1697b07c08c8d42f5bc17354db",
+          "timing": "unittest monotonic duration; original launcher wall elapsed may differ during observed host clock rollback"
+        },
+        {
+          "python": "3.12",
+          "source": "d2181d1de0aca67a6e59ef4bf6cdefab087d48ee",
+          "tests": 1896,
+          "skipped": 1,
+          "seconds": 793.52,
+          "status": "passed",
+          "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/final-python3.12/unittest.log",
+          "log_sha256": "ce3d51d45c45018c2f22081c53cd32ec3da49fb91c20dcbd88edb54f53b07cdc",
+          "timing": "unittest monotonic duration; original launcher wall elapsed may differ during observed host clock rollback"
+        }
+      ]
+    },
+    "runs": [
+      {
+        "python": "3.11",
+        "source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+        "tests": 1909,
+        "skipped": 1,
+        "seconds": 620.951,
+        "status": "passed",
+        "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-python3.11/unittest.log",
+        "log_sha256": "3b66558c3a07b65ed120c83a59f655011a84abd553ced3b94b982faa32823a06",
+        "launcher_receipt_sha256": "04b7eeebd766870570b9d481ea28b03d0c504b06b98d2c96712effc1f71bd557"
+      },
+      {
+        "python": "3.12",
+        "source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+        "tests": 1909,
+        "skipped": 1,
+        "seconds": 603.335,
+        "status": "passed",
+        "private_log": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/qualified-python3.12/unittest.log",
+        "log_sha256": "d50e275d2a6190ec688da075f0eb009239b234979f0d61fed1a1ac6be51b17c7",
+        "launcher_receipt_sha256": "8e7c6f79969c48de506f99ef4c03b0352bfd8d110af65842797462ab15a5b52c"
+      }
+    ]
   },
   "review": {
     "frozen_tip": "415607bd6eda7a0bbff0161eec4917988ed02c91",
@@ -600,8 +653,15 @@
       "standards": "/root/review393_standards_once",
       "spec": "/root/review393_spec_once"
     },
-    "state": "adjudicated",
-    "remediation": "pending bounded TDD pass",
+    "state": "complete",
+    "remediation": "complete:6accepted findings fixed in1TDDpass",
     "adjudication": "docs/dev/evidence/plan0190/review393-adjudication.json"
-  }
+  },
+  "tip_kind": "validated product source; later commits documentation only",
+  "final_validation": "docs/dev/evidence/plan0190/review393-final-validation.json",
+  "remaining_gates": [
+    368,
+    370,
+    380
+  ]
 }

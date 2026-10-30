@@ -1,0 +1,85 @@
+{
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "checks": [
+    {
+      "transport": "api",
+      "oversized": false,
+      "exit_code": 0,
+      "status": "completed",
+      "error": null,
+      "stdout_bytes": 105,
+      "child_exited": true
+    },
+    {
+      "transport": "mcp",
+      "oversized": false,
+      "exit_code": 0,
+      "status": "completed",
+      "error": null,
+      "stdout_bytes": 105,
+      "child_exited": true
+    },
+    {
+      "transport": "api",
+      "oversized": true,
+      "exit_code": 2,
+      "status": "failed",
+      "error": "response_limit",
+      "stdout_bytes": 158,
+      "child_exited": true
+    },
+    {
+      "transport": "mcp",
+      "oversized": true,
+      "exit_code": 2,
+      "status": "failed",
+      "error": "response_limit",
+      "stdout_bytes": 158,
+      "child_exited": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/operations",
+      "operation": "inventory.list",
+      "mcp_tool": null
+    },
+    {
+      "path": "/mcp",
+      "operation": null,
+      "mcp_tool": "wake_controller_list"
+    },
+    {
+      "path": "/operations",
+      "operation": "inventory.list",
+      "mcp_tool": null
+    },
+    {
+      "path": "/mcp",
+      "operation": null,
+      "mcp_tool": "wake_controller_list"
+    }
+  ],
+  "source_hashes": {
+    "entrypoint.py": "36e77bcfb1d2f1cd4dc85a3a9886091d8bbc418b7cd25759b2e5d4486734047e",
+    "controller_client.py": "d1be18817548fb2289be57c9373c9bb4e9ebec4685248457b184c07e3b03a7c9",
+    "controller_client_windows.py": "e95063d2d62b1d93627f7700ca1202362d498edd3aa680176f7064da6875eeab"
+  },
+  "fixture_thread_exited": true,
+  "owned_directory": "C:\\Users\\ecoch\\AppData\\Local\\Temp\\wake-review393-jycjq481",
+  "owned_directory_removed": true,
+  "status": "passed",
+  "provider_calls": 0,
+  "acl_edits": "new empty owned fixture token only, before synthetic token write",
+  "fresh_cleanup": {
+    "owned_directory_absent": true
+  },
+  "source_commit": "204d372",
+  "command": "python3 /home/ecochran76/.local/state/codex-wake/testing/review393-windows-portable/run.py",
+  "native_python": "/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe",
+  "boundary": "Native Windows published portable entrypoint with three source modules; finite synthetic loopback API/MCP envelopes. No native Windows controller owner or live provider proof.",
+  "primary_reconciliation": "All three Windows-qualified source module hashes match current integration. Four waited children, exited fixture/parent and fresh native directory-absence readback are delegated evidence; primary did not launch a second Windows probe.",
+  "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/review393-windows-portable/receipt.json",
+  "receipt_sha256": "d194d557537d16d902bf5d7483b414f28ff6504f34a4f24b2af9d96d77ad86bb"
+}

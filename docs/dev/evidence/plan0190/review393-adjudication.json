@@ -23,7 +23,10 @@
       "disposition": "blocking",
       "title": "Controller build launches omit configuration overrides reported by the account owner",
       "reason": "Primary reproduced: effective model account, native argv only --no-daemon; shared configuration promise requires actual launch parity",
-      "state": "remediation_pending"
+      "state": "fixed_and_validated",
+      "fix_commits": [
+        "9da94ed"
+      ]
     },
     {
       "id": "SPEC2",
@@ -31,7 +34,10 @@
       "disposition": "blocking",
       "title": "Adding an unused function version invalidates existing flow runs",
       "reason": "Primary reproduced stale_condition_registry after adding predicate@2 to a run pinned to predicate@1; future-only editing contract violated",
-      "state": "remediation_pending"
+      "state": "fixed_and_validated",
+      "fix_commits": [
+        "2a2021d"
+      ]
     },
     {
       "id": "SPEC3",
@@ -39,7 +45,12 @@
       "disposition": "blocking",
       "title": "Wall-clock rollback extends cumulative flow deadlines",
       "reason": "Primary reproduced a max_seconds1 flow dispatching after100 to99 rollback; original cumulative budgets require continuity or explicit hold",
-      "state": "remediation_pending"
+      "state": "fixed_and_validated",
+      "fix_commits": [
+        "204d372",
+        "8ff842d",
+        "51bf634"
+      ]
     },
     {
       "id": "SPEC4",
@@ -47,7 +58,11 @@
       "disposition": "blocking",
       "title": "Foreach per-iteration time/token limits are rejected and unaccounted",
       "reason": "Primary compile reproduction unsupported_flow_node; spec requires independent child bounds tightening parents",
-      "state": "remediation_pending"
+      "state": "fixed_and_validated",
+      "fix_commits": [
+        "ea00e56",
+        "efc5fa1"
+      ]
     },
     {
       "id": "STD1",
@@ -55,7 +70,10 @@
       "disposition": "blocking",
       "title": "SQLite owner failures leave a misleading fresh running scheduler heartbeat",
       "reason": "Reviewer constructor-failure seam reproduced twice; operational visibility requirement applies to scheduled recovery as well as wakes; regression must use real corrupt/locked private store",
-      "state": "remediation_pending"
+      "state": "fixed_and_validated",
+      "fix_commits": [
+        "acf021d"
+      ]
     },
     {
       "id": "STD2",
@@ -63,9 +81,33 @@
       "disposition": "blocking",
       "title": "Duplicated Linux transport accepts oversized unbounded JSON responses",
       "reason": "Concrete divergence from bounded portable client; accept a bounded shared transport fix, not speculative architecture rewrite; smell classification remains judgement",
-      "state": "remediation_pending"
+      "state": "fixed_and_validated",
+      "fix_commits": [
+        "5062f34"
+      ]
     }
   ],
   "remediation_round": 1,
-  "source_publication_only": true
+  "source_publication_only": true,
+  "validation_repair": {
+    "source": "8e2bacd",
+    "scope": "test_a2a_mcp timeout fixture only; production timeout semantics unchanged",
+    "first_failure": "postreview-python3.12/unittest.log: timeout returned effect_uncertain before child marker existed",
+    "red": "review-one/mcp-timeout-red.log: deterministic delayed-start case reproduces FileNotFoundError",
+    "green": [
+      "review-one/mcp-timeout-green311.log",
+      "review-one/mcp-timeout-green312.log"
+    ],
+    "behavior": "Timeout may precede child startup. Append-only fixture evidence allows zero or one start, never duplicate starts or assumed completion; original idempotency/reconciliation and invalid-input rejection assertions preserved."
+  },
+  "clock_followup": {
+    "first_failure": "grok-postreview-fixture.log: clock uncertainty before semantic dispatch; exact offending sample not retained",
+    "diagnostic": "grok-clock-diagnostic.log: all5 interfaces passed with exception-only tracing, no clock exception recorded; no clock values changed; hook removed",
+    "causal_repro": "flow-fixes/clock-domain-diagnostic.json:1us wall regression with valid boot/counter causes old overly broad hold",
+    "refinement": "Original elapsed/high-water usage never decreases. Qualified counters continue under budget with visible wall uncertainty; elapsed exhaustion still stops original work, boot/counter loss still holds. No original allowance or clock anchor renewed."
+  },
+  "product_tip": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+  "windows_evidence": "docs/dev/evidence/plan0190/review393-windows-portable.json",
+  "flow_tdd_receipt": "review-one/flow-fixes/result-wall-refinement.json",
+  "final_validation": "docs/dev/evidence/plan0190/review393-final-validation.json"
 }
