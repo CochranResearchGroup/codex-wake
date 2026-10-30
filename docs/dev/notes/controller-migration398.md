@@ -148,3 +148,9 @@ writer detection and the full migration selection. Twelve focused tests pass in
 3.795s; the native WAL test also verifies no sidecars appear. Production writer
 qualification still remains issue380; a changed or unobservable process is never
 silently described as idle.
+
+A focused registry-preservation red/green test also distinguishes public model
+output-token limits and native credential-store mode settings from embedded
+credential values. Valid policy survives exactly; actual env/API-key credential
+fields, including nested lists, remain held rather than being copied. Thirteen
+focused migration tests now pass in 3.015s.

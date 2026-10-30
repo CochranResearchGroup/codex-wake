@@ -73,7 +73,7 @@ legacy_config="{self.legacy}"
 
     def test_apply_and_rollback_preserve_native_credential_inode_and_original_shared_store(self):
         owner = self.owner()
-        self.path.write_text(self.path.read_text() + '\n[configuration.base]\nmodel="shared-policy"\n')
+        self.path.write_text(self.path.read_text() + '\n[configuration.base]\nmodel="shared-policy"\nmodel_max_output_tokens=8000\nmcp_oauth_credentials_store="keyring"\n')
         ledger = self.home / 'wake' / 'objective-ledgers' / 'prior.json'
         ledger.parent.mkdir(parents=True)
         ledger.write_bytes(b'{"used":93,"deadline":1800000010,"uncertain":true}')
@@ -91,6 +91,8 @@ legacy_config="{self.legacy}"
         import tomllib
         candidate_policy = tomllib.loads((self.lab / 'candidate' / 'controller-accounts.toml').read_text())
         self.assertEqual(candidate_policy['configuration']['base']['model'], 'shared-policy')
+        self.assertEqual(candidate_policy['configuration']['base']['model_max_output_tokens'], 8000)
+        self.assertEqual(candidate_policy['configuration']['base']['mcp_oauth_credentials_store'], 'keyring')
         self.assertEqual(self.pointer.resolve(), self.lab / 'candidate' / 'controller-accounts.toml')
         self.assertEqual((self.source / 'config.toml').read_bytes(), source_before)
         self.assertEqual((self.source / 'sessions' / 'unassigned.jsonl').read_bytes(), history_before)
@@ -203,3 +205,10 @@ legacy_config="{self.legacy}"
         self.assertIn('native_wal_history_requires_quiescent_owner', preview['holds'])
         self.assertFalse(database.with_name(database.name + '-wal').exists())
         self.assertFalse(database.with_name(database.name + '-shm').exists())
+
+    def test_embedded_credential_settings_are_held_instead_of_replicated(self):
+        self.path.write_text(self.path.read_text() + '\n[configuration.base.mcp_servers.example.env]\nAPI_KEY="synthetic-never-copy"\n')
+        preview = self.owner().execute('migration.preview', {})
+        self.assertIn('registry_rewrite_unqualified', preview['holds'])
+        self.assertNotIn('synthetic-never-copy', json.dumps(preview))
+        self.assertFalse((self.lab / 'candidate').exists())
