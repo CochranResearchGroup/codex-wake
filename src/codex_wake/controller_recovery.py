@@ -48,6 +48,8 @@ class ControllerRecovery:
         fd=os.open(self.path,os.O_CREAT|os.O_RDWR,0o600);os.close(fd);os.chmod(self.path,0o600)
         with self._db() as db:
             db.execute('CREATE TABLE IF NOT EXISTS policies (id TEXT PRIMARY KEY, record TEXT)')
+            db.execute('CREATE TABLE IF NOT EXISTS scheduler (id INTEGER PRIMARY KEY, cursor INTEGER)')
+            db.execute('INSERT OR IGNORE INTO scheduler VALUES(1,0)')
 
     def _db(self):return sqlite3.connect(self.path,timeout=5)
 
@@ -83,7 +85,7 @@ class ControllerRecovery:
         return record
 
     @staticmethod
-    def _public(record):return {k:v for k,v in record.items() if k!='principal'}
+    def _public(record):return {k:v for k,v in record.items() if k not in ('principal','authorization')}
 
     @staticmethod
     def _definition(value):
@@ -116,6 +118,8 @@ class ControllerRecovery:
     def _configure(self,actor,args):
         declaration=self._definition(args.get('policy'));policy_id=args['policy_id']
         record=dict(schema_version=1,policy_id=policy_id,principal=identity(actor),target=args['expected_target'],
+            authorization=dict(scopes=sorted(actor.scopes),targets=json.loads(encoded(actor.targets)),expires_at=actor.expires_at,principal_kind=actor.principal_kind),
+            monitor_enabled=False,scheduler_status='not_enabled',scheduler_reason=None,
             definition=declaration,definition_sha256=hashlib.sha256(encoded(declaration).encode()).hexdigest(),
             mode='observe',generation=1,created_at=self.now(),checks=0,unknown_streak=0,attempts=0,
             health_status='unobserved',last_observation=None,next_due=self.now(),last_action_at=None,
@@ -243,7 +247,7 @@ class ControllerRecovery:
         except Exception as error:result=dict(pending,reason=getattr(error,'code','notice_uncertain'))
         def saved(current):
             current['notifications'][source_id]=result
-            if current['mode']=='activation_pending' and current['generation']==generation and current.get('activation_source_id')==source_id and result['status']=='recorded':current['mode']='automatic'
+            if current['mode']=='activation_pending' and current['generation']==generation and current.get('activation_source_id')==source_id and result['status']=='recorded':current['mode']='automatic';current['monitor_enabled']=True;current['scheduler_status']='ready'
         self._edit(policy_id,saved)
         return result
 
@@ -352,6 +356,55 @@ class ControllerRecovery:
         self._authorize(actor,target,capability,authorize)
         return result
 
+    def drive_due(self,resolve_original,*,limit=8):
+        """Trusted host scheduler hook; no public caller-selected identity input.
+
+        Revalidates the retained original grant at every step. The host callback
+        may only reconstruct that existing authority, never issue/renew a grant.
+        One due occurrence is coalesced per policy; stable intent prevents replay.
+        """
+        from .controller_auth import Actor
+        if type(limit) is not int or not 0<=limit<=8:raise InventoryError('invalid_argument','scheduler policy limit must be zero to eight')
+        if not limit:return []
+        with self._db() as db:
+            records=[json.loads(row[0]) for row in db.execute('SELECT record FROM policies ORDER BY rowid')]
+            cursor=db.execute('SELECT cursor FROM scheduler WHERE id=1').fetchone()[0]
+        if not records:return []
+        result=[];next_cursor=cursor
+        for offset in range(len(records)):
+            index=(cursor+offset)%len(records);next_cursor=(index+1)%len(records)
+            record=records[index]
+            if not record.get('monitor_enabled'):continue
+            try:
+                elapsed=self._clock(record)
+                if elapsed<record['clock']['next_due_elapsed']:continue
+                original=record.get('authorization')
+                if not isinstance(original,dict):raise AuthError()
+                def authorized():
+                    actor=resolve_original(dict(record['principal']),json.loads(encoded(original)))
+                    if not isinstance(actor,Actor) or identity(actor)!=record['principal'] or actor.principal_kind!=original['principal_kind'] or actor.scopes!=frozenset(original['scopes']) or actor.targets!=original['targets'] or actor.expires_at!=original['expires_at'] or actor.expires_at<=self.now():
+                        raise AuthError()
+                    return actor
+                actor=authorized()
+                pin=[record['policy_id'],record['generation'],record['clock']['boot_id'],record['clock']['next_due_elapsed']]
+                key='recovery-scheduled-'+hashlib.sha256(encoded(pin).encode()).hexdigest()
+                target=record['target']
+                meta=dict(operation_id=key,idempotency_key=key,correlation_id=key,binding='original-recovery-schedule',target=target)
+                envelope=self.execute(actor,'recovery.tick',dict(policy_id=record['policy_id'],expected_target=target,_request=meta),authorize=authorized)
+                operation=envelope['result']['operation']
+                status='completed' if operation['phase']=='terminal' else 'uncertain'
+                reason=operation.get('reason')
+                self._edit(record['policy_id'],lambda current:current.update(scheduler_status=status,scheduler_reason=reason))
+                result.append(dict(policy_id=record['policy_id'],status=status,operation_id=key,reason=reason))
+            except (ValueError,OSError,KeyError,AttributeError) as error:
+                code=getattr(error,'code','scheduler_unavailable')
+                status='authority_unavailable' if isinstance(error,AuthError) else 'held'
+                self._edit(record['policy_id'],lambda current:current.update(scheduler_status=status,scheduler_reason=code))
+                result.append(dict(policy_id=record['policy_id'],status='held',reason=code))
+            if len(result)>=limit:break
+        with self._db() as db:db.execute('UPDATE scheduler SET cursor=? WHERE id=1',(next_cursor,))
+        return result
+
     def _reconcile(self,actor,args,authorize):
         record=self._owned(actor,args['policy_id'],args['expected_target'],'recovery',authorize)
         def guard():return self._authorize(actor,record['target'],'recovery',authorize)
@@ -384,7 +437,7 @@ class ControllerRecovery:
                 if delivery.get('status')=='recorded':
                     def saved(current):
                         current['notifications'][source_id]=dict(notice,status='recorded')
-                        if current['mode']=='activation_pending' and current.get('activation_source_id')==source_id:current['mode']='automatic'
+                        if current['mode']=='activation_pending' and current.get('activation_source_id')==source_id:current['mode']='automatic';current['monitor_enabled']=True;current['scheduler_status']='ready'
                     record=self._edit(record['policy_id'],saved)
             except (ValueError,OSError,KeyError):pass
         guard()

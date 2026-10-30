@@ -164,3 +164,41 @@ class RecoveryTests(unittest.TestCase):
             self.assertEqual(state['checks'],1)
             self.assertEqual(state['clock']['next_due_elapsed'],120.0)
             self.assertEqual(state['created_at'],1000.0)
+
+    def test_bounded_scheduled_driver_uses_original_grant_and_keeps_observing_after_off(self):
+        with tempfile.TemporaryDirectory() as directory:
+            owner,actor,target,args,policy,clock,probes,notices,status=self.fixture(Path(directory))
+            owner.execute(actor,'recovery.configure',args('configure',policy=policy),authorize=lambda:actor)
+            resolutions=[]
+            def resolve(principal,authorization):
+                resolutions.append((principal,authorization));return actor
+            self.assertEqual(owner.drive_due(resolve),[])
+            owner.execute(actor,'recovery.enable',args('enable'),authorize=lambda:actor)
+            for unused in range(2):
+                clock[0]+=10;owner.drive_due(resolve,limit=1)
+            state=owner.execute(actor,'recovery.show',dict(policy_id='policy',expected_target=target),authorize=lambda:actor)['result']['policy']
+            self.assertEqual(state['checks'],2)
+            self.assertEqual(state['attempts'],1)
+            self.assertNotIn('authorization',state)
+            self.assertTrue(resolutions)
+            self.assertEqual(resolutions[0][1]['expires_at'],actor.expires_at)
+            owner.execute(actor,'recovery.disable',args('disable'),authorize=lambda:actor)
+            clock[0]+=10;owner.drive_due(resolve)
+            after=owner.execute(actor,'recovery.show',dict(policy_id='policy',expected_target=target),authorize=lambda:actor)['result']['policy']
+            self.assertEqual(after['checks'],3)
+            self.assertEqual(after['attempts'],1)
+            self.assertEqual(after['mode'],'off')
+            before=len(probes);clock[0]+=10
+            def revoked(*unused):raise AuthError()
+            receipt=owner.drive_due(revoked)
+            self.assertEqual(receipt[0]['status'],'held')
+            self.assertEqual(len(probes),before)
+            held=owner.execute(actor,'recovery.show',dict(policy_id='policy',expected_target=target),authorize=lambda:actor)['result']['policy']
+            self.assertEqual(held['scheduler_status'],'authority_unavailable')
+            self.assertEqual(held['clock']['next_due_elapsed'],140.0)
+            renewed=Actor(actor.subject,actor.principal_kind,actor.client_id,actor.grant_id,actor.issuer,actor.resource,actor.scopes,actor.targets,2000)
+            self.assertEqual(owner.drive_due(lambda *unused:renewed)[0]['status'],'held')
+            self.assertEqual(len(probes),before)
+            owner.boot=lambda:'replacement-boot'
+            self.assertEqual(owner.drive_due(resolve)[0]['reason'],'time_uncertain')
+            self.assertEqual(len(probes),before)
