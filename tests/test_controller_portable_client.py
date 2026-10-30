@@ -32,7 +32,7 @@ class PortableClientTests(unittest.TestCase):
                     self.assertEqual(code,0);self.assertEqual(json.loads(out.getvalue()),envelope)
                 self.assertEqual([row[0] for row in requests],['/operations','/mcp'])
                 self.assertTrue(all(row[1]=='Bearer synthetic-token' for row in requests))
-                self.assertEqual(requests[1][2]['params']['name'],'wake_inventory_list')
+                self.assertEqual(requests[1][2]['params']['name'],'wake_controller_list')
         finally:server.shutdown();server.server_close();worker.join()
 
     def test_portable_client_refuses_public_token_and_native_owner_commands(self):
