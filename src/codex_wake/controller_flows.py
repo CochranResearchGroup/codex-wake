@@ -521,8 +521,14 @@ class ControllerFlows:
             return invoke(self.root,actor,function,args,bounds,tokens,receipt,
                 authorize=lambda:self._step_guard(actor,run_id,attempt),request_id=identifier,binding=state['binding'])
         from .controller_conditions import ConditionPending
-        if resume and any(item.get('status')=='admitted' and 'evaluation_id' not in item for item in state.get('condition_trace',[])):
-            return self.projection(dict(state,reason='legacy_condition_interrupted_no_replay'))
+        if resume and any('evaluation_id' not in item for item in state.get('condition_trace',[])):
+            with self.connect() as db:
+                db.execute('BEGIN IMMEDIATE')
+                latest=self._owned(actor,self._load(run_id,db),'control')
+                if latest.get('attempt')==attempt:
+                    latest.update(phase='uncertain',reason='legacy_condition_interrupted_no_replay')
+                    self._write(db,latest)
+                return self.projection(latest)
         try:
             outcome=registry.evaluate(condition,state,resolve=lambda value:self._resolve(value,state),
                 compare=lambda value:self._condition(value,state),save=save,now=self.now,semantic=semantic,
