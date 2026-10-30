@@ -83,8 +83,51 @@ profiles="{fixture.profiles}"
         policy = {'version': 1, 'global': {'actions': {'resume.recover': 'allow'}},
                   'delegations': {'reader': {'actions': ['resume.recover'], 'sessions': [THREAD]}}}
         store.configure(policy, Principal('operator', 'operator'), expected_revision=store._read()['revision'])
-        success = service.execute(token, 'history.resume', arguments)
+        import json
+        import threading
+        from urllib.request import Request, urlopen
+        from urllib.error import HTTPError
+        from codex_wake.controller_http import ControllerHTTPServer
+        from codex_wake.controller_operations import ControllerOperations
+        from codex_wake.managed_inventory import ManagedInventory
+        account_owner = ControllerAccounts(self.path, host='local', environment='test')
+        server = ControllerHTTPServer(('127.0.0.1', 0), authority,
+            ControllerOperations(ManagedInventory(self.root), host='local', environment='test',
+                accounts=account_owner, history_runtime=fixture.runtime, history_now=lambda: fixture.inv.now()))
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        def cleanup_server():
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=5)
+        self.addCleanup(cleanup_server)
+        def post(path, payload):
+            request = Request('http://127.0.0.1:' + str(server.server_port) + path,
+                data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token})
+            try:
+                with urlopen(request, timeout=5) as response:
+                    return response.status, json.load(response)
+            except HTTPError as error:
+                return error.code, json.load(error)
+        status, success = post('/operations', {'operation': 'history.resume', 'arguments': arguments})
+        self.assertEqual(status, 200, success)
         self.assertEqual(success['result']['resume']['status'], 'resumed')
+        status, mcp = post('/mcp', {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/call',
+            'params': {'name': 'wake_controller_history_resume', 'arguments': dict(arguments, intent='oauth-mcp')}})
+        self.assertEqual(status, 200, mcp)
+        self.assertEqual(mcp['result']['structuredContent']['result']['resume']['status'], 'resumed')
+        import os
+        import subprocess
+        import sys
+        token_file = self.root / 'remote.token'
+        token_file.write_text(token)
+        token_file.chmod(0o600)
+        cli = subprocess.run([sys.executable, '-m', 'codex_wake.cli', 'controller', 'remote',
+            '--endpoint', 'http://127.0.0.1:' + str(server.server_port), '--token-file', str(token_file),
+            'history.resume', '--arguments', json.dumps(dict(arguments, intent='remote-cli'))],
+            env=dict(os.environ), text=True, capture_output=True, timeout=10)
+        self.assertEqual(cli.returncode, 0, cli.stderr + cli.stdout)
+        self.assertEqual(json.loads(cli.stdout)['result']['resume']['status'], 'resumed')
         self.assertEqual(success['actor']['subject'], 'reader')
         fixture.current = False
         original_terminal = fixture.runtime.terminal
@@ -94,6 +137,7 @@ profiles="{fixture.profiles}"
                 authority.revoke_grant(grant_id)
             return original_terminal(args, *command)
         fixture.runtime.terminal = revoked_terminal
-        with self.assertRaises(AuthError):
-            service.execute(token, 'history.resume', dict(arguments, intent='revoked-before-effect'))
+        status, denied = post('/operations', {'operation': 'history.resume',
+            'arguments': dict(arguments, intent='revoked-before-effect')})
+        self.assertEqual(status, 401, denied)
         self.assertEqual(len([command for command in fixture.commands if command[0] == 'new-window']), 1)
