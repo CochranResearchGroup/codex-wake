@@ -112,9 +112,9 @@ class ControllerGrok:
         if operation in ('grok.wait','grok.cancel'):
             return self.runtime.operation(actor,'operations.wait' if operation=='grok.wait' else 'operations.cancel',args,authorize=authorize,expected_operation='grok.prompt')
         capability='observe' if operation in ('grok.capabilities','grok.health','grok.checkpoint') else 'control'
-        profile=self._context(actor,args,capability,authorize,conversation=operation in ('grok.prompt','grok.load','grok.fork','grok.checkpoint'))
+        profile=self._context(actor,args,capability,authorize,conversation=operation in ('grok.prompt','grok.load','grok.fork','grok.checkpoint') or operation in ('grok.capabilities','grok.health') and isinstance(args.get('expected_target'),dict) and 'conversation_id' in args['expected_target'])
         def guard():
-            current=self._context(actor,args,capability,authorize,conversation=operation in ('grok.prompt','grok.load','grok.fork','grok.checkpoint'))
+            current=self._context(actor,args,capability,authorize,conversation=operation in ('grok.prompt','grok.load','grok.fork','grok.checkpoint') or operation in ('grok.capabilities','grok.health') and isinstance(args.get('expected_target'),dict) and 'conversation_id' in args['expected_target'])
             if current['_sha256']!=profile['_sha256']:raise InventoryError('stale_target','Grok host profile changed before native I/O')
             return actor
         with self._connection(profile,guard) as connection:
@@ -130,7 +130,7 @@ class ControllerGrok:
                 if operation=='grok.create':
                     value=connection.call('session/new',dict(cwd=profile['cwd'],mcpServers=[]),identifier)
                     bounded_id(value.get('sessionId'))
-                    return dict(session_id=value['sessionId'],target=dict(profile['target'],conversation_id=value['sessionId']),native_result=value)
+                    return dict(session_id=value['sessionId'],target=dict(profile['target'],conversation_id=value['sessionId']),native_result=value,allocation_created=False,authority='inherited')
                 session=args['expected_target']['conversation_id']
                 if operation=='grok.load':
                     value=connection.call('session/load',dict(sessionId=session,cwd=profile['cwd'],mcpServers=[]),identifier)
@@ -147,7 +147,7 @@ class ControllerGrok:
                 stop=value.get('stopReason')
                 if stop not in ('end_turn','max_tokens','max_turn_requests','refusal','cancelled'):raise InventoryError('effect_uncertain','native prompt final stop reason is not qualified')
                 return dict(session_id=session,text=''.join(text),stop_reason=stop,native_result=value,output_truncated=truncated,
-                    native_request_id=identifier,peer_content_trust='untrusted',execution='cancelled' if stop=='cancelled' else 'completed')
+                    native_request_id=identifier,peer_content_trust='untrusted',allocation_created=False,authority='inherited',execution='cancelled' if stop=='cancelled' else 'completed')
             return self.runtime.execute(actor,operation,prepared,authorize=authorize,dispatch=dispatch)
 
     def observe_native_owned(self,record):

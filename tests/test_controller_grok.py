@@ -55,3 +55,19 @@ class GrokControllerTests(unittest.TestCase):
             health=owner.execute(actor,'grok.health',dict(profile='selected',expected_target=target),authorize=lambda:actor)
             self.assertEqual(health['result']['status'],'unsupported')
             self.assertFalse((root/'runtime-bindings').exists())
+
+    def test_flow_session_facade_exposes_new_and_sequential_modes_with_original_answers(self):
+        from codex_wake.controller_grok_sessions import ControllerGrokSessions
+        with tempfile.TemporaryDirectory() as directory:
+            owner,actor,target,args,calls,profile=self.fixture(Path(directory))
+            sessions=ControllerGrokSessions(directory,owner=owner)
+            capabilities=sessions.execute(actor,'sessions.capabilities',dict(profile='selected',expected_target=target),authorize=lambda:actor)
+            self.assertEqual(capabilities['result']['modes'],['new_session','sequential'])
+            self.assertEqual(capabilities['result']['max_parallelism'],1)
+            created=sessions.execute(actor,'sessions.create',args('create-one'),authorize=lambda:actor)
+            self.assertEqual(created['result']['operation']['result']['target']['conversation_id'],'new-conversation')
+            submitted=sessions.execute(actor,'sessions.prompt',args('step-one',conversation=True,prompt='first'),authorize=lambda:actor)
+            waited=sessions.execute(actor,'sessions.wait',dict(operation_id='step-one',timeout=0),authorize=lambda:actor)
+            self.assertEqual(waited['result']['operation']['answer']['text'],'fixture answer')
+            self.assertEqual(waited['result']['operation']['operation'],'grok.prompt')
+            self.assertFalse(waited['result']['operation']['result']['allocation_created'])
