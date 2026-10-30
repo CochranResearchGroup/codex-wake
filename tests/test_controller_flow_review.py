@@ -28,19 +28,37 @@ class FlowReviewTests(unittest.TestCase):
             path.unlink()
             self.assertEqual(owner().advance(actor(),run['run_id']),done)
 
-    def test_wall_clock_rollback_holds_without_dispatch_or_budget_reset(self):
+    def test_wall_rollback_never_extends_original_qualified_elapsed_budget(self):
         with tempfile.TemporaryDirectory() as directory:
-            clock=[100];calls=[]
-            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=lambda *a,**k:calls.append(a[0]) or {},authorize=actor,now=lambda:clock[0])
+            wall=[100];sample={'boot_id':'fixture-clock-only','seconds':10};calls=[]
+            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=lambda *a,**k:calls.append(a[0]) or {},authorize=actor,now=lambda:wall[0],clock=lambda:dict(sample))
             source=dict(id='example',version=1,entry='call',limits=dict(max_seconds=1,metering='estimate_opt_in'),nodes=[dict(id='call',type='call',operation='inventory.list',arguments={})])
             owner().publish(actor(),source);run=owner().start(actor(),'example',1,inputs={},intent='rollback',binding='caller')
-            clock[0]=99
-            held=owner().advance(actor(),run['run_id'])
-            self.assertEqual(held['phase'],'held')
-            self.assertEqual(held['reason'],'flow_clock_uncertain')
+            wall[0]=99;sample['seconds']=12
+            stopped=owner().advance(actor(),run['run_id'])
+            self.assertEqual(stopped['phase'],'cancelled')
+            self.assertEqual(stopped['limit_stop']['reason'],'flow_nested_limit')
             self.assertEqual(calls,[])
-            self.assertEqual(held['created_at'],100)
-            self.assertEqual(held['condition_usage'],dict(calls=0,tokens=0))
+            self.assertEqual(stopped['created_at'],100)
+            self.assertGreaterEqual(stopped['elapsed_clock']['elapsed'],2)
+            self.assertEqual(stopped['elapsed_clock']['wall_latest'],100)
+            self.assertEqual(stopped['elapsed_clock']['wall_observation'],'regressed')
+            self.assertEqual(stopped['condition_usage'],dict(calls=0,tokens=0))
+
+    def test_qualified_elapsed_counter_continues_under_budget_with_visible_wall_uncertainty(self):
+        with tempfile.TemporaryDirectory() as directory:
+            wall=[100];sample={'boot_id':'fixture-clock-only','seconds':10};calls=[]
+            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=lambda *a,**k:calls.append(a[0]) or {},authorize=actor,now=lambda:wall[0],clock=lambda:dict(sample))
+            source=dict(id='example',version=1,entry='call',limits=dict(max_seconds=1,metering='estimate_opt_in'),nodes=[dict(id='call',type='call',operation='inventory.list',arguments={})])
+            owner().publish(actor(),source);run=owner().start(actor(),'example',1,inputs={},intent='rollback-under-budget',binding='caller')
+            wall[0]=99;sample['seconds']=10.25
+            done=owner().advance(actor(),run['run_id'])
+            self.assertEqual(done['phase'],'completed')
+            self.assertEqual(calls,['inventory.list'])
+            self.assertEqual(done['elapsed_clock']['elapsed'],.25)
+            self.assertEqual(done['elapsed_clock']['wall_latest'],100)
+            self.assertEqual(done['elapsed_clock']['wall_observation'],'regressed')
+            self.assertGreater(done['elapsed_clock']['wall_regression_observations'],0)
 
     def test_elapsed_budget_survives_handoff_and_boot_or_counter_loss_holds(self):
         for mode in ('elapsed','boot','counter'):
