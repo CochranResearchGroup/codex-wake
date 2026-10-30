@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "3627fdd",
+  "tip_sha": "f9c1061",
   "state": "running",
   "tickets": {
     "394": {
@@ -153,7 +153,13 @@
       "owned_paths": [],
       "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "integrated_commits": [
+        "c6af360",
+        "012dc11",
+        "7679732",
+        "dab9ddb"
+      ]
     },
     "399": {
       "title": "Authorize direct API and OAuth MCP operations with scoped principals",
@@ -261,7 +267,15 @@
       "owned_paths": [],
       "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "integrated_commits": [
+        "9042dc8",
+        "75417a3",
+        "cd31d76",
+        "e71ccdb",
+        "b562dfe",
+        "f9c1061"
+      ]
     },
     "403": {
       "title": "Display Wake controller notifications and model-readable intervention state",
@@ -326,7 +340,13 @@
       ],
       "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
       "result_sha": null,
-      "validation": []
+      "validation": [
+        {
+          "command": "PYTHONPATH=src repository-venv/python -m unittest discover -s tests -p test_controller_flows.py -v",
+          "red": "interrupted retained-result recovery absent; cancellation absent; waiting cancellation did not reach owner",
+          "green": "8 focused behaviors passed; public installed CLI red pending shared registration"
+        }
+      ]
     },
     "407": {
       "title": "Execute foreach in new sessions and ordered same-session prompts",
