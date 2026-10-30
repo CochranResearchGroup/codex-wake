@@ -122,3 +122,95 @@ class FlowReviewTests(unittest.TestCase):
             self.assertEqual(done['condition_usage'],dict(calls=6,tokens=6))
             self.assertEqual(cancellations,[prompts[0]])
             self.assertEqual(len(prompts),2)
+
+    def test_zero_iteration_token_bound_stops_before_creating_a_child(self):
+        with tempfile.TemporaryDirectory() as directory:
+            effects=[]
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']()
+                if operation=='sessions.capabilities':return dict(result=dict(modes=['new_session']))
+                effects.append(operation)
+                if operation=='sessions.create':return dict(result=dict(operation=dict(phase='terminal',execution='completed',result=dict(target={'conversation_id':'should-not-create'}))))
+                self.fail(operation)
+            owner=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=actor,now=lambda:100)
+            source=dict(id='example',version=1,entry='each',limits=dict(max_tokens=6,metering='estimate_opt_in'),nodes=[dict(id='each',type='foreach',items=['one'],mode='new_session',profile='fixture',expected_target={},prompt='fixture',limits=dict(max_tokens=0))])
+            owner.publish(actor(),source);run=owner.start(actor(),'example',1,inputs={},intent='zero',binding='caller')
+            done=owner.advance(actor(),run['run_id'])
+            self.assertEqual(effects,[])
+            self.assertEqual(done['phase'],'failed')
+            self.assertIsNone(done['result']['items'][0]['target'])
+            self.assertEqual(done['condition_usage'],dict(calls=0,tokens=0))
+
+    def test_wait_retries_charge_the_original_iteration_across_handoff(self):
+        with tempfile.TemporaryDirectory() as directory:
+            prompts=[];cancels=[]
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']()
+                if operation=='sessions.capabilities':return dict(result=dict(modes=['sequential']))
+                if operation=='sessions.prompt':
+                    prompts.append(kwargs['request']['operation_id'])
+                    return dict(result=dict(operation=dict(operation_id=prompts[-1],phase='waiting',execution='queued')))
+                if operation=='sessions.cancel':
+                    cancels.append(args['operation_id'])
+                    return dict(result=dict(operation=dict(phase='terminal',execution='cancelled',cancellation='confirmed')))
+                if operation=='sessions.wait':
+                    pending=args['operation_id']==prompts[0]
+                    return dict(result=dict(wait=dict(status='timeout' if pending else 'completed'),operation=dict(operation_id=args['operation_id'],phase='waiting' if pending else 'terminal',execution='queued' if pending else 'completed')))
+                self.fail(operation)
+            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=actor,now=lambda:100)
+            source=dict(id='example',version=1,entry='each',limits=dict(max_calls=10,max_tokens=10,metering='estimate_opt_in'),nodes=[
+                dict(id='each',type='foreach',items=['one','two'],mode='sequential',profile='fixture',expected_target={'conversation_id':'existing'},prompt={'ref':'item'},join='all_complete',limits=dict(max_calls=2,max_tokens=3),next='end'),dict(id='end',type='end',value={'ref':'steps.each'})])
+            owner().publish(actor(),source);run=owner().start(actor(),'example',1,inputs={},intent='retry',binding='caller')
+            waiting=owner().advance(actor(),run['run_id']);self.assertEqual(waiting['phase'],'waiting')
+            done=owner().advance(actor(),run['run_id'])
+            self.assertEqual(done['phase'],'completed')
+            self.assertEqual(done['result']['status'],'failed')
+            self.assertEqual(done['iteration_frames']['each.0']['reason'],'iteration_call_limit')
+            self.assertEqual([frame['usage'] for frame in done['iteration_frames'].values()],[dict(calls=2,tokens=3),dict(calls=2,tokens=3)])
+            self.assertEqual(done['condition_usage'],dict(calls=4,tokens=6))
+            self.assertEqual(cancels,[prompts[0]]);self.assertEqual(len(prompts),2)
+
+    def test_iteration_limits_tighten_parent_and_parent_reservations_never_reset(self):
+        with tempfile.TemporaryDirectory() as directory:
+            prompts=[]
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']()
+                if operation=='sessions.capabilities':return dict(result=dict(modes=['sequential']))
+                if operation=='sessions.prompt':
+                    prompts.append(kwargs['request']['operation_id'])
+                    return dict(result=dict(operation=dict(operation_id=prompts[-1],phase='waiting',execution='queued')))
+                if operation=='sessions.wait':return dict(result=dict(wait=dict(status='completed'),operation=dict(operation_id=args['operation_id'],phase='terminal',execution='completed')))
+                self.fail(operation)
+            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=actor,now=lambda:100)
+            source=dict(id='example',version=1,entry='each',limits=dict(max_calls=10,max_tokens=6,max_seconds=5,metering='estimate_opt_in'),nodes=[
+                dict(id='each',type='foreach',items=['one','two'],mode='sequential',profile='fixture',expected_target={'conversation_id':'existing'},prompt={'ref':'item'},limits=dict(max_calls=20,max_tokens=10,max_seconds=20))])
+            owner().publish(actor(),source);run=owner().start(actor(),'example',1,inputs={},intent='parent',binding='caller')
+            done=owner().advance(actor(),run['run_id'])
+            self.assertEqual(done['limit_stop']['reason'],'flow_token_limit')
+            self.assertEqual(done['condition_usage'],dict(calls=2,tokens=6))
+            frame=done['iteration_frames']['each.0']
+            self.assertEqual((frame['limits']['max_calls'],frame['limits']['max_tokens'],frame['limits']['max_seconds']),(10,6,5))
+            self.assertEqual(frame['phase'],'completed');self.assertEqual(len(prompts),1)
+            self.assertEqual(owner().advance(actor(),run['run_id']),done)
+
+    def test_nested_predicate_reservation_tightens_remaining_foreach_parent_budget(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);path=root/'controller-conditions.json'
+            path.write_text(json.dumps(dict(version=1,functions={'predicate@1':dict(kind='semantic',inputs={},effects='action',estimated_tokens=4)})));path.chmod(0o600)
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']()
+                if operation=='sessions.capabilities':return dict(result=dict(modes=['new_session']))
+                self.fail('parent token reservation admitted another native effect')
+            owner=ControllerFlows(root,host='host',environment='test',invoke=invoke,authorize=actor,now=lambda:100)
+            source=dict(id='example',version=1,entry='choose',limits=dict(max_calls=10,max_tokens=6,metering='estimate_opt_in'),nodes=[
+                dict(id='choose',type='branch',condition=dict(function='predicate',version=1,arguments={}),then='each',**{'else':'end'}),
+                dict(id='each',type='foreach',items=['one'],mode='new_session',profile='fixture',expected_target={},prompt='fixture',limits=dict(max_tokens=4),next='end'),dict(id='end',type='end')])
+            owner.publish(actor(),source);run=owner.start(actor(),'example',1,inputs={},intent='nested',binding='caller')
+            def semantic(root,actor,function,args,bounds,tokens,receipt,**kwargs):
+                receipt['native_execution']='completed'
+                return dict(status='known',value=True,usage={'tokens':4})
+            with patch('codex_wake.controller_condition_native.invoke',side_effect=semantic):done=owner.advance(actor(),run['run_id'])
+            self.assertEqual(done['limit_stop']['reason'],'flow_token_limit')
+            self.assertEqual(done['condition_usage'],dict(calls=1,tokens=4))
+            self.assertEqual(done['iteration_frames']['each.0']['usage'],dict(calls=0,tokens=0))
