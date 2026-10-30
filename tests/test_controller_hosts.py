@@ -79,3 +79,33 @@ class HostTests(unittest.TestCase):
                 operations.execute('hosts.route', dict(args, operation_id='operation-two', idempotency_key='request-two'), actor=actor)
             self.assertEqual(error.exception.code, 'offline_target')
             self.assertEqual(len(calls), 1)
+
+    def test_exact_pin_and_final_authorization_callback_block_submission(self):
+        from dataclasses import replace
+        from codex_wake.controller_hosts import HostRegistry, HostOperations
+        from codex_wake.controller_auth import Actor, AuthError
+        with tempfile.TemporaryDirectory() as directory:
+            registry = HostRegistry(Path(directory) / 'hosts.sqlite', now=lambda: 100)
+            row = registry.register('host', 'remote', kind='remote', authority='authority', destination='fixture', operator=True)
+            calls = []
+            class ForbiddenTransport:
+                def send(self, *args):
+                    calls.append(args)
+                    raise AssertionError('unauthorized input reached SSH')
+            operations = HostOperations(registry, transport=ForbiddenTransport())
+            actor = Actor('caller', 'service', 'client', 'grant', 'https://wake.test', 'https://wake.test/controller', frozenset({'observe'}), [dict(row['target'])], 200)
+            args = dict(target=row['target'], operation='inventory.list', arguments={}, operation_id='revoked-operation', idempotency_key='revoked-key')
+            for scopes in ([{'host': 'host', 'environment': 'remote'}], [dict(row['target'], authority='other')]):
+                with self.assertRaises(InventoryError) as error:
+                    operations.execute('hosts.route', args, actor=replace(actor, targets=scopes))
+                self.assertEqual(error.exception.code, 'unauthorized_target')
+            def revoked(): raise AuthError()
+            result = operations.execute('hosts.route', args, actor=actor, authorize=revoked)['route']
+            self.assertEqual((result['execution'], result['delivery'], result['reason']), ('not_started', 'not_submitted', 'invalid_token'))
+            later = operations.execute('hosts.route', args, actor=actor, authorize=lambda: actor)['route']
+            self.assertEqual(result, later)
+            registry.now = lambda: 131
+            with self.assertRaises(InventoryError) as error:
+                operations.execute('hosts.route', dict(args, operation_id='expired-observation', idempotency_key='expired-observation'), actor=actor)
+            self.assertEqual(error.exception.code, 'stale_target')
+            self.assertEqual(calls, [])
