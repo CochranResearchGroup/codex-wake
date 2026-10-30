@@ -79,8 +79,8 @@
     },
     "396": {
       "title": "Search permitted history and resume its owning conversation",
-      "state": "integrated",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         395,
         375,
@@ -94,12 +94,16 @@
         {
           "command": "source unittest test_controller*.py",
           "result": "34 passed including history grant, resume and host routing owner tests"
+        },
+        {
+          "command": "reinstall integrated package in /tmp/codex-wake-accounts395-installed; run scripts/controller_history_acceptance.py",
+          "result": "passed actual installed CLI/API/MCP and qualified fixture effects on integration538694c"
         }
       ],
       "worker_branch": "feat/controller-history396",
       "worker_worktree": "/tmp/codex-wake-history396",
       "integrated_sha": "565d856",
-      "remaining_gate": "remote actor/history guard wiring, worker final revocation/installed proof"
+      "remaining_gate": null
     },
     "397": {
       "title": "Launch visibly identified stock and modded immutable builds",
@@ -187,8 +191,8 @@
     },
     "400": {
       "title": "Route pinned operations through SSH and registered host environments",
-      "state": "integrated",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         394,
         399
@@ -202,23 +206,33 @@
       ],
       "base_sha": "71b7766fbd199c91c45ee5b1a4425a99b5aa4bcf",
       "result_sha": "0d895443f00eba70adc5793f055d2e2073388211",
-      "validation": [],
+      "validation": [
+        {
+          "command": "reinstall integrated package in /tmp/codex-wake-accounts395-installed; run scripts/controller_hosts_acceptance.py",
+          "result": "passed actual installed CLI/API/MCP and qualified fixture effects on integration538694c"
+        }
+      ],
       "worker_branch": "feat/controller-400",
       "worker_worktree": "/tmp/codex-wake-400",
       "integrated_sha": "5964375",
-      "remaining_gate": "actual installed shared CLI/API/MCP qualification worker running"
+      "remaining_gate": null
     },
     "401": {
       "title": "Return correlated answers durably through caller disconnect",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         399,
         400
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root",
+      "owned_paths": [
+        "durable operation runtime",
+        "operation/result commands",
+        "shared registrations",
+        "runtime tests"
+      ],
+      "base_sha": "538694c",
       "result_sha": null,
       "validation": []
     },
