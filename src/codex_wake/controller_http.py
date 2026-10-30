@@ -286,12 +286,32 @@ class ControllerHTTPServer(ThreadingHTTPServer):
             raise ValueError('controller listener must bind loopback; use authenticated TLS ingress')
         self._slots = threading.BoundedSemaphore(16)
         self.authority = authority
+        self._recovery_lock = threading.Lock()
         self.operations = ProtectedOperations(authority, operations)
         self.consent_secret, self.owner = consent_secret, owner
         super().__init__(address, ControllerHandler)
 
     def service_actions(self):
         self.authority.recover_revocations(limit=1)
+        inventory=self.operations.operations.inventory
+        if inventory is None:
+            return
+        from pathlib import Path
+        root=inventory.root
+        if not (Path(root)/'controller-recovery'/'policies.sqlite').is_file():
+            return
+        if self._recovery_lock.acquire(blocking=False):
+            def run():
+                try:
+                    from .controller_schedule import maintain
+                    maintain(self.authority,root)
+                finally:
+                    self._recovery_lock.release()
+            try:
+                threading.Thread(target=run,name='controller-recovery-scheduler',daemon=True).start()
+            except BaseException:
+                self._recovery_lock.release()
+                raise
 
     def process_request(self, request, address):
         request.settimeout(5)
