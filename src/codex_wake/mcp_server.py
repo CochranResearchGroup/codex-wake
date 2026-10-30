@@ -169,6 +169,11 @@ from .migration_commands import tool_specs as migration_tool_specs
 SPECS.update(migration_tool_specs())
 
 
+from .flow_commands import tool_specs as flow_tool_specs
+for _name, _spec in flow_tool_specs().items():
+    SPECS[_name] = (*_spec[:3], dict(_spec[3], caller_thread_id={'type': 'string'}),
+        [*_spec[4], 'caller_thread_id'], _spec[5])
+
 from .controller_http import TOOLS as controller_public_tools
 for tool_name, (operation, schema) in controller_public_tools.items():
     if operation.startswith('operations.'):
@@ -308,6 +313,13 @@ class CommandRunner:
                 return result, result['status'] != 'completed'
             except InventoryError as error:
                 return {'error': {'code': error.code, 'message': str(error)}}, True
+        if group == 'controller-flows':
+            from .flow_commands import mcp_call
+            try:
+                value = mcp_call(self, verb, arguments, native_context)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'flow_held'), 'message': str(error)}}, True
         if group == 'controller-operations':
             from .operation_commands import mcp_call
             try:

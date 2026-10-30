@@ -68,6 +68,12 @@ class FlowDefinition:
                 flow_error('invalid_flow', 'call requires an operation and object arguments')
             if kind == 'branch' and not {'condition', 'then', 'else'} <= node.keys():
                 flow_error('invalid_flow', 'branch requires typed condition and explicit paths')
+            if kind == 'branch':
+                condition = node['condition']
+                if type(condition) is not bool and (not isinstance(condition, dict)
+                        or set(condition) != {'op', 'left', 'right'}
+                        or condition['op'] not in ('eq', 'ne', 'lt', 'lte', 'gt', 'gte')):
+                    flow_error('invalid_condition', 'supported typed deterministic condition required')
             if kind == 'wait' and (type(node.get('timeout', 0)) not in (int, float) or not 0 <= node.get('timeout', 0) <= 30):
                 flow_error('invalid_flow', 'wait timeout must be between zero and 30 seconds')
             by_id[identifier] = node

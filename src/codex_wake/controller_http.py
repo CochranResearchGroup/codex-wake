@@ -78,6 +78,12 @@ for verb in ('send', 'result', 'wait', 'stream', 'cancel', 'rebind'):
         'required': required, 'additionalProperties': False})
 
 
+from .flow_commands import tool_specs as flow_specs
+for name, spec in flow_specs().items():
+    TOOLS[name] = (spec[1], {'type': 'object', 'properties': spec[3],
+        'required': spec[4], 'additionalProperties': False})
+
+
 def operation_failure(operation, error):
     return {'schema_version': 1, 'operation': operation, 'status': 'failed',
             'error': {'code': error.code, 'message': str(error)}}
@@ -93,6 +99,8 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)
+            for verb in ('propose', 'publish', 'definition', 'start', 'inspect', 'advance', 'reconcile', 'cancel')},
         'migration.preview': ('migration.observe', None, None),
         'migration.apply': ('admin', None, None),
         'migration.rollback': ('admin', None, None),
@@ -132,7 +140,23 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('operations.'):
+        if operation.startswith('flows.'):
+            from types import SimpleNamespace
+            from .flow_commands import owner, execute
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host flow owner unavailable')
+            def dispatch(child_operation, child_arguments, guard):
+                # Every child rechecks both the active flow attempt and the current grant.
+                def authenticate(unused):
+                    guard()
+                    return self.authority.authenticate(token)
+                child = type(self)(SimpleNamespace(authenticate=authenticate), self.operations)
+                return child.execute(token, child_operation, child_arguments)
+            flows = owner(self.operations.inventory.root, actor=actor,
+                authorize=lambda: self.authority.authenticate(token), dispatch=dispatch)
+            result = execute(flows, actor, operation, arguments)
+        elif operation.startswith('operations.'):
+
             from .operation_commands import execute
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host operation owner is unavailable')

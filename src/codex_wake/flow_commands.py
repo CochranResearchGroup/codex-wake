@@ -74,19 +74,52 @@ def register_parser(subparsers):
     return parser
 
 
-def protected_execute(operation, arguments, root):
+def protected_execute(operation, arguments, root, *, authority=None, protected_type=None):
     from types import SimpleNamespace
     from .operation_commands import local_actor
     from .controller_http import ProtectedOperations
     from .controller_operations import ControllerOperations
     from .managed_inventory import ManagedInventory
-    authority = SimpleNamespace(authenticate=lambda unused: local_actor(root))
+    authority = authority or SimpleNamespace(authenticate=lambda unused: local_actor(root))
     operations = ControllerOperations(ManagedInventory(root), host=socket.gethostname(),
         environment=os.environ.get('WSL_DISTRO_NAME') or os.name)
-    return ProtectedOperations(authority, operations).execute('host-local-grant', operation, arguments)
+    return (protected_type or ProtectedOperations)(authority, operations).execute('host-local-grant', operation, arguments)
 
 
 def command(args, root):
     result = protected_execute('flows.' + args.flow_verb, args.arguments, root)
     print(json.dumps(result, sort_keys=True))
     return 0 if result['status'] == 'completed' else 2
+
+
+def mcp_call(runner, operation, arguments, native_context):
+    from types import SimpleNamespace
+    from .controller_auth import Actor
+    from .controller_http import ProtectedOperations
+    from .controller_mailbox import ControllerMailbox
+    from .goal_supervision import verified_native_caller
+    caller = arguments.get('caller_thread_id')
+    def authenticated(unused):
+        verified_native_caller(native_context, caller)
+        config = ControllerMailbox(runner.wake_root).config()
+        value = config.get('flow_callers', {}).get(caller)
+        if not isinstance(value, dict):
+            raise InventoryError('unauthorized_target', 'native flow caller requires its own host-approved grant')
+        return Actor(value['subject'], 'service', value['client_id'], value['grant_id'],
+            value['issuer'], value['resource'], frozenset(value['scopes']), value['targets'], value['expires_at'])
+    class NativeOperations(ProtectedOperations):
+        def execute(self, token, operation, arguments):
+            if operation == 'operations.send':
+                config = ControllerMailbox(runner.wake_root).config()
+                if arguments.get('backend', 'mailbox') == 'job':
+                    mapping = config.get('job_bindings', {}).get(arguments.get('sender_binding'), {})
+                    claimed = mapping.get('native_thread_id', mapping.get('native_subject'))
+                else:
+                    mapping = config.get('bindings', {}).get(arguments.get('sender_binding'), {})
+                    claimed = mapping.get('identity', {}).get('thread_id')
+                if claimed != caller:
+                    raise InventoryError('native_caller_unverified', 'flow child sender differs from invoking native session')
+                verified_native_caller(native_context, claimed)
+            return super().execute(token, operation, arguments)
+    return protected_execute(operation, {key: value for key, value in arguments.items() if key != 'caller_thread_id'},
+        runner.wake_root, authority=SimpleNamespace(authenticate=authenticated), protected_type=NativeOperations)

@@ -187,3 +187,16 @@ class FlowTests(unittest.TestCase):
             runtime.revoke_grant('grant', issuer='local://test', resource='wake:controller')
             with self.assertRaises(AuthError):
                 owner.advance(actor(), run['run_id'])
+
+    def test_invalid_predicate_is_rejected_before_any_run_can_be_started(self):
+        from codex_wake.controller_flows import ControllerFlows
+        with tempfile.TemporaryDirectory() as directory:
+            effects = []
+            owner = ControllerFlows(Path(directory), host='host', environment='test',
+                invoke=lambda *a, **kw: effects.append(a) or {}, authorize=lambda: actor(), now=lambda: 100)
+            source = definition()
+            source['nodes'][0]['condition']['op'] = 'python.eval'
+            with self.assertRaises(InventoryError) as caught:
+                owner.publish(actor(), source)
+            self.assertEqual(caught.exception.code, 'invalid_condition')
+            self.assertEqual(effects, [])
