@@ -101,3 +101,42 @@ class OAuthTests(unittest.TestCase):
             clock[0] = 701
             with self.assertRaises(AuthError): auth.authenticate(separate['access_token'])
             with self.assertRaises(ValueError): OAuthAuthority(auth.path, issuer='https://another.test', resource=auth.resource)
+
+    def test_integrated_account_grants_filter_each_account_and_redact_configuration(self):
+        from codex_wake.controller_auth import OAuthAuthority, AuthError
+        from codex_wake.controller_accounts import ControllerAccounts
+        from codex_wake.controller_operations import ControllerOperations
+        from codex_wake.controller_http import ProtectedOperations
+        from codex_wake.managed_inventory import ManagedInventory
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            homes = root / 'homes'
+            for account in ('alice', 'bob'):
+                (homes / ('codex-' + account)).mkdir(parents=True)
+            config = root / 'controller-accounts.toml'
+            config.write_text('[profiles]\nstate_root = "' + str(homes) + '"\nknown_profiles = ["alice", "bob"]\n[configuration.base.mcp_servers.example.env]\nAPI_KEY = "private-fixture"\n')
+            accounts = ControllerAccounts(config, host='host', environment='test')
+            target = accounts.execute('accounts.resolve', {'selector': 'alice'})['account']['target']
+            authority = OAuthAuthority(root / 'oauth.sqlite', issuer='https://wake.test', resource='https://wake.test/mcp')
+            client = authority.register({'redirect_uris': ['http://localhost/callback']})
+            verifier = 'x' * 43
+            challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            code = authority.authorize(subject='service-alice', principal_kind='service',
+                client_id=client['client_id'], redirect_uri=client['redirect_uris'][0], resource=authority.resource,
+                scopes=['account.observe', 'configuration.observe'], targets=[target], code_challenge=challenge)
+            token = authority.token(dict(grant_type='authorization_code', client_id=client['client_id'],
+                code=code, redirect_uri=client['redirect_uris'][0], code_verifier=verifier,
+                resource=authority.resource))['access_token']
+            service = ProtectedOperations(authority, ControllerOperations(ManagedInventory(root / 'wake'),
+                host='host', environment='test', accounts=accounts))
+            rows = service.execute(token, 'accounts.list', {})['result']['accounts']
+            self.assertEqual([row['id'] for row in rows], ['codex-alice'])
+            view = service.execute(token, 'configuration.explain', {'selector': 'alice'})
+            self.assertNotIn('private-fixture', str(view))
+            with self.assertRaises(AuthError):
+                service.execute(token, 'configuration.explain', {'selector': 'bob'})
+            with self.assertRaises(AuthError):
+                service.execute(token, 'accounts.resolve', {'selector': 'bob'})
+            config.write_text(config.read_text() + '\n# new generation\n')
+            with self.assertRaises(AuthError):
+                service.execute(token, 'accounts.resolve', {'selector': 'alice'})

@@ -124,8 +124,8 @@
     },
     "399": {
       "title": "Authorize direct API and OAuth MCP operations with scoped principals",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         394
       ],
@@ -138,21 +138,40 @@
         "admission tests"
       ],
       "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
-      "result_sha": null,
-      "validation": [],
+      "result_sha": "401ae5d81ecaeb6ea70c4dadf4695252e0ba50a4",
+      "validation": [
+        {
+          "command": "repository venv unittest discover -s tests -p test_controller*.py",
+          "result": "14 passed before additional integrated account-grant regression"
+        },
+        {
+          "command": "installed disposable python -m unittest discover -s tests -p test_controller_auth.py",
+          "result": "4 passed including integrated account filtering, config redaction and revision invalidation"
+        },
+        {
+          "command": "rebuild/reinstall integrated package; installed python scripts/controller_oauth_acceptance.py",
+          "result": "passed actual CLI/OAuth/API/MCP/reconnect/revocation; isolated synthetic state; no production effects"
+        }
+      ],
       "worker_branch": "feat/controller-399",
-      "worker_worktree": "/tmp/codex-wake-399"
+      "worker_worktree": "/tmp/codex-wake-399",
+      "integrated_sha": "724da66"
     },
     "400": {
       "title": "Route pinned operations through SSH and registered host environments",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         394,
         399
       ],
-      "worker": null,
-      "owned_paths": [],
+      "worker": "/root",
+      "owned_paths": [
+        "host/environment registry",
+        "SSH routing adapter",
+        "host command registrations",
+        "host routing tests"
+      ],
       "base_sha": null,
       "result_sha": null,
       "validation": []
