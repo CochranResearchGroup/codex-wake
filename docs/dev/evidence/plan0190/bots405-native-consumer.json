@@ -58,6 +58,15 @@
     "native MCP",
     "remote CLI"
   ],
+  "public_wake_readback": {
+    "api_ack": "0eda3b517c41403d888e58ebd42aeefd93bf2bfcb3ab43bea43e3ab100d5942d",
+    "broad_grant_denied": true,
+    "cli_ack": "f98cea48a6dd4aed8e0764d6a355b32f4ef3dd62b1d843f28d7a0f9e7b1bd65e",
+    "native_mcp_ack": "d34c0cb5ce354bc9a572c545aaab133991cedc02d7d24989881bfc91db22c2b6",
+    "oauth_mcp_ack": "6ca4b30d4f9b4491b4757ee6344002e2570b03cc89c24b2689612b34362ae5dd",
+    "remote_cli_ack": "962096d603e842bf9d8ddabbdc9d4124f7891dc5b9b14999a3435ed950142328",
+    "revoked_access_denied": true
+  },
   "queue_preserved": true,
   "schema_version": 1,
   "startup_network_requests_trapped": 5,
