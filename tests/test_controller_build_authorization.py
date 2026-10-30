@@ -31,3 +31,27 @@ class BuildAuthorizationTests(unittest.TestCase):
     def test_stage_requires_admin_and_host_pinned_recipe(self):
         with self.assertRaises(AuthError):
             self.service({'admin'}, [{}]).execute('token', 'builds.stage', {'recipe': '/tmp/untrusted'})
+
+    def test_recipe_replacement_after_admission_is_refused_before_dispatch(self):
+        import hashlib
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as directory:
+            recipe = Path(directory) / 'approved.json'
+            recipe.write_text('{"version":1}')
+            target = {'host': 'host', 'environment': 'test', 'recipe': 'approved',
+                      'recipe_sha256': hashlib.sha256(recipe.read_bytes()).hexdigest()}
+            actor = SimpleNamespace(scopes={'admin'}, targets=[target])
+            authority = SimpleNamespace(authenticate=lambda token: actor)
+            builds = SimpleNamespace(recipes={'approved': str(recipe)},
+                execute=lambda *args: self.fail('changed recipe was dispatched'))
+            class Runtime:
+                def execute(unused, caller, operation, arguments, *, authorize, dispatch):
+                    recipe.write_text('{"version":2}')
+                    authorize()
+                    return {'unexpected': 'changed recipe admitted'}
+            service = BuildAuthorization(authority, builds,
+                recipe_targets={'approved': target}, runtime=Runtime())
+            with self.assertRaises(InventoryError) as caught:
+                service.execute('token', 'builds.stage', {'recipe': 'approved'})
+            self.assertEqual(caught.exception.code, 'stale_target')

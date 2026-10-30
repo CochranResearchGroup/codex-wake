@@ -3,6 +3,9 @@
 The runtime must persist intent before dispatch and reconcile uncertain launches
 without replay. This module deliberately refuses effects without that owner.
 """
+import hashlib
+from pathlib import Path
+
 from .controller_auth import AuthError
 from .managed_inventory import InventoryError
 
@@ -38,13 +41,24 @@ class BuildAuthorization:
         if not any(fields <= scope.keys() and all(target.get(k) == v for k, v in scope.items())
                    for scope in actor.targets):
             raise AuthError('insufficient_scope')
-        current = self.authority.authenticate(token)
-        if current != actor:
-            raise AuthError()
+        def authorize():
+            current = self.authority.authenticate(token)
+            if current != actor:
+                raise AuthError()
+            if operation == 'builds.stage':
+                path = self.builds.recipes.get(arguments.get('recipe'))
+                try:
+                    digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                except (OSError, TypeError):
+                    raise InventoryError('stale_target', 'host recipe is unavailable') from None
+                if digest != target['recipe_sha256']:
+                    raise InventoryError('stale_target', 'host recipe changed since authorization')
+            return current
+        authorize()
         if self.runtime is None:
             raise InventoryError('operation_runtime_required', 'durable mutation intent and uncertain-effect reconciliation required')
         # Runtime owns durable idempotency, cancellation/reconnect, result custody,
         # and a final admission callback immediately before invoking this owner.
         return self.runtime.execute(actor, operation, arguments,
-                                    authorize=lambda: self.authority.authenticate(token),
+                                    authorize=authorize,
                                     dispatch=self.builds.execute)
