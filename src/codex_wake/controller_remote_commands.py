@@ -6,8 +6,6 @@ import os
 import secrets
 import socket
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
 
 from .controller_auth import OAuthAuthority
 from .controller_http import ControllerHTTPServer
@@ -35,7 +33,9 @@ def register(commands):
     remote = commands.add_parser('remote', help='perform authenticated direct controller operation')
     remote.add_argument('--endpoint', required=True)
     remote.add_argument('--token-file', type=Path, required=True)
-    remote.add_argument('operation', choices=['tabs.list','tabs.show','tabs.preview','tabs.apply','tabs.undo','tabs.capture','tabs.input', 'inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list', 'builds.launch', 'builds.stage', 'builds.select', 'builds.rollback', 'hosts.list', 'hosts.resolve', 'hosts.route', 'history.search', 'history.read', 'history.resume', 'operations.send', 'operations.result', 'operations.wait', 'operations.stream', 'operations.cancel', 'operations.rebind', 'migration.preview', 'migration.apply', 'migration.rollback', 'flows.propose', 'flows.publish', 'flows.definition', 'flows.start', 'flows.inspect', 'flows.advance', 'flows.reconcile', 'flows.cancel', 'health.observe', 'notices.list', 'notices.publish', 'notices.reconcile', 'recovery.list', 'recovery.show', 'recovery.configure', 'recovery.enable', 'recovery.disable', 'recovery.check', 'recovery.tick', 'recovery.apply', 'recovery.reconcile', 'sessions.capabilities', 'sessions.create', 'sessions.prompt', 'sessions.wait', 'sessions.cancel', 'sessions.checkpoint', 'sessions.fork', 'grok.capabilities', 'grok.create', 'grok.load', 'grok.prompt', 'grok.wait', 'grok.cancel', 'grok.health', 'grok.checkpoint', 'grok.fork'])
+    from .controller_client import OPERATIONS
+    remote.add_argument('operation', choices=sorted(OPERATIONS))
+    remote.add_argument('--transport', choices=('api','mcp'), default='api')
     remote.add_argument('--arguments', type=json.loads, default={})
 
 
@@ -46,24 +46,8 @@ def private_write(path, text):
 
 def command(args):
     if args.controller_command == 'remote':
-        # The token file is private caller OAuth, never a provider credential.
-        from urllib.parse import urlsplit
-        endpoint = urlsplit(args.endpoint)
-        if endpoint.scheme != 'https' and not (endpoint.scheme == 'http' and endpoint.hostname in ('127.0.0.1', '::1', 'localhost')):
-            raise ValueError('HTTPS endpoint required except loopback fixtures')
-        if args.token_file.stat().st_mode & 0o077: raise ValueError('token file must be private')
-        request = Request(args.endpoint.rstrip('/') + '/operations', data=json.dumps(dict(operation=args.operation, arguments=args.arguments)).encode(),
-            headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + args.token_file.read_text().strip()})
-        # Bearer credentials must never follow redirects to a different origin.
-        from urllib.request import HTTPRedirectHandler, build_opener
-        class NoRedirect(HTTPRedirectHandler):
-            def redirect_request(self, *a, **kw): return None
-        try:
-            with build_opener(NoRedirect).open(request, timeout=35) as response: value = json.load(response)
-        except HTTPError as error:
-            value = json.load(error)
-            print(json.dumps(value, sort_keys=True)); return 2
-        print(json.dumps(value, sort_keys=True)); return 0
+        from .controller_client import execute_cli
+        return execute_cli(args)
     if args.wake_root is None: raise ValueError('host Wake root is required')
     root = Path(args.wake_root) / 'controller-auth'
     config_path = root / 'authority.json'

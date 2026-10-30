@@ -10,6 +10,40 @@ from pathlib import Path
 
 
 class PortableClientTests(unittest.TestCase):
+    def test_linux_and_portable_callers_reject_oversized_controller_responses(self):
+        import subprocess
+        import sys
+        body = json.dumps({'fixture': 'x' * 4194304}).encode()
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args): pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers['Content-Length']))
+                self.send_response(200)
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                token = Path(directory) / 'token'
+                token.write_text('synthetic-token')
+                token.chmod(0o600)
+                for module in ('codex_wake.controller_client', 'codex_wake.cli'):
+                    with self.subTest(module=module):
+                        result = subprocess.run([sys.executable, '-m', module, 'controller', 'remote',
+                            '--endpoint', 'http://127.0.0.1:' + str(server.server_port),
+                            '--token-file', str(token), 'inventory.list'], capture_output=True, text=True, timeout=15)
+                        self.assertEqual(result.returncode, 2)
+                        self.assertEqual(json.loads(result.stdout)['status'], 'failed')
+                        self.assertEqual(json.loads(result.stdout)['error']['code'], 'response_limit')
+                        self.assertLess(len(result.stdout), 4096)
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join()
+
     def test_portable_client_preserves_api_and_oauth_mcp_envelopes(self):
         from codex_wake.controller_client import main
         requests=[]

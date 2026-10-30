@@ -71,6 +71,7 @@ def invoke(endpoint,token_file,operation,arguments,*,transport='api'):
         with response:raw=response.read(4194305)
         if len(raw)>4194304:raise ClientError('response_limit','response exceeds bounded capacity')
         value=json.loads(raw)
+    except ClientError:raise
     except (ValueError,UnicodeError):raise ClientError('invalid_response','controller response was not a bounded JSON envelope') from None
     if not isinstance(value,dict):raise ClientError('invalid_response','controller operation envelope required')
     if transport=='mcp' and not failed:
@@ -96,6 +97,11 @@ def main(argv=None):
     remote.add_argument('--transport',choices=('api','mcp'),default='api')
     remote.add_argument('operation',choices=sorted(OPERATIONS));remote.add_argument('--arguments',type=json.loads,default={})
     args=parser.parse_args(argv)
+    return execute_cli(args)
+
+
+def execute_cli(args):
+    """Shared bounded caller behavior for portable and full native CLI parsers."""
     try:
         value,failed=invoke(args.endpoint,args.token_file,args.operation,args.arguments,transport=args.transport)
         print(json.dumps(value,sort_keys=True));return 2 if failed else 0
