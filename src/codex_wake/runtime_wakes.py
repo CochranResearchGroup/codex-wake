@@ -210,8 +210,10 @@ def dispatch(root, found, *, time_provider=None):
 
 
 def add_grok_parser(subparsers):
-    group=subparsers.add_parser('grok',help='qualified managed-launch Grok terminal wakes')
+    group=subparsers.add_parser('grok',help='structured Grok control and explicit legacy terminal wakes')
     commands=group.add_subparsers(dest='grok_command',required=True)
+    from .grok_commands import register_verbs
+    register_verbs(commands)
     bind=commands.add_parser('bind',help='operator-only approval of an exact already-open minimal TUI')
     for key in ('socket','pane','session-id','executable'):
         bind.add_argument('--'+key,required=True)
@@ -240,6 +242,9 @@ def add_grok_parser(subparsers):
 
 
 def command(args,root):
+    if args.grok_command in ('capabilities','create','load','prompt','wait','cancel','health','checkpoint','fork'):
+        from .grok_commands import command as structured_command
+        return structured_command(args,root)
     host=GrokTerminalHost(root)
     if args.grok_command=='bind':
         value=host.enroll(socket=args.socket,pane=args.pane,pid=args.pid,session_id=args.session_id,

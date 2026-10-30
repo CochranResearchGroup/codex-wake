@@ -264,6 +264,9 @@ class ControllerFlows:
                     authorize=lambda: self.check(actor, flow_id, 'control'))
                 if node['mode'] not in capabilities.get('result', {}).get('modes', []):
                     flow_error('unsupported_session_mode', 'host cannot execute the requested foreach session mode')
+                maximum=capabilities.get('result',{}).get('max_parallelism',8)
+                if type(maximum) is not int or not 1<=maximum<=8 or node.get('parallelism',1)>maximum:
+                    flow_error('unsupported_parallelism','requested foreach parallelism exceeds the negotiated runtime capability')
         from .controller_flow_foreach import expand
         execution, memberships = expand(definition, state, self._resolve, _UNKNOWN)
         state.update(execution_definition=execution, memberships=memberships, cursor=execution['entry'])

@@ -94,9 +94,15 @@ class ControllerEffects:
         return self.cancel(SimpleNamespace(**record['principal']),record)
 
     def cancel_native_owned(self, record):
+        if record['operation']=='grok.prompt':
+            from .controller_grok import ControllerGrok
+            return ControllerGrok(self.root).cancel_native_owned(record)
         from .controller_flow_sessions import ControllerFlowSessions
         return ControllerFlowSessions(self.root).cancel_native_owned(record)
 
     def observe_native_owned(self, record):
+        if record['operation'].startswith('grok.'):
+            from .controller_grok import ControllerGrok
+            return ControllerGrok(self.root).observe_native_owned(record)
         from .controller_flow_sessions import ControllerFlowSessions
         return ControllerFlowSessions(self.root).observe_native_owned(record)
