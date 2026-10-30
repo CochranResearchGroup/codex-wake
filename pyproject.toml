@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-codex-wake = "codex_wake.cli:main"
+codex-wake = "codex_wake.entrypoint:main"
 codex-profiles = "codex_wake.profile_compat:main"
 codex-profile = "codex_wake.profile_compat:profile_main"
 codex-stock = "codex_wake.profile_compat:stock_main"
