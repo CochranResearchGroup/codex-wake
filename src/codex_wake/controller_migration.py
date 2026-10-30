@@ -202,13 +202,17 @@ class ControllerMigration:
         except (OSError, ValueError, TypeError, KeyError, RuntimeError):
             raise InventoryError('migration_unavailable', 'migration policy/evidence is unavailable; reconcile any existing receipt before retry') from None
 
-    def _authorize(self, authorize):
+    def _authorize(self, authorize, policy_sha):
         if authorize is not None:
             authorize()
+        if hashlib.sha256(self.path.read_bytes()).hexdigest() != policy_sha:
+            raise InventoryError('stale_target', 'host migration policy changed before the next effect')
         unused_data, unused_settings, unused_fixture, unused_marker, paths = self._configuration()
         census = self.writer_probe(tuple(paths.values()))
         if census.get('status') != 'complete' or census.get('writers'):
             raise InventoryError('migration_held', 'writer changed or census is unknown before the next effect')
+        if authorize is not None:
+            authorize()
 
     def _candidate_configuration(self, candidate):
         original = self.path.read_text()
@@ -249,13 +253,13 @@ class ControllerMigration:
         source_before, unused = _tree(paths['source_root'], fixture)
         before_pointer = os.readlink(pointer)
         receipt = dict(schema_version=1, receipt_id=receipt_id, state='preparing',
-            scope=self.scope_target(), candidate=str(candidate), pointer=str(pointer), old_pointer=before_pointer,
+            scope=self.scope_target(), policy_sha=hashlib.sha256(self.path.read_bytes()).hexdigest(), candidate=str(candidate), pointer=str(pointer), old_pointer=before_pointer,
             homes=[dict(old=str(settings.account_root(name)), new=str(candidate / 'accounts' / name)) for name in preview['accounts']],
             original_shared=source_before, original_homes={str(settings.account_root(name)): _tree(settings.account_root(name), fixture)[0]
                 for name in preview['accounts']}, moved=[], compatibility_links=[], effects_attempted=True)
         _save(receipt_path, receipt)
         try:
-            self._authorize(authorize)
+            self._authorize(authorize, receipt['policy_sha'])
             if self._preview()['target'] != preview['target']:
                 raise InventoryError('stale_target', 'migration source changed before the first effect')
             candidate.mkdir(mode=0o700)
@@ -263,7 +267,7 @@ class ControllerMigration:
                 known_profiles=tuple(preview['accounts']), aliases=settings.aliases)
             apply_migration(candidate_settings, plan_migration(candidate_settings))
             for home in receipt['homes']:
-                self._authorize(authorize)
+                self._authorize(authorize, receipt['policy_sha'])
                 old, new = Path(home['old']), Path(home['new'])
                 if (old.is_symlink() or not old.is_dir() or new.exists()
                         or _tree(old, fixture)[0] != receipt['original_homes'][str(old)]):
@@ -273,10 +277,11 @@ class ControllerMigration:
                 os.rename(old, new)
                 receipt['moved'].append(home['old'])
                 _save(receipt_path, receipt)
-                self._authorize(authorize)
+                self._authorize(authorize, receipt['policy_sha'])
                 old.symlink_to(new, target_is_directory=True)
                 receipt['compatibility_links'].append(home['old'])
                 _save(receipt_path, receipt)
+            self._authorize(authorize, receipt['policy_sha'])
             config = candidate / 'controller-accounts.toml'
             config.write_text(self._candidate_configuration(candidate))
             config.chmod(0o600)
@@ -289,7 +294,7 @@ class ControllerMigration:
                 select_session(load_settings(config), row['thread_id'], row['profile'])
             if _tree(paths['source_root'], fixture)[0] != source_before:
                 raise InventoryError('target_changed', 'original shared store changed during migration')
-            self._authorize(authorize)
+            self._authorize(authorize, receipt['policy_sha'])
             if not pointer.is_symlink() or os.readlink(pointer) != before_pointer:
                 raise InventoryError('target_changed', 'legacy pointer changed before cutover')
             temporary = pointer.with_name(pointer.name + '.migration-' + receipt_id[:12])
@@ -320,7 +325,8 @@ class ControllerMigration:
         candidate, pointer = paths['candidate_root'], paths['pointer']
         if receipt.get('state') != 'applied' or receipt.get('scope') != self.scope_target():
             raise InventoryError('uncertain_effect', 'only an attributable completed migration may roll back')
-        if (receipt.get('candidate') != str(candidate) or receipt.get('pointer') != str(pointer)
+        if (receipt.get('policy_sha') != hashlib.sha256(self.path.read_bytes()).hexdigest()
+                or receipt.get('candidate') != str(candidate) or receipt.get('pointer') != str(pointer)
                 or _tree(candidate, fixture)[0] != receipt.get('candidate_after')
                 or _tree(paths['source_root'], fixture)[0] != receipt.get('original_shared')
                 or not pointer.is_symlink() or os.readlink(pointer) != receipt.get('pointer_after')):
@@ -329,20 +335,20 @@ class ControllerMigration:
             old, new = Path(home['old']), Path(home['new'])
             if not old.is_symlink() or os.readlink(old) != str(new) or not new.is_dir():
                 raise InventoryError('target_changed', 'owning account compatibility binding changed')
-        self._authorize(authorize)
+        self._authorize(authorize, receipt['policy_sha'])
         receipt['state'] = 'rolling_back'
         _save(receipt_path, receipt)
         try:
             for home in receipt['homes']:
-                self._authorize(authorize)
+                self._authorize(authorize, receipt['policy_sha'])
                 old, new = Path(home['old']), Path(home['new'])
                 old.unlink()
                 os.rename(new, old)
-            self._authorize(authorize)
+            self._authorize(authorize, receipt['policy_sha'])
             temporary = pointer.with_name(pointer.name + '.rollback-' + receipt_id[:12])
             temporary.symlink_to(receipt['old_pointer'])
             os.replace(temporary, pointer)
-            self._authorize(authorize)
+            self._authorize(authorize, receipt['policy_sha'])
             shutil.rmtree(candidate)
             receipt['state'] = 'rolled_back'
             _save(receipt_path, receipt)
