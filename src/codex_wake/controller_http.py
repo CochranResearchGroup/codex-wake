@@ -84,7 +84,8 @@ class ProtectedOperations:
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host history owner is unavailable')
             result = HistoryAuthorization(self.authority, self.operations.inventory.root,
-                host=self.operations.host, environment=self.operations.environment).execute(token, operation, arguments)
+                host=self.operations.host, environment=self.operations.environment,
+                runtime=self.operations.history_runtime, now=self.operations.history_now).execute(token, operation, arguments)
         elif operation == 'hosts.route':
             result = self.operations.execute(operation, arguments, actor=actor,
                 authorize=lambda: self.authority.authenticate(token))
