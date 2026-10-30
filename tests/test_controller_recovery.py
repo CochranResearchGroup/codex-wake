@@ -150,3 +150,17 @@ class RecoveryTests(unittest.TestCase):
             with self.assertRaises(InventoryError):owner.execute(replacement_actor,'recovery.show',dict(policy_id='policy',expected_target=replaced),authorize=lambda:replacement_actor)
             self.assertEqual(probes,[])
             self.assertEqual(notices,[])
+
+    def test_wall_clock_rollback_does_not_reset_original_elapsed_schedule(self):
+        with tempfile.TemporaryDirectory() as directory:
+            owner,actor,target,args,policy,clock,probes,notices,status=self.fixture(Path(directory))
+            wall=[1000.0];owner.now=lambda:wall[0]
+            owner.execute(actor,'recovery.configure',args('configure',policy=policy),authorize=lambda:actor)
+            owner.execute(actor,'recovery.enable',args('enable'),authorize=lambda:actor)
+            wall[0]=900.0;clock[0]+=10
+            result=owner.execute(actor,'recovery.tick',args('after-wall-rollback'),authorize=lambda:actor)
+            self.assertEqual(result['result']['operation']['phase'],'terminal')
+            state=owner.execute(actor,'recovery.show',dict(policy_id='policy',expected_target=target),authorize=lambda:actor)['result']['policy']
+            self.assertEqual(state['checks'],1)
+            self.assertEqual(state['clock']['next_due_elapsed'],120.0)
+            self.assertEqual(state['created_at'],1000.0)
