@@ -10,8 +10,20 @@ from .managed_inventory import InventoryError
 
 
 def fork_capability(profile, metadata):
-    if 'fork' not in profile['modes'] or not {'thread/fork', 'thread/read'} <= set(profile['methods']):
+    if 'fork' not in profile['modes'] or not {'thread/fork', 'thread/read', 'thread/goal/get'} <= set(profile['methods']):
         raise InventoryError('unsupported_fork_variant', 'native completed-prefix fork method is not configured')
+
+
+def _no_goal(owner, profile, identifier):
+    # Existing goals, including terminal goals, have unqualified accounting here.
+    # Unavailable/disabled observation is not proof of absence.
+    try:
+        state = owner.request(profile['endpoint'], profile['target']['executable'],
+                              'thread/goal/get', dict(threadId=identifier), 5)
+    except Exception as error:
+        raise InventoryError('unsupported_goal_fork', 'native goal absence cannot be qualified') from error
+    if not isinstance(state, dict) or set(state) != {'goal'} or state['goal'] is not None:
+        raise InventoryError('unsupported_goal_fork', 'fork of existing or unknown native goal is not qualified')
 
 
 def _read(owner, profile, identifier):
@@ -21,6 +33,7 @@ def _read(owner, profile, identifier):
         raise InventoryError('unsupported_fork_variant', 'native thread identity changed')
     if thread.get('ephemeral') is not False or not isinstance(thread.get('path'), str) or not thread['path']:
         raise InventoryError('unsupported_fork_variant', 'checkpoint requires persisted non-ephemeral history')
+    _no_goal(owner, profile, identifier)
     return thread
 
 
