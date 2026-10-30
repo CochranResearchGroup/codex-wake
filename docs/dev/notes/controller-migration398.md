@@ -101,3 +101,29 @@ Shared registration and installed actual transports are pending in this core
 checkpoint. This note does not claim issue completion, production authorization
 or source-only acceptance. Supplied frozen issues and current owners are the
 implementation authority; no external memory lookup adds authority here.
+
+## Scoped admission checkpoint
+
+`MigrationAuthorization(authority, migration, *, runtime=None).execute(token,
+operation, arguments)` now owns preview scope admission and delegates mutations
+to the existing ControllerRuntime. Preview requires migration.observe; effects
+require admin and stable host/environment/migration_id plus fixture_id for a
+marked fixture. Grants intentionally need not contain migration_revision. Each
+request independently pins expected_target and the durable _request target.
+The same real OAuth grant previews, applies, replays the original operation and
+rolls back the changed target revision. Read-only and wrong-scope grants refuse
+mutation before effects. Runtime absence refuses effects.
+
+Per-step callbacks pin host policy bytes and stable scope, never the mutable
+pre-apply filesystem snapshot. Own successful cutover/rollback therefore does
+not invalidate the reusable grant or final delivery. Revalidation after a writer
+probe closes the observed mid-probe revocation window: red test showed cutover
+occurred after a probe revoked the token; green checks authority again before
+the next filesystem step. Partial qualification loss yields the common durable
+operation's unknown/uncertain state, and replay returns that original operation
+without dispatching again. Candidate registry/accounting preservation is also
+asserted through public filesystem outcomes.
+
+Auth-scope and administrative runtime schema commits supplied by the coordinator
+are separate dependencies, not worker changes. Eleven focused migration tests
+pass; shared registration and full installed acceptance remain the next gate.

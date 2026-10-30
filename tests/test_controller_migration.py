@@ -73,6 +73,11 @@ legacy_config="{self.legacy}"
 
     def test_apply_and_rollback_preserve_native_credential_inode_and_original_shared_store(self):
         owner = self.owner()
+        self.path.write_text(self.path.read_text() + '\n[configuration.base]\nmodel="shared-policy"\n')
+        ledger = self.home / 'wake' / 'objective-ledgers' / 'prior.json'
+        ledger.parent.mkdir(parents=True)
+        ledger.write_bytes(b'{"used":93,"deadline":1800000010,"uncertain":true}')
+        ledger_before = ledger.read_bytes()
         before_auth = (self.home / 'auth.json').stat().st_ino
         source_before = (self.source / 'config.toml').read_bytes()
         history_before = (self.source / 'sessions' / 'unassigned.jsonl').read_bytes()
@@ -82,6 +87,10 @@ legacy_config="{self.legacy}"
         candidate_home = self.lab / 'candidate' / 'accounts' / 'codex-alice'
         self.assertEqual((candidate_home / 'auth.json').stat().st_ino, before_auth)
         self.assertTrue(self.home.is_symlink())
+        self.assertEqual((candidate_home / 'wake' / 'objective-ledgers' / 'prior.json').read_bytes(), ledger_before)
+        import tomllib
+        candidate_policy = tomllib.loads((self.lab / 'candidate' / 'controller-accounts.toml').read_text())
+        self.assertEqual(candidate_policy['configuration']['base']['model'], 'shared-policy')
         self.assertEqual(self.pointer.resolve(), self.lab / 'candidate' / 'controller-accounts.toml')
         self.assertEqual((self.source / 'config.toml').read_bytes(), source_before)
         self.assertEqual((self.source / 'sessions' / 'unassigned.jsonl').read_bytes(), history_before)
@@ -90,6 +99,7 @@ legacy_config="{self.legacy}"
         self.assertFalse(self.home.is_symlink())
         self.assertEqual((self.home / 'auth.json').stat().st_ino, before_auth)
         self.assertEqual(self.pointer.resolve(), self.legacy)
+        self.assertEqual(ledger.read_bytes(), ledger_before)
         self.assertFalse((self.lab / 'candidate').exists())
 
     def test_unknown_writer_stale_plan_and_changed_rollback_target_are_held(self):
