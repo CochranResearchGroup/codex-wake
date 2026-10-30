@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -122,9 +123,10 @@ class FlowDefinition:
 
 
 class ControllerFlows:
-    def __init__(self, root, *, host, environment, invoke, authorize, now=time.time):
+    def __init__(self, root, *, host, environment, invoke, authorize, now=time.time, clock=None):
         self.root, self.host, self.environment = Path(root), host, environment
         self.invoke, self.authorize, self.now = invoke, authorize, now
+        self.clock = clock or self._host_clock
         self.runtime = ControllerRuntime(self.root, now=now)
         directory = self.root / 'controller-flows'
         directory.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -146,6 +148,38 @@ class ControllerFlows:
 
     def connect(self):
         return sqlite3.connect(self.path, timeout=5)
+
+    @staticmethod
+    def _host_clock():
+        return dict(boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(),seconds=time.monotonic())
+
+    def _clock_value(self,state):
+        from .controller_conditions import ConditionPending
+        try:
+            sample=self.clock();wall=self.now();anchor=state['elapsed_clock']
+            counter=sample['seconds']
+            if (not isinstance(sample['boot_id'],str) or not sample['boot_id'] or sample['boot_id']!=anchor['boot_id']
+                or type(counter) not in (int,float) or not math.isfinite(counter) or counter<anchor['latest']
+                or type(wall) not in (int,float) or not math.isfinite(wall) or wall<anchor['wall_latest']):
+                raise ValueError('clock continuity lost')
+            anchor.update(latest=counter,wall_latest=wall,elapsed=max(anchor['elapsed'],counter-anchor['start'],wall-state['created_at']))
+            return state['created_at']+anchor['elapsed']
+        except (KeyError,OSError,TypeError,ValueError):
+            raise ConditionPending('flow_clock_uncertain') from None
+
+    def _observe_time(self,actor,run_id):
+        from .controller_conditions import ConditionPending
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            state=self._owned(actor,self._load(run_id,db),'control')
+            if state['phase'] not in ('ready','waiting'):return None
+            try:self._clock_value(state)
+            except ConditionPending:
+                state.update(phase='held',reason='flow_clock_uncertain')
+                self._write(db,state)
+                return self.projection(state)
+            self._write(db,state)
+        return None
 
     def target(self, flow_id):
         return dict(host=self.host, environment=self.environment, flow_id=name(flow_id))
@@ -257,6 +291,11 @@ class ControllerFlows:
             condition_enforcement='host_admission_bounds_only; native_exact_tokens_and_time_unqualified',
             condition_registry_used=uses_registry,condition_registry_revision=registry.revision,condition_registry_snapshot=json.loads(encoded(registry.registry)),condition_limits=configured_limits,condition_usage=dict(calls=0,tokens=0),condition_trace=[],
             steps={}, attempt_counts={}, attempt_history={}, result=None, reason=None, cancellation=False, completed_steps=0)
+        try:
+            sample=self.clock();counter=sample['seconds']
+            if not isinstance(sample['boot_id'],str) or not sample['boot_id'] or type(counter) not in (int,float) or not math.isfinite(counter):raise ValueError()
+        except (KeyError,OSError,TypeError,ValueError):flow_error('flow_clock_unavailable','host elapsed continuity is unavailable; no run admitted')
+        state['elapsed_clock']=dict(boot_id=sample['boot_id'],start=counter,latest=counter,wall_latest=state['created_at'],elapsed=0)
         for node in definition['nodes']:
             if node['type'] == 'foreach':
                 capabilities = self.invoke('sessions.capabilities',
@@ -512,7 +551,7 @@ class ControllerFlows:
                 latest=self._owned(actor,self._load(run_id,db),'control')
                 if latest.get('attempt')!=attempt or latest['cancellation']:
                     flow_error('stale_flow_attempt','condition ownership or authority changed')
-                latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace']
+                latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace'];latest['elapsed_clock']=state.get('elapsed_clock')
                 self._write(db,latest)
         def semantic(function,args,bounds,tokens,receipt):
             from .controller_condition_native import invoke,recover
@@ -535,27 +574,28 @@ class ControllerFlows:
                 return self.projection(latest)
         try:
             outcome=registry.evaluate(condition,state,resolve=lambda value:self._resolve(value,state),
-                compare=lambda value:self._condition(value,state),save=save,now=self.now,semantic=semantic,
+                compare=lambda value:self._condition(value,state),save=save,now=lambda:self._clock_value(state),semantic=semantic,
                 evaluation_id=node['id'],resume=resume)
         except ConditionPending as pending:
             with self.connect() as db:
                 db.execute('BEGIN IMMEDIATE')
                 latest=self._owned(actor,self._load(run_id,db),'control')
                 if latest.get('attempt')==attempt:
-                    latest.update(phase='uncertain',reason=str(pending),condition_usage=state['condition_usage'],condition_trace=state['condition_trace'])
+                    latest.update(phase='uncertain',reason=str(pending),condition_usage=state['condition_usage'],condition_trace=state['condition_trace'],elapsed_clock=state.get('elapsed_clock'))
                     self._write(db,latest)
                 pending_state=self.projection(latest)
             overall=state.get('condition_limits',{})
-            timed_out=self.now()-state['created_at']>=overall.get('max_seconds',300)
-            timed_out=timed_out or any('outcome' not in item and item.get('frame') and
-                self.now()-item['frame']['began']>=item['limits']['max_seconds'] for item in state.get('condition_trace',[]))
+            try:budget_now=self._clock_value(state)
+            except ConditionPending:budget_now=None
+            timed_out=budget_now is not None and (budget_now-state['created_at']>=overall.get('max_seconds',300) or any('outcome' not in item and item.get('frame') and
+                budget_now-item['frame']['began']>=item['limits']['max_seconds'] for item in state.get('condition_trace',[])))
             if timed_out:raise _FlowLimitReached('condition_time_limit')
             return pending_state
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             latest=self._owned(actor,self._load(run_id,db),'control')
             if latest.get('attempt')!=attempt:return self.projection(latest)
-            latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace']
+            latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace'];latest['elapsed_clock']=state.get('elapsed_clock')
             latest['steps'][node['id']]=outcome
             value=outcome['value'] if outcome['status']=='known' else None
             selected=node.get('unknown') if value is None else node['then'] if value else node['else']
@@ -591,6 +631,8 @@ class ControllerFlows:
     def _advance(self, actor, run_id):
         from uuid import uuid4
         for unused in range(16):
+            clock_state=self._observe_time(actor,run_id)
+            if clock_state is not None:return clock_state
             condition_state=self._advance_condition(actor,run_id)
             if condition_state is not None:
                 if condition_state['phase']!='ready':return condition_state
@@ -659,10 +701,16 @@ class ControllerFlows:
                     state.update(phase='held', reason='input_unknown')
                     self._write(db, state)
                     return self.projection(state)
+                from .controller_conditions import ConditionPending
+                try:budget_now=self._clock_value(state)
+                except ConditionPending:
+                    state.update(phase='held',reason='flow_clock_uncertain')
+                    self._write(db,state)
+                    return self.projection(state)
                 bounds=state.get('condition_limits')
                 if bounds:
                     usage=state.setdefault('condition_usage',dict(calls=0,tokens=0))
-                    if usage['calls']>=bounds['max_calls'] or self.now()-state['created_at']>=bounds['max_seconds']:
+                    if usage['calls']>=bounds['max_calls'] or budget_now-state['created_at']>=bounds['max_seconds']:
                         raise _FlowLimitReached('flow_nested_limit')
                     usage['calls']+=1
                 count = state.setdefault('attempt_counts',{}).get(node['id'],0)+1
