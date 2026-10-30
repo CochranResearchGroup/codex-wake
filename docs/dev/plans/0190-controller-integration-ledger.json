@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "d79a78c",
+  "tip_sha": "8a20e6e",
   "state": "running",
   "tickets": {
     "394": {
@@ -257,8 +257,8 @@
     },
     "402": {
       "title": "Organize Byobu and psmux attachments without changing session identity",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         397,
         400
@@ -266,8 +266,14 @@
       "worker": "/root/builds397",
       "owned_paths": [],
       "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
-      "result_sha": null,
-      "validation": [],
+      "result_sha": "8a20e6e",
+      "validation": [
+        {
+          "command": "worker installed controller_tabs_acceptance.py plus 9tabs/9legacy/1flow; primary 9tabs/1flow",
+          "result": "passed; delegated installed evidence accepted against a9ef6d8 integrated8a20e6e",
+          "evidence": "docs/dev/evidence/plan0190/tabs402-public.json"
+        }
+      ],
       "integrated_commits": [
         "9042dc8",
         "75417a3",
