@@ -74,7 +74,7 @@ class OAuthTests(unittest.TestCase):
                 status, stale = request('/operations', {'operation': 'inventory.resolve', 'arguments': {'selector': 'alice', 'expected_target': original['target']}})
                 self.assertEqual((status, stale['error']['code']), (400, 'stale_target'))
                 actor = auth.authenticate(token)
-                self.assertEqual(auth.revoke_grant(actor.grant_id)['cancellation'], 'no_owned_active_work')
+                self.assertEqual(auth.revoke_grant(actor.grant_id)['cancellation'], 'not_configured')
                 self.assertEqual(request('/operations', {'operation': 'inventory.list', 'arguments': {}})[0], 401)
                 self.assertEqual(request('/mcp', {'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'})[0], 401)
             finally:
@@ -140,3 +140,47 @@ class OAuthTests(unittest.TestCase):
             config.write_text(config.read_text() + '\n# new generation\n')
             with self.assertRaises(AuthError):
                 service.execute(token, 'accounts.resolve', {'selector': 'alice'})
+
+    def test_revocation_commits_before_requesting_owned_work_cancellation(self):
+        from codex_wake.controller_auth import OAuthAuthority, AuthError
+        calls = []
+        with tempfile.TemporaryDirectory() as directory:
+            token_holder = []
+            def cancelled(grant_id, *, issuer, resource):
+                with self.assertRaises(AuthError):
+                    auth.authenticate(token_holder[0])
+                calls.append((grant_id, issuer, resource))
+                return {'cancellation': 'requested', 'uncertain_effects': ['owned-fixture']}
+            auth = OAuthAuthority(Path(directory) / 'auth.sqlite', issuer='https://wake.test',
+                resource='https://wake.test/mcp', on_revoke=cancelled)
+            client = auth.register({'redirect_uris': ['http://localhost/callback']})
+            verifier = 'x' * 43
+            challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            code = auth.authorize(subject='operator', principal_kind='owner', client_id=client['client_id'],
+                redirect_uri=client['redirect_uris'][0], resource=auth.resource, scopes=['observe'],
+                targets=[{'host': 'fixture'}], code_challenge=challenge)
+            token = auth.token(dict(grant_type='authorization_code', client_id=client['client_id'],
+                code=code, redirect_uri=client['redirect_uris'][0], code_verifier=verifier, resource=auth.resource))['access_token']
+            token_holder.append(token)
+            grant = auth.authenticate(token).grant_id
+            outcome = auth.revoke_grant(grant)
+            self.assertEqual(calls, [(grant, auth.issuer, auth.resource)])
+            self.assertEqual(outcome['cancellation'], 'requested')
+
+    def test_interrupted_cancellation_request_is_recovered_after_authority_restart(self):
+        from codex_wake.controller_auth import OAuthAuthority
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'auth.sqlite'
+            def interrupted(*args, **kwargs):
+                raise SystemExit('fixture process termination')
+            first = OAuthAuthority(path, issuer='https://wake.test', resource='https://wake.test/mcp', on_revoke=interrupted)
+            with self.assertRaises(SystemExit):
+                first.revoke_grant('owned-fixture-grant')
+            recovered = []
+            def cancelled(grant_id, **context):
+                recovered.append(grant_id)
+                return {'cancellation': 'requested', 'uncertain_effects': []}
+            restarted = OAuthAuthority(path, issuer='https://wake.test', resource='https://wake.test/mcp', on_revoke=cancelled)
+            self.assertEqual(recovered, ['owned-fixture-grant'])
+            restarted.recover_revocations()
+            self.assertEqual(recovered, ['owned-fixture-grant'])

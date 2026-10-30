@@ -77,7 +77,9 @@ def command(args):
         print(json.dumps(dict(status='configured', authority=str(config_path), consent_secret_file=str(root / 'consent.secret'), activated=False)))
         return 0
     config = json.loads(config_path.read_text())
-    auth = OAuthAuthority(root / 'authority.sqlite', issuer=config['issuer'], resource=config['resource'])
+    from .operation_commands import owner as operation_owner
+    auth = OAuthAuthority(root / 'authority.sqlite', issuer=config['issuer'], resource=config['resource'],
+        on_revoke=operation_owner(args.wake_root).revoke_grant)
     if args.controller_command == 'authorize-client':
         code = auth.authorize(subject=args.subject, principal_kind=args.principal_kind,
             client_id=args.client_id, redirect_uri=args.redirect_uri, resource=auth.resource,

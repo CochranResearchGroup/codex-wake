@@ -195,6 +195,9 @@ class ControllerHTTPServer(ThreadingHTTPServer):
         self.consent_secret, self.owner = consent_secret, owner
         super().__init__(address, ControllerHandler)
 
+    def service_actions(self):
+        self.authority.recover_revocations(limit=1)
+
     def process_request(self, request, address):
         request.settimeout(5)
         if not self._slots.acquire(blocking=False):

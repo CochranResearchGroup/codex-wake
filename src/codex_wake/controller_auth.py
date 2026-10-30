@@ -44,7 +44,8 @@ class Actor:
 
 
 class OAuthAuthority:
-    def __init__(self, path, *, issuer, resource, now=time.time):
+    def __init__(self, path, *, issuer, resource, now=time.time, on_revoke=None):
+        self.on_revoke = on_revoke
         if urlsplit(issuer).path:
             raise ValueError('issuer must be a canonical origin without path or trailing slash')
         for value in (issuer, resource):
@@ -65,11 +66,15 @@ class OAuthAuthority:
                 CREATE TABLE IF NOT EXISTS grants (id TEXT PRIMARY KEY, subject TEXT, kind TEXT, client TEXT, scopes TEXT, targets TEXT, revoked INTEGER DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS codes (hash TEXT PRIMARY KEY, grant_id TEXT, redirect TEXT, challenge TEXT, expires REAL, used INTEGER DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, grant_id TEXT, kind TEXT, expires REAL, used INTEGER DEFAULT 0);
+                CREATE TABLE IF NOT EXISTS revocations (grant_id TEXT PRIMARY KEY, pending INTEGER, result TEXT, attempts INTEGER NOT NULL DEFAULT 0);
             ''')
+            if 'attempts' not in {row[1] for row in db.execute('PRAGMA table_info(revocations)')}:
+                db.execute('ALTER TABLE revocations ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0')
             previous = db.execute('SELECT issuer,resource FROM authority WHERE id=1').fetchone()
             if previous and previous != (issuer, resource):
                 raise ValueError('authority issuer/resource changed; explicit new authority required')
             db.execute('INSERT OR IGNORE INTO authority VALUES(1,?,?)', (issuer, resource))
+        self.recover_revocations()
 
     def connect(self):
         return sqlite3.connect(self.path, timeout=10)
@@ -143,6 +148,7 @@ class OAuthAuthority:
                 if row[2]:
                     db.execute('UPDATE grants SET revoked=1 WHERE id=?', (grant,))
                     db.commit()
+                    self.revoke_grant(grant)
                     raise AuthError('invalid_grant', 'refresh replay revoked grant')
             else: raise AuthError('unsupported_grant_type')
             current = db.execute('SELECT client,scopes,revoked FROM grants WHERE id=?', (grant,)).fetchone()
@@ -165,10 +171,43 @@ class OAuthAuthority:
         if not row or row[6] <= self.now(): raise AuthError()
         return Actor(*row[:4], self.issuer, self.resource, frozenset(json.loads(row[4])), json.loads(row[5]), row[6])
 
+    def recover_revocations(self, *, limit=4, grant_id=None):
+        if self.on_revoke is None:
+            return
+        with self.connect() as db:
+            rows = db.execute('SELECT grant_id,attempts FROM revocations WHERE pending=1 '
+                + ('AND grant_id=? ' if grant_id is not None else '') + 'ORDER BY rowid LIMIT ?',
+                (grant_id, limit) if grant_id is not None else (limit,)).fetchall()
+        for identifier, attempts in rows:
+            with self.connect() as db:
+                db.execute('UPDATE revocations SET attempts=attempts+1 WHERE grant_id=?', (identifier,))
+            try:
+                if attempts >= 3:
+                    raise ValueError('cancellation attempt ceiling reached')
+                result = self.on_revoke(identifier, issuer=self.issuer, resource=self.resource)
+                if not isinstance(result, dict):
+                    raise ValueError('revocation owner returned no outcome')
+                pending = bool(result.get('remaining', result.get('remaining_count', 0)))
+            except Exception:
+                result = dict(cancellation='uncertain', uncertain_effects=['cancellation_owner_unavailable'])
+                pending = attempts + 1 < 3
+                if not pending:
+                    result['reason'] = 'cancellation_attempt_limit_reached'
+            with self.connect() as db:
+                db.execute('UPDATE revocations SET pending=?,result=?,attempts=? WHERE grant_id=?',
+                    (int(pending), json.dumps(result), 0 if result.get('cancellation') != 'uncertain' else attempts + 1, identifier))
+
     def revoke_grant(self, grant_id):
         with self.connect() as db:
             db.execute('UPDATE grants SET revoked=1 WHERE id=?', (grant_id,))
-        return dict(grant_id=grant_id, status='revoked', cancellation='no_owned_active_work', uncertain_effects=[])
+            db.execute('INSERT OR IGNORE INTO revocations(grant_id,pending,result) VALUES(?,1,NULL)', (grant_id,))
+        # Cancellation is requested after revocation commits. An interrupted request
+        # stays pending for bounded server maintenance/reconstruction.
+        self.recover_revocations(grant_id=grant_id)
+        with self.connect() as db:
+            row = db.execute('SELECT result FROM revocations WHERE grant_id=?', (grant_id,)).fetchone()
+        result = json.loads(row[0]) if row and row[0] else dict(cancellation='not_configured', uncertain_effects=[])
+        return dict(result, grant_id=grant_id, status='revoked')
 
     def revoke_token(self, token, client_id):
         with self.connect() as db:
