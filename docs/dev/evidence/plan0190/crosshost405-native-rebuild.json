@@ -1,0 +1,69 @@
+{
+  "activation": false,
+  "build": {
+    "cargo_elapsed": "13m48s",
+    "cargo_profile": "dev",
+    "exit_code": 0,
+    "jobs": 2,
+    "log": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/native-build/build.log",
+    "log_sha256": "f6054567efebd7e5a68be227d7640f7b749acfa2cc4dc331528e551b77b6ac4a",
+    "owner_script": "scripts/build_codex_package.py",
+    "rust_toolchain": "1.99.1",
+    "strip": "all",
+    "target": "x86_64-unknown-linux-gnu",
+    "target_directory": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/native-build/target"
+  },
+  "collected_at": "2026-10-30T16:41:40.641010+00:00",
+  "files": {
+    "bin/codex": {
+      "sha256": "5597f709655cfc5ec6accf69670483a937fe7cdfba6ad8899f820a5ebc26b015",
+      "size_bytes": 419492640
+    },
+    "bin/codex-code-mode-host": {
+      "sha256": "83896c264f5e2224de2ae29447727adb1e0e15fe6fb4d58fb4445c0e8ff157a3",
+      "size_bytes": 100581696
+    },
+    "codex-package.json": {
+      "sha256": "ae04908eddd3eb52d7ac68984b664f45b9fcec7747bbd594e4ecec13dca0a203",
+      "size_bytes": 204
+    },
+    "codex-path/rg": {
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+      "size_bytes": 5408904
+    },
+    "codex-resources/bwrap": {
+      "sha256": "8b6679d62120e60335aac2bfe141f60237710ff0897e658113d1e039987a78db",
+      "size_bytes": 427584
+    }
+  },
+  "identity": "codex-cli0.164.0; exactpriorhealthsource95; binaryhashdiffersfromhistorical390build and must be pinned afresh for acceptance",
+  "ownership": {
+    "disk_reserve_gib": 64,
+    "last_available_memory_gib": 22,
+    "last_free_disk_gib": 453,
+    "other_caches_deleted": false,
+    "owned_target": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/native-build/target",
+    "resource_mode": "manual",
+    "shared_native_branches_changed": false,
+    "shared_native_processes_restarted": false
+  },
+  "package": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/native-build/package",
+  "reused_bwrap": {
+    "historical390_bwrap_is_different": true,
+    "sha256": "8b6679d62120e60335aac2bfe141f60237710ff0897e658113d1e039987a78db",
+    "source": "/home/ecochran76/.local/share/codex-wake/native/modern-0164-fbfe287f4d-final3/codex-resources/bwrap"
+  },
+  "schema_version": 1,
+  "source_clean": true,
+  "source_commit": "95cd89dd5f3cddeb241a9de75a3cc255a9484606",
+  "source_tree": "7cdb7769fc5f1a207263a5c763daaffbf534f9e6",
+  "source_worktree": "/home/ecochran76/workspace.local/codex-wake-native-health405",
+  "status": "source_package_rebuilt_not_yet_runtime_requalified",
+  "ticket": 405,
+  "v8": {
+    "archive_sha256": "b3b490f2aa809eda7f6ac727f851fb00ce8355be72827577cfaac28c7137dbcd",
+    "binding_sha256": "3e4d5fecdbe0f98a6017e69d7ca82519a77fb032c5eb5e4cdbecdd3e2ec519d5",
+    "verification": "source95 trusted release manifest and pair hashes verified via codex_package.v8.fetch_codex_v8_artifacts",
+    "version": "152.2.0"
+  }
+}
