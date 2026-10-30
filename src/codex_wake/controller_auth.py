@@ -110,7 +110,7 @@ class OAuthAuthority:
         if not isinstance(subject, str) or not subject or principal_kind not in ('owner', 'service'):
             raise AuthError('invalid_request')
         if not scopes or not set(scopes) <= SCOPES: raise AuthError('invalid_scope')
-        if not isinstance(targets, list) or not targets or any(not isinstance(t, dict) or not t or set(t) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256'} or any(not isinstance(v, str) or not v for v in t.values()) for t in targets):
+        if not isinstance(targets, list) or not targets or any(not isinstance(t, dict) or not t or set(t) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256', 'authority', 'generation'} or any(not isinstance(v, str) or not v for v in t.values()) for t in targets):
             raise AuthError('invalid_target')
         if not isinstance(code_challenge, str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}', code_challenge):
             raise AuthError('invalid_request', 'S256 challenge required')
