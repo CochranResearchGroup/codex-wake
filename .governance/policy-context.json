@@ -28,7 +28,7 @@
   "governance_inventory": [
     {
       "path": "AGENTS.md",
-      "sha256": "7e5021ab958fa9310bbdde029375518b2f07531c40b629bb68982335935e226a"
+      "sha256": "60a2b87fc9c31e96eb4fb4b5ed11bfa84366f9e8f8d6b6ff3d2b14dbfb7515b8"
     },
     {
       "path": "docs/dev/policies/0001-policy-selection.md",
@@ -129,7 +129,7 @@
       "sources": [
         {
           "path": "AGENTS.md",
-          "sha256": "7e5021ab958fa9310bbdde029375518b2f07531c40b629bb68982335935e226a",
+          "sha256": "60a2b87fc9c31e96eb4fb4b5ed11bfa84366f9e8f8d6b6ff3d2b14dbfb7515b8",
           "sections": [
             {
               "heading_path": [
