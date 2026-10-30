@@ -9,12 +9,18 @@ from .managed_inventory import InventoryError
 
 
 class ControllerOperations:
-    def __init__(self, inventory, *, host, environment):
+    def __init__(self, inventory, *, host, environment, accounts=None):
+        self.accounts = accounts
         self.inventory = inventory
         self.host = host
         self.environment = environment
 
     def execute(self, operation, arguments):
+        if operation in ('accounts.list', 'accounts.resolve', 'configuration.explain'):
+            if self.accounts is None:
+                raise InventoryError('configuration_unavailable', 'host account owner is unavailable')
+            return dict(schema_version=1, operation=operation, status='completed',
+                        result=self.accounts.execute(operation, arguments))
         if operation not in ('inventory.list', 'inventory.resolve'):
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         allowed = {'query'} if operation == 'inventory.list' else {'selector', 'expected_target'}
