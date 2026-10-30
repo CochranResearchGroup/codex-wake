@@ -904,3 +904,16 @@ lanes:
     overlaps: [P173-COMBINED-UX]
     updated_at: 2026-10-25
     disposition: Final modern package, managed rollback and installed dev1 paginated stock-TUI acceptance pass; live cutover/current caller grant and controller activation remain open
+
+  - id: P190-CONTROLLER393
+    owner: primary / ecochran76
+    objective: Implement the cross-host controller ticket graph through installed disposable qualification
+    work_items: [393, 412]
+    plan: docs/dev/plans/0190-2026-10-29-cross-host-controller-specification.md
+    branch: feat/controller-393-resumed
+    target: origin/main
+    integration: review_pr
+    plan_state: IMPLEMENTING
+    custody_state: PUBLISHED_CHECKPOINT
+    updated_at: 2026-10-30
+    disposition: 19 of 20 implementation tickets closed; Grok412 native stdio bridge remains active; one final review and bounded TDD remediation remain; manual resource monitoring only; production activation380 separate
