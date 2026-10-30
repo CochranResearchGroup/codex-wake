@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "299b6c2",
+  "tip_sha": "03e79e1",
   "state": "running",
   "tickets": {
     "394": {
@@ -142,8 +142,8 @@
     },
     "398": {
       "title": "Preview and qualify legacy migration with reversible cutover",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         396,
         397,
@@ -152,8 +152,13 @@
       "worker": "/root/accounts395",
       "owned_paths": [],
       "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
-      "result_sha": null,
-      "validation": [],
+      "result_sha": "efbbf8c",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/migration398-installed.json",
+          "result": "delegated all5 installed surfaces,14focused/73regressions accepted; primary10migration tests reproduced after integration"
+        }
+      ],
       "integrated_commits": [
         "c6af360",
         "012dc11",
@@ -384,23 +389,27 @@
     },
     "408": {
       "title": "Fork foreach sessions from a pinned common checkpoint",
-      "state": "validated",
-      "tracker_state": "closed",
+      "state": "running",
+      "tracker_state": "open",
       "blockers": [
         407
       ],
-      "worker": "/root/builds397",
+      "worker": "/root/accounts395",
       "owned_paths": [
-        "controller_flow_sessions.py fork mode",
-        "fork extension/tests/acceptance",
-        "proposed foreach hooks only"
+        "controller_flow_fork.py supported lastTurnId variant",
+        "controller_flow_sessions.py fork capability only",
+        "fork tests and installed acceptance"
       ],
-      "base_sha": "aec16f7",
+      "base_sha": "03e79e1",
       "result_sha": "399c574ed945f84b4e5dd054adb1493ff50c5f75",
       "validation": [
         {
           "evidence": "docs/dev/evidence/plan0190/fork408-installed.json",
           "result": "delegated all5 installed public surfaces +4 fork tests green, source/install module hashes match; accepted by primary"
+        },
+        {
+          "finding": "Adapter qualification used a provisional native extension absent from the supported native build; existing lastTurnId is source-verified and must replace it before feature closure",
+          "source": "/tmp/codex-native-390 at d1325aeb: ThreadForkParams.last_turn_id; request processor ThroughTurn; paginated/legacy truncation"
         }
       ]
     },
@@ -429,17 +438,22 @@
     },
     "410": {
       "title": "Evaluate composable semantic Boolean functions under nested limits",
-      "state": "pending",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         406,
         409
       ],
-      "worker": null,
+      "worker": "/root/builds397",
       "owned_paths": [],
       "base_sha": null,
-      "result_sha": null,
-      "validation": []
+      "result_sha": "fad7252",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/conditions410-installed.json",
+          "result": "7installedconditiontests/14flowregressions/all5 installed public surfaces delegated; primary7conditiontests reproduced and3modulehashes match"
+        }
+      ]
     },
     "411": {
       "title": "Qualify durable flows across handoff, limits and caller recovery",
