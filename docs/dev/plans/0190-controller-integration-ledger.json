@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "e37bc8f",
+  "tip_sha": "3627fdd",
   "state": "running",
   "tickets": {
     "394": {
@@ -90,7 +90,12 @@
       "owned_paths": [],
       "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
       "result_sha": "097b69e",
-      "validation": [],
+      "validation": [
+        {
+          "command": "source unittest test_controller*.py",
+          "result": "34 passed including history grant, resume and host routing owner tests"
+        }
+      ],
       "worker_branch": "feat/controller-history396",
       "worker_worktree": "/tmp/codex-wake-history396",
       "integrated_sha": "565d856",
@@ -182,7 +187,7 @@
     },
     "400": {
       "title": "Route pinned operations through SSH and registered host environments",
-      "state": "running",
+      "state": "integrated",
       "tracker_state": "open",
       "blockers": [
         394,
@@ -196,10 +201,12 @@
         "host routing tests"
       ],
       "base_sha": "71b7766fbd199c91c45ee5b1a4425a99b5aa4bcf",
-      "result_sha": null,
+      "result_sha": "0d895443f00eba70adc5793f055d2e2073388211",
       "validation": [],
       "worker_branch": "feat/controller-400",
-      "worker_worktree": "/tmp/codex-wake-400"
+      "worker_worktree": "/tmp/codex-wake-400",
+      "integrated_sha": "5964375",
+      "remaining_gate": "actual installed shared CLI/API/MCP qualification worker running"
     },
     "401": {
       "title": "Return correlated answers durably through caller disconnect",
@@ -385,7 +392,7 @@
     }
   },
   "validation": {
-    "dependency_cycle_check": "passed",
+    "dependency_cycle_check": "passed after adding397->401",
     "native_children_count": 20,
     "frontier": [
       394
