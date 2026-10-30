@@ -43,6 +43,7 @@ def main():
                 if 'id' not in message:continue
                 method,params=message['method'],message.get('params',{})
                 if method=='initialize':value=dict(codexHome=str(home))
+                elif method=='thread/goal/get':value=dict(goal=None)
                 elif method=='thread/fork':
                     assert params['threadId']=='source' and params['lastTurnId']=='completed-one'
                     identifier='fork-child-'+str(len(threads))
@@ -68,7 +69,7 @@ def main():
         worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
         native=process_identity(os.getpid())
         profile=dict(target=base,endpoint='unix://'+str(endpoint),process=dict(pid=os.getpid(),start_ticks=native['start_time_ticks'],boot_id=native['boot_id']),
-            modes=['fork'],cwd=str(root),native_provider='openai',methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork'])
+            modes=['fork'],cwd=str(root),native_provider='openai',methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork','thread/goal/get'])
         path=root/'controller-flow-sessions.json';path.write_text(json.dumps(dict(version=1,profiles={'fixture':profile})));path.chmod(0o600)
         target=dict(ControllerFlowSessions(root).target('fixture'),conversation_id='source')
         flow_target=dict(host=socket.gethostname(),environment=os.environ.get('WSL_DISTRO_NAME') or os.name,flow_id='fixture')

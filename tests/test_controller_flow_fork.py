@@ -5,7 +5,7 @@ from codex_wake.managed_inventory import InventoryError
 
 class ForkTests(unittest.TestCase):
     def test_existing_native_fork_method_is_sufficient_without_hypothetical_advertisement(self):
-        fork_capability({'modes':['fork'],'methods':['thread/fork','thread/read']},{})
+        fork_capability({'modes':['fork'],'methods':['thread/fork','thread/read','thread/goal/get']},{})
         with self.assertRaises(InventoryError):
             fork_capability({'modes':['fork'],'methods':['thread/read']},{})
 
@@ -20,13 +20,14 @@ class ForkTests(unittest.TestCase):
         base=dict(host='host',environment='fixture',provider='codex',account='alice',home=str(root),home_generation='fixture',
             configuration_revision='one',build_channel='modded',build_sha256=hashlib.sha256(Path('/proc/self/exe').read_bytes()).hexdigest(),build_revision='fixture',executable='/fixture/native')
         profile=dict(target=base,endpoint='unix:///fixture/native.sock',process=process,modes=['fork'],native_provider='codex',cwd=str(root),
-            methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork'])
+            methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork','thread/goal/get'])
         if not variant: profile['methods'].remove('thread/fork')
         path=root/'controller-flow-sessions.json'
         path.write_text(json.dumps(dict(version=1,profiles={'fixture':profile})));path.chmod(0o600)
         source=dict(id='source',cwd=str(root),modelProvider='codex',ephemeral=False,path=str(root/'rollout.jsonl'),turns=[dict(id='persisted-one',status='completed',items=[dict(id='message-one',type='agentMessage',text='retained answer')])])
         effects=[];children={}
         def request(endpoint,executable,method,params,timeout):
+            if method=='thread/goal/get':return dict(goal=None)
             if method=='thread/read':
                 import copy
                 return dict(thread=copy.deepcopy(source if params['threadId']=='source' else children[params['threadId']]))
@@ -141,6 +142,26 @@ class ForkTests(unittest.TestCase):
             except InventoryError:
                 pass
             self.assertEqual(effects,[])
+
+    def test_existing_or_unknown_native_goal_refuses_before_fork(self):
+        import tempfile
+        from pathlib import Path
+        for goal in ({'goal':{'status':'active'}},{'goal':{'status':'complete'}},{},None):
+            with self.subTest(goal=goal), tempfile.TemporaryDirectory() as directory:
+                owner,target,actor,source,effects=self.fixture(Path(directory))
+                pinned=owner.execute(actor,'sessions.checkpoint',dict(profile='fixture',expected_target=target),authorize=lambda:actor)['result']['checkpoint']
+                original=owner.request
+                def request(endpoint,executable,method,params,timeout):
+                    if method=='thread/goal/get':
+                        if goal is None:raise ValueError('goals feature disabled or unavailable')
+                        return goal
+                    return original(endpoint,executable,method,params,timeout)
+                owner.request=request
+                owner.execute(actor,'sessions.fork',dict(profile='fixture',expected_target=target,checkpoint=pinned,
+                    _request=dict(operation_id='goal',idempotency_key='goal',correlation_id='goal',binding='fixture',target=target)),authorize=lambda:actor)
+                self.assertEqual(effects,[])
+                with self.assertRaises(InventoryError):
+                    owner.execute(actor,'sessions.checkpoint',dict(profile='fixture',expected_target=target),authorize=lambda:actor)
 
     def test_unknown_variant_has_no_native_effect(self):
         import tempfile

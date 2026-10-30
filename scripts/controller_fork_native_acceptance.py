@@ -56,6 +56,8 @@ model_catalog_json = {json.dumps(str(catalog))}
 check_for_update_on_startup = false
 [analytics]
 enabled = false
+[features]
+goals = true
 [model_providers.fork_fixture]
 name = "Provider-free persisted fork fixture"
 base_url = "{url}/never-query"
@@ -103,7 +105,7 @@ trust_level = "trusted"
         base=dict(host='fixture',environment='private',provider='codex',account='synthetic',home=str(home),home_generation='fixture',
             configuration_revision='fixture',build_channel='modded',build_sha256=digest,build_revision='95cd89dd5f3cddeb241a9de75a3cc255a9484606',executable=str(binary))
         profile=dict(target=base,endpoint=endpoint,process=dict(pid=daemon.pid,start_ticks=birth['start_time_ticks'],boot_id=birth['boot_id']),
-            modes=['fork'],native_provider='fork_fixture',cwd=str(cwd),methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork'])
+            modes=['fork'],native_provider='fork_fixture',cwd=str(cwd),methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork','thread/goal/get'])
         path=wake/'controller-flow-sessions.json';path.write_text(json.dumps(dict(version=1,profiles={'fixture':profile})));path.chmod(0o600)
         owner=ControllerFlowSessions(wake,resolve_build=lambda target:base,request=request)
         target=dict(owner.target('fixture'),conversation_id=source)
