@@ -152,7 +152,7 @@ class ControllerFlowSessions:
             guard()
             if operation == 'sessions.fork':
                 from .controller_flow_fork import fork
-                return fork(self,profile,target,payload['checkpoint'])
+                return fork(self,profile,target,payload['checkpoint'],guard=guard)
             if operation == 'sessions.create':
                 thread = self.request(profile['endpoint'],profile['target']['executable'],'thread/start',
                     dict(cwd=profile['cwd'],ephemeral=False),5)['thread']

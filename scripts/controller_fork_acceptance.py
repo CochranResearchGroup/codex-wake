@@ -36,19 +36,19 @@ def main():
             sha256=hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest(),upstream_version='0.164.0+fixture',revision='protocol-fixture',source='disposable Python protocol fixture')})))
         (root/'controller-accounts.toml').write_text(f'''[profiles]\nstate_root="{root/'homes'}"\nknown_profiles=["alice"]\n[builds]\nmanifest="{manifest}"\n''')
         base=next(row['target'] for row in owner_from_root(root).execute('builds.list',dict(account='alice'))['builds'] if row['name']=='modded')
-        threads={'source':dict(id='source',cwd=str(root),modelProvider='openai',checkpointId='immutable-one',turns=[])};effects=[];auto=[False]
+        threads={'source':dict(id='source',cwd=str(root),modelProvider='openai',ephemeral=False,path=str(root/'source.jsonl'),turns=[dict(id='completed-one',status='completed',items=[dict(id='answer-one',type='agentMessage',text='common checkpoint')])])};effects=[];auto=[False]
         def handler(ws):
             for raw in ws:
                 message=json.loads(raw)
                 if 'id' not in message:continue
                 method,params=message['method'],message.get('params',{})
-                if method=='initialize':value=dict(codexHome=str(home),forkCheckpointV1=True)
+                if method=='initialize':value=dict(codexHome=str(home))
                 elif method=='thread/fork':
-                    assert params['threadId']=='source' and params['checkpointId']=='immutable-one'
+                    assert params['threadId']=='source' and params['lastTurnId']=='completed-one'
                     identifier='fork-child-'+str(len(threads))
-                    thread=dict(id=identifier,cwd=str(root),modelProvider='openai',turns=[])
-                    threads[identifier]=thread;effects.append(('fork',identifier,params['checkpointId'],params['expectedSnapshotSha256']))
-                    value=dict(thread=thread,forkProvenance=dict(sourceThreadId='source',checkpointId=params['checkpointId'],sourceSnapshotSha256=params['expectedSnapshotSha256']))
+                    thread=dict(id=identifier,cwd=str(root),modelProvider='openai',ephemeral=False,path=str(root/(identifier+'.jsonl')),turns=json.loads(json.dumps(threads['source']['turns'])))
+                    threads[identifier]=thread;effects.append(('fork',identifier,params['lastTurnId'],json.dumps(thread['turns'],sort_keys=True)))
+                    value=dict(thread=thread)
                 elif method=='thread/start':
                     identifier='fixture-thread-'+str(len(threads))
                     thread=dict(id=identifier,cwd=str(root),modelProvider='openai',turns=[])
@@ -68,7 +68,7 @@ def main():
         worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
         native=process_identity(os.getpid())
         profile=dict(target=base,endpoint='unix://'+str(endpoint),process=dict(pid=os.getpid(),start_ticks=native['start_time_ticks'],boot_id=native['boot_id']),
-            modes=['fork'],cwd=str(root),native_provider='openai',methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork','thread/fork@checkpoint_v1'])
+            modes=['fork'],cwd=str(root),native_provider='openai',methods=['thread/start','turn/start','thread/read','turn/interrupt','thread/fork'])
         path=root/'controller-flow-sessions.json';path.write_text(json.dumps(dict(version=1,profiles={'fixture':profile})));path.chmod(0o600)
         target=dict(ControllerFlowSessions(root).target('fixture'),conversation_id='source')
         flow_target=dict(host=socket.gethostname(),environment=os.environ.get('WSL_DISTRO_NAME') or os.name,flow_id='fixture')
@@ -149,10 +149,10 @@ def main():
                         done=await call('advance',dict(run_id=started['run_id']))
                         assert done['phase']=='completed' and done['result']['items'][0]['result']['answer']['text']=='answer:native',done
             asyncio.run(native_mcp())
-            assert threads['source']['turns']==[]
+            assert threads['source']['turns']==[dict(id='completed-one',status='completed',items=[dict(id='answer-one',type='agentMessage',text='common checkpoint')])]
             assert len({(e[2],e[3]) for e in effects if e[0]=='fork'})==1
             print(json.dumps(dict(status='passed',package=codex_wake.__file__,checks=[
-                'actual existing Unix socket with kernel peer PID/account/build pins','installed CLI forks distinct native-shaped child per snapshotted member from one pinned common checkpoint',
+                'actual existing Unix socket with kernel peer PID/account/build pins','installed CLI forks distinct native-shaped child per snapshotted member from one completed persisted common checkpoint using existing lastTurnId',
                 'late native-shaped result across caller process exit with no resubmission','real OAuth API/MCP and remote CLI fork variants retain source snapshot unchanged',
                 'actual stdio MCP inherited native grant starts checkpoint-pinned fork foreach'],
                 boundary='deterministic disposable Python protocol server; no actual model/provider call or packaged Codex qualification'),sort_keys=True))

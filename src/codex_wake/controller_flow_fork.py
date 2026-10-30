@@ -56,10 +56,11 @@ def checkpoint(owner, profile, target, turn_id=None):
                 variant='completed_turn', profile_revision=profile['revision'])
 
 
-def fork(owner, profile, target, pinned):
+def fork(owner, profile, target, pinned, *, guard):
     if (not isinstance(pinned, dict) or not isinstance(pinned.get('last_turn_id'), str) or
             checkpoint(owner, profile, target, pinned['last_turn_id']) != pinned):
         raise InventoryError('stale_checkpoint', 'source completed prefix changed since selection')
+    guard()
     result = owner.request(profile['endpoint'], profile['target']['executable'], 'thread/fork',
                            dict(threadId=target['conversation_id'], lastTurnId=pinned['last_turn_id'],
                                 cwd=profile['cwd'], ephemeral=False), 5)

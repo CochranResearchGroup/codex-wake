@@ -41,7 +41,7 @@ class ForkTests(unittest.TestCase):
                 return dict(thread=child)
             raise AssertionError(method)
         owner=ControllerFlowSessions(root,resolve_build=lambda target:base,request=request,
-            metadata=lambda profile:dict(codexHome=str(root),peer_pid=os.getpid(),forkCheckpointV1=variant))
+            metadata=lambda profile:dict(codexHome=str(root),peer_pid=os.getpid()))
         target=dict(owner.target('fixture'),conversation_id='source')
         actor=Actor('caller','service','client','grant','local://fixture','wake:controller',frozenset({'observe','control'}),[base],time.time()+600)
         return owner,target,actor,source,effects
@@ -119,6 +119,28 @@ class ForkTests(unittest.TestCase):
                 _request=dict(operation_id='later',idempotency_key='later',correlation_id='later',binding='fixture',target=target)),authorize=lambda:actor)
             self.assertEqual(result['result']['operation']['result']['provenance']['retainedTurnIds'],['persisted-one'])
             self.assertEqual(effects[0],dict(threadId='source',lastTurnId='persisted-one',cwd=directory,ephemeral=False))
+
+    def test_revocation_after_source_read_blocks_native_fork(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as directory:
+            owner,target,actor,source,effects=self.fixture(Path(directory))
+            pinned=owner.execute(actor,'sessions.checkpoint',dict(profile='fixture',expected_target=target),authorize=lambda:actor)['result']['checkpoint']
+            original=owner.request;revoked=[False]
+            def request(endpoint,executable,method,params,timeout):
+                value=original(endpoint,executable,method,params,timeout)
+                if method=='thread/read':revoked[0]=True
+                return value
+            def authorize():
+                if revoked[0]:raise InventoryError('forbidden','fixture grant revoked')
+                return actor
+            owner.request=request
+            try:
+                owner.execute(actor,'sessions.fork',dict(profile='fixture',expected_target=target,checkpoint=pinned,
+                    _request=dict(operation_id='revoked',idempotency_key='revoked',correlation_id='revoked',binding='fixture',target=target)),authorize=authorize)
+            except InventoryError:
+                pass
+            self.assertEqual(effects,[])
 
     def test_unknown_variant_has_no_native_effect(self):
         import tempfile
