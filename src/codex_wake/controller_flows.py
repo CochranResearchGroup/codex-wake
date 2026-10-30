@@ -18,6 +18,10 @@ from .a2a_bus import private_path
 from .controller_runtime import ControllerRuntime, encoded, identity
 from .managed_inventory import InventoryError
 
+class _FlowLimitReached(Exception):
+    pass
+
+
 _NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z')
 
 
@@ -513,9 +517,31 @@ class ControllerFlows:
             latest['completed_steps']+=1
             for key in ('attempt','executing_node','condition_attempt'):latest.pop(key,None)
             self._write(db,latest)
+            stopped=self.projection(latest)
+        def limit_reason(value):
+            if not isinstance(value,dict):return None
+            if value.get('status')=='timeout':return 'condition_timeout'
+            if value.get('reason') in ('condition_call_limit','condition_token_limit','condition_time_limit'):return value['reason']
+            return next((reason for child in value.get('trace',[]) if (reason:=limit_reason(child))),None)
+        reason=limit_reason(outcome)
+        if reason:raise _FlowLimitReached(reason)
+        return stopped
+
+    def _stop_at_limit(self,actor,run_id,reason):
+        cancelled=self.cancel(actor,run_id)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            latest=self._owned(actor,self._load(run_id,db),'control')
+            latest['limit_stop']=dict(reason=reason,new_work='stopped',cancellation='confirmed' if cancelled['phase']=='cancelled' else 'uncertain',hard_stop_claim=False)
+            latest['reason']=reason
+            self._write(db,latest)
             return self.projection(latest)
 
     def advance(self, actor, run_id):
+        try:return self._advance(actor,run_id)
+        except _FlowLimitReached as stopped:return self._stop_at_limit(actor,run_id,str(stopped))
+
+    def _advance(self, actor, run_id):
         from uuid import uuid4
         for unused in range(16):
             condition_state=self._advance_condition(actor,run_id)
@@ -590,7 +616,7 @@ class ControllerFlows:
                 if bounds:
                     usage=state.setdefault('condition_usage',dict(calls=0,tokens=0))
                     if usage['calls']>=bounds['max_calls'] or self.now()-state['created_at']>=bounds['max_seconds']:
-                        state.update(phase='held',reason='flow_nested_limit');self._write(db,state);return self.projection(state)
+                        raise _FlowLimitReached('flow_nested_limit')
                     usage['calls']+=1
                 count = state.setdefault('attempt_counts',{}).get(node['id'],0)+1
                 state['attempt_counts'][node['id']] = count
