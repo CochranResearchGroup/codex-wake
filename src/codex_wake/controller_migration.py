@@ -296,6 +296,10 @@ class ControllerMigration:
             candidate_settings = Settings(state_root=candidate / 'accounts', source_root=settings.source_root,
                 known_profiles=tuple(preview['accounts']), aliases=settings.aliases)
             apply_migration(candidate_settings, plan_migration(candidate_settings))
+            if preview.get('selected_account') is not None:
+                self._authorize(authorize, receipt['policy_sha'])
+                candidate_settings.current_profile_path.write_text(preview['selected_account'] + '\n')
+                candidate_settings.current_profile_path.chmod(0o600)
             for home in receipt['homes']:
                 self._authorize(authorize, receipt['policy_sha'])
                 old, new = Path(home['old']), Path(home['new'])
@@ -439,15 +443,22 @@ class ControllerMigration:
             self._candidate_configuration(paths['candidate_root'])
         except InventoryError:
             holds.append('registry_rewrite_unqualified')
+        selected_account = settings.current_profile_resolved()
+        if selected_account is not None and selected_account not in {row['id'] for row in accounts}:
+            holds.append('selected_account_unqualified')
         candidate = Settings(state_root=paths['candidate_root'] / 'accounts', source_root=settings.source_root,
             known_profiles=tuple(row['id'] for row in accounts), aliases=settings.aliases)
         plan = [dict(kind=action.kind, source=str(action.source) if action.source else None,
                      destination=str(action.destination), status=action.status) for action in plan_migration(candidate)]
+        if selected_account is not None:
+            plan.append(dict(kind='selection', source=str(settings.current_profile_path),
+                destination=str(candidate.current_profile_path), status='plan', account=selected_account))
         target = dict(self.scope_target(),
                       migration_revision=_digest(dict(configuration=hashlib.sha256(self.path.read_bytes()).hexdigest(), entries=entries, links=links, writers=writers)))
         return dict(status='held' if holds else 'ready', target=target, links=links, writers=writers,
                     holds=sorted(set(holds)), plan=plan, accounts=[row['id'] for row in accounts],
                     history=dict(qualified_sessions=len(history['sessions']), unassigned_policy='preserve_original_store'),
+                    selected_account=selected_account,
                     phase='applied' if active else 'legacy',
                     production_effect_status='not_authorized', production_gate='issue380',
                     disposable_effect_status='authorized' if marker is not None else 'not_authorized',

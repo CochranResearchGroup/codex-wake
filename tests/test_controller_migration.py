@@ -37,6 +37,7 @@ class ControllerMigrationTests(unittest.TestCase):
         with sqlite3.connect(self.home / 'state_5.sqlite') as db:
             db.execute('create table threads(id text primary key,cwd text,title text,rollout_path text)')
             db.execute('insert into threads values(?,?,?,?)', (THREAD, str(self.lab), 'owned fixture', str(rollout)))
+        db.close()
         self.legacy = self.lab / 'legacy-profiles.toml'
         self.legacy.write_text('[profiles]\nstate_root=' + json.dumps(str(self.accounts)) + '\n')
         self.pointer = self.lab / 'active-config'
@@ -73,6 +74,8 @@ legacy_config="{self.legacy}"
 
     def test_apply_and_rollback_preserve_native_credential_inode_and_original_shared_store(self):
         owner = self.owner()
+        (self.accounts / 'shared').mkdir()
+        (self.accounts / 'shared' / '.current-profile').write_text('codex-alice\n')
         self.path.write_text(self.path.read_text() + '\n[configuration.base]\nmodel="shared-policy"\nmodel_max_output_tokens=8000\nmcp_oauth_credentials_store="keyring"\n[history]\nreadable_accounts=["alice"]\n')
         ledger = self.home / 'wake' / 'objective-ledgers' / 'prior.json'
         ledger.parent.mkdir(parents=True)
@@ -93,6 +96,8 @@ legacy_config="{self.legacy}"
         self.assertEqual((candidate_home / 'wake' / 'objective-ledgers' / 'prior.json').read_bytes(), ledger_before)
         import tomllib
         candidate_policy = tomllib.loads((self.lab / 'candidate' / 'controller-accounts.toml').read_text())
+        from codex_profiles.config import load_settings
+        self.assertEqual(load_settings(self.lab / 'candidate' / 'controller-accounts.toml').current_profile_resolved(), 'codex-alice')
         self.assertEqual(candidate_policy['configuration']['base']['model'], 'shared-policy')
         self.assertEqual(candidate_policy['configuration']['base']['model_max_output_tokens'], 8000)
         self.assertEqual(candidate_policy['configuration']['base']['mcp_oauth_credentials_store'], 'keyring')
