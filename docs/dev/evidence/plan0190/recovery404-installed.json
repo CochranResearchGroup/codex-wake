@@ -1,0 +1,88 @@
+{
+  "authorized_observation_continues_after_off": true,
+  "broad_denied": true,
+  "command": "env -u PYTHONPATH recovery404-installed/bin/python scripts/controller_recovery_acceptance.py --bin-dir recovery404-installed/bin --artifacts recovery404-acceptance-scheduled-1",
+  "environment": "Linux GNU/WSL; Python3.12; MCP2.2; pip-installed isolated wheel. No hosted GitHub CI; operator cost policy. Unix protocol fixture is not native TUI or cross-host acceptance.",
+  "exact_thread_reload_count": 5,
+  "frontdoors": {
+    "api": {
+      "attempts": 1,
+      "checks": 4,
+      "mode": "off",
+      "native_scope": "thread_mcp_connections",
+      "replayed": false
+    },
+    "cli": {
+      "attempts": 1,
+      "checks": 5,
+      "mode": "off",
+      "native_scope": "thread_mcp_connections",
+      "replayed": false
+    },
+    "native_mcp": {
+      "attempts": 1,
+      "checks": 6,
+      "mode": "off",
+      "native_scope": "thread_mcp_connections",
+      "replayed": false
+    },
+    "oauth_mcp": {
+      "attempts": 1,
+      "checks": 5,
+      "mode": "off",
+      "native_scope": "thread_mcp_connections",
+      "replayed": false
+    },
+    "remote_cli": {
+      "attempts": 1,
+      "checks": 5,
+      "mode": "off",
+      "native_scope": "thread_mcp_connections",
+      "replayed": false
+    }
+  },
+  "hashes": {
+    "cli.py": "74a5239cfe14adae4458cfa017068415233f3f54d65c440fce46740b13c8a6c5",
+    "controller_auth.py": "b1ae3b16c0e33ce1e55d191026444abf69bd2e99f6281112ab24ec7ead4d196e",
+    "controller_http.py": "d3659b19c53ed85f53680847dc5f0562954002a83933cadd72393642645c9ca0",
+    "controller_notices.py": "43ba1540f65d7be5ceed09acfffb629028b9a096e9a3e38ccb862c76cc6ac155",
+    "controller_recovery.py": "09d0c38c2142504d6d10935263496984a46cac307eaaca4d93237bd25f39dcd5",
+    "controller_runtime.py": "ea5fc009087db93c9800b0c692c3d0dcf61f74c49021f46d8cfad2c06ae1fa63",
+    "controller_schedule.py": "5427fdbff1f7e4c6c078c62a348fcc55f1fb0c2def10baa2be5cdf06878c11c1",
+    "mcp_server.py": "eea92161b8abc36e9fc91ff767da6157db5ccb260c1767270c50e0a6da74d7e9",
+    "recovery_commands.py": "93fdb85897b09d4350b4050e111d4d1cfc88768e44f1854372e915e7d01507cf",
+    "scoped_refresh.py": "e5baef11bf16a707915536dbb926980bda0edfe1f9208db737998aff272d75fa",
+    "shared_refresh.py": "997ded0259a12e567fc50528a64d246e0051416f424bc99aa0b72b1cc03b7887"
+  },
+  "installed_prefix": "/home/ecochran76/.local/state/codex-wake/testing/recovery404-installed",
+  "local_checks": {
+    "ruff_F821_F822_F823": "passed",
+    "test_controller_notices.py": "2 passed",
+    "test_controller_recovery.py": "9 passed",
+    "test_scoped_refresh_controller_guard.py": "2 passed"
+  },
+  "lost_activation_notice_readback_no_reappend": true,
+  "no_goal_change": true,
+  "no_model_turn": true,
+  "no_resource_renewal": true,
+  "no_shared_restart": true,
+  "observer_denied": true,
+  "owned_controller_exited": true,
+  "prior_runs_preserved": [
+    "recovery404-acceptance-1",
+    "recovery404-acceptance-2",
+    "recovery404-acceptance-3"
+  ],
+  "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/recovery404-acceptance-scheduled-1/receipt.json",
+  "qualification": "installed owned Unix protocol fixture composition; not native TUI or platform acceptance",
+  "qualification_boundaries": {
+    "native_health": "Existing #390 qualification remains authoritative; fixture returns only unknown health, no positive native proof claimed.",
+    "native_notice_render": "Existing #403 actual owned native TUI and model-context qualification remains separate.",
+    "platform": "Windows/remote and Bots platform matrix belong to #405; this packet qualifies policy composition only.",
+    "production": "No service installation, governor activation, migration activation, shared restart, credential copying, model/provider experiment or resource renewal."
+  },
+  "revoked_denied": true,
+  "scheduled_without_public_tick": true,
+  "source_commit": "32020c0",
+  "status": "passed"
+}
