@@ -913,7 +913,8 @@ lanes:
     branch: feat/controller-393-resumed
     target: origin/main
     integration: review_pr
-    plan_state: IMPLEMENTING
-    custody_state: PUBLISHED_CHECKPOINT
+    plan_state: SOURCE_ACCEPTED
+    custody_state: PUBLISHED_REVIEW
     updated_at: 2026-10-30
-    disposition: 19 of 20 implementation tickets closed; Grok412 native stdio bridge remains active; one final review and bounded TDD remediation remain; manual resource monitoring only; production activation380 separate
+    pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/419
+    disposition: All20children and parent393 closed from source/disposable qualification; review1of1 and TDD1of1 fixed6findings; both Python versions1909passed/1skip; production380 and recovery368/370 separate; manual resource monitoring only

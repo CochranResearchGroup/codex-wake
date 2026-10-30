@@ -1,5 +1,7 @@
 # Controller393: one review and one TDD remediation pass
 
+All20implementation tickets and parent393 are closed from qualified source/disposable evidence. [Wake draft PR419](https://github.com/CochranResearchGroup/codex-wake/pull/419) and [Bots draft PR239](https://github.com/ecochran76/grok-bots/pull/239) publish the source; main integration and production activation remain separate. Python3.11/3.12 each passed1909tests/1skip on8e2bacd.
+
 Review fixed point: `9538354ce2d8ec9f097664946ea4847079fba9c3`. Frozen Wake snapshot: `415607bd6eda7a0bbff0161eec4917988ed02c91`. Supporting Bots diff: `864a93967..0614856ec340da6d2d84f1b5cb5104fd26528403`. Independent reviewers examined Standards and Spec once. Primary adjudication is recorded in `docs/dev/evidence/plan0190/review393-adjudication.json`.
 
 ## Standards
@@ -23,3 +25,5 @@ The first post-review Grok fixture stopped at clock uncertainty before semantic 
 Memory disposition: queued in reviewed private codex_bots_main cloud for the qualified Bots integration only; queue acceptance is not persistence or retrieval proof. User-scoped receipt: controller393-resumed/closeout-memory.json.
 
 Parallel semantic operands and explicit in-flight condition migration remain unsupported; supported foreach parallel/join behavior is qualified separately.
+
+Cleanup: removed only this task’s16GiB native Rust target cache after confirming no compiler processes. The qualified native package and its CLI hash5597f709… remain intact; other caches/workspaces were preserved.

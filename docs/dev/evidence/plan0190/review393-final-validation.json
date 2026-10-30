@@ -93,5 +93,22 @@
     "Actual Grok native initialization only; model/effect qualification remains synthetic; exact cancellation/health/fork/metering/tool isolation unsupported",
     "Recovery368/370 and explicit parallel semantic operands/in-flight condition migration remain separate or unsupported",
     "Manual resource monitoring; no governor activation, old-goal resume, resource renewal, shared restart, credential replication or business/model work"
-  ]
+  ],
+  "publication": {
+    "wake_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/419",
+    "bots_pr": "https://github.com/ecochran76/grok-bots/pull/239",
+    "parent_issue_state": "closed",
+    "implementation_children_closed": 20,
+    "main_integration": "separate; both PRs draft",
+    "hosted_checks_at_publication": []
+  },
+  "owned_build_cache_cleanup": {
+    "scope": "only this task owned native-build/target cache",
+    "removed": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/native-build/target",
+    "observed_allocated_size": "16GiB from du -sh before removal",
+    "qualified_package_retained": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/native-build/package",
+    "native_cli_sha256": "5597f709655cfc5ec6accf69670483a937fe7cdfba6ad8899f820a5ebc26b015",
+    "active_cargo_rustc_processes_before": 0,
+    "runtime_activation": false
+  }
 }

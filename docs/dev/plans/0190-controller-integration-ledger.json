@@ -663,5 +663,16 @@
     368,
     370,
     380
-  ]
+  ],
+  "parent_tracker_state": "closed",
+  "publication": {
+    "wake_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/419",
+    "bots_pr": "https://github.com/ecochran76/grok-bots/pull/239",
+    "state": "draft_source_reviews; main integration separate",
+    "validated_product_source": "8e2bacd264faa0451e3d6453bcdbbfbc1b6d9958",
+    "wake_head_at_creation": "b30d45b449d9f2f9bb43e97b74b0a1cde8bc5e2c",
+    "bots_reviewed_head": "0614856ec340da6d2d84f1b5cb5104fd26528403",
+    "bots_publication_docs_head": "58bbdfc",
+    "source_delta_after_qualification": "none; documentation only"
+  }
 }
