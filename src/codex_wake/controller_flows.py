@@ -59,11 +59,15 @@ class FlowDefinition:
             fields = {
                 'call': {'id', 'type', 'operation', 'arguments', 'next'},
                 'branch': {'id', 'type', 'condition', 'then', 'else', 'unknown'},
-                'wait': {'id', 'type', 'operation_id', 'timeout', 'next'},
+                'wait': {'id', 'type', 'operation_id', 'timeout', 'next', 'operation'},
+                'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'next'},
                 'end': {'id', 'type', 'value'},
             }
             if kind not in fields or set(node) - fields[kind]:
                 flow_error('unsupported_flow_node', 'node type or fields are unsupported')
+            if kind == 'foreach':
+                from .controller_flow_foreach import validate
+                validate(node)
             if kind == 'call' and (not isinstance(node.get('operation'), str) or not isinstance(node.get('arguments', {}), dict)):
                 flow_error('invalid_flow', 'call requires an operation and object arguments')
             if kind == 'branch' and not {'condition', 'then', 'else'} <= node.keys():
@@ -228,6 +232,16 @@ class ControllerFlows:
             definition_sha256=compiled.digest, target=self.target(flow_id), owner=identity(actor), inputs=inputs,
             binding=binding, created_at=self.now(), phase='ready', cursor=definition['entry'],
             steps={}, result=None, reason=None, cancellation=False, completed_steps=0)
+        for node in definition['nodes']:
+            if node['type'] == 'foreach':
+                capabilities = self.invoke('sessions.capabilities',
+                    dict(profile=node['profile'], expected_target=node['expected_target']),
+                    authorize=lambda: self.check(actor, flow_id, 'control'))
+                if node['mode'] not in capabilities.get('result', {}).get('modes', []):
+                    flow_error('unsupported_session_mode', 'host cannot execute the requested foreach session mode')
+        from .controller_flow_foreach import expand
+        execution, memberships = expand(definition, state, self._resolve, _UNKNOWN)
+        state.update(execution_definition=execution, memberships=memberships, cursor=execution['entry'])
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             previous = db.execute('SELECT fingerprint,state FROM runs WHERE intent=?', (key,)).fetchone()
@@ -308,7 +322,8 @@ class ControllerFlows:
             self._write(db, state)
         if active and child_id:
             try:
-                value = self.invoke('operations.cancel', {'operation_id': child_id},
+                cancel_operation = 'sessions.cancel' if state.get('waiting_operation') == 'sessions.wait' else 'operations.cancel'
+                value = self.invoke(cancel_operation, {'operation_id': child_id},
                     authorize=lambda: self._owned(actor, self._load(run_id), 'control') and actor)
                 child = value.get('result', {}).get('operation', {})
                 if child.get('cancellation') == 'confirmed':
@@ -338,7 +353,7 @@ class ControllerFlows:
             latest = self._owned(actor, self._load(run_id, db), 'control')
             if latest.get('attempt') != attempt or latest['phase'] not in ('executing', 'uncertain'):
                 return self.projection(latest)
-            definition = self._definition(latest['flow_id'], latest['version']).as_dict()
+            definition = latest.get('execution_definition') or self._definition(latest['flow_id'], latest['version']).as_dict()
             node = next(item for item in definition['nodes'] if item['id'] == latest['cursor'])
             latest['steps'][node['id']] = value
             selected = node.get('next')
@@ -351,7 +366,7 @@ class ControllerFlows:
 
     def advance(self, actor, run_id):
         from uuid import uuid4
-        for unused in range(65):
+        for unused in range(16):
             with self.connect() as db:
                 db.execute('BEGIN IMMEDIATE')
                 state = self._owned(actor, self._load(run_id, db), 'control')
@@ -367,6 +382,7 @@ class ControllerFlows:
                 definition = self._definition(state['flow_id'], state['version']).as_dict()
                 if state['definition_sha256'] != FlowDefinition.compile(definition).digest:
                     flow_error('flow_store_invalid', 'run definition pin changed')
+                definition = state.get('execution_definition') or definition
                 node = next(item for item in definition['nodes'] if item['id'] == state['cursor'])
                 if node['type'] == 'branch':
                     value = self._condition(node['condition'], state)
@@ -375,6 +391,17 @@ class ControllerFlows:
                     if value is None and selected is None:
                         state.update(phase='held', reason='condition_unknown')
                     else:
+                        state.update(cursor=selected, phase='ready' if selected is not None else 'completed')
+                    state['completed_steps'] += 1
+                    self._write(db, state)
+                    continue
+                if node['type'] == 'collect':
+                    value = self._resolve(node['value'], state)
+                    if value is _UNKNOWN:
+                        state.update(phase='held', reason='output_unknown')
+                    else:
+                        state['steps'][node['id']] = value
+                        selected = node.get('next')
                         state.update(cursor=selected, phase='ready' if selected is not None else 'completed')
                     state['completed_steps'] += 1
                     self._write(db, state)
@@ -388,7 +415,9 @@ class ControllerFlows:
                 if node['type'] == 'wait':
                     operation_id = self._resolve(node.get('operation_id'), state)
                     arguments = _UNKNOWN if operation_id is _UNKNOWN else {'operation_id': operation_id, 'timeout': node.get('timeout', 0)}
-                    operation = 'operations.wait'
+                    operation = node.get('operation', 'operations.wait')
+                    if operation not in ('operations.wait', 'sessions.wait'):
+                        flow_error('unsupported_operation', 'wait operation is unsupported')
                 else:
                     arguments = self._resolve(node.get('arguments', {}), state)
                     operation = node['operation']
@@ -427,7 +456,7 @@ class ControllerFlows:
                     self._write(db, latest)
                     return self.projection(latest)
                 if node['type'] == 'wait' and value.get('result', {}).get('wait', {}).get('status') == 'timeout':
-                    latest.update(phase='waiting', reason='wait_timeout', waiting_on=arguments['operation_id'])
+                    latest.update(phase='waiting', reason='wait_timeout', waiting_on=arguments['operation_id'], waiting_operation=operation)
                     latest.pop('attempt', None)
                     latest.pop('executing_node', None)
                     self._write(db, latest)
@@ -439,7 +468,7 @@ class ControllerFlows:
                 latest.pop('attempt', None)
                 latest.pop('executing_node', None)
                 self._write(db, latest)
-        flow_error('flow_step_capacity', 'flow exceeded its declared node bound')
+        return self.inspect(actor, run_id)
 
 
 _UNKNOWN = object()

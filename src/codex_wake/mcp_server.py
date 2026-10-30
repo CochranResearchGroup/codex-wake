@@ -171,6 +171,9 @@ from .tab_commands import tool_specs as tab_tool_specs
 SPECS.update(tab_tool_specs())
 
 
+from .flow_session_commands import tool_specs as flow_session_specs
+SPECS.update(flow_session_specs())
+
 from .health_commands import tool_specs as health_tool_specs
 SPECS.update(health_tool_specs())
 
@@ -325,6 +328,13 @@ class CommandRunner:
                 return value,value['status'] != 'completed'
             except (ValueError,OSError,KeyError) as error:
                 return {'error':{'code':getattr(error,'code','attachment_held'),'message':str(error)}},True
+        if group == 'controller-flow-sessions':
+            from .flow_session_commands import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'session_held'), 'message': str(error)}}, True
         if group == 'controller-health':
             from .health_commands import protected_execute
             try:

@@ -87,6 +87,10 @@ for name, spec in flow_specs().items():
         'required': spec[4], 'additionalProperties': False})
 
 
+from .flow_session_commands import tool_specs as flow_session_specs
+for name, spec in flow_session_specs().items():
+    TOOLS[name] = (spec[1], {'type': 'object', 'properties': spec[3], 'required': spec[4], 'additionalProperties': False})
+
 from .health_commands import INPUT_SCHEMA as health_schema
 TOOLS['wake_controller_health'] = ('health.observe', health_schema)
 
@@ -106,6 +110,8 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait') else 'control', None, None)
+            for verb in ('capabilities','create','prompt','wait','cancel')},
         'health.observe': ('observe', None, None),
         **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
         **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)
@@ -149,7 +155,14 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation == 'health.observe':
+        if operation.startswith('sessions.'):
+            from .flow_session_commands import execute
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host session owner unavailable')
+            result = execute(operation, arguments, self.operations.inventory.root, actor=actor,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation == 'health.observe':
+
             from .health_commands import protected_observe
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host health owner unavailable')
