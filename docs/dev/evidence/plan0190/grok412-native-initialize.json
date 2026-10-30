@@ -1,0 +1,108 @@
+{
+  "actual_bridge_pid": 1853508,
+  "actual_native_pid": 1853637,
+  "boundaries": [
+    "Actual native metadata only; no session/model prompt/provider credential or authentication experiment",
+    "Native agent serve WebSocket startup remains unqualified; failed probe receipts retained",
+    "Exact turn cancellation, exact TUI health, fork, exact metering and observation-only tool isolation unsupported",
+    "No production activation, resource renewal, governor activation or shared restart"
+  ],
+  "child_is_distinct_from_transport_owner": true,
+  "exact_tui_health": "unsupported",
+  "frontdoors": {
+    "api": {
+      "agent_id": "92850542-44c5-5d03-b4ca-4c944d840ccd",
+      "agent_instance_id": "6a1df2ad-321a-4945-8dfa-c6e0ab9d2336",
+      "agent_version": "1.0.70"
+    },
+    "cli": {
+      "agent_id": "92850542-44c5-5d03-b4ca-4c944d840ccd",
+      "agent_instance_id": "6a1df2ad-321a-4945-8dfa-c6e0ab9d2336",
+      "agent_version": "1.0.70"
+    },
+    "native_mcp": {
+      "agent_id": "92850542-44c5-5d03-b4ca-4c944d840ccd",
+      "agent_instance_id": "6a1df2ad-321a-4945-8dfa-c6e0ab9d2336",
+      "agent_version": "1.0.70"
+    },
+    "oauth_mcp": {
+      "agent_id": "92850542-44c5-5d03-b4ca-4c944d840ccd",
+      "agent_instance_id": "6a1df2ad-321a-4945-8dfa-c6e0ab9d2336",
+      "agent_version": "1.0.70"
+    },
+    "remote_cli": {
+      "agent_id": "92850542-44c5-5d03-b4ca-4c944d840ccd",
+      "agent_instance_id": "6a1df2ad-321a-4945-8dfa-c6e0ab9d2336",
+      "agent_version": "1.0.70"
+    }
+  },
+  "genuine_initialize_once": true,
+  "hashes": {
+    "cli.py": "74a5239cfe14adae4458cfa017068415233f3f54d65c440fce46740b13c8a6c5",
+    "controller_grok.py": "1a90bc3c2beb4b716b724f67a07d46e2ea7bd77d36cb3449545d0e26aff311a0",
+    "grok_acp.py": "41396bebef3a447c85ef719287203982c123b0139279db37cc482690a3f7ba0b",
+    "grok_commands.py": "b7cb8192802edd06ababc7b71d8ad0b54cf04fc774d0cec9156a30f910f15ffa",
+    "grok_stdio_host.py": "73eea0f9fc9afee275883afbc26fee7ed50ead50630b7d7f8f5fac53759e2801",
+    "runtime_wakes.py": "52f37d98d949a6bed2c4d0ee854cf386f4e5c5b302c0bb10ade26bd4a06e233c"
+  },
+  "native_account_verified": false,
+  "native_binary": "/home/ecochran76/.grok/downloads/grok-1.0.70-linux-x86_64",
+  "native_capabilities": {
+    "_meta": {
+      "x.ai/capabilities": {
+        "toolOverrides": {
+          "x_keyword_search": true,
+          "x_semantic_search": true,
+          "x_thread_fetch": false,
+          "x_user_search": false
+        }
+      },
+      "x.ai/fs_notify": true,
+      "x.ai/hooks": {
+        "blockingEvents": [
+          "pre_tool_use",
+          "stop",
+          "subagent_stop"
+        ],
+        "decisions": [
+          "deny",
+          "block"
+        ],
+        "stopSignals": [
+          "continue",
+          "stopReason",
+          "additionalContext"
+        ]
+      }
+    },
+    "auth": {},
+    "loadSession": true,
+    "mcpCapabilities": {
+      "http": true,
+      "sse": true
+    },
+    "promptCapabilities": {
+      "audio": false,
+      "embeddedContext": true,
+      "image": true
+    },
+    "sessionCapabilities": {
+      "close": {},
+      "list": {},
+      "resume": {}
+    }
+  },
+  "native_sha256": "22d281c5964c5444147328096ba2a221f3f0874c6858e27c825656a80f6e58e9",
+  "native_version": "1.0.70",
+  "no_native_model_prompt": true,
+  "no_native_session": true,
+  "no_provider_authentication": true,
+  "no_provider_credential_read": true,
+  "owned_processes_exited": true,
+  "primary_reconciliation": "All six installed/source module hashes match; fresh /proc readback confirms both owned PIDs absent; all five public interfaces match one genuine native identity.",
+  "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/grok412-native-stdio-host-1/receipt.json",
+  "product_source": "d2181d1de0aca67a6e59ef4bf6cdefab087d48ee",
+  "receipt_sha256": "35c42db6e9f5b356465775876bd4272f5654c1c51f04dd2b6adb5af756e038f1",
+  "status": "passed",
+  "transport": "explicit sole-owned native ACP stdio; local bridge forwarding"
+}

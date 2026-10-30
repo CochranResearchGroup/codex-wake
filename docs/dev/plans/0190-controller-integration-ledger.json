@@ -2,8 +2,8 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393-resumed",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "393c87b",
-  "state": "running",
+  "tip_sha": "d2181d1",
+  "state": "review_pending",
   "tickets": {
     "394": {
       "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
@@ -525,8 +525,8 @@
     },
     "412": {
       "title": "Control Grok through an honest structured-runtime adapter",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         405,
         411
@@ -538,8 +538,22 @@
         "sharedhooksbyroot"
       ],
       "base_sha": "b1aa712",
-      "result_sha": null,
-      "validation": []
+      "result_sha": "d2181d1",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/grok412-primary-fixture.json",
+          "result": "Primary all5 installed frontdoors/15 flow programs;120 ACP fixture requests,45 synthetic effects;9 module hashes matched;original disconnect/no replay/authority negatives passed"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/grok412-native-initialize.json",
+          "result": "Actual Grok1.0.70 through explicit stdio host;all5 public interfaces match native identity;6 module hashes matched;fresh native/bridge PIDs absent;no native sessions/model/auth requests"
+        },
+        {
+          "command": "PYTHONPATH=src installed403/bin/python -m unittest discover -s tests -p test_grok_stdio_host.py",
+          "result": "1 actual child/socket custody and busy/noqueue test passed;public CLI help and Ruff passed"
+        }
+      ],
+      "remaining_gate": "Native WebSocket serve unqualified; exact cancellation/TUI health/fork/metering/tool isolation unsupported; model/provider and production activation separate"
     },
     "390": {
       "state": "validated",
@@ -566,9 +580,7 @@
   "validation": {
     "dependency_cycle_check": "passed after adding397->401",
     "native_children_count": 20,
-    "frontier": [
-      394
-    ]
+    "frontier": []
   },
   "review_rounds": 0,
   "remediation_rounds": 0,
