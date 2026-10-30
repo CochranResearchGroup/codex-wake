@@ -110,6 +110,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_builds(subparsers)
     from .history_commands import register_parser as register_history
     register_history(subparsers)
+    from .migration_commands import register_parser as register_migration
+    register_migration(subparsers)
     from .host_commands import register_parser as register_hosts
     register_hosts(subparsers)
     from .operation_commands import register_parser as register_operations
@@ -2940,6 +2942,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command == "hosts":
         from .host_commands import command
         return command(args, args.wake_root)
+    if args.command == "migration":
+        from .migration_commands import command
+        return command(args, root)
     if args.command == "history":
         from .history_commands import command
         return command(args, args.wake_root)

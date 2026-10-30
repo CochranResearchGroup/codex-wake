@@ -33,7 +33,8 @@ def owner_from_root(root):
     from .managed_inventory import InventoryError
     if root is None:
         raise InventoryError('host_wake_root_required', 'host Wake root is required')
-    path = Path(root) / 'controller-accounts.toml'
+    from .controller_registry import resolve_registry
+    path = resolve_registry(Path(root) / 'controller-accounts.toml', root=root)
     try:
         config = tomllib.loads(path.read_text())
         builds = config['builds']

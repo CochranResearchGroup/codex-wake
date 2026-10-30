@@ -29,8 +29,9 @@ class HistoryAuthorization:
         capability = 'history.resume' if operation == 'history.resume' else 'history.observe'
         initial = self.authority.authenticate(token)
         path = self.root / 'controller-accounts.toml'
-        settings = load_settings(path)
         def admission():
+            from .controller_registry import resolve_registry
+            settings = load_settings(resolve_registry(path, root=self.root, host=self.host, environment=self.environment))
             actor = self.authority.authenticate(token)
             if actor.grant_id != initial.grant_id or actor.subject != initial.subject or capability not in actor.scopes:
                 raise AuthError('insufficient_scope')

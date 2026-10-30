@@ -31,6 +31,10 @@ for name, spec in history_specs().items():
     properties = {key: value for key, value in spec[3].items() if key != 'caller_thread_id'}
     TOOLS[name] = ('history.' + spec[1], {'type': 'object', 'properties': properties,
         'required': [key for key in spec[4] if key != 'caller_thread_id'], 'additionalProperties': False})
+from .migration_commands import tool_specs as migration_specs
+for name, spec in migration_specs().items():
+    TOOLS[name] = (spec[1], {'type': 'object', 'properties': spec[3],
+        'required': spec[4], 'additionalProperties': False})
 TOOLS.update({
     'wake_hosts_list': ('hosts.list', {'type': 'object', 'properties': {}, 'additionalProperties': False}),
     'wake_hosts_resolve': ('hosts.resolve', {'type': 'object', 'properties': {'host': {'type': 'string'}, 'environment': {'type': 'string'}, 'expected_target': {'type': 'object'}}, 'required': ['host', 'environment'], 'additionalProperties': False}),
@@ -89,6 +93,9 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        'migration.preview': ('migration.observe', None, None),
+        'migration.apply': ('admin', None, None),
+        'migration.rollback': ('admin', None, None),
         'operations.send': ('control', None, None),
         'operations.result': ('observe', None, None),
         'operations.wait': ('observe', None, None),
@@ -131,6 +138,13 @@ class ProtectedOperations:
                 raise InventoryError('configuration_unavailable', 'host operation owner is unavailable')
             result = execute(operation, arguments, self.operations.inventory.root, actor=actor,
                 authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('migration.'):
+            from .controller_migration_authorization import MigrationAuthorization
+            from .controller_runtime import ControllerRuntime
+            if self.operations.migration is None or self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host migration owner is unavailable')
+            result = MigrationAuthorization(self.authority, self.operations.migration,
+                runtime=ControllerRuntime(self.operations.inventory.root)).execute(token, operation, arguments)
         elif operation.startswith('builds.') and operation != 'builds.list':
             from .controller_build_authorization import BuildAuthorization
             from .controller_runtime import ControllerRuntime
@@ -324,8 +338,9 @@ class ControllerHandler(BaseHTTPRequestHandler):
                 and (operation.startswith('inventory.')
                      or (operation.startswith('operations.') and self.server.operations.operations.inventory is not None)
                      or (operation.startswith('hosts.') and self.server.operations.operations.hosts is not None)
+                     or (operation.startswith('migration.') and self.server.operations.operations.migration is not None)
                      or (operation.startswith('builds.') and self.server.operations.operations.builds is not None)
-                     or (not operation.startswith(('hosts.', 'builds.')) and self.server.operations.operations.accounts is not None))]}
+                     or (not operation.startswith(('hosts.', 'builds.', 'migration.')) and self.server.operations.operations.accounts is not None))]}
         elif method == 'tools/call':
             name = params.get('name')
             if name not in TOOLS:

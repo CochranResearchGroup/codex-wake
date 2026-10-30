@@ -30,6 +30,15 @@ def main(argv=None):
     if not parsed.config.is_file() and parsed.command not in ('completion', 'shell-init'):
         print('account operation held: explicit account configuration is unavailable', file=sys.stderr)
         return 2
+    from .controller_registry import resolve_registry
+    effective = resolve_registry(parsed.config)
+    if effective != parsed.config:
+        for index, argument in enumerate(arguments):
+            if argument == '--config':
+                arguments[index + 1] = str(effective)
+            elif argument.startswith('--config='):
+                arguments[index] = '--config=' + str(effective)
+        parsed.config = effective
     if parsed.command == 'run':
         try:
             settings = load_settings(parsed.config, parsed.state_root, parsed.source_root)

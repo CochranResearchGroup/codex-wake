@@ -165,6 +165,8 @@ for _name, _spec in tuple(SPECS.items()):
 
 from .history_commands import tool_specs as history_tool_specs
 SPECS.update(history_tool_specs())
+from .migration_commands import tool_specs as migration_tool_specs
+SPECS.update(migration_tool_specs())
 
 
 from .controller_http import TOOLS as controller_public_tools
@@ -184,7 +186,8 @@ class CommandRunner:
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
                  goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None,
-                 actor_runtime="codex", runtime_root=None, harness_policy=None):
+                 actor_runtime="codex", runtime_root=None, harness_policy=None, migration_writer_probe=None):
+        self.migration_writer_probe = migration_writer_probe
         self.harness_policy = harness_policy
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
         self.bus_root, self.capability = bus_root, capability
@@ -312,6 +315,14 @@ class CommandRunner:
                 return value, value['status'] != 'completed'
             except (ValueError, OSError, KeyError) as error:
                 return {'error': {'code': getattr(error, 'code', 'operation_held'), 'message': str(error)}}, True
+        if group == 'controller-migration':
+            from .migration_commands import protected_execute
+            from .managed_inventory import InventoryError
+            try:
+                value = protected_execute(verb, arguments, self.wake_root, writer_probe=self.migration_writer_probe)
+                return value, value['status'] != 'completed'
+            except (InventoryError, ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'migration_held'), 'message': str(error)}}, True
         if group == 'controller-builds':
             from .build_commands import protected_execute
             try:
