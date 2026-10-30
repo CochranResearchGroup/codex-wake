@@ -1,0 +1,33 @@
+{
+  "issue": 407,
+  "source_commit": "aec16f7",
+  "installed_module_hashes": {
+    "controller_flows.py": "fa5f502b9246a64db129edb4f2cf6f808dcc21d84ee5539874dbee758e6dd60e",
+    "controller_flow_foreach.py": "9bd25d161b7992da3cd4ed4022c0ed31fddcbe2255b26b205cdd3a705e7939a6",
+    "controller_flow_sessions.py": "4e8fd82720d5f908e9173d393c119b847fedbddbf72e085dd4e2953577d69bea",
+    "flow_session_commands.py": "ab01d520e1c8e0e773f9e0c511d59048f1b25a32cb2ba55074fb729ecb8f2ceb",
+    "controller_http.py": "4bba1855d910f9603820b4a25ecdd37b82f91cb56995c63a5c09545f490e4039",
+    "cli.py": "0ec7d9e83cc6cf77434fa74295ba8a0b0187c5ebbe9fab776b17630a4f84f1ff",
+    "mcp_server.py": "8cf391db2e32f0d8ab011250925655423674df8702cf915cb4d3dee5c8344470"
+  },
+  "package": "0.22.0.dev2",
+  "checks": [
+    "92 controller tests passed before final emergency-pause guard",
+    "14 focused flow checks passed including pause guard",
+    "installed actual Unix protocol fixture: new session foreach, sequential prompts, late answers after caller exit",
+    "CLI/API/OAuthMCP/remoteCLI/native stdio MCP passed"
+  ],
+  "red": [
+    "foreach node unsupported",
+    "session adapter missing",
+    "unsupported host session mode accepted at start",
+    "emergency pause did not prevent new session"
+  ],
+  "boundary": "disposable deterministic Python protocol server; no provider/model/native package acceptance; no new allowance/governor activation",
+  "remaining": [
+    "fork408",
+    "parallel join retry409",
+    "semantic conditions limits410",
+    "aggregate qualification411"
+  ]
+}

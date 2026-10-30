@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "8a20e6e",
+  "tip_sha": "aec16f7",
   "state": "running",
   "tickets": {
     "394": {
@@ -361,8 +361,8 @@
     },
     "407": {
       "title": "Execute foreach in new sessions and ordered same-session prompts",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         406
       ],
@@ -373,32 +373,47 @@
         "controller_flows.py node integration after shared402 release"
       ],
       "base_sha": "d79a78c",
-      "result_sha": null,
-      "validation": []
+      "result_sha": "aec16f7",
+      "validation": [
+        {
+          "command": "test_controller*.py; post-guard test_controller_flow*.py; installed controller_foreach_acceptance.py",
+          "result": "92 controller tests;14 focused after final guard; all five installed surfaces passed with actual disposable Unix protocol fixture",
+          "evidence": "docs/dev/evidence/plan0190/foreach407-installed.json"
+        }
+      ]
     },
     "408": {
       "title": "Fork foreach sessions from a pinned common checkpoint",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         407
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root/builds397",
+      "owned_paths": [
+        "controller_flow_sessions.py fork mode",
+        "fork extension/tests/acceptance",
+        "proposed foreach hooks only"
+      ],
+      "base_sha": "aec16f7",
       "result_sha": null,
       "validation": []
     },
     "409": {
       "title": "Join parallel iterations with safe retry and uncertain-effect reconciliation",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         407
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root",
+      "owned_paths": [
+        "controller_flows.py",
+        "controller_flow_foreach.py",
+        "parallel/join/retry tests",
+        "shared registrations"
+      ],
+      "base_sha": "aec16f7",
       "result_sha": null,
       "validation": []
     },
