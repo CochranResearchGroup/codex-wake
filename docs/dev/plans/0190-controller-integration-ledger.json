@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "f9c1061",
+  "tip_sha": "d79a78c",
   "state": "running",
   "tickets": {
     "394": {
@@ -326,8 +326,8 @@
     },
     "406": {
       "title": "Run a versioned branch-and-wait flow durably",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         401
       ],
@@ -339,25 +339,34 @@
         "shared service integration"
       ],
       "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
-      "result_sha": null,
+      "result_sha": "d79a78c",
       "validation": [
         {
           "command": "PYTHONPATH=src repository-venv/python -m unittest discover -s tests -p test_controller_flows.py -v",
           "red": "interrupted retained-result recovery absent; cancellation absent; waiting cancellation did not reach owner",
           "green": "8 focused behaviors passed; public installed CLI red pending shared registration"
+        },
+        {
+          "command": "source test_controller*.py; installed controller_flow_acceptance.py; installed test_controller_flow_surfaces.py",
+          "result": "87 controller tests; 10 focused flow tests; installed CLI/native stdio MCP late actual Mailbox result; OAuth API/MCP/remote CLI passed",
+          "evidence": "docs/dev/evidence/plan0190/flows406-installed.json"
         }
       ]
     },
     "407": {
       "title": "Execute foreach in new sessions and ordered same-session prompts",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         406
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root",
+      "owned_paths": [
+        "controller_flow_foreach.py",
+        "foreach tests",
+        "controller_flows.py node integration after shared402 release"
+      ],
+      "base_sha": "d79a78c",
       "result_sha": null,
       "validation": []
     },
