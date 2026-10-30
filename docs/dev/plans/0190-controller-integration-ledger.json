@@ -79,7 +79,7 @@
     },
     "396": {
       "title": "Search permitted history and resume its owning conversation",
-      "state": "running",
+      "state": "integrated",
       "tracker_state": "open",
       "blockers": [
         395,
@@ -89,19 +89,22 @@
       "worker": "/root/accounts395",
       "owned_paths": [],
       "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
-      "result_sha": null,
+      "result_sha": "097b69e",
       "validation": [],
       "worker_branch": "feat/controller-history396",
-      "worker_worktree": "/tmp/codex-wake-history396"
+      "worker_worktree": "/tmp/codex-wake-history396",
+      "integrated_sha": "565d856",
+      "remaining_gate": "remote actor/history guard wiring, worker final revocation/installed proof"
     },
     "397": {
       "title": "Launch visibly identified stock and modded immutable builds",
-      "state": "integrated",
+      "state": "blocked",
       "tracker_state": "open",
       "blockers": [
         395,
         373,
-        377
+        377,
+        401
       ],
       "worker": "/root/builds397",
       "owned_paths": [
@@ -124,7 +127,8 @@
       ],
       "worker_branch": "feat/controller-397",
       "worker_worktree": "/tmp/codex-wake-397",
-      "integrated_sha": "f4ea22b"
+      "integrated_sha": "f4ea22b",
+      "remaining_gate": "Durable operation runtime401 for protected mutations; inspection and existing operator owner installed checks pass"
     },
     "398": {
       "title": "Preview and qualify legacy migration with reversible cutover",
